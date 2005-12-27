@@ -1,0 +1,84 @@
+#!/bin/bash
+#
+# Startup script for the Motion Detection System 
+#
+# chkconfig: - 85 15
+# description: Motion Detection System.  It is used to detect \
+#              movement based on compare images.
+# processname: motion 
+# pidfile: /var/run/motion.pid
+# config: /etc/motion.conf
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+
+
+motion=${MOTION-@BIN_PATH@/motion}
+prog=motion
+PIDFILE=/var/run/motion.pid
+RETVAL=0
+
+
+start() {
+	echo -n $"Starting $prog: "
+	daemon $motion 
+	RETVAL=$?
+	echo `ps axf | grep -v grep | grep  $motion | head -n1 | awk '{print $1}'` > $PIDFILE
+	echo
+	[ $RETVAL = 0 ] && touch /var/lock/subsys/motion
+	return $RETVAL
+}
+stop() {
+	echo -n $"Stopping $prog: "
+	killproc $motion
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion /var/run/motion.pid
+}
+stopsafe() {
+	echo -n $"Stopping $prog: ( for restarting ) "
+	killproc $motion
+	RETVAL=$?
+	sleep 10s
+	echo
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion /var/run/motion.pid
+}
+reload() {
+	echo -n $"Reloading $prog: "
+	killproc $motion -HUP
+	RETVAL=$?
+	echo
+}
+
+# See how we were called.
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	status)
+		status $motion
+		RETVAL=$?
+		;;
+	restart)
+		stopsafe
+		start
+		;;
+	condrestart)
+		if [ -f /var/run/motion.pid ] ; then
+			stop
+			start
+		fi
+		;;
+	reload)
+		reload
+		;;
+	*)
+		echo $"Usage: $prog {start|stop|restart|condrestart|reload|status}"
+		exit 1
+esac
+
+exit $RETVAL

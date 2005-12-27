@@ -1,0 +1,13 @@
+#!/bin/sh
+# postinst script for motion
+
+set -e
+
+
+. /usr/share/debconf/confmodule
+
+db_stop
+
+#DEBHELPER#
+
+exit 0

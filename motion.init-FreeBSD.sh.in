@@ -1,0 +1,30 @@
+#!/bin/sh
+
+NAME=motion
+DAEMON=@BIN_PATH@/motion
+PIDFILE=/var/run/$NAME.pid
+
+case "$1" in
+start)
+	if [ -x $DAEMON ] ; then 
+		$DAEMON && > /dev/null && echo -n ' Starting motion'
+		echo `ps axf | grep -v grep | grep $DAEMON | head -n1 | awk '{print $1}'` > $PIDFILE
+	else
+		echo "Daemon not found"
+		echo		
+	fi
+	;;
+stop)
+	if [ -r $PIDFILE ] ; then 
+		kill -15 `cat $PIDFILE` && rm $PIDFILE > /dev/null && echo -n ' Stopping motion'
+	else
+		echo "pidfile doesn't exist or motion stopped"
+		echo
+	fi
+	;;
+*)
+	echo "Usage: `basename $0` {start|stop}" >&2
+	;;
+esac
+
+exit 0

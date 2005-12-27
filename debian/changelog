@@ -1,0 +1,21 @@
+motion (3.2.4-1) unstable; urgency=low
+
+  * New upstream package
+
+ -- Angel Carpintero <ack@telefonica.net>  Sat, 17 Dec 2005 08:50:18 +0100
+
+motion (3.2.3-1) unstable; urgency=low
+
+  * New upstream package.
+
+ -- Angel Carpintero <ack@telefonica.net>  Fri, 19 Aug 2005 19:15:18 +0100
+
+motion (3.2.1-1) unstable; urgency=low
+
+  * New upstream package (Just an example).
+
+ -- Angel Carpintero <ack@telefonica.net>  Sun, 29 May 2005 20:57:18 +0100
+
+Local variables:
+mode: debian-changelog
+End:

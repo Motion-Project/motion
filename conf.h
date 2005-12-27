@@ -1,0 +1,154 @@
+/*
+  **
+  ** conf.h - function prototypes for the config handling routines
+  **
+  ** Originally written for the dproxy package by Matthew Pratt.
+  **
+  ** Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
+  **
+  ** This software is licensed under the terms of the GNU General
+  ** Public License (GPL). Please see the file COPYING for details.
+  **
+  **
+*/
+
+#ifndef _INCLUDE_CONF_H
+#define _INCLUDE_CONF_H
+
+/* 
+	more parameters may be added later.
+ */
+struct config {
+	int setup_mode;
+	int width;
+	int height;
+	int quality;
+	int rotate_deg;
+	int max_changes;
+	int threshold_tune;
+	const char *output_normal;
+	int motion_img;
+	int output_all;
+	int gap;
+	int maxmpegtime;
+	int snapshot_interval;
+	const char *locate;
+	int input;
+	int norm;
+	int frame_limit;
+	int quiet;
+	int ppm;
+	int noise;
+	int noise_tune;
+	int mingap;
+	int lightswitch;
+	int nightcomp;
+	unsigned int low_cpu;
+	int nochild;
+	int autobright;
+	int brightness;
+	int contrast;
+	int saturation;
+	int hue;
+	int roundrobin_frames;
+	int roundrobin_skip;
+	int pre_capture;
+	int post_capture;
+	int switchfilter;
+	int ffmpeg_cap_new;
+	int ffmpeg_cap_motion;
+	int ffmpeg_bps;
+	int ffmpeg_vbr;
+	const char *ffmpeg_video_codec;
+	int webcam_port;
+	int webcam_quality;
+	int webcam_motion;
+	int webcam_maxrate;
+	int webcam_localhost;
+	int webcam_limit;
+	int control_port;
+	int control_localhost;
+	int control_html_output;
+	const char *control_authentication;
+	int frequency;
+	int tuner_number;
+	int timelapse;
+	const char *timelapse_mode; 
+#ifdef __freebsd__
+	const char *tuner_device;
+#endif
+	const char *video_device;
+	const char *vidpipe;
+	const char *filepath;
+	const char *jpegpath;
+	const char *mpegpath;
+	const char *snappath;
+	const char *timepath;
+	char *on_event_start;
+	char *on_event_end;
+	const char *mask_file;
+	int smart_mask_speed;
+	int sql_log_image;
+	int sql_log_snapshot;
+	int sql_log_mpeg;
+	int sql_log_timelapse;
+	const char *sql_query;
+	const char *mysql_db;
+	const char *mysql_host;
+	const char *mysql_user;
+	const char *mysql_password;
+	char *on_picture_save;
+	char *on_motion_detected;
+	char *on_movie_start;
+	char *on_movie_end;
+	const char *motionvidpipe;
+	const char *netcam_url;
+	const char *netcam_userpass;
+	const char *netcam_proxy;
+	const char *pgsql_db;
+	const char *pgsql_host;
+	const char *pgsql_user;
+	const char *pgsql_password;
+	int pgsql_port;
+	int text_changes;
+	const char *text_left;
+	const char *text_right;
+	const char *text_event;
+	int text_double;
+	const char *despeckle;
+	int minimum_motion_frames;
+	// int debug_parameter;
+	int argc;
+	char **argv;
+};
+
+/** 
+ * typedef for a param copy function. 
+ */
+typedef struct context ** (* conf_copy_func)(struct context **, const char *, int);
+typedef const char *(* conf_print_func)(struct context **, char **, int, int);
+
+/**
+ * description for parameters in the config file
+ */
+typedef struct {
+	const char * param_name;	/* name for this parameter             */
+	const char * param_help;	/* short explanation for parameter */
+	int conf_value;	/* pointer to a field in struct context */
+	conf_copy_func  copy;	/* a function to set the value in 'config' */
+	conf_print_func print;	/* a function to output the value to a file */
+} config_param; 
+
+
+extern config_param config_params[];
+
+struct context **conf_load (struct context **);
+struct context **conf_cmdparse(struct context **, const char *, const char *);
+const char *config_type(config_param *);
+void conf_print (struct context **);
+void malloc_strings (struct context *);
+char *mystrdup(const char *);
+char *mystrcpy(char *, const char *);
+struct context **copy_string(struct context **, const char *, int);
+
+#endif /* _INCLUDE_CONF_H */

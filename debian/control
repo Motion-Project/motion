@@ -1,0 +1,29 @@
+Source: motion
+Section: graphics
+Priority: optional
+Build-Depends: libjpeg62-dev, sharutils, nasm, zlib1g-dev, libmysqlclient10-dev, postgresql-dev, libavcodec-dev, libavformat-dev
+Maintainer: Angel Carpintero <ack@telefonica.net>
+Standards-Version: 3.6.1.0 
+
+Package: motion
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: ffmpeg
+Suggests: mysql-client, postgresql-client
+Description: V4L capture program supporting motion detection
+ Motion is a program that monitors the video signal from
+ one or more cameras and is able to detect if a significant
+ part of the picture has changed. Or in other words, it can
+ detect motion.
+ .
+ Motion is a command line based tool. It has no graphical
+ user interface. Everything is setup either via the
+ command line or via configuration files.
+ .
+ The output from motion can be:
+    - jpg files
+    - ppm format files
+    - mpeg video sequences
+ .
+ Also, motion has its own minimalistic web server. Thus,
+ you can access the webcam output from motion via a browser.

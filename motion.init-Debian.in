@@ -1,0 +1,72 @@
+#! /bin/bash
+#
+# motion	Start the motion detection .
+#
+
+NAME=motion
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+DAEMON=@BIN_PATH@/motion
+PIDFILE=/var/run/$NAME.pid
+
+
+trap "" 1
+export LANG=C
+export PATH
+
+test -f $DAEMON || exit 0
+
+
+case "$1" in
+  start)
+    echo "Starting motion detection : $NAME"
+    start-stop-daemon --start --make-pidfile --pidfile $PIDFILE --exec $DAEMON
+    echo `ps axf | grep -v grep | grep $DAEMON | head -n1 | awk '{print $1}'` > $PIDFILE
+    ;;
+
+  stop)
+    echo "Stopping motion detection : $NAME"
+    start-stop-daemon --stop --pidfile $PIDFILE --oknodo --exec $DAEMON --retry 30 
+    rm -rf $PIDFILE 2> /dev/null
+    ;;
+
+  status)
+    echo "Status motion detection : $NAME"
+    if (test -f $PIDFILE); then
+        echo -n "Running process for $NAME : "
+    	pidof $NAME  
+    else
+    	echo "Stopped"
+    fi
+    ;;  
+    
+  reload-config)
+    echo "Reloading $NAME configuration"
+    start-stop-daemon --stop --pidfile $PIDFILE --signal HUP --exec $DAEMON
+    ;;
+
+  restart-motion)
+    echo "Restarting $NAME"
+    start-stop-daemon --stop --pidfile $PIDFILE --oknodo --exec $DAEMON  --retry 30
+    rm -rf $PIDFILE 2> /dev/null
+    start-stop-daemon --start --make-pidfile --pidfile $PIDFILE --exec $DAEMON
+    echo `ps axf | grep -v grep | grep $DAEMON | head -n1 | awk '{print $1}'` > $PIDFILE
+    ;;
+
+  restart)
+    $0 restart-motion
+    exit $?
+    ;;
+
+  *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|status|reload-config|restart}"
+    exit 1
+    ;;
+esac
+
+if [ $? == 0 ]; then
+	echo .
+	exit 0
+else
+	echo failed
+	exit 1
+fi

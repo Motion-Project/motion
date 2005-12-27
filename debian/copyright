@@ -1,0 +1,15 @@
+This package was originally debianized by Paul Hedderly (DH/DSS) <prh@debian.org> on
+Wed, 20 Sep 2000 12:39:09 +0100.
+
+Package is currently maintained by Frederik Dannemare <frederik@dannemare.net> since
+Mon, 28 Jun 2004 17:28:24 +0200.
+
+Upstream source: http://motion.sourceforge.net/
+
+Upstream Author: Kenneth Lavrsen <kenneth@lavrsen.dk>
+
+Copyright: Copyright 2000-2004 by Jeroen Vreeken/Folkert Van Heusden/Kenneth Lavrsen
+
+This software is released under the GNU GENERAL PUBLIC LICENSE Version 2.
+See /usr/share/common-licenses/GPL-2 for details.
+

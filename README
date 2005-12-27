@@ -1,0 +1,65 @@
+Motion up to version 3.1.8 was created and maintained by Jeroen Vreeken.
+Versions 3.1.9-3.1.12 was maintained by Kenneth Lavrsen (http://www.lavrsen.dk/)
+and Folkert van Heusden (http://www.vanheusden.com/).
+
+From 3.1.12 Motion is project managed by Kenneth Lavrsen and maintained by
+a large number of people.
+
+See the file CREDITS for the list of people having made contributions to the
+Motion code.
+
+Copyright 2000-2005 by Jeroen Vreeken/Folkert Van Heusden/Kenneth Lavrsen
+and the contributors mentioned in the file CREDITS.
+
+The source file netcam_wget.c and netcam_wget.h contains code reused from
+GNU Wget. It has been merged and modified for use in the program Motion which
+is also released under the terms of the GNU General Public License.
+Copyright (C) 1995, 1996, 1997, 1998, 2000, 2001, 2002
+Free Software Foundation, Inc.
+The code contains additional modifications 
+Additional Copyright (C) 2004-2005 Christopher Price,
+Angel Carpintero, and other contributing authors.
+
+GNU Wget and Motion is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+GNU Wget and Motion is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Wget; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */ 
+
+
+Installing:
+
+Read the motion.1 manpage for more info
+
+And most of all read the Motion Guide for very detailed description of both
+installation and use.
+The Motion Guide is part of the distribution (motion_guide.htm).
+You are encouraged to look up an up to date version by visiting the Motion
+homepage at
+http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome
+and specifically the Motion Guide at
+http://www.lavrsen.dk/twiki/bin/view/Motion/MotionGuide
+
+
+Support:
+
+Lots of resources at http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome
+Please join the mailing list
+http://www.lavrsen.dk/twiki/bin/view/Motion/MailingList
+Newbies and silly questions are welcome. We prefer support through the mailing
+list because more will have benefit from the answers.
+
+
+Jeroen Vreeken
+pe1rxq@amsat.org
+
+Kenneth Lavrsen
+kenneth@lavrsen.dk
