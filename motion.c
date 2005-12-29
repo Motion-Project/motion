@@ -819,6 +819,13 @@ static void *motion_loop(void *arg)
 			}
 			cnt->missing_frame_counter = 0;
 			
+#ifdef HAVE_FFMPEG
+			/* Deinterlace the image with ffmpeg, before the image is modified. */
+			if(cnt->conf.ffmpeg_deinterlace) {
+				ffmpeg_deinterlace(newimg, cnt->imgs.width, cnt->imgs.height);
+			}
+#endif
+			
 			/* save the newly captured still virgin image to a buffer
 			 * which we will not alter with text and location graphics
 			 */

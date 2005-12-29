@@ -575,4 +575,43 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
 	return picture;
 }
 
+
+/** ffmpeg_deinterlace
+ *      Make the image suitable for deinterlacing using ffmpeg, then deinterlace the picture.
+ * 
+ * Parameters
+ *      img     image in YUV420P format
+ *      width   image width in pixels
+ *      height  image height in pixels
+ *
+ * Returns
+ *      Function returns nothing.
+ *      img     contains deinterlaced image
+ */
+void ffmpeg_deinterlace(unsigned char *img, int width, int height)
+{
+	AVFrame *picture;
+	int width2 = width / 2;
+	
+	picture = avcodec_alloc_frame();
+	if (!picture) {
+		motion_log(LOG_ERR, 1, "Could not alloc frame");
+		return;
+	}
+	
+	picture->data[0] = img;
+	picture->data[1] = img+width*height;
+	picture->data[2] = picture->data[1]+(width*height)/4;
+	picture->linesize[0] = width;
+	picture->linesize[1] = width2;
+	picture->linesize[2] = width2;
+	
+	/* We assume using 'PIX_FMT_YUV420P' always */
+	avpicture_deinterlace((AVPicture *)picture, (AVPicture *)picture, PIX_FMT_YUV420P, width, height);
+	
+	av_free(picture);
+	
+	return;
+}
+
 #endif /* HAVE_FFMPEG */

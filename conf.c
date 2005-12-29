@@ -531,7 +531,10 @@ config_param config_params[] = {
 	{
 	"ffmpeg_cap_new",
 	"\n############################################################\n"
-	"# Film (mpeg) File Output - ffmpeg based\n"
+	"# FFMPEG related options\n"
+	"# Film (mpeg) file output, and deinterlacing of the video input\n"
+	"# The options movie_filename and timelapse_filename are also used\n"
+	"# by the ffmpeg feature\n"
 	"############################################################\n\n"
 	"# Use ffmpeg to encode mpeg movies in realtime (default: off)",
 	CONF_OFFSET(ffmpeg_cap_new),
@@ -592,6 +595,15 @@ config_param config_params[] = {
 	CONF_OFFSET(ffmpeg_video_codec),
 	copy_string,
 	print_string
+	},
+	{
+	"ffmpeg_deinterlace",
+	"# Use ffmpeg to deinterlace video. Necessary if you use an analog camera\n"
+	"# and see horizontal combing on moving objects in video or pictures.\n"
+	"# (default: off)",
+	CONF_OFFSET(ffmpeg_deinterlace),
+	copy_bool,
+	print_bool
 	},
 #endif /* HAVE_FFMPEG */
 
@@ -723,12 +735,13 @@ config_param config_params[] = {
 	},
 #ifdef HAVE_FFMPEG
 	{
-	"ffmpeg_filename",
+	"movie_filename",
 	"# File path for motion triggered ffmpeg films (mpeg) relative to target_dir\n"
 	"# Default: "DEF_MPEGPATH"\n"
 	"# Default value is equivalent to legacy oldlayout option\n"
 	"# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S\n"
-	"# File extension .mpg or .avi is automatically added so do not include this",
+	"# File extension .mpg or .avi is automatically added so do not include this\n"
+	"# This option was previously called ffmpeg_filename",
 	CONF_OFFSET(mpegpath),
 	copy_string,
 	print_string

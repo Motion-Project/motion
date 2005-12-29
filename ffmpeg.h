@@ -63,4 +63,7 @@ void ffmpeg_put_other_image(
 /* Closes the mpeg file. */
 void ffmpeg_close(struct ffmpeg *);
 
+/*Deinterlace the image. */
+void ffmpeg_deinterlace(unsigned char *, int, int);
+
 #endif /* _INCLUDE_FFMPEG_H_ */

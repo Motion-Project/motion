@@ -59,6 +59,7 @@ struct config {
 	int ffmpeg_cap_motion;
 	int ffmpeg_bps;
 	int ffmpeg_vbr;
+	int ffmpeg_deinterlace;
 	const char *ffmpeg_video_codec;
 	int webcam_port;
 	int webcam_quality;
