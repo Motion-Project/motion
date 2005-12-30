@@ -19,6 +19,7 @@ snap1
      From mailing list 23 Dec 2005.
    * Changed CHANGELOG to same bullet format as used by TWiki to make it easier
      to write release notes (Kenneth Lavrsen)
+   * Changed CREDITS to same bullet format as CHANGELOG (Kenneth Lavrsen)
 
 
 3.2.4   Formal Release. Summary of changes
