@@ -283,6 +283,8 @@ Angel Carpintero
       * Remove cpu optimization (is broken)
    * Fixed http control of pan and tilt.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x12x22x122649
+   * Fixed sql_mask not initialisated correctly
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603 
 
 John Edwards
    * Added the 'pal-nc' norm.

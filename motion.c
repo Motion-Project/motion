@@ -569,6 +569,16 @@ static void motion_init(struct context *cnt)
 	}
 #endif /* HAVE_PGSQL */
 
+
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+	/* Set the sql mask file according to the SQL config options*/ 
+	
+	cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
+			cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
+			cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
+			cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
+	
 	/* Load the mask file if any */
 	if (cnt->conf.mask_file) {
 		if ((picture = fopen(cnt->conf.mask_file, "r"))) {

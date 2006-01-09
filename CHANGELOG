@@ -20,6 +20,8 @@ snap1
    * Changed CHANGELOG to same bullet format as used by TWiki to make it easier
      to write release notes (Kenneth Lavrsen)
    * Changed CREDITS to same bullet format as CHANGELOG (Kenneth Lavrsen)
+   * Fixed sql_mask not initialisated correctly (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603 
 
 
 3.2.4   Formal Release. Summary of changes
