@@ -468,7 +468,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 						type = strdup(config_type(&config_params[i]));
 
 						if (!strcmp(type,"string")) {
-							char value[1]={'\0'};
+							char *value = NULL;
 							conf_cmdparse(cnt+thread, config_params[i].param_name, value);
 							free(type);
 							type = strdup("(null)");

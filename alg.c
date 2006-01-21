@@ -39,7 +39,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 	cent->maxy=0;
 	cent->minx=width;
 	cent->miny=height;
-	
+
 	/* If Labeling enabled - locate center of largest labelgroup */
 	if (imgs->labelsize_max) {
 		/* Locate largest labelgroup */
@@ -155,7 +155,7 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 	int x, y;
 
 	out=imgs->out;
-	
+
 	/* Draw a box around the movement */
 	if (mode == LOCATE_BOTH){ /* both normal and motion image gets a box */
 		int width_miny = width*cent->miny;
@@ -656,14 +656,20 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 		case 'l':
 			diffs = alg_labeling(cnt);
 			i=len;
-			done=1;
+			done=2;
 			break;
 		}
 	}
-	if (done)
+
+	/* If conf.despeckle contains any valid action EeDdl */
+	if (done){
+		if (done != 2) cnt->imgs.labelsize_max = 0; // Disable Labeling
 		return diffs;
+	}	
 	else
-		return olddiffs;
+		cnt->imgs.labelsize_max = 0; // Disable Labeling
+	
+	return olddiffs;
 }
 
 /* Generate actual smartmask. Calculate sensitivity based on motion */

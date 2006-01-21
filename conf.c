@@ -1227,8 +1227,13 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 	 */
 	while( config_params[i].param_name != NULL ) {
 		if(!strncasecmp(cmd, config_params[i].param_name , 255 + 50)) { // Why +50?
-			if(config_params[i].conf_value && !arg1)
-				return cnt;
+	
+			/* if config_param is string we don't want to check arg1 */		
+			if (strcmp(config_type(&config_params[i]),"string")) {
+				if(config_params[i].conf_value && !arg1)
+					return cnt;
+			}
+			
 			/* We call the function given by the pointer config_params[i].copy
 			 * If the option is a bool, copy_bool is called.
 			 * If the option is an int, copy_int is called.

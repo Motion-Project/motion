@@ -174,6 +174,10 @@ static void context_destroy(struct context *cnt)
 	if (cnt->currenttime_tm)
 		free(cnt->currenttime_tm);
 
+	/* Cleanup the event time structure */
+	if (cnt->eventtime_tm)
+		free(cnt->eventtime_tm);
+	
 	/* Free memory allocated for config parameters */
 	for (j = 0; config_params[j].param_name != NULL; j++) {
 		if (config_params[j].copy == copy_string) {
