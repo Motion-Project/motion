@@ -1,7 +1,7 @@
 /*
  *	netcam_jpeg.c
  *
- *	Module for handling JPEG decompression fornetwork cameras.
+ *	Module for handling JPEG decompression for network cameras.
  *
  *	This code was inspired by the original module written by
  *	Jeroen Vreeken and enhanced by several Motion project
@@ -162,7 +162,7 @@ static void netcam_memory_src(j_decompress_ptr cinfo, char *data, int length)
  * netcam_error_exit
  *
  * 	Routine to override the libjpeg error exit routine so
- * 	that we can just thow away the bad frame and continue
+ * 	that we can just throw away the bad frame and continue
  * 	with more data from the netcam.
  *
  * Parameters

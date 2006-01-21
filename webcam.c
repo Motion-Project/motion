@@ -32,8 +32,8 @@
 
 
 
-/* This function sets up a TCP/IP socket for incomming requests. It is called only during
- * initiatization of Motion from the function webcam_init
+/* This function sets up a TCP/IP socket for incoming requests. It is called only during
+ * initialisation of Motion from the function webcam_init
  * The function sets up a a socket on the port number given by _port_.
  * If the parameter _local_ is not zero the socket is setup to only accept connects from localhost.
  * Otherwise any client IP address is accepted. The function returns an integer representing the socket.
@@ -133,7 +133,7 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 					      client->tmpbuffer->size - client->filepos);
 		
 				/* If any data has been written, update the
-				 * data pointer and set the "workdone flag
+				 * data pointer and set the workdone flag
 				 */
 				if (written>0) {
 					client->filepos+=written;
@@ -284,7 +284,7 @@ static int webcam_check_write(struct webcam *list)
 
 
 /* This function is called from motion.c for each motion thread starting up.
- * The function setup the incomming tcp socket that the clients connect to
+ * The function setup the incoming tcp socket that the clients connect to
  * The function returns an integer representing the socket.
  */
 int webcam_init(struct context *cnt)

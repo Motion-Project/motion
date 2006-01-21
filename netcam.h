@@ -24,7 +24,7 @@
 /*
  * We are aiming to get the gcc compilation of motion practically "warning
  * free", when using all the possible warning switches.  The following macro
- * is to allow some function protypes to include parameters which, at the
+ * is to allow some function prototypes to include parameters which, at the
  * moment, are not used, but either still "need to be declared", or else are
  * planned to be used in the near future.  Eventually this macro will go into
  * motion.h, but that will be a little later.
@@ -120,7 +120,7 @@ typedef struct netcam_context {
 	pthread_mutex_t mutex;      /* mutex used with conditional waits */
 
 	pthread_cond_t exiting;     /* pthread condition structure to let
-	                               the camera-handler acknowlege that
+	                               the camera-handler acknowledge that
 	                               it's finished */
 
 	pthread_cond_t cap_cond;    /* pthread condition structure to
@@ -172,7 +172,7 @@ typedef struct netcam_context {
 	int (*get_image)(netcam_context_ptr);
 	                            /* Function to fetch the image from
 	                               the netcam.  It is initialised in
-	                               netcam_setup depending upon whetheer
+	                               netcam_setup depending upon whether
 	                               the picture source is from an http
 	                               server or from an ftp server */
 
@@ -199,7 +199,7 @@ typedef struct netcam_context {
 	                               data from the camera */
 
 	netcam_buff_ptr jpegbuf;    /* This buffer is used for jpeg
-	                               decompresssion */
+	                               decompression */
 
 	int imgcnt;                 /* count for # of received jpegs */
 	int imgcnt_last;            /* remember last count to check if a new

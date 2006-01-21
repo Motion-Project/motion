@@ -50,7 +50,7 @@ typedef unsigned TYPE_32BIT __uint32;
 /**
  * The code below is copied (with modification) from bits/byteswap.h. It provides
  * a macro/function named rot__bswap_32 that swaps the bytes in a 32-bit integer, 
- * preferrably using the bswap assembler instruction if configure found support
+ * preferably using the bswap assembler instruction if configure found support
  * for it.
  *
  * It would be neater to simply include byteswap.h and use the bswap_32 macro

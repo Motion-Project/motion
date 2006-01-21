@@ -16,7 +16,7 @@ struct ffmpeg {
 	AVStream *video_st;
 	AVCodecContext *c;
 
-	AVFrame *picture;       /* contains default imaga pointers */
+	AVFrame *picture;       /* contains default image pointers */
 	uint8_t *video_outbuf;
 	int video_outbuf_size;
 

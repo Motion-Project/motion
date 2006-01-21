@@ -2,7 +2,7 @@
   **
   ** conf.c
   **
-  ** I originaly wrote conf.c as part of the drpoxy package
+  ** I originally wrote conf.c as part of the drpoxy package
   ** thanks to Matthew Pratt and others for their additions.
   **
   ** Copyright 1999 Jeroen Vreeken (pe1rxq@chello.nl)
@@ -668,7 +668,7 @@ config_param config_params[] = {
 	},
 	{
 	"text_event",
-	"# This option defines the value of the speciel event conversion specifier %C\n"
+	"# This option defines the value of the special event conversion specifier %C\n"
 	"# You can use any conversion specifier in this option except %C. Date and time\n"
 	"# values are from the timestamp of the first image in the current event.\n"
 	"# Default: %Y%m%d%H%M%S\n"
@@ -846,7 +846,7 @@ config_param config_params[] = {
 	"############################################################\n\n"
 	"# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic)\n"
 	"# The generic type enables the definition of motion center and motion size to\n"
-	"# be used with the convertion specifiers for options like on_motion_detected",
+	"# be used with the conversion specifiers for options like on_motion_detected",
 	TRACK_OFFSET(type),
 	copy_int,
 	print_int
@@ -1539,7 +1539,7 @@ void malloc_strings (struct context * cnt)
  ***********************************************************************/
 
 /* copy_bool assigns a config option to a new boolean value.
- * The boolean is given as a string in str which is coverted to 0 or 1 
+ * The boolean is given as a string in str which is converted to 0 or 1 
  * by the function. Values 1, yes and on are converted to 1 ignoring case.
  * Any other value is converted to 0.
  */
@@ -1562,8 +1562,8 @@ static struct context **copy_bool (struct context **cnt, const char *str, int va
 	return cnt;
 }
 
-/* copy_int assigns a config option to a new interger value.
- * The integer is given as a string in str which is coverted to integer by the function.
+/* copy_int assigns a config option to a new integer value.
+ * The integer is given as a string in str which is converted to integer by the function.
  */
 static struct context ** copy_int(struct context **cnt, const char *str, int val_ptr)
 {
@@ -1620,7 +1620,7 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
  *
  * from - pointer to the new string we want to copy
  * to   - the pointer to the current string (or pointing to NULL)
- *        If not NULL the memory it points to is fre'ed.
+ *        If not NULL the memory it points to is free'd.
  * function returns pointer to the new string which is in malloc'ed memory
  * FIXME The strings that are malloc'ed with this function should be freed
  * when the motion program is terminated normally instead of relying on the

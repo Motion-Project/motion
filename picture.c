@@ -87,7 +87,7 @@ static GLOBAL(int) jpeg_mem_size(j_compress_ptr cinfo)
  * Inputs:
  * - image_size is the size of the input image buffer.
  * - input_image is the image in YUV420P format.
- * - width and height are the dimentions of the image
+ * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
  * Output:
  * - dest_image is a pointer to the jpeg image buffer
@@ -155,7 +155,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
  * Inputs:
  * - image_size is the size of the input image buffer.
  * - input_image is the image in grayscale format.
- * - width and height are the dimentions of the image
+ * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
  * Output:
  * - dest_image is a pointer to the jpeg image buffer
@@ -201,7 +201,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
  * it to an already open file.
  * Inputs:
  * - image is the image in YUV420P format.
- * - width and height are the dimentions of the image
+ * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
  * Output:
  * - The jpeg is written directly to the file given by the file pointer fp
@@ -265,7 +265,7 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
  * it to an already open file.
  * Inputs:
  * - image is the image in greyscale format.
- * - width and height are the dimentions of the image
+ * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
  * Output:
  * - The jpeg is written directly to the file given by the file pointer fp
@@ -307,7 +307,7 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
  * it to an already open file.
  * Inputs:
  * - image is the image in YUV420P format.
- * - width and height are the dimentions of the image
+ * - width and height are the dimensions of the image
  * Output:
  * - The PPM is written directly to the file given by the file pointer fp
  * Returns nothing

@@ -114,7 +114,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 	if (centc) {
 		cent->minx = cent->x - xdist/centc*2;
 		cent->maxx = cent->x + xdist/centc*2;
-		/* Make the box a litle bigger in y direction to make sure the
+		/* Make the box a little bigger in y direction to make sure the
 		   heads fit in so we multiply by 3 instead of 2 which seems to
 		   to work well in practical */
 		cent->miny = cent->y - ydist/centc*3;
@@ -837,7 +837,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 		}
 
 		/* Next, compare the multiplied absolute differences with the multiplied
-		 * noise level (repeted as 4 words in mm7), resulting in a "motion flag"
+		 * noise level (repeated as 4 words in mm7), resulting in a "motion flag"
 		 * for each pixel.
 		 *
 		 * Since pcmpgtw performs signed comparisons, we have to subtract noise,
@@ -950,7 +950,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 			
 		if (smartmask_speed) {
 			if (curdiff > noise) {
-				/* increase smart_mask sesitivity every frame when motion
+				/* increase smart_mask sensitivity every frame when motion
 				   is detected. (with speed=5, mask is increased by 1 every
 				   second. To be able to increase by 5 every second (with
 				   speed=10) we add 5 here. NOT related to the 5 at ratio-

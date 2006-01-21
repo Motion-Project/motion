@@ -95,7 +95,7 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 				if (ioctl(dev, VIDIOCGPICT, &vid_pic)==-1)
 					motion_log(LOG_ERR, 1, "ioctl (VIDIOCGPICT)");
 			}
-			/* average is above window - turn down brigtness - go for the target */
+			/* average is above window - turn down brightness - go for the target */
 			if (avg > brightness_window_high) {
 				step = MIN2((avg - brightness_target)/5+1, viddev->brightness);
 				if (viddev->brightness > step+1) {
@@ -104,7 +104,7 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 					make_change = 1;
 				}
 			}
-			/* average is below window - turn up brigtness - go for the target */
+			/* average is below window - turn up brightness - go for the target */
 			if (avg < brightness_window_low) {
 				step = MIN2((brightness_target - avg)/5+1, 255 - viddev->brightness);
 				if (viddev->brightness < 255-step ) {
@@ -509,7 +509,7 @@ static int v4l_open_vidpipe(void)
 		
 		fprintf(stderr,"\t%s", buffer);
 		
-		/* Read explaination line */
+		/* Read explanation line */
 		
 		if (!fgets(buffer, 255, vloopbacks)) {
 			motion_log(LOG_ERR, 1, "Unable to read vloopback explanation line");
@@ -720,7 +720,7 @@ void vid_cleanup(void)
  * - Width and height are checked for valid value (multiple of 16)
  * - Copy the config height and width to the imgs struct. Note that height and width are
  *   only copied to the from the conf struct to the imgs struct during program startup
- *   The width and height can no leter be changed via http remote control as this would
+ *   The width and height can no later be changed via http remote control as this would
  *   require major re-memory allocations of all image buffers.
  * - Setup basic V4L properties incl palette incl setting 
  * - Open the device
@@ -733,7 +733,7 @@ void vid_cleanup(void)
  *     viddevs    The viddevs struct is "global" within the context of video.c
  *                and used in functions vid_*.
  *     vid_mutex  Mutex needed to handle exclusive access to the viddevs struct when
- *                each thread adds a new video device durig startup calling vid_start
+ *                each thread adds a new video device during startup calling vid_start
  *
  * Returns
  *     device number

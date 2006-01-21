@@ -478,7 +478,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 *
 *      ctxt    pointer to an FTP context
 *
-* Returns -1 incase of error, 0 otherwise
+* Returns -1 in case of error, 0 otherwise
 */
 
 static int ftp_get_connection(ftp_context_pointer ctxt) {

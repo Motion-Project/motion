@@ -438,7 +438,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 						warningkill = sscanf(pointer,"%1024s", Value);
 						length_uri = length_uri - strlen(Value);
 						if ( (length_uri == 0) && (strlen(Value) > 0) ) {
-							/* FIXME need to asure that is a valid value */
+							/* FIXME need to assure that is a valid value */
 							url_decode(Value,strlen(Value));
 							conf_cmdparse(cnt + thread, config_params[i].param_name, Value);
 							if (cnt[0]->conf.control_html_output) {
@@ -593,7 +593,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 		length_uri = length_uri - 3;
 
 		if ((length_uri > 7) && (question == '?')) {
-			/* 8 -> query=param_name FIXME minimun length param_name */
+			/* 8 -> query=param_name FIXME minimum length param_name */
 			pointer++;
 			length_uri--;
 			warningkill = sscanf(pointer,"%256[a-z]%c", command, &question);
@@ -1985,7 +1985,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 						/* A valid auth request.  Process it.  */
 					}
 				} else {
-					// Resquest Authorithation
+					// Request Authorization
 					char response[1024]={'\0'};
 					snprintf (response, sizeof (response),request_auth_response_template, method);
 					warningkill = write (client_socket, response, strlen (response));

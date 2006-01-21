@@ -168,9 +168,9 @@
  * Location      Purpose
  * 
  * conf          The values in conf reflect width and height set in the
- *               configuration file. These can be set via xmlrpc, but they are
- *               not used internally by Motion, so it won't break anything.
- *               These values are transferred to imgs in vid_start.
+ *               configuration file. These can be set via http remote control, 
+ *               but they are not used internally by Motion, so it won't break
+ *               anything. These values are transferred to imgs in vid_start.
  *
  * imgs          The values in imgs are the actual output dimensions. Normally
  *               the output dimensions are the same as the capture dimensions,

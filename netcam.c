@@ -26,7 +26,7 @@
  *      is accessed.  The other type is one which supplies an mjpeg
  *      stream of data.
  *
- *      For each of these cameras, the routinei taking care of the netcam
+ *      For each of these cameras, the routine taking care of the netcam
  *      will start up a completely separate thread (which I call the "camera
  *      handler thread" within subsequent comments).  For a streaming camera,
  *      this handler will receive the mjpeg stream of data from the camera,

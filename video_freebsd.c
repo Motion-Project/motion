@@ -594,7 +594,7 @@ static unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, i
 	}
 /*
 	if (ioctl(dev_bktr, METEORSACTPIXFMT, &pixelformat) < 0 ){
-        	motion_log(LOG_ERR, 1, "set enconding method BSD_VIDFMT_I420"); 
+        	motion_log(LOG_ERR, 1, "set encoding method BSD_VIDFMT_I420"); 
 		return(NULL);
         }
 
@@ -734,7 +734,7 @@ static int v4l_next(struct video_dev *viddev,unsigned char *map, int width, int 
 
 	if (viddev->capture_method == CAPTURE_CONTINOUS){
 		if (ioctl(dev_bktr, METEORCAPTUR, &continous) < 0) {
-			motion_log(LOG_ERR, 1, "Error capturing using continous method");
+			motion_log(LOG_ERR, 1, "Error capturing using continuous method");
 			sigprocmask (SIG_UNBLOCK, &old, NULL);
 			return (-1);
 		}
@@ -825,7 +825,7 @@ static void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigne
 
 vid_init - Allocate viddev struct.
 vid_start - Setup Device parameters ( device , channel , freq , contrast , hue , saturation , brightness ) and open it.
-vid_next - Capture a frame and set input , contrast , hue , saturation and brighness if necesary. 
+vid_next - Capture a frame and set input , contrast , hue , saturation and brightness if necessary. 
 vid_close - close devices. 
 vid_cleanup - Free viddev struct.
 

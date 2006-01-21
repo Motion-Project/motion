@@ -43,7 +43,7 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
 		setsid();
 
 		/*
-		 * Close any file descripter except console because we will
+		 * Close any file descriptor except console because we will
 		 * like to see error messages
 		 */
 		for (i = getdtablesize(); i > 2; --i)
