@@ -662,7 +662,7 @@ static void *motion_loop(void *arg)
 
 #ifdef HAVE_FFMPEG
 	/* Next two variables are used for timelapse feature
-	 * time_last_frame is set to 1 so that first comming timelapse or second=0
+	 * time_last_frame is set to 1 so that first coming timelapse or second=0
 	 * is acted upon.
 	 */
 	unsigned long int time_last_frame=1, time_current_frame;
@@ -798,7 +798,7 @@ static void *motion_loop(void *arg)
 			cnt->netcam = NULL;
 			cnt->video_dev = vid_start(cnt);
 			
-			/* if the netcam has different dimentions than in the config file
+			/* if the netcam has different dimensions than in the config file
 			 * we need to restart Motion to re-allocate all the buffers
 			 */
 			if (cnt->imgs.width != cnt->imgs.width || cnt->imgs.height != cnt->conf.height) {
@@ -955,10 +955,10 @@ static void *motion_loop(void *arg)
 			
 			/* Switchfilter feature tries to detect a change in the video signal
 			 * from one camera to the next. This is normally used in the Round
-			 * Robin feature. The algoritm is not very safe.
-			 * The algoritm takes a little time so we only call it when needed
+			 * Robin feature. The algorithm is not very safe.
+			 * The algorithm takes a little time so we only call it when needed
 			 * ie. when feature is enabled and diffs>threshold.
-			 * We do not suspend motion detection like we did for lightswith 
+			 * We do not suspend motion detection like we did for lightswitch 
 			 * because with Round Robin this is controlled by roundrobin_skip.
 			 */
 			if (cnt->conf.switchfilter && cnt->diffs > cnt->threshold) {
@@ -972,7 +972,7 @@ static void *motion_loop(void *arg)
 
 			/* Despeckle feature
 			 * First we run (as given by the despeckle option iterations
-			 * of erode and dilate algoritms.
+			 * of erode and dilate algorithms.
 			 * Finally we run the labelling feature.
 			 * All this is done in the alg_despeckle code.
 			 */
@@ -982,7 +982,9 @@ static void *motion_loop(void *arg)
 			if (cnt->conf.despeckle && cnt->diffs > 0) {
 				olddiffs = cnt->diffs;
 				cnt->diffs = alg_despeckle(cnt, olddiffs);
-			}
+			}else if (cnt->imgs.labelsize_max) 
+				cnt->imgs.labelsize_max = 0; /* Disable labeling if enabled */
+			
 		} else if (!cnt->conf.setup_mode)
 			cnt->diffs = 0;
 
@@ -1316,8 +1318,8 @@ static void *motion_loop(void *arg)
 		}
 		
 		/* if timelapse mpeg is in progress but conf.timelapse is zero then close timelapse file
-		 * This is an important feature that allows manual roll-over of timelapse file using xmlrpc
-		 * via a cron job
+		 * This is an important feature that allows manual roll-over of timelapse file using the http 
+		 * remote control via a cron job.
 		 */
 		else if (cnt->ffmpeg_timelapse)
 			event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
@@ -1360,7 +1362,7 @@ static void *motion_loop(void *arg)
 				cnt->new_img=NEWIMG_FIRST;
 			else if (strcasecmp(cnt->conf.output_normal, "best") == 0){
 				cnt->new_img=NEWIMG_BEST;
-				/* alocate buffer here when not yet done */
+				/* allocate buffer here when not yet done */
 				if (!cnt->imgs.preview_buffer){
 					cnt->imgs.preview_buffer = mymalloc(cnt->imgs.size);
 					if (cnt->conf.setup_mode)
