@@ -288,7 +288,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	/* set intra frame distance in frames depending on codec */
 	c->gop_size = is_mpeg1 ? 10 : 12;
 	
-	/* some formats want stream headers to be seperate */
+	/* some formats want stream headers to be separate */
 	if(!strcmp(ffmpeg->oc->oformat->name, "mp4") || 
 	   !strcmp(ffmpeg->oc->oformat->name, "mov") ||
 	   !strcmp(ffmpeg->oc->oformat->name, "3gp")) {
@@ -429,7 +429,9 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 */
 	/* free the stream */
 	av_free(ffmpeg->oc);
+#if LIBAVFORMAT_BUILD >= 4629
 	free(ffmpeg->c);
+#endif
 	free(ffmpeg);
 }
 
@@ -460,7 +462,9 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
 
 	/* free the stream */
 	av_free(ffmpeg->oc);
+#if LIBAVFORMAT_BUILD >= 4629
 	free(ffmpeg->c);
+#endif
 	free(ffmpeg);
 }
 
