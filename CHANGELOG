@@ -22,6 +22,16 @@ snap1
    * Changed CREDITS to same bullet format as CHANGELOG (Kenneth Lavrsen)
    * Fixed sql_mask not initialisated correctly (Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603 
+   * Fixed the management of strings from http remote control , setting to NULL 
+     when they are set to "blank" and fixes a problem with despeckle , that didn't 
+     allow to remove labeling action from http remote control. (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FixStringsAndDisableLabeling
+   * Fix many typos in comments ( i ran aspell against the code ). Also there's a 
+     fix to free cnt->eventtime_tm when motion exits. (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FixTypoInComments
+   * Fix the problem that happens in FreeBSD and Debian Sarge because 
+     version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Pete Shipley and Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335 
 
 
 3.2.4   Formal Release. Summary of changes
