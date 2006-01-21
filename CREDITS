@@ -285,6 +285,17 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x12x22x122649
    * Fixed sql_mask not initialisated correctly
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603 
+   * Fixed the management of strings from http remote control , setting to NULL
+     when they are set to "blank" and fixes a problem with despeckle , that didn't
+     allow to remove labeling action from http remote control. 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FixStringsAndDisableLabeling
+   * Fix many typos in comments ( i ran aspell against the code ). Also there's a
+     fix to free cnt->eventtime_tm when motion exits.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FixTypoInComments
+   * Fix the problem that happens in FreeBSD and Debian Sarge because
+     version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Pete Shipley and Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
+ 
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -980,6 +991,11 @@ James A. Russo.
 
 Petter Reinholdtsen
    * Adding the install option to the makefile.
+
+Pete Shipley
+   * Fix the problem that happens in FreeBSD and Debian Sarge because
+     version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Angel Carpintero and Pete Shipley)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335	
 
 Roberto Spadim
    * Fixed compatibility problem with Palantir. Fixed by making output more
