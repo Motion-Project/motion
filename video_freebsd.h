@@ -68,7 +68,7 @@
 #define CAPTURE_CONTINOUS 1
 
 #define VIDEO_DEVICE "/dev/bktr0"
-#define TUNER_DEVICE "/dev/turner0"
+#define TUNER_DEVICE "/dev/tuner0"
 
 struct video_dev {
 	int fd_bktr;
