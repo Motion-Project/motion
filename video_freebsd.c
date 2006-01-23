@@ -141,7 +141,8 @@ static void rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width
 			v++;
 		}
 
-		if ((loop & 1) == 1) {
+		if ((loop & 1) == 0) 
+		{
 			u-=width/2;
 			v-=width/2;
 		}
