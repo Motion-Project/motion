@@ -9,7 +9,6 @@
  */
 
 #include "picture.h"
-#include "motion.h"
 #include "event.h"
 
 #include <jpeglib.h>

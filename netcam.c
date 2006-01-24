@@ -48,7 +48,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "netcam_wget.h"
 #include "netcam_ftp.h"
 
 #define CONNECT_TIMEOUT        10   /* timeout on remote connection attempt */

@@ -9,16 +9,9 @@
 #include <math.h>
 #include <termios.h>
 #include "motion.h"
-
-#ifdef __freebsd__
-#include "video_freebsd.h"
-#else
-#include "video.h"
-#endif /* __freebsd__ */
-
-#include "conf.h"
-#include "track.h"
-#include "alg.h"
+//#include "conf.h"
+//#include "track.h"
+//#include "alg.h"
 
 #include "pwc-ioctl.h"
 

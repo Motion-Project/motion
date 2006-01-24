@@ -10,7 +10,6 @@
 /* Common stuff: */
 #include "motion.h"
 #include "video.h"
-#include "conf.h"
 /* for rotation */
 #include "rotate.h"
 

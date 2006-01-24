@@ -12,13 +12,9 @@
 #include "ffmpeg.h"           /* must be first to avoid 'shadow' warning */
 #include "motion.h"
 #include "event.h"
-
-#ifdef __freebsd__
-#include "video_freebsd.h"
-#else
+#ifndef __freebsd__
 #include "video.h"
-#endif /* __freebsd__ */
-
+#endif
 #include "picture.h"
 
 /*

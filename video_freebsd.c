@@ -10,7 +10,6 @@
 /* Common stuff: */
 #include "motion.h"
 #include "video_freebsd.h"
-#include "conf.h"
 /* for rotation */
 #include "rotate.h"
 
@@ -572,7 +571,7 @@ static unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, i
 	void *map;
 
 	/* if we have choose the tuner is needed to setup the frequency */
-	if ( ((viddev->tuner_device != NULL)) && ( input == IN_TV ) ) {
+	if ( (viddev->tuner_device != NULL) && ( input == IN_TV ) ) {
 		if (!freq) {
 			motion_log(LOG_ERR, 1, "Not valid Frequency [%lu] for Source input [%i]", freq, input);
 			return (NULL);

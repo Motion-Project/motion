@@ -27,7 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "netcam_wget.h"
 
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 

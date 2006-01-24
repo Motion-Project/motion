@@ -19,8 +19,7 @@
  */
 
 #include "picture.h"
-#include "webcam.h"
-#include "motion.h"
+/* picture.h already includes motion.h and this one webcam.h */
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

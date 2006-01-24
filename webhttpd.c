@@ -16,9 +16,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include "conf.h"
-#include "webhttpd.h"
-#include "netcam_wget.h"
 
 pthread_mutex_t httpd_mutex;
 

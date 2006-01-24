@@ -7,16 +7,7 @@
  *
  */
 #include "motion.h"
-
-#ifdef __freebsd__
-#include "video_freebsd.h"
-#else
-#include "video.h"
-#endif /* __freebsd__ */
-
-#include "conf.h"
 #include "alg.h"
-#include "event.h"
 
 #ifdef __MMX__
 #define HAVE_MMX

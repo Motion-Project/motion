@@ -25,14 +25,13 @@
  */
 #include "motion.h"
 
+
 #ifdef __freebsd__
 #include "video_freebsd.h"
 #else
 #include "video.h"
 #endif /* __freebsd__ */
 
-#include "conf.h"
-#include "track.h"
 
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
