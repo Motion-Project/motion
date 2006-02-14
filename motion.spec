@@ -26,6 +26,8 @@ and http remote control.
 
 %build
 
+CFLAGS=`echo "$CFLAGS" | sed -e 's/D_FORTIFY_SOURCE=2/D_FORTIFY_SOURCE=1/'`
+
 %configure --sysconfdir=%{_sysconfdir}/%{name} \
 	--without-optimizecpu \
 	--without-libjpeg-mmx
