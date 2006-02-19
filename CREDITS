@@ -295,7 +295,8 @@ Angel Carpintero
    * Fix the problem that happens in FreeBSD and Debian Sarge because
      version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Pete Shipley and Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
- 
+   * Updated motion.spec. Changing D_FORTIFY_SOURCE=2 by D_FORTIFY_SOURCE=1 to fix
+     problem related to building with ffmpeg. (Angel Carpintero) 
 
 John Edwards
    * Added the 'pal-nc' norm.
