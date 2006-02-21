@@ -35,6 +35,14 @@
      problem related to building with ffmpeg. (Angel Carpintero)
    * Implemented fix for missed snapshots with slow network cameras (Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x162149
+   * Added some constants in video.c function v4l_picture_controls() which can help
+     people hack an optimal set of values for controlling auto brighness for their
+     particular camera. For now I am do not want to add all of these to the already
+     too large number of motion config options. Maybe based on feedback we can
+     permanently change the constants and add an additional auto brightness option.
+     Or maybe a combined option that sets more constant based on an algoritm.
+     (Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x212816
 
 
 3.2.4   Formal Release. Summary of changes

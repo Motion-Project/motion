@@ -26,6 +26,26 @@
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
 
+/* Constants used by auto brightness feature
+ * Defined as constant to make it easier for people to tweak code for a
+ * difficult camera.
+ * The experience gained from people could help improving the feature without
+ * adding too many new options.
+ * AUTOBRIGHT_HYSTERESIS sets the minimum the light intensity must change before
+ * we adjust brigtness.
+ * AUTOBRIGHTS_DAMPER damps the speed with which we adjust the brightness
+ * When the brightness changes a lot we step in large steps and as we approach the
+ * target value we slow down to avoid overshoot and oscillations. If the camera
+ * adjusts too slowly decrease the DAMPER value. If the camera oscillates try
+ * increasing the DAMPER value. DAMPER must be minimum 1.
+ * MAX and MIN are the max and min values of brightness setting we will send to
+ * the camera device.
+ */
+#define AUTOBRIGHT_HYSTERESIS 10
+#define AUTOBRIGHT_DAMPER 5
+#define AUTOBRIGHT_MAX 255
+#define AUTOBRIGHT_MIN 0
+
 static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 {
 	int dev = viddev->fd;
@@ -79,8 +99,8 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 		else
 			brightness_target = 128;
 		
-		brightness_window_high = MIN2(brightness_target + 10, 255);
-		brightness_window_low = MAX2(brightness_target - 10, 1);
+		brightness_window_high = MIN2(brightness_target + AUTOBRIGHT_HYSTERESIS, 255);
+		brightness_window_low = MAX2(brightness_target - AUTOBRIGHT_HYSTERESIS, 1);
 		
 		for (i = 0; i < cnt->imgs.motionsize; i += 101) {
 			avg += image[i];
@@ -96,8 +116,9 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 			}
 			/* average is above window - turn down brightness - go for the target */
 			if (avg > brightness_window_high) {
-				step = MIN2((avg - brightness_target)/5+1, viddev->brightness);
-				if (viddev->brightness > step+1) {
+				step = MIN2((avg - brightness_target)/AUTOBRIGHT_DAMPER + 1,
+				             viddev->brightness - AUTOBRIGHT_MIN);
+				if (viddev->brightness > step + 1 - AUTOBRIGHT_MIN) {
 					viddev->brightness -= step;
 					vid_pic.brightness = viddev->brightness * 256;
 					make_change = 1;
@@ -105,8 +126,9 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 			}
 			/* average is below window - turn up brightness - go for the target */
 			if (avg < brightness_window_low) {
-				step = MIN2((brightness_target - avg)/5+1, 255 - viddev->brightness);
-				if (viddev->brightness < 255-step ) {
+				step = MIN2((brightness_target - avg)/AUTOBRIGHT_DAMPER + 1,
+				             AUTOBRIGHT_MAX - viddev->brightness);
+				if (viddev->brightness < AUTOBRIGHT_MAX - step ) {
 					viddev->brightness += step;
 					vid_pic.brightness = viddev->brightness * 256;
 					make_change = 1;

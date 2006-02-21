@@ -194,7 +194,7 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 #define NDIFF(x, y)        (ABS(x)*NORM/(ABS(x)+2*DIFF(x,y)))
 
 
-void alg_noise_tune (struct context *cnt, unsigned char *new)
+void alg_noise_tune(struct context *cnt, unsigned char *new)
 {
 	struct images *imgs=&cnt->imgs;
 	int i;
@@ -338,7 +338,7 @@ static int iflood(int x, int y,
 	return count;
 }
 
-static int alg_labeling (struct context *cnt)
+static int alg_labeling(struct context *cnt)
 {
 	struct images *imgs=&cnt->imgs;
 	unsigned char *out=imgs->out;
@@ -970,7 +970,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	Very fast diff function, does not do nightcompensation or mask
 	overlaying.
 */
-static char alg_diff_fast (struct context *cnt, int max_n_changes, unsigned char *new)
+static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char *new)
 {
 	struct images *imgs=&cnt->imgs;
 	int i, diffs=0, step=imgs->motionsize/10000;
@@ -1000,7 +1000,7 @@ static char alg_diff_fast (struct context *cnt, int max_n_changes, unsigned char
 /* alg_diff uses diff_fast to quickly decide if there is anything worth
  * sending to diff_standard.
 */
-int alg_diff (struct context *cnt, unsigned char *new)
+int alg_diff(struct context *cnt, unsigned char *new)
 {
 	int diffs=0;
 	
@@ -1014,7 +1014,7 @@ int alg_diff (struct context *cnt, unsigned char *new)
    It is assumed to be the light being switched on or a camera displacement.
    In any way the user doesn't think it is worth capturing.
  */
-int alg_lightswitch (struct context *cnt, int diffs)
+int alg_lightswitch(struct context *cnt, int diffs)
 {
 	struct images *imgs=&cnt->imgs;
 	
@@ -1030,7 +1030,7 @@ int alg_lightswitch (struct context *cnt, int diffs)
 	return 0;
 }
 
-int alg_switchfilter (struct context *cnt, int diffs, unsigned char *newimg)
+int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 {
 	int linediff = diffs / cnt->imgs.height;
 	unsigned char *out = cnt->imgs.out;
