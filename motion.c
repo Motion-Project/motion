@@ -1241,11 +1241,17 @@ static void *motion_loop(void *arg)
 
 		/* Did we get triggered to make a snapshot from control http? Then shoot a snap
 		 * If snapshot_interval is not zero and time since epoch MOD snapshot_interval = 0 then snap
+		 * We actually allow the time to run over the interval in case we have a delay
+		 * from slow camera.
 		 * Note: Negative value means SIGALRM snaps are enabled
 		 * httpd-control snaps are always enabled.
 		 */
-		if ( (cnt->conf.snapshot_interval > 0 && cnt->shots==0 &&
-		      cnt->currenttime % cnt->conf.snapshot_interval == 0) ||
+		
+		/* time_current_frame is used both for snapshot and timelapse features */
+		time_current_frame = cnt->currenttime;		
+		
+		if ( (cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
+		      time_current_frame % cnt->conf.snapshot_interval <= time_last_frame % cnt->conf.snapshot_interval) ||
 		    cnt->snapshot) {
 			event(cnt, EVENT_IMAGE_SNAPSHOT, newimg, NULL, NULL, cnt->currenttime_tm);
 			cnt->snapshot = 0;
@@ -1256,7 +1262,7 @@ static void *motion_loop(void *arg)
 
 #ifdef HAVE_FFMPEG
 		
-		time_current_frame = cnt->currenttime;
+
 		
 		if (cnt->conf.timelapse) {
 
@@ -1324,9 +1330,10 @@ static void *motion_loop(void *arg)
 		else if (cnt->ffmpeg_timelapse)
 			event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
 			
-		time_last_frame = time_current_frame;
 		
 #endif /* HAVE_FFMPEG */
+
+		time_last_frame = time_current_frame;
 
 
 	/***** MOTION LOOP - VIDEO LOOPBACK SECTION *****/

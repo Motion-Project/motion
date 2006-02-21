@@ -823,6 +823,8 @@ Kenneth Lavrsen (Currently project managing Motion)
      originally made by Moshe Van Der Sterre. Kenneth Lavrsen extended it to
      be more generic.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PwcConfiguration
+   * Implemented fix for missed snapshots with slow network cameras
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x162149
 
 Mike Lees
    * Added the onffmpegclose feature.

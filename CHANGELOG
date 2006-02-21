@@ -33,6 +33,8 @@
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
    * Updated motion.spec. Changing D_FORTIFY_SOURCE=2 by D_FORTIFY_SOURCE=1 to fix
      problem related to building with ffmpeg. (Angel Carpintero)
+   * Implemented fix for missed snapshots with slow network cameras (Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x162149
 
 
 3.2.4   Formal Release. Summary of changes
