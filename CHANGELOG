@@ -43,6 +43,11 @@
      Or maybe a combined option that sets more constant based on an algoritm.
      (Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x212816
+   * Fixed a syntax error in picture.c get_pgm() which caused the program to seg
+     fault when a mask file size did not match the picture size. Now the program
+     correctly gives an error message and continues without the mask. (Kenneth
+     Lavrsen).
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x08x150720
 
 
 3.2.4   Formal Release. Summary of changes

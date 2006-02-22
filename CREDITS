@@ -770,18 +770,16 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Added two new conversion specifiers: %f which is filename (full path)
      and %n which is filetype (sqltype) valid in on_picture_save, on_movie_start,
      on_movie_end and sql_query. This also means that filename is no longer
-     appended at the end of the 3 on_xxxx commands. (Kenneth Lavrsen)
-   * Removed the sql_user_text option that was added in snap 2 (Kenneth
-     Lavrsen)
+     appended at the end of the 3 on_xxxx commands.
+   * Removed the sql_user_text option that was added in snap 2
    * Added new sql_query option. This in combination with convertion
      specifiers incl the two new %f and %n enables the user to use any database
      structure they please. Added fields is now a simple matter of modifying
      the sql query. The default is the same as the default in snap1.
-     (Kenneth Lavrsen).
    * Change the sequence of events connected with creating files. Data is
      now written to the databases (if used) before an external commens is
      on (on_xxxx options) allowing the external program to use the new data
-     in the database (Kenneth Lavrsen)
+     in the database
    * Added an infinite retry scheme for netcams that are not available
      when Motion is started. Instead of just dying, Motion now retries every
      10 seconds until the netcam is available. Until the netcam is available
@@ -831,8 +829,11 @@ Kenneth Lavrsen (Currently project managing Motion)
      too large number of motion config options. Maybe based on feedback we can
      permanently change the constants and add an additional auto brightness option.
      Or maybe a combined option that sets more constant based on an algoritm.
-     (Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x212816
+   * Fixed a syntax error in picture.c get_pgm() which caused the program to seg
+     fault when a mask file size did not match the picture size. Now the program
+     correctly gives an error message and continues without the mask.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x08x150720
 
 Mike Lees
    * Added the onffmpegclose feature.

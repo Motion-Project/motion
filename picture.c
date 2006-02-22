@@ -562,17 +562,17 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 		if (!fgets(line, 255, picture))
 			return NULL;
 
-	
 	/* check size */
 	if (sscanf(line, "%d %d", &x, &y)!=2) {
 		motion_log(LOG_ERR, 1, "Failed reading size in pgm file");
 		return NULL;
 	}
 	
-	if (x!=width || y!=height) {
-		motion_log(LOG_ERR, 1, "Wrong image size %dx%d% should be %dx%d", x, y, width, height);
+	if (x != width || y != height) {
+		motion_log(LOG_ERR, 1, "Wrong image size %dx%d should be %dx%d", x, y, width, height);
 		return NULL;
 	}
+
 	/* Maximum value */
 	line[0] = '#';
 	while (line[0] == '#')
@@ -586,14 +586,14 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 	
 	/* read data */
 	
-	image=mymalloc(width*height);
+	image = mymalloc(width * height);
 	
 	for (y=0; y<height; y++) {
-		if ((int)fread(&image[y*width], 1, width, picture)!=width)
+		if ((int)fread(&image[y * width], 1, width, picture) != width)
 			motion_log(LOG_ERR, 1, "Failed reading image data from pgm file");
 		
 		for (x=0; x<width; x++) {
-			image[y*width+x] = (int)image[y*width+x]*255/maxval;
+			image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
 		}
 	}	
 
