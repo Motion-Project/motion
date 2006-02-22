@@ -76,6 +76,7 @@ struct config conf_template = {
 	ffmpeg_cap_motion:     0,
 	ffmpeg_bps:            DEF_FFMPEG_BPS,
 	ffmpeg_vbr:            DEF_FFMPEG_VBR,
+	ffmpeg_deinterlace:    0,
 	ffmpeg_video_codec:    DEF_FFMPEG_CODEC,
 	webcam_port:           0,
 	webcam_quality:        50,

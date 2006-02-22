@@ -92,6 +92,12 @@ static int http_acceptsock(int sl)
 	return -1;
 }
 
+/* Put webcam_tmpbuffer to reuse onto list of unused webcam_tmpbuffers */
+static void webcam_tmpbuffer_unuse(struct webcam *list, struct webcam_buffer *tmpbuffer)
+{
+	tmpbuffer->next=list->tmpbuffer;
+	list->tmpbuffer=tmpbuffer;
+}
 
 /* Webcam flush sends any outstanding data to all connected clients.
  * It continuously goes through the client list until no data is able
@@ -148,11 +154,9 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 			 */
 			if ( (client->filepos >= client->tmpbuffer->size) ||
 			     (written < 0 && errno!=EAGAIN)) {
-				/* If no other clients need this buffer, free it */
-				if (--client->tmpbuffer->ref <= 0) {
-					free(client->tmpbuffer->ptr);
-					free(client->tmpbuffer);
-				}
+				/* If no other clients need this buffer, unuse it */
+				if (--client->tmpbuffer->ref <= 0)
+					webcam_tmpbuffer_unuse(list, client->tmpbuffer);
 			
 				/* Mark this client's buffer as empty */
 				client->tmpbuffer=NULL;
@@ -195,17 +199,28 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 }
 
 /* Routine to create a new "tmpbuffer", which is a common
- * object used by all clients connected to a single camera
+ * object used by all clients connected to a single camera.
+ * Get an unused webcam_tmpbuffer or create a new one
  */
-static struct webcam_buffer *webcam_tmpbuffer(int size)
+static struct webcam_buffer *webcam_tmpbuffer(struct webcam *list, int size)
 {
-	struct webcam_buffer *tmpbuffer=mymalloc(sizeof(struct webcam_buffer));
-	tmpbuffer->ref=0;
-	tmpbuffer->ptr=mymalloc(size);
-		
+	struct webcam_buffer *tmpbuffer;
+
+	tmpbuffer=list->tmpbuffer;
+	if (tmpbuffer) {
+		list->tmpbuffer=tmpbuffer->next;
+		if (size > tmpbuffer->buffersize) {
+			tmpbuffer->ptr=myrealloc(tmpbuffer->ptr,size,"webcam_tmpbuffer");
+			tmpbuffer->buffersize=size;
+		}
+	} else {
+		tmpbuffer=mymalloc(sizeof(struct webcam_buffer));
+		tmpbuffer->ref=0;
+		tmpbuffer->ptr=mymalloc(size);
+		tmpbuffer->buffersize=size;
+	}
 	return tmpbuffer;
 }
-
 
 static void webcam_add_client(struct webcam *list, int sc)
 {
@@ -222,11 +237,12 @@ static void webcam_add_client(struct webcam *list, int sc)
 	memset(new, 0, sizeof(struct webcam));
 	new->socket=sc;
 	
-	if ((new->tmpbuffer = webcam_tmpbuffer(sizeof(header))) == NULL) {
+	if ((new->tmpbuffer = webcam_tmpbuffer(list, sizeof(header))) == NULL) {
 		motion_log(LOG_ERR, 1, "Error creating tmpbuffer in webcam_add_client");
 	} else {
 		memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
 		new->tmpbuffer->size = sizeof(header)-1;
+		new->tmpbuffer->ref++;
 	}
 	
 	new->prev=list;
@@ -258,10 +274,8 @@ static void webcam_add_write(struct webcam *list, struct webcam_buffer *tmpbuffe
 		}
 	}
 	
-	if (tmpbuffer->ref<=0) {
-		free(tmpbuffer->ptr);
-		free(tmpbuffer);
-	}
+	if (tmpbuffer->ref<=0)
+		webcam_tmpbuffer_unuse(list, tmpbuffer);
 }
 
 
@@ -291,6 +305,7 @@ int webcam_init(struct context *cnt)
 	cnt->webcam.socket=http_bindsock(cnt->conf.webcam_port, cnt->conf.webcam_localhost);
 	cnt->webcam.next=NULL;
 	cnt->webcam.prev=NULL;
+	cnt->webcam.tmpbuffer=NULL;
 	return cnt->webcam.socket;
 }
 
@@ -301,6 +316,7 @@ void webcam_stop(struct context *cnt)
 {	
 	struct webcam *list;
 	struct webcam *next = cnt->webcam.next;
+	struct webcam_buffer *tmpbuffer;
 
 	if (cnt->conf.setup_mode)
 		motion_log(-1, 0, "Closing webcam listen socket");
@@ -321,6 +337,13 @@ void webcam_stop(struct context *cnt)
 		
 		close(list->socket);
 		free(list);
+	}
+	tmpbuffer=cnt->webcam.tmpbuffer;
+	while (tmpbuffer) {
+		tmpbuffer=cnt->webcam.tmpbuffer->next;
+
+		free(cnt->webcam.tmpbuffer->ptr);
+		free(cnt->webcam.tmpbuffer);
 	}
 }
 
@@ -378,12 +401,12 @@ void webcam_put(struct context *cnt, unsigned char *image)
 	
 	/* Check if any clients have available buffers */
 	if (webcam_check_write(&cnt->webcam)) {
-		/* yes - create a new tmpbuffer for current image.
+		/* yes - get a tmpbuffer for current image.
 		 * Note that this should create a buffer which is *much* larger
 		 * than necessary, but it is difficult to estimate the
 		 * minimum size actually required.
 		 */
-		tmpbuffer = webcam_tmpbuffer(cnt->imgs.size);
+		tmpbuffer = webcam_tmpbuffer(&cnt->webcam, cnt->imgs.size);
 		
 		/* check if allocation went ok */
 		if (tmpbuffer) {
