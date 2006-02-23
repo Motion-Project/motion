@@ -25,8 +25,6 @@ struct webcam_buffer {
 	unsigned char *ptr;
 	int ref;
 	long size;
-	long buffersize;
-	struct webcam_buffer *next;
 };
 
 struct webcam {

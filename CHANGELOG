@@ -48,11 +48,7 @@
      correctly gives an error message and continues without the mask. (Kenneth
      Lavrsen).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x08x150720
-   * Module webcam used to malloc and free memory for each jpeg. Now it implements
-     a pool for unused memory. If memory is needed unused memory from the pool is
-     used first, and otherwise malloced. Additionally fixed a small bug:
-     webcam_add_client misses new->tmpbuffer->ref++. (Peter Holik)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebcamMempool
+
 
 3.2.4   Formal Release. Summary of changes
 

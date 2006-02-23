@@ -395,11 +395,6 @@ Peter Holik
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamModulo16Patch
    * Fixed netcamera bug related to seperating frames in an mjpeg stream.
      From mailing list 23 Dec 2005.
-   * Module webcam used to malloc and free memory for each jpeg. Now it implements
-     a pool for unused memory. If memory is needed unused memory from the pool is
-     used first, and otherwise malloced. Additionally fixed a small bug:
-     webcam_add_client misses new->tmpbuffer->ref++.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebcamMempool
 
 Wesley Hosking
    * For pointing me to the absence of a frame length check using
