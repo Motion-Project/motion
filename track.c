@@ -20,7 +20,9 @@ struct trackoptions track_template = {
 	dev:            -1,             /* dev open */
 	port:           NULL,           /* char *port */
 	motorx:         0,              /* int motorx */
+	motory:		0,		/* int motory */
 	maxx:           0,              /* int maxx; */
+	maxy:		0,		/* int maxy; */
 	speed:          TRACK_SPEED,    /* speed */
 	stepsize:       TRACK_STEPSIZE, /* stepsize */
 	active:         0,              /* auto tracking active */
@@ -111,7 +113,7 @@ static int stepper_status(struct context *cnt, int motor)
 }
 
 
-static int stepper_center(struct context *cnt, int x_offset, int y_offset ATTRIBUTE_UNUSED)
+static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 {
 	struct termios adtio;
 
@@ -136,9 +138,14 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset ATTRIB
 		}
 	}
 
+	/* x-axis */
+	
 	stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_SPEED, cnt->track.speed);
 	stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_LEFT_N, cnt->track.maxx);
 
+	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_SPEED, cnt->track.speed);
+	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_UP_N, cnt->track.maxy);
+	
 	while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_LEFT);
 
 	stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_RIGHT_N,
@@ -146,6 +153,18 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset ATTRIB
 
 	while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_RIGHT);
 
+	/* y-axis */
+
+	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_SPEED, cnt->track.speed);
+	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_UP_N, cnt->track.maxy);
+
+	while (stepper_status(cnt, cnt->track.motory) & STEPPER_STATUS_UP)
+	
+	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_DOWN_N,
+			cnt->track.maxy / 2 + y_offset * cnt->track.stepsize);
+		
+	while (stepper_status(cnt, cnt->track.motory) & STEPPER_STATUS_DOWN);
+	
 	return cnt->track.move_wait;
 }
 
@@ -158,6 +177,8 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 		if (stepper_center(cnt, 0, 0) < 0)
 			return 0;
 
+	/* x-axis */
+	
 	if (cent->x < imgs->width / 2) {
 		command = STEPPER_COMMAND_LEFT_N;
 		n = imgs->width / 2 - cent->x;
@@ -170,12 +191,27 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 
 	n = n * cnt->track.stepsize / imgs->width;
 
-	if (n) {
-		stepper_command(cnt, cnt->track.motorx, command, n);
-		return n / 5;
+	if (n) 	stepper_command(cnt, cnt->track.motorx, command, n);
+
+	 /* y-axis */
+
+	if (cent->y < imgs->height / 2) {
+		command = STEPPER_COMMAND_UP_N;
+		n = imgs->height / 2 - cent->y;
 	}
 
-	return 0;
+	if (cent->y > imgs->height / 2) {
+		command = STEPPER_COMMAND_DOWN_N;
+		n = cent->y - imgs->height / 2;
+	}
+	
+	n = n * cnt->track.stepsize / imgs->height;
+
+	if (n) stepper_command(cnt, cnt->track.motory, command, n);	
+	
+	
+	return cnt->track.move_wait;
+//	return 0;
 }
 
 /******************************************************************************

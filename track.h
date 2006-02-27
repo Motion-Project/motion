@@ -17,7 +17,9 @@ struct trackoptions {
 	int type;
 	char *port;
 	int motorx;
+	int motory;
 	int maxx;
+	int maxy;
 	int stepsize;
 	int speed;
 	int iomojo_id;
@@ -59,6 +61,13 @@ int track_move(struct context *, int, struct coord *, struct images *, int);
 #define STEPPER_STATUS_SAFETYL  4
 #define STEPPER_STATUS_SAFETYR  8
 
+#define STEPPER_STATUS_UP       1
+#define STEPPER_STATUS_DOWN     2
+#define STEPPER_STATUS_SAFETYU  4
+#define STEPPER_STATUS_SAFETYD  8
+
+
+
 #define STEPPER_COMMAND_STATUS  0
 #define STEPPER_COMMAND_LEFT_N  1
 #define STEPPER_COMMAND_RIGHT_N 2
@@ -67,6 +76,11 @@ int track_move(struct context *, int, struct coord *, struct images *, int);
 #define STEPPER_COMMAND_SWEEP   5
 #define STEPPER_COMMAND_STOP    6
 #define STEPPER_COMMAND_SPEED   7
+
+#define STEPPER_COMMAND_UP_N    1
+#define STEPPER_COMMAND_DOWN_N  2
+#define STEPPER_COMMAND_UP      3
+#define STEPPER_COMMAND_DOWN    4
 
 
 /*

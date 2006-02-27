@@ -872,9 +872,23 @@ config_param config_params[] = {
 	print_int
 	},
 	{
+	"track_motory",
+	"# Motor number for y-axis (default: -1)",
+	TRACK_OFFSET(motory),
+	copy_int,
+	print_int
+	},
+	{
 	"track_maxx",
 	"# Maximum value on x-axis (default: 0)",
 	TRACK_OFFSET(maxx),
+	copy_int,
+	print_int
+	},
+	 {
+	"track_maxy",
+	"# Maximum value on y-axis (default: 0)",
+	TRACK_OFFSET(maxy),
 	copy_int,
 	print_int
 	},
