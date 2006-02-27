@@ -48,7 +48,7 @@
      correctly gives an error message and continues without the mask. (Kenneth
      Lavrsen).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x08x150720
-
+   * Added Tilt support to stepper track. ( Angel Carpintero ).
 
 3.2.4   Formal Release. Summary of changes
 

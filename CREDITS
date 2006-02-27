@@ -297,6 +297,7 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
    * Updated motion.spec. Changing D_FORTIFY_SOURCE=2 by D_FORTIFY_SOURCE=1 to fix
      problem related to building with ffmpeg. (Angel Carpintero) 
+   * Added Tilt support to stepper track.
 
 John Edwards
    * Added the 'pal-nc' norm.
