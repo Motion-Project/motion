@@ -1066,6 +1066,10 @@ Moshe Van Der Sterre
      be more generic.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PwcConfiguration
 
+James Van Vleet
+   * CPU VIA Ezra C3 autodetection support added.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/VIAEzraC3Patch	
+
 Sean Watkins
    * Created a centralized logging function that became event()
 

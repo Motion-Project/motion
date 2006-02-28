@@ -678,6 +678,10 @@ if test "x${CPU_TYPE}" = "xunknown"; then
 	k6-3)
 		CPU_OPTIONS="-march=k6-3"
 		;;
+	"VIA C3 Ezra")
+		CPU_OPTIONS="-march=c3"
+		CPU_TYPE="known"
+               ;;
 	*)
 		CPU_OPTIONS=""
 		CPU_TYPE="unknown"
