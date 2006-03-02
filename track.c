@@ -143,9 +143,6 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 	stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_SPEED, cnt->track.speed);
 	stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_LEFT_N, cnt->track.maxx);
 
-	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_SPEED, cnt->track.speed);
-	stepper_command(cnt, cnt->track.motory, STEPPER_COMMAND_UP_N, cnt->track.maxy);
-	
 	while (stepper_status(cnt, cnt->track.motorx) & STEPPER_STATUS_LEFT);
 
 	stepper_command(cnt, cnt->track.motorx, STEPPER_COMMAND_RIGHT_N,
