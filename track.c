@@ -46,8 +46,15 @@ int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
 {
 	if (!manual && !cnt->track.active)
 		return 0;
-	if (cnt->track.type == TRACK_TYPE_STEPPER)
-		return stepper_center(cnt, xoff, yoff);
+	if (cnt->track.type == TRACK_TYPE_STEPPER){
+		int ret;
+		ret = stepper_center(cnt, xoff, yoff);
+		if (ret < 1) {
+				motion_log(LOG_ERR, 1, "track_center: internal error (stepper_center)");
+				return 0;		
+		}
+		else return ret;	
+	}
 	else if (cnt->track.type == TRACK_TYPE_PWC)
 		return lqos_center(cnt, dev, xoff, yoff);
 	else if (cnt->track.type == TRACK_TYPE_IOMOJO)
@@ -55,7 +62,7 @@ int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
 		return 10; // FIX ME. I chose to return something reasonable.
 
-	motion_log(LOG_ERR, 1, "track_move: internal error, %d is not a known track-type", cnt->track.type);
+	motion_log(LOG_ERR, 1, "track_center: internal error, %d is not a known track-type", cnt->track.type);
 
 	return 0;
 }
@@ -118,9 +125,11 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 	struct termios adtio;
 
 	if (cnt->track.dev<0) {
+		motion_log(LOG_INFO, 1, "Try to open serial device %s", cnt->track.port);
+		
 		if ((cnt->track.dev=open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
 			motion_log(LOG_ERR, 1, "Unable to open serial device %s", cnt->track.port);
-			exit(1);
+			return -1;
 		}
 
 		bzero (&adtio, sizeof(adtio));
@@ -134,8 +143,9 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 
 		if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
 			motion_log(LOG_ERR, 1, "Unable to initialize serial device %s", cnt->track.port);
-			exit(1);
+			return -1;
 		}
+		motion_log(LOG_INFO, 1, "Opened serial device %s and initialize", cnt->track.port);
 	}
 
 	/* x-axis */
@@ -170,10 +180,15 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 	int command = 0;
 	int n = 0;
 
-	if (dev < 0)
-		if (stepper_center(cnt, 0, 0) < 0)
-			return 0;
-
+	if (dev < 0){
+		motion_log(LOG_INFO, 1, "No device started yet , try stepper_center()");	
+		if (stepper_center(cnt, 0, 0) < 0){
+			motion_log(LOG_ERR, 1, "Problems in stepper_center() ... bye !");	
+			exit(0); // Motion shouldn't exit  TODO : Disable track and go ahead , maybe retry later
+		}
+		motion_log(LOG_INFO, 1, "stepper_center() succeed , device started");	
+	}
+	
 	/* x-axis */
 	
 	if (cent->x < imgs->width / 2) {
