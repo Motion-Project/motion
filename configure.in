@@ -413,7 +413,7 @@ if test "${MYSQL}" = "yes"; then
 		fi
 	done
 
-	for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql; do
+	for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
 		# check for plain setups
 		if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
 			MYSQL_LIBDIR=$w

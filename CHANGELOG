@@ -51,6 +51,8 @@
    * Added Tilt support to stepper track. ( Angel Carpintero ).
    * CPU VIA Ezra C3 autodetection support added. (James Van Vleet)
      http://www.lavrsen.dk/twiki/bin/view/Motion/VIAEzraC3Patch
+   * Fixed mysql configure auto-detection for x64 systems. ( Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x03x02x152208	
 
 3.2.4   Formal Release. Summary of changes
 

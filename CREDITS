@@ -298,6 +298,8 @@ Angel Carpintero
    * Updated motion.spec. Changing D_FORTIFY_SOURCE=2 by D_FORTIFY_SOURCE=1 to fix
      problem related to building with ffmpeg. (Angel Carpintero) 
    * Added Tilt support to stepper track.
+   * Fixed mysql configure auto-detection for x64 systems.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x03x02x152208
 
 John Edwards
    * Added the 'pal-nc' norm.
