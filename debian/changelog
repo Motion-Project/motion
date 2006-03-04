@@ -1,3 +1,9 @@
+motion (3.2.5-1) unstable; urgency=low
+
+  * New upstrean package
+
+ -- Angel Carpintero <ack@telefonica.net>  Sun, 5 Mar 2006 00:23:18 +0100
+
 motion (3.2.4-1) unstable; urgency=low
 
   * New upstream package

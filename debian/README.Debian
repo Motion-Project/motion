@@ -5,17 +5,17 @@
  - dpkg-dev
  - fakeroot
 
- To create the deb package ( from motion-3.2.4 ) :
+ To create the deb package ( from motion-3.2.5 ) :
 
- tar xfvz motion-3.2.4.tar.gz 
- cd motion-3.2.4/
+ tar xfvz motion-3.2.5.tar.gz 
+ cd motion-3.2.5/
  dpkg-buildpackage -tc -b -rfakeroot
 
- now you'll have a motion_3.2.4-1_i386.deb package in :
+ now you'll have a motion_3.2.5-1_i386.deb package in :
 
- ../motion-3.2.4 , so you can install typing :
+ ../motion-3.2.5 , so you can install typing :
 
- dpkg -i ../motion_3.2.4-1_i386.deb
+ dpkg -i ../motion_3.2.5-1_i386.deb
 
 
  Angel Carpintero
