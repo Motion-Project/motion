@@ -31,6 +31,7 @@ These are the options that can be used in the config file.
 .I They are overridden by the commandline!
 All number values are integer numbers (no decimals allowed).
 Boolean options can be on or off (values "1", "yes" and "on" all means true and any other value means false).
+
 .TP
 .B auto_brightness boolean
 Values: on, off / Default: off
@@ -343,7 +344,7 @@ Values: on, off / Default: off
 Be quiet, don't output beeps when detecting motion.
 .TP
 .B rotate discrete strings
-Values: 0, 90, 180, 270 / Default: 0
+Values: 0, 90, 180, 270 / Default: 0 (not rotated)
 .br
 Rotate image the given number of degrees. The rotation affects all saved images as well as mpeg movies.
 .TP
@@ -477,10 +478,20 @@ Values: 0 - 2147483647 / Default: 0
 .br
 The maximum position for servo x.
 .TP
+.B track_maxy integer
+Values: 0 - 2147483647 / Default: 0
+.br
+The maximum position for servo y.
+.TP
 .B track_motorx integer
 Values: -1 - 2147483647 / Default: -1
 .br
 The motor number that is used for controlling the x-axis.
+.TP
+.B track_motory integer
+Values: -1 - 2147483647 / Default: -1
+.br
+The motor number that is used for controlling the y-axis.
 .TP
 .B track_move_wait integer
 Values: 0 - 2147483647 / Default: 10
@@ -638,6 +649,7 @@ If you run the http control command http://host:port/0/config/writeyes, motion w
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
 .br
 In text_left and text_right you can additionally use '\n' for new line.
+
 .TP
 .B %a
 The abbreviated weekday name according to the current locale.
