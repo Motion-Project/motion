@@ -837,6 +837,9 @@ Kenneth Lavrsen (Currently project managing Motion)
      fault when a mask file size did not match the picture size. Now the program
      correctly gives an error message and continues without the mask.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x08x150720
+   * ffmpeg_filename has changed name to movie_filename to prepare for
+     alternative movie encoding to the current ffmpeg based implementation
+     and ffmpeg_filename will then be a bad name.
 
 Mike Lees
    * Added the onffmpegclose feature.

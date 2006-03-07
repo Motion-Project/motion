@@ -1323,7 +1323,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-VERSION=3.2.5
+VERSION=3.2.5.1
 
 
 THREAD_CFLAGS=""

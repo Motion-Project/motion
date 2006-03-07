@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script
 AC_INIT(motion.c)
 
-VERSION=3.2.5
+VERSION=3.2.5.1
 AC_SUBST(VERSION)
 
 THREAD_CFLAGS=""

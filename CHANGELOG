@@ -1,3 +1,9 @@
+3.2.5.1  Doc and man page correction
+   * ffmpeg_filename has changed name to movie_filename to prepare for
+     alternative movie encoding to the current ffmpeg based implementation
+     and ffmpeg_filename will then be a bad name (Kenneth Lavrsen)
+   * Man page corrected.
+
 3.2.5   Formal Release. Summary of changes
 
    * Fixed misc problems in FreeBSD. (Angel Carpintero)
