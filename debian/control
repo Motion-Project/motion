@@ -1,7 +1,7 @@
 Source: motion
 Section: graphics
 Priority: optional
-Build-Depends: libjpeg62-dev, sharutils, nasm, zlib1g-dev, libmysqlclient14-dev, postgresql-dev, libavcodec-dev, libavformat-dev
+Build-Depends: libjpeg62-dev, sharutils, nasm, zlib1g-dev, libmysqlclient14-dev, libavcodec-dev, libavformat-dev
 Maintainer: Angel Carpintero <ack@telefonica.net>
 Standards-Version: 3.6.1.0 
 

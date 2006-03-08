@@ -93,11 +93,6 @@ Values: on, off / Default: off
 .br
 Use ffmpeg libraries to encode mpeg movies in realtime.
 .TP
-.B ffmpeg_filename string
-Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S
-.br
-File path for motion triggered ffmpeg movies (mpeg) relative to target_dir.
-.TP
 .B ffmpeg_timelapse boolean
 Values: 0 - 2147483647 / Default: 0 (disabled)
 .br
@@ -192,6 +187,11 @@ Picture frames must contain motion at least the specified number of frames in a 
 Values: Max 4095 characters / Default: Not defined
 .br
 The video4linux video loopback input device for motion images. If a particular pipe is to be used then use the device filename of this pipe, if a dash '-' is given motion will use /proc/video/vloopback/vloopbacks to locate a free pipe. Default: not set
+.TP
+.B movie_filename string
+Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S
+.br
+File path for motion triggered ffmpeg movies (mpeg) relative to target_dir.
 .TP
 .B mysql_db string
 Values: Max 4095 characters / Default: Not defined
