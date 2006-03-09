@@ -660,13 +660,11 @@ static void *motion_loop(void *arg)
 	unsigned char *newimg = NULL;     /* Pointer to where new image is stored */
 	int vid_return_code = 0;          /* Return code used when calling vid_next */
 
-#ifdef HAVE_FFMPEG
-	/* Next two variables are used for timelapse feature
+	/* Next two variables are used for snapshot and timelapse feature
 	 * time_last_frame is set to 1 so that first coming timelapse or second=0
 	 * is acted upon.
 	 */
 	unsigned long int time_last_frame=1, time_current_frame;
-#endif /* HAVE_FFMPEG */
 
 	motion_init(cnt);
 

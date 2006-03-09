@@ -1,3 +1,10 @@
+3.2.6
+snap1
+   * Fixed bug where variables time_last_frame and time_current_frame had been
+     extended to also be used for snapshot feature but declaration was hidden
+     between #ifdef HAVE_FFMPEG. (Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x09x012244
+
 3.2.5.1  Doc and man page correction
    * ffmpeg_filename has changed name to movie_filename to prepare for
      alternative movie encoding to the current ffmpeg based implementation

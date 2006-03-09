@@ -840,6 +840,10 @@ Kenneth Lavrsen (Currently project managing Motion)
    * ffmpeg_filename has changed name to movie_filename to prepare for
      alternative movie encoding to the current ffmpeg based implementation
      and ffmpeg_filename will then be a bad name.
+   * Fixed bug where variables time_last_frame and time_current_frame had been
+     extended to also be used for snapshot feature but declaration was hidden
+     between #ifdef HAVE_FFMPEG.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x09x012244
 
 Mike Lees
    * Added the onffmpegclose feature.
