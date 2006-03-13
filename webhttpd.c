@@ -1663,13 +1663,18 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 
 			if ((thread != -1) && (thread < i)) {
 				/* thread_number found */
-				if (slash == '/') {   /* slash found /2/ */
+				if (thread > 9){
 					pointer = pointer + 2;
 					length_uri = length_uri - 2;
-				} else {
-					pointer++;    /* /2 found */
-					length_uri--;
+				}else{
+					pointer++;
+					length_uri--;	
 				}
+				
+				if (slash == '/') {   /* slash found /2/ */
+					pointer++;
+					length_uri--;
+				} 
 
 				if (length_uri!=0) {
 					warningkill = sscanf (pointer, "%256[a-z]%c" , command , &slash);
