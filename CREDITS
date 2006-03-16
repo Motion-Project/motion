@@ -848,6 +848,9 @@ Kenneth Lavrsen (Currently project managing Motion)
      extended to also be used for snapshot feature but declaration was hidden
      between #ifdef HAVE_FFMPEG.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x09x012244
+   * text_changes now shows a '-' when motion detection is paused instead of
+     just showing 0 (Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x03x16x095713
 
 Mike Lees
    * Added the onffmpegclose feature.

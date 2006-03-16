@@ -8,6 +8,9 @@ snap1
      Motion can present up to 99 cameras in its http remote control interface
      (Angel Carpintero based on idea by Chuck Sheehan)
      http://www.lavrsen.dk/twiki/bin/view/Motion/WebHttpManyThreads
+   * text_changes now shows a '-' when motion detection is paused instead of
+     just showing 0 (Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x03x16x095713
 
 3.2.5.1  Doc and man page correction
    * ffmpeg_filename has changed name to movie_filename to prepare for

@@ -1072,7 +1072,12 @@ static void *motion_loop(void *arg)
 		/* Add changed pixels in upper right corner of the pictures */
 		if (cnt->conf.text_changes) {
 			char tmp[15];
-			sprintf(tmp, "%d", cnt->diffs);
+			
+			if (!cnt->pause)
+				sprintf(tmp, "%d", cnt->diffs);
+			else
+				sprintf(tmp, "-");
+			
 			draw_text(newimg, cnt->imgs.width - 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
 		}
 
