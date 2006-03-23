@@ -1,5 +1,4 @@
-3.2.6
-snap1
+3.2.6 Firmal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been
      extended to also be used for snapshot feature but declaration was hidden
      between #ifdef HAVE_FFMPEG. (Kenneth Lavrsen)
