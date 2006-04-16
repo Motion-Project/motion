@@ -708,14 +708,14 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 	len = sizeof(ret);
 
 	if (getsockopt(netcam->sock, SOL_SOCKET, SO_ERROR, &ret, &len) < 0) {
-		motion_log(LOG_ERR, 1, "getsockopt after connect");
+		motion_log(LOG_ERR, 0, "getsockopt after connect");
 		netcam_disconnect(netcam);
 		return -1;
 	}
 
 	/* If the return code is anything except 0, error on connect */
 	if (ret) {
-		motion_log(LOG_ERR, 0, "connect returned error");
+		motion_log(LOG_ERR, 1, "connect returned error");
 		netcam_disconnect(netcam);
 		return -1;
 	}
@@ -1142,6 +1142,7 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
 static void *netcam_handler_loop(void *arg)
 {
 	int retval;
+	int open_error = 0;
 	netcam_context_ptr netcam = arg;
 	struct context *cnt = netcam->cnt; /* needed for the SETUP macro :-( */
 
@@ -1169,9 +1170,19 @@ static void *netcam_handler_loop(void *arg)
 			if (!netcam->caps.streaming) {
 
 				if (netcam_connect(netcam, NULL) < 0) {
-					motion_log(LOG_ERR, 0, "re-opening camera (non-streaming)");
+					if (!open_error) { /* log first error */
+						motion_log(LOG_ERR, 0,
+						    "re-opening camera (non-streaming)");
+						open_error = 1;
+					}
 					/* need to have a dynamic delay here */
+					SLEEP(5,0);
 					continue;
+				}
+				if (open_error) {          /* log re-connection */
+					motion_log(LOG_ERR, 0,
+					    "camera re-connected");
+					open_error = 0;
 				}
 				/* Send our request and look at the response */
 				if ((retval = netcam_read_first_header(netcam)) != 1) {
@@ -1188,8 +1199,11 @@ static void *netcam_handler_loop(void *arg)
 			} else {
 				if (netcam_read_next_header(netcam) < 0) {
 					if (netcam_connect(netcam, NULL) < 0) {
-						motion_log(LOG_ERR, 0,
-						    "re-opening camera (streaming)");
+						if (!open_error) { /* log first error */
+							motion_log(LOG_ERR, 0,
+							    "re-opening camera (streaming)");
+							open_error = 1;
+						}
 						SLEEP(5,0);
 						continue;
 					}
@@ -1206,6 +1220,11 @@ static void *netcam_handler_loop(void *arg)
 						/* FIXME need some limit */
 						continue;
 					}
+				}
+				if (open_error) {          /* log re-connection */
+					motion_log(LOG_ERR, 0,
+					    "camera re-connected");
+					open_error = 0;
 				}
 			}
 		}
