@@ -274,7 +274,7 @@ void rbuf_initialize(netcam_context_ptr netcam)
 int rbuf_read_bufferful(netcam_context_ptr netcam)
 {
 	return netcam_recv(netcam, netcam->response->buffer,
-	                   sizeof (netcam->response->buffer), 0);
+	                   sizeof (netcam->response->buffer));
 }
 
 /* Like rbuf_readchar(), only don't move the buffer position.  */
@@ -285,7 +285,7 @@ int rbuf_peek(netcam_context_ptr netcam, char *store)
 		netcam->response->buffer_pos = netcam->response->buffer;
 		netcam->response->buffer_left = 0;
 		res = netcam_recv (netcam, netcam->response->buffer,
-		                   sizeof (netcam->response->buffer), NULL);
+		                   sizeof (netcam->response->buffer));
 
 		if (res <= 0)
 			return res;

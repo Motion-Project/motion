@@ -653,18 +653,9 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 	if (timeout)
 		netcam->timeout = *timeout;
 
-	if ((setsockopt(netcam->sock, SOL_SOCKET, SO_RCVTIMEO,
-	                &netcam->timeout, sizeof(netcam->timeout))) < 0) {
-		motion_log(LOG_ERR, 1, "setsockopt() failed");
-		netcam_disconnect(netcam);
-		return -1;
-	}
-
 	/*
-	 * Unfortunately, the SO_RCVTIMEO does not affect the 'connect'
-	 * call, so we need to be quite a bit more clever.  We want to
-	 * use netcam->timeout, so we set the socket non-blocking and
-	 * then use a 'select' system call to control the timeout.
+	 * We set the socket non-blocking and then use a 'select'
+	 * system call to control the timeout.
 	 */
 
 	if ((saveflags = fcntl(netcam->sock, F_GETFL, 0)) < 0) {
@@ -686,14 +677,6 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 	ret = connect(netcam->sock, (struct sockaddr *) &server,
 	              sizeof(server));
 	back_err = errno;           /* save the errno from connect */
-
-	/* Restore the normal socket flags */
-	if (fcntl(netcam->sock, F_SETFL, saveflags) < 0) {
-		motion_log(LOG_ERR, 1, "fcntl(3) on socket");
-		close(netcam->sock);
-		netcam->sock = -1;
-		return -1;
-	}
 
 	/* If the connect failed with anything except EINPROGRESS, error */
 	if ((ret < 0) && (back_err != EINPROGRESS)) {
@@ -981,8 +964,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 				retval = netcam_recv(netcam, netcam->response->buffer +
 				                     netcam->response->buffer_left,
 				                     sizeof(netcam->response->buffer) -
-				                     netcam->response->buffer_left,
-				                     NULL);
+				                     netcam->response->buffer_left);
 
 				if (retval <= 0) { /* this is a fatal error */
 					motion_log(LOG_ERR, 1, "recv() fail after boundary string");
@@ -1520,33 +1502,27 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url) {
  *      netcam          Pointer to a netcam context
  *      buffptr         Pointer to the receive buffer
  *      buffsize        Length of the buffer
- *      timeout         Pointer to struct timeval (NULL for no change)
  *
  * Returns:
  *      If successful, the length of the message received, otherwise the
  *      error reply from the system call.
  *
  */
-ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize,
-                    struct timeval *timeout) {
+ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize) {
 	ssize_t retval;
+	fd_set fd_r;
+	struct timeval selecttime;
 
-	if (timeout) {
-		if ((timeout->tv_sec != netcam->timeout.tv_sec) ||
-		    (timeout->tv_usec != netcam->timeout.tv_usec)) {
-			if ((setsockopt(netcam->sock, SOL_SOCKET,
-			     SO_RCVTIMEO, timeout, sizeof(*timeout))) < 0) {
-				motion_log(LOG_ERR, 1, "setsockopt() in netcam_recv failed");
-			}
-		}
-		netcam->timeout = *timeout;
+	FD_ZERO(&fd_r);
+	FD_SET(netcam->sock, &fd_r);
+	selecttime = netcam->timeout;
+
+	retval = select(FD_SETSIZE, &fd_r, NULL, NULL, &selecttime);
+	if (retval == 0) {             /* 0 means timeout */
+		return -1;
 	}
 
-	do {
-		retval = recv(netcam->sock, buffptr, buffsize, 0);
-	} while ((retval < 0) && ((errno == EINTR) || (errno == EAGAIN)));
-
-	return retval;
+	return recv(netcam->sock, buffptr, buffsize, 0);
 }
 
 /**

@@ -235,6 +235,6 @@ void netcam_get_dimensions (struct netcam_context *);
 int netcam_start (struct context *);
 int netcam_next (struct context *, unsigned char *);
 void netcam_cleanup (struct netcam_context *, int);
-ssize_t netcam_recv(netcam_context_ptr, void *, size_t, struct timeval *);
+ssize_t netcam_recv(netcam_context_ptr, void *, size_t);
 
 #endif
