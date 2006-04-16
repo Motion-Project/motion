@@ -606,12 +606,15 @@ static void netcam_disconnect(netcam_context_ptr netcam)
  *
  * Parameters:
  *
- *      netcam  pointer to netcam_context structure
+ *      netcam    pointer to netcam_context structure
+ *      err_flag  flag to suppress error printout (1 => suppress)
+ *                Note that errors which indicate something other than
+ *                a network connection problem are not suppressed.
  *
  * Returns:     0 for success, -1 for error
  *
  */
-static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
+static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 {
 	struct sockaddr_in server;      /* for connect */
 	struct addrinfo *res;           /* for getaddrinfo */
@@ -633,8 +636,9 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 
 	/* lookup the hostname given in the netcam URL */
 	if ((ret = getaddrinfo(netcam->connect_host, NULL, NULL, &res)) != 0) {
-		motion_log(LOG_ERR, 0, "getaddrinfo() failed (%s): %s",
-		           netcam->connect_host, gai_strerror(ret));
+		if (!err_flag)
+			motion_log(LOG_ERR, 0, "getaddrinfo() failed (%s): %s",
+			           netcam->connect_host, gai_strerror(ret));
 		netcam_disconnect(netcam);
 		return -1;
 	}
@@ -649,9 +653,6 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 
 	server.sin_family = AF_INET;
 	server.sin_port = htons(netcam->connect_port);
-
-	if (timeout)
-		netcam->timeout = *timeout;
 
 	/*
 	 * We set the socket non-blocking and then use a 'select'
@@ -680,7 +681,8 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 
 	/* If the connect failed with anything except EINPROGRESS, error */
 	if ((ret < 0) && (back_err != EINPROGRESS)) {
-		motion_log(LOG_ERR, 1, "connect() failed (%d)", back_err);
+		if (!err_flag)
+			motion_log(LOG_ERR, 1, "connect() failed (%d)", back_err);
 		close(netcam->sock);
 		netcam->sock = -1;
 		return -1;
@@ -694,7 +696,8 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 	ret = select(FD_SETSIZE, NULL, &fd_w, NULL, &selecttime);
 
 	if (ret == 0) {            /* 0 means timeout */
-		motion_log(LOG_ERR, 0, "timeout on connect()");
+		if (!err_flag)
+			motion_log(LOG_ERR, 0, "timeout on connect()");
 		close(netcam->sock);
 		netcam->sock = -1;
 		return -1;
@@ -715,7 +718,8 @@ static int netcam_connect(netcam_context_ptr netcam, struct timeval *timeout)
 
 	/* If the return code is anything except 0, error on connect */
 	if (ret) {
-		motion_log(LOG_ERR, 1, "connect returned error");
+		if (!err_flag)
+			motion_log(LOG_ERR, 1, "connect returned error");
 		netcam_disconnect(netcam);
 		return -1;
 	}
@@ -1169,7 +1173,7 @@ static void *netcam_handler_loop(void *arg)
 		if (netcam->response) {    /* if html input */
 			if (!netcam->caps.streaming) {
 
-				if (netcam_connect(netcam, NULL) < 0) {
+				if (netcam_connect(netcam, open_error) < 0) {
 					if (!open_error) { /* log first error */
 						motion_log(LOG_ERR, 0,
 						    "re-opening camera (non-streaming)");
@@ -1198,7 +1202,7 @@ static void *netcam_handler_loop(void *arg)
 				}
 			} else {
 				if (netcam_read_next_header(netcam) < 0) {
-					if (netcam_connect(netcam, NULL) < 0) {
+					if (netcam_connect(netcam, open_error) < 0) {
 						if (!open_error) { /* log first error */
 							motion_log(LOG_ERR, 0,
 							    "re-opening camera (streaming)");
@@ -1421,7 +1425,7 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 		 * netcam_connect does an automatic netcam_close, so it's
 		 * safe to include it as part of this loop
 		 */
-		if (netcam_connect(netcam, NULL) != 0) {
+		if (netcam_connect(netcam, 0) != 0) {
 			motion_log(LOG_ERR, 0,"Failed to open camera - check your config and that netcamera is online");
 
 			/* Fatal error on startup */
