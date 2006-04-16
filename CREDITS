@@ -87,6 +87,9 @@ William M Brack
    * Enhancement to Netcam Code for Connection to Pixord Cameras.
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamFixPixordBug
    * Fix related to connecting to the netcam. From mailing list 23 Dec 2005.
+   * Fixed problem related to fetching images from Network camera and error
+     handling when it fails. Motion would end in infinite loops.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
 
 Ashley Cambrell
    * PostgreSQL support, put_jpeg_grey(), webcam bugfixes.

@@ -1,4 +1,9 @@
-3.2.6 Firmal Bugfix Release.
+3.2.7 Formal Bugfix Release
+   * Fixed problem related to fetching images from Network camera and error
+     handling when it fails. Motion would end in infinite loops (Bill Brack).
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
+
+3.2.6 Formal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been
      extended to also be used for snapshot feature but declaration was hidden
      between #ifdef HAVE_FFMPEG. (Kenneth Lavrsen)
