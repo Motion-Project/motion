@@ -59,8 +59,8 @@ dnl Check to Exclude BKTR
 dnl
 BKTR="yes"
 AC_ARG_WITH(bktr,
-[  --without-bktr           Exclude to use bktr subsytem , that usually usefull
-                          for devices as network cameras.
+[  --without-bktr           Exclude to use bktr subsystem , that usually useful
+                          for devices as network cameras ( ONLY used in *BSD).
                           ]
                           ,
 BKTR="$withval"
