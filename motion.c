@@ -1849,11 +1849,6 @@ int main (int argc, char **argv)
 		 * option is used, so start at 1 then and 0 otherwise.
 		 */
 		for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
-			if (cnt_list[0]->conf.setup_mode)
-				motion_log(-1, 0, "Thread device: %s input %d",
-				           cnt_list[i]->conf.netcam_url ? cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
-				           cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input
-				          );
 				
 			/* Assign the thread number for this thread. This is done within a
 			 * mutex lock to prevent multiple simultaneous updates to 
@@ -1864,7 +1859,14 @@ int main (int argc, char **argv)
 			pthread_mutex_unlock(&global_lock);
 
 			if ( strcmp(cnt_list[i]->conf_filename,"") )
-				motion_log(LOG_INFO, 0, "Thread is from %s", cnt_list[i]->conf_filename );	
+				motion_log(LOG_INFO, 0, "Thread %d is from %s", threads_running, cnt_list[i]->conf_filename );
+
+			if (cnt_list[0]->conf.setup_mode) {
+				motion_log(-1, 0, "Thread %d is device: %s input %d", threads_running,
+				           cnt_list[i]->conf.netcam_url ? cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
+				           cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input
+				          );
+			}
 
 			/* Create the actual thread. Use 'motion_loop' as the thread
 			 * function.

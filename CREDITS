@@ -852,8 +852,11 @@ Kenneth Lavrsen (Currently project managing Motion)
      between #ifdef HAVE_FFMPEG.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x09x012244
    * text_changes now shows a '-' when motion detection is paused instead of
-     just showing 0 (Kenneth Lavrsen)
+     just showing 0
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x03x16x095713
+   * Improved reporting of thread numbers during startup in setup mode.
+     (Peter Smith and Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SlightlyImprovedThreadCreationLogging
 
 Mike Lees
    * Added the onffmpegclose feature.
@@ -1027,7 +1030,12 @@ Petter Reinholdtsen
 Pete Shipley
    * Fix the problem that happens in FreeBSD and Debian Sarge because
      version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Angel Carpintero and Pete Shipley)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
+
+Peter Smith
+   * Improved reporting of thread numbers during startup in setup mode.
+     (Peter Smith and Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SlightlyImprovedThreadCreationLogging
 
 Roberto Spadim
    * Fixed compatibility problem with Palantir. Fixed by making output more
