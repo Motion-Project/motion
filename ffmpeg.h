@@ -66,4 +66,7 @@ void ffmpeg_close(struct ffmpeg *);
 /*Deinterlace the image. */
 void ffmpeg_deinterlace(unsigned char *, int, int);
 
+/*Setup an avcodec log handler. */
+static callback *ffmpeg_avcodec_log(void *, int val, const char * msg, va_list ap);
+
 #endif /* _INCLUDE_FFMPEG_H_ */
