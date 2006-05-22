@@ -129,7 +129,6 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 void ffmpeg_init()
 {
 	av_register_all();
-	av_log_set_callback( ffmpeg_avcodec_log );
 
 	/* Copy the functions to use for the append file protocol from the standard
 	 * file protocol.
@@ -318,19 +317,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	/* Set the picture format - need in ffmpeg starting round April-May 2005 */
 	c->pix_fmt = PIX_FMT_YUV420P;
 
-	/* Get a mutex lock. */
-	pthread_mutex_lock(&global_lock);
-
 	/* open the codec */
 	if (avcodec_open(c, codec) < 0) {
-		/* Release the lock. */
-		pthread_mutex_unlock(&global_lock);
 		motion_log(LOG_ERR, 1, "avcodec_open - could not open codec");
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
-	} else {
-		/* Release the lock. */
-		pthread_mutex_unlock(&global_lock);
 	}
 
 	ffmpeg->video_outbuf = NULL;
@@ -625,22 +616,6 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
 	av_free(picture);
 	
 	return;
-}
-
-/** ffmpeg_avcodec_log
- *      Handle any logging output from the ffmpeg library avcodec.
- * 
- * Parameters
- *      val      the message value.
- *      msg      text message to be used for log entry in printf() format.
- *      va_list  list of variables to be used in msg text.
- *
- * Returns
- *      Function returns nothing.
- */
-static callback *ffmpeg_avcodec_log(void *, int val, const char * msg, va_list ap)
-{
-	motion_log(LOG_ERR, val, msg, ap);
 }
 
 #endif /* HAVE_FFMPEG */

@@ -1036,10 +1036,6 @@ Peter Smith
    * Improved reporting of thread numbers during startup in setup mode.
      (Peter Smith and Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/SlightlyImprovedThreadCreationLogging
-   * Ffmpeg code mutex locking fix
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
-   * Ffmpeg avicodec logging improved
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
 
 Roberto Spadim
    * Fixed compatibility problem with Palantir. Fixed by making output more
