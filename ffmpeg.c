@@ -641,7 +641,6 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
  */
 void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *message, va_list vars)
 {
-	//motion_log(LOG_ERR, errno_flag, message, vars);
 	motion_log(LOG_ERR, 0, "ffmpeg_avcodec_log: %s", message, vars);
 }
 
