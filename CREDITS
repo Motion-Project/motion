@@ -1039,7 +1039,7 @@ Peter Smith
    * Ffmpeg code mutex locking fix
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
    * Ffmpeg avicodec logging improved (Peter Smith and Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegAvicodecLogging
 
 Roberto Spadim
    * Fixed compatibility problem with Palantir. Fixed by making output more

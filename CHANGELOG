@@ -8,7 +8,7 @@
    * Ffmpeg code mutex locking fix (Peter Smith)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
    * Ffmpeg avicodec logging improved (Peter Smith and Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegAvicodecLogging
 
 3.2.6 Formal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been
