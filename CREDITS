@@ -1040,6 +1040,9 @@ Peter Smith
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
    * Ffmpeg avicodec logging improved (Peter Smith and Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegAvicodecLogging
+   * Improved upon a few ambiguous log messages which may be emitted by the Event
+     handling code with regards to Ffmpeg (Peter Smith)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LoggingEventFix
 
 Roberto Spadim
    * Fixed compatibility problem with Palantir. Fixed by making output more
