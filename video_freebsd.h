@@ -12,8 +12,14 @@
 
 #ifndef WITHOUT_V4L
 
+#ifdef OLD_BKTR
+#include <machine/ioctl_meteor.h>
+#include <machine/ioctl_bt848.h>
+#else
 #include <dev/bktr/ioctl_meteor.h>
 #include <dev/bktr/ioctl_bt848.h>
+#endif
+
 
 #endif
 

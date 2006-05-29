@@ -54,6 +54,15 @@ TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
 
 if test "${FreeBSD}" != ""; then
 
+AC_MSG_CHECKING(bktr headers in /usr/include/dev/bktr)
+
+if test -f /usr/include/dev/bktr/ioctl_meteor.h && test -f /usr/include/dev/bktr/ioctl_bt848.h; then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
+fi
+
 dnl
 dnl Check to Exclude BKTR 
 dnl

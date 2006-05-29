@@ -49,7 +49,11 @@ DEPEND_FILE  = .depend
 # ALL and PROGS build Motion and, possibly, Motion-control.                    #
 ################################################################################
 all: progs
+ifneq (,$(findstring freebsd,$(VIDEO_OBJ)))
+	@echo "Build complete, run \"gmake install\" to install Motion!"
+else
 	@echo "Build complete, run \"make install\" to install Motion!"
+endif
 	@echo
 
 progs: pre-build-info $(PROGS)
