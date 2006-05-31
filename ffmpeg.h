@@ -67,6 +67,6 @@ void ffmpeg_close(struct ffmpeg *);
 void ffmpeg_deinterlace(unsigned char *, int, int);
 
 /*Setup an avcodec log handler. */
-void ffmpeg_avcodec_log(void *, int, const char *, va_list);
+void ffmpeg_avcodec_log(void *, int, const char *, ...);
 
 #endif /* _INCLUDE_FFMPEG_H_ */
