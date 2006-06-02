@@ -633,25 +633,32 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
  * Parameters
  *      *ignoreme  A pointer we will ignore
  *      errno_flag The error number value
- *      msg        Text message to be used for log entry in printf() format.
- *      vars       List of variables to be used in formatted message text.
+ *      fmt        Text message to be used for log entry in printf() format.
+ *      ap         List of variables to be used in formatted message text.
  *
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const char *message, ...)
+void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const char *fmt, ...)
 {
-	va_list vars;
+	char buf[1024];
+	va_list ap;
 
-	/* Get the message from the argument list passed in */
-	va_start(vars, message);
+	/* Do not log the message coming from avcodec if the debug_level is not set. */
+	if (debug_level) {
 
-	/* If the debug_level is correct then send the message to the motion logging routine. */
-	if (debug_level)
-		motion_log(LOG_ERR, 0, "ffmpeg_avcodec_log: %s - flag %d", message, vars, errno_flag);
+		/* Get the message from the argument list passed in */
+		va_start(ap, fmt);
 
-	/* Clean up the argument list routine */
-	va_end(vars);
+		/* Flatten the message coming in from avcodec */
+		vsnprintf(buf, sizeof(buf), fmt, ap);
+
+		/* If the debug_level is correct then send the message to the motion logging routine. */
+		motion_log(LOG_ERR, 0, "ffmpeg_avcodec_log: %s - flag %d", buf, errno_flag);
+
+		/* Clean up the argument list routine */
+		va_end(ap);
+	}
 }
 
 #endif /* HAVE_FFMPEG */
