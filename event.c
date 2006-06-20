@@ -237,9 +237,9 @@ static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			
 		mystrftime(cnt, filename, sizeof(filename), jpegpath, currenttime_tm, NULL, 0);
 		/* motion images gets same name as normal images plus an appended 'm' */
-		sprintf(filenamem, "%sm", filename);
-		sprintf(fullfilename, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
-		sprintf(fullfilenamem, "%s/%s.%s", cnt->conf.filepath, filenamem, imageext(cnt));
+		snprintf(filenamem, PATH_MAX, "%sm", filename);
+		snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
+		snprintf(fullfilenamem, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filenamem, imageext(cnt));
 	}
 	if (conf->motion_img) {
 		put_picture(cnt, fullfilenamem, cnt->imgs.out, FTYPE_IMAGE_MOTION);
@@ -268,20 +268,20 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			snappath = DEF_SNAPPATH;
 			
 		mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tm, NULL, 0);
-		sprintf(filename, "%s.%s", filepath, imageext(cnt));
-		sprintf(fullfilename, "%s/%s", cnt->conf.filepath, filename);
+		snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
+		snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
 		put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
 
 		/* Update symbolic link *after* image has been written so that
 		   the link always points to a valid file. */
-		sprintf(linkpath, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
+		snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
 		remove(linkpath);
 		if (symlink(filename, linkpath)) {
 			motion_log(LOG_ERR, 1, "Could not create symbolic link [%s]", filename);
 			return;
 		}
 	} else {
-		sprintf(fullfilename, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
+		snprintf(fullfilename, PATH_MAX, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
 		remove(fullfilename);
 		put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
 	}
@@ -330,8 +330,9 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	mystrftime(cnt, stamp, sizeof(stamp), mpegpath, currenttime_tm, NULL, 0);
 
 	/* motion mpegs get the same name as normal mpegs plus an appended 'm' */
-	sprintf(cnt->motionfilename, "%s/%sm", cnt->conf.filepath, stamp);
-	sprintf(cnt->newfilename, "%s/%s", cnt->conf.filepath, stamp);
+	/* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
+	snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
+	snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
 	if (cnt->conf.ffmpeg_cap_new) {
 		if (cnt->imgs.type==VIDEO_PALETTE_GREY) {
@@ -420,7 +421,9 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 			timepath = DEF_TIMEPATH;
 		
 		mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tm, NULL, 0);
-		sprintf(cnt->timelapsefilename, "%s/%s", cnt->conf.filepath, tmp);
+		
+		/* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
+		snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
 		
 		if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
 			convbuf = mymalloc((width*height)/2);

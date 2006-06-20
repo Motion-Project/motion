@@ -546,7 +546,7 @@ static int v4l_open_vidpipe(void)
 				output=strtok(NULL, "\t");
 				ostatus=strtok(NULL, "\t");
 				if (istatus[0]=='-') {
-					sprintf(pipepath, "/dev/%s", input);
+					snprintf(pipepath, 255, "/dev/%s", input);
 					pipe_fd=open(pipepath, O_RDWR);
 					if (pipe_fd>=0) {
 						motion_log(-1, 0, "\tInput:  /dev/%s", input);
@@ -573,9 +573,9 @@ static int v4l_open_vidpipe(void)
 		}
 		while ((dirp=readdir(dir)) != NULL) {
 			if (!strncmp(dirp->d_name, "video", 5)) {
-				strcpy(buffer, prefix);
-				strcat(buffer, dirp->d_name);
-				strcat(buffer, "/name");
+				strncpy(buffer, prefix, 255);
+				strncat(buffer, dirp->d_name, 255);
+				strncat(buffer, "/name", 255);
 				if ((fd=open(buffer, O_RDONLY)) >= 0) {
 					if ((read(fd, buffer, sizeof(buffer)-1))<0) {
 						close(fd);

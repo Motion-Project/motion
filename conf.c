@@ -1466,11 +1466,11 @@ struct context ** conf_load (struct context **cnt)
 		fp = fopen (filename, "r");
 	}
 	if (!fp) {     /* specified file does not exist... try default file */
-		sprintf(filename, "%s/.motion/motion.conf", getenv("HOME"));
-		fp = fopen (filename, "r");
+		snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
+		fp = fopen(filename, "r");
 		if (!fp) {
-			sprintf(filename, "%s/motion.conf", sysconfdir);
-			fp = fopen (filename, "r");
+			snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
+			fp = fopen(filename, "r");
 			if (!fp)        /* there is no config file.... use defaults */
 				motion_log(-1, 1, "could not open configfile %s",filename);
 		}

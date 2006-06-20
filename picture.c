@@ -674,7 +674,7 @@ void preview_best(struct context *cnt)
 			jpegpath = (char *)DEF_JPEGPATH;
 			
 		mystrftime(cnt, filename, sizeof(filename), jpegpath, cnt->currenttime_tm, NULL, 0);
-		sprintf(previewname, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
+		snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 		put_picture(cnt, previewname, cnt->imgs.preview_buffer , FTYPE_IMAGE);
 	}
 }

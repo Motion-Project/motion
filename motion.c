@@ -2164,13 +2164,13 @@ size_t mystrftime(struct context *cnt, char *s, size_t max, const char *userform
 					break;
 				case 'C': // text_event
 					if (cnt->text_event_string && cnt->text_event_string[0])
-						sprintf(tempstr, "%s", cnt->text_event_string);
+						snprintf(tempstr, PATH_MAX, "%s", cnt->text_event_string);
 					else
 						++pos_userformat;
 					break;
 				case 'f': // filename
 					if (filename)
-						sprintf(tempstr, "%s", filename);
+						snprintf(tempstr, PATH_MAX, "%s", filename);
 					else
 						++pos_userformat;
 					break;

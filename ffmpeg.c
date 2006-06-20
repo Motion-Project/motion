@@ -162,7 +162,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 		|| (strcmp(codec, "mpeg1") == 0)
 #endif 
 	) {
-		ext = "mpg";
+		ext = ".mpg";
 		/* We use "mpeg1video" for raw mpeg1 format. Using "mpeg" would
 		 * result in a muxed output file, which isn't appropriate here.
 		 */
@@ -177,10 +177,10 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 		return NULL;
 #endif
 	} else if (strcmp(codec, "mpeg4") == 0) {
-		ext = "avi";
+		ext = ".avi";
 		of = guess_format("avi", NULL, NULL);
 	} else if (strcmp(codec, "msmpeg4") == 0) {
-		ext = "avi";
+		ext = ".avi";
 		of = guess_format("avi", NULL, NULL);
 		if (of) {
 			/* Manually override the codec id. */
@@ -196,8 +196,9 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 		return NULL;
 	}
 
-	/* WARNING: potential buffer overflow */
-	sprintf(filename, "%s.%s", filename, ext);
+	/* The 4 allows for ".avi" or ".mpg" to be appended */
+	strncat(filename, ext, 4);
+
 	return of;
 }
 

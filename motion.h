@@ -274,7 +274,8 @@ struct context {
 
 	int event_nr;
 	int prev_event;
-	char text_event_string[255]; /* The text for conv. spec. %C - we assume 255 characters is fine */
+	char text_event_string[PATH_MAX]; /* The text for conv. spec. %C -
+	                                     we assume PATH_MAX normally 4096 characters is fine */
 
 	int shots;
 	struct tm *currenttime_tm;

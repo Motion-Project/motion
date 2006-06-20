@@ -447,6 +447,14 @@ Per Jönsson
      that are a multiple of 16.
      http://www.lavrsen.dk/twiki/bin/view/Motion/RotateSimplificationPatch
 
+Mike Kenney
+   * Implemented a fix for the rare problem where some experienced that the
+     move file names would only consist of the extension .mpg or .avi with no
+     name in front. The root cause was the use of sprintf for appending to
+     strings. (Mike Kenney and Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2005x09x05x133031
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x06x19x174238
+
 Matthias Kilian
    * Configure patch which enables configure to find and use a
      dynamic library of ffmpegs libavcodec.so
@@ -857,6 +865,14 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Improved reporting of thread numbers during startup in setup mode.
      (Peter Smith and Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/SlightlyImprovedThreadCreationLogging
+   * Implemented a fix for the rare problem where some experienced that the
+     move file names would only consist of the extension .mpg or .avi with no
+     name in front. The root cause was the use of sprintf for appending to
+     strings. (Mike Kenney and Kenneth Lavrsen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2005x09x05x133031
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x06x19x174238
+   * Altered the risky use of sprintf to snprintf in all places related to
+     use with config strings that can become very long. 
 
 Mike Lees
    * Added the onffmpegclose feature.
