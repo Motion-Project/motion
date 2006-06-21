@@ -53,8 +53,6 @@
 #define CONNECT_TIMEOUT        10   /* timeout on remote connection attempt */
 #define READ_TIMEOUT            5   /* default timeout on recv requests */
 #define MAX_HEADER_RETRIES      5   /* Max tries to find a header record */
-#define CAMERA_WARNINGS         3   /* if debug_level >= this number print */
-#define CAMERA_INFO             5   /* debug level to activate everything */
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 
 /*

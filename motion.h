@@ -98,6 +98,11 @@
 #define VIDEO_PALETTE_COMPONENT 7       /* start of component entries */
 #endif
 
+
+/* Debug levels */
+#define CAMERA_WARNINGS         3   /* warnings only */
+#define CAMERA_INFO             5   /* debug level to activate everything */
+
 /* Default picture settings */
 #define DEF_WIDTH              352
 #define DEF_HEIGHT             288
