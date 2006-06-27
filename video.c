@@ -153,7 +153,7 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 			motion_log(LOG_ERR, 1, "ioctl (VIDIOCSPICT)");
 	}
 }
-		
+
 
 static void yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
@@ -163,7 +163,7 @@ static void yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, 
 	/* Create the Y plane */
 	src=cap_map;
 	dest=map;
-	for (i=width*height; i; i--) {
+	for (i=width*height; i>0; i--) {
 		*dest++=*src;
 		src+=2;
 	}
@@ -172,8 +172,8 @@ static void yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, 
 	src2=cap_map+width*2+1;
 	dest=map+width*height;
 	dest2=dest+(width*height)/4;
-	for (i=height/2; i; i--) {
-		for (j=width/2; j; j--) {
+	for (i=height/2; i>0; i--) {
+		for (j=width/2; j>0; j--) {
 			*dest=((int)*src+(int)*src2)/2;
 			src+=2;
 			src2+=2;
