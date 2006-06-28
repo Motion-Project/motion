@@ -776,8 +776,6 @@ static void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigne
 	unsigned long frequnits = freq;
 
 	if (input != viddev->input || width != viddev->width || height!=viddev->height || freq!=viddev->freq){ 
-		motion_log(LOG_WARNING, 0, "v4l_set_input really needed ?");
-
 		if (set_input(viddev, input) == -1)
 			return;
 
