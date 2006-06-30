@@ -307,6 +307,10 @@ Angel Carpintero
      Motion can present up to 99 cameras in its http remote control interface
      (Angel Carpintero based on idea by Chuck Sheehan)
      http://www.lavrsen.dk/twiki/bin/view/Motion/WebHttpManyThreads
+   * Removed annoying debug messages (v4l_set_input really needed ?) in the FreeBSD
+     version.
+   * Added new feature: minimum_frame_time which enables capturing at a lower rate
+     than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -872,7 +876,10 @@ Kenneth Lavrsen (Currently project managing Motion)
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2005x09x05x133031
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x06x19x174238
    * Altered the risky use of sprintf to snprintf in all places related to
-     use with config strings that can become very long. 
+     use with config strings that can become very long.
+   * Removed the minimum_gap feature which was utterly useless
+   * Added new feature: minimum_frame_time which enables capturing at a lower rate
+     than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
 
 Mike Lees
    * Added the onffmpegclose feature.
