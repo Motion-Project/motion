@@ -373,7 +373,7 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		}
 	}
 	
-	if (cnt->shots < conf->frame_limit && cnt->currenttime - cnt->lastshottime >= conf->mingap ) {
+	if (cnt->shots < conf->frame_limit) {
 		cnt->lastshottime = cnt->currenttime;
 
 		/* Output the latest picture 'image_new' or image_out for motion picture. */
