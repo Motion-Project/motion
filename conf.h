@@ -40,7 +40,7 @@ struct config {
 	int ppm;
 	int noise;
 	int noise_tune;
-	int mingap;
+	int minimum_frame_time;
 	int lightswitch;
 	int nightcomp;
 	unsigned int low_cpu;

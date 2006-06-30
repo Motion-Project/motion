@@ -57,7 +57,7 @@ struct config conf_template = {
 	ppm:                   0,
 	noise:                 DEF_NOISELEVEL,
 	noise_tune:            1,
-	mingap:                0,
+	minimum_frame_time:    0,
 	lightswitch:           0,
 	nightcomp:             0,
 	low_cpu:               0,
@@ -248,6 +248,15 @@ config_param config_params[] = {
 	"# Maximum number of frames to be captured per second.\n"
 	"# Valid range: 2-100. Default: 100 (almost no limit).",
 	CONF_OFFSET(frame_limit),
+	copy_int,
+	print_int
+	},
+	{
+	"minimum_frame_time",
+	"# Minimum time in seconds between the capturing picture frames from the camera.\n"
+	"# Default: 0 = disabled - the capture rate is given by the camera framerate.\n"
+	"# This option is used when you want to capture images at a rate lower than 2 per second.",
+	CONF_OFFSET(minimum_frame_time),
 	copy_int,
 	print_int
 	},
@@ -454,15 +463,6 @@ config_param config_params[] = {
 	"# Recommended value is 60 seconds (Default). The value 0 is allowed and disables\n"
 	"# events causing all Motion to be written to one single mpeg file and no pre_capture.",
 	CONF_OFFSET(gap),
-	copy_int,
-	print_int
-	},
-	{
-	"minimum_gap",
-	"# Minimum gap in seconds between the storing pictures while detecting motion.\n"
-	"# Default: 0 = as fast as possible (given by the camera framerate)\n"
-	"# Note: This option has nothing to do with the option 'gap'",
-	CONF_OFFSET(mingap),
 	copy_int,
 	print_int
 	},
