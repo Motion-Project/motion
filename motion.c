@@ -372,6 +372,7 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 			alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
 		}
 	}
+
 	
 	if (cnt->shots < conf->frame_limit) {
 		cnt->lastshottime = cnt->currenttime;
@@ -659,7 +660,9 @@ static void *motion_loop(void *arg)
 	unsigned long long int timenow = 0, timebefore = 0;
 	unsigned char *newimg = NULL;     /* Pointer to where new image is stored */
 	int vid_return_code = 0;          /* Return code used when calling vid_next */
-
+	int minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; /* time in seconds to skip between capturing images */
+	int get_image = 1;
+	
 	/* Next two variables are used for snapshot and timelapse feature
 	 * time_last_frame is set to 1 so that first coming timelapse or second=0
 	 * is acted upon.
@@ -745,6 +748,7 @@ static void *motion_loop(void *arg)
 
 		/* Get time for current frame */
 		cnt->currenttime = time(NULL);
+
 		
 		/* localtime returns static data and is not threadsafe
 		 * so we use localtime_r which is reentrant and threadsafe
@@ -759,10 +763,21 @@ static void *motion_loop(void *arg)
 			cnt->lastrate = cnt->shots + 1;
 			cnt->shots = -1;
 			lastframetime = cnt->currenttime;
+			if (cnt->conf.minimum_frame_time) {
+				minimum_frame_time_downcounter--;
+				if (minimum_frame_time_downcounter == 0) get_image = 1;	
+			}		
 		}
 
+		
 		/* Increase the shots variable for each frame captured within this second */
 		cnt->shots++;
+
+if (get_image){
+		if (cnt->conf.minimum_frame_time) {
+			minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; 	
+			get_image = 0;
+		}	
 
 		/* Store time with pre_captured image*/
 		*(cnt->imgs.timestamp + cnt->precap_cur) = cnt->currenttime;
@@ -1131,7 +1146,7 @@ static void *motion_loop(void *arg)
 				detecting_motion = 1;
 			
 			detecting_motion++;
-			
+		
 			if (detecting_motion > cnt->conf.minimum_motion_frames) {
 				motion_detected(cnt, cnt->diffs, cnt->video_dev, newimg);
 				postcap = cnt->conf.post_capture;
@@ -1239,7 +1254,8 @@ static void *motion_loop(void *arg)
 			motion_log(-1, 0, "%s", msg);
 		}
 
-		
+} // get_image end		
+
 	/***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
 
 		/* Did we get triggered to make a snapshot from control http? Then shoot a snap
@@ -1420,6 +1436,7 @@ static void *motion_loop(void *arg)
 
 
 	/***** MOTION LOOP - FRAMERATE TIMING AND SLEEPING SECTION *****/
+
 
 		/* Work out expected frame rate based on config setting which may
 		   have changed from http-control */
