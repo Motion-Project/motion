@@ -253,7 +253,7 @@ config_param config_params[] = {
 	},
 	{
 	"minimum_frame_time",
-	"# Minimum time in seconds between the capturing picture frames from the camera.\n"
+	"# Minimum time in seconds between capturing picture frames from the camera.\n"
 	"# Default: 0 = disabled - the capture rate is given by the camera framerate.\n"
 	"# This option is used when you want to capture images at a rate lower than 2 per second.",
 	CONF_OFFSET(minimum_frame_time),
