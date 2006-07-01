@@ -750,8 +750,11 @@ static void *motion_loop(void *arg)
 			lastframetime = cnt->currenttime;
 			if (cnt->conf.minimum_frame_time) {
 				minimum_frame_time_downcounter--;
-				if (minimum_frame_time_downcounter == 0) get_image = 1;
+				if (minimum_frame_time_downcounter == 0)
+					get_image = 1;
 			}
+			else
+				get_image = 1;
 		}
 
 
