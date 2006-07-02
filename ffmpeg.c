@@ -15,8 +15,6 @@
 #include "ffmpeg.h"
 #include "motion.h"
 
-
-
 #if LIBAVCODEC_BUILD > 4680
 /* FFmpeg after build 4680 doesn't have support for mpeg1 videos with 
  * non-standard framerates. Previous builds contained a broken hack 
@@ -38,13 +36,13 @@
 #	endif /* __GNUC__ */
 #endif /* LIBAVCODEC_BUILD > 4680 */
 
-#if FFMPEG_VERSION_INT >= 0x000409
+#if LIBAVFORMAT_BUILD >= 4616
 /* The API for av_write_frame changed with FFmpeg version 0.4.9pre1.
  * It now uses an AVPacket struct instead of direct parameters to the
- * function.
+ * function. The
  */
 #	define FFMPEG_AVWRITEFRAME_NEWAPI
-#endif /* FFMPEG_VERSION_INT >= 0x000409 */
+#endif /* LIBAVFORMAT_BUILD >= 4616 */
 
 #if LIBAVFORMAT_BUILD >= 4629
 /* In this build/header version, the codec member of struct AVStream
