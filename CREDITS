@@ -880,6 +880,9 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Removed the minimum_gap feature which was utterly useless
    * Added new feature: minimum_frame_time which enables capturing at a lower rate
      than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
+   * Fixed the check for ffmpeg version. In rev 5503 of ffmpeg the FFMPEG_VERSION_INT
+     was removed from libavcodec/avcodec.h. Instead we now use the equivalent
+     LIBAVFORMAT_BUILD >= 4616 which is the 0.4.9pre1 version of ffmpeg.
 
 Mike Lees
    * Added the onffmpegclose feature.
