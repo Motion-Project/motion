@@ -385,7 +385,7 @@ static int set_geometry(struct video_dev *viddev, int width, int height)
 
 
 	geom.oformat = METEOR_GEO_YUV_422 | METEOR_GEO_YUV_12;
-//	geom.oformat |= METEOR_GEO_EVEN_ONLY;	
+	geom.oformat |= METEOR_GEO_EVEN_ONLY;	
 	
 //	geom.oformat = 0;
 	geom.frames  = 1;
