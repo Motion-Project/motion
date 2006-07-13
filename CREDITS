@@ -411,8 +411,6 @@ Peter Holik
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamModulo16Patch
    * Fixed netcamera bug related to seperating frames in an mjpeg stream.
      From mailing list 23 Dec 2005.
-   * Avoid open filedescriptors in netcam
-     http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
 
 Wesley Hosking
    * For pointing me to the absence of a frame length check using

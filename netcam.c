@@ -660,14 +660,16 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 
 	if ((saveflags = fcntl(netcam->sock, F_GETFL, 0)) < 0) {
 		motion_log(LOG_ERR, 1, "fcntl(1) on socket");
-		netcam_disconnect(netcam);
+		close(netcam->sock);
+		netcam->sock = -1;
 		return -1;
 	}
 
 	/* Set the socket non-blocking */
 	if (fcntl(netcam->sock, F_SETFL, saveflags | O_NONBLOCK) < 0) {
 		motion_log(LOG_ERR, 1, "fcntl(2) on socket");
-		netcam_disconnect(netcam);
+		close(netcam->sock);
+		netcam->sock = -1;
 		return -1;
 	}
 
@@ -680,7 +682,8 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 	if ((ret < 0) && (back_err != EINPROGRESS)) {
 		if (!err_flag)
 			motion_log(LOG_ERR, 1, "connect() failed (%d)", back_err);
-		netcam_disconnect(netcam);
+		close(netcam->sock);
+		netcam->sock = -1;
 		return -1;
 	}
 
@@ -694,7 +697,8 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 	if (ret == 0) {            /* 0 means timeout */
 		if (!err_flag)
 			motion_log(LOG_ERR, 0, "timeout on connect()");
-		netcam_disconnect(netcam);
+		close(netcam->sock);
+		netcam->sock = -1;
 		return -1;
 	}
 
@@ -1684,8 +1688,6 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
 
 	if (netcam->ftp != NULL) {
 		ftp_free_context(netcam->ftp);
-	} else {
-		netcam_disconnect(netcam);
 	}
 
 	pthread_mutex_destroy(&netcam->mutex);
