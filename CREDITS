@@ -311,6 +311,8 @@ Angel Carpintero
      version.
    * Added new feature: minimum_frame_time which enables capturing at a lower rate
      than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
+   * Fix segfault when netcam_url has no service ( http , ftp )
+   * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -409,6 +411,8 @@ Peter Holik
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamModulo16Patch
    * Fixed netcamera bug related to seperating frames in an mjpeg stream.
      From mailing list 23 Dec 2005.
+   * Avoid open filedescriptors in netcam
+     http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
 
 Wesley Hosking
    * For pointing me to the absence of a frame length check using

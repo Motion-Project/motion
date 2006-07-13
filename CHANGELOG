@@ -29,6 +29,10 @@
      was removed from libavcodec/avcodec.h. Instead we now use the equivalent
      LIBAVFORMAT_BUILD >= 4616 which is the 0.4.9pre1 version of ffmpeg.
      (Kenneth Lavrsen)
+   * Fixed segfault when netcam_url has no service ( http , ftp ) (Angel Carpintero)
+   * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD (Angel Carpintero)
+   * Avoid open filedescriptors in netcam (Peter Holik)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
 
 3.2.6 Formal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been
