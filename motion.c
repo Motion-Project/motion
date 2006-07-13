@@ -1192,10 +1192,13 @@ static void *motion_loop(void *arg)
 		/***** MOTION LOOP - REFERENCE FRAME SECTION *****/
 
 			/* Update reference frame */
-			if (cnt->moved && (cnt->track.type || cnt->conf.lightswitch)) {
+			if ((cnt->diffs > cnt->threshold * 2) ||
+			    (cnt->moved && (cnt->track.type || cnt->conf.lightswitch))) {
 				/* Prevent the motion created by moving camera or sudden light intensity
-			 	 * being detected by creating a fresh reference frame
-			 	 */
+				 * being detected by creating a fresh reference frame. Decaying is also
+				 * disabled when motion is above a certain threshold to make tracking
+				 * more accurate.
+				 */
 				memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
 			} else if (cnt->threshold) {
 				/* Old image slowly decays, this will make it even harder on

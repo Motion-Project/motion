@@ -31,6 +31,9 @@
      (Kenneth Lavrsen)
    * Fixed segfault when netcam_url has no service ( http , ftp ) (Angel Carpintero)
    * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD (Angel Carpintero)
+   * Make the creation of reference frame and the decay mechanism depending
+     on how much motion was detected relative to threshold setting (Joerg Weber)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
 
 3.2.6 Formal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been

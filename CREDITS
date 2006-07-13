@@ -1173,6 +1173,9 @@ Joerg Weber
    * Improved the labelling algoritm so that locate feature and tracking
      features includes all labelled areas above threshold.
      http://www.lavrsen.dk/twiki/bin/view/Motion/ImprovedLabellingPatch
+   * Make the creation of reference frame and the decay mechanism depending
+     on how much motion was detected relative to threshold setting.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
 
 
 Tristan Willy
