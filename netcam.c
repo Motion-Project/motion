@@ -187,7 +187,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 			}
 		}
 	}
-	if (!parse_url->port) {
+	if ((!parse_url->port) && (parse_url->service)){
 		if (!strcmp(parse_url->service, "http"))
 			parse_url->port = 80;
 		else if (!strcmp(parse_url->service, "ftp"))
@@ -1869,14 +1869,13 @@ int netcam_start(struct context *cnt)
 		netcam->connect_port = url.port;
 	}
 
-
-	if (!strcmp(url.service, "http")) {
+	if ((url.service) && (!strcmp(url.service, "http")) ){
 		retval = netcam_setup_html(netcam, &url);
-	} else if (!strcmp(url.service, "ftp")) {
+	} else if ((url.service) && (!strcmp(url.service, "ftp")) ){
 		retval = netcam_setup_ftp(netcam, &url);
 	} else {
 		motion_log(LOG_ERR, 0, "Invalid netcam service  '%s' - "
-		                       "must be http or ftp", url.service);
+					"must be http or ftp", url.service);
 		netcam_url_free(&url);
 		return -1;
 	}
