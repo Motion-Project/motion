@@ -472,7 +472,7 @@ else
 		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
 		#Add -lz for some mysql installs....
 		TEMP_LIBS="$TEMP_LIBS -lz"
-		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I $MYSQL_INCDIR"
+		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
 		AC_MSG_RESULT(yes)
 		MYSQL_SUPPORT="yes"
 	fi
