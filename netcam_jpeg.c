@@ -425,10 +425,10 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 	int ret;                                /* working var */
 
 	/*
-	 * This routine is only called from the main thread.  If there is
-	 * a camera-handler thread, we need to "protect" the "latest"
-	 * image while we decompress it.  We can use netcam->mutex to
-	 * do this;
+	 * This routine is only called from the main thread.
+	 * We need to "protect" the "latest" image while we
+	 * decompress it.  netcam_init_jpeg uses
+	 * netcam->mutex to do this;
 	 */
 	if (debug_level > 5) {
 		motion_log(LOG_INFO, 0, "processing jpeg image - content length "
@@ -441,7 +441,8 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 		return ret;
 
 	/* Do a sanity check on dimensions
-	 * If dimensions have changed we throw an error messages that will cause
+	 * If dimensions have changed we throw an
+	 * error message that will cause
 	 * restart of Motion
 	 */
 	if (netcam->width) {    /* 0 means not yet init'ed */

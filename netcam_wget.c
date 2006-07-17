@@ -282,8 +282,7 @@ int rbuf_peek(netcam_context_ptr netcam, char *store)
 {
 	if (!netcam->response->buffer_left) {
 		int res;
-		netcam->response->buffer_pos = netcam->response->buffer;
-		netcam->response->buffer_left = 0;
+		rbuf_initialize(netcam);
 		res = netcam_recv (netcam, netcam->response->buffer,
 		                   sizeof (netcam->response->buffer));
 
@@ -316,13 +315,6 @@ int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
 		netcam->response->buffer_pos += howmuch;
 		return howmuch;
 	}
-}
-
-/* Discard any cached data in RBUF.  */
-void rbuf_discard (netcam_context_ptr netcam)
-{
-	netcam->response->buffer_left = 0;
-	netcam->response->buffer_pos = netcam->response->buffer;
 }
 
 /* Get the HTTP result code */

@@ -65,7 +65,6 @@ void rbuf_uninitialize(netcam_context_ptr);
 int rbuf_readchar(netcam_context_ptr, char *);
 int rbuf_peek(netcam_context_ptr, char *);
 int rbuf_flush(netcam_context_ptr, char *, int);
-void rbuf_discard(netcam_context_ptr);
 
 /* Internal, but used by the macro. */
 int rbuf_read_bufferful(netcam_context_ptr);
