@@ -313,6 +313,7 @@ Angel Carpintero
      than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
    * Fix segfault when netcam_url has no service ( http , ftp )
    * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD
+   * Fixed possible syntax error in configure related to MySQL
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -411,6 +412,8 @@ Peter Holik
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamModulo16Patch
    * Fixed netcamera bug related to seperating frames in an mjpeg stream.
      From mailing list 23 Dec 2005.
+   * Avoid open file descriptor when connecting to network cameras fails 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
 
 Wesley Hosking
    * For pointing me to the absence of a frame length check using
