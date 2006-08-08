@@ -930,7 +930,18 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		length_uri = length_uri - 5;
 		if (length_uri == 0) {
 			/*call start*/
+			int i = 0;
+
 			cnt[thread]->pause = 0;
+
+			if (thread == 0) {
+				do {
+					cnt[i]->pause = 0;
+				} while (cnt[++i]);
+			} else {
+				cnt[thread]->pause = 0;
+			}
+
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket,ini_template);
 				sprintf(res,"Thread %i Detection resumed<br>\n"
@@ -954,7 +965,18 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		length_uri = length_uri - 5;
 		if (length_uri==0) {
 			/*call pause*/
+			int i = 0;
+			
 			cnt[thread]->pause=1;
+
+			if (thread == 0) {
+				do {
+					cnt[i]->pause = 1;
+				} while (cnt[++i]);
+			} else {
+				cnt[thread]->pause = 1;
+			}
+			
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res,"Thread %i Detection paused<br>\n"
