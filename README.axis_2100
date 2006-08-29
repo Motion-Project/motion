@@ -1,8 +1,8 @@
 Using motion with the Axis 2100 network camera
 
 First compile the motion binary as described in README and INSTALL
-Then either start motion with the -A option and your axis cameras ip address or
-edit motion.conf.
+Then edit motion.conf: Add your axis cameras ip address to the netcam_url
+paramter in the "Captute Device Options" section.
 
  To increase the performance use this urls :
 
