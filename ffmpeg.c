@@ -327,10 +327,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 		motion_log(LOG_ERR, 1, "avcodec_open - could not open codec");
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
-	} else {
-		/* Release the lock. */
-		pthread_mutex_unlock(&global_lock);
 	}
+
+	/* Release the lock. */
+	pthread_mutex_unlock(&global_lock);
+
 
 	ffmpeg->video_outbuf = NULL;
 	if (!(ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE)) {
@@ -420,7 +421,9 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 
 	/* close each codec */
 	if (ffmpeg->video_st) {
+		pthread_mutex_lock(&global_lock);
 		avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
+		pthread_mutex_unlock(&global_lock);	
 		av_freep(&ffmpeg->picture);
 		av_freep(&ffmpeg->video_outbuf);
 	}
@@ -450,7 +453,9 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
 
 	/* close each codec */
 	if (ffmpeg->video_st) {
+		pthread_mutex_lock(&global_lock);
 		avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
+		pthread_mutex_unlock(&global_lock);
 		av_freep(&ffmpeg->picture);
 		av_freep(&ffmpeg->video_outbuf);
 	}
