@@ -11,7 +11,6 @@
 #define _INCLUDE_MOTION_H
 
 /* Includes */
-
 #ifdef HAVE_MYSQL
 #include <mysql.h>
 #endif
@@ -33,9 +32,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
 
 #define _LINUX_TIME_H 1
-#if (!defined(WITHOUT_V4L)) && (!defined (__freebsd__))
+#if (!defined(WITHOUT_V4L)) && (!defined(BSD))
 #include <linux/videodev.h>
 #endif
 
@@ -76,7 +76,7 @@
         } 
 
 
-#if defined(WITHOUT_V4L) || defined(__freebsd__)
+#if defined(WITHOUT_V4L) || defined(BSD)
  
 #define VIDEO_PALETTE_GREY      1       /* Linear greyscale */
 #define VIDEO_PALETTE_HI240     2       /* High 240 cube (BT848) */
@@ -298,7 +298,7 @@ struct context {
 	int pause;
 	int missing_frame_counter;   /* counts failed attempts to fetch picture frame from camera */
 
-#ifdef __freebsd__
+#if (defined(BSD))
 	int tuner_dev;
 #endif
 	int video_dev;

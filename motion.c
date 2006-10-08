@@ -9,11 +9,11 @@
 #include "ffmpeg.h"
 #include "motion.h"
 
-#ifdef __freebsd__
+#if (defined(BSD)) 
 #include "video_freebsd.h"
 #else
 #include "video.h"
-#endif /* __freebsd__ */
+#endif /* BSD */
 
 #include "conf.h"
 #include "alg.h"
@@ -492,7 +492,7 @@ static void motion_init(struct context *cnt)
 	memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
 
 #ifndef WITHOUT_V4L
-#ifndef __freebsd__
+#if (!defined(BSD))
 	/* open video loopback devices if enabled */
 	if (cnt->conf.vidpipe) {
 		if (cnt->conf.setup_mode)
@@ -516,7 +516,7 @@ static void motion_init(struct context *cnt)
 			exit(1);
 		}
 	}
-#endif /* __freebsd__ */
+#endif /* BSD */
 #endif /*WITHOUT_V4L*/
 
 #ifdef HAVE_MYSQL
@@ -1570,11 +1570,11 @@ static void become_daemon(void)
 		motion_log(LOG_ERR, 1, "Could not change directory");
 	}
 
-#ifdef __freebsd__
+#if (defined(BSD))
 	setpgrp(0, getpid());
 #else
 	setpgrp();
-#endif /* __freebsd__ */
+#endif /* BSD */
 
 	if ((i = open("/dev/tty", O_RDWR)) >= 0) {
 		ioctl(i, TIOCNOTTY, NULL);
@@ -2239,7 +2239,7 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 {
 	int errno_save, n;
 	char buf[1024];
-#ifndef __freebsd__
+#if (!defined(BSD))
 	char msg_buf[100];
 #endif
 	va_list ap;
@@ -2273,7 +2273,7 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 		 * version of strerror_r, which doesn't actually put the message into
 		 * my buffer :-(.  I have put in a 'hack' to get around this.
 		 */
-#ifdef __freebsd__
+#if (defined(BSD))
 		strerror_r(errno_save, buf + n, sizeof(buf) - n);	/* 2 for the ': ' */
 #else
 		strcat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)));

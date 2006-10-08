@@ -43,8 +43,6 @@
 #define VIDEO_MPEG          19  /* MPEG1/2 */
 #define VIDEO_FMT_COUNT     20
 
-#define MAX(x,y) ( (x) > (y) ? (x) : (y) )
-#define MIN(x,y) ( (x) < (y) ? (x) : (y) )
 #define array_elem(x) (sizeof(x) / sizeof( (x)[0] ))
 
 static const struct camparam_st {

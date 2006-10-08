@@ -26,11 +26,11 @@
 #include "motion.h"
 
 
-#ifdef __freebsd__
+#if (defined(BSD))
 #include "video_freebsd.h"
 #else
 #include "video.h"
-#endif /* __freebsd__ */
+#endif /* BSD */
 
 
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
@@ -91,7 +91,7 @@ struct config conf_template = {
 	tuner_number:          0,
 	timelapse:             0,
 	timelapse_mode:        DEF_TIMELAPSE_MODE,
-#ifdef  __freebsd__
+#if (defined(BSD))
 	tuner_device:          NULL,
 #endif
 	video_device:          VIDEO_DEVICE,
@@ -188,7 +188,7 @@ config_param config_params[] = {
 	copy_string,
 	print_string
 	},
-#ifdef __freebsd__
+#if (defined(BSD))
 	{
 	"tunerdevice",
 	"# Tuner device to be used for capturing using tuner as source (default /dev/tuner0)\n"

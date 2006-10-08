@@ -12,7 +12,7 @@
 #include "ffmpeg.h"           /* must be first to avoid 'shadow' warning */
 #include "motion.h"
 #include "event.h"
-#ifndef __freebsd__
+#if (!defined(BSD)) 
 #include "video.h"
 #endif
 #include "picture.h"
@@ -194,7 +194,7 @@ static void event_webcam_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
 }
 
 #ifndef WITHOUT_V4L
-#ifndef __freebsd__
+#if (!defined(BSD))
 static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
             struct tm *tm ATTRIBUTE_UNUSED)
@@ -204,7 +204,7 @@ static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			motion_log(LOG_ERR, 1, "Failed to put image into video pipe");
 	}
 }
-#endif /* __freebsd__ */
+#endif /* BSD */
 #endif /* WITHOUT_V4L */
 
 
@@ -580,12 +580,12 @@ struct event_handlers event_handlers[] = {
 	event_image_snapshot
 	},
 #ifndef WITHOUT_V4L
-#ifndef __freebsd__
+#if (!defined(BSD))
 	{
 	EVENT_IMAGE | EVENT_IMAGEM,
 	event_vid_putpipe
 	},
-#endif /* __freebsd__ */
+#endif /* BSD */
 #endif /* WITHOUT_V4L */
 	{
 	EVENT_WEBCAM,

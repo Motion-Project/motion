@@ -10,6 +10,13 @@ THREAD_CHECK="pthread.h"
 Darwin=""
 FreeBSD=""
 
+LINUXTHREADS="no"
+AC_ARG_WITH(linuxthreads,
+[  --with-linuxthreads     Use linuxthreads in BSD instead of native phtreads
+				]
+				,
+LINUXTHREADS="$withval"
+)
 
 AC_MSG_CHECKING(for Darwin)
 Darwin=`uname -a | grep "Darwin"`
@@ -24,15 +31,21 @@ if test "${Darwin}" = ""; then
 		VIDEO="video.o"
 	else
 		AC_MSG_RESULT(yes)
-		THREAD_CHECK="/usr/local/include/pthread/linuxthreads/pthread.h"
-		THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
-		TEMP_CFLAGS="${CFLAGS} -D__freebsd__ -I/usr/local/include"
+		if test "${LINUXTHREADS}" = "no"; then
+			AC_MSG_CHECKING(Linuxthreads)
+			AC_MSG_RESULT(skipping)
+		else	
+			THREAD_CHECK="/usr/local/include/pthread/linuxthreads/pthread.h"
+			THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
+		fi
+
+		TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
 		TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
 		TEMP_LIBS="-L/usr/local/lib"
 		VIDEO="video_freebsd.o"
 	fi
 else
-	TEMP_CFLAGS="${CFLAGS} -I/sw/include -D__freebsd__"
+	TEMP_CFLAGS="${CFLAGS} -I/sw/include"
 	TEMP_LDFLAGS="${LDFLAGS} -L/sw/lib"
 	TEMP_LIBS="-L/sw/lib"
 	VIDEO="video_freebsd.o"
@@ -105,7 +118,7 @@ if test "${V4L}" = "no"; then
 fi
 
 
-if test "${FreeBSD}" != ""; then
+if test "${FreeBSD}" != "" && test "${LINUXTHREADS}" != "no" ; then
 
 AC_MSG_CHECKING(for linuxthreads)
 
@@ -526,7 +539,7 @@ dnl End Postgresql
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdio.h stdlib.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h)
+AC_CHECK_HEADERS(stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h sys/param.h)
 
 dnl Check sizes of integer types
 AC_CHECK_SIZEOF(short int)
