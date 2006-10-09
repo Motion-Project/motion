@@ -2101,7 +2101,7 @@ size_t mystrftime(struct context *cnt, char *s, size_t max, const char *userform
                   const struct tm *tm, const char *filename, int sqltype)
 {
 	char formatstring[PATH_MAX] = "";
-	char tempstring[255] = "";
+	char tempstring[PATH_MAX] = "";
 	char *format, *tempstr;
 	const char *pos_userformat;
 
