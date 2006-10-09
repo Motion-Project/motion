@@ -314,6 +314,18 @@ Angel Carpintero
    * Fix segfault when netcam_url has no service ( http , ftp )
    * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD
    * Fixed possible syntax error in configure related to MySQL
+   * Put a new global mutex arround avcodec_close to avoid problems with not thread
+     safe functions in ffmpeg
+   * Put a new global mutex arround avcodec_close to avoid problems with not thread
+     safe functions in ffmpeg.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
+   * On FreeBSD configure defines a redundant freebsd for motion. Fixed by replacing
+     -D__freebsd_ by BSD macro  included in sys/param.h for BSD platforms.
+     (JukkaUkkonen and Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x070417
+   * For BSD platforms changed to using native pthreads as default and adding
+     linuxthreads as a optional parameter from configure.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x071646
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -888,6 +900,7 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Fixed the check for ffmpeg version. In rev 5503 of ffmpeg the FFMPEG_VERSION_INT
      was removed from libavcodec/avcodec.h. Instead we now use the equivalent
      LIBAVFORMAT_BUILD >= 4616 which is the 0.4.9pre1 version of ffmpeg.
+   * Smartmask overlay feature did not set intensity correctly.
 
 Mike Lees
    * Added the onffmpegclose feature.
@@ -1063,6 +1076,10 @@ Pete Shipley
      version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Angel Carpintero and Pete Shipley)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
 
+Gunnar Skjold     
+   * Fixed http pause feature so that pausing thread 0 now pauses all threads.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x10x111239
+
 Peter Smith
    * Improved reporting of thread numbers during startup in setup mode.
      (Peter Smith and Kenneth Lavrsen)
@@ -1118,6 +1135,12 @@ Dirk Traenapp
      for max_mpeg_time.
    * Found the 'strtok' call that caused motion to crash under RH7.0
 
+Jukka Ukkonen
+   * On FreeBSD configure defines a redundant freebsd for motion. Fixed by replacing
+     -D__freebsd_ by BSD macro  included in sys/param.h for BSD platforms.
+     (JukkaUkkonen and Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x070417
+
 Moshe Van Der Sterre
    * Added 3 new tracking options: track_step_angle_x, track_step_angle_y,
      and track_move_wait. The options track_step_angle control the movement
@@ -1130,6 +1153,18 @@ Moshe Van Der Sterre
      originally made by Moshe Van Der Sterre. Kenneth Lavrsen extended it to
      be more generic.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PwcConfiguration
+
+Folkert Van Heusden
+   * Maintained the code from version 3.1.9 till 3.1.12-rc1
+     Including features like..
+   * Error reporting to syslog.
+   * Better memory allocation.
+     low_cpu feature extention to configurable frame rate.
+   * First work on Logitech Sphere/Orbit tracking.
+   * Implemented original pre-record feature.
+     Misc code optimisations
+   * Closed 2 memory-leaks (two 'FILE *' were not closed) in the
+     webcam-interface.
 
 James Van Vleet
    * CPU VIA Ezra C3 autodetection support added.
@@ -1180,21 +1215,8 @@ Joerg Weber
      on how much motion was detected relative to threshold setting.
      http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
 
-
 Tristan Willy
    * Wrote Axis 2100 support and added the check for ~/.motion/motin.conf
-
-Folkert Van Heusden
-   * Maintained the code from version 3.1.9 till 3.1.12-rc1
-     Including features like..
-   * Error reporting to syslog.
-   * Better memory allocation.
-     low_cpu feature extention to configurable frame rate.
-   * First work on Logitech Sphere/Orbit tracking.
-   * Implemented original pre-record feature.
-     Misc code optimisations
-   * Closed 2 memory-leaks (two 'FILE *' were not closed) in the
-     webcam-interface.
 
 Robert Eugene Wood
    * Inverse pixels for locate box.

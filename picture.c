@@ -373,38 +373,38 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
 void overlay_smartmask(struct context *cnt, unsigned char *out)
 {
 	int i, x, v, width, height, line;
-	struct images *imgs=&cnt->imgs;
-	unsigned char *smartmask=imgs->smartmask_final;
+	struct images *imgs = &cnt->imgs;
+	unsigned char *smartmask = imgs->smartmask_final;
 	unsigned char *out_y, *out_u, *out_v;
 	
-	i=imgs->motionsize;
-	v=i+((imgs->motionsize)/4);
-	width=imgs->width;
-	height=imgs->height;
+	i = imgs->motionsize;
+	v = i + ((imgs->motionsize) / 4);
+	width = imgs->width;
+	height = imgs->height;
 
 	/* set V to 255 to make smartmask appear red */
-	out_v=out+v;
-	out_u=out+i;
-	for ( i=0; i<height; i+=2){
-		line=i*width;
-		for (x=0; x<width; x+=2){
-			if (smartmask[line+x]==0 ||
-				smartmask[line+x+1]==0 ||
-				smartmask[line+width+x]==0 ||
-				smartmask[line+width+x+1]==0){
-					*out_v=255;
-					*out_u=128;
+	out_v = out + v;
+	out_u = out + i;
+	for ( i = 0; i < height; i += 2){
+		line = i * width;
+		for (x = 0; x < width; x += 2){
+			if (smartmask[line + x] == 0 ||
+				smartmask[line + x + 1] == 0 ||
+				smartmask[line + width + x] == 0 ||
+				smartmask[line + width + x + 1] == 0){
+					*out_v = 255;
+					*out_u = 128;
 			}
 			out_v++;
 			out_u++;
 		}
 	}
-	out_y=out;
+	out_y = out;
 	/* set colour intensity for smartmask */
-	for (i=0; i<imgs->motionsize; i++){
-		if (smartmask[i]==0)
-			*out_y=0;
-		*out_y++;
+	for (i = 0; i < imgs->motionsize; i++){
+		if (smartmask[i] == 0)
+			*out_y = 0;
+		out_y++;
 	}
 }
 

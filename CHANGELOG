@@ -37,6 +37,20 @@
    * Fixed possible syntax error in configure related to MySQL (Angel Carpintero)
    * Avoid open file descriptor when connecting to network cameras fails (Peter Holik) 
      http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
+   * Fixed http pause feature so that pausing thread 0 now pauses all threads.
+     (GunnarSkjold)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x10x111239
+   * Put a new global mutex arround avcodec_close to avoid problems with not thread
+     safe functions in ffmpeg (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
+   * On FreeBSD configure defines a redundant freebsd for motion. Fixed by replacing
+     -D__freebsd_ by BSD macro  included in sys/param.h for BSD platforms.
+     (JukkaUkkonen and Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x070417
+   * For BSD platforms changed to using native pthreads as default and adding
+     linuxthreads as a optional parameter from configure. (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x071646
+   * Smartmask overlay feature did not set intensity correctly. (Kenneth Lavrsen)
 
 3.2.6 Formal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been
