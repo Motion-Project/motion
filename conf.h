@@ -118,6 +118,7 @@ struct config {
 	int text_double;
 	const char *despeckle;
 	int minimum_motion_frames;
+	char *pid_file;
 	// int debug_parameter;
 	int argc;
 	char **argv;

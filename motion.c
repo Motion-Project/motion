@@ -663,10 +663,9 @@ static void *motion_loop(void *arg)
 		text_size_factor = 1;
 
 	/* Work out expected frame rate based on config setting */
-	if (cnt->conf.frame_limit)
-		required_frame_time = 1000000L / cnt->conf.frame_limit;
-	else
-		required_frame_time = 0;
+	if (cnt->conf.frame_limit < 2) cnt->conf.frame_limit = 2;
+
+	required_frame_time = 1000000L / cnt->conf.frame_limit;
 
 	frame_delay = required_frame_time;
 
@@ -1548,6 +1547,7 @@ static void *motion_loop(void *arg)
 static void become_daemon(void)
 {
 	int i;
+	FILE *pidf;	
 	struct sigaction sig_ign_action;
 
 	/* Setup sig_ign_action */
@@ -1559,11 +1559,26 @@ static void become_daemon(void)
 	sig_ign_action.sa_handler = SIG_IGN;
 	sigemptyset(&sig_ign_action.sa_mask);
 
+	/* fork */
 	if (fork()) {
 		motion_log(-1, 0, "Motion going to daemon mode");
 		exit(0);
 	}
-
+	
+	/* Create the pid file if defined, if failed exit */
+	if (cnt_list[0]->conf.pid_file){
+		pidf = fopen(cnt_list[0]->conf.pid_file, "w+");
+	
+		if ( pidf ){
+			(void) fprintf(pidf, "%d\n", getpid());
+			motion_log(LOG_INFO, 0, "Created process id file (pid file) %s",cnt_list[0]->conf.pid_file);
+			fclose(pidf);
+		}else{
+			motion_log(LOG_ERR, 1, "Exit motion, cannot create process id file (pid file) %s",cnt_list[0]->conf.pid_file);	
+			exit(0);	
+		}
+	}
+	
 	/* changing dir to root enables people to unmount a disk
 	   without having to stop Motion */
 	if (chdir("/")) {
@@ -1576,6 +1591,7 @@ static void become_daemon(void)
 	setpgrp();
 #endif /* BSD */
 
+	
 	if ((i = open("/dev/tty", O_RDWR)) >= 0) {
 		ioctl(i, TIOCNOTTY, NULL);
 		close(i);
@@ -1655,6 +1671,12 @@ static void cntlist_create(int argc, char *argv[])
 static void motion_shutdown(void)
 {
 	int i = -1;
+
+	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file)){
+		if (!unlink(cnt_list[0]->conf.pid_file)) motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
+		else motion_log(LOG_INFO, 1, "Error removing pid file");
+	}
+	
 	while (cnt_list[++i]){
 		context_destroy(cnt_list[i]);
 	}

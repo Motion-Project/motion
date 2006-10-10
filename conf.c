@@ -134,6 +134,7 @@ struct config conf_template = {
 	text_double:           0,
 	despeckle:             NULL,
 	minimum_motion_frames: 1,
+	pid_file:              NULL,
 	// debug_parameter:       0
 };
 
@@ -166,6 +167,13 @@ config_param config_params[] = {
 	CNT_OFFSET(daemon),
 	copy_bool,
 	print_bool
+	},
+	{
+	"process_id_file",
+	"#File to store the process ID, also called pid file. (default: not defined)",
+	CONF_OFFSET(pid_file),
+	copy_string,
+	print_string
 	},
 	{
 	"setup_mode",
@@ -1197,7 +1205,7 @@ static void conf_cmdline (struct context *cnt, int thread)
 	 * if necessary. This is accomplished by calling mystrcpy();
 	 * see this function for more information.
 	 */
-	while ((c=getopt(conf->argc, conf->argv, "c:d:hns?"))!=EOF)
+	while ((c=getopt(conf->argc, conf->argv, "c:d:hns?p"))!=EOF)
 		switch (c) {
 			case 'c':
 				if (thread==-1) strcpy(cnt->conf_filename, optarg);
@@ -1212,6 +1220,9 @@ static void conf_cmdline (struct context *cnt, int thread)
 				/* no validation - just take what user gives */
 				debug_level = atoi(optarg);
 				break;
+			case 'p':
+				cnt->conf.pid_file = mystrcpy(cnt->conf.pid_file, optarg);
+				break;	
 			case 'h':
 			case '?':
 			default:
@@ -1319,8 +1330,8 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 			/* trim space between command and argument */
 			beg++;
 
-			if (strlen(beg) > 0) {
-				while (*beg == ' ' || *beg == '\t' || *beg == '=') {
+			if (strlen(beg) > 0){
+				while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r') {
 					beg++;
 				}
 
