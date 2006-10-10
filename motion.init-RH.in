@@ -24,7 +24,6 @@ start() {
 	echo -n $"Starting $prog: "
 	daemon $motion 
 	RETVAL=$?
-	echo `ps axf | grep -v grep | grep  $motion | head -n1 | awk '{print $1}'` > $PIDFILE
 	echo
 	[ $RETVAL = 0 ] && touch /var/lock/subsys/motion
 	return $RETVAL
@@ -34,7 +33,7 @@ stop() {
 	killproc $motion
 	RETVAL=$?
 	echo
-	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion /var/run/motion.pid
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion
 }
 stopsafe() {
 	echo -n $"Stopping $prog: ( for restarting ) "
@@ -42,7 +41,7 @@ stopsafe() {
 	RETVAL=$?
 	sleep 10s
 	echo
-	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion /var/run/motion.pid
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion
 }
 reload() {
 	echo -n $"Reloading $prog: "

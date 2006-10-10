@@ -1,30 +1,26 @@
 #!/bin/sh
+#
+# motion.sh for rc.d usage 2006 Angel Carpintero 
+#
+# Add the following line in /etc/rc.conf to enable motion at startup
+#
+# motion_enable="YES"
+#
 
-NAME=motion
-DAEMON=@BIN_PATH@/motion
-PIDFILE=/var/run/$NAME.pid
+# PROVIDE: motion
+# REQUIRE: DAEMON
+# KEYWORD: shutdown
 
-case "$1" in
-start)
-	if [ -x $DAEMON ] ; then 
-		$DAEMON && > /dev/null && echo -n ' Starting motion'
-		echo `ps axf | grep -v grep | grep $DAEMON | head -n1 | awk '{print $1}'` > $PIDFILE
-	else
-		echo "Daemon not found"
-		echo		
-	fi
-	;;
-stop)
-	if [ -r $PIDFILE ] ; then 
-		kill -15 `cat $PIDFILE` && rm $PIDFILE > /dev/null && echo -n ' Stopping motion'
-	else
-		echo "pidfile doesn't exist or motion stopped"
-		echo
-	fi
-	;;
-*)
-	echo "Usage: `basename $0` {start|stop}" >&2
-	;;
-esac
+. /etc/rc.subr
 
-exit 0
+motion_enable="${motion_enable-NO}"
+
+name="motion"
+rcvar=`set_rcvar`
+
+command="@BIN_PATH@/${name}"
+pidfile="/var/run/${name}.pid"
+required_files="/usr/local/etc/${name}.conf"
+
+load_rc_config $name
+run_rc_command "$1"
