@@ -333,6 +333,11 @@ Values: 0 - 100s / Default: 0 (disabled)
 .br
 Specifies the number of previous frames to be outputted at motion detection. Recommended range: 0 to 5, default=0. Do not use large values! Large values will cause Motion to skip video frames and cause unsmooth mpegs. To smooth mpegs use larger values of post_capture instead.
 .TP
+.B process_id_file string
+Values: Max 4095 characters / Default: Not defined = not used
+.br
+File to store the process id , also called pid file. This will only be used if daemon on is defined.
+.TP
 .B quality integer
 Values: 1 - 100 / Default: 75
 .br
