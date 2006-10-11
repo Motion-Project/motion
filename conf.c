@@ -1848,11 +1848,12 @@ static void usage ()
 	printf("\nusage:\tmotion [options]\n");
 	printf("\n\n");
 	printf("Possible options:\n\n");
-	printf("-n\t\tRun in non-daemon mode.\n");
-	printf("-s\t\tRun in setup mode.\n");
-	printf("-c config\tFull path and filename of config file.\n");
+	printf("-n\t\t\tRun in non-daemon mode.\n");
+	printf("-s\t\t\tRun in setup mode.\n");
+	printf("-c config\t\tFull path and filename of config file.\n");
 	printf("-d level\t\tDebug mode.\n");
-	printf("-h\t\tShow this screen.\n");
+	printf("-p process_id_file\tFull path and filename of process id file ( pid file).\n");
+	printf("-h\t\t\tShow this screen.\n");
 	printf("\n");
 	printf("Motion is configured using a config file only. If none is supplied,\n");
 	printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
