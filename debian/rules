@@ -86,7 +86,7 @@ install: build
 	# Offer a minimal default config file.
 	cp debian/motion.conf debian/motion/etc/motion
 	# Remove unwanted/misplaced files.
-	rm -rf $(CURDIR)/debian/motion/usr/share/doc/motion-3.2.4
+	rm -rf $(CURDIR)/debian/motion/usr/share/doc/motion-3.2.7
 	rm -f $(CURDIR)/debian/motion/etc/motion/motion-dist.conf
 
 

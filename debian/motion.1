@@ -1,4 +1,4 @@
-.TH MOTION 1 2005-12-13 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2006-10-16 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
@@ -25,6 +25,9 @@ Run in setup mode. Also forces non-daemon mode
 .TP
 .B \-d
 Run in debug mode.
+.TP
+.B \-p
+Full path and filename for process id file (pid file). E.g /var/run/motion.pid. Default is not defined. Pid file is only created when Motion is started in daemon mode.
 .TP
 .SH "CONFIG FILE OPTIONS"
 These are the options that can be used in the config file.
@@ -92,6 +95,11 @@ Use ffmpeg libraries to encode motion type mpeg movies where you only see the pi
 Values: on, off / Default: off
 .br
 Use ffmpeg libraries to encode mpeg movies in realtime.
+.TP
+.B ffmpeg_deinterlace boolean
+Values: on, off / Default: off
+.br
+Use ffmpeg to deinterlace video. Necessary if you use an analog camera and see horizontal combing on moving objects in video or pictures.
 .TP
 .B ffmpeg_timelapse boolean
 Values: 0 - 2147483647 / Default: 0 (disabled)
@@ -173,10 +181,10 @@ Values: 0 (infinite) - 2147483647 / Default: 3600
 .br
 The maximum length of an mpeg movie in seconds. Set this to zero for unlimited length.
 .TP
-.B minimum_gap integer
-Values: 0 - 2147483647 / Default: 0 (no minimum)
+.B minimum_frame_time integer
+Values: 0 - 2147483647 / Default: 0
 .br
-The minimum time between two shots in seconds.
+Minimum time in seconds between the capturing picture frames from the camera. Default: 0 = disabled - the capture rate is given by the camera framerate.
 .TP
 .B minimum_motion_frames boolean
 Values: 1 - 1000s / Default: 1
@@ -191,7 +199,7 @@ The video4linux video loopback input device for motion images. If a particular p
 .B movie_filename string
 Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S
 .br
-File path for motion triggered ffmpeg movies (mpeg) relative to target_dir.
+File path for motion triggered ffmpeg movies (mpeg) relative to target_dir. This was previously called ffmpeg_filename.
 .TP
 .B mysql_db string
 Values: Max 4095 characters / Default: Not defined
@@ -231,7 +239,7 @@ For network cameras protected by username and password, use this option for HTTP
 .B night_compensate boolean
 Values: on, off / Default: off
 .br
-When this option is set the noise threshold will be lowered if the picture is dark. This will improve the sensitivity in dark places. However it might also increase the number of false alarms since most cameras also compensate for this with their AGC which will increase noise.
+When this option is set the noise threshold will be lowered if the picture is dark. This will improve the sensitivity in dark places. However it might also increase the number of false alarms since most cameras also increase light sensitivity with their AGC (Automatic Gain Control) and this will increase noise.
 .TP
 .B noise_level integer
 Values: 1 - 255 / Default: 32
@@ -332,6 +340,11 @@ Output ppm images instead of jpeg. This uses less CPU time, but causes a LOT of 
 Values: 0 - 100s / Default: 0 (disabled)
 .br
 Specifies the number of previous frames to be outputted at motion detection. Recommended range: 0 to 5, default=0. Do not use large values! Large values will cause Motion to skip video frames and cause unsmooth mpegs. To smooth mpegs use larger values of post_capture instead.
+.TP
+.B process_id_file string
+Values: Max 4095 characters / Default: Not defined
+.br
+File to store the process ID, also called pid file. Recommended value when used: /var/run/motion.pid
 .TP
 .B quality integer
 Values: 1 - 100 / Default: 75
@@ -556,7 +569,7 @@ Limits the access to the webcam to the localhost.
 .B webcam_maxrate integer
 Values: 1 - 100 / Default: 1
 .br
-Limit the framerate of the webcam. Default is 1. Set the value to 100 for practically unlimited.
+Limit the framerate of the webcam in frames per second. Default is 1. Set the value to 100 for practically unlimited.
 .TP
 .B webcam_motion boolean
 Values: on, off / Default: off
