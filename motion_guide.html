@@ -564,7 +564,9 @@ You should also note these major differences. <ul>
 </li> <li> Many new conversion specifiers have been added which can be used both in filenames, commands, text, and SQL database features (3.2.2-3.2.4)
 </li> <li> Stepper motor tracking feature extended to also include a Y axis (3.2.5)
 </li> <li> ffmpeg_filename has been renamed to movie_filename to prepare for alternative implementation to mpeg files made with ffmpeg (3.2.5)
-</li> <li> New feature: ffmpeg_deinterlace which can de-interlace using the ffmpeg libs.
+</li> <li> New feature: ffmpeg_deinterlace which can de-interlace using the ffmpeg libs (3.2.5)
+</li> <li> New feature: minimum_frame_time which enables Motion to run at frame rates below 2. minimum_gap feature was removed since this was useless and the new minimum_frame_time feature replaces it with much better function. (3.2.7)
+</li> <li> New feature: process_id_file which writes a PID file when started and removes it when stopped (3.2.7)
 </li></ul> 
 <p />
 The table below shows the new options in the left column, and obsolete options in the right column. If the there are options on both sides in a row it means that the options in the left column replaced the options in the right column.
@@ -610,7 +612,7 @@ The table below shows the new options in the left column, and obsolete options i
 <tr><td width="50%" bgcolor="#eaeaea" class="twikiFirstCol"> track_maxy (3.2.5)<br />track_motory (3.2.5) </td><td width="50%" bgcolor="#eaeaea"> &nbsp; </td></tr>
 <tr><td width="50%" bgcolor="#ffffff" class="twikiFirstCol"> movie_filename (3.2.5) </td><td width="50%" bgcolor="#ffffff"> ffmpeg_filename (3.2.5) </td></tr>
 <tr><td width="50%" bgcolor="#eaeaea" class="twikiFirstCol"> ffmpeg_deinterlace (3.2.5) </td><td width="50%" bgcolor="#eaeaea"> &nbsp; </td></tr>
-<tr><td width="50%" bgcolor="#ffffff" class="twikiFirstCol"> minimum_frame_time (3.2.7) </td><td width="50%" bgcolor="#ffffff"> &nbsp; </td></tr>
+<tr><td width="50%" bgcolor="#ffffff" class="twikiFirstCol"> minimum_frame_time (3.2.7) </td><td width="50%" bgcolor="#ffffff"> minimum_gap (3.2.7) </td></tr>
 <tr><td width="50%" bgcolor="#eaeaea" class="twikiFirstCol"> process_id_file (3.2.7) </td><td width="50%" bgcolor="#eaeaea"> &nbsp; </td></tr>
 </table>
 <input type="hidden" name="etrows"   value="39" />

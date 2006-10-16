@@ -101,11 +101,6 @@ Values: on, off / Default: off
 .br
 Use ffmpeg to deinterlace video. Necessary if you use an analog camera and see horizontal combing on moving objects in video or pictures.
 .TP
-.B ffmpeg_filename (now called movie_filename) string
-Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S
-.br
-File path for motion triggered ffmpeg movies (mpeg) relative to target_dir. This option was renamed to movie_filename in 3.2.5 to enable better integration of alternative movie libraries to the current ffmpeg solution.
-.TP
 .B ffmpeg_timelapse boolean
 Values: 0 - 2147483647 / Default: 0 (disabled)
 .br
@@ -190,11 +185,6 @@ The maximum length of an mpeg movie in seconds. Set this to zero for unlimited l
 Values: 0 - 2147483647 / Default: 0
 .br
 Minimum time in seconds between the capturing picture frames from the camera. Default: 0 = disabled - the capture rate is given by the camera framerate.
-.TP
-.B minimum_gap integer
-Values: 0 - 2147483647 / Default: 0 (no minimum)
-.br
-The minimum time between two shots in seconds.
 .TP
 .B minimum_motion_frames boolean
 Values: 1 - 1000s / Default: 1

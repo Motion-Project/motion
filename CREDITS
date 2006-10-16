@@ -326,6 +326,8 @@ Angel Carpintero
    * For BSD platforms changed to using native pthreads as default and adding
      linuxthreads as a optional parameter from configure.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x071646
+   * Added process_id_file feature
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x06x06x123003
 
 John Edwards
    * Added the 'pal-nc' norm.

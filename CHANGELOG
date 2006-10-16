@@ -51,6 +51,8 @@
      linuxthreads as a optional parameter from configure. (Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x071646
    * Smartmask overlay feature did not set intensity correctly. (Kenneth Lavrsen)
+   * Added process_id_file feature (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x06x06x123003
 
 3.2.6 Formal Bugfix Release.
    * Fixed bug where variables time_last_frame and time_current_frame had been
