@@ -1642,8 +1642,8 @@ static void become_daemon(void)
 	
 	/* Now it is safe to add the PID creation to the logs */
 	if ( pidf )
-		motion_log(LOG_INFO, 0, "Created process id file %s. Process ID is %d", cnt_list[0]->conf.pid_file, getpid());
-
+		motion_log(LOG_INFO, 0, "Created process id file %s. Process ID is %d",
+		           cnt_list[0]->conf.pid_file, getpid());
 	
 	sigaction(SIGTTOU, &sig_ign_action, NULL);
 	sigaction(SIGTTIN, &sig_ign_action, NULL);
