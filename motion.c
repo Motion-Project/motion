@@ -1588,20 +1588,25 @@ static void become_daemon(void)
 		exit(0);
 	}
 	
-	/* Create the pid file if defined, if failed exit */
-	if (cnt_list[0]->conf.pid_file){
+	/* Create the pid file if defined, if failed exit
+	 * If we fail we report it. If we succeed we postpone the log entry till
+	 * later when we have closed stdout. Otherwise Motion hangs in the terminal waiting
+	 * for an enter.
+	 */
+	if (cnt_list[0]->conf.pid_file) {
 		pidf = fopen(cnt_list[0]->conf.pid_file, "w+");
 	
-		if ( pidf ){
-			(void) fprintf(pidf, "%d\n", getpid());
-			motion_log(LOG_INFO, 0, "Created process id file (pid file) %s",cnt_list[0]->conf.pid_file);
+		if ( pidf ) {
+			(void)fprintf(pidf, "%d\n", getpid());
+			motion_log(LOG_INFO, 0, "Created process id file (pid file) %s", cnt_list[0]->conf.pid_file);
 			fclose(pidf);
-		}else{
-			motion_log(LOG_ERR, 1, "Exit motion, cannot create process id file (pid file) %s",cnt_list[0]->conf.pid_file);	
+		} else {
+			motion_log(LOG_ERR, 1, "Exit motion, cannot create process id file (pid file) %s",
+			           cnt_list[0]->conf.pid_file);	
 			exit(0);	
 		}
 	}
-	
+
 	/* changing dir to root enables people to unmount a disk
 	   without having to stop Motion */
 	if (chdir("/")) {
@@ -1635,7 +1640,12 @@ static void become_daemon(void)
 		dup2(i, STDERR_FILENO);
 		close(i);
 	}
+	
+	/* Now it is safe to add the PID creation to the logs */
+	if ( pidf )
+		motion_log(LOG_INFO, 0, "Created process id file %s. Process ID is %d", cnt_list[0]->conf.pid_file, getpid());
 
+	
 	sigaction(SIGTTOU, &sig_ign_action, NULL);
 	sigaction(SIGTTIN, &sig_ign_action, NULL);
 	sigaction(SIGTSTP, &sig_ign_action, NULL);
