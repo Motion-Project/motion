@@ -1852,7 +1852,7 @@ static void usage ()
 	printf("-s\t\t\tRun in setup mode.\n");
 	printf("-c config\t\tFull path and filename of config file.\n");
 	printf("-d level\t\tDebug mode.\n");
-	printf("-p process_id_file\tFull path and filename of process id file ( pid file).\n");
+	printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
 	printf("-h\t\t\tShow this screen.\n");
 	printf("\n");
 	printf("Motion is configured using a config file only. If none is supplied,\n");
