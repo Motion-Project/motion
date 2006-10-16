@@ -125,7 +125,9 @@
    * CPU VIA Ezra C3 autodetection support added. (James Van Vleet)
      http://www.lavrsen.dk/twiki/bin/view/Motion/VIAEzraC3Patch
    * Fixed mysql configure auto-detection for x64 systems. ( Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x03x02x152208	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x03x02x152208
+   * Added the ffmpeg_deinterlace feature (Andrew Hamilton)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionffmpegDeinterlace 	
 
 3.2.4   Formal Release. Summary of changes
 
