@@ -183,8 +183,8 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 	if (dev < 0){
 		motion_log(LOG_INFO, 1, "No device started yet , try stepper_center()");	
 		if (stepper_center(cnt, 0, 0) < 0){
-			motion_log(LOG_ERR, 1, "Problems in stepper_center() ... bye !");	
-			exit(0); // Motion shouldn't exit  TODO : Disable track and go ahead , maybe retry later
+			motion_log(LOG_ERR, 1, "Stepper_center() failed to initialize stepper device.");	
+			return(0);
 		}
 		motion_log(LOG_INFO, 1, "stepper_center() succeed , device started");	
 	}
@@ -205,7 +205,7 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 
 	if (n) 	stepper_command(cnt, cnt->track.motorx, command, n);
 
-	 /* y-axis */
+	/* y-axis */
 
 	if (cent->y < imgs->height / 2) {
 		command = STEPPER_COMMAND_UP_N;
@@ -223,7 +223,6 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 	
 	
 	return cnt->track.move_wait;
-//	return 0;
 }
 
 /******************************************************************************
