@@ -1570,7 +1570,7 @@ static void *motion_loop(void *arg)
 static void become_daemon(void)
 {
 	int i;
-	FILE *pidf;	
+	FILE *pidf = NULL;	
 	struct sigaction sig_ign_action;
 
 	/* Setup sig_ign_action */
