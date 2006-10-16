@@ -380,6 +380,23 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 	}
 }
 
+
+/**
+ *  motion_remove_pid
+ *
+ *  This function remove the process id file ( pid file ) before motion exit.
+ *
+ */
+static void motion_remove_pid(void)
+{
+	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file)){
+		if (!unlink(cnt_list[0]->conf.pid_file)) motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
+		else motion_log(LOG_INFO, 1, "Error removing pid file");
+	}
+}
+
+
+
 /**
  * motion_init
  *
@@ -424,6 +441,7 @@ static void motion_init(struct context *cnt)
 	if (cnt->video_dev == -1 && !cnt->conf.netcam_url) {
 		motion_log(LOG_ERR, 0, "Capture error calling vid_start");
 		motion_log(-1 , 0, "Thread finishing...");
+		motion_remove_pid();
 		exit(1);
 	}
 
@@ -484,6 +502,7 @@ static void motion_init(struct context *cnt)
 		if (i >= 10) {
 			motion_log(LOG_ERR, 0, "Error capturing first image");
 			motion_log(-1, 0, "Thread finishing...");
+			motion_remove_pid();
 			exit(1);
 		}
 	}
@@ -502,6 +521,7 @@ static void motion_init(struct context *cnt)
 		if (cnt->pipe < 0) {
 			motion_log(LOG_ERR, 0, "Failed to open video loopback");
 			motion_log(-1, 0, "Thread finishing...");
+			motion_remove_pid();
 			exit(1);
 		}
 	}
@@ -513,6 +533,7 @@ static void motion_init(struct context *cnt)
 		if (cnt->mpipe < 0) {
 			motion_log(LOG_ERR, 0, "Failed to open video loopback");
 			motion_log(-1, 0, "Thread finishing...");
+			motion_remove_pid();
 			exit(1);
 		}
 	}
@@ -529,6 +550,7 @@ static void motion_init(struct context *cnt)
 			           cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
 			motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
 			motion_log(-1, 0, "Thread finishing...");
+			motion_remove_pid();
 			exit(1);
 		}
 	}
@@ -554,6 +576,7 @@ static void motion_init(struct context *cnt)
 			motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
 			           cnt->conf.pgsql_db, PQerrorMessage(cnt->database_pg));
 			motion_log(-1, 0, "Thread finishing...");
+			motion_remove_pid();
 			exit(1);
 		}
 	}
@@ -1657,6 +1680,7 @@ static void cntlist_create(int argc, char *argv[])
 	cnt_list = conf_load(cnt_list);
 }
 
+
 /**
  * motion_shutdown
  *
@@ -1672,10 +1696,7 @@ static void motion_shutdown(void)
 {
 	int i = -1;
 
-	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file)){
-		if (!unlink(cnt_list[0]->conf.pid_file)) motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
-		else motion_log(LOG_INFO, 1, "Error removing pid file");
-	}
+	motion_remove_pid();
 	
 	while (cnt_list[++i]){
 		context_destroy(cnt_list[i]);
@@ -1964,6 +1985,7 @@ void * mymalloc(size_t nbytes)
 	void *dummy = malloc(nbytes);
 	if (!dummy) {
 		motion_log(LOG_EMERG, 1, "Could not allocate %llu bytes of memory!", (unsigned long long)nbytes);
+		motion_remove_pid();
 		exit(1);
 	}
 
@@ -2001,6 +2023,7 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 			motion_log(LOG_EMERG, 0,
 			           "Could not resize memory-block at offset %p to %llu bytes (function %s)!",
 			           ptr, (unsigned long long)size, desc);
+			motion_remove_pid();
 			exit(1);
 		}
 	}
