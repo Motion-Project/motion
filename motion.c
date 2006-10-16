@@ -1598,7 +1598,6 @@ static void become_daemon(void)
 	
 		if ( pidf ) {
 			(void)fprintf(pidf, "%d\n", getpid());
-			motion_log(LOG_INFO, 0, "Created process id file (pid file) %s", cnt_list[0]->conf.pid_file);
 			fclose(pidf);
 		} else {
 			motion_log(LOG_ERR, 1, "Exit motion, cannot create process id file (pid file) %s",
