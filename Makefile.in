@@ -188,6 +188,18 @@ dist: distclean updateguide
 	@chmod 755 debian
 	@chmod 755 debian/rules
 
+
+################################################################################
+# DEB create a deb package.						       #	
+################################################################################
+deb:
+	@chmod -R 644 * 
+	@chmod 755 configure
+	@chmod 755 debian
+	@chmod 755 debian/rules
+	dpkg-buildpackage -tc -b -rfakeroot
+
+
 ################################################################################
 # DISTCLEAN removes all files generated during the configure step in addition  #
 # to basic cleaning.                                                           #
