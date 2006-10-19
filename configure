@@ -840,8 +840,11 @@ if test -n "$ac_init_help"; then
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --without-bktr           Exclude to use bktr subsytem , that usually usefull
-                          for devices as network cameras.
+  --with-linuxthreads     Use linuxthreads in BSD instead of native phtreads
+
+
+  --without-bktr           Exclude to use bktr subsystem , that usually useful
+                          for devices as network cameras ( ONLY used in *BSD).
 
 
   --without-v4l           Exclude using v4l (video4linux) subsystem.
@@ -1332,6 +1335,14 @@ THREAD_CHECK="pthread.h"
 Darwin=""
 FreeBSD=""
 
+LINUXTHREADS="no"
+
+# Check whether --with-linuxthreads or --without-linuxthreads was given.
+if test "${with_linuxthreads+set}" = set; then
+  withval="$with_linuxthreads"
+  LINUXTHREADS="$withval"
+
+fi;
 
 echo "$as_me:$LINENO: checking for Darwin" >&5
 echo $ECHO_N "checking for Darwin... $ECHO_C" >&6
@@ -1351,15 +1362,23 @@ echo "${ECHO_T}no" >&6
 	else
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		THREAD_CHECK="/usr/local/include/pthread/linuxthreads/pthread.h"
-		THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
-		TEMP_CFLAGS="${CFLAGS} -D__freebsd__ -I/usr/local/include"
+		if test "${LINUXTHREADS}" = "no"; then
+			echo "$as_me:$LINENO: checking Linuxthreads" >&5
+echo $ECHO_N "checking Linuxthreads... $ECHO_C" >&6
+			echo "$as_me:$LINENO: result: skipping" >&5
+echo "${ECHO_T}skipping" >&6
+		else
+			THREAD_CHECK="/usr/local/include/pthread/linuxthreads/pthread.h"
+			THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
+		fi
+
+		TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
 		TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
 		TEMP_LIBS="-L/usr/local/lib"
 		VIDEO="video_freebsd.o"
 	fi
 else
-	TEMP_CFLAGS="${CFLAGS} -I/sw/include -D__freebsd__"
+	TEMP_CFLAGS="${CFLAGS} -I/sw/include"
 	TEMP_LDFLAGS="${LDFLAGS} -L/sw/lib"
 	TEMP_LIBS="-L/sw/lib"
 	VIDEO="video_freebsd.o"
@@ -2310,6 +2329,18 @@ TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
 
 if test "${FreeBSD}" != ""; then
 
+echo "$as_me:$LINENO: checking bktr headers in /usr/include/dev/bktr" >&5
+echo $ECHO_N "checking bktr headers in /usr/include/dev/bktr... $ECHO_C" >&6
+
+if test -f /usr/include/dev/bktr/ioctl_meteor.h && test -f /usr/include/dev/bktr/ioctl_bt848.h; then
+	echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+	echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
+fi
+
 BKTR="yes"
 
 # Check whether --with-bktr or --without-bktr was given.
@@ -2347,7 +2378,7 @@ if test "${V4L}" = "no"; then
 fi
 
 
-if test "${FreeBSD}" != ""; then
+if test "${FreeBSD}" != "" && test "${LINUXTHREADS}" != "no" ; then
 
 echo "$as_me:$LINENO: checking for linuxthreads" >&5
 echo $ECHO_N "checking for linuxthreads... $ECHO_C" >&6
@@ -2958,7 +2989,7 @@ echo "${ECHO_T}no" >&6
 		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
 		#Add -lz for some mysql installs....
 		TEMP_LIBS="$TEMP_LIBS -lz"
-		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I $MYSQL_INCDIR"
+		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 		MYSQL_SUPPORT="yes"
@@ -3797,7 +3828,7 @@ done
 
 
 
-for ac_header in stdio.h stdlib.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h
+for ac_header in stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h sys/param.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then

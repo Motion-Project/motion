@@ -180,7 +180,7 @@ clean: pre-build-info
 	@rm -f *~ *.jpg *.o $(PROGS) combine $(DEPEND_FILE)
 
 ################################################################################
-# DIST restores the directory to distribution state.                           # 
+# DIST restores the directory to distribution state.                           #
 ################################################################################
 dist: distclean updateguide
 	@chmod -R 644 *
@@ -190,7 +190,7 @@ dist: distclean updateguide
 
 
 ################################################################################
-# DEB create a deb package.						       #	
+# DEB create a deb package.                                                    #
 ################################################################################
 deb:
 	@chmod -R 644 * 
