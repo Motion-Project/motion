@@ -1,4 +1,14 @@
-3.2.7 Formal Bugfix Release
+3.2.7 Formal Release - Summary of Changes
+
+Features
+   * Removed the minimum_gap feature which was utterly useless (Kenneth Lavrsen)
+   * Added new feature: minimum_frame_time which enables capturing at a lower rate
+     than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
+   * Made the creation of reference frame and the decay mechanism depending
+     on how much motion was detected relative to threshold setting (Joerg Weber)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
+
+Bugfixes
    * Fixed problem related to fetching images from Network camera and error
      handling when it fails. Motion would end in infinite loops (Bill Brack).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
@@ -22,18 +32,12 @@
      use with config strings that can become very long (Kenneth Lavrsen)
    * Removed annoying debug messages (v4l_set_input really needed ?) in the FreeBSD
      version (Angel Carpintero)
-   * Removed the minimum_gap feature which was utterly useless (Kenneth Lavrsen)
-   * Added new feature: minimum_frame_time which enables capturing at a lower rate
-     than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
    * Fixed the check for ffmpeg version. In rev 5503 of ffmpeg the FFMPEG_VERSION_INT
      was removed from libavcodec/avcodec.h. Instead we now use the equivalent
      LIBAVFORMAT_BUILD >= 4616 which is the 0.4.9pre1 version of ffmpeg.
      (Kenneth Lavrsen)
    * Fixed segfault when netcam_url has no service ( http , ftp ) (Angel Carpintero)
    * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD (Angel Carpintero)
-   * Make the creation of reference frame and the decay mechanism depending
-     on how much motion was detected relative to threshold setting (Joerg Weber)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
    * Fixed possible syntax error in configure related to MySQL (Angel Carpintero)
    * Avoid open file descriptor when connecting to network cameras fails (Peter Holik) 
      http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
