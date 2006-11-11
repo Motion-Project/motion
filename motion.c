@@ -847,7 +847,10 @@ static void *motion_loop(void *arg)
 			 */
 			vid_return_code = vid_next(cnt, newimg);
 
+			// VALID PICTURE
 			if (vid_return_code == 0) {
+				cnt->lost_connection = 0;
+
 				/* If all is well reset missing_frame_counter */
 				if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
 					/* If we previously logged starting a grey image, now log video re-start */
@@ -877,67 +880,67 @@ static void *motion_loop(void *arg)
 					gettimeofday(&tv1, NULL);
 					timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
 				}
-			} else {
-				if (vid_return_code < 0) {
-					/* Fatal error - break out of main loop terminating thread */
-					motion_log(LOG_ERR, 0, "Video device fatal error - terminating camera thread");
+			// FATAL ERROR - leave the thread by breaking out of the main loop	
+			} else if (vid_return_code < 0) {
+				/* Fatal error - break out of main loop terminating thread */
+				motion_log(LOG_ERR, 0, "Video device fatal error - terminating camera thread");
+				break;
+			// NO FATAL ERROR -  copy last image or show grey image with message			
+			} else { 
+				cnt->lost_connection = 1;
+				if (debug_level)
+					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
+
+				/* Netcams that change dimensions while Motion is running will
+				 * require that Motion restarts to reinitialize all the many
+				 * buffers inside Motion. It will be a mess to try and recover any
+				 * other way
+				 */
+				if (vid_return_code == NETCAM_RESTART_ERROR) {
+					motion_log(LOG_ERR, 0, "Restarting Motion to reinitialize all "
+					                       "image buffers");
+					kill(getpid(), 1);
 					break;
-				} else {       /* Non fatal errors */
-					if (debug_level)
-						motion_log(-1, 0, "vid_return_code %d", vid_return_code);
+				}
 
-					/* Netcams that change dimensions while Motion is running will
-					 * require that Motion restarts to reinitialize all the many
-					 * buffers inside Motion. It will be a mess to try and recover any
-					 * other way
-					 */
-					if (vid_return_code == NETCAM_RESTART_ERROR) {
-						motion_log(LOG_ERR, 0, "Restarting Motion to reinitialize all "
-						                       "image buffers");
-						kill(getpid(), 1);
-						break;
-					}
+				/* First missed frame - store timestamp */
+				if (!cnt->missing_frame_counter)
+					cnt->connectionlosttime = cnt->currenttime;
 
-					/* First missed frame - store timestamp */
-					if (!cnt->missing_frame_counter)
-						cnt->connectionlosttime = cnt->currenttime;
+				/* If we are waiting for first image prevent the
+				 * cnt->connectionlosttime from being updated each time we come back
+				 */
+				if (cnt->video_dev == -1)
+					cnt->missing_frame_counter = 1;
 
-					/* If we are waiting for first image prevent the
-					 * cnt->connectionlosttime from being updated each time we come back
-					 */
-					if (cnt->video_dev == -1)
-						cnt->missing_frame_counter = 1;
+				/* Increase missing_frame_counter
+				 * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
+				 * After 30 seconds we put a grey error image in the buffer
+				 * Note: at low_cpu the timeout will be longer but we live with that
+				 * If we still have not yet received the initial image from a camera
+				 * we go straight for the grey error image.
+				 */
+				if (cnt->video_dev != -1 &&
+				    ++cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
+					memcpy(newimg, cnt->imgs.image_virgin, cnt->imgs.size);
 
-					/* Increase missing_frame_counter
-					 * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
-					 * After 30 seconds we put a grey error image in the buffer
-					 * Note: at low_cpu the timeout will be longer but we live with that
-					 * If we still have not yet received the initial image from a camera
-					 * we go straight for the grey error image.
-					 */
-					if (cnt->video_dev != -1 &&
-					    ++cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
-						memcpy(newimg, cnt->imgs.image_virgin, cnt->imgs.size);
+				} else {
+					char tmpout[80];
+					char tmpin[] = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
+					struct tm tmptime;
+					localtime_r(&cnt->connectionlosttime, &tmptime);
+					memset(newimg, 0x80, cnt->imgs.size);
+					mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
+					draw_text(newimg, 10, 20 * text_size_factor, cnt->imgs.width,
+					          tmpout, cnt->conf.text_double);
 
-					} else {
-						char tmpout[80];
-						char tmpin[] = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
-						struct tm tmptime;
-						localtime_r(&cnt->connectionlosttime, &tmptime);
-						memset(newimg, 0x80, cnt->imgs.size);
-						mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
-						draw_text(newimg, 10, 20 * text_size_factor, cnt->imgs.width,
-						          tmpout, cnt->conf.text_double);
-
-						/* Write error message only once */
-						if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
-							motion_log(LOG_ERR, 0, "Video signal lost - Adding grey image");
-							// Event for lost video signal can be called from here
-						}
+					/* Write error message only once */
+					if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
+						motion_log(LOG_ERR, 0, "Video signal lost - Adding grey image");
+						// Event for lost video signal can be called from here
 					}
 				}
 			}
-
 
 		/***** MOTION LOOP - MOTION DETECTION SECTION *****/
 

@@ -128,6 +128,9 @@
                                      * and then we show a grey image instead
                                      */
 
+#define CONNECTION_KO "Lost connection"
+#define CONNECTION_OK "Connection OK"
+
 #define DEF_MAXSTREAMS          10  /* Maximum number of webcam clients per camera */
 #define DEF_MAXWEBQUEUE         10  /* Maximum number of webcam client in queue */
 
@@ -297,6 +300,7 @@ struct context {
 	int switched;
 	int pause;
 	int missing_frame_counter;   /* counts failed attempts to fetch picture frame from camera */
+	int lost_connection;	
 
 #if (defined(BSD))
 	int tuner_dev;

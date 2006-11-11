@@ -903,6 +903,7 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		length_uri = length_uri - 6;
 		if (length_uri == 0) {
 			/*call status*/
+			
 			if (cnt[thread]->pause)
 				sprintf(res, "Thread %d Detection status PAUSE\n", thread);
 			else
@@ -995,6 +996,30 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
+	} else if (!strcmp(command,"connection")){
+		pointer = pointer + 10;
+		length_uri = length_uri - 10;
+		if (length_uri==0) {
+			/*call connection*/	
+			if (cnt[0]->conf.control_html_output) {
+				send_template_ini_client(client_socket, ini_template);
+				sprintf(res,"Thread %i %s<br>\n"
+						"<a href=/%d/detection><- back</a>\n",thread, (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK, thread);
+				send_template(client_socket,res);
+				send_template_end_client(client_socket);
+			} else {
+				send_template_ini_client_raw(client_socket);
+				sprintf(res,"Thread %i %s\n", thread,(cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+				send_template_raw(client_socket, res);
+				
+			}	
+		}else{
+			/*error*/
+			 if (cnt[0]->conf.control_html_output)
+				 response_client(client_socket, not_found_response_valid_command, NULL);
+			 else
+				 response_client(client_socket, not_found_response_valid_command_raw, NULL);
+		}	
 	} else {
 		if (cnt[0]->conf.control_html_output)
 			response_client(client_socket, not_found_response_valid_command, NULL);
@@ -1782,13 +1807,14 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 								            "<a href=/%d/detection/status>status</a><br>\n"
 								            "<a href=/%d/detection/start>start</a><br>\n"
 								            "<a href=/%d/detection/pause>pause</a><br>\n"
+								            "<a href=/%d/detection/connection>connection</a><br>\n"
 								            "<a href=/%d/><- back</a>\n",
 								        thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res,"Thread %d\nstatus\nstart\npause\n", thread);
+								sprintf(res,"Thread %d\nstatus\nstart\npause\nconnection\n", thread);
 								send_template_raw(client_socket, res);
 							}
 						} else if ((slash == '/') && (length_uri > 5)) {
