@@ -1809,7 +1809,7 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 								            "<a href=/%d/detection/pause>pause</a><br>\n"
 								            "<a href=/%d/detection/connection>connection</a><br>\n"
 								            "<a href=/%d/><- back</a>\n",
-								        thread, thread, thread, thread, thread);
+								        thread, thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
