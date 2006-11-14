@@ -85,8 +85,9 @@ install: build
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/motion
 	# Offer a minimal default config file.
 	cp debian/motion.conf debian/motion/etc/motion
+	cp motion.init-Debian debian/motion/etc/init.d/motion
 	# Remove unwanted/misplaced files.
-	rm -rf $(CURDIR)/debian/motion/usr/share/doc/motion-3.2.7
+	rm -rf $(CURDIR)/debian/motion/usr/share/doc/motion-3.2.8
 	rm -f $(CURDIR)/debian/motion/etc/motion/motion-dist.conf
 
 
