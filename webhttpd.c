@@ -1000,17 +1000,37 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		pointer = pointer + 10;
 		length_uri = length_uri - 10;
 		if (length_uri==0) {
+			
 			/*call connection*/	
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"Thread %i %s<br>\n"
-						"<a href=/%d/detection><- back</a>\n",thread, (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK, thread);
+				if (thread == 0){
+					int i = 0;
+					do{
+						sprintf(res,"Thread %i %s<br>\n",i, 
+								(cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
+						send_template(client_socket,res);
+					}while (cnt[++i]);
+					sprintf(res,"<a href=/%d/detection><- back</a>\n",thread);
+				}else{
+					sprintf(res,"Thread %i %s<br>\n"
+							"<a href=/%d/detection><- back</a>\n",thread, (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK, thread);
+				}	
 				send_template(client_socket,res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"Thread %i %s\n", thread,(cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
-				send_template_raw(client_socket, res);
+				if (thread == 0){
+					int i = 0;
+					do{
+						sprintf(res,"Thread %i %s\n", i,
+								(cnt[i]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+						send_template_raw(client_socket, res);
+					}while (cnt[++i]);
+				}else{		
+					sprintf(res,"Thread %i %s\n", thread,(cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+					send_template_raw(client_socket, res);
+				}	
 				
 			}	
 		}else{

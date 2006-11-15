@@ -1542,6 +1542,7 @@ static void *motion_loop(void *arg)
 	if (rolling_average_data)
 		free(rolling_average_data);
 
+	cnt->lost_connection = 1;
 	motion_log(-1, 0, "Thread exiting");
 	if (!cnt->finish)
 		motion_log(LOG_ERR, 1, "Somebody stole the video device, lets hope we got his picture");
