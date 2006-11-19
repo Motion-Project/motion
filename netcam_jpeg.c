@@ -464,7 +464,6 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 	if (ret != 0)
 		retval |= NETCAM_JPEG_CONV_ERROR;
 
-	jpeg_destroy_decompress (&cinfo);
 	return retval;
 }
 
