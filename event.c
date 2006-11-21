@@ -125,6 +125,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 		char sqlquery[PATH_MAX];
 		char timestr[20];
 		char eventtimestr[20];
+		int ret;
 	
 		strftime(timestr, sizeof(timestr), "%Y-%m-%d %T", cnt->currenttime_tm);
 		strftime(eventtimestr, sizeof(eventtimestr), "%Y-%m-%d %T", cnt->eventtime_tm);
@@ -133,8 +134,25 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 
 #ifdef HAVE_MYSQL
 		if (cnt->conf.mysql_db) {
-			if (mysql_query(cnt->database, sqlquery) != 0)
-				motion_log(LOG_ERR, 1, "Mysql query failed");
+			ret = mysql_query(cnt->database, sqlquery);
+			if (ret != 0){
+				int error_code = mysql_errno(cnt->database);
+				
+				motion_log(LOG_ERR, 1, "Mysql query failed %s error code %d",
+						mysql_error(cnt->database), error_code);
+				/* Try to reconnect ONCE if fails continue and discard this sql query */
+				if (error_code >= 2000){
+					cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
+					mysql_init(cnt->database);
+					if (!mysql_real_connect(cnt->database, cnt->conf.mysql_host, 
+								cnt->conf.mysql_user, cnt->conf.mysql_password, 
+								cnt->conf.mysql_db, 0, NULL, 0)) {
+						motion_log(LOG_ERR, 0, "Cannot reconnect to MySQL database %s on host %s with user %s", cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
+						motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
+					}else mysql_query(cnt->database, sqlquery);
+				}	
+				
+			}	
 		}
 #endif /* HAVE_MYSQL */
 
