@@ -23,6 +23,7 @@ bindir      = @bindir@
 mandir      = @mandir@
 sysconfdir  = @sysconfdir@
 datadir     = @datadir@
+datarootdir = @datarootdir@
 docdir      = $(datadir)/doc/motion-$(VERSION)
 examplesdir = $(docdir)/examples
 
