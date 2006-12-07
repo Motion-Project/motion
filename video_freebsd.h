@@ -53,6 +53,15 @@
 #define NORM_SECAM_NEW		 BT848_IFORM_F_SECAM	         	
 #define NORM_PAL_NC_NEW		 BT848_IFORM_F_AUTO /* FIXME */	
 
+#define PAL	0
+#define NTSC	1
+#define SECAM	2
+#define PAL_NC	3	
+
+#define PAL_HEIGHT 576
+#define SECAM_HEIGHT 576
+#define NTSC_HEIGHT 480
+
 #define BSD_VIDFMT_NONE       0
 #define BSD_VIDFMT_YV12       1
 #define BSD_VIDFMT_I420       2

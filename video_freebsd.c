@@ -374,18 +374,25 @@ static int set_input(struct video_dev *viddev, unsigned short input)
 static int set_geometry(struct video_dev *viddev, int width, int height)
 {
 	struct meteor_geomet geom;
+	int h_max;
 
 	geom.columns = width;
 	geom.rows = height;
 
-//	geom.rows = geom.rows / 2;
-//	geom.oformat |= METEOR_GEO_ODD_ONLY;
-
-
 	geom.oformat = METEOR_GEO_YUV_422 | METEOR_GEO_YUV_12;
-	geom.oformat |= METEOR_GEO_EVEN_ONLY;	
-	
-//	geom.oformat = 0;
+
+
+	switch (viddev->norm) {
+        	case PAL:   h_max = PAL_HEIGHT;  
+		case NTSC:  h_max = NTSC_HEIGHT; 
+        	case SECAM: h_max = SECAM_HEIGHT;
+        	default:    h_max = PAL_HEIGHT;
+        }
+
+        if (height <= h_max/2) {
+                geom.oformat |= METEOR_GEO_EVEN_ONLY;
+        }
+
 	geom.frames  = 1;
 
 	if( ioctl( viddev->fd_bktr, METEORSETGEO, &geom ) < 0 ) {
@@ -422,7 +429,7 @@ static int set_input_format(struct video_dev *viddev, unsigned short newformat)
 			return -1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -585,6 +592,8 @@ static unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, i
 		motion_log(LOG_ERR, 1, "set input format [%d]",norm);
 		return (NULL);
 	}
+
+	viddev->norm = norm;
 
 	if (set_geometry(viddev, width, height) == -1) {
 		motion_log(LOG_ERR, 1, "set geometry [%d]x[%d]",width, height);
@@ -793,6 +802,8 @@ static void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigne
 		}
 		*/
 
+		viddev->norm=norm;
+
 		if (set_geometry(viddev, width, height) == -1)
 			return;
 	
@@ -802,7 +813,6 @@ static void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigne
 		viddev->width=width;
 		viddev->height=height;
 		viddev->freq=freq;
-		viddev->norm=norm;
 
 		/* skip a few frames if needed */
 		for (i=0; i<skip; i++)
