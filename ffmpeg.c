@@ -441,7 +441,7 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 	/* free the stream */
 	av_free(ffmpeg->oc);
 #if LIBAVFORMAT_BUILD >= 4629
-	free(ffmpeg->c);
+	av_free(ffmpeg->c);
 #endif
 	free(ffmpeg);
 }
@@ -476,7 +476,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
 	/* free the stream */
 	av_free(ffmpeg->oc);
 #if LIBAVFORMAT_BUILD >= 4629
-	free(ffmpeg->c);
+	av_free(ffmpeg->c);
 #endif
 	free(ffmpeg);
 }
@@ -497,7 +497,7 @@ void ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
 
 	if (picture) {
 		ffmpeg_put_frame(ffmpeg, picture);
-		free(picture);
+		av_free(picture);
 	}
 }
 
