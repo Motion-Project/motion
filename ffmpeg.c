@@ -184,6 +184,9 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 			/* Manually override the codec id. */
 			of->video_codec = CODEC_ID_MSMPEG4V2;
 		}
+	} else if (strcmp(codec, "swf") == 0) {
+		ext = ".swf";
+		of = guess_format("swf", NULL, NULL);
 	} else {
 		motion_log(LOG_ERR, 0, "ffmpeg_video_codec option value %s is not supported", codec);
 		return NULL;

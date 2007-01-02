@@ -596,9 +596,10 @@ config_param config_params[] = {
 	"# Timelapse mpegs are always made in mpeg1 format independent from this option.\n"
 	"# Supported formats are: mpeg1 (ffmpeg-0.4.8 only), mpeg4 (default), and msmpeg4.\n"
 	"# mpeg1 - gives you files with extension .mpg\n"
-	"# mpeg4 or msmpeg4 - give you files with extension .avi\n"
+	"# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
 	"# msmpeg4 is recommended for use with Windows Media Player because\n"
-	"# it requires no installation of codec on the Windows client.",
+	"# it requires no installation of codec on the Windows client.\n"
+	"# swf - gives you a flash film with extension .swf",
 	CONF_OFFSET(ffmpeg_video_codec),
 	copy_string,
 	print_string
