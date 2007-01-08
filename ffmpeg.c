@@ -428,7 +428,7 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 		avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
 		pthread_mutex_unlock(&global_lock);	
 		av_freep(&ffmpeg->picture);
-		av_freep(&ffmpeg->video_outbuf);
+		free(ffmpeg->video_outbuf);
 	}
 
 	/* free the streams */
@@ -460,7 +460,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
 		avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
 		pthread_mutex_unlock(&global_lock);
 		av_freep(&ffmpeg->picture);
-		av_freep(&ffmpeg->video_outbuf);
+		free(ffmpeg->video_outbuf);
 	}
 
 	/* write the trailer, if any */

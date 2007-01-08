@@ -37,6 +37,9 @@ Paul Beltrani
 Michael Newlyn Blake
    * For setting up the motion mailinglist and the onsave command.
 
+Krzysztof Blaszkowski
+   * Removed a duplicate call to jpeg_destroy_decompress already is called from netcam_image_conv. 
+
 Mathias Bogaert
    * Lots of good ideas and the motion logos
 
@@ -90,6 +93,9 @@ William M Brack
    * Fixed problem related to fetching images from Network camera and error
      handling when it fails. Motion would end in infinite loops.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
+
+Andy Brown 
+   * Add swf codec to video creation (on behalf of Bowser Pete).
 
 Ashley Cambrell
    * PostgreSQL support, put_jpeg_grey(), webcam bugfixes.
@@ -328,6 +334,11 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x071646
    * Added process_id_file feature
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x06x06x123003
+   * Add connection status for all devices available from http web interface.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x11x09x050638
+   * Improved deb packaging , install the init.d script.
+   * Reconnet to mysql if connection dropped.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903	
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -479,6 +490,10 @@ Mike Kenney
      strings. (Mike Kenney and Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2005x09x05x133031
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x06x19x174238
+
+Rafis Khayrullin
+   * Fix memory management in ffmpeg.c 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432
 
 Matthias Kilian
    * Configure patch which enables configure to find and use a
@@ -954,6 +969,9 @@ nullset?
 
 Mikko Paananen
    * Changed netcam open to use pipes and fixed authentication.
+
+Bowser Pete
+   * Add swf codec to video creation.
 
 Asbjørn Pettersen
    * Netcam_ftp code fixes (Angel Carpintero and Asbjørn Pettersen)

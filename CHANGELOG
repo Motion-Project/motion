@@ -4,8 +4,14 @@ Feaures
    * Add connection status for all devices available from http web interface. (Angel Carpintero).
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x11x09x050638
    * Improved deb packaging , install the init.d script. (Angel Carpintero).
+   * Add swf codec to video creation (Bowser Pete, Andy Brown).
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FFmpegSWFcreation	
 
 Bugfixes
+   * Removed a duplicate call to jpeg_destroy_decompress already is called from netcam_image_conv (Krzysztof Blaszkowski).
+   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903 , reconnet to mysql if connection dropped (Angel Carpintero).
+   * Fix memory management in ffmpeg.c http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432 (Rafis Khayrullin).	
+
 	
 3.2.7 Formal Release - Summary of Changes
 
