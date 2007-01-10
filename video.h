@@ -28,10 +28,9 @@
 #define IN_SVIDEO       3
 
 /* video4linux error codes */
-#define V4L_GENERAL_ERROR    0x01          /* binary 000001 */
-#define V4L_BTTVLOST_ERROR   0x05          /* binary 000101 */
+#define V4L_GENERAL_ERROR    0x01	/* binary 000001 */
+#define V4L_BTTVLOST_ERROR   0x05	/* binary 000101 */
 #define V4L_FATAL_ERROR      -1
-
 
 #define VIDEO_DEVICE "/dev/video0"
 
@@ -52,10 +51,13 @@ struct video_dev {
 	pthread_mutexattr_t attr;
 	int owner;
 	int frames;
-	
+
 	/* Device type specific stuff: */
-#ifndef WITHOUT_V4L	
+#ifndef WITHOUT_V4L
 	/* v4l */
+	int v4l2;
+	void *v4l2_private;
+
 	int size_map;
 	int v4l_fmt;
 	unsigned char *v4l_buffers[2];
@@ -65,15 +67,44 @@ struct video_dev {
 #endif
 };
 
-/* video functions, video.c */
-int vid_start(struct context *);
-int vid_next(struct context *, unsigned char *map);
-#ifndef WITHOUT_V4L
-void vid_init(void);
-int vid_startpipe(const char *devname, int width, int height, int);
-int vid_putpipe(int dev, unsigned char *image, int);
-void vid_close(void);
-void vid_cleanup(void);
+#if 0
+typedef struct {
+	void *start;
+	size_t length;
+	size_t used;
+} v4l2_buffer_t;
 #endif
 
-#endif /* _INCLUDE_VIDEO_H */
+/* video functions, video_common.c */
+int vid_start(struct context *);
+int vid_next(struct context *, unsigned char *map);
+void vid_close(void);
+void vid_cleanup(void);
+void vid_init(void);
+void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
+void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
+int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int v4l_bufsize, int width,
+		     int height);
+int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
+
+#ifndef WITHOUT_V4L
+/* video functions, video.c */
+int vid_startpipe(const char *devname, int width, int height, int);
+int vid_putpipe(int dev, unsigned char *image, int);
+unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int width, int height,
+			 int input, int norm, unsigned long freq, int tuner_number);
+void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height, int input,
+		   int norm, int skip, unsigned long freq, int tuner_number);
+int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int height);
+
+/* video2.c */
+unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int width, int height,
+			  int input, int norm, unsigned long freq, int tuner_number);
+void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height,
+		    struct config *conf);
+int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height);
+void v4l2_cleanup(struct video_dev *viddev);
+
+#endif
+
+#endif				/* _INCLUDE_VIDEO_H */

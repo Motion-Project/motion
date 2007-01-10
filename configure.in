@@ -28,7 +28,7 @@ if test "${Darwin}" = ""; then
 	FreeBSD=`uname -a | grep "BSD"`
 	if test "${FreeBSD}" = ""; then
 		AC_MSG_RESULT(no)
-		VIDEO="video.o"
+		VIDEO="video.o video2.o video_common.o"
 	else
 		AC_MSG_RESULT(yes)
 		if test "${LINUXTHREADS}" = "no"; then
