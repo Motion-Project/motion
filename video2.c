@@ -132,8 +132,14 @@ static int v4l2_get_capability(src_v4l2_t * s)
 		motion_log(LOG_INFO, 0, "- TUNER");
 	if (s->cap.capabilities & V4L2_CAP_AUDIO)
 		motion_log(LOG_INFO, 0, "- AUDIO");
+#if 0
+	// not sense to check if is a radio device
+	// moreover it breaks compilation for some 2.6.x kernels
+	// that don't include V4L2_CAP_RADIO in videodev2.h
+
 	if (s->cap.capabilities & V4L2_CAP_RADIO)
 		motion_log(LOG_INFO, 0, "- RADIO");
+#endif
 	if (s->cap.capabilities & V4L2_CAP_READWRITE)
 		motion_log(LOG_INFO, 0, "- READWRITE");
 	if (s->cap.capabilities & V4L2_CAP_ASYNCIO)
