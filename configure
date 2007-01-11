@@ -4779,6 +4779,120 @@ fi
 done
 
 
+
+have_v4l2=false
+{ echo "$as_me:$LINENO: checking for struct v4l2_buffer" >&5
+echo $ECHO_N "checking for struct v4l2_buffer... $ECHO_C" >&6; }
+if test "${ac_cv_type_struct_v4l2_buffer+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sys/time.h>
+		#include <linux/videodev.h>
+
+typedef struct v4l2_buffer ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_type_struct_v4l2_buffer=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_struct_v4l2_buffer=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_type_struct_v4l2_buffer" >&5
+echo "${ECHO_T}$ac_cv_type_struct_v4l2_buffer" >&6; }
+if test $ac_cv_type_struct_v4l2_buffer = yes; then
+  have_v4l2=true
+else
+  have_v4l2=false
+fi
+
+
+if test x$have_v4l2 = xfalse; then
+    KERNEL_VERSION=`uname -r`
+    as_ac_File=`echo "ac_cv_file_/lib/modules/$KERNEL_VERSION/build/include/linux/videodev2.h" | $as_tr_sh`
+{ echo "$as_me:$LINENO: checking for /lib/modules/$KERNEL_VERSION/build/include/linux/videodev2.h" >&5
+echo $ECHO_N "checking for /lib/modules/$KERNEL_VERSION/build/include/linux/videodev2.h... $ECHO_C" >&6; }
+if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  test "$cross_compiling" = yes &&
+  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+if test -r "/lib/modules/$KERNEL_VERSION/build/include/linux/videodev2.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+ac_res=`eval echo '${'$as_ac_File'}'`
+	       { echo "$as_me:$LINENO: result: $ac_res" >&5
+echo "${ECHO_T}$ac_res" >&6; }
+if test `eval echo '${'$as_ac_File'}'` = yes; then
+  have_v4l2=true
+	  have_v4l2=false
+fi
+
+fi
+
+if test x$have_v4l2 = xtrue; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"
+fi
+
+
 { echo "$as_me:$LINENO: checking for short int" >&5
 echo $ECHO_N "checking for short int... $ECHO_C" >&6; }
 if test "${ac_cv_type_short_int+set}" = set; then
@@ -7781,6 +7895,12 @@ else
 		echo "V4L included:        Yes"
 	else
 		echo "V4L included:        No"
+	fi
+
+	if test x$have_v4l2 = xtrue; then
+		echo "V4L2 supported:      Yes"
+	else
+		echo "V4L2 supported:      No"
 	fi
 fi
 

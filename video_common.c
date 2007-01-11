@@ -245,9 +245,11 @@ void vid_cleanup(void)
 	int i = -1;
 	if (viddevs) {
 		while (viddevs[++i]) {
+#ifdef HAVE_V4L2
 			if (viddevs[i]->v4l2)
 				v4l2_cleanup(viddevs[i]);
 			else
+#endif
 				munmap(viddevs[i]->v4l_buffers[0], viddevs[i]->size_map);
 			free(viddevs[i]);
 		}
@@ -392,19 +394,21 @@ static int vid_v4lx_start(struct context *cnt)
 		viddevs[i]->hue = 0;
 		viddevs[i]->owner = -1;
 		viddevs[i]->v4l_fmt = VIDEO_PALETTE_YUV420P;
-
+#ifdef HAVE_V4L2
 		/* First lets try V4L2 and if it's not supported V4L1 */
 
 		viddevs[i]->v4l2 = 1;
 
 		if (!v4l2_start(cnt, viddevs[i], width, height, input, norm, frequency, tuner_number)) {
+#endif
 			if (!v4l_start(cnt, viddevs[i], width, height, input, norm, frequency, tuner_number)) {
 				pthread_mutex_unlock(&vid_mutex);
 				return -1;
 			}
+#ifdef HAVE_V4L2
 			viddevs[i]->v4l2 =0;
 		}
-
+#endif
 		if (viddevs[i]->v4l2 == 0){
 			motion_log(-1, 0, "Using V4L1");
 		}else{
@@ -509,18 +513,20 @@ int vid_next(struct context *cnt, unsigned char *map)
 			viddevs[i]->frames = conf->roundrobin_frames;
 			cnt->switched = 1;
 		}
-
+#ifdef HAVE_V4L2
 		if (viddevs[i]->v4l2) {
 			v4l2_set_input(cnt, viddevs[i], map, width, height, conf);
 
 			ret = v4l2_next(cnt, viddevs[i], map, width, height);
 		} else {
+#endif
 			v4l_set_input(cnt, viddevs[i], map, width, height, conf->input, conf->norm,
 				      conf->roundrobin_skip, conf->frequency, conf->tuner_number);
 
 			ret = v4l_next(viddevs[i], map, width, height);
+#ifdef HAVE_V4L2
 		}
-
+#endif
 		if (--viddevs[i]->frames <= 0) {
 			viddevs[i]->owner = -1;
 			pthread_mutex_unlock(&viddevs[i]->mutex);

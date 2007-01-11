@@ -541,6 +541,27 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h sys/param.h)
 
+
+dnl check if v4l2 is available
+have_v4l2=false
+AC_CHECK_TYPE([struct v4l2_buffer], 
+              [have_v4l2=true],
+              [have_v4l2=false],
+	        [#include <sys/time.h>
+		#include <linux/videodev.h>])
+
+if test x$have_v4l2 = xfalse; then
+    KERNEL_VERSION=`uname -r`
+    AC_CHECK_FILE(/lib/modules/$KERNEL_VERSION/build/include/linux/videodev2.h,
+          [have_v4l2=true]
+	  [have_v4l2=false])
+fi
+
+if test x$have_v4l2 = xtrue; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"	
+fi
+
+
 dnl Check sizes of integer types
 AC_CHECK_SIZEOF(short int)
 if test "$ac_cv_sizeof_short_int" = "4"; then
@@ -876,6 +897,12 @@ else
 		echo "V4L included:        Yes"
 	else
 		echo "V4L included:        No"
+	fi
+
+	if test x$have_v4l2 = xtrue; then
+		echo "V4L2 supported:      Yes"	
+	else
+		echo "V4L2 supported:      No"
 	fi
 fi
 

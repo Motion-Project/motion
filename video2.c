@@ -41,6 +41,10 @@
 */
 
 #ifndef WITHOUT_V4L
+#ifdef HAVE_V4L2 
+#               warning **************************************************
+#		warning		Using experimental V4L2 support
+#               warning **************************************************
 
 #include <math.h>
 #include <sys/utsname.h>
@@ -684,4 +688,5 @@ void v4l2_cleanup(struct video_dev *viddev)
 	viddev->v4l2_private = NULL;
 }
 
+#endif
 #endif
