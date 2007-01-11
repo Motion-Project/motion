@@ -226,9 +226,9 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 	static const u32 supported_formats[] = {	/* higher index means better chance to be used */
 		V4L2_PIX_FMT_JPEG,
 		V4L2_PIX_FMT_RGB24,
+		V4L2_PIX_FMT_YUYV,
 		V4L2_PIX_FMT_YUV422P,
 		V4L2_PIX_FMT_YUV420,
-		V4L2_PIX_FMT_YUYV,
 		0
 	};
 
@@ -246,7 +246,6 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 			   fmt.pixelformat >> 0, fmt.pixelformat >> 8,
 			   fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);
 
-//              if (fmt.pixelformat == V4L2_PIX_FMT_YUV420) has_yuv420 = v4l2_pal;
 		for (i = 0; supported_formats[i]; i++)
 			if (supported_formats[i] == fmt.pixelformat && i > index_format) {
 				index_format = i;
