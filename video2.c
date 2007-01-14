@@ -8,6 +8,10 @@
  * Supported features and TODO
  *  - preferred palette is JPEG which seems to be very popular for many 640x480 usb cams
  *  - other supported palettes (NOT TESTED)
+ *  		V4L2_PIX_FMT_SBGGR8	( sonix )	
+ *  		V4L2_PIX_FMT_SN9C10X	( sonix )
+ *  		V4L2_PIX_FMT_MJPEG,
+ *  		V4L2_PIX_FMT_JPEG,
 		V4L2_PIX_FMT_RGB24,
 		V4L2_PIX_FMT_YUV422P,
 		V4L2_PIX_FMT_YUV420, ( tested )
@@ -67,6 +71,19 @@
 #define u8 unsigned char
 #define u16 unsigned short
 #define u32 unsigned int
+
+#ifndef V4L2_PIX_FMT_SBGGR8
+/* see http://www.siliconimaging.com/RGB%20Bayer.htm */
+#define V4L2_PIX_FMT_SBGGR8  v4l2_fourcc('B','A','8','1') /*  8  BGBG.. GRGR.. */ 
+#endif
+
+#ifndef V4L2_PIX_FMT_MJPEG
+#define V4L2_PIX_FMT_MJPEG    v4l2_fourcc('M','J','P','G') /* Motion-JPEG   */ 
+#endif
+
+#ifndef V4L2_PIX_FMT_SN9C10X
+#define V4L2_PIX_FMT_SN9C10X v4l2_fourcc('S','9','1','0') /* SN9C10x compression */
+#endif
 
 #define ZC301_V4L2_CID_DAC_MAGN 	V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE 	(V4L2_CID_PRIVATE_BASE+1)
@@ -224,6 +241,9 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 	int v4l2_pal;
 
 	static const u32 supported_formats[] = {	/* higher index means better chance to be used */
+		V4L2_PIX_FMT_SBGGR8,
+		V4L2_PIX_FMT_SN9C10X,
+		V4L2_PIX_FMT_MJPEG,
 		V4L2_PIX_FMT_JPEG,
 		V4L2_PIX_FMT_RGB24,
 		V4L2_PIX_FMT_YUYV,
@@ -270,7 +290,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8,
 				   pixformat >> 16, pixformat >> 24, *width, *height);
 
-			if (s->fmt.fmt.pix.width != *width || s->fmt.fmt.pix.height != *height) {
+			if (s->fmt.fmt.pix.width != (unsigned int)*width || s->fmt.fmt.pix.height != (unsigned int)*height) {
 				motion_log(LOG_INFO, 0, "Adjusting resolution from %ix%i to %ix%i.",
 					   *width, *height, s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
 				*width = s->fmt.fmt.pix.width;
@@ -579,7 +599,7 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 	int input = conf->input;
 	int norm = conf->norm;
 	int skip = conf->roundrobin_skip;
-	int freq = conf->frequency;
+	unsigned long freq = conf->frequency;
 	int tuner_number = conf->tuner_number;
 
 	if (input != viddev->input || width != viddev->width || height != viddev->height ||
@@ -658,8 +678,21 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 		memcpy(map, s->buffers[s->buf.index].ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].length;
 		return 0;
 
+	case V4L2_PIX_FMT_MJPEG:
 	case V4L2_PIX_FMT_JPEG:
 		return conv_jpeg2yuv420(cnt, map, &s->buffers[s->buf.index], viddev->v4l_bufsize, width, height);
+
+	case V4L2_PIX_FMT_SBGGR8: /* bayer */ 
+		bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *)s->buffers[s->buf.index].ptr, width, height);
+		conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+		return 0;
+
+	case V4L2_PIX_FMT_SN9C10X:
+		sonix_decompress_init();
+		sonix_decompress(map, (unsigned char *)s->buffers[s->buf.index].ptr, width, height);
+		bayer2rgb24(cnt->imgs.common_buffer , map, width, height);
+		conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+		return 0;
 	}
 
 	return 1;
@@ -670,7 +703,7 @@ void v4l2_cleanup(struct video_dev *viddev)
 	src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
 
 	if (s->buffers) {
-		int i;
+		unsigned int i;
 
 		for (i = 0; i < s->req.count; i++)
 			munmap(s->buffers[i].ptr, s->buffers[i].size);

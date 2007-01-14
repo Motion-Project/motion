@@ -85,6 +85,9 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int v4l_bufsize, int width,
 		     int height);
+void sonix_decompress_init(void);
+int sonix_decompress(unsigned char *outp, unsigned char *inp,int width, int height);
+void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
 
 #ifndef WITHOUT_V4L

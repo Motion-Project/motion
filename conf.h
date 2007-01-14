@@ -71,7 +71,7 @@ struct config {
 	int control_localhost;
 	int control_html_output;
 	const char *control_authentication;
-	int frequency;
+	unsigned long frequency;
 	int tuner_number;
 	int timelapse;
 	const char *timelapse_mode; 
