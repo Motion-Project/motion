@@ -544,21 +544,27 @@ AC_CHECK_HEADERS(stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h
 
 dnl check if v4l2 is available
 have_v4l2=false
+have_v4l2_old=false
 AC_CHECK_TYPE([struct v4l2_buffer], 
               [have_v4l2=true],
               [have_v4l2=false],
 	        [#include <sys/time.h>
 		#include <linux/videodev.h>])
 
+dnl linux/videodev.h doesn't include videodev2.h
 if test x$have_v4l2 = xfalse; then
-    KERNEL_VERSION=`uname -r`
-    AC_CHECK_FILE(/lib/modules/$KERNEL_VERSION/build/include/linux/videodev2.h,
-          [have_v4l2=true]
-	  [have_v4l2=false])
+	AC_CHECK_TYPE([struct v4l2_buffer],
+              [have_v4l2=true have_v4l2_old=true],
+              [have_v4l2=false],
+                [#include <sys/time.h>
+                #include <linux/videodev2.h>])
 fi
 
 if test x$have_v4l2 = xtrue; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"	
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"
+	if test x$have_v4l2_old = xtrue; then
+		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2_OLD"
+	fi	
 fi
 
 

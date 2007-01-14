@@ -63,6 +63,10 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#ifdef HAVE_V4L2_OLD
+#include <linux/videodev2.h>
+#endif
+
 #include "motion.h"
 #include "netcam.h"
 #include "video.h"
