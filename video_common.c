@@ -365,6 +365,7 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff
 	return netcam_proc_jpeg(&netcam, dst);
 }
 
+
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
 
@@ -482,9 +483,14 @@ void vid_close(void)
 
 	if (viddevs) {
 		while (viddevs[++i]) {
+#ifdef HAVE_V4L2
+			if (viddevs[i]->v4l2)
+				v4l2_close(viddevs[i]);
+#else
 			int tmp = viddevs[i]->fd;
 			viddevs[i]->fd = -1;
 			close(tmp);
+#endif
 		}
 	}
 }

@@ -551,21 +551,49 @@ AC_CHECK_TYPE([struct v4l2_buffer],
 	        [#include <sys/time.h>
 		#include <linux/videodev.h>])
 
-dnl linux/videodev.h doesn't include videodev2.h
-if test x$have_v4l2 = xfalse; then
-	AC_CHECK_TYPE([struct v4l2_buffer],
-              [have_v4l2=true have_v4l2_old=true],
-              [have_v4l2=false],
-                [#include <sys/time.h>
-                #include <linux/videodev2.h>])
+AC_MSG_CHECKING(for V42L support)
+if test x$have_v4l2 = xtrue; then
+	AC_MSG_RESULT(yes)
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"
+else	
+	AC_MSG_RESULT(no)
 fi
 
-if test x$have_v4l2 = xtrue; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"
-	if test x$have_v4l2_old = xtrue; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2_OLD"
-	fi	
+dnl linux/videodev.h doesn't include videodev2.h
+if test x$have_v4l2 = xfalse; then
+	AC_MSG_CHECKING(for V42L *old* support)
+	AC_CHECK_HEADER(linux/videodev2.h,[have_v4l2_old=true],
+					[
+		    			AC_MSG_CHECKING([for linux/videodev2.h with sys/types.h])
+					AC_TRY_COMPILE([
+					#ifdef __linux__
+					#include <sys/types.h>
+					#include <linux/types.h>
+					#endif
+				    	],
+				    	[
+				        	return 0;
+				    	],
+				    	[
+				       	have_v4l2_old=true 
+				        AC_MSG_RESULT(yes)
+				    	],
+                                    	[
+				        AC_MSG_RESULT(no)
+                                    	])
+                  			], 
+					[
+					#ifdef __linux__
+					#include <linux/types.h>
+					#endif
+					])
 fi
+
+if test x$have_v4l2_old = xtrue; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2 -DHAVE_V4L2_OLD"
+	have_v4l2=true
+fi	
+
 
 
 dnl Check sizes of integer types

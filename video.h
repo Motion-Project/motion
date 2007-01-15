@@ -106,6 +106,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height,
 		    struct config *conf);
 int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height);
+void v4l2_close(struct video_dev *viddev);
 void v4l2_cleanup(struct video_dev *viddev);
 
 #endif

@@ -128,10 +128,21 @@ typedef struct {
 
 } src_v4l2_t;
 
+
+static int xioctl(int fd, int request, void * arg){
+        int r;
+
+        do r = ioctl (fd, request, arg);
+        while (-1 == r && EINTR == errno);
+
+        return r;
+}
+
+
 static int v4l2_get_capability(src_v4l2_t * s)
 {
 
-	if (ioctl(s->fd, VIDIOC_QUERYCAP, &s->cap) < 0) {
+	if (xioctl(s->fd, VIDIOC_QUERYCAP, &s->cap) < 0) {
 		motion_log(LOG_ERR, 0, "Not a V4L2 device?");
 		return (-1);
 	}
@@ -191,7 +202,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 
 	/* Set the input. */
 	input.index = in;
-	if (ioctl(s->fd, VIDIOC_ENUMINPUT, &input) == -1) {
+	if (xioctl(s->fd, VIDIOC_ENUMINPUT, &input) == -1) {
 		motion_log(LOG_ERR, 0, "Unable to query input %d.", in);
 		motion_log(LOG_ERR, 0, "VIDIOC_ENUMINPUT: %s", strerror(errno));
 		return (-1);
@@ -204,7 +215,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 	if (input.type & V4L2_INPUT_TYPE_CAMERA)
 		motion_log(LOG_INFO, 0, "- CAMERA");
 
-	if (ioctl(s->fd, VIDIOC_S_INPUT, &in) == -1) {
+	if (xioctl(s->fd, VIDIOC_S_INPUT, &in) == -1) {
 		motion_log(LOG_ERR, 0, "Error selecting input %d", in);
 		motion_log(LOG_ERR, 0, "VIDIOC_S_INPUT: %s", strerror(errno));
 		return (-1);
@@ -220,7 +231,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		memset(&tuner, 0, sizeof(struct v4l2_tuner));
 		tuner.index = input.tuner;
 
-		if (ioctl(s->fd, VIDIOC_G_TUNER, &tuner) == -1) {
+		if (xioctl(s->fd, VIDIOC_G_TUNER, &tuner) == -1) {
 			return (0);
 		}
 
@@ -230,7 +241,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		freq.type = V4L2_TUNER_ANALOG_TV;
 		freq.frequency = (freq_ / 1000) * 16;
 
-		if (ioctl(s->fd, VIDIOC_S_FREQUENCY, &freq) == -1) {
+		if (xioctl(s->fd, VIDIOC_S_FREQUENCY, &freq) == -1) {
 			return (0);
 		}
 
@@ -263,7 +274,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 	motion_log(LOG_INFO, 0, "Supported palettes:");
-	while (ioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
+	while (xioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
 		int i;
 
 		motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal,
@@ -290,7 +301,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 		s->fmt.fmt.pix.pixelformat = pixformat;
 		s->fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
-		if (ioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
+		if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
 			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8,
 				   pixformat >> 16, pixformat >> 24, *width, *height);
 
@@ -301,7 +312,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 				*height = s->fmt.fmt.pix.height;
 			}
 
-			if (ioctl(s->fd, VIDIOC_S_FMT, &s->fmt) == -1) {
+			if (xioctl(s->fd, VIDIOC_S_FMT, &s->fmt) == -1) {
 				motion_log(LOG_ERR, 0, "Error setting pixel format.");
 				motion_log(LOG_ERR, 0, "VIDIOC_S_FMT: %s", strerror(errno));
 				return (-1);
@@ -335,7 +346,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 	s->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	s->req.memory = V4L2_MEMORY_MMAP;
 
-	if (ioctl(s->fd, VIDIOC_REQBUFS, &s->req) == -1) {
+	if (xioctl(s->fd, VIDIOC_REQBUFS, &s->req) == -1) {
 		motion_log(LOG_ERR, 1, "Error requesting buffers for memory map.");
 		motion_log(LOG_ERR, 0, "VIDIOC_REQBUFS: %s", strerror(errno));
 		return (-1);
@@ -364,7 +375,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 		buf.memory = V4L2_MEMORY_MMAP;
 		buf.index = b;
 
-		if (ioctl(s->fd, VIDIOC_QUERYBUF, &buf) == -1) {
+		if (xioctl(s->fd, VIDIOC_QUERYBUF, &buf) == -1) {
 			motion_log(LOG_ERR, 0, "Error querying buffer %i", b);
 			motion_log(LOG_ERR, 0, "VIDIOC_QUERYBUF: %s", strerror(errno));
 			free(s->buffers);
@@ -393,7 +404,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 		s->buf.memory = V4L2_MEMORY_MMAP;
 		s->buf.index = b;
 
-		if (ioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1) {
+		if (xioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1) {
 			motion_log(LOG_ERR, 0, "VIDIOC_QBUF: %s", strerror(errno));
 			return (-1);
 		}
@@ -401,7 +412,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-	if (ioctl(s->fd, VIDIOC_STREAMON, &type) == -1) {
+	if (xioctl(s->fd, VIDIOC_STREAMON, &type) == -1) {
 		motion_log(LOG_ERR, 0, "Error starting stream.");
 		motion_log(LOG_ERR, 0, "VIDIOC_STREAMON: %s", strerror(errno));
 		return (-1);
@@ -419,7 +430,7 @@ static int v4l2_scan_controls(src_v4l2_t * s)
 
 	for (i = 0, count = 0; queried_ctrls[i]; i++) {
 		queryctrl.id = queried_ctrls[i];
-		if (ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
+		if (xioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
 			continue;
 
 		count++;
@@ -439,7 +450,7 @@ static int v4l2_scan_controls(src_v4l2_t * s)
 				struct v4l2_control control;
 
 				queryctrl.id = queried_ctrls[i];
-				if (ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
+				if (xioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
 					continue;
 
 				memcpy(ctrl, &queryctrl, sizeof(struct v4l2_queryctrl));
@@ -449,7 +460,7 @@ static int v4l2_scan_controls(src_v4l2_t * s)
 					   ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "!DISABLED!" : "");
 
 				control.id = queried_ctrls[i];
-				ioctl(s->fd, VIDIOC_G_CTRL, &control);
+				xioctl(s->fd, VIDIOC_G_CTRL, &control);
 				motion_log(LOG_INFO, 0, "\t\"%s\", default %d, current %d", ctrl->name,
 					   ctrl->default_value, control.value);
 
@@ -481,12 +492,12 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
 				case V4L2_CTRL_TYPE_INTEGER:
 					value = control.value =
 					    (value * (ctrl->maximum - ctrl->minimum) / 256) + ctrl->minimum;
-					ret = ioctl(s->fd, VIDIOC_S_CTRL, &control);
+					ret = xioctl(s->fd, VIDIOC_S_CTRL, &control);
 					break;
 
 				case V4L2_CTRL_TYPE_BOOLEAN:
 					value = control.value = value ? 1 : 0;
-					ret = ioctl(s->fd, VIDIOC_S_CTRL, &control);
+					ret = xioctl(s->fd, VIDIOC_S_CTRL, &control);
 					break;
 
 				default:
@@ -646,7 +657,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 	pthread_sigmask(SIG_BLOCK, &set, &old);
 
 	if (s->pframe >= 0) {
-		if (ioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1) {
+		if (xioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1) {
 			motion_log(LOG_ERR, 0, "%s: VIDIOC_QBUF: %s", __FUNCTION__, strerror(errno));
 			return (-1);
 		}
@@ -657,7 +668,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 	s->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	s->buf.memory = V4L2_MEMORY_MMAP;
 
-	if (ioctl(s->fd, VIDIOC_DQBUF, &s->buf) == -1) {
+	if (xioctl(s->fd, VIDIOC_DQBUF, &s->buf) == -1) {
 		motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: %s", __FUNCTION__, strerror(errno));
 		return (-1);
 	}
@@ -700,6 +711,17 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 	}
 
 	return 1;
+}
+
+void v4l2_close(struct video_dev *viddev)
+{
+	src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+	enum v4l2_buf_type type;
+	
+	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	xioctl (s->fd, VIDIOC_STREAMOFF, &type);
+	close (s->fd);
+	s->fd = -1;
 }
 
 void v4l2_cleanup(struct video_dev *viddev)
