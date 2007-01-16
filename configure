@@ -1231,7 +1231,7 @@ Optional Packages:
   --with-linuxthreads     Use linuxthreads in BSD instead of native phtreads
 
 
-  --without-bktr           Exclude to use bktr subsystem , that usually useful
+  --without-bktr          Exclude to use bktr subsystem , that usually useful
                           for devices as network cameras ( ONLY used in *BSD).
 
 
@@ -1249,9 +1249,16 @@ Optional Packages:
                           If this is not specified motion will try to find
                           the libraries in /usr and /usr/local.
 
-  --with-mysql=DIR        Normally, configure will scan all possible default
-                          installation paths for mysql. When its fail, use
-                          this command to tell configure where mysql
+  --without-mysql         Disable mysql support in motion.
+
+  --with-mysql-lib=DIR        Normally, configure will scan all possible default
+                          installation paths for mysql libs. When its fail, use
+                          this command to tell configure where mysql libs
+                          installation root directory is.
+
+  --with-mysql-include=DIR    Normally, configure will scan all possible default
+                          installation paths for mysql include. When its fail, use
+                          this command to tell configure where mysql include
                           installation root directory is.
 
   --with-pgsql=DIR        Include PostgreSQL support.  DIR is the PostgreSQL
@@ -3430,9 +3437,13 @@ fi
 
 
 MYSQL="yes"
+MYSQL_SUPPORT="no"
+MYSQL_HEADERS="yes"
+MYSQL_LIBS="yes"
 
-{ echo "$as_me:$LINENO: checking for MySQL" >&5
-echo $ECHO_N "checking for MySQL... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: checking for mysql support" >&5
+echo $ECHO_N "checking for mysql support... $ECHO_C" >&6; }
+
 
 # Check whether --with-mysql was given.
 if test "${with_mysql+set}" = set; then
@@ -3441,85 +3452,138 @@ if test "${with_mysql+set}" = set; then
 fi
 
 
-if test "${MYSQL}" = "yes"; then
-	# Autodetect
-	for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
-		# check for plain setups
-		if test -f $w/mysql.h; then
-			MYSQL_INCDIR=$w
-			break
-		fi
-		# check for "/usr/include/<packagename>" type setups
-		if test -f $w/mysql/mysql.h; then
-			MYSQL_INCDIR=$w/mysql
-			break
-		fi
-		# check for "/usr/<packagename>/include" type setups
-		if test -f $w/mysql/include/mysql.h; then
-			MYSQL_INCDIR=$w/mysql/include
-			break
-		fi
-	done
 
-	for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
-		# check for plain setups
-		if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
-			MYSQL_LIBDIR=$w
-			break
-		fi
-		# check for "/usr/lib/<packagename>" type setups
-		if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
-			MYSQL_LIBDIR=$w/mysql
-			break
-		fi
-		# check for "/usr/<packagename>/lib" type setups
-		if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
-			MYSQL_LIBDIR=$w/mysql/lib
-			break
-		fi
-	done
-else
-	# Manual detection for <withval>/include/<packagename>
-	# and <withval>/include.
-	if test -f $withval/include/mysql/mysql.h; then
-		MYSQL_INCDIR=$withval/include/mysql
-	elif test -f $withval/include/mysql.h; then
-		MYSQL_INCDIR=$withval/include
-	fi
+# Check whether --with-mysql-lib was given.
+if test "${with_mysql_lib+set}" = set; then
+  withval=$with_mysql_lib; MYSQL_LIBS="$withval"
 
-	# Manual detection for <withval>/lib/<packagename>
-	# and <withval>/lib.
-
-	if test -f $withval/lib/mysql/libmysqlclient.a -o -f $withval/lib/mysql/libmysqlclient.so; then
-		MYSQL_LIBDIR=$withval/lib/mysql
-	elif test -f $withval/lib/libmysqlclient.a -o -f $withval/lib/libmysqlclient.so; then
-		MYSQL_LIBDIR=$withval/lib
-	fi
 fi
 
-## Did we find anything?
+
+
+
+# Check whether --with-mysql-include was given.
+if test "${with_mysql_include+set}" = set; then
+  withval=$with_mysql_include; MYSQL_HEADERS="$withval"
+
+fi
+
+
+
 if test "${MYSQL}" = "no"; then
 	{ echo "$as_me:$LINENO: result: skipped" >&5
 echo "${ECHO_T}skipped" >&6; }
 else
-	if test -z "$MYSQL_LIBDIR" ; then
-		{ echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
-	elif test -z "$MYSQL_INCDIR" ; then
-		{ echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
+	{ echo "$as_me:$LINENO: result: testing" >&5
+echo "${ECHO_T}testing" >&6; }
+	# ******* Search mysql headers *******
+
+	if test "${MYSQL_HEADERS}" = "yes"; then
+		{ echo "$as_me:$LINENO: checking autodect mysql headers" >&5
+echo $ECHO_N "checking autodect mysql headers... $ECHO_C" >&6; }
+		# Autodetect
+		for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
+			# check for plain setups
+			if test -f $w/mysql.h; then
+				MYSQL_INCDIR=$w
+				break
+			fi
+			# check for "/usr/include/<packagename>" type setups
+			if test -f $w/mysql/mysql.h; then
+				MYSQL_INCDIR=$w/mysql
+				break
+			fi
+			# check for "/usr/<packagename>/include" type setups
+			if test -f $w/mysql/include/mysql.h; then
+				MYSQL_INCDIR=$w/mysql/include
+				break
+			fi
+		done
+	elif test "${MYSQL_HEADERS}" = "no"; then
+		{ echo "$as_me:$LINENO: checking for mysql headers" >&5
+echo $ECHO_N "checking for mysql headers... $ECHO_C" >&6; }
+		{ echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6; }
+	else
+		{ echo "$as_me:$LINENO: checking for mysql headers in $withval" >&5
+echo $ECHO_N "checking for mysql headers in $withval... $ECHO_C" >&6; }
+		# Manual detection for <withval>
+        	if test -f $withval/mysql.h; then
+                	MYSQL_INCDIR=$withval
+	        fi
+	fi
+
+	if test -z "$MYSQL_INCDIR" ; then
+		MYSQL_HEADERS="no"
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
 		echo Invalid MySQL directory - unable to find mysql.h.
+	else
+		{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+		MYSQL_HEADERS="yes"
+	fi
+
+
+	if test "${MYSQL_HEADERS}" = "yes"; then
+
+	# ******* Search mysql libs *********
+	if test "${MYSQL_LIBS}" = "yes"; then
+		{ echo "$as_me:$LINENO: checking autodect mysql libs" >&5
+echo $ECHO_N "checking autodect mysql libs... $ECHO_C" >&6; }
+        	# Autodetect
+		for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
+			# check for plain setups
+			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w
+				break
+			fi
+			# check for "/usr/lib/<packagename>" type setups
+			if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w/mysql
+				break
+			fi
+			# check for "/usr/<packagename>/lib" type setups
+			if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w/mysql/lib
+				break
+			fi
+		done
+	elif test "${MYSQL_LIBS}" = "no"; then
+        	{ echo "$as_me:$LINENO: checking for mysql libs" >&5
+echo $ECHO_N "checking for mysql libs... $ECHO_C" >&6; }
+	        { echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6; }
+	else
+		{ echo "$as_me:$LINENO: checking for mysql libs in $withval" >&5
+echo $ECHO_N "checking for mysql libs in $withval... $ECHO_C" >&6; }
+		# Manual detection for <withval>
+		if test -f $withval/libmysqlclient.a -o -f $withval/libmysqlclient.so; then
+			MYSQL_LIBDIR=$withval
+		fi
+	fi
+
+
+	if test -z "$MYSQL_LIBDIR" ; then
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
 	else
 		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
 		#Add -lz for some mysql installs....
 		TEMP_LIBS="$TEMP_LIBS -lz"
 		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
-		{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
 		MYSQL_SUPPORT="yes"
 	fi
+
+	# end mysql-include , mysql-libs
+	fi
+
+# end Mysql detection
 fi
+
 
 
 PGSQL="yes"

@@ -81,7 +81,7 @@ dnl Check to Exclude BKTR
 dnl
 BKTR="yes"
 AC_ARG_WITH(bktr,
-[  --without-bktr           Exclude to use bktr subsystem , that usually useful
+[  --without-bktr          Exclude to use bktr subsystem , that usually useful
                           for devices as network cameras ( ONLY used in *BSD).
                           ]
                           ,
@@ -403,93 +403,141 @@ fi
 
 
 MYSQL="yes"
+MYSQL_SUPPORT="no"
+MYSQL_HEADERS="yes"
+MYSQL_LIBS="yes"
 
-AC_MSG_CHECKING(for MySQL)
+AC_MSG_CHECKING(for mysql support)
+
 AC_ARG_WITH(mysql,
-[  --with-mysql[=DIR]        Normally, configure will scan all possible default
-                          installation paths for mysql. When its fail, use
-                          this command to tell configure where mysql
-                          installation root directory is.
+[  --without-mysql         Disable mysql support in motion.
                           ],
 MYSQL="$withval"
 dnl if not given argument, assume standard
 )
 
-if test "${MYSQL}" = "yes"; then
-	# Autodetect
-	for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
-		# check for plain setups
-		if test -f $w/mysql.h; then
-			MYSQL_INCDIR=$w
-			break
-		fi
-		# check for "/usr/include/<packagename>" type setups
-		if test -f $w/mysql/mysql.h; then
-			MYSQL_INCDIR=$w/mysql
-			break
-		fi
-		# check for "/usr/<packagename>/include" type setups
-		if test -f $w/mysql/include/mysql.h; then
-			MYSQL_INCDIR=$w/mysql/include
-			break
-		fi
-	done
+AC_ARG_WITH(mysql-lib,
+[  --with-mysql-lib[=DIR]        Normally, configure will scan all possible default
+                          installation paths for mysql libs. When its fail, use
+                          this command to tell configure where mysql libs
+                          installation root directory is.
+                          ],
+MYSQL_LIBS="$withval"
+dnl if not given argument, assume standard
+)
 
-	for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
-		# check for plain setups
-		if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
-			MYSQL_LIBDIR=$w
-			break
-		fi
-		# check for "/usr/lib/<packagename>" type setups
-		if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
-			MYSQL_LIBDIR=$w/mysql
-			break
-		fi
-		# check for "/usr/<packagename>/lib" type setups
-		if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
-			MYSQL_LIBDIR=$w/mysql/lib
-			break
-		fi
-	done
-else
-	# Manual detection for <withval>/include/<packagename>
-	# and <withval>/include.
-	if test -f $withval/include/mysql/mysql.h; then
-		MYSQL_INCDIR=$withval/include/mysql
-	elif test -f $withval/include/mysql.h; then
-		MYSQL_INCDIR=$withval/include
-	fi
 
-	# Manual detection for <withval>/lib/<packagename>
-	# and <withval>/lib.
+AC_ARG_WITH(mysql-include,
+[  --with-mysql-include[=DIR]    Normally, configure will scan all possible default
+                          installation paths for mysql include. When its fail, use
+                          this command to tell configure where mysql include
+                          installation root directory is.
+                          ],
+MYSQL_HEADERS="$withval"
+dnl if not given argument, assume standard
+)
 
-	if test -f $withval/lib/mysql/libmysqlclient.a -o -f $withval/lib/mysql/libmysqlclient.so; then
-		MYSQL_LIBDIR=$withval/lib/mysql
-	elif test -f $withval/lib/libmysqlclient.a -o -f $withval/lib/libmysqlclient.so; then
-		MYSQL_LIBDIR=$withval/lib
-	fi
-fi
 
-## Did we find anything?
 if test "${MYSQL}" = "no"; then
 	AC_MSG_RESULT(skipped)
 else
-	if test -z "$MYSQL_LIBDIR" ; then
-		AC_MSG_RESULT(no)
-		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
-	elif test -z "$MYSQL_INCDIR" ; then
-		AC_MSG_RESULT(no)
+	AC_MSG_RESULT(testing)
+	# ******* Search mysql headers *******
+
+	if test "${MYSQL_HEADERS}" = "yes"; then
+		AC_MSG_CHECKING(autodect mysql headers)
+		# Autodetect
+		for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
+			# check for plain setups
+			if test -f $w/mysql.h; then
+				MYSQL_INCDIR=$w
+				break
+			fi
+			# check for "/usr/include/<packagename>" type setups
+			if test -f $w/mysql/mysql.h; then
+				MYSQL_INCDIR=$w/mysql
+				break
+			fi
+			# check for "/usr/<packagename>/include" type setups
+			if test -f $w/mysql/include/mysql.h; then
+				MYSQL_INCDIR=$w/mysql/include
+				break
+			fi
+		done
+	elif test "${MYSQL_HEADERS}" = "no"; then
+		AC_MSG_CHECKING(for mysql headers)	
+		AC_MSG_RESULT(skipped)
+	else
+		AC_MSG_CHECKING(for mysql headers in $withval)
+		# Manual detection for <withval>
+        	if test -f $withval/mysql.h; then
+                	MYSQL_INCDIR=$withval
+	        fi
+	fi
+
+	if test -z "$MYSQL_INCDIR" ; then
+		MYSQL_HEADERS="no"
+		AC_MSG_RESULT(not found)
 		echo Invalid MySQL directory - unable to find mysql.h.
+	else
+		AC_MSG_RESULT(yes)
+		MYSQL_HEADERS="yes"
+	fi
+
+
+	if test "${MYSQL_HEADERS}" = "yes"; then
+
+	# ******* Search mysql libs *********
+	if test "${MYSQL_LIBS}" = "yes"; then
+		AC_MSG_CHECKING(autodect mysql libs)
+        	# Autodetect
+		for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
+			# check for plain setups
+			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w
+				break
+			fi
+			# check for "/usr/lib/<packagename>" type setups
+			if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w/mysql
+				break
+			fi
+			# check for "/usr/<packagename>/lib" type setups
+			if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w/mysql/lib
+				break
+			fi
+		done
+	elif test "${MYSQL_LIBS}" = "no"; then
+        	AC_MSG_CHECKING(for mysql libs)
+	        AC_MSG_RESULT(skipped)
+	else
+		AC_MSG_CHECKING(for mysql libs in $withval)
+		# Manual detection for <withval>
+		if test -f $withval/libmysqlclient.a -o -f $withval/libmysqlclient.so; then
+			MYSQL_LIBDIR=$withval
+		fi
+	fi
+
+
+	if test -z "$MYSQL_LIBDIR" ; then
+		AC_MSG_RESULT(not found)
+		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
 	else
 		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
 		#Add -lz for some mysql installs....
 		TEMP_LIBS="$TEMP_LIBS -lz"
 		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
-		AC_MSG_RESULT(yes)
+		AC_MSG_RESULT(found)
 		MYSQL_SUPPORT="yes"
 	fi
+
+	# end mysql-include , mysql-libs
+	fi
+
+# end Mysql detection
 fi
+
 
 dnl Start Check for Postgresql
 AC_DEFUN(PGSQL_INC_CHK,[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
