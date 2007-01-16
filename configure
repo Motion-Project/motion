@@ -1705,6 +1705,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 VERSION=3.2.8
 
 
@@ -3505,11 +3506,11 @@ echo $ECHO_N "checking for mysql headers... $ECHO_C" >&6; }
 		{ echo "$as_me:$LINENO: result: skipped" >&5
 echo "${ECHO_T}skipped" >&6; }
 	else
-		{ echo "$as_me:$LINENO: checking for mysql headers in $withval" >&5
-echo $ECHO_N "checking for mysql headers in $withval... $ECHO_C" >&6; }
+		{ echo "$as_me:$LINENO: checking for mysql headers in $MYSQL_HEADERS" >&5
+echo $ECHO_N "checking for mysql headers in $MYSQL_HEADERS... $ECHO_C" >&6; }
 		# Manual detection for <withval>
-        	if test -f $withval/mysql.h; then
-                	MYSQL_INCDIR=$withval
+        	if test -f $MYSQL_HEADERS/mysql.h; then
+                	MYSQL_INCDIR=$MYSQL_HEADERS
 	        fi
 	fi
 
@@ -3555,11 +3556,11 @@ echo $ECHO_N "checking for mysql libs... $ECHO_C" >&6; }
 	        { echo "$as_me:$LINENO: result: skipped" >&5
 echo "${ECHO_T}skipped" >&6; }
 	else
-		{ echo "$as_me:$LINENO: checking for mysql libs in $withval" >&5
-echo $ECHO_N "checking for mysql libs in $withval... $ECHO_C" >&6; }
+		{ echo "$as_me:$LINENO: checking for mysql libs in $MYSQL_LIBS" >&5
+echo $ECHO_N "checking for mysql libs in $MYSQL_LIBS... $ECHO_C" >&6; }
 		# Manual detection for <withval>
-		if test -f $withval/libmysqlclient.a -o -f $withval/libmysqlclient.so; then
-			MYSQL_LIBDIR=$withval
+		if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
+			MYSQL_LIBDIR=$MYSQL_LIBS
 		fi
 	fi
 

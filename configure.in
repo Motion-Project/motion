@@ -1,5 +1,6 @@
 dnl Process this file with autoconf to produce a configure script
-AC_INIT(motion.c)
+AC_INIT
+AC_CONFIG_SRCDIR([motion.c])
 
 VERSION=3.2.8
 AC_SUBST(VERSION)
@@ -468,10 +469,10 @@ else
 		AC_MSG_CHECKING(for mysql headers)	
 		AC_MSG_RESULT(skipped)
 	else
-		AC_MSG_CHECKING(for mysql headers in $withval)
+		AC_MSG_CHECKING(for mysql headers in $MYSQL_HEADERS)
 		# Manual detection for <withval>
-        	if test -f $withval/mysql.h; then
-                	MYSQL_INCDIR=$withval
+        	if test -f $MYSQL_HEADERS/mysql.h; then
+                	MYSQL_INCDIR=$MYSQL_HEADERS
 	        fi
 	fi
 
@@ -512,10 +513,10 @@ else
         	AC_MSG_CHECKING(for mysql libs)
 	        AC_MSG_RESULT(skipped)
 	else
-		AC_MSG_CHECKING(for mysql libs in $withval)
+		AC_MSG_CHECKING(for mysql libs in $MYSQL_LIBS)
 		# Manual detection for <withval>
-		if test -f $withval/libmysqlclient.a -o -f $withval/libmysqlclient.so; then
-			MYSQL_LIBDIR=$withval
+		if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
+			MYSQL_LIBDIR=$MYSQL_LIBS
 		fi
 	fi
 
@@ -613,20 +614,17 @@ if test x$have_v4l2 = xfalse; then
 	AC_CHECK_HEADER(linux/videodev2.h,[have_v4l2_old=true],
 					[
 		    			AC_MSG_CHECKING([for linux/videodev2.h with sys/types.h])
-					AC_TRY_COMPILE([
+					AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 					#ifdef __linux__
 					#include <sys/types.h>
 					#include <linux/types.h>
 					#endif
-				    	],
-				    	[
+				    	]], [[
 				        	return 0;
-				    	],
-				    	[
+				    	]])],[
 				       	have_v4l2_old=true 
 				        AC_MSG_RESULT(yes)
-				    	],
-                                    	[
+				    	],[
 				        AC_MSG_RESULT(no)
                                     	])
                   			], 
@@ -922,13 +920,13 @@ fi
 
 AC_SUBST(BIN_PATH)
 
-AC_OUTPUT(
-motion.init-FreeBSD.sh
+AC_CONFIG_FILES([motion.init-FreeBSD.sh
 motion.init-Debian
 motion.init-RH
 motion.spec
 Makefile
-)
+])
+AC_OUTPUT
 
 echo ""
 echo "   ************************"
