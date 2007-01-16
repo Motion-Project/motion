@@ -611,28 +611,8 @@ fi
 dnl linux/videodev.h doesn't include videodev2.h
 if test x$have_v4l2 = xfalse; then
 	AC_MSG_CHECKING(for V42L *old* support)
-	AC_CHECK_HEADER(linux/videodev2.h,[have_v4l2_old=true],
-					[
-		    			AC_MSG_CHECKING([for linux/videodev2.h with sys/types.h])
-					AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-					#ifdef __linux__
-					#include <sys/types.h>
-					#include <linux/types.h>
-					#endif
-				    	]], [[
-				        	return 0;
-				    	]])],[
-				       	have_v4l2_old=true 
-				        AC_MSG_RESULT(yes)
-				    	],[
-				        AC_MSG_RESULT(no)
-                                    	])
-                  			], 
-					[
-					#ifdef __linux__
-					#include <linux/types.h>
-					#endif
-					])
+	AC_MSG_RESULT(testing)	
+	AC_CHECK_HEADER(linux/videodev2.h,[have_v4l2_old=true],[AC_MSG_RESULT(no)], [AC_MSG_RESULT(yes) have_v4l2_old=true])
 fi
 
 if test x$have_v4l2_old = xtrue; then
