@@ -362,6 +362,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 				return (-1);
 			}
 
+#ifdef HAVE_FFMPEG
 			/* TODO: Review when it has been tested */ 
 			if (pixformat == V4L2_PIX_FMT_MJPEG){
 				struct v4l2_jpegcompression v4l2_jpeg;
@@ -380,7 +381,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 					return 0;
 				}
 			}
-
+#endif
 			return 0;
 		}
 
