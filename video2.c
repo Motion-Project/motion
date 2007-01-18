@@ -64,17 +64,17 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
-#ifdef MOTION_V4L2_OLD
-// Seems that is needed for some system
-#include <linux/time.h>
-#include <linux/videodev2.h>
-#endif
-
 #include "motion.h"
 #include "netcam.h"
 #include "video.h"
 #include "rotate.h"
 #include "mjpeg.h"
+
+#ifdef MOTION_V4L2_OLD
+// Seems that is needed for some system
+#include <linux/time.h>
+#include <linux/videodev2.h>
+#endif
 
 #define u8 unsigned char
 #define u16 unsigned short
