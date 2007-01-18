@@ -20,6 +20,7 @@
  *  - setting tuner - NOT TESTED 
  *  - access to V4L2 device controls is missing. Will be added soon (high priority)
  *  - changing resolution at run-time may not work. 
+ *  - ucvideo svn r75 or above to work with MJPEG ( i.ex Logitech 5000 pro )
  
  * This work is inspired by fswebcam and current design of motion.
  * This interface has been tested with ZC0301 driver from kernel 2.6.17.3 and Labtec's usb camera (PAS202 sensor)
@@ -45,7 +46,7 @@
 */
 
 #ifndef WITHOUT_V4L
-#ifdef HAVE_V4L2 
+#ifdef MOTION_V4L2 
 #               warning **************************************************
 #		warning		Using experimental V4L2 support
 #               warning **************************************************
@@ -63,7 +64,9 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
-#ifdef HAVE_V4L2_OLD
+#ifdef MOTION_V4L2_OLD
+// Seems that is needed for some system
+#include <linux/time.h>
 #include <linux/videodev2.h>
 #endif
 
@@ -71,10 +74,14 @@
 #include "netcam.h"
 #include "video.h"
 #include "rotate.h"
+#include "mjpeg.h"
 
 #define u8 unsigned char
 #define u16 unsigned short
 #define u32 unsigned int
+
+#define MMAP_BUFFERS 4
+#define MIN_MMAP_BUFFERS 2
 
 #ifndef V4L2_PIX_FMT_SBGGR8
 /* see http://www.siliconimaging.com/RGB%20Bayer.htm */
@@ -121,6 +128,7 @@ typedef struct {
 
 	netcam_buff *buffers;
 
+	struct mjpeg *mjpeg;
 	int pframe;
 
 	u32 ctrl_flags;
@@ -196,6 +204,9 @@ static int v4l2_get_capability(src_v4l2_t * s)
 static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long freq_, int tuner_number)
 {
 	struct v4l2_input input;
+	struct v4l2_standard standard;
+	v4l2_std_id std_id;
+
 
 	if (in == 8)
 		in = 0;
@@ -215,10 +226,43 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 	if (input.type & V4L2_INPUT_TYPE_CAMERA)
 		motion_log(LOG_INFO, 0, "- CAMERA");
 
+
 	if (xioctl(s->fd, VIDIOC_S_INPUT, &in) == -1) {
 		motion_log(LOG_ERR, 0, "Error selecting input %d", in);
 		motion_log(LOG_ERR, 0, "VIDIOC_S_INPUT: %s", strerror(errno));
 		return (-1);
+	}
+
+	/* Set video standard usually webcams doesn't support the ioctl or return V4L2_STD_UNKNOWN */ 
+	if (xioctl(s->fd, VIDIOC_G_STD, &std_id) == -1){
+		motion_log(LOG_INFO, 0, "Device doesn't support VIDIOC_G_STD ");
+		std_id = 0; // V4L2_STD_UNKNOWN = 0
+	}	
+
+	if ( std_id ){
+		memset (&standard, 0, sizeof (standard));
+		standard.index = 0;
+
+		while (xioctl(s->fd,VIDIOC_ENUMSTD, &standard)== 0){
+			if (standard.id & std_id) {
+				motion_log(LOG_INFO, 0, "- video standard %s", standard.name);
+			}
+			standard.index++;
+		}
+
+		switch (norm){
+			case 1:std_id = V4L2_STD_NTSC;
+			break;
+			case 2:std_id = V4L2_STD_SECAM;
+			break;
+			default:std_id = V4L2_STD_PAL;
+		}
+
+		if (xioctl (s->fd, VIDIOC_S_STD, &std_id) == -1) {
+			motion_log(LOG_ERR, 0, "Error selecting standard method %d", std_id);	
+			motion_log(LOG_ERR, 0, "VIDIOC_S_STD: %s", strerror(errno));
+			return (-1);
+		}	
 	}
 
 	/* If this input is attached to a tuner, set the frequency. */
@@ -256,8 +300,8 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 	int v4l2_pal;
 
 	static const u32 supported_formats[] = {	/* higher index means better chance to be used */
-		V4L2_PIX_FMT_SBGGR8,
 		V4L2_PIX_FMT_SN9C10X,
+		V4L2_PIX_FMT_SBGGR8,
 		V4L2_PIX_FMT_MJPEG,
 		V4L2_PIX_FMT_JPEG,
 		V4L2_PIX_FMT_RGB24,
@@ -299,7 +343,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 		s->fmt.fmt.pix.width = *width;
 		s->fmt.fmt.pix.height = *height;
 		s->fmt.fmt.pix.pixelformat = pixformat;
-		s->fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+		s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
 		if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
 			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8,
@@ -316,6 +360,25 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 				motion_log(LOG_ERR, 0, "Error setting pixel format.");
 				motion_log(LOG_ERR, 0, "VIDIOC_S_FMT: %s", strerror(errno));
 				return (-1);
+			}
+
+			/* TODO: Review when it has been tested */ 
+			if (pixformat == V4L2_PIX_FMT_MJPEG){
+				struct v4l2_jpegcompression v4l2_jpeg;
+
+				if (xioctl(s->fd,VIDIOC_G_JPEGCOMP,&v4l2_jpeg) == -1){
+					motion_log(LOG_ERR, 0, "VIDIOC_G_JPEGCOMP not supported but it should");
+				}else{
+					v4l2_jpeg.jpeg_markers |= V4L2_JPEG_MARKER_DHT;
+					if (xioctl(s->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)
+						motion_log(LOG_ERR, 0, "VIDIOC_S_JPEGCOMP %s",strerror(errno));
+						
+				}
+
+				if ((s->mjpeg = MJPEGStartDecoder(s->fmt.fmt.pix.width, s->fmt.fmt.pix.height)) == NULL){ 
+					motion_log(LOG_ERR, 0, "Error registering mjpeg extension %s",strerror(errno));
+					return 0;
+				}
 			}
 
 			return 0;
@@ -342,7 +405,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 
 	memset(&s->req, 0, sizeof(struct v4l2_requestbuffers));
 
-	s->req.count = 2;
+	s->req.count = MMAP_BUFFERS;
 	s->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	s->req.memory = V4L2_MEMORY_MMAP;
 
@@ -355,7 +418,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 	motion_log(LOG_DEBUG, 0, "mmap information:");
 	motion_log(LOG_DEBUG, 0, "frames=%d", s->req.count);
 
-	if (s->req.count < 2) {
+	if (s->req.count < MIN_MMAP_BUFFERS) {
 		motion_log(LOG_ERR, 0, "Insufficient buffer memory.");
 		return (-1);
 	}
@@ -587,7 +650,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 #endif
 	if (v4l2_set_mmap(s)) {
 		goto err;
-	}
+	}	
 
 	viddev->size_map = 0;
 	viddev->v4l_buffers[0] = NULL;
@@ -690,10 +753,17 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 		return 0;
 
 	case V4L2_PIX_FMT_YUV420:
-		memcpy(map, s->buffers[s->buf.index].ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].length;
+		memcpy(map, s->buffers[s->buf.index].ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].size;
 		return 0;
-
+#ifdef HAVE_FFMPEG
 	case V4L2_PIX_FMT_MJPEG:
+		s->buffers[s->buf.index].ptr = (char *)MJPEGDecodeFrame((unsigned char *)s->buffers[s->buf.index].ptr, s->buffers[s->buf.index].content_length, cnt->imgs.common_buffer, (width*height*3), s->mjpeg);
+
+		if (s->buffers[s->buf.index].ptr == NULL) 
+			return 2; /* Error decoding MJPEG frame */
+
+		return conv_jpeg2yuv420(cnt, map, &s->buffers[s->buf.index], viddev->v4l_bufsize, width, height);
+#endif		
 	case V4L2_PIX_FMT_JPEG:
 		return conv_jpeg2yuv420(cnt, map, &s->buffers[s->buf.index], viddev->v4l_bufsize, width, height);
 
@@ -717,6 +787,13 @@ void v4l2_close(struct video_dev *viddev)
 {
 	src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
 	enum v4l2_buf_type type;
+
+#ifdef HAVE_FFMPEG
+	if (s->fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_MJPEG){
+		MJPEGStopDecoder(s->mjpeg);
+		free(s->mjpeg);
+	}
+#endif 
 	
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	xioctl (s->fd, VIDIOC_STREAMOFF, &type);

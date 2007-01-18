@@ -217,18 +217,23 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 	switch (viddev->v4l_fmt) {
 		case VIDEO_PALETTE_YUV420P:
 			viddev->v4l_bufsize=(width*height*3)/2;
+			motion_log(LOG_DEBUG, 0, "Using VIDEO_PALETTE_YUV420P palette");
 			break;
 		case VIDEO_PALETTE_YUV422:
 			viddev->v4l_bufsize=(width*height*2);
+			motion_log(LOG_DEBUG, 0, "Using VIDEO_PALETTE_YUV422 palette");
 			break;
 		case VIDEO_PALETTE_YUYV:
 			viddev->v4l_bufsize=(width*height*2);
+			motion_log(LOG_DEBUG, 0, "Using VIDEO_PALETTE_YUYV palette");
 			break;
 		case VIDEO_PALETTE_RGB24:
 			viddev->v4l_bufsize=(width*height*3);
+			motion_log(LOG_DEBUG, 0, "Using VIDEO_PALETTE_RGB24 palette");
 			break;
 		case VIDEO_PALETTE_GREY:
 			viddev->v4l_bufsize=width*height;
+			motion_log(LOG_DEBUG, 0, "Using VIDEO_PALETTE_GREY palette");
 			break;
 	}
 	return map;

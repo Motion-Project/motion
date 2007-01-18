@@ -4845,8 +4845,8 @@ done
 
 
 
-have_v4l2=false
-have_v4l2_old=false
+SUPPORTED_V4L2=false
+SUPPORTED_V4L2_old=false
 { echo "$as_me:$LINENO: checking for struct v4l2_buffer" >&5
 echo $ECHO_N "checking for struct v4l2_buffer... $ECHO_C" >&6; }
 if test "${ac_cv_type_struct_v4l2_buffer+set}" = set; then
@@ -4920,31 +4920,35 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_type_struct_v4l2_buffer" >&5
 echo "${ECHO_T}$ac_cv_type_struct_v4l2_buffer" >&6; }
 if test $ac_cv_type_struct_v4l2_buffer = yes; then
-  have_v4l2=true
+  SUPPORTED_V4L2=true
 else
-  have_v4l2=false
+  SUPPORTED_V4L2=false
 fi
 
 
 { echo "$as_me:$LINENO: checking for V42L support" >&5
 echo $ECHO_N "checking for V42L support... $ECHO_C" >&6; }
-if test x$have_v4l2 = xtrue; then
+if test x$SUPPORTED_V4L2 = xtrue; then
 	{ echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2"
 else
 	{ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
 fi
 
-if test x$have_v4l2 = xfalse; then
+if test x$SUPPORTED_V4L2 = xfalse; then
 	{ echo "$as_me:$LINENO: checking for V42L *old* support" >&5
 echo $ECHO_N "checking for V42L *old* support... $ECHO_C" >&6; }
 	{ echo "$as_me:$LINENO: result: testing" >&5
 echo "${ECHO_T}testing" >&6; }
-	{ echo "$as_me:$LINENO: checking for linux/videodev2.h" >&5
-echo $ECHO_N "checking for linux/videodev2.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_linux_videodev2_h+set}" = set; then
+
+for ac_header in linux/videodev2.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+{ echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6; }
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -4953,10 +4957,9 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; } have_v4l2_old=true
+#include <asm/types.h>
 
-#include <linux/videodev2.h>
+#include <$ac_header>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (ac_try="$ac_compile"
@@ -4992,34 +4995,35 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_header_linux_videodev2_h=yes
+  eval "$as_ac_Header=yes"
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_header_linux_videodev2_h=no
+	eval "$as_ac_Header=no"
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_linux_videodev2_h" >&5
-echo "${ECHO_T}$ac_cv_header_linux_videodev2_h" >&6; }
-if test $ac_cv_header_linux_videodev2_h = yes; then
-  have_v4l2_old=true
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
+ac_res=`eval echo '${'$as_ac_Header'}'`
+	       { echo "$as_me:$LINENO: result: $ac_res" >&5
+echo "${ECHO_T}$ac_res" >&6; }
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ SUPPORTED_V4L2_old=true
+fi
+
+done
+
 fi
 
 
+if test x$SUPPORTED_V4L2_old = xtrue; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2 -DMOTION_V4L2_OLD"
+	SUPPORTED_V4L2=true
 fi
-
-if test x$have_v4l2_old = xtrue; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2 -DHAVE_V4L2_OLD"
-	have_v4l2=true
-fi
-
-
 
 { echo "$as_me:$LINENO: checking for short int" >&5
 echo $ECHO_N "checking for short int... $ECHO_C" >&6; }
@@ -8025,7 +8029,7 @@ else
 		echo "V4L included:        No"
 	fi
 
-	if test x$have_v4l2 = xtrue; then
+	if test x$SUPPORTED_V4L2 = xtrue; then
 		echo "V4L2 supported:      Yes"
 	else
 		echo "V4L2 supported:      No"

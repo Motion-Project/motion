@@ -1,3 +1,13 @@
+/*      video_common.c
+ *
+ *      Video stream functions for motion.
+ *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *      	  2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)	
+ *      	  2007 by Angel Carpinteo (ack@telefonica.net)
+ *      This software is distributed under the GNU public license version 2
+ *      See also the file 'COPYING'.
+ *
+ */
 
 #include "motion.h"
 #include "video.h"
@@ -483,7 +493,7 @@ void vid_close(void)
 
 	if (viddevs) {
 		while (viddevs[++i]) {
-#ifdef HAVE_V4L2
+#ifdef MOTION_V4L2
 			if (viddevs[i]->v4l2)
 				v4l2_close(viddevs[i]);
 #else
@@ -506,7 +516,7 @@ void vid_cleanup(void)
 	int i = -1;
 	if (viddevs) {
 		while (viddevs[++i]) {
-#ifdef HAVE_V4L2
+#ifdef MOTION_V4L2
 			if (viddevs[i]->v4l2)
 				v4l2_cleanup(viddevs[i]);
 			else
@@ -655,7 +665,7 @@ static int vid_v4lx_start(struct context *cnt)
 		viddevs[i]->hue = 0;
 		viddevs[i]->owner = -1;
 		viddevs[i]->v4l_fmt = VIDEO_PALETTE_YUV420P;
-#ifdef HAVE_V4L2
+#ifdef MOTION_V4L2
 		/* First lets try V4L2 and if it's not supported V4L1 */
 
 		viddevs[i]->v4l2 = 1;
@@ -666,7 +676,7 @@ static int vid_v4lx_start(struct context *cnt)
 				pthread_mutex_unlock(&vid_mutex);
 				return -1;
 			}
-#ifdef HAVE_V4L2
+#ifdef MOTION_V4L2
 			viddevs[i]->v4l2 =0;
 		}
 #endif
@@ -774,7 +784,7 @@ int vid_next(struct context *cnt, unsigned char *map)
 			viddevs[i]->frames = conf->roundrobin_frames;
 			cnt->switched = 1;
 		}
-#ifdef HAVE_V4L2
+#ifdef MOTION_V4L2
 		if (viddevs[i]->v4l2) {
 			v4l2_set_input(cnt, viddevs[i], map, width, height, conf);
 
@@ -785,7 +795,7 @@ int vid_next(struct context *cnt, unsigned char *map)
 				      conf->roundrobin_skip, conf->frequency, conf->tuner_number);
 
 			ret = v4l_next(viddevs[i], map, width, height);
-#ifdef HAVE_V4L2
+#ifdef MOTION_V4L2
 		}
 #endif
 		if (--viddevs[i]->frames <= 0) {

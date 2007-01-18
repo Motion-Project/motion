@@ -592,35 +592,34 @@ AC_CHECK_HEADERS(stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h
 
 
 dnl check if v4l2 is available
-have_v4l2=false
-have_v4l2_old=false
+SUPPORTED_V4L2=false
+SUPPORTED_V4L2_old=false
 AC_CHECK_TYPE([struct v4l2_buffer], 
-              [have_v4l2=true],
-              [have_v4l2=false],
+              [SUPPORTED_V4L2=true],
+              [SUPPORTED_V4L2=false],
 	        [#include <sys/time.h>
 		#include <linux/videodev.h>])
 
 AC_MSG_CHECKING(for V42L support)
-if test x$have_v4l2 = xtrue; then
+if test x$SUPPORTED_V4L2 = xtrue; then
 	AC_MSG_RESULT(yes)
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2"
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2"
 else	
 	AC_MSG_RESULT(no)
 fi
 
 dnl linux/videodev.h doesn't include videodev2.h
-if test x$have_v4l2 = xfalse; then
+if test x$SUPPORTED_V4L2 = xfalse; then
 	AC_MSG_CHECKING(for V42L *old* support)
-	AC_MSG_RESULT(testing)	
-	AC_CHECK_HEADER(linux/videodev2.h,[have_v4l2_old=true],[AC_MSG_RESULT(no)], [AC_MSG_RESULT(yes) have_v4l2_old=true])
+	AC_MSG_RESULT(testing)
+	AC_CHECK_HEADERS(linux/videodev2.h,[SUPPORTED_V4L2_old=true],[], [#include <asm/types.h>])
 fi
 
-if test x$have_v4l2_old = xtrue; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_V4L2 -DHAVE_V4L2_OLD"
-	have_v4l2=true
-fi	
 
-
+if test x$SUPPORTED_V4L2_old = xtrue; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2 -DMOTION_V4L2_OLD"
+	SUPPORTED_V4L2=true
+fi
 
 dnl Check sizes of integer types
 AC_CHECK_SIZEOF(short int)
@@ -959,7 +958,7 @@ else
 		echo "V4L included:        No"
 	fi
 
-	if test x$have_v4l2 = xtrue; then
+	if test x$SUPPORTED_V4L2 = xtrue; then
 		echo "V4L2 supported:      Yes"	
 	else
 		echo "V4L2 supported:      No"
