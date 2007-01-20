@@ -1,7 +1,7 @@
 /*
  *	video2.c
  *
- *	V4L2 interface with basically JPEG decompression support
+ *	V4L2 interface with basically JPEG decompression support and even more ...
  *	Copyright 2006 Krzysztof Blaszkowski (kb@sysmikro.com.pl)
  *		  2007 Angel Carpintero (ack@telefonica.net)
  
@@ -11,14 +11,14 @@
  *  		V4L2_PIX_FMT_SBGGR8	( sonix )	
  *  		V4L2_PIX_FMT_SN9C10X	( sonix )
  *  		V4L2_PIX_FMT_MJPEG,
- *  		V4L2_PIX_FMT_JPEG,
+ *  		V4L2_PIX_FMT_JPEG,	( tested )
 		V4L2_PIX_FMT_RGB24,
 		V4L2_PIX_FMT_YUV422P,
-		V4L2_PIX_FMT_YUV420, ( tested )
-		V4L2_PIX_FMT_YUYV ( tested )
+		V4L2_PIX_FMT_YUV420, 	( tested )
+		V4L2_PIX_FMT_YUYV 	( tested )
  
  *  - setting tuner - NOT TESTED 
- *  - access to V4L2 device controls is missing. Will be added soon (high priority)
+ *  - access to V4L2 device controls is missing. Partially added but requires some improvements likely.
  *  - changing resolution at run-time may not work. 
  *  - ucvideo svn r75 or above to work with MJPEG ( i.ex Logitech 5000 pro )
  
@@ -46,7 +46,7 @@
 */
 
 #ifndef WITHOUT_V4L
-#ifdef MOTION_V4L2 
+#ifdef MOTION_V4L2
 #               warning **************************************************
 #		warning		Using experimental V4L2 support
 #               warning **************************************************
@@ -85,15 +85,15 @@
 
 #ifndef V4L2_PIX_FMT_SBGGR8
 /* see http://www.siliconimaging.com/RGB%20Bayer.htm */
-#define V4L2_PIX_FMT_SBGGR8  v4l2_fourcc('B','A','8','1') /*  8  BGBG.. GRGR.. */ 
+#define V4L2_PIX_FMT_SBGGR8  v4l2_fourcc('B','A','8','1')	/*  8  BGBG.. GRGR.. */
 #endif
 
 #ifndef V4L2_PIX_FMT_MJPEG
-#define V4L2_PIX_FMT_MJPEG    v4l2_fourcc('M','J','P','G') /* Motion-JPEG   */ 
+#define V4L2_PIX_FMT_MJPEG    v4l2_fourcc('M','J','P','G')	/* Motion-JPEG   */
 #endif
 
 #ifndef V4L2_PIX_FMT_SN9C10X
-#define V4L2_PIX_FMT_SN9C10X v4l2_fourcc('S','9','1','0') /* SN9C10x compression */
+#define V4L2_PIX_FMT_SN9C10X v4l2_fourcc('S','9','1','0')	/* SN9C10x compression */
 #endif
 
 #define ZC301_V4L2_CID_DAC_MAGN 	V4L2_CID_PRIVATE_BASE
@@ -136,16 +136,16 @@ typedef struct {
 
 } src_v4l2_t;
 
+static int xioctl(int fd, int request, void *arg)
+{
+	int r;
 
-static int xioctl(int fd, int request, void * arg){
-        int r;
+	do
+		r = ioctl(fd, request, arg);
+	while (-1 == r && EINTR == errno);
 
-        do r = ioctl (fd, request, arg);
-        while (-1 == r && EINTR == errno);
-
-        return r;
+	return r;
 }
-
 
 static int v4l2_get_capability(src_v4l2_t * s)
 {
@@ -176,14 +176,6 @@ static int v4l2_get_capability(src_v4l2_t * s)
 		motion_log(LOG_INFO, 0, "- TUNER");
 	if (s->cap.capabilities & V4L2_CAP_AUDIO)
 		motion_log(LOG_INFO, 0, "- AUDIO");
-#if 0
-	// not sense to check if is a radio device
-	// moreover it breaks compilation for some 2.6.x kernels
-	// that don't include V4L2_CAP_RADIO in videodev2.h
-
-	if (s->cap.capabilities & V4L2_CAP_RADIO)
-		motion_log(LOG_INFO, 0, "- RADIO");
-#endif
 	if (s->cap.capabilities & V4L2_CAP_READWRITE)
 		motion_log(LOG_INFO, 0, "- READWRITE");
 	if (s->cap.capabilities & V4L2_CAP_ASYNCIO)
@@ -207,7 +199,6 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 	struct v4l2_standard standard;
 	v4l2_std_id std_id;
 
-
 	if (in == 8)
 		in = 0;
 
@@ -226,43 +217,45 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 	if (input.type & V4L2_INPUT_TYPE_CAMERA)
 		motion_log(LOG_INFO, 0, "- CAMERA");
 
-
 	if (xioctl(s->fd, VIDIOC_S_INPUT, &in) == -1) {
 		motion_log(LOG_ERR, 0, "Error selecting input %d", in);
 		motion_log(LOG_ERR, 0, "VIDIOC_S_INPUT: %s", strerror(errno));
 		return (-1);
 	}
 
-	/* Set video standard usually webcams doesn't support the ioctl or return V4L2_STD_UNKNOWN */ 
-	if (xioctl(s->fd, VIDIOC_G_STD, &std_id) == -1){
+	/* Set video standard usually webcams doesn't support the ioctl or return V4L2_STD_UNKNOWN */
+	if (xioctl(s->fd, VIDIOC_G_STD, &std_id) == -1) {
 		motion_log(LOG_INFO, 0, "Device doesn't support VIDIOC_G_STD ");
-		std_id = 0; // V4L2_STD_UNKNOWN = 0
-	}	
+		std_id = 0;	// V4L2_STD_UNKNOWN = 0
+	}
 
-	if ( std_id ){
-		memset (&standard, 0, sizeof (standard));
+	if (std_id) {
+		memset(&standard, 0, sizeof(standard));
 		standard.index = 0;
 
-		while (xioctl(s->fd,VIDIOC_ENUMSTD, &standard)== 0){
+		while (xioctl(s->fd, VIDIOC_ENUMSTD, &standard) == 0) {
 			if (standard.id & std_id) {
 				motion_log(LOG_INFO, 0, "- video standard %s", standard.name);
 			}
 			standard.index++;
 		}
 
-		switch (norm){
-			case 1:std_id = V4L2_STD_NTSC;
+		switch (norm) {
+		case 1:
+			std_id = V4L2_STD_NTSC;
 			break;
-			case 2:std_id = V4L2_STD_SECAM;
+		case 2:
+			std_id = V4L2_STD_SECAM;
 			break;
-			default:std_id = V4L2_STD_PAL;
+		default:
+			std_id = V4L2_STD_PAL;
 		}
 
-		if (xioctl (s->fd, VIDIOC_S_STD, &std_id) == -1) {
-			motion_log(LOG_ERR, 0, "Error selecting standard method %d", std_id);	
+		if (xioctl(s->fd, VIDIOC_S_STD, &std_id) == -1) {
+			motion_log(LOG_ERR, 0, "Error selecting standard method %d", std_id);
 			motion_log(LOG_ERR, 0, "VIDIOC_S_STD: %s", strerror(errno));
-			return (-1);
-		}	
+		//	return (-1);
+		}
 	}
 
 	/* If this input is attached to a tuner, set the frequency. */
@@ -288,7 +281,6 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		if (xioctl(s->fd, VIDIOC_S_FREQUENCY, &freq) == -1) {
 			return (0);
 		}
-
 	}
 
 	return (0);
@@ -349,9 +341,10 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8,
 				   pixformat >> 16, pixformat >> 24, *width, *height);
 
-			if (s->fmt.fmt.pix.width != (unsigned int)*width || s->fmt.fmt.pix.height != (unsigned int)*height) {
-				motion_log(LOG_INFO, 0, "Adjusting resolution from %ix%i to %ix%i.",
-					   *width, *height, s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
+			if (s->fmt.fmt.pix.width != (unsigned int) *width
+			    || s->fmt.fmt.pix.height != (unsigned int) *height) {
+				motion_log(LOG_INFO, 0, "Adjusting resolution from %ix%i to %ix%i.", *width, *height,
+					   s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
 				*width = s->fmt.fmt.pix.width;
 				*height = s->fmt.fmt.pix.height;
 			}
@@ -361,23 +354,22 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 				motion_log(LOG_ERR, 0, "VIDIOC_S_FMT: %s", strerror(errno));
 				return (-1);
 			}
-
 #ifdef HAVE_FFMPEG
-			/* TODO: Review when it has been tested */ 
-			if (pixformat == V4L2_PIX_FMT_MJPEG){
+			/* TODO: Review when it has been tested */
+			if (pixformat == V4L2_PIX_FMT_MJPEG) {
 				struct v4l2_jpegcompression v4l2_jpeg;
 
-				if (xioctl(s->fd,VIDIOC_G_JPEGCOMP,&v4l2_jpeg) == -1){
+				if (xioctl(s->fd, VIDIOC_G_JPEGCOMP, &v4l2_jpeg) == -1) {
 					motion_log(LOG_ERR, 0, "VIDIOC_G_JPEGCOMP not supported but it should");
-				}else{
+				} else {
 					v4l2_jpeg.jpeg_markers |= V4L2_JPEG_MARKER_DHT;
 					if (xioctl(s->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)
-						motion_log(LOG_ERR, 0, "VIDIOC_S_JPEGCOMP %s",strerror(errno));
-						
+						motion_log(LOG_ERR, 0, "VIDIOC_S_JPEGCOMP %s", strerror(errno));
+
 				}
 
-				if ((s->mjpeg = MJPEGStartDecoder(s->fmt.fmt.pix.width, s->fmt.fmt.pix.height)) == NULL){ 
-					motion_log(LOG_ERR, 0, "Error registering mjpeg extension %s",strerror(errno));
+				if ((s->mjpeg = MJPEGStartDecoder(s->fmt.fmt.pix.width, s->fmt.fmt.pix.height)) == NULL) {
+					motion_log(LOG_ERR, 0, "Error registering mjpeg extension %s", strerror(errno));
 					return 0;
 				}
 			}
@@ -651,7 +643,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 #endif
 	if (v4l2_set_mmap(s)) {
 		goto err;
-	}	
+	}
 
 	viddev->size_map = 0;
 	viddev->v4l_buffers[0] = NULL;
@@ -743,42 +735,50 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
 	pthread_sigmask(SIG_UNBLOCK, &old, NULL);	/*undo the signal blocking */
 
-	switch (s->fmt.fmt.pix.pixelformat) {
-	case V4L2_PIX_FMT_RGB24:
-		conv_rgb24toyuv420p(map, (unsigned char *)s->buffers[s->buf.index].ptr, width, height);
-		return 0;
+	{
+		netcam_buff *the_buffer = &s->buffers[s->buf.index];
 
-	case V4L2_PIX_FMT_YUYV:
-	case V4L2_PIX_FMT_YUV422P:
-		conv_yuv422to420p(map, (unsigned char *)s->buffers[s->buf.index].ptr, width, height);
-		return 0;
+		switch (s->fmt.fmt.pix.pixelformat) {
+		case V4L2_PIX_FMT_RGB24:
+			conv_rgb24toyuv420p(map, (unsigned char *) the_buffer->ptr, width, height);
+			return 0;
 
-	case V4L2_PIX_FMT_YUV420:
-		memcpy(map, s->buffers[s->buf.index].ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].size;
-		return 0;
+		case V4L2_PIX_FMT_YUYV:
+		case V4L2_PIX_FMT_YUV422P:
+			conv_yuv422to420p(map, (unsigned char *) the_buffer->ptr, width, height);
+			return 0;
+
+		case V4L2_PIX_FMT_YUV420:
+			memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].size;
+			return 0;
 #ifdef HAVE_FFMPEG
-	case V4L2_PIX_FMT_MJPEG:
-		s->buffers[s->buf.index].ptr = (char *)MJPEGDecodeFrame((unsigned char *)s->buffers[s->buf.index].ptr, s->buffers[s->buf.index].content_length, cnt->imgs.common_buffer, (width*height*3), s->mjpeg);
+		case V4L2_PIX_FMT_MJPEG:
+			{
+				netcam_buff temp_netcam_buff = *the_buffer;
 
-		if (s->buffers[s->buf.index].ptr == NULL) 
-			return 2; /* Error decoding MJPEG frame */
+				temp_netcam_buff.ptr =
+				    (char *) MJPEGDecodeFrame((unsigned char *) the_buffer->ptr,
+							      the_buffer->content_length, cnt->imgs.common_buffer,
+							      (width * height * 3), s->mjpeg);
+				return conv_jpeg2yuv420(cnt, map, &temp_netcam_buff, viddev->v4l_bufsize, width,
+							height);
+			}
+#endif
+		case V4L2_PIX_FMT_JPEG:
+			return conv_jpeg2yuv420(cnt, map, the_buffer, viddev->v4l_bufsize, width, height);
 
-		return conv_jpeg2yuv420(cnt, map, &s->buffers[s->buf.index], viddev->v4l_bufsize, width, height);
-#endif		
-	case V4L2_PIX_FMT_JPEG:
-		return conv_jpeg2yuv420(cnt, map, &s->buffers[s->buf.index], viddev->v4l_bufsize, width, height);
+		case V4L2_PIX_FMT_SBGGR8:	/* bayer */
+			bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *) the_buffer->ptr, width, height);
+			conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+			return 0;
 
-	case V4L2_PIX_FMT_SBGGR8: /* bayer */ 
-		bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *)s->buffers[s->buf.index].ptr, width, height);
-		conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
-		return 0;
-
-	case V4L2_PIX_FMT_SN9C10X:
-		sonix_decompress_init();
-		sonix_decompress(map, (unsigned char *)s->buffers[s->buf.index].ptr, width, height);
-		bayer2rgb24(cnt->imgs.common_buffer , map, width, height);
-		conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
-		return 0;
+		case V4L2_PIX_FMT_SN9C10X:
+			//sonix_decompress_init(); // now it is not necessary to call it every time
+			sonix_decompress(map, (unsigned char *) the_buffer->ptr, width, height);
+			bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
+			conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+			return 0;
+		}
 	}
 
 	return 1;
@@ -790,15 +790,15 @@ void v4l2_close(struct video_dev *viddev)
 	enum v4l2_buf_type type;
 
 #ifdef HAVE_FFMPEG
-	if (s->fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_MJPEG){
+	if (s->fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_MJPEG) {
 		MJPEGStopDecoder(s->mjpeg);
 		free(s->mjpeg);
 	}
-#endif 
-	
+#endif
+
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	xioctl (s->fd, VIDIOC_STREAMOFF, &type);
-	close (s->fd);
+	xioctl(s->fd, VIDIOC_STREAMOFF, &type);
+	close(s->fd);
 	s->fd = -1;
 }
 

@@ -17,16 +17,10 @@
 #define CLAMP(x)        ((x)<0?0:((x)>255)?255:(x))
 
 typedef struct {
-  int is_abs;
-  int len;
-  int val;
+	int is_abs;
+	int len;
+	int val;
 } code_table_t;
-
-
-/* local storage */
-static code_table_t table[256];
-static int init_done = 0;
-
 
 /*
  *   sonix_decompress_init
@@ -37,69 +31,58 @@ static int init_done = 0;
  *   present at the MSB of byte x.
  *
  */
-void sonix_decompress_init(void)
+static void sonix_decompress_init(code_table_t * table)
 {
-  int i;
-  int is_abs, val, len;
+	int i;
+	int is_abs, val, len;
 
-  for (i = 0; i < 256; i++) {
-    is_abs = 0;
-    val = 0;
-    len = 0;
-    if ((i & 0x80) == 0) {
-      /* code 0 */
-      val = 0;
-      len = 1;
-    }
-    else if ((i & 0xE0) == 0x80) {
-      /* code 100 */
-      val = +4;
-      len = 3;
-    }
-    else if ((i & 0xE0) == 0xA0) {
-      /* code 101 */
-      val = -4;
-      len = 3;
-    }
-    else if ((i & 0xF0) == 0xD0) {
-      /* code 1101 */
-      val = +11;
-      len = 4;
-    }
-    else if ((i & 0xF0) == 0xF0) {
-      /* code 1111 */
-      val = -11;
-      len = 4;
-    }
-    else if ((i & 0xF8) == 0xC8) {
-      /* code 11001 */
-      val = +20;
-      len = 5;
-    }
-    else if ((i & 0xFC) == 0xC0) {
-      /* code 110000 */
-      val = -20;
-      len = 6;
-    }
-    else if ((i & 0xFC) == 0xC4) {
-      /* code 110001xx: unknown */
-      val = 0;
-      len = 8;
-    }
-    else if ((i & 0xF0) == 0xE0) {
-      /* code 1110xxxx */
-      is_abs = 1;
-      val = (i & 0x0F) << 4;
-      len = 8;
-    }
-    table[i].is_abs = is_abs;
-    table[i].val = val;
-    table[i].len = len;
-  }
-
-  init_done = 1;
+	for (i = 0; i < 256; i++) {
+		is_abs = 0;
+		val = 0;
+		len = 0;
+		if ((i & 0x80) == 0) {
+			/* code 0 */
+			val = 0;
+			len = 1;
+		} else if ((i & 0xE0) == 0x80) {
+			/* code 100 */
+			val = +4;
+			len = 3;
+		} else if ((i & 0xE0) == 0xA0) {
+			/* code 101 */
+			val = -4;
+			len = 3;
+		} else if ((i & 0xF0) == 0xD0) {
+			/* code 1101 */
+			val = +11;
+			len = 4;
+		} else if ((i & 0xF0) == 0xF0) {
+			/* code 1111 */
+			val = -11;
+			len = 4;
+		} else if ((i & 0xF8) == 0xC8) {
+			/* code 11001 */
+			val = +20;
+			len = 5;
+		} else if ((i & 0xFC) == 0xC0) {
+			/* code 110000 */
+			val = -20;
+			len = 6;
+		} else if ((i & 0xFC) == 0xC4) {
+			/* code 110001xx: unknown */
+			val = 0;
+			len = 8;
+		} else if ((i & 0xF0) == 0xE0) {
+			/* code 1110xxxx */
+			is_abs = 1;
+			val = (i & 0x0F) << 4;
+			len = 8;
+		}
+		table[i].is_abs = is_abs;
+		table[i].val = val;
+		table[i].len = len;
+	}
 }
-
 
 /*
  *   sonix_decompress
@@ -115,74 +98,76 @@ void sonix_decompress_init(void)
  *         Returns <0 if operation failed.
  *
  */
-int sonix_decompress(unsigned char *outp, unsigned char *inp,int width, int height)
+int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int height)
 {
-  int row, col;
-  int val;
-  int bitpos;
-  unsigned char code;
-  unsigned char *addr;
+	int row, col;
+	int val;
+	int bitpos;
+	unsigned char code;
+	unsigned char *addr;
 
-  if (!init_done) {
-    /* do sonix_decompress_init first! */
-    return -1;
-  }
+	/* local storage */
+	static code_table_t table[256];
+	static int init_done = 0;
 
-  bitpos = 0;
-  for (row = 0; row < height; row++) {
+	if (!init_done) {
+		init_done = 1;
+		sonix_decompress_init(table);
+		/* do sonix_decompress_init first! */
+		//return -1; // so it has been done and now fall through
+	}
 
-    col = 0;
+	bitpos = 0;
+	for (row = 0; row < height; row++) {
 
+		col = 0;
 
+		/* first two pixels in first two rows are stored as raw 8-bit */
+		if (row < 2) {
+			addr = inp + (bitpos >> 3);
+			code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
+			bitpos += 8;
+			*outp++ = code;
 
-    /* first two pixels in first two rows are stored as raw 8-bit */
-    if (row < 2) {
-      addr = inp + (bitpos >> 3);
-      code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
-      bitpos += 8;
-      *outp++ = code;
+			addr = inp + (bitpos >> 3);
+			code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
+			bitpos += 8;
+			*outp++ = code;
 
-      addr = inp + (bitpos >> 3);
-      code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
-      bitpos += 8;
-      *outp++ = code;
+			col += 2;
+		}
 
-      col += 2;
-    }
+		while (col < width) {
+			/* get bitcode from bitstream */
+			addr = inp + (bitpos >> 3);
+			code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
 
-    while (col < width) {
-      /* get bitcode from bitstream */
-      addr = inp + (bitpos >> 3);
-      code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
+			/* update bit position */
+			bitpos += table[code].len;
 
-      /* update bit position */
-      bitpos += table[code].len;
+			/* calculate pixel value */
+			val = table[code].val;
+			if (!table[code].is_abs) {
+				/* value is relative to top and left pixel */
+				if (col < 2) {
+					/* left column: relative to top pixel */
+					val += outp[-2 * width];
+				} else if (row < 2) {
+					/* top row: relative to left pixel */
+					val += outp[-2];
+				} else {
+					/* main area: average of left pixel and top pixel */
+					val += (outp[-2] + outp[-2 * width]) / 2;
+				}
+			}
 
-      /* calculate pixel value */
-      val = table[code].val;
-      if (!table[code].is_abs) {
-        /* value is relative to top and left pixel */
-        if (col < 2) {
-          /* left column: relative to top pixel */
-          val += outp[-2*width];
-        }
-        else if (row < 2) {
-          /* top row: relative to left pixel */
-          val += outp[-2];
-        }
-        else {
-          /* main area: average of left pixel and top pixel */
-          val += (outp[-2] + outp[-2*width]) / 2;
-        }
-      }
+			/* store pixel */
+			*outp++ = CLAMP(val);
+			col++;
+		}
+	}
 
-      /* store pixel */
-      *outp++ = CLAMP(val);
-      col++;
-    }
-  }
-
-  return 0;
+	return 0;
 }
 
 /*
@@ -195,79 +180,72 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp,int width, int heig
 
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height)
 {
-    long int i;
-    unsigned char *rawpt, *scanpt;
-    long int size;
+	long int i;
+	unsigned char *rawpt, *scanpt;
+	long int size;
 
-    rawpt = src;
-    scanpt = dst;
-    size = width*height;
+	rawpt = src;
+	scanpt = dst;
+	size = width * height;
 
-    for ( i = 0; i < size; i++ ) {
-  if ( (i/width) % 2 == 0 ) {
-      if ( (i % 2) == 0 ) {
-    /* B */
-    if ( (i > width) && ((i % width) > 0) ) {
-        *scanpt++ = (*(rawpt-width-1)+*(rawpt-width+1)+
-         *(rawpt+width-1)+*(rawpt+width+1))/4;  /* R */
-        *scanpt++ = (*(rawpt-1)+*(rawpt+1)+
-         *(rawpt+width)+*(rawpt-width))/4;      /* G */
-        *scanpt++ = *rawpt;                                     /* B */
-    } else {
-        /* first line or left column */
-        *scanpt++ = *(rawpt+width+1);           /* R */
-        *scanpt++ = (*(rawpt+1)+*(rawpt+width))/2;      /* G */
-        *scanpt++ = *rawpt;                             /* B */
-    }
-      } else {
-    /* (B)G */
-    if ( (i > width) && ((i % width) < (width-1)) ) {
-        *scanpt++ = (*(rawpt+width)+*(rawpt-width))/2;  /* R */
-        *scanpt++ = *rawpt;                                     /* G */
-        *scanpt++ = (*(rawpt-1)+*(rawpt+1))/2;          /* B */
-    } else {
-        /* first line or right column */
-        *scanpt++ = *(rawpt+width);     /* R */
-        *scanpt++ = *rawpt;             /* G */
-        *scanpt++ = *(rawpt-1); /* B */
-    }
-      }
-  } else {
-      if ( (i % 2) == 0 ) {
-    /* G(R) */
-    if ( (i < (width*(height-1))) && ((i % width) > 0) ) {
-        *scanpt++ = (*(rawpt-1)+*(rawpt+1))/2;          /* R */
-        *scanpt++ = *rawpt;                                     /* G */
-        *scanpt++ = (*(rawpt+width)+*(rawpt-width))/2;  /* B */
-    } else {
-        /* bottom line or left column */
-        *scanpt++ = *(rawpt+1);         /* R */
-        *scanpt++ = *rawpt;                     /* G */
-        *scanpt++ = *(rawpt-width);             /* B */
-    }
-      } else {
-    /* R */
-    if ( i < (width*(height-1)) && ((i % width) < (width-1)) ) {
-        *scanpt++ = *rawpt;                                     /* R */
-        *scanpt++ = (*(rawpt-1)+*(rawpt+1)+
-         *(rawpt-width)+*(rawpt+width))/4;      /* G */
-        *scanpt++ = (*(rawpt-width-1)+*(rawpt-width+1)+
-         *(rawpt+width-1)+*(rawpt+width+1))/4;  /* B */
-    } else {
-        /* bottom line or right column */
-        *scanpt++ = *rawpt;                             /* R */
-        *scanpt++ = (*(rawpt-1)+*(rawpt-width))/2;      /* G */
-        *scanpt++ = *(rawpt-width-1);           /* B */
-    }
-      }
-  }
-  rawpt++;
-    }
+	for (i = 0; i < size; i++) {
+		if (((i / width) & 1) == 0) {	// %2 changed to & 1
+			if ((i & 1) == 0) {
+				/* B */
+				if ((i > width) && ((i % width) > 0)) {
+					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;	/* R */
+					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt + width) + *(rawpt - width)) / 4;	/* G */
+					*scanpt++ = *rawpt;	/* B */
+				} else {
+					/* first line or left column */
+					*scanpt++ = *(rawpt + width + 1);	/* R */
+					*scanpt++ = (*(rawpt + 1) + *(rawpt + width)) / 2;	/* G */
+					*scanpt++ = *rawpt;	/* B */
+				}
+			} else {
+				/* (B)G */
+				if ((i > width) && ((i % width) < (width - 1))) {
+					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;	/* R */
+					*scanpt++ = *rawpt;	/* G */
+					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;	/* B */
+				} else {
+					/* first line or right column */
+					*scanpt++ = *(rawpt + width);	/* R */
+					*scanpt++ = *rawpt;	/* G */
+					*scanpt++ = *(rawpt - 1);	/* B */
+				}
+			}
+		} else {
+			if ((i & 1) == 0) {
+				/* G(R) */
+				if ((i < (width * (height - 1))) && ((i % width) > 0)) {
+					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;	/* R */
+					*scanpt++ = *rawpt;	/* G */
+					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;	/* B */
+				} else {
+					/* bottom line or left column */
+					*scanpt++ = *(rawpt + 1);	/* R */
+					*scanpt++ = *rawpt;	/* G */
+					*scanpt++ = *(rawpt - width);	/* B */
+				}
+			} else {
+				/* R */
+				if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
+					*scanpt++ = *rawpt;	/* R */
+					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt - width) + *(rawpt + width)) / 4;	/* G */
+					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;	/* B */
+				} else {
+					/* bottom line or right column */
+					*scanpt++ = *rawpt;	/* R */
+					*scanpt++ = (*(rawpt - 1) + *(rawpt - width)) / 2;	/* G */
+					*scanpt++ = *(rawpt - width - 1);	/* B */
+				}
+			}
+		}
+		rawpt++;
+	}
 
 }
-
-
-
 
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
@@ -347,6 +325,12 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff
 {
 	netcam_context netcam;
 
+	if (!buff || !dst)
+		return 3;
+
+	if (!buff->ptr)
+		return 2;	/* Error decoding MJPEG frame */
+
 #if 0
 	memset(&latest, 0, sizeof(netcam_buff));
 	latest.ptr = buff->start;
@@ -374,7 +358,6 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff
 
 	return netcam_proc_jpeg(&netcam, dst);
 }
-
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
@@ -677,12 +660,12 @@ static int vid_v4lx_start(struct context *cnt)
 				return -1;
 			}
 #ifdef MOTION_V4L2
-			viddevs[i]->v4l2 =0;
+			viddevs[i]->v4l2 = 0;
 		}
 #endif
-		if (viddevs[i]->v4l2 == 0){
+		if (viddevs[i]->v4l2 == 0) {
 			motion_log(-1, 0, "Using V4L1");
-		}else{
+		} else {
 			motion_log(-1, 0, "Using V4L2");
 		}
 
