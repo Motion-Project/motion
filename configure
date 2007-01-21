@@ -6705,6 +6705,7 @@ if test -e "/proc/cpuinfo" ; then
 	intel[51]="-march=pentium"
 	intel[52]="-march=pentium"
 	intel[54]="-march=pentium-mmx"
+	intel[56]="-march=pentium-mmx"
 	intel[61]="-march=pentiumpro"
 	intel[63]="-march=pentium2"
 	intel[65]="-march=pentium2"
@@ -6716,6 +6717,8 @@ if test -e "/proc/cpuinfo" ; then
 	intel[150]="-march=pentium4"
 	intel[151]="-march=pentium4"
 	intel[152]="-march=pentium4"
+	intel[154]="-march=pentium4"
+	intel[614]="-march=prescott"
 	amd[50]="-march=i586"
 	amd[51]="-march=i586"
 	amd[52]="-march=i586"
@@ -6723,7 +6726,9 @@ if test -e "/proc/cpuinfo" ; then
 	amd[56]="-march=k6"
 	amd[57]="-march=k6"
 	amd[58]="-march=k6-2"
+	amd[510]="-march=k6-2"
 	amd[59]="-march=k6-3"
+	amd[513]="-march=k6-3"
 	amd[61]="-march=athlon"
 	amd[62]="-march=athlon"
 	amd[63]="-march=athlon"
@@ -6731,7 +6736,18 @@ if test -e "/proc/cpuinfo" ; then
 	amd[66]="-march=athlon"
 	amd[67]="-march=athlon"
 	amd[68]="-march=athlon"
+	amd[610]="-march=athlon"
+	amd[158]="-march=athlon-xp"
+	amd[154]="-march=k8"
 	amd[155]="-march=athlon64"
+	amd[1543]="-march=athlon64"
+	amd[1544]="-march=athlon64"
+	amd[1565]="-march=opteron"
+	via[67]="-march=c3"
+	via[68]="-march=c3"
+	via[69]="-march=i686"
+	via[610]="-march=i686"
+
 	CPU_TYPE="known"
 	CPU_FAMILY=`cat /proc/cpuinfo | grep "cpu family" | head -n1`
 	CPU_MODEL=`cat /proc/cpuinfo | grep model[^\ ] | head -n1`
@@ -6748,6 +6764,9 @@ if test -e "/proc/cpuinfo" ; then
 	fi
 	if test "x${CPU_VENDOR}" = "xAuthenticAMD" ; then
 		CPU_OPTIONS=${amd[$CPU_FAMILY$CPU_MODEL]}
+	fi
+	if test "x${CPU_VENDOR}" = "xCentaurHauls"; then
+		CPU_OPTIONS=${via[$CPU_FAMILY$CPU_MODEL]}
 	fi
 	if test "x${CPU_OPTIONS}" = "x" ; then
 		CPU_TYPE="unknown"
@@ -6766,6 +6785,9 @@ if test -e "/proc/cpuinfo" ; then
 			;;
 		sse2)
 			CPU_FPU="-mfpmath=sse -msse2"
+			;;
+		sse3)
+			CPU_FPU="-msse3"
 			;;
 		3dnow)
 			CPU_EXT="$CPU_EXT -m3dnow"
