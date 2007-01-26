@@ -636,11 +636,11 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 	if (v4l2_set_pix_format(s, &width, &height)) {
 		goto err;
 	}
-#if 1
+
 	if (v4l2_scan_controls(s)) {
 		goto err;
 	}
-#endif
+
 	if (v4l2_set_mmap(s)) {
 		goto err;
 	}
@@ -652,6 +652,11 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 
 	viddev->v4l_fmt = VIDEO_PALETTE_YUV420P;
 	viddev->v4l_bufsize = (width * height * 3) / 2;
+
+
+	/* Update width and height with supported values from camera driver */
+	viddev->width = width;
+	viddev->height = height;
 
 	return (void *) 1;
 

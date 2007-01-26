@@ -654,7 +654,11 @@ static int vid_v4lx_start(struct context *cnt)
 		viddevs[i]->v4l2 = 1;
 
 		if (!v4l2_start(cnt, viddevs[i], width, height, input, norm, frequency, tuner_number)) {
+			/* restore width & height because could be changed in v4l2_start ()*/
+			viddevs[i]->width = width;
+			viddevs[i]->height = height;
 #endif
+
 			if (!v4l_start(cnt, viddevs[i], width, height, input, norm, frequency, tuner_number)) {
 				pthread_mutex_unlock(&vid_mutex);
 				return -1;
@@ -667,6 +671,13 @@ static int vid_v4lx_start(struct context *cnt)
 			motion_log(-1, 0, "Using V4L1");
 		} else {
 			motion_log(-1, 0, "Using V4L2");
+			/* Update width & height because could be changed in v4l2_start () */
+			width = viddevs[i]->width;
+			height = viddevs[i]->height;
+			cnt->conf.width = width;
+			cnt->conf.height = height;
+			cnt->imgs.width = width;
+			cnt->imgs.height = height;
 		}
 
 		cnt->imgs.type = viddevs[i]->v4l_fmt;
