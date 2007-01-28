@@ -18,7 +18,13 @@ struct mjpeg * MJPEGStartDecoder(unsigned int width, unsigned int height){
 	MJPEG_ST = mymalloc(sizeof(struct mjpeg));
 	memset(MJPEG_ST, 0, sizeof(struct mjpeg));
 
+	/* Get a mutex lock. */
+	pthread_mutex_lock(&global_lock);
+
 	MJPEGinit();	
+
+	/* Release the lock. */
+	pthread_mutex_unlock(&global_lock);
 		
 	MJPEG_ST->mjpegDecoder = avcodec_find_decoder(CODEC_ID_MJPEG);
 	if (!MJPEG_ST->mjpegDecoder){
@@ -34,12 +40,19 @@ struct mjpeg * MJPEGStartDecoder(unsigned int width, unsigned int height){
 	MJPEG_ST->mjpegDecContext->height = height;
 	MJPEG_ST->mjpegDecContext->pix_fmt = PIX_FMT_YUV420P;
 
+	/* Get a mutex lock. */
+	pthread_mutex_lock(&global_lock);
+
 	/* open it */
 	if (avcodec_open(MJPEG_ST->mjpegDecContext, MJPEG_ST->mjpegDecoder) < 0){
 		motion_log(LOG_ERR,1,"Could not open MJPEG Decoder");
+		pthread_mutex_unlock(&global_lock);	
 		return NULL;
 	}
     
+	/* Release the lock. */
+	pthread_mutex_unlock(&global_lock);
+
 	return MJPEG_ST;
 }
 

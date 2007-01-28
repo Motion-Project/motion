@@ -330,6 +330,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 	}
 
 	if (index_format >= 0) {
+		
 		u32 pixformat = supported_formats[index_format];
 
 		memset(&s->fmt, 0, sizeof(struct v4l2_format));
@@ -340,8 +341,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 		s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
 		if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
-			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8,
-				   pixformat >> 16, pixformat >> 24, *width, *height);
+			motion_log(LOG_INFO, 0, "Test palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height);
 
 			if (s->fmt.fmt.pix.width != (unsigned int) *width
 			    || s->fmt.fmt.pix.height != (unsigned int) *height) {
@@ -356,6 +356,9 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 				motion_log(LOG_ERR, 0, "VIDIOC_S_FMT: %s", strerror(errno));
 				return (-1);
 			}
+
+			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage %d colorspace %08x", pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height, s->fmt.fmt.pix.bytesperline, s->fmt.fmt.pix.sizeimage, s->fmt.fmt.   pix.colorspace);
+
 #ifdef HAVE_FFMPEG
 			/* TODO: Review when it has been tested */
 			if (pixformat == V4L2_PIX_FMT_MJPEG) {
@@ -786,6 +789,12 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 				    (char *) MJPEGDecodeFrame((unsigned char *) the_buffer->ptr,
 							      the_buffer->content_length, cnt->imgs.common_buffer,
 							      (width * height << 1), s->mjpeg);
+				
+				if (temp_netcam_buff.ptr == NULL){
+					motion_log(LOG_INFO,0,"Error decoding MJPEG");
+					return 1;
+				}
+
 				return conv_jpeg2yuv420(cnt, map, &temp_netcam_buff, viddev->v4l_bufsize, width,
 							height);
 			}
