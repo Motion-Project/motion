@@ -32,6 +32,7 @@ struct mjpeg * MJPEGStartDecoder(unsigned int width, unsigned int height){
 	MJPEG_ST->mjpegDecContext->codec_id = CODEC_ID_MJPEG;
 	MJPEG_ST->mjpegDecContext->width = width;
 	MJPEG_ST->mjpegDecContext->height = height;
+	MJPEG_ST->mjpegDecContext->pix_fmt = PIX_FMT_YUV420P;
 
 	/* open it */
 	if (avcodec_open(MJPEG_ST->mjpegDecContext, MJPEG_ST->mjpegDecoder) < 0){
@@ -42,11 +43,6 @@ struct mjpeg * MJPEGStartDecoder(unsigned int width, unsigned int height){
 	return MJPEG_ST;
 }
 
-
-int getPixFmt() {
-	return 0;
-//	return mjpegDecContext->pix_fmt;
-}
 
 unsigned char * MJPEGDecodeFrame(unsigned char *mjpegFrame, int mjpegFrameLen, unsigned char *outbuf, 
 								int outbufSize, struct mjpeg *MJPEG_ST){

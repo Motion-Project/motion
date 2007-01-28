@@ -107,6 +107,7 @@ static const u32 queried_ctrls[] = {
 
 	V4L2_CID_RED_BALANCE,
 	V4L2_CID_BLUE_BALANCE,
+	V4L2_CID_GAMMA,
 	V4L2_CID_EXPOSURE,
 	V4L2_CID_AUTOGAIN,
 	V4L2_CID_GAIN,
@@ -120,6 +121,7 @@ typedef struct {
 
 	int fd;
 	char map;
+	int fps;
 
 	struct v4l2_capability cap;
 	struct v4l2_format fmt;
@@ -387,6 +389,21 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 	return (-1);
 }
 
+
+static void v4l2_set_fps(src_v4l2_t * s){
+	struct v4l2_streamparm* setfps;
+
+	setfps=(struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
+	memset(setfps, 0, sizeof(struct v4l2_streamparm));
+	setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	setfps->parm.capture.timeperframe.numerator=1;
+	setfps->parm.capture.timeperframe.denominator=s->fps;
+	if (xioctl(s->fd, VIDIOC_S_PARM, setfps) == -1){
+		motion_log(LOG_ERR, 0, "v4l2_set_fps VIDIOC_S_PARM %s",strerror(errno));
+	}
+
+}
+
 static int v4l2_set_mmap(src_v4l2_t * s)
 {
 	enum v4l2_buf_type type;
@@ -623,6 +640,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 
 	viddev->v4l2_private = s;
 	s->fd = viddev->fd;
+	s->fps = cnt->conf.frame_limit;
 	s->pframe = -1;
 
 	if (v4l2_get_capability(s)) {
@@ -641,6 +659,9 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 		goto err;
 	}
 
+#if 0
+	v4l2_set_fps(s);
+#endif
 	if (v4l2_set_mmap(s)) {
 		goto err;
 	}
@@ -764,7 +785,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 				temp_netcam_buff.ptr =
 				    (char *) MJPEGDecodeFrame((unsigned char *) the_buffer->ptr,
 							      the_buffer->content_length, cnt->imgs.common_buffer,
-							      (width * height * 3), s->mjpeg);
+							      (width * height << 1), s->mjpeg);
 				return conv_jpeg2yuv420(cnt, map, &temp_netcam_buff, viddev->v4l_bufsize, width,
 							height);
 			}

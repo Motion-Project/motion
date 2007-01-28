@@ -19,6 +19,5 @@ struct mjpeg {
 struct mjpeg * MJPEGStartDecoder(unsigned int width, unsigned int height);
 unsigned char * MJPEGDecodeFrame(unsigned char *mjpegFrame, int mjpegFrameLen, unsigned char *outbuf, int outbufSize, struct mjpeg *MJPEG_ST);
 void MJPEGStopDecoder(struct mjpeg *MJPEG_ST);
-int getPixFmt(void);
 
 #endif
