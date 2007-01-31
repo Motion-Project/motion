@@ -794,9 +794,9 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 					motion_log(LOG_INFO,0,"Error decoding MJPEG");
 					return 1;
 				}
+				memcpy(map, temp_netcam_buff.ptr, viddev->v4l_bufsize);
+				return 0;
 
-				return conv_jpeg2yuv420(cnt, map, &temp_netcam_buff, viddev->v4l_bufsize, width,
-							height);
 			}
 #endif
 		case V4L2_PIX_FMT_JPEG:
