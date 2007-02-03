@@ -67,14 +67,6 @@ struct video_dev {
 #endif
 };
 
-#if 0
-typedef struct {
-	void *start;
-	size_t length;
-	size_t used;
-} v4l2_buffer_t;
-#endif
-
 /* video functions, video_common.c */
 int vid_start(struct context *);
 int vid_next(struct context *, unsigned char *map);
@@ -82,10 +74,9 @@ void vid_close(void);
 void vid_cleanup(void);
 void vid_init(void);
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
+void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
-int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int v4l_bufsize, int width,
-		     int height);
-//void sonix_decompress_init(void);
+int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int v4l_bufsize, int width, int height);
 int sonix_decompress(unsigned char *outp, unsigned char *inp,int width, int height);
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);

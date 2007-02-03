@@ -280,6 +280,52 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
 	}
 }
 
+void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+	int i, j, w2;
+	unsigned char * y, * u, * v;
+
+	w2 = width / 2;
+
+	y = map;
+	v = map + width * height;
+	u = map + width * height * 5 / 4;
+
+	for(i = 0; i < height; i += 2){
+		for (j = 0; j < w2; j++){
+			/* UYVY.  The byte order is CbY'CrY' */
+
+			*u++ = *cap_map++;
+			*y++ = *cap_map++;
+			*v++ = *cap_map++;
+			*y++ = *cap_map++;
+		}
+
+		//downsampling
+
+		u -= w2;
+		v -= w2;
+
+		/* average every second line for U and V */
+
+		for(j = 0; j < w2; j++){
+			int un = *u & 0xff;
+			int vn = *v & 0xff;
+
+			un += *cap_map++ & 0xff;
+			*u++ = un>>1;
+
+			*y++ = *cap_map++;
+
+			vn += *cap_map++ & 0xff;
+			*v++ = vn>>1;
+
+			*y++ = *cap_map++;
+		}
+	}
+
+}
+
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
 	unsigned char *y, *u, *v;

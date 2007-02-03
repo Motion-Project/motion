@@ -13,6 +13,7 @@
  *  		V4L2_PIX_FMT_MJPEG,
  *  		V4L2_PIX_FMT_JPEG,	( tested )
 		V4L2_PIX_FMT_RGB24,
+		V4L2_PIX_FMT_UYVY,
 		V4L2_PIX_FMT_YUV422P,
 		V4L2_PIX_FMT_YUV420, 	( tested )
 		V4L2_PIX_FMT_YUYV 	( tested )
@@ -299,6 +300,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 		V4L2_PIX_FMT_MJPEG,
 		V4L2_PIX_FMT_JPEG,
 		V4L2_PIX_FMT_RGB24,
+		V4L2_PIX_FMT_UYVY,
 		V4L2_PIX_FMT_YUYV,
 		V4L2_PIX_FMT_YUV422P,
 		V4L2_PIX_FMT_YUV420,
@@ -770,6 +772,10 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 		switch (s->fmt.fmt.pix.pixelformat) {
 		case V4L2_PIX_FMT_RGB24:
 			conv_rgb24toyuv420p(map, (unsigned char *) the_buffer->ptr, width, height);
+			return 0;
+
+		case V4L2_PIX_FMT_UYVY:
+			conv_uyvyto420p(map, (unsigned char *) the_buffer->ptr, width, height);
 			return 0;
 
 		case V4L2_PIX_FMT_YUYV:
