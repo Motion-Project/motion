@@ -389,7 +389,7 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
  */
 static void motion_remove_pid(void)
 {
-	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file)){
+	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file) && (restart == 0)){
 		if (!unlink(cnt_list[0]->conf.pid_file)) motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
 		else motion_log(LOG_INFO, 1, "Error removing pid file");
 	}
@@ -1868,6 +1868,7 @@ int main (int argc, char **argv)
 			 */
 			motion_shutdown();
 			restart = 0; /* only one reset for now */
+			motion_log(LOG_INFO,0,"motion restarted");
 #ifndef WITHOUT_V4L
 			SLEEP(5,0); // maybe some cameras needs less time
 #endif

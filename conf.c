@@ -1494,6 +1494,8 @@ struct context ** conf_load (struct context **cnt)
 		motion_log(LOG_INFO, 0, "Processing thread 0 - config file %s",filename);
 		cnt=conf_process(cnt, fp);
 		fclose(fp);
+	}else{
+		motion_log(LOG_INFO, 0, "Not config file to process using default values");
 	}
 	
 
