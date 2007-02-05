@@ -14,6 +14,10 @@
 /* for rotation */
 #include "rotate.h"
 
+typedef unsigned char uint8_t;
+typedef unsigned short int uint16_t;
+typedef unsigned int uint32_t;
+
 #define CLAMP(x)        ((x)<0?0:((x)>255)?255:(x))
 
 typedef struct {
@@ -282,48 +286,33 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
-	int i, j, w2;
-	unsigned char * y, * u, * v;
+	uint8_t *pY = map;
+	uint8_t *pU = pY + (width * height);
+	uint8_t *pV = pU + (width * height)/4;
+	uint32_t uv_offset = width * 4 * sizeof(uint8_t);
+	uint32_t ix, jx;
 
-	w2 = width / 2;
-
-	y = map;
-	v = map + width * height;
-	u = map + width * height * 5 / 4;
-
-	for(i = 0; i < height; i += 2){
-		for (j = 0; j < w2; j++){
-			/* UYVY.  The byte order is CbY'CrY' */
-
-			*u++ = *cap_map++;
-			*y++ = *cap_map++;
-			*v++ = *cap_map++;
-			*y++ = *cap_map++;
-		}
-
-		//downsampling
-
-		u -= w2;
-		v -= w2;
-
-		/* average every second line for U and V */
-
-		for(j = 0; j < w2; j++){
-			int un = *u & 0xff;
-			int vn = *v & 0xff;
-
-			un += *cap_map++ & 0xff;
-			*u++ = un>>1;
-
-			*y++ = *cap_map++;
-
-			vn += *cap_map++ & 0xff;
-			*v++ = vn>>1;
-
-			*y++ = *cap_map++;
+	for (ix = 0; ix < height; ix++) {
+		for (jx = 0; jx < width; jx += 2) {
+			uint16_t calc;
+			if ((ix&1) == 0) {
+				calc = *cap_map;
+				calc += *(cap_map + uv_offset);
+				calc /= 2;
+				*pU++ = (uint8_t) calc;
+			}
+			cap_map++;
+			*pY++ = *cap_map++;
+			if ((ix&1) == 0) {
+				calc = *cap_map;
+				calc += *(cap_map + uv_offset);
+				calc /= 2;
+				*pV++ = (uint8_t) calc;
+			}
+			cap_map++;
+			*pY++ = *cap_map++;
 		}
 	}
-
 }
 
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
