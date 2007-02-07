@@ -1,0 +1,6 @@
+MD5 (motion-20070207-051001.tar.gz) = 51bed154295ac7adb3f98e8b00999b73 
+SHA256 (motion-20070207-051001.tar.gz) = 9415c2c9bb8addc1e377e25dae183842ca7effe7f85a928ffe55e279cb232962 
+SIZE (motion-20070207-051001.tar.gz) = 386141 
+MD5 (motion-daily-freebsd.diff.gz) = 8dd5aca009aad060a332315273e334f9 
+SHA256 (motion-daily-freebsd.diff.gz) = 7ebac59f35194ae723c951863d3147db19923716a9400d691318e39b757b6a5e 
+SIZE (motion-daily-freebsd.diff.gz) = 3361 

@@ -10,10 +10,10 @@
  *  - other supported palettes (NOT TESTED)
  *  		V4L2_PIX_FMT_SBGGR8	( sonix )	
  *  		V4L2_PIX_FMT_SN9C10X	( sonix )
- *  		V4L2_PIX_FMT_MJPEG,
+ *  		V4L2_PIX_FMT_MJPEG,	( tested )
  *  		V4L2_PIX_FMT_JPEG,	( tested )
 		V4L2_PIX_FMT_RGB24,
-		V4L2_PIX_FMT_UYVY,
+		V4L2_PIX_FMT_UYVY,	( tested )
 		V4L2_PIX_FMT_YUV422P,
 		V4L2_PIX_FMT_YUV420, 	( tested )
 		V4L2_PIX_FMT_YUYV 	( tested )

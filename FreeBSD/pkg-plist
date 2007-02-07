@@ -1,0 +1,11 @@
+bin/motion
+@unexec if cmp -s %D/etc/motion.conf %D/etc/motion.conf.sample; then rm -f %D/etc/motion.conf; fi
+etc/motion.conf.sample
+@exec [ -f %B/motion.conf ] || cp %B/%f %B/motion.conf
+%%EXAMPLESDIR%%/motion-dist.conf
+%%EXAMPLESDIR%%/motion.init-FreeBSD.sh
+%%EXAMPLESDIR%%/thread1.conf
+%%EXAMPLESDIR%%/thread2.conf
+%%EXAMPLESDIR%%/thread3.conf
+%%EXAMPLESDIR%%/thread4.conf
+@dirrm %%EXAMPLESDIR%%

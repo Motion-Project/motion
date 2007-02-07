@@ -1,0 +1,5 @@
+This is a port of motion, this version works with network cameras and with any
+capture devices that supports bktr(4) with composite and svideo inputs. Tuner
+support is not yet implemented.
+
+WWW: http://motion.sourceforge.net/
