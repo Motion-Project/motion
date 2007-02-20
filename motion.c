@@ -475,8 +475,7 @@ static void motion_init(struct context *cnt)
 
 	/* Allocate a buffer for temp. usage in some places */
 	/* Only despeckle for now... */
-	/* Also for MJPEG , TODO: Check if size is right or not , we don't want to malloc a lot of memory */
-	cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width * cnt->imgs.height);
+	cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width);
 
 	/* Now is a good time to init rotation data. Since vid_start has been
 	 * called, we know that we have imgs.width and imgs.height. When capturing
