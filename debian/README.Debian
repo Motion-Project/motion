@@ -4,6 +4,7 @@
 
  - dpkg-dev
  - fakeroot
+ - debhelper
 
  To create the deb package ( from motion-3.2.7 ) :
 
@@ -16,6 +17,9 @@
  ../motion-3.2.7 , so you can install typing :
 
  dpkg -i ../motion_3.2.7-1_i386.deb
+
+
+ Note : If you want to use motion init.d script set daemon on in motion.conf to allow motion create the pid file.
 
 
  Angel Carpintero

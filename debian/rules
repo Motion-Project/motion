@@ -38,7 +38,7 @@ config.status: configure
 		--infodir=\$${datadir}/info \
 		--sysconfdir=/etc/motion \
 		--with-ffmpeg \
-		--with-mysql \
+		--without-mysql \
 		--without-pgsql \
 		--without-optimizecpu \
 		--without-jpeg-mmx
