@@ -646,25 +646,18 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const char *fmt, ...)
+void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const char *fmt, va_list vl)
 {
 	char buf[1024];
-	va_list ap;
 
 	/* Do not log the message coming from avcodec if the debug_level is not set. */
 	if (debug_level) {
 
-		/* Get the message from the argument list passed in */
-		va_start(ap, fmt);
-
 		/* Flatten the message coming in from avcodec */
-		vsnprintf(buf, sizeof(buf), fmt, ap);
+		vsnprintf(buf, sizeof(buf), fmt, vl);
 
 		/* If the debug_level is correct then send the message to the motion logging routine. */
 		motion_log(LOG_ERR, 0, "ffmpeg_avcodec_log: %s - flag %d", buf, errno_flag);
-
-		/* Clean up the argument list routine */
-		va_end(ap);
 	}
 }
 

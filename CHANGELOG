@@ -11,6 +11,8 @@ Bugfixes
    * Removed a duplicate call to jpeg_destroy_decompress already is called from netcam_image_conv (Krzysztof Blaszkowski).
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903 , reconnet to mysql if connection dropped (Angel Carpintero).
    * Fix memory management in ffmpeg.c http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432 (Rafis Khayrullin).	
+   * Fix of ffmpeg_avcodec_log code (Alain Guidez).
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x25x074612
 
 	
 3.2.7 Formal Release - Summary of Changes

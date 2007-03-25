@@ -382,6 +382,10 @@ Mihnea-Costin Grigore
    * Added the snapshot_overwrite option.
    * Fix for correct mpeg names when using mpeg_encode.
 
+Alain Guidez
+   * Fix of ffmpeg_avcodec_log code.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x25x074612
+
 Jan Gyselinck
    * Original time/date-stamp code.
    * ppm support
