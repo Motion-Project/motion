@@ -32,6 +32,9 @@ struct trackoptions {
 	int step_angle_x;
 	int step_angle_y;
 	int move_wait;
+// UVC
+	int pan_angle; // degrees
+	int tilt_angle; // degrees
 };
 
 extern struct trackoptions track_template;
@@ -49,6 +52,7 @@ int track_move(struct context *, int, struct coord *, struct images *, int);
 #define TRACK_TYPE_IOMOJO       2
 #define TRACK_TYPE_PWC          3
 #define TRACK_TYPE_GENERIC      4
+#define TRACK_TYPE_UVC          5
 
 /*
 	Some defines for the Serial stepper motor:
@@ -110,6 +114,14 @@ int track_move(struct context *, int, struct coord *, struct images *, int);
 #define LQOS_VERTICAL_DEGREES   180
 #define LQOS_HORIZONAL_DEGREES  120
 
+/*
+ * UVC
+ */
 
+#define V4L2_CID_PAN_RELATIVE		(V4L2_CID_PRIVATE_BASE+7)
+#define V4L2_CID_TILT_RELATIVE		(V4L2_CID_PRIVATE_BASE+8)
+#define V4L2_CID_PANTILT_RESET		(V4L2_CID_PRIVATE_BASE+9)
+
+#define INCPANTILT 64 // 1 degree
 
 #endif /* _INCLUDE_TRACK_H */

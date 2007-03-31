@@ -474,8 +474,8 @@ static void motion_init(struct context *cnt)
 	cnt->imgs.shotstamp = mymalloc(sizeof(int));
 
 	/* Allocate a buffer for temp. usage in some places */
-	/* Only despeckle for now... */
-	cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width);
+	/* Only despeckle & bayer2rgb24() for now for now... */
+	cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width * cnt->imgs.height);
 
 	/* Now is a good time to init rotation data. Since vid_start has been
 	 * called, we know that we have imgs.width and imgs.height. When capturing
