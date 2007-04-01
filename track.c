@@ -527,11 +527,7 @@ static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct im
 static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
 	/* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
-	
 	int move_x_degrees = 0, move_y_degrees = 0;
-	int con_pan = V4L2_CID_PAN_RELATIVE;
-	int con_tilt = V4L2_CID_TILT_RELATIVE;
-	int con_reset = V4L2_CID_PANTILT_RESET;
 
 	union pantilt {
 		struct {
@@ -547,7 +543,7 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 		int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
 		struct v4l2_control control_s;
 
-		control_s.id = con_reset;
+		control_s.id = V4L2_CID_PANTILT_RESET;
 		control_s.value = (unsigned char) reset;
 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -569,14 +565,14 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 		motion_log(LOG_DEBUG, 1, "Getting camera range");
 		
 
-	/* DWe 30.03.07 The orig request failed : must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
-	 		Range X = -70 to +70 degrees              Y = -30 to +30 degrees  
-	*/	
+		/* DWe 30.03.07 The orig request failed : 
+		* must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
+		* Range X = -70 to +70 degrees              
+		* Y = -30 to +30 degrees  
+		*/	
 		
 //		//get mininum
 //		pan.value = queryctrl.minimum;
-//		cnt->track.panmin = pan.s16.pan / INCPANTILT;
-//		cnt->track.tiltmin = pan.s16.tilt / INCPANTILT;
 
 		cnt->track.panmin = -4480 / INCPANTILT;
 		cnt->track.tiltmin = -1920 / INCPANTILT;
@@ -584,8 +580,6 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 		cnt->track.panmax = 4480 / INCPANTILT; 
 		cnt->track.tiltmax = 1920 / INCPANTILT;
 //		pan.value = queryctrl.maximum;
-//		cnt->track.panmax = pan.s16.pan / INCPANTILT;
-//		cnt->track.tiltmax = pan.s16.tilt / INCPANTILT;
 
 		cnt->track.dev = dev;
 		cnt->track.pan_angle = 0;
@@ -615,16 +609,15 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 	pan.s16.pan = -move_x_degrees * INCPANTILT;
 	pan.s16.tilt = -move_y_degrees * INCPANTILT;
 	
-
 	motion_log(LOG_ERR, 1, "For_SET_ABS move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
 		
-    /* DWe 30.03.07 	Must be broken in diff calls, because 
-    			- one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
-    			- The Webcam or uvcvideo does not like a call with a zero-move 
-    */
+	/* DWe 30.03.07 Must be broken in diff calls, because 
+    	- one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
+    	- The Webcam or uvcvideo does not like a call with a zero-move 
+	*/
     
 	if (move_x_degrees != 0 ) {
-		control_s.id = con_pan;
+		control_s.id = V4L2_CID_PAN_RELATIVE;
 	//	control_s.value = pan.value;
 		control_s.value = pan.s16.pan;
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -633,13 +626,13 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 		}
 	}
 
-    /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */ 	
+	/* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */ 	
 	if ((move_x_degrees != 0) && (move_y_degrees != 0)) {
 		SLEEP (1,0);
 	}   
 	
 	if (move_y_degrees != 0 ) {
-		control_s.id = con_tilt;
+		control_s.id = V4L2_CID_TILT_RELATIVE;
 	//	control_s.value = pan.value;
 		control_s.value = pan.s16.tilt;
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -674,10 +667,6 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 	int delta_x = cent->x - (imgs->width / 2);
 	int delta_y = cent->y - (imgs->height / 2);
 	int move_x_degrees, move_y_degrees;
-	int con_pan = V4L2_CID_PAN_RELATIVE;
-	int con_tilt = V4L2_CID_TILT_RELATIVE;
-	int con_reset = V4L2_CID_PANTILT_RESET;
-
 	
 	/* DWe 30.03.07 Does the request of act.position from WebCam work ? luvcview shows at every position 180 :( */
 	/*		Now we init the Web by call Reset, so we can sure, that we are at x/y = 0,0                 */
@@ -687,7 +676,7 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 		int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
 		struct v4l2_control control_s;
 
-		control_s.id = con_reset;
+		control_s.id = V4L2_CID_PANTILT_RESET;
 		control_s.value = (unsigned char) reset;
 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -700,13 +689,11 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 		cent->x = 0;
 		SLEEP(8,0);
 		
-	
-
-
-	/* DWe 30.03.07 The orig request failed : must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
-	 		Range X = -70 to +70 degrees              Y = -30 to +30 degrees  
-	*/	
-		
+		/* DWe 30.03.07 The orig request failed : 
+		* must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
+		* Range X = -70 to +70 degrees              
+		*	Y = -30 to +30 degrees  
+		*/	
 
 		cnt->track.panmin = -4480 / INCPANTILT;
 		cnt->track.tiltmin = -1920 / INCPANTILT;
@@ -716,11 +703,8 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 		cnt->track.pan_angle = 0;
 		cnt->track.tilt_angle = 0;
 		cnt->track.minmaxfound = 1;
-
 	}
 
-	
-	
 	
 	/* If we are on auto track we calculate delta, otherwise we use user input in degrees */
 	if (!manual) {
@@ -764,9 +748,9 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 	}
 
 
-		motion_log(LOG_ERR, 1, "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", cnt->track.panmin, cnt->track.panmax, cnt->track.tiltmin, cnt->track.tiltmax );
-		motion_log(LOG_ERR, 1, "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d ", cnt->track.pan_angle, cnt->track.tilt_angle);	
-		motion_log(LOG_ERR, 1, "For_SET_REL move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
+	motion_log(LOG_ERR, 1, "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", cnt->track.panmin, cnt->track.panmax, cnt->track.tiltmin, cnt->track.tiltmax );
+	motion_log(LOG_ERR, 1, "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d ", cnt->track.pan_angle, cnt->track.tilt_angle);	
+	motion_log(LOG_ERR, 1, "For_SET_REL move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
 	/*
 	tilt up: - value
 	tilt down: + value
@@ -784,10 +768,10 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 
 	if (move_x_degrees != 0) {
 
-	control_s.id = con_pan;
+		control_s.id = V4L2_CID_PAN_RELATIVE;
 
 //	control_s.value = pan.value;
-	control_s.value = pan.s16.pan;
+		control_s.value = pan.s16.pan;
 		motion_log(LOG_ERR, 1," dev %d,addr= %d, control_S= %d,Wert= %d,", dev,VIDIOC_S_CTRL, &control_s, pan.s16.pan ); 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
 	    	    motion_log(LOG_ERR, 1, "Failed to move camera!");
@@ -803,7 +787,7 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 
 	if (move_y_degrees != 0) {
 
-	control_s.id = con_tilt;
+	control_s.id = V4L2_CID_TILT_RELATIVE;
 
 //	control_s.value = pan.value;
 	control_s.value = pan.s16.tilt;
@@ -830,4 +814,3 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
   
 	return cnt->track.move_wait;
 }
-
