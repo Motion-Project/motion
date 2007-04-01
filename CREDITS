@@ -339,6 +339,8 @@ Angel Carpintero
    * Improved deb packaging , install the init.d script.
    * Reconnet to mysql if connection dropped.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903	
+   * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch
 
 John Edwards
    * Added the 'pal-nc' norm.
@@ -932,6 +934,10 @@ Mike Lees
    * Implemented the new brightness, contrast, hue, saturation features
      http://www.lavrsen.dk/twiki/bin/view/Motion/BrightnessContrastPatch
 
+Michal Licko
+   * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch
+
 Bill Maidment
    * Fixed bug reporting errors when creating symlink to last snap.
 
@@ -1241,11 +1247,19 @@ Joerg Weber
      on how much motion was detected relative to threshold setting.
      http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
 
+Dirk Wesenberg
+   * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch	
+
 Tristan Willy
-   * Wrote Axis 2100 support and added the check for ~/.motion/motin.conf
+   * Wrote Axis 2100 support and added the check for ~/.motion/motion.conf
 
 Robert Eugene Wood
    * Inverse pixels for locate box.
+
+Damian Wrobel
+   * Fix a segfault adding correct size to be used for bayer2rgb24(). 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x30x175913
 
 Yieldtech
    * These guys are making a complete linux based security system

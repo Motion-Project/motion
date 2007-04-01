@@ -6,6 +6,8 @@ Feaures
    * Improved deb packaging , install the init.d script. (Angel Carpintero).
    * Add swf codec to video creation (Bowser Pete, Andy Brown).
      http://www.lavrsen.dk/twiki/bin/view/Motion/FFmpegSWFcreation	
+   * ucvideo track pan/tilt support ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch 
 
 Bugfixes
    * Removed a duplicate call to jpeg_destroy_decompress already is called from netcam_image_conv (Krzysztof Blaszkowski).
@@ -13,7 +15,8 @@ Bugfixes
    * Fix memory management in ffmpeg.c http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432 (Rafis Khayrullin).	
    * Fix of ffmpeg_avcodec_log code (Alain Guidez).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x25x074612
-
+   * Fix a segfault adding correct size to be used for bayer2rgb24() (Damian Wrobel)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x30x175913
 	
 3.2.7 Formal Release - Summary of Changes
 
