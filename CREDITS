@@ -39,6 +39,7 @@ Michael Newlyn Blake
 
 Krzysztof Blaszkowski
    * Removed a duplicate call to jpeg_destroy_decompress already is called from netcam_image_conv. 
+   * Added V4L2 support http://www.lavrsen.dk/twiki/bin/view/Motion/VideoForLinuxTwoDiscussion, (Krzysztof Blaszkowski, Angel Carpintero).
 
 Mathias Bogaert
    * Lots of good ideas and the motion logos
@@ -341,6 +342,16 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903	
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch
+   * Added V4L2 support http://www.lavrsen.dk/twiki/bin/view/Motion/VideoForLinuxTwoDiscussion, (Krzysztof Blaszkowski, Angel Carpintero).
+   * Added support for V4L2_PIX_FMT_SBGGR8 ( bayer ), V4L2_PIX_FMT_SN9C10X, V4L2_PIX_FMT_MJPEG and V4L2_PIX_FMT_UYVY. 
+   * Added a FreeBSD directory to allow people from BSD to get a daily version and create a port. 
+   * Removed mysql dependency from debian package and added a note to setup motion to run as daemon to create the pid file.
+   * Changed the way configure search mysql headers and libs, added 3 parameters to configure --without-mysql to disable support, --with-  mysql-include directory of mysql.h and --with-mysql-lib directory of libmysqlclient.a or libmysqlclient.so
+   * Fix an error in FreeBSD , the use of capture even fields depends on height value.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610
+   * Fixed autodetection for VIA cpu , no needed to use --without-optimizecpu. Added many others.
+   * Fix , don't remove pid file when motion reload config file( HUP signal ).
+   
 
 John Edwards
    * Added the 'pal-nc' norm.
