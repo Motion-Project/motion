@@ -1,9 +1,9 @@
-3.2.8
+3.2.8 beta release 1 - Summary of Changes
 
-Feaures
+Features
    * Added connection status for all devices available from http web interface. (Angel Carpintero).
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x11x09x050638
-   * Improved deb packaging , install the init.d script. (Angel Carpintero).
+   * Improved deb packaging, install the init.d script. (Angel Carpintero).
    * Added swf codec to video creation (Bowser Pete, Andy Brown).
      http://www.lavrsen.dk/twiki/bin/view/Motion/FFmpegSWFcreation
    * Added V4L2 support http://www.lavrsen.dk/twiki/bin/view/Motion/VideoForLinuxTwoDiscussion, (Krzysztof Blaszkowski, Angel Carpintero).
@@ -17,16 +17,16 @@ Feaures
 
 Bugfixes
    * Removed a duplicate call to jpeg_destroy_decompress already is called from netcam_image_conv (Krzysztof Blaszkowski).
-   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903 , reconnet to mysql if connection dropped (Angel Carpintero).
+   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903, reconnet to mysql if connection dropped (Angel Carpintero).
    * Fix memory management in ffmpeg.c http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432 (Rafis Khayrullin).	
    * Fix of ffmpeg_avcodec_log code (Alain Guidez).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x25x074612
    * Fix a segfault adding correct size to be used for bayer2rgb24() (Damian Wrobel)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x30x175913
-   * Fix an error in FreeBSD , the use of capture even fields depends on height value. (Angel Carpintero)
+   * Fix an error in FreeBSD, the use of capture even fields depends on height value. (Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610	
-   * Fixed autodetection for VIA cpu , no needed to use --without-optimizecpu. Added many others (Angel Carpintero)
-   * Fix , don't remove pid file when motion reload config file( HUP signal ) (Angel Carpintero).
+   * Fixed autodetection for VIA cpu, no needed to use --without-optimizecpu. Added many others (Angel Carpintero)
+   * Fix, don't remove pid file when motion reload config file( HUP signal ) (Angel Carpintero).
 	
 3.2.7 Formal Release - Summary of Changes
 
