@@ -95,6 +95,12 @@ typedef struct netcam_image_buff {
 } netcam_buff;
 typedef netcam_buff *netcam_buff_ptr;
 
+typedef struct file_context {
+	char      *path;               /* the path within the URL */
+	int       control_file_desc;   /* file descriptor for the control socket */
+	time_t    last_st_mtime;       /* time this image was modified */
+} tfile_context;
+
 /*
  * struct netcam_context contains all the structures and other data
  * for an individual netcam.
@@ -166,8 +172,11 @@ typedef struct netcam_context {
 	                               structure includes a large
 	                               buffer for the HTTP data */
 
-	struct ftp_context *ftp;        /* this structure contains the
+	struct ftp_context *ftp;    /* this structure contains the
 	                               context for FTP connection */
+
+	struct file_context *file;  /* this structure contains the
+	                               context for FILE connection */
 
 	int (*get_image)(netcam_context_ptr);
 	                            /* Function to fetch the image from

@@ -52,6 +52,8 @@
 
 #define CONNECT_TIMEOUT        10   /* timeout on remote connection attempt */
 #define READ_TIMEOUT            5   /* default timeout on recv requests */
+#define POLLING_TIMEOUT  READ_TIMEOUT /* file polling timeout [s] */
+#define POLLING_TIME  500*1000*1000 /* file polling time quantum [ns] (500ms) */
 #define MAX_HEADER_RETRIES      5   /* Max tries to find a header record */
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 
@@ -149,6 +151,13 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 	regex_t pattbuf;
 	regmatch_t matches[10];
 
+	if( !strncmp( text_url, "file", 4 ) ) 
+		re = "(file)://(((.*):(.*))@)?"
+	                 "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
+
+	if (debug_level > 7)
+		motion_log(-1, 0, "Entry netcam_url_parse data %s", text_url );
+
 	memset(parse_url, 0, sizeof(struct url_t));
 	/*
 	 * regcomp compiles regular expressions into a form that is
@@ -161,6 +170,8 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 		if (regexec(&pattbuf, text_url, 10, matches, 0) != REG_NOMATCH) {
 			for (i = 0; i < 10; i++) {
 				if ((s = netcam_url_match(matches[i], text_url)) != NULL) {
+					if (debug_level > 7)
+						motion_log(-1, 0, "Parse case %d data %s", i, s );
 					switch (i) {
 						case 1:
 							parse_url->service = s;
@@ -1124,6 +1135,179 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
 	return 0;
 }
 
+
+/**
+ * netcam_read_file_jpeg
+ *
+ *      This routine reads local image file. ( netcam_url file:///path/image.jpg )
+ *      The current implementation is still a little experimental,
+ *      and needs some additional code for error detection and
+ *      recovery.
+ */
+static int netcam_read_file_jpeg(netcam_context_ptr netcam)
+{
+	int loop_counter=0;
+	if (debug_level > 9) {
+		motion_log(-1,0,"Begin %s", __FUNCTION__);
+	}
+	netcam_buff_ptr buffer;
+	int len;
+	netcam_buff *xchg;
+	struct timeval curtime;
+	struct stat statbuf;
+
+	/* Point to our working buffer */
+	buffer = netcam->receiving;
+	buffer->used = 0;
+
+	/*int fstat(int filedes, struct stat *buf);*/
+	do {
+
+		if( stat( netcam->file->path, &statbuf) ) {
+			motion_log(-1, 0, "stat(%s) error", netcam->file->path );
+			return -1;
+		}
+	
+		if (debug_level > 9) {
+			motion_log(-1, 0, "statbuf.st_mtime[%d] != last_st_mtime[%d]", statbuf.st_mtime,  netcam->file->last_st_mtime);
+		}
+
+		if( loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000)) ) { //its waits POLLING_TIMEOUT
+			motion_log(-1, 0, "waiting new file image timeout" );
+			return -1;
+		}
+
+		if (debug_level > 9) {
+			motion_log(-1, 0, "delay waiting new file image ");
+		}
+
+		//SLEEP(netcam->timeout.tv_sec, netcam->timeout.tv_usec*1000 ); //its waits 5seconds - READ_TIMEOUT
+		SLEEP( 0, POLLING_TIME ); // its waits 500ms
+		/*return -1;*/
+		loop_counter++;
+
+	} while(statbuf.st_mtime==netcam->file->last_st_mtime);
+
+	netcam->file->last_st_mtime = statbuf.st_mtime;
+	if (debug_level > 5) {
+		motion_log(LOG_INFO, 0, "processing new file image - st_mtime "
+                              "%d", netcam->file->last_st_mtime );
+	}
+
+	/* Assure there's enough room in the buffer */
+	while( buffer->size < statbuf.st_size ) {
+		netcam_check_buffsize(buffer, statbuf.st_size ); 
+	}
+
+	/* Do the read */
+	netcam->file->control_file_desc = open( netcam->file->path, O_RDONLY );
+	if( netcam->file->control_file_desc < 0 ) {
+		motion_log(-1, 0, "open(%s) error:%d", netcam->file->path, netcam->file->control_file_desc );
+		return -1;
+	}
+
+	if ((len = read(netcam->file->control_file_desc, buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
+		motion_log(-1, 0, "read(%s) error:%d", netcam->file->control_file_desc, len );
+		return -1;
+	}
+
+	buffer->used += len;
+
+	close( netcam->file->control_file_desc );
+
+	if (gettimeofday(&curtime, NULL) < 0) {
+		motion_log(LOG_ERR, 1, "gettimeofday in netcam_read_jpeg");
+	}
+
+	netcam->receiving->image_time = curtime;
+	/*
+	 * Calculate our "running average" time for this netcam's
+	 * frame transmissions (except for the first time).
+	 * Note that the average frame time is held in microseconds.
+	 */
+	if (netcam->last_image.tv_sec) {
+		netcam->av_frame_time =
+		  ((9.0 * netcam->av_frame_time) + 1000000.0 *
+		  (curtime.tv_sec - netcam->last_image.tv_sec) +
+		  (curtime.tv_usec- netcam->last_image.tv_usec))
+		  / 10.0;
+		if (debug_level > 5)
+			motion_log(-1, 0, "Calculated frame time %f", netcam->av_frame_time);
+	}
+
+	netcam->last_image = curtime;
+
+	/*
+	 * read is complete - set the current 'receiving' buffer atomically
+	 * as 'latest', and make the buffer previously in 'latest' become
+	 * the new 'receiving'
+	 */
+	pthread_mutex_lock(&netcam->mutex);
+
+	xchg = netcam->latest;
+	netcam->latest = netcam->receiving;
+	netcam->receiving = xchg;
+	netcam->imgcnt++;
+
+	/*
+	 * We have a new frame ready.  We send a signal so that
+	 * any thread (e.g. the motion main loop) waiting for the
+	 * next frame to become available may proceed.
+	 */
+	pthread_cond_signal(&netcam->pic_ready);
+
+	pthread_mutex_unlock(&netcam->mutex);
+
+	if (debug_level > 9) {
+		motion_log(-1,0,"End %s", __FUNCTION__);
+	}
+	return 0;
+}
+
+
+tfile_context *file_new_context(void) {
+	tfile_context *ret;
+
+	/* note that mymalloc will exit on any problem */
+	ret = mymalloc(sizeof(tfile_context));
+	if (!ret)
+		return ret;
+
+	memset(ret, 0, sizeof(tfile_context));
+	return ret;
+}
+
+void file_free_context(tfile_context* ctxt) {
+	if (ctxt == NULL)
+		return;
+
+	if (ctxt->path != NULL)
+		free(ctxt->path);
+
+	free(ctxt);
+}
+
+static int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url) {
+
+	if ((netcam->file = file_new_context()) == NULL)
+		return -1;
+
+	/*
+	 * We copy the strings out of the url structure into the ftp_context
+	 * structure.  By setting url->{string} to NULL we effectively "take
+	 * ownership" of the string away from the URL (i.e. it won't be freed
+	 * when we cleanup the url structure later).
+	 */
+	netcam->file->path = url->path;
+	url->path = NULL;
+
+	netcam_url_free(url);
+
+	netcam->get_image = netcam_read_file_jpeg;
+
+	return 0;
+}
+
 /**
  * netcam_handler_loop
  *      This is the "main loop" for the handler thread.  It is created
@@ -1870,6 +2054,8 @@ int netcam_start(struct context *cnt)
 		retval = netcam_setup_html(netcam, &url);
 	} else if ((url.service) && (!strcmp(url.service, "ftp")) ){
 		retval = netcam_setup_ftp(netcam, &url);
+	} else if ((url.service) && (!strcmp(url.service, "file")) ){
+		retval = netcam_setup_file(netcam, &url);
 	} else {
 		motion_log(LOG_ERR, 0, "Invalid netcam service  '%s' - "
 					"must be http or ftp", url.service);
@@ -1888,7 +2074,7 @@ int netcam_start(struct context *cnt)
 	 * these to set the required image buffer(s) in our netcam_struct.
 	 */
 	if ((retval = netcam->get_image(netcam)) != 0) {
-		motion_log(LOG_ERR, 0, "Failed trying to read first image");
+		motion_log(LOG_ERR, 0, "Failed trying to read first image - retval:%d", retval );
 		return -1;
 	}
 
