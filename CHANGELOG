@@ -27,6 +27,7 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610	
    * Fixed autodetection for VIA cpu, no needed to use --without-optimizecpu. Added many others (Angel Carpintero)
    * Fix, don't remove pid file when motion reload config file( HUP signal ) (Angel Carpintero).
+   * Fix compilation broken by uvc track type. (Angel Carpintero).
 	
 3.2.7 Formal Release - Summary of Changes
 
