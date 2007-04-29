@@ -40,9 +40,11 @@ static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct 
 #ifndef WITHOUT_V4L
 static int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
 static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual);
+#ifdef MOTION_V4L2
 static int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
 static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual);
-#endif
+#endif /* MOTION_V4L2 */
+#endif /* WITHOUT_V4L */
 
 /* Add a call to your functions here: */
 int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
@@ -61,9 +63,11 @@ int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
 #ifndef WITHOUT_V4L	
 	else if (cnt->track.type == TRACK_TYPE_PWC)
 		return lqos_center(cnt, dev, xoff, yoff);
+#ifdef MOTION_V4L2
 	else if (cnt->track.type == TRACK_TYPE_UVC)
 		return uvc_center(cnt, dev, xoff, yoff);
-#endif
+#endif /* MOTION_V4L2 */
+#endif /* WITHOUT_V4L */
 	else if (cnt->track.type == TRACK_TYPE_IOMOJO)
 		return iomojo_center(cnt, xoff, yoff);
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
@@ -84,9 +88,11 @@ int track_move(struct context *cnt, int dev, struct coord *cent, struct images *
 #ifndef WITHOUT_V4L
 	else if (cnt->track.type == TRACK_TYPE_PWC)
 		return lqos_move(cnt, dev, cent, imgs, manual);
+#ifdef MOTION_V4L2
 	else if (cnt->track.type == TRACK_TYPE_UVC)
 		return uvc_move(cnt, dev, cent, imgs, manual);
-#endif
+#endif /* MOTION_V4L2 */
+#endif /* WITHOUT_V4L */
 	else if (cnt->track.type == TRACK_TYPE_IOMOJO)
 		return iomojo_move(cnt, dev, cent, imgs);
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
@@ -528,6 +534,7 @@ static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct im
 	- for new API in uvcvideo 
 	- add Trace-steps for investigation
 ******************************************************************************/
+#ifdef MOTION_V4L2
 
 static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
@@ -817,4 +824,5 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 
 	return cnt->track.move_wait;
 }
+#endif /* MOTION_V4L2 */
 #endif /* WITHOUT_V4L */
