@@ -6,6 +6,7 @@
  *	See also the file 'COPYING'.
  *
  */
+#ifndef WITHOUT_V4L
 
 /* Common stuff: */
 #include "motion.h"
@@ -13,7 +14,6 @@
 /* for rotation */
 #include "rotate.h"
 
-#ifndef WITHOUT_V4L
 
 /* for the v4l stuff: */
 #include "pwc-ioctl.h"
@@ -546,10 +546,8 @@ static int v4l_putpipe (int dev, unsigned char *image, int size)
 {
 	return write(dev, image, size);
 }
-#endif /*WITHOUT_V4L*/
 
 
-#ifndef WITHOUT_V4L
 int vid_startpipe(const char *devname, int width, int height, int type)
 {
 	return v4l_startpipe( (char *)devname, width, height, type);

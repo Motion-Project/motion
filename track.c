@@ -9,11 +9,10 @@
 #include <math.h>
 #include <termios.h>
 #include "motion.h"
-//#include "conf.h"
-//#include "track.h"
-//#include "alg.h"
 
+#ifndef WITHOUT_V4L
 #include "pwc-ioctl.h"
+#endif
 
 
 struct trackoptions track_template = {
@@ -38,10 +37,12 @@ static int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUS
 static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 static int iomojo_center(struct context *cnt, int xoff, int yoff);
 static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
+#ifndef WITHOUT_V4L
 static int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
 static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual);
 static int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
 static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual);
+#endif
 
 /* Add a call to your functions here: */
 int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
@@ -57,14 +58,16 @@ int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
 		}
 		else return ret;	
 	}
+#ifndef WITHOUT_V4L	
 	else if (cnt->track.type == TRACK_TYPE_PWC)
 		return lqos_center(cnt, dev, xoff, yoff);
+	else if (cnt->track.type == TRACK_TYPE_UVC)
+		return uvc_center(cnt, dev, xoff, yoff);
+#endif
 	else if (cnt->track.type == TRACK_TYPE_IOMOJO)
 		return iomojo_center(cnt, xoff, yoff);
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
 		return 10; // FIX ME. I chose to return something reasonable.
-	else if (cnt->track.type == TRACK_TYPE_UVC)
-		return uvc_center(cnt, dev, xoff, yoff);
 
 	motion_log(LOG_ERR, 1, "track_center: internal error, %d is not a known track-type", cnt->track.type);
 
@@ -78,14 +81,16 @@ int track_move(struct context *cnt, int dev, struct coord *cent, struct images *
 		return 0;
 	if (cnt->track.type == TRACK_TYPE_STEPPER)
 		return stepper_move(cnt, dev, cent, imgs);
+#ifndef WITHOUT_V4L
 	else if (cnt->track.type == TRACK_TYPE_PWC)
 		return lqos_move(cnt, dev, cent, imgs, manual);
+	else if (cnt->track.type == TRACK_TYPE_UVC)
+		return uvc_move(cnt, dev, cent, imgs, manual);
+#endif
 	else if (cnt->track.type == TRACK_TYPE_IOMOJO)
 		return iomojo_move(cnt, dev, cent, imgs);
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
 		return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
-	else if (cnt->track.type == TRACK_TYPE_UVC)
-		return uvc_move(cnt, dev, cent, imgs, manual);
 
 	motion_log(LOG_ERR, 1, "track_move: internal error, %d is not a known track-type", cnt->track.type);
 
@@ -401,7 +406,7 @@ static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct 
 	Logitech QuickCam Orbit camera tracking code by folkert@vanheusden.com
 
 ******************************************************************************/
-
+#ifndef WITHOUT_V4L
 static int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
 	int reset = 3;
@@ -655,13 +660,11 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 		motion_log(LOG_ERR, 1," After_ABS_Y_Angel : x= %d , Y= %d , ", cnt->track.pan_angle, cnt->track.tilt_angle );	
 	}
 
-
 	return cnt->track.move_wait;
 }
 
 static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual)
 {
-	
 	/* RELATIVE MOVING : Act.Position +/- X and Y */
 	
 	int delta_x = cent->x - (imgs->width / 2);
@@ -811,6 +814,7 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 			}    
 			motion_log(LOG_ERR, 1," After_REL_Y_Angel : x= %d , Y= %d", cnt->track.pan_angle, cnt->track.tilt_angle  );
 		}
-  
+
 	return cnt->track.move_wait;
 }
+#endif /* WITHOUT_V4L */

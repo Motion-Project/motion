@@ -465,12 +465,11 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 	Wrappers calling the actual capture routines
  *****************************************************************************/
 
+#ifndef WITHOUT_V4L
 /* big lock for vid_start to ensure exclusive access to viddevs while adding 
  * devices during initialization of each thread
  */
 static pthread_mutex_t vid_mutex;
-
-#ifndef WITHOUT_V4L
 
 /* for the v4l stuff: */
 #include <sys/mman.h>
