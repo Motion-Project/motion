@@ -43,15 +43,15 @@ hw.bt848.format=0
 
 Tested in FreeBSD 4.9/4.1x/5.x/6.0 .
 
-Packages needed (dependencies for 6.0):
+Packages needed (dependencies for 6.1):
 
  - autoconf-2.59_2 
  - gcc-3.4.6_20051206 
  - m4-1.4.4 
- - linuxthreads-2.2.3_19 
+ - linuxthreads-2.2.3_19 only if you don't want native freebsd pthread 
  - jpeg-6b_4 or above  
  - gmake-3.80_2 ( GNU Make )
- - ffmpeg-0.4.9.p1_5 ( mpeg1/4 video encoders ).
+ - ffmpeg-0.4.9.p1_6 ( mpeg1/4 video encoders ).
  - mysql-server , mysql-client ( database backend support ).
  - postgresql-devel , postgresql ( database backend support ).
 
@@ -70,6 +70,9 @@ Packages needed (dependencies for 6.0):
 
  Any question / fix / suggestion  please send it to motion mailing list.
 
+
+ http://www.lavrsen.dk/twiki/bin/view/Motion/FreeBSD
+ http://www.lavrsen.dk/twiki/bin/view/Motion/HowtoMotionPwcFreeBSD
 
  Angel Carpintero
  ack@telefonica.net
