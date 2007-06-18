@@ -1920,11 +1920,14 @@ int main (int argc, char **argv)
 			 * 'threads_running'.
 			 */
 			pthread_mutex_lock(&global_lock);
-			cnt_list[i]->threadnr = ++threads_running;
+			threads_running++;
 			pthread_mutex_unlock(&global_lock);
+			
+			/* If i is 0 it means no thread files and we then set the thread number to 1 */
+			cnt_list[i]->threadnr = i ? i : 1;
 
 			if ( strcmp(cnt_list[i]->conf_filename,"") )
-				motion_log(LOG_INFO, 0, "Thread %d is from %s", threads_running, cnt_list[i]->conf_filename );
+				motion_log(LOG_INFO, 0, "Thread %d is from %s", cnt_list[i]->threadnr, cnt_list[i]->conf_filename );
 
 			if (cnt_list[0]->conf.setup_mode) {
 				motion_log(-1, 0, "Thread %d is device: %s input %d", threads_running,
