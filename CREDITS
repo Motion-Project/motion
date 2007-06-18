@@ -940,7 +940,6 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Fixed the thread number assignment which could goof up if netcams started very
      quickly before all thread were created at startup.
 
-
 Mike Lees
    * Added the onffmpegclose feature.
    * Fixed a serious stability issue related to syslog not being a fully

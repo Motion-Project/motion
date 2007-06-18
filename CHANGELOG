@@ -23,7 +23,6 @@ Features
      directory of mysql.h and --with-mysql-lib directory of libmysqlclient.a or
      libmysqlclient.so (Angel Carpintero).
 
-
 Bugfixes
    * Removed a duplicate call to jpeg_destroy_decompress already is called from
      netcam_image_conv (Krzysztof Blaszkowski).
