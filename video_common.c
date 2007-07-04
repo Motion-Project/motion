@@ -197,52 +197,52 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
 			if ((i & 1) == 0) {
 				/* B */
 				if ((i > width) && ((i % width) > 0)) {
-					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;	/* R */
+					*scanpt++ = *rawpt;     /* B */
 					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt + width) + *(rawpt - width)) / 4;	/* G */
-					*scanpt++ = *rawpt;	/* B */
+					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
 				} else {
 					/* first line or left column */
-					*scanpt++ = *(rawpt + width + 1);	/* R */
+					*scanpt++ = *rawpt;     /* B */
 					*scanpt++ = (*(rawpt + 1) + *(rawpt + width)) / 2;	/* G */
-					*scanpt++ = *rawpt;	/* B */
+					*scanpt++ = *(rawpt + width + 1);       /* R */
 				}
 			} else {
 				/* (B)G */
 				if ((i > width) && ((i % width) < (width - 1))) {
-					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;	/* R */
+					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* B */
 					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;	/* B */
+					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* R */
 				} else {
 					/* first line or right column */
-					*scanpt++ = *(rawpt + width);	/* R */
+					*scanpt++ = *(rawpt - 1);       /* B */
 					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = *(rawpt - 1);	/* B */
+					*scanpt++ = *(rawpt + width);   /* R */
 				}
 			}
 		} else {
 			if ((i & 1) == 0) {
 				/* G(R) */
 				if ((i < (width * (height - 1))) && ((i % width) > 0)) {
-					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;	/* R */
+					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* B */
 					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;	/* B */
+					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* R */
 				} else {
 					/* bottom line or left column */
-					*scanpt++ = *(rawpt + 1);	/* R */
+					*scanpt++ = *(rawpt - width);   /* B */
 					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = *(rawpt - width);	/* B */
+					*scanpt++ = *(rawpt + 1);       /* R */
 				}
 			} else {
 				/* R */
 				if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
-					*scanpt++ = *rawpt;	/* R */
+					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* B */
 					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt - width) + *(rawpt + width)) / 4;	/* G */
-					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;	/* B */
+					*scanpt++ = *rawpt;     /* R */
 				} else {
 					/* bottom line or right column */
-					*scanpt++ = *rawpt;	/* R */
+					*scanpt++ = *(rawpt - width - 1);       /* B */
 					*scanpt++ = (*(rawpt - 1) + *(rawpt - width)) / 2;	/* G */
-					*scanpt++ = *(rawpt - width - 1);	/* B */
+					*scanpt++ = *rawpt;     /* R */
 				}
 			}
 		}
