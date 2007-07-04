@@ -630,11 +630,10 @@ static void motion_init(struct context *cnt)
 	/* Initialize webcam server if webcam port is specified to not 0 */
 	if (cnt->conf.webcam_port) {
 		if ( webcam_init(cnt) == -1 ) {
-			motion_log(LOG_ERR, 1, "Problem enabling stream server");
+			motion_log(LOG_ERR, 1, "Problem enabling stream server in port %d", cnt->conf.webcam_port);
 			cnt->finish = 1;
 			cnt->makemovie = 0;
-		}
-		motion_log(LOG_DEBUG, 0, "Started stream webcam server in port %d", cnt->conf.webcam_port);
+		}else 	motion_log(LOG_DEBUG, 0, "Started stream webcam server in port %d", cnt->conf.webcam_port);
 	}
 
 	/* Prevent first few frames from triggering motion... */
