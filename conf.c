@@ -852,7 +852,7 @@ config_param config_params[] = {
 	"\n############################################################\n"
 	"# Tracking (Pan/Tilt)\n"
 	"############################################################\n\n"
-	"# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic)\n"
+	"# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo)\n"
 	"# The generic type enables the definition of motion center and motion size to\n"
 	"# be used with the conversion specifiers for options like on_motion_detected",
 	TRACK_OFFSET(type),
