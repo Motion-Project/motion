@@ -6,17 +6,17 @@
  - fakeroot
  - debhelper
 
- To create the deb package ( from motion-3.2.7 ) :
+ To create the deb package ( from motion-3.2.8 ) :
 
- tar xfvz motion-3.2.7.tar.gz 
- cd motion-3.2.7/
+ tar xfvz motion-3.2.8.tar.gz 
+ cd motion-3.2.8/
  dpkg-buildpackage -tc -b -rfakeroot
 
- now you'll have a motion_3.2.7-1_i386.deb package in :
+ now you'll have a motion_3.2.8-1_i386.deb package in :
 
- ../motion-3.2.7 , so you can install typing :
+ ../motion-3.2.8 , so you can install typing :
 
- dpkg -i ../motion_3.2.7-1_i386.deb
+ dpkg -i ../motion_3.2.8-1_i386.deb
 
 
  Note : If you want to use motion init.d script set daemon on in motion.conf to allow motion create the pid file.
