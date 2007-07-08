@@ -284,7 +284,7 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
 	}
 }
 
-void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
 {
 	uint8_t *pY = map;
 	uint8_t *pU = pY + (width * height);
@@ -355,8 +355,7 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
 	}
 }
 
-int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int v4l_bufsize, int width,
-		     int height)
+int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int width, int height)
 {
 	netcam_context netcam;
 

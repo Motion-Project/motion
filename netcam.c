@@ -65,6 +65,10 @@
  */
 #define SETUP    ((cnt->conf.setup_mode) || (debug_level >= CAMERA_INFO))
 
+
+tfile_context *file_new_context(void);
+void file_free_context(tfile_context* ctxt);
+
 /* These strings are used for the HTTP connection */
 static const char    *connect_req = "GET %s HTTP/1.0\r\n"
                       "Host: %s\r\n"
@@ -1195,7 +1199,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 	}
 
 	/* Assure there's enough room in the buffer */
-	while( buffer->size < statbuf.st_size ) {
+	while( buffer->size < (size_t)statbuf.st_size ) {
 		netcam_check_buffsize(buffer, statbuf.st_size ); 
 	}
 

@@ -5,7 +5,9 @@
 
 /* EXPERIMENTAL : some mutex needs to be set around ! */
 
-void MJPEGinit(){
+void MJPEGinit(void);
+
+void MJPEGinit(void){
 	avcodec_init();
 	avcodec_register_all();
 }

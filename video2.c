@@ -775,7 +775,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 			return 0;
 
 		case V4L2_PIX_FMT_UYVY:
-			conv_uyvyto420p(map, (unsigned char *) the_buffer->ptr, width, height);
+			conv_uyvyto420p(map, (unsigned char *) the_buffer->ptr, (unsigned)width, (unsigned)height);
 			return 0;
 
 		case V4L2_PIX_FMT_YUYV:
@@ -806,7 +806,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 			}
 #endif
 		case V4L2_PIX_FMT_JPEG:
-			return conv_jpeg2yuv420(cnt, map, the_buffer, viddev->v4l_bufsize, width, height);
+			return conv_jpeg2yuv420(cnt, map, the_buffer, width, height);
 
 		case V4L2_PIX_FMT_SBGGR8:	/* bayer */
 			bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *) the_buffer->ptr, width, height);
