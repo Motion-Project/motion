@@ -220,7 +220,7 @@ updateguide: pre-build-info
 	@echo
 	wget www.lavrsen.dk/twiki/bin/view/Motion/MotionGuideOneLargeDocument?skin=text -O motion_guide.tmp
 	@echo "Cleaning up and fixing links..."
-	@cat motion_guide.tmp | sed -e 's/\?CGISESSID=[0-9a-fA-F]*//g;s,"/twiki/,"http://www.lavrsen.dk/twiki/,g' > motion_guide.html
+	@cat motion_guide.tmp | sed -e 's/\?skin=text//g;s,"/twiki/,"http://www.lavrsen.dk/twiki/,g' > motion_guide.html
 	@rm -f motion_guide.tmp
 	@echo "All done, you should now have an up-to-date local copy of the Motion guide."
 	@echo
