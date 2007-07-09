@@ -707,7 +707,11 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 	if (input != viddev->input || width != viddev->width || height != viddev->height ||
 	    freq != viddev->freq || tuner_number != viddev->tuner_number) {
 
+		struct timeval switchTime;
+
 		v4l2_select_input((src_v4l2_t *) viddev->v4l2_private, input, norm, freq, tuner_number);
+
+		gettimeofday(&switchTime, NULL);
 
 		v4l2_picture_controls(cnt, viddev);
 
@@ -716,8 +720,30 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 		viddev->height = height;
 		viddev->freq = freq;
 		viddev->tuner_number = tuner_number;
+
+
+		/* Skip all frames captured before switchtime, capture 1 after switchtime */
+		{
+			src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+			unsigned int counter = 0;
+			motion_log(LOG_DEBUG, 0, "set_input_skip_frame switch_time=%ld:%ld", switchTime.tv_sec, switchTime.tv_usec);
+
+			/* Avoid hang using the number of mmap buffers */
+			while(counter < s->req.count)
+			{
+				counter++;
+				if (v4l2_next(cnt, viddev, map, width, height))
+					break;
+				if (s->buf.timestamp.tv_sec > switchTime.tv_sec || 
+				(s->buf.timestamp.tv_sec == switchTime.tv_sec && s->buf.timestamp.tv_usec > switchTime.tv_usec))
+					break;
+				motion_log(LOG_DEBUG, 0, "got frame before switch timestamp=%ld:%ld", 
+					s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
+			}
+		}
+
 		/* skip a few frames if needed */
-		for (i = 0; i < skip; i++)
+		for (i = 1; i < skip; i++)
 			v4l2_next(cnt, viddev, map, width, height);
 	} else {
 		/* No round robin - we only adjust picture controls */
