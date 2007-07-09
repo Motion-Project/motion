@@ -111,7 +111,7 @@ struct config conf_template = {
 	sql_log_timelapse:     0,
 	sql_query:             DEF_SQL_QUERY,
 	mysql_db:              NULL,
-	mysql_host:            NULL,
+	mysql_host:            "localhost",
 	mysql_user:            NULL,
 	mysql_password:        NULL,
 	on_picture_save:       NULL,

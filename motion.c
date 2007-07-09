@@ -553,6 +553,10 @@ static void motion_init(struct context *cnt)
 			motion_remove_pid();
 			exit(1);
 		}
+		#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
+		my_bool  my_true = TRUE;
+		mysql_options(cnt->database,MYSQL_OPT_RECONNECT,&my_true);
+		#endif
 	}
 #endif /* HAVE_MYSQL */
 
