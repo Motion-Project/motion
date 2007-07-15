@@ -782,7 +782,23 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 	s->buf.memory = V4L2_MEMORY_MMAP;
 
 	if (xioctl(s->fd, VIDIOC_DQBUF, &s->buf) == -1) {
+
+		/* some drivers return EIO when there is no signal, 
+		   driver might dequeue an (empty) buffer despite
+		   returning an error, or even stop capturing.
+		*/
+		if ( errno == EIO ){
+			s->pframe++; 
+			if(s->pframe >= s->req.count) s->pframe=0;
+			s->buf.index = s->pframe;
+		
+			motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__,s->pframe);
+	
+			return (1);
+		}
+
 		motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: %s", __FUNCTION__, strerror(errno));
+
 		return (-1);
 	}
 
