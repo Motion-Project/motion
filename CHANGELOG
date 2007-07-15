@@ -22,6 +22,8 @@ Features
      to configure --without-mysql to disable support, --with-mysql-include
      directory of mysql.h and --with-mysql-lib directory of libmysqlclient.a or
      libmysqlclient.so (Angel Carpintero).
+   * Added MYSQL_OPT_RECONNECT flag for mysql connection (MYSQL 5.x only) and 
+     changed default value for mysql_host (Angel Carpintero).
 
 Bugfixes
    * Removed a duplicate call to jpeg_destroy_decompress already is called from
@@ -45,6 +47,14 @@ Bugfixes
    * Fix compilation broken by uvc track type. (Angel Carpintero).
    * Fixed the thread number assignment which could goof up if netcams started
      very quickly before all thread were created at startup. (Kenneth Lavrsen)
+   * Fix RoundRobin v4l2 buffers in driver when switching input,
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x07x07x182605 
+     (Dag Erlandsson and Angel Carpintero).
+   * Check EIO for VIDIOC_DQBUF to workaround saa7134 problem. 
+     (Dag Erlandsson and Angel Carpintero).
+   * Change bayer2rgb24() to fix a problem with sn9c102 driver
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x06x05x012249 
+     (Jared D and Angel Carpintero).	
 	
 3.2.7 Formal Release - Summary of Changes
 
