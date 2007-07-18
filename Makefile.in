@@ -194,10 +194,7 @@ dist: distclean updateguide
 # DEB create a deb package.                                                    #
 ################################################################################
 deb:
-	@chmod -R 644 * 
-	@chmod 755 configure
-	@chmod 755 debian
-	@chmod 755 debian/rules
+	@chmod -R 755 * 
 	dpkg-buildpackage -tc -b -rfakeroot
 
 
