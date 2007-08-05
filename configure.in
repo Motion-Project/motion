@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script
 AC_INIT
 AC_CONFIG_SRCDIR([motion.c])
 
-VERSION=3.2.8
+VERSION=3.2.9
 AC_SUBST(VERSION)
 
 THREAD_CFLAGS=""
