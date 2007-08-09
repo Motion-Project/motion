@@ -14,6 +14,12 @@
 /* for rotation */
 #include "rotate.h"
 
+#ifdef MJPEGT 
+#include <mjpegtools/jpegutils.h>
+#include <mjpegtools/mjpeg_types.h>
+#endif
+
+
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
@@ -392,6 +398,45 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff
 
 	return netcam_proc_jpeg(&netcam, dst);
 }
+
+#ifdef MJPEGT 
+void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
+{
+	uint8_t *yuv[3];
+	unsigned char *y, *u, *v;
+	int loop;
+
+	yuv[0] = malloc(width * height * sizeof(yuv[0][0]));
+	yuv[1] = malloc(width * height / 4 * sizeof(yuv[1][0]));
+	yuv[2] = malloc(width * height / 4 * sizeof(yuv[2][0]));
+
+
+	decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
+
+	y=map;
+	u=y+width*height;
+	v=u+(width*height)/4;
+	memset(y, 0, width*height);
+	memset(u, 0, width*height/4);
+	memset(v, 0, width*height/4);
+
+	for(loop=0; loop<width*height; loop++) {
+		*map++=yuv[0][loop];
+	}
+
+	for(loop=0; loop<width*height/4; loop++) {
+		*map++=yuv[1][loop];
+	}
+
+	for(loop=0; loop<width*height/4; loop++) {
+		*map++=yuv[2][loop];
+	}
+
+	free(yuv[0]);
+	free(yuv[1]);
+	free(yuv[2]);
+}
+#endif
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))

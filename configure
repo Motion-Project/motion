@@ -659,10 +659,10 @@ CPPFLAGS
 ac_ct_CC
 EXEEXT
 OBJEXT
-FFMPEG_OBJ
 CPP
 GREP
 EGREP
+FFMPEG_OBJ
 BIN_PATH
 LIBOBJS
 LTLIBOBJS'
@@ -3087,715 +3087,14 @@ fi
 
 fi
 
-FFMPEG="yes"
-FFMPEG_OK="no_found"
-FFMPEG_OBJ=""
-
-# Check whether --with-ffmpeg was given.
-if test "${with_ffmpeg+set}" = set; then
-  withval=$with_ffmpeg; FFMPEG="$withval"
-
-fi
-
-if test "${FFMPEG}" = "no"; then
-	{ echo "$as_me:$LINENO: checking for ffmpeg" >&5
-echo $ECHO_N "checking for ffmpeg... $ECHO_C" >&6; }
-	{ echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6; }
-else if test "${FFMPEG}" = "yes"; then
-		{ echo "$as_me:$LINENO: checking for ffmpeg autodetecting" >&5
-echo $ECHO_N "checking for ffmpeg autodetecting... $ECHO_C" >&6; }
-
-# weird hack to fix debian problem TO BE REMOVED
-
-	if test -f /usr/bin/ffmpeg-config; then
-		FFMPEG_LIBS_DEB="`ffmpeg-config --libs avformat`"
-		FFMPEG_CFLAGS_DEB="`ffmpeg-config --cflags`"
-		FFMPEG_OK="found"
-		{ echo "$as_me:$LINENO: result: found for debian" >&5
-echo "${ECHO_T}found for debian" >&6; }
-	elif test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_OK="found"
-		FFMPEG="/usr/lib64"
-	elif test -f /usr/lib/libavcodec.a -o -f /usr/lib/libavcodec.so && test -f /usr/lib/libavformat.a -o -f /usr/lib/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_OK="found"
-		FFMPEG="/usr/lib"
-	elif test -f /usr/local/lib/libavcodec.a -o -f /usr/local/lib/libavcodec.so && test -f /usr/local/lib/libavformat.a -o -f /usr/local/lib/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_OK="found"
-		FFMPEG="/usr/local/lib"
-	else
-		{ echo "$as_me:$LINENO: result: not found" >&5
-echo "${ECHO_T}not found" >&6; }
-		echo ""
-		echo "**********************************************"
-		echo "* libavcodec.a or libavcodec.so or           *"
-		echo "* libavformat.a or libavformat.so not found: *"
-		echo "*    ALL FFMPEG FEATURES DISABLED            *"
-		echo "*                                            *"
-		echo "* Please read the Motion Guide for help:     *"
-		echo "* http://motion.sourceforge.net              *"
-		echo "**********************************************"
-		echo ""
-	fi
-else
-	{ echo "$as_me:$LINENO: checking for ffmpeg in -> ${FFMPEG} <-" >&5
-echo $ECHO_N "checking for ffmpeg in -> ${FFMPEG} <-... $ECHO_C" >&6; }
-	if test -f ${FFMPEG}/lib/libavcodec.a -o -f ${FFMPEG}/lib/libavcodec.so && test -f ${FFMPEG}/lib/libavformat.a -o -f ${FFMPEG}/lib/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_OK="found"
-		FFMPEG="${FFMPEG}/lib"
-	elif test -f ${FFMPEG}/libavcodec.a -o -f ${FFMPEG}/libavcodec.so && test -f ${FFMPEG}/libavformat.a -o -f ${FFMPEG}/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_OK="found"
-	else
-		{ echo "$as_me:$LINENO: result: not found" >&5
-echo "${ECHO_T}not found" >&6; }
-		if test "${FFMPEG}" != "no"; then
-			echo ""
-			echo "**********************************************"
-			echo "* libavcodec.a or libavcodec.so or           *"
-			echo "* libavformat.a or libavformat.so not found: *"
-			echo "*    ALL FFMPEG FEATURES DISABLED            *"
-			echo "*                                            *"
-			echo "* Please read the Motion Guide for help:     *"
-			echo "* http://motion.sourceforge.net              *"
-			echo "**********************************************"
-			echo ""
-		fi
-	fi
-fi
 
 #
-# Now check for ffmpeg headers ( avformat.h ) if ffmpeg libs were found
+# Check mjpegtools -lmjpegutils -llavjpeg
 #
 
-if test "${FFMPEG_OK}" = "found"; then
-	{ echo "$as_me:$LINENO: checking for ffmpeg headers" >&5
-echo $ECHO_N "checking for ffmpeg headers... $ECHO_C" >&6; }
-
-	if test "${FFMPEG_CFLAGS_DEB}" != "" ; then
-		FFMPEG_CFLAGS="${FFMPEG_CFLAGS_DEB}"
-		{ echo "$as_me:$LINENO: result: found for debian" >&5
-echo "${ECHO_T}found for debian" >&6; }
-	elif test -f ${FFMPEG}/include/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_CFLAGS="-I${FFMPEG}/include"
-	elif test -f ${FFMPEG}/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_CFLAGS="-I${FFMPEG}"
-	elif test -f `$as_dirname -- ${FFMPEG} ||
-$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X${FFMPEG} : 'X\(//\)[^/]' \| \
-	 X${FFMPEG} : 'X\(//\)$' \| \
-	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
-echo X${FFMPEG} |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`/include/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_CFLAGS="-I`$as_dirname -- ${FFMPEG} ||
-$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X${FFMPEG} : 'X\(//\)[^/]' \| \
-	 X${FFMPEG} : 'X\(//\)$' \| \
-	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
-echo X${FFMPEG} |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`/include"
-	elif test -f `$as_dirname -- ${FFMPEG} ||
-$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X${FFMPEG} : 'X\(//\)[^/]' \| \
-	 X${FFMPEG} : 'X\(//\)$' \| \
-	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
-echo X${FFMPEG} |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`/include/ffmpeg/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		FFMPEG_CFLAGS="-I`$as_dirname -- ${FFMPEG} ||
-$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X${FFMPEG} : 'X\(//\)[^/]' \| \
-	 X${FFMPEG} : 'X\(//\)$' \| \
-	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
-echo X${FFMPEG} |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`/include/ffmpeg"
-	else
-		{ echo "$as_me:$LINENO: result: not found" >&5
-echo "${ECHO_T}not found" >&6; }
-		FFMPEG_OK="no_found"
-		echo "**********************************************"
-		echo "*       avformat.h not found:                *"
-		echo "*    ALL FFMPEG FEATURES DISABLED            *"
-		echo "*                                            *"
-		echo "* Please read the Motion Guide for help:     *"
-		echo "* http://motion.sourceforge.net              *"
-		echo "**********************************************"
-		echo ""
-	fi
-
-#
-# If ffmpeg libs and headers have been found
-#
-
-	if  test "${FFMPEG_OK}" = "found"; then
-		if test "${FFMPEG_LIBS_DEB}" != ""; then
-			TEMP_LIBS="$TEMP_LIBS ${FFMPEG_LIBS_DEB}"
-#			TEMP_LDFLAGS="${TEMP_LDFLAGS} ${FFMPEG_LIBS_DEB}"
-		else
-			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG} -lavformat -lavcodec -lm -lz"
-			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG}"
-		fi
-
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
-
-		FFMPEG_OBJ="ffmpeg.o"
-
-	fi
-fi
-fi
-
-
-MYSQL="yes"
-MYSQL_SUPPORT="no"
-MYSQL_HEADERS="yes"
-MYSQL_LIBS="yes"
-
-{ echo "$as_me:$LINENO: checking for mysql support" >&5
-echo $ECHO_N "checking for mysql support... $ECHO_C" >&6; }
-
-
-# Check whether --with-mysql was given.
-if test "${with_mysql+set}" = set; then
-  withval=$with_mysql; MYSQL="$withval"
-
-fi
-
-
-
-# Check whether --with-mysql-lib was given.
-if test "${with_mysql_lib+set}" = set; then
-  withval=$with_mysql_lib; MYSQL_LIBS="$withval"
-
-fi
-
-
-
-
-# Check whether --with-mysql-include was given.
-if test "${with_mysql_include+set}" = set; then
-  withval=$with_mysql_include; MYSQL_HEADERS="$withval"
-
-fi
-
-
-
-if test "${MYSQL}" = "no"; then
-	{ echo "$as_me:$LINENO: result: skipped" >&5
-echo "${ECHO_T}skipped" >&6; }
-else
-	{ echo "$as_me:$LINENO: result: testing" >&5
-echo "${ECHO_T}testing" >&6; }
-	# ******* Search mysql headers *******
-
-	if test "${MYSQL_HEADERS}" = "yes"; then
-		{ echo "$as_me:$LINENO: checking autodect mysql headers" >&5
-echo $ECHO_N "checking autodect mysql headers... $ECHO_C" >&6; }
-		# Autodetect
-		for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
-			# check for plain setups
-			if test -f $w/mysql.h; then
-				MYSQL_INCDIR=$w
-				break
-			fi
-			# check for "/usr/include/<packagename>" type setups
-			if test -f $w/mysql/mysql.h; then
-				MYSQL_INCDIR=$w/mysql
-				break
-			fi
-			# check for "/usr/<packagename>/include" type setups
-			if test -f $w/mysql/include/mysql.h; then
-				MYSQL_INCDIR=$w/mysql/include
-				break
-			fi
-		done
-	elif test "${MYSQL_HEADERS}" = "no"; then
-		{ echo "$as_me:$LINENO: checking for mysql headers" >&5
-echo $ECHO_N "checking for mysql headers... $ECHO_C" >&6; }
-		{ echo "$as_me:$LINENO: result: skipped" >&5
-echo "${ECHO_T}skipped" >&6; }
-	else
-		{ echo "$as_me:$LINENO: checking for mysql headers in $MYSQL_HEADERS" >&5
-echo $ECHO_N "checking for mysql headers in $MYSQL_HEADERS... $ECHO_C" >&6; }
-		# Manual detection for <withval>
-        	if test -f $MYSQL_HEADERS/mysql.h; then
-                	MYSQL_INCDIR=$MYSQL_HEADERS
-	        fi
-	fi
-
-	if test -z "$MYSQL_INCDIR" ; then
-		MYSQL_HEADERS="no"
-		{ echo "$as_me:$LINENO: result: not found" >&5
-echo "${ECHO_T}not found" >&6; }
-		echo Invalid MySQL directory - unable to find mysql.h.
-	else
-		{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-		MYSQL_HEADERS="yes"
-	fi
-
-
-	if test "${MYSQL_HEADERS}" = "yes"; then
-
-	# ******* Search mysql libs *********
-	if test "${MYSQL_LIBS}" = "yes"; then
-		{ echo "$as_me:$LINENO: checking autodect mysql libs" >&5
-echo $ECHO_N "checking autodect mysql libs... $ECHO_C" >&6; }
-        	# Autodetect
-		for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
-			# check for plain setups
-			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
-				MYSQL_LIBDIR=$w
-				break
-			fi
-			# check for "/usr/lib/<packagename>" type setups
-			if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
-				MYSQL_LIBDIR=$w/mysql
-				break
-			fi
-			# check for "/usr/<packagename>/lib" type setups
-			if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
-				MYSQL_LIBDIR=$w/mysql/lib
-				break
-			fi
-		done
-	elif test "${MYSQL_LIBS}" = "no"; then
-        	{ echo "$as_me:$LINENO: checking for mysql libs" >&5
-echo $ECHO_N "checking for mysql libs... $ECHO_C" >&6; }
-	        { echo "$as_me:$LINENO: result: skipped" >&5
-echo "${ECHO_T}skipped" >&6; }
-	else
-		{ echo "$as_me:$LINENO: checking for mysql libs in $MYSQL_LIBS" >&5
-echo $ECHO_N "checking for mysql libs in $MYSQL_LIBS... $ECHO_C" >&6; }
-		# Manual detection for <withval>
-		if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
-			MYSQL_LIBDIR=$MYSQL_LIBS
-		fi
-	fi
-
-
-	if test -z "$MYSQL_LIBDIR" ; then
-		{ echo "$as_me:$LINENO: result: not found" >&5
-echo "${ECHO_T}not found" >&6; }
-		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
-	else
-		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
-		#Add -lz for some mysql installs....
-		TEMP_LIBS="$TEMP_LIBS -lz"
-		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
-		MYSQL_SUPPORT="yes"
-	fi
-
-	# end mysql-include , mysql-libs
-	fi
-
-# end Mysql detection
-fi
-
-
-
-PGSQL="yes"
-
-{ echo "$as_me:$LINENO: checking for PostgreSQL" >&5
-echo $ECHO_N "checking for PostgreSQL... $ECHO_C" >&6; }
-
-# Check whether --with-pgsql was given.
-if test "${with_pgsql+set}" = set; then
-  withval=$with_pgsql; PGSQL="$withval"
-
-fi
-
-if test "${PGSQL}" = "no"; then
-	{ echo "$as_me:$LINENO: result: skipped" >&5
-echo "${ECHO_T}skipped" >&6; }
-fi
-
-if test "${PGSQL}" = "yes"; then
-	for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
-		if test -r $i/include/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i/include
-		elif test -r $i/include/pgsql/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i/include/pgsql
-		elif test -r $i/include/postgresql/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i/include/postgresql
-		fi
-	done
-
-	if test -z "$PGSQL_DIR"; then
-		{ echo "$as_me:$LINENO: result: Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL" >&5
-echo "${ECHO_T}Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL" >&6; }
-	else
-		PGSQL_INCLUDE="-I$PGSQL_INCDIR"
-		PGSQL_LIBDIR=$PGSQL_DIR/lib
-		{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-		test -d $PGSQL_DIR/lib/pgsql && PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql
-		LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
-		{ echo "$as_me:$LINENO: checking for PQcmdTuples in -lpq" >&5
-echo $ECHO_N "checking for PQcmdTuples in -lpq... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pq_PQcmdTuples+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpq  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char PQcmdTuples ();
-int
-main ()
-{
-return PQcmdTuples ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pq_PQcmdTuples=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_pq_PQcmdTuples=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQcmdTuples" >&5
-echo "${ECHO_T}$ac_cv_lib_pq_PQcmdTuples" >&6; }
-if test $ac_cv_lib_pq_PQcmdTuples = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_PQCMDTUPLES 1
-_ACEOF
-
-fi
-
-		{ echo "$as_me:$LINENO: checking for PQoidValue in -lpq" >&5
-echo $ECHO_N "checking for PQoidValue in -lpq... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pq_PQoidValue+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpq  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char PQoidValue ();
-int
-main ()
-{
-return PQoidValue ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pq_PQoidValue=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_pq_PQoidValue=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQoidValue" >&5
-echo "${ECHO_T}$ac_cv_lib_pq_PQoidValue" >&6; }
-if test $ac_cv_lib_pq_PQoidValue = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_PQOIDVALUE 1
-_ACEOF
-
-fi
-
-		{ echo "$as_me:$LINENO: checking for PQclientEncoding in -lpq" >&5
-echo $ECHO_N "checking for PQclientEncoding in -lpq... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pq_PQclientEncoding+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpq  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char PQclientEncoding ();
-int
-main ()
-{
-return PQclientEncoding ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pq_PQclientEncoding=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_pq_PQclientEncoding=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQclientEncoding" >&5
-echo "${ECHO_T}$ac_cv_lib_pq_PQclientEncoding" >&6; }
-if test $ac_cv_lib_pq_PQclientEncoding = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_PQCLIENTENCODING 1
-_ACEOF
-
-fi
-
-		{ echo "$as_me:$LINENO: checking for pg_encoding_to_char in -lpq" >&5
-echo $ECHO_N "checking for pg_encoding_to_char in -lpq... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pq_pg_encoding_to_char+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpq  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pg_encoding_to_char ();
-int
-main ()
-{
-return pg_encoding_to_char ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pq_pg_encoding_to_char=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_pq_pg_encoding_to_char=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_pg_encoding_to_char" >&5
-echo "${ECHO_T}$ac_cv_lib_pq_pg_encoding_to_char" >&6; }
-if test $ac_cv_lib_pq_pg_encoding_to_char = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT 1
-_ACEOF
-
-fi
-
-	 	LDFLAGS=""
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_PGSQL 1
-_ACEOF
-
-		TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
-		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL $PGSQL_INCLUDE"
-		PostgreSQL_SUPPORT="yes"
-	fi
-fi
+MJPEG_SUPPORT="no"
+MJPEG_HEADER1_SUPPORT="no"
+MJPEG_HEADER2_SUPPORT="no"
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -4432,6 +3731,1240 @@ fi
 
 done
 
+
+if test "${ac_cv_header_mjpegtools_jpegutils_h+set}" = set; then
+  { echo "$as_me:$LINENO: checking for mjpegtools/jpegutils.h" >&5
+echo $ECHO_N "checking for mjpegtools/jpegutils.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_mjpegtools_jpegutils_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_mjpegtools_jpegutils_h" >&5
+echo "${ECHO_T}$ac_cv_header_mjpegtools_jpegutils_h" >&6; }
+else
+  # Is the header compilable?
+{ echo "$as_me:$LINENO: checking mjpegtools/jpegutils.h usability" >&5
+echo $ECHO_N "checking mjpegtools/jpegutils.h usability... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <mjpegtools/jpegutils.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ echo "$as_me:$LINENO: checking mjpegtools/jpegutils.h presence" >&5
+echo $ECHO_N "checking mjpegtools/jpegutils.h presence... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mjpegtools/jpegutils.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/jpegutils.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: mjpegtools/jpegutils.h: in the future, the compiler will take precedence" >&2;}
+
+    ;;
+esac
+{ echo "$as_me:$LINENO: checking for mjpegtools/jpegutils.h" >&5
+echo $ECHO_N "checking for mjpegtools/jpegutils.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_mjpegtools_jpegutils_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_mjpegtools_jpegutils_h=$ac_header_preproc
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_mjpegtools_jpegutils_h" >&5
+echo "${ECHO_T}$ac_cv_header_mjpegtools_jpegutils_h" >&6; }
+
+fi
+if test $ac_cv_header_mjpegtools_jpegutils_h = yes; then
+  :
+else
+  MJPEG_HEADER1_SUPPORT="yes"
+fi
+
+
+if test "${ac_cv_header_mjpegtools_mjpeg_types_h+set}" = set; then
+  { echo "$as_me:$LINENO: checking for mjpegtools/mjpeg_types.h" >&5
+echo $ECHO_N "checking for mjpegtools/mjpeg_types.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_mjpegtools_mjpeg_types_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_mjpegtools_mjpeg_types_h" >&5
+echo "${ECHO_T}$ac_cv_header_mjpegtools_mjpeg_types_h" >&6; }
+else
+  # Is the header compilable?
+{ echo "$as_me:$LINENO: checking mjpegtools/mjpeg_types.h usability" >&5
+echo $ECHO_N "checking mjpegtools/mjpeg_types.h usability... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <mjpegtools/mjpeg_types.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ echo "$as_me:$LINENO: checking mjpegtools/mjpeg_types.h presence" >&5
+echo $ECHO_N "checking mjpegtools/mjpeg_types.h presence... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mjpegtools/mjpeg_types.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: mjpegtools/mjpeg_types.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: mjpegtools/mjpeg_types.h: in the future, the compiler will take precedence" >&2;}
+
+    ;;
+esac
+{ echo "$as_me:$LINENO: checking for mjpegtools/mjpeg_types.h" >&5
+echo $ECHO_N "checking for mjpegtools/mjpeg_types.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_mjpegtools_mjpeg_types_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_mjpegtools_mjpeg_types_h=$ac_header_preproc
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_mjpegtools_mjpeg_types_h" >&5
+echo "${ECHO_T}$ac_cv_header_mjpegtools_mjpeg_types_h" >&6; }
+
+fi
+if test $ac_cv_header_mjpegtools_mjpeg_types_h = yes; then
+  :
+else
+  MJPEG_HEADER2_SUPPORT="yes"
+fi
+
+
+
+if test x$MJPEG_HEADER1_SUPPORT != xyes && test x$MJPEG_HEADER2_SUPPORT != xyes; then
+
+   LDFLAGS=$TEMP_LDFLAGS
+
+   { echo "$as_me:$LINENO: checking for decode_jpeg_raw in -llavjpeg" >&5
+echo $ECHO_N "checking for decode_jpeg_raw in -llavjpeg... $ECHO_C" >&6; }
+if test "${ac_cv_lib_lavjpeg_decode_jpeg_raw+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-llavjpeg -lmjpegutils $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char decode_jpeg_raw ();
+int
+main ()
+{
+return decode_jpeg_raw ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_lavjpeg_decode_jpeg_raw=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_lavjpeg_decode_jpeg_raw=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_lavjpeg_decode_jpeg_raw" >&5
+echo "${ECHO_T}$ac_cv_lib_lavjpeg_decode_jpeg_raw" >&6; }
+if test $ac_cv_lib_lavjpeg_decode_jpeg_raw = yes; then
+
+		TEMP_LDFLAGS="$TEMP_LDFLAGS -lmjpegutils -llavjpeg"
+		MJPEG_SUPPORT="yes"
+		TEMP_CFLAGS="$TEMP_CFLAGS -DMJPEGT"
+
+fi
+
+fi
+
+{ echo "$as_me:$LINENO: checking mjpegtools" >&5
+echo $ECHO_N "checking mjpegtools... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: result: $MJPEG_SUPPORT" >&5
+echo "${ECHO_T}$MJPEG_SUPPORT" >&6; }
+
+
+FFMPEG="yes"
+FFMPEG_OK="no_found"
+FFMPEG_OBJ=""
+
+# Check whether --with-ffmpeg was given.
+if test "${with_ffmpeg+set}" = set; then
+  withval=$with_ffmpeg; FFMPEG="$withval"
+
+fi
+
+if test "${FFMPEG}" = "no"; then
+	{ echo "$as_me:$LINENO: checking for ffmpeg" >&5
+echo $ECHO_N "checking for ffmpeg... $ECHO_C" >&6; }
+	{ echo "$as_me:$LINENO: result: skipping" >&5
+echo "${ECHO_T}skipping" >&6; }
+else if test "${FFMPEG}" = "yes"; then
+		{ echo "$as_me:$LINENO: checking for ffmpeg autodetecting" >&5
+echo $ECHO_N "checking for ffmpeg autodetecting... $ECHO_C" >&6; }
+
+# weird hack to fix debian problem TO BE REMOVED
+
+	if test -f /usr/bin/ffmpeg-config; then
+		FFMPEG_LIBS_DEB="`ffmpeg-config --libs avformat`"
+		FFMPEG_CFLAGS_DEB="`ffmpeg-config --cflags`"
+		FFMPEG_OK="found"
+		{ echo "$as_me:$LINENO: result: found for debian" >&5
+echo "${ECHO_T}found for debian" >&6; }
+	elif test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_OK="found"
+		FFMPEG="/usr/lib64"
+	elif test -f /usr/lib/libavcodec.a -o -f /usr/lib/libavcodec.so && test -f /usr/lib/libavformat.a -o -f /usr/lib/libavformat.so ; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_OK="found"
+		FFMPEG="/usr/lib"
+	elif test -f /usr/local/lib/libavcodec.a -o -f /usr/local/lib/libavcodec.so && test -f /usr/local/lib/libavformat.a -o -f /usr/local/lib/libavformat.so ; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_OK="found"
+		FFMPEG="/usr/local/lib"
+	else
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+		echo ""
+		echo "**********************************************"
+		echo "* libavcodec.a or libavcodec.so or           *"
+		echo "* libavformat.a or libavformat.so not found: *"
+		echo "*    ALL FFMPEG FEATURES DISABLED            *"
+		echo "*                                            *"
+		echo "* Please read the Motion Guide for help:     *"
+		echo "* http://motion.sourceforge.net              *"
+		echo "**********************************************"
+		echo ""
+	fi
+else
+	{ echo "$as_me:$LINENO: checking for ffmpeg in -> ${FFMPEG} <-" >&5
+echo $ECHO_N "checking for ffmpeg in -> ${FFMPEG} <-... $ECHO_C" >&6; }
+	if test -f ${FFMPEG}/lib/libavcodec.a -o -f ${FFMPEG}/lib/libavcodec.so && test -f ${FFMPEG}/lib/libavformat.a -o -f ${FFMPEG}/lib/libavformat.so ; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_OK="found"
+		FFMPEG="${FFMPEG}/lib"
+	elif test -f ${FFMPEG}/libavcodec.a -o -f ${FFMPEG}/libavcodec.so && test -f ${FFMPEG}/libavformat.a -o -f ${FFMPEG}/libavformat.so ; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_OK="found"
+	else
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+		if test "${FFMPEG}" != "no"; then
+			echo ""
+			echo "**********************************************"
+			echo "* libavcodec.a or libavcodec.so or           *"
+			echo "* libavformat.a or libavformat.so not found: *"
+			echo "*    ALL FFMPEG FEATURES DISABLED            *"
+			echo "*                                            *"
+			echo "* Please read the Motion Guide for help:     *"
+			echo "* http://motion.sourceforge.net              *"
+			echo "**********************************************"
+			echo ""
+		fi
+	fi
+fi
+
+#
+# Now check for ffmpeg headers ( avformat.h ) if ffmpeg libs were found
+#
+
+if test "${FFMPEG_OK}" = "found"; then
+	{ echo "$as_me:$LINENO: checking for ffmpeg headers" >&5
+echo $ECHO_N "checking for ffmpeg headers... $ECHO_C" >&6; }
+
+	if test "${FFMPEG_CFLAGS_DEB}" != "" ; then
+		FFMPEG_CFLAGS="${FFMPEG_CFLAGS_DEB}"
+		{ echo "$as_me:$LINENO: result: found for debian" >&5
+echo "${ECHO_T}found for debian" >&6; }
+	elif test -f ${FFMPEG}/include/avformat.h; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_CFLAGS="-I${FFMPEG}/include"
+	elif test -f ${FFMPEG}/avformat.h; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_CFLAGS="-I${FFMPEG}"
+	elif test -f `$as_dirname -- ${FFMPEG} ||
+$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X${FFMPEG} : 'X\(//\)[^/]' \| \
+	 X${FFMPEG} : 'X\(//\)$' \| \
+	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
+echo X${FFMPEG} |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`/include/avformat.h; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_CFLAGS="-I`$as_dirname -- ${FFMPEG} ||
+$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X${FFMPEG} : 'X\(//\)[^/]' \| \
+	 X${FFMPEG} : 'X\(//\)$' \| \
+	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
+echo X${FFMPEG} |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`/include"
+	elif test -f `$as_dirname -- ${FFMPEG} ||
+$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X${FFMPEG} : 'X\(//\)[^/]' \| \
+	 X${FFMPEG} : 'X\(//\)$' \| \
+	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
+echo X${FFMPEG} |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`/include/ffmpeg/avformat.h; then
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		FFMPEG_CFLAGS="-I`$as_dirname -- ${FFMPEG} ||
+$as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X${FFMPEG} : 'X\(//\)[^/]' \| \
+	 X${FFMPEG} : 'X\(//\)$' \| \
+	 X${FFMPEG} : 'X\(/\)' \| . 2>/dev/null ||
+echo X${FFMPEG} |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`/include/ffmpeg"
+	else
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+		FFMPEG_OK="no_found"
+		echo "**********************************************"
+		echo "*       avformat.h not found:                *"
+		echo "*    ALL FFMPEG FEATURES DISABLED            *"
+		echo "*                                            *"
+		echo "* Please read the Motion Guide for help:     *"
+		echo "* http://motion.sourceforge.net              *"
+		echo "**********************************************"
+		echo ""
+	fi
+
+#
+# If ffmpeg libs and headers have been found
+#
+
+	if  test "${FFMPEG_OK}" = "found"; then
+		if test "${FFMPEG_LIBS_DEB}" != ""; then
+			TEMP_LIBS="$TEMP_LIBS ${FFMPEG_LIBS_DEB}"
+#			TEMP_LDFLAGS="${TEMP_LDFLAGS} ${FFMPEG_LIBS_DEB}"
+		else
+			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG} -lavformat -lavcodec -lm -lz"
+			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG}"
+		fi
+
+		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
+
+		FFMPEG_OBJ="ffmpeg.o"
+
+	fi
+fi
+fi
+
+
+#
+# Check Mysql
+#
+
+MYSQL="yes"
+MYSQL_SUPPORT="no"
+MYSQL_HEADERS="yes"
+MYSQL_LIBS="yes"
+
+{ echo "$as_me:$LINENO: checking for mysql support" >&5
+echo $ECHO_N "checking for mysql support... $ECHO_C" >&6; }
+
+
+# Check whether --with-mysql was given.
+if test "${with_mysql+set}" = set; then
+  withval=$with_mysql; MYSQL="$withval"
+
+fi
+
+
+
+# Check whether --with-mysql-lib was given.
+if test "${with_mysql_lib+set}" = set; then
+  withval=$with_mysql_lib; MYSQL_LIBS="$withval"
+
+fi
+
+
+
+
+# Check whether --with-mysql-include was given.
+if test "${with_mysql_include+set}" = set; then
+  withval=$with_mysql_include; MYSQL_HEADERS="$withval"
+
+fi
+
+
+
+if test "${MYSQL}" = "no"; then
+	{ echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6; }
+else
+	{ echo "$as_me:$LINENO: result: testing" >&5
+echo "${ECHO_T}testing" >&6; }
+	# ******* Search mysql headers *******
+
+	if test "${MYSQL_HEADERS}" = "yes"; then
+		{ echo "$as_me:$LINENO: checking autodect mysql headers" >&5
+echo $ECHO_N "checking autodect mysql headers... $ECHO_C" >&6; }
+		# Autodetect
+		for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
+			# check for plain setups
+			if test -f $w/mysql.h; then
+				MYSQL_INCDIR=$w
+				break
+			fi
+			# check for "/usr/include/<packagename>" type setups
+			if test -f $w/mysql/mysql.h; then
+				MYSQL_INCDIR=$w/mysql
+				break
+			fi
+			# check for "/usr/<packagename>/include" type setups
+			if test -f $w/mysql/include/mysql.h; then
+				MYSQL_INCDIR=$w/mysql/include
+				break
+			fi
+		done
+	elif test "${MYSQL_HEADERS}" = "no"; then
+		{ echo "$as_me:$LINENO: checking for mysql headers" >&5
+echo $ECHO_N "checking for mysql headers... $ECHO_C" >&6; }
+		{ echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6; }
+	else
+		{ echo "$as_me:$LINENO: checking for mysql headers in $MYSQL_HEADERS" >&5
+echo $ECHO_N "checking for mysql headers in $MYSQL_HEADERS... $ECHO_C" >&6; }
+		# Manual detection for <withval>
+        	if test -f $MYSQL_HEADERS/mysql.h; then
+                	MYSQL_INCDIR=$MYSQL_HEADERS
+	        fi
+	fi
+
+	if test -z "$MYSQL_INCDIR" ; then
+		MYSQL_HEADERS="no"
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+		echo Invalid MySQL directory - unable to find mysql.h.
+	else
+		{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+		MYSQL_HEADERS="yes"
+	fi
+
+
+	if test "${MYSQL_HEADERS}" = "yes"; then
+
+	# ******* Search mysql libs *********
+	if test "${MYSQL_LIBS}" = "yes"; then
+		{ echo "$as_me:$LINENO: checking autodect mysql libs" >&5
+echo $ECHO_N "checking autodect mysql libs... $ECHO_C" >&6; }
+        	# Autodetect
+		for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
+			# check for plain setups
+			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w
+				break
+			fi
+			# check for "/usr/lib/<packagename>" type setups
+			if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w/mysql
+				break
+			fi
+			# check for "/usr/<packagename>/lib" type setups
+			if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
+				MYSQL_LIBDIR=$w/mysql/lib
+				break
+			fi
+		done
+	elif test "${MYSQL_LIBS}" = "no"; then
+        	{ echo "$as_me:$LINENO: checking for mysql libs" >&5
+echo $ECHO_N "checking for mysql libs... $ECHO_C" >&6; }
+	        { echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6; }
+	else
+		{ echo "$as_me:$LINENO: checking for mysql libs in $MYSQL_LIBS" >&5
+echo $ECHO_N "checking for mysql libs in $MYSQL_LIBS... $ECHO_C" >&6; }
+		# Manual detection for <withval>
+		if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
+			MYSQL_LIBDIR=$MYSQL_LIBS
+		fi
+	fi
+
+
+	if test -z "$MYSQL_LIBDIR" ; then
+		{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
+	else
+		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
+		#Add -lz for some mysql installs....
+		TEMP_LIBS="$TEMP_LIBS -lz"
+		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
+		{ echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+		MYSQL_SUPPORT="yes"
+	fi
+
+	# end mysql-include , mysql-libs
+	fi
+
+# end Mysql detection
+fi
+
+
+
+PGSQL="yes"
+
+{ echo "$as_me:$LINENO: checking for PostgreSQL" >&5
+echo $ECHO_N "checking for PostgreSQL... $ECHO_C" >&6; }
+
+# Check whether --with-pgsql was given.
+if test "${with_pgsql+set}" = set; then
+  withval=$with_pgsql; PGSQL="$withval"
+
+fi
+
+if test "${PGSQL}" = "no"; then
+	{ echo "$as_me:$LINENO: result: skipped" >&5
+echo "${ECHO_T}skipped" >&6; }
+fi
+
+if test "${PGSQL}" = "yes"; then
+	for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
+		if test -r $i/include/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i/include
+		elif test -r $i/include/pgsql/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i/include/pgsql
+		elif test -r $i/include/postgresql/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i/include/postgresql
+		fi
+	done
+
+	if test -z "$PGSQL_DIR"; then
+		{ echo "$as_me:$LINENO: result: Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL" >&5
+echo "${ECHO_T}Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL" >&6; }
+	else
+		PGSQL_INCLUDE="-I$PGSQL_INCDIR"
+		PGSQL_LIBDIR=$PGSQL_DIR/lib
+		{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+		test -d $PGSQL_DIR/lib/pgsql && PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql
+		LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
+		{ echo "$as_me:$LINENO: checking for PQcmdTuples in -lpq" >&5
+echo $ECHO_N "checking for PQcmdTuples in -lpq... $ECHO_C" >&6; }
+if test "${ac_cv_lib_pq_PQcmdTuples+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpq  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PQcmdTuples ();
+int
+main ()
+{
+return PQcmdTuples ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_pq_PQcmdTuples=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_pq_PQcmdTuples=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQcmdTuples" >&5
+echo "${ECHO_T}$ac_cv_lib_pq_PQcmdTuples" >&6; }
+if test $ac_cv_lib_pq_PQcmdTuples = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PQCMDTUPLES 1
+_ACEOF
+
+fi
+
+		{ echo "$as_me:$LINENO: checking for PQoidValue in -lpq" >&5
+echo $ECHO_N "checking for PQoidValue in -lpq... $ECHO_C" >&6; }
+if test "${ac_cv_lib_pq_PQoidValue+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpq  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PQoidValue ();
+int
+main ()
+{
+return PQoidValue ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_pq_PQoidValue=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_pq_PQoidValue=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQoidValue" >&5
+echo "${ECHO_T}$ac_cv_lib_pq_PQoidValue" >&6; }
+if test $ac_cv_lib_pq_PQoidValue = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PQOIDVALUE 1
+_ACEOF
+
+fi
+
+		{ echo "$as_me:$LINENO: checking for PQclientEncoding in -lpq" >&5
+echo $ECHO_N "checking for PQclientEncoding in -lpq... $ECHO_C" >&6; }
+if test "${ac_cv_lib_pq_PQclientEncoding+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpq  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PQclientEncoding ();
+int
+main ()
+{
+return PQclientEncoding ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_pq_PQclientEncoding=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_pq_PQclientEncoding=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQclientEncoding" >&5
+echo "${ECHO_T}$ac_cv_lib_pq_PQclientEncoding" >&6; }
+if test $ac_cv_lib_pq_PQclientEncoding = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PQCLIENTENCODING 1
+_ACEOF
+
+fi
+
+		{ echo "$as_me:$LINENO: checking for pg_encoding_to_char in -lpq" >&5
+echo $ECHO_N "checking for pg_encoding_to_char in -lpq... $ECHO_C" >&6; }
+if test "${ac_cv_lib_pq_pg_encoding_to_char+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpq  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pg_encoding_to_char ();
+int
+main ()
+{
+return pg_encoding_to_char ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_pq_pg_encoding_to_char=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_pq_pg_encoding_to_char=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_pg_encoding_to_char" >&5
+echo "${ECHO_T}$ac_cv_lib_pq_pg_encoding_to_char" >&6; }
+if test $ac_cv_lib_pq_pg_encoding_to_char = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT 1
+_ACEOF
+
+fi
+
+	 	LDFLAGS=""
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PGSQL 1
+_ACEOF
+
+		TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
+		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL $PGSQL_INCLUDE"
+		PostgreSQL_SUPPORT="yes"
+	fi
+fi
+
+{ echo "$as_me:$LINENO: checking for ANSI C header files" >&5
+echo $ECHO_N "checking for ANSI C header files... $ECHO_C" >&6; }
+if test "${ac_cv_header_stdc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_header_stdc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_header_stdc=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+if test $ac_cv_header_stdc = yes; then
+  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <string.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "memchr" >/dev/null 2>&1; then
+  :
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <stdlib.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "free" >/dev/null 2>&1; then
+  :
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
+  if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <ctype.h>
+#include <stdlib.h>
+#if ((' ' & 0x0FF) == 0x020)
+# define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
+# define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
+#else
+# define ISLOWER(c) \
+		   (('a' <= (c) && (c) <= 'i') \
+		     || ('j' <= (c) && (c) <= 'r') \
+		     || ('s' <= (c) && (c) <= 'z'))
+# define TOUPPER(c) (ISLOWER(c) ? ((c) | 0x40) : (c))
+#endif
+
+#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
+int
+main ()
+{
+  int i;
+  for (i = 0; i < 256; i++)
+    if (XOR (islower (i), ISLOWER (i))
+	|| toupper (i) != TOUPPER (i))
+      return 2;
+  return 0;
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  :
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+ac_cv_header_stdc=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+
+fi
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_stdc" >&5
+echo "${ECHO_T}$ac_cv_header_stdc" >&6; }
+if test $ac_cv_header_stdc = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define STDC_HEADERS 1
+_ACEOF
+
+fi
 
 
 
@@ -7073,10 +7606,10 @@ CPPFLAGS!$CPPFLAGS$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
 EXEEXT!$EXEEXT$ac_delim
 OBJEXT!$OBJEXT$ac_delim
-FFMPEG_OBJ!$FFMPEG_OBJ$ac_delim
 CPP!$CPP$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
+FFMPEG_OBJ!$FFMPEG_OBJ$ac_delim
 BIN_PATH!$BIN_PATH$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
@@ -7445,6 +7978,11 @@ else
         echo "**********************************************"
 fi
 
+if test "${MJPEG_SUPPORT}" = "yes"; then
+	echo "mjpeg Support:       Yes"
+else
+	echo "mjpeg Support:       No"
+fi
 
 if test "${FreeBSD}" != ""; then
 	if test "${BKTR}" = "yes"; then

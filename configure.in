@@ -260,6 +260,33 @@ if test x$JPEG_SUPPORT != xyes ; then
   )
 fi
 
+
+#
+# Check mjpegtools -lmjpegutils -llavjpeg
+#
+
+MJPEG_SUPPORT="no"
+MJPEG_HEADER1_SUPPORT="no"
+MJPEG_HEADER2_SUPPORT="no"
+
+AC_CHECK_HEADER(mjpegtools/jpegutils.h, ,MJPEG_HEADER1_SUPPORT="yes")
+AC_CHECK_HEADER(mjpegtools/mjpeg_types.h, ,MJPEG_HEADER2_SUPPORT="yes")
+
+if test x$MJPEG_HEADER1_SUPPORT != xyes && test x$MJPEG_HEADER2_SUPPORT != xyes; then
+
+   LDFLAGS=$TEMP_LDFLAGS  
+	
+   AC_CHECK_LIB(lavjpeg, decode_jpeg_raw,[ 
+		TEMP_LDFLAGS="$TEMP_LDFLAGS -lmjpegutils -llavjpeg"
+		MJPEG_SUPPORT="yes"
+		TEMP_CFLAGS="$TEMP_CFLAGS -DMJPEGT"
+                 ], , -lmjpegutils)
+fi
+
+AC_MSG_CHECKING(mjpegtools)
+AC_MSG_RESULT($MJPEG_SUPPORT)
+
+
 dnl
 dnl Check for libavcodec and libavformat from ffmpeg
 dnl
@@ -402,6 +429,10 @@ if test "${FFMPEG_OK}" = "found"; then
 fi	
 fi
 
+
+#
+# Check Mysql
+#
 
 MYSQL="yes"
 MYSQL_SUPPORT="no"
@@ -973,6 +1004,11 @@ else
         echo "**********************************************"
 fi
 
+if test "${MJPEG_SUPPORT}" = "yes"; then
+	echo "mjpeg Support:       Yes"
+else
+	echo "mjpeg Support:       No"
+fi
 
 if test "${FreeBSD}" != ""; then
 	if test "${BKTR}" = "yes"; then

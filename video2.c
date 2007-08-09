@@ -69,7 +69,6 @@
 #include "netcam.h"
 #include "video.h"
 #include "rotate.h"
-#include "mjpeg.h"
 
 #ifdef MOTION_V4L2_OLD
 // Seems that is needed for some system
@@ -361,7 +360,6 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 
 			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage %d colorspace %08x", pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height, s->fmt.fmt.pix.bytesperline, s->fmt.fmt.pix.sizeimage, s->fmt.fmt.   pix.colorspace);
 
-#ifdef HAVE_FFMPEG
 			/* TODO: Review when it has been tested */
 			if (pixformat == V4L2_PIX_FMT_MJPEG) {
 				struct v4l2_jpegcompression v4l2_jpeg;
@@ -374,13 +372,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 						motion_log(LOG_ERR, 0, "VIDIOC_S_JPEGCOMP %s", strerror(errno));
 
 				}
-
-				if ((s->mjpeg = MJPEGStartDecoder(s->fmt.fmt.pix.width, s->fmt.fmt.pix.height)) == NULL) {
-					motion_log(LOG_ERR, 0, "Error registering mjpeg extension %s", strerror(errno));
-					return 0;
-				}
 			}
-#endif
 			return 0;
 		}
 
@@ -828,24 +820,11 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 		case V4L2_PIX_FMT_YUV420:
 			memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].size;
 			return 0;
-#ifdef HAVE_FFMPEG
+
 		case V4L2_PIX_FMT_MJPEG:
-			{
-				netcam_buff temp_netcam_buff = *the_buffer;
-
-				temp_netcam_buff.ptr =
-				    (char *) MJPEGDecodeFrame((unsigned char *) the_buffer->ptr,
-							      the_buffer->content_length, cnt->imgs.common_buffer,
-							      (width * height << 1), s->mjpeg);
-				
-				if (temp_netcam_buff.ptr == NULL){
-					motion_log(LOG_INFO,0,"Error decoding MJPEG");
-					return 1;
-				}
-				memcpy(map, temp_netcam_buff.ptr, viddev->v4l_bufsize);
-				return 0;
-
-			}
+#ifdef MJPEGT
+			mjpegtoyuv420p(map, (unsigned char *) the_buffer->ptr, width, height, s->buffers[s->buf.index].content_length);
+			return 0;
 #endif
 		case V4L2_PIX_FMT_JPEG:
 			return conv_jpeg2yuv420(cnt, map, the_buffer, width, height);
@@ -871,13 +850,6 @@ void v4l2_close(struct video_dev *viddev)
 {
 	src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
 	enum v4l2_buf_type type;
-
-#ifdef HAVE_FFMPEG
-	if (s->fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_MJPEG) {
-		MJPEGStopDecoder(s->mjpeg);
-		free(s->mjpeg);
-	}
-#endif
 
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	xioctl(s->fd, VIDIOC_STREAMOFF, &type);
