@@ -362,6 +362,10 @@ Angel Carpintero
      (Jared D and Angel Carpintero).  
    * Added MYSQL_OPT_RECONNECT flag for mysql connection (MYSQL 5.x only) and 
      changed default value for mysql_host.
+   * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
+     (Marius Rieder, Angel Carpintero).
 
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -1127,6 +1131,15 @@ Michael Reuschling
      setting ffmpeg_timelapse = 1 (fixed by Michael Reuschling)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x31x211756
 
+Petter Reinholdtsen
+   * Adding the install option to the makefile.
+
+Marius Rieder
+   * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
+     (Marius Rieder, Angel Carpintero).
+
 James A. Russo.
    * Implemented ffmpeg_timelapse_mode feature.
    * Implemented enhanced SQL features. This adds logging of mpeg
@@ -1134,9 +1147,6 @@ James A. Russo.
    * Replaced the mime file types by a more refined filetype
      scheme that allows more refined control for SQL and other
      future control.
-
-Petter Reinholdtsen
-   * Adding the install option to the makefile.
 
 Pete Shipley
    * Fix the problem that happens in FreeBSD and Debian Sarge because

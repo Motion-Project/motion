@@ -1,4 +1,15 @@
-3.2.8 Summary of Changes
+3.2.9 Summary of Changes
+
+Features
+
+Bugfixes
+   * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
+     (Marius Rieder, Angel Carpintero).     
+
+	
+3.2.8 Formal Release - Summary of Changes
 
 Features
    * Added connection status for all devices available from http web interface.
