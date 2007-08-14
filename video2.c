@@ -240,7 +240,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		standard.index = 0;
 
 		while (xioctl(s->fd, VIDIOC_ENUMSTD, &standard) == 0) {
-			if ((standard.id & std_id) (debug_level > 5)) {
+			if ((standard.id & std_id)  && (debug_level > 5)) {
 				motion_log(LOG_INFO, 0, "- video standard %s", standard.name);
 			}
 			standard.index++;
