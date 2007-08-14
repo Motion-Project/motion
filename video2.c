@@ -212,11 +212,14 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		return (-1);
 	}
 
-	motion_log(LOG_INFO, 0, "%s: name = \"%s\", type 0x%08X, status %08x", __FUNCTION__, input.name, input.type,
-		   input.status);
-	if (input.type & V4L2_INPUT_TYPE_TUNER)
+	if (debug_level > 5)
+		motion_log(LOG_INFO, 0, "%s: name = \"%s\", type 0x%08X, status %08x", __FUNCTION__, input.name, 
+			input.type, input.status);
+
+	if ((input.type & V4L2_INPUT_TYPE_TUNER) && (debug_level > 5))
 		motion_log(LOG_INFO, 0, "- TUNER");
-	if (input.type & V4L2_INPUT_TYPE_CAMERA)
+
+	if ((input.type & V4L2_INPUT_TYPE_CAMERA) && (debug_level > 5)) 
 		motion_log(LOG_INFO, 0, "- CAMERA");
 
 	if (xioctl(s->fd, VIDIOC_S_INPUT, &in) == -1) {
@@ -574,10 +577,10 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
 					motion_log(LOG_ERR, 0, "%s: control type not supported yet");
 					return -1;
 				}
-
-				motion_log(LOG_INFO, 0, "setting control \"%s\" to %d (ret %d %s) %s", ctrl->name,
-					   value, ret, ret ? strerror(errno) : "",
-					   ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "Control is DISABLED!" : "");
+				if (debug_level > 5)
+					motion_log(LOG_INFO, 0, "setting control \"%s\" to %d (ret %d %s) %s", ctrl->name,
+						value, ret, ret ? strerror(errno) : "",
+						ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "Control is DISABLED!" : "");
 
 				return 0;
 			}
@@ -718,7 +721,9 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 		{
 			src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
 			unsigned int counter = 0;
-			motion_log(LOG_DEBUG, 0, "set_input_skip_frame switch_time=%ld:%ld", switchTime.tv_sec, switchTime.tv_usec);
+			if (debug_level > 5)
+				motion_log(LOG_DEBUG, 0, "set_input_skip_frame switch_time=%ld:%ld", 
+						switchTime.tv_sec, switchTime.tv_usec);
 
 			/* Avoid hang using the number of mmap buffers */
 			while(counter < s->req.count)
@@ -729,8 +734,9 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 				if (s->buf.timestamp.tv_sec > switchTime.tv_sec || 
 				(s->buf.timestamp.tv_sec == switchTime.tv_sec && s->buf.timestamp.tv_usec > switchTime.tv_usec))
 					break;
-				motion_log(LOG_DEBUG, 0, "got frame before switch timestamp=%ld:%ld", 
-					s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
+				if (debug_level > 5)
+					motion_log(LOG_DEBUG, 0, "got frame before switch timestamp=%ld:%ld", 
+						s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
 			}
 		}
 
