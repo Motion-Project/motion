@@ -230,7 +230,8 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 
 	/* Set video standard usually webcams doesn't support the ioctl or return V4L2_STD_UNKNOWN */
 	if (xioctl(s->fd, VIDIOC_G_STD, &std_id) == -1) {
-		motion_log(LOG_INFO, 0, "Device doesn't support VIDIOC_G_STD ");
+		if (debug_level > 5)
+			motion_log(LOG_INFO, 0, "Device doesn't support VIDIOC_G_STD ");
 		std_id = 0;	// V4L2_STD_UNKNOWN = 0
 	}
 
@@ -239,7 +240,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		standard.index = 0;
 
 		while (xioctl(s->fd, VIDIOC_ENUMSTD, &standard) == 0) {
-			if (standard.id & std_id) {
+			if ((standard.id & std_id) (debug_level > 5)) {
 				motion_log(LOG_INFO, 0, "- video standard %s", standard.name);
 			}
 			standard.index++;
