@@ -234,16 +234,39 @@ const char *imageext(struct context *cnt)
 }
 
 static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
-            unsigned char *newimg, char *dummy1 ATTRIBUTE_UNUSED,
+	    unsigned char *newimg, char *dummy1 ATTRIBUTE_UNUSED,
+	    void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
+{
+	char fullfilename[PATH_MAX];
+	char filename[PATH_MAX];
+
+	if (cnt->new_img == NEWIMG_ON) {
+		const char *jpegpath;
+
+		/* conf.jpegpath would normally be defined but if someone deleted it by control interface
+		   it is better to revert to the default than fail */
+		if (cnt->conf.jpegpath)
+			jpegpath = cnt->conf.jpegpath;
+		else
+			jpegpath = DEF_JPEGPATH;
+			
+		mystrftime(cnt, filename, sizeof(filename), jpegpath, currenttime_tm, NULL, 0);
+		snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
+
+		put_picture(cnt, fullfilename, newimg, FTYPE_IMAGE);
+	}
+}
+
+static void event_imagem_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *newimg_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
 {
 	struct config *conf=&cnt->conf;
-	char fullfilename[PATH_MAX];
-	char filename[PATH_MAX];
 	char fullfilenamem[PATH_MAX];
+	char filename[PATH_MAX];
 	char filenamem[PATH_MAX];
 
-	if (conf->motion_img || cnt->new_img==NEWIMG_ON || cnt->preview_shot) {
+	if (conf->motion_img) {
 		const char *jpegpath;
 
 		/* conf.jpegpath would normally be defined but if someone deleted it by control interface
@@ -256,14 +279,9 @@ static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		mystrftime(cnt, filename, sizeof(filename), jpegpath, currenttime_tm, NULL, 0);
 		/* motion images gets same name as normal images plus an appended 'm' */
 		snprintf(filenamem, PATH_MAX, "%sm", filename);
-		snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 		snprintf(fullfilenamem, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filenamem, imageext(cnt));
-	}
-	if (conf->motion_img) {
+
 		put_picture(cnt, fullfilenamem, cnt->imgs.out, FTYPE_IMAGE_MOTION);
-	}
-	if (cnt->new_img==NEWIMG_ON || cnt->preview_shot) {
-		put_picture(cnt, fullfilename, newimg, FTYPE_IMAGE);
 	}
 }
 
@@ -592,6 +610,10 @@ struct event_handlers event_handlers[] = {
 	{
 	EVENT_IMAGE_DETECTED,
 	event_image_detect
+	},
+	{
+	EVENT_IMAGEM_DETECTED,
+	event_imagem_detect
 	},
 	{
 	EVENT_IMAGE_SNAPSHOT,

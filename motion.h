@@ -201,6 +201,12 @@ int initialize_chars(void);
 
 struct images {
 	unsigned char *image_ring_buffer; /* The base address of the image ring buffer */
+	time_t *timestamp_ring_buffer;
+	int *shotstamp_ring_buffer;
+	int *diffs_ring_buffer;
+	int ring_buffer_size;
+	int ring_buffer_last_in;
+	int ring_buffer_last_out;
 	unsigned char *ref;               /* The reference frame */
 	unsigned char *out;               /* Picture buffer for motion images */
 	unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
@@ -222,8 +228,6 @@ struct images {
 	int labelgroup_max;
 	int labels_above;
 	int largest_label;
-	time_t *timestamp;
-	int *shotstamp;
 };
 
 /* Contains data for image rotation, see rotate.c. */
@@ -261,10 +265,7 @@ struct context {
 	struct images imgs;
 	struct trackoptions track;
 	struct netcam_context *netcam;
-	int precap_nr;
-	int precap_cur;
 	int new_img;
-	int preview_shot;
 	int preview_max;            /* Stores max diff number seen in an event of output_normal==best */
 	int locate;
 	struct coord location;      /* coordinates for center and size of last motion detection*/
@@ -284,6 +285,7 @@ struct context {
 	int prev_event;
 	char text_event_string[PATH_MAX]; /* The text for conv. spec. %C -
 	                                     we assume PATH_MAX normally 4096 characters is fine */
+	int postcap;		/* downcounter, frames left to to send post event */
 
 	int shots;
 	struct tm *currenttime_tm;
@@ -292,7 +294,6 @@ struct context {
 	time_t currenttime;
 	time_t lasttime;
 	time_t eventtime;
-	time_t lastshottime;
 	time_t connectionlosttime;   /* timestamp from connection lost */
 
 	int lastrate;

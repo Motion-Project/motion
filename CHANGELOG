@@ -1,6 +1,8 @@
 3.2.9 Summary of Changes
 
 Features
+   * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign (Dag Erlandsson)
 
 Bugfixes
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy

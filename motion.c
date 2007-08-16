@@ -138,10 +138,12 @@ static void context_destroy(struct context *cnt)
 		free(cnt->imgs.smartmask_buffer);
 	if (cnt->imgs.common_buffer)
 		free(cnt->imgs.common_buffer);
-	if (cnt->imgs.timestamp)
-		free(cnt->imgs.timestamp);
-	if (cnt->imgs.shotstamp)
-		free(cnt->imgs.shotstamp);
+	if (cnt->imgs.timestamp_ring_buffer)
+		free(cnt->imgs.timestamp_ring_buffer);
+	if (cnt->imgs.shotstamp_ring_buffer)
+		free(cnt->imgs.shotstamp_ring_buffer);
+	if (cnt->imgs.diffs_ring_buffer)
+		free(cnt->imgs.diffs_ring_buffer);
 	if (cnt->imgs.preview_buffer)
 		free(cnt->imgs.preview_buffer);
 	rotate_deinit(cnt); /* cleanup image rotation data */
@@ -249,6 +251,22 @@ static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
 }
 
 /**
+ *  motion_remove_pid
+ *
+ *  This function remove the process id file ( pid file ) before motion exit.
+ *
+ */
+static void motion_remove_pid(void)
+{
+	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file) && (restart == 0)) {
+		if (!unlink(cnt_list[0]->conf.pid_file)) 
+		    motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
+		else 
+		    motion_log(LOG_INFO, 1, "Error removing pid file");
+	}
+}
+
+/**
  * motion_detected
  *
  *   Called from 'motion_loop' when motion is detected, or when to act as if
@@ -270,12 +288,18 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 	struct images *imgs = &cnt->imgs;
 	struct coord *location = &cnt->location;
 
+	/* sanity check */
+	if (newimg != cnt->imgs.image_ring_buffer + (cnt->imgs.size * cnt->imgs.ring_buffer_last_in)) {
+		motion_log(LOG_ERR, 0, "Error in %s: newimg is not at last_in pos in ringbuffer", __FUNCTION__);
+		motion_log(-1, 0, "Thread finishing...");
+		motion_remove_pid();
+		exit(1);	
+	}
+
 	cnt->lasttime = cnt->currenttime;
 
 	/* Take action if this is a new event */
 	if (cnt->event_nr != cnt->prev_event) {
-		int i, tmpshots;
-		struct tm tmptime;
 		cnt->preview_max = 0;
 
 		/* Reset prev_event number to current event and save event time
@@ -298,43 +322,14 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		if (cnt->conf.setup_mode)
 			motion_log(-1, 0, "Motion detected - starting event %d", cnt->event_nr);
 
-		/* pre_capture frames are written as jpegs and to the ffmpeg film
-		 * We store the current cnt->shots temporarily until we are done with
-		 * the pre_capture stuff
-		 */
-
-		tmpshots = cnt->shots;
-
-		for (i=cnt->precap_cur; i < cnt->precap_nr; i++) {
-			localtime_r(cnt->imgs.timestamp + i, &tmptime);
-			cnt->shots = *(cnt->imgs.shotstamp + i);
-			event(cnt, EVENT_IMAGE_DETECTED,
-			    cnt->imgs.image_ring_buffer + (cnt->imgs.size * i), NULL, NULL, &tmptime);
-		}
-
-		if (cnt->precap_cur) {
-			localtime_r(cnt->imgs.timestamp+cnt->precap_nr, &tmptime);
-			cnt->shots = *(cnt->imgs.shotstamp + cnt->precap_nr);
-			event(cnt, EVENT_IMAGE_DETECTED,
-			      cnt->imgs.image_ring_buffer + (cnt->imgs.size * cnt->precap_nr),
-			      NULL, NULL, &tmptime);
-		}
-
-		for (i=0; i < cnt->precap_cur-1; i++) {
-			localtime_r(cnt->imgs.timestamp + i, &tmptime);
-			cnt->shots = *(cnt->imgs.shotstamp + i);
-			event(cnt, EVENT_IMAGE_DETECTED,
-			      cnt->imgs.image_ring_buffer + (cnt->imgs.size * i),
-			      NULL, NULL, &tmptime);
-		}
-		/* If output_normal=first always capture first motion frame as preview-shot */
-		if (cnt->new_img == NEWIMG_FIRST){
-			cnt->preview_shot = 1;
-			if (cnt->locate == LOCATE_PREVIEW){
-				alg_draw_location(location, imgs, imgs->width, newimg, LOCATE_NORMAL);
+		/* If output_normal=first save first motion frame as preview-shot */
+		if (cnt->new_img == NEWIMG_FIRST || cnt->new_img == NEWIMG_BEST) {
+			memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
+			cnt->preview_max = diffs;
+			if (cnt->locate == LOCATE_PREVIEW) {
+				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
 			}
 		}
-		cnt->shots = tmpshots;
 	}
 
 	/* motion_detected is called with diffs = 0 during post_capture
@@ -347,6 +342,18 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 
 		/* EVENT_MOTION triggers event_beep and on_motion_detected_command */
 		event(cnt, EVENT_MOTION, NULL, NULL, NULL, cnt->currenttime_tm);
+		cnt->postcap = cnt->conf.post_capture;
+	}
+	else {
+		/* sanity check */
+		if (cnt->postcap == 0) {
+			motion_log(LOG_ERR, 0, "Error in %s: cnt->postcap == 0 when called with diff == 0", __FUNCTION__);
+			motion_log(-1, 0, "Thread finishing...");
+			motion_remove_pid();
+			exit(1);	
+		}
+		if (cnt->postcap > 0)
+			cnt->postcap--;
 	}
 
 	/* Check for most significant preview-shot when output_normal=best */
@@ -358,44 +365,62 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		}
 	}
 
-
+	/* Limit framerate */
 	if (cnt->shots < conf->frame_limit) {
-		cnt->lastshottime = cnt->currenttime;
-
-		/* Output the latest picture 'image_new' or image_out for motion picture. */
-		event(cnt, EVENT_IMAGE_DETECTED, newimg, NULL, NULL, cnt->currenttime_tm);
-
 		/* If config option webcam_motion is enabled, send the latest motion detected image
 		 * to the webcam but only if it is not the first shot within a second. This is to
 		 * avoid double frames since we already have sent a frame to the webcam.
 		 * We also disable this in setup_mode.
 		 */
-		if (conf->webcam_motion && !conf->setup_mode && cnt->shots != 1)
+		if (conf->webcam_motion && !conf->setup_mode && cnt->shots != 1) {
 			event(cnt, EVENT_WEBCAM, newimg, NULL, NULL, cnt->currenttime_tm);
-		cnt->preview_shot = 0;
+		}
+
+		/* Save motion jpeg, if configured */
+		/* Output the image_out (motion) picture. */
+		if (conf->motion_img) {
+			event(cnt, EVENT_IMAGEM_DETECTED,
+			      NULL, NULL, NULL, cnt->currenttime_tm);
+		}
+	}
+
+	/* Send some images from ring buffer to jpegs and ffmpeg */
+	{
+		int tmpshots;
+		struct tm tmptime;
+		int frames_handled = 0;
+
+		/* pre_capture frames are written as jpegs and to the ffmpeg film
+		 * We store the current cnt->shots temporarily until we are done with
+		 * the ring_buffer stuff
+		 */
+		tmpshots = cnt->shots;
+		while (cnt->imgs.ring_buffer_last_out != cnt->imgs.ring_buffer_last_in) {
+			cnt->imgs.ring_buffer_last_out++;
+			if (cnt->imgs.ring_buffer_last_out >= cnt->imgs.ring_buffer_size)
+				cnt->imgs.ring_buffer_last_out = 0;
+			localtime_r(&cnt->imgs.timestamp_ring_buffer[cnt->imgs.ring_buffer_last_out], &tmptime);
+			cnt->shots = cnt->imgs.shotstamp_ring_buffer[cnt->imgs.ring_buffer_last_out] & 0x0fff;
+			if (cnt->shots < conf->frame_limit) {
+				/* Output the picture to jpegs and ffmpeg */
+				event(cnt, EVENT_IMAGE_DETECTED,
+				      cnt->imgs.image_ring_buffer + (cnt->imgs.size * cnt->imgs.ring_buffer_last_out), NULL, NULL, &tmptime);
+			}
+			frames_handled++;
+			/* breakout if we have done some images (>=2), 
+			 * but if we are at end of postcap send 
+			 * everything left in ring_buffer 
+			 */
+			if (frames_handled >= 2 && !(cnt->postcap == 0))
+				break;
+		}
+		cnt->shots = tmpshots;
 	}
 
 	if (cnt->track.type != 0 && diffs != 0)	{
 		cnt->moved = track_move(cnt, dev, &cnt->location, imgs, 0);
 	}
 }
-
-
-/**
- *  motion_remove_pid
- *
- *  This function remove the process id file ( pid file ) before motion exit.
- *
- */
-static void motion_remove_pid(void)
-{
-	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file) && (restart == 0)){
-		if (!unlink(cnt_list[0]->conf.pid_file)) motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
-		else motion_log(LOG_INFO, 1, "Error removing pid file");
-	}
-}
-
-
 
 /**
  * motion_init
@@ -470,8 +495,12 @@ static void motion_init(struct context *cnt)
 	cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(int));
 	cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.labels));
 	cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(cnt->imgs.labelsize));
-	cnt->imgs.timestamp = mymalloc(sizeof(time_t));
-	cnt->imgs.shotstamp = mymalloc(sizeof(int));
+	cnt->imgs.timestamp_ring_buffer = mymalloc(sizeof(cnt->imgs.timestamp_ring_buffer[0]));
+	cnt->imgs.shotstamp_ring_buffer = mymalloc(sizeof(cnt->imgs.shotstamp_ring_buffer[0]));
+	cnt->imgs.diffs_ring_buffer = mymalloc(sizeof(cnt->imgs.diffs_ring_buffer[0]));
+
+	/* allocate buffer here for preview buffer */
+	cnt->imgs.preview_buffer = mymalloc(cnt->imgs.size);
 
 	/* Allocate a buffer for temp. usage in some places */
 	/* Only despeckle & bayer2rgb24() for now for now... */
@@ -655,7 +684,6 @@ static void *motion_loop(void *arg)
 	struct context *cnt = arg;
 	int i, j, detecting_motion = 0;
 	time_t lastframetime = 0;
-	int postcap = 0;
 	int frame_buffer_size;
 	int smartmask_ratio = 0;
 	int smartmask_count = 20;
@@ -731,28 +759,41 @@ static void *motion_loop(void *arg)
 		 * If pre_capture or minimum_motion_frames has been changed
 		 * via the http remote control we need to re-size the ring buffer
 		 */
-		frame_buffer_size = cnt->conf.pre_capture + cnt->conf.minimum_motion_frames - 1;
-		if (cnt->precap_nr != frame_buffer_size) {
-			/* Only decrease if at last position in new buffer */
-			if (frame_buffer_size > cnt->precap_nr || frame_buffer_size == cnt->precap_cur) {
-				unsigned char *tmp;
-				time_t *tmp2;
-				int *tmp3;
-				int smallest;
-				smallest = (cnt->precap_nr < frame_buffer_size) ? cnt->precap_nr : frame_buffer_size;
-				tmp=mymalloc(cnt->imgs.size*(1+frame_buffer_size));
-				tmp2=mymalloc(sizeof(time_t)*(1+frame_buffer_size));
-				tmp3=mymalloc(sizeof(int)*(1+frame_buffer_size));
-				memcpy(tmp, cnt->imgs.image_ring_buffer, cnt->imgs.size * (1+smallest));
-				memcpy(tmp2, cnt->imgs.timestamp, sizeof(time_t) * (1+smallest));
-				memcpy(tmp3, cnt->imgs.shotstamp, sizeof(int) * (1+smallest));
+		frame_buffer_size = cnt->conf.pre_capture + cnt->conf.minimum_motion_frames;
+		if (cnt->imgs.ring_buffer_size != frame_buffer_size) {
+			/* Only resize if :
+			 * decreasing at last position in new buffer
+			 * increasing at last position in old buffer 
+			 * e.g. at end of smallest buffer */
+			int smallest;
+			if (frame_buffer_size < cnt->imgs.ring_buffer_size) { /* Decreasing */
+				smallest = frame_buffer_size;
+			}
+			else { /* Increasing */
+				smallest = cnt->imgs.ring_buffer_size;
+			}
+			if (cnt->imgs.ring_buffer_last_in == smallest) {
+				void *tmp;
+				void *tmp2;
+				void *tmp3;
+				void *tmp4;
+				tmp = mymalloc(cnt->imgs.size * frame_buffer_size);
+				tmp2 = mymalloc(sizeof(cnt->imgs.timestamp_ring_buffer[0]) * frame_buffer_size);
+				tmp3 = mymalloc(sizeof(cnt->imgs.shotstamp_ring_buffer[0]) * frame_buffer_size);
+				tmp4 = mymalloc(sizeof(cnt->imgs.diffs_ring_buffer[0]) * frame_buffer_size);
+				memcpy(tmp, cnt->imgs.image_ring_buffer, cnt->imgs.size * smallest);
+				memcpy(tmp2, cnt->imgs.timestamp_ring_buffer, sizeof(cnt->imgs.timestamp_ring_buffer[0]) * smallest);
+				memcpy(tmp3, cnt->imgs.shotstamp_ring_buffer, sizeof(cnt->imgs.shotstamp_ring_buffer[0]) * smallest);
+				memcpy(tmp4, cnt->imgs.diffs_ring_buffer, sizeof(cnt->imgs.diffs_ring_buffer[0]) * smallest);
 				free(cnt->imgs.image_ring_buffer);
-				free(cnt->imgs.timestamp);
-				free(cnt->imgs.shotstamp);
+				free(cnt->imgs.timestamp_ring_buffer);
+				free(cnt->imgs.shotstamp_ring_buffer);
+				free(cnt->imgs.diffs_ring_buffer);
 				cnt->imgs.image_ring_buffer = tmp;
-				cnt->imgs.timestamp = tmp2;
-				cnt->imgs.shotstamp = tmp3;
-				cnt->precap_nr = frame_buffer_size;
+				cnt->imgs.timestamp_ring_buffer = tmp2;
+				cnt->imgs.shotstamp_ring_buffer = tmp3;
+				cnt->imgs.diffs_ring_buffer = tmp4;
+				cnt->imgs.ring_buffer_size = frame_buffer_size;
 			}
 		}
 
@@ -792,27 +833,29 @@ static void *motion_loop(void *arg)
 				get_image = 0;
 			}
 
-			/* Store time with pre_captured image*/
-			*(cnt->imgs.timestamp + cnt->precap_cur) = cnt->currenttime;
+			/* ring_buffer_last_in is pointing to current pos, update before put in a new image */
+			if (++cnt->imgs.ring_buffer_last_in >= cnt->imgs.ring_buffer_size)
+				cnt->imgs.ring_buffer_last_in = 0;
 
-			/* Store shot number with pre_captured image*/
-			*(cnt->imgs.shotstamp+cnt->precap_cur) = cnt->shots;
+			/* Check if we have filled the ring buffer, throw away last image */
+			if (cnt->imgs.ring_buffer_last_in == cnt->imgs.ring_buffer_last_out) {
+				if (++cnt->imgs.ring_buffer_last_out >= cnt->imgs.ring_buffer_size)
+					cnt->imgs.ring_buffer_last_out = 0;
+			}
 
-			/* newimg now points to the current image. With precap_cur incremented it
-			 * will be pointing to the position in the buffer for the NEXT image frame
-			 * not the current!!! So newimg points to current frame about to be loaded
-			 * and the cnt->precap_cur already have been incremented to point to the
-			 * next frame.
-			 */
-			newimg = cnt->imgs.image_ring_buffer + (cnt->imgs.size * (cnt->precap_cur++));
+			/* Store time with pre_captured image */
+			cnt->imgs.timestamp_ring_buffer[cnt->imgs.ring_buffer_last_in] = cnt->currenttime;
 
-			/* If we are at the end of the ring buffer go to the start */
-			if (cnt->precap_cur > cnt->precap_nr)
-				cnt->precap_cur=0;
+			/* Store shot number with pre_captured image */
+			cnt->imgs.shotstamp_ring_buffer[cnt->imgs.ring_buffer_last_in] = cnt->shots;
 
+			/* set diffs to 0 now, will be written after we calculated diffs in new image */
+			cnt->imgs.diffs_ring_buffer[cnt->imgs.ring_buffer_last_in] = 0;
+
+			/* newimg points to position in ring where to store image */
+			newimg = cnt->imgs.image_ring_buffer + (cnt->imgs.size * cnt->imgs.ring_buffer_last_in);
 
 		/***** MOTION LOOP - RETRY INITIALIZING NETCAM SECTION *****/
-
 			/* If a network camera is not available we keep on retrying every 10 seconds
 			 * until it shows up.
 			 */
@@ -1038,6 +1081,8 @@ static void *motion_loop(void *arg)
 				cnt->diffs = 0;
 			}
 
+			/* save diffs in ring buffer */
+			cnt->imgs.diffs_ring_buffer[cnt->imgs.ring_buffer_last_in] = cnt->diffs;
 
 		/***** MOTION LOOP - TUNING SECTION *****/
 
@@ -1165,11 +1210,9 @@ static void *motion_loop(void *arg)
 
 				if (detecting_motion > cnt->conf.minimum_motion_frames) {
 					motion_detected(cnt, cnt->diffs, cnt->video_dev, newimg);
-					postcap = cnt->conf.post_capture;
 				}
-			} else if (postcap) {
+			} else if (cnt->postcap) {
 				motion_detected(cnt, 0, cnt->video_dev, newimg);
-				postcap--;
 			} else {
 				detecting_motion = 0;
 			}
@@ -1187,8 +1230,8 @@ static void *motion_loop(void *arg)
 			if (((cnt->currenttime - cnt->lasttime >= cnt->conf.gap) && cnt->conf.gap > 0) || cnt->makemovie) {
 				if (cnt->event_nr == cnt->prev_event || cnt->makemovie) {
 
-					/* When output_normal=best save best preview_shot here at the end of event */
-					if (cnt->new_img == NEWIMG_BEST && cnt->preview_max) {
+					/* Save preview_shot here at the end of event */
+					if (cnt->preview_max) {
 						preview_best(cnt);
 						cnt->preview_max = 0;
 					}
@@ -1407,12 +1450,6 @@ static void *motion_loop(void *arg)
 				cnt->new_img=NEWIMG_FIRST;
 			else if (strcasecmp(cnt->conf.output_normal, "best") == 0){
 				cnt->new_img=NEWIMG_BEST;
-				/* allocate buffer here when not yet done */
-				if (!cnt->imgs.preview_buffer){
-					cnt->imgs.preview_buffer = mymalloc(cnt->imgs.size);
-					if (cnt->conf.setup_mode)
-						motion_log(-1, 0, "Preview buffer allocated");
-				}
 			}
 			else
 				cnt->new_img = NEWIMG_OFF;

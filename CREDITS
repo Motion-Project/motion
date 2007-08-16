@@ -381,7 +381,9 @@ Dag Erlandsson
      (Dag Erlandsson and Angel Carpintero).
    * Check EIO for VIDIOC_DQBUF to workaround saa7134 problem.
      (Dag Erlandsson and Angel Carpintero). 
-
+   * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign
+     
 Stephen Farrugia
    * Fixing the division by zero problem.
      This makes motion a lot more stable.
