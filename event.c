@@ -258,7 +258,7 @@ static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
 }
 
 static void event_imagem_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
-            unsigned char *newimg_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
+            unsigned char *newimg ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
 {
 	struct config *conf=&cnt->conf;
