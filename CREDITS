@@ -366,7 +366,7 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
      (Marius Rieder, Angel Carpintero).
-
+   
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x06x05x012249
@@ -383,6 +383,7 @@ Dag Erlandsson
      (Dag Erlandsson and Angel Carpintero). 
    * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign
+   * Fixed a problem with locate and fixed mask overlay
      
 Stephen Farrugia
    * Fixing the division by zero problem.

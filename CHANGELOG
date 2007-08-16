@@ -9,6 +9,7 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue 
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
      (Marius Rieder, Angel Carpintero).     
+   * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson)
 
 	
 3.2.8 Formal Release - Summary of Changes

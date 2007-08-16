@@ -1118,10 +1118,6 @@ static void *motion_loop(void *arg)
 			 * picture frame is captured.
 			 */
 
-			/* Fixed mask overlay */
-			if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
-				overlay_fixed_mask(cnt, cnt->imgs.out);
-
 			/* Smartmask overlay */
 			if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
 				overlay_smartmask(cnt, cnt->imgs.out);
@@ -1135,6 +1131,10 @@ static void *motion_loop(void *arg)
 			   for adding the locate rectangle */
 			if (cnt->diffs > cnt->threshold)
 				 alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->location);
+
+			/* Fixed mask overlay */
+			if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
+				overlay_fixed_mask(cnt, cnt->imgs.out);
 
 			/* Initialize the double sized characters if needed. */
 			if(cnt->conf.text_double && text_size_factor == 1)
