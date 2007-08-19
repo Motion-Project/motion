@@ -322,11 +322,16 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		if (cnt->conf.setup_mode)
 			motion_log(-1, 0, "Motion detected - starting event %d", cnt->event_nr);
 
-		/* If output_normal=first save first motion frame as preview-shot */
-		if (cnt->new_img == NEWIMG_FIRST || cnt->new_img == NEWIMG_BEST) {
+		/* always save first motion frame as preview-shot */
+		if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
+			unsigned int distX = abs((cnt->imgs.width/2) - location->x);
+			unsigned int distY = abs((cnt->imgs.height/2) - location->y);
+
 			memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
 			cnt->preview_max = diffs;
-			if (cnt->locate == LOCATE_PREVIEW) {
+			cnt->preview_cent_dist = distX*distX + distY*distY;
+			/* We haven't yet draw the location on the image, do it if configured */
+			if (cnt->locate == LOCATE_PREVIEW || cnt->locate == LOCATE_ON) {
 				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
 			}
 		}
@@ -357,11 +362,32 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 	}
 
 	/* Check for most significant preview-shot when output_normal=best */
-	if (cnt->new_img == NEWIMG_BEST && diffs > cnt->preview_max) {
+	if ((cnt->new_img & NEWIMG_BEST) && (diffs > cnt->preview_max)) {
+		unsigned int distX = abs((cnt->imgs.width/2) - location->x);
+		unsigned int distY = abs((cnt->imgs.height/2) - location->y);
+
 		memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
 		cnt->preview_max = diffs;
-		if (cnt->locate == LOCATE_PREVIEW){
+		cnt->preview_cent_dist = distX*distX + distY*distY;
+		if (cnt->locate == LOCATE_PREVIEW) {
 			alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
+		}
+	}
+	/* Check for most significant preview-shot when output_normal=center */
+	if ((cnt->new_img & NEWIMG_CENTER) && (diffs > 0)) {
+		unsigned long distance;
+		unsigned int distX = abs((cnt->imgs.width/2) - location->x);
+		unsigned int distY = abs((cnt->imgs.height/2) - location->y);
+
+		distance = distX*distX + distY*distY;
+		if(distance < cnt->preview_cent_dist) {
+			memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
+			cnt->preview_max = diffs;
+			cnt->preview_cent_dist = distance;
+			if (cnt->locate == LOCATE_PREVIEW) {
+				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
+			}
+		
 		}
 	}
 
@@ -1232,7 +1258,7 @@ static void *motion_loop(void *arg)
 
 					/* Save preview_shot here at the end of event */
 					if (cnt->preview_max) {
-						preview_best(cnt);
+						preview_save(cnt);
 						cnt->preview_max = 0;
 					}
 
@@ -1445,12 +1471,13 @@ static void *motion_loop(void *arg)
 		/* Check for some config parameter changes but only every second */
 		if (cnt->shots == 0){
 			if (strcasecmp(cnt->conf.output_normal, "on") == 0)
-				cnt->new_img=NEWIMG_ON;
+				cnt->new_img = NEWIMG_ON;
 			else if (strcasecmp(cnt->conf.output_normal, "first") == 0)
-				cnt->new_img=NEWIMG_FIRST;
-			else if (strcasecmp(cnt->conf.output_normal, "best") == 0){
-				cnt->new_img=NEWIMG_BEST;
-			}
+				cnt->new_img = NEWIMG_FIRST;
+			else if (strcasecmp(cnt->conf.output_normal, "best") == 0)
+				cnt->new_img = NEWIMG_BEST;
+			else if (strcasecmp(cnt->conf.output_normal, "center") == 0)
+				cnt->new_img = NEWIMG_CENTER;
 			else
 				cnt->new_img = NEWIMG_OFF;
 

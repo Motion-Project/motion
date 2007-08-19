@@ -2,14 +2,16 @@
 
 Features
    * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign (Dag Erlandsson)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign (Dag Erlandsson).
+   * Added preview center feature.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter (Dag Erlandsson).	
 
 Bugfixes
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue 
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
      (Marius Rieder, Angel Carpintero).     
-   * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson)
+   * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
 
 	
 3.2.8 Formal Release - Summary of Changes

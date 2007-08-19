@@ -158,10 +158,12 @@
 #define FTYPE_MPEG_ANY    (FTYPE_MPEG | FTYPE_MPEG_MOTION | FTYPE_MPEG_TIMELAPSE)
 #define FTYPE_IMAGE_ANY   (FTYPE_IMAGE | FTYPE_IMAGE_SNAPSHOT | FTYPE_IMAGE_MOTION)
 
+/* What types of jpeg files do we want to have */
 #define NEWIMG_OFF       0
 #define NEWIMG_ON        1
 #define NEWIMG_FIRST     2
-#define NEWIMG_BEST      3
+#define NEWIMG_BEST      4
+#define NEWIMG_CENTER    8
 
 #define LOCATE_OFF       0
 #define LOCATE_ON        1
@@ -267,6 +269,9 @@ struct context {
 	struct netcam_context *netcam;
 	int new_img;
 	int preview_max;            /* Stores max diff number seen in an event of output_normal==best */
+	/* Current preview frame, movement to img center distance 
+	 * Note Dist is calculated distX*distX + distY*distY */
+	unsigned long preview_cent_dist;
 	int locate;
 	struct coord location;      /* coordinates for center and size of last motion detection*/
 	struct rotdata rotate_data; /* rotation data is thread-specific */

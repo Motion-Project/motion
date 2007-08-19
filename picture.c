@@ -639,8 +639,8 @@ void put_fixed_mask(struct context *cnt, const char *file)
 	motion_log(LOG_ERR, 0, "Please edit this file and re-run motion to enable mask feature");
 }
 
-/* save 'best' preview_shot */
-void preview_best(struct context *cnt)
+/* save preview_shot */
+void preview_save(struct context *cnt)
 {
 #ifdef HAVE_FFMPEG
 	int use_jpegpath;

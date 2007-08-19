@@ -384,6 +384,8 @@ Dag Erlandsson
    * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign
    * Fixed a problem with locate and fixed mask overlay
+   * Added preview center feature.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter
      
 Stephen Farrugia
    * Fixing the division by zero problem.

@@ -504,9 +504,10 @@ config_param config_params[] = {
 	"# Image File Output\n"
 	"############################################################\n\n"
 	"# Output 'normal' pictures when motion is detected (default: on)\n"
-	"# Valid values: on, off, first, best\n"
+	"# Valid values: on, off, first, best, center\n"
 	"# When set to 'first', only the first picture of an event is saved.\n"
 	"# Picture with most motion of an event is saved when set to 'best'.\n"
+	"# Picture with motion nearest center of picture is saved when set to 'center'.\n"
 	"# Can be used as preview shot for the corresponding movie.",
 	CONF_OFFSET(output_normal),
 	copy_string,

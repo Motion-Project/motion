@@ -240,7 +240,7 @@ static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	char fullfilename[PATH_MAX];
 	char filename[PATH_MAX];
 
-	if (cnt->new_img == NEWIMG_ON) {
+	if (cnt->new_img & NEWIMG_ON) {
 		const char *jpegpath;
 
 		/* conf.jpegpath would normally be defined but if someone deleted it by control interface
