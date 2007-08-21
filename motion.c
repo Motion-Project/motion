@@ -330,6 +330,9 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 			memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
 			cnt->preview_max = diffs;
 			cnt->preview_cent_dist = distX*distX + distY*distY;
+			cnt->preview_time = cnt->currenttime;
+			cnt->preview_shots = cnt->shots;
+			
 			/* We haven't yet draw the location on the image, do it if configured */
 			if (cnt->locate == LOCATE_PREVIEW || cnt->locate == LOCATE_ON) {
 				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
@@ -362,6 +365,9 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
 		cnt->preview_max = diffs;
 		cnt->preview_cent_dist = distX*distX + distY*distY;
+		cnt->preview_time = cnt->currenttime;
+		cnt->preview_shots = cnt->shots;
+
 		if (cnt->locate == LOCATE_PREVIEW) {
 			alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
 		}
@@ -377,6 +383,9 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 			memcpy(cnt->imgs.preview_buffer, newimg, cnt->imgs.size);
 			cnt->preview_max = diffs;
 			cnt->preview_cent_dist = distance;
+			cnt->preview_time = cnt->currenttime;
+			cnt->preview_shots = cnt->shots;
+
 			if (cnt->locate == LOCATE_PREVIEW) {
 				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_buffer, LOCATE_NORMAL);
 			}

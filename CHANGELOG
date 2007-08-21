@@ -12,8 +12,9 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
      (Marius Rieder, Angel Carpintero).     
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
+   * Preview pictures get the timestamp of moment they were captured (Dag Erlandsson).
 
-	
+
 3.2.8 Formal Release - Summary of Changes
 
 Features

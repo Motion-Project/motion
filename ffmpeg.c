@@ -127,7 +127,7 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 void ffmpeg_init()
 {
 	av_register_all();
-	av_log_set_callback( (void *)ffmpeg_avcodec_log );
+//	av_log_set_callback( (void *)ffmpeg_avcodec_log );
 
 	/* Copy the functions to use for the append file protocol from the standard
 	 * file protocol.

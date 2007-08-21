@@ -646,8 +646,10 @@ void preview_save(struct context *cnt)
 	int use_jpegpath;
 #endif /* HAVE_FFMPEG */
 	const char *jpegpath;
-	char previewname[PATH_MAX];
+	static char previewname[PATH_MAX];
 	char filename[PATH_MAX];
+	struct tm tmptime;
+	int tmpshots;
 
 	if(cnt->preview_max){
 #ifdef HAVE_FFMPEG
@@ -662,6 +664,11 @@ void preview_save(struct context *cnt)
 			return;
 		}
 #endif /* HAVE_FFMPEG */
+		/* Save shots while processing preview image */
+		tmpshots = cnt->shots;
+		cnt->shots = cnt->preview_shots;
+		localtime_r(&cnt->preview_time, &tmptime);
+
 		/* Save best preview-shot also when no movies are recorded or jpegpath
 		   is used. Filename has to be generated - nothing available to reuse! */
 		//printf("preview_shot: different filename or picture only!\n");
@@ -673,8 +680,11 @@ void preview_save(struct context *cnt)
 		else
 			jpegpath = (char *)DEF_JPEGPATH;
 			
-		mystrftime(cnt, filename, sizeof(filename), jpegpath, cnt->currenttime_tm, NULL, 0);
+		mystrftime(cnt, filename, sizeof(filename), jpegpath, &tmptime, NULL, 0);
 		snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 		put_picture(cnt, previewname, cnt->imgs.preview_buffer , FTYPE_IMAGE);
+
+		/* Restore shots */
+		cnt->shots = tmpshots;
 	}
 }

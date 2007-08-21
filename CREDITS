@@ -386,6 +386,7 @@ Dag Erlandsson
    * Fixed a problem with locate and fixed mask overlay
    * Added preview center feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter
+   * Fixed timestamp for preview pictures.
      
 Stephen Farrugia
    * Fixing the division by zero problem.

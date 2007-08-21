@@ -272,6 +272,9 @@ struct context {
 	/* Current preview frame, movement to img center distance 
 	 * Note Dist is calculated distX*distX + distY*distY */
 	unsigned long preview_cent_dist;
+	time_t preview_time;              /* Timestamp of preview image */
+	int preview_shots;                 /* Shot of preview buffer image */
+
 	int locate;
 	struct coord location;      /* coordinates for center and size of last motion detection*/
 	struct rotdata rotate_data; /* rotation data is thread-specific */
