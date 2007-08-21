@@ -293,7 +293,7 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		motion_log(LOG_ERR, 0, "Error in %s: newimg is not at last_in pos in ringbuffer", __FUNCTION__);
 		motion_log(-1, 0, "Thread finishing...");
 		motion_remove_pid();
-		exit(1);	
+		exit(1);
 	}
 
 	cnt->lasttime = cnt->currenttime;
@@ -350,13 +350,6 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		cnt->postcap = cnt->conf.post_capture;
 	}
 	else {
-		/* sanity check */
-		if (cnt->postcap == 0) {
-			motion_log(LOG_ERR, 0, "Error in %s: cnt->postcap == 0 when called with diff == 0", __FUNCTION__);
-			motion_log(-1, 0, "Thread finishing...");
-			motion_remove_pid();
-			exit(1);	
-		}
 		if (cnt->postcap > 0)
 			cnt->postcap--;
 	}
@@ -421,10 +414,17 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 		 * the ring_buffer stuff
 		 */
 		tmpshots = cnt->shots;
-		while (cnt->imgs.ring_buffer_last_out != cnt->imgs.ring_buffer_last_in) {
-			cnt->imgs.ring_buffer_last_out++;
-			if (cnt->imgs.ring_buffer_last_out >= cnt->imgs.ring_buffer_size)
-				cnt->imgs.ring_buffer_last_out = 0;
+		/* We should always take at least one. 
+		 * If we have minimum_motion_frames==1 and pre_capture==0, we have a ring buffer of 1 element
+		 * and then last_out always equals last_in.
+		 */
+		do {
+			/* If we are at end in ring buffer don't increment out */
+			if (cnt->imgs.ring_buffer_last_out != cnt->imgs.ring_buffer_last_in) {
+				cnt->imgs.ring_buffer_last_out++;
+				if (cnt->imgs.ring_buffer_last_out >= cnt->imgs.ring_buffer_size)
+					cnt->imgs.ring_buffer_last_out = 0;
+			}
 			localtime_r(&cnt->imgs.timestamp_ring_buffer[cnt->imgs.ring_buffer_last_out], &tmptime);
 			cnt->shots = cnt->imgs.shotstamp_ring_buffer[cnt->imgs.ring_buffer_last_out] & 0x0fff;
 			if (cnt->shots < conf->frame_limit) {
@@ -439,7 +439,7 @@ static void motion_detected(struct context *cnt, int diffs, int dev, unsigned ch
 			 */
 			if (frames_handled >= 2 && !(cnt->postcap == 0))
 				break;
-		}
+		} while (cnt->imgs.ring_buffer_last_out != cnt->imgs.ring_buffer_last_in);
 		cnt->shots = tmpshots;
 	}
 
@@ -524,6 +524,7 @@ static void motion_init(struct context *cnt)
 	cnt->imgs.timestamp_ring_buffer = mymalloc(sizeof(cnt->imgs.timestamp_ring_buffer[0]));
 	cnt->imgs.shotstamp_ring_buffer = mymalloc(sizeof(cnt->imgs.shotstamp_ring_buffer[0]));
 	cnt->imgs.diffs_ring_buffer = mymalloc(sizeof(cnt->imgs.diffs_ring_buffer[0]));
+	cnt->imgs.ring_buffer_size = 1;
 
 	/* allocate buffer here for preview buffer */
 	cnt->imgs.preview_buffer = mymalloc(cnt->imgs.size);
@@ -798,7 +799,7 @@ static void *motion_loop(void *arg)
 			else { /* Increasing */
 				smallest = cnt->imgs.ring_buffer_size;
 			}
-			if (cnt->imgs.ring_buffer_last_in == smallest) {
+			if (cnt->imgs.ring_buffer_last_in == smallest - 1) {
 				void *tmp;
 				void *tmp2;
 				void *tmp3;
