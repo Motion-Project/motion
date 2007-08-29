@@ -646,10 +646,10 @@ void preview_save(struct context *cnt)
 	int use_jpegpath;
 #endif /* HAVE_FFMPEG */
 	const char *jpegpath;
-	static char previewname[PATH_MAX];
+	char previewname[PATH_MAX];
 	char filename[PATH_MAX];
 	struct tm tmptime;
-	int tmpshots;
+	int tmpshots, basename_len;
 
 	if(cnt->preview_max){
 #ifdef HAVE_FFMPEG
@@ -658,7 +658,9 @@ void preview_save(struct context *cnt)
 	
 		if (cnt->ffmpeg_new && !use_jpegpath){
 			/* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
-			strncpy(previewname, cnt->newfilename, strlen(cnt->newfilename)-3);
+			basename_len = strlen(cnt->newfilename) - 3;
+			strncpy(previewname, cnt->newfilename, basename_len);
+			previewname[basename_len] = '\0';
 			strcat(previewname, imageext(cnt));
 			put_picture(cnt, previewname, cnt->imgs.preview_buffer , FTYPE_IMAGE);
 			return;
