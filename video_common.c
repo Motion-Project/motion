@@ -468,7 +468,7 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 	int brightness_window_low;
 	int brightness_target;
 	int i, j = 0, avg = 0, step = 0;
-	unsigned char *image = cnt->imgs.image_ring_buffer;
+	unsigned char *image = cnt->imgs.image_virgin; /* Or cnt->current_image ? */
 
 	int make_change = 0;
 

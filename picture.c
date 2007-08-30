@@ -30,7 +30,6 @@ typedef mem_destination_mgr *mem_dest_ptr;
 METHODDEF(void) init_destination(j_compress_ptr cinfo)
 {
         mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-
         dest->pub.next_output_byte = dest->buf;
         dest->pub.free_in_buffer = dest->bufsize;
         dest->jpegsize = 0;
@@ -39,7 +38,6 @@ METHODDEF(void) init_destination(j_compress_ptr cinfo)
 METHODDEF(boolean) empty_output_buffer(j_compress_ptr cinfo)
 {
         mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-
         dest->pub.next_output_byte = dest->buf;
         dest->pub.free_in_buffer = dest->bufsize;
 
@@ -648,10 +646,15 @@ void preview_save(struct context *cnt)
 	const char *jpegpath;
 	char previewname[PATH_MAX];
 	char filename[PATH_MAX];
-	struct tm tmptime;
-	int tmpshots, basename_len;
+	int basename_len;
+	struct image_data *saved_current_image;
 
-	if(cnt->preview_max){
+	if (cnt->imgs.preview_image.diffs) {
+		/* Save current global context */
+		saved_current_image = cnt->current_image;
+		/* Set global context to the image we are processing */
+		cnt->current_image = &cnt->imgs.preview_image;
+
 #ifdef HAVE_FFMPEG
 		/* Use filename of movie i.o. jpeg_filename when set to 'preview' */
 		use_jpegpath=strcmp(cnt->conf.jpegpath, "preview");
@@ -662,31 +665,28 @@ void preview_save(struct context *cnt)
 			strncpy(previewname, cnt->newfilename, basename_len);
 			previewname[basename_len] = '\0';
 			strcat(previewname, imageext(cnt));
-			put_picture(cnt, previewname, cnt->imgs.preview_buffer , FTYPE_IMAGE);
-			return;
-		}
+			put_picture(cnt, previewname, cnt->imgs.preview_image.image , FTYPE_IMAGE);
+		} else
 #endif /* HAVE_FFMPEG */
-		/* Save shots while processing preview image */
-		tmpshots = cnt->shots;
-		cnt->shots = cnt->preview_shots;
-		localtime_r(&cnt->preview_time, &tmptime);
+		{
+			/* Save best preview-shot also when no movies are recorded or jpegpath
+			 * is used. Filename has to be generated - nothing available to reuse! */
+			//printf("preview_shot: different filename or picture only!\n");
 
-		/* Save best preview-shot also when no movies are recorded or jpegpath
-		   is used. Filename has to be generated - nothing available to reuse! */
-		//printf("preview_shot: different filename or picture only!\n");
-
-		/* conf.jpegpath would normally be defined but if someone deleted it by control interface
-		   it is better to revert to the default than fail */
-		if (cnt->conf.jpegpath)
-			jpegpath = cnt->conf.jpegpath;
-		else
-			jpegpath = (char *)DEF_JPEGPATH;
+			/* conf.jpegpath would normally be defined but if someone deleted it by control interface
+			 * it is better to revert to the default than fail */
+			if (cnt->conf.jpegpath)
+				jpegpath = cnt->conf.jpegpath;
+			else
+				jpegpath = (char *)DEF_JPEGPATH;
 			
-		mystrftime(cnt, filename, sizeof(filename), jpegpath, &tmptime, NULL, 0);
-		snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
-		put_picture(cnt, previewname, cnt->imgs.preview_buffer , FTYPE_IMAGE);
+			mystrftime(cnt, filename, sizeof(filename), jpegpath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0);
+			snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
-		/* Restore shots */
-		cnt->shots = tmpshots;
+			put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);
+		}
+
+		/* restore global context values */
+		cnt->current_image = saved_current_image;
 	}
 }

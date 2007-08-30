@@ -172,6 +172,44 @@
 #define LOCATE_NORMAL    0
 #define LOCATE_BOTH      1
 
+/* Forward declaration, used in track.h */
+struct images;
+
+#include "track.h"
+#include "netcam.h"
+
+/* Structure to hold images information
+ * The idea is that this should have all information about a picture e.g. diffs, timestamp etc.
+ * The exception is the label information, it uses a lot of memory
+ * When the image is stored all texts motion marks etc. is written to the image
+ * so we only have to send it out when/if we want.
+ */
+/* A image can have detected motion in it, but dosn't trigger an event, if we use minimum_motion_frames */
+#define IMAGE_MOTION     1
+#define IMAGE_TRIGGER    2
+#define IMAGE_SAVE       4
+#define IMAGE_SAVED      8
+#define IMAGE_PRECAP    16
+#define IMAGE_POSTCAP   32
+
+struct image_data {
+	unsigned char *image;
+	int diffs;
+	time_t timestamp;         /* Timestamp when image was captured */
+	struct tm timestamp_tm;
+	int shot;                 /* Sub second timestamp count */
+
+	/* movement center to img center distance 
+	 * Note Dist is calculated distX*distX + distY*distY */
+	unsigned long cent_dist;
+
+	unsigned int flags;       /* Se IMAGE_* defines */
+
+	struct coord location;      /* coordinates for center and size of last motion detection*/
+
+	int total_labels;
+};
+
 /* DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
  * (and the corresponding height values, of course)
  * ===========================================================================
@@ -202,17 +240,15 @@ int draw_text (unsigned char *image, int startx, int starty, int width, char *te
 int initialize_chars(void);
 
 struct images {
-	unsigned char *image_ring_buffer; /* The base address of the image ring buffer */
-	time_t *timestamp_ring_buffer;
-	int *shotstamp_ring_buffer;
-	int *diffs_ring_buffer;
-	int ring_buffer_size;
-	int ring_buffer_last_in;
-	int ring_buffer_last_out;
+	struct image_data *image_ring;    /* The base address of the image ring buffer */
+	int image_ring_size;
+	int image_ring_in;                /* Index in image ring buffer we last added a image into */
+	int image_ring_out;               /* Index in image ring buffer we want to process next time */
+
 	unsigned char *ref;               /* The reference frame */
 	unsigned char *out;               /* Picture buffer for motion images */
 	unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
-	unsigned char *preview_buffer;    /* Picture buffer for best image when enables */
+	struct image_data preview_image;  /* Picture buffer for best image when enables */
 	unsigned char *mask;              /* Buffer for the mask file */
 	unsigned char *smartmask;
 	unsigned char *smartmask_final;
@@ -225,10 +261,9 @@ struct images {
 	int type;
 	int size;
 	int motionsize;
-	int total_labels;
-	int labelsize_max;
 	int labelgroup_max;
 	int labels_above;
+	int labelsize_max;
 	int largest_label;
 };
 
@@ -248,12 +283,6 @@ struct rotdata {
 	int cap_height;
 };
 
-#include "track.h"
-
-#include "netcam.h"
-
-
-
 /*
 	these used to be global variables but now each thread will have its
 	own context
@@ -267,19 +296,14 @@ struct context {
 	struct images imgs;
 	struct trackoptions track;
 	struct netcam_context *netcam;
+	struct image_data *current_image; /* Pointer to a structure where the image, diffs etc is stored */
 	int new_img;
-	int preview_max;            /* Stores max diff number seen in an event of output_normal==best */
-	/* Current preview frame, movement to img center distance 
-	 * Note Dist is calculated distX*distX + distY*distY */
-	unsigned long preview_cent_dist;
 	time_t preview_time;              /* Timestamp of preview image */
 	int preview_shots;                 /* Shot of preview buffer image */
 
 	int locate;
-	struct coord location;      /* coordinates for center and size of last motion detection*/
 	struct rotdata rotate_data; /* rotation data is thread-specific */
 
-	int diffs;
 	int noise;
 	int threshold;
 	int diffs_last[THRESHOLD_TUNE_LENGTH];

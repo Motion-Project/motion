@@ -348,7 +348,7 @@ static int alg_labeling(struct context *cnt)
 	int height=imgs->height;
 	int labelsize=0;
 	int current_label=2;
-	imgs->total_labels=0;
+	cnt->current_image->total_labels=0;
 	imgs->labelsize_max=0;
 	/* ALL labels above threshold are counted as labelgroup */
 	imgs->labelgroup_max=0;
@@ -371,7 +371,7 @@ static int alg_labeling(struct context *cnt)
 			labelsize=iflood(ix, iy, width, height, out, labels, current_label, 0);
 			
 			if( labelsize > 0 ) {
-				//printf( "Label: %i (%i) Size: %i (%i,%i)\n", current_label, imgs->total_labels, labelsize, ix, iy );
+				//printf( "Label: %i (%i) Size: %i (%i,%i)\n", current_label, cnt->current_image->total_labels, labelsize, ix, iy );
 				/* Label above threshold? Mark it again (add 32768 to labelnumber) */
 				if (labelsize > cnt->threshold){
 					labelsize=iflood(ix, iy, width, height, out, labels, current_label+32768, current_label);
@@ -384,13 +384,13 @@ static int alg_labeling(struct context *cnt)
 					imgs->largest_label=current_label;
 				}
 				
-				imgs->total_labels++;
+				cnt->current_image->total_labels++;
 				current_label++;
 			}
 		}
 		pixelpos++; /* compensate for ix<width-1 */
 	}	
-	//printf( "%i Labels found. Largest connected Area: %i Pixel(s). Largest Label: %i\n", imgs->total_labels, imgs->labelsize_max, imgs->largest_label);
+	//printf( "%i Labels found. Largest connected Area: %i Pixel(s). Largest Label: %i\n", imgs->total_labels, imgs->labelsize_max, cnt->current_image->largest_label);
 	/* return group of significant labels */
 	return imgs->labelgroup_max;
 }
