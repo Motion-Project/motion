@@ -642,11 +642,11 @@ void preview_save(struct context *cnt)
 {
 #ifdef HAVE_FFMPEG
 	int use_jpegpath;
+	int basename_len;
 #endif /* HAVE_FFMPEG */
 	const char *jpegpath;
 	char previewname[PATH_MAX];
 	char filename[PATH_MAX];
-	int basename_len;
 	struct image_data *saved_current_image;
 
 	if (cnt->imgs.preview_image.diffs) {
