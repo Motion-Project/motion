@@ -520,7 +520,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
  *                Set to IMAGE_BUFFER_FLUSH to send/save all images in buffer
  */
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
-void process_image_ring(struct context *cnt, int max_images)
+static void process_image_ring(struct context *cnt, unsigned int max_images)
 {
 	/* we are going to send an event, in the events there is still
 	 * some code that use cnt->current_image
@@ -1315,8 +1315,8 @@ static void *motion_loop(void *arg)
 
 				/* Count how many frames with motion there is in the last minimum_motion_frames in precap buffer */
 				int frame_count = 0;
-				int i;
 				int pos = cnt->imgs.image_ring_in;
+
 				for(i = 0; i < cnt->conf.minimum_motion_frames; i++)
 				{
 					if(cnt->imgs.image_ring[pos].flags & IMAGE_MOTION)
@@ -1329,7 +1329,6 @@ static void *motion_loop(void *arg)
 				}
 
 				if (frame_count >= cnt->conf.minimum_motion_frames) {
-					int i;
 					cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 					detecting_motion = 1;
 					/* Mark all images in image_ring to be saved */
