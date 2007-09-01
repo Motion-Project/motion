@@ -6,7 +6,7 @@
 NAME=motion
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 DAEMON=@BIN_PATH@/motion
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/motion/$NAME.pid
 
 
 trap "" 1
@@ -19,7 +19,7 @@ test -f $DAEMON || exit 0
 case "$1" in
   start)
     echo "Starting motion detection : $NAME"
-    start-stop-daemon --start --pidfile $PIDFILE --exec $DAEMON
+    start-stop-daemon --start --pidfile $PIDFILE --exec $DAEMON --chuid motion
     ;;
 
   stop)
@@ -45,7 +45,7 @@ case "$1" in
   restart-motion)
     echo "Restarting $NAME"
     start-stop-daemon --stop --pidfile $PIDFILE --oknodo --exec $DAEMON  --retry 30
-    start-stop-daemon --start --pidfile $PIDFILE --exec $DAEMON
+    start-stop-daemon --start --pidfile $PIDFILE --exec $DAEMON --chuid motion
     ;;
 
   restart)

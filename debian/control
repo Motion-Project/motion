@@ -9,7 +9,7 @@ Package: motion
 Architecture: any
 Depends: ${shlibs:Depends}
 Recommends: ffmpeg
-Suggests: mysql-client, postgresql-client
+Suggests: mysql-client, postgresql-client, mjpegtools
 Description: V4L capture program supporting motion detection
  Motion is a program that monitors the video signal from
  one or more cameras and is able to detect if a significant
@@ -23,7 +23,7 @@ Description: V4L capture program supporting motion detection
  The output from motion can be:
     - jpg files
     - ppm format files
-    - mpeg video sequences
+    - mpeg, avi, swf video sequences
  .
  Also, motion has its own minimalistic web server. Thus,
  you can access the webcam output from motion via a browser.

@@ -6,6 +6,36 @@ set -e
 
 . /usr/share/debconf/confmodule
 
+add_group_if_missing() {
+    if [ -x /usr/sbin/adduser ]; then
+        if ! id -g motion >/dev/null 2>&1; then
+                addgroup --force-badname motion
+        fi
+    fi
+}
+
+add_user_if_missing() { 
+    if [ -x /usr/sbin/adduser ]; then
+        if ! id -u motion > /dev/null 2>&1; then
+            adduser --system --no-create-home \
+                --disabled-password --force-badname \
+                motion
+        fi
+    fi 
+}
+
+create_pid_dir(){
+	if ! [ -d /var/run/motion ]; then
+		mkdir /var/run/motion
+	fi
+	chown motion:motion /var/run/motion
+}
+
+
+add_group_if_missing
+add_user_if_missing
+create_pid_dir
+
 db_stop
 
 #DEBHELPER#
