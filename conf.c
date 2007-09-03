@@ -60,7 +60,6 @@ struct config conf_template = {
 	minimum_frame_time:    0,
 	lightswitch:           0,
 	nightcomp:             0,
-	low_cpu:               0,
 	nochild:               0,
 	autobright:            0,
 	brightness:            0,
@@ -479,14 +478,6 @@ config_param config_params[] = {
 	"# Maximum length in seconds of an mpeg movie\n"
 	"# When value is exceeded a new mpeg file is created. (Default: 0 = infinite)",
 	CONF_OFFSET(maxmpegtime),
-	copy_int,
-	print_int
-	},
-	{
-	"low_cpu",
-	"# Number of frames per second to capture when not detecting\n"
-	"# motion (saves CPU load) (Default: 0 = disabled)",
-	CONF_OFFSET(low_cpu),
 	copy_int,
 	print_int
 	},

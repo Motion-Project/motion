@@ -43,7 +43,6 @@ struct config {
 	int minimum_frame_time;
 	int lightswitch;
 	int nightcomp;
-	unsigned int low_cpu;
 	int nochild;
 	int autobright;
 	int brightness;

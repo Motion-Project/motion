@@ -1074,7 +1074,6 @@ static void *motion_loop(void *arg)
 				/* Increase missing_frame_counter
 				 * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
 				 * After 30 seconds we put a grey error image in the buffer
-				 * Note: at low_cpu the timeout will be longer but we live with that
 				 * If we still have not yet received the initial image from a camera
 				 * we go straight for the grey error image.
 				 */
@@ -1682,35 +1681,6 @@ static void *motion_loop(void *arg)
 			/* SLEEP as defined in motion.h  A safe sleep using nanosleep */
 			SLEEP(0, delay_time_nsec);
 		}
-
-		/* This will limit the framerate to 1 frame while not detecting
-		   motion. Using a different motion flag to allow for multiple frames per second
-		 */
-
-		if (cnt->conf.low_cpu && !detecting_motion) {
-			/* Recalculate remaining time to delay for a total of 1/low_cpu seconds */
-			if (frame_delay + elapsedtime < (1000000L / cnt->conf.low_cpu)) {
-				frame_delay = (1000000L / cnt->conf.low_cpu) - frame_delay - elapsedtime;
-
-
-				/* Delay time in nanoseconds for SLEEP */
-				delay_time_nsec = frame_delay * 1000;
-
-				if (delay_time_nsec > 999999999)
-					delay_time_nsec = 999999999;
-
-				/* SLEEP as defined in motion.h  A safe sleep using nanosleep */
-				SLEEP(0, delay_time_nsec);
-
-				/* Correct frame times to ensure required_frame_time is maintained
-				 * This is done by taking the time NOW and subtract the time
-				 * required_frame_time. This way we pretend that timenow was set
-				 * one frame ago.
-				 */
-				gettimeofday(&tv1, NULL);
-				timenow = tv1.tv_usec + 1000000L * tv1.tv_sec - required_frame_time;
-			}
-		}
 	}
 
 	/* END OF MOTION MAIN LOOP
@@ -1937,10 +1907,6 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 		if (cnt_list[0]->daemon && cnt_list[0]->conf.setup_mode == 0) {
 			become_daemon();
 			motion_log(LOG_INFO, 0, "Motion running as daemon process");
-			if (cnt_list[0]->conf.low_cpu) {
-				motion_log(LOG_INFO, 0, "Capturing %d frames/s when idle",
-				           cnt_list[0]->conf.low_cpu);
-			}
 		}
 	}
 

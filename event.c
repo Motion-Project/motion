@@ -379,10 +379,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			u=img+width*height;
 			v=u+(width*height)/4;
 		}
-		if (cnt->conf.low_cpu)
-			fps=cnt->conf.frame_limit;
-		else
-			fps=cnt->lastrate;
+		fps=cnt->lastrate;
 		if (fps>30)
 			fps=30;
 		if (fps<2)
@@ -411,10 +408,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			v=u+(width*height)/4;
 			convbuf=NULL;
 		}
-		if (cnt->conf.low_cpu)
-			fps=cnt->conf.frame_limit;
-		else
-			fps=cnt->lastrate;
+		fps=cnt->lastrate;
 		if (fps>30)
 			fps=30;
 		if (fps<2)
