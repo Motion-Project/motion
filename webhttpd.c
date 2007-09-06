@@ -519,6 +519,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 					}
 					/* param_name exists */
 					if (config_params[i].param_name) {
+
 						send_template_ini_client(client_socket, ini_template);
 						if (!strcmp ("bool",config_type(&config_params[i])) )
 							sprintf(res, "<b>Thread %d </b>\n"
@@ -533,11 +534,12 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 						else
 							sprintf(res, "<b>Thread %d </b>\n"
 								     "<form action=set?>\n"
-								     "<b>%s</b>&nbsp;<input type=text name='%s' value=''>\n"
+								     "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
 								     "<input type='submit' value='set'>\n"
 								     "</form>\n"
 								     "<a href=/%d/config/list><- back</a>\n", thread,
-								     config_params[i].param_name, config_params[i].param_name, thread);
+								     config_params[i].param_name, config_params[i].param_name, 
+								     config_params[i].print(cnt, NULL, i, thread),thread);
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
 					} else {

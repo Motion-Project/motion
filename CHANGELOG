@@ -7,6 +7,7 @@ Features
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter (Dag Erlandsson).	
    * Removed low_cpu feature, as it is not really compatible with pre_capture and a lot of other
      features rely on the pre_capture buffer behind the scenes. (Joerg Weber)
+   * Improve debian package, create user/group motion and added --chuid motion to init script (Angel Carpintero).
 
 Bugfixes
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy
