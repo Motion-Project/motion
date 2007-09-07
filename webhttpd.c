@@ -519,19 +519,33 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 					}
 					/* param_name exists */
 					if (config_params[i].param_name) {
+						const char *value = NULL;							
+						
+						value = config_params[i].print(cnt, NULL, i, thread);
 
 						send_template_ini_client(client_socket, ini_template);
-						if (!strcmp ("bool",config_type(&config_params[i])) )
+						if (!strcmp ("bool",config_type(&config_params[i])) ){
+							char option[80] = {'\0'};
+
+							if (!strcmp ("on", value))
+								sprintf(option,"<option value='on' selected>on</option>\n"
+								"<option value='off'>off</option>\n");
+							else
+								sprintf(option,"<option value='on'>on</option>\n"
+								"<option value='off' selected>off</option>\n");
+
 							sprintf(res, "<b>Thread %d </b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<select name='%s'>\n"
-								     "<option value='on'>on</option>\n"
-								     "<option value='off'>off</option></select>\n"
-								     "<input type='submit' value='set'>\n"
+								     "%s"	
+								     "</select><input type='submit' value='set'>\n"
 								     "</form>\n"
 								     "<a href=/%d/config/list><- back</a>\n", thread,
-								     config_params[i].param_name, config_params[i].param_name, thread);
-						else
+								     config_params[i].param_name, 
+								     config_params[i].param_name, option, thread);
+						}else{
+							if (value == NULL) value = "";
+
 							sprintf(res, "<b>Thread %d </b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
@@ -539,7 +553,8 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 								     "</form>\n"
 								     "<a href=/%d/config/list><- back</a>\n", thread,
 								     config_params[i].param_name, config_params[i].param_name, 
-								     config_params[i].print(cnt, NULL, i, thread),thread);
+								     value ,thread);
+						}
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
 					} else {
