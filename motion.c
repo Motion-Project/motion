@@ -967,7 +967,7 @@ static void *motion_loop(void *arg)
 				cnt->current_image->cent_dist = 0;
 
 				/* Clear location data */
-				memset(&cnt->current_image->location, 0, sizeof(cnt->current_image->location));  /* initialize to grey */
+				memset(&cnt->current_image->location, 0, sizeof(cnt->current_image->location));
 				cnt->current_image->total_labels = 0;
 			}
 
