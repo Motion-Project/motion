@@ -527,7 +527,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 						if (!strcmp ("bool",config_type(&config_params[i])) ){
 							char option[80] = {'\0'};
 
-							if (!strcmp ("on", value))
+							if (value != NULL)
 								sprintf(option,"<option value='on' selected>on</option>\n"
 								"<option value='off'>off</option>\n");
 							else
