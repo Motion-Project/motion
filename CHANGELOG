@@ -8,6 +8,7 @@ Features
    * Removed low_cpu feature, as it is not really compatible with pre_capture and a lot of other
      features rely on the pre_capture buffer behind the scenes. (Joerg Weber)
    * Improve debian package, create user/group motion and added --chuid motion to init script (Angel Carpintero).
+   * Removed night_compensate feature. This functionality is covered by noise_tune. (Joerg Weber)
 
 Bugfixes
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy

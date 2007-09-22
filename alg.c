@@ -706,7 +706,6 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 {
 	struct images *imgs=&cnt->imgs;
 	int i, diffs=0;
-	long int level=0;
 	int noise=cnt->noise;
 	int smartmask_speed=cnt->smartmask_speed;
 	unsigned char *ref=imgs->ref;
@@ -718,19 +717,6 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	mmx_t mmtemp; /* used for transferring to/from memory */
 	int unload;   /* counter for unloading diff counts */
 #endif
-
-	/* If the average level of the picture is to low, compensate by 
-	 * lowering the noise threshold
-	 */
-	if (cnt->conf.nightcomp) {
-		i=imgs->motionsize;
-		for (i--; i>=0; i--) {
-			level+=(unsigned char)new[i];
-		}
-		level/=imgs->motionsize;
-		if (level < noise*2)
-			noise/=2;
-	}
 
 	i=imgs->motionsize;
 	memset(out+i, 128, i/2); /* motion pictures are now b/w i.o. green */
@@ -967,8 +953,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 }
 
 /*
-	Very fast diff function, does not do nightcompensation or mask
-	overlaying.
+	Very fast diff function, does not apply mask overlaying.
 */
 static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char *new)
 {

@@ -59,7 +59,6 @@ struct config conf_template = {
 	noise_tune:            1,
 	minimum_frame_time:    0,
 	lightswitch:           0,
-	nightcomp:             0,
 	nochild:               0,
 	autobright:            0,
 	brightness:            0,
@@ -391,14 +390,6 @@ config_param config_params[] = {
 	"noise_tune",
 	"# Automatically tune the noise threshold (default: on)",
 	CONF_OFFSET(noise_tune),
-	copy_bool,
-	print_bool
-	},
-	{
-	"night_compensate",
-	"# Enables motion to adjust its detection/noise level for very dark frames\n"
-	"# Don't use this with noise_tune on. (default: off)",
-	CONF_OFFSET(nightcomp),
 	copy_bool,
 	print_bool
 	},

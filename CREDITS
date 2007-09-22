@@ -1298,6 +1298,7 @@ Joerg Weber
      on how much motion was detected relative to threshold setting.
      http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
    * Removed low_cpu feature.
+   * Removed night_compensate feature
    
 Dirk Wesenberg
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
