@@ -275,6 +275,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		tuner.index = input.tuner;
 
 		if (xioctl(s->fd, VIDIOC_G_TUNER, &tuner) == -1) {
+			motion_log(LOG_ERR, 0, "VIDIOC_G_TUNER: %s", strerror(errno));	
 			return (0);
 		}
 
@@ -285,6 +286,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		freq.frequency = (freq_ / 1000) * 16;
 
 		if (xioctl(s->fd, VIDIOC_S_FREQUENCY, &freq) == -1) {
+			motion_log(LOG_ERR, 0, "VIDIOC_S_FREQUENCY: %s", strerror(errno));
 			return (0);
 		}
 	}
@@ -790,9 +792,9 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 			s->pframe++; 
 			if(s->pframe >= s->req.count) s->pframe=0;
 			s->buf.index = s->pframe;
-		
+
 			motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__,s->pframe);
-	
+
 			return (1);
 		}
 

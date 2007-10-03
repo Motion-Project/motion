@@ -245,7 +245,6 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
  *                v4l_next fetches a video frame from a v4l device
  *
  * Parameters:
- *     cnt        Pointer to the context for this thread
  *     viddev     Pointer to struct containing video device handle amd device parameters
  *     map        Pointer to the buffer in which the function puts the new image
  *     width      Width of image in pixels
@@ -314,7 +313,6 @@ int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int height
 		default:
 			memcpy(map, cap_map, viddev->v4l_bufsize);
 	}
-
 
 	return 0;
 }

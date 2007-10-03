@@ -593,7 +593,7 @@ static void motion_init(struct context *cnt)
 	cnt->event_nr = 1;
 	cnt->prev_event = 0;
 
-	motion_log(LOG_DEBUG, 0, "Thread started");
+	motion_log(LOG_DEBUG, 0, "Thread %d started", (unsigned long)pthread_getspecific(tls_key_threadnr));
 
 	if (!cnt->conf.filepath)
 		cnt->conf.filepath = strdup(".");
@@ -1896,6 +1896,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 {
 	/* Initialize our global mutex */
 	pthread_mutex_init(&global_lock, NULL);
+
+	motion_log(LOG_INFO, 0, "Motion "VERSION" Started"); 
 
 	/* Create the list of context structures and load the
 	 * configuration.
