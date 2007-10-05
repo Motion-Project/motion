@@ -496,7 +496,8 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 	/* close each codec */
 	if (ffmpeg->video_st) {
 		pthread_mutex_lock(&global_lock);
-		avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
+		if (ffmpeg->video_st->codec->priv_data != NULL)
+			avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
 		pthread_mutex_unlock(&global_lock);	
 		av_freep(&ffmpeg->picture);
 		free(ffmpeg->video_outbuf);
