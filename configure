@@ -4311,6 +4311,54 @@ echo "${ECHO_T}not found" >&6; }
 
 		FFMPEG_OBJ="ffmpeg.o"
 
+
+		{ echo "$as_me:$LINENO: checking file_protocol is defined in ffmpeg ?" >&5
+echo $ECHO_N "checking file_protocol is defined in ffmpeg ?... $ECHO_C" >&6; }
+		CFLAGS="${FFMPEG_CFLAGS}"
+		LIBS="$TEMP_LIBS"
+
+		cat >conftest.$ac_ext <<_ACEOF
+
+			#include <avformat.h>
+			URLProtocol test_file_protocol;
+			int main(void){
+				test_file_protocol.url_read  = file_protocol.url_read;
+				return 0;
+			}
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+				{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+				TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	fi
 fi
 fi

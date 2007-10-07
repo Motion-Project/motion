@@ -114,7 +114,7 @@ URLProtocol mpeg1_file_protocol = {
 };
 
 
-#if LIBAVFORMAT_BUILD > 3345660 && defined(BSD)
+#ifdef HAVE_FFMPEG_NEW
 
 /*
  * file_procotol has been removed from avio.h
@@ -198,7 +198,10 @@ void ffmpeg_init()
 {
 	motion_log(LOG_INFO, 0, "ffmpeg LIBAVCODEC_BUILD %d LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, LIBAVFORMAT_BUILD);
 	av_register_all();
+
+#if LIBAVCODEC_BUILD > 4680
 	av_log_set_callback( (void *)ffmpeg_avcodec_log );
+#endif
 
 	/* Copy the functions to use for the append file protocol from the standard
 	 * file protocol.
@@ -496,7 +499,9 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 	/* close each codec */
 	if (ffmpeg->video_st) {
 		pthread_mutex_lock(&global_lock);
+#if LIBAVCODEC_BUILD > 4680
 		if (ffmpeg->video_st->codec->priv_data != NULL)
+#endif
 			avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
 		pthread_mutex_unlock(&global_lock);	
 		av_freep(&ffmpeg->picture);

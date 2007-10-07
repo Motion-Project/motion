@@ -425,6 +425,26 @@ if test "${FFMPEG_OK}" = "found"; then
 
 		FFMPEG_OBJ="ffmpeg.o"
 		AC_SUBST(FFMPEG_OBJ)
+
+		AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
+		CFLAGS="${FFMPEG_CFLAGS}"
+		LIBS="$TEMP_LIBS"
+		
+		AC_COMPILE_IFELSE(
+			[
+			#include <avformat.h>
+			URLProtocol test_file_protocol;
+			int main(void){
+				test_file_protocol.url_read  = file_protocol.url_read;
+				return 0;
+			}
+			],
+			[AC_MSG_RESULT(yes)],
+			[
+				AC_MSG_RESULT(no)
+				TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
+			]
+		)
 	fi
 fi	
 fi
