@@ -134,6 +134,9 @@ struct config conf_template = {
 	minimum_motion_frames: 1,
 	pid_file:              NULL,
 	// debug_parameter:       0
+	correction_factor:     40,
+	in_timer:              5,
+	out_timer:             60,
 };
 
 
@@ -1174,7 +1177,28 @@ config_param config_params[] = {
 	config_thread,
 	print_thread
 	},
-	{ NULL, NULL, 0 , NULL, NULL }
+	{
+	"correction_factor",
+	"#Temporary debugging option to tune the new reference frame. Will be removed again soon",
+	CONF_OFFSET(correction_factor),
+	copy_int,
+	print_int
+	},
+	{
+	"in_timer",
+	"#Temporary debugging option to tune the new reference frame. Will be removed again soon",
+	CONF_OFFSET(in_timer),
+	copy_int,
+	print_int
+	},
+	{
+	"out_timer",
+	"#Temporary debugging option to tune the new reference frame. Will be removed again soon",
+	CONF_OFFSET(out_timer),
+	copy_int,
+	print_int
+	},
+{ NULL, NULL, 0 , NULL, NULL }
 };
 
 /* conf_cmdline sets the conf struct options as defined by the command line.

@@ -204,27 +204,23 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
 	unsigned char *smartmask=imgs->smartmask_final;
 
 	i=imgs->motionsize;
-	
+			
 	for (; i>0; i--) {
-		diff = *ref - *new;
-		
+		diff = ABS(*ref - *new);
 		if (mask)
 			diff = ((diff * *mask++)/255);
-
 		if (*smartmask){
-			sum += ABS(diff) + 1;
+			sum += diff + 1;
 			count++;
 		}
-
 		ref++;
 		new++;
 		smartmask++;
 	}
-	
-	if (count > 4) /* avoid divide by zero */
-		sum /= count/4;
-		
-	cnt->noise = 4 + (cnt->noise+sum)/2;
+	if (count > 3) { /* avoid divide by zero */
+		sum /= count / 3;
+	}
+	cnt->noise = 4 + (cnt->noise + sum) / 2;  /* 5: safe, 4: regular, 3: more sensitive */
 }
 
 void alg_threshold_tune(struct context *cnt, int diffs, int motion)
@@ -708,6 +704,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	int i, diffs=0;
 	int noise=cnt->noise;
 	int smartmask_speed=cnt->smartmask_speed;
+	register char detecting_motion = cnt->detecting_motion;
 	unsigned char *ref=imgs->ref;
 	unsigned char *out=imgs->out;
 	unsigned char *mask=imgs->mask;
@@ -857,14 +854,16 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 			movq_r2r(mm3, mm0);              /* U */
 
 			/* Add to *smartmask_buffer. This is probably the fastest way to do it. */
-			if (mmtemp.ub[0]) smartmask_buffer[0]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[1]) smartmask_buffer[1]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[2]) smartmask_buffer[2]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[3]) smartmask_buffer[3]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[4]) smartmask_buffer[4]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[5]) smartmask_buffer[5]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[6]) smartmask_buffer[6]+=SMARTMASK_SENSITIVITY_INCR;
-			if (mmtemp.ub[7]) smartmask_buffer[7]+=SMARTMASK_SENSITIVITY_INCR;
+			if (!detecting_motion) {
+				if (mmtemp.ub[0]) smartmask_buffer[0]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[1]) smartmask_buffer[1]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[2]) smartmask_buffer[2]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[3]) smartmask_buffer[3]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[4]) smartmask_buffer[4]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[5]) smartmask_buffer[5]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[6]) smartmask_buffer[6]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[7]) smartmask_buffer[7]+=SMARTMASK_SENSITIVITY_INCR;
+			}
 
 			smartmask_buffer+=8;
 			smartmask_final+=8;
@@ -932,7 +931,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 				   second. To be able to increase by 5 every second (with
 				   speed=10) we add 5 here. NOT related to the 5 at ratio-
 				   calculation. */
-				(*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+				if (!detecting_motion)
+					(*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
 				/* apply smart_mask */
 				if (!*smartmask_final)
 					curdiff=0;
@@ -1047,4 +1047,73 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 		return diffs;
 	}
 	return 0;
+}
+
+/** 
+ * alg_update_reference_frame
+ *
+ *   Called from 'motion_loop' to calculate the reference frame
+ *   Moving objects are excluded from the reference frame for a certain
+ *   amount of time to improve detection.
+ * 
+ * Parameters:
+ *
+ *   cnt    - current thread's context struct
+ *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
+ *
+ */
+/* Seconds */
+#define ACCEPT_STATIC_OBJECT_TIME 5
+#define DISCARD_STATIC_OBJECT_TIME 60
+#define BLOCK_PIXEL_DURATION 1
+#define EXCLUDE_LEVEL_PERCENT 40
+void alg_update_reference_frame(struct context *cnt, int action) 
+{
+//	int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
+//	int discard_timer = cnt->lastrate * (-DISCARD_STATIC_OBJECT_TIME);
+	int block_timer = cnt->lastrate * (-BLOCK_PIXEL_DURATION);
+	int accept_timer = cnt->lastrate * cnt->conf.in_timer;
+	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
+	int i, threshold_ref;
+	int *ref_dyn = cnt->imgs.ref_dyn;
+	unsigned char *image_virgin = cnt->imgs.image_virgin;
+	unsigned char *ref = cnt->imgs.ref;
+	unsigned char *smartmask = cnt->imgs.smartmask_final;
+
+	if (action == UPDATE_REF_FRAME) { /* black&white only for better performance */
+//		threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
+		threshold_ref = cnt->noise * cnt->conf.correction_factor / 100;
+		for (i = cnt->imgs.motionsize; i > 0; i--) {
+			/* exclude pixels from ref frame well below noise level */
+			if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
+				if (*ref_dyn < 0) { /* Static Object moves again? */
+					*ref = *image_virgin;
+					if (*ref_dyn < block_timer) /* block pixel for a while */
+						*ref_dyn = 0;
+					else
+						(*ref_dyn)--;
+				}
+				else if (*ref_dyn > accept_timer) { /* Include static Object after some time */
+					*ref_dyn = -1;
+					*ref = *image_virgin;
+				} else {
+					(*ref_dyn)++; /* Motionpixel? Exclude from ref frame */
+				}
+			}
+			else {  /* No motion: copy to ref frame */
+				*ref = *image_virgin;
+				if ((*ref_dyn >= 0) || (*ref_dyn == discard_timer)) /* Discard static object again after a while */
+					*ref_dyn = 0;
+				else
+					(*ref_dyn)--; /* Still keep static object in mind */
+			}
+			ref++;
+			image_virgin++;
+			smartmask++;
+			ref_dyn++;
+		} /* end for i */
+	} else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup */
+		memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size); /* copy fresh image */
+		memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));  /* reset static objects */
+	}
 }

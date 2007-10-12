@@ -120,6 +120,9 @@ struct config {
 	// int debug_parameter;
 	int argc;
 	char **argv;
+	int correction_factor;
+	int in_timer;
+	int out_timer;
 };
 
 /** 

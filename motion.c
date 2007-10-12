@@ -239,6 +239,8 @@ static void context_destroy(struct context *cnt)
 		free(cnt->imgs.out);
 	if (cnt->imgs.ref)
 		free(cnt->imgs.ref);
+	if (cnt->imgs.ref_dyn)
+		free(cnt->imgs.ref_dyn);
 	if (cnt->imgs.image_virgin)
 		free(cnt->imgs.image_virgin);
 	if (cnt->imgs.labels)
@@ -592,6 +594,7 @@ static void motion_init(struct context *cnt)
 	 * that certain code below does not run until motion has been detected the first time */
 	cnt->event_nr = 1;
 	cnt->prev_event = 0;
+	cnt->detecting_motion = 0;
 
 	motion_log(LOG_DEBUG, 0, "Thread %d started", (unsigned long)pthread_getspecific(tls_key_threadnr));
 
@@ -629,13 +632,14 @@ static void motion_init(struct context *cnt)
 
 	cnt->imgs.ref = mymalloc(cnt->imgs.size);
 	cnt->imgs.out = mymalloc(cnt->imgs.size);
+	cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(int));  /* contains the moving objects of ref. frame */
 	cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
 	memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
 	cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
 	cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
 	cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(int));
-	cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.labels));
-	cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(cnt->imgs.labelsize));
+	cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(int));
+	cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(int));
 
 	/* allocate buffer here for preview buffer */
 	cnt->imgs.preview_image.image = mymalloc(cnt->imgs.size);
@@ -675,7 +679,7 @@ static void motion_init(struct context *cnt)
 	}
 
 	/* create a reference frame */
-	memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
+	alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
 #ifndef WITHOUT_V4L
 #if (!defined(BSD))
@@ -820,13 +824,14 @@ static void motion_init(struct context *cnt)
 static void *motion_loop(void *arg)
 {
 	struct context *cnt = arg;
-	int i, j, detecting_motion = 0;
+	int i, j = 0;
 	time_t lastframetime = 0;
 	int frame_buffer_size;
 	int smartmask_ratio = 0;
 	int smartmask_count = 20;
 	int smartmask_lastrate = 0;
 	int olddiffs = 0;
+	int previous_diffs = 0;
 	int text_size_factor;
 	int passflag = 0;
 	long int *rolling_average_data;
@@ -1120,7 +1125,7 @@ static void *motion_loop(void *arg)
 				 * motion, the alg_diff will trigger alg_diff_standard
 				 * anyway
 				 */
-				if (detecting_motion || cnt->conf.setup_mode)
+				if (cnt->detecting_motion || cnt->conf.setup_mode)
 					cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin);
 				else
 					cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin);
@@ -1137,6 +1142,7 @@ static void *motion_loop(void *arg)
 						if (cnt->moved < 5)
 							cnt->moved = 5;
 						cnt->current_image->diffs = 0;
+						alg_update_reference_frame(cnt, RESET_REF_FRAME);
 					}
 				}
 
@@ -1176,7 +1182,7 @@ static void *motion_loop(void *arg)
 				cnt->current_image->diffs = 0;
 
 			/* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
-			if (cnt->smartmask_speed) {
+			if (cnt->smartmask_speed && !cnt->detecting_motion) {
 				if (!--smartmask_count){
 					alg_tune_smartmask(cnt);
 					smartmask_count = smartmask_ratio;
@@ -1202,7 +1208,7 @@ static void *motion_loop(void *arg)
 			 * no frames have been recorded and only once per second
 			 */
 			if (cnt->conf.noise_tune && cnt->shots == 0) {
-				if (!detecting_motion && (cnt->current_image->diffs <= cnt->threshold))
+				if (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold))
 					alg_noise_tune(cnt, cnt->imgs.image_virgin);
 			}
 
@@ -1217,10 +1223,22 @@ static void *motion_loop(void *arg)
 			 * changes of threshold are used.
 			 */
 			if (cnt->conf.threshold_tune)
-				alg_threshold_tune(cnt, cnt->current_image->diffs, detecting_motion);
+				alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
 			else
 				cnt->threshold = cnt->conf.max_changes;
 
+			/* Update reference frame.                                               *
+			 * micro-lighswitch: e.g. neighbors cat switched on the motion sensitive *
+			 * frontdoor illumination.                                               */
+			//jw if (abs(previous_diffs - cnt->current_image->diffs)) > (previous_diffs / 20)
+			if (1)
+				alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+			else {
+				alg_update_reference_frame(cnt, RESET_REF_FRAME);
+				printf("micro-lightswitch!\n");
+			}
+			previous_diffs = cnt->current_image->diffs;
+				
 
 		/***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
 
@@ -1307,7 +1325,7 @@ static void *motion_loop(void *arg)
 			 * code section.
 			 */
 			if (cnt->conf.output_all) {
-				detecting_motion = 1;
+				cnt->detecting_motion = 1;
 				cnt->current_image->flags |= IMAGE_SAVE;
 			} else if (cnt->current_image->diffs > cnt->threshold) {
 				/* flag this image, it have motion */
@@ -1333,7 +1351,7 @@ static void *motion_loop(void *arg)
 
 				if (frame_count >= cnt->conf.minimum_motion_frames) {
 					cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
-					detecting_motion = 1;
+					cnt->detecting_motion = 1;
 					/* Mark all images in image_ring to be saved */
 					for(i = 0; i < cnt->imgs.image_ring_size; i++) {
 						cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
@@ -1353,7 +1371,7 @@ static void *motion_loop(void *arg)
 				cnt->postcap--;
 			} else {
 				cnt->current_image->flags |= IMAGE_PRECAP;
-				detecting_motion = 0;
+				cnt->detecting_motion = 0;
 			}
 
 			/* Is the mpeg movie to long? Then make movies
@@ -1403,31 +1421,6 @@ static void *motion_loop(void *arg)
 
 			/* Save/send to movie some images */
 			process_image_ring(cnt, 2);
-
-		/***** MOTION LOOP - REFERENCE FRAME SECTION *****/
-
-			/* Update reference frame */
-			if ((cnt->current_image->diffs > cnt->threshold * 2) ||
-			    (cnt->moved && (cnt->track.type || cnt->conf.lightswitch))) {
-				/* Prevent the motion created by moving camera or sudden light intensity
-				 * being detected by creating a fresh reference frame. Decaying is also
-				 * disabled when motion is above a certain threshold to make tracking
-				 * more accurate.
-				 */
-				memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
-			} else if (cnt->threshold) {
-				/* Old image slowly decays, this will make it even harder on
-			 	 * a slow moving object to stay undetected
-			 	 */
-				unsigned char *imgs_ref_ptr = cnt->imgs.ref;
-				unsigned char *newimg_ptr = cnt->imgs.image_virgin;
-				for (i=cnt->imgs.size-1; i>=0; i--) {
-					*imgs_ref_ptr = (*imgs_ref_ptr + *newimg_ptr)/2;
-					imgs_ref_ptr++;
-					newimg_ptr++;
-				}
-			}
-
 
 		/***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
@@ -1546,6 +1539,7 @@ static void *motion_loop(void *arg)
 			if (cnt->shots == 0 &&
 				time_current_frame % cnt->conf.timelapse <= time_last_frame % cnt->conf.timelapse)
 				event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+				//jw event(cnt, EVENT_TIMELAPSE, cnt->imgs.ref, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
 		/* if timelapse mpeg is in progress but conf.timelapse is zero then close timelapse file
@@ -1578,7 +1572,8 @@ static void *motion_loop(void *arg)
 		} else {
 			event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, &cnt->current_image->timestamp_tm);
 			if (!cnt->conf.webcam_motion || cnt->shots == 1)
-				event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+				//jw event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+				event(cnt, EVENT_WEBCAM, cnt->imgs.ref, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
 		event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);

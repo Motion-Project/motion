@@ -41,5 +41,6 @@ void alg_noise_tune(struct context *, unsigned char *);
 void alg_threshold_tune(struct context *, int, int);
 int alg_despeckle(struct context *, int);
 void alg_tune_smartmask(struct context *);
+void alg_update_reference_frame(struct context *, int);
 
 #endif /* _INCLUDE_ALG_H */
