@@ -1572,8 +1572,8 @@ static void *motion_loop(void *arg)
 		} else {
 			event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, &cnt->current_image->timestamp_tm);
 			if (!cnt->conf.webcam_motion || cnt->shots == 1)
-				//jw event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
-				event(cnt, EVENT_WEBCAM, cnt->imgs.ref, NULL, NULL, &cnt->current_image->timestamp_tm);
+				event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+				//jw event(cnt, EVENT_WEBCAM, cnt->imgs.ref, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
 		event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
