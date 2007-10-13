@@ -11,6 +11,8 @@ Features
    * Removed night_compensate feature. This functionality is covered by noise_tune. (Joerg Weber)
    * Implemented a new reference frame algorithm to improve object recognition and location. (Joerg Weber)
    * Improved smartmask feature: real moving objects don't trigger the mask anymore. (Joerg Weber)
+   * Added Flash video format (FLV) to ffmpeg. 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x07x19x131921 (Timo Taskinen)
 
 Bugfixes
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy

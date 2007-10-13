@@ -261,6 +261,9 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 	} else if (strcmp(codec, "swf") == 0) {
 		ext = ".swf";
 		of = guess_format("swf", NULL, NULL);
+	} else if (strcmp(codec, "flv") == 0) {
+		ext = ".flv";
+		of = guess_format("flv", NULL, NULL);
 	} else {
 		motion_log(LOG_ERR, 0, "ffmpeg_video_codec option value %s is not supported", codec);
 		return NULL;

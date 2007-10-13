@@ -1206,6 +1206,10 @@ Tommy Svensson
    * Wrote the original patch for supporting pan/tilt with Logitech
      Quickcam Sphere/Orbit
 
+Timo Taskinen
+   * Added Flash video format (FLV) to ffmpeg.   
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x07x19x131921
+
 technolust.cx
    * For hosting motion.technolust.cx
 
