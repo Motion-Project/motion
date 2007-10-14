@@ -134,7 +134,7 @@ struct config conf_template = {
 	minimum_motion_frames: 1,
 	pid_file:              NULL,
 	// debug_parameter:       0
-	correction_factor:     40,
+	correction_factor:     30,
 	in_timer:              5,
 	out_timer:             60,
 };

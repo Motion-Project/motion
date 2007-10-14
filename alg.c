@@ -220,7 +220,7 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
 	if (count > 3) { /* avoid divide by zero */
 		sum /= count / 3;
 	}
-	cnt->noise = 4 + (cnt->noise + sum) / 2;  /* 5: safe, 4: regular, 3: more sensitive */
+	cnt->noise = 5 + (cnt->noise + sum) / 2;  /* 5: safe, 4: regular, 3: more sensitive */
 }
 
 void alg_threshold_tune(struct context *cnt, int diffs, int motion)
@@ -1105,7 +1105,8 @@ void alg_update_reference_frame(struct context *cnt, int action)
 				if ((*ref_dyn >= 0) || (*ref_dyn == discard_timer)) /* Discard static object again after a while */
 					*ref_dyn = 0;
 				else
-					(*ref_dyn)--; /* Still keep static object in mind */
+					//(*ref_dyn)--; /* Still keep static object in mind */
+					(*ref_dyn) = 0; /* Still keep static object in mind */
 			}
 			ref++;
 			image_virgin++;
