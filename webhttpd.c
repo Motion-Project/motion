@@ -2200,7 +2200,7 @@ void httpd_run(struct context **cnt)
 		client_socket_fd = acceptnonblocking(sd, 1);
 
 		if (client_socket_fd<0) {
-			if (cnt[0]->finish){ 
+			if ((!cnt[0]) || (cnt[0]->finish)){
 				motion_log(-1, 1, "httpd - Finishing");
 				closehttpd = 1;
 			}
