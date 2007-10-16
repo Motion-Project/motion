@@ -1066,19 +1066,20 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 #define ACCEPT_STATIC_OBJECT_TIME 5
 #define DISCARD_STATIC_OBJECT_TIME 60
 #define BLOCK_PIXEL_DURATION 1
-#define EXCLUDE_LEVEL_PERCENT 40
+#define EXCLUDE_LEVEL_PERCENT 30
 void alg_update_reference_frame(struct context *cnt, int action) 
 {
 //	int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
 //	int discard_timer = cnt->lastrate * (-DISCARD_STATIC_OBJECT_TIME);
 	int block_timer = cnt->lastrate * (-BLOCK_PIXEL_DURATION);
 	int accept_timer = cnt->lastrate * cnt->conf.in_timer;
-	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
+//	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
 	int i, threshold_ref;
 	int *ref_dyn = cnt->imgs.ref_dyn;
 	unsigned char *image_virgin = cnt->imgs.image_virgin;
 	unsigned char *ref = cnt->imgs.ref;
 	unsigned char *smartmask = cnt->imgs.smartmask_final;
+	unsigned char *out = cnt->imgs.out;
 
 	if (action == UPDATE_REF_FRAME) { /* black&white only for better performance */
 //		threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
@@ -1096,22 +1097,22 @@ void alg_update_reference_frame(struct context *cnt, int action)
 				else if (*ref_dyn > accept_timer) { /* Include static Object after some time */
 					*ref_dyn = -1;
 					*ref = *image_virgin;
-				} else {
-					(*ref_dyn)++; /* Motionpixel? Exclude from ref frame */
 				}
+				else if (*out)
+					(*ref_dyn)++; /* Motionpixel? Exclude from ref frame */
 			}
 			else {  /* No motion: copy to ref frame */
 				*ref = *image_virgin;
-				if ((*ref_dyn >= 0) || (*ref_dyn == discard_timer)) /* Discard static object again after a while */
+				if ((*ref_dyn >= 0) || (*ref_dyn < block_timer)) /* reset pixel */
 					*ref_dyn = 0;
 				else
-					//(*ref_dyn)--; /* Still keep static object in mind */
-					(*ref_dyn) = 0; /* Still keep static object in mind */
+					(*ref_dyn)--; /* blocked pixel */
 			}
 			ref++;
 			image_virgin++;
 			smartmask++;
 			ref_dyn++;
+			out++;
 		} /* end for i */
 	} else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup */
 		memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size); /* copy fresh image */
