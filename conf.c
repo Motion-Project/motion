@@ -586,7 +586,8 @@ config_param config_params[] = {
 	"# msmpeg4 is recommended for use with Windows Media Player because\n"
 	"# it requires no installation of codec on the Windows client.\n"
 	"# swf - gives you a flash film with extension .swf\n"
-	"# flv - gives you a flash video with extension .flv",
+	"# flv - gives you a flash video with extension .flv\n"
+	"# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )",
 	CONF_OFFSET(ffmpeg_video_codec),
 	copy_string,
 	print_string

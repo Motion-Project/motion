@@ -12,7 +12,9 @@ Features
    * Implemented a new reference frame algorithm to improve object recognition and location. (Joerg Weber)
    * Improved smartmask feature: real moving objects don't trigger the mask anymore. (Joerg Weber)
    * Added Flash video format (FLV) to ffmpeg. 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x07x19x131921 (Timo Taskinen)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x07x19x131921 (Timo Taskinen).
+   * Added FFV1 ( FF video codec 1 ) codec , Lossless encoding
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LosslessEncoding (Andrew Hamilton). 
 
 Bugfixes
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy

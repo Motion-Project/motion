@@ -264,6 +264,14 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 	} else if (strcmp(codec, "flv") == 0) {
 		ext = ".flv";
 		of = guess_format("flv", NULL, NULL);
+	} else if (strcmp(codec, "ffv1") == 0) {
+		ext = ".avi";
+		of = guess_format("avi", NULL, NULL);
+		if (of) {
+			/* Use the FFMPEG Lossless Video codec (experimental!).
+			   Requires strict_std_compliance to be <= -2 */
+			of->video_codec = CODEC_ID_FLV1;
+		}		
 	} else {
 		motion_log(LOG_ERR, 0, "ffmpeg_video_codec option value %s is not supported", codec);
 		return NULL;
@@ -344,6 +352,10 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	c->codec_id   = ffmpeg->oc->oformat->video_codec;
 	c->codec_type = CODEC_TYPE_VIDEO;
 	is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
+
+
+	if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
+		c->strict_std_compliance = -2; 
 
 	/* Uncomment to allow non-standard framerates. */
 	//c->strict_std_compliance = -1;

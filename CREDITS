@@ -451,8 +451,10 @@ Andrew Hamilton
      be set 'on' and this scales the text to double size. Default is off.
      http://www.lavrsen.dk/twiki/bin/view/Motion/TextScalingPatch
    * Fixed memory leak in ffmpeg code.
-   * Added the ffmpeg_deinterlace feature (Andrew Hamilton)
+   * Added the ffmpeg_deinterlace feature
      http://www.lavrsen.dk/twiki/bin/view/Motion/MotionffmpegDeinterlace 
+   * Added FFV1 ( FF video codec 1 ) codec , Lossless encoding
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LosslessEncoding 
 
 Peter Holik
    * Netcam First Header patch. If an error with jpeg decompression occured at
