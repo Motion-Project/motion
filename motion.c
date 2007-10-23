@@ -401,8 +401,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 	struct images *imgs = &cnt->imgs;
 	struct coord *location = &img->location;
 
-	cnt->lasttime = img->timestamp;
-
 	/* Draw location */
 	if (cnt->locate == LOCATE_ON)
 		alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
@@ -1372,6 +1370,11 @@ static void *motion_loop(void *arg)
 			} else {
 				cnt->current_image->flags |= IMAGE_PRECAP;
 				cnt->detecting_motion = 0;
+			}
+
+			/* Update last frame saved time, so we can end event after gap time */
+			if (cnt->current_image->flags & IMAGE_SAVE) {
+				cnt->lasttime = cnt->current_image->timestamp;
 			}
 
 			/* Is the mpeg movie to long? Then make movies
