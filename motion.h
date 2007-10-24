@@ -250,7 +250,7 @@ struct images {
 
 	unsigned char *ref;               /* The reference frame */
 	unsigned char *out;               /* Picture buffer for motion images */
-	int *ref_dyn;                    /* Dynamic objects to be excluded from reference frame */
+	int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
 	unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
 	struct image_data preview_image;  /* Picture buffer for best image when enables */
 	unsigned char *mask;              /* Buffer for the mask file */
@@ -319,6 +319,7 @@ struct context {
 
 	int event_nr;
 	int prev_event;
+	int lightswitch_framecounter;
 	char text_event_string[PATH_MAX]; /* The text for conv. spec. %C -
 	                                     we assume PATH_MAX normally 4096 characters is fine */
 	int postcap;		/* downcounter, frames left to to send post event */

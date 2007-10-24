@@ -592,6 +592,7 @@ static void motion_init(struct context *cnt)
 	 * that certain code below does not run until motion has been detected the first time */
 	cnt->event_nr = 1;
 	cnt->prev_event = 0;
+	cnt->lightswitch_framecounter = 0;
 	cnt->detecting_motion = 0;
 
 	motion_log(LOG_DEBUG, 0, "Thread %d started", (unsigned long)pthread_getspecific(tls_key_threadnr));
@@ -829,7 +830,7 @@ static void *motion_loop(void *arg)
 	int smartmask_count = 20;
 	int smartmask_lastrate = 0;
 	int olddiffs = 0;
-	int previous_diffs = 0;
+	int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
 	int text_size_factor;
 	int passflag = 0;
 	long int *rolling_average_data;
@@ -1225,18 +1226,35 @@ static void *motion_loop(void *arg)
 			else
 				cnt->threshold = cnt->conf.max_changes;
 
-			/* Update reference frame.                                               *
-			 * micro-lighswitch: e.g. neighbors cat switched on the motion sensitive *
+			/* If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
+			   we find the center and size coordinates of the motion to be used for text overlays and later
+			   for adding the locate rectangle */
+			if (cnt->current_image->diffs > cnt->threshold)
+				 alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
+
+			/* Update reference frame. */
+			/* micro-lighswitch: e.g. neighbors cat switched on the motion sensitive *
 			 * frontdoor illumination.                                               */
-			//jw if (abs(previous_diffs - cnt->current_image->diffs)) > (previous_diffs / 20)
-			if (1)
-				alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
-			else {
+			if ((cnt->current_image->diffs > cnt->threshold) && 
+			    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window */
+			    ((abs(previous_diffs - cnt->current_image->diffs)) < (previous_diffs / 15)) &&
+			    ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 100)) &&
+			    ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 100))) {
 				alg_update_reference_frame(cnt, RESET_REF_FRAME);
-				printf("micro-lightswitch!\n");
+				cnt->current_image->diffs = 0;
+				cnt->lightswitch_framecounter = 0;
+				if (cnt->conf.setup_mode) {
+					motion_log(-1, 0, "micro-lightswitch!");
+					//motion_log(LOG_INFO, 0, "lightswitch_framecounter: %d  previous_diffs: %d  diffs: %d  location.x: %d  location.y: %d", 
+					//           cnt->lightswitch_framecounter, previous_diffs, cnt->current_image->diffs, 
+					//           cnt->current_image->location.x, cnt->current_image->location.y);
+				}
+			} else {
+				alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
 			}
 			previous_diffs = cnt->current_image->diffs;
-				
+			previous_location_x = cnt->current_image->location.x;
+			previous_location_y = cnt->current_image->location.y;
 
 		/***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
 
@@ -1254,11 +1272,6 @@ static void *motion_loop(void *arg)
 			if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
 				overlay_largest_label(cnt, cnt->imgs.out);
 
-			/* If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
-			   we find the center and size coordinates of the motion to be used for text overlays and later
-			   for adding the locate rectangle */
-			if (cnt->current_image->diffs > cnt->threshold)
-				 alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
 
 			/* Fixed mask overlay */
 			if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
@@ -1328,6 +1341,7 @@ static void *motion_loop(void *arg)
 			} else if (cnt->current_image->diffs > cnt->threshold) {
 				/* flag this image, it have motion */
 				cnt->current_image->flags |= IMAGE_MOTION;
+				cnt->lightswitch_framecounter++; /* micro lightswitch */
 				/* Did we detect motion (like the cat just walked in :) )?
 				 * If so, ensure the motion is sustained if minimum_motion_frames
 				 * is set, and take action by calling motion_detected(). */
@@ -1370,6 +1384,7 @@ static void *motion_loop(void *arg)
 			} else {
 				cnt->current_image->flags |= IMAGE_PRECAP;
 				cnt->detecting_motion = 0;
+				cnt->lightswitch_framecounter = 0; /* reset micro-lightswitch when no motion */
 			}
 
 			/* Update last frame saved time, so we can end event after gap time */
@@ -1414,6 +1429,7 @@ static void *motion_loop(void *arg)
 
 					/* Finally we increase the event number */
 					cnt->event_nr++;
+					cnt->lightswitch_framecounter = 0;
 
 					/* And we unset the text_event_string to avoid that buffered
 					 * images get a timestamp from previous event.

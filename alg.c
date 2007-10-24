@@ -1073,7 +1073,7 @@ void alg_update_reference_frame(struct context *cnt, int action)
 //	int discard_timer = cnt->lastrate * (-DISCARD_STATIC_OBJECT_TIME);
 	int block_timer = cnt->lastrate * (-BLOCK_PIXEL_DURATION);
 	int accept_timer = cnt->lastrate * cnt->conf.in_timer;
-//	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
+	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
 	int i, threshold_ref;
 	int *ref_dyn = cnt->imgs.ref_dyn;
 	unsigned char *image_virgin = cnt->imgs.image_virgin;
