@@ -1181,7 +1181,7 @@ static void *motion_loop(void *arg)
 				cnt->current_image->diffs = 0;
 
 			/* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
-			if (cnt->smartmask_speed && !cnt->detecting_motion) {
+			if (cnt->smartmask_speed && (cnt->event_nr != cnt->prev_event)) {
 				if (!--smartmask_count){
 					alg_tune_smartmask(cnt);
 					smartmask_count = smartmask_ratio;
@@ -1243,12 +1243,11 @@ static void *motion_loop(void *arg)
 				alg_update_reference_frame(cnt, RESET_REF_FRAME);
 				cnt->current_image->diffs = 0;
 				cnt->lightswitch_framecounter = 0;
-				if (cnt->conf.setup_mode) {
+				//motion_log(LOG_INFO, 0, "lightswitch_framecounter: %d  previous_diffs: %d  diffs: %d  location.x: %d  location.y: %d", 
+				//           cnt->lightswitch_framecounter, previous_diffs, cnt->current_image->diffs, 
+				//           cnt->current_image->location.x, cnt->current_image->location.y);
+				if (cnt->conf.setup_mode)
 					motion_log(-1, 0, "micro-lightswitch!");
-					//motion_log(LOG_INFO, 0, "lightswitch_framecounter: %d  previous_diffs: %d  diffs: %d  location.x: %d  location.y: %d", 
-					//           cnt->lightswitch_framecounter, previous_diffs, cnt->current_image->diffs, 
-					//           cnt->current_image->location.x, cnt->current_image->location.y);
-				}
 			} else {
 				alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
 			}

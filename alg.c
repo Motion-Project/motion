@@ -704,7 +704,6 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	int i, diffs=0;
 	int noise=cnt->noise;
 	int smartmask_speed=cnt->smartmask_speed;
-	register char detecting_motion = cnt->detecting_motion;
 	unsigned char *ref=imgs->ref;
 	unsigned char *out=imgs->out;
 	unsigned char *mask=imgs->mask;
@@ -854,7 +853,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 			movq_r2r(mm3, mm0);              /* U */
 
 			/* Add to *smartmask_buffer. This is probably the fastest way to do it. */
-			if (!detecting_motion) {
+			if (cnt->event_nr != cnt->prev_event) {
 				if (mmtemp.ub[0]) smartmask_buffer[0]+=SMARTMASK_SENSITIVITY_INCR;
 				if (mmtemp.ub[1]) smartmask_buffer[1]+=SMARTMASK_SENSITIVITY_INCR;
 				if (mmtemp.ub[2]) smartmask_buffer[2]+=SMARTMASK_SENSITIVITY_INCR;
@@ -931,7 +930,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 				   second. To be able to increase by 5 every second (with
 				   speed=10) we add 5 here. NOT related to the 5 at ratio-
 				   calculation. */
-				if (!detecting_motion)
+				if (cnt->event_nr != cnt->prev_event)
 					(*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
 				/* apply smart_mask */
 				if (!*smartmask_final)
@@ -1073,7 +1072,7 @@ void alg_update_reference_frame(struct context *cnt, int action)
 //	int discard_timer = cnt->lastrate * (-DISCARD_STATIC_OBJECT_TIME);
 	int block_timer = cnt->lastrate * (-BLOCK_PIXEL_DURATION);
 	int accept_timer = cnt->lastrate * cnt->conf.in_timer;
-	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
+//	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
 	int i, threshold_ref;
 	int *ref_dyn = cnt->imgs.ref_dyn;
 	unsigned char *image_virgin = cnt->imgs.image_virgin;
@@ -1087,26 +1086,30 @@ void alg_update_reference_frame(struct context *cnt, int action)
 		for (i = cnt->imgs.motionsize; i > 0; i--) {
 			/* exclude pixels from ref frame well below noise level */
 			if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
-				if (*ref_dyn < 0) { /* Static Object moves again? */
+				if (*ref_dyn == 0) { /* Always give new pixels a chance */
+					*ref_dyn = 1;
+				}
+				else if (*ref_dyn < 0) { /* Handle blocked pixel */
+					(*ref_dyn)++;
 					*ref = *image_virgin;
-					if (*ref_dyn < block_timer) /* block pixel for a while */
-						*ref_dyn = 0;
-					else
-						(*ref_dyn)--;
 				}
 				else if (*ref_dyn > accept_timer) { /* Include static Object after some time */
-					*ref_dyn = -1;
+					*ref_dyn = block_timer;
 					*ref = *image_virgin;
 				}
-				else if (*out)
-					(*ref_dyn)++; /* Motionpixel? Exclude from ref frame */
+				else if (*out) {
+					(*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame */
+				} else {
+					*ref_dyn = 0; /* Nothing special - always fully release */
+					*ref = *image_virgin;
+				}
 			}
 			else {  /* No motion: copy to ref frame */
 				*ref = *image_virgin;
-				if ((*ref_dyn >= 0) || (*ref_dyn < block_timer)) /* reset pixel */
-					*ref_dyn = 0;
+				if (*ref_dyn < 0)  /* blocked pixel */
+					(*ref_dyn)++;
 				else
-					(*ref_dyn)--; /* blocked pixel */
+					*ref_dyn = 0; /* reset pixel */
 			}
 			ref++;
 			image_virgin++;
