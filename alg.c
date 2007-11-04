@@ -220,7 +220,7 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
 	if (count > 3) { /* avoid divide by zero */
 		sum /= count / 3;
 	}
-	cnt->noise = 5 + (cnt->noise + sum) / 2;  /* 5: safe, 4: regular, 3: more sensitive */
+	cnt->noise = 4 + (cnt->noise + sum) / 2;  /* 5: safe, 4: regular, 3: more sensitive */
 }
 
 void alg_threshold_tune(struct context *cnt, int diffs, int motion)
@@ -1062,17 +1062,12 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
  *
  */
 /* Seconds */
-#define ACCEPT_STATIC_OBJECT_TIME 5
-#define DISCARD_STATIC_OBJECT_TIME 60
-#define BLOCK_PIXEL_DURATION 1
-#define EXCLUDE_LEVEL_PERCENT 30
+#define ACCEPT_STATIC_OBJECT_TIME 10
+#define EXCLUDE_LEVEL_PERCENT 20
 void alg_update_reference_frame(struct context *cnt, int action) 
 {
 //	int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
-//	int discard_timer = cnt->lastrate * (-DISCARD_STATIC_OBJECT_TIME);
-	int block_timer = cnt->lastrate * (-BLOCK_PIXEL_DURATION);
 	int accept_timer = cnt->lastrate * cnt->conf.in_timer;
-//	int discard_timer = cnt->lastrate * (-cnt->conf.out_timer);
 	int i, threshold_ref;
 	int *ref_dyn = cnt->imgs.ref_dyn;
 	unsigned char *image_virgin = cnt->imgs.image_virgin;
@@ -1089,27 +1084,20 @@ void alg_update_reference_frame(struct context *cnt, int action)
 				if (*ref_dyn == 0) { /* Always give new pixels a chance */
 					*ref_dyn = 1;
 				}
-				else if (*ref_dyn < 0) { /* Handle blocked pixel */
-					(*ref_dyn)++;
-					*ref = *image_virgin;
-				}
 				else if (*ref_dyn > accept_timer) { /* Include static Object after some time */
-					*ref_dyn = block_timer;
+					*ref_dyn = 0;
 					*ref = *image_virgin;
 				}
-				else if (*out) {
+				else if (*out)
 					(*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame */
-				} else {
-					*ref_dyn = 0; /* Nothing special - always fully release */
-					*ref = *image_virgin;
+				else {
+					*ref_dyn = 0; /* Nothing special - release pixel */
+					*ref = (*ref + *image_virgin) / 2;
 				}
 			}
 			else {  /* No motion: copy to ref frame */
+				*ref_dyn = 0; /* reset pixel */
 				*ref = *image_virgin;
-				if (*ref_dyn < 0)  /* blocked pixel */
-					(*ref_dyn)++;
-				else
-					*ref_dyn = 0; /* reset pixel */
 			}
 			ref++;
 			image_virgin++;
