@@ -1,4 +1,4 @@
-.TH MOTION 1 2007-07-08 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2007-11-06 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
@@ -117,7 +117,7 @@ Values: 0, 2 - 31 / Default: 0 (disabled)
 Enables and defines variable bitrate for the ffmpeg encoder. ffmpeg_bps is ignored if variable bitrate is enabled. Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps, or the range 2 - 31 where 2 means best quality and 31 is worst.
 .TP
 .B ffmpeg_video_codec discrete strings
-Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf / Default: mpeg4
+Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf , flv , ffv1 / Default: mpeg4
 .br
 Codec to be used by ffmpeg for the video compression. Timelapse mpegs are always made in mpeg1 format independent from this option.
 .TP
