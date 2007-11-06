@@ -130,7 +130,6 @@ typedef struct {
 
 	netcam_buff *buffers;
 
-	struct mjpeg *mjpeg;
 	int pframe;
 
 	u32 ctrl_flags;
@@ -260,7 +259,6 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		if (xioctl(s->fd, VIDIOC_S_STD, &std_id) == -1) {
 			motion_log(LOG_ERR, 0, "Error selecting standard method %d", std_id);
 			motion_log(LOG_ERR, 0, "VIDIOC_S_STD: %s", strerror(errno));
-		//	return (-1);
 		}
 	}
 
@@ -827,7 +825,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 			return 0;
 
 		case V4L2_PIX_FMT_YUV420:
-			memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);	// ? s->buffer[s->buf.index].size;
+			memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);
 			return 0;
 
 		case V4L2_PIX_FMT_MJPEG:
@@ -844,7 +842,6 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 			return 0;
 
 		case V4L2_PIX_FMT_SN9C10X:
-			//sonix_decompress_init(); // now it is not necessary to call it every time
 			sonix_decompress(map, (unsigned char *) the_buffer->ptr, width, height);
 			bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
 			conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);

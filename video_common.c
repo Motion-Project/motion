@@ -371,15 +371,6 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff
 	if (!buff->ptr)
 		return 2;	/* Error decoding MJPEG frame */
 
-#if 0
-	memset(&latest, 0, sizeof(netcam_buff));
-	latest.ptr = buff->start;
-	latest.content_length = buff->used;
-	latest.size = buff->length;	/* total allocated size */
-	latest.used = buff->used;
-#endif
-	//motion_log(LOG_DEBUG, 0, "frame %p length=%d", buff->start, buff->length);
-
 	memset(&netcam, 0, sizeof(netcam));
 	netcam.imgcnt_last = 1;
 	netcam.latest = buff;
@@ -517,7 +508,6 @@ static pthread_mutex_t vid_mutex;
 
 /* for the v4l stuff: */
 #include <sys/mman.h>
-//#include "sys/ioctl.h"
 #include <sys/utsname.h>
 #include <dirent.h>
 
