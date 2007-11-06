@@ -362,11 +362,20 @@ Angel Carpintero
      (Jared D and Angel Carpintero).  
    * Added MYSQL_OPT_RECONNECT flag for mysql connection (MYSQL 5.x only) and 
      changed default value for mysql_host.
+   * Fix http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=391055 , change
+     motion man page , -d requieres level.
    * Handle mjpeg decoding and fix color issue adding mjpegtools dependecy
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
      (Marius Rieder, Angel Carpintero).
-   
+   * Fix segfault in webhttpd.c on motion restart.
+   * Fix segfault in debian http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x09x24x175945  
+   * Add debug level > 5 to get logs from v4l2_select_input, v4l2_set_control and v4l2_set_input.
+   * Removed debian ( to avoid conflicts with debian package) and FreeBSD
+     ( no needed to deploy BSD port here ) directories.
+   * Improve debian package, create user/group motion and added --chuid motion to init script.
+     
+ 
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x06x05x012249
