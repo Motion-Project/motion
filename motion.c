@@ -823,9 +823,11 @@ static void motion_init(struct context *cnt)
 static void *motion_loop(void *arg)
 {
 	struct context *cnt = arg;
-	int i, j = 0;
+	int i, j, z = 0;
 	time_t lastframetime = 0;
 	int frame_buffer_size;
+ 	int area_once = 0;
+ 	int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
 	int smartmask_ratio = 0;
 	int smartmask_count = 20;
 	int smartmask_lastrate = 0;
@@ -857,6 +859,15 @@ static void *motion_loop(void *arg)
 	else
 		text_size_factor = 1;
 
+	/* Initialize area detection */
+	area_minx[0] = area_minx[3] = area_minx[6] = area_miny[0] = area_miny[1] = area_miny[2] = 0;
+	area_minx[1] = area_minx[4] = area_minx[7] = area_maxx[0] = area_maxx[3] = area_maxx[6] = cnt->imgs.width / 3;
+	area_minx[2] = area_minx[5] = area_minx[8] = area_maxx[1] = area_maxx[4] = area_maxx[7] = cnt->imgs.width / 3 * 2;
+	area_miny[3] = area_miny[4] = area_miny[5] = area_maxy[0] = area_maxy[1] = area_maxy[2] = cnt->imgs.height / 3;
+	area_miny[6] = area_miny[7] = area_miny[8] = area_maxy[3] = area_maxy[4] = area_maxy[5] = cnt->imgs.height / 3 * 2;
+	area_maxx[2] = area_maxx[5] = area_maxx[8] = cnt->imgs.width;
+	area_maxy[6] = area_maxy[7] = area_maxy[8] = cnt->imgs.height;
+	
 	/* Work out expected frame rate based on config setting */
 	if (cnt->conf.frame_limit < 2) cnt->conf.frame_limit = 2;
 
@@ -1391,6 +1402,28 @@ static void *motion_loop(void *arg)
 				cnt->lasttime = cnt->current_image->timestamp;
 			}
 
+			/* Simple hack to recognize motion in a specific area */
+			/* Do we need a new coversion specifier as well?? */
+			if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && (cnt->detecting_motion)) {
+				j = strlen(cnt->conf.area_detect);
+				for (i = 0; i < j; i++) {
+					z = cnt->conf.area_detect[i] - 49; /* 1 becomes 0 */
+					if ((z >= 0) && (z < 9)) {
+						if (cnt->current_image->location.x > area_minx[z] &&
+						    cnt->current_image->location.x < area_maxx[z] &&
+						    cnt->current_image->location.y > area_miny[z] &&
+						    cnt->current_image->location.y < area_maxy[z]) {
+							event(cnt, EVENT_AREA_DETECTED, NULL, NULL,
+							      NULL, cnt->currenttime_tm);
+							area_once = cnt->event_nr; /* Fire script only once per event */
+							if (cnt->conf.setup_mode)
+								motion_log(-1, 0, "Motion in area %d detected.\n", z+1);
+							break;
+						}
+					}
+				}
+			}
+			
 			/* Is the mpeg movie to long? Then make movies
 			 * First test for max mpegtime
 			 */
@@ -1557,7 +1590,6 @@ static void *motion_loop(void *arg)
 			if (cnt->shots == 0 &&
 				time_current_frame % cnt->conf.timelapse <= time_last_frame % cnt->conf.timelapse)
 				event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
-				//jw event(cnt, EVENT_TIMELAPSE, cnt->imgs.ref, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
 		/* if timelapse mpeg is in progress but conf.timelapse is zero then close timelapse file
@@ -1591,7 +1623,6 @@ static void *motion_loop(void *arg)
 			event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, &cnt->current_image->timestamp_tm);
 			if (!cnt->conf.webcam_motion || cnt->shots == 1)
 				event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
-				//jw event(cnt, EVENT_WEBCAM, cnt->imgs.ref, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
 		event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);

@@ -170,6 +170,14 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 
 #endif /* defined HAVE_MYSQL || defined HAVE_PGSQL */
 
+static void on_area_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *dummy1 ATTRIBUTE_UNUSED,
+            char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
+            struct tm *tm ATTRIBUTE_UNUSED)
+{
+	if (cnt->conf.on_area_detected)
+		exec_command(cnt, cnt->conf.on_area_detected, NULL, 0);
+}
 
 static void on_event_start_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *dummy1 ATTRIBUTE_UNUSED,
@@ -588,6 +596,10 @@ struct event_handlers event_handlers[] = {
 	{
 	EVENT_MOTION,
 	on_motion_detected_command
+	},
+	{
+	EVENT_AREA_DETECTED,
+	on_area_command
 	},
 	{
 	EVENT_FIRSTMOTION,

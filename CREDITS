@@ -1316,6 +1316,7 @@ Joerg Weber
    * Removed night_compensate feature
    * Implemented a new reference frame algorithm to improve object recognition and location.
    * Improved smartmask feature: real moving objects don't trigger the mask anymore.
+   * Added area_detect feature.
 
 Dirk Wesenberg
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )

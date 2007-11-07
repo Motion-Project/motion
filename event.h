@@ -27,6 +27,7 @@
 #define EVENT_FILECLOSE         16384
 #define EVENT_DEBUG             65536
 #define EVENT_CRITICAL          131072
+#define EVENT_AREA_DETECTED     262144
 #
 
 typedef void(* event_handler)(struct context *, int, unsigned char *, char *, void *, struct tm *);

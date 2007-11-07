@@ -97,6 +97,7 @@ struct config {
 	const char *mysql_user;
 	const char *mysql_password;
 	char *on_picture_save;
+	char *on_area_detected;
 	char *on_motion_detected;
 	char *on_movie_start;
 	char *on_movie_end;
@@ -115,6 +116,7 @@ struct config {
 	const char *text_event;
 	int text_double;
 	const char *despeckle;
+	const char *area_detect;
 	int minimum_motion_frames;
 	char *pid_file;
 	// int debug_parameter;

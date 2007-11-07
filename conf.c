@@ -113,6 +113,7 @@ struct config conf_template = {
 	mysql_user:            NULL,
 	mysql_password:        NULL,
 	on_picture_save:       NULL,
+	on_area_detected:      NULL,
 	on_motion_detected:    NULL,
 	on_movie_start:        NULL,
 	on_movie_end:          NULL,
@@ -131,6 +132,7 @@ struct config conf_template = {
 	text_event:            DEF_EVENTSTAMP,
 	text_double:           0,
 	despeckle:             NULL,
+	area_detect:           NULL,
 	minimum_motion_frames: 1,
 	pid_file:              NULL,
 	// debug_parameter:       0
@@ -402,6 +404,16 @@ config_param config_params[] = {
 	"# (l)abeling must only be used once and the 'l' must be the last letter.\n"
 	"# Comment out to disable",
 	CONF_OFFSET(despeckle),
+	copy_string,
+	print_string
+	},
+	{
+	"area_detect",
+	"# Detect motion in predefined areas (1 - 9). Areas are numbered like that:  1 2 3\n" 
+	"# A script (on_area_detected) is started immediately when motion is         4 5 6\n"
+	"# detected in one of the given areas, but only once during an event.        7 8 9\n"
+	"# One or more areas can be specified with this option. (Default: not defined)",
+	CONF_OFFSET(area_detect),
 	copy_string,
 	print_string
 	},
@@ -988,6 +1000,14 @@ config_param config_params[] = {
 	"on_motion_detected",
 	"# Command to be executed when a motion frame is detected (default: none)",
 	CONF_OFFSET(on_motion_detected),
+	copy_string,
+	print_string
+	},
+	{
+	"on_area_detected",
+	"# Command to be executed when motion in a predefined area is detected\n"
+	"# Check option 'area_detect'.   (default: none)",
+	CONF_OFFSET(on_area_detected),
 	copy_string,
 	print_string
 	},
