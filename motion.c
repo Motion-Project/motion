@@ -384,16 +384,13 @@ static void motion_remove_pid(void)
  * motion_detected
  *
  *   Called from 'motion_loop' when motion is detected
+ *   Can be called when no motion if output_all is set!
  *
  * Parameters:
  *
  *   cnt      - current thread's context struct
- *   diffs    - number of different pixels between the reference image and the
- *              new image (may be zero)
  *   dev      - video device file descriptor
- *   devpipe  - file descriptor of still image pipe
- *   devmpipe - file descriptor of motion pipe
- *   img      - pointer to the captured image with detected motion
+ *   img      - pointer to the captured image_data with detected motion
  */
 static void motion_detected(struct context *cnt, int dev, struct image_data *img)
 {
@@ -440,7 +437,12 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 			image_save_as_preview(cnt, img);
 			cnt->preview_time = cnt->currenttime;
 			cnt->preview_shots = cnt->shots;
-			
+
+			/* If we set output_all to yes and during the event
+			 * there is no image with motion, diffs is 0, we are not going to save the preview event */
+			 if (cnt->imgs.preview_image.diffs == 0)
+				cnt->imgs.preview_image.diffs = 1;
+
 			/* If we have locate on it is already dine above */
 			if (cnt->locate == LOCATE_PREVIEW) {
 				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
@@ -453,9 +455,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 
 		/* EVENT_MOTION triggers event_beep and on_motion_detected_command */
 		event(cnt, EVENT_MOTION, NULL, NULL, NULL, &img->timestamp_tm);
-
-		/* Setup the postcap counter */
-		cnt->postcap = cnt->conf.post_capture;
 
 		/* Check for most significant preview-shot when output_normal=best */
 		if (cnt->new_img & NEWIMG_BEST) {
@@ -1339,6 +1338,12 @@ static void *motion_loop(void *arg)
 
 		/***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
+			if (cnt->current_image->diffs > cnt->threshold) {
+				/* flag this image, it have motion */
+				cnt->current_image->flags |= IMAGE_MOTION;
+				cnt->lightswitch_framecounter++; /* micro lightswitch */
+			}
+
 			/* If motion has been detected we take action and start saving
 			 * pictures and movies etc by calling motion_detected().
 			 * Is output_all enabled we always call motion_detected()
@@ -1347,14 +1352,14 @@ static void *motion_loop(void *arg)
 			 */
 			if (cnt->conf.output_all) {
 				cnt->detecting_motion = 1;
-				cnt->current_image->flags |= IMAGE_SAVE;
-			} else if (cnt->current_image->diffs > cnt->threshold) {
-				/* flag this image, it have motion */
-				cnt->current_image->flags |= IMAGE_MOTION;
-				cnt->lightswitch_framecounter++; /* micro lightswitch */
+				/* Setup the postcap counter */
+				cnt->postcap = cnt->conf.post_capture;
+				cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+				motion_detected(cnt, cnt->video_dev, cnt->current_image);
+			} else if (cnt->current_image->flags & IMAGE_MOTION) {
 				/* Did we detect motion (like the cat just walked in :) )?
 				 * If so, ensure the motion is sustained if minimum_motion_frames
-				 * is set, and take action by calling motion_detected(). */
+				 */
 
 				/* Count how many frames with motion there is in the last minimum_motion_frames in precap buffer */
 				int frame_count = 0;
@@ -1374,6 +1379,8 @@ static void *motion_loop(void *arg)
 				if (frame_count >= cnt->conf.minimum_motion_frames) {
 					cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 					cnt->detecting_motion = 1;
+					/* Setup the postcap counter */
+					cnt->postcap = cnt->conf.post_capture;
 					/* Mark all images in image_ring to be saved */
 					for(i = 0; i < cnt->imgs.image_ring_size; i++) {
 						cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
@@ -1389,9 +1396,11 @@ static void *motion_loop(void *arg)
 				/* Always call motion_detected when we have a motion image */
 				motion_detected(cnt, cnt->video_dev, cnt->current_image);
 			} else if (cnt->postcap) {
+				/* No motion, doing postcap */
 				cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
 				cnt->postcap--;
 			} else {
+				/* Done with postcap, so just have the image in the precap buffer */
 				cnt->current_image->flags |= IMAGE_PRECAP;
 				cnt->detecting_motion = 0;
 				cnt->lightswitch_framecounter = 0; /* reset micro-lightswitch when no motion */
@@ -1404,7 +1413,7 @@ static void *motion_loop(void *arg)
 
 			/* Simple hack to recognize motion in a specific area */
 			/* Do we need a new coversion specifier as well?? */
-			if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && (cnt->detecting_motion)) {
+			if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && (cnt->current_image->flags & IMAGE_MOTION)) {
 				j = strlen(cnt->conf.area_detect);
 				for (i = 0; i < j; i++) {
 					z = cnt->conf.area_detect[i] - 49; /* 1 becomes 0 */
