@@ -1066,8 +1066,7 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 #define EXCLUDE_LEVEL_PERCENT 20
 void alg_update_reference_frame(struct context *cnt, int action) 
 {
-//	int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
-	int accept_timer = cnt->lastrate * cnt->conf.in_timer;
+	int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
 	int i, threshold_ref;
 	int *ref_dyn = cnt->imgs.ref_dyn;
 	unsigned char *image_virgin = cnt->imgs.image_virgin;
@@ -1076,8 +1075,7 @@ void alg_update_reference_frame(struct context *cnt, int action)
 	unsigned char *out = cnt->imgs.out;
 
 	if (action == UPDATE_REF_FRAME) { /* black&white only for better performance */
-//		threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
-		threshold_ref = cnt->noise * cnt->conf.correction_factor / 100;
+		threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
 		for (i = cnt->imgs.motionsize; i > 0; i--) {
 			/* exclude pixels from ref frame well below noise level */
 			if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {

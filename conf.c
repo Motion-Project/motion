@@ -136,8 +136,6 @@ struct config conf_template = {
 	minimum_motion_frames: 1,
 	pid_file:              NULL,
 	// debug_parameter:       0
-	correction_factor:     20,
-	in_timer:              10,
 };
 
 
@@ -1197,20 +1195,6 @@ config_param config_params[] = {
 	0,
 	config_thread,
 	print_thread
-	},
-	{
-	"correction_factor",
-	"#Temporary debugging option to tune the new reference frame. Will be removed again soon",
-	CONF_OFFSET(correction_factor),
-	copy_int,
-	print_int
-	},
-	{
-	"in_timer",
-	"#Temporary debugging option to tune the new reference frame. Will be removed again soon",
-	CONF_OFFSET(in_timer),
-	copy_int,
-	print_int
 	},
 { NULL, NULL, 0 , NULL, NULL }
 };

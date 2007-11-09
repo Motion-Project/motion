@@ -1248,8 +1248,8 @@ static void *motion_loop(void *arg)
 			if ((cnt->current_image->diffs > cnt->threshold) && 
 			    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window */
 			    ((abs(previous_diffs - cnt->current_image->diffs)) < (previous_diffs / 15)) &&
-			    ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 100)) &&
-			    ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 100))) {
+			    ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 150)) &&
+			    ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 150))) {
 				alg_update_reference_frame(cnt, RESET_REF_FRAME);
 				cnt->current_image->diffs = 0;
 				cnt->lightswitch_framecounter = 0;
@@ -1342,7 +1342,7 @@ static void *motion_loop(void *arg)
 				/* flag this image, it have motion */
 				cnt->current_image->flags |= IMAGE_MOTION;
 				cnt->lightswitch_framecounter++; /* micro lightswitch */
-			}
+			} else cnt->lightswitch_framecounter = 0;
 
 			/* If motion has been detected we take action and start saving
 			 * pictures and movies etc by calling motion_detected().
@@ -1403,7 +1403,6 @@ static void *motion_loop(void *arg)
 				/* Done with postcap, so just have the image in the precap buffer */
 				cnt->current_image->flags |= IMAGE_PRECAP;
 				cnt->detecting_motion = 0;
-				cnt->lightswitch_framecounter = 0; /* reset micro-lightswitch when no motion */
 			}
 
 			/* Update last frame saved time, so we can end event after gap time */
