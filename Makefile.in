@@ -32,7 +32,7 @@ examplesdir = $(docdir)/examples
 # install.                                                                     #
 ################################################################################
 CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"$(VERSION)\" -D_REENTRANT \
-	       -Dsysconfdir=\"$(sysconfdir)\"
+	       -Dsysconfdir=\"$(sysconfdir)\" -Ddocdir=\"$(docdir)\"
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@ 
 VIDEO_OBJ    = @VIDEO@

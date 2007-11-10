@@ -509,7 +509,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 */
 void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 {
-	int i;
+	unsigned int i;
 
 	/* close each codec */
 	if (ffmpeg->video_st) {
@@ -544,7 +544,7 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 /* Closes a video file. */
 void ffmpeg_close(struct ffmpeg *ffmpeg)
 {
-	int i;
+	unsigned int i;
 
 	/* close each codec */
 	if (ffmpeg->video_st) {

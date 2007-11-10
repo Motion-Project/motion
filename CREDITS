@@ -374,7 +374,7 @@ Angel Carpintero
    * Removed debian ( to avoid conflicts with debian package) and FreeBSD
      ( no needed to deploy BSD port here ) directories.
    * Improve debian package, create user/group motion and added --chuid motion to init script.
-     
+   * Added help in http control http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=396595.
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

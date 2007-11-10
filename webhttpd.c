@@ -539,10 +539,12 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 								     "<b>%s</b>&nbsp;<select name='%s'>\n"
 								     "%s"	
 								     "</select><input type='submit' value='set'>\n"
+								     "&nbsp;&nbsp;&nbsp;&nbsp;"
+								     "<a href='file:////"docdir"/motion_guide.html#%s' target=_blank>[help]</a>"
 								     "</form>\n"
 								     "<a href=/%d/config/list><- back</a>\n", thread,
-								     config_params[i].param_name, 
-								     config_params[i].param_name, option, thread);
+								     config_params[i].param_name, config_params[i].param_name, 
+								     option, config_params[i].param_name, thread);
 						}else{
 							if (value == NULL) value = "";
 
@@ -550,10 +552,12 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
 								     "<input type='submit' value='set'>\n"
+								     "&nbsp;&nbsp;&nbsp;&nbsp;"
+								     "<a href='file:////"docdir"/motion_guide.html#%s' target=_blank>[help]</a>"
 								     "</form>\n"
 								     "<a href=/%d/config/list><- back</a>\n", thread,
 								     config_params[i].param_name, config_params[i].param_name, 
-								     value ,thread);
+								     value, config_params[i].param_name, thread);
 						}
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
