@@ -236,10 +236,15 @@ static void response_client(int client_socket, const char* template, char *back)
 	}
 }
 
-
+/*
+ * check_authentication
+ *
+ * return 1 on success
+ * return 0 on error
+ */
 static short unsigned int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
 {
-	short unsigned int ret;
+	short unsigned int ret=0;
 	char *userpass = NULL;
 
 	authentication = (char *) mymalloc(BASE64_LENGTH(size_auth) + 1);
