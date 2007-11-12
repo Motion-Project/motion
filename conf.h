@@ -134,11 +134,12 @@ typedef const char *(* conf_print_func)(struct context **, char **, int, int);
  * description for parameters in the config file
  */
 typedef struct {
-	const char * param_name;	/* name for this parameter             */
-	const char * param_help;	/* short explanation for parameter */
-	int conf_value;	/* pointer to a field in struct context */
-	conf_copy_func  copy;	/* a function to set the value in 'config' */
-	conf_print_func print;	/* a function to output the value to a file */
+	const char * param_name;	/* name for this parameter                  */
+	const char * param_help;	/* short explanation for parameter          */
+	unsigned short int main_thread;	/* belong only to main thread when value>0  */
+	int conf_value;			/* pointer to a field in struct context     */
+	conf_copy_func  copy;		/* a function to set the value in 'config'  */
+	conf_print_func print;		/* a function to output the value to a file */
 } config_param; 
 
 

@@ -237,9 +237,9 @@ static void response_client(int client_socket, const char* template, char *back)
 }
 
 
-static int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
+static short unsigned int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
 {
-	int ret = 0;
+	short unsigned int ret;
 	char *userpass = NULL;
 
 	authentication = (char *) mymalloc(BASE64_LENGTH(size_auth) + 1);
@@ -262,7 +262,7 @@ static int check_authentication(char *authentication, char *auth_base64, size_t 
    This function decode the values from GET request following the http RFC.
 */
 
-static int url_decode(char *urlencoded, int length)
+static void url_decode(char *urlencoded, int length)
 {
 	char *data=urlencoded;
 	char *urldecoded=urlencoded;
@@ -296,19 +296,21 @@ static int url_decode(char *urlencoded, int length)
 		length--;
 	}
 	*urldecoded = '\0';
-	return 0;
 }
 
 
 /*
     This function manages/parses the config action for motion ( set , get , write , list ).
+
+    return 1 to exit from function.
 */
 
-static int config(char *pointer, char *res, int length_uri, int thread, int client_socket, void *userdata)
+static short unsigned int config(char *pointer, char *res, short unsigned int length_uri, 
+				short unsigned int thread, int client_socket, void *userdata)
 {
 	char question;
 	char command[256] = {'\0'};
-	int i;
+	short unsigned int i;
 	struct context **cnt = userdata;
 
 	warningkill = sscanf (pointer, "%256[a-z]%c", command , &question);
@@ -321,15 +323,19 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 			/*call list*/
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res, "<a href=/%d/config><- back</a>", thread);
+				sprintf(res, "<a href=/%hu/config><- back</a><br><br>\n<b>Thread %hu</b>\n", thread, thread);
 				send_template(client_socket, res);
 
 				for (i=0; config_params[i].param_name != NULL; i++) {
+
+					if ((thread != 0) && (config_params[i].main_thread)) 
+						continue;
+
 					value = config_params[i].print(cnt, NULL, i, thread);
 
 					if (value == NULL) {
 						retval=NULL;
-						
+					
 						/* Only get the thread value for main thread */ 
 						if (thread == 0)
 							config_params[i].print(cnt, &retval, i, thread);
@@ -345,7 +351,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 								char *temp=retval;
 								size_t retval_miss = 0;
 								size_t retval_len = strlen(retval);
-								int ind=0;
+								short unsigned int ind=0;
 								char thread_strings[1024]={'\0'};
 								
 								while (retval_miss != retval_len) {
@@ -366,30 +372,30 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 								retval = strdup(thread_strings);
 							}
 							
-							sprintf(res, "<li><a href=/%d/config/set?%s>%s</a> = %s</li>\n", thread,
+							sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
 							        config_params[i].param_name, config_params[i].param_name, retval);
 							free(retval);
 						} else if (thread != 0) {
 							/* get the value from main thread for the rest of threads */
 							value = config_params[i].print(cnt, NULL, i, 0);
 							
-							sprintf(res,"<li><a href=/%d/config/set?%s>%s</a> = %s</li>\n", thread,
+							sprintf(res,"<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
 							        config_params[i].param_name, config_params[i].param_name,
 							        value ? value : "(not defined)");
 						} else {
-							sprintf(res, "<li><a href=/%d/config/set?%s>%s</a> = %s</li>\n", thread,
+							sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
 							        config_params[i].param_name, config_params[i].param_name,
 							        "(not defined)");
 						}
 						
 					} else {
-						sprintf(res,"<li><a href=/%d/config/set?%s>%s</a> = %s</li>\n",thread,
+						sprintf(res,"<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n",thread,
 						        config_params[i].param_name, config_params[i].param_name, value);
 					}
 					send_template(client_socket, res);
 				}
 
-				sprintf(res,"<br><a href=/%d/config><- back</a>",thread);
+				sprintf(res,"<br><a href=/%hu/config><- back</a>",thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
@@ -424,6 +430,11 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 				/* check if command exists and type of command and not end of URI */
 				i=0;
 				while (config_params[i].param_name != NULL) {
+					if ((thread != 0) && (config_params[i].main_thread)){
+						i++;
+						continue;
+					}
+
 					if (!strcasecmp(command, config_params[i].param_name))
 						break;
 					i++;
@@ -440,10 +451,11 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 							conf_cmdparse(cnt + thread, config_params[i].param_name, Value);
 							if (cnt[0]->conf.control_html_output) {
 								sprintf(res,
-								        "<li><a href=/%d/config/set?%s>%s</a> = %s</li> <b>Done</b><br>\n"
-								        "<a href=/%d/config/list><- back</a>\n",
-								        thread, config_params[i].param_name,
-								        config_params[i].param_name, Value, thread);
+									"<a href=/%hu/config/list><- back</a>"
+									"<br><br>\n<b>Thread %hu</b>\n"
+								        "<li><a href=/%hu/config/set?%s>%s</a> = %s</li><br><b>Done</b>",
+								        thread, thread, thread,config_params[i].param_name,
+								        config_params[i].param_name, Value);
 								
 								send_template_ini_client(client_socket, ini_template);
 								send_template(client_socket,res);
@@ -484,10 +496,10 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 
 						if (cnt[0]->conf.control_html_output) {
 							sprintf(res,
-							        "<li><a href=/%d/config/set?%s>%s</a> = %s</li> <b>Done</b><br>\n"
-							        "<a href=/%d/config/list><- back</a>",
-							        thread, config_params[i].param_name,
-							        config_params[i].param_name, type, thread);
+								"<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
+							        "<li><a href=/%hu/config/set?%s>%s</a> = %s</li><br><b>Done</b>",
+							        thread, thread, thread, config_params[i].param_name,
+							        config_params[i].param_name, type);
 							
 							send_template_ini_client(client_socket, ini_template);
 							send_template(client_socket, res);
@@ -513,6 +525,11 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 				     (((length_uri = length_uri - strlen(command)) == 0 )) ) {
 					i=0;
 					while (config_params[i].param_name != NULL) {
+						if ((thread != 0) && (config_params[i].main_thread)){
+							i++;
+                                                	continue;
+						}
+
 						if (!strcasecmp(command, config_params[i].param_name))
 							break;
 						i++;
@@ -520,45 +537,54 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 					/* param_name exists */
 					if (config_params[i].param_name) {
 						const char *value = NULL;							
-						
+	
 						value = config_params[i].print(cnt, NULL, i, thread);
-
+						
 						send_template_ini_client(client_socket, ini_template);
 						if (!strcmp ("bool",config_type(&config_params[i])) ){
 							char option[80] = {'\0'};
-
-							if (value != NULL)
+					
+							if ((value == NULL) && (thread != 0))
+								value = config_params[i].print(cnt, NULL, i, 0);
+							
+							if (!strcmp ("on", value))
 								sprintf(option,"<option value='on' selected>on</option>\n"
 								"<option value='off'>off</option>\n");
 							else
 								sprintf(option,"<option value='on'>on</option>\n"
 								"<option value='off' selected>off</option>\n");
+							
 
-							sprintf(res, "<b>Thread %d </b>\n"
+							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<select name='%s'>\n"
 								     "%s"	
 								     "</select><input type='submit' value='set'>\n"
 								     "&nbsp;&nbsp;&nbsp;&nbsp;"
 								     "<a href='file:////"docdir"/motion_guide.html#%s' target=_blank>[help]</a>"
-								     "</form>\n"
-								     "<a href=/%d/config/list><- back</a>\n", thread,
+								     "</form>\n", thread, thread,
 								     config_params[i].param_name, config_params[i].param_name, 
-								     option, config_params[i].param_name, thread);
+								     option, config_params[i].param_name);
 						}else{
-							if (value == NULL) value = "";
+		
+							if (value == NULL){
+								if (thread != 0)
+									/* get the value from main thread for the rest of threads */
+                                                        		value = config_params[i].print(cnt, NULL, i, 0); 
+								if (value == NULL) value = "";
+							}
 
-							sprintf(res, "<b>Thread %d </b>\n"
+							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
 								     "<input type='submit' value='set'>\n"
 								     "&nbsp;&nbsp;&nbsp;&nbsp;"
 								     "<a href='file:////"docdir"/motion_guide.html#%s' target=_blank>[help]</a>"
-								     "</form>\n"
-								     "<a href=/%d/config/list><- back</a>\n", thread,
+								     "</form>\n", thread, thread,
 								     config_params[i].param_name, config_params[i].param_name, 
-								     value, config_params[i].param_name, thread);
+								     value, config_params[i].param_name);
 						}
+
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
 					} else {
@@ -577,9 +603,13 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 		} else if (length_uri == 0) {
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, set_template);
-				sprintf(res, "<b>Thread %d </b>\n<form name='n'>\n<select name='onames'>\n", thread);
+				sprintf(res, "<a href=/%hu/config><- back</a><br><br>\n<b>Thread %hu</b>\n"
+					     "<form name='n'>\n<select name='onames'>\n", thread, thread );
+
 				send_template(client_socket, res);
 				for (i=0; config_params[i].param_name != NULL; i++) {
+					if ((thread != 0) && (config_params[i].main_thread))
+						continue;
 					sprintf(res, "<option value='%s'>%s</option>\n",
 					        config_params[i].param_name, config_params[i].param_name);
 					send_template(client_socket, res);
@@ -589,8 +619,7 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 				            "ONSUBMIT='if (!this.submitted) return false; else return true;'>\n"
 				             "<input type=text name='valor' value=''>\n"
 				             "<input type='button' value='set' onclick='javascript:show()'>\n"
-				             "</form>\n"
-				             "<a href=/%d/config><- back</a>\n", thread);
+				             "</form>\n");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
@@ -625,8 +654,13 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 
 				if (length_uri == 0) {
 					const char *value = NULL;
-					i = 0;
+					i=0;
 					while (config_params[i].param_name != NULL) {
+						if ((thread != 0) && (config_params[i].main_thread)){
+							i++;
+							continue;
+						}
+
 						if (!strcasecmp(command, config_params[i].param_name))
 							break;
 						i++;
@@ -650,9 +684,12 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 								value=config_params[i].print(cnt, NULL, i, 0);
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket,ini_template);
-								sprintf(res,"<li>%s = %s</li><br>\n"
-								            "<a href=/%d/config/get><- back</a>\n",
-								        config_params[i].param_name,value, thread);
+								sprintf(res, "<a href=/%hu/config/get><- back</a><br><br>\n"
+									"<b>Thread %hu</b><br>\n<li>%s = %s"
+									"&nbsp;&nbsp;&nbsp;&nbsp;"
+									"<a href='file:////"docdir"/motion_guide.html#%s' "
+									"target=_blank>[help]</a></li>",thread, thread,
+								        config_params[i].param_name, value, config_params[i].param_name);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
@@ -679,19 +716,20 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 		} else if (length_uri == 0) {
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"<b>Thread %d </b><br>\n"
+				sprintf(res, "<a href=/%hu/config><- back</a><br><br>\n<b>Thread %hu</b><br>\n"	
 				            "<form action=get>\n"
-				            "<select name='query'>\n", thread);
+				            "<select name='query'>\n", thread, thread);
 				send_template(client_socket, res);
 				for (i=0; config_params[i].param_name != NULL; i++) {
+					if ((thread != 0) && (config_params[i].main_thread))
+						continue;
 					sprintf(res,"<option value='%s'>%s</option>\n",
 					        config_params[i].param_name, config_params[i].param_name);
 					send_template(client_socket, res);
 				}
 				sprintf(res,"</select>\n"
 				            "<input type='submit' value='get'>\n"
-				            "</form>\n"
-				            "<a href=/%d/config><- back</a>\n", thread);
+				            "</form>\n");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
@@ -712,14 +750,14 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 			if (length_uri == 0) {
 				if (cnt[0]->conf.control_html_output) {
 					send_template_ini_client(client_socket, ini_template);
-					sprintf(res,"Are you sure? <a href=/%d/config/writeyes>Yes</a><br>\n"
-					            "<a href=/%d/config>No</a>\n", thread, thread);
+					sprintf(res, "<a href=/%hu/config><- back</a><br><br>"
+						     "Are you sure? <a href=/%hu/config/writeyes>Yes</a>\n", thread, thread);
 					send_template(client_socket, res);
 					send_template_end_client(client_socket);
 				} else {
 					conf_print(cnt);
 					send_template_ini_client_raw(client_socket);
-					sprintf(res,"Thread %d write\nDone\n", thread);
+					sprintf(res,"Thread %hu write\nDone\n", thread);
 					send_template_raw(client_socket, res);
 				}
 			} else {
@@ -737,13 +775,13 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 			conf_print(cnt);
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"<b>Thread %d</b> write done !<br>\n"
-				            "<a href=/%d/config><- back</a>\n", thread, thread);
+				sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n<b>Thread %hu</b>  write done !\n",
+					    thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"Thread %d write\nDone\n", thread);
+				sprintf(res,"Thread %hu write\nDone\n", thread);
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -768,13 +806,18 @@ static int config(char *pointer, char *res, int length_uri, int thread, int clie
 
 /*
     This function manages/parses the actions for motion ( makemovie , snapshot , restart , quit ).
+
+    return 0 for restart & quit
+    return 1 for makemovie & snaphost
 */
 
-static int action(char *pointer, char *res, int length_uri, int thread, int client_socket, void *userdata)
+static short unsigned int action(char *pointer, char *res, short unsigned int length_uri, 
+				short unsigned int thread, int client_socket, void *userdata)
 {
 	/* parse action commands */
 	char command[256] = {'\0'};
 	struct context **cnt = userdata;
+	short unsigned int i = 0;
 
 	warningkill = sscanf (pointer, "%256[a-z]" , command);
 	if (!strcmp(command,"makemovie")) {
@@ -784,7 +827,6 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 			/*call makemovie*/
 
 			if (thread == 0) {
-				int i = 0;
 				while (cnt[++i])
 					cnt[i]->makemovie=1;
 			} else {
@@ -793,13 +835,13 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"makemovie for thread %d done<br>\n"
-				            "<a href=/%d/action><- back</a>\n", thread, thread);
+				sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+					    "makemovie for thread %hu done<br>\n", thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"makemovie for thread %d\nDone\n", thread);
+				sprintf(res,"makemovie for thread %hu\nDone\n", thread);
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -816,7 +858,6 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 			/*call snapshot*/
 
 			if (thread == 0) {
-				int i = 0;
 				while (cnt[++i])
 					cnt[i]->snapshot=1;
 			} else {
@@ -826,13 +867,13 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 			cnt[thread]->snapshot = 1;
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"snapshot for thread %d done<br>\n"
-				            "<a href=/%d/action><- back</a>\n", thread, thread);
+				sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+					    "snapshot for thread %hu done<br>\n", thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"snapshot for thread %d\nDone\n", thread);
+				sprintf(res,"snapshot for thread %hu\nDone\n", thread);
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -846,7 +887,6 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 		pointer = pointer + 7;
 		length_uri = length_uri - 7;
 		if (length_uri == 0) {
-			int i = 0;
 			do {
 				motion_log(LOG_DEBUG, 0, "httpd restart");
 				kill(getpid(),1);
@@ -873,7 +913,6 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 		pointer = pointer + 4;
 		length_uri = length_uri - 4;
 		if (length_uri == 0) {
-			int i = 0;
 			/*call quit*/
 			do {
 				motion_log(LOG_DEBUG, 0, "httpd quitting");
@@ -911,12 +950,16 @@ static int action(char *pointer, char *res, int length_uri, int thread, int clie
 
 /*
    This function manages/parses the detection actions for motion ( status , start , pause ).
+
+   return 1 to exit from function.
 */
 
-static int detection(char *pointer, char *res, int length_uri, int thread, int client_socket, void *userdata)
+static short unsigned int detection(char *pointer, char *res, short unsigned int length_uri, short unsigned int thread, 
+			int client_socket, void *userdata)
 {
 	char command[256]={'\0'};
 	struct context **cnt=userdata;
+	short unsigned int i = 0;
 
 	warningkill = sscanf (pointer, "%256[a-z]" , command);
 	if (!strcmp(command,"status")) {
@@ -925,18 +968,14 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		if (length_uri == 0) {
 			/*call status*/
 			
-			if (cnt[thread]->pause)
-				sprintf(res, "Thread %d Detection status PAUSE\n", thread);
-			else
-				sprintf(res, "Thread %d Detection status ACTIVE\n", thread);
-
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				send_template(client_socket, res);
-				sprintf(res, "<br><a href=/%d/detection><- back</a>\n", thread);
+				sprintf(res, "<a href=/%hu/detection><- back</a><br><br><b>Thread %hu</b> Detection status %s\n", 
+					      thread, thread, (cnt[thread]->pause)? "PAUSE":"ACTIVE");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
+				sprintf(res, "Thread %hu Detection status %s\n",thread, (cnt[thread]->pause)? "PAUSE":"ACTIVE");
 				send_template_ini_client_raw(client_socket);
 				send_template_raw(client_socket, res);
 			}
@@ -952,8 +991,6 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		length_uri = length_uri - 5;
 		if (length_uri == 0) {
 			/*call start*/
-			int i = 0;
-
 			cnt[thread]->pause = 0;
 
 			if (thread == 0) {
@@ -966,13 +1003,13 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket,ini_template);
-				sprintf(res,"Thread %i Detection resumed<br>\n"
-				            "<a href=/%d/detection><- back</a>\n", thread, thread);
+				sprintf(res,"<a href=/%hu/detection><- back</a><br><br>\n<b>Thread %hu</b> Detection resumed\n",
+				            thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"Thread %i Detection resumed\nDone\n", thread);
+				sprintf(res,"Thread %hu Detection resumed\nDone\n", thread);
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -987,8 +1024,6 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 		length_uri = length_uri - 5;
 		if (length_uri==0) {
 			/*call pause*/
-			int i = 0;
-			
 			cnt[thread]->pause=1;
 
 			if (thread == 0) {
@@ -1001,13 +1036,13 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 			
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"Thread %i Detection paused<br>\n"
-				            "<a href=/%d/detection><- back</a>\n",thread,thread);
+				sprintf(res,"<a href=/%hu/detection><- back</a><br><br>\n<b>Thread %hu</b> Detection paused\n",
+				            thread,thread);
 				send_template(client_socket,res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"Thread %i Detection paused\nDone\n", thread);
+				sprintf(res,"Thread %hu Detection paused\nDone\n", thread);
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -1025,31 +1060,30 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 			/*call connection*/	
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
+				sprintf(res,"<a href=/%hu/detection><- back</a><br><br>\n",thread);
+				send_template(client_socket,res);
 				if (thread == 0){
-					int i = 0;
 					do{
-						sprintf(res,"Thread %i %s<br>\n",i, 
+						sprintf(res,"Thread %hu %s<br>\n",i, 
 								(cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
 						send_template(client_socket,res);
 					}while (cnt[++i]);
-					sprintf(res,"<a href=/%d/detection><- back</a>\n",thread);
 				}else{
-					sprintf(res,"Thread %i %s<br>\n"
-							"<a href=/%d/detection><- back</a>\n",thread, (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK, thread);
+					sprintf(res,"Thread %hu %s\n",
+						     thread, (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+					send_template(client_socket,res);
 				}	
-				send_template(client_socket,res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
 				if (thread == 0){
-					int i = 0;
 					do{
-						sprintf(res,"Thread %i %s\n", i,
+						sprintf(res,"Thread %hu %s\n", i,
 								(cnt[i]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
 						send_template_raw(client_socket, res);
 					}while (cnt[++i]);
 				}else{		
-					sprintf(res,"Thread %i %s\n", thread,(cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+					sprintf(res,"Thread %hu %s\n", thread,(cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
 					send_template_raw(client_socket, res);
 				}	
 				
@@ -1074,9 +1108,12 @@ static int detection(char *pointer, char *res, int length_uri, int thread, int c
 
 /*
    This function manages/parses the track action for motion ( set , pan , tilt , auto ).
+
+   return 1 to exit from function.
 */
 
-static int track(char *pointer, char *res, int length_uri, int thread, int client_socket, void *userdata)
+static short unsigned int track(char *pointer, char *res, short unsigned int length_uri, short unsigned int thread, 
+			int client_socket, void *userdata)
 {
 	char question;
 	char command[256] = {'\0'};
@@ -1197,8 +1234,8 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					if (cnt[thread]->moved) {
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
-							sprintf(res,"track set relative pan=%s<br>\n"
-							            "<a href=/%d/track><- back</a>\n", panvalue, thread);
+							sprintf(res, "<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>\n"
+								     "track set relative pan=%s<br>\n", thread, thread, panvalue);
 							send_template(client_socket, res);
 							send_template_end_client(client_socket);
 						} else {
@@ -1209,7 +1246,8 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					} else {
 					/*error in track action*/
 						if (cnt[0]->conf.control_html_output) {
-							sprintf(res, "<a href=/%d/track><- back</a>\n", thread);
+							sprintf(res, "<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", 
+								     thread, thread);
 							response_client(client_socket, track_error, res);
 						}
 						else
@@ -1231,8 +1269,9 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					if (cnt[thread]->moved){	
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
-							sprintf(res,"track set relative tilt=%s<br>\n"
-							            "<a href=/%d/track><- back</a>\n", tiltvalue, thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>\n"
+								    "track set relative tilt=%s\n"
+							            , thread, thread, tiltvalue);
 							send_template(client_socket, res);
 							send_template_end_client(client_socket);
 						} else {
@@ -1243,7 +1282,8 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					} else {
 						/*error in track action*/
 						if (cnt[0]->conf.control_html_output) {
-							sprintf(res,"<a href=/%d/track><- back</a>\n", thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", 
+								    thread, thread);
 							response_client(client_socket, track_error, res);
 						}
 						else
@@ -1257,8 +1297,9 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					if (cnt[thread]->moved) {
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
-							sprintf(res,"track set absolute x=%s<br>\n"
-							            "<a href=/%d/track><- back</a>\n", x_value, thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>\n"
+								    "track set absolute x=%s\n",
+							            thread, thread, x_value);
 							send_template(client_socket, res);
 							send_template_end_client(client_socket);
 						} else {
@@ -1269,7 +1310,8 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					} else {
 						/*error in track action*/
 						if (cnt[0]->conf.control_html_output) {
-							sprintf(res,"<a href=/%d/track><- back</a>\n", thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", 
+								    thread, thread);
 							response_client(client_socket, track_error, res);
 						}
 						else
@@ -1284,8 +1326,9 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					if (cnt[thread]->moved) {
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
-							sprintf(res,"track set absolute y=%s<br>\n"
-							            "<a href=/%d/track><- back</a>\n", y_value, thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>\n"
+								    "track set absolute y=%s<br>\n",
+							            thread, thread, y_value);
 							send_template(client_socket, res);
 							send_template_end_client(client_socket);
 						} else {
@@ -1296,7 +1339,8 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					} else {
 						/*error in track action*/
 						if (cnt[0]->conf.control_html_output) {
-							sprintf(res,"<a href=/%d/track><- back</a>", thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", 
+								    thread, thread);
 							response_client(client_socket, track_error, res);
 						}
 						else
@@ -1458,19 +1502,20 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 				if (cnt[thread]->moved) {
 					if (cnt[0]->conf.control_html_output){
 						send_template_ini_client(client_socket, ini_template);
-						sprintf(res,"track set x=%s y=%s<br>\n"
-						            "<a href=/%d/track><- back</a>\n", x_value, y_value, thread);
+						sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>\n"
+							    "track absolute set x=%s y=%s<br>\n",
+							    thread, thread, x_value, y_value);
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
 					} else {
 						send_template_ini_client_raw(client_socket);
-						sprintf(res,"track set x=%s y=%s\nDone\n", x_value, y_value);
+						sprintf(res,"track absolute set x=%s y=%s\nDone\n", x_value, y_value);
 						send_template_raw(client_socket, res);
 					}
 				} else {
 					/*error in track action*/
 					if (cnt[0]->conf.control_html_output) {
-						sprintf(res,"<a href=/%d/track><- back</a>\n", thread);
+						sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", thread, thread);
 						response_client(client_socket, track_error, res);
 					}
 					else
@@ -1502,13 +1547,14 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					if (cnt[thread]->moved){
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
-							sprintf(res,"track pan=%s tilt=%s<br>\n"
-							            "<a href=/%d/track><- back</a>\n", panvalue, tiltvalue, thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>\n"
+								    "track relative pan=%s tilt=%s\n",
+							            thread, thread, panvalue, tiltvalue);
 							send_template(client_socket, res);
 							send_template_end_client(client_socket);
 						} else {
 							send_template_ini_client_raw(client_socket);
-							sprintf(res,"track pan=%s tilt=%s\nDone\n", panvalue, tiltvalue);
+							sprintf(res,"track relative pan=%s tilt=%s\nDone\n", panvalue, tiltvalue);
 							send_template_raw(client_socket, res);
 						}
 						return 1;
@@ -1516,7 +1562,8 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 					else{
 						/*error in track tilt*/	
 						if (cnt[0]->conf.control_html_output) {
-							sprintf(res,"<a href=/%d/track><- back</a>\n", thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", 
+								    thread, thread);
 							response_client(client_socket, track_error, res);
 						}else response_client(client_socket, track_error_raw, NULL);
 					}
@@ -1524,7 +1571,7 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 
 				/*error in track pan*/
 				if (cnt[0]->conf.control_html_output) {
-					sprintf(res,"<a href=/%d/track><- back</a>\n", thread);
+					sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>\n", thread, thread);
 					response_client(client_socket, track_error, res);
 				} else
 					response_client(client_socket, track_error_raw, NULL);
@@ -1532,7 +1579,7 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 		} else if (length_uri == 0) {
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"<b>Thread %d</b><br>\n"
+				sprintf(res,"<a href=/%hu/track><- back</a><br><br>\n<b>Thread %hu</b><br>\n"
 				            "<form action='set'>\n"
 				            "Pan<input type=text name='pan' value=''>\n"
 				            "Tilt<input type=text name='tilt' value=''>\n"
@@ -1542,8 +1589,7 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 				            "X<input type=text name='x' value=''>\n"
 				            "Y<input type=text name='y' value=''>\n"
 				            "<input type=submit value='set absolute'>\n"
-				            "</form>\n"
-				            "<a href=/%d/track><- back</a>\n", thread, thread);
+				            "</form>\n", thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
@@ -1563,20 +1609,13 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 		length_uri = length_uri-6;
 		if (length_uri==0) {
 			if (cnt[0]->conf.control_html_output) {
-				if (cnt[thread]->track.active)
-					sprintf(res,"<b>Thread %d</b><br>track auto enabled<br>\n",thread);
-				else
-					sprintf(res,"<b>Thread %d</b><br>track auto disabled<br>\n",thread);
 				send_template_ini_client(client_socket, ini_template);
-				send_template(client_socket, res);
-				sprintf(res, "<a href=/%d/track><- back</a>\n",thread);
+				sprintf(res, "<a href=/%hu/track><- back</a><br><br>\n<b>Thread %hu</b><br>track auto %s",
+					     thread, thread, (cnt[thread]->track.active)? "enabled":"disabled");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
-				if (cnt[thread]->track.active)
-					sprintf(res,"Thread %d\n track auto enabled\nDone\n",thread);
-				else
-					sprintf(res,"Thread %d\n track auto disabled\nDone\n",thread);
+				sprintf(res,"Thread %hu\n track auto %s\nDone\n",thread, (cnt[thread]->track.active)? "enabled":"disabled");
 				send_template_ini_client_raw(client_socket);
 				send_template_raw(client_socket, res);
 			}
@@ -1609,33 +1648,29 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 
 					if (!strcmp(command,"status")) {
 						if (cnt[0]->conf.control_html_output) {
-							if (cnt[thread]->track.active)
-								sprintf(res, "<b>Thread %d</b><br>track auto enabled\n", thread);
-							else
-								sprintf(res, "<b>Thread %d</b><br>track auto disabled\n", thread);
 							send_template_ini_client(client_socket, ini_template);
-							send_template(client_socket, res);
-							sprintf(res,"<a href=/%d/track><- back</a>", thread);
+							sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b><br>"
+								    "track auto %s",thread, thread, 
+								    (cnt[thread]->track.active)? "enabled":"disabled");
 							send_template(client_socket, res);
 							send_template_end_client(client_socket);
 						} else {
-							if (cnt[thread]->track.active)
-								sprintf(res, "Thread %d\n track auto enabled\nDone\n", thread);
-							else
-								sprintf(res, "Thread %d\n track auto disabled\nDone\n", thread);
+							sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread, 
+								     (cnt[thread]->track.active)? "enabled":"disabled");
 							send_template_ini_client_raw(client_socket);
 							send_template_raw(client_socket, res);
 						}
 					} else {
 						int active;
 						active = atoi(command);
+						/* CHECK */
 						if (active > -1 && active < 2) {
 							autocnt = cnt[thread];
 							autocnt->track.active = atoi(command);
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
-								sprintf(res,"track auto	%s<br><a href=/%d/track><- back</a>",
-								        command,thread);
+								sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>"
+									    "<br>track auto %s<br>", thread, thread, command);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
@@ -1666,13 +1701,12 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 		else if (length_uri == 0) {
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"<b>Thread %d</b>\n"
+				sprintf(res,"<a href=/%hu/track><- back</a><br><br>\n<b>Thread %hu</b>\n"
 				            "<form action='auto'><select name='value'>\n"
 				            "<option value='0'>Disable</option><option value='1'>Enable</option>\n"
 				            "<option value='status'>status</option>\n"
 				            "</select><input type=submit value='set'>\n"
-				            "</form>\n"
-				            "<a href=/%d/track><- back</a>\n", thread, thread);
+				            "</form>\n",thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
@@ -1701,13 +1735,16 @@ static int track(char *pointer, char *res, int length_uri, int thread, int clien
 /*
 	parses the action requested for motion ( config , action , detection , track ) and call
 	to action function if needed.
+
+	return 0 on error
+	return 1 on success	
 */
 
-static int handle_get(int client_socket, const char* url, void *userdata)
+static short unsigned int handle_get(int client_socket, const char* url, void *userdata)
 {
 	struct context **cnt=userdata;
 	if (*url == '/' ){
-		int i=0;
+		short unsigned int i = 0;
 		char *res=NULL;
 		res = malloc(2048);
 
@@ -1715,23 +1752,23 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 		while (cnt[++i]);
 		/* ROOT_URI -> GET / */
 		if (! (strcmp (url, "/")) ) {
-			int y=0;
+			short unsigned int y;
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket,ini_template);
-				sprintf(res,"<b>Motion "VERSION" Running [%d] Threads</b><br>\n"
+				sprintf(res,"<b>Motion "VERSION" Running [%hu] Threads</b><br>\n"
 				            "<a href='/0/'>All</a><br>\n", i);
 				send_template(client_socket, res);
 				for (y=1; y<i; y++) {
-					sprintf(res,"<a href='/%d/'>Thread %d</a><br>\n", y, y);
+					sprintf(res,"<a href='/%hu/'>Thread %hu</a><br>\n", y, y);
 					send_template(client_socket, res);
 				}
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"Motion "VERSION" Running [%d] Threads\n0\n",i);
+				sprintf(res,"Motion "VERSION" Running [%hu] Threads\n0\n",i);
 				send_template_raw(client_socket, res);
 				for (y=1; y<i; y++) {
-					sprintf(res, "%d\n", y);
+					sprintf(res, "%hu\n", y);
 					send_template_raw(client_socket, res);
 				}
 			}
@@ -1739,15 +1776,15 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 		else {
 			char command[256] = {'\0'};
 			char slash;
-			int thread = -1;
-			int length_uri = 0;
+			short int thread = -1;
+			size_t length_uri = 0;
 			char *pointer = (char *)url;
 
 			length_uri = strlen(url);
 			/* Check for Thread number first -> GET /2 */
 			pointer++;
 			length_uri--;
-			warningkill = sscanf (pointer, "%i%c", &thread, &slash);
+			warningkill = sscanf (pointer, "%hd%c", &thread, &slash);
 
 			if ((thread != -1) && (thread < i)) {
 				/* thread_number found */
@@ -1774,18 +1811,17 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 						if (length_uri == 0) {
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
-								sprintf(res,"<b>Thread %d</b><br>\n"
-								            "<a href=/%d/config/list>list</a><br>\n"
-								            "<a href=/%d/config/write>write</a><br>\n"
-								            "<a href=/%d/config/set>set</a><br>\n"
-								            "<a href=/%d/config/get>get</a><br>\n"
-								            "<a href=/%d/><- back</a>\n",
+								sprintf(res,"<a href=/%hd/><- back</a><br><br>\n<b>Thread %hd</b><br>\n"
+								            "<a href=/%hd/config/list>list</a><br>\n"
+								            "<a href=/%hd/config/write>write</a><br>\n"
+								            "<a href=/%hd/config/set>set</a><br>\n"
+								            "<a href=/%hd/config/get>get</a><br>\n",
 								        thread, thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res,"Thread %d\nlist\nwrite\nset\nget\n", thread);
+								sprintf(res,"Thread %hd\nlist\nwrite\nset\nget\n", thread);
 								send_template_raw(client_socket, res);
 							}
 						} else if ((slash == '/') && (length_uri >= 4)) {
@@ -1808,22 +1844,21 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 						if (length_uri == 0) {
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
-								sprintf(res,"<b>Thread %d</b><br>\n"
-								            "<a href=/%d/action/makemovie>makemovie</a><br>\n"
-								            "<a href=/%d/action/snapshot>snapshot</a><br>\n"
-								            "<a href=/%d/action/restart>restart</a><br>\n"
-								            "<a href=/%d/action/quit>quit</a><br>\n"
-								            "<a href=/%d/><- back</a>\n",
+								sprintf(res,"<a href=/%hd/><- back</a><br><br>\n<b>Thread %hd</b><br>\n"
+								            "<a href=/%hd/action/makemovie>makemovie</a><br>\n"
+								            "<a href=/%hd/action/snapshot>snapshot</a><br>\n"
+								            "<a href=/%hd/action/restart>restart</a><br>\n"
+								            "<a href=/%hd/action/quit>quit</a><br>\n",
 								        thread,thread,thread,thread,thread,thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res,"Thread %d\nmakemovie\nsnapshot\nrestart\nquit\n", thread);
+								sprintf(res,"Thread %hd\nmakemovie\nsnapshot\nrestart\nquit\n", thread);
 								send_template_raw(client_socket, res);
 							}
 						} else if ((slash == '/') && (length_uri > 4)) {
-							int ret = 1;
+							short unsigned int ret = 1;
 							pointer++;
 							length_uri--;
 							ret = action(pointer, res, length_uri, thread, client_socket, cnt);
@@ -1844,18 +1879,17 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 						if (length_uri == 0) {
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
-								sprintf(res,"<b>Thread %d</b><br>\n"
-								            "<a href=/%d/detection/status>status</a><br>\n"
-								            "<a href=/%d/detection/start>start</a><br>\n"
-								            "<a href=/%d/detection/pause>pause</a><br>\n"
-								            "<a href=/%d/detection/connection>connection</a><br>\n"
-								            "<a href=/%d/><- back</a>\n",
+								sprintf(res,"<a href=/%hd/><- back</a><br><br>\n<b>Thread %hd</b><br>\n"
+								            "<a href=/%hd/detection/status>status</a><br>\n"
+								            "<a href=/%hd/detection/start>start</a><br>\n"
+								            "<a href=/%hd/detection/pause>pause</a><br>\n"
+								            "<a href=/%hd/detection/connection>connection</a><br>\n",
 								        thread, thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res,"Thread %d\nstatus\nstart\npause\nconnection\n", thread);
+								sprintf(res,"Thread %hd\nstatus\nstart\npause\nconnection\n", thread);
 								send_template_raw(client_socket, res);
 							}
 						} else if ((slash == '/') && (length_uri > 5)) {
@@ -1877,17 +1911,16 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 						if (length_uri == 0) {
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
-								sprintf(res,"<b>Thread %d</b><br>\n"
-								            "<a href=/%d/track/set>track set pan/tilt</a><br>\n"
-								            "<a href=/%d/track/auto>track auto</a><br>\n"
-								            "<a href=/%d/track/status>track status</a><br>\n"
-								            "<a href=/%d/><- back</a>\n",
+								sprintf(res,"<a href=/%hd/><- back</a><br><br>\n<b>Thread %hd</b><br>\n"
+								            "<a href=/%hd/track/set>track set pan/tilt</a><br>\n"
+								            "<a href=/%hd/track/auto>track auto</a><br>\n"
+								            "<a href=/%hd/track/status>track status</a><br>\n",
 								        thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res,"Thread %d\nset pan/tilt\nauto\nstatus\n", thread);
+								sprintf(res,"Thread %hd\nset pan/tilt\nauto\nstatus\n", thread);
 								send_template_raw(client_socket, res);
 							}
 						}
@@ -1900,7 +1933,7 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 							} else {
 								/* error track not enable */
 								if (cnt[0]->conf.control_html_output) {
-									sprintf(res,"<a href=/%d/><- back</a>\n",thread);
+									sprintf(res,"<a href=/%hd/><- back</a>\n",thread);
 									response_client(client_socket, not_track,res);
 								}
 								else
@@ -1908,7 +1941,7 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 							}
 						} else {
 							if (cnt[0]->conf.control_html_output) {
-								sprintf(res,"<a href=/%d/><- back</a>\n",thread);
+								sprintf(res,"<a href=/%hd/><- back</a>\n",thread);
 								response_client(client_socket, not_found_response_valid_command, res);
 							}
 							else
@@ -1916,7 +1949,7 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 						}
 					} else {
 						if (cnt[0]->conf.control_html_output) {
-							sprintf(res,"<a href=/%d/><- back</a>\n",thread);
+							sprintf(res,"<a href=/%hd/><- back</a>\n",thread);
 							response_client(client_socket, not_found_response_valid_command, res);
 						}
 						else
@@ -1926,18 +1959,17 @@ static int handle_get(int client_socket, const char* url, void *userdata)
 					/* /thread_number/ requested */
 					if (cnt[0]->conf.control_html_output) {
 						send_template_ini_client(client_socket,ini_template);
-						sprintf(res,"<b>Thread %d</b><br>\n"
-						            "<a href='/%d/config'>config</a><br>\n"
-						            "<a href='/%d/action'>action</a><br>\n"
-						            "<a href='/%d/detection'>detection</a><br>\n"
-						            "<a href='/%d/track'>track</a><br>\n"
-						            "<a href=/><- back</a>\n",
+						sprintf(res,"<a href=/><- back</a><br><br>\n<b>Thread %hd</b><br>\n"
+						            "<a href='/%hd/config'>config</a><br>\n"
+						            "<a href='/%hd/action'>action</a><br>\n"
+						            "<a href='/%hd/detection'>detection</a><br>\n"
+						            "<a href='/%hd/track'>track</a><br>\n",
 						        thread, thread, thread, thread, thread);
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
 					} else {
 						send_template_ini_client_raw(client_socket);
-						sprintf(res,"Thread %d\nconfig\naction\ndetection\ntrack\n", thread);
+						sprintf(res,"Thread %hd\nconfig\naction\ndetection\ntrack\n", thread);
 						send_template_raw(client_socket, res);
 					}
 				}
@@ -1966,12 +1998,14 @@ static int handle_get(int client_socket, const char* url, void *userdata)
  -TODO-
  As usually web clients uses nonblocking connect/read
  read_client should handle nonblocking sockets.
+ return 0 on error
+ return 1 on success
 */
 
-static int read_client(int client_socket, void *userdata, char *auth)
+static short unsigned int read_client(int client_socket, void *userdata, char *auth)
 {
-	int alive = 1;
-	int ret = 1;
+	short unsigned int alive = 1;
+	short unsigned int ret = 1;
 	char buffer[1024] = {'\0'};
 	int length = 1024;
 	struct context **cnt = userdata;
@@ -1981,14 +2015,14 @@ static int read_client(int client_socket, void *userdata, char *auth)
 
 	while (alive)
 	{
-		int nread = 0, readb = -1;
+		ssize_t nread = 0, readb = -1;
 
 		nread = read (client_socket, buffer, length);
 
 		if (nread <= 0) {
 			motion_log(LOG_ERR, 1, "httpd First read");
 			pthread_mutex_unlock(&httpd_mutex);
-			return -1;
+			return 0;
 		}
 		else {
 			char method[sizeof (buffer)];
@@ -2022,7 +2056,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 			if (nread == -1) {
 				motion_log(LOG_ERR, 1, "httpd READ");
 				pthread_mutex_unlock(&httpd_mutex);
-				return -1;
+				return 0;
 			}
 			alive = 0;
 
@@ -2035,7 +2069,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 					warningkill = write (client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
 
 				pthread_mutex_unlock(&httpd_mutex);
-				return -1;
+				return 0;
 			}
 			else if (strcmp (method, "GET")) {
 				/* This server only implements the GET method.  If client
@@ -2047,7 +2081,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 					snprintf (response, sizeof (response),bad_method_response_template_raw, method);
 				warningkill = write (client_socket, response, strlen (response));
 				pthread_mutex_unlock(&httpd_mutex);
-				return -1;
+				return 0;
 			} else if ( auth != NULL) {
 				if ( (authentication = strstr(buffer,"Basic")) ) {
 					char *end_auth = NULL;
@@ -2060,7 +2094,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 						snprintf (response, sizeof (response),request_auth_response_template, method);
 						warningkill = write (client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
-						return -1;
+						return 0;
 					}
 
 					if ( !check_authentication(auth, authentication,
@@ -2070,7 +2104,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 						snprintf(response, sizeof (response), request_auth_response_template, method);
 						warningkill = write (client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
-						return -1;
+						return 0;
 					} else {
 						ret = handle_get (client_socket, url, cnt);
 						/* A valid auth request.  Process it.  */
@@ -2081,7 +2115,7 @@ static int read_client(int client_socket, void *userdata, char *auth)
 					snprintf (response, sizeof (response),request_auth_response_template, method);
 					warningkill = write (client_socket, response, strlen (response));
 					pthread_mutex_unlock(&httpd_mutex);
-					return -1;
+					return 0;
 				}
 			} else {
 				ret=handle_get (client_socket, url, cnt);
@@ -2134,9 +2168,8 @@ static int acceptnonblocking(int serverfd, int timeout)
 
 void httpd_run(struct context **cnt)
 {
-	int sd, client_socket_fd;
-	int client_sent_quit_message = 1, val=1;
-	int closehttpd = 0;
+	int sd, client_socket_fd, val = 1;
+	short unsigned int client_sent_quit_message = 1, closehttpd = 0; 
 	struct sockaddr_in servAddr;
 	struct sigaction act;
 	char *authentication = NULL;
@@ -2199,7 +2232,7 @@ void httpd_run(struct context **cnt)
 		free(userpass);
 	}
 
-	while ((client_sent_quit_message!=0) && (!closehttpd)) { 
+	while ((client_sent_quit_message) && (!closehttpd)) { 
 
 		client_socket_fd = acceptnonblocking(sd, 1);
 
