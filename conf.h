@@ -42,7 +42,6 @@ struct config {
 	int noise_tune;
 	int minimum_frame_time;
 	int lightswitch;
-	int nochild;
 	int autobright;
 	int brightness;
 	int contrast;

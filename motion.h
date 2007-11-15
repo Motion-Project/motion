@@ -297,6 +297,7 @@ struct context {
 	char conf_filename[PATH_MAX];
 	int threadnr;
 	int daemon;
+	char pid_file[PATH_MAX];
 
 	struct config conf;
 	struct images imgs;

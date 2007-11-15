@@ -59,7 +59,6 @@ struct config conf_template = {
 	noise_tune:            1,
 	minimum_frame_time:    0,
 	lightswitch:           0,
-	nochild:               0,
 	autobright:            0,
 	brightness:            0,
 	contrast:              0,
@@ -135,7 +134,6 @@ struct config conf_template = {
 	area_detect:           NULL,
 	minimum_motion_frames: 1,
 	pid_file:              NULL,
-	// debug_parameter:       0
 };
 
 
@@ -1270,20 +1268,6 @@ config_param config_params[] = {
 	copy_string,
 	print_string
 	},
-/*
-	{
-	"debug_parameter",
-	"\n############################################################\n"
-	"# Thread Config Files - One for each camera\n"
-	"# If Only One Camera - Use default values in this file\n"
-	"############################################################\n\n",
-	//"# Debug option for programmers - not normally used",
-	0,
-	CONF_OFFSET(debug_parameter),
-	copy_int,
-	print_int
-	},
-*/
 	{
 	"thread",
 	"\n##############################################################\n"
@@ -1312,7 +1296,7 @@ static void conf_cmdline (struct context *cnt, int thread)
 	 * if necessary. This is accomplished by calling mystrcpy();
 	 * see this function for more information.
 	 */
-	while ((c=getopt(conf->argc, conf->argv, "c:d:hns?p"))!=EOF)
+	while ((c=getopt(conf->argc, conf->argv, "c:d:hns?p:"))!=EOF)
 		switch (c) {
 			case 'c':
 				if (thread==-1) strcpy(cnt->conf_filename, optarg);
@@ -1328,7 +1312,7 @@ static void conf_cmdline (struct context *cnt, int thread)
 				debug_level = atoi(optarg);
 				break;
 			case 'p':
-				cnt->conf.pid_file = mystrcpy(cnt->conf.pid_file, optarg);
+				if (thread==-1) strcpy(cnt->pid_file, optarg);
 				break;	
 			case 'h':
 			case '?':
@@ -1570,8 +1554,10 @@ struct context ** conf_load (struct context **cnt)
 	 * 3. $HOME/.motion/motion.conf
 	 * 4. sysconfig/motion.conf
 	 */
-	/* Get filename from commandline */
+	/* Get filename & pid file from commandline */
 	cnt[0]->conf_filename[0] = 0;
+	cnt[0]->pid_file[0] = 0;
+
 	conf_cmdline(cnt[0], -1);
 	if (cnt[0]->conf_filename[0]){ /* User has supplied filename on commandline*/
 		strcpy(filename, cnt[0]->conf_filename);
@@ -1616,6 +1602,10 @@ struct context ** conf_load (struct context **cnt)
 	i=-1;
 	while(cnt[++i])
 		conf_cmdline(cnt[i], i);
+
+	/* if pid file was passed from command line copy to main thread conf struct */
+	if (cnt[0]->pid_file[0])	
+		cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
 
 	return cnt;
 }
