@@ -189,7 +189,7 @@ Minimum time in seconds between the capturing picture frames from the camera. De
 .B minimum_motion_frames boolean
 Values: 1 - 1000s / Default: 1
 .br
-Picture frames must contain motion at least the specified number of frames in a row before they are detected as true motion. At the default of 1, all motion is detected. Valid range is 1 to thousands, but it is recommended to keep it within 1-10.
+Picture frames must contain motion at least the specified number of frames in a row before they are detected as true motion. At the default of 1, all motion is detected. Valid range is 1 to thousands, but it is recommended to keep it within 1-5.
 .TP
 .B motion_video_pipe string
 Values: Max 4095 characters / Default: Not defined
@@ -307,7 +307,7 @@ Values: Max 4095 characters / Default: Not defined
 Name of the PostgreSQL database.
 .TP
 .B pgsql_host string
-Values: Max 4095 characters / Default: Not defined
+Values: Max 4095 characters / Default: localhost 
 .br
 IP address or domain name for the PostgreSQL server. Use "localhost" if motion and PostgreSQL runs on the same server.
 .TP
