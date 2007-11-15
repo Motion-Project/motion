@@ -684,14 +684,15 @@ fi
 
 dnl Check sizes of integer types
 AC_CHECK_SIZEOF(short int)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long int)
+
 if test "$ac_cv_sizeof_short_int" = "4"; then
 	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short int\""
 else
-	AC_CHECK_SIZEOF(int)
 	if test "$ac_cv_sizeof_int" = "4"; then
 		TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"int\""
 	else
-		AC_CHECK_SIZEOF(long int)
 		if test "$ac_cv_sizeof_long_int" = "4"; then
 			TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"long int\""
 		fi

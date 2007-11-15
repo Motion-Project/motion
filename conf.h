@@ -119,7 +119,6 @@ struct config {
 	const char *area_detect;
 	int minimum_motion_frames;
 	char *pid_file;
-	// int debug_parameter;
 	int argc;
 	char **argv;
 };

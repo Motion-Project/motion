@@ -68,7 +68,6 @@
 #include "motion.h"
 #include "netcam.h"
 #include "video.h"
-#include "rotate.h"
 
 #ifdef MOTION_V4L2_OLD
 // Seems that is needed for some system

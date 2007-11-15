@@ -5731,10 +5731,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-if test "$ac_cv_sizeof_short_int" = "4"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short int\""
-else
-	{ echo "$as_me:$LINENO: checking for int" >&5
+{ echo "$as_me:$LINENO: checking for int" >&5
 echo $ECHO_N "checking for int... $ECHO_C" >&6; }
 if test "${ac_cv_type_int+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6139,10 +6136,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-	if test "$ac_cv_sizeof_int" = "4"; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"int\""
-	else
-		{ echo "$as_me:$LINENO: checking for long int" >&5
+{ echo "$as_me:$LINENO: checking for long int" >&5
 echo $ECHO_N "checking for long int... $ECHO_C" >&6; }
 if test "${ac_cv_type_long_int+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6547,6 +6541,13 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+
+if test "$ac_cv_sizeof_short_int" = "4"; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short int\""
+else
+	if test "$ac_cv_sizeof_int" = "4"; then
+		TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"int\""
+	else
 		if test "$ac_cv_sizeof_long_int" = "4"; then
 			TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"long int\""
 		fi

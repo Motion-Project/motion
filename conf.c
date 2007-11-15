@@ -122,7 +122,7 @@ struct config conf_template = {
 	netcam_userpass:       NULL,
 	netcam_proxy:          NULL,
 	pgsql_db:              NULL,
-	pgsql_host:            NULL,
+	pgsql_host:            "localhost",
 	pgsql_user:            NULL,
 	pgsql_password:        NULL,
 	pgsql_port:            5432,
