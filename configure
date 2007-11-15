@@ -1722,6 +1722,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+ac_config_headers="$ac_config_headers config.h"
+
 
 VERSION=3.2.10
 
@@ -5023,7 +5025,10 @@ fi
 
 
 
-for ac_header in stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h sys/param.h
+
+
+
+for ac_header in stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -6737,6 +6742,7 @@ if test -e "/proc/cpuinfo" ; then
 	amd[1543]="-march=athlon64"
 	amd[1544]="-march=athlon64"
 	amd[1565]="-march=opteron"
+	amd[1572]="-march=k8"
 	via[67]="-march=c3"
 	via[68]="-march=c3"
 	via[69]="-march=i686"
@@ -7054,37 +7060,7 @@ test "x$prefix" = xNONE && prefix=$ac_default_prefix
 # Let make expand exec_prefix.
 test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
 
-# Transform confdefs.h into DEFS.
-# Protect against shell expansion while executing Makefile rules.
-# Protect against Makefile macro expansion.
-#
-# If the first sed substitution is executed (which looks for macros that
-# take arguments), then branch to the quote section.  Otherwise,
-# look for a macro that doesn't take arguments.
-ac_script='
-t clear
-:clear
-s/^[	 ]*#[	 ]*define[	 ][	 ]*\([^	 (][^	 (]*([^)]*)\)[	 ]*\(.*\)/-D\1=\2/g
-t quote
-s/^[	 ]*#[	 ]*define[	 ][	 ]*\([^	 ][^	 ]*\)[	 ]*\(.*\)/-D\1=\2/g
-t quote
-b any
-:quote
-s/[	 `~#$^&*(){}\\|;'\''"<>?]/\\&/g
-s/\[/\\&/g
-s/\]/\\&/g
-s/\$/$$/g
-H
-:any
-${
-	g
-	s/^\n//
-	s/\n/ /g
-	p
-}
-'
-DEFS=`sed -n "$ac_script" confdefs.h`
-
+DEFS=-DHAVE_CONFIG_H
 
 ac_libobjs=
 ac_ltlibobjs=
@@ -7419,6 +7395,7 @@ _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF
 # Files that config.status was made for.
 config_files="$ac_config_files"
+config_headers="$ac_config_headers"
 
 _ACEOF
 
@@ -7436,9 +7413,14 @@ Usage: $0 [OPTIONS] [FILE]...
       --recheck    update $as_me by reconfiguring in the same conditions
   --file=FILE[:TEMPLATE]
 		   instantiate the configuration file FILE
+  --header=FILE[:TEMPLATE]
+		   instantiate the configuration header FILE
 
 Configuration files:
 $config_files
+
+Configuration headers:
+$config_headers
 
 Report bugs to <bug-autoconf@gnu.org>."
 
@@ -7488,7 +7470,16 @@ do
     $ac_shift
     CONFIG_FILES="$CONFIG_FILES $ac_optarg"
     ac_need_defaults=false;;
-  --he | --h |  --help | --hel | -h )
+  --header | --heade | --head | --hea )
+    $ac_shift
+    CONFIG_HEADERS="$CONFIG_HEADERS $ac_optarg"
+    ac_need_defaults=false;;
+  --he | --h)
+    # Conflict between --help and --header
+    { echo "$as_me: error: ambiguous option: $1
+Try \`$0 --help' for more information." >&2
+   { (exit 1); exit 1; }; };;
+  --help | --hel | -h )
     echo "$ac_cs_usage"; exit ;;
   -q | -quiet | --quiet | --quie | --qui | --qu | --q \
   | -silent | --silent | --silen | --sile | --sil | --si | --s)
@@ -7543,6 +7534,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
+    "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "motion.init-FreeBSD.sh") CONFIG_FILES="$CONFIG_FILES motion.init-FreeBSD.sh" ;;
     "motion.init-Debian") CONFIG_FILES="$CONFIG_FILES motion.init-Debian" ;;
     "motion.init-RH") CONFIG_FILES="$CONFIG_FILES motion.init-RH" ;;
@@ -7562,6 +7554,7 @@ done
 # bizarre bug on SunOS 4.1.3.
 if $ac_need_defaults; then
   test "${CONFIG_FILES+set}" = set || CONFIG_FILES=$config_files
+  test "${CONFIG_HEADERS+set}" = set || CONFIG_HEADERS=$config_headers
 fi
 
 # Have a temporary directory for convenience.  Make it in the build tree
@@ -7720,7 +7713,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF
 fi # test -n "$CONFIG_FILES"
 
 
-for ac_tag in  :F $CONFIG_FILES
+for ac_tag in  :F $CONFIG_FILES  :H $CONFIG_HEADERS
 do
   case $ac_tag in
   :[FHLC]) ac_mode=$ac_tag; continue;;
@@ -7955,7 +7948,104 @@ which seems to be undefined.  Please make sure it is defined." >&2;}
   *) rm -f "$ac_file"; mv "$tmp/out" $ac_file;;
   esac
  ;;
+  :H)
+  #
+  # CONFIG_HEADER
+  #
+_ACEOF
 
+# Transform confdefs.h into a sed script `conftest.defines', that
+# substitutes the proper values into config.h.in to produce config.h.
+rm -f conftest.defines conftest.tail
+# First, append a space to every undef/define line, to ease matching.
+echo 's/$/ /' >conftest.defines
+# Then, protect against being on the right side of a sed subst, or in
+# an unquoted here document, in config.status.  If some macros were
+# called several times there might be several #defines for the same
+# symbol, which is useless.  But do not sort them, since the last
+# AC_DEFINE must be honored.
+ac_word_re=[_$as_cr_Letters][_$as_cr_alnum]*
+# These sed commands are passed to sed as "A NAME B PARAMS C VALUE D", where
+# NAME is the cpp macro being defined, VALUE is the value it is being given.
+# PARAMS is the parameter list in the macro definition--in most cases, it's
+# just an empty string.
+ac_dA='s,^\\([	 #]*\\)[^	 ]*\\([	 ]*'
+ac_dB='\\)[	 (].*,\\1define\\2'
+ac_dC=' '
+ac_dD=' ,'
+
+uniq confdefs.h |
+  sed -n '
+	t rset
+	:rset
+	s/^[	 ]*#[	 ]*define[	 ][	 ]*//
+	t ok
+	d
+	:ok
+	s/[\\&,]/\\&/g
+	s/^\('"$ac_word_re"'\)\(([^()]*)\)[	 ]*\(.*\)/ '"$ac_dA"'\1'"$ac_dB"'\2'"${ac_dC}"'\3'"$ac_dD"'/p
+	s/^\('"$ac_word_re"'\)[	 ]*\(.*\)/'"$ac_dA"'\1'"$ac_dB$ac_dC"'\2'"$ac_dD"'/p
+  ' >>conftest.defines
+
+# Remove the space that was appended to ease matching.
+# Then replace #undef with comments.  This is necessary, for
+# example, in the case of _POSIX_SOURCE, which is predefined and required
+# on some systems where configure will not decide to define it.
+# (The regexp can be short, since the line contains either #define or #undef.)
+echo 's/ $//
+s,^[	 #]*u.*,/* & */,' >>conftest.defines
+
+# Break up conftest.defines:
+ac_max_sed_lines=50
+
+# First sed command is:	 sed -f defines.sed $ac_file_inputs >"$tmp/out1"
+# Second one is:	 sed -f defines.sed "$tmp/out1" >"$tmp/out2"
+# Third one will be:	 sed -f defines.sed "$tmp/out2" >"$tmp/out1"
+# et cetera.
+ac_in='$ac_file_inputs'
+ac_out='"$tmp/out1"'
+ac_nxt='"$tmp/out2"'
+
+while :
+do
+  # Write a here document:
+    cat >>$CONFIG_STATUS <<_ACEOF
+    # First, check the format of the line:
+    cat >"\$tmp/defines.sed" <<\\CEOF
+/^[	 ]*#[	 ]*undef[	 ][	 ]*$ac_word_re[	 ]*\$/b def
+/^[	 ]*#[	 ]*define[	 ][	 ]*$ac_word_re[(	 ]/b def
+b
+:def
+_ACEOF
+  sed ${ac_max_sed_lines}q conftest.defines >>$CONFIG_STATUS
+  echo 'CEOF
+    sed -f "$tmp/defines.sed"' "$ac_in >$ac_out" >>$CONFIG_STATUS
+  ac_in=$ac_out; ac_out=$ac_nxt; ac_nxt=$ac_in
+  sed 1,${ac_max_sed_lines}d conftest.defines >conftest.tail
+  grep . conftest.tail >/dev/null || break
+  rm -f conftest.defines
+  mv conftest.tail conftest.defines
+done
+rm -f conftest.defines conftest.tail
+
+echo "ac_result=$ac_in" >>$CONFIG_STATUS
+cat >>$CONFIG_STATUS <<\_ACEOF
+  if test x"$ac_file" != x-; then
+    echo "/* $configure_input  */" >"$tmp/config.h"
+    cat "$ac_result" >>"$tmp/config.h"
+    if diff $ac_file "$tmp/config.h" >/dev/null 2>&1; then
+      { echo "$as_me:$LINENO: $ac_file is unchanged" >&5
+echo "$as_me: $ac_file is unchanged" >&6;}
+    else
+      rm -f $ac_file
+      mv "$tmp/config.h" $ac_file
+    fi
+  else
+    echo "/* $configure_input  */"
+    cat "$ac_result"
+  fi
+  rm -f "$tmp/out12"
+ ;;
 
 
   esac

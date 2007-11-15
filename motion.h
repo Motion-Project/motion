@@ -10,6 +10,8 @@
 #ifndef _INCLUDE_MOTION_H
 #define _INCLUDE_MOTION_H
 
+#include "config.h"
+
 /* Includes */
 #ifdef HAVE_MYSQL
 #include <mysql.h>

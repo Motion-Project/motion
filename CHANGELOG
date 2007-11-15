@@ -16,6 +16,7 @@ Features
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
    * Preview pictures get the timestamp of moment they were captured (Dag Erlandsson).
+   * Fixed http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x23x093651 (Angel Carpitero)
 
 
 3.2.9 Formal Release - Summary of Changes

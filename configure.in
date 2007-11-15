@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script
 AC_INIT
 AC_CONFIG_SRCDIR([motion.c])
+AC_CONFIG_HEADERS(config.h)
 
 VERSION=3.2.10
 AC_SUBST(VERSION)
@@ -639,7 +640,7 @@ dnl End Postgresql
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdio.h unistd.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h sys/param.h)
+AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h)
 
 
 dnl check if v4l2 is available
@@ -781,7 +782,8 @@ if test -e "/proc/cpuinfo" ; then
 	amd[[155]]="-march=athlon64"
 	amd[[1543]]="-march=athlon64"
 	amd[[1544]]="-march=athlon64"
-	amd[[1565]]="-march=opteron" 
+	amd[[1565]]="-march=opteron"
+	amd[[1572]]="-march=k8" 
 	via[[67]]="-march=c3"
 	via[[68]]="-march=c3"
 	via[[69]]="-march=i686" 
