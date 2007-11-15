@@ -1949,12 +1949,12 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 	/* Initialize our global mutex */
 	pthread_mutex_init(&global_lock, NULL);
 
-	motion_log(LOG_INFO, 0, "Motion "VERSION" Started"); 
-
 	/* Create the list of context structures and load the
 	 * configuration.
 	 */
 	cntlist_create(argc, argv);
+
+	motion_log(LOG_INFO, 0, "Motion "VERSION" Started");
 
 	initialize_chars();
 
