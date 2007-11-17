@@ -281,7 +281,7 @@ config_param config_params[] = {
 	},
 	{
 	"netcam_url",
-	"# URL to use if you are using a network camera, size will be autodetected (incl http://)\n"
+	"# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// or file:///)\n"
 	"# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined",
 	0,
 	CONF_OFFSET(netcam_url),
