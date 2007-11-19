@@ -76,6 +76,7 @@ struct config {
 	const char *tuner_device;
 #endif
 	const char *video_device;
+	short unsigned int v4l2_palette;
 	const char *vidpipe;
 	const char *filepath;
 	const char *jpegpath;

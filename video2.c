@@ -291,10 +291,10 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 	return (0);
 }
 
-static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
+static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, int *height)
 {
 	struct v4l2_fmtdesc fmt;
-	int v4l2_pal;
+	short int v4l2_pal;
 
 	static const u32 supported_formats[] = {	/* higher index means better chance to be used */
 		V4L2_PIX_FMT_SN9C10X,
@@ -309,7 +309,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 		0
 	};
 
-	int index_format = -1;
+	short int index_format = -1;
 
 	memset(&fmt, 0, sizeof(struct v4l2_fmtdesc));
 	fmt.index = v4l2_pal = 0;
@@ -317,7 +317,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 
 	motion_log(LOG_INFO, 0, "Supported palettes:");
 	while (xioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
-		int i;
+		short int i;
 
 		motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal,
 			   fmt.pixelformat >> 0, fmt.pixelformat >> 8,
@@ -325,6 +325,13 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 
 		for (i = 0; supported_formats[i]; i++)
 			if (supported_formats[i] == fmt.pixelformat && i > index_format) {
+				if (cnt->conf.v4l2_palette == i) {
+					index_format = cnt->conf.v4l2_palette;
+					motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
+								fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24);
+					i=10;
+					break;
+				}
 				index_format = i;
 			}
 
@@ -345,7 +352,7 @@ static int v4l2_set_pix_format(src_v4l2_t * s, int *width, int *height)
 		s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
 		if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
-			motion_log(LOG_INFO, 0, "Test palette %c%c%c%c (%dx%d)", pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height);
+			motion_log(LOG_INFO, 0, "index_format %d Test palette %c%c%c%c (%dx%d)", index_format, pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height);
 
 			if (s->fmt.fmt.pix.width != (unsigned int) *width
 			    || s->fmt.fmt.pix.height != (unsigned int) *height) {
@@ -651,7 +658,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 		goto err;
 	}
 
-	if (v4l2_set_pix_format(s, &width, &height)) {
+	if (v4l2_set_pix_format(cnt ,s, &width, &height)) {
 		goto err;
 	}
 
