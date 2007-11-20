@@ -11,6 +11,7 @@
 #include "picture.h"
 #include "event.h"
 
+#undef HAVE_STDLIB_H
 #include <jpeglib.h>
 #include <jerror.h>
 

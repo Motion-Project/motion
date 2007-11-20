@@ -2243,13 +2243,13 @@ void httpd_run(struct context **cnt)
 
 		if (client_socket_fd<0) {
 			if ((!cnt[0]) || (cnt[0]->finish)){
-				motion_log(-1, 1, "httpd - Finishing");
+				motion_log(-1, 0, "httpd - Finishing");
 				closehttpd = 1;
 			}
 		} else {
 			/* Get the Client request */
 			client_sent_quit_message = read_client (client_socket_fd, cnt, authentication);
-			motion_log(-1, 1, "httpd - Read from client");
+			motion_log(-1, 0, "httpd - Read from client");
 
 			/* Close Connection */
 			if (client_socket_fd)

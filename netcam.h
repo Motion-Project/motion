@@ -15,6 +15,7 @@
 #ifndef _INCLUDE_NETCAM_H
 #define _INCLUDE_NETCAM_H
 
+#undef HAVE_STDLIB_H
 #include <jpeglib.h>
 #include <setjmp.h>
 #include <sys/socket.h>
