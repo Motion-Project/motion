@@ -630,14 +630,14 @@ static void motion_init(struct context *cnt)
 
 	cnt->imgs.ref = mymalloc(cnt->imgs.size);
 	cnt->imgs.out = mymalloc(cnt->imgs.size);
-	cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(int));  /* contains the moving objects of ref. frame */
+	cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));  /* contains the moving objects of ref. frame */
 	cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
 	memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
 	cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
 	cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
-	cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(int));
-	cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(int));
-	cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(int));
+	cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.smartmask_buffer));
+	cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.labels));
+	cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(cnt->imgs.labelsize));
 
 	/* allocate buffer here for preview buffer */
 	cnt->imgs.preview_image.image = mymalloc(cnt->imgs.size);
@@ -792,7 +792,7 @@ static void motion_init(struct context *cnt)
 	/* Always initialize smart_mask - someone could turn it on later... */
 	memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
 	memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
-	memset(cnt->imgs.smartmask_buffer, 0, cnt->imgs.motionsize*sizeof(int));
+	memset(cnt->imgs.smartmask_buffer, 0, cnt->imgs.motionsize*sizeof(cnt->imgs.smartmask_buffer));
 
 	/* Set noise level */
 	cnt->noise = cnt->conf.noise;
@@ -879,7 +879,7 @@ static void *motion_loop(void *arg)
 	 * if there is any problem on the allocation, mymalloc does not return.
 	 */
 	rolling_average_limit = 10 * cnt->conf.frame_limit;
-	rolling_average_data = mymalloc(sizeof(long int) * rolling_average_limit);
+	rolling_average_data = mymalloc(sizeof(rolling_average_data) * rolling_average_limit);
 
 	/* Preset history buffer with expected frame rate */
 	for (j=0; j< rolling_average_limit; j++)

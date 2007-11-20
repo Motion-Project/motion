@@ -351,7 +351,7 @@ static int alg_labeling(struct context *cnt)
 	imgs->labels_above=0;
 
 	/* init: 0 means no label set / not checked */
-	memset(labels, 0, width*height*sizeof(int));
+	memset(labels, 0, width*height*sizeof(labels));
 	pixelpos = 0;
 	for( iy=0; iy<height-1; iy++ ) {
 		for( ix=0; ix<width-1; ix++, pixelpos++ ) {
