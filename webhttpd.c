@@ -427,7 +427,7 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
 		if ((length_uri != 0) && (question == '?')) {
 			pointer++;
 			length_uri--;
-			warningkill = sscanf(pointer,"%256[a-z_]%c", command, &question);
+			warningkill = sscanf(pointer,"%256[-0-9a-z_]%c", command, &question);
 			/*check command , question == '='  length_uri too*/
 			if ((question == '=') && (command[0]!='\0')) {
 				length_uri = length_uri - strlen(command) - 1;
@@ -669,12 +669,12 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
 			/* 8 -> query=param_name FIXME minimum length param_name */
 			pointer++;
 			length_uri--;
-			warningkill = sscanf(pointer,"%256[a-z]%c", command, &question);
+			warningkill = sscanf(pointer,"%256[-0-9a-z]%c", command, &question);
 
 			if ( (question == '=') && (!strcmp(command,"query")) ) {
 				pointer = pointer + 6;
 				length_uri = length_uri - 6;
-				warningkill = sscanf(pointer, "%256[a-z_]", command);
+				warningkill = sscanf(pointer, "%256[-0-9a-z_]", command);
 				/*check if command exist, length_uri too*/
 				length_uri = length_uri-strlen(command);
 
