@@ -311,7 +311,7 @@ static void url_decode(char *urlencoded, int length)
 */
 
 static short unsigned int config(char *pointer, char *res, short unsigned int length_uri, 
-				short unsigned int thread, int client_socket, void *userdata)
+				short unsigned int thread, int client_socket, const char* host_url, void *userdata)
 {
 	char question;
 	char command[256] = {'\0'};
@@ -559,7 +559,18 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
 								sprintf(option,"<option value='on'>on</option>\n"
 								"<option value='off' selected>off</option>\n");
 							
-
+							if (!cnt[0]->conf.control_localhost)
+							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
+								     "<form action=set?>\n"
+								     "<b>%s</b>&nbsp;<select name='%s'>\n"
+								     "%s"
+								     "</select><input type='submit' value='set'>\n"
+								     "&nbsp;&nbsp;&nbsp;&nbsp;"
+								     "<a href='http://%s/motion_guide/motion_guide.html#%s' target=_blank>[help]</a>"
+                                                                     "</form>\n", thread, thread,
+                                                                     config_params[i].param_name, config_params[i].param_name,
+                                                                     option, host_url, config_params[i].param_name);
+							else
 							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<select name='%s'>\n"
@@ -578,7 +589,17 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
                                                         		value = config_params[i].print(cnt, NULL, i, 0); 
 								if (value == NULL) value = "";
 							}
-
+							if (!cnt[0]->conf.control_localhost)
+							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
+								"<form action=set?>\n"
+								"<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
+								"<input type='submit' value='set'>\n"
+								"&nbsp;&nbsp;&nbsp;&nbsp;"
+								"<a href='http://%s/motion_guide/motion_guide.html#%s'                      target=_blank>[help]</a>"
+								"</form>\n", thread, thread,
+								config_params[i].param_name, config_params[i].param_name,
+								value, host_url, config_params[i].param_name);
+							else	
 							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
@@ -689,6 +710,14 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
 								value=config_params[i].print(cnt, NULL, i, 0);
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket,ini_template);
+								if (!cnt[0]->conf.control_localhost)
+								sprintf(res, "<a href=/%hu/config/get><- back</a><br><br>\n"
+									"<b>Thread %hu</b><br>\n<li>%s = %s"
+									"&nbsp;&nbsp;&nbsp;&nbsp;"
+									"<a href='http://%s/motion_guide/motion_guide.html#%s' "
+									"target=_blank>[help]</a></li>", thread, thread,
+									config_params[i].param_name, value, host_url, config_params[i].param_name);
+								else
 								sprintf(res, "<a href=/%hu/config/get><- back</a><br><br>\n"
 									"<b>Thread %hu</b><br>\n<li>%s = %s"
 									"&nbsp;&nbsp;&nbsp;&nbsp;"
@@ -1741,11 +1770,11 @@ static short unsigned int track(char *pointer, char *res, short unsigned int len
 	parses the action requested for motion ( config , action , detection , track ) and call
 	to action function if needed.
 
-	return 0 on error
+	return 0 on action restart or quit 
 	return 1 on success	
 */
 
-static short unsigned int handle_get(int client_socket, const char* url, void *userdata)
+static short unsigned int handle_get(int client_socket, const char* url, const char* host_url, void *userdata)
 {
 	struct context **cnt=userdata;
 	if (*url == '/' ){
@@ -1833,7 +1862,7 @@ static short unsigned int handle_get(int client_socket, const char* url, void *u
 							/*call config() */
 							pointer++;
 							length_uri--;
-							config(pointer, res, length_uri, thread, client_socket, cnt);
+							config(pointer, res, length_uri, thread, client_socket, host_url, cnt);
 						} else {
 							if (cnt[0]->conf.control_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
@@ -2003,7 +2032,7 @@ static short unsigned int handle_get(int client_socket, const char* url, void *u
  -TODO-
  As usually web clients uses nonblocking connect/read
  read_client should handle nonblocking sockets.
- return 0 on error
+ return 0 to quit or restart
  return 1 on success
 */
 
@@ -2027,17 +2056,19 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 		if (nread <= 0) {
 			motion_log(LOG_ERR, 1, "httpd First read");
 			pthread_mutex_unlock(&httpd_mutex);
-			return 0;
+			return 1;
 		}
 		else {
 			char method[sizeof (buffer)];
 			char url[sizeof (buffer)];
 			char protocol[sizeof (buffer)];
+			char host[sizeof (buffer)];
+			char host_url[sizeof (buffer)];
 			char *authentication=NULL;
 
 			buffer[nread] = '\0';
 
-			warningkill = sscanf (buffer, "%s %s %s", method, url, protocol);
+			warningkill = sscanf (buffer, "%s %s %s %s %s", method, url, protocol, host, host_url);
 
 			while ((strstr (buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)){
 				readb = read (client_socket, buffer+nread, sizeof (buffer) - nread);
@@ -2061,7 +2092,7 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 			if (nread == -1) {
 				motion_log(LOG_ERR, 1, "httpd READ");
 				pthread_mutex_unlock(&httpd_mutex);
-				return 0;
+				return 1;
 			}
 			alive = 0;
 
@@ -2074,9 +2105,10 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 					warningkill = write (client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
 
 				pthread_mutex_unlock(&httpd_mutex);
-				return 0;
+				return 1;
 			}
-			else if (strcmp (method, "GET")) {
+
+			if (strcmp (method, "GET")) {
 				/* This server only implements the GET method.  If client
 				uses other method, report the failure.  */
 				char response[1024];
@@ -2086,8 +2118,26 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 					snprintf (response, sizeof (response),bad_method_response_template_raw, method);
 				warningkill = write (client_socket, response, strlen (response));
 				pthread_mutex_unlock(&httpd_mutex);
-				return 0;
-			} else if ( auth != NULL) {
+				return 1;
+			}
+
+			if ((!cnt[0]->conf.control_localhost) && (strcmp (host, "Host:"))) {
+				/* Request MUST use Host: host */
+				if (cnt[0]->conf.control_html_output)
+					warningkill = write (client_socket, bad_request_response, sizeof (bad_request_response));
+				else
+					 warningkill = write (client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
+				pthread_mutex_unlock(&httpd_mutex);
+				return 1;
+			}
+	
+			nread = 0;
+			while ((host_url[nread] != ':') && (host_url[nread] != '\r') && (host_url[nread] != '\n')) 
+				nread++;
+				
+			host_url[nread]='\0';
+
+			if ( auth != NULL) {
 				if ( (authentication = strstr(buffer,"Basic")) ) {
 					char *end_auth = NULL;
 					authentication = authentication + 6;
@@ -2099,7 +2149,7 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 						snprintf (response, sizeof (response),request_auth_response_template, method);
 						warningkill = write (client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
-						return 0;
+						return 1;
 					}
 
 					if ( !check_authentication(auth, authentication,
@@ -2109,9 +2159,9 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 						snprintf(response, sizeof (response), request_auth_response_template, method);
 						warningkill = write (client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
-						return 0;
+						return 1;
 					} else {
-						ret = handle_get (client_socket, url, cnt);
+						ret = handle_get (client_socket, url, host_url, cnt);
 						/* A valid auth request.  Process it.  */
 					}
 				} else {
@@ -2120,10 +2170,10 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 					snprintf (response, sizeof (response),request_auth_response_template, method);
 					warningkill = write (client_socket, response, strlen (response));
 					pthread_mutex_unlock(&httpd_mutex);
-					return 0;
+					return 1;
 				}
 			} else {
-				ret=handle_get (client_socket, url, cnt);
+				ret=handle_get (client_socket, url, host_url, cnt);
 				/* A valid request.  Process it.  */
 			}
 		}
