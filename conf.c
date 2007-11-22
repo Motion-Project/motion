@@ -1483,7 +1483,7 @@ void conf_print(struct context **cnt)
 	FILE *conffile;
 
 	for (thread=0; cnt[thread]; thread++) {
-		motion_log(LOG_INFO, 1, "Writing config file to %s",cnt[thread]->conf_filename);
+		motion_log(LOG_INFO, 0, "Writing config file to %s",cnt[thread]->conf_filename);
 		conffile=myfopen(cnt[thread]->conf_filename, "w");
 		if (!conffile)
 			continue;

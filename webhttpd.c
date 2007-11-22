@@ -2059,11 +2059,11 @@ static short unsigned int read_client(int client_socket, void *userdata, char *a
 			return 1;
 		}
 		else {
-			char method[sizeof (buffer)];
-			char url[sizeof (buffer)];
-			char protocol[sizeof (buffer)];
-			char host[sizeof (buffer)];
-			char host_url[sizeof (buffer)];
+			char method[20];
+			char url[512];
+			char protocol[20];
+			char host[20];
+			char host_url[20];
 			char *authentication=NULL;
 
 			buffer[nread] = '\0';
