@@ -1,10 +1,7 @@
 dnl Process this file with autoconf to produce a configure script
-AC_INIT
+AC_INIT(motion,3.2.10)
 AC_CONFIG_SRCDIR([motion.c])
 AC_CONFIG_HEADERS(config.h)
-
-VERSION=3.2.10
-AC_SUBST(VERSION)
 
 THREAD_CFLAGS=""
 THREAD_CHECK="pthread.h"
@@ -974,17 +971,27 @@ if test $prefix = "NONE";then
 	else
 		BIN_PATH="$BIN_PATH/$bindir"
 	fi
+	DOC_DIR="$ac_default_prefix/share/doc/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 else
 	if test $exec_prefix = "NONE";then
 		BIN_PATH="$prefix/bin"
 	else
 		BIN_PATH="$prefix/$bindir"
 	fi
+	DOC_DIR="$prefix/share/doc/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 fi
 
+
+AC_SUBST(DOC_DIR)
 AC_SUBST(BIN_PATH)
 
-AC_CONFIG_FILES([motion.init-FreeBSD.sh
+AC_CONFIG_FILES([motion-help.conf
+thread1.conf
+thread2.conf
+thread3.conf
+thread4.conf
+motion-dist.conf
+motion.init-FreeBSD.sh
 motion.init-Debian
 motion.init-RH
 motion.spec
@@ -993,9 +1000,10 @@ Makefile
 AC_OUTPUT
 
 echo ""
-echo "   ************************"
-echo "   *   Configure status   *"
-echo "   ************************"
+echo "   *********************"
+echo "     Configure status    "
+echo "      ${PACKAGE_NAME} ${PACKAGE_VERSION}"
+echo "   *********************"
 echo ""
 
 

@@ -308,7 +308,7 @@ void webcam_stop(struct context *cnt)
 	close(cnt->webcam.socket);
 	
 	if (cnt->conf.setup_mode)
-		motion_log(LOG_ERR, 1, "Closing active webcam sockets");
+		motion_log(LOG_INFO, 0, "Closing active webcam sockets");
 
 	while (next) {
 		list=next;

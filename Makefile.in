@@ -12,7 +12,6 @@
 
 CC      = @CC@
 INSTALL = install
-VERSION = @VERSION@
 
 ################################################################################
 # Install locations, controlled by setting configure flags.                    #
@@ -24,14 +23,14 @@ mandir      = @mandir@
 sysconfdir  = @sysconfdir@
 datadir     = @datadir@
 datarootdir = @datarootdir@
-docdir      = $(datadir)/doc/motion-$(VERSION)
+docdir      = @DOC_DIR@
 examplesdir = $(docdir)/examples
 
 ################################################################################
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
-CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"$(VERSION)\" -D_REENTRANT \
+CFLAGS       = @CFLAGS@ -Wall -D_REENTRANT -DVERSION=\"@PACKAGE_VERSION@\"  \
 	       -Dsysconfdir=\"$(sysconfdir)\" -Ddocdir=\"$(docdir)\"
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@ 
@@ -68,7 +67,7 @@ pre-build-info:
 	@echo "Motion Guide contains all information you should need to get Motion up and running."
 	@echo "Run \"make updateguide\" to download the latest version of the Motion Guide."
 	@echo
-	@echo "Version:  $(VERSION)"
+	@echo "Version: @PACKAGE_VERSION@"
 ifneq (,$(findstring freebsd,$(VIDEO_OBJ)))
 	@echo "Platform: FreeBSD"
 else

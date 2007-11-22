@@ -1,0 +1,3 @@
+<Directory @DOC_DIR@>
+	AllowOverride All
+</Directory>

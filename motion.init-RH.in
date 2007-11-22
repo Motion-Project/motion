@@ -5,18 +5,18 @@
 # chkconfig: - 85 15
 # description: Motion Detection System.  It is used to detect \
 #              movement based on compare images.
-# processname: motion 
-# pidfile: /var/run/motion.pid
-# config: /etc/motion.conf
+# processname: @PACKAGE_NAME@ 
+# pidfile: /var/run/@PACKAGE_NAME@.pid
+# config: /etc/@PACKAGE_NAME@.conf
 
 # Source function library.
 . /etc/rc.d/init.d/functions
 
 
 
-motion=${MOTION-@BIN_PATH@/motion}
-prog=motion
-PIDFILE=/var/run/motion.pid
+motion=${MOTION-@BIN_PATH@/@PACKAGE_NAME@}
+prog=@PACKAGE_NAME@
+PIDFILE=/var/run/@PACKAGE_NAME@.pid
 RETVAL=0
 
 
@@ -25,7 +25,7 @@ start() {
 	daemon $motion 
 	RETVAL=$?
 	echo
-	[ $RETVAL = 0 ] && touch /var/lock/subsys/motion
+	[ $RETVAL = 0 ] && touch /var/lock/subsys/@PACKAGE_NAME@
 	return $RETVAL
 }
 stop() {
@@ -33,7 +33,7 @@ stop() {
 	killproc $motion
 	RETVAL=$?
 	echo
-	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/@PACKAGE_NAME@
 }
 stopsafe() {
 	echo -n $"Stopping $prog: ( for restarting ) "
@@ -41,7 +41,7 @@ stopsafe() {
 	RETVAL=$?
 	sleep 10s
 	echo
-	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/motion
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/@PACKAGE_NAME@
 }
 reload() {
 	echo -n $"Reloading $prog: "
@@ -67,7 +67,7 @@ case "$1" in
 		start
 		;;
 	condrestart)
-		if [ -f /var/run/motion.pid ] ; then
+		if [ -f /var/run/@PACKAGE_NAME@.pid ] ; then
 			stop
 			start
 		fi
