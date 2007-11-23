@@ -11,13 +11,17 @@ Features
    * Implemented a new reference frame algorithm to improve object recognition and location. (Joerg Weber)
    * Improved smartmask feature: real moving objects don't trigger the mask anymore. (Joerg Weber)
    * Added area_detect feature. New config options: area_detect, on_area_detected. (Joerg Weber)
-   * Added help in http control http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=396595. (Angel Carpintero)
+   * Added help in http control http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=396595
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x181541 (Angel Carpintero)
+   * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
+     (Angel Carpintero)  
+   * Improved http control ( 'back' link, select box, show current values when are going to be changed ).
 
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
    * Preview pictures get the timestamp of moment they were captured (Dag Erlandsson).
    * Fixed http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x23x093651 (Angel Carpintero)
-   * Fix process_id_file when is passed from command line (Angel Carpitero)
+   * Fix process_id_file when is passed from command line (Angel Carpintero)
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x27x150419 (Angel Carpintero)
 
 3.2.9 Formal Release - Summary of Changes

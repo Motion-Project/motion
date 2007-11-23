@@ -296,7 +296,7 @@ struct rotdata {
 struct context {
 	char conf_filename[PATH_MAX];
 	int threadnr;
-	int daemon;
+	unsigned short int daemon;
 	char pid_file[PATH_MAX];
 
 	struct config conf;
@@ -317,8 +317,8 @@ struct context {
 	int smartmask_speed;
 
 	int snapshot;
-	int makemovie;
-	int finish;
+	unsigned short int makemovie;
+	unsigned short int finish;
 
 	int event_nr;
 	int prev_event;
@@ -340,9 +340,9 @@ struct context {
 	int lastrate;
 	int moved;
 	int switched;
-	int pause;
+	unsigned short int pause;
 	int missing_frame_counter;   /* counts failed attempts to fetch picture frame from camera */
-	int lost_connection;	
+	unsigned short int lost_connection;	
 
 #if (defined(BSD))
 	int tuner_dev;

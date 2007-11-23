@@ -1479,7 +1479,7 @@ void conf_print(struct context **cnt)
 {
 	const char *retval;
 	char *val;
-	int i, thread;
+	unsigned short int i, thread;
 	FILE *conffile;
 
 	for (thread=0; cnt[thread]; thread++) {

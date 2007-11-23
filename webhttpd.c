@@ -1026,7 +1026,6 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 		length_uri = length_uri - 5;
 		if (length_uri == 0) {
 			/*call start*/
-			cnt[thread]->pause = 0;
 
 			if (thread == 0) {
 				do {
@@ -1059,7 +1058,6 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 		length_uri = length_uri - 5;
 		if (length_uri==0) {
 			/*call pause*/
-			cnt[thread]->pause=1;
 
 			if (thread == 0) {
 				do {
