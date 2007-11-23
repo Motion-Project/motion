@@ -48,9 +48,6 @@
 
 #ifndef WITHOUT_V4L
 #ifdef MOTION_V4L2
-#               warning **************************************************
-#		warning		Using experimental V4L2 support
-#               warning **************************************************
 
 #include <math.h>
 #include <sys/utsname.h>
@@ -78,6 +75,7 @@
 #define u8 unsigned char
 #define u16 unsigned short
 #define u32 unsigned int
+#define s32 signed int
 
 #define MMAP_BUFFERS 4
 #define MIN_MMAP_BUFFERS 2
@@ -120,7 +118,7 @@ typedef struct {
 
 	int fd;
 	char map;
-	int fps;
+	u32 fps;
 
 	struct v4l2_capability cap;
 	struct v4l2_format fmt;
@@ -129,7 +127,7 @@ typedef struct {
 
 	netcam_buff *buffers;
 
-	int pframe;
+	s32 pframe;
 
 	u32 ctrl_flags;
 	struct v4l2_queryctrl *controls;
@@ -193,7 +191,7 @@ static int v4l2_get_capability(src_v4l2_t * s)
 	return (0);
 }
 
-static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long freq_, int tuner_number)
+static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long freq_, int tuner_number ATTRIBUTE_UNUSED)
 {
 	struct v4l2_input input;
 	struct v4l2_standard standard;
@@ -396,7 +394,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 	return (-1);
 }
 
-
+#if 0
 static void v4l2_set_fps(src_v4l2_t * s){
 	struct v4l2_streamparm* setfps;
 
@@ -410,6 +408,7 @@ static void v4l2_set_fps(src_v4l2_t * s){
 	}
 
 }
+#endif
 
 static int v4l2_set_mmap(src_v4l2_t * s)
 {
@@ -794,7 +793,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 		*/
 		if ( errno == EIO ){
 			s->pframe++; 
-			if(s->pframe >= s->req.count) s->pframe=0;
+			if ((u32)s->pframe >= s->req.count) s->pframe=0;
 			s->buf.index = s->pframe;
 
 			motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__,s->pframe);

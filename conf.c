@@ -143,10 +143,10 @@ static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_thread(struct context **cnt, const char *str, int val);
 
-static const char *print_bool(struct context **, char **, int, int);
-static const char *print_int(struct context **, char **, int, int);
-static const char *print_string(struct context **, char **, int, int);
-static const char *print_thread(struct context **, char **, int, int);
+static const char *print_bool(struct context **, char **, int, unsigned short int);
+static const char *print_int(struct context **, char **, int, unsigned short int);
+static const char *print_string(struct context **, char **, int, unsigned short int);
+static const char *print_thread(struct context **, char **, int, unsigned short int);
 
 static void usage(void);
 
@@ -1312,7 +1312,7 @@ config_param config_params[] = {
 /* conf_cmdline sets the conf struct options as defined by the command line.
  * Any option already set from a config file are overridden.
  */
-static void conf_cmdline (struct context *cnt, int thread)
+static void conf_cmdline (struct context *cnt, short int thread)
 {
 	struct config *conf=&cnt->conf;
 	int c;
@@ -1645,7 +1645,7 @@ struct context ** conf_load (struct context **cnt)
  */
 void malloc_strings (struct context * cnt)
 {
-	int i = 0;
+	unsigned short int i = 0;
 	char **val;
 	while( config_params[i].param_name != NULL ) {
 		if (config_params[i].copy == copy_string) { /* if member is a string */
@@ -1831,7 +1831,7 @@ const char *config_type(config_param *configparam)
 }
 
 static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                              int parm, int threadnr)
+                              int parm, unsigned short int threadnr)
 {
 	int val=config_params[parm].conf_value;
 
@@ -1853,7 +1853,7 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  */
 static const char *print_string(struct context **cnt,
                                 char **str ATTRIBUTE_UNUSED, int parm,
-                                int threadnr)
+                                unsigned short int threadnr)
 {
 	int val=config_params[parm].conf_value;
 	const char **cptr0, **cptr1;
@@ -1868,7 +1868,7 @@ static const char *print_string(struct context **cnt,
 }
 
 static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, int threadnr)
+                             int parm, unsigned short int threadnr)
 {
 	static char retval[20];
 	int val = config_params[parm].conf_value;
@@ -1883,10 +1883,10 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 }
 
 static const char *print_thread(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, int threadnr)
+                                int parm ATTRIBUTE_UNUSED, unsigned short int threadnr)
 {
 	char *retval;
-	int i=0;
+	unsigned short int i=0;
 
 	if (!str || threadnr)
 		return NULL;

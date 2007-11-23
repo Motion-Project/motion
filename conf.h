@@ -127,7 +127,7 @@ struct config {
  * typedef for a param copy function. 
  */
 typedef struct context ** (* conf_copy_func)(struct context **, const char *, int);
-typedef const char *(* conf_print_func)(struct context **, char **, int, int);
+typedef const char *(* conf_print_func)(struct context **, char **, int, unsigned short int);
 
 /**
  * description for parameters in the config file

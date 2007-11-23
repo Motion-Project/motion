@@ -236,15 +236,16 @@ static void response_client(int client_socket, const char* template, char *back)
 	}
 }
 
+
 /*
  * check_authentication
  *
  * return 1 on success
  * return 0 on error
  */
-static short unsigned int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
+static unsigned short int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
 {
-	short unsigned int ret=0;
+	unsigned short int ret=0;
 	char *userpass = NULL;
 
 	authentication = (char *) mymalloc(BASE64_LENGTH(size_auth) + 1);
@@ -267,7 +268,7 @@ static short unsigned int check_authentication(char *authentication, char *auth_
    This function decode the values from GET request following the http RFC.
 */
 
-static void url_decode(char *urlencoded, int length)
+static void url_decode(char *urlencoded, size_t length)
 {
 	char *data=urlencoded;
 	char *urldecoded=urlencoded;
@@ -310,12 +311,12 @@ static void url_decode(char *urlencoded, int length)
     return 1 to exit from function.
 */
 
-static short unsigned int config(char *pointer, char *res, short unsigned int length_uri, 
-				short unsigned int thread, int client_socket, const char* host_url, void *userdata)
+static unsigned short int config(char *pointer, char *res, unsigned short int length_uri, 
+				unsigned short int thread, int client_socket, const char* host_url, void *userdata)
 {
 	char question;
 	char command[256] = {'\0'};
-	short unsigned int i;
+	unsigned short int i;
 	struct context **cnt = userdata;
 
 	warningkill = sscanf (pointer, "%256[a-z]%c", command , &question);
@@ -356,7 +357,7 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
 								char *temp=retval;
 								size_t retval_miss = 0;
 								size_t retval_len = strlen(retval);
-								short unsigned int ind=0;
+								unsigned short int ind=0;
 								char thread_strings[1024]={'\0'};
 								
 								while (retval_miss != retval_len) {
@@ -845,13 +846,13 @@ static short unsigned int config(char *pointer, char *res, short unsigned int le
     return 1 for makemovie & snaphost
 */
 
-static short unsigned int action(char *pointer, char *res, short unsigned int length_uri, 
-				short unsigned int thread, int client_socket, void *userdata)
+static unsigned short int action(char *pointer, char *res, unsigned short int length_uri, 
+				unsigned short int thread, int client_socket, void *userdata)
 {
 	/* parse action commands */
 	char command[256] = {'\0'};
 	struct context **cnt = userdata;
-	short unsigned int i = 0;
+	unsigned short int i = 0;
 
 	warningkill = sscanf (pointer, "%256[a-z]" , command);
 	if (!strcmp(command,"makemovie")) {
@@ -988,12 +989,12 @@ static short unsigned int action(char *pointer, char *res, short unsigned int le
    return 1 to exit from function.
 */
 
-static short unsigned int detection(char *pointer, char *res, short unsigned int length_uri, short unsigned int thread, 
+static unsigned short int detection(char *pointer, char *res, unsigned short int length_uri, unsigned short int thread, 
 			int client_socket, void *userdata)
 {
 	char command[256]={'\0'};
 	struct context **cnt=userdata;
-	short unsigned int i = 0;
+	unsigned short int i = 0;
 
 	warningkill = sscanf (pointer, "%256[a-z]" , command);
 	if (!strcmp(command,"status")) {
@@ -1146,7 +1147,7 @@ static short unsigned int detection(char *pointer, char *res, short unsigned int
    return 1 to exit from function.
 */
 
-static short unsigned int track(char *pointer, char *res, short unsigned int length_uri, short unsigned int thread, 
+static unsigned short int track(char *pointer, char *res, unsigned short int length_uri, unsigned short int thread, 
 			int client_socket, void *userdata)
 {
 	char question;
@@ -1695,7 +1696,7 @@ static short unsigned int track(char *pointer, char *res, short unsigned int len
 							send_template_raw(client_socket, res);
 						}
 					} else {
-						int active;
+						short int active;
 						active = atoi(command);
 						/* CHECK */
 						if (active > -1 && active < 2) {
@@ -1704,12 +1705,13 @@ static short unsigned int track(char *pointer, char *res, short unsigned int len
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>"
-									    "<br>track auto %s<br>", thread, thread, command);
+									    "<br>track auto %s<br>", thread, thread, 
+									    active ? "enabled":"disabled");
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res,"track auto %s\nDone\n",command);
+								sprintf(res,"track auto %s\nDone\n",active ? "enabled":"disabled");
 								send_template_raw(client_socket, res);
 							}
 						} else {
@@ -1733,19 +1735,21 @@ static short unsigned int track(char *pointer, char *res, short unsigned int len
 			}
 		}
 		else if (length_uri == 0) {
+
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res,"<a href=/%hu/track><- back</a><br><br>\n<b>Thread %hu</b>\n"
 				            "<form action='auto'><select name='value'>\n"
-				            "<option value='0'>Disable</option><option value='1'>Enable</option>\n"
+				            "<option value='0' %s>Disable</option><option value='1' %s>Enable</option>\n"
 				            "<option value='status'>status</option>\n"
 				            "</select><input type=submit value='set'>\n"
-				            "</form>\n",thread, thread);
+				            "</form>\n",thread, thread, (cnt[thread]->track.active) ? "selected":"",
+					    (cnt[thread]->track.active) ? "selected":"" );
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"auto needs a value 0,1 or status\n");
+				sprintf(res,"auto accepts only  0,1 or status as valid value\n");
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -1774,11 +1778,11 @@ static short unsigned int track(char *pointer, char *res, short unsigned int len
 	return 1 on success	
 */
 
-static short unsigned int handle_get(int client_socket, const char* url, const char* host_url, void *userdata)
+static unsigned short int handle_get(int client_socket, const char* url, const char* host_url, void *userdata)
 {
 	struct context **cnt=userdata;
 	if (*url == '/' ){
-		short unsigned int i = 0;
+		unsigned short int i = 0;
 		char *res=NULL;
 		res = malloc(2048);
 
@@ -1786,7 +1790,7 @@ static short unsigned int handle_get(int client_socket, const char* url, const c
 		while (cnt[++i]);
 		/* ROOT_URI -> GET / */
 		if (! (strcmp (url, "/")) ) {
-			short unsigned int y;
+			unsigned short int y;
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket,ini_template);
 				sprintf(res,"<b>Motion "VERSION" Running [%hu] Threads</b><br>\n"
@@ -1892,7 +1896,7 @@ static short unsigned int handle_get(int client_socket, const char* url, const c
 								send_template_raw(client_socket, res);
 							}
 						} else if ((slash == '/') && (length_uri > 4)) {
-							short unsigned int ret = 1;
+							unsigned short int ret = 1;
 							pointer++;
 							length_uri--;
 							ret = action(pointer, res, length_uri, thread, client_socket, cnt);
@@ -2036,12 +2040,12 @@ static short unsigned int handle_get(int client_socket, const char* url, const c
  return 1 on success
 */
 
-static short unsigned int read_client(int client_socket, void *userdata, char *auth)
+static unsigned short int read_client(int client_socket, void *userdata, char *auth)
 {
-	short unsigned int alive = 1;
-	short unsigned int ret = 1;
-	char buffer[1024] = {'\0'};
-	int length = 1024;
+	unsigned short int alive = 1;
+	unsigned short int ret = 1;
+	char buffer[592] = {'\0'};
+	unsigned short int length = 592;
 	struct context **cnt = userdata;
 
 	/* lock the mutex */
@@ -2224,7 +2228,7 @@ static int acceptnonblocking(int serverfd, int timeout)
 void httpd_run(struct context **cnt)
 {
 	int sd, client_socket_fd, val = 1;
-	short unsigned int client_sent_quit_message = 1, closehttpd = 0; 
+	unsigned short int client_sent_quit_message = 1, closehttpd = 0; 
 	struct sockaddr_in servAddr;
 	struct sigaction act;
 	char *authentication = NULL;
