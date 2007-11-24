@@ -1694,12 +1694,12 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 							send_template_raw(client_socket, res);
 						}
 					} else {
-						short int active;
+						int active;
 						active = atoi(command);
 						/* CHECK */
 						if (active > -1 && active < 2) {
 							autocnt = cnt[thread];
-							autocnt->track.active = atoi(command);
+							autocnt->track.active = active;
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res,"<a href=/%hu/track><- back</a><br><br><b>Thread %hu</b>"
@@ -2042,8 +2042,8 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 {
 	unsigned short int alive = 1;
 	unsigned short int ret = 1;
-	char buffer[592] = {'\0'};
-	unsigned short int length = 592;
+	char buffer[656] = {'\0'};
+	unsigned short int length = 656;
 	struct context **cnt = userdata;
 
 	/* lock the mutex */
@@ -2065,7 +2065,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			char url[512];
 			char protocol[20];
 			char host[20];
-			char host_url[20];
+			char host_url[84];
 			char *authentication=NULL;
 
 			buffer[nread] = '\0';

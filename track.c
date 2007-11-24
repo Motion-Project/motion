@@ -33,28 +33,28 @@ struct trackoptions track_template = {
 
 
 /* Add your own center and move functions here: */
-static int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
-static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
-static int iomojo_center(struct context *cnt, int xoff, int yoff);
-static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
+static unsigned short int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
+static unsigned short int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
+static unsigned short int iomojo_center(struct context *cnt, int xoff, int yoff);
+static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 #ifndef WITHOUT_V4L
-static int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
-static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual);
+static unsigned short int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
+static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, unsigned short int manual);
 #ifdef MOTION_V4L2
-static int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
-static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual);
+static unsigned short int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
+static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, unsigned short int manual);
 #endif /* MOTION_V4L2 */
 #endif /* WITHOUT_V4L */
 
 /* Add a call to your functions here: */
-int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
+unsigned short int track_center(struct context *cnt, int dev, unsigned short int manual, int xoff, int yoff)
 {
 	if (!manual && !cnt->track.active)
 		return 0;
 	if (cnt->track.type == TRACK_TYPE_STEPPER){
 		int ret;
 		ret = stepper_center(cnt, xoff, yoff);
-		if (ret < 1) {
+		if (!ret) {
 				motion_log(LOG_ERR, 1, "track_center: internal error (stepper_center)");
 				return 0;		
 		}
@@ -73,13 +73,13 @@ int track_center(struct context *cnt, int dev, int manual, int xoff, int yoff)
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
 		return 10; // FIX ME. I chose to return something reasonable.
 
-	motion_log(LOG_ERR, 1, "track_center: internal error, %d is not a known track-type", cnt->track.type);
+	motion_log(LOG_ERR, 1, "track_center: internal error, %hu is not a known track-type", cnt->track.type);
 
 	return 0;
 }
 
 /* Add a call to your functions here: */
-int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual)
+unsigned short int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, unsigned short int manual)
 {
 	if (!manual && !cnt->track.active)
 		return 0;
@@ -98,46 +98,50 @@ int track_move(struct context *cnt, int dev, struct coord *cent, struct images *
 	else if (cnt->track.type == TRACK_TYPE_GENERIC)
 		return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
 
-	motion_log(LOG_ERR, 1, "track_move: internal error, %d is not a known track-type", cnt->track.type);
+	motion_log(LOG_ERR, 1, "track_move: internal error, %hu is not a known track-type", cnt->track.type);
 
 	return 0;
 }
 
 
 /******************************************************************************
-
 	Stepper motor on serial port
-
+	http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTracking
+	http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTrackerAPI
 ******************************************************************************/
 
 
-static int stepper_command(struct context *cnt, int motor, int command, int n)
+static unsigned short int stepper_command(struct context *cnt, unsigned short int motor, unsigned short int command,  
+					unsigned short int data)
 {
 	char buffer[3];
 	time_t timeout=time(NULL);
 
 	buffer[0]=motor;
 	buffer[1]=command;
-	buffer[2]=n;
-	if (write(cnt->track.dev, buffer, 3)!=3)
-		return -1;
+	buffer[2]=data;
+	if (write(cnt->track.dev, buffer, 3)!=3){
+		motion_log(LOG_ERR, 1, "stepper_command");
+		return 0;
+	}
 
 	while (read(cnt->track.dev, buffer, 1)!=1 && time(NULL) < timeout+1);
 	if (time(NULL) >= timeout+2) {
 		motion_log(LOG_ERR, 1, "Status byte timeout!");
 		return 0;
 	}
+
 	return buffer[0];
 }
 
 
-static int stepper_status(struct context *cnt, int motor)
+static unsigned short int stepper_status(struct context *cnt,  unsigned short int motor)
 {
 	return stepper_command(cnt, motor, STEPPER_COMMAND_STATUS, 0);
 }
 
 
-static int stepper_center(struct context *cnt, int x_offset, int y_offset)
+static unsigned short int stepper_center(struct context *cnt, int x_offset, int y_offset)
 {
 	struct termios adtio;
 
@@ -146,7 +150,7 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 		
 		if ((cnt->track.dev=open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
 			motion_log(LOG_ERR, 1, "Unable to open serial device %s", cnt->track.port);
-			return -1;
+			return 0;
 		}
 
 		bzero (&adtio, sizeof(adtio));
@@ -160,7 +164,7 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 
 		if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
 			motion_log(LOG_ERR, 1, "Unable to initialize serial device %s", cnt->track.port);
-			return -1;
+			return 0;
 		}
 		motion_log(LOG_INFO, 1, "Opened serial device %s and initialize", cnt->track.port);
 	}
@@ -192,16 +196,15 @@ static int stepper_center(struct context *cnt, int x_offset, int y_offset)
 	return cnt->track.move_wait;
 }
 
-static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
+static unsigned short int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
 {
-	int command = 0;
-	int n = 0;
+	unsigned short int command = 0, data = 0;
 
 	if (dev < 0){
 		motion_log(LOG_INFO, 1, "No device started yet , try stepper_center()");	
-		if (stepper_center(cnt, 0, 0) < 0){
+		if (!stepper_center(cnt, 0, 0)){
 			motion_log(LOG_ERR, 1, "Stepper_center() failed to initialize stepper device.");	
-			return(0);
+			return 0;
 		}
 		motion_log(LOG_INFO, 1, "stepper_center() succeed , device started");	
 	}
@@ -210,33 +213,33 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 	
 	if (cent->x < imgs->width / 2) {
 		command = STEPPER_COMMAND_LEFT_N;
-		n = imgs->width / 2 - cent->x;
+		data = imgs->width / 2 - cent->x;
 	}
 
 	if (cent->x > imgs->width / 2) {
 		command = STEPPER_COMMAND_RIGHT_N;
-		n = cent->x - imgs->width / 2;
+		data = cent->x - imgs->width / 2;
 	}
 
-	n = n * cnt->track.stepsize / imgs->width;
+	data = data * cnt->track.stepsize / imgs->width;
 
-	if (n) 	stepper_command(cnt, cnt->track.motorx, command, n);
+	if (data) stepper_command(cnt, cnt->track.motorx, command, data);
 
 	/* y-axis */
 
 	if (cent->y < imgs->height / 2) {
 		command = STEPPER_COMMAND_UP_N;
-		n = imgs->height / 2 - cent->y;
+		data = imgs->height / 2 - cent->y;
 	}
 
 	if (cent->y > imgs->height / 2) {
 		command = STEPPER_COMMAND_DOWN_N;
-		n = cent->y - imgs->height / 2;
+		data = cent->y - imgs->height / 2;
 	}
 	
-	n = n * cnt->track.stepsize / imgs->height;
+	data = data * cnt->track.stepsize / imgs->height;
 
-	if (n) stepper_command(cnt, cnt->track.motory, command, n);	
+	if (data) stepper_command(cnt, cnt->track.motory, command, data);	
 	
 	
 	return cnt->track.move_wait;
@@ -248,7 +251,7 @@ static int stepper_move(struct context *cnt, int dev, struct coord *cent, struct
 
 ******************************************************************************/
 
-static char iomojo_command(struct context *cnt, char *command, int len, int ret)
+static char iomojo_command(struct context *cnt, char *command, unsigned short int len, unsigned short int ret)
 {
 	char buffer[1];
 	time_t timeout = time(NULL);
@@ -264,10 +267,11 @@ static char iomojo_command(struct context *cnt, char *command, int len, int ret)
 			return 0;
 		}
 	}
+	/* range values ? */
 	return buffer[0];
 }
 
-static void iomojo_setspeed(struct context *cnt, int speed)
+static void iomojo_setspeed(struct context *cnt, unsigned short int speed)
 {
 	char command[3];
 	
@@ -289,7 +293,7 @@ static void iomojo_movehome(struct context *cnt)
 	iomojo_command(cnt, command, 2, 0);
 }
 
-static int iomojo_center(struct context *cnt, int x_offset, int y_offset)
+static unsigned short int iomojo_center(struct context *cnt, int x_offset, int y_offset)
 {
 	struct termios adtio;
 	char command[5], direction=0;
@@ -348,7 +352,7 @@ static int iomojo_center(struct context *cnt, int x_offset, int y_offset)
 	return cnt->track.move_wait;
 }
 
-static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
+static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
 {
 	char command[5];
 	int direction = 0;
@@ -356,7 +360,7 @@ static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct 
 	int i;
 	
 	if (dev < 0)
-		if (iomojo_center(cnt, 0, 0) < 0)
+		if (!iomojo_center(cnt, 0, 0))
 			return 0;
 
 	if (cent->x < imgs->width / 2) {
@@ -413,7 +417,7 @@ static int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct 
 
 ******************************************************************************/
 #ifndef WITHOUT_V4L
-static int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
+static unsigned short int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
 	int reset = 3;
 	struct pwc_mpt_angles pma;
@@ -460,7 +464,7 @@ static int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
 	return cnt->track.move_wait;
 }
 
-static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual)
+static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, unsigned short int manual)
 {
 	int delta_x = cent->x - (imgs->width / 2);
 	int delta_y = cent->y - (imgs->height / 2);
@@ -536,7 +540,7 @@ static int lqos_move(struct context *cnt, int dev, struct coord *cent, struct im
 ******************************************************************************/
 #ifdef MOTION_V4L2
 
-static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
+static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
 	/* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
 	int move_x_degrees = 0, move_y_degrees = 0;
@@ -670,7 +674,7 @@ static int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 	return cnt->track.move_wait;
 }
 
-static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, int manual)
+static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, unsigned short int manual)
 {
 	/* RELATIVE MOVING : Act.Position +/- X and Y */
 	
@@ -683,7 +687,7 @@ static int uvc_move(struct context *cnt, int dev, struct coord *cent, struct ima
 	/* 		Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...? */
 	/* 		PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that  */  
 	if (( cnt->track.minmaxfound != 1) || (cent->x == 7777 )) {
-		int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
+		unsigned short int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
 		struct v4l2_control control_s;
 
 		control_s.id = V4L2_CID_PANTILT_RESET;

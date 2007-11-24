@@ -482,32 +482,32 @@ Values: on, off / Default: off
 Enable auto tracking
 .TP
 .B track_iomojo_id integer
-Values: 0 - 2147483647 / Default: 0
+Values: 0 - 65535 / Default: 0
 .br
 Use this option if you have an iomojo smilecam connected to the serial port instead of a general stepper motor controller.
 .TP
 .B track_maxx integer
-Values: 0 - 2147483647 / Default: 0
+Values: 0 - 65535 / Default: 0
 .br
 The maximum position for servo x.
 .TP
 .B track_maxy integer
-Values: 0 - 2147483647 / Default: 0
+Values: 0 - 65535 / Default: 0
 .br
 The maximum position for servo y.
 .TP
 .B track_motorx integer
-Values: -1 - 2147483647 / Default: -1
+Values: 0 - 65535 / Default: 0
 .br
 The motor number that is used for controlling the x-axis.
 .TP
 .B track_motory integer
-Values: -1 - 2147483647 / Default: -1
+Values: 0 - 65535 / Default: 0
 .br
 The motor number that is used for controlling the y-axis.
 .TP
 .B track_move_wait integer
-Values: 0 - 2147483647 / Default: 10
+Values: 0 - 65535 / Default: 10
 .br
 Delay during which tracking is disabled after auto tracking has moved the camera. Delay is defined as number of picture frames.
 .TP
