@@ -303,45 +303,45 @@ struct context {
 	struct images imgs;
 	struct trackoptions track;
 	struct netcam_context *netcam;
-	struct image_data *current_image; /* Pointer to a structure where the image, diffs etc is stored */
-	int new_img;
-	time_t preview_time;              /* Timestamp of preview image */
-	int preview_shots;                 /* Shot of preview buffer image */
+	struct image_data *current_image;	/* Pointer to a structure where the image, diffs etc is stored */
+	unsigned short int new_img;
+	time_t preview_time;			/* Timestamp of preview image */
+	unsigned short int preview_shots;	/* Shot of preview buffer image */
 
 	int locate;
-	struct rotdata rotate_data; /* rotation data is thread-specific */
+	struct rotdata rotate_data;		/* rotation data is thread-specific */
 
 	int noise;
 	int threshold;
 	int diffs_last[THRESHOLD_TUNE_LENGTH];
 	int smartmask_speed;
 
-	int snapshot;
+	unsigned short int snapshot;
 	unsigned short int makemovie;
 	unsigned short int finish;
 
 	int event_nr;
 	int prev_event;
 	int lightswitch_framecounter;
-	char text_event_string[PATH_MAX]; /* The text for conv. spec. %C -
-	                                     we assume PATH_MAX normally 4096 characters is fine */
-	int postcap;		/* downcounter, frames left to to send post event */
+	char text_event_string[PATH_MAX];	/* The text for conv. spec. %C -
+						we assume PATH_MAX normally 4096 characters is fine */
+	int postcap;				/* downcounter, frames left to to send post event */
 
-	int shots;
-	int detecting_motion;
+	short int shots;
+	unsigned short int detecting_motion;
 	struct tm *currenttime_tm;
 	struct tm *eventtime_tm;
 
 	time_t currenttime;
 	time_t lasttime;
 	time_t eventtime;
-	time_t connectionlosttime;   /* timestamp from connection lost */
+	time_t connectionlosttime;		/* timestamp from connection lost */
 
 	int lastrate;
 	unsigned short int moved;
-	int switched;
+	unsigned short int switched;
 	unsigned short int pause;
-	int missing_frame_counter;   /* counts failed attempts to fetch picture frame from camera */
+	int missing_frame_counter;		/* counts failed attempts to fetch picture frame from camera */
 	unsigned short int lost_connection;	
 
 #if (defined(BSD))

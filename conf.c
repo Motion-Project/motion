@@ -963,7 +963,7 @@ config_param config_params[] = {
 	},
 	{
 	"track_motorx",
-	"# Motor number for x-axis (default: -1)",
+	"# Motor number for x-axis (default: 0)",
 	0,
 	TRACK_OFFSET(motorx),
 	copy_int,
@@ -971,7 +971,7 @@ config_param config_params[] = {
 	},
 	{
 	"track_motory",
-	"# Motor number for y-axis (default: -1)",
+	"# Motor number for y-axis (default: 0)",
 	0,
 	TRACK_OFFSET(motory),
 	copy_int,

@@ -57,7 +57,7 @@ volatile int threads_running=0;
  * debug_level is for developers, normally used to control which
  * types of messages get output.
  */
-int debug_level;
+unsigned short int debug_level;
 
 /**
  * restart
@@ -66,7 +66,7 @@ int debug_level;
  *   finished running, 'main' checks if 'restart' is true and if so starts
  *   up again (instead of just quitting).
  */
-int restart=0;
+unsigned short int restart=0;
 
 /**
  * image_ring_resize
@@ -141,7 +141,7 @@ static void image_ring_resize(struct context *cnt, int new_size)
  */
 static void image_ring_destroy(struct context *cnt)
 {
-	int i;
+	unsigned short int i;
 	
 	/* Exit if don't have any ring */
 	if (cnt->imgs.image_ring == NULL)
@@ -233,7 +233,7 @@ static void context_init (struct context *cnt)
  */
 static void context_destroy(struct context *cnt)
 {
-	int j;
+	unsigned short int j;
 
 	if (cnt->imgs.out)
 		free(cnt->imgs.out);
@@ -301,7 +301,7 @@ static void context_destroy(struct context *cnt)
  */
 static void sig_handler(int signo)
 {
-	int i;
+	short int i;
 
 	switch(signo) {
 		case SIGALRM:

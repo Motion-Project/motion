@@ -52,7 +52,7 @@ unsigned short int track_center(struct context *cnt, int dev, unsigned short int
 	if (!manual && !cnt->track.active)
 		return 0;
 	if (cnt->track.type == TRACK_TYPE_STEPPER){
-		int ret;
+		unsigned short int ret;
 		ret = stepper_center(cnt, xoff, yoff);
 		if (!ret) {
 				motion_log(LOG_ERR, 1, "track_center: internal error (stepper_center)");

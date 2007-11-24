@@ -439,11 +439,11 @@ track_auto off
 # Serial port of motor (default: none)
 ; track_port value
 
-# Motor number for x-axis (default: -1)
-track_motorx -1
+# Motor number for x-axis (default: 0)
+track_motorx 0
 
-# Motor number for y-axis (default: -1)
-track_motory -1
+# Motor number for y-axis (default: 0)
+track_motory 0
 
 # Maximum value on x-axis (default: 0)
 track_maxx 0
