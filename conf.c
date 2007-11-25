@@ -1334,7 +1334,7 @@ static void conf_cmdline (struct context *cnt, short int thread)
 				break;
 			case 'd':
 				/* no validation - just take what user gives */
-				debug_level = atoi(optarg);
+				debug_level = (unsigned short int)atoi(optarg);
 				break;
 			case 'p':
 				if (thread==-1) strcpy(cnt->pid_file, optarg);
@@ -1357,7 +1357,7 @@ static void conf_cmdline (struct context *cnt, short int thread)
  */
 struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
 {
-	int i = 0;
+	unsigned short int i = 0;
 
 	if(!cmd)
 		return cnt;

@@ -379,7 +379,7 @@ struct context {
 
 extern pthread_mutex_t global_lock;
 extern volatile int threads_running;
-extern int debug_level;
+extern unsigned short int debug_level;
 
 /* TLS keys below */
 extern pthread_key_t tls_key_threadnr; /* key for thread number */
