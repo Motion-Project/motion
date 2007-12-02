@@ -16,6 +16,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <stddef.h>
+#include <stdint.h> 
 
 pthread_mutex_t httpd_mutex;
 
@@ -243,6 +245,7 @@ static void response_client(int client_socket, const char* template, char *back)
  * return 1 on success
  * return 0 on error
  */
+#if 0
 static unsigned short int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
 {
 	unsigned short int ret=0;
@@ -261,8 +264,38 @@ static unsigned short int check_authentication(char *authentication, char *auth_
 
 	return ret;
 }
+#endif
 
 
+static char *replace(const char *str, const char *old, const char *new)
+{
+    char *ret, *r;
+    const char *p, *q;
+    size_t oldlen = strlen(old);
+    size_t count, retlen, newlen = strlen(new);
+
+    if (oldlen != newlen) {
+        for (count = 0, p = str; (q = strstr(p, old)) != NULL; p = q + oldlen)
+            count++;
+        /* this is undefined if p - str > PTRDIFF_MAX */
+        retlen = p - str + strlen(p) + count * (newlen - oldlen);
+    } else
+        retlen = strlen(str);
+
+    ret = malloc(retlen + 1);
+
+    for (r = ret, p = str; (q = strstr(p, old)) != NULL; p = q + oldlen) {
+        /* this is undefined if q - p > PTRDIFF_MAX */
+        ptrdiff_t l = q - p;
+        memcpy(r, p, l);
+        r += l;
+        memcpy(r, new, newlen);
+        r += newlen;
+    }
+    strcpy(r, p);
+
+    return ret;
+} 
 
 /*
    This function decode the values from GET request following the http RFC.
@@ -543,8 +576,17 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 					/* param_name exists */
 					if (config_params[i].param_name) {
 						const char *value = NULL;							
-	
+						char *text_help = NULL;
+						char *sharp = NULL;
+						
 						value = config_params[i].print(cnt, NULL, i, thread);
+
+						sharp = strstr(config_params[i].param_help, "#\n\n#");
+						if (sharp == NULL)
+							sharp = strstr(config_params[i].param_help, "#");
+						sharp++;
+
+						text_help = replace(sharp, "\n#", "<br>");
 						
 						send_template_ini_client(client_socket, ini_template);
 						if (!strcmp ("bool",config_type(&config_params[i])) ){
@@ -567,9 +609,9 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								     "</select><input type='submit' value='set'>\n"
 								     "&nbsp;&nbsp;&nbsp;&nbsp;"
 								     "<a href='%s#%s' target=_blank>[help]</a>"
-                                                                     "</form>\n", thread, thread,
+                                                                     "</form>\n<hr><i>%s</i>", thread, thread,
                                                                      config_params[i].param_name, config_params[i].param_name,
-                                                                     option, TWIKI_URL,config_params[i].param_name);
+                                                                     option, TWIKI_URL,config_params[i].param_name, text_help);
 						}else{
 		
 							if (value == NULL){
@@ -584,13 +626,14 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								"<input type='submit' value='set'>\n"
 								"&nbsp;&nbsp;&nbsp;&nbsp;"
 								"<a href='%s#%s' target=_blank>[help]</a>"
-								"</form>\n", thread, thread,
+								"</form>\n<hr><i>%s</i>", thread, thread,
 								config_params[i].param_name, config_params[i].param_name,
-								value, TWIKI_URL, config_params[i].param_name);
+								value, TWIKI_URL, config_params[i].param_name, text_help);
 						}
 
 						send_template(client_socket, res);
 						send_template_end_client(client_socket);
+						free(text_help);
 					} else {
 						if (cnt[0]->conf.control_html_output)
 							response_client(client_socket, not_found_response_valid_command, NULL);
@@ -683,7 +726,18 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								response_client(client_socket, not_found_response_valid_command_raw, NULL);
 							return 1;
 						} else {
+							char *text_help = NULL;
+							char *sharp = NULL;
+
 							value = config_params[i].print(cnt, NULL, i, thread);
+
+							sharp = strstr(config_params[i].param_help, "#\n\n#");
+							if (sharp == NULL)
+								sharp = strstr(config_params[i].param_help, "#");
+							sharp++;
+
+							text_help = replace(sharp, "\n#", "<br>");
+
 							if (value == NULL)
 								value=config_params[i].print(cnt, NULL, i, 0);
 							if (cnt[0]->conf.control_html_output) {
@@ -691,11 +745,13 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								sprintf(res, "<a href=/%hu/config/get><- back</a><br><br>\n"
 									"<b>Thread %hu</b><br>\n<li>%s = %s"
 									"&nbsp;&nbsp;&nbsp;&nbsp;"
-									"<a href='%s#%s' target=_blank>[help]</a></li>", 
+									"<a href='%s#%s' target=_blank>[help]</a></li><hr><i>%s</i>", 
 									thread, thread,	config_params[i].param_name, value, 
-									TWIKI_URL, config_params[i].param_name);
+									TWIKI_URL, config_params[i].param_name, text_help);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
+
+								free(text_help);
 							} else {
 								send_template_ini_client_raw(client_socket);
 								sprintf(res,"%s = %s\nDone\n", config_params[i].param_name,value);
@@ -839,7 +895,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+				sprintf(res,"<a href=/%hu/action><- back</a><br><br>\n"
 					    "makemovie for thread %hu done<br>\n", thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
@@ -871,7 +927,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			cnt[thread]->snapshot = 1;
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+				sprintf(res,"<a href=/%hu/action><- back</a><br><br>\n"
 					    "snapshot for thread %hu done<br>\n", thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
@@ -1080,7 +1136,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res,"Thread %hu Detection paused\nDone\n", thread);
+				sprintf(res,"<b>Thread %hu</b> Detection paused\nDone\n", thread);
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -1102,12 +1158,12 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				send_template(client_socket,res);
 				if (thread == 0){
 					do{
-						sprintf(res,"Thread %hu %s<br>\n",i, 
+						sprintf(res,"<b>Thread %hu</b> %s<br>\n",i, 
 								(!cnt[i]->running)? "NOT RUNNING" : (cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
 						send_template(client_socket,res);
 					}while (cnt[++i]);
 				}else{
-					sprintf(res,"Thread %hu %s\n", thread,
+					sprintf(res,"<b>Thread %hu</b> %s\n", thread,
 					        (!cnt[thread]->running)? "NOT RUNNING" : (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
 					send_template(client_socket,res);
 				}	

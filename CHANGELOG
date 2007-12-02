@@ -15,7 +15,8 @@ Features
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x181541 (Angel Carpintero)
    * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
      (Angel Carpintero)  
-   * Improved http control ( 'back' link, select box, show current values when are going to be changed ).
+   * Improved http control ( 'back' link, select box, show current values when are going to be changed ). 
+     (Angel Carpintero)
    * Improved thread handling, single threads can be stopped/restarted (Dag Erlandsson)
    * Watchdog, restart hang threads (Dag Erlandsson)
    * Added ON_CAMERA_LOST event (Dag Erlandsson)
