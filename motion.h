@@ -130,6 +130,9 @@
                                      * and then we show a grey image instead
                                      */
 
+#define WATCHDOG_TMO 30  /* 10 sec max motion_loop interval */
+#define WATCHDOG_OFF -127 /* Turn off watchdog, used when we wants to quit a thread */
+
 #define CONNECTION_KO "Lost connection"
 #define CONNECTION_OK "Connection OK"
 
@@ -305,8 +308,6 @@ struct context {
 	struct netcam_context *netcam;
 	struct image_data *current_image;	/* Pointer to a structure where the image, diffs etc is stored */
 	unsigned short int new_img;
-	time_t preview_time;			/* Timestamp of preview image */
-	unsigned short int preview_shots;	/* Shot of preview buffer image */
 
 	int locate;
 	struct rotdata rotate_data;		/* rotation data is thread-specific */
@@ -316,9 +317,16 @@ struct context {
 	int diffs_last[THRESHOLD_TUNE_LENGTH];
 	int smartmask_speed;
 
-	unsigned short int snapshot;
-	unsigned short int makemovie;
-	unsigned short int finish;
+	/* Commands to the motion thread */
+	volatile unsigned short int snapshot;    /* Make a snapshot */
+	volatile unsigned short int makemovie;   /* End a movie */
+	volatile unsigned short int finish;      /* End the thread */
+	volatile unsigned short int restart;     /* Restart the thread when it ends */
+	/* Is the motion thread running */
+	volatile unsigned short int running;
+	volatile int watchdog;
+
+	pthread_t thread_id;
 
 	int event_nr;
 	int prev_event;

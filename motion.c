@@ -22,6 +22,11 @@
 #include "picture.h"
 #include "rotate.h"
 
+/* Forward declarations */
+static int motion_init(struct context *cnt);
+static void motion_cleanup(struct context *cnt);
+
+
 /**
  * tls_key_threadnr
  *
@@ -58,6 +63,10 @@ volatile int threads_running=0;
  * types of messages get output.
  */
 unsigned short int debug_level;
+
+/* Set this when we want main to end or restart
+ */
+volatile unsigned short int finish=0;
 
 /**
  * restart
@@ -235,50 +244,6 @@ static void context_destroy(struct context *cnt)
 {
 	unsigned short int j;
 
-	if (cnt->imgs.out)
-		free(cnt->imgs.out);
-	if (cnt->imgs.ref)
-		free(cnt->imgs.ref);
-	if (cnt->imgs.ref_dyn)
-		free(cnt->imgs.ref_dyn);
-	if (cnt->imgs.image_virgin)
-		free(cnt->imgs.image_virgin);
-	if (cnt->imgs.labels)
-		free(cnt->imgs.labels);
-	if (cnt->imgs.labelsize)
-		free(cnt->imgs.labelsize);
-	if (cnt->imgs.smartmask)
-		free(cnt->imgs.smartmask);
-	if (cnt->imgs.smartmask_final)
-		free(cnt->imgs.smartmask_final);
-	if (cnt->imgs.smartmask_buffer)
-		free(cnt->imgs.smartmask_buffer);
-	if (cnt->imgs.common_buffer)
-		free(cnt->imgs.common_buffer);
-	if (cnt->imgs.preview_image.image)
-		free(cnt->imgs.preview_image.image);
-
-	image_ring_destroy(cnt); /* Cleanup the precapture ring buffer */
-
-	rotate_deinit(cnt); /* cleanup image rotation data */
-
-	if(cnt->pipe != -1)
-		close(cnt->pipe);
-	if(cnt->mpipe != -1)
-		close(cnt->mpipe);
-
-	/* Cleanup the netcam part */
-	if(cnt->netcam)
-		netcam_cleanup(cnt->netcam, 0);
-
-	/* Cleanup the current time structure */
-	if (cnt->currenttime_tm)
-		free(cnt->currenttime_tm);
-
-	/* Cleanup the event time structure */
-	if (cnt->eventtime_tm)
-		free(cnt->eventtime_tm);
-
 	/* Free memory allocated for config parameters */
 	for (j = 0; config_params[j].param_name != NULL; j++) {
 		if (config_params[j].copy == copy_string) {
@@ -342,8 +307,15 @@ static void sig_handler(int signo)
 				while (cnt_list[++i]) {
 					cnt_list[i]->makemovie=1;
 					cnt_list[i]->finish=1;
+					/* don't restart thread when it ends, 
+					 * all threads restarts if global restart is set 
+					 */
+					cnt_list[i]->restart=0;
 				}
 			}
+			/* Set flag we want to quit main check threads loop
+			 * if restart is set (above) we start up again */
+			finish = 1;
 			break;
 		case SIGSEGV:
 			exit(0);
@@ -435,8 +407,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		/* always save first motion frame as preview-shot, may be changed to an other one later */
 		if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
 			image_save_as_preview(cnt, img);
-			cnt->preview_time = cnt->currenttime;
-			cnt->preview_shots = cnt->shots;
 
 			/* If we set output_all to yes and during the event
 			 * there is no image with motion, diffs is 0, we are not going to save the preview event */
@@ -460,8 +430,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		if (cnt->new_img & NEWIMG_BEST) {
 			if (img->diffs > cnt->imgs.preview_image.diffs) {
 				image_save_as_preview(cnt, img);
-				cnt->preview_time = cnt->currenttime;
-				cnt->preview_shots = cnt->shots;
 
 				/* If we have locate on it is already dine above */
 				if (cnt->locate == LOCATE_PREVIEW) {
@@ -473,8 +441,6 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		if (cnt->new_img & NEWIMG_CENTER) {
 			if(img->cent_dist < cnt->imgs.preview_image.cent_dist) {
 				image_save_as_preview(cnt, img);
-				cnt->preview_time = cnt->currenttime;
-				cnt->preview_shots = cnt->shots;
 
 				/* If we have locate on it is already dine above */
 				if (cnt->locate == LOCATE_PREVIEW) {
@@ -573,9 +539,11 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
  *
  *      cnt     Pointer to the motion context structure
  *
- * Returns:     nothing
+ * Returns:     0 OK
+ *             -1 Fatal error, open loopback error
+ *             -2 Fatal error, open SQL database error
  */
-static void motion_init(struct context *cnt)
+static int motion_init(struct context *cnt)
 {
 	int i;
 	FILE *picture;
@@ -585,6 +553,10 @@ static void motion_init(struct context *cnt)
 
 	cnt->currenttime_tm = mymalloc(sizeof(struct tm));
 	cnt->eventtime_tm = mymalloc(sizeof(struct tm));
+	/* Init frame time */
+	cnt->currenttime = time(NULL);
+	localtime_r(&cnt->currenttime, cnt->currenttime_tm);
+
 	cnt->smartmask_speed = 0;
 
 	/* We initialize cnt->event_nr to 1 and cnt->prev_event to 0 (not really needed) so
@@ -593,6 +565,7 @@ static void motion_init(struct context *cnt)
 	cnt->prev_event = 0;
 	cnt->lightswitch_framecounter = 0;
 	cnt->detecting_motion = 0;
+	cnt->makemovie = 0;
 
 	motion_log(LOG_DEBUG, 0, "Thread %d started", (unsigned long)pthread_getspecific(tls_key_threadnr));
 
@@ -602,22 +575,12 @@ static void motion_init(struct context *cnt)
 	/* set the device settings */
 	cnt->video_dev = vid_start(cnt);
 
-	/* We still cannot handle a V4L type camera not being available
-	 * during startup. We have no other option than to die
-	 */
-	if (cnt->video_dev == -1 && !cnt->conf.netcam_url) {
-		motion_log(LOG_ERR, 0, "Capture error calling vid_start");
-		motion_log(-1 , 0, "Thread finishing...");
-		motion_remove_pid();
-		exit(1);
-	}
-
-	/* We failed to get an initial image from a network camera
+	/* We failed to get an initial image from a camera
 	 * So we need to guess height and width based on the config
 	 * file options.
 	 */
-	if (cnt->video_dev == -1) {
-		motion_log(LOG_ERR, 0, "Could not fetch initial image from network camera");
+	if (cnt->video_dev < 0) {
+		motion_log(LOG_ERR, 0, "Could not fetch initial image from camera");
 		motion_log(LOG_ERR, 0, "Motion continues using width and height from config file(s)");
 		cnt->imgs.width = cnt->conf.width;
 		cnt->imgs.height = cnt->conf.height;
@@ -632,7 +595,6 @@ static void motion_init(struct context *cnt)
 	cnt->imgs.out = mymalloc(cnt->imgs.size);
 	cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));  /* contains the moving objects of ref. frame */
 	cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
-	memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
 	cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
 	cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
 	cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.smartmask_buffer));
@@ -656,23 +618,18 @@ static void motion_init(struct context *cnt)
 	 */
 	rotate_init(cnt); /* rotate_deinit is called in main */
 
-	/* Allow videodevice to settle in */
-
 	/* Capture first image, or we will get an alarm on start */
 	if (cnt->video_dev > 0) {
-		for (i = 0; i < 10; i++) {
+		for (i = 0; i < 5; i++) {
 			if (vid_next(cnt, cnt->imgs.image_virgin) == 0)
 				break;
 			SLEEP(2,0);
 		}
-		/* We still cannot handle a V4L type camera not being available
-		 * during startup. We have no other option than to die
-		 */
-		if (i >= 10) {
+		if (i >= 5) {
+			memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
+			draw_text(cnt->imgs.image_virgin, 10, 20, cnt->imgs.width,
+			          "Error capturing first image", cnt->conf.text_double);
 			motion_log(LOG_ERR, 0, "Error capturing first image");
-			motion_log(-1, 0, "Thread finishing...");
-			motion_remove_pid();
-			exit(1);
 		}
 	}
 
@@ -689,9 +646,7 @@ static void motion_init(struct context *cnt)
 		cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 		if (cnt->pipe < 0) {
 			motion_log(LOG_ERR, 0, "Failed to open video loopback");
-			motion_log(-1, 0, "Thread finishing...");
-			motion_remove_pid();
-			exit(1);
+			return -1;
 		}
 	}
 	if (cnt->conf.motionvidpipe) {
@@ -701,9 +656,7 @@ static void motion_init(struct context *cnt)
 		cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 		if (cnt->mpipe < 0) {
 			motion_log(LOG_ERR, 0, "Failed to open video loopback");
-			motion_log(-1, 0, "Thread finishing...");
-			motion_remove_pid();
-			exit(1);
+			return -1;
 		}
 	}
 #endif /* BSD */
@@ -718,9 +671,7 @@ static void motion_init(struct context *cnt)
 			motion_log(LOG_ERR, 0, "Cannot connect to MySQL database %s on host %s with user %s",
 			           cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
 			motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
-			motion_log(-1, 0, "Thread finishing...");
-			motion_remove_pid();
-			exit(1);
+			return -2;
 		}
 		#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
 		my_bool  my_true = TRUE;
@@ -748,9 +699,7 @@ static void motion_init(struct context *cnt)
 		if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
 			motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
 			           cnt->conf.pgsql_db, PQerrorMessage(cnt->database_pg));
-			motion_log(-1, 0, "Thread finishing...");
-			motion_remove_pid();
-			exit(1);
+			return -2;
 		}
 	}
 #endif /* HAVE_PGSQL */
@@ -805,12 +754,106 @@ static void motion_init(struct context *cnt)
 		if ( webcam_init(cnt) == -1 ) {
 			motion_log(LOG_ERR, 1, "Problem enabling stream server in port %d", cnt->conf.webcam_port);
 			cnt->finish = 1;
-			cnt->makemovie = 0;
 		}else 	motion_log(LOG_DEBUG, 0, "Started stream webcam server in port %d", cnt->conf.webcam_port);
 	}
 
 	/* Prevent first few frames from triggering motion... */
 	cnt->moved = 8;
+
+	return 0;
+}
+
+/**
+ * motion_cleanup
+ *
+ * This routine is called from motion_loop when thread ends to
+ * cleanup all memory etc. that motion_init did.
+ *
+ * Parameters:
+ *
+ *      cnt     Pointer to the motion context structure
+ *
+ * Returns:     nothing
+ */
+static void motion_cleanup(struct context *cnt)
+{
+	/* Stop webcam */
+	event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
+
+#ifndef WITHOUT_V4L
+	if (cnt->video_dev >= 0)
+		vid_close(cnt);
+#endif
+
+	if (cnt->imgs.out) {
+		free(cnt->imgs.out);
+		cnt->imgs.out = NULL;
+	}
+	if (cnt->imgs.ref) {
+		free(cnt->imgs.ref);
+		cnt->imgs.ref = NULL;
+	}
+	if (cnt->imgs.ref_dyn) {
+		free(cnt->imgs.ref_dyn);
+		cnt->imgs.ref_dyn = NULL;
+	}
+	if (cnt->imgs.image_virgin) {
+		free(cnt->imgs.image_virgin);
+		cnt->imgs.image_virgin = NULL;
+	}
+	if (cnt->imgs.labels) {
+		free(cnt->imgs.labels);
+		cnt->imgs.labels = NULL;
+	}
+	if (cnt->imgs.labelsize) {
+		free(cnt->imgs.labelsize);
+		cnt->imgs.labelsize = NULL;
+	}
+	if (cnt->imgs.smartmask) {
+		free(cnt->imgs.smartmask);
+		cnt->imgs.smartmask = NULL;
+	}
+	if (cnt->imgs.smartmask_final) {
+		free(cnt->imgs.smartmask_final);
+		cnt->imgs.smartmask_final = NULL;
+	}
+	if (cnt->imgs.smartmask_buffer) {
+		free(cnt->imgs.smartmask_buffer);
+		cnt->imgs.smartmask_buffer = NULL;
+	}
+	if (cnt->imgs.common_buffer) {
+		free(cnt->imgs.common_buffer);
+		cnt->imgs.common_buffer = NULL;
+	}
+	if (cnt->imgs.preview_image.image) {
+		free(cnt->imgs.preview_image.image);
+		cnt->imgs.preview_image.image = NULL;
+	}
+
+	image_ring_destroy(cnt); /* Cleanup the precapture ring buffer */
+
+	rotate_deinit(cnt); /* cleanup image rotation data */
+
+	if(cnt->pipe != -1) {
+		close(cnt->pipe);
+		cnt->pipe = -1;
+	}
+	if(cnt->mpipe != -1) {
+		close(cnt->mpipe);
+		cnt->mpipe = -1;
+	}
+
+	/* Cleanup the current time structure */
+	if (cnt->currenttime_tm) {
+		free(cnt->currenttime_tm);
+		cnt->currenttime_tm = NULL;
+	}
+
+	/* Cleanup the event time structure */
+	if (cnt->eventtime_tm) {
+		free(cnt->eventtime_tm);
+		cnt->eventtime_tm = NULL;
+	}
 }
 
 /**
@@ -834,7 +877,7 @@ static void *motion_loop(void *arg)
 	int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
 	int text_size_factor;
 	int passflag = 0;
-	long int *rolling_average_data;
+	long int *rolling_average_data = NULL;
 	long int rolling_average_limit, required_frame_time, frame_delay, delay_time_nsec;
 	int rolling_frame = 0;
 	struct timeval tv1, tv2;
@@ -850,7 +893,11 @@ static void *motion_loop(void *arg)
 	 */
 	unsigned long int time_last_frame=1, time_current_frame;
 
-	motion_init(cnt);
+	cnt->running = 1;
+	
+	if (motion_init(cnt) < 0) {
+		goto err;
+	}
 
 	/* Initialize the double sized characters if needed. */
 	if(cnt->conf.text_double)
@@ -892,6 +939,7 @@ static void *motion_loop(void *arg)
 	while (!cnt->finish || cnt->makemovie) {
 
 	/***** MOTION LOOP - PREPARE FOR NEW FRAME SECTION *****/
+		cnt->watchdog = WATCHDOG_TMO;
 
 		/* Get current time and preserver last time for frame interval calc. */
 		timebefore = timenow;
@@ -917,7 +965,6 @@ static void *motion_loop(void *arg)
 
 		/* Get time for current frame */
 		cnt->currenttime = time(NULL);
-
 
 		/* localtime returns static data and is not threadsafe
 		 * so we use localtime_r which is reentrant and threadsafe
@@ -985,28 +1032,29 @@ static void *motion_loop(void *arg)
 				cnt->current_image->total_labels = 0;
 			}
 
-		/***** MOTION LOOP - RETRY INITIALIZING NETCAM SECTION *****/
-			/* If a network camera is not available we keep on retrying every 10 seconds
+		/***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
+			/* If a camera is not available we keep on retrying every 10 seconds
 			 * until it shows up.
 			 */
-			if (cnt->video_dev == -1 && cnt->conf.netcam_url &&
+			if (cnt->video_dev < 0 &&
 			    cnt->currenttime % 10 == 0 && cnt->shots == 0) {
 				motion_log(LOG_ERR, 0,
-				           "Retrying until successful initial connection with network camera");
-				netcam_cleanup(cnt->netcam, 1);
-				cnt->netcam = NULL;
+				           "Retrying until successful connection with camera");
 				cnt->video_dev = vid_start(cnt);
 
 				/* if the netcam has different dimensions than in the config file
 				 * we need to restart Motion to re-allocate all the buffers
 				 */
-				if (cnt->imgs.width != cnt->imgs.width || cnt->imgs.height != cnt->conf.height) {
-					motion_log(LOG_ERR, 0, "Network camera has finally become available");
-					motion_log(LOG_ERR, 0, "Network camera image has different width and height "
+				if (cnt->imgs.width != cnt->conf.width || cnt->imgs.height != cnt->conf.height) {
+					motion_log(LOG_ERR, 0, "Camera has finally become available");
+					motion_log(LOG_ERR, 0, "Camera image has different width and height "
 					                       "from what is in the config file. You should fix that");
-					motion_log(LOG_ERR, 0, "Restarting Motion to reinitialize all "
+					motion_log(LOG_ERR, 0, "Restarting Motion thread to reinitialize all "
 					                       "image buffers to new picture dimensions");
-					kill(getpid(), 1);
+					cnt->conf.width = cnt->imgs.width;
+					cnt->conf.height = cnt->imgs.height;
+					/* Break out of main loop terminating thread 
+					 * watchdog will start us again */
 					break;
 				}
 			}
@@ -1021,11 +1069,15 @@ static void *motion_loop(void *arg)
 			 * <0 = fatal error - leave the thread by breaking out of the main loop
 			 * >0 = non fatal error - copy last image or show grey image with message
 			 */
-			vid_return_code = vid_next(cnt, cnt->current_image->image);
+			if (cnt->video_dev >= 0)
+				vid_return_code = vid_next(cnt, cnt->current_image->image);
+			else
+				vid_return_code = 1; /* Non fatal error */
 
 			// VALID PICTURE
 			if (vid_return_code == 0) {
 				cnt->lost_connection = 0;
+				cnt->connectionlosttime = 0;
 
 				/* If all is well reset missing_frame_counter */
 				if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
@@ -1058,12 +1110,17 @@ static void *motion_loop(void *arg)
 				}
 			// FATAL ERROR - leave the thread by breaking out of the main loop	
 			} else if (vid_return_code < 0) {
-				/* Fatal error - break out of main loop terminating thread */
-				motion_log(LOG_ERR, 0, "Video device fatal error - terminating camera thread");
-				break;
+				/* Fatal error - Close video device */
+				motion_log(LOG_ERR, 0, "Video device fatal error - Closing video device");
+				vid_close(cnt);
+				/* Use virgin image, if we are not able to open it again next loop
+				 * a gray image with message is applied
+				 */
+				memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
 			// NO FATAL ERROR -  copy last image or show grey image with message			
 			} else { 
 				cnt->lost_connection = 1;
+
 				if (debug_level)
 					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
 
@@ -1073,21 +1130,17 @@ static void *motion_loop(void *arg)
 				 * other way
 				 */
 				if (vid_return_code == NETCAM_RESTART_ERROR) {
-					motion_log(LOG_ERR, 0, "Restarting Motion to reinitialize all "
+					motion_log(LOG_ERR, 0, "Restarting Motion thread to reinitialize all "
 					                       "image buffers");
-					kill(getpid(), 1);
+					/* Break out of main loop terminating thread 
+					 * watchdog will start us again */
 					break;
 				}
 
-				/* First missed frame - store timestamp */
-				if (!cnt->missing_frame_counter)
+				/* First missed frame - store timestamp 
+				 * Don't reset time when thread restarts*/
+				if (cnt->connectionlosttime == 0)
 					cnt->connectionlosttime = cnt->currenttime;
-
-				/* If we are waiting for first image prevent the
-				 * cnt->connectionlosttime from being updated each time we come back
-				 */
-				if (cnt->video_dev == -1)
-					cnt->missing_frame_counter = 1;
 
 				/* Increase missing_frame_counter
 				 * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
@@ -1095,14 +1148,18 @@ static void *motion_loop(void *arg)
 				 * If we still have not yet received the initial image from a camera
 				 * we go straight for the grey error image.
 				 */
-				if (cnt->video_dev != -1 &&
-				    ++cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
+				++cnt->missing_frame_counter;
+				if (cnt->video_dev >= 0 &&
+				    cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
 					memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
-
 				} else {
+					const char *tmpin;
 					char tmpout[80];
-					char tmpin[] = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
 					struct tm tmptime;
+					if (cnt->video_dev >= 0)
+						tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
+					else
+						tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
 					localtime_r(&cnt->connectionlosttime, &tmptime);
 					memset(cnt->current_image->image, 0x80, cnt->imgs.size);
 					mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
@@ -1113,6 +1170,16 @@ static void *motion_loop(void *arg)
 					if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
 						motion_log(LOG_ERR, 0, "Video signal lost - Adding grey image");
 						// Event for lost video signal can be called from here
+						event(cnt, EVENT_CAMERA_LOST, NULL, NULL,
+						      NULL, cnt->currenttime_tm);
+					}
+
+					/* If we don't get a valid frame for a long time, try to close/reopen device 
+					 * Only try this when a device is open */
+					if ( (cnt->video_dev > 0) && 
+					     (cnt->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cnt->conf.frame_limit) ) {
+						motion_log(LOG_ERR, 0, "Video signal still lost - Trying to close video device");
+						vid_close(cnt);
 					}
 				}
 			}
@@ -1143,8 +1210,9 @@ static void *motion_loop(void *arg)
 				 * This can happen due to change of light conditions or due to a sudden change of the camera
 				 * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
 				 * 5 frames to allow the camera to settle.
+				 * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
 				 */
-				if (cnt->conf.lightswitch) {
+				if (cnt->conf.lightswitch && !cnt->lost_connection) {
 					if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
 						if (cnt->conf.setup_mode)
 							motion_log(-1, 0, "Lightswitch detected");
@@ -1742,24 +1810,21 @@ static void *motion_loop(void *arg)
 	/* END OF MOTION MAIN LOOP
 	 * If code continues here it is because the thread is exiting or restarting
 	 */
-
-	if (cnt->netcam) {
-		netcam_cleanup(cnt->netcam, 0);
-		cnt->netcam = NULL;
-	}
+err:
 	if (rolling_average_data)
 		free(rolling_average_data);
 
 	cnt->lost_connection = 1;
 	motion_log(-1, 0, "Thread exiting");
-	if (!cnt->finish)
-		motion_log(LOG_ERR, 1, "Somebody stole the video device, lets hope we got his picture");
 
-	event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
+	motion_cleanup(cnt);
 
 	pthread_mutex_lock(&global_lock);
 	threads_running--;
 	pthread_mutex_unlock(&global_lock);
+
+	cnt->running = 0;
+	cnt->finish = 0;
 
 	pthread_exit(NULL);
 }
@@ -1923,8 +1988,8 @@ static void motion_shutdown(void)
 		context_destroy(cnt_list[i]);
 	}
 	free(cnt_list);
+	cnt_list = NULL;
 #ifndef WITHOUT_V4L
-	vid_close();
 	vid_cleanup();
 #endif
 }
@@ -2011,6 +2076,74 @@ static void setup_signals(struct sigaction *sig_handler_action, struct sigaction
 }
 
 /**
+ * start_motion_thread
+ *
+ *   Called from main when start a motion thread
+ *
+ * Parameters:
+ *
+ *   cnt - Thread context pointer
+ *   thread_attr - pointer to thread attributes
+ *
+ * Returns: nothing
+ */
+static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr)
+{
+	int i;
+
+	/* Check the webcam port number for conflicts.
+	 * First we check for conflict with the control port.
+	 * Second we check for that two threads does not use the same port number
+	 * for the webcam. If a duplicate port is found the webcam feature gets disabled (port =0)
+	 * for this thread and a warning is written to console and syslog.
+	 */
+
+	if (cnt->conf.webcam_port != 0) {
+		/* Compare against the control port. */
+		if (cnt_list[0]->conf.control_port == cnt->conf.webcam_port) {
+			motion_log(LOG_ERR, 0,
+			           "Webcam port number %d for thread %d conflicts with the control port",
+			           cnt->conf.webcam_port, cnt->threadnr);
+			motion_log(LOG_ERR, 0, "Webcam feature for thread %d is disabled.", cnt->threadnr);
+			cnt->conf.webcam_port = 0;
+		}
+
+		/* Compare against webcam ports of other threads. */
+		for (i = 1; cnt_list[i]; i++) {
+			if (cnt_list[i] == cnt)
+				continue;
+			if (cnt_list[i]->conf.webcam_port == cnt->conf.webcam_port) {
+				motion_log(LOG_ERR, 0,
+				           "Webcam port number %d for thread %d conflicts with thread %d",
+				           cnt->conf.webcam_port, cnt->threadnr, cnt_list[i]->threadnr);
+				motion_log(LOG_ERR, 0,
+				           "Webcam feature for thread %d is disabled.", cnt->threadnr);
+				cnt->conf.webcam_port = 0;
+			}
+		}
+	}
+
+	/* Update how many threads we have running. This is done within a
+	 * mutex lock to prevent multiple simultaneous updates to
+	 * 'threads_running'.
+	 */
+	pthread_mutex_lock(&global_lock);
+	threads_running++;
+	pthread_mutex_unlock(&global_lock);
+
+	/* Set a flag that we want this thread running */
+	cnt->restart = 1;
+
+	/* Give the thread 30s to start */
+	cnt->watchdog = 30;
+
+	/* Create the actual thread. Use 'motion_loop' as the thread
+	 * function.
+	 */
+	pthread_create(&cnt->thread_id, thread_attr, &motion_loop, cnt);
+}
+
+/**
  * main
  *
  *   Main entry point of Motion. Launches all the motion threads and contains
@@ -2025,8 +2158,7 @@ static void setup_signals(struct sigaction *sig_handler_action, struct sigaction
  */
 int main (int argc, char **argv)
 {
-	int i, j;
-	int webcam_port;
+	int i;
 	pthread_attr_t thread_attr;
 	pthread_t thread_id;
 
@@ -2080,55 +2212,11 @@ int main (int argc, char **argv)
 			motion_startup(0, argc, argv); /* 0 = skip daemon init */
 		}
 
-		/* Check the webcam port number for conflicts.
-		 * First we check for conflict with the control port.
-		 * Second we check for that two threads does not use the same port number
-		 * for the webcam. If a duplicate port is found the webcam feature gets disabled (port =0)
-		 * for this thread and a warning is written to console and syslog.
-		 */
-		for (i = 1; cnt_list[i]; i++) {
-			/* Get the webcam port for thread 'i', may be 0. */
-			webcam_port = cnt_list[i]->conf.webcam_port;
-
-			if (cnt_list[0]->conf.setup_mode)
-				motion_log(LOG_ERR, 0, "Webcam port %d", webcam_port);
-
-			/* Compare against the control port. */
-			if (cnt_list[0]->conf.control_port == webcam_port && webcam_port != 0) {
-				cnt_list[i]->conf.webcam_port = 0;
-				motion_log(LOG_ERR, 0,
-				           "Webcam port number %d for thread %d conflicts with the control port",
-				           webcam_port, i);
-				motion_log(LOG_ERR, 0, "Webcam feature for thread %d is disabled.", i);
-			}
-
-			/* Compare against webcam ports of other threads. */
-			j = i;
-			while (cnt_list[++j]) {
-				if (cnt_list[j]->conf.webcam_port == webcam_port && webcam_port != 0) {
-					cnt_list[j]->conf.webcam_port = 0;
-					motion_log(LOG_ERR, 0,
-					           "Webcam port number %d for thread %d conflicts with thread %d",
-					           webcam_port, j, i);
-					motion_log(LOG_ERR, 0,
-					           "Webcam feature for thread %d is disabled.", j);
-				}
-			}
-		}
 
 		/* Start the motion threads. First 'cnt_list' item is global if 'thread'
 		 * option is used, so start at 1 then and 0 otherwise.
 		 */
 		for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
-
-			/* Assign the thread number for this thread. This is done within a
-			 * mutex lock to prevent multiple simultaneous updates to
-			 * 'threads_running'.
-			 */
-			pthread_mutex_lock(&global_lock);
-			threads_running++;
-			pthread_mutex_unlock(&global_lock);
-			
 			/* If i is 0 it means no thread files and we then set the thread number to 1 */
 			cnt_list[i]->threadnr = i ? i : 1;
 
@@ -2136,16 +2224,16 @@ int main (int argc, char **argv)
 				motion_log(LOG_INFO, 0, "Thread %d is from %s", cnt_list[i]->threadnr, cnt_list[i]->conf_filename );
 
 			if (cnt_list[0]->conf.setup_mode) {
-				motion_log(-1, 0, "Thread %d is device: %s input %d", threads_running,
+				motion_log(-1, 0, "Thread %d is device: %s input %d", cnt_list[i]->threadnr,
 				           cnt_list[i]->conf.netcam_url ? cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
 				           cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input
 				          );
 			}
 
-			/* Create the actual thread. Use 'motion_loop' as the thread
-			 * function.
-			 */
-			pthread_create(&thread_id, &thread_attr, &motion_loop, cnt_list[i]);
+			if (cnt_list[0]->conf.setup_mode)
+				motion_log(LOG_ERR, 0, "Webcam port %d", cnt_list[i]->conf.webcam_port);
+
+			start_motion_thread(cnt_list[i], &thread_attr);
 		}
 
 		/* Create a thread for the control interface if requested. Create it
@@ -2160,9 +2248,37 @@ int main (int argc, char **argv)
 		/* Crude way of waiting for all threads to finish - check the thread
 		 * counter (because we cannot do join on the detached threads).
 		 */
-		while(threads_running > 0) {
+		while( (threads_running > 0) || (!finish) ) {
 			SLEEP(1,0);
+			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
+				/* Check if threads wants to be restarted */
+				if ( (!cnt_list[i]->running) && (cnt_list[i]->restart) ) {
+					motion_log(LOG_INFO, 0, "Motion thread %d restart", cnt_list[i]->threadnr);
+					start_motion_thread(cnt_list[i], &thread_attr);
+				}
+				if (cnt_list[i]->watchdog > WATCHDOG_OFF) {
+					cnt_list[i]->watchdog--;
+					if (cnt_list[i]->watchdog == 0) {
+						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, trying to do a graceful restart",
+						                          cnt_list[i]->threadnr);
+						cnt_list[i]->finish = 1;
+					}
+					if (cnt_list[i]->watchdog == -60) {
+						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, did NOT restart graceful, killing it!",
+						                          cnt_list[i]->threadnr);
+						pthread_cancel(cnt_list[i]->thread_id);
+						pthread_mutex_lock(&global_lock);
+						threads_running--;
+						pthread_mutex_unlock(&global_lock);
+						motion_cleanup(cnt_list[i]);
+						cnt_list[i]->running = 0;
+						cnt_list[i]->finish = 0;
+					}
+				}
+			}
 		}
+		/* Reset end main loop flag */
+		finish = 0;
 
 		if (cnt_list[0]->conf.setup_mode)
 			motion_log(LOG_DEBUG, 0, "Threads finished");

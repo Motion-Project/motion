@@ -891,22 +891,41 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 		pointer = pointer + 7;
 		length_uri = length_uri - 7;
 		if (length_uri == 0) {
-			do {
-				motion_log(LOG_DEBUG, 0, "httpd restart");
-				kill(getpid(),1);
-			} while (cnt[++i]);
+			/*call restart*/
 
-			if (cnt[0]->conf.control_html_output) {
-				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"restart in progress ... bye<br>\n<a href='/'>Home</a>");
-				send_template(client_socket, res);
-				send_template_end_client(client_socket);
+			if (thread == 0) {
+				motion_log(LOG_DEBUG, 0, "httpd restart");
+				kill(getpid(),SIGHUP);
+				if (cnt[0]->conf.control_html_output) {
+					send_template_ini_client(client_socket, ini_template);
+					sprintf(res,"restart in progress ... bye<br>\n<a href='/'>Home</a>");
+					send_template(client_socket, res);
+					send_template_end_client(client_socket);
+				} else {
+					send_template_ini_client_raw(client_socket);
+					sprintf(res,"restart in progress ...\nDone\n");
+					send_template_raw(client_socket, res);
+				}
+				return 0; // to restart
 			} else {
-				send_template_ini_client_raw(client_socket);
-				sprintf(res,"restart in progress ...\nDone\n");
-				send_template_raw(client_socket, res);
+				motion_log(LOG_DEBUG, 0, "httpd restart thread %d", thread);
+				if (cnt[thread]->running) {
+					cnt[thread]->makemovie=1;
+					cnt[thread]->finish=1;
+				}
+				cnt[thread]->restart=1;
+				if (cnt[0]->conf.control_html_output) {
+					send_template_ini_client(client_socket, ini_template);
+					sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+						    "restart for thread %hu done<br>\n", thread, thread);
+					send_template(client_socket, res);
+					send_template_end_client(client_socket);
+				} else {
+					send_template_ini_client_raw(client_socket);
+					sprintf(res,"restart for thread %hu\nDone\n", thread);
+					send_template_raw(client_socket, res);
+				}
 			}
-			return 0; // to restart
 		} else {
 			if (cnt[0]->conf.control_html_output)
 				response_client(client_socket,not_found_response_valid_command,NULL);
@@ -918,23 +937,39 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 		length_uri = length_uri - 4;
 		if (length_uri == 0) {
 			/*call quit*/
-			do {
-				motion_log(LOG_DEBUG, 0, "httpd quitting");
-				cnt[i]->makemovie = 1;
-				cnt[i]->finish = 1;
-			} while (cnt[++i]);
 
-			if (cnt[0]->conf.control_html_output) {
-				send_template_ini_client(client_socket, ini_template);
-				sprintf(res,"quit in progress ... bye");
-				send_template(client_socket, res);
-				send_template_end_client(client_socket);
+			if (thread == 0) {
+				motion_log(LOG_DEBUG, 0, "httpd quit");
+				kill(getpid(),SIGQUIT);
+				if (cnt[0]->conf.control_html_output) {
+					send_template_ini_client(client_socket, ini_template);
+					sprintf(res,"quit in progress ... bye");
+					send_template(client_socket, res);
+					send_template_end_client(client_socket);
+				} else {
+					send_template_ini_client_raw(client_socket);
+					sprintf(res,"quit in progress ... bye\nDone\n");
+					send_template_raw(client_socket, res);
+				}
+				return 0; // to quit
 			} else {
-				send_template_ini_client_raw(client_socket);
-				sprintf(res,"quit in progress ... bye\nDone\n");
-				send_template_raw(client_socket, res);
+				motion_log(LOG_DEBUG, 0, "httpd quit thread %d", thread);
+				cnt[thread]->restart=0;
+				cnt[thread]->makemovie=1;
+				cnt[thread]->finish=1;
+				cnt[thread]->watchdog=WATCHDOG_OFF;
+				if (cnt[0]->conf.control_html_output) {
+					send_template_ini_client(client_socket, ini_template);
+					sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+						    "quit for thread %hu done<br>\n", thread, thread);
+					send_template(client_socket, res);
+					send_template_end_client(client_socket);
+				} else {
+					send_template_ini_client_raw(client_socket);
+					sprintf(res,"quit for thread %hu\nDone\n", thread);
+					send_template_raw(client_socket, res);
+				}
 			}
-			return 0; // to quit
 		} else {
 			/*error*/
 			if (cnt[0]->conf.control_html_output)
@@ -975,11 +1010,12 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection><- back</a><br><br><b>Thread %hu</b> Detection status %s\n", 
-					      thread, thread, (cnt[thread]->pause)? "PAUSE":"ACTIVE");
+					      thread, thread, (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
-				sprintf(res, "Thread %hu Detection status %s\n",thread, (cnt[thread]->pause)? "PAUSE":"ACTIVE");
+				sprintf(res, "Thread %hu Detection status %s\n",thread, 
+				          (!cnt[thread]->running)? "NOT RUNNING" : (cnt[thread]->pause)? "PAUSE":"ACTIVE");
 				send_template_ini_client_raw(client_socket);
 				send_template_raw(client_socket, res);
 			}
@@ -1067,12 +1103,12 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				if (thread == 0){
 					do{
 						sprintf(res,"Thread %hu %s<br>\n",i, 
-								(cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
+								(!cnt[i]->running)? "NOT RUNNING" : (cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
 						send_template(client_socket,res);
 					}while (cnt[++i]);
 				}else{
-					sprintf(res,"Thread %hu %s\n",
-						     thread, (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+					sprintf(res,"Thread %hu %s\n", thread,
+					        (!cnt[thread]->running)? "NOT RUNNING" : (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
 					send_template(client_socket,res);
 				}	
 				send_template_end_client(client_socket);
@@ -1081,11 +1117,12 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				if (thread == 0){
 					do{
 						sprintf(res,"Thread %hu %s\n", i,
-								(cnt[i]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+								(!cnt[i]->running)? "NOT RUNNING" : (cnt[i]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
 						send_template_raw(client_socket, res);
 					}while (cnt[++i]);
 				}else{		
-					sprintf(res,"Thread %hu %s\n", thread,(cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
+					sprintf(res,"Thread %hu %s\n", thread,
+					        (!cnt[thread]->running)? "NOT RUNNING" : (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
 					send_template_raw(client_socket, res);
 				}	
 				

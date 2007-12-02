@@ -101,6 +101,7 @@ struct config {
 	char *on_motion_detected;
 	char *on_movie_start;
 	char *on_movie_end;
+	char *on_camera_lost;
 	const char *motionvidpipe;
 	const char *netcam_url;
 	const char *netcam_userpass;

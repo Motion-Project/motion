@@ -28,6 +28,7 @@
 #define EVENT_DEBUG             65536
 #define EVENT_CRITICAL          131072
 #define EVENT_AREA_DETECTED     262144
+#define EVENT_CAMERA_LOST       524288
 #
 
 typedef void(* event_handler)(struct context *, int, unsigned char *, char *, void *, struct tm *);

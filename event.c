@@ -329,6 +329,14 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	cnt->snapshot = 0;
 }
 
+static void event_camera_lost(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *img ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
+{
+	if (cnt->conf.on_camera_lost)
+		exec_command(cnt, cnt->conf.on_camera_lost, NULL, 0);
+}
+
 #ifdef HAVE_FFMPEG
 static void grey2yuv420p(unsigned char *u, unsigned char *v, int width, int height)
 {
@@ -659,6 +667,10 @@ struct event_handlers event_handlers[] = {
 	on_movie_end_command
 	},
 #endif /* HAVE_FFMPEG */
+	{
+	EVENT_CAMERA_LOST,
+	event_camera_lost
+	},
 	{
 	EVENT_STOP,
 	event_stop_webcam

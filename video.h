@@ -35,6 +35,8 @@
 #define VIDEO_DEVICE "/dev/video0"
 
 struct video_dev {
+	struct video_dev *next;
+	int usage_count;
 	int fd;
 	const char *video_device;
 	int input;
@@ -70,7 +72,7 @@ struct video_dev {
 /* video functions, video_common.c */
 int vid_start(struct context *);
 int vid_next(struct context *, unsigned char *map);
-void vid_close(void);
+void vid_close(struct context *cnt);
 void vid_cleanup(void);
 void vid_init(void);
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);

@@ -514,69 +514,100 @@ static pthread_mutex_t vid_mutex;
 /* Here we setup the viddevs structure which is used globally in the vid_*
  * functions.
  */
-static struct video_dev **viddevs = NULL;
+static struct video_dev *viddevs = NULL;
 
 /**
  * vid_init
  *
  * Called from motion.c at the very beginning before setting up the threads.
- * Function prepares the viddevs struct for the threads and the vid_mutex
+ * Function prepares the vid_mutex
  */
 void vid_init(void)
 {
-	if (!viddevs) {
-		viddevs = mymalloc(sizeof(struct video_dev *));
-		viddevs[0] = NULL;
-	}
-
 	pthread_mutex_init(&vid_mutex, NULL);
-}
-
-/**
- * vid_close
- *
- * vid_close is called from motion.c when Motion is stopped or restarted
- * It gets rid of all open video devices. It is called BEFORE vid_cleanup.
- */
-void vid_close(void)
-{
-	int i = -1;
-
-	if (viddevs) {
-		while (viddevs[++i]) {
-#ifdef MOTION_V4L2
-			if (viddevs[i]->v4l2)
-				v4l2_close(viddevs[i]);
-#else
-			int tmp = viddevs[i]->fd;
-			viddevs[i]->fd = -1;
-			close(tmp);
-#endif
-		}
-	}
 }
 
 /**
  * vid_cleanup
  *
  * vid_cleanup is called from motion.c when Motion is stopped or restarted
- * It free all the memory held by the viddevs structs.
  */
 void vid_cleanup(void)
 {
-	int i = -1;
-	if (viddevs) {
-		while (viddevs[++i]) {
+	pthread_mutex_destroy(&vid_mutex);
+}
+
+/**
+ * vid_close
+ *
+ * vid_close is called from motion.c when a Motion thread is stopped or restarted
+ */
+void vid_close(struct context *cnt)
+{
+	struct video_dev *dev = viddevs;
+	struct video_dev *prev = NULL;
+
+	/* Cleanup the netcam part */
+	if(cnt->netcam) {
+		netcam_cleanup(cnt->netcam, 0);
+		cnt->netcam = NULL;
+		return;
+	}
+
+	/* Cleanup the v4l part */
+	pthread_mutex_lock(&vid_mutex);
+	while (dev) {
+		if (dev->fd == cnt->video_dev)
+			break;
+		prev = dev;
+		dev = dev->next;
+	}
+	pthread_mutex_unlock(&vid_mutex);
+
+	/* Set it as closed in thread context */
+	cnt->video_dev = -1;
+
+	if (dev == NULL) {
+		motion_log(LOG_ERR, 0, "vid_close: Unable to find video device");
+		return;
+	}
+
+	if( --dev->usage_count == 0) {
+		motion_log(LOG_INFO, 0, "Closing video device %s", dev->video_device);
 #ifdef MOTION_V4L2
-			if (viddevs[i]->v4l2)
-				v4l2_cleanup(viddevs[i]);
-			else
+		if (dev->v4l2) {
+			v4l2_close(dev);
+			v4l2_cleanup(dev);
+		} else {
 #endif
-				munmap(viddevs[i]->v4l_buffers[0], viddevs[i]->size_map);
-			free(viddevs[i]);
+			close(dev->fd);
+			munmap(viddevs->v4l_buffers[0], viddevs->size_map);
+			munmap(viddevs->v4l_buffers[1], viddevs->size_map);
+#ifdef MOTION_V4L2
 		}
-		free(viddevs);
-		viddevs = NULL;
+#endif
+		dev->fd = -1;
+		pthread_mutex_lock(&vid_mutex);
+		/* Remove from list */
+		if (prev == NULL)
+			viddevs = dev->next;
+		else
+			prev->next = dev->next;
+		pthread_mutex_unlock(&vid_mutex);
+
+		pthread_mutexattr_destroy(&dev->attr);
+		pthread_mutex_destroy(&dev->mutex);
+		free(dev);
+	} else {
+		motion_log(LOG_INFO, 0, "Still %d users of video device %s, so we don't close it now", dev->usage_count, dev->video_device);
+		/* There is still at least one thread using this device 
+		 * If we own it, release it
+		 */
+		if (dev->owner == cnt->threadnr) {
+			dev->frames = 0;
+			dev->owner = -1;
+			pthread_mutex_unlock(&dev->mutex);
+		}
 	}
 }
 
@@ -608,180 +639,190 @@ void vid_cleanup(void)
  *     device number
  *     -1 if failed to open device.
  */
-
 static int vid_v4lx_start(struct context *cnt)
 {
 	struct config *conf = &cnt->conf;
-	int dev = -1;
+	int fd = -1;
+	struct video_dev *dev;
 
-	/* Start a new block so we can make declarations without breaking good old
-	 * gcc 2.95 or older.
+	int width, height, input, norm, tuner_number;
+	unsigned long frequency;
+
+	/* We use width and height from conf in this function. They will be assigned
+	 * to width and height in imgs here, and cap_width and cap_height in 
+	 * rotate_data won't be set until in rotate_init.
+	 * Motion requires that width and height is a multiple of 16 so we check
+	 * for this first.
 	 */
-	{
-		int i = -1;
-		int width, height, input, norm, tuner_number;
-		unsigned long frequency;
-
-		/* We use width and height from conf in this function. They will be assigned
-		 * to width and height in imgs here, and cap_width and cap_height in 
-		 * rotate_data won't be set until in rotate_init.
-		 * Motion requires that width and height is a multiple of 16 so we check
-		 * for this first.
-		 */
-		if (conf->width % 16) {
-			motion_log(LOG_ERR, 0, "config image width (%d) is not modulo 16", conf->width);
-			return -1;
-		}
-
-		if (conf->height % 16) {
-			motion_log(LOG_ERR, 0, "config image height (%d) is not modulo 16", conf->height);
-			return -1;
-		}
-
-		width = conf->width;
-		height = conf->height;
-		input = conf->input;
-		norm = conf->norm;
-		frequency = conf->frequency;
-		tuner_number = conf->tuner_number;
-
-		pthread_mutex_lock(&vid_mutex);
-
-		/* Transfer width and height from conf to imgs. The imgs values are the ones
-		 * that is used internally in Motion. That way, setting width and height via
-		 * http remote control won't screw things up.
-		 */
-		cnt->imgs.width = width;
-		cnt->imgs.height = height;
-
-		/* First we walk through the already discovered video devices to see
-		 * if we have already setup the same device before. If this is the case
-		 * the device is a Round Robin device and we set the basic settings
-		 * and return the file descriptor
-		 */
-		while (viddevs[++i]) {
-			if (!strcmp(conf->video_device, viddevs[i]->video_device)) {
-				int fd;
-				cnt->imgs.type = viddevs[i]->v4l_fmt;
-				switch (cnt->imgs.type) {
-				case VIDEO_PALETTE_GREY:
-					cnt->imgs.motionsize = width * height;
-					cnt->imgs.size = width * height;
-					break;
-				case VIDEO_PALETTE_YUYV:
-				case VIDEO_PALETTE_RGB24:
-				case VIDEO_PALETTE_YUV422:
-					cnt->imgs.type = VIDEO_PALETTE_YUV420P;
-				case VIDEO_PALETTE_YUV420P:
-					cnt->imgs.motionsize = width * height;
-					cnt->imgs.size = (width * height * 3) / 2;
-					break;
-				}
-				fd = viddevs[i]->fd;
-				pthread_mutex_unlock(&vid_mutex);
-				return fd;
-			}
-		}
-
-		viddevs = myrealloc(viddevs, sizeof(struct video_dev *) * (i + 2), "vid_start");
-		viddevs[i] = mymalloc(sizeof(struct video_dev));
-		memset(viddevs[i], 0, sizeof(struct video_dev));
-		viddevs[i + 1] = NULL;
-
-		pthread_mutexattr_init(&viddevs[i]->attr);
-		pthread_mutex_init(&viddevs[i]->mutex, NULL);
-
-		viddevs[i]->video_device = conf->video_device;
-
-		dev = open(viddevs[i]->video_device, O_RDWR);
-
-		if (dev < 0) {
-			motion_log(LOG_ERR, 1, "Failed to open video device %s", conf->video_device);
-			return -1;
-		}
-
-		viddevs[i]->fd = dev;
-		viddevs[i]->input = input;
-		viddevs[i]->height = height;
-		viddevs[i]->width = width;
-		viddevs[i]->freq = frequency;
-		viddevs[i]->tuner_number = tuner_number;
-
-		/* We set brightness, contrast, saturation and hue = 0 so that they only get
-		 * set if the config is not zero.
-		 */
-		viddevs[i]->brightness = 0;
-		viddevs[i]->contrast = 0;
-		viddevs[i]->saturation = 0;
-		viddevs[i]->hue = 0;
-		viddevs[i]->owner = -1;
-		viddevs[i]->v4l_fmt = VIDEO_PALETTE_YUV420P;
-#ifdef MOTION_V4L2
-		/* First lets try V4L2 and if it's not supported V4L1 */
-
-		viddevs[i]->v4l2 = 1;
-
-		if (!v4l2_start(cnt, viddevs[i], width, height, input, norm, frequency, tuner_number)) {
-			/* restore width & height because could be changed in v4l2_start ()*/
-			viddevs[i]->width = width;
-			viddevs[i]->height = height;
-#endif
-
-			if (!v4l_start(cnt, viddevs[i], width, height, input, norm, frequency, tuner_number)) {
-				pthread_mutex_unlock(&vid_mutex);
-				return -1;
-			}
-#ifdef MOTION_V4L2
-			viddevs[i]->v4l2 = 0;
-		}
-#endif
-		if (viddevs[i]->v4l2 == 0) {
-			motion_log(-1, 0, "Using V4L1");
-		} else {
-			motion_log(-1, 0, "Using V4L2");
-			/* Update width & height because could be changed in v4l2_start () */
-			width = viddevs[i]->width;
-			height = viddevs[i]->height;
-			cnt->conf.width = width;
-			cnt->conf.height = height;
-			cnt->imgs.width = width;
-			cnt->imgs.height = height;
-		}
-
-		cnt->imgs.type = viddevs[i]->v4l_fmt;
-
-		switch (cnt->imgs.type) {
-		case VIDEO_PALETTE_GREY:
-			cnt->imgs.size = width * height;
-			cnt->imgs.motionsize = width * height;
-			break;
-		case VIDEO_PALETTE_YUYV:
-		case VIDEO_PALETTE_RGB24:
-		case VIDEO_PALETTE_YUV422:
-			cnt->imgs.type = VIDEO_PALETTE_YUV420P;
-		case VIDEO_PALETTE_YUV420P:
-			cnt->imgs.size = (width * height * 3) / 2;
-			cnt->imgs.motionsize = width * height;
-			break;
-		}
-
-		pthread_mutex_unlock(&vid_mutex);
+	if (conf->width % 16) {
+		motion_log(LOG_ERR, 0, "config image width (%d) is not modulo 16", conf->width);
+		return -1;
 	}
 
-	return dev;
+	if (conf->height % 16) {
+		motion_log(LOG_ERR, 0, "config image height (%d) is not modulo 16", conf->height);
+		return -1;
+	}
+
+	width = conf->width;
+	height = conf->height;
+	input = conf->input;
+	norm = conf->norm;
+	frequency = conf->frequency;
+	tuner_number = conf->tuner_number;
+
+	pthread_mutex_lock(&vid_mutex);
+
+	/* Transfer width and height from conf to imgs. The imgs values are the ones
+	 * that is used internally in Motion. That way, setting width and height via
+	 * http remote control won't screw things up.
+	 */
+	cnt->imgs.width = width;
+	cnt->imgs.height = height;
+
+	/* First we walk through the already discovered video devices to see
+	 * if we have already setup the same device before. If this is the case
+	 * the device is a Round Robin device and we set the basic settings
+	 * and return the file descriptor
+	 */
+	dev = viddevs;
+	while (dev) {
+		if (!strcmp(conf->video_device, dev->video_device)) {
+			dev->usage_count++;
+			cnt->imgs.type = dev->v4l_fmt;
+			switch (cnt->imgs.type) {
+			case VIDEO_PALETTE_GREY:
+				cnt->imgs.motionsize = width * height;
+				cnt->imgs.size = width * height;
+				break;
+			case VIDEO_PALETTE_YUYV:
+			case VIDEO_PALETTE_RGB24:
+			case VIDEO_PALETTE_YUV422:
+				cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+			case VIDEO_PALETTE_YUV420P:
+				cnt->imgs.motionsize = width * height;
+				cnt->imgs.size = (width * height * 3) / 2;
+				break;
+			}
+			pthread_mutex_unlock(&vid_mutex);
+			return dev->fd;
+		}
+		dev = dev->next;
+	}
+
+	dev = mymalloc(sizeof(struct video_dev));
+	memset(dev, 0, sizeof(struct video_dev));
+
+	dev->video_device = conf->video_device;
+
+	fd = open(dev->video_device, O_RDWR);
+
+	if (fd < 0) {
+		motion_log(LOG_ERR, 1, "Failed to open video device %s", conf->video_device);
+		free(dev);
+		pthread_mutex_unlock(&vid_mutex);
+		return -1;
+	}
+
+	pthread_mutexattr_init(&dev->attr);
+	pthread_mutex_init(&dev->mutex, &dev->attr);
+
+	dev->usage_count = 1;
+	dev->fd = fd;
+	dev->input = input;
+	dev->height = height;
+	dev->width = width;
+	dev->freq = frequency;
+	dev->tuner_number = tuner_number;
+
+	/* We set brightness, contrast, saturation and hue = 0 so that they only get
+	 * set if the config is not zero.
+	 */
+	dev->brightness = 0;
+	dev->contrast = 0;
+	dev->saturation = 0;
+	dev->hue = 0;
+	dev->owner = -1;
+	dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
+#ifdef MOTION_V4L2
+	/* First lets try V4L2 and if it's not supported V4L1 */
+
+	dev->v4l2 = 1;
+
+	if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
+		/* restore width & height before test with v4l
+		 * because could be changed in v4l2_start ()
+		 */
+		dev->width = width;
+		dev->height = height;
+#endif
+
+		if (!v4l_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
+			close(dev->fd);
+			pthread_mutexattr_destroy(&dev->attr);
+			pthread_mutex_destroy(&dev->mutex);
+			free(dev);
+
+			pthread_mutex_unlock(&vid_mutex);
+			return -1;
+		}
+#ifdef MOTION_V4L2
+		dev->v4l2 = 0;
+	}
+#endif
+	if (dev->v4l2 == 0) {
+		motion_log(-1, 0, "Using V4L1");
+	} else {
+		motion_log(-1, 0, "Using V4L2");
+		/* Update width & height because could be changed in v4l2_start () */
+		width = dev->width;
+		height = dev->height;
+		cnt->imgs.width = width;
+		cnt->imgs.height = height;
+	}
+
+	cnt->imgs.type = dev->v4l_fmt;
+
+	switch (cnt->imgs.type) {
+	case VIDEO_PALETTE_GREY:
+		cnt->imgs.size = width * height;
+		cnt->imgs.motionsize = width * height;
+		break;
+	case VIDEO_PALETTE_YUYV:
+	case VIDEO_PALETTE_RGB24:
+	case VIDEO_PALETTE_YUV422:
+		cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+	case VIDEO_PALETTE_YUV420P:
+		cnt->imgs.size = (width * height * 3) / 2;
+		cnt->imgs.motionsize = width * height;
+		break;
+	}
+
+	/* Insert into linked list */
+	dev->next = viddevs;
+	viddevs = dev;
+
+	pthread_mutex_unlock(&vid_mutex);
+
+return fd;
 }
 #endif				/*WITHOUT_V4L */
 
 int vid_start(struct context *cnt)
 {
 	struct config *conf = &cnt->conf;
-	int dev = -1;
+	int dev;
 
 	if (conf->netcam_url) {
-		return netcam_start(cnt);
+		dev = netcam_start(cnt);
+		if (dev < 0) {
+			netcam_cleanup(cnt->netcam, 1);
+			cnt->netcam = NULL;
+		}
 	}
 #ifndef WITHOUT_V4L
-	dev = vid_v4lx_start(cnt);
+	else
+		dev = vid_v4lx_start(cnt);
 #endif				/*WITHOUT_V4L */
 
 	return dev;
@@ -809,60 +850,63 @@ int vid_start(struct context *cnt)
  */
 int vid_next(struct context *cnt, unsigned char *map)
 {
+	int ret;
 	struct config *conf = &cnt->conf;
-	int ret = -1;
 
 	if (conf->netcam_url) {
 		if (cnt->video_dev == -1)
 			return NETCAM_GENERAL_ERROR;
 
-		ret = netcam_next(cnt, map);
-		return ret;
+		return netcam_next(cnt, map);
 	}
 #ifndef WITHOUT_V4L
-
 	/* We start a new block so we can make declarations without breaking
 	 * gcc 2.95 or older
 	 */
 	{
-		int i = -1;
+		struct video_dev *dev;
 		int width, height;
-		int dev = cnt->video_dev;
 
 		/* NOTE: Since this is a capture, we need to use capture dimensions. */
 		width = cnt->rotate_data.cap_width;
 		height = cnt->rotate_data.cap_height;
 
-		while (viddevs[++i])
-			if (viddevs[i]->fd == dev)
+		pthread_mutex_lock(&vid_mutex);
+		dev = viddevs;
+		while (dev) {
+			if (dev->fd == cnt->video_dev)
 				break;
+			dev = dev->next;
+		}
+		pthread_mutex_unlock(&vid_mutex);
 
-		if (!viddevs[i])
+		if (dev == NULL)
 			return V4L_FATAL_ERROR;
 
-		if (viddevs[i]->owner != cnt->threadnr) {
-			pthread_mutex_lock(&viddevs[i]->mutex);
-			viddevs[i]->owner = cnt->threadnr;
-			viddevs[i]->frames = conf->roundrobin_frames;
+		if (dev->owner != cnt->threadnr) {
+			pthread_mutex_lock(&dev->mutex);
+			dev->owner = cnt->threadnr;
+			dev->frames = conf->roundrobin_frames;
 			cnt->switched = 1;
 		}
 #ifdef MOTION_V4L2
-		if (viddevs[i]->v4l2) {
-			v4l2_set_input(cnt, viddevs[i], map, width, height, conf);
+		if (dev->v4l2) {
+			v4l2_set_input(cnt, dev, map, width, height, conf);
 
-			ret = v4l2_next(cnt, viddevs[i], map, width, height);
+			ret = v4l2_next(cnt, dev, map, width, height);
 		} else {
 #endif
-			v4l_set_input(cnt, viddevs[i], map, width, height, conf->input, conf->norm,
+			v4l_set_input(cnt, dev, map, width, height, conf->input, conf->norm,
 				      conf->roundrobin_skip, conf->frequency, conf->tuner_number);
 
-			ret = v4l_next(viddevs[i], map, width, height);
+			ret = v4l_next(dev, map, width, height);
 #ifdef MOTION_V4L2
 		}
 #endif
-		if (--viddevs[i]->frames <= 0) {
-			viddevs[i]->owner = -1;
-			pthread_mutex_unlock(&viddevs[i]->mutex);
+		if (--dev->frames <= 0) {
+			dev->owner = -1;
+			dev->frames = 0;
+			pthread_mutex_unlock(&dev->mutex);
 		}
 
 		if (cnt->rotate_data.degrees > 0) {

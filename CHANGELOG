@@ -16,6 +16,10 @@ Features
    * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
      (Angel Carpintero)  
    * Improved http control ( 'back' link, select box, show current values when are going to be changed ).
+   * Improved thread handling, single threads can be stopped/restarted (Dag Erlandsson)
+   * Watchdog, restart hang threads (Dag Erlandsson)
+   * Added ON_CAMERA_LOST event (Dag Erlandsson)
+   * Motion start if a camera isn't there at start, retries to connect if lost (Dag Erlandsson)
 
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
