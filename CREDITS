@@ -147,7 +147,7 @@ Angel Carpintero
    * Added fix to BugReport2005x02x11x170019
    * Added fix to BugReport2005x02x11x150802
    * Major new feature. XMLRPC is replaced by a simpler http remote control
-     interface (implemented by Angel Carpintero)
+     interface.
      http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl
    * Fixed netcam->userpass problem
    * Added support in configure for athlon64 from
@@ -218,7 +218,7 @@ Angel Carpintero
      Note that RPMS will be built without this (Peter Holik and Angel Carpintero).
      http://www.lavrsen.dk/twiki/bin/view/Motion/LibJpegMmx
    * Fixed memory leak in webhttpd related to use of strdup.
-   * Error Logging Enhancement Patch v 1.3 (Angel Carpintero) including:
+   * Error Logging Enhancement Patch v 1.3 including:
       * Populate the motion_log to the whole motion source code.
       * Fixed FreeBSD copilation.
       * Added the posiblity to pass NULL as struct context *
@@ -231,7 +231,7 @@ Angel Carpintero
       * http://www.lavrsen.dk/twiki/bin/view/Motion/ErrorLoggingEnhancementPatch
    * http-control: Fixed segfault when motion is restarted from command line
      ( kill -s 1 pid_motion ). Improved control code so Motion can Restart and
-     Finish 'smoothly'. (Angel Carpintero).
+     Finish 'smoothly'. 
      http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl.
    * Fixed a bug in the http control code that failed to accept a client
      connecting in some systems
@@ -381,6 +381,8 @@ Angel Carpintero
    * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
    * Improved in http control ( 'back' link, select box, show current values when are going to be changed ). 
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808
+   * Avoid random errors , initialising some structs for V4L1 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -1170,6 +1172,11 @@ James A. Russo.
    * Replaced the mime file types by a more refined filetype
      scheme that allows more refined control for SQL and other
      future control.
+
+Jason Sharpee
+   * Avoid random errors , initialising some structs for V4L1
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)   
+
 
 Pete Shipley
    * Fix the problem that happens in FreeBSD and Debian Sarge because

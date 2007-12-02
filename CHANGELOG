@@ -29,6 +29,8 @@ Bugfixes
    * Fix process_id_file when is passed from command line (Angel Carpintero)
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x27x150419 (Angel Carpintero)
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808 (Angel Carpintero)
+   * Avoid random errors , initialising some structs for V4L1 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
 
 3.2.9 Formal Release - Summary of Changes
 
