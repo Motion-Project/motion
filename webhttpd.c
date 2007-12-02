@@ -312,7 +312,7 @@ static void url_decode(char *urlencoded, size_t length)
 */
 
 static unsigned short int config(char *pointer, char *res, unsigned short int length_uri, 
-				unsigned short int thread, int client_socket, const char* host_url, void *userdata)
+				unsigned short int thread, int client_socket, void *userdata)
 {
 	char question;
 	char command[256] = {'\0'};
@@ -560,28 +560,16 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								sprintf(option,"<option value='on'>on</option>\n"
 								"<option value='off' selected>off</option>\n");
 							
-							if (!cnt[0]->conf.control_localhost)
 							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
 								     "<form action=set?>\n"
 								     "<b>%s</b>&nbsp;<select name='%s'>\n"
 								     "%s"
 								     "</select><input type='submit' value='set'>\n"
 								     "&nbsp;&nbsp;&nbsp;&nbsp;"
-								     "<a href='http://%s/motion_guide/motion_guide.html#%s' target=_blank>[help]</a>"
+								     "<a href='%s#%s' target=_blank>[help]</a>"
                                                                      "</form>\n", thread, thread,
                                                                      config_params[i].param_name, config_params[i].param_name,
-                                                                     option, host_url, config_params[i].param_name);
-							else
-							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
-								     "<form action=set?>\n"
-								     "<b>%s</b>&nbsp;<select name='%s'>\n"
-								     "%s"	
-								     "</select><input type='submit' value='set'>\n"
-								     "&nbsp;&nbsp;&nbsp;&nbsp;"
-								     "<a href='file:////"docdir"/motion_guide.html#%s' target=_blank>[help]</a>"
-								     "</form>\n", thread, thread,
-								     config_params[i].param_name, config_params[i].param_name, 
-								     option, config_params[i].param_name);
+                                                                     option, TWIKI_URL,config_params[i].param_name);
 						}else{
 		
 							if (value == NULL){
@@ -590,26 +578,15 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
                                                         		value = config_params[i].print(cnt, NULL, i, 0); 
 								if (value == NULL) value = "";
 							}
-							if (!cnt[0]->conf.control_localhost)
 							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
 								"<form action=set?>\n"
 								"<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
 								"<input type='submit' value='set'>\n"
 								"&nbsp;&nbsp;&nbsp;&nbsp;"
-								"<a href='http://%s/motion_guide/motion_guide.html#%s'                      target=_blank>[help]</a>"
+								"<a href='%s#%s' target=_blank>[help]</a>"
 								"</form>\n", thread, thread,
 								config_params[i].param_name, config_params[i].param_name,
-								value, host_url, config_params[i].param_name);
-							else	
-							sprintf(res, "<a href=/%hu/config/list><- back</a><br><br>\n<b>Thread %hu</b>\n"
-								     "<form action=set?>\n"
-								     "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
-								     "<input type='submit' value='set'>\n"
-								     "&nbsp;&nbsp;&nbsp;&nbsp;"
-								     "<a href='file:////"docdir"/motion_guide.html#%s' target=_blank>[help]</a>"
-								     "</form>\n", thread, thread,
-								     config_params[i].param_name, config_params[i].param_name, 
-								     value, config_params[i].param_name);
+								value, TWIKI_URL, config_params[i].param_name);
 						}
 
 						send_template(client_socket, res);
@@ -711,20 +688,12 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								value=config_params[i].print(cnt, NULL, i, 0);
 							if (cnt[0]->conf.control_html_output) {
 								send_template_ini_client(client_socket,ini_template);
-								if (!cnt[0]->conf.control_localhost)
 								sprintf(res, "<a href=/%hu/config/get><- back</a><br><br>\n"
 									"<b>Thread %hu</b><br>\n<li>%s = %s"
 									"&nbsp;&nbsp;&nbsp;&nbsp;"
-									"<a href='http://%s/motion_guide/motion_guide.html#%s' "
-									"target=_blank>[help]</a></li>", thread, thread,
-									config_params[i].param_name, value, host_url, config_params[i].param_name);
-								else
-								sprintf(res, "<a href=/%hu/config/get><- back</a><br><br>\n"
-									"<b>Thread %hu</b><br>\n<li>%s = %s"
-									"&nbsp;&nbsp;&nbsp;&nbsp;"
-									"<a href='file:////"docdir"/motion_guide.html#%s' "
-									"target=_blank>[help]</a></li>",thread, thread,
-								        config_params[i].param_name, value, config_params[i].param_name);
+									"<a href='%s#%s' target=_blank>[help]</a></li>", 
+									thread, thread,	config_params[i].param_name, value, 
+									TWIKI_URL, config_params[i].param_name);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
@@ -1776,7 +1745,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 	return 1 on success	
 */
 
-static unsigned short int handle_get(int client_socket, const char* url, const char* host_url, void *userdata)
+static unsigned short int handle_get(int client_socket, const char* url, void *userdata)
 {
 	struct context **cnt=userdata;
 	if (*url == '/' ){
@@ -1864,7 +1833,7 @@ static unsigned short int handle_get(int client_socket, const char* url, const c
 							/*call config() */
 							pointer++;
 							length_uri--;
-							config(pointer, res, length_uri, thread, client_socket, host_url, cnt);
+							config(pointer, res, length_uri, thread, client_socket, cnt);
 						} else {
 							if (cnt[0]->conf.control_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
@@ -2042,8 +2011,8 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 {
 	unsigned short int alive = 1;
 	unsigned short int ret = 1;
-	char buffer[656] = {'\0'};
-	unsigned short int length = 656;
+	char buffer[1024] = {'\0'};
+	unsigned short int length = 1024;
 	struct context **cnt = userdata;
 
 	/* lock the mutex */
@@ -2064,13 +2033,11 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			char method[20];
 			char url[512];
 			char protocol[20];
-			char host[20];
-			char host_url[84];
 			char *authentication=NULL;
 
 			buffer[nread] = '\0';
 
-			warningkill = sscanf (buffer, "%s %s %s %s %s", method, url, protocol, host, host_url);
+			warningkill = sscanf (buffer, "%s %s %s", method, url, protocol);
 
 			while ((strstr (buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)){
 				readb = read (client_socket, buffer+nread, sizeof (buffer) - nread);
@@ -2123,22 +2090,6 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 				return 1;
 			}
 
-			if ((!cnt[0]->conf.control_localhost) && (strcmp (host, "Host:"))) {
-				/* Request MUST use Host: host */
-				if (cnt[0]->conf.control_html_output)
-					warningkill = write (client_socket, bad_request_response, sizeof (bad_request_response));
-				else
-					 warningkill = write (client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
-				pthread_mutex_unlock(&httpd_mutex);
-				return 1;
-			}
-	
-			nread = 0;
-			while ((host_url[nread] != ':') && (host_url[nread] != '\r') && (host_url[nread] != '\n')) 
-				nread++;
-				
-			host_url[nread]='\0';
-
 			if ( auth != NULL) {
 				if ( (authentication = strstr(buffer,"Basic")) ) {
 					char *end_auth = NULL;
@@ -2154,16 +2105,21 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 						return 1;
 					}
 
-					if ( !check_authentication(auth, authentication,
+					// Don't allow to change control_authentication from http control
+					// If it has to be allowed reenable check_authentication()
+					/*if ( !check_authentication(auth, authentication,
 					                           strlen(cnt[0]->conf.control_authentication),
 					                           cnt[0]->conf.control_authentication)) {
+					*/
+
+					if (strcmp(auth, authentication)){
 						char response[1024]={'\0'};
 						snprintf(response, sizeof (response), request_auth_response_template, method);
 						warningkill = write (client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
 						return 1;
 					} else {
-						ret = handle_get (client_socket, url, host_url, cnt);
+						ret = handle_get (client_socket, url, cnt);
 						/* A valid auth request.  Process it.  */
 					}
 				} else {
@@ -2175,7 +2131,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 					return 1;
 				}
 			} else {
-				ret=handle_get (client_socket, url, host_url, cnt);
+				ret = handle_get(client_socket, url, cnt);
 				/* A valid request.  Process it.  */
 			}
 		}

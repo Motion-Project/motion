@@ -201,6 +201,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
 		in = 0;
 
 	/* Set the input. */
+	memset (&input, 0, sizeof (input));
 	input.index = in;
 	if (xioctl(s->fd, VIDIOC_ENUMINPUT, &input) == -1) {
 		motion_log(LOG_ERR, 0, "Unable to query input %d.", in);
@@ -538,6 +539,7 @@ static int v4l2_scan_controls(src_v4l2_t * s)
 					   ctrl->name, ctrl->minimum, ctrl->maximum,
 					   ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "!DISABLED!" : "");
 
+				memset (&control, 0, sizeof (control));
 				control.id = queried_ctrls[i];
 				xioctl(s->fd, VIDIOC_G_CTRL, &control);
 				motion_log(LOG_INFO, 0, "\t\"%s\", default %d, current %d", ctrl->name,
@@ -565,6 +567,7 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
 				struct v4l2_control control;
 				int ret;
 
+				memset (&control, 0, sizeof (control));
 				control.id = queried_ctrls[i];
 
 				switch (ctrl->type) {

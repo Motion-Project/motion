@@ -11,7 +11,7 @@ Features
    * Implemented a new reference frame algorithm to improve object recognition and location. (Joerg Weber)
    * Improved smartmask feature: real moving objects don't trigger the mask anymore. (Joerg Weber)
    * Added area_detect feature. New config options: area_detect, on_area_detected. (Joerg Weber)
-   * Added help in http control http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=396595
+   * Added help in http control 
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x181541 (Angel Carpintero)
    * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
      (Angel Carpintero)  
