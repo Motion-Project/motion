@@ -1076,7 +1076,7 @@ struct big_char big_table[sizeof(draw_table) / sizeof(struct draw_char)];
 
 #define NEWLINE "\\n"
 
-static int draw_textn (unsigned char *image, int startx, int starty, int width, char *text, int len, int factor)
+static int draw_textn (unsigned char *image, int startx, int starty, int width, const char *text, int len, int factor)
 {
 	int pos, x, y, line_offset, next_char_offs;
 	unsigned char *image_ptr, *char_ptr, **char_arr_ptr;
@@ -1121,21 +1121,21 @@ static int draw_textn (unsigned char *image, int startx, int starty, int width, 
 	return 0;
 }
 
-int draw_text (unsigned char *image, int startx, int starty, int width, char *text, int factor)
+int draw_text (unsigned char *image, int startx, int starty, int width, const char *text, int factor)
 {
 	int num_nl = 0;
 	char *end, *begin;
 	const int line_space = (factor + 1) * 9;
 	
 	/* Count the number of newlines in "text" so we scroll it up the image */
-	end = text;
+	end = (char *)text;
 	while ((end = strstr(end, NEWLINE))) {
 		num_nl++;
 		end += sizeof(NEWLINE)-1;
 	}
 	starty -= line_space * num_nl;
 	
-	begin = end = text;
+	begin = end = (char *)text;
 	while ((end = strstr(end, NEWLINE))) {
 		int len = end-begin;
 		draw_textn(image, startx, starty, width, begin, len, factor);

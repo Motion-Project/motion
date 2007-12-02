@@ -331,7 +331,7 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
 static void event_camera_lost(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
-            void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm ATTRIBUTE_UNUSED)
 {
 	if (cnt->conf.on_camera_lost)
 		exec_command(cnt, cnt->conf.on_camera_lost, NULL, 0);
