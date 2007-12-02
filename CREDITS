@@ -380,6 +380,7 @@ Angel Carpintero
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x27x150419
    * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
    * Improved in http control ( 'back' link, select box, show current values when are going to be changed ). 
+   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
