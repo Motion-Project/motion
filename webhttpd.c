@@ -972,7 +972,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 				cnt[thread]->restart=1;
 				if (cnt[0]->conf.control_html_output) {
 					send_template_ini_client(client_socket, ini_template);
-					sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+					sprintf(res,"<a href=/%hu/action><- back</a><br><br>\n"
 						    "restart for thread %hu done<br>\n", thread, thread);
 					send_template(client_socket, res);
 					send_template_end_client(client_socket);
@@ -1016,7 +1016,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 				cnt[thread]->watchdog=WATCHDOG_OFF;
 				if (cnt[0]->conf.control_html_output) {
 					send_template_ini_client(client_socket, ini_template);
-					sprintf(res,"<a href=/%hu/config><- back</a><br><br>\n"
+					sprintf(res,"<a href=/%hu/action><- back</a><br><br>\n"
 						    "quit for thread %hu done<br>\n", thread, thread);
 					send_template(client_socket, res);
 					send_template_end_client(client_socket);

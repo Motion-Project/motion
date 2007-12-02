@@ -523,6 +523,11 @@ quiet on
 # To give the filename as an argument to a command append it with %f
 ; on_movie_end value
 
+# Command to be executed when a camera can't be opened or if it is lost
+# NOTE: There is situations when motion don't detect a lost camera!
+# It depends on the driver, some drivers dosn't detect a lost camera at all
+# Some hangs the motion thread. Some even hangs the PC! (default: none)
+; on_camera_lost value
 
 ############################################################
 # Common Options For MySQL and PostgreSQL database features.

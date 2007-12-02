@@ -113,8 +113,8 @@ struct config conf_template = {
 	mysql_user:            NULL,
 	mysql_password:        NULL,
 	on_picture_save:       NULL,
-	on_area_detected:      NULL,
 	on_motion_detected:    NULL,
+	on_area_detected:      NULL,
 	on_movie_start:        NULL,
 	on_movie_end:          NULL,
 	on_camera_lost:        NULL,
@@ -1110,20 +1110,9 @@ config_param config_params[] = {
 	{
 	"on_area_detected",
 	"# Command to be executed when motion in a predefined area is detected\n"
-	"# Check option 'area_detect'.   (default: none)",
+	"# Check option 'area_detect'. (default: none)",
 	0,
 	CONF_OFFSET(on_area_detected),
-	copy_string,
-	print_string
-	},
-	{
-	"on_camera_lost",
-	"# Command to be executed when a camera can't be opened or if it is lost\n"
-	"# NOTE: There is situations when motion don't detect a lost camera!\n"
-	"# It depends on the driver, some drivers dosn't detect a lost camera at all\n"
-	"# Some hangs the motion thread. Some even hangs the PC! (default: none)\n",
-	0,
-	CONF_OFFSET(on_camera_lost),
 	copy_string,
 	print_string
 	},
@@ -1147,6 +1136,17 @@ config_param config_params[] = {
 	print_string
 	},
 #endif /* HAVE_FFMPEG */
+	{
+	"on_camera_lost",
+	"# Command to be executed when a camera can't be opened or if it is lost\n"
+	"# NOTE: There is situations when motion don't detect a lost camera!\n"
+	"# It depends on the driver, some drivers dosn't detect a lost camera at all\n"
+	"# Some hangs the motion thread. Some even hangs the PC! (default: none)\n",
+	0,
+	CONF_OFFSET(on_camera_lost),
+	copy_string,
+	print_string
+	},
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
 	{
