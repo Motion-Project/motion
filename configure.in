@@ -985,7 +985,7 @@ fi
 AC_SUBST(DOC_DIR)
 AC_SUBST(BIN_PATH)
 
-AC_CONFIG_FILES([motion-help.conf
+AC_CONFIG_FILES([
 thread1.conf
 thread2.conf
 thread3.conf
