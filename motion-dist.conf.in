@@ -52,7 +52,7 @@ v4l2_palette 8
 ; tunerdevice /dev/tuner0
 
 # The video input to be used (default: 8)
-# Should normally be set to 1 for video/TV cards, and 8 for USB cameras
+# Should normally be set to 0 or 1 for video/TV cards, and 8 for USB cameras
 input 8
 
 # The video norm to use (only for video capture and TV tuner cards)

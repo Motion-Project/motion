@@ -238,7 +238,7 @@ config_param config_params[] = {
 	{
 	"input",
 	"# The video input to be used (default: 8)\n"
-	"# Should normally be set to 1 for video/TV cards, and 8 for USB cameras",
+	"# Should normally be set to 0 or 1 for video/TV cards, and 8 for USB cameras",
 	0,
 	CONF_OFFSET(input),
 	copy_int,
