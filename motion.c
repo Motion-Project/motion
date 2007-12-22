@@ -1480,7 +1480,7 @@ static void *motion_loop(void *arg)
 
 			/* Simple hack to recognize motion in a specific area */
 			/* Do we need a new coversion specifier as well?? */
-			if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && (cnt->current_image->flags & IMAGE_MOTION)) {
+			if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && (cnt->current_image->flags & IMAGE_TRIGGER)) {
 				j = strlen(cnt->conf.area_detect);
 				for (i = 0; i < j; i++) {
 					z = cnt->conf.area_detect[i] - 49; /* 1 becomes 0 */
