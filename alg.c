@@ -1074,6 +1074,9 @@ void alg_update_reference_frame(struct context *cnt, int action)
 	unsigned char *smartmask = cnt->imgs.smartmask_final;
 	unsigned char *out = cnt->imgs.out;
 
+	if (cnt->lastrate > 5)  /* match rate limit */
+		accept_timer /= (cnt->lastrate / 3);
+
 	if (action == UPDATE_REF_FRAME) { /* black&white only for better performance */
 		threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
 		for (i = cnt->imgs.motionsize; i > 0; i--) {

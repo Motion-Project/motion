@@ -868,6 +868,7 @@ static void *motion_loop(void *arg)
 	int i, j, z = 0;
 	time_t lastframetime = 0;
 	int frame_buffer_size;
+	unsigned short int ref_frame_limit = 0;
  	int area_once = 0;
  	int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
 	int smartmask_ratio = 0;
@@ -1312,26 +1313,33 @@ static void *motion_loop(void *arg)
 
 			/* Update reference frame. */
 			/* micro-lighswitch: e.g. neighbors cat switched on the motion sensitive *
-			 * frontdoor illumination.                                               */
-			if ((cnt->current_image->diffs > cnt->threshold) && 
-			    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window */
-			    ((abs(previous_diffs - cnt->current_image->diffs)) < (previous_diffs / 15)) &&
-			    ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 150)) &&
-			    ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 150))) {
-				alg_update_reference_frame(cnt, RESET_REF_FRAME);
-				cnt->current_image->diffs = 0;
-				cnt->lightswitch_framecounter = 0;
-				//motion_log(LOG_INFO, 0, "lightswitch_framecounter: %d  previous_diffs: %d  diffs: %d  location.x: %d  location.y: %d", 
-				//           cnt->lightswitch_framecounter, previous_diffs, cnt->current_image->diffs, 
-				//           cnt->current_image->location.x, cnt->current_image->location.y);
-				if (cnt->conf.setup_mode)
-					motion_log(-1, 0, "micro-lightswitch!");
-			} else {
-				alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+			 * frontdoor illumination. Updates are rate-limited to 3 per second at   *
+			 * framerates above 5fps to save CPU resources and to keep sensitivity   *
+			 * at a constant level.                                                  *
+			 */
+			ref_frame_limit++;
+			if (ref_frame_limit >= (cnt->lastrate / 3)) {
+				ref_frame_limit = 0;
+				if ((cnt->current_image->diffs > cnt->threshold) && 
+				    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window */
+				    ((abs(previous_diffs - cnt->current_image->diffs)) < (previous_diffs / 15)) &&
+				    ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 150)) &&
+				    ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 150))) {
+					alg_update_reference_frame(cnt, RESET_REF_FRAME);
+					cnt->current_image->diffs = 0;
+					cnt->lightswitch_framecounter = 0;
+					motion_log(LOG_INFO, 0, "lightswitch_framecounter: %d  previous_diffs: %d  diffs: %d  location.x: %d  location.y: %d", 
+					           cnt->lightswitch_framecounter, previous_diffs, cnt->current_image->diffs, 
+					           cnt->current_image->location.x, cnt->current_image->location.y);
+					if (cnt->conf.setup_mode)
+						motion_log(-1, 0, "micro-lightswitch!");
+				} else {
+	    					alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+				}
+				previous_diffs = cnt->current_image->diffs;
+				previous_location_x = cnt->current_image->location.x;
+				previous_location_y = cnt->current_image->location.y;
 			}
-			previous_diffs = cnt->current_image->diffs;
-			previous_location_x = cnt->current_image->location.x;
-			previous_location_y = cnt->current_image->location.y;
 
 		/***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
 
