@@ -105,6 +105,7 @@ struct config {
 	const char *motionvidpipe;
 	const char *netcam_url;
 	const char *netcam_userpass;
+	const char *netcam_http;
 	const char *netcam_proxy;
 	const char *pgsql_db;
 	const char *pgsql_host;

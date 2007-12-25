@@ -12,6 +12,13 @@
 # Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined
 netcam_url http://192.168.1.6:8093/
 
+# The setting for keep-alive of network socket, should improve performance on compatible net cameras.
+# 1.0 : the historical implementation using HTTP/1.0, closing the socket after each http request.
+# keep_alive : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
+# 1.1 : Use HTTP/1.1 requests that support keep alive as default.
+# Default: 1.0
+netcam_http keep_alive
+
 # The video input to be used (default: 8)
 # Should normally be set to 1 for video/TV cards, and 8 for USB cameras 
 input 1

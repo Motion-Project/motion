@@ -89,6 +89,14 @@ minimum_frame_time 0
 # Syntax is user:password
 ; netcam_userpass value
 
+
+# The setting for keep-alive of network socket, should improve performance on compatible net cameras.
+# 1.0 : the historical implementation using HTTP/1.0, closing the socket after each http request.
+# keep_alive : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
+# 1.1 : Use HTTP/1.1 requests that support keep alive as default.
+# Default: 1.0
+; netcam_http value
+
 # URL to use for a netcam proxy server, if required, e.g. "http://myproxy".
 # If a port number other than 80 is needed, use "http://myproxy:1234".
 # Default: not defined

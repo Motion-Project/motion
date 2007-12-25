@@ -21,6 +21,8 @@ Features
    * Watchdog, restart hang threads (Dag Erlandsson)
    * Added ON_CAMERA_LOST event (Dag Erlandsson)
    * Motion start if a camera isn't there at start, retries to connect if lost (Dag Erlandsson)
+   * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
+    (Simon Walls)
 
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).

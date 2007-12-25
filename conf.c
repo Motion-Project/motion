@@ -121,6 +121,7 @@ struct config conf_template = {
 	motionvidpipe:         NULL,
 	netcam_url:            NULL,
 	netcam_userpass:       NULL,
+	netcam_http:           "1.0",    /* Choices: 1.0, 1.1, or keep_alive */
 	netcam_proxy:          NULL,
 	pgsql_db:              NULL,
 	pgsql_host:            "localhost",
@@ -320,6 +321,18 @@ config_param config_params[] = {
 	"# Syntax is user:password",
 	0,
 	CONF_OFFSET(netcam_userpass),
+	copy_string,
+	print_string
+	},
+	{
+	"netcam_http",
+	"# The setting for keep-alive of network socket, should improve performance on compatible net cameras.\n"
+	"# 1.0 : the historical implementation using HTTP/1.0, closing the socket after each http request.\n"
+	"# keep_alive : Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
+	"# 1.1 : Use HTTP/1.1 requests that support keep alive as default.\n"
+	"# Default: 1.0",
+	0,
+	CONF_OFFSET(netcam_http),
 	copy_string,
 	print_string
 	},

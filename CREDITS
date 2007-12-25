@@ -1281,6 +1281,9 @@ James Van Vleet
    * CPU VIA Ezra C3 autodetection support added.
      http://www.lavrsen.dk/twiki/bin/view/Motion/VIAEzraC3Patch	
 
+Simon Walls
+   * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
+
 Sean Watkins
    * Created a centralized logging function that became event()
 
