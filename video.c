@@ -18,7 +18,6 @@
 /* for the v4l stuff: */
 #include "pwc-ioctl.h"
 #include <sys/mman.h>
-//#include "sys/ioctl.h"
 #include <math.h>
 #include <sys/utsname.h>
 #include <dirent.h>

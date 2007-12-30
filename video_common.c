@@ -887,7 +887,6 @@ int vid_next(struct context *cnt, unsigned char *map)
 			pthread_mutex_lock(&dev->mutex);
 			dev->owner = cnt->threadnr;
 			dev->frames = conf->roundrobin_frames;
-			cnt->switched = 1;
 		}
 #ifdef MOTION_V4L2
 		if (dev->v4l2) {

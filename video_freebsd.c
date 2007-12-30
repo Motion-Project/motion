@@ -1088,7 +1088,6 @@ int vid_next(struct context *cnt, unsigned char *map)
 		pthread_mutex_lock(&viddevs[i]->mutex);
 		viddevs[i]->owner=cnt->threadnr;
 		viddevs[i]->frames=conf->roundrobin_frames;
-		cnt->switched=1;
 	}
 
 
