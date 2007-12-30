@@ -89,7 +89,7 @@ static boolean netcam_fill_input_buffer(j_decompress_ptr cinfo)
 		src->buffer = (JOCTET *) src->data;
 	} else {
 		/* Insert a fake EOI marker - as per jpeglib recommendation */
-		if (debug_level)
+		if (debug_level > CAMERA_VERBOSE)
 			motion_log(LOG_INFO, 0, "**fake EOI inserted**");
 		src->buffer[0] = (JOCTET) 0xFF;
 		src->buffer[1] = (JOCTET) JPEG_EOI;    /* 0xD9 */
@@ -228,7 +228,7 @@ static void netcam_output_message(j_common_ptr cinfo)
 	 * wrong, and that indicates a network problem rather
 	 * than a problem with the content.
 	 */
-	if (debug_level) {
+	if (debug_level > CAMERA_VERBOSE) {
 		/*
 		 * Format the message according to library standards.
 		 * Write it out to the motion log.
@@ -293,13 +293,13 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
 		if (retcode) {    /* we assume a non-zero reply is ETIMEOUT */
 			pthread_mutex_unlock(&netcam->mutex);
 			
-			if (debug_level > 3)
+			if (debug_level > CAMERA_WARNINGS)
 				motion_log(-1,0,"no new pic, no signal rcvd");
 				
 			return NETCAM_GENERAL_ERROR | NETCAM_NOTHING_NEW_ERROR;
 		}
 		
-		if (debug_level > 3)
+		if (debug_level > CAMERA_VERBOSE)
 			motion_log(-1, 0, "***new pic delay successful***");
 	}
 	
@@ -430,7 +430,7 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 	 * decompress it.  netcam_init_jpeg uses
 	 * netcam->mutex to do this;
 	 */
-	if (debug_level > 5) {
+	if (debug_level > CAMERA_INFO) {
 		motion_log(LOG_INFO, 0, "processing jpeg image - content length "
 				"%d", netcam->latest->content_length);
 	}

@@ -168,7 +168,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 		re = "(file)://(((.*):(.*))@)?"
 	                 "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
 
-	if (debug_level > 7)
+	if (debug_level > CAMERA_DEBUG)
 		motion_log(-1, 0, "Entry netcam_url_parse data %s", text_url );
 
 	memset(parse_url, 0, sizeof(struct url_t));
@@ -183,7 +183,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 		if (regexec(&pattbuf, text_url, 10, matches, 0) != REG_NOMATCH) {
 			for (i = 0; i < 10; i++) {
 				if ((s = netcam_url_match(matches[i], text_url)) != NULL) {
-					if (debug_level > 7)
+					if (debug_level > CAMERA_DEBUG)
 						motion_log(-1, 0, "Parse case %d data %s", i, s );
 					switch (i) {
 						case 1:
@@ -568,18 +568,18 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 	while (1) {                                 /* 'Do forever' */
 		ret = header_get(netcam, &header, HG_NONE);
 
-		if (debug_level > 5)	/* Changed criterion and moved up from below to catch headers that cause returns */
+		if (debug_level > CAMERA_INFO)	/* Changed criterion and moved up from below to catch headers that cause returns */
 			motion_log(LOG_DEBUG, 0, "Received first header ('%s')", header);
 
 		if (ret != HG_OK) {
-			if (debug_level > 5)
+			if (debug_level > CAMERA_INFO)
 				motion_log(LOG_ERR, 0, "Error reading first header (%s)", header);
 			free(header);
 			return -1;
 		}
 		if (firstflag) {
 			if ((ret = http_result_code(header)) != 200) {
-				if (debug_level > 5)
+				if (debug_level > CAMERA_INFO)
 					motion_log(-1, 0, "HTTP Result code %d", ret);
 				free(header);
 				if (netcam->connect_keepalive) {
@@ -670,7 +670,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 			/* Note that we have received a Connection: close header */
 			closeflag=TRUE;
 			/* This flag is acted upon below */
-			if (debug_level > 5)	/* Changed criterion and moved up from below to catch headers that cause returns */
+			if (debug_level > CAMERA_INFO) /* Changed criterion and moved up from below to catch headers that cause returns */
 				motion_log(LOG_DEBUG, 0, "Found Conn:close header ('%s')", header);
 		};
 		free(header);
@@ -789,7 +789,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 				motion_log(LOG_ERR, 1, "netcam_connect : getsockopt()");
 				return -1;
 				}
-			if (debug_level > 5 ) {
+			if (debug_level > CAMERA_INFO) {
 				if (optval==1)	
 					motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is ON");
 				else
@@ -803,7 +803,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 				motion_log(LOG_ERR, 1, "netcam_connect : setsockopt()");
 				return -1;
 				}
-			if (debug_level > 5 )
+			if (debug_level > CAMERA_INFO )
 				motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE set on socket.");
 		}
                 else    {
@@ -1202,7 +1202,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 		                         1000000.0 * (curtime.tv_sec - netcam->last_image.tv_sec) +
 		                         (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
-		if (debug_level > 1) /* changed from debug_level > 5 */
+		if (debug_level > CAMERA_INFO) 
 			motion_log(-1, 0, "Calculated frame time %f", netcam->av_frame_time);
 	}
 	netcam->last_image = curtime;
@@ -1290,7 +1290,7 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
 		  (curtime.tv_sec - netcam->last_image.tv_sec) +
 		  (curtime.tv_usec- netcam->last_image.tv_usec))
 		  / 10.0;
-		if (debug_level > 1) /* changed from debug_level > 5 */
+		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "Calculated frame time %f", netcam->av_frame_time);
 	}
 
@@ -1332,7 +1332,7 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
 static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 {
 	int loop_counter=0;
-	if (debug_level > 9) {
+	if (debug_level > CAMERA_VERBOSE) {
 		motion_log(-1,0,"Begin %s", __FUNCTION__);
 	}
 	netcam_buff_ptr buffer;
@@ -1353,7 +1353,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 			return -1;
 		}
 	
-		if (debug_level > 9) {
+		if (debug_level > CAMERA_VERBOSE) {
 			motion_log(-1, 0, "statbuf.st_mtime[%d] != last_st_mtime[%d]", statbuf.st_mtime,  netcam->file->last_st_mtime);
 		}
 
@@ -1362,7 +1362,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 			return -1;
 		}
 
-		if (debug_level > 9) {
+		if (debug_level > CAMERA_VERBOSE) {
 			motion_log(-1, 0, "delay waiting new file image ");
 		}
 
@@ -1374,7 +1374,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 	} while(statbuf.st_mtime==netcam->file->last_st_mtime);
 
 	netcam->file->last_st_mtime = statbuf.st_mtime;
-	if (debug_level > 5) {
+	if (debug_level > CAMERA_INFO) {
 		motion_log(LOG_INFO, 0, "processing new file image - st_mtime "
                               "%d", netcam->file->last_st_mtime );
 	}
@@ -1416,7 +1416,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 		  (curtime.tv_sec - netcam->last_image.tv_sec) +
 		  (curtime.tv_usec- netcam->last_image.tv_usec))
 		  / 10.0;
-		if (debug_level > 5)
+		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "Calculated frame time %f", netcam->av_frame_time);
 	}
 
@@ -1443,7 +1443,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
 	pthread_mutex_unlock(&netcam->mutex);
 
-	if (debug_level > 9) {
+	if (debug_level > CAMERA_VERBOSE) {
 		motion_log(-1,0,"End %s", __FUNCTION__);
 	}
 	return 0;
@@ -1485,6 +1485,9 @@ static int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url) {
 	 */
 	netcam->file->path = url->path;
 	url->path = NULL;
+
+	if (debug_level > CAMERA_INFO)
+		motion_log(LOG_INFO, 0, "netcam_setup_file: netcam->file->path %s",netcam->file->path);
 
 	netcam_url_free(url);
 
@@ -1676,7 +1679,7 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 	netcam->response = (struct rbuf *) mymalloc(sizeof(struct rbuf));
 	memset(netcam->response, 0, sizeof(struct rbuf));
 
-	if (debug_level > 5)
+	if (debug_level > CAMERA_INFO)
 		motion_log(LOG_INFO, 0, "netcam_setup_html: Netcam has flags: HTTP1.0: %s HTTP1.1: %s Keep-Alive %s.", netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", netcam->connect_keepalive ? "ON":"OFF");
 
 	/*
@@ -1748,7 +1751,7 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 		               + strlen(url->path) + 4);
 		sprintf((char *)ptr, "http://%s%s", url->host, url->path);
 	        netcam->connect_keepalive=0; /* Disable Keepalive if proxy */
-		if (debug_level > 5)
+		if (debug_level > CAMERA_INFO)
 			motion_log(LOG_DEBUG, 0, "Removed netcam_keepalive flag due to proxy set. Proxy is incompatible with Keep-Alive.");
 	} else {
 		/* if no proxy, set as netcam_url path */
@@ -2304,7 +2307,7 @@ int netcam_start(struct context *cnt)
         	netcam->connect_http_11   = TRUE;
         	netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default */
 	}
-	if (debug_level > 5)
+	if (debug_level > CAMERA_INFO)
 		motion_log(LOG_INFO, 0, "netcam_start: Netcam_http parameter '%s' converts to flags: HTTP1.0: %s HTTP1.1: %s Keep-Alive %s.", cnt->conf.netcam_http, netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", netcam->connect_keepalive ? "ON":"OFF");
 
 	/* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic */
@@ -2319,6 +2322,8 @@ int netcam_start(struct context *cnt)
 			motion_log(-1, 0, "netcam_start: now calling netcam_setup_ftp");
 		retval = netcam_setup_ftp(netcam, &url);
 	} else if ((url.service) && (!strcmp(url.service, "file")) ){
+		if (debug_level > CAMERA_INFO)
+			motion_log(-1, 0, "netcam_start: now calling netcam_setup_file()");
 		retval = netcam_setup_file(netcam, &url);
 	} else {
 		motion_log(LOG_ERR, 0, "Invalid netcam service  '%s' - "

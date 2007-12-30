@@ -101,9 +101,11 @@
 #endif
 
 
-/* Debug levels */
+/* Debug levels FIXME */
 #define CAMERA_WARNINGS         3   /* warnings only */
 #define CAMERA_INFO             5   /* debug level to activate everything */
+#define CAMERA_DEBUG		7   /* debug but not verbose */
+#define CAMERA_VERBOSE          8   /* verbose level */
 
 /* Default picture settings */
 #define DEF_WIDTH              352
