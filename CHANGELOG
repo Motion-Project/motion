@@ -23,6 +23,7 @@ Features
    * Motion start if a camera isn't there at start, retries to connect if lost (Dag Erlandsson)
    * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
     (Simon Walls)
+   * Added mov , Quicktime file format (Andrew Hamilton).
 
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
@@ -35,6 +36,10 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
    * Fix motion segfaul because ffmpeg API change 
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
+   * Little fix in ffmpeg.c comparing version of LIBAVFORMAT_BUILD, since ffmpeg svn -r4486 LIBAVFORMAT_BUILD and
+     LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
+     (Angel Carpintero)	
+
 
 3.2.9 Formal Release - Summary of Changes
 

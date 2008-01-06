@@ -385,6 +385,9 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
    * Fix motion segfaul because ffmpeg API change
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
+   * Little fix in ffmpeg.c comparing version of LIBAVFORMAT_BUILD, since ffmpeg svn -r4486 LIBAVFORMAT_BUILD and 
+     LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
+     (Angel Carpintero)
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -474,6 +477,7 @@ Andrew Hamilton
      http://www.lavrsen.dk/twiki/bin/view/Motion/MotionffmpegDeinterlace 
    * Added FFV1 ( FF video codec 1 ) codec , Lossless encoding
      http://www.lavrsen.dk/twiki/bin/view/Motion/LosslessEncoding 
+   * Added mov , Quicktime file format (Andrew Hamilton).
 
 Peter Holik
    * Netcam First Header patch. If an error with jpeg decompression occured at

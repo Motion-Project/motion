@@ -275,6 +275,7 @@ ffmpeg_variable_bitrate 0
 # swf - gives you a flash film with extension .swf
 # flv - gives you a flash video with extension .flv
 # ffv1 - FF video codec 1 for Lossless Encoding ( experimental )
+# mov - QuickTime ( testing )
 ffmpeg_video_codec mpeg4
 
 # Use ffmpeg to deinterlace video. Necessary if you use an analog camera

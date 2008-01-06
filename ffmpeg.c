@@ -189,13 +189,13 @@ URLProtocol file_protocol = {
  */
 static int mpeg1_write_trailer(AVFormatContext *s)
 {
-#if LIBAVFORMAT_BUILD >= 5200
+#if LIBAVFORMAT_BUILD >= (52<<16) 
 	put_buffer(s->pb, mpeg1_trailer, 4);
 	put_flush_packet(s->pb);	
 #else
 	put_buffer(&s->pb, mpeg1_trailer, 4);
 	put_flush_packet(&s->pb);
-#endif /* LIBAVFORMAT_BUILD >= 5200 */
+#endif /* LIBAVFORMAT_BUILD >= (52<<16) */
 
 	return 0; /* success */
 }
@@ -278,7 +278,10 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 			/* Use the FFMPEG Lossless Video codec (experimental!).
 			   Requires strict_std_compliance to be <= -2 */
 			of->video_codec = CODEC_ID_FLV1;
-		}		
+		}
+	} else if (strcmp(codec, "mov") == 0) {
+		ext = ".mov";
+		of = guess_format("mov", NULL, NULL);		
 	} else {
 		motion_log(LOG_ERR, 0, "ffmpeg_video_codec option value %s is not supported", codec);
 		return NULL;
@@ -572,11 +575,11 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
 
 	if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
 		/* close the output file */
-#if LIBAVFORMAT_BUILD >= 5200
+#if LIBAVFORMAT_BUILD >= (52<<16) 
 		url_fclose(ffmpeg->oc->pb);
 #else
 		url_fclose(&ffmpeg->oc->pb);
-#endif /* LIBAVFORMAT_BUILD >= 5200 */
+#endif /* LIBAVFORMAT_BUILD >= (52<<16) */
 	}
 
 	/* free the stream */

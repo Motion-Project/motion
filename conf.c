@@ -678,7 +678,8 @@ config_param config_params[] = {
 	"# it requires no installation of codec on the Windows client.\n"
 	"# swf - gives you a flash film with extension .swf\n"
 	"# flv - gives you a flash video with extension .flv\n"
-	"# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )",
+	"# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )\n"
+	"# mov - QuickTime ( testing )",
 	0,
 	CONF_OFFSET(ffmpeg_video_codec),
 	copy_string,
