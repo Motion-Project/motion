@@ -383,6 +383,8 @@ Angel Carpintero
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808
    * Avoid random errors , initialising some structs for V4L1 
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
+   * Fix motion segfaul because ffmpeg API change
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

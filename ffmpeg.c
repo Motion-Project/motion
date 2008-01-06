@@ -36,6 +36,7 @@
 #	endif /* __GNUC__ */
 #endif /* LIBAVCODEC_BUILD > 4680 */
 
+
 #if LIBAVFORMAT_BUILD >= 4616
 /* The API for av_write_frame changed with FFmpeg version 0.4.9pre1.
  * It now uses an AVPacket struct instead of direct parameters to the
@@ -188,8 +189,14 @@ URLProtocol file_protocol = {
  */
 static int mpeg1_write_trailer(AVFormatContext *s)
 {
+#if LIBAVFORMAT_BUILD >= 5200
+	put_buffer(s->pb, mpeg1_trailer, 4);
+	put_flush_packet(s->pb);	
+#else
 	put_buffer(&s->pb, mpeg1_trailer, 4);
 	put_flush_packet(&s->pb);
+#endif /* LIBAVFORMAT_BUILD >= 5200 */
+
 	return 0; /* success */
 }
 
@@ -565,7 +572,11 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
 
 	if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
 		/* close the output file */
+#if LIBAVFORMAT_BUILD >= 5200
+		url_fclose(ffmpeg->oc->pb);
+#else
 		url_fclose(&ffmpeg->oc->pb);
+#endif /* LIBAVFORMAT_BUILD >= 5200 */
 	}
 
 	/* free the stream */

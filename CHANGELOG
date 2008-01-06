@@ -33,6 +33,8 @@ Bugfixes
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808 (Angel Carpintero)
    * Avoid random errors , initialising some structs for V4L1 
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
+   * Fix motion segfaul because ffmpeg API change 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
 
 3.2.9 Formal Release - Summary of Changes
 
