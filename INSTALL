@@ -1,0 +1,16 @@
+Very simple:
+
+type:
+
+    ./configure
+
+followed by:
+
+    make
+
+And
+
+    make install
+
+    
+Next read the README

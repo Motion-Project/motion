@@ -1,0 +1,60 @@
+diff -Naupr ffmpeg-0.4.8/configure ffmpeg-0.4.8-macosx/configure
+--- ffmpeg-0.4.8/configure	2003-09-28 08:26:39.000000000 -0700
++++ ffmpeg-0.4.8-macosx/configure	2005-10-06 15:49:33.000000000 -0700
+@@ -84,7 +84,7 @@ debug="yes"
+ extralibs="-lm"
+ simpleidct="yes"
+ bigendian="no"
+-vhook="default"
++vhook="no"
+ dlfcn="no"
+ dlopen="no"
+ mpegaudio_hp="yes"
+@@ -163,6 +163,7 @@ extralibs="-lpoll -lgnugetopt -lm"
+ make="gmake"
+ ;;
+ Darwin)
++SLIBSUF=".dylib"
+ cc="cc"
+ v4l="no"
+ audio_oss="no"
+@@ -177,13 +178,13 @@ FFSLDFLAGS=-Wl,-bind_at_load
+ gcc_version="$($cc -v 2>&1 | grep version | cut -d ' ' -f3-)"
+ case "$gcc_version" in
+ *2.95*) 
+-CFLAGS="-no-cpp-precomp -pipe -fomit-frame-pointer"
++CFLAGS="$CFLAGS -no-cpp-precomp -pipe -fomit-frame-pointer"
+ ;;
+ *3.3*) 
+-CFLAGS="-no-cpp-precomp -pipe -fomit-frame-pointer -mdynamic-no-pic -force_cpusubtype_ALL"
++CFLAGS="$CFLAGS -no-cpp-precomp -pipe -fomit-frame-pointer -mdynamic-no-pic -force_cpusubtype_ALL"
+ ;;
+ *) 
+-CFLAGS="-no-cpp-precomp -pipe -fomit-frame-pointer -mdynamic-no-pic"
++CFLAGS="$CFLAGS -no-cpp-precomp -pipe -fomit-frame-pointer -mdynamic-no-pic"
+ ;;
+ esac
+ ;;
+diff -Naupr ffmpeg-0.4.8/libavcodec/Makefile ffmpeg-0.4.8-macosx/libavcodec/Makefile
+--- ffmpeg-0.4.8/libavcodec/Makefile	2003-09-28 08:26:39.000000000 -0700
++++ ffmpeg-0.4.8-macosx/libavcodec/Makefile	2005-10-06 17:22:21.000000000 -0700
+@@ -239,6 +239,8 @@ install:
+ endif
+ 
+ installlib: all install-headers
++	ranlib $(LIB)
++	install -d $(prefix)/lib
+ 	install -m 644 $(LIB) $(prefix)/lib
+ 
+ install-headers:
+diff -Naupr ffmpeg-0.4.8/libavformat/Makefile ffmpeg-0.4.8-macosx/libavformat/Makefile
+--- ffmpeg-0.4.8/libavformat/Makefile	2003-09-28 08:26:40.000000000 -0700
++++ ffmpeg-0.4.8-macosx/libavformat/Makefile	2005-10-06 15:42:53.000000000 -0700
+@@ -102,6 +102,7 @@ install:
+ endif
+ 
+ installlib: all install-headers
++	ranlib $(LIB)
+ 	install -m 644 $(LIB) $(prefix)/lib
+ 
+ install-headers:

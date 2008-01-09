@@ -1,0 +1,21 @@
+Using motion with the Axis 2100 network camera
+
+First compile the motion binary as described in README and INSTALL
+Then edit motion.conf: Add your axis cameras ip address to the netcam_url
+paramter in the "Captute Device Options" section.
+
+ To increase the performance use this urls :
+
+ # for multipart jpeg
+ http://192.168.1.10/axis-cgi/mjpg/video.cgi?showlength=1
+ 
+ or
+
+ # for single jpeg
+ http://192.168.1.10/axis-cgi/jpg/image.cgi?showlength=1
+
+There are only two valid picture sizes for the axis camera: 320x240 and 640x480
+
+TODO:
+
+	- Make the IP changeable at run-time.
