@@ -192,6 +192,16 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
 
 	/* Copy image */
 	memcpy(cnt->imgs.preview_image.image, img->image, cnt->imgs.size);
+
+	/* If we set output_all to yes and during the event
+	 * there is no image with motion, diffs is 0, we are not going to save the preview event */
+	if (cnt->imgs.preview_image.diffs == 0)
+		cnt->imgs.preview_image.diffs = 1;
+
+	/* If we have locate on it is already done */
+	if (cnt->locate == LOCATE_PREVIEW) {
+		alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
+	}
 }
 
 /**
@@ -376,100 +386,67 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 
 	/* Calculate how centric motion is if configured preview center*/
 	if (cnt->new_img & NEWIMG_CENTER) {
-		unsigned int distX = abs((cnt->imgs.width/2) - location->x);
-		unsigned int distY = abs((cnt->imgs.height/2) - location->y);
+		unsigned int distX = abs((imgs->width/2) - location->x);
+		unsigned int distY = abs((imgs->height/2) - location->y);
 
 		img->cent_dist = distX*distX + distY*distY;
 	}
 
-	/* Take action if this is a new event and we have a trigger image */
-	if (cnt->event_nr != cnt->prev_event && (img->flags & IMAGE_TRIGGER)) {
-		/* Reset prev_event number to current event and save event time
-		 * in both time_t and struct tm format.
-		 */
-		cnt->prev_event = cnt->event_nr;
-		cnt->eventtime = img->timestamp;
-		localtime_r(&cnt->eventtime, cnt->eventtime_tm);
 
-		/* Since this is a new event we create the event_text_string used for
-		 * the %C conversion specifier. We may already need it for
-		 * on_motion_detected_commend so it must be done now.
-		 */
-		mystrftime(cnt, cnt->text_event_string, sizeof(cnt->text_event_string),
-		           cnt->conf.text_event, cnt->eventtime_tm, NULL, 0);
+	/* Do things only if we have got minimum_motion_frames */
+	if (img->flags & IMAGE_TRIGGER) {
+		/* Take action if this is a new event and we have a trigger image */
+		if (cnt->event_nr != cnt->prev_event) {
+			/* Reset prev_event number to current event and save event time
+			 * in both time_t and struct tm format.
+			 */
+			cnt->prev_event = cnt->event_nr;
+			cnt->eventtime = img->timestamp;
+			localtime_r(&cnt->eventtime, cnt->eventtime_tm);
 
-		/* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
-		event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tm);
+			/* Since this is a new event we create the event_text_string used for
+			 * the %C conversion specifier. We may already need it for
+			 * on_motion_detected_commend so it must be done now.
+			 */
+			mystrftime(cnt, cnt->text_event_string, sizeof(cnt->text_event_string),
+			           cnt->conf.text_event, cnt->eventtime_tm, NULL, 0);
 
-		if (cnt->conf.setup_mode)
-			motion_log(-1, 0, "Motion detected - starting event %d", cnt->event_nr);
+			/* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
+			event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tm);
 
-		/* always save first motion frame as preview-shot, may be changed to an other one later */
-		if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
-			image_save_as_preview(cnt, img);
+			if (cnt->conf.setup_mode)
+				motion_log(-1, 0, "Motion detected - starting event %d", cnt->event_nr);
 
-			/* If we set output_all to yes and during the event
-			 * there is no image with motion, diffs is 0, we are not going to save the preview event */
-			 if (cnt->imgs.preview_image.diffs == 0)
-				cnt->imgs.preview_image.diffs = 1;
-
-			/* If we have locate on it is already dine above */
-			if (cnt->locate == LOCATE_PREVIEW) {
-				alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
+			/* always save first motion frame as preview-shot, may be changed to an other one later */
+			if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
+				image_save_as_preview(cnt, img);
 			}
 		}
-	}
-
-	/* Do things only if we are triggered, e.g. are in an event e.g. got minimum_motion_frames */
-	if (cnt->event_nr == cnt->prev_event) {
 
 		/* EVENT_MOTION triggers event_beep and on_motion_detected_command */
 		event(cnt, EVENT_MOTION, NULL, NULL, NULL, &img->timestamp_tm);
+	}
 
-		/* Check for most significant preview-shot when output_normal=best */
-		if (cnt->new_img & NEWIMG_BEST) {
-			if (img->diffs > cnt->imgs.preview_image.diffs) {
-				image_save_as_preview(cnt, img);
-
-				/* If we have locate on it is already dine above */
-				if (cnt->locate == LOCATE_PREVIEW) {
-					alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
-				}
-			}
-		}
-		/* Check for most significant preview-shot when output_normal=center */
-		if (cnt->new_img & NEWIMG_CENTER) {
-			if(img->cent_dist < cnt->imgs.preview_image.cent_dist) {
-				image_save_as_preview(cnt, img);
-
-				/* If we have locate on it is already dine above */
-				if (cnt->locate == LOCATE_PREVIEW) {
-					alg_draw_location(location, imgs, imgs->width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
-				}		
-			}
+	/* Limit framerate */
+	if (img->shot < conf->frame_limit) {
+		/* If config option webcam_motion is enabled, send the latest motion detected image
+		 * to the webcam but only if it is not the first shot within a second. This is to
+		 * avoid double frames since we already have sent a frame to the webcam.
+		 * We also disable this in setup_mode.
+		 */
+		if (conf->webcam_motion && !conf->setup_mode && img->shot != 1) {
+			event(cnt, EVENT_WEBCAM, img->image, NULL, NULL, &img->timestamp_tm);
 		}
 
-		/* Limit framerate */
-		if (img->shot < conf->frame_limit) {
-			/* If config option webcam_motion is enabled, send the latest motion detected image
-			 * to the webcam but only if it is not the first shot within a second. This is to
-			 * avoid double frames since we already have sent a frame to the webcam.
-			 * We also disable this in setup_mode.
-			 */
-			if (conf->webcam_motion && !conf->setup_mode && img->shot != 1) {
-				event(cnt, EVENT_WEBCAM, img->image, NULL, NULL, &img->timestamp_tm);
-			}
-
-			/* Save motion jpeg, if configured */
-			/* Output the image_out (motion) picture. */
-			if (conf->motion_img) {
-				event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tm);
-			}
+		/* Save motion jpeg, if configured */
+		/* Output the image_out (motion) picture. */
+		if (conf->motion_img) {
+			event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tm);
 		}
 	}
 
 	if (cnt->track.type != 0)	{
-		cnt->moved = track_move(cnt, dev, &cnt->current_image->location, imgs, 0);
+		cnt->moved = track_move(cnt, dev, location, imgs, 0);
 	}
 }
 
@@ -510,6 +487,23 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
 		/* Mark the image as saved */
 		cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags |= IMAGE_SAVED;
+
+		/* Store it as a preview image, only if it have motion */
+		if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_MOTION)
+		{
+			/* Check for most significant preview-shot when output_normal=best */
+			if (cnt->new_img & NEWIMG_BEST) {
+				if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].diffs > cnt->imgs.preview_image.diffs) {
+					image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
+				}
+			}
+			/* Check for most significant preview-shot when output_normal=center */
+			if (cnt->new_img & NEWIMG_CENTER) {
+				if(cnt->imgs.image_ring[cnt->imgs.image_ring_out].cent_dist < cnt->imgs.preview_image.cent_dist) {
+					image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
+				}
+			}
+		}
 
 		/* Increment to image after last sended */
 		if (++cnt->imgs.image_ring_out >= cnt->imgs.image_ring_size)
