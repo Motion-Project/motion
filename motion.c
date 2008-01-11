@@ -1110,11 +1110,18 @@ static void *motion_loop(void *arg)
 				vid_close(cnt);
 				/* Use virgin image, if we are not able to open it again next loop
 				 * a gray image with message is applied
+				 * flag lost_connection
 				 */
 				memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
-			// NO FATAL ERROR -  copy last image or show grey image with message			
-			} else { 
 				cnt->lost_connection = 1;
+			/* NO FATAL ERROR -  
+			*		copy last image or show grey image with message 
+			*		flag on lost_connection if :
+			*               vid_return_code == NETCAM_RESTART_ERROR  
+			*		cnt->video_dev < 0
+			*		cnt->missing_frame_counter > (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)
+			*/			
+			} else { 
 
 				if (debug_level)
 					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
@@ -1128,7 +1135,10 @@ static void *motion_loop(void *arg)
 					motion_log(LOG_ERR, 0, "Restarting Motion thread to reinitialize all "
 					                       "image buffers");
 					/* Break out of main loop terminating thread 
-					 * watchdog will start us again */
+					 * watchdog will start us again 
+					 * Set lost_connection flag on */
+
+					cnt->lost_connection = 1;
 					break;
 				}
 
@@ -1151,6 +1161,8 @@ static void *motion_loop(void *arg)
 					const char *tmpin;
 					char tmpout[80];
 					struct tm tmptime;
+					cnt->lost_connection = 1;
+		
 					if (cnt->video_dev >= 0)
 						tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
 					else
