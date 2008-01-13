@@ -445,7 +445,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		}
 	}
 
-	if (cnt->track.type != 0)	{
+	if (cnt->track.type) {
 		cnt->moved = track_move(cnt, dev, location, imgs, 0);
 	}
 }
@@ -870,17 +870,17 @@ static void *motion_loop(void *arg)
 	int smartmask_lastrate = 0;
 	int olddiffs = 0;
 	int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
-	int text_size_factor;
-	int passflag = 0;
+	unsigned short int text_size_factor;
+	unsigned short int passflag = 0;
 	long int *rolling_average_data = NULL;
 	long int rolling_average_limit, required_frame_time, frame_delay, delay_time_nsec;
 	int rolling_frame = 0;
 	struct timeval tv1, tv2;
 	unsigned long int rolling_average, elapsedtime;
 	unsigned long long int timenow = 0, timebefore = 0;
-	int vid_return_code = 0;          /* Return code used when calling vid_next */
+	int vid_return_code = 0;		/* Return code used when calling vid_next */
 	int minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; /* time in seconds to skip between capturing images */
-	int get_image = 1;                /* Flag used to signal that we capture new image when we run the loop */
+	unsigned short int get_image = 1;	/* Flag used to signal that we capture new image when we run the loop */
 
 	/* Next two variables are used for snapshot and timelapse feature
 	 * time_last_frame is set to 1 so that first coming timelapse or second=0

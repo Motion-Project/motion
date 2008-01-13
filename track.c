@@ -146,7 +146,7 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
 	struct termios adtio;
 
 	if (cnt->track.dev<0) {
-		motion_log(LOG_INFO, 1, "Try to open serial device %s", cnt->track.port);
+		motion_log(LOG_INFO, 0, "Try to open serial device %s", cnt->track.port);
 		
 		if ((cnt->track.dev=open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
 			motion_log(LOG_ERR, 1, "Unable to open serial device %s", cnt->track.port);
@@ -166,7 +166,7 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
 			motion_log(LOG_ERR, 1, "Unable to initialize serial device %s", cnt->track.port);
 			return 0;
 		}
-		motion_log(LOG_INFO, 1, "Opened serial device %s and initialize", cnt->track.port);
+		motion_log(LOG_INFO, 0, "Opened serial device %s and initialize", cnt->track.port);
 	}
 
 	/* x-axis */
@@ -201,12 +201,12 @@ static unsigned short int stepper_move(struct context *cnt, int dev, struct coor
 	unsigned short int command = 0, data = 0;
 
 	if (dev < 0){
-		motion_log(LOG_INFO, 1, "No device started yet , try stepper_center()");	
+		motion_log(LOG_INFO, 0, "No device started yet , trying stepper_center()");	
 		if (!stepper_center(cnt, 0, 0)){
 			motion_log(LOG_ERR, 1, "Stepper_center() failed to initialize stepper device.");	
 			return 0;
 		}
-		motion_log(LOG_INFO, 1, "stepper_center() succeed , device started");	
+		motion_log(LOG_INFO, 0, "stepper_center() succeed , device started");	
 	}
 	
 	/* x-axis */
@@ -349,6 +349,8 @@ static unsigned short int iomojo_center(struct context *cnt, int x_offset, int y
 		iomojo_command(cnt, command, 5, 0);
 	}
 
+	motion_log(LOG_INFO, 0, "iomojo_center() succeed");
+
 	return cnt->track.move_wait;
 }
 
@@ -426,7 +428,7 @@ static unsigned short int lqos_center(struct context *cnt, int dev, int x_angle,
 	if (cnt->track.dev==-1) {
 
 		if (ioctl(dev, VIDIOCPWCMPTRESET, &reset) == -1) {
-			motion_log(LOG_ERR, 1, "Failed to reset camera to starting position! Reason");
+			motion_log(LOG_ERR, 1, "Failed to reset pwc camera to starting position! Reason");
 			return 0;
 		}
 
@@ -457,9 +459,11 @@ static unsigned short int lqos_center(struct context *cnt, int dev, int x_angle,
 		pma.tilt = y_angle * 100;
 
 	if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
-		motion_log(LOG_ERR, 1, "Failed to pan/tilt camera! Reason");
+		motion_log(LOG_ERR, 1, "Failed to pan/tilt pwc camera! Reason");
 		return 0;
 	}
+
+	motion_log(LOG_INFO, 0, "lqos_center succeed");
 
 	return cnt->track.move_wait;
 }
@@ -524,7 +528,7 @@ static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *
 	pma.tilt = move_y_degrees;
 
 	if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
-		motion_log(LOG_ERR, 1, "Failed to pan/tilt camera! Reason");
+		motion_log(LOG_ERR, 1, "Failed to pan/tilt pwc camera! Reason");
 		return 0;
 	}
 
@@ -563,10 +567,10 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 		control_s.value = (unsigned char) reset;
 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-			motion_log(LOG_ERR, 1, "Failed to reset camera to starting position! Reason");
+			motion_log(LOG_ERR, 1, "Failed to reset UVC camera to starting position! Reason");
 			return 0;
 		}
-		motion_log(LOG_DEBUG, 1, "Reseting camera to starting position");
+		motion_log(LOG_DEBUG, 0, "Reseting UVC camera to starting position");
 
 		SLEEP(8,0)
 
@@ -578,7 +582,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 			motion_log(LOG_ERR, 1, "ioctl querycontrol error %d",errno);
 			return 0;
 		}
-		motion_log(LOG_DEBUG, 1, "Getting camera range");
+		motion_log(LOG_DEBUG, 0, "Getting camera range");
 		
 
 		/* DWe 30.03.07 The orig request failed : 
@@ -606,8 +610,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 
 	struct v4l2_control control_s;
 
-	motion_log(LOG_ERR, 1, "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", cnt->track.panmin, cnt->track.panmax, cnt->track.tiltmin, cnt->track.tiltmax );
-	motion_log(LOG_ERR, 1, "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ", x_angle, y_angle);
+	motion_log(LOG_DEBUG, 0, "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", cnt->track.panmin, cnt->track.panmax, cnt->track.tiltmin, cnt->track.tiltmax );
+	motion_log(LOG_DEBUG, 0, "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ", x_angle, y_angle);
 
 	if (x_angle <= cnt->track.panmax && x_angle >= cnt->track.panmin)
 		move_x_degrees = x_angle - (cnt->track.pan_angle);
@@ -625,7 +629,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 	pan.s16.pan = -move_x_degrees * INCPANTILT;
 	pan.s16.tilt = -move_y_degrees * INCPANTILT;
 	
-	motion_log(LOG_ERR, 1, "For_SET_ABS move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
+	motion_log(LOG_DEBUG, 0, "For_SET_ABS move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
 		
 	/* DWe 30.03.07 Must be broken in diff calls, because 
     	- one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
@@ -637,7 +641,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 	//	control_s.value = pan.value;
 		control_s.value = pan.s16.pan;
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-			motion_log(LOG_ERR, 1, "Failed to move camera!");
+			motion_log(LOG_ERR, 1, "Failed to move UVC camera!");
 			return 0;
 		}
 	}
@@ -652,23 +656,23 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 	//	control_s.value = pan.value;
 		control_s.value = pan.s16.tilt;
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-			motion_log(LOG_ERR, 1, "Failed to move camera!");
+			motion_log(LOG_ERR, 1, "Failed to move UVC camera!");
 			return 0;
 		}	
 	
 	}
 
-	motion_log(LOG_ERR, 1,"Found MINMAX = %d", cnt->track.minmaxfound); 
+	motion_log(LOG_DEBUG, 0,"Found MINMAX = %d", cnt->track.minmaxfound); 
 
 	if (cnt->track.dev!=-1) {
-		motion_log(LOG_ERR, 1," Before_ABS_Y_Angel : x= %d , Y= %d , ", cnt->track.pan_angle, cnt->track.tilt_angle );
+		motion_log(LOG_DEBUG, 0," Before_ABS_Y_Angel : x= %d , Y= %d , ", cnt->track.pan_angle, cnt->track.tilt_angle );
 		if (move_x_degrees != -1) { 
 			cnt->track.pan_angle += move_x_degrees;
 		}
 		if (move_x_degrees != -1) { 
 			cnt->track.tilt_angle += move_y_degrees;
 		}
-		motion_log(LOG_ERR, 1," After_ABS_Y_Angel : x= %d , Y= %d , ", cnt->track.pan_angle, cnt->track.tilt_angle );	
+		motion_log(LOG_DEBUG, 0," After_ABS_Y_Angel : x= %d , Y= %d , ", cnt->track.pan_angle, cnt->track.tilt_angle );	
 	}
 
 	return cnt->track.move_wait;
@@ -694,10 +698,10 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 		control_s.value = (unsigned char) reset;
 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-			motion_log(LOG_ERR, 1, "Failed to reset camera to starting position! Reason");
+			motion_log(LOG_ERR, 1, "Failed to reset UVC camera to starting position! Reason");
 			return 0;
 		}
-		motion_log(LOG_DEBUG, 1, "Reseting camera to starting position");
+		motion_log(LOG_DEBUG, 0, "Reseting UVC camera to starting position");
 		
 		/* set the "helpvalue" back to null because after reset CAM should be in x=0 and not 70 */
 		cent->x = 0;
@@ -762,9 +766,9 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 	}
 
 
-	motion_log(LOG_ERR, 1, "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", cnt->track.panmin, cnt->track.panmax, cnt->track.tiltmin, cnt->track.tiltmax );
-	motion_log(LOG_ERR, 1, "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d ", cnt->track.pan_angle, cnt->track.tilt_angle);	
-	motion_log(LOG_ERR, 1, "For_SET_REL move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
+	motion_log(LOG_DEBUG, 0, "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", cnt->track.panmin, cnt->track.panmax, cnt->track.tiltmin, cnt->track.tiltmax );
+	motion_log(LOG_DEBUG, 0, "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d ", cnt->track.pan_angle, cnt->track.tilt_angle);	
+	motion_log(LOG_DEBUG, 0, "For_SET_REL move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
 	/*
 	tilt up: - value
 	tilt down: + value
@@ -786,9 +790,9 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 
 //	control_s.value = pan.value;
 		control_s.value = pan.s16.pan;
-		motion_log(LOG_ERR, 1," dev %d,addr= %d, control_S= %d,Wert= %d,", dev,VIDIOC_S_CTRL, &control_s, pan.s16.pan ); 
+		motion_log(LOG_DEBUG, 0," dev %d,addr= %d, control_S= %d,Wert= %d,", dev,VIDIOC_S_CTRL, &control_s, pan.s16.pan ); 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-	    	    motion_log(LOG_ERR, 1, "Failed to move camera!");
+	    	    motion_log(LOG_ERR, 1, "Failed to move UVC camera!");
 		    return 0;
 		}
 	}
@@ -805,17 +809,17 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 
 //	control_s.value = pan.value;
 	control_s.value = pan.s16.tilt;
-		motion_log(LOG_ERR, 1," dev %d,addr= %d, control_S= %d, Wert= %d, ", dev,VIDIOC_S_CTRL, &control_s, pan.s16.tilt ); 
+		motion_log(LOG_DEBUG, 0," dev %d,addr= %d, control_S= %d, Wert= %d, ", dev,VIDIOC_S_CTRL, &control_s, pan.s16.tilt ); 
 		if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-		motion_log(LOG_ERR, 1, "Failed to move camera!");
+		motion_log(LOG_ERR, 1, "Failed to move UVC camera!");
 		return 0;
 		}
 	}
 	
   
-    		motion_log(LOG_ERR, 1,"Found MINMAX = %d", cnt->track.minmaxfound); 
+    		motion_log(LOG_DEBUG, 0,"Found MINMAX = %d", cnt->track.minmaxfound); 
 		if (cnt->track.minmaxfound == 1) {
-			motion_log(LOG_ERR, 1," Before_REL_Y_Angel : x= %d , Y= %d", cnt->track.pan_angle, cnt->track.tilt_angle  );
+			motion_log(LOG_DEBUG, 0," Before_REL_Y_Angel : x= %d , Y= %d", cnt->track.pan_angle, cnt->track.tilt_angle  );
 		
 		    	if (move_x_degrees != 0){ 
 			    cnt->track.pan_angle += -pan.s16.pan / INCPANTILT;
@@ -823,7 +827,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 			if (move_y_degrees != 0){
 			    cnt->track.tilt_angle += -pan.s16.tilt / INCPANTILT;
 			}    
-			motion_log(LOG_ERR, 1," After_REL_Y_Angel : x= %d , Y= %d", cnt->track.pan_angle, cnt->track.tilt_angle  );
+			motion_log(LOG_DEBUG, 0," After_REL_Y_Angel : x= %d , Y= %d", cnt->track.pan_angle, cnt->track.tilt_angle  );
 		}
 
 	return cnt->track.move_wait;

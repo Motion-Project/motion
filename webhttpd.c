@@ -10,9 +10,10 @@
  *      See also the file 'COPYING'.
  *
  */
-#include "motion.h"
-#include <sys/types.h>
-#include <sys/socket.h>
+//#include "motion.h"
+#include "webhttpd.h"	/* already includes motion.h */
+//#include <sys/types.h>
+//#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>

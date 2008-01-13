@@ -19,14 +19,13 @@
  */
 
 #include "picture.h"
-/* picture.h already includes motion.h and this one webcam.h */
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/fcntl.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 
 

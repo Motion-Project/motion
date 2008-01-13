@@ -9,13 +9,13 @@
 
 */
 
-#include "ffmpeg.h"           /* must be first to avoid 'shadow' warning */
-#include "motion.h"
+#include "ffmpeg.h"	/* must be first to avoid 'shadow' warning */
+//#include "motion.h"
+#include "picture.h"	/* already includes motion.h */
 #include "event.h"
 #if (!defined(BSD)) 
 #include "video.h"
 #endif
-#include "picture.h"
 
 /*
  *	Various functions (most doing the actual action)
