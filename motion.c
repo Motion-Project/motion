@@ -774,10 +774,10 @@ static void motion_cleanup(struct context *cnt)
 	/* Stop webcam */
 	event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
 
-#ifndef WITHOUT_V4L
-	if (cnt->video_dev >= 0)
+	if (cnt->video_dev >= 0){
+		motion_log(LOG_DEBUG, 0, "Calling vid_close() from motion_cleanup");		
 		vid_close(cnt);
-#endif
+	}
 
 	if (cnt->imgs.out) {
 		free(cnt->imgs.out);

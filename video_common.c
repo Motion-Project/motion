@@ -539,6 +539,8 @@ void vid_cleanup(void)
 	pthread_mutex_destroy(&vid_mutex);
 }
 
+#endif	/* WITHOUT_V4L */
+
 /**
  * vid_close
  *
@@ -546,15 +548,20 @@ void vid_cleanup(void)
  */
 void vid_close(struct context *cnt)
 {
+#ifndef WITHOUT_V4L
 	struct video_dev *dev = viddevs;
 	struct video_dev *prev = NULL;
+#endif /* WITHOUT_V4L */ 
 
 	/* Cleanup the netcam part */
 	if(cnt->netcam) {
+		motion_log(LOG_DEBUG, 0, "vid_close: calling netcam_cleanup");
 		netcam_cleanup(cnt->netcam, 0);
 		cnt->netcam = NULL;
 		return;
 	}
+
+#ifndef WITHOUT_V4L
 
 	/* Cleanup the v4l part */
 	pthread_mutex_lock(&vid_mutex);
@@ -611,20 +618,18 @@ void vid_close(struct context *cnt)
 			pthread_mutex_unlock(&dev->mutex);
 		}
 	}
+#endif /* WITHOUT_V4L */
 }
 
+#ifndef WITHOUT_V4L
+
 /**
- * vid_start
+ * vid_v4lx_start
  *
- * vid_start setup the capture device. This will be either a V4L device or a netcam.
+ * Called from vid_start setup the V4L/V4L2 capture device
  * The function does the following:
- * - If the camera is a netcam - netcam_start is called and function returns
- * - Width and height are checked for valid value (multiple of 16)
- * - Copy the config height and width to the imgs struct. Note that height and width are
- *   only copied to the from the conf struct to the imgs struct during program startup
- *   The width and height can no later be changed via http remote control as this would
- *   require major re-memory allocations of all image buffers.
- * - Setup basic V4L properties incl palette incl setting 
+ *   
+ * - Setup basic V4L/V4L2 properties incl palette incl setting 
  * - Open the device
  * - Returns the device number.
  *
@@ -810,10 +815,34 @@ return fd;
 }
 #endif				/*WITHOUT_V4L */
 
+
+
+/**
+ * vid_start
+ *
+ * vid_start setup the capture device. This will be either a V4L device or a netcam.
+ * The function does the following:
+ * - If the camera is a netcam - netcam_start is called and function returns
+ * - Width and height are checked for valid value (multiple of 16)
+ * - Copy the config height and width to the imgs struct. Note that height and width are
+ *   only copied to the from the conf struct to the imgs struct during program startup
+ *   The width and height can no later be changed via http remote control as this would
+ *   require major re-memory allocations of all image buffers.
+ *    
+ * - if the camera is V4L/V4L2 vid_v4lx_start is called 
+ *
+ * Parameters:
+ *     cnt        Pointer to the context for this thread
+ *
+ * Returns
+ *     device number
+ *     -1 if failed to open device.
+ */
+
 int vid_start(struct context *cnt)
 {
 	struct config *conf = &cnt->conf;
-	int dev;
+	int dev = -1;
 
 	if (conf->netcam_url) {
 		dev = netcam_start(cnt);
@@ -825,7 +854,7 @@ int vid_start(struct context *cnt)
 #ifndef WITHOUT_V4L
 	else
 		dev = vid_v4lx_start(cnt);
-#endif				/*WITHOUT_V4L */
+#endif	/*WITHOUT_V4L */
 
 	return dev;
 }
@@ -852,7 +881,7 @@ int vid_start(struct context *cnt)
  */
 int vid_next(struct context *cnt, unsigned char *map)
 {
-	int ret;
+	int ret = -2;
 	struct config *conf = &cnt->conf;
 
 	if (conf->netcam_url) {

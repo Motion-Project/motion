@@ -47,7 +47,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 #endif /* WITHOUT_V4L */
 
 /* Add a call to your functions here: */
-unsigned short int track_center(struct context *cnt, int dev, unsigned short int manual, int xoff, int yoff)
+unsigned short int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED, unsigned short int manual, int xoff, int yoff)
 {
 	if (!manual && !cnt->track.active)
 		return 0;
