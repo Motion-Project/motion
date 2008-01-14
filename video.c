@@ -9,14 +9,16 @@
 #ifndef WITHOUT_V4L
 
 /* Common stuff: */
-#include "motion.h"
+//#include "motion.h"
+///* for rotation */
+#include "rotate.h"     /* already includes motion.h */
 #include "video.h"
 /* for rotation */
-#include "rotate.h"
+//#include "rotate.h"
 
 
 /* for the v4l stuff: */
-#include "pwc-ioctl.h"
+//#include "pwc-ioctl.h"	/* not needed here only in track */
 #include <sys/mman.h>
 #include <math.h>
 #include <sys/utsname.h>

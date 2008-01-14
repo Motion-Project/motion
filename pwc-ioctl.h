@@ -52,6 +52,7 @@
              ... 	the function
  */
 
+#if (!defined(BSD))
 #include <linux/types.h>
 #include <linux/version.h>
 
@@ -59,6 +60,8 @@
 /* Compatibility for older kernel */
 typedef __u16 __le16;
 #endif
+
+#endif /* ( !BSD ) */
 
  /* Enumeration of image sizes */
 #define PSZ_SQCIF	0x00
@@ -307,6 +310,8 @@ struct pwc_table_init_buffer {
  * use interface offer by v4l2.
  */
 
+#if (defined(MOTION_V4L2)) && (!defined(BSD))
+
 #define V4L2_CID_PRIVATE_SAVE_USER       (V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_PRIVATE_RESTORE_USER    (V4L2_CID_PRIVATE_BASE + 1)
 #define V4L2_CID_PRIVATE_RESTORE_FACTORY (V4L2_CID_PRIVATE_BASE + 2)
@@ -325,5 +330,6 @@ struct pwc_raw_frame {
    __u8   rawframe[0];	/* frame_size = H/4*vbandlength */
 } __attribute__ ((packed));
 
+#endif	/*  MOTION_V4L2 && (! BSD ) */
 
 #endif
