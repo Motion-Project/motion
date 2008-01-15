@@ -94,7 +94,7 @@ static int file_open_append(URLContext *h, const char *filename, int flags)
 
 	fd = open(filename, access_flags, 0666);
 	if (fd < 0) {
-		return -ENOENT;
+		return AVERROR(ENOENT);
 	}
 	h->priv_data = (void *)(size_t)fd;
 	return 0;

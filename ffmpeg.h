@@ -2,6 +2,7 @@
 #define _INCLUDE_FFMPEG_H_
 
 #ifdef HAVE_FFMPEG
+#include <errno.h>
 #include <avformat.h>
 #endif
 
