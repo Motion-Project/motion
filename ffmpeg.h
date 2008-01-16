@@ -6,8 +6,8 @@
 #include <avformat.h>
 #endif
 
-//#include <stdio.h>
-//#include <stdarg.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 /* Define a codec name/identifier for timelapse videos, so that we can
  * differentiate between normal mpeg1 videos and timelapse videos.
