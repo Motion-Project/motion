@@ -4,7 +4,22 @@
 #ifdef HAVE_FFMPEG
 #include <errno.h>
 #include <avformat.h>
+
+#ifndef AVERROR /* 0.4.8 & 0.4.9-pre1 */
+
+#if EINVAL > 0
+#define AVERROR(e) (-(e)) 
+#define AVUNERROR(e) (-(e)) 
+#else
+/* Some platforms have E* and errno already negated. */
+#define AVERROR(e) (e)
+#define AVUNERROR(e) (e)
 #endif
+
+#endif /* AVERROR */
+
+#endif /* HAVE_FFMPEG */
+
 
 #include <stdio.h>
 #include <stdarg.h>

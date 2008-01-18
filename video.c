@@ -177,6 +177,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 		}
 
 		if (MAP_FAILED == map) {
+			motion_log(LOG_ERR,1,"MAP_FAILED");
 			return (NULL);
 		}
 		viddev->v4l_curbuffer=0;
