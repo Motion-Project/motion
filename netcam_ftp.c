@@ -11,19 +11,19 @@
 #include "motion.h"  /* needs to come first, because _GNU_SOURCE_ set there */
 
 #include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
+//#include <errno.h>
+//#include <fcntl.h>
 #include <netdb.h>
 #include <regex.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <syslog.h>
-#include <unistd.h>
+//#include <stdarg.h>
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <string.h>
+//#include <syslog.h>
+//#include <unistd.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <sys/types.h>
 #include <netinet/in.h>
 
 #include "netcam_ftp.h"

@@ -8,10 +8,12 @@
  */
 
 /* Common stuff: */
-#include "motion.h"
+//#include "motion.h"
+/* for rotation */
+#include "rotate.h"     /* already includes motion.h */
 #include "video_freebsd.h"
 /* for rotation */
-#include "rotate.h"
+//#include "rotate.h"
 
 #ifndef WITHOUT_V4L
 
@@ -829,57 +831,124 @@ static void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigne
 
 /*
 
-vid_init - Allocate viddev struct.
+vid_init - Initi vid_mutex.
 vid_start - Setup Device parameters ( device , channel , freq , contrast , hue , saturation , brightness ) and open it.
 vid_next - Capture a frame and set input , contrast , hue , saturation and brightness if necessary. 
 vid_close - close devices. 
-vid_cleanup - Free viddev struct.
+vid_cleanup - Destroy vid_mutex.
 
 */
 
-/* big lock for vid_start */
-pthread_mutex_t vid_mutex;
-/* structure used for per device locking */
-struct video_dev **viddevs=NULL;
+/* big lock for vid_start to ensure exclusive access to viddevs while adding
+ * devices during initialization of each thread
+ */
+static pthread_mutex_t vid_mutex;
 
+
+/* Here we setup the viddevs structure which is used globally in the vid_*
+ * functions.
+ */      
+static struct video_dev *viddevs = NULL;
+
+
+/*
+ * vid_init
+ *
+ * Called from motion.c at the very beginning before setting up the threads.
+ * Function prepares the vid_mutex
+ */
 void vid_init(void)
 {
-	if (!viddevs) { 
-		viddevs=mymalloc(sizeof(struct video_dev *));
-		viddevs[0]=NULL;
-	}
-
 	pthread_mutex_init(&vid_mutex, NULL);
 }
-
-/* Called by childs to get rid of open video devices */
-void vid_close(void)
-{
-	int i=-1;
-
-	if (viddevs){ 
-		while(viddevs[++i]){
-			close(viddevs[i]->fd_bktr);
-			close(viddevs[i]->fd_tuner);
-		}
-	}
-}
-
+                
+/**
+ * vid_cleanup
+ *
+ * vid_cleanup is called from motion.c when Motion is stopped or restarted
+ */
 void vid_cleanup(void)
 {
-	int i=-1;
-	if (viddevs){ 
-		while(viddevs[++i]){
-			munmap(viddevs[i]->v4l_buffers[0],viddevs[i]->v4l_bufsize);
-			viddevs[i]->v4l_buffers[0] = MAP_FAILED;
-			free(viddevs[i]);
-		}
-		free(viddevs);
-		viddevs=NULL;
-	}
+	pthread_mutex_destroy(&vid_mutex);
 }
 
 #endif /*WITHOUT_V4L*/
+
+
+/**
+ * vid_close
+ *
+ * vid_close is called from motion.c when a Motion thread is stopped or restarted
+ */
+void vid_close(struct context *cnt)   
+{
+#ifndef WITHOUT_V4L
+        struct video_dev *dev = viddevs;
+        struct video_dev *prev = NULL;
+#endif
+
+        /* Cleanup the netcam part */
+        if(cnt->netcam) {
+                netcam_cleanup(cnt->netcam, 0);
+                cnt->netcam = NULL;
+                return;
+        } 
+
+#ifndef WITHOUT_V4L
+
+        /* Cleanup the v4l part */
+        pthread_mutex_lock(&vid_mutex);
+        while (dev) {
+                if (dev->fd_bktr == cnt->video_dev)
+                        break;
+                prev = dev;
+                dev = dev->next;
+        }
+        pthread_mutex_unlock(&vid_mutex);
+ 
+        /* Set it as closed in thread context */
+        cnt->video_dev = -1;
+ 
+        if (dev == NULL) {
+                motion_log(LOG_ERR, 0, "vid_close: Unable to find video device");   
+                return;
+        }
+
+        if( --dev->usage_count == 0) {
+                motion_log(LOG_INFO, 0, "Closing video device %s", dev->video_device);
+		//close(dev->fd);
+		close(dev->fd_bktr);
+		close(dev->fd_tuner);
+
+		munmap(viddevs->v4l_buffers[0],viddevs->v4l_bufsize);
+		viddevs->v4l_buffers[0] = MAP_FAILED;
+
+                dev->fd_bktr = -1;
+                pthread_mutex_lock(&vid_mutex);
+                /* Remove from list */
+                if (prev == NULL)
+                        viddevs = dev->next;
+                else
+                        prev->next = dev->next;
+                pthread_mutex_unlock(&vid_mutex);
+
+                pthread_mutexattr_destroy(&dev->attr);
+                pthread_mutex_destroy(&dev->mutex);
+                free(dev);
+        } else {
+                motion_log(LOG_INFO, 0, "Still %d users of video device %s, so we don't close it now", dev->usage_count, dev->video_device);
+                /* There is still at least one thread using this device
+                 * If we own it, release it
+                 */
+                if (dev->owner == cnt->threadnr) {
+                        dev->frames = 0;
+                        dev->owner = -1;
+                        pthread_mutex_unlock(&dev->mutex);
+                }
+        }
+#endif /* WITHOUT_V4L */
+}
+
 
 
 int vid_start(struct context *cnt)
@@ -892,8 +961,8 @@ int vid_start(struct context *cnt)
 
 #ifndef WITHOUT_V4L
 	{
+		struct video_dev *dev;
 		int fd_tuner=-1;
-		int i=-1;
 		int width, height;
 		unsigned short input, norm;
 		unsigned long frequency;
@@ -935,10 +1004,11 @@ int vid_start(struct context *cnt)
 		 * the device is a Round Robin device and we set the basic settings
 		 * and return the file descriptor
 		 */
-		while (viddevs[++i]) { 
-			if (!strcmp(conf->video_device, viddevs[i]->video_device)) {
-				int fd;
-				cnt->imgs.type=viddevs[i]->v4l_fmt;
+		dev = viddevs;
+		while (dev) { 
+			if (!strcmp(conf->video_device, dev->video_device)) {
+				dev->usage_count++;
+				cnt->imgs.type=dev->v4l_fmt;
 				motion_log(-1, 0, "vid_start cnt->imgs.type [%i]", cnt->imgs.type);
 				switch (cnt->imgs.type) {
 					case VIDEO_PALETTE_GREY:
@@ -955,67 +1025,77 @@ int vid_start(struct context *cnt)
 						cnt->imgs.size=(width*height*3)/2;
 					break;
 				}
-				fd=viddevs[i]->fd_bktr; // FIXME return fd_tuner ?!
 				pthread_mutex_unlock(&vid_mutex);
-				return fd;
+				return dev->fd_bktr; // FIXME return fd_tuner ?!
 			}
+			dev = dev->next;
 		}
 
-		viddevs=myrealloc(viddevs, sizeof(struct video_dev *)*(i+2), "vid_start");
-		viddevs[i]=mymalloc(sizeof(struct video_dev));
-		viddevs[i+1]=NULL;
 
-		pthread_mutexattr_init(&viddevs[i]->attr);
-		pthread_mutex_init(&viddevs[i]->mutex, NULL);
+		dev = mymalloc(sizeof(struct video_dev));
+		memset(dev, 0, sizeof(struct video_dev));
 
 		fd_bktr=open(conf->video_device, O_RDWR);
+
 		if (fd_bktr <0) { 
 			motion_log(LOG_ERR, 1, "open video device %s",conf->video_device);
-			motion_log(LOG_ERR, 0, "Motion Exits.");
+			free(dev);
+			pthread_mutex_unlock(&vid_mutex);
 			return -1;
 		}
+
 
 		/* Only open tuner if conf->tuner_device has set , freq and input is 1 */
 		if ( (conf->tuner_device != NULL) && (frequency > 0) && ( input == IN_TV )) {
 			fd_tuner=open(conf->tuner_device, O_RDWR);
 			if (fd_tuner <0) { 
 				motion_log(LOG_ERR, 1, "open tuner device %s",conf->tuner_device);
-				motion_log(LOG_ERR, 0, "Motion Exits.");
+				free(dev);
+				pthread_mutex_unlock(&vid_mutex);
 				return -1;
 			}
 		}
 
-		viddevs[i]->video_device=conf->video_device;
-		viddevs[i]->tuner_device=conf->tuner_device;
-		viddevs[i]->fd_bktr=fd_bktr;
-		viddevs[i]->fd_tuner=fd_tuner;
-		viddevs[i]->input=input;
-		viddevs[i]->height=height;
-		viddevs[i]->width=width;
-		viddevs[i]->freq=frequency;
-		viddevs[i]->owner=-1;
+		pthread_mutexattr_init(&dev->attr);
+		pthread_mutex_init(&dev->mutex, &dev->attr);
+
+		dev->usage_count = 1;
+		dev->video_device=conf->video_device;
+		dev->tuner_device=conf->tuner_device;
+		dev->fd_bktr=fd_bktr;
+		dev->fd_tuner=fd_tuner;
+		dev->input=input;
+		dev->height=height;
+		dev->width=width;
+		dev->freq=frequency;
+		dev->owner=-1;
 
 		/* We set brightness, contrast, saturation and hue = 0 so that they only get
                  * set if the config is not zero.
                  */
 		
-		viddevs[i]->brightness=0;
-		viddevs[i]->contrast=0;
-		viddevs[i]->saturation=0;
-		viddevs[i]->hue=0;
-		viddevs[i]->owner=-1;
+		dev->brightness=0;
+		dev->contrast=0;
+		dev->saturation=0;
+		dev->hue=0;
+		dev->owner=-1;
 
 		/* default palette */ 
-		viddevs[i]->v4l_fmt=VIDEO_PALETTE_YUV420P;
-		viddevs[i]->v4l_curbuffer=0;
-		viddevs[i]->v4l_maxbuffer=1;
+		dev->v4l_fmt=VIDEO_PALETTE_YUV420P;
+		dev->v4l_curbuffer=0;
+		dev->v4l_maxbuffer=1;
 
-		if (!v4l_start (cnt, viddevs[i], width, height, input, norm, frequency)){ 
+		if (!v4l_start (cnt, dev, width, height, input, norm, frequency)){ 
+			close(dev->fd_bktr);
+			pthread_mutexattr_destroy(&dev->attr);
+                        pthread_mutex_destroy(&dev->mutex);
+                        free(dev);
+
 			pthread_mutex_unlock(&vid_mutex);
 			return -1;
 		}
 	
-		cnt->imgs.type=viddevs[i]->v4l_fmt;
+		cnt->imgs.type=dev->v4l_fmt;
 	
 		switch (cnt->imgs.type) { 
 			case VIDEO_PALETTE_GREY:
@@ -1031,6 +1111,10 @@ int vid_start(struct context *cnt)
 				cnt->imgs.motionsize=width*height;
 			break;
 		}
+
+		/* Insert into linked list */
+		dev->next = viddevs;
+		viddevs = dev;
 	
 		pthread_mutex_unlock(&vid_mutex);
 	}
@@ -1068,37 +1152,44 @@ int vid_next(struct context *cnt, unsigned char *map)
 	}
 
 #ifndef WITHOUT_V4L
-	
-	int i=-1;
+
+	struct video_dev *dev;	
 	int width, height;
 	int dev_bktr = cnt->video_dev;
 
 	/* NOTE: Since this is a capture, we need to use capture dimensions. */
 	width = cnt->rotate_data.cap_width;
 	height = cnt->rotate_data.cap_height;
-		
-	while (viddevs[++i])
-		if (viddevs[i]->fd_bktr==dev_bktr)
+	
+	pthread_mutex_lock(&vid_mutex);
+	dev = viddevs;	
+	while (dev){
+		if (dev->fd_bktr==dev_bktr)
 			break;
+		dev = dev->next;
+	}
+	pthread_mutex_unlock(&vid_mutex);
 
-	if (!viddevs[i])
-		return -1;
+	if (dev == NULL)
+		return V4L_FATAL_ERROR;
+		//return -1;
 
-	if (viddevs[i]->owner!=cnt->threadnr) { 
-		pthread_mutex_lock(&viddevs[i]->mutex);
-		viddevs[i]->owner=cnt->threadnr;
-		viddevs[i]->frames=conf->roundrobin_frames;
+	if (dev->owner!=cnt->threadnr) { 
+		pthread_mutex_lock(&dev->mutex);
+		dev->owner=cnt->threadnr;
+		dev->frames=conf->roundrobin_frames;
 	}
 
 
-	v4l_set_input(cnt, viddevs[i], map, width, height, conf->input, conf->norm,
+	v4l_set_input(cnt, dev, map, width, height, conf->input, conf->norm,
 	              conf->roundrobin_skip, conf->frequency);
 	
-	ret = v4l_next(viddevs[i], map, width, height);
+	ret = v4l_next(dev, map, width, height);
 
-	if (--viddevs[i]->frames <= 0) { 
-		viddevs[i]->owner=-1;
-		pthread_mutex_unlock(&viddevs[i]->mutex);
+	if (--dev->frames <= 0) { 
+		dev->owner=-1;
+		dev->frames = 0;
+		pthread_mutex_unlock(&dev->mutex);
 	}
 	
  	if(cnt->rotate_data.degrees > 0){ 

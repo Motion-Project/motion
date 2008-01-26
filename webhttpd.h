@@ -13,6 +13,8 @@
 #ifndef _INCLUDE_WEBHTTPD_H_
 #define _INCLUDE_WEBHTTPD_H_
 
+#include "motion.h"
+
 #define TWIKI_URL "http://www.lavrsen.dk/twiki/bin/view/Motion/MotionGuideAlphabeticalOptionReferenceManual"
 
 void * motion_web_control(void *arg); 

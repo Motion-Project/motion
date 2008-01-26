@@ -19,14 +19,13 @@
  */
 
 #include "picture.h"
-/* picture.h already includes motion.h and this one webcam.h */
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/fcntl.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 
 
@@ -306,6 +305,7 @@ void webcam_stop(struct context *cnt)
 		motion_log(-1, 0, "Closing webcam listen socket");
 	
 	close(cnt->webcam.socket);
+	cnt->webcam.socket = -1;
 	
 	if (cnt->conf.setup_mode)
 		motion_log(LOG_INFO, 0, "Closing active webcam sockets");

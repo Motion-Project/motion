@@ -9,13 +9,13 @@
 
 */
 
-#include "ffmpeg.h"           /* must be first to avoid 'shadow' warning */
-#include "motion.h"
+#include "ffmpeg.h"	/* must be first to avoid 'shadow' warning */
+//#include "motion.h"
+#include "picture.h"	/* already includes motion.h */
 #include "event.h"
 #if (!defined(BSD)) 
 #include "video.h"
 #endif
-#include "picture.h"
 
 /*
  *	Various functions (most doing the actual action)
@@ -202,7 +202,7 @@ static void event_stop_webcam(struct context *cnt, int type ATTRIBUTE_UNUSED,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct tm *tm ATTRIBUTE_UNUSED)
 {
-	if (cnt->conf.webcam_port){
+	if ((cnt->conf.webcam_port) && (cnt->webcam.socket != -1)){
 		webcam_stop(cnt);
 	}
 }

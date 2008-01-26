@@ -86,6 +86,8 @@
 #define TUNER_DEVICE "/dev/tuner0"
 
 struct video_dev {
+	struct video_dev *next;
+	int usage_count;
 	int fd_bktr;
 	int fd_tuner;
 	const char *video_device;
@@ -121,10 +123,10 @@ struct video_dev {
 /* video functions, video_freebsd.c */
 int vid_start(struct context *);
 int vid_next(struct context *, unsigned char *map);
+void vid_close(struct context *cnt);
 
 #ifndef WITHOUT_V4L
 void vid_init(void);
-void vid_close(void);
 void vid_cleanup(void);
 #endif
 

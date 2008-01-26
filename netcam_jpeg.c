@@ -12,15 +12,16 @@
  *	This program is published under the GNU Public license
  */
 
-#include "motion.h"
+//#include "motion.h"
+#include "rotate.h"	/* already includes motion.h */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <string.h>
 #include <jpeglib.h>
 #include <jerror.h>
 
-#include "rotate.h"
+//#include "rotate.h"
 
 /*
  * netcam_source_mgr is a locally-defined structure to contain elements

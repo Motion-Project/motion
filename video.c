@@ -9,14 +9,16 @@
 #ifndef WITHOUT_V4L
 
 /* Common stuff: */
-#include "motion.h"
+//#include "motion.h"
+///* for rotation */
+#include "rotate.h"     /* already includes motion.h */
 #include "video.h"
 /* for rotation */
-#include "rotate.h"
+//#include "rotate.h"
 
 
 /* for the v4l stuff: */
-#include "pwc-ioctl.h"
+//#include "pwc-ioctl.h"	/* not needed here only in track */
 #include <sys/mman.h>
 #include <math.h>
 #include <sys/utsname.h>
@@ -175,6 +177,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 		}
 
 		if (MAP_FAILED == map) {
+			motion_log(LOG_ERR,1,"MAP_FAILED");
 			return (NULL);
 		}
 		viddev->v4l_curbuffer=0;

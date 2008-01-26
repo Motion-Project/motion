@@ -445,7 +445,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		}
 	}
 
-	if (cnt->track.type != 0)	{
+	if (cnt->track.type) {
 		cnt->moved = track_move(cnt, dev, location, imgs, 0);
 	}
 }
@@ -774,10 +774,10 @@ static void motion_cleanup(struct context *cnt)
 	/* Stop webcam */
 	event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
 
-#ifndef WITHOUT_V4L
-	if (cnt->video_dev >= 0)
+	if (cnt->video_dev >= 0){
+		motion_log(LOG_DEBUG, 0, "Calling vid_close() from motion_cleanup");		
 		vid_close(cnt);
-#endif
+	}
 
 	if (cnt->imgs.out) {
 		free(cnt->imgs.out);
@@ -870,17 +870,17 @@ static void *motion_loop(void *arg)
 	int smartmask_lastrate = 0;
 	int olddiffs = 0;
 	int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
-	int text_size_factor;
-	int passflag = 0;
+	unsigned short int text_size_factor;
+	unsigned short int passflag = 0;
 	long int *rolling_average_data = NULL;
 	long int rolling_average_limit, required_frame_time, frame_delay, delay_time_nsec;
 	int rolling_frame = 0;
 	struct timeval tv1, tv2;
 	unsigned long int rolling_average, elapsedtime;
 	unsigned long long int timenow = 0, timebefore = 0;
-	int vid_return_code = 0;          /* Return code used when calling vid_next */
+	int vid_return_code = 0;		/* Return code used when calling vid_next */
 	int minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; /* time in seconds to skip between capturing images */
-	int get_image = 1;                /* Flag used to signal that we capture new image when we run the loop */
+	unsigned short int get_image = 1;	/* Flag used to signal that we capture new image when we run the loop */
 
 	/* Next two variables are used for snapshot and timelapse feature
 	 * time_last_frame is set to 1 so that first coming timelapse or second=0
@@ -1110,11 +1110,18 @@ static void *motion_loop(void *arg)
 				vid_close(cnt);
 				/* Use virgin image, if we are not able to open it again next loop
 				 * a gray image with message is applied
+				 * flag lost_connection
 				 */
 				memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
-			// NO FATAL ERROR -  copy last image or show grey image with message			
-			} else { 
 				cnt->lost_connection = 1;
+			/* NO FATAL ERROR -  
+			*		copy last image or show grey image with message 
+			*		flag on lost_connection if :
+			*               vid_return_code == NETCAM_RESTART_ERROR  
+			*		cnt->video_dev < 0
+			*		cnt->missing_frame_counter > (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)
+			*/			
+			} else { 
 
 				if (debug_level)
 					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
@@ -1128,7 +1135,10 @@ static void *motion_loop(void *arg)
 					motion_log(LOG_ERR, 0, "Restarting Motion thread to reinitialize all "
 					                       "image buffers");
 					/* Break out of main loop terminating thread 
-					 * watchdog will start us again */
+					 * watchdog will start us again 
+					 * Set lost_connection flag on */
+
+					cnt->lost_connection = 1;
 					break;
 				}
 
@@ -1151,6 +1161,8 @@ static void *motion_loop(void *arg)
 					const char *tmpin;
 					char tmpout[80];
 					struct tm tmptime;
+					cnt->lost_connection = 1;
+		
 					if (cnt->video_dev >= 0)
 						tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
 					else
