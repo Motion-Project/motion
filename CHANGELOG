@@ -39,6 +39,7 @@ Bugfixes
    * Little fix in ffmpeg.c comparing version of LIBAVFORMAT_BUILD, since ffmpeg svn -r4486 LIBAVFORMAT_BUILD and
      LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
      (Angel Carpintero)	
+   * Fix choose v4l2 palette , http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x01x21x043812	(Onakra)
 
 
 3.2.9 Formal Release - Summary of Changes

@@ -1047,6 +1047,9 @@ nemosoft
 nullset?
    * For the ir script to turn motion and lights on and of
 
+Onakra
+   * Fix choose v4l2 palette , http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x01x21x043812
+
 Mikko Paananen
    * Changed netcam open to use pipes and fixed authentication.
 
