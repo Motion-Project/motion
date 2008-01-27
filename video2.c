@@ -334,6 +334,10 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 				index_format = i;
 			}
 
+		/* Chosen our selected palette, break from while */
+		if (index_format == cnt->conf.v4l2_palette && index_format >= 0)
+			break;
+
 		memset(&fmt, 0, sizeof(struct v4l2_fmtdesc));
 		fmt.index = ++v4l2_pal;
 		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
