@@ -1246,7 +1246,7 @@ if test -n "$ac_init_help"; then
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-linuxthreads     Use linuxthreads in BSD instead of native phtreads
+  --with-linuxthreads     Use linuxthreads in BSD instead of native pthreads
 
 
   --without-bktr          Exclude to use bktr subsystem , that usually useful
@@ -1736,7 +1736,7 @@ ac_config_headers="$ac_config_headers config.h"
 
 
 THREAD_CFLAGS=""
-THREAD_CHECK="pthread.h"
+THREAD_CHECK="/usr/include/pthread.h"
 
 Darwin=""
 FreeBSD=""
@@ -1790,6 +1790,7 @@ else
 	VIDEO="video_freebsd.o"
 	FINK_LIB="-L/sw/lib"
 	Darwin="yes"
+	V4L="no"
 	{ echo "$as_me:$LINENO: result: $Darwin" >&5
 echo "${ECHO_T}$Darwin" >&6; }
 fi
@@ -2764,10 +2765,6 @@ fi
 fi
 
 
-if test "${Darwin}" = "yes"; then
-	V4L="no"
-fi
-
 if test "${V4L}" = "no"; then
 	TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
 fi
@@ -2809,34 +2806,25 @@ echo "${ECHO_T}$THREADS" >&6; }
                 echo
         fi
 
-else
+elif test -f "${THREAD_CHECK}"; then
 
 
-{ echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
-echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpthread  $LIBS"
+{ echo "$as_me:$LINENO: checking threads" >&5
+echo $ECHO_N "checking threads... $ECHO_C" >&6; }
+
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pthread_create ();
+#include <pthread.h>
 int
 main ()
 {
-return pthread_create ();
+pthread_t th; pthread_join(th, 0);
+ pthread_attr_init(0); pthread_cleanup_push(0, 0);
+ pthread_create(0,0,0,0); pthread_cleanup_pop(0);
   ;
   return 0;
 }
@@ -2859,35 +2847,35 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pthread_pthread_create=yes
+  PTHREAD_LIB=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_lib_pthread_pthread_create=no
+
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pthread_pthread_create" >&5
-echo "${ECHO_T}$ac_cv_lib_pthread_pthread_create" >&6; }
-if test $ac_cv_lib_pthread_pthread_create = yes; then
 
+if test x$PTHREAD_LIB != xyes; then
+
+	if test "${FreeBSD}" != ""; then
+		TEMP_LIBS="$TEMP_LIBS -pthread"
+		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT -D_THREAD_SAFE"
+	else
 		TEMP_LIBS="$TEMP_LIBS -lpthread"
-		PTHREAD_SUPPORT="yes"
+		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT"
+	fi
+	PTHREAD_SUPPORT="yes"
+fi
+	{ echo "$as_me:$LINENO: result: $PTHREAD_SUPPORT" >&5
+echo "${ECHO_T}$PTHREAD_SUPPORT" >&6; }
 
 else
-
-		echo
-		echo You do not have pthread installed
-		echo
-
-
-fi
-
-
+	echo
+	echo You do not have threads support
+	echo
 fi
 
 

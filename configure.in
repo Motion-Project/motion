@@ -4,14 +4,14 @@ AC_CONFIG_SRCDIR([motion.c])
 AC_CONFIG_HEADERS(config.h)
 
 THREAD_CFLAGS=""
-THREAD_CHECK="pthread.h"
+THREAD_CHECK="/usr/include/pthread.h"
 
 Darwin=""
 FreeBSD=""
 
 LINUXTHREADS="no"
 AC_ARG_WITH(linuxthreads,
-[  --with-linuxthreads     Use linuxthreads in BSD instead of native phtreads
+[  --with-linuxthreads     Use linuxthreads in BSD instead of native pthreads
 				]
 				,
 LINUXTHREADS="$withval"
@@ -50,6 +50,7 @@ else
 	VIDEO="video_freebsd.o"
 	FINK_LIB="-L/sw/lib"
 	Darwin="yes"
+	V4L="no"
 	AC_MSG_RESULT($Darwin)
 fi
 
@@ -108,10 +109,6 @@ V4L="$withval"
 fi
 
 
-if test "${Darwin}" = "yes"; then
-	V4L="no"
-fi
-
 if test "${V4L}" = "no"; then
 	TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
 fi
@@ -163,19 +160,33 @@ dnl
                 echo
         fi
 
-else
+elif test -f "${THREAD_CHECK}"; then
 
-dnl Checks for Library pthread ( no cross platform )
-AC_CHECK_LIB(pthread,pthread_create,[
+
+AC_MSG_CHECKING(threads)
+AC_TRY_LINK([#include <pthread.h>],
+[pthread_t th; pthread_join(th, 0);
+ pthread_attr_init(0); pthread_cleanup_push(0, 0);
+ pthread_create(0,0,0,0); pthread_cleanup_pop(0); ],
+ [PTHREAD_LIB=yes])
+
+if test x$PTHREAD_LIB != xyes; then
+
+	if test "${FreeBSD}" != ""; then
+		TEMP_LIBS="$TEMP_LIBS -pthread"
+		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT -D_THREAD_SAFE"
+	else
 		TEMP_LIBS="$TEMP_LIBS -lpthread"
-		PTHREAD_SUPPORT="yes"
-	],[
-		echo
-		echo You do not have pthread installed
-		echo
-	]	
-)
+		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT"
+	fi
+	PTHREAD_SUPPORT="yes"
+fi
+	AC_MSG_RESULT($PTHREAD_SUPPORT)                        
 
+else
+	echo 
+	echo You do not have threads support
+	echo	
 fi
 
 
