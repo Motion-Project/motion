@@ -2259,8 +2259,20 @@ int main (int argc, char **argv)
 		/* Crude way of waiting for all threads to finish - check the thread
 		 * counter (because we cannot do join on the detached threads).
 		 */
-		while( (threads_running > 0) || (!finish) ) {
+		while (1) {
 			SLEEP(1,0);
+
+			/* Calculate how many threads runnig or wants to run
+			 * if zero and we want to finish, break out
+			 */
+			int motion_threads_running = 0;
+			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
+				if (cnt_list[i]->running || cnt_list[i]->restart)
+					motion_threads_running++;
+			}
+			if ( (motion_threads_running == 0 ) && finish )
+				break;
+
 			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
 				/* Check if threads wants to be restarted */
 				if ( (!cnt_list[i]->running) && (cnt_list[i]->restart) ) {
