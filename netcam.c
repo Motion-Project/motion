@@ -583,12 +583,13 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 					motion_log(-1, 0, "HTTP Result code %d", ret);
 				free(header);
 				if (netcam->connect_keepalive) {
-					/* Cannot unset netcam->cnt->conf.netcam_keepalive as it is assigned const */
-					/* But we do unset the netcam structure flag which was set in netcam_start */
-				        netcam->connect_keepalive = 0;
-					if (debug_level > CAMERA_INFO)
-						motion_log(LOG_DEBUG, 0, "Removed netcam_keepalive flag "
-						                         "due to apparent closed HTTP connection.");
+					/* Cannot unset netcam->cnt->conf.netcam_http as it is assigned const */
+					/* But we do unset the netcam keepalive flag which was set in netcam_start */
+					/* This message is logged as Information as it would be useful to know */
+					/* if your netcam often returns bad HTTP result codes */
+					netcam->connect_keepalive = 0;
+					motion_log(LOG_INFO, 0, "Removed netcam Keep-Alive flag"
+					                        "due to apparent closed HTTP connection.");
 				}
 				return ret;
 			}
@@ -666,6 +667,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 		} else if (netcam_check_keepalive(header) == TRUE) {
 			/* Note that we have received a Keep-Alive header, and thus the socket can be left open */
 			aliveflag=TRUE;
+			netcam->keepalive_thisconn = TRUE;
 			/* This flag will not be set when a Streaming cam is in use, but that */
 			/* does not matter as the test below looks at Streaming state also.   */
 		} else if (netcam_check_close(header) == TRUE) {
@@ -679,33 +681,75 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 	}
 	free(header);
 
-	if (!netcam->caps.streaming && !aliveflag && netcam->connect_keepalive) {
+	if (!netcam->caps.streaming && netcam->connect_keepalive) {
+		
 		/*
-		 * If not a streaming cam, and keepalive is set, and the flag shows we 
-		 * did not see a Keep-Alive field returned from netcam.           
-		 * Then we want to cease keep-alive for this cam. We cannot just   
-		 * unset netcam->cnt->conf.netcam_keepalive as it is assigned const
-		 * But we do unset the flag in the netcam structure (was set in netcam_start)
-		 * That will unset keep-alive until the camera is restarted, when 
-		 * it will get another bite of the cherry (if keepalive configured). 
+		 * If we are a non-streaming (ie. Jpeg) netcam and keepalive is configured 
 		 */
-	        netcam->connect_keepalive = 0;
-		if (debug_level > CAMERA_INFO)
-			motion_log(LOG_DEBUG, 0, "Removed netcam_keepalive flag because no Keep-Alive header received.");
-	}
-	if (!netcam->caps.streaming && closeflag && netcam->connect_keepalive) {
-		/*
-		 * If not a streaming cam, and keepalive is set, and the flag shows we 
-		 * received a 'Connection: close' field returned from netcam.           
-		 * Then we want to cease keep-alive for this cam, method as above.
-		 * This situation will occur in 2 situations:
-		 *	(a) in HTTP 1.1 when the client wants to stop the keep-alive
-		 *	(b) in HTTP 1.0 with keepalive, when the client does not support it
-		 * Due to that, we accept a Connection: close header in HTTP 1.0 & 1.1 modes
-		 */
-	        netcam->connect_keepalive = 0;
-		if (debug_level > CAMERA_INFO)
-			motion_log(LOG_DEBUG, 0, "Removed netcam_keepalive flag because 'Connection: close' header received.");
+
+		if (aliveflag){
+			if (closeflag) {
+			       /*
+			        * If not a streaming cam, and keepalive is set, and the flag shows we 
+			        * did not see a Keep-Alive field returned from netcam and a Close field.
+			        * Not quite sure what the correct course of action is here. In for testing.
+			        */ 
+				motion_log(LOG_INFO, 0, "Info: Both 'Connection: Keep-Alive' and 'Connection: close' "
+				                        "header received. Motion continues unchanged.");
+			}else{
+			        /* aliveflag && !closeflag 
+			         *
+			         * If not a streaming cam, and keepalive is set, and the flag shows we 
+			         * just got a Keep-Alive field returned from netcam and no Close field.
+			         * No action, as this is the normal case. In debug we print a notification.
+			         */
+		
+				if (debug_level > CAMERA_INFO)
+					motion_log(LOG_INFO, 0, "Info: Received a Keep-Alive field in this set of headers.");
+			}
+		}else{ /* !aliveflag */
+			if (!closeflag) {
+			       /*
+			        * If not a streaming cam, and keepalive is set, and the flag shows we 
+			        * did not see a Keep-Alive field returned from netcam nor a Close field.
+			        * Not quite sure what the correct course of action is here. In for testing.
+			        */                                                                                                     
+				motion_log(LOG_INFO, 0, "Info: No 'Connection: Keep-Alive' nor 'Connection: close' "
+				                        "header received. Motion continues unchanged.");
+			}else{  
+				/* !aliveflag & closeflag 
+				 * If not a streaming cam, and keepalive is set, and the flag shows we 
+				 * received a 'Connection: close' field returned from netcam. It is not likely
+				 * we will get a Keep-Alive and Close header together - this is picked up by
+				 * the test code above.
+				 * If we receive a Close header, then we want to cease keep-alive for this cam.
+				 * This situation will occur in 2 situations:
+				 *	(a) in HTTP 1.1 when the client wants to stop the keep-alive
+				 *          (and in this case it would be correct to close connection and then
+				 *          make a new one, with keep-alive set again).
+				 *	(b) in HTTP 1.0 with keepalive, when the client does not support it.
+				 *          In this case we should not attempt to re-start Keep-Alive.
+				 * Due to that, we accept a Connection: close header in HTTP 1.0 & 1.1 modes
+				 *
+				 * To tell between the sitation where a camera has been in Keep-Alive mode and
+				 * is now finishing (and will want to be re-started in Keep-Alive) and the other
+				 * case when a cam does not support it, we have a flag which says if the netcam
+			 	* has returned a Keep-Alive flag during this connection. If that's set, we
+			 	* set ourselves up to re-connect with Keep-Alive after the socket is closed.
+			 	* If it's not set, then we will not try again to use Keep-Alive.
+			 	*/
+				if (!netcam->keepalive_thisconn) {
+		        		netcam->connect_keepalive = FALSE;	/* No further attempts at keep-alive */
+					motion_log(LOG_INFO, 0, "Removed netcam Keep-Alive flag because 'Connection: close' "
+					                        "header received. Netcam does not support Keep-Alive. Motion "
+					                        "continues in non-Keep-Alive.");
+				} else {
+		        		netcam->keepalive_timeup = TRUE;	/* We will close and re-open keep-alive */
+					motion_log(LOG_INFO, 0, "Keep-Alive has reached end of valid period. Motion will close " 
+					                        "netcam, then resume Keep-Alive with a new socket.");
+				}
+			}
+		}
 	}
 	return retval;
 }
@@ -787,6 +831,9 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 			if (debug_level > CAMERA_INFO )
 				motion_log(LOG_DEBUG, 0, "netcam_connect with keepalive set, invalid socket."
 				                         "This could be first time, created a new one with fd %d", netcam->sock);
+
+			/* Record that this connection has not yet received a Keep-Alive header */
+			netcam->keepalive_thisconn = FALSE;
 
 			/* Check the socket status for the keepalive option */
 			if (getsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
@@ -1544,7 +1591,15 @@ static void *netcam_handler_loop(void *arg)
 		if (netcam->response) {    /* if html input */
 			if (!netcam->caps.streaming) {
 				/* Non-streaming ie. jpeg */
-				if (!netcam->connect_keepalive) {
+				if (!netcam->connect_keepalive || (netcam->connect_keepalive && netcam->keepalive_timeup)) {
+					/* If keepalive flag set but time up, time to close this socket */
+					if (netcam->connect_keepalive && netcam->keepalive_timeup) {
+						motion_log(LOG_INFO, 0, "Closing netcam socket as Keep-Alive time is up "
+						                        "(camera sent Close field). A reconnect should happen.");
+						netcam_disconnect(netcam);
+						netcam->keepalive_timeup = FALSE;
+					}
+					/* And the netcam_connect call below will open a new one */
 					if (netcam_connect(netcam, open_error) < 0) {
 						if (!open_error) { /* log first error */
 							motion_log(LOG_ERR, 0,
