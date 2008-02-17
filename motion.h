@@ -348,6 +348,7 @@ struct context {
 	time_t connectionlosttime;		/* timestamp from connection lost */
 
 	int lastrate;
+	unsigned short int startup_frames;
 	unsigned short int moved;
 	unsigned short int pause;
 	int missing_frame_counter;		/* counts failed attempts to fetch picture frame from camera */

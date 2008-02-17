@@ -753,6 +753,8 @@ static int motion_init(struct context *cnt)
 
 	/* Prevent first few frames from triggering motion... */
 	cnt->moved = 8;
+	/* 2 sec startup delay so FPS is calculated correct */
+	cnt->startup_frames = cnt->conf.frame_limit * 2;
 
 	return 0;
 }
@@ -986,6 +988,9 @@ static void *motion_loop(void *arg)
 
 		/* Increase the shots variable for each frame captured within this second */
 		cnt->shots++;
+
+		if (cnt->startup_frames > 0)
+			cnt->startup_frames--;
 
 		if (get_image){
 			if (cnt->conf.minimum_frame_time) {
@@ -1429,13 +1434,13 @@ static void *motion_loop(void *arg)
 			 * If post_capture is enabled we also take care of this in the this
 			 * code section.
 			 */
-			if (cnt->conf.output_all) {
+			if ( cnt->conf.output_all && (cnt->startup_frames == 0) ) {
 				cnt->detecting_motion = 1;
 				/* Setup the postcap counter */
 				cnt->postcap = cnt->conf.post_capture;
 				cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 				motion_detected(cnt, cnt->video_dev, cnt->current_image);
-			} else if (cnt->current_image->flags & IMAGE_MOTION) {
+			} else if ( (cnt->current_image->flags & IMAGE_MOTION) && (cnt->startup_frames == 0) ) {
 				/* Did we detect motion (like the cat just walked in :) )?
 				 * If so, ensure the motion is sustained if minimum_motion_frames
 				 */
