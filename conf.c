@@ -143,10 +143,12 @@ struct config conf_template = {
 
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
+static struct context **copy_short(struct context **, const char *, int);
 static struct context **config_thread(struct context **cnt, const char *str, int val);
 
 static const char *print_bool(struct context **, char **, int, unsigned short int);
 static const char *print_int(struct context **, char **, int, unsigned short int);
+static const char *print_short(struct context **, char **, int, unsigned short int);
 static const char *print_string(struct context **, char **, int, unsigned short int);
 static const char *print_thread(struct context **, char **, int, unsigned short int);
 
@@ -222,8 +224,8 @@ config_param config_params[] = {
 	"# V4L2_PIX_FMT_YUV420  : 8  'YU12'",
 	0,
 	CONF_OFFSET(v4l2_palette),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 #if (defined(BSD))
 	{
@@ -957,8 +959,8 @@ config_param config_params[] = {
 	"# be used with the conversion specifiers for options like on_motion_detected",
 	0,
 	TRACK_OFFSET(type),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_auto",
@@ -981,40 +983,40 @@ config_param config_params[] = {
 	"# Motor number for x-axis (default: 0)",
 	0,
 	TRACK_OFFSET(motorx),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_motory",
 	"# Motor number for y-axis (default: 0)",
 	0,
 	TRACK_OFFSET(motory),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_maxx",
 	"# Maximum value on x-axis (default: 0)",
 	0,
 	TRACK_OFFSET(maxx),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_maxy",
 	"# Maximum value on y-axis (default: 0)",
 	0,
 	TRACK_OFFSET(maxy),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_iomojo_id",
 	"# ID of an iomojo camera if used (default: 0)",
 	0,
 	TRACK_OFFSET(iomojo_id),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_step_angle_x",
@@ -1023,8 +1025,8 @@ config_param config_params[] = {
 	"# Currently only used with pwc type cameras",
 	0,
 	TRACK_OFFSET(step_angle_x),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_step_angle_y",
@@ -1033,8 +1035,8 @@ config_param config_params[] = {
 	"# Currently only used with pwc type cameras",
 	0,
 	TRACK_OFFSET(step_angle_y),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_move_wait",
@@ -1042,24 +1044,24 @@ config_param config_params[] = {
 	"# of picture frames (default: 10)",
 	0,
 	TRACK_OFFSET(move_wait),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_speed",
 	"# Speed to set the motor to (stepper motor option) (default: 255)",
 	0,
 	TRACK_OFFSET(speed),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"track_stepsize",
 	"# Number of steps to make (stepper motor option) (default: 40)",
 	0,
 	TRACK_OFFSET(stepsize),
-	copy_int,
-	print_int
+	copy_short,
+	print_short
 	},
 	{
 	"quiet",
@@ -1403,6 +1405,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 			/* We call the function given by the pointer config_params[i].copy
 			 * If the option is a bool, copy_bool is called.
 			 * If the option is an int, copy_int is called.
+			 * If the option is a short, copy_short is called.
 			 * If the option is a string, copy_string is called.
 			 * If the option is a thread, config_thread is called.
 			 * The arguments to the function are:
@@ -1694,6 +1697,7 @@ void malloc_strings (struct context * cnt)
  *
  *   copy_bool   - convert a bool representation to int
  *   copy_int    - convert a string to int
+ *   copy_short  - convert a string to short
  *   copy_string - just a string copy
  *
  * @param str     - A char *, pointing to a string representation of the
@@ -1748,6 +1752,24 @@ static struct context ** copy_int(struct context **cnt, const char *str, int val
 	while(cnt[++i]) {
 		tmp = (char *)cnt[i]+val_ptr;
 		*((int *)tmp) = atoi(str);
+		if (cnt[0]->threadnr)
+			return cnt;
+	}
+	return cnt;
+}
+
+/* copy_short assigns a config option to a new short value.
+ * The integer is given as a string in str which is converted to short by the function.
+ */ 
+static struct context ** copy_short(struct context **cnt, const char *str, int val_ptr)
+{
+	void *tmp;
+	int i;
+
+	i=-1;
+	while(cnt[++i]) {
+		tmp = (char *)cnt[i]+val_ptr;
+		*((short int *)tmp) = atoi(str);
 		if (cnt[0]->threadnr)
 			return cnt;
 	}
@@ -1851,6 +1873,8 @@ const char *config_type(config_param *configparam)
 		return "string";
 	if (configparam->copy == copy_int)
 		return "int";
+	if (configparam->copy == copy_short)
+		return "short";
 	if (configparam->copy == copy_bool)
 		return "bool";
 	return "unknown";
@@ -1904,6 +1928,21 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 		return NULL;
 
 	sprintf(retval, "%d", *(int*)((char *)cnt[threadnr] + val));
+
+	return retval;
+}
+
+
+static const char *print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                             int parm, unsigned short int threadnr) 
+{
+	static char retval[20];
+	int val = config_params[parm].conf_value;
+
+	if (threadnr &&
+	    *(short int*)((char *)cnt[threadnr] + val) == *(short int*)((char *)cnt[0] + val))
+		return NULL;
+	sprintf(retval, "%d", *(short int*)((char *)cnt[threadnr] + val));
 
 	return retval;
 }
