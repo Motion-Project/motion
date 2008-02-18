@@ -361,7 +361,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	int width=cnt->imgs.width;
 	int height=cnt->imgs.height;
 	unsigned char *convbuf, *y, *u, *v;
-	int fps;
+	int fps=0;
 	char stamp[PATH_MAX];
 	const char *mpegpath;
 
@@ -396,6 +396,10 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			v=u+(width*height)/4;
 		}
 		fps=cnt->lastrate;
+
+		if (debug_level >= CAMERA_DEBUG) 
+			motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__,fps);
+
 		if (fps>30)
 			fps=30;
 		if (fps<2)
@@ -424,6 +428,10 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			v=u+(width*height)/4;
 			convbuf=NULL;
 		}
+
+		if (debug_level >= CAMERA_DEBUG) 
+			motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__,fps);
+
 		fps=cnt->lastrate;
 		if (fps>30)
 			fps=30;

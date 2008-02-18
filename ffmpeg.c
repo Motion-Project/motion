@@ -362,7 +362,6 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	c->codec_type = CODEC_TYPE_VIDEO;
 	is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
 
-
 	if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
 		c->strict_std_compliance = -2; 
 
@@ -381,7 +380,10 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	c->frame_rate      = rate;
 	c->frame_rate_base = 1;
 #endif /* LIBAVCODEC_BUILD >= 4754 */
-	
+
+	if (debug_level >= CAMERA_DEBUG)
+		motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__,rate);	
+
 	if (vbr)
 		c->flags |= CODEC_FLAG_QSCALE;
 

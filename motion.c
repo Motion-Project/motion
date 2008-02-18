@@ -1128,7 +1128,7 @@ static void *motion_loop(void *arg)
 			*/			
 			} else { 
 
-				if (debug_level)
+				if (debug_level >= CAMERA_VERBOSE)
 					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
 
 				/* Netcams that change dimensions while Motion is running will
