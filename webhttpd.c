@@ -2399,5 +2399,6 @@ void *motion_web_control(void *arg)
 {
 	struct context **cnt=arg;
 	httpd_run(cnt);
+	motion_log(LOG_DEBUG, 0, "httpd thread exit");
 	pthread_exit(NULL);
 }

@@ -587,6 +587,7 @@ static int motion_init(struct context *cnt)
 
 	cnt->imgs.ref = mymalloc(cnt->imgs.size);
 	cnt->imgs.out = mymalloc(cnt->imgs.size);
+	memset(cnt->imgs.out, 0, cnt->imgs.size);
 	cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));  /* contains the moving objects of ref. frame */
 	cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
 	cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
@@ -2292,8 +2293,8 @@ int main (int argc, char **argv)
 						cnt_list[i]->finish = 1;
 					}
 					if (cnt_list[i]->watchdog == -60) {
-						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, did NOT restart graceful, killing it!",
-						                          cnt_list[i]->threadnr);
+						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, did NOT restart graceful," 
+						                       "killing it!", cnt_list[i]->threadnr);
 						pthread_cancel(cnt_list[i]->thread_id);
 						pthread_mutex_lock(&global_lock);
 						threads_running--;
@@ -2317,6 +2318,9 @@ int main (int argc, char **argv)
 
 	} while (restart); /* loop if we're supposed to restart */
 
+	// Be sure that http control exits fine
+	cnt_list[0]->finish = 1;
+	SLEEP(1,0);
 	motion_log(LOG_INFO, 0, "Motion terminating");
 
 	/* Perform final cleanup. */
