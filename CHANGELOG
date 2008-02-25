@@ -40,6 +40,8 @@ Bugfixes
      LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
      (Angel Carpintero)	
    * Fix choose v4l2 palette , http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x01x21x043812	(Onakra)
+   * Get current directory to allow write motion.conf properly 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray) 
 
 
 3.2.9 Formal Release - Summary of Changes

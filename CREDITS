@@ -95,6 +95,10 @@ William M Brack
      handling when it fails. Motion would end in infinite loops.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
 
+John Bray
+   * Get current directory to allow write motion.conf properly 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419
+
 Andy Brown 
    * Add swf codec to video creation (on behalf of Bowser Pete).
 
