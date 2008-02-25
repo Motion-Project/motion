@@ -1620,7 +1620,7 @@ struct context ** conf_load (struct context **cnt)
 	if (!fp){      /* Commandline didn't work, try current dir */
 		if (cnt[0]->conf_filename[0])
 			motion_log(-1, 1, "Configfile %s not found - trying defaults.", filename);
-		snprintf(filename, PATH_MAX, "%s/motion.conf", get_current_dir_name());
+		sprintf(filename, "motion.conf");
 		fp = fopen (filename, "r");
 	}
 	if (!fp) {     /* specified file does not exist... try default file */
