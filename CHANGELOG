@@ -42,6 +42,8 @@ Bugfixes
    * Fix choose v4l2 palette , http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x01x21x043812	(Onakra)
    * Get current directory to allow write motion.conf properly 
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray) 
+   * Fix broken PostgreSQL detection for custom location, 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134 ( Angel Carpintero )
 
 
 3.2.9 Formal Release - Summary of Changes

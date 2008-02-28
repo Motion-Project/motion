@@ -1,4 +1,4 @@
-dnl Process this file with autoconf to produce a configure script
+# Process this file with autoconf to produce a configure script
 
 AC_INIT(motion, esyscmd(['./version.sh']))
 AC_CONFIG_SRCDIR([motion.c])
@@ -58,7 +58,7 @@ fi
 
 AC_SUBST(VIDEO)
 
-dnl Checks for programs.
+# Checks for programs.
 AC_PROG_CC
 
 TEMP_LIBS="-lm ${TEMP_LIBS}"
@@ -77,9 +77,9 @@ else
 	TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
 fi
 
-dnl
-dnl Check to Exclude BKTR 
-dnl
+#
+# Check to Exclude BKTR 
+#
 BKTR="yes"
 AC_ARG_WITH(bktr,
 [  --without-bktr          Exclude to use bktr subsystem , that usually useful
@@ -96,9 +96,9 @@ BKTR="$withval"
 
 else
 
-dnl
-dnl Check to Exclude V4L
-dnl
+#
+# Check to Exclude V4L
+#
 V4L="yes"
 AC_ARG_WITH(v4l,
 [  --without-v4l           Exclude using v4l (video4linux) subsystem.
@@ -119,9 +119,9 @@ if test "${FreeBSD}" != "" && test "${LINUXTHREADS}" != "no" ; then
 
 AC_MSG_CHECKING(for linuxthreads)
 
-dnl
-dnl Check for thread header
-dnl
+#
+# Check for thread header
+#
 	if test -f "${THREAD_CHECK}"; then
         	HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
         	THREADS="yes"
@@ -129,9 +129,9 @@ dnl
         	THREADS="no"
 	fi
 
-dnl
-dnl Check for thread lib
-dnl
+#
+# Check for thread lib
+#
 	if test -f "${THREAD_LIB_CHECK}" ; then
 		THREADS="yes"
 		LIB_THREAD="-llthread -llgcc_r"
@@ -139,13 +139,13 @@ dnl
         	THREADS="no"
 	fi
 
-dnl Checks for Library linuxthreads for FreeBSD
-dnl
-dnl linuxthreads on freeBSD, ports collection
-dnl /usr/local/include/pthreads/linuxthreads/pthread.h
-dnl #include <linuxthreads/pthread.h>
-dnl /usr/local/lib/libpthread.so
-dnl
+# Checks for Library linuxthreads for FreeBSD
+#
+# linuxthreads on freeBSD, ports collection
+# /usr/local/include/pthreads/linuxthreads/pthread.h
+# #include <linuxthreads/pthread.h>
+# /usr/local/lib/libpthread.so
+#
 
 	if test "${THREADS}" = "yes"; then
 		TEMP_CFLAGS="${HEADERS_THREAD_CFLAGS} $TEMP_CFLAGS -DWITH_LINUXTREADS"
@@ -157,7 +157,7 @@ dnl
                 PTHREAD_SUPPORT="no"
                 AC_MSG_RESULT($THREADS)
                 echo
-                echo You do not have linuxthread installed
+                echo "You do not have linuxthread installed"
                 echo
         fi
 
@@ -186,15 +186,15 @@ fi
 
 else
 	echo 
-	echo You do not have threads support
+	echo "You do not have threads support"
 	echo	
 fi
 
 
 
-dnl
-dnl Check for the special mmx accelerated jpeg library
-dnl
+#
+# Check for the special mmx accelerated jpeg library
+#
 JPEG_MMX="no"
 JPEG_MMX_OK="not_found"
 AC_ARG_WITH(jpeg-mmx,
@@ -206,15 +206,15 @@ AC_ARG_WITH(jpeg-mmx,
 JPEG_MMX="$withval"
 )
 
-dnl
-dnl --without-jpeg-mmx or with-jpeg-mmx=no
-dnl
+#
+# --without-jpeg-mmx or with-jpeg-mmx=no
+#
 
 if test "${JPEG_MMX}" = "no"; then
         AC_MSG_CHECKING(for libjpeg-mmx)
         AC_MSG_RESULT(skipping)
 elif test "${JPEG_MMX}" = "yes"; then
-	dnl AUTODETECT STATIC LIB
+	# AUTODETECT STATIC LIB
 	AC_MSG_CHECKING(for libjpeg-mmx autodetecting)
 	
 	if test -f /usr/lib/libjpeg-mmx.a ; then
@@ -252,11 +252,11 @@ if test "${JPEG_MMX_OK}" = "found"; then
 	JPEG_SUPPORT_MMX="yes"
 fi
 
-dnl
-dnl Look for _a_ jpeg lib that will work.
-dnl
+#
+# Look for _a_ jpeg lib that will work.
+#
 if test x$JPEG_SUPPORT != xyes ; then
-  dnl Checks for libraries
+  # Checks for libraries
   LDFLAGS=$TEMP_LDFLAGS
 
   AC_CHECK_LIB(jpeg, jpeg_set_defaults, [
@@ -264,7 +264,7 @@ if test x$JPEG_SUPPORT != xyes ; then
 		JPEG_SUPPORT="yes"
 	], [
 		echo
-		echo You do not have libjpeg installed
+		echo "You do not have libjpeg installed"
 		echo
 	]
   )
@@ -297,9 +297,9 @@ AC_MSG_CHECKING(mjpegtools)
 AC_MSG_RESULT($MJPEG_SUPPORT)
 
 
-dnl
-dnl Check for libavcodec and libavformat from ffmpeg
-dnl
+#
+# Check for libavcodec and libavformat from ffmpeg
+#
 FFMPEG="yes"
 FFMPEG_OK="no_found"
 FFMPEG_OBJ=""
@@ -312,17 +312,17 @@ AC_ARG_WITH(ffmpeg,
                           ],
 FFMPEG="$withval"
 )
-dnl
-dnl --without-ffmpeg or with-ffmpeg=no
-dnl
+#
+# --without-ffmpeg or with-ffmpeg=no
+#
 if test "${FFMPEG}" = "no"; then
 	AC_MSG_CHECKING(for ffmpeg)
 	AC_MSG_RESULT(skipping)
-dnl
-dnl with-ffmpeg=<dir> or nothing
-dnl
+#
+# with-ffmpeg=<dir> or nothing
+#
 else if test "${FFMPEG}" = "yes"; then
-	dnl AUTODETECT STATIC/SHARED LIB 
+	# AUTODETECT STATIC/SHARED LIB 
 	AC_MSG_CHECKING(for ffmpeg autodetecting)
 
 # weird hack to fix debian problem TO BE REMOVED
@@ -475,28 +475,28 @@ AC_ARG_WITH(mysql,
 [  --without-mysql         Disable mysql support in motion.
                           ],
 MYSQL="$withval"
-dnl if not given argument, assume standard
+# if not given argument, assume standard
 )
 
 AC_ARG_WITH(mysql-lib,
 [  --with-mysql-lib[=DIR]        Normally, configure will scan all possible default
-                          installation paths for mysql libs. When its fail, use
+                          installation paths for mysql libs. When it fails, use
                           this command to tell configure where mysql libs
                           installation root directory is.
                           ],
 MYSQL_LIBS="$withval"
-dnl if not given argument, assume standard
+# if not given argument, assume standard
 )
 
 
 AC_ARG_WITH(mysql-include,
 [  --with-mysql-include[=DIR]    Normally, configure will scan all possible default
-                          installation paths for mysql include. When its fail, use
+                          installation paths for mysql include. When it fails, use
                           this command to tell configure where mysql include
                           installation root directory is.
                           ],
 MYSQL_HEADERS="$withval"
-dnl if not given argument, assume standard
+# if not given argument, assume standard
 )
 
 
@@ -540,7 +540,7 @@ else
 	if test -z "$MYSQL_INCDIR" ; then
 		MYSQL_HEADERS="no"
 		AC_MSG_RESULT(not found)
-		echo Invalid MySQL directory - unable to find mysql.h.
+		echo "Invalid MySQL directory - unable to find mysql.h."
 	else
 		AC_MSG_RESULT(yes)
 		MYSQL_HEADERS="yes"
@@ -584,7 +584,7 @@ else
 
 	if test -z "$MYSQL_LIBDIR" ; then
 		AC_MSG_RESULT(not found)
-		echo Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so.
+		echo "Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so."
 	else
 		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
 		#Add -lz for some mysql installs....
@@ -601,58 +601,155 @@ else
 fi
 
 
-dnl Start Check for Postgresql
-AC_DEFUN(PGSQL_INC_CHK,[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
+#
+# Check PostgreSQL
+#
 PGSQL="yes"
+PGSQL_SUPPORT="no"
+PGSQL_HEADERS="yes"
+PGSQL_LIBS="yes"
 
-AC_MSG_CHECKING(for PostgreSQL)
+AC_DEFUN(PGSQL_INC_CHK,[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
+
 AC_ARG_WITH(pgsql,
-[  --with-pgsql[=DIR]        Include PostgreSQL support.  DIR is the PostgreSQL
-                          base install directory. If not specified configure will
-                          search in /usr, /usr/local and /usr/local/pgsql.
+[  --without-pgsql         Disable PostgreSQL support in motion.
                           ],
 PGSQL="$withval"
-dnl if not given argument, assume standard
+# if not given argument, assume standard
 )
+
+AC_ARG_WITH(pgsql-lib,
+[  --with-pgsql-lib[=DIR]        Normally, configure will scan all possible default
+                          installation paths for pgsql libs. When it fails, use
+                          this command to tell configure where pgsql libs
+                          installation root directory is.
+                          ],
+PGSQL_LIBS="$withval"
+# if not given argument, assume standard
+)
+
+AC_ARG_WITH(pgsql-include,
+[  --with-pgsql-include[=DIR]    Normally, configure will scan all possible default
+                          installation paths for pgsql include. When it fails, use
+                          this command to tell configure where pgsql include
+                          installation root directory is.
+                          ],
+PGSQL_HEADERS="$withval"
+# if not given argument, assume standard
+)
+
+AC_MSG_CHECKING(for PostgreSQL)
+
 if test "${PGSQL}" = "no"; then
 	AC_MSG_RESULT(skipped)
-fi
+else
+	AC_MSG_RESULT(testing)
 
-if test "${PGSQL}" = "yes"; then
-	for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
-		PGSQL_INC_CHK(/include)
-		el[]PGSQL_INC_CHK(/include/pgsql)
-		el[]PGSQL_INC_CHK(/include/postgresql)
-		fi
-	done
+	# ******* Search pgsql headers *******
+	if test "${PGSQL_HEADERS}" = "yes"; then
 
-	if test -z "$PGSQL_DIR"; then
-		AC_MSG_RESULT(Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL)
+		AC_MSG_CHECKING(autodect pgsql headers)
+		# Autodetect
+		for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
+			PGSQL_INC_CHK(/include)
+			el[]PGSQL_INC_CHK(/include/pgsql)
+			el[]PGSQL_INC_CHK(/include/postgresql)
+			fi
+		done
+		
+	elif test "${PGSQL_HEADERS}" = "no"; then
+		AC_MSG_CHECKING(for pgsql headers)	
+		AC_MSG_RESULT(skipped)
 	else
-		PGSQL_INCLUDE="-I$PGSQL_INCDIR"
-		PGSQL_LIBDIR=$PGSQL_DIR/lib
-		AC_MSG_RESULT(yes)
-		test -d $PGSQL_DIR/lib/pgsql && PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql
-		LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
-		AC_CHECK_LIB(pq, PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[ ]))
-		AC_CHECK_LIB(pq, PQoidValue,AC_DEFINE(HAVE_PQOIDVALUE,1,[ ]))
-		AC_CHECK_LIB(pq, PQclientEncoding,AC_DEFINE(HAVE_PQCLIENTENCODING,1,[ ]))
-		AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[ ]))
-	 	LDFLAGS=""	
-		AC_DEFINE(HAVE_PGSQL,1,[ ])
-		TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
-		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL $PGSQL_INCLUDE"
-		PostgreSQL_SUPPORT="yes"
+		AC_MSG_CHECKING(for pgsql headers in $PGSQL_HEADERS)
+		# Manual detection for <withval>
+        	if test -f $PGSQL_HEADERS/libpq-fe.h; then
+                	PGSQL_INCDIR=$PGSQL_HEADERS
+	        fi
 	fi
-fi
-dnl End Postgresql
 
-dnl Checks for header files.
+	if test -z "$PGSQL_INCDIR" ; then
+		PGSQL_HEADERS="no"
+		AC_MSG_RESULT(not found)
+		echo "Invalid PostgreSQL directory - unable to find libpq-fe.h."
+	else
+		AC_MSG_RESULT(yes [$PGSQL_INCDIR])
+		PGSQL_HEADERS="yes"
+	fi
+
+
+	if test "${PGSQL_HEADERS}" = "yes"; then
+
+		# ******* Search pgsql libs *********
+		if test "${PGSQL_LIBS}" = "yes"; then
+			AC_MSG_CHECKING(autodect pgsql libs)
+			# Autodetect
+			PGSQL_INCLUDE="-I$PGSQL_INCDIR"
+			PGSQL_LIBDIR=$PGSQL_DIR/lib
+
+			if test -f $PGSQL_DIR/lib/pgsql/libpq.so ; then
+				PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql 
+			elif test -f $PGSQL_DIR/lib/postgresql/libpq.so ; then
+				PGSQL_LIBDIR=$PGSQL_DIR/lib/postgresql
+			elif test -f $PGSQL_DIR/lib/libpq.so ; then	
+				PGSQL_LIBDIR=$PGSQL_DIR/lib
+			else
+				PGSQL_LIBDIR=""
+			fi
+
+			AC_MSG_RESULT($PGSQL_LIBDIR)
+
+			if test -d $PGSQL_LIBDIR; then
+				LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
+				AC_CHECK_LIB(pq, PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[ ]))
+				AC_CHECK_LIB(pq, PQoidValue,AC_DEFINE(HAVE_PQOIDVALUE,1,[ ]))
+				AC_CHECK_LIB(pq, PQclientEncoding,AC_DEFINE(HAVE_PQCLIENTENCODING,1,[ ]))
+				AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[ ]))
+		 		LDFLAGS=""	
+				AC_DEFINE(HAVE_PGSQL,1,[ ])
+				TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
+				TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL $PGSQL_INCLUDE"
+				PGSQL_SUPPORT="yes"
+			fi
+
+		elif test "${PGSQL_LIBS}" = "no"; then
+	        	AC_MSG_CHECKING(for pgsql libs)
+		        AC_MSG_RESULT(skipped)
+		else
+			AC_MSG_CHECKING(for pgsql libs in $PGSQL_LIBS)
+			# Manual detection for <withval>
+			if test -f $PGSQL_LIBS/libpq.a -o -f $PGSQL_LIBS/libpq.so; then
+				PGSQL_LIBDIR=$PGSQL_LIBS
+			fi
+		fi
+
+
+		if test -z "$PGSQL_LIBDIR" ; then
+			AC_MSG_RESULT(not found)
+			echo "Invalid PostgreSQL directory - unable to find libpq.a or libpq.so."
+		elif test "${PGSQL_SUPPORT}" = "yes"; then
+			AC_MSG_RESULT(autodetected found)		
+		else
+			TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
+			TEMP_LIBS="$TEMP_LIBS -lz"
+			TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL -I$PGSQL_INCDIR"
+			AC_MSG_RESULT(found)
+			PGSQL_SUPPORT="yes"
+		fi
+		
+	fi # end pgsql-include , pgsql-libs
+
+# end PostgreSQL detection
+fi
+
+
+
+#Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h)
 
 
-dnl check if v4l2 is available
+# Check if v4l2 is available
 SUPPORTED_V4L2=false
 SUPPORTED_V4L2_old=false
 
@@ -675,7 +772,7 @@ else
 		AC_MSG_RESULT(no)
 	fi
 
-	dnl linux/videodev.h doesn't include videodev2.h
+	# linux/videodev.h doesn't include videodev2.h
 	if test x$SUPPORTED_V4L2 = xfalse; then
 		AC_MSG_CHECKING(for V42L *old* support)
 		AC_MSG_RESULT(testing)
@@ -691,7 +788,7 @@ else
 fi
 
 
-dnl Check sizes of integer types
+# Check sizes of integer types
 AC_CHECK_SIZEOF(short int)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long int)
@@ -728,7 +825,7 @@ AC_ARG_WITH(developer-flags,
 DEVELOPER_FLAGS="$withval"
 )
 
-dnl Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 
 if test "${FreeBSD}" != ""; then
@@ -737,7 +834,7 @@ fi
 
 if test "${OPTIMIZECPU}" = "yes"; then
 
-dnl Try to autodetect cpu type
+# Try to autodetect cpu type
 CPU_NAME="unknown"
 CPU_TYPE="unknown"
 if test -e "/proc/cpuinfo" ; then
@@ -920,7 +1017,7 @@ if test "x${CPU_TYPE}" = "xunknown"; then
 	fi
 fi
 echo "Detected CPU: $CPU_NAME"
-dnl Now we check if the compiler supports the detected cpu
+# Now we check if the compiler supports the detected cpu
 COMPILER=$CC
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
 	test "$I" && break
@@ -973,9 +1070,9 @@ CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"
 LIBS="${TEMP_LIBS}"
 LDFLAGS="${TEMP_LDFLAGS}"
 
-dnl
-dnl Add the right exec path for rc scripts
-dnl
+#
+# Add the right exec path for rc scripts
+#
 if test $prefix = "NONE";then
 	BIN_PATH="$ac_default_prefix"
 	if test $exec_prefix = "NONE"; then
@@ -1016,7 +1113,7 @@ echo "   *********************"
 echo "     Configure status    "
 echo "      ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 echo "   *********************"
-echo ""
+echo 
 
 
 if test "${Darwin}" != ""; then
@@ -1087,12 +1184,12 @@ else
 	echo "MYSQL Support:       No"
 fi
 
-if test "${PostgreSQL_SUPPORT}" = "yes"; then
+if test "${PGSQL_SUPPORT}" = "yes"; then
 	echo "PostgreSQL Support:  Yes"
 else
 	echo "PostgreSQL Support:  No"
 fi
-echo ""
+echo 
 
 echo "CFLAGS: $CFLAGS"
 echo "LIBS: $LIBS"
