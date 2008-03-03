@@ -239,16 +239,16 @@ else
 fi
 
 if test "${JPEG_MMX_OK}" = "found"; then
-	OLD_CFLAGS="$CFLAGS"
-	OLD_LIBS="$LIBS"
+	saved_CFLAGS="$CFLAGS"
+	saved_LIBS="$LIBS"
 	CFLAGS="$CFLAGS -I${JPEG_MMX}"
 	LIBS="$LIBS -L${JPEG_MMX}"
 	AC_CHECK_LIB(jpeg-mmx, jpeg_start_compress,
 		[ TEMP_LIBS="$TEMP_LIBS -ljpeg-mmx"
 		TEMP_CFLAGS="${TEMP_CFLAGS} -I${JPEG_MMX}"
 		JPEG_SUPPORT="yes"],,)
-	LIBS="$OLD_LIBS"
-	CFLAGS="$OLD_CFLAGS"
+	LIBS="$saved_LIBS"
+	CFLAGS="$saved_CFLAGS"
 	JPEG_SUPPORT_MMX="yes"
 fi
 
@@ -437,6 +437,8 @@ if test "${FFMPEG_OK}" = "found"; then
 		AC_SUBST(FFMPEG_OBJ)
 
 		AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
+		saved_CFLAGS=$CFLAGS
+		saved_LIBS=$LIBS
 		CFLAGS="${FFMPEG_CFLAGS}"
 		LIBS="$TEMP_LIBS"
 		
@@ -455,6 +457,8 @@ if test "${FFMPEG_OK}" = "found"; then
 				TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
 			]
 		)
+		CFLAGS=$saved_CFLAGS
+		LIBS=$saved_LIBS	
 	fi
 fi	
 fi
@@ -586,12 +590,20 @@ else
 		AC_MSG_RESULT(not found)
 		echo "Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so."
 	else
-		TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient"
-		#Add -lz for some mysql installs....
-		TEMP_LIBS="$TEMP_LIBS -lz"
-		TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_MYSQL -I$MYSQL_INCDIR"
-		AC_MSG_RESULT(found)
-		MYSQL_SUPPORT="yes"
+		#LDFLAGS="-L$MYSQL_LIBDIR"
+		saved_CFLAGS=$CFLAGS
+		saved_LIBS=$LIBS
+		CFLAGS="-I$MYSQL_INCDIR"
+		LIBS="-L$MYSQL_LIBDIR"
+		AC_CHECK_LIB(mysqlclient,mysql_init,[	
+					TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient -lz"
+					TEMP_CFLAGS="$TEMP_CFLAGS -I$MYSQL_INCDIR"
+					MYSQL_SUPPORT="yes"
+					AC_DEFINE([HAVE_MYSQL],1,[Define to 1 if you have MySQL support])
+					],
+					AC_MSG_ERROR(MySQL support can't build without MySQL libraries))	
+		CFLAGS=$saved_CFLAGS
+		LIBS=$saved_LIBS
 	fi
 
 	# end mysql-include , mysql-libs
@@ -699,19 +711,6 @@ else
 
 			AC_MSG_RESULT($PGSQL_LIBDIR)
 
-			if test -d $PGSQL_LIBDIR; then
-				LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
-				AC_CHECK_LIB(pq, PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[ ]))
-				AC_CHECK_LIB(pq, PQoidValue,AC_DEFINE(HAVE_PQOIDVALUE,1,[ ]))
-				AC_CHECK_LIB(pq, PQclientEncoding,AC_DEFINE(HAVE_PQCLIENTENCODING,1,[ ]))
-				AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[ ]))
-		 		LDFLAGS=""	
-				AC_DEFINE(HAVE_PGSQL,1,[ ])
-				TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
-				TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL $PGSQL_INCLUDE"
-				PGSQL_SUPPORT="yes"
-			fi
-
 		elif test "${PGSQL_LIBS}" = "no"; then
 	        	AC_MSG_CHECKING(for pgsql libs)
 		        AC_MSG_RESULT(skipped)
@@ -726,22 +725,30 @@ else
 
 		if test -z "$PGSQL_LIBDIR" ; then
 			AC_MSG_RESULT(not found)
-			echo "Invalid PostgreSQL directory - unable to find libpq.a or libpq.so."
-		elif test "${PGSQL_SUPPORT}" = "yes"; then
-			AC_MSG_RESULT(autodetected found)		
+			echo "Invalid PostgreSQL directory [$PGSQL_LIBDIR] - unable to find libpq.a or libpq.so."
 		else
-			TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
-			TEMP_LIBS="$TEMP_LIBS -lz"
-			TEMP_CFLAGS="$TEMP_CFLAGS -DHAVE_PGSQL -I$PGSQL_INCDIR"
-			AC_MSG_RESULT(found)
-			PGSQL_SUPPORT="yes"
+			#LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
+			saved_CFLAGS=$CFLAGS
+			saved_LIBS=$LIBS
+			CFLAGS="-I$PGSQL_INCDIR"
+			LIBS="-L$PGSQL_LIBDIR"
+			AC_CHECK_LIB(pq, PQconnectStart, [
+						PGSQL_SUPPORT="yes"
+						TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
+						TEMP_CFLAGS="$TEMP_CFLAGS -I$PGSQL_INCDIR"
+						AC_DEFINE([HAVE_PGSQL],1,[Define to 1 if you have PostgreSQL support])
+					], 
+			AC_MSG_ERROR(PostgreSQL support can't build without PostgreSQL libraries))
+			LDFLAGS=""	
+			AC_MSG_RESULT($PGSQL_SUPPORT)
+			CFLAGS=$saved_CFLAGS
+			LIBS=$saved_LIBS
 		fi
 		
 	fi # end pgsql-include , pgsql-libs
 
 # end PostgreSQL detection
 fi
-
 
 
 #Checks for header files.
