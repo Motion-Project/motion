@@ -32,6 +32,15 @@
 #include "video.h"
 #endif /* BSD */
 
+#ifndef HAVE_GET_CURRENT_DIR_NAME
+char *get_current_dir_name()
+{
+	char *buf = malloc(MAXPATHLEN);
+	getwd(buf);
+	return buf;
+}
+#endif
+
 
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
@@ -1618,10 +1627,16 @@ struct context ** conf_load (struct context **cnt)
 		fp = fopen (filename, "r");
 	}
 	if (!fp){      /* Commandline didn't work, try current dir */
+		char *path = NULL;
 		if (cnt[0]->conf_filename[0])
 			motion_log(-1, 1, "Configfile %s not found - trying defaults.", filename);
-		snprintf(filename, PATH_MAX, "%s/motion.conf", get_current_dir_name());
+		if ( (path = get_current_dir_name()) == NULL){
+			motion_log(LOG_ERR, 1, "Error get_current_dir_name");
+			exit(-1);
+		}
+		snprintf(filename, PATH_MAX, "%s/motion.conf", path);
 		fp = fopen (filename, "r");
+		free(path);
 	}
 	if (!fp) {     /* specified file does not exist... try default file */
 		snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));

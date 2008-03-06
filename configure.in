@@ -755,6 +755,7 @@ fi
 AC_HEADER_STDC
 AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h)
 
+AC_CHECK_FUNCS(get_current_dir_name)
 
 # Check if v4l2 is available
 SUPPORTED_V4L2=false
