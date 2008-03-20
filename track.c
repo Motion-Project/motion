@@ -34,7 +34,7 @@ struct trackoptions track_template = {
 
 /* Add your own center and move functions here: */
 static unsigned short int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
-static unsigned short int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
+static unsigned short int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs);
 static unsigned short int iomojo_center(struct context *cnt, int xoff, int yoff);
 static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 #ifndef WITHOUT_V4L
@@ -84,7 +84,7 @@ unsigned short int track_move(struct context *cnt, int dev, struct coord *cent, 
 	if (!manual && !cnt->track.active)
 		return 0;
 	if (cnt->track.type == TRACK_TYPE_STEPPER)
-		return stepper_move(cnt, dev, cent, imgs);
+		return stepper_move(cnt, cent, imgs);
 #ifndef WITHOUT_V4L
 	else if (cnt->track.type == TRACK_TYPE_PWC)
 		return lqos_move(cnt, dev, cent, imgs, manual);
@@ -121,7 +121,8 @@ static unsigned short int stepper_command(struct context *cnt, unsigned short in
 	buffer[1]=command;
 	buffer[2]=data;
 	if (write(cnt->track.dev, buffer, 3)!=3){
-		motion_log(LOG_ERR, 1, "stepper_command");
+		motion_log(LOG_ERR, 1, "stepper_command port %s dev fd %i, motor %hu command %hu data %hu",
+		                       cnt->track.port, cnt->track.dev, motor, command, data);
 		return 0;
 	}
 
@@ -166,7 +167,7 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
 			motion_log(LOG_ERR, 1, "Unable to initialize serial device %s", cnt->track.port);
 			return 0;
 		}
-		motion_log(LOG_INFO, 0, "Opened serial device %s and initialize", cnt->track.port);
+		motion_log(LOG_INFO, 0, "Opened serial device %s and initialize, fd %i", cnt->track.port, cnt->track.dev);
 	}
 
 	/* x-axis */
@@ -196,19 +197,20 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
 	return cnt->track.move_wait;
 }
 
-static unsigned short int stepper_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
+static unsigned short int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs)
 {
 	unsigned short int command = 0, data = 0;
 
-	if (dev < 0){
-		motion_log(LOG_INFO, 0, "No device started yet , trying stepper_center()");	
+	if (cnt->track.dev < 0){
+		motion_log(LOG_INFO, 0, "No device %s started yet , trying stepper_center()", cnt->track.port);	
 		if (!stepper_center(cnt, 0, 0)){
-			motion_log(LOG_ERR, 1, "Stepper_center() failed to initialize stepper device.");	
+			motion_log(LOG_ERR, 1, "Stepper_center() failed to initialize stepper device on %s , fd [%i].", 
+			                        cnt->track.port, cnt->track.dev);	
 			return 0;
 		}
-		motion_log(LOG_INFO, 0, "stepper_center() succeed , device started");	
+		motion_log(LOG_INFO, 0, "stepper_center() succeed , device started %s , fd [%i]", cnt->track.port, cnt->track.dev);	
 	}
-	
+
 	/* x-axis */
 	
 	if (cent->x < imgs->width / 2) {

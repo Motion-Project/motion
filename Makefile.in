@@ -30,7 +30,7 @@ examplesdir = $(docdir)/examples
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
-CFLAGS       = @CFLAGS@ -Wall -D_REENTRANT -DVERSION=\"@PACKAGE_VERSION@\"  \
+CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\"  \
 	       -Dsysconfdir=\"$(sysconfdir)\" -Ddocdir=\"$(docdir)\"
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@ 

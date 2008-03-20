@@ -15,20 +15,11 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* */
+/* Define to 1 if you have MySQL support */
+#undef HAVE_MYSQL
+
+/* Define to 1 if you have PostgreSQL support */
 #undef HAVE_PGSQL
-
-/* */
-#undef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-
-/* */
-#undef HAVE_PQCLIENTENCODING
-
-/* */
-#undef HAVE_PQCMDTUPLES
-
-/* */
-#undef HAVE_PQOIDVALUE
 
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H

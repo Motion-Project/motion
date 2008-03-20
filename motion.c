@@ -587,6 +587,7 @@ static int motion_init(struct context *cnt)
 
 	cnt->imgs.ref = mymalloc(cnt->imgs.size);
 	cnt->imgs.out = mymalloc(cnt->imgs.size);
+	memset(cnt->imgs.out, 0, cnt->imgs.size);
 	cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));  /* contains the moving objects of ref. frame */
 	cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
 	cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
@@ -753,6 +754,8 @@ static int motion_init(struct context *cnt)
 
 	/* Prevent first few frames from triggering motion... */
 	cnt->moved = 8;
+	/* 2 sec startup delay so FPS is calculated correct */
+	cnt->startup_frames = cnt->conf.frame_limit * 2;
 
 	return 0;
 }
@@ -987,6 +990,9 @@ static void *motion_loop(void *arg)
 		/* Increase the shots variable for each frame captured within this second */
 		cnt->shots++;
 
+		if (cnt->startup_frames > 0)
+			cnt->startup_frames--;
+
 		if (get_image){
 			if (cnt->conf.minimum_frame_time) {
 				minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
@@ -1123,7 +1129,7 @@ static void *motion_loop(void *arg)
 			*/			
 			} else { 
 
-				if (debug_level)
+				if (debug_level >= CAMERA_VERBOSE)
 					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
 
 				/* Netcams that change dimensions while Motion is running will
@@ -1429,13 +1435,13 @@ static void *motion_loop(void *arg)
 			 * If post_capture is enabled we also take care of this in the this
 			 * code section.
 			 */
-			if (cnt->conf.output_all) {
+			if ( cnt->conf.output_all && (cnt->startup_frames == 0) ) {
 				cnt->detecting_motion = 1;
 				/* Setup the postcap counter */
 				cnt->postcap = cnt->conf.post_capture;
 				cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
 				motion_detected(cnt, cnt->video_dev, cnt->current_image);
-			} else if (cnt->current_image->flags & IMAGE_MOTION) {
+			} else if ( (cnt->current_image->flags & IMAGE_MOTION) && (cnt->startup_frames == 0) ) {
 				/* Did we detect motion (like the cat just walked in :) )?
 				 * If so, ensure the motion is sustained if minimum_motion_frames
 				 */
@@ -2259,8 +2265,20 @@ int main (int argc, char **argv)
 		/* Crude way of waiting for all threads to finish - check the thread
 		 * counter (because we cannot do join on the detached threads).
 		 */
-		while( (threads_running > 0) || (!finish) ) {
+		while (1) {
 			SLEEP(1,0);
+
+			/* Calculate how many threads runnig or wants to run
+			 * if zero and we want to finish, break out
+			 */
+			int motion_threads_running = 0;
+			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
+				if (cnt_list[i]->running || cnt_list[i]->restart)
+					motion_threads_running++;
+			}
+			if ( (motion_threads_running == 0 ) && finish )
+				break;
+
 			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
 				/* Check if threads wants to be restarted */
 				if ( (!cnt_list[i]->running) && (cnt_list[i]->restart) ) {
@@ -2275,8 +2293,8 @@ int main (int argc, char **argv)
 						cnt_list[i]->finish = 1;
 					}
 					if (cnt_list[i]->watchdog == -60) {
-						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, did NOT restart graceful, killing it!",
-						                          cnt_list[i]->threadnr);
+						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, did NOT restart graceful," 
+						                       "killing it!", cnt_list[i]->threadnr);
 						pthread_cancel(cnt_list[i]->thread_id);
 						pthread_mutex_lock(&global_lock);
 						threads_running--;
@@ -2300,6 +2318,9 @@ int main (int argc, char **argv)
 
 	} while (restart); /* loop if we're supposed to restart */
 
+	// Be sure that http control exits fine
+	cnt_list[0]->finish = 1;
+	SLEEP(1,0);
 	motion_log(LOG_INFO, 0, "Motion terminating");
 
 	/* Perform final cleanup. */

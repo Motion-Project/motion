@@ -526,6 +526,10 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							free(type);
 							type = strdup("0");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
+						} else if (!strcmp(type,"short")) {
+							free(type);
+							type = strdup("0");
+							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
 						} else if (!strcmp(type,"bool")) {
 							free(type);
 							type = strdup("off");
@@ -2395,5 +2399,6 @@ void *motion_web_control(void *arg)
 {
 	struct context **cnt=arg;
 	httpd_run(cnt);
+	motion_log(LOG_DEBUG, 0, "httpd thread exit");
 	pthread_exit(NULL);
 }

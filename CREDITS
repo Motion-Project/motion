@@ -95,6 +95,10 @@ William M Brack
      handling when it fails. Motion would end in infinite loops.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
 
+John Bray
+   * Get current directory to allow write motion.conf properly 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419
+
 Andy Brown 
    * Add swf codec to video creation (on behalf of Bowser Pete).
 
@@ -384,10 +388,12 @@ Angel Carpintero
    * Avoid random errors , initialising some structs for V4L1 
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
    * Fix motion segfaul because ffmpeg API change
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x17553
    * Little fix in ffmpeg.c comparing version of LIBAVFORMAT_BUILD, since ffmpeg svn -r4486 LIBAVFORMAT_BUILD and 
      LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
-     (Angel Carpintero)
+   * Fix broken PostgreSQL detection for custom location,
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134
+   * Fixed stepper when is used track_auto on.
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

@@ -162,6 +162,12 @@ typedef struct netcam_context {
                                        after a request, otherwise FALSE to
                                        close down the socket each time */
 
+	int keepalive_thisconn;     /* set to TRUE if cam has sent 'Keep-Alive' in this connection */
+
+	int keepalive_timeup;       /* set to TRUE if it is time to close netcam's socket,
+	                               and then re-open it with Keep-Alive set again.
+	                               Even Keep-Alive netcams need a close/open sometimes. */
+
 	char *connect_request;      /* contains the complete string
 	                               required for connection to the
 	                               camera */

@@ -851,7 +851,10 @@ int vid_start(struct context *cnt)
 			cnt->netcam = NULL;
 		}
 	}
-#ifndef WITHOUT_V4L
+#ifdef WITHOUT_V4L
+        else	
+		motion_log(LOG_ERR, 0,"You must setup netcam_url");
+#else
 	else
 		dev = vid_v4lx_start(cnt);
 #endif	/*WITHOUT_V4L */
