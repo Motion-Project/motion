@@ -393,6 +393,7 @@ Angel Carpintero
      LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
    * Fix broken PostgreSQL detection for custom location,
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134
+   * Fixed stepper when is used track_auto on.
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

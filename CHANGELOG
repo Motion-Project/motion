@@ -44,7 +44,7 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray) 
    * Fix broken PostgreSQL detection for custom location, 
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134 ( Angel Carpintero )
-
+   * Fixed stepper when is used track_auto on ( Angel Carpintero ).
 
 3.2.9 Formal Release - Summary of Changes
 
