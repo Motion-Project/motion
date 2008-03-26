@@ -637,6 +637,8 @@ static int motion_init(struct context *cnt)
 	if (cnt->conf.vidpipe) {
 		if (cnt->conf.setup_mode)
 			motion_log(-1, 0, "Opening video loopback device for normal pictures");
+		else 
+			motion_log(LOG_INFO, 0, "Opening video loopback device for normal pictures");
 		/* vid_startpipe should get the output dimensions */
 		cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 		if (cnt->pipe < 0) {
@@ -647,6 +649,8 @@ static int motion_init(struct context *cnt)
 	if (cnt->conf.motionvidpipe) {
 		if (cnt->conf.setup_mode)
 			motion_log(-1, 0, "Opening video loopback device for motion pictures");
+		else 
+			motion_log(LOG_INFO, 0, "Opening video loopback device for motion pictures");
 		/* vid_startpipe should get the output dimensions */
 		cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 		if (cnt->mpipe < 0) {
@@ -729,6 +733,8 @@ static int motion_init(struct context *cnt)
 		} else {
 			if (cnt->conf.setup_mode)
 				motion_log(-1, 0, "Maskfile \"%s\" loaded.",cnt->conf.mask_file);
+			else  
+				motion_log(LOG_INFO, 0, "Maskfile \"%s\" loaded.",cnt->conf.mask_file);
 		}
 	} else
 		cnt->imgs.mask=NULL;

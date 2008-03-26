@@ -740,7 +740,6 @@ else
 					], 
 			AC_MSG_ERROR(PostgreSQL support can't build without PostgreSQL libraries))
 			LDFLAGS=""	
-			AC_MSG_RESULT($PGSQL_SUPPORT)
 			CFLAGS=$saved_CFLAGS
 			LIBS=$saved_LIBS
 		fi
