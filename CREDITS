@@ -415,6 +415,7 @@ Dag Erlandsson
    * Added preview center feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter
    * Fixed timestamp for preview pictures.
+   * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522
      
 Stephen Farrugia
    * Fixing the division by zero problem.

@@ -479,10 +479,67 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 		cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_out];
 
 		if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot < cnt->conf.frame_limit) {
+			if (debug_level >= CAMERA_DEBUG) {
+				char tmp[32];
+				const char *t;
+
+				if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_TRIGGER)
+					t = "Trigger";
+				else if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_MOTION)
+					t = "Motion";
+				else if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_PRECAP)
+					t = "Precap";
+				else if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_POSTCAP)
+					t = "Postcap";
+				else
+					t = "Other";
+
+				mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q", 
+				           &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm, NULL, 0);
+				draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 20, cnt->imgs.width, tmp, 
+				          cnt->conf.text_double);
+				draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30, cnt->imgs.width, t, 
+				          cnt->conf.text_double);
+			}
 			/* Output the picture to jpegs and ffmpeg */
 			event(cnt, EVENT_IMAGE_DETECTED,
 			      cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
 			      &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
+
+			/* Check if we must add any "filler" frames into movie to keep up fps */
+			if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) {
+				/* movie_last_shoot is -1 when file is created,
+				 * we don't know how many frames there is in first sec */
+				if (cnt->movie_last_shot >= 0) {
+					if (debug_level >= CAMERA_DEBUG) {
+						int frames = cnt->movie_fps - (cnt->movie_last_shot + 1);
+						if (frames > 0) {
+							char tmp[15];
+							motion_log(LOG_DEBUG, 0, "Added %d fillerframes into movie", frames );
+							sprintf(tmp, "Fillerframes %d", frames);
+							draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 40, 
+							          cnt->imgs.width, tmp, cnt->conf.text_double);
+						}
+					}
+					/* Check how many frames it was last sec */
+					while( (cnt->movie_last_shot + 1) < cnt->movie_fps ) {
+						/* Add a filler frame into ffmpeg */
+						event(cnt, EVENT_FFMPEG_PUT,
+						      cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
+						      &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
+
+						cnt->movie_last_shot++;
+					}
+				}
+				cnt->movie_last_shot = 0;
+			} else if ( cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot != (cnt->movie_last_shot + 1)) {
+				/* We are out of sync! Properbly we got motion - no motion - motion */
+				cnt->movie_last_shot = -1;
+			}
+			/* Save last shot added to movie
+			 * only when we not are within first sec */
+			if (cnt->movie_last_shot >= 0)
+				cnt->movie_last_shot = cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot;
 		}
 
 		/* Mark the image as saved */
@@ -539,7 +596,6 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
  */
 static int motion_init(struct context *cnt)
 {
-	int i;
 	FILE *picture;
 
 	/* Store thread number in TLS. */
@@ -615,6 +671,8 @@ static int motion_init(struct context *cnt)
 
 	/* Capture first image, or we will get an alarm on start */
 	if (cnt->video_dev > 0) {
+		int i;
+
 		for (i = 0; i < 5; i++) {
 			if (vid_next(cnt, cnt->imgs.image_virgin) == 0)
 				break;

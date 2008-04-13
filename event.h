@@ -13,22 +13,23 @@
 
 #define EVENT_FILECREATE        1
 #define EVENT_MOTION            2
-#define EVENT_FIRSTMOTION       4
-#define EVENT_ENDMOTION         8
-#define EVENT_STOP              16
-#define EVENT_TIMELAPSE         32
-#define EVENT_TIMELAPSEEND      64
-#define EVENT_WEBCAM            128
-#define EVENT_IMAGE_DETECTED    256
-#define EVENT_IMAGEM_DETECTED   512
-#define EVENT_IMAGE_SNAPSHOT    1024
-#define EVENT_IMAGE             2048
-#define EVENT_IMAGEM            8192
-#define EVENT_FILECLOSE         16384
-#define EVENT_DEBUG             65536
-#define EVENT_CRITICAL          131072
-#define EVENT_AREA_DETECTED     262144
-#define EVENT_CAMERA_LOST       524288
+#define EVENT_FIRSTMOTION       3
+#define EVENT_ENDMOTION         4
+#define EVENT_STOP              5
+#define EVENT_TIMELAPSE         6
+#define EVENT_TIMELAPSEEND      7
+#define EVENT_WEBCAM            8
+#define EVENT_IMAGE_DETECTED    9
+#define EVENT_IMAGEM_DETECTED   10
+#define EVENT_IMAGE_SNAPSHOT    11
+#define EVENT_IMAGE             12
+#define EVENT_IMAGEM            13
+#define EVENT_FILECLOSE         14
+#define EVENT_DEBUG             15
+#define EVENT_CRITICAL          16
+#define EVENT_AREA_DETECTED     17
+#define EVENT_CAMERA_LOST       18
+#define EVENT_FFMPEG_PUT        19
 #
 
 typedef void(* event_handler)(struct context *, int, unsigned char *, char *, void *, struct tm *);
