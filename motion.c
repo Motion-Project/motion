@@ -1615,6 +1615,8 @@ static void *motion_loop(void *arg)
 						motion_log(-1, 0, "End of event %d", cnt->event_nr);
 
 					cnt->makemovie = 0;
+					/* Reset post capture */
+					cnt->postcap = 0;
 
 					/* Finally we increase the event number */
 					cnt->event_nr++;
