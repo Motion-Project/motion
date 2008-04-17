@@ -455,8 +455,18 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
 			retval = header_get(netcam, &header, HG_NONE);
 
 			if (retval != HG_OK) {
-				motion_log(LOG_ERR, 0, "Error reading image header");
-				free(header);
+				/* Header reported as not-OK, check to see if it's null */
+				if (strlen(header) == 0 ) {
+					if (debug_level > CAMERA_INFO)
+						motion_log(LOG_DEBUG, 0, "Error reading image header, streaming mode (1). Null header.");
+				} else {
+					/* Header is not null. Output it in case it's a new camera with unknown headers. */
+					if (debug_level > CAMERA_INFO)
+						motion_log(LOG_ERR, 0, "Error reading image header, streaming mode (1). " 
+						                       "Unknown header '%s'", header );
+			 	}
+
+			 	free(header);
 				return -1;
 			}
 
@@ -472,7 +482,7 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
 		retval = header_get(netcam, &header, HG_NONE);
 
 		if (retval != HG_OK) {
-			motion_log(LOG_ERR, 0, "Error reading image header");
+			motion_log(LOG_ERR, 0, "Error reading image header (2)");
 			free(header);
 			return -1;
 		}
