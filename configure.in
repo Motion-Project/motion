@@ -740,7 +740,6 @@ else
 					], 
 			AC_MSG_ERROR(PostgreSQL support can't build without PostgreSQL libraries))
 			LDFLAGS=""	
-			AC_MSG_RESULT($PGSQL_SUPPORT)
 			CFLAGS=$saved_CFLAGS
 			LIBS=$saved_LIBS
 		fi
@@ -754,6 +753,7 @@ fi
 #Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h)
+AC_CHECK_FUNCS(get_current_dir_name)
 
 
 # Check if v4l2 is available
