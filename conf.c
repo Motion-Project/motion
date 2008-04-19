@@ -33,7 +33,7 @@
 #endif /* BSD */
 
 #ifndef HAVE_GET_CURRENT_DIR_NAME
-char *get_current_dir_name()
+char *get_current_dir_name(void)
 {
 	char *buf = malloc(MAXPATHLEN);
 	getwd(buf);

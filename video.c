@@ -511,16 +511,16 @@ static int v4l_open_vidpipe(void)
 	return pipe_fd;
 }
 
-static int v4l_startpipe(char *devname, int width, int height, int type)
+static int v4l_startpipe(char *dev_name, int width, int height, int type)
 {
 	int dev;
 	struct video_picture vid_pic;
 	struct video_window vid_win;
 
-	if (!strcmp(devname, "-")) {
+	if (!strcmp(dev_name, "-")) {
 		dev=v4l_open_vidpipe();
 	} else {
-		dev=open(devname, O_RDWR);
+		dev=open(dev_name, O_RDWR);
 	}
 	if (dev < 0)
 		return(-1);
@@ -553,9 +553,9 @@ static int v4l_putpipe (int dev, unsigned char *image, int size)
 }
 
 
-int vid_startpipe(const char *devname, int width, int height, int type)
+int vid_startpipe(const char *dev_name, int width, int height, int type)
 {
-	return v4l_startpipe( (char *)devname, width, height, type);
+	return v4l_startpipe( (char *)dev_name, width, height, type);
 }
 
 int vid_putpipe (int dev, unsigned char *image, int size)
