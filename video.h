@@ -88,7 +88,7 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
 
 #ifndef WITHOUT_V4L
 /* video functions, video.c */
-int vid_startpipe(const char *devname, int width, int height, int);
+int vid_startpipe(const char *dev_name, int width, int height, int);
 int vid_putpipe(int dev, unsigned char *image, int);
 unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int width, int height,
 			 int input, int norm, unsigned long freq, int tuner_number);

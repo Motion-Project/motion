@@ -26,14 +26,14 @@
 #include "motion.h"
 
 
-#if (defined(BSD))
+#if (defined(BSD) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
 #include "video.h"
 #endif /* BSD */
 
 #ifndef HAVE_GET_CURRENT_DIR_NAME
-char *get_current_dir_name()
+char *get_current_dir_name(void)
 {
 	char *buf = malloc(MAXPATHLEN);
 	getwd(buf);

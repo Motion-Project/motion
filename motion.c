@@ -9,7 +9,7 @@
 #include "ffmpeg.h"
 #include "motion.h"
 
-#if (defined(BSD)) 
+#if (defined(BSD) && !defined(PWCBSD)) 
 #include "video_freebsd.h"
 #else
 #include "video.h"

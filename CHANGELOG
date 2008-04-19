@@ -1,3 +1,13 @@
+SVN trunk Summary of Changes
+
+Features
+   * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
+   * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr 
+     (Angel Carpintero)
+
+Bugfixes
+
+
 3.2.10 Summary of Changes
 
 Features
@@ -24,7 +34,6 @@ Features
    * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
     (Simon Walls)
    * Added mov , Quicktime file format (Andrew Hamilton).
-   * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
 
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).

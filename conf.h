@@ -155,4 +155,8 @@ char *mystrdup(const char *);
 char *mystrcpy(char *, const char *);
 struct context **copy_string(struct context **, const char *, int);
 
+#ifndef HAVE_GET_CURRENT_DIR_NAME
+char *get_current_dir_name(void);
+#endif
+
 #endif /* _INCLUDE_CONF_H */
