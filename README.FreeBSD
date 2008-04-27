@@ -41,9 +41,9 @@ hw.bt848.format=0
 
 ( ./configure --without-bktr , to work only with network cameras ).
 
-Tested in FreeBSD 4.9/4.1x/5.x/6.0 .
+Tested in FreeBSD 4.9/4.1x/5.x/6.x .
 
-Packages needed (dependencies for 6.1):
+Packages needed (dependencies for 6.x):
 
  - autoconf-2.59_2 
  - gcc-3.4.6_20051206 
@@ -58,6 +58,10 @@ Packages needed (dependencies for 6.1):
  - kernel with bktr support ( GENERIC kernel has by default support ).
 
 
+ *  webcams pwc based
+
+ - pwcbsd-1.4.1_1 ( with mmap support )
+ - v4l_compat-1.0.20060801
 
 * TODO *
 --------
@@ -72,6 +76,9 @@ Packages needed (dependencies for 6.1):
 
 
  http://www.lavrsen.dk/twiki/bin/view/Motion/FreeBSD
+
+ * WEBCAMS
+ ----------
  http://www.lavrsen.dk/twiki/bin/view/Motion/HowtoMotionPwcFreeBSD
 
  Angel Carpintero
