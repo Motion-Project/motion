@@ -4152,18 +4152,18 @@ echo $ECHO_N "checking for ffmpeg autodetecting... $ECHO_C" >&6; }
 		{ echo "$as_me:$LINENO: result: found for debian" >&5
 echo "${ECHO_T}found for debian" >&6; }
 	elif test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found in /usr/lib64" >&5
+echo "${ECHO_T}found in /usr/lib64" >&6; }
 		FFMPEG_OK="found"
 		FFMPEG="/usr/lib64"
 	elif test -f /usr/lib/libavcodec.a -o -f /usr/lib/libavcodec.so && test -f /usr/lib/libavformat.a -o -f /usr/lib/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found in /usr/lib" >&5
+echo "${ECHO_T}found in /usr/lib" >&6; }
 		FFMPEG_OK="found"
 		FFMPEG="/usr/lib"
 	elif test -f /usr/local/lib/libavcodec.a -o -f /usr/local/lib/libavcodec.so && test -f /usr/local/lib/libavformat.a -o -f /usr/local/lib/libavformat.so ; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found in /usr/local/lib" >&5
+echo "${ECHO_T}found in /usr/local/lib" >&6; }
 		FFMPEG_OK="found"
 		FFMPEG="/usr/local/lib"
 	else
@@ -4223,12 +4223,12 @@ echo $ECHO_N "checking for ffmpeg headers... $ECHO_C" >&6; }
 		{ echo "$as_me:$LINENO: result: found for debian" >&5
 echo "${ECHO_T}found for debian" >&6; }
 	elif test -f ${FFMPEG}/include/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found ${FFMPEG}/include/avformat.h" >&5
+echo "${ECHO_T}found ${FFMPEG}/include/avformat.h" >&6; }
 		FFMPEG_CFLAGS="-I${FFMPEG}/include"
 	elif test -f ${FFMPEG}/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found ${FFMPEG}/avformat.h" >&5
+echo "${ECHO_T}found ${FFMPEG}/avformat.h" >&6; }
 		FFMPEG_CFLAGS="-I${FFMPEG}"
 	elif test -f `$as_dirname -- ${FFMPEG} ||
 $as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
@@ -4253,8 +4253,8 @@ echo X${FFMPEG} |
 	    q
 	  }
 	  s/.*/./; q'`/include/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found ${FFMPEG}/include/avformat.h" >&5
+echo "${ECHO_T}found ${FFMPEG}/include/avformat.h" >&6; }
 		FFMPEG_CFLAGS="-I`$as_dirname -- ${FFMPEG} ||
 $as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X${FFMPEG} : 'X\(//\)[^/]' \| \
@@ -4301,8 +4301,8 @@ echo X${FFMPEG} |
 	    q
 	  }
 	  s/.*/./; q'`/include/ffmpeg/avformat.h; then
-		{ echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+		{ echo "$as_me:$LINENO: result: found ${FFMPEG}/include/ffmpeg/avformat.h" >&5
+echo "${ECHO_T}found ${FFMPEG}/include/ffmpeg/avformat.h" >&6; }
 		FFMPEG_CFLAGS="-I`$as_dirname -- ${FFMPEG} ||
 $as_expr X${FFMPEG} : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X${FFMPEG} : 'X\(//\)[^/]' \| \
@@ -4347,7 +4347,6 @@ echo "${ECHO_T}not found" >&6; }
 	if  test "${FFMPEG_OK}" = "found"; then
 		if test "${FFMPEG_LIBS_DEB}" != ""; then
 			TEMP_LIBS="$TEMP_LIBS ${FFMPEG_LIBS_DEB}"
-#			TEMP_LDFLAGS="${TEMP_LDFLAGS} ${FFMPEG_LIBS_DEB}"
 		else
 			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG} -lavformat -lavcodec -lm -lz"
 			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG}"
@@ -4554,6 +4553,8 @@ echo $ECHO_N "checking for mysql libs in $MYSQL_LIBS... $ECHO_C" >&6; }
 echo "${ECHO_T}not found" >&6; }
 		echo "Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so."
 	else
+		{ echo "$as_me:$LINENO: result: $MYSQL_LIBDIR" >&5
+echo "${ECHO_T}$MYSQL_LIBDIR" >&6; }
 		#LDFLAGS="-L$MYSQL_LIBDIR"
 		saved_CFLAGS=$CFLAGS
 		saved_LIBS=$LIBS
