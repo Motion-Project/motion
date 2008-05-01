@@ -349,15 +349,15 @@ else if test "${FFMPEG}" = "yes"; then
 		FFMPEG_OK="found"
 		AC_MSG_RESULT(found for debian)
 	elif test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found in /usr/lib64)
 		FFMPEG_OK="found"
 		FFMPEG="/usr/lib64"
 	elif test -f /usr/lib/libavcodec.a -o -f /usr/lib/libavcodec.so && test -f /usr/lib/libavformat.a -o -f /usr/lib/libavformat.so ; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found in /usr/lib)
 		FFMPEG_OK="found"
 		FFMPEG="/usr/lib"
 	elif test -f /usr/local/lib/libavcodec.a -o -f /usr/local/lib/libavcodec.so && test -f /usr/local/lib/libavformat.a -o -f /usr/local/lib/libavformat.so ; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found in /usr/local/lib)
 		FFMPEG_OK="found"
 		FFMPEG="/usr/local/lib"
 	else
@@ -410,16 +410,16 @@ if test "${FFMPEG_OK}" = "found"; then
 		FFMPEG_CFLAGS="${FFMPEG_CFLAGS_DEB}"
 		AC_MSG_RESULT(found for debian)
 	elif test -f ${FFMPEG}/include/avformat.h; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found ${FFMPEG}/include/avformat.h)
 		FFMPEG_CFLAGS="-I${FFMPEG}/include"
 	elif test -f ${FFMPEG}/avformat.h; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found ${FFMPEG}/avformat.h)
 		FFMPEG_CFLAGS="-I${FFMPEG}"
 	elif test -f `AS_DIRNAME([${FFMPEG}])`/include/avformat.h; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found ${FFMPEG}/include/avformat.h)
 		FFMPEG_CFLAGS="-I`AS_DIRNAME([${FFMPEG}])`/include"
 	elif test -f `AS_DIRNAME([${FFMPEG}])`/include/ffmpeg/avformat.h; then
-		AC_MSG_RESULT(found)
+		AC_MSG_RESULT(found ${FFMPEG}/include/ffmpeg/avformat.h)
 		FFMPEG_CFLAGS="-I`AS_DIRNAME([${FFMPEG}])`/include/ffmpeg"
 	else
 		AC_MSG_RESULT(not found)
@@ -441,7 +441,6 @@ if test "${FFMPEG_OK}" = "found"; then
 	if  test "${FFMPEG_OK}" = "found"; then	
 		if test "${FFMPEG_LIBS_DEB}" != ""; then
 			TEMP_LIBS="$TEMP_LIBS ${FFMPEG_LIBS_DEB}"
-#			TEMP_LDFLAGS="${TEMP_LDFLAGS} ${FFMPEG_LIBS_DEB}"
 		else
 			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG} -lavformat -lavcodec -lm -lz"
 			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG}"
@@ -606,6 +605,7 @@ else
 		AC_MSG_RESULT(not found)
 		echo "Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so."
 	else
+		AC_MSG_RESULT($MYSQL_LIBDIR)
 		#LDFLAGS="-L$MYSQL_LIBDIR"
 		saved_CFLAGS=$CFLAGS
 		saved_LIBS=$LIBS
