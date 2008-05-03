@@ -1074,7 +1074,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br><b>Thread %hu</b>" 
-				             "Detection status %s\n", thread, thread, 
+				             " Detection status %s\n", thread, thread, 
 				             (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
@@ -1108,7 +1108,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket,ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
-				             "Detection resumed\n", thread, thread);
+				             " Detection resumed\n", thread, thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
@@ -1140,7 +1140,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
-				             "Detection paused\n", thread, thread);
+				             " Detection paused\n", thread, thread);
 				send_template(client_socket,res);
 				send_template_end_client(client_socket);
 			} else {
