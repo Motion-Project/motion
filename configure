@@ -1249,6 +1249,9 @@ Optional Packages:
   --with-linuxthreads     Use linuxthreads in BSD instead of native pthreads
 
 
+  --with-pwcbsd           Use pwcbsd based webcams ( only BSD )
+
+
   --without-bktr          Exclude to use bktr subsystem , that usually useful
                           for devices as network cameras ( ONLY used in *BSD).
 
@@ -1758,6 +1761,16 @@ if test "${with_linuxthreads+set}" = set; then
 fi
 
 
+PWCBSD="no"
+
+# Check whether --with-pwcbsd was given.
+if test "${with_pwcbsd+set}" = set; then
+  withval=$with_pwcbsd; PWCBSD="$withval"
+
+fi
+
+
+
 { echo "$as_me:$LINENO: checking for Darwin" >&5
 echo $ECHO_N "checking for Darwin... $ECHO_C" >&6; }
 Darwin=`uname -a | grep "Darwin"`
@@ -1786,10 +1799,19 @@ echo "${ECHO_T}skipping" >&6; }
 			THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
 		fi
 
-		TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
+		if test "${PWCBSD}" != "no"; then
+			VIDEO="video.o video2.o video_common.o"
+			TEMP_CFLAGS="${CFLAGS} -I/usr/local/include -DPWCBSD"
+		else
+			VIDEO="video_freebsd.o"
+			TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
+		fi
+
 		TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
 		TEMP_LIBS="-L/usr/local/lib"
-		VIDEO="video_freebsd.o"
+		{ echo "$as_me:$LINENO: result: Build with PWCBSD support $PWCBSD" >&5
+echo "${ECHO_T}Build with PWCBSD support $PWCBSD" >&6; }
+
 	fi
 else
 	TEMP_CFLAGS="${CFLAGS} -I/sw/include"
@@ -2732,20 +2754,19 @@ TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
 TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
 
 
-if test "${FreeBSD}" != ""; then
+if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
 
-{ echo "$as_me:$LINENO: checking bktr headers in /usr/include/dev/bktr" >&5
+	{ echo "$as_me:$LINENO: checking bktr headers in /usr/include/dev/bktr" >&5
 echo $ECHO_N "checking bktr headers in /usr/include/dev/bktr... $ECHO_C" >&6; }
 
-if test -f /usr/include/dev/bktr/ioctl_meteor.h && test -f /usr/include/dev/bktr/ioctl_bt848.h; then
-	{ echo "$as_me:$LINENO: result: yes" >&5
+	if test -f /usr/include/dev/bktr/ioctl_meteor.h && test -f /usr/include/dev/bktr/ioctl_bt848.h; then
+		{ echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
-else
-	{ echo "$as_me:$LINENO: result: no" >&5
+	else
+		{ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
-fi
-
+		TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
+	fi
 #
 # Check to Exclude BKTR
 #
@@ -5199,6 +5220,7 @@ fi
 done
 
 
+
 for ac_func in get_current_dir_name
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -5291,7 +5313,6 @@ _ACEOF
 
 fi
 done
-
 
 
 # Check if v4l2 is available
@@ -8274,6 +8295,11 @@ if test "${FreeBSD}" != ""; then
         	echo "BKTR included:       No"
 	fi
 
+	if test "${PWCBSD}" = "yes"; then
+		echo "PWCBSD include:      Yes"
+	else
+		echo "PWCBSD include:      No"
+	fi
 
 else
 	if test "${V4L}" = "yes"; then
