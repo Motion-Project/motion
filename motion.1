@@ -1,4 +1,4 @@
-.TH MOTION 1 2007-11-06 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2008-05-05 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
@@ -34,7 +34,11 @@ These are the options that can be used in the config file.
 .I They are overridden by the commandline!
 All number values are integer numbers (no decimals allowed).
 Boolean options can be on or off (values "1", "yes" and "on" all means true and any other value means false).
-
+.TP
+.B area_detect integer
+Values: 0 - 999999999 / Default: Not defined
+.br
+Detect motion center in predefined areas. A script (on_area_detected) is started immediately when motion center is detected in one of the given areas, but only once during an event even if there is motion in a different configured area.
 .TP
 .B auto_brightness boolean
 Values: on, off / Default: off
@@ -117,7 +121,7 @@ Values: 0, 2 - 31 / Default: 0 (disabled)
 Enables and defines variable bitrate for the ffmpeg encoder. ffmpeg_bps is ignored if variable bitrate is enabled. Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps, or the range 2 - 31 where 2 means best quality and 31 is worst.
 .TP
 .B ffmpeg_video_codec discrete strings
-Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf , flv , ffv1 / Default: mpeg4
+Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf , flv , ffv1, mov / Default: mpeg4
 .br
 Codec to be used by ffmpeg for the video compression. Timelapse mpegs are always made in mpeg1 format independent from this option.
 .TP
@@ -165,11 +169,6 @@ Ignore sudden massive light intensity changes given as a percentage of the pictu
 Values: on, off, preview / Default: off
 .br
 Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved mpeg movie.
-.TP
-.B low_cpu integer
-Values: 0 - 100 / Default: 0 (disabled)
-.br
-When this option is not zero motion will be in a low cpu mode while not detecting motion. In low cpu mode Motion reduces the framerate to the value given for this option. Value zero means disabled.
 .TP
 .B mask_file string
 Values: Max 4095 characters / Default: Not defined
@@ -221,6 +220,11 @@ Values: Max 4095 characters / Default: Not defined
 .br
 The MySQL user name.
 .TP
+.B netcam_http discrete string
+Values: 1.0 , keep_alive, 1.1 / Default: 1.0
+.br
+The setting for keep-alive of network socket, should improve performance on compatible net cameras.
+.TP
 .B netcam_proxy string
 Values: Max 4095 characters / Default: Not defined
 .br
@@ -236,11 +240,6 @@ Values: Max 4095 characters / Default: Not defined
 .br
 For network cameras protected by username and password, use this option for HTTP 1.1 Basic authentication. The string is specified as username:password. Do not specify this option for no authentication.
 .TP
-.B night_compensate boolean
-Values: on, off / Default: off
-.br
-When this option is set the noise threshold will be lowered if the picture is dark. This will improve the sensitivity in dark places. However it might also increase the number of false alarms since most cameras also increase light sensitivity with their AGC (Automatic Gain Control) and this will increase noise.
-.TP
 .B noise_level integer
 Values: 1 - 255 / Default: 32
 .br
@@ -255,6 +254,16 @@ Activates the automatic tuning of noise level.
 Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour) / Default: 0 (PAL)
 .br
 Select the norm of the video device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
+.TP
+.B on_area_detected string
+Values: Max 4095 characters / Default: Not defined
+.br
+Command to be executed when motion in a predefined area is detected, check option area_detect.
+.TP
+.B on_camera_lost
+Values: Max 4095 characters / Default: Not defined
+.br
+Command to be executed when a camera can't be opened or if it is lost. You can use Conversion Specifiers and spaces as part of the command. Use %f for passing filename (with full path) to the command.
 .TP
 .B on_event_end string
 Values: Max 4095 characters / Default: Not defined
@@ -297,7 +306,7 @@ Values: on, off / Default: off
 Output pictures with only the moving object. This feature generates the special motion type movies where you only see the pixels that changes as a graytone image. If labelling is enabled you see the largest area in blue. Smartmask is shown in red.
 .TP
 .B output_normal discrete strings
-Values: on, off, first, best / Default: on
+Values: on, off, first, best, center / Default: on
 .br
 Normal image is an image that is stored when motion is detected. It is the same image that was taken by the camera. I.e. not a motion image like defined by output_motion. Default is that normal images are stored.
 .TP
@@ -546,6 +555,11 @@ Values: Max 4095 characters / Default: /dev/tuner0
 .br
 The tuner device used for controlling the tuner in a tuner card. This option is only used when Motion is compiled for FreeBSD.
 .TP
+.B v4l2_palette intenger
+Values: 0 - 8 / Default: 8
+.br
+Allow to choose preferable palette to be use by motion to capture from those supported by your videodevice.
+.TP
 .B video_pipe string
 Values: Max 4095 characters / Default: Not defined
 .br
@@ -659,7 +673,7 @@ If motion is built without specific features such as ffmpeg, mysql etc it will i
 If you run the http control command http://host:port/0/config/writeyes, motion will overwrite motion.conf and all the thread.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do. 
 .TP
 .B Conversion Specifiers for Advanced Filename and Text Features
-The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
+The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_area_detected, on_camera_lost, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
 .br
 In text_left and text_right you can additionally use '\n' for new line.
 
