@@ -394,6 +394,7 @@ Angel Carpintero
    * Fix broken PostgreSQL detection for custom location,
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134
    * Fixed stepper when is used track_auto on.
+   * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr.
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

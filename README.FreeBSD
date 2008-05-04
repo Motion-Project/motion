@@ -63,6 +63,9 @@ Packages needed (dependencies for 6.x):
  - pwcbsd-1.4.1_1 ( with mmap support )
  - v4l_compat-1.0.20060801
 
+ run : ./configure --with-pwcbsd ; gmake ; gmake install 
+
+
 * TODO *
 --------
 
