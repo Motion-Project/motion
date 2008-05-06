@@ -69,10 +69,10 @@ struct ffmpeg *ffmpeg_open(
 	);
 
 /* Puts the image pointed to by the picture member of struct ffmpeg. */
-void ffmpeg_put_image(struct ffmpeg *);
+int ffmpeg_put_image(struct ffmpeg *);
 
 /* Puts the image defined by u, y and v (YUV420 format). */
-void ffmpeg_put_other_image(
+int ffmpeg_put_other_image(
 	struct ffmpeg *ffmpeg, 
 	unsigned char *y, 
 	unsigned char *u, 

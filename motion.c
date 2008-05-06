@@ -1906,6 +1906,8 @@ err:
 	threads_running--;
 	pthread_mutex_unlock(&global_lock);
 
+	if (!cnt->restart)
+		cnt->watchdog=WATCHDOG_OFF;
 	cnt->running = 0;
 	cnt->finish = 0;
 
@@ -2342,8 +2344,13 @@ int main (int argc, char **argv)
 				if (cnt_list[i]->running || cnt_list[i]->restart)
 					motion_threads_running++;
 			}
-			if ( (motion_threads_running == 0 ) && finish )
+			if ( ((motion_threads_running == 0 ) && finish ) || 
+			     ((motion_threads_running == 0 ) && (threads_running == 0)) ){
+			     if (debug_level >= CAMERA_DEBUG)
+				motion_log(LOG_INFO, 0, "DEBUG-1 threads_running %d motion_threads_running %d , finish %d", 
+				                         threads_running, motion_threads_running, finish);			     
 				break;
+			}	
 
 			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
 				/* Check if threads wants to be restarted */
@@ -2371,6 +2378,9 @@ int main (int argc, char **argv)
 					}
 				}
 			}
+			if (debug_level >= CAMERA_DEBUG)
+				motion_log(LOG_INFO, 0, "DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
+				                         threads_running, motion_threads_running, finish);
 		}
 		/* Reset end main loop flag */
 		finish = 0;

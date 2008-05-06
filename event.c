@@ -502,7 +502,10 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 		u = img+width*height;
 	
 	v = u+(width*height)/4;
-	ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v);
+	if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v) == -1){
+		cnt->finish = 1;
+		cnt->restart = 0;
+	}	
 	
 }
 
@@ -523,11 +526,17 @@ static void event_ffmpeg_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			u = y + (width * height);
 		
 		v = u + (width * height) / 4;
-		ffmpeg_put_other_image(cnt->ffmpeg_new, y, u, v);
+		if (ffmpeg_put_other_image(cnt->ffmpeg_new, y, u, v) == -1){
+			cnt->finish = 1;
+			cnt->restart = 0;
+		}	
 	}
 	
 	if (cnt->ffmpeg_motion) {
-		ffmpeg_put_image(cnt->ffmpeg_motion);
+		if (ffmpeg_put_image(cnt->ffmpeg_motion) == -1){
+			cnt->finish = 1;
+			cnt->restart = 0;
+		}	
 	}
 }
 
