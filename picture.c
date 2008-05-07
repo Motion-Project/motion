@@ -131,8 +131,8 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 	
 	jpeg_start_compress (&cinfo, TRUE);
 
-	for (j=0; j<height; j+=16) {
-		for (i=0; i<16; i++) {
+	for (j = 0; j < height; j += 16) {
+		for (i = 0; i < 16; i++) {
 			y[i] = input_image + width*(i+j);
 			if (i%2 == 0) {
 				cb[i/2] = input_image + width*height + width/2*((i+j)/2);
@@ -183,7 +183,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
 
 	row_ptr[0] = input_image;
 	
-	for (y=0; y<height; y++) {
+	for (y = 0; y < height; y++) {
 		jpeg_write_scanlines(&cjpeg, row_ptr, 1);
 		row_ptr[0] += width;
 	}
@@ -243,8 +243,8 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 	jpeg_stdio_dest(&cinfo, fp);  	  // data written to file
 	jpeg_start_compress(&cinfo, TRUE);
 
-	for (j=0;j<height;j+=16) {
-		for (i=0;i<16;i++) {
+	for (j = 0; j < height; j += 16) {
+		for (i = 0; i < 16; i++) {
 			y[i] = image + width*(i+j);
 			if (i%2 == 0) {
 				cb[i/2] = image + width*height + width/2*((i+j)/2);
@@ -292,9 +292,9 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
 	jpeg_start_compress(&cjpeg, TRUE);
 
 	row_ptr[0]=image;
-	for (y=0; y<height; y++) {
+	for (y = 0; y < height; y++) {
 		jpeg_write_scanlines(&cjpeg, row_ptr, 1);
-		row_ptr[0]+=width;
+		row_ptr[0] += width;
 	}
 	jpeg_finish_compress(&cjpeg);
 	jpeg_destroy_compress(&cjpeg);
@@ -313,9 +313,9 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
 static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, int height)
 {
 	int x, y;
-	unsigned char *l=image;
-	unsigned char *u=image+width*height;
-	unsigned char *v=u+(width*height)/4;
+	unsigned char *l = image;
+	unsigned char *u = image+width*height;
+	unsigned char *v = u+(width*height)/4;
 	int r, g, b;
 	int warningkiller;
 	unsigned char rgb[3];
@@ -327,43 +327,43 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
 	fprintf(picture, "P6\n");
 	fprintf(picture, "%d %d\n", width, height);
 	fprintf(picture, "%d\n", 255);
-	for (y=0; y<height; y++) {
+	for (y = 0; y < height; y++) {
 		
-		for (x=0; x<width; x++) {
+		for (x = 0; x < width; x++) {
 			r = 76283*(((int)*l)-16)+104595*(((int)*u)-128);
 			g = 76283*(((int)*l)-16)- 53281*(((int)*u)-128)-25625*(((int)*v)-128);
 			b = 76283*(((int)*l)-16)+132252*(((int)*v)-128);
 			r = r>>16;
 			g = g>>16;
 			b = b>>16;
-			if (r<0)
-				r=0;
-			else if (r>255)
-				r=255;
-			if (g<0)
-				g=0;
-			else if (g>255)
-				g=255;
-			if (b<0)
-				b=0;
-			else if (b>255)
-				b=255;
+			if (r < 0)
+				r = 0;
+			else if (r > 255)
+				r = 255;
+			if (g < 0)
+				g = 0;
+			else if (g > 255)
+				g = 255;
+			if (b < 0)
+				b = 0;
+			else if (b > 255)
+				b = 255;
 
-			rgb[0]=b;
-			rgb[1]=g;
-			rgb[2]=r;
+			rgb[0] = b;
+			rgb[1] = g;
+			rgb[2] = r;
 
 			l++;
-			if (x&1) {
+			if (x & 1) {
 				u++;
 				v++;
 			}
 			/* ppm is rgb not bgr */
-			warningkiller=fwrite(rgb, 1, 3, picture);
+			warningkiller = fwrite(rgb, 1, 3, picture);
 		}
-		if (y&1) {
-			u-=width/2;
-			v-=width/2;
+		if (y & 1) {
+			u -= width/2;
+			v -= width/2;
 		}
 	}
 }
@@ -384,7 +384,7 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
 	/* set V to 255 to make smartmask appear red */
 	out_v = out + v;
 	out_u = out + i;
-	for ( i = 0; i < height; i += 2){
+	for (i = 0; i < height; i += 2){
 		line = i * width;
 		for (x = 0; x < width; x += 2){
 			if (smartmask[line + x] == 0 ||
@@ -411,18 +411,18 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
 void overlay_fixed_mask(struct context *cnt, unsigned char *out)
 {
 	int i;
-	struct images *imgs=&cnt->imgs;
-	unsigned char *motion_img=imgs->out;
-	unsigned char *mask=imgs->mask;
+	struct images *imgs = &cnt->imgs;
+	unsigned char *motion_img = imgs->out;
+	unsigned char *mask = imgs->mask;
 	int pixel;
 	
 	/* set y to mask + motion-pixel to keep motion pixels visible on grey background*/
-	for (i=0; i<imgs->motionsize; i++){
-		pixel=255-mask[i]+motion_img[i];
-		if (pixel>255)
-			*out=255;
+	for (i = 0; i < imgs->motionsize; i++){
+		pixel = 255-mask[i]+motion_img[i];
+		if (pixel > 255)
+			*out = 255;
 		else
-			*out=pixel;
+			*out = pixel;
 		out++;
 	}
 }
@@ -431,37 +431,37 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
 void overlay_largest_label(struct context *cnt, unsigned char *out)
 {
 	int i, x, v, width, height, line;
-	struct images *imgs=&cnt->imgs;
-	int *labels=imgs->labels;
+	struct images *imgs = &cnt->imgs;
+	int *labels = imgs->labels;
 	unsigned char *out_y, *out_u, *out_v;
 	
-	i=imgs->motionsize;
-	v=i+((imgs->motionsize)/4);
-	width=imgs->width;
-	height=imgs->height;
+	i = imgs->motionsize;
+	v = i+((imgs->motionsize)/4);
+	width = imgs->width;
+	height = imgs->height;
 
 	/* set U to 255 to make label appear blue */
-	out_u=out+i;
-	out_v=out+v;
-	for ( i=0; i<height; i+=2){
-		line=i*width;
-		for (x=0; x<width; x+=2){
+	out_u = out+i;
+	out_v = out+v;
+	for (i = 0; i < height; i += 2){
+		line = i*width;
+		for (x = 0; x < width; x += 2){
 			if (labels[line+x] & 32768 ||
 				labels[line+x+1] & 32768 ||
 				labels[line+width+x] & 32768 ||
 				labels[line+width+x+1] & 32768) {
-					*out_u=255;
-					*out_v=128;
+					*out_u = 255;
+					*out_v = 128;
 			}
 			out_u++;
 			out_v++;
 		}
 	}
-	out_y=out;
+	out_y = out;
 	/* set intensity for coloured label to have better visibility */
-	for (i=0; i<imgs->motionsize; i++) {
+	for (i = 0; i < imgs->motionsize; i++) {
 		if (*labels++ & 32768)
-			*out_y=0;
+			*out_y = 0;
 		out_y++;
 	}
 }
@@ -515,7 +515,6 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 	FILE *picture;
 
 	picture = myfopen(file, "w");
-	
 	if (!picture) {
 		/* Report to syslog - suggest solution if the problem is access rights to target dir */
 		if (errno ==  EACCES) {
@@ -523,6 +522,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 			           "Can't write picture to file %s - check access rights to target directory", file);
 			motion_log(LOG_ERR, 1, "Thread is going to finish due to this fatal error");
 			cnt->finish = 1;
+			cnt->restart = 0;
 			return;
 		} else {
 			/* If target dir is temporarily unavailable we may survive */
@@ -562,7 +562,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 			return NULL;
 
 	/* check size */
-	if (sscanf(line, "%d %d", &x, &y)!=2) {
+	if (sscanf(line, "%d %d", &x, &y) != 2) {
 		motion_log(LOG_ERR, 1, "Failed reading size in pgm file");
 		return NULL;
 	}
@@ -578,7 +578,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 		if (!fgets(line, 255, picture))
 			return NULL;
 	
-	if (sscanf(line, "%d", &maxval)!=1) {
+	if (sscanf(line, "%d", &maxval) != 1) {
 		motion_log(LOG_ERR, 1, "Failed reading maximum value in pgm file");
 		return NULL;
 	}
@@ -587,11 +587,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 	
 	image = mymalloc(width * height);
 	
-	for (y=0; y<height; y++) {
+	for (y = 0; y < height; y++) {
 		if ((int)fread(&image[y * width], 1, width, picture) != width)
 			motion_log(LOG_ERR, 1, "Failed reading image data from pgm file");
 		
-		for (x=0; x<width; x++) {
+		for (x = 0; x < width; x++) {
 			image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
 		}
 	}	
@@ -607,7 +607,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
 {
 	FILE *picture;
 
-	picture=myfopen(file, "w");
+	picture = myfopen(file, "w");
 	if (!picture) {
 		/* Report to syslog - suggest solution if the problem is access rights to target dir */
 		if (errno ==  EACCES) {
@@ -658,7 +658,7 @@ void preview_save(struct context *cnt)
 
 #ifdef HAVE_FFMPEG
 		/* Use filename of movie i.o. jpeg_filename when set to 'preview' */
-		use_jpegpath=strcmp(cnt->conf.jpegpath, "preview");
+		use_jpegpath = strcmp(cnt->conf.jpegpath, "preview");
 	
 		if (cnt->ffmpeg_new && !use_jpegpath){
 			/* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
