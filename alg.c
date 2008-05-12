@@ -20,23 +20,23 @@
 /* locate the center and size of the movement. */
 void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
 {
-	unsigned char *out=imgs->out;
-	int *labels=imgs->labels;
-	int x, y, centc=0, xdist=0, ydist=0;
+	unsigned char *out = imgs->out;
+	int *labels = imgs->labels;
+	int x, y, centc = 0, xdist = 0, ydist = 0;
 
-	cent->x=0;
-	cent->y=0;
-	cent->maxx=0;
-	cent->maxy=0;
-	cent->minx=width;
-	cent->miny=height;
+	cent->x = 0;
+	cent->y = 0;
+	cent->maxx = 0;
+	cent->maxy = 0;
+	cent->minx = width;
+	cent->miny = height;
 
 	/* If Labeling enabled - locate center of largest labelgroup */
 	if (imgs->labelsize_max) {
 		/* Locate largest labelgroup */
-		for (y=0; y<height; y++) {
-			for (x=0; x<width; x++) {
-				if (*(labels++)&32768) {
+		for (y = 0; y < height; y++) {
+			for (x = 0; x < width; x++) {
+				if (*(labels++) & 32768) {
 					cent->x += x;
 					cent->y += y;
 					centc++;
@@ -45,8 +45,8 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 		}
 	} else {
 		/* Locate movement */
-		for (y=0; y<height; y++) {
-			for (x=0; x<width; x++) {
+		for (y = 0; y < height; y++) {
+			for (x = 0; x < width; x++) {
 				if (*(out++)) {
 					cent->x += x;
 					cent->y += y;
@@ -56,22 +56,22 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 		}
 	}
 	if (centc) {
-		cent->x=cent->x/centc;
-		cent->y=cent->y/centc;
+		cent->x = cent->x / centc;
+		cent->y = cent->y / centc;
 	}
 	
 	/* Now we find the size of the Motion */
 
 	/* First reset pointers back to initial value */
-	centc=0;
-	labels=imgs->labels;
-	out=imgs->out;
+	centc = 0;
+	labels = imgs->labels;
+	out = imgs->out;
 
 	/* If Labeling then we find the area around largest labelgroup instead */
 	if (imgs->labelsize_max) {
-		for (y=0; y<height; y++) {
-			for (x=0; x<width; x++) {
-				if (*(labels++)&32768) {
+		for (y = 0; y < height; y++) {
+			for (x = 0; x < width; x++) {
+				if (*(labels++) & 32768) {
 					if (x > cent->x)
 						xdist += x - cent->x;
 					else if (x < cent->x)
@@ -85,8 +85,8 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 			}	
 		}
 	} else {
-		for (y=0; y<height; y++) {
-			for (x=0; x<width; x++) {
+		for (y = 0; y < height; y++) {
+			for (x = 0; x < width; x++) {
 				if (*(out++)) {
 					if (x > cent->x)
 						xdist += x - cent->x;
@@ -103,13 +103,13 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 	}
 	
 	if (centc) {
-		cent->minx = cent->x - xdist/centc*2;
-		cent->maxx = cent->x + xdist/centc*2;
+		cent->minx = cent->x - xdist / centc * 2;
+		cent->maxx = cent->x + xdist / centc * 2;
 		/* Make the box a little bigger in y direction to make sure the
 		   heads fit in so we multiply by 3 instead of 2 which seems to
 		   to work well in practical */
-		cent->miny = cent->y - ydist/centc*3;
-		cent->maxy = cent->y + ydist/centc*2;
+		cent->miny = cent->y - ydist / centc * 3;
+		cent->maxy = cent->y + ydist / centc * 2;
 	}
 	if (cent->maxx > width - 1)
 		cent->maxx = width - 1;
@@ -134,7 +134,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 	/* We want to center Y coordinate to be the center of the action.
 	   The head of a person is important so we correct the cent.y coordinate
 	   to match the correction to include a persons head that we just did above */
-	cent->y = (cent->miny + cent->maxy)/2;
+	cent->y = (cent->miny + cent->maxy) / 2;
 	
 }
 
@@ -142,46 +142,46 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 /* draw a box around the movement */
 void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int mode)
 {
-	unsigned char *out=imgs->out;
+	unsigned char *out = imgs->out;
 	int x, y;
 
-	out=imgs->out;
+	out = imgs->out;
 
 	/* Draw a box around the movement */
 	if (mode == LOCATE_BOTH){ /* both normal and motion image gets a box */
 		int width_miny = width*cent->miny;
 		int width_maxy = width*cent->maxy;
-		for (x=cent->minx; x<=cent->maxx; x++) {
+		for (x = cent->minx; x <= cent->maxx; x++) {
 			int width_miny_x = x+width_miny;
 			int width_maxy_x = x+width_maxy;
-			new[width_miny_x]=~new[width_miny_x];
-			new[width_maxy_x]=~new[width_maxy_x];
-			out[width_miny_x]=~out[width_miny_x];
-			out[width_maxy_x]=~out[width_maxy_x];
+			new[width_miny_x] =~new[width_miny_x];
+			new[width_maxy_x] =~new[width_maxy_x];
+			out[width_miny_x] =~out[width_miny_x];
+			out[width_maxy_x] =~out[width_maxy_x];
 		}
-		for (y=cent->miny; y<=cent->maxy; y++) {
-			int width_minx_y = cent->minx+y*width; 
-			int width_maxx_y = cent->maxx+y*width;
-			new[width_minx_y]=~new[width_minx_y];
-			new[width_maxx_y]=~new[width_maxx_y];
-			out[width_minx_y]=~out[width_minx_y];
-			out[width_maxx_y]=~out[width_maxx_y];
+		for (y = cent->miny; y <= cent->maxy; y++) {
+			int width_minx_y = cent->minx + y * width; 
+			int width_maxx_y = cent->maxx + y * width;
+			new[width_minx_y] =~new[width_minx_y];
+			new[width_maxx_y] =~new[width_maxx_y];
+			out[width_minx_y] =~out[width_minx_y];
+			out[width_maxx_y] =~out[width_maxx_y];
 		}
 	}
 	else{ /* normal image only (e.g. preview shot) */
-		int width_miny = width*cent->miny;
-		int width_maxy = width*cent->maxy;
-		for (x=cent->minx; x<=cent->maxx; x++) {
+		int width_miny = width * cent->miny;
+		int width_maxy = width * cent->maxy;
+		for (x = cent->minx; x <= cent->maxx; x++) {
 			int width_miny_x = width_miny+x;
 			int width_maxy_x = width_maxy+x;
-			new[width_miny_x]=~new[width_miny_x];
-			new[width_maxy_x]=~new[width_maxy_x];
+			new[width_miny_x] =~new[width_miny_x];
+			new[width_maxy_x] =~new[width_maxy_x];
 		}
-		for (y=cent->miny; y<=cent->maxy; y++) {
+		for (y = cent->miny; y <= cent->maxy; y++) {
 			int minx_y = cent->minx+y*width;
 			int maxx_y = cent->maxx+y*width;
-			new[minx_y]=~new[minx_y];
-			new[maxx_y]=~new[maxx_y];
+			new[minx_y] =~new[minx_y];
+			new[maxx_y] =~new[maxx_y];
 		}
 	}
 }
@@ -189,26 +189,26 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 
 
 #define NORM               100
-#define ABS(x)             ((x)<0 ? -(x) : (x))
+#define ABS(x)             ((x) < 0 ? -(x) : (x))
 #define DIFF(x, y)         (ABS((x)-(y)))
-#define NDIFF(x, y)        (ABS(x)*NORM/(ABS(x)+2*DIFF(x,y)))
+#define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
 
 
 void alg_noise_tune(struct context *cnt, unsigned char *new)
 {
-	struct images *imgs=&cnt->imgs;
+	struct images *imgs = &cnt->imgs;
 	int i;
-	unsigned char *ref=imgs->ref;
-	int diff, sum=0, count=0;
-	unsigned char *mask=imgs->mask;
-	unsigned char *smartmask=imgs->smartmask_final;
+	unsigned char *ref = imgs->ref;
+	int diff, sum = 0, count = 0;
+	unsigned char *mask = imgs->mask;
+	unsigned char *smartmask = imgs->smartmask_final;
 
-	i=imgs->motionsize;
+	i = imgs->motionsize;
 			
-	for (; i>0; i--) {
+	for (; i > 0; i--) {
 		diff = ABS(*ref - *new);
 		if (mask)
-			diff = ((diff * *mask++)/255);
+			diff = ((diff * *mask++) / 255);
 		if (*smartmask){
 			sum += diff + 1;
 			count++;
@@ -298,8 +298,8 @@ static int iflood(int x, int y,
 		 * segment of scan line y-dy for x1<=x<=x2 was previously filled,
 		 * now explore adjacent pixels in scan line y
 		 */
-		for (x = x1; x >= 0 && out[y*width+x] != 0 && labels[y*width+x] == oldvalue; x--) {
-			labels[y*width+x] = newvalue;
+		for (x = x1; x >= 0 && out[y * width + x] != 0 && labels[y * width + x] == oldvalue; x--) {
+			labels[y * width + x] = newvalue;
 			count++;
 		}
 		
@@ -314,8 +314,8 @@ static int iflood(int x, int y,
 		x = x1 + 1;
 		
 		do {
-			for (; x < width && out[y*width+x] != 0 && labels[y*width+x]==oldvalue; x++) {
-				labels[y*width+x] = newvalue;
+			for (; x < width && out[y * width + x] != 0 && labels[y * width + x] == oldvalue; x++) {
+				labels[y * width + x] = newvalue;
 				count++;
 			}
 			
@@ -326,7 +326,7 @@ static int iflood(int x, int y,
 			
 			skip:
 			
-			for (x++; x <= x2 && !(out[y*width+x] != 0 && labels[y*width+x]==oldvalue); x++);
+			for (x++; x <= x2 && !(out[y * width + x] != 0 && labels[y * width + x] == oldvalue); x++);
 			
 			l = x;
 		} while (x <= x2);
@@ -336,48 +336,48 @@ static int iflood(int x, int y,
 
 static int alg_labeling(struct context *cnt)
 {
-	struct images *imgs=&cnt->imgs;
-	unsigned char *out=imgs->out;
-	int *labels=imgs->labels;
+	struct images *imgs = &cnt->imgs;
+	unsigned char *out = imgs->out;
+	int *labels = imgs->labels;
 	int ix, iy, pixelpos;
-	int width=imgs->width;
-	int height=imgs->height;
-	int labelsize=0;
-	int current_label=2;
-	cnt->current_image->total_labels=0;
-	imgs->labelsize_max=0;
+	int width = imgs->width;
+	int height = imgs->height;
+	int labelsize = 0;
+	int current_label = 2;
+	cnt->current_image->total_labels = 0;
+	imgs->labelsize_max = 0;
 	/* ALL labels above threshold are counted as labelgroup */
-	imgs->labelgroup_max=0;
-	imgs->labels_above=0;
+	imgs->labelgroup_max = 0;
+	imgs->labels_above = 0;
 
 	/* init: 0 means no label set / not checked */
 	memset(labels, 0, width*height*sizeof(labels));
 	pixelpos = 0;
-	for( iy=0; iy<height-1; iy++ ) {
-		for( ix=0; ix<width-1; ix++, pixelpos++ ) {
+	for (iy = 0; iy < height-1; iy++) {
+		for (ix = 0; ix < width-1; ix++, pixelpos++) {
 			/* no motion - no label */
 			if( out[pixelpos] == 0 ) {
-				labels[pixelpos]=1;
+				labels[pixelpos] = 1;
 				continue;
 			}
 			
 			/* already visited by iflood */
 			if (labels[pixelpos] > 0)
 				continue;
-			labelsize=iflood(ix, iy, width, height, out, labels, current_label, 0);
+			labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
 			
-			if( labelsize > 0 ) {
+			if (labelsize > 0) {
 				//printf( "Label: %i (%i) Size: %i (%i,%i)\n", current_label, cnt->current_image->total_labels, labelsize, ix, iy );
 				/* Label above threshold? Mark it again (add 32768 to labelnumber) */
-				if (labelsize > cnt->threshold){
-					labelsize=iflood(ix, iy, width, height, out, labels, current_label+32768, current_label);
-					imgs->labelgroup_max+=labelsize;
+				if (labelsize > cnt->threshold) {
+					labelsize = iflood(ix, iy, width, height, out, labels, current_label + 32768, current_label);
+					imgs->labelgroup_max += labelsize;
 					imgs->labels_above++;
 				}
 				
-				if( imgs->labelsize_max < labelsize ){
-					imgs->labelsize_max=labelsize;
-					imgs->largest_label=current_label;
+				if (imgs->labelsize_max < labelsize) {
+					imgs->labelsize_max = labelsize;
+					imgs->largest_label = current_label;
 				}
 				
 				cnt->current_image->total_labels++;
@@ -546,7 +546,7 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
 	char *Row1,*Row2,*Row3;
 	Row1 = buffer;
 	Row2 = Row1 + width;
-	Row3 = Row1 + 2*width;
+	Row3 = Row1 + 2 * width;
 	memset(Row2, flag, width);
 	memcpy(Row3, img, width);
 	for (y = 0; y < height; y++) {
@@ -555,7 +555,7 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
 		if (y == height-1)
 			memset(Row3, flag, width);
 		else
-			memcpy(Row3, img+(y+1)*width, width);
+			memcpy(Row3, img + (y+1) * width, width);
 
 		for (i = width-2; i >= 1; i--) {
 			if (Row1[i-1] == 0 ||
@@ -571,7 +571,7 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
 			else
 				sum++;
 		}
-		img[y*width] = img[y*width+width-1] = flag;
+		img[y * width] = img[y * width + width - 1] = flag;
 	}
 	return sum;
 }
@@ -583,7 +583,7 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 	char *Row1,*Row2,*Row3;
 	Row1 = buffer;
 	Row2 = Row1 + width;
-	Row3 = Row1 + 2*width;
+	Row3 = Row1 + 2 * width;
 	memset(Row2, flag, width);
 	memcpy(Row3, img, width);
 	for (y = 0; y < height; y++) {
@@ -592,19 +592,19 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 		if (y == height-1)
 			memset(Row3, flag, width);
 		else
-			memcpy(Row3, img+(y+1)*width, width);
+			memcpy(Row3, img + (y + 1) * width, width);
 
-		for (i = width-2; i >= 1; i--) {
+		for (i = width - 2; i >= 1; i--) {
 			if (Row1[i]   == 0 ||
 				Row2[i-1] == 0 ||
 				Row2[i]   == 0 ||
 				Row2[i+1] == 0 ||
 				Row3[i]   == 0)
-				img[y*width+i] = 0;
+				img[y * width + i] = 0;
 			else
 				sum++;
 		}
-		img[y*width] = img[y*width+width-1] = flag;
+		img[y * width] = img[y * width + width - 1] = flag;
 	}
 	return sum;
 }
@@ -617,33 +617,33 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 	int diffs = 0;
 	unsigned char *out = cnt->imgs.out;
 	int width = cnt->imgs.width;
-	int height= cnt->imgs.height;
+	int height = cnt->imgs.height;
 	int done = 0, i, len = strlen(cnt->conf.despeckle);
 	unsigned char *common_buffer = cnt->imgs.common_buffer;
 
 	for (i = 0; i < len; i++) {
 		switch (cnt->conf.despeckle[i]) {
 		case 'E':
-			if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) i=len;
-			done=1;
+			if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) i = len;
+			done = 1;
 			break;
 		case 'e':
-			if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0) i=len;
-			done=1;
+			if ((diffs = erode5(out, width, height, common_buffer, 0)) == 0) i = len;
+			done = 1;
 			break;
 		case 'D':
 			diffs = dilate9(out, width, height, common_buffer);
-			done=1;
+			done = 1;
 			break;
 		case 'd':
 			diffs = dilate5(out, width, height, common_buffer);
-			done=1;
+			done = 1;
 			break;
 		/* no further despeckle after labeling! */
 		case 'l':
 			diffs = alg_labeling(cnt);
-			i=len;
-			done=2;
+			i = len;
+			done = 2;
 			break;
 		}
 	}
@@ -668,10 +668,9 @@ void alg_tune_smartmask(struct context *cnt)
 	unsigned char *smartmask = cnt->imgs.smartmask;
 	unsigned char *smartmask_final = cnt->imgs.smartmask_final;
 	int *smartmask_buffer = cnt->imgs.smartmask_buffer;
-	int sensitivity=cnt->lastrate*(11-cnt->smartmask_speed);
+	int sensitivity = cnt->lastrate * (11 - cnt->smartmask_speed);
 
-	for (i=0; i<motionsize; i++)
-	{
+	for (i = 0; i < motionsize; i++) {
 		/* Decrease smart_mask sensitivity every 5*speed seconds only */
 		if (smartmask[i] > 0)
 			smartmask[i]--;
@@ -679,16 +678,16 @@ void alg_tune_smartmask(struct context *cnt)
 		diff = smartmask_buffer[i]/sensitivity;
 		if (diff){
 			if (smartmask[i] <= diff+80)
-				smartmask[i]+=diff;
+				smartmask[i] += diff;
 			else
-				smartmask[i]=80;
-			smartmask_buffer[i]%=sensitivity;
+				smartmask[i] = 80;
+			smartmask_buffer[i] %= sensitivity;
 		}
 		/* Transfer raw mask to the final stage when above trigger value */
-		if (smartmask[i]>20)
-			smartmask_final[i]=0;
+		if (smartmask[i] > 20)
+			smartmask_final[i] = 0;
 		else
-			smartmask_final[i]=255;
+			smartmask_final[i] = 255;
 	}
 	/* Further expansion (here:erode due to inverted logic!) of the mask */
 	diff = erode9(smartmask_final, cnt->imgs.width, cnt->imgs.height, cnt->imgs.common_buffer, 255);
@@ -700,21 +699,21 @@ void alg_tune_smartmask(struct context *cnt)
 
 int alg_diff_standard (struct context *cnt, unsigned char *new)
 {
-	struct images *imgs=&cnt->imgs;
-	int i, diffs=0;
-	int noise=cnt->noise;
-	int smartmask_speed=cnt->smartmask_speed;
-	unsigned char *ref=imgs->ref;
-	unsigned char *out=imgs->out;
-	unsigned char *mask=imgs->mask;
-	unsigned char *smartmask_final=imgs->smartmask_final;
-	int *smartmask_buffer=imgs->smartmask_buffer;
+	struct images *imgs = &cnt->imgs;
+	int i, diffs = 0;
+	int noise = cnt->noise;
+	int smartmask_speed = cnt->smartmask_speed;
+	unsigned char *ref = imgs->ref;
+	unsigned char *out = imgs->out;
+	unsigned char *mask = imgs->mask;
+	unsigned char *smartmask_final = imgs->smartmask_final;
+	int *smartmask_buffer = imgs->smartmask_buffer;
 #ifdef HAVE_MMX
 	mmx_t mmtemp; /* used for transferring to/from memory */
 	int unload;   /* counter for unloading diff counts */
 #endif
 
-	i=imgs->motionsize;
+	i = imgs->motionsize;
 	memset(out+i, 128, i/2); /* motion pictures are now b/w i.o. green */
 	/* Keeping this memset in the MMX case when zeroes are necessarily 
 	 * written anyway seems to be beneficial in terms of speed. Perhaps a
@@ -741,7 +740,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	 * 255*(noise+1)-1).
 	 */
 	mmtemp.uw[0] = mmtemp.uw[1] = mmtemp.uw[2] = mmtemp.uw[3] =
-		(unsigned short)(noise * 255 + 254);
+	               (unsigned short)(noise * 255 + 254);
 	
 	/* Reset mm5 to zero, set the mm6 mask, and store the multiplied noise
 	 * level as four words in mm7.
@@ -756,9 +755,9 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	 * in each packed byte, which can hold at most 255 diffs before it
 	 * gets saturated.
 	 */
-	unload=255;
+	unload = 255;
 	
-	for (; i>7; i-=8) {
+	for (; i > 7; i -= 8) {
 		/* Calculate abs(*ref-*new) for 8 pixels in parallel. */
 		movq_m2r(*ref, mm0);           /* U: mm0 = r7 r6 r5 r4 r3 r2 r1 r0 */
 		pxor_r2r(mm4, mm4);            /* V: mm4 = 0 */
@@ -793,9 +792,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 			
 			pmullw_r2r(mm3, mm1);      /* U: mm1 = (d7*m7) ... (d4*m4) */
 
-			mask+=8;
-		}
-		else {
+			mask += 8;
+		} else {
 			/* Not using mask - multiply the absolute differences by 255. We
 			 * do this by left-shifting 8 places and then subtracting dX.
 			 */
@@ -854,18 +852,18 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 
 			/* Add to *smartmask_buffer. This is probably the fastest way to do it. */
 			if (cnt->event_nr != cnt->prev_event) {
-				if (mmtemp.ub[0]) smartmask_buffer[0]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[1]) smartmask_buffer[1]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[2]) smartmask_buffer[2]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[3]) smartmask_buffer[3]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[4]) smartmask_buffer[4]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[5]) smartmask_buffer[5]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[6]) smartmask_buffer[6]+=SMARTMASK_SENSITIVITY_INCR;
-				if (mmtemp.ub[7]) smartmask_buffer[7]+=SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[0]) smartmask_buffer[0] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[1]) smartmask_buffer[1] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[2]) smartmask_buffer[2] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[3]) smartmask_buffer[3] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[4]) smartmask_buffer[4] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[5]) smartmask_buffer[5] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[6]) smartmask_buffer[6] += SMARTMASK_SENSITIVITY_INCR;
+				if (mmtemp.ub[7]) smartmask_buffer[7] += SMARTMASK_SENSITIVITY_INCR;
 			}
 
-			smartmask_buffer+=8;
-			smartmask_final+=8;
+			smartmask_buffer += 8;
+			smartmask_final += 8;
 		}
 
 		movq_m2r(*new, mm2);           /* U: mm1 = n7 n6 n5 n4 n3 n2 n1 n0 */
@@ -885,28 +883,28 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 		/* Every 255th turn, we need to unload mm5 into the diffs variable,
 		 * because otherwise the packed bytes will get saturated.
 		 */
-		if (--unload==0) {
+		if (--unload == 0) {
 			/* Unload mm5 to memory and reset it. */
 			movq_r2m(mm5, mmtemp);     /* U */
 			pxor_r2r(mm5, mm5);        /* V: mm5 = 0 */
 
 			diffs += mmtemp.ub[0] + mmtemp.ub[1] + mmtemp.ub[2] + mmtemp.ub[3] + 
-				mmtemp.ub[4] + mmtemp.ub[5] + mmtemp.ub[6] + mmtemp.ub[7];
-			unload=255;
+			         mmtemp.ub[4] + mmtemp.ub[5] + mmtemp.ub[6] + mmtemp.ub[7];
+			unload = 255;
 		}
 
-		out+=8;
-		ref+=8;
-		new+=8;
+		out += 8;
+		ref += 8;
+		new += 8;
 	}
 
 	/* Check if there are diffs left in mm5 that need to be copied to the
 	 * diffs variable. 
 	 */
-	if (unload<255) {
+	if (unload < 255) {
 		movq_r2m(mm5, mmtemp);
 		diffs += mmtemp.ub[0] + mmtemp.ub[1] + mmtemp.ub[2] + mmtemp.ub[3] + 
-			mmtemp.ub[4] + mmtemp.ub[5] + mmtemp.ub[6] + mmtemp.ub[7];
+                         mmtemp.ub[4] + mmtemp.ub[5] + mmtemp.ub[6] + mmtemp.ub[7];
 	}
 
 	emms();
@@ -917,11 +915,11 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 	 * case the non-MMX code needs to take care of the remaining pixels.
 	 */
 
-	for (; i>0; i--) {
-		register unsigned char curdiff=(int)(abs(*ref - *new)); /* using a temp variable is 12% faster */
+	for (; i > 0; i--) {
+		register unsigned char curdiff = (int)(abs(*ref - *new)); /* using a temp variable is 12% faster */
 		/* apply fixed mask */
 		if (mask)
-			curdiff=((int)(curdiff * *mask++)/255);
+			curdiff = ((int)(curdiff * *mask++) / 255);
 			
 		if (smartmask_speed) {
 			if (curdiff > noise) {
@@ -934,14 +932,14 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 					(*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
 				/* apply smart_mask */
 				if (!*smartmask_final)
-					curdiff=0;
+					curdiff = 0;
 			}
 			smartmask_final++;
 			smartmask_buffer++;
 		}
 		/* Pixel still in motion after all the masks? */
 		if (curdiff > noise) {
-			*out=*new;
+			*out = *new;
 			diffs++;
 		}
 		out++;
@@ -956,26 +954,26 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 */
 static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char *new)
 {
-	struct images *imgs=&cnt->imgs;
-	int i, diffs=0, step=imgs->motionsize/10000;
-	int noise=cnt->noise;
-	unsigned char *ref=imgs->ref;
+	struct images *imgs = &cnt->imgs;
+	int i, diffs = 0, step = imgs->motionsize/10000;
+	int noise = cnt->noise;
+	unsigned char *ref = imgs->ref;
 
-	if (!step%2)
+	if (!step % 2)
 		step++;
 	/* we're checking only 1 of several pixels */
 	max_n_changes /= step;
 
-	i=imgs->motionsize;
-	for (; i>0; i-=step) {
-		register unsigned char curdiff=(int)(abs((char)(*ref-*new))); /* using a temp variable is 12% faster */
+	i = imgs->motionsize;
+	for (; i > 0; i -= step) {
+		register unsigned char curdiff = (int)(abs((char)(*ref - *new))); /* using a temp variable is 12% faster */
 		if (curdiff >  noise) {
 			diffs++;
 			if (diffs > max_n_changes)
 				return 1;
 		}
-		ref+=step;
-		new+=step;
+		ref += step;
+		new += step;
 	}
 
 	return 0;
@@ -986,10 +984,10 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
 */
 int alg_diff(struct context *cnt, unsigned char *new)
 {
-	int diffs=0;
+	int diffs = 0;
 	
-	if (alg_diff_fast(cnt, cnt->conf.max_changes/2, new))
-		diffs=alg_diff_standard(cnt, new);
+	if (alg_diff_fast(cnt, cnt->conf.max_changes / 2, new))
+		diffs = alg_diff_standard(cnt, new);
 
 	return diffs;
 }
@@ -1000,7 +998,7 @@ int alg_diff(struct context *cnt, unsigned char *new)
  */
 int alg_lightswitch(struct context *cnt, int diffs)
 {
-	struct images *imgs=&cnt->imgs;
+	struct images *imgs = &cnt->imgs;
 	
 	if (cnt->conf.lightswitch < 0)
 		cnt->conf.lightswitch = 0;
@@ -1019,29 +1017,29 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 	int linediff = diffs / cnt->imgs.height;
 	unsigned char *out = cnt->imgs.out;
 	int y, x, line;
-	int lines=0, vertlines=0;
+	int lines = 0, vertlines = 0;
 
-	for (y=0; y < cnt->imgs.height; y++) {
-		line=0;
-		for (x=0; x < cnt->imgs.width; x++) {
+	for (y = 0; y < cnt->imgs.height; y++) {
+		line = 0;
+		for (x = 0; x < cnt->imgs.width; x++) {
 			if (*(out++)) {
 				line++;
 			}
 		}
-		if (line > cnt->imgs.width/18) {
+		if (line > cnt->imgs.width / 18) {
 			vertlines++;
 		}
-		if (line > linediff*2) {
+		if (line > linediff * 2) {
 			lines++;
 		}
 	}
 
-	if (vertlines > cnt->imgs.height/10 && lines < vertlines/3 &&
-	    (vertlines > cnt->imgs.height/4 || lines - vertlines > lines/2)) {
+	if (vertlines > cnt->imgs.height / 10 && lines < vertlines / 3 &&
+	    (vertlines > cnt->imgs.height / 4 || lines - vertlines > lines / 2)) {
 		if (cnt->conf.text_changes) {
 			char tmp[80];
 			sprintf(tmp, "%d %d", lines, vertlines);
-			draw_text(newimg, cnt->imgs.width-10, 20, cnt->imgs.width, tmp, cnt->conf.text_double);
+			draw_text(newimg, cnt->imgs.width - 10, 20, cnt->imgs.width, tmp, cnt->conf.text_double);
 		}
 		return diffs;
 	}

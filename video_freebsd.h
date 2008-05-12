@@ -122,8 +122,8 @@ struct video_dev {
 
 /* video functions, video_freebsd.c */
 int vid_start(struct context *);
-int vid_next(struct context *, unsigned char *map);
-void vid_close(struct context *cnt);
+int vid_next(struct context *, unsigned char *);
+void vid_close(struct context *);
 
 #ifndef WITHOUT_V4L
 void vid_init(void);

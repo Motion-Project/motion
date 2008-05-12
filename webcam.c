@@ -19,15 +19,12 @@
  */
 
 #include "picture.h"
-//#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <ctype.h>
 #include <sys/fcntl.h>
-//#include <sys/stat.h>
-
-
 
 
 /* This function sets up a TCP/IP socket for incoming requests. It is called only during
@@ -38,35 +35,70 @@
  */
 int http_bindsock(int port, int local)
 {
-	int sl, optval=1;
-	struct sockaddr_in sin;
+	int sl = -1, optval;
+	struct addrinfo hints, *res, *ressave;
+	char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
-	if ((sl=socket(PF_INET, SOCK_STREAM, 0))<0) {
-		motion_log(LOG_ERR, 1, "socket()");
+
+	snprintf(portnumber, sizeof(portnumber), "%u", port);
+
+	memset(&hints, 0, sizeof(struct addrinfo));
+	/* Use the AI_PASSIVE flag, which indicates we are using this address for a listen() */
+	hints.ai_flags = AI_PASSIVE;
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
+
+	if (optval != 0) {
+		motion_log(LOG_ERR, 1, "getaddrinfo() for webcam socket failed: %s", gai_strerror(optval));
+		freeaddrinfo(res);
 		return -1;
 	}
 
-	memset(&sin, 0, sizeof(struct sockaddr_in));
-	sin.sin_family=AF_INET;
-	sin.sin_port=htons(port);
+	ressave = res;
+
+	while (res) {
+		/* create socket */
+		sl = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+
+		getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
+		            sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
+
+		if (sl >= 0) {
+			optval = 1;
+			/* Reuse Address */ 
+			setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof( int ) );
+
+			motion_log(LOG_INFO, 0, "webcam testing : %s addr: %s port: %s",
+			                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
+
+			if (bind(sl, res->ai_addr, res->ai_addrlen) == 0){
+				motion_log(LOG_INFO, 0, "webcam Binded : %s addr: %s port: %s",
+				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);	
+				break;
+			}
+
+			motion_log(LOG_ERR, 1, "webcam bind() failed, retrying ");
+			close(sl);
+			sl = -1;
+		}
+		motion_log(LOG_ERR, 1, "webcam socket failed, retrying");
+		res = res->ai_next;
+	}
+
+	freeaddrinfo(ressave);
+
+	if (sl < 0) {
+		motion_log(LOG_ERR, 1, "webcam creating socket/bind ERROR");
+		return -1;
+	}
 	
-	if (local)
-		sin.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
-	else
-		sin.sin_addr.s_addr=htonl(INADDR_ANY);
 
-	setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-
-	if (bind(sl, (struct sockaddr *)&sin, sizeof(struct sockaddr_in))==-1) {
-		motion_log(LOG_ERR, 1, "bind()");
+	if (listen(sl, DEF_MAXWEBQUEUE) == -1) {
+		motion_log(LOG_ERR, 1, "webcam listen() ERROR");
 		close(sl);
-		return -1;
-	}
-
-	if (listen(sl, DEF_MAXWEBQUEUE)==-1) {
-		motion_log(LOG_ERR, 1, "listen()");
-		close(sl);
-		return -1;
+		sl = -1;
 	}
 
 	return sl;
@@ -77,16 +109,16 @@ static int http_acceptsock(int sl)
 {
 	int sc;
 	unsigned long i;
-	struct sockaddr_in sin;
-	socklen_t addrlen=sizeof(struct sockaddr_in);
+	struct sockaddr_storage sin;
+	socklen_t addrlen = sizeof(sin);
 
-	if ((sc=accept(sl, (struct sockaddr *)&sin, &addrlen))>=0) {
-		i=1;
+	if ((sc = accept(sl, (struct sockaddr *)&sin, &addrlen)) >= 0) {
+		i = 1;
 		ioctl(sc, FIONBIO, &i);
 		return sc;
 	}
 	
-	motion_log(LOG_ERR, 1, "accept()");
+	motion_log(LOG_ERR, 1, "motion-stream accept()");
 
 	return -1;
 }
@@ -126,15 +158,15 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 				 * 'filepos' contains how much of the buffer
 				 * has already been written.
 				 */
-				written=write(client->socket, 
+				written = write(client->socket, 
 					      client->tmpbuffer->ptr + client->filepos,
 					      client->tmpbuffer->size - client->filepos);
 		
 				/* If any data has been written, update the
 				 * data pointer and set the workdone flag
 				 */
-				if (written>0) {
-					client->filepos+=written;
+				if (written > 0) {
+					client->filepos += written;
 					workdone = 1;
 				}
 			} else
@@ -146,7 +178,7 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 			 * finished.
 			 */
 			if ( (client->filepos >= client->tmpbuffer->size) ||
-			     (written < 0 && errno!=EAGAIN)) {
+			     (written < 0 && errno != EAGAIN)) {
 				/* If no other clients need this buffer, free it */
 				if (--client->tmpbuffer->ref <= 0) {
 					free(client->tmpbuffer->ptr);
@@ -154,7 +186,7 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 				}
 			
 				/* Mark this client's buffer as empty */
-				client->tmpbuffer=NULL;
+				client->tmpbuffer = NULL;
 				client->nr++;
 			}
 			
@@ -163,18 +195,18 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 			 * greater than our configuration limit, disconnect
 			 * the client and free the webcam struct
 			 */
-			if ( (written<0 && errno!=EAGAIN) ||
-			     (lim && !client->tmpbuffer && client->nr>lim) ) {
+			if ( (written < 0 && errno != EAGAIN) ||
+			     (lim && !client->tmpbuffer && client->nr > lim) ) {
 				void *tmp;
 
 				close(client->socket);
 				
 				if (client->next)
-					client->next->prev=client->prev;
+					client->next->prev = client->prev;
 				
-				client->prev->next=client->next;
-				tmp=client;
-				client=client->prev;
+				client->prev->next = client->next;
+				tmp = client;
+				client = client->prev;
 				free(tmp);
 				(*stream_count)--;
 			}
@@ -198,9 +230,9 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
  */
 static struct webcam_buffer *webcam_tmpbuffer(int size)
 {
-	struct webcam_buffer *tmpbuffer=mymalloc(sizeof(struct webcam_buffer));
-	tmpbuffer->ref=0;
-	tmpbuffer->ptr=mymalloc(size);
+	struct webcam_buffer *tmpbuffer = mymalloc(sizeof(struct webcam_buffer));
+	tmpbuffer->ref = 0;
+	tmpbuffer->ptr = mymalloc(size);
 		
 	return tmpbuffer;
 }
@@ -219,7 +251,7 @@ static void webcam_add_client(struct webcam *list, int sc)
 			"Content-Type: multipart/x-mixed-replace; boundary=--BoundaryString\r\n\r\n";
 
 	memset(new, 0, sizeof(struct webcam));
-	new->socket=sc;
+	new->socket = sc;
 	
 	if ((new->tmpbuffer = webcam_tmpbuffer(sizeof(header))) == NULL) {
 		motion_log(LOG_ERR, 1, "Error creating tmpbuffer in webcam_add_client");
@@ -228,13 +260,13 @@ static void webcam_add_client(struct webcam *list, int sc)
 		new->tmpbuffer->size = sizeof(header)-1;
 	}
 	
-	new->prev=list;
-	new->next=list->next;
+	new->prev = list;
+	new->next = list->next;
 	
 	if (new->next)
-		new->next->prev=new;
+		new->next->prev = new;
 	
-	list->next=new;
+	list->next = new;
 }
 
 
@@ -244,20 +276,20 @@ static void webcam_add_write(struct webcam *list, struct webcam_buffer *tmpbuffe
 	unsigned long int curtime;
 
 	gettimeofday(&curtimeval, NULL);
-	curtime=curtimeval.tv_usec+1000000L*curtimeval.tv_sec;
+	curtime = curtimeval.tv_usec + 1000000L * curtimeval.tv_sec;
 	
 	while (list->next) {
-		list=list->next;
+		list = list->next;
 		
-		if (list->tmpbuffer==NULL && ((curtime-list->last) >= 1000000L/fps)) {
-			list->last=curtime;
-			list->tmpbuffer=tmpbuffer;
+		if (list->tmpbuffer == NULL && ((curtime - list->last) >= 1000000L / fps)) {
+			list->last = curtime;
+			list->tmpbuffer = tmpbuffer;
 			tmpbuffer->ref++;
-			list->filepos=0;
+			list->filepos = 0;
 		}
 	}
 	
-	if (tmpbuffer->ref<=0) {
+	if (tmpbuffer->ref <= 0) {
 		free(tmpbuffer->ptr);
 		free(tmpbuffer);
 	}
@@ -272,9 +304,9 @@ static void webcam_add_write(struct webcam *list, struct webcam_buffer *tmpbuffe
 static int webcam_check_write(struct webcam *list)
 {
 	while (list->next) {
-		list=list->next;
+		list = list->next;
 		
-		if (list->tmpbuffer==NULL)
+		if (list->tmpbuffer == NULL)
 			return 1;
 	}
 	return 0;
@@ -287,9 +319,9 @@ static int webcam_check_write(struct webcam *list)
  */
 int webcam_init(struct context *cnt)
 {
-	cnt->webcam.socket=http_bindsock(cnt->conf.webcam_port, cnt->conf.webcam_localhost);
-	cnt->webcam.next=NULL;
-	cnt->webcam.prev=NULL;
+	cnt->webcam.socket = http_bindsock(cnt->conf.webcam_port, cnt->conf.webcam_localhost);
+	cnt->webcam.next = NULL;
+	cnt->webcam.prev = NULL;
 	return cnt->webcam.socket;
 }
 
@@ -310,8 +342,8 @@ void webcam_stop(struct context *cnt)
 	cnt->webcam.socket = -1;
 
 	while (next) {
-		list=next;
-		next=list->next;
+		list = next;
+		next = list->next;
 		
 		if (list->tmpbuffer) {
 			free(list->tmpbuffer->ptr);
@@ -347,7 +379,7 @@ void webcam_put(struct context *cnt, unsigned char *image)
 	struct timeval timeout; 
 	struct webcam_buffer *tmpbuffer;
 	fd_set fdread;
-	int sl=cnt->webcam.socket;
+	int sl = cnt->webcam.socket;
 	int sc;
 	/* the following string has an extra 16 chars at end for length */
 	const char jpeghead[] = "--BoundaryString\r\n"
@@ -359,8 +391,8 @@ void webcam_put(struct context *cnt, unsigned char *image)
 	/* timeout struct used to timeout the time we wait for a client
 	 * and we do not wait at all
 	 */
-	timeout.tv_sec=0;
-	timeout.tv_usec=0;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
 	FD_ZERO(&fdread);
 	FD_SET(cnt->webcam.socket, &fdread);
 	
@@ -372,7 +404,7 @@ void webcam_put(struct context *cnt, unsigned char *image)
 	 */
 	if ((cnt->stream_count < DEF_MAXSTREAMS) &&
 	    (select(sl+1, &fdread, NULL, NULL, &timeout)>0)) {
-		sc=http_acceptsock(sl);
+		sc = http_acceptsock(sl);
 		webcam_add_client(&cnt->webcam, sc);
 		cnt->stream_count++;
 	}

@@ -9,12 +9,9 @@
  *
  */
 
-//#include "motion.h"
 /* for rotation */
 #include "rotate.h"	/* already includes motion.h */
 #include "video.h"
-/* for rotation */
-//#include "rotate.h"
 
 #ifdef MJPEGT 
 #include <mjpegtools/jpegutils.h>
@@ -296,7 +293,7 @@ void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int wi
 {
 	uint8_t *pY = map;
 	uint8_t *pU = pY + (width * height);
-	uint8_t *pV = pU + (width * height)/4;
+	uint8_t *pV = pU + (width * height) / 4;
 	uint32_t uv_offset = width * 4 * sizeof(uint8_t);
 	uint32_t ix, jx;
 
@@ -363,7 +360,7 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
 	}
 }
 
-int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int width, int height)
+int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff *buff, int width, int height)
 {
 	netcam_context netcam;
 
@@ -406,23 +403,23 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
 
 	decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
 
-	y=map;
-	u=y+width*height;
-	v=u+(width*height)/4;
-	memset(y, 0, width*height);
-	memset(u, 0, width*height/4);
-	memset(v, 0, width*height/4);
+	y = map;
+	u = y + width * height;
+	v = u + (width * height) / 4;
+	memset(y, 0, width * height);
+	memset(u, 0, width * height / 4);
+	memset(v, 0, width * height / 4);
 
-	for(loop=0; loop<width*height; loop++) {
-		*map++=yuv[0][loop];
+	for(loop = 0; loop < width * height; loop++) {
+		*map++ = yuv[0][loop];
 	}
 
-	for(loop=0; loop<width*height/4; loop++) {
-		*map++=yuv[1][loop];
+	for(loop = 0; loop < width * height / 4; loop++) {
+		*map++ = yuv[1][loop];
 	}
 
-	for(loop=0; loop<width*height/4; loop++) {
-		*map++=yuv[2][loop];
+	for(loop = 0; loop < width * height / 4; loop++) {
+		*map++ = yuv[2][loop];
 	}
 
 	free(yuv[0]);
@@ -853,7 +850,7 @@ int vid_start(struct context *cnt)
 	}
 #ifdef WITHOUT_V4L
         else	
-		motion_log(LOG_ERR, 0,"You must setup netcam_url");
+		motion_log(LOG_ERR, 0, "You must setup netcam_url");
 #else
 	else
 		dev = vid_v4lx_start(cnt);

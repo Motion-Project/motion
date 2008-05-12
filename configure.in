@@ -1085,7 +1085,7 @@ AC_LINK_IFELSE([
 
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long"
+	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -gdwarf-2 -g3"
 fi
 
 CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"

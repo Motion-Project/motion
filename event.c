@@ -10,7 +10,6 @@
 */
 
 #include "ffmpeg.h"	/* must be first to avoid 'shadow' warning */
-//#include "motion.h"
 #include "picture.h"	/* already includes motion.h */
 #include "event.h"
 #if (!defined(BSD)) 
@@ -340,8 +339,8 @@ static void event_camera_lost(struct context *cnt, int type ATTRIBUTE_UNUSED,
 #ifdef HAVE_FFMPEG
 static void grey2yuv420p(unsigned char *u, unsigned char *v, int width, int height)
 {
-	memset(u, 128, width*height/4);
-	memset(v, 128, width*height/4);
+	memset(u, 128, width * height / 4);
+	memset(v, 128, width * height / 4);
 }
 
 static void on_movie_end_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
@@ -358,8 +357,8 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
 {
-	int width=cnt->imgs.width;
-	int height=cnt->imgs.height;
+	int width = cnt->imgs.width;
+	int height = cnt->imgs.height;
 	unsigned char *convbuf, *y, *u, *v;
 	char stamp[PATH_MAX];
 	const char *mpegpath;
@@ -371,7 +370,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	cnt->movie_fps = cnt->lastrate;
 
 	if (debug_level >= CAMERA_DEBUG) 
-		motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__,cnt->movie_fps);
+		motion_log(LOG_DEBUG, 0, "%s FPS %d", __FUNCTION__, cnt->movie_fps);
 
 	if (cnt->movie_fps > 30)
 		cnt->movie_fps = 30;
@@ -393,41 +392,41 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
 	if (cnt->conf.ffmpeg_cap_new) {
-		if (cnt->imgs.type==VIDEO_PALETTE_GREY) {
-			convbuf=mymalloc((width*height)/2);
-			y=img;
-			u=convbuf;
-			v=convbuf+(width*height)/4;
+		if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
+			convbuf = mymalloc((width * height) / 2);
+			y = img;
+			u = convbuf;
+			v = convbuf + (width * height) / 4;
 			grey2yuv420p(u, v, width, height);
 		} else {
-			convbuf=NULL;
-			y=img;
-			u=img+width*height;
-			v=u+(width*height)/4;
+			convbuf = NULL;
+			y = img;
+			u = img + width * height;
+			v = u + (width * height) / 4;
 		}
 		if ( (cnt->ffmpeg_new =
 		      ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
 		                  cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL) {
-			motion_log(LOG_ERR, 1, "ffopen_open error creating (new) file [%s]",cnt->newfilename);
-			cnt->finish=1;
+			motion_log(LOG_ERR, 1, "ffopen_open error creating (new) file [%s]", cnt->newfilename);
+			cnt->finish = 1;
 			return;
 		}
-		((struct ffmpeg *)cnt->ffmpeg_new)->udata=convbuf;
+		((struct ffmpeg *)cnt->ffmpeg_new)->udata = convbuf;
 		event(cnt, EVENT_FILECREATE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
 	}
 	if (cnt->conf.ffmpeg_cap_motion) {
-		if (cnt->imgs.type==VIDEO_PALETTE_GREY) {
-			convbuf=mymalloc((width*height)/2);
-			y=cnt->imgs.out;
-			u=convbuf;
-			v=convbuf+(width*height)/4;
+		if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
+			convbuf = mymalloc((width * height) / 2);
+			y = cnt->imgs.out;
+			u = convbuf;
+			v = convbuf + (width * height) / 4;
 			grey2yuv420p(u, v, width, height);
 		} else {
-			y=cnt->imgs.out;
-			u=cnt->imgs.out+width*height;
-			v=u+(width*height)/4;
-			convbuf=NULL;
+			y = cnt->imgs.out;
+			u = cnt->imgs.out + width *height;
+			v = u + (width * height) / 4;
+			convbuf = NULL;
 		}
 
 		if ( (cnt->ffmpeg_motion =
@@ -435,10 +434,10 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		                  cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL){
 			motion_log(LOG_ERR, 1, "ffopen_open error creating (motion) file [%s]", cnt->motionfilename);
-			cnt->finish=1;
+			cnt->finish = 1;
 			return;
 		}
-		cnt->ffmpeg_motion->udata=convbuf;
+		cnt->ffmpeg_motion->udata = convbuf;
 		event(cnt, EVENT_FILECREATE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, NULL);
 	}
 }
@@ -469,16 +468,16 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 		snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
 		
 		if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
-			convbuf = mymalloc((width*height)/2);
+			convbuf = mymalloc((width * height) / 2);
 			y = img;
 			u = convbuf;
-			v = convbuf+(width*height)/4;
+			v = convbuf + (width * height) / 4;
 			grey2yuv420p(u, v, width, height);
 		} else {
 			convbuf = NULL;
 			y = img;
-			u = img+width*height;
-			v = u+(width*height)/4;
+			u = img + width * height;
+			v = u + (width * height) / 4;
 		}
 		
 		if ( (cnt->ffmpeg_timelapse =
@@ -486,7 +485,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 		                  cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL) {
 			motion_log(LOG_ERR, 1, "ffopen_open error creating (timelapse) file [%s]", cnt->timelapsefilename);
-			cnt->finish=1;
+			cnt->finish = 1;
 			return;
 		}
 		
@@ -499,7 +498,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 	if (cnt->imgs.type == VIDEO_PALETTE_GREY)
 		u = cnt->ffmpeg_timelapse->udata;
 	else
-		u = img+width*height;
+		u = img + width * height;
 	
 	v = u+(width*height)/4;
 	if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v) == -1){
@@ -515,8 +514,8 @@ static void event_ffmpeg_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
 	if (cnt->ffmpeg_new)
 	{
-		int width=cnt->imgs.width;
-		int height=cnt->imgs.height;
+		int width = cnt->imgs.width;
+		int height = cnt->imgs.height;
 		unsigned char *y = img;
 		unsigned char *u, *v;
 		

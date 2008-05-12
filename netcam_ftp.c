@@ -11,19 +11,9 @@
 #include "motion.h"  /* needs to come first, because _GNU_SOURCE_ set there */
 
 #include <ctype.h>
-//#include <errno.h>
-//#include <fcntl.h>
 #include <netdb.h>
-#include <regex.h>
-//#include <stdarg.h>
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <string.h>
-//#include <syslog.h>
-//#include <unistd.h>
-#include <sys/socket.h>
-//#include <sys/stat.h>
-//#include <sys/types.h>
+//#include <regex.h>
+//#include <sys/socket.h>
 #include <netinet/in.h>
 
 #include "netcam_ftp.h"
@@ -210,7 +200,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
 	int res = -1, cur = -1;
 
 	if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-	return(-1);
+		return(-1);
 
 	get_more:
 	/*
@@ -244,7 +234,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
 			break;
 		}
 		while ((ptr < end) && (*ptr != '\n'))
-		ptr++;
+			ptr++;
 		if (ptr >= end) {
 			ctxt->control_buffer_index = ctxt->control_buffer_used;
 			goto get_more;
@@ -268,9 +258,9 @@ static int ftp_send_user(ftp_context_pointer ctxt) {
 	int res;
 
 	if (ctxt->user == NULL)
-	snprintf(buf, sizeof(buf), "USER anonymous\r\n");
+		snprintf(buf, sizeof(buf), "USER anonymous\r\n");
 	else
-	snprintf(buf, sizeof(buf), "USER %s\r\n", ctxt->user);
+		snprintf(buf, sizeof(buf), "USER %s\r\n", ctxt->user);
 	buf[sizeof(buf) - 1] = 0;
 	len = strlen(buf);
 	res = send(ctxt->control_file_desc, buf, len, 0);
@@ -291,9 +281,9 @@ static int ftp_send_passwd(ftp_context_pointer ctxt) {
 	int res;
 
 	if (ctxt->passwd == NULL)
-	snprintf(buf, sizeof(buf), "PASS anonymous@\r\n");
+		snprintf(buf, sizeof(buf), "PASS anonymous@\r\n");
 	else
-	snprintf(buf, sizeof(buf), "PASS %s\r\n", ctxt->passwd);
+		snprintf(buf, sizeof(buf), "PASS %s\r\n", ctxt->passwd);
 	buf[sizeof(buf) - 1] = 0;
 	len = strlen(buf);
 	res = send(ctxt->control_file_desc, buf, len, 0);
@@ -322,7 +312,7 @@ static int ftp_quit(ftp_context_pointer ctxt) {
 	int len, res;
 
 	if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-	return(-1);
+		return(-1);
 
 	snprintf(buf, sizeof(buf), "QUIT\r\n");
 	len = strlen(buf);
@@ -354,19 +344,19 @@ int ftp_connect(netcam_context_ptr netcam) {
 	int addrlen = sizeof (struct sockaddr_in);
 
 	if (netcam == NULL)
-	return -1;
+		return -1;
 	ctxt = netcam->ftp;
 	if (ctxt == NULL)
-	return(-1);
+		return(-1);
 	if (netcam->connect_host == NULL)
-	return(-1);
+		return(-1);
 
 	/*
 	* do the blocking DNS query.
 	*/
 	port = netcam->connect_port;
 	if (port == 0)
-	port = 21;
+		port = 21;
 
 	memset (&ctxt->ftp_address, 0, sizeof(ctxt->ftp_address));
 
@@ -386,10 +376,8 @@ int ftp_connect(netcam_context_ptr netcam) {
 	* Prepare the socket
 	*/
 	((struct sockaddr_in *)&ctxt->ftp_address)->sin_family = AF_INET;
-	memcpy (&((struct sockaddr_in *)&ctxt->ftp_address)->sin_addr,
-	hp->h_addr_list[0], hp->h_length);
-	((struct sockaddr_in *)&ctxt->ftp_address)->sin_port =
-	(u_short)htons ((unsigned short)port);
+	memcpy (&((struct sockaddr_in *)&ctxt->ftp_address)->sin_addr, hp->h_addr_list[0], hp->h_length);
+	((struct sockaddr_in *)&ctxt->ftp_address)->sin_port = (u_short)htons ((unsigned short)port);
 	ctxt->control_file_desc = socket (AF_INET, SOCK_STREAM, 0);
 	addrlen = sizeof (struct sockaddr_in);
 
@@ -431,7 +419,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 	res = ftp_get_response(ctxt);
 	switch (res) {
 		case 2:
-		return(0);
+			return(0);
 		case 3:
 		break;
 		case 1:
@@ -439,9 +427,9 @@ int ftp_connect(netcam_context_ptr netcam) {
 		case 5:
 		case -1:
 		default:
-		close(ctxt->control_file_desc);
-		ctxt->control_file_desc = -1;
-		return(-1);
+			close(ctxt->control_file_desc);
+			ctxt->control_file_desc = -1;
+			return(-1);
 	}
 	res = ftp_send_passwd(ctxt);
 	if (res < 0) {
@@ -454,15 +442,15 @@ int ftp_connect(netcam_context_ptr netcam) {
 		case 2:
 		break;
 		case 3:
-		motion_log(LOG_ERR, 0, "FTP server asking for ACCT on anonymous");
+			motion_log(LOG_ERR, 0, "FTP server asking for ACCT on anonymous");
 		case 1:
 		case 4:
 		case 5:
 		case -1:
 		default:
-		close(ctxt->control_file_desc); ctxt->control_file_desc = -1;
-		ctxt->control_file_desc = -1;
-		return(-1);
+			close(ctxt->control_file_desc); ctxt->control_file_desc = -1;
+			ctxt->control_file_desc = -1;
+			return(-1);
 	}
 
 	return(0);
@@ -552,7 +540,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 			}
 			return (-1);
 		}
-		for (i=0; i<6; i++)
+		for (i = 0; i < 6; i++)
 		ad[i] = (unsigned char) (temp[i] & 0xff) ;
 		memcpy (&((struct sockaddr_in *)&data_address)->sin_addr, &ad[0], 4);
 		memcpy (&((struct sockaddr_in *)&data_address)->sin_port, &ad[4], 2);
@@ -600,7 +588,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 		/* now generate the PORT command */
 		adp = (unsigned char *) &((struct sockaddr_in *)&data_address)->sin_addr;
 		portp = (unsigned char *) &((struct sockaddr_in *)&data_address)->sin_port;
-		snprintf (buf, sizeof(buf), "PORT %d,%d,%d,%d,%d,%d\r\n",
+		snprintf (buf, sizeof(buf), "PORT %d,%d,%d,%d,%d,%d\r\n", 
 		adp[0] & 0xff, adp[1] & 0xff, adp[2] & 0xff, adp[3] & 0xff,
 		portp[0] & 0xff, portp[1] & 0xff);
 

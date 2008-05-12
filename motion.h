@@ -134,14 +134,14 @@
                                      * and then we show a grey image instead
                                      */
 
-#define WATCHDOG_TMO 30  /* 10 sec max motion_loop interval */
-#define WATCHDOG_OFF -127 /* Turn off watchdog, used when we wants to quit a thread */
+#define WATCHDOG_TMO 30              /* 10 sec max motion_loop interval */
+#define WATCHDOG_OFF -127            /* Turn off watchdog, used when we wants to quit a thread */
 
 #define CONNECTION_KO "Lost connection"
 #define CONNECTION_OK "Connection OK"
 
-#define DEF_MAXSTREAMS          10  /* Maximum number of webcam clients per camera */
-#define DEF_MAXWEBQUEUE         10  /* Maximum number of webcam client in queue */
+#define DEF_MAXSTREAMS          10   /* Maximum number of webcam clients per camera */
+#define DEF_MAXWEBQUEUE         10   /* Maximum number of webcam client in queue */
 
 #define DEF_TIMESTAMP      "%Y-%m-%d\\n%T"
 #define DEF_EVENTSTAMP     "%Y%m%d%H%M%S"
@@ -207,15 +207,15 @@ struct images;
 struct image_data {
 	unsigned char *image;
 	int diffs;
-	time_t timestamp;         /* Timestamp when image was captured */
+	time_t timestamp;           /* Timestamp when image was captured */
 	struct tm timestamp_tm;
-	int shot;                 /* Sub second timestamp count */
+	int shot;                   /* Sub second timestamp count */
 
 	/* movement center to img center distance 
 	 * Note Dist is calculated distX*distX + distY*distY */
 	unsigned long cent_dist;
 
-	unsigned int flags;       /* Se IMAGE_* defines */
+	unsigned int flags;         /* Se IMAGE_* defines */
 
 	struct coord location;      /* coordinates for center and size of last motion detection*/
 
@@ -310,11 +310,11 @@ struct context {
 	struct images imgs;
 	struct trackoptions track;
 	struct netcam_context *netcam;
-	struct image_data *current_image;	/* Pointer to a structure where the image, diffs etc is stored */
+	struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
 	unsigned short int new_img;
 
 	int locate;
-	struct rotdata rotate_data;		/* rotation data is thread-specific */
+	struct rotdata rotate_data;              /* rotation data is thread-specific */
 
 	int noise;
 	int threshold;
@@ -335,9 +335,9 @@ struct context {
 	int event_nr;
 	int prev_event;
 	int lightswitch_framecounter;
-	char text_event_string[PATH_MAX];	/* The text for conv. spec. %C -
-						we assume PATH_MAX normally 4096 characters is fine */
-	int postcap;				/* downcounter, frames left to to send post event */
+	char text_event_string[PATH_MAX];        /* The text for conv. spec. %C -
+                                                    we assume PATH_MAX normally 4096 characters is fine */
+	int postcap;                             /* downcounter, frames left to to send post event */
 
 	short int shots;
 	unsigned short int detecting_motion;
@@ -347,13 +347,13 @@ struct context {
 	time_t currenttime;
 	time_t lasttime;
 	time_t eventtime;
-	time_t connectionlosttime;		/* timestamp from connection lost */
+	time_t connectionlosttime;               /* timestamp from connection lost */
 
 	int lastrate;
 	unsigned short int startup_frames;
 	unsigned short int moved;
 	unsigned short int pause;
-	int missing_frame_counter;		/* counts failed attempts to fetch picture frame from camera */
+	int missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
 	unsigned short int lost_connection;	
 
 #if (defined(BSD))

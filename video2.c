@@ -315,20 +315,22 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 	motion_log(LOG_INFO, 0, "Supported palettes:");
+
 	while (xioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
 		short int i;
 
-		motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal,
-			   fmt.pixelformat >> 0, fmt.pixelformat >> 8,
-			   fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);
+		motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal, fmt.pixelformat >> 0, 
+		                         fmt.pixelformat >> 8, fmt.pixelformat >> 16, 
+		                         fmt.pixelformat >> 24, fmt.description);
 
 		for (i = 0; supported_formats[i]; i++)
 			if (supported_formats[i] == fmt.pixelformat && i > index_format) {
 				if (cnt->conf.v4l2_palette == i) {
 					index_format = cnt->conf.v4l2_palette;
 					motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
-								fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24);
-					i=10;
+					                         fmt.pixelformat >> 8, fmt.pixelformat >> 16, 
+					                         fmt.pixelformat >> 24);
+					i = 10;
 					break;
 				}
 				index_format = i;
@@ -355,12 +357,14 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 		s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
 		if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
-			motion_log(LOG_INFO, 0, "index_format %d Test palette %c%c%c%c (%dx%d)", index_format, pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height);
+			motion_log(LOG_INFO, 0, "index_format %d Test palette %c%c%c%c (%dx%d)", 
+			                         index_format, pixformat >> 0, pixformat >> 8, 
+			                         pixformat >> 16, pixformat >> 24, *width, *height);
 
 			if (s->fmt.fmt.pix.width != (unsigned int) *width
 			    || s->fmt.fmt.pix.height != (unsigned int) *height) {
 				motion_log(LOG_INFO, 0, "Adjusting resolution from %ix%i to %ix%i.", *width, *height,
-					   s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
+				                         s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
 				*width = s->fmt.fmt.pix.width;
 				*height = s->fmt.fmt.pix.height;
 			}
@@ -371,7 +375,9 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 				return (-1);
 			}
 
-			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage %d colorspace %08x", pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height, s->fmt.fmt.pix.bytesperline, s->fmt.fmt.pix.sizeimage, s->fmt.fmt.   pix.colorspace);
+			motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage %d colorspace %08x", 
+			                         pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height, 
+			                         s->fmt.fmt.pix.bytesperline, s->fmt.fmt.pix.sizeimage, s->fmt.fmt.   pix.colorspace);
 
 			/* TODO: Review when it has been tested */
 			if (pixformat == V4L2_PIX_FMT_MJPEG) {
@@ -390,7 +396,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 		}
 
 		motion_log(LOG_ERR, 0, "VIDIOC_TRY_FMT failed for format %c%c%c%c (%s).", pixformat >> 0,
-			   pixformat >> 8, pixformat >> 16, pixformat >> 24, strerror(errno));
+		                        pixformat >> 8, pixformat >> 16, pixformat >> 24, strerror(errno));
 
 		return -1;
 	}
@@ -403,13 +409,13 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 static void v4l2_set_fps(src_v4l2_t * s){
 	struct v4l2_streamparm* setfps;
 
-	setfps=(struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
+	setfps = (struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
 	memset(setfps, 0, sizeof(struct v4l2_streamparm));
 	setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	setfps->parm.capture.timeperframe.numerator=1;
-	setfps->parm.capture.timeperframe.denominator=s->fps;
-	if (xioctl(s->fd, VIDIOC_S_PARM, setfps) == -1){
-		motion_log(LOG_ERR, 0, "v4l2_set_fps VIDIOC_S_PARM %s",strerror(errno));
+	setfps->parm.capture.timeperframe.numerator = 1;
+	setfps->parm.capture.timeperframe.denominator = s->fps;
+	if (xioctl(s->fd, VIDIOC_S_PARM, setfps) == -1) {
+		motion_log(LOG_ERR, 0, "v4l2_set_fps VIDIOC_S_PARM %s", strerror(errno));
 	}
 
 }
@@ -540,14 +546,14 @@ static int v4l2_scan_controls(src_v4l2_t * s)
 				memcpy(ctrl, &queryctrl, sizeof(struct v4l2_queryctrl));
 
 				motion_log(LOG_INFO, 0, "found control 0x%08x, \"%s\", range %d,%d %s", ctrl->id,
-					   ctrl->name, ctrl->minimum, ctrl->maximum,
-					   ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "!DISABLED!" : "");
+				                         ctrl->name, ctrl->minimum, ctrl->maximum,
+				                         ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "!DISABLED!" : "");
 
 				memset (&control, 0, sizeof (control));
 				control.id = queried_ctrls[i];
 				xioctl(s->fd, VIDIOC_G_CTRL, &control);
 				motion_log(LOG_INFO, 0, "\t\"%s\", default %d, current %d", ctrl->name,
-					   ctrl->default_value, control.value);
+				                         ctrl->default_value, control.value);
 
 				ctrl++;
 			}
@@ -592,8 +598,9 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
 				}
 				if (debug_level > 5)
 					motion_log(LOG_INFO, 0, "setting control \"%s\" to %d (ret %d %s) %s", ctrl->name,
-						value, ret, ret ? strerror(errno) : "",
-						ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "Control is DISABLED!" : "");
+					                         value, ret, ret ? strerror(errno) : "",
+					                         ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? 
+					                         "Control is DISABLED!" : "");
 
 				return 0;
 			}
@@ -664,7 +671,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 		goto err;
 	}
 
-	if (v4l2_set_pix_format(cnt ,s, &width, &height)) {
+	if (v4l2_set_pix_format(cnt, s, &width, &height)) {
 		goto err;
 	}
 
@@ -736,7 +743,7 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 			unsigned int counter = 0;
 			if (debug_level > 5)
 				motion_log(LOG_DEBUG, 0, "set_input_skip_frame switch_time=%ld:%ld", 
-						switchTime.tv_sec, switchTime.tv_usec);
+				                          switchTime.tv_sec, switchTime.tv_usec);
 
 			/* Avoid hang using the number of mmap buffers */
 			while(counter < s->req.count)
@@ -749,7 +756,7 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 					break;
 				if (debug_level > 5)
 					motion_log(LOG_DEBUG, 0, "got frame before switch timestamp=%ld:%ld", 
-						s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
+				                                  s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
 			}
 		}
 
@@ -798,12 +805,12 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 		   driver might dequeue an (empty) buffer despite
 		   returning an error, or even stop capturing.
 		*/
-		if ( errno == EIO ){
+		if ( errno == EIO ) {
 			s->pframe++; 
-			if ((u32)s->pframe >= s->req.count) s->pframe=0;
+			if ((u32)s->pframe >= s->req.count) s->pframe = 0;
 			s->buf.index = s->pframe;
 
-			motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__,s->pframe);
+			motion_log(LOG_ERR, 0, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__, s->pframe);
 
 			return (1);
 		}

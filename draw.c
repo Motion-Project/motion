@@ -1081,26 +1081,26 @@ static int draw_textn (unsigned char *image, int startx, int starty, int width, 
 	int pos, x, y, line_offset, next_char_offs;
 	unsigned char *image_ptr, *char_ptr, **char_arr_ptr;
 
-	if (startx>width/2)
-		startx -= len*(6*(factor+1));
+	if (startx > width / 2)
+		startx -= len * (6 * (factor + 1));
 
 	if (startx < 0)
 		startx = 0;
 	
-	if (startx+len*6*(factor+1) >= width)
+	if (startx + len * 6 * (factor + 1) >= width)
 		len = (width-startx-1)/(6*(factor+1));
 	
-	line_offset = width - 7*(factor+1);
-	next_char_offs = width*8*(factor+1) - 6*(factor+1);
+	line_offset = width - 7 * (factor + 1);
+	next_char_offs = width * 8 * (factor + 1) - 6 * (factor + 1);
 	
-	image_ptr = image + startx + starty*width;
+	image_ptr = image + startx + starty * width;
 
 	char_arr_ptr = factor ? big_char_arr_ptr : small_char_arr_ptr;
 	
 	for (pos = 0; pos < len; pos++) {
 		char_ptr = char_arr_ptr[(int)text[pos]];
-		for (y=8*(factor+1); y--;) {
-			for (x=7*(factor+1); x--;) {
+		for (y = 8 * (factor + 1); y--; ) {
+			for (x = 7 * (factor + 1); x--; ) {
 				switch(*char_ptr) {
 					case 1:
 						*image_ptr = 0;
@@ -1149,13 +1149,13 @@ int draw_text (unsigned char *image, int startx, int starty, int width, const ch
 
 int initialize_chars(void)
 {
-	unsigned int i=0, x, y;
+	unsigned int i = 0, x, y;
 	
 	/* Fill the structure 'big_table' with double sized characters. */
 	while(draw_table[i].ascii) {
 		big_table[i].ascii = draw_table[i].ascii;
-		for(x=0; x < 14; x++) {
-			for(y=0; y < 16; y++) {
+		for(x = 0; x < 14; x++) {
+			for(y = 0; y < 16; y++) {
 				big_table[i].pix[y][x] = draw_table[i].pix[y/2][x/2];
 			}
 		}
@@ -1163,15 +1163,15 @@ int initialize_chars(void)
 	}
 
 	/* first init all char ptr's to a space character */
-	for (i=0; i < ASCII_MAX; i++) {
-		small_char_arr_ptr[i]=&draw_table[0].pix[0][0];
-		big_char_arr_ptr[i]=&big_table[0].pix[0][0];
+	for (i = 0; i < ASCII_MAX; i++) {
+		small_char_arr_ptr[i] = &draw_table[0].pix[0][0];
+		big_char_arr_ptr[i] = &big_table[0].pix[0][0];
 	}
 			
 	/* build [big_]char_arr_ptr table to point to each available ascii */
-	for (i=0; i < sizeof(draw_table) / sizeof(struct draw_char); i++) {
-		small_char_arr_ptr[(int)draw_table[i].ascii]=&draw_table[i].pix[0][0];
-		big_char_arr_ptr[(int)draw_table[i].ascii]=&big_table[i].pix[0][0];
+	for (i = 0; i < sizeof(draw_table) / sizeof(struct draw_char); i++) {
+		small_char_arr_ptr[(int)draw_table[i].ascii] = &draw_table[i].pix[0][0];
+		big_char_arr_ptr[(int)draw_table[i].ascii] = &big_table[i].pix[0][0];
 	}
 	return 0;
 }

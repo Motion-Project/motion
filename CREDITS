@@ -395,6 +395,8 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134
    * Fixed stepper when is used track_auto on.
    * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr.
+   * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6
+     (Jeroen Massar & Angel Carpintero)
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -1021,6 +1023,10 @@ Bill Maidment
 
 Philip Marien
    * Fixed a problem when compiling with --without-v4l configuration.
+
+Jeroen Massar
+   * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6
+     (Jeroen Massar & Angel Carpintero)
 
 Lionnel Maugis
    * ffmpeg code

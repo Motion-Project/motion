@@ -48,7 +48,7 @@ pthread_mutex_t global_lock;
  *
  *   List of context structures, one for each main Motion thread.
  */
-struct context **cnt_list=NULL;
+struct context **cnt_list = NULL;
 
 /**
  * threads_running
@@ -56,7 +56,7 @@ struct context **cnt_list=NULL;
  *   Keeps track of number of Motion threads currently running. Also used
  *   by 'main' to know when all threads have exited.
  */
-volatile int threads_running=0;
+volatile int threads_running = 0;
 
 /*
  * debug_level is for developers, normally used to control which
@@ -66,7 +66,7 @@ unsigned short int debug_level;
 
 /* Set this when we want main to end or restart
  */
-volatile unsigned short int finish=0;
+volatile unsigned short int finish = 0;
 
 /**
  * restart
@@ -75,7 +75,7 @@ volatile unsigned short int finish=0;
  *   finished running, 'main' checks if 'restart' is true and if so starts
  *   up again (instead of just quitting).
  */
-unsigned short int restart=0;
+unsigned short int restart = 0;
 
 /**
  * image_ring_resize
@@ -288,7 +288,7 @@ static void sig_handler(int signo)
 				i = -1;
 				while (cnt_list[++i]) {
 					if (cnt_list[i]->conf.snapshot_interval) {
-						cnt_list[i]->snapshot=1;
+						cnt_list[i]->snapshot = 1;
 					}
 				}
 			}
@@ -299,7 +299,7 @@ static void sig_handler(int signo)
 			if (cnt_list) {
 				i = -1;
 				while (cnt_list[++i])
-					cnt_list[i]->makemovie=1;
+					cnt_list[i]->makemovie = 1;
 			}
 			break;
 		case SIGHUP:
@@ -315,12 +315,12 @@ static void sig_handler(int signo)
 			if (cnt_list) {
 				i = -1;
 				while (cnt_list[++i]) {
-					cnt_list[i]->makemovie=1;
-					cnt_list[i]->finish=1;
+					cnt_list[i]->makemovie = 1;
+					cnt_list[i]->finish = 1;
 					/* don't restart thread when it ends, 
 					 * all threads restarts if global restart is set 
 					 */
-					cnt_list[i]->restart=0;
+					cnt_list[i]->restart = 0;
 				}
 			}
 			/* Set flag we want to quit main check threads loop
@@ -676,7 +676,7 @@ static int motion_init(struct context *cnt)
 		for (i = 0; i < 5; i++) {
 			if (vid_next(cnt, cnt->imgs.image_virgin) == 0)
 				break;
-			SLEEP(2,0);
+			SLEEP(2, 0);
 		}
 		if (i >= 5) {
 			memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
@@ -795,7 +795,7 @@ static int motion_init(struct context *cnt)
 				motion_log(LOG_INFO, 0, "Maskfile \"%s\" loaded.",cnt->conf.mask_file);
 		}
 	} else
-		cnt->imgs.mask=NULL;
+		cnt->imgs.mask = NULL;
 
 	/* Always initialize smart_mask - someone could turn it on later... */
 	memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
@@ -950,10 +950,10 @@ static void *motion_loop(void *arg)
 	unsigned short int get_image = 1;	/* Flag used to signal that we capture new image when we run the loop */
 
 	/* Next two variables are used for snapshot and timelapse feature
-	 * time_last_frame is set to 1 so that first coming timelapse or second=0
+	 * time_last_frame is set to 1 so that first coming timelapse or second = 0
 	 * is acted upon.
 	 */
-	unsigned long int time_last_frame=1, time_current_frame;
+	unsigned long int time_last_frame = 1, time_current_frame;
 
 	cnt->running = 1;
 	
@@ -991,8 +991,8 @@ static void *motion_loop(void *arg)
 	rolling_average_data = mymalloc(sizeof(rolling_average_data) * rolling_average_limit);
 
 	/* Preset history buffer with expected frame rate */
-	for (j=0; j< rolling_average_limit; j++)
-		rolling_average_data[j]=required_frame_time;
+	for (j = 0; j < rolling_average_limit; j++)
+		rolling_average_data[j] = required_frame_time;
 
 
 	/* MAIN MOTION LOOP BEGINS HERE */
@@ -1868,7 +1868,7 @@ static void *motion_loop(void *arg)
 		/* Calculate 10 second average and use deviation in delay calculation */
 		rolling_average = 0L;
 
-		for (j=0; j < rolling_average_limit; j++)
+		for (j = 0; j < rolling_average_limit; j++)
 			rolling_average += rolling_average_data[j];
 
 		rolling_average /= rolling_average_limit;
@@ -1907,7 +1907,7 @@ err:
 	pthread_mutex_unlock(&global_lock);
 
 	if (!cnt->restart)
-		cnt->watchdog=WATCHDOG_OFF;
+		cnt->watchdog = WATCHDOG_OFF;
 	cnt->running = 0;
 	cnt->finish = 0;
 
@@ -2179,7 +2179,7 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
 	/* Check the webcam port number for conflicts.
 	 * First we check for conflict with the control port.
 	 * Second we check for that two threads does not use the same port number
-	 * for the webcam. If a duplicate port is found the webcam feature gets disabled (port =0)
+	 * for the webcam. If a duplicate port is found the webcam feature gets disabled (port = 0)
 	 * for this thread and a warning is written to console and syslog.
 	 */
 
@@ -2292,7 +2292,7 @@ int main (int argc, char **argv)
 			restart = 0; /* only one reset for now */
 			motion_log(LOG_INFO,0,"motion restarted");
 #ifndef WITHOUT_V4L
-			SLEEP(5,0); // maybe some cameras needs less time
+			SLEEP(5, 0); // maybe some cameras needs less time
 #endif
 			motion_startup(0, argc, argv); /* 0 = skip daemon init */
 		}
@@ -2334,7 +2334,7 @@ int main (int argc, char **argv)
 		 * counter (because we cannot do join on the detached threads).
 		 */
 		while (1) {
-			SLEEP(1,0);
+			SLEEP(1, 0);
 
 			/* Calculate how many threads runnig or wants to run
 			 * if zero and we want to finish, break out
@@ -2390,13 +2390,13 @@ int main (int argc, char **argv)
 
 		/* Rest for a while if we're supposed to restart. */
 		if (restart)
-			SLEEP(2,0);
+			SLEEP(2, 0);
 
 	} while (restart); /* loop if we're supposed to restart */
 
 	// Be sure that http control exits fine
 	cnt_list[0]->finish = 1;
-	SLEEP(1,0);
+	SLEEP(1, 0);
 	motion_log(LOG_INFO, 0, "Motion terminating");
 
 	/* Perform final cleanup. */

@@ -382,7 +382,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 #endif /* LIBAVCODEC_BUILD >= 4754 */
 
 	if (debug_level >= CAMERA_DEBUG)
-		motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__,rate);	
+		motion_log(LOG_DEBUG, 0, "%s FPS %d", __FUNCTION__, rate);	
 
 	if (vbr)
 		c->flags |= CODEC_FLAG_QSCALE;
@@ -489,7 +489,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
 				/* and retry opening the file (use file_proto) */
 				if (url_fopen(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
-					motion_log(LOG_ERR, 1, "url_fopen - error opening file %s",filename);
+					motion_log(LOG_ERR, 1, "url_fopen - error opening file %s", filename);
 					ffmpeg_cleanups(ffmpeg);
 					return (NULL);
 				}
@@ -735,8 +735,8 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
 	}
 	
 	picture->data[0] = img;
-	picture->data[1] = img+width*height;
-	picture->data[2] = picture->data[1]+(width*height)/4;
+	picture->data[1] = img + width * height;
+	picture->data[2] = picture->data[1] + (width * height) / 4;
 	picture->linesize[0] = width;
 	picture->linesize[1] = width2;
 	picture->linesize[2] = width2;

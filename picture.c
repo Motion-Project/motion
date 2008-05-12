@@ -291,7 +291,7 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
 
 	jpeg_start_compress(&cjpeg, TRUE);
 
-	row_ptr[0]=image;
+	row_ptr[0] = image;
 	for (y = 0; y < height; y++) {
 		jpeg_write_scanlines(&cjpeg, row_ptr, 1);
 		row_ptr[0] += width;
@@ -539,11 +539,11 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 /* Get the pgm file used as fixed mask */
 unsigned char *get_pgm(FILE *picture, int width, int height)
 {
-	int x = 0 ,y = 0, maxval;
+	int x = 0 , y = 0, maxval;
 	char line[256];
 	unsigned char *image;
 
-	line[255]=0;
+	line[255] = 0;
 	
 	if (!fgets(line, 255, picture)) {
 		motion_log(LOG_ERR, 1, "Could not read from ppm file");

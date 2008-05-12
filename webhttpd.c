@@ -10,10 +10,7 @@
  *      See also the file 'COPYING'.
  *
  */
-//#include "motion.h"
 #include "webhttpd.h"	/* already includes motion.h */
-//#include <sys/types.h>
-//#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -24,7 +21,7 @@ pthread_mutex_t httpd_mutex;
 
 int warningkill; // This is a dummy variable use to kill warnings when not checking sscanf and similar functions
 
-static const char* ini_template =
+static const char *ini_template =
 	"<html><head><title>Motion "VERSION"</title></head>\n"
 	"<body>\n";
 
@@ -36,11 +33,11 @@ static const char *set_template =
 	"}</script>\n<title>Motion "VERSION"</title>\n"
 	"</head><body>\n";
 
-static const char* end_template =
+static const char *end_template =
 	"</body>\n"
 	"</html>\n";
 
-static const char* ok_response =
+static const char *ok_response =
 	"HTTP/1.1 200 OK\r\n"
 	"Server: Motion-httpd/"VERSION"\r\n"
 	"Connection: close\r\n"
@@ -51,7 +48,7 @@ static const char* ok_response =
 	"Pragma: no-cache\r\n"
 	"Content-type: text/html\r\n\r\n";
 
-static const char* ok_response_raw =
+static const char *ok_response_raw =
 	"HTTP/1.1 200 OK\r\n"
 	"Server: Motion-httpd/"VERSION"\r\n"
 	"Connection: close\r\n"
@@ -63,7 +60,7 @@ static const char* ok_response_raw =
 	"Content-type: text/plain\r\n\r\n";
 
 
-static const char* bad_request_response =
+static const char *bad_request_response =
 	"HTTP/1.0 400 Bad Request\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
@@ -73,12 +70,12 @@ static const char* bad_request_response =
 	"</body>\n"
 	"</html>\n";
 
-static const char* bad_request_response_raw =
+static const char *bad_request_response_raw =
 	"HTTP/1.0 400 Bad Request\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Bad Request";
 
-static const char* not_found_response_template =
+static const char *not_found_response_template =
 	"HTTP/1.0 404 Not Found\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
@@ -88,12 +85,12 @@ static const char* not_found_response_template =
 	"</body>\n"
 	"</html>\n";
 
-static const char* not_found_response_template_raw =
+static const char *not_found_response_template_raw =
 	"HTTP/1.0 404 Not Found\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Not Found";
 
-static const char* not_found_response_valid =
+static const char *not_found_response_valid =
 	"HTTP/1.0 404 Not Valid\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
@@ -103,12 +100,12 @@ static const char* not_found_response_valid =
 	"</body>\n"
 	"</html>\n";
 
-static const char* not_found_response_valid_raw =
+static const char *not_found_response_valid_raw =
 	"HTTP/1.0 404 Not Valid\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"The requested URL is not valid.";
 
-static const char* not_valid_syntax =
+static const char *not_valid_syntax =
 	"HTTP/1.0 404 Not Valid Syntax\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
@@ -117,48 +114,48 @@ static const char* not_valid_syntax =
 	"</body>\n"
 	"</html>\n";
 
-static const char* not_valid_syntax_raw =
+static const char *not_valid_syntax_raw =
 	"HTTP/1.0 404 Not Valid Syntax\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Not Valid Syntax\n";
 
-static const char* not_track =
+static const char *not_track =
 	"HTTP/1.0 200 OK\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
 	"<body>\n"
 	"<h1>Tracking Not Enabled</h1>\n";
 
-static const char* not_track_raw =
+static const char *not_track_raw =
 	"HTTP/1.0 200 OK\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Tracking Not Enabled";
 
-static const char* track_error =
+static const char *track_error =
 	"HTTP/1.0 200 OK\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
 	"<body>\n"
 	"<h1>Track Error</h1>\n";
 
-static const char* track_error_raw =
+static const char *track_error_raw =
 	"HTTP/1.0 200 OK\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Track Error";
 
-static const char* error_value =
+static const char *error_value =
 	"HTTP/1.0 200 OK\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
 	"<body>\n"
 	"<h1>Value Error</h1>\n";
 
-static const char* error_value_raw =
+static const char *error_value_raw =
 	"HTTP/1.0 200 OK\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Value Error";
 	
-static const char* not_found_response_valid_command =
+static const char *not_found_response_valid_command =
 	"HTTP/1.0 404 Not Valid Command\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
@@ -168,12 +165,12 @@ static const char* not_found_response_valid_command =
 	"</body>\n"
 	"</html>\n";
 
-static const char* not_found_response_valid_command_raw =
+static const char *not_found_response_valid_command_raw =
 	"HTTP/1.0 404 Not Valid Command\r\n"
 	"Content-type: text/plain\n\n"
 	"Not Valid Command\n";
 
-static const char* bad_method_response_template =
+static const char *bad_method_response_template =
 	"HTTP/1.0 501 Method Not Implemented\r\n"
 	"Content-type: text/html\r\n\r\n"
 	"<html>\n"
@@ -183,7 +180,7 @@ static const char* bad_method_response_template =
 	"</body>\n"
 	"</html>\n";
 
-static const char* bad_method_response_template_raw =
+static const char *bad_method_response_template_raw =
 	"HTTP/1.0 501 Method Not Implemented\r\n"
 	"Content-type: text/plain\r\n\r\n"
 	"Method Not Implemented\n";
@@ -192,7 +189,7 @@ static const char *request_auth_response_template=
 	"HTTP/1.0 401 Authorization Required\r\n"
 	"WWW-Authenticate: Basic realm=\"Motion Security Access\"\r\n";
 
-static void send_template_ini_client(int client_socket, const char* template)
+static void send_template_ini_client(int client_socket, const char *template)
 {
 	ssize_t nwrite = 0;
 	nwrite = write(client_socket, ok_response, strlen (ok_response));
@@ -229,7 +226,7 @@ static void send_template_end_client(int client_socket)
 	nwrite = write(client_socket, end_template, strlen(end_template));
 }
 
-static void response_client(int client_socket, const char* template, char *back)
+static void response_client(int client_socket, const char *template, char *back)
 {
 	ssize_t nwrite = 0;
 	nwrite = write(client_socket, template, strlen(template));
@@ -304,8 +301,8 @@ static char *replace(const char *str, const char *old, const char *new)
 
 static void url_decode(char *urlencoded, size_t length)
 {
-	char *data=urlencoded;
-	char *urldecoded=urlencoded;
+	char *data = urlencoded;
+	char *urldecoded = urlencoded;
 
 	while (length > 0)  {
 		if (*data == '%') {
@@ -325,12 +322,12 @@ static void url_decode(char *urlencoded, size_t length)
 				*urldecoded++ = c[0];
 				*urldecoded++ = c[1];
 			}
-		} else if (*data=='+') {
-			*urldecoded++=' ';
+		} else if (*data == '+') {
+			*urldecoded++ = ' ';
 		
 		}
 		else {
-			*urldecoded++=*data;
+			*urldecoded++ = *data;
 		}
 		data++;
 		length--;
@@ -353,8 +350,8 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 	unsigned short int i;
 	struct context **cnt = userdata;
 
-	warningkill = sscanf (pointer, "%256[a-z]%c", command , &question);
-	if (!strcmp(command,"list")) {
+	warningkill = sscanf(pointer, "%256[a-z]%c", command , &question);
+	if (!strcmp(command, "list")) {
 		pointer = pointer + 4;
 		length_uri = length_uri - 4;
 		if (length_uri == 0) {
@@ -374,7 +371,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 					value = config_params[i].print(cnt, NULL, i, thread);
 
 					if (value == NULL) {
-						retval=NULL;
+						retval = NULL;
 					
 						/* Only get the thread value for main thread */ 
 						if (thread == 0)
@@ -388,11 +385,11 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								free(retval);
 								retval = strdup("No threads");
 							} else {
-								char *temp=retval;
+								char *temp = retval;
 								size_t retval_miss = 0;
 								size_t retval_len = strlen(retval);
-								unsigned short int ind=0;
-								char thread_strings[1024]={'\0'};
+								unsigned short int ind = 0;
+								char thread_strings[1024] = {'\0'};
 								
 								while (retval_miss != retval_len) {
 									while (*temp != '\n') {
@@ -429,21 +426,21 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						}
 						
 					} else {
-						sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n",thread,
+						sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
 						        config_params[i].param_name, config_params[i].param_name, value);
 					}
 					send_template(client_socket, res);
 				}
 
-				sprintf(res, "</ul><a href=/%hu/config>&lt;&ndash; back</a>",thread);
+				sprintf(res, "</ul><a href=/%hu/config>&lt;&ndash; back</a>", thread);
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
 				for (i=0; config_params[i].param_name != NULL; i++) {
-					value=config_params[i].print(cnt, NULL, i, thread);
+					value = config_params[i].print(cnt, NULL, i, thread);
 					if (value == NULL)
-						value=config_params[i].print(cnt, NULL, i, 0);
+						value = config_params[i].print(cnt, NULL, i, 0);
 					sprintf(res, "%s = %s\n", config_params[i].param_name, value);
 					send_template_raw(client_socket, res);
 				}
@@ -455,7 +452,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"set")) {
+	} else if (!strcmp(command, "set")) {
 		/* set?param_name=value */
 		pointer = pointer + 3;
 		length_uri = length_uri - 3;
@@ -464,13 +461,13 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			length_uri--;
 			warningkill = sscanf(pointer,"%256[-0-9a-z_]%c", command, &question);
 			/*check command , question == '='  length_uri too*/
-			if ((question == '=') && (command[0]!='\0')) {
+			if ((question == '=') && (command[0] != '\0')) {
 				length_uri = length_uri - strlen(command) - 1;
 				pointer = pointer + strlen(command) + 1;
 				/* check if command exists and type of command and not end of URI */
 				i=0;
 				while (config_params[i].param_name != NULL) {
-					if ((thread != 0) && (config_params[i].main_thread)){
+					if ((thread != 0) && (config_params[i].main_thread)) {
 						i++;
 						continue;
 					}
@@ -482,12 +479,12 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 
 				if (config_params[i].param_name) {
 					if (length_uri > 0) {
-						char Value[1024]={'\0'};
+						char Value[1024] = {'\0'};
 						warningkill = sscanf(pointer,"%1024s", Value);
 						length_uri = length_uri - strlen(Value);
 						if ( (length_uri == 0) && (strlen(Value) > 0) ) {
 							/* FIXME need to assure that is a valid value */
-							url_decode(Value,strlen(Value));
+							url_decode(Value, strlen(Value));
 							conf_cmdparse(cnt + thread, config_params[i].param_name, Value);
 							if (cnt[0]->conf.control_html_output) {
 								sprintf(res,
@@ -495,11 +492,11 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 									"<br><br>\n<b>Thread %hu</b>\n"
 									"<ul><li><a href=/%hu/config/set?%s>%s</a> = %s"
 									"</li></ul><b>Done</b>",
-								        thread, thread, thread,config_params[i].param_name,
+								        thread, thread, thread, config_params[i].param_name,
 								        config_params[i].param_name, Value);
 								
 								send_template_ini_client(client_socket, ini_template);
-								send_template(client_socket,res);
+								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
@@ -517,20 +514,20 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						char *type = NULL;
 						type = strdup(config_type(&config_params[i]));
 
-						if (!strcmp(type,"string")) {
+						if (!strcmp(type, "string")) {
 							char *value = NULL;
 							conf_cmdparse(cnt+thread, config_params[i].param_name, value);
 							free(type);
 							type = strdup("(null)");
-						} else if (!strcmp(type,"int")) {
+						} else if (!strcmp(type, "int")) {
 							free(type);
 							type = strdup("0");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
-						} else if (!strcmp(type,"short")) {
+						} else if (!strcmp(type, "short")) {
 							free(type);
 							type = strdup("0");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
-						} else if (!strcmp(type,"bool")) {
+						} else if (!strcmp(type, "bool")) {
 							free(type);
 							type = strdup("off");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
@@ -551,7 +548,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							send_template_end_client(client_socket);
 						} else {
 							send_template_ini_client_raw(client_socket);
-							sprintf(res, "%s = %s\nDone\n", config_params[i].param_name,type);
+							sprintf(res, "%s = %s\nDone\n", config_params[i].param_name, type);
 							send_template_raw(client_socket, res);
 						}
 						free(type);
@@ -566,13 +563,13 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 				}
 			} else {
 				/* Show param_name dialogue only for html output */
-				if ( (cnt[0]->conf.control_html_output) && (command[0]!='\0') &&
+				if ( (cnt[0]->conf.control_html_output) && (command[0] != '\0') &&
 				     (((length_uri = length_uri - strlen(command)) == 0 )) ) {
 					i=0;
 					while (config_params[i].param_name != NULL) {
-						if ((thread != 0) && (config_params[i].main_thread)){
+						if ((thread != 0) && (config_params[i].main_thread)) {
 							i++;
-                                                	continue;
+							continue;
 						}
 
 						if (!strcasecmp(command, config_params[i].param_name))
@@ -595,7 +592,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						text_help = replace(sharp, "\n#", "<br>");
 						
 						send_template_ini_client(client_socket, ini_template);
-						if (!strcmp ("bool",config_type(&config_params[i])) ){
+						if (!strcmp ("bool", config_type(&config_params[i])) ) {
 							char option[80] = {'\0'};
 					
 							if ((value == NULL) && (thread != 0))
@@ -618,10 +615,10 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							             "<a href='%s#%s' target=_blank>[help]</a>"
 							             "</form>\n<hr><i>%s</i>", thread, thread,
 							             config_params[i].param_name, config_params[i].param_name,
-							             option, TWIKI_URL,config_params[i].param_name, text_help);
+							             option, TWIKI_URL, config_params[i].param_name, text_help);
 						}else{
 		
-							if (value == NULL){
+							if (value == NULL) {
 								if (thread != 0)
 									/* get the value from main thread for the rest of threads */
                                                         		value = config_params[i].print(cnt, NULL, i, 0); 
@@ -688,7 +685,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"get")) {
+	} else if (!strcmp(command, "get")) {
 		/* get?query=param_name */
 		pointer = pointer + 3;
 		length_uri = length_uri - 3;
@@ -699,7 +696,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			length_uri--;
 			warningkill = sscanf(pointer,"%256[-0-9a-z]%c", command, &question);
 
-			if ( (question == '=') && (!strcmp(command,"query")) ) {
+			if ( (question == '=') && (!strcmp(command, "query")) ) {
 				pointer = pointer + 6;
 				length_uri = length_uri - 6;
 				warningkill = sscanf(pointer, "%256[-0-9a-z_]", command);
@@ -708,9 +705,9 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 
 				if (length_uri == 0) {
 					const char *value = NULL;
-					i=0;
+					i = 0;
 					while (config_params[i].param_name != NULL) {
-						if ((thread != 0) && (config_params[i].main_thread)){
+						if ((thread != 0) && (config_params[i].main_thread)) {
 							i++;
 							continue;
 						}
@@ -723,9 +720,9 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 					solved with config_type */
 
 					if (config_params[i].param_name) {
-						const char *type=NULL;
+						const char *type = NULL;
 						type = config_type(&config_params[i]);
-						if (!strcmp(type,"unknown")) {
+						if (!strcmp(type, "unknown")) {
 							/*error doesn't exists this param_name */
 							if (cnt[0]->conf.control_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
@@ -746,9 +743,9 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							text_help = replace(sharp, "\n#", "<br>");
 
 							if (value == NULL)
-								value=config_params[i].print(cnt, NULL, i, 0);
+								value = config_params[i].print(cnt, NULL, i, 0);
 							if (cnt[0]->conf.control_html_output) {
-								send_template_ini_client(client_socket,ini_template);
+								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hu/config/get>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hu</b><br>\n<ul><li>%s = %s &nbsp;&nbsp;"
 								             "&nbsp;&nbsp;<a href='%s#%s' target=_blank>"
@@ -762,7 +759,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								free(text_help);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res, "%s = %s\nDone\n", config_params[i].param_name,value);
+								sprintf(res, "%s = %s\nDone\n", config_params[i].param_name, value);
 								send_template_raw(client_socket, res);
 							}
 						}
@@ -812,7 +809,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			else
 				response_client(client_socket, not_valid_syntax_raw, NULL);
 		}
-	} else if (!strcmp(command,"write")) {
+	} else if (!strcmp(command, "write")) {
 			pointer = pointer + 5;
 			length_uri = length_uri - 5;
 			if (length_uri == 0) {
@@ -839,7 +836,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 	} else if (!strcmp(command, "writeyes")) {
 		pointer = pointer + 8;
 		length_uri = length_uri - 8;
-		if (length_uri==0) {
+		if (length_uri == 0) {
 			conf_print(cnt);
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
@@ -887,8 +884,8 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 	struct context **cnt = userdata;
 	unsigned short int i = 0;
 
-	warningkill = sscanf (pointer, "%256[a-z]" , command);
-	if (!strcmp(command,"makemovie")) {
+	warningkill = sscanf(pointer, "%256[a-z]" , command);
+	if (!strcmp(command, "makemovie")) {
 		pointer = pointer + 9;
 		length_uri = length_uri - 9;
 		if (length_uri == 0) {
@@ -896,9 +893,9 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 
 			if (thread == 0) {
 				while (cnt[++i])
-					cnt[i]->makemovie=1;
+					cnt[i]->makemovie = 1;
 			} else {
-				cnt[thread]->makemovie=1;
+				cnt[thread]->makemovie = 1;
 			}
 
 			if (cnt[0]->conf.control_html_output) {
@@ -915,11 +912,11 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 		} else {
 			/*error*/
 			if (cnt[0]->conf.control_html_output)
-				response_client(client_socket,not_found_response_valid_command,NULL);
+				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
-				response_client(client_socket,not_found_response_valid_command_raw,NULL);
+				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"snapshot")) {
+	} else if (!strcmp(command, "snapshot")) {
 		pointer = pointer + 8;
 		length_uri = length_uri - 8;
 		if (length_uri == 0) {
@@ -927,9 +924,9 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 
 			if (thread == 0) {
 				while (cnt[++i])
-					cnt[i]->snapshot=1;
+					cnt[i]->snapshot = 1;
 			} else {
-				cnt[thread]->snapshot=1;
+				cnt[thread]->snapshot = 1;
 			}
 
 			cnt[thread]->snapshot = 1;
@@ -974,10 +971,10 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			} else {
 				motion_log(LOG_DEBUG, 0, "httpd restart thread %d", thread);
 				if (cnt[thread]->running) {
-					cnt[thread]->makemovie=1;
-					cnt[thread]->finish=1;
+					cnt[thread]->makemovie = 1;
+					cnt[thread]->finish = 1;
 				}
-				cnt[thread]->restart=1;
+				cnt[thread]->restart = 1;
 				if (cnt[0]->conf.control_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
@@ -992,11 +989,11 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			if (cnt[0]->conf.control_html_output)
-				response_client(client_socket,not_found_response_valid_command,NULL);
+				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
-				response_client(client_socket,not_found_response_valid_command_raw,NULL);
+				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"quit")) {
+	} else if (!strcmp(command, "quit")) {
 		pointer = pointer + 4;
 		length_uri = length_uri - 4;
 		if (length_uri == 0) {
@@ -1018,10 +1015,10 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 				return 0; // to quit
 			} else {
 				motion_log(LOG_DEBUG, 0, "httpd quit thread %d", thread);
-				cnt[thread]->restart=0;
-				cnt[thread]->makemovie=1;
-				cnt[thread]->finish=1;
-				cnt[thread]->watchdog=WATCHDOG_OFF;
+				cnt[thread]->restart = 0;
+				cnt[thread]->makemovie = 1;
+				cnt[thread]->finish = 1;
+				cnt[thread]->watchdog = WATCHDOG_OFF;
 				if (cnt[0]->conf.control_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
@@ -1060,12 +1057,12 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 static unsigned short int detection(char *pointer, char *res, unsigned short int length_uri, unsigned short int thread, 
 			int client_socket, void *userdata)
 {
-	char command[256]={'\0'};
-	struct context **cnt=userdata;
+	char command[256] = {'\0'};
+	struct context **cnt = userdata;
 	unsigned short int i = 0;
 
-	warningkill = sscanf (pointer, "%256[a-z]" , command);
-	if (!strcmp(command,"status")) {
+	warningkill = sscanf(pointer, "%256[a-z]" , command);
+	if (!strcmp(command, "status")) {
 		pointer = pointer + 6;
 		length_uri = length_uri - 6;
 		if (length_uri == 0) {
@@ -1079,7 +1076,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
-				sprintf(res, "Thread %hu Detection status %s\n",thread, 
+				sprintf(res, "Thread %hu Detection status %s\n", thread, 
 				             (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
 				send_template_ini_client_raw(client_socket);
 				send_template_raw(client_socket, res);
@@ -1106,7 +1103,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			}
 
 			if (cnt[0]->conf.control_html_output) {
-				send_template_ini_client(client_socket,ini_template);
+				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
 				             " Detection resumed\n", thread, thread);
 				send_template(client_socket, res);
@@ -1123,10 +1120,10 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"pause")){
+	} else if (!strcmp(command, "pause")) {
 		pointer = pointer + 5;
 		length_uri = length_uri - 5;
-		if (length_uri==0) {
+		if (length_uri == 0) {
 			/*call pause*/
 
 			if (thread == 0) {
@@ -1141,7 +1138,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
 				             " Detection paused\n", thread, thread);
-				send_template(client_socket,res);
+				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
@@ -1155,33 +1152,33 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"connection")){
+	} else if (!strcmp(command, "connection")) {
 		pointer = pointer + 10;
 		length_uri = length_uri - 10;
-		if (length_uri==0) {
+		if (length_uri == 0) {
 			
 			/*call connection*/	
 			if (cnt[0]->conf.control_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n", thread);
-				send_template(client_socket,res);
-				if (thread == 0){
+				send_template(client_socket, res);
+				if (thread == 0) {
 					do{
-						sprintf(res, "<b>Thread %hu</b> %s<br>\n",i, 
+						sprintf(res, "<b>Thread %hu</b> %s<br>\n", i, 
 						             (!cnt[i]->running)? "NOT RUNNING" : 
 						             (cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
-						send_template(client_socket,res);
+						send_template(client_socket, res);
 					}while (cnt[++i]);
 				}else{
 					sprintf(res, "<b>Thread %hu</b> %s\n", thread,
 					             (!cnt[thread]->running)? "NOT RUNNING" : 
 					             (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
-					send_template(client_socket,res);
+					send_template(client_socket, res);
 				}	
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				if (thread == 0){
+				if (thread == 0) {
 					do{
 						sprintf(res, "Thread %hu %s\n", i,
 						             (!cnt[i]->running)? "NOT RUNNING" : 
@@ -1229,7 +1226,8 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 
 	warningkill = sscanf(pointer, "%256[a-z]%c", command, &question);
 	if (!strcmp(command, "set")) {
-		pointer=pointer+3;length_uri=length_uri-3;
+		pointer = pointer+3;
+		length_uri = length_uri-3;
 		/* FIXME need to check each value */
 		/* Relative movement set?pan=0&tilt=0 | set?pan=0 | set?tilt=0*/
 		/* Absolute movement set?x=0&y=0 | set?x=0 | set?y=0 */
@@ -1246,7 +1244,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			/* set?x=value&y=value */
 			/* pan= or x= | tilt= or y= */
 
-			warningkill = sscanf (pointer, "%256[a-z]%c" , command, &question);
+			warningkill = sscanf(pointer, "%256[a-z]%c" , command, &question);
 
 			if (( question != '=' ) || (command[0] == '\0')) {
 				/* no valid syntax */
@@ -1267,7 +1265,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				pointer = pointer + 3;
 				length_uri = length_uri - 3;
 				pan = 1;
-				if ((warningkill = sscanf(pointer, "%10[-0-9]", panvalue))){
+				if ((warningkill = sscanf(pointer, "%10[-0-9]", panvalue))) {
 					pointer = pointer + strlen(panvalue);
 					length_uri = length_uri - strlen(panvalue);
 				}
@@ -1276,7 +1274,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				pointer = pointer + 4;
 				length_uri = length_uri - 4;
 				tilt = 1;
-				if ((warningkill = sscanf(pointer, "%10[-0-9]", tiltvalue))){
+				if ((warningkill = sscanf(pointer, "%10[-0-9]", tiltvalue))) {
 					pointer = pointer + strlen(tiltvalue);
 					length_uri = length_uri - strlen(tiltvalue);
 				}
@@ -1285,7 +1283,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				pointer++;
 				length_uri--;
 				X = 1;
-				if ((warningkill = sscanf(pointer, "%10[-0-9]", x_value))){
+				if ((warningkill = sscanf(pointer, "%10[-0-9]", x_value))) {
 					pointer = pointer + strlen(x_value);
 					length_uri = length_uri - strlen(x_value);
 				}
@@ -1294,7 +1292,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				pointer++;
 				length_uri--;
 				Y = 1;
-				if ((warningkill = sscanf (pointer, "%10[-0-9]" , y_value))){
+				if ((warningkill = sscanf(pointer, "%10[-0-9]" , y_value))) {
 					pointer = pointer + strlen(y_value);
 					length_uri = length_uri - strlen(y_value);
 				}
@@ -1308,9 +1306,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				return 1;
 			}
 
-
 			/* first value check for error */
-
 			
 			if ( !warningkill ) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 3");
@@ -1321,8 +1317,6 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					response_client(client_socket, error_value_raw, NULL);
 				return 1;
 			}
-
-			
 
 			/* Only one parameter (pan= ,tilt= ,x= ,y= ) */
 			if (length_uri == 0) {
@@ -1375,8 +1369,8 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					cent.x = 0;
 					cent.y = atoi(tiltvalue);
 					// Add the number of frame to skip for motion detection
-					cnt[thread]->moved=track_move(tiltcnt, tiltcnt->video_dev, &cent, &tiltcnt->imgs, 1);
-					if (cnt[thread]->moved){	
+					cnt[thread]->moved = track_move(tiltcnt, tiltcnt->video_dev, &cent, &tiltcnt->imgs, 1);
+					if (cnt[thread]->moved) {	
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
@@ -1387,7 +1381,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 							send_template_end_client(client_socket);
 						} else {
 							send_template_ini_client_raw(client_socket);
-							sprintf(res, "track set relative tilt=%s\nDone\n",tiltvalue);
+							sprintf(res, "track set relative tilt=%s\nDone\n", tiltvalue);
 							send_template_raw(client_socket, res);
 						}
 					} else {
@@ -1400,7 +1394,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 						else
 							response_client(client_socket, track_error_raw, NULL);
 					}
-				} else if (X){
+				} else if (X) {
 					/* X */
 					setcnt = cnt[thread];
 					// 1000 is out of range for pwc
@@ -1466,10 +1460,10 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 
 			/* Check Second parameter */
 
-			warningkill = sscanf (pointer, "%c%256[a-z]" ,&question, command);
-			if ( ( question != '&' ) || (command[0] == '\0') ){
+			warningkill = sscanf(pointer, "%c%256[a-z]" , &question, command);
+			if ( ( question != '&' ) || (command[0] == '\0') ) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 4");
-				if ( strstr(pointer,"&")){
+				if ( strstr(pointer, "&")) {
 					if (cnt[0]->conf.control_html_output)
 						response_client(client_socket, error_value, NULL);
 					else
@@ -1488,7 +1482,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			pointer++;
 			length_uri--;
 
-			if (!strcmp(command, "pan")){
+			if (!strcmp(command, "pan")) {
 				pointer = pointer + 3;
 				length_uri = length_uri - 3;
 				if ( (pan) || (!tilt) || (X) || (Y) ) {
@@ -1501,7 +1495,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					return 1;
 				}
 				pan=2;
-				warningkill = sscanf (pointer, "%c%10[-0-9]" ,&question, panvalue);
+				warningkill = sscanf(pointer, "%c%10[-0-9]" , &question, panvalue);
 			}
 			else if (!strcmp(command, "tilt")) {
 				pointer = pointer + 4;
@@ -1516,7 +1510,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					return 1;
 				}
 				tilt = 2;
-				warningkill = sscanf (pointer, "%c%10[-0-9]" ,&question, tiltvalue);
+				warningkill = sscanf(pointer, "%c%10[-0-9]" , &question, tiltvalue);
 			}
 			else if	(!strcmp(command, "x")) {
 				pointer++;
@@ -1532,12 +1526,12 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					return 1;
 				}
 				X = 2;
-				warningkill = sscanf (pointer, "%c%10[-0-9]" ,&question, x_value);
+				warningkill = sscanf(pointer, "%c%10[-0-9]" , &question, x_value);
 			}
 			else if	(!strcmp(command, "y")) {
 				pointer++;
 				length_uri--;
-				if ( (Y) || (!X) || (pan) || (tilt) ){
+				if ( (Y) || (!X) || (pan) || (tilt) ) {
 					motion_log(LOG_WARNING, 0, "httpd debug race 8");
 					/* no valid syntax */
 					if (cnt[0]->conf.control_html_output)
@@ -1547,7 +1541,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					return 1;
 				}
 				Y = 2;
-				warningkill = sscanf (pointer, "%c%10[-0-9]" ,&question, y_value);
+				warningkill = sscanf(pointer, "%c%10[-0-9]" , &question, y_value);
 			} else {
 				motion_log(LOG_WARNING, 0, "httpd debug race 9");
 				/* no valid syntax */
@@ -1568,7 +1562,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				else
 					response_client(client_socket, not_valid_syntax_raw, NULL);
 				return 1;
-			}else if (( question == '=') && ( warningkill == 1)){
+			}else if (( question == '=') && ( warningkill == 1)) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 11");
 				if (cnt[0]->conf.control_html_output)
 					response_client(client_socket, error_value, NULL);
@@ -1578,15 +1572,15 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			}
 			
 			
-			if (pan == 2){
+			if (pan == 2) {
 				pointer = pointer + strlen(panvalue) + 1;
 				length_uri = length_uri - strlen(panvalue) - 1;	
 			}
-			else if (tilt == 2){
+			else if (tilt == 2) {
 				pointer = pointer + strlen(tiltvalue) + 1;
 				length_uri = length_uri - strlen(tiltvalue) - 1;
 			}
-			else if (X == 2){
+			else if (X == 2) {
 				pointer = pointer + strlen(x_value) + 1;
 				length_uri = length_uri - strlen(x_value) - 1;
 			}
@@ -1613,7 +1607,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				setcnt = cnt[thread];
 				cnt[thread]->moved = track_center(setcnt, setcnt->video_dev, 1, atoi(x_value), atoi(y_value));
 				if (cnt[thread]->moved) {
-					if (cnt[0]->conf.control_html_output){
+					if (cnt[0]->conf.control_html_output) {
 						send_template_ini_client(client_socket, ini_template);
 						sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 						             "<b>Thread %hu</b><br>\n"
@@ -1650,7 +1644,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				cent.x = atoi(panvalue);
 				// Add the number of frame to skip for motion detection
 				cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, &cent, &relativecnt->imgs, 1);
-				if (cnt[thread]->moved){
+				if (cnt[thread]->moved) {
 					/* move tilt */
 					relativecnt = cnt[thread];
 					cent.width = relativecnt->imgs.width;
@@ -1659,7 +1653,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					cent.y = atoi(tiltvalue);
 					SLEEP(1,0);
 					cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, &cent, &relativecnt->imgs, 1);
-					if (cnt[thread]->moved){
+					if (cnt[thread]->moved) {
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
@@ -1721,7 +1715,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"status")) {
+	} else if (!strcmp(command, "status")) {
 		pointer = pointer+6;
 		length_uri = length_uri-6;
 		if (length_uri==0) {
@@ -1733,7 +1727,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
-				sprintf(res, "Thread %hu\n track auto %s\nDone\n",thread, 
+				sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread, 
 				             (cnt[thread]->track.active)? "enabled":"disabled");
 				send_template_ini_client_raw(client_socket);
 				send_template_raw(client_socket, res);
@@ -1746,7 +1740,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
-	} else if (!strcmp(command,"auto")) {
+	} else if (!strcmp(command, "auto")) {
 		pointer = pointer + 4;
 		length_uri = length_uri - 4;
 		if ((question == '?') && (length_uri > 0)) {
@@ -1755,17 +1749,17 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			length_uri--;
 			/* value= */
 
-			warningkill = sscanf (pointer, "%256[a-z]%c",query,&question);
-			if ((question == '=') && (!strcmp(query,"value")) ) {
+			warningkill = sscanf(pointer, "%256[a-z]%c", query, &question);
+			if ((question == '=') && (!strcmp(query, "value")) ) {
 				pointer = pointer + 6;
 				length_uri = length_uri - 6;
-				warningkill = sscanf (pointer, "%256[-0-9a-z]" , command);
-				if ((command!=NULL) && (strlen(command) > 0)) {
+				warningkill = sscanf(pointer, "%256[-0-9a-z]" , command);
+				if ((command != NULL) && (strlen(command) > 0)) {
 					struct context *autocnt;
 
 					/* auto value=0|1|status*/
 
-					if (!strcmp(command,"status")) {
+					if (!strcmp(command, "status")) {
 						if (cnt[0]->conf.control_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
@@ -1797,7 +1791,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res, "track auto %s\nDone\n",active ? "enabled":"disabled");
+								sprintf(res, "track auto %s\nDone\n", active ? "enabled":"disabled");
 								send_template_raw(client_socket, res);
 							}
 						} else {
@@ -1829,13 +1823,13 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				             "<option value='0' %s>Disable</option><option value='1' %s>Enable</option>\n"
 				             "<option value='status'>status</option>\n"
 				             "</select><input type=submit value='set'>\n"
-				             "</form>\n",thread, thread, (cnt[thread]->track.active) ? "selected":"",
-				             (cnt[thread]->track.active) ? "selected":"" );
+				             "</form>\n", thread, thread, (cnt[thread]->track.active) ? "selected":"",
+				             (cnt[thread]->track.active) ? "selected":"");
 				send_template(client_socket, res);
 				send_template_end_client(client_socket);
 			} else {
 				send_template_ini_client_raw(client_socket);
-				sprintf(res, "auto accepts only  0,1 or status as valid value\n");
+				sprintf(res, "auto accepts only 0,1 or status as valid value\n");
 				send_template_raw(client_socket, res);
 			}
 		} else {
@@ -1864,10 +1858,10 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 	return 1 on success	
 */
 
-static unsigned short int handle_get(int client_socket, const char* url, void *userdata)
+static unsigned short int handle_get(int client_socket, const char *url, void *userdata)
 {
-	struct context **cnt=userdata;
-	if (*url == '/' ){
+	struct context **cnt = userdata;
+	if (*url == '/' ) {
 		unsigned short int i = 0;
 		char *res=NULL;
 		res = malloc(2048);
@@ -1878,11 +1872,11 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 		if (! (strcmp (url, "/")) ) {
 			unsigned short int y;
 			if (cnt[0]->conf.control_html_output) {
-				send_template_ini_client(client_socket,ini_template);
+				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<b>Motion "VERSION" Running [%hu] Threads</b><br>\n"
 				             "<a href='/0/'>All</a><br>\n", i);
 				send_template(client_socket, res);
-				for (y=1; y<i; y++) {
+				for (y = 1; y < i; y++) {
 					sprintf(res, "<a href='/%hu/'>Thread %hu</a><br>\n", y, y);
 					send_template(client_socket, res);
 				}
@@ -1908,11 +1902,11 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 			/* Check for Thread number first -> GET /2 */
 			pointer++;
 			length_uri--;
-			warningkill = sscanf (pointer, "%hd%c", &thread, &slash);
+			warningkill = sscanf(pointer, "%hd%c", &thread, &slash);
 
 			if ((thread != -1) && (thread < i)) {
 				/* thread_number found */
-				if (thread > 9){
+				if (thread > 9) {
 					pointer = pointer + 2;
 					length_uri = length_uri - 2;
 				}else{
@@ -1926,10 +1920,10 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 				} 
 
 				if (length_uri!=0) {
-					warningkill = sscanf (pointer, "%256[a-z]%c" , command , &slash);
+					warningkill = sscanf(pointer, "%256[a-z]%c" , command , &slash);
 
 					/* config */
-					if (!strcmp(command,"config")) {
+					if (!strcmp(command, "config")) {
 						pointer = pointer + 6;
 						length_uri = length_uri - 6;
 						if (length_uri == 0) {
@@ -1962,7 +1956,7 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 						}
 					}
 					/* action */
-					else if (!strcmp(command,"action")) {
+					else if (!strcmp(command, "action")) {
 						pointer = pointer + 6;
 						length_uri = length_uri - 6;
 						/* call action() */
@@ -1975,7 +1969,7 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 								             "<a href=/%hd/action/snapshot>snapshot</a><br>\n"
 								             "<a href=/%hd/action/restart>restart</a><br>\n"
 								             "<a href=/%hd/action/quit>quit</a><br>\n",
-								             thread,thread,thread,thread,thread,thread);
+								             thread, thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
@@ -1999,7 +1993,7 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 						}
 					}
 					/* detection */
-					else if (!strcmp(command,"detection")) {
+					else if (!strcmp(command, "detection")) {
 						pointer = pointer + 9;
 						length_uri = length_uri - 9;
 						if (length_uri == 0) {
@@ -2062,10 +2056,10 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 								/* error track not enable */
 								if (cnt[0]->conf.control_html_output) {
 									sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
-									response_client(client_socket, not_track,res);
+									response_client(client_socket, not_track, res);
 								}
 								else
-									response_client(client_socket, not_track_raw,NULL);
+									response_client(client_socket, not_track_raw, NULL);
 							}
 						} else {
 							if (cnt[0]->conf.control_html_output) {
@@ -2086,7 +2080,7 @@ static unsigned short int handle_get(int client_socket, const char* url, void *u
 				} else {
 					/* /thread_number/ requested */
 					if (cnt[0]->conf.control_html_output) {
-						send_template_ini_client(client_socket,ini_template);
+						send_template_ini_client(client_socket, ini_template);
 						sprintf(res, "<a href=/>&lt;&ndash; back</a><br><br>\n<b>Thread %hd</b><br>\n"
 						             "<a href='/%hd/config'>config</a><br>\n"
 						             "<a href='/%hd/action'>action</a><br>\n"
@@ -2145,7 +2139,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 	{
 		ssize_t nread = 0, readb = -1;
 
-		nread = read (client_socket, buffer, length);
+		nread = read(client_socket, buffer, length);
 
 		if (nread <= 0) {
 			motion_log(LOG_ERR, 1, "httpd First read");
@@ -2160,17 +2154,17 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 
 			buffer[nread] = '\0';
 
-			warningkill = sscanf (buffer, "%s %s %s", method, url, protocol);
+			warningkill = sscanf(buffer, "%s %s %s", method, url, protocol);
 
-			while ((strstr (buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)){
-				readb = read (client_socket, buffer+nread, sizeof (buffer) - nread);
+			while ((strstr(buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)) {
+				readb = read(client_socket, buffer+nread, sizeof (buffer) - nread);
 
-				if (readb == -1){
+				if (readb == -1) {
 					nread = -1;
 					break;
 				}
 
-				nread +=readb;
+				nread += readb;
 				
 				if (nread > length) {
 					motion_log(LOG_ERR, 1, "httpd End buffer reached waiting for buffer ending");
@@ -2189,12 +2183,12 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			alive = 0;
 
 			/* Check Protocol */
-			if (strcmp (protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) {
+			if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) {
 				/* We don't understand this protocol.  Report a bad response.  */
 				if (cnt[0]->conf.control_html_output)
-					warningkill = write (client_socket, bad_request_response, sizeof (bad_request_response));
+					warningkill = write(client_socket, bad_request_response, sizeof (bad_request_response));
 				else
-					warningkill = write (client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
+					warningkill = write(client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
 
 				pthread_mutex_unlock(&httpd_mutex);
 				return 1;
@@ -2205,10 +2199,10 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 				uses other method, report the failure.  */
 				char response[1024];
 				if (cnt[0]->conf.control_html_output)
-					snprintf (response, sizeof (response),bad_method_response_template, method);
+					snprintf(response, sizeof (response), bad_method_response_template, method);
 				else
-					snprintf (response, sizeof (response),bad_method_response_template_raw, method);
-				warningkill = write (client_socket, response, strlen (response));
+					snprintf(response, sizeof (response), bad_method_response_template_raw, method);
+				warningkill = write(client_socket, response, strlen (response));
 				pthread_mutex_unlock(&httpd_mutex);
 				return 1;
 			}
@@ -2222,8 +2216,8 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 						authentication[end_auth - authentication] = '\0';
 					} else {
 						char response[1024];
-						snprintf (response, sizeof (response),request_auth_response_template, method);
-						warningkill = write (client_socket, response, strlen (response));
+						snprintf(response, sizeof (response), request_auth_response_template, method);
+						warningkill = write(client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
 						return 1;
 					}
@@ -2235,21 +2229,21 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 					                           cnt[0]->conf.control_authentication)) {
 					*/
 
-					if (strcmp(auth, authentication)){
-						char response[1024]={'\0'};
+					if (strcmp(auth, authentication)) {
+						char response[1024] = {'\0'};
 						snprintf(response, sizeof (response), request_auth_response_template, method);
-						warningkill = write (client_socket, response, strlen (response));
+						warningkill = write(client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
 						return 1;
 					} else {
-						ret = handle_get (client_socket, url, cnt);
+						ret = handle_get(client_socket, url, cnt);
 						/* A valid auth request.  Process it.  */
 					}
 				} else {
 					// Request Authorization
-					char response[1024]={'\0'};
-					snprintf (response, sizeof (response),request_auth_response_template, method);
-					warningkill = write (client_socket, response, strlen (response));
+					char response[1024] = {'\0'};
+					snprintf(response, sizeof (response), request_auth_response_template, method);
+					warningkill = write(client_socket, response, strlen (response));
 					pthread_mutex_unlock(&httpd_mutex);
 					return 1;
 				}
@@ -2277,19 +2271,20 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 static int acceptnonblocking(int serverfd, int timeout)
 {
 	int curfd;
-	socklen_t namelen = sizeof(struct sockaddr_in);
-	struct sockaddr_in client;
+	struct sockaddr_storage client;
+	socklen_t namelen = sizeof(client);
+
 	struct timeval tm;
 	fd_set fds;
 
 	tm.tv_sec = timeout; /* Timeout in seconds */
 	tm.tv_usec = 0;
 	FD_ZERO(&fds);
-	FD_SET(serverfd,&fds);
+	FD_SET(serverfd, &fds);
 	
-	if( select (serverfd + 1, &fds, NULL, NULL, &tm) > 0){
+	if ( select (serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
 		if(FD_ISSET(serverfd, &fds)) { 
-			if((curfd = accept(serverfd, (struct sockaddr*)&client, &namelen))>0)
+			if((curfd = accept(serverfd, (struct sockaddr*)&client, &namelen)) > 0)
 				return(curfd);
 		}	
 	}
@@ -2304,56 +2299,86 @@ static int acceptnonblocking(int serverfd, int timeout)
 
 void httpd_run(struct context **cnt)
 {
-	int sd, client_socket_fd, val = 1;
+	int sd = -1, client_socket_fd, val;
 	unsigned short int client_sent_quit_message = 1, closehttpd = 0; 
-	struct sockaddr_in servAddr;
+	struct addrinfo hints, *res, *ressave;
 	struct sigaction act;
 	char *authentication = NULL;
+	char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
 	/* Initialize the mutex */
 	pthread_mutex_init(&httpd_mutex, NULL);
 
-
 	/* set signal handlers TO IGNORE */
-	memset(&act,0,sizeof(act));
+	memset(&act, 0, sizeof(act));
 	sigemptyset(&act.sa_mask);
 	act.sa_handler = SIG_IGN;
-	sigaction(SIGPIPE,&act,NULL);
-	sigaction(SIGCHLD,&act,NULL);
+	sigaction(SIGPIPE, &act, NULL);
+	sigaction(SIGCHLD, &act, NULL);
 
-	/* create socket */
-	sd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sd<0) {
-		motion_log(LOG_ERR, 1, "httpd socket");
+	memset(&hints, 0, sizeof(struct addrinfo));
+	/* PASSIVE as we are going to listen */
+	hints.ai_flags = AI_PASSIVE;
+	hints.ai_family	= AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	snprintf(portnumber, sizeof(portnumber), "%u", cnt[0]->conf.control_port);
+
+	val = getaddrinfo(cnt[0]->conf.control_localhost ? "localhost" : NULL, portnumber, &hints, &res);
+
+	/* check != 0 to allow FreeBSD compatibility */ 
+	if (val != 0) {
+		motion_log(LOG_ERR, 1, "getaddrinfo() for httpd socket failed: %s", gai_strerror(val));
+		freeaddrinfo(res);
 		return;
 	}
 
-	/* bind server port */
-	servAddr.sin_family = AF_INET;
-	if (cnt[0]->conf.control_localhost)
-		servAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	else
-		servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servAddr.sin_port = htons(cnt[0]->conf.control_port);
+	ressave = res;
 
-	/* Reuse Address */ 
+	while (res) {
+		/* create socket */
+		sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+
+		getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
+		            sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
+
+		motion_log(LOG_INFO, 0, "motion-httpd testing : %s addr: %s port: %s", 
+		                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
+
+		if (sd >= 0) {
+			val = 1;
+			/* Reuse Address */ 
+			setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( int ) );
+
+			if (bind(sd, res->ai_addr, res->ai_addrlen) == 0) {
+				motion_log(LOG_INFO, 0, "motion-httpd Binded : %s addr: %s port: %s",
+				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
+				break;
+			}
+
+			motion_log(LOG_ERR, 1, "motion-httpd failed bind() interface %s / port %s, retrying", hbuf, sbuf);
+			close(sd);
+			sd = -1;
+		}
+		motion_log(LOG_ERR, 1, "motion-httpd socket failed interface %s / port %s, retrying", hbuf, sbuf);
+		res = res->ai_next;
+	}
+
+	freeaddrinfo(ressave);
+
+	if (sd < 0) {
+		motion_log(LOG_ERR, 1, "motion-httpd ERROR bind() [interface %s port %s]", hbuf, sbuf);
+		return;
+	}
 	
-	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( int ) ) ;
-
-	if (bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0) {
-		motion_log(LOG_ERR, 1, "httpd bind()");
-		close(sd);
-		return;
-	}
-
-	if (listen(sd,5) == -1){
-		motion_log(LOG_ERR, 1, "httpd listen()");
+	if (listen(sd,5) == -1) {
+		motion_log(LOG_ERR, 1, "motion-httpd ERROR listen() [interface %s port %s]", hbuf, sbuf);
 		close(sd);
 		return;
 	}
 
 	motion_log(LOG_DEBUG, 0, "motion-httpd/"VERSION" running, accepting connections");
-	motion_log(LOG_DEBUG, 0, "motion-httpd: waiting for data on port TCP %d", cnt[0]->conf.control_port);
+	motion_log(LOG_DEBUG, 0, "motion-httpd: waiting for data on %s port TCP %s", hbuf, sbuf);
 
 	if (cnt[0]->conf.control_authentication != NULL ) {
 		char *userpass = NULL;
@@ -2372,15 +2397,15 @@ void httpd_run(struct context **cnt)
 
 		client_socket_fd = acceptnonblocking(sd, 1);
 
-		if (client_socket_fd<0) {
-			if ((!cnt[0]) || (cnt[0]->finish)){
-				motion_log(-1, 0, "httpd - Finishing");
+		if (client_socket_fd < 0) {
+			if ((!cnt[0]) || (cnt[0]->finish)) {
+				motion_log(-1, 0, "motion-httpd - Finishing");
 				closehttpd = 1;
 			}
 		} else {
 			/* Get the Client request */
 			client_sent_quit_message = read_client (client_socket_fd, cnt, authentication);
-			motion_log(-1, 0, "httpd - Read from client");
+			motion_log(-1, 0, "motion-httpd - Read from client");
 
 			/* Close Connection */
 			if (client_socket_fd)
@@ -2391,14 +2416,14 @@ void httpd_run(struct context **cnt)
 
 	if (authentication != NULL) free(authentication);
 	close(sd);
-	motion_log(LOG_DEBUG, 0, "httpd Closing");
+	motion_log(LOG_DEBUG, 0, "motion-httpd Closing");
 	pthread_mutex_destroy(&httpd_mutex);
 }
 
 void *motion_web_control(void *arg)
 {
-	struct context **cnt=arg;
+	struct context **cnt = arg;
 	httpd_run(cnt);
-	motion_log(LOG_DEBUG, 0, "httpd thread exit");
+	motion_log(LOG_DEBUG, 0, "motion-httpd thread exit");
 	pthread_exit(NULL);
 }

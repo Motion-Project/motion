@@ -2,6 +2,8 @@ SVN trunk Summary of Changes
 
 Features
    * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
+   * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6 
+     (Jeroen Massar & Angel Carpintero) 
 
 Bugfixes
 

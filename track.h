@@ -32,7 +32,7 @@ struct trackoptions {
 	unsigned short int step_angle_x;
 	unsigned short int step_angle_y;
 	unsigned short int move_wait;
-// UVC
+	/* UVC */
 	int pan_angle; // degrees
 	int tilt_angle; // degrees
 };
@@ -43,7 +43,7 @@ unsigned short int track_center(struct context *, int, unsigned short int, int, 
 unsigned short int track_move(struct context *, int, struct coord *, struct images *, unsigned short int);
 
 /*
-	Some default values:
+ * Some default values:
  */
 #define TRACK_SPEED             255
 #define TRACK_STEPSIZE          40
@@ -55,7 +55,7 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 #define TRACK_TYPE_UVC          5
 
 /*
-	Some defines for the Serial stepper motor:
+ * Some defines for the Serial stepper motor:
  */
 
 #define STEPPER_BAUDRATE        B9600
@@ -88,7 +88,7 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 
 
 /*
-	Some defines for the Iomojo Smilecam:
+ * Some defines for the Iomojo Smilecam:
  */
 
 #define IOMOJO_BAUDRATE	B19200
@@ -109,14 +109,14 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 #ifndef WITHOUT_V4L
 
 /*
-	Defines for the Logitech QuickCam Orbit/Sphere USB webcam
-*/
+ * Defines for the Logitech QuickCam Orbit/Sphere USB webcam
+ */
 
 #define LQOS_VERTICAL_DEGREES   180
 #define LQOS_HORIZONAL_DEGREES  120
 
 /*
- * UVC
+ * UVC 
  */
 
 #ifdef MOTION_V4L2

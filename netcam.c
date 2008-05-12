@@ -42,11 +42,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <regex.h>                  /* For parsing of the URL */
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
 #include <sys/socket.h>
-//#include <sys/types.h>
 
 #include "netcam_ftp.h"
 
@@ -211,7 +207,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 			}
 		}
 	}
-	if ((!parse_url->port) && (parse_url->service)){
+	if ((!parse_url->port) && (parse_url->service)) {
 		if (!strcmp(parse_url->service, "http"))
 			parse_url->port = 80;
 		else if (!strcmp(parse_url->service, "ftp"))
@@ -363,13 +359,13 @@ static int netcam_check_keepalive(char *header)
 static int netcam_check_close(char *header)
 {
 	char *type = NULL;
-	int ret=-1;
+	int ret = -1;
 
 	if (!header_process(header, "Connection", http_process_type, &type))
 		return -1;
 	
 	if (!strcmp(type, "close")) /* strcmp returns 0 for match */
-		ret=1;
+		ret = 1;
 	
 	if (type) 
 		free(type);
@@ -697,7 +693,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 		 * If we are a non-streaming (ie. Jpeg) netcam and keepalive is configured 
 		 */
 
-		if (aliveflag){
+		if (aliveflag) {
 			if (closeflag) {
 			       /*
 			        * If not a streaming cam, and keepalive is set, and the flag shows we 
@@ -706,7 +702,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 			        */ 
 				motion_log(LOG_INFO, 0, "Info: Both 'Connection: Keep-Alive' and 'Connection: close' "
 				                        "header received. Motion continues unchanged.");
-			}else{
+			} else {
 			        /* aliveflag && !closeflag 
 			         *
 			         * If not a streaming cam, and keepalive is set, and the flag shows we 
@@ -717,7 +713,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 				if (debug_level > CAMERA_INFO)
 					motion_log(LOG_INFO, 0, "Info: Received a Keep-Alive field in this set of headers.");
 			}
-		}else{ /* !aliveflag */
+		} else { /* !aliveflag */
 			if (!closeflag) {
 			       /*
 			        * If not a streaming cam, and keepalive is set, and the flag shows we 
@@ -812,7 +808,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 	int saveflags;
 	int back_err;
 	int optval;
-	socklen_t optlen=sizeof(optval);
+	socklen_t optlen = sizeof(optval);
 	socklen_t len;
 	fd_set fd_w;
 	struct timeval selecttime;
@@ -820,16 +816,16 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
         /* Assure any previous connection has been closed - IF we are not in keepalive */
         if (!netcam->connect_keepalive) {
 		if (debug_level > CAMERA_INFO )
-        		motion_log(LOG_DEBUG, 0, "netcam_connect, disconnecting netcam since keep-alive not set." );
-                netcam_disconnect(netcam);
+			motion_log(LOG_DEBUG, 0, "netcam_connect, disconnecting netcam since keep-alive not set." );
+		netcam_disconnect(netcam);
 
 		/* create a new socket */
-               	if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-                       	motion_log(LOG_ERR, 1, "netcam_connect with no keepalive, attempt to create socket failed.");
-                       	return -1;
-                       	}
-			if (debug_level > CAMERA_INFO )
-				motion_log(LOG_DEBUG, 0, "netcam_connect with no keepalive, new socket created fd %d", netcam->sock);
+		if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+			motion_log(LOG_ERR, 1, "netcam_connect with no keepalive, attempt to create socket failed.");
+			return -1;
+		}
+		if (debug_level > CAMERA_INFO )
+			motion_log(LOG_DEBUG, 0, "netcam_connect with no keepalive, new socket created fd %d", netcam->sock);
 	} else {       /* We are in keepalive mode, check for invalid socket */
 		if (netcam->sock == -1) {
 			/* Must be first time, or closed, create a new socket */
@@ -851,11 +847,11 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 				return -1;
 			}
 			if (debug_level > CAMERA_INFO) {
-				if (optval==1)	
+				if (optval == 1)	
 					motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is ON");
 				else
 					motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is OFF");
-				}
+			}
 	
 			/* Set the option active */
 			optval = 1;
@@ -1393,9 +1389,9 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
  */
 static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 {
-	int loop_counter=0;
+	int loop_counter = 0;
 	if (debug_level > CAMERA_VERBOSE) {
-		motion_log(-1,0,"Begin %s", __FUNCTION__);
+		motion_log(-1, 0, "Begin %s", __FUNCTION__);
 	}
 	netcam_buff_ptr buffer;
 	int len;
@@ -1433,7 +1429,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 		/*return -1;*/
 		loop_counter++;
 
-	} while(statbuf.st_mtime==netcam->file->last_st_mtime);
+	} while(statbuf.st_mtime == netcam->file->last_st_mtime);
 
 	netcam->file->last_st_mtime = statbuf.st_mtime;
 	if (debug_level > CAMERA_INFO) {
@@ -1507,7 +1503,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 	pthread_mutex_unlock(&netcam->mutex);
 
 	if (debug_level > CAMERA_VERBOSE) {
-		motion_log(-1,0,"End %s", __FUNCTION__);
+		motion_log(-1, 0, "End %s", __FUNCTION__);
 	}
 	return 0;
 }
@@ -1550,7 +1546,7 @@ static int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url) {
 	url->path = NULL;
 
 	if (debug_level > CAMERA_INFO)
-		motion_log(LOG_INFO, 0, "netcam_setup_file: netcam->file->path %s",netcam->file->path);
+		motion_log(LOG_INFO, 0, "netcam_setup_file: netcam->file->path %s", netcam->file->path);
 
 	netcam_url_free(url);
 
@@ -1617,7 +1613,7 @@ static void *netcam_handler_loop(void *arg)
 							open_error = 1;
 						}
 						/* need to have a dynamic delay here */
-						SLEEP(5,0);
+						SLEEP(5, 0);
 						continue;
 					}
 					if (open_error) {          /* log re-connection */
@@ -1629,11 +1625,9 @@ static void *netcam_handler_loop(void *arg)
 				/* Send our request and look at the response */
 				if ((retval = netcam_read_first_header(netcam)) != 1) {
 					if (retval > 0) {
-						motion_log(LOG_ERR, 0,
-						    "Unrecognized image header (%d)", retval);
+						motion_log(LOG_ERR, 0, "Unrecognized image header (%d)", retval);
 					} else if (retval != -1) {
-						motion_log(LOG_ERR, 0,
-						           "Error in header (%d)", retval);
+						motion_log(LOG_ERR, 0, "Error in header (%d)", retval);
 					}
 					/* need to have a dynamic delay here */
 					continue;
@@ -1646,7 +1640,7 @@ static void *netcam_handler_loop(void *arg)
 							    "re-opening camera (streaming)");
 							open_error = 1;
 						}
-						SLEEP(5,0);
+						SLEEP(5, 0);
 						continue;
 					}
 
@@ -1823,7 +1817,7 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 		ptr = mymalloc(strlen(url->service) + strlen(url->host)
 		               + strlen(url->path) + 4);
 		sprintf((char *)ptr, "http://%s%s", url->host, url->path);
-	        netcam->connect_keepalive=0; /* Disable Keepalive if proxy */
+	        netcam->connect_keepalive = 0; /* Disable Keepalive if proxy */
 		if (debug_level > CAMERA_INFO)
 			motion_log(LOG_DEBUG, 0, "Removed netcam_keepalive flag due to proxy set." 
 			                         "Proxy is incompatible with Keep-Alive.");
@@ -1911,7 +1905,7 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "netcam_setup_html: about to try to connect, time #%d", ix );
 		if (netcam_connect(netcam, 0) != 0) {
-			motion_log(LOG_ERR, 0,"Failed to open camera - check your config and that netcamera is online");
+			motion_log(LOG_ERR, 0, "Failed to open camera - check your config and that netcamera is online");
 
 			/* Fatal error on startup */
 			ix = MAX_HEADER_RETRIES;
@@ -1975,7 +1969,7 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url) {
 			netcam->ftp->user = strdup(ptr);
 		else {
 			netcam->ftp->user = mymalloc((cptr - ptr));
-			memcpy(netcam->ftp->user,ptr,(cptr - ptr));
+			memcpy(netcam->ftp->user, ptr,(cptr - ptr));
 			netcam->ftp->passwd = strdup(cptr + 1);
 		}
 	}
@@ -2368,15 +2362,15 @@ int netcam_start(struct context *cnt)
 	 * in the context structures (cnt->...) only.
 	 */
 
-	if (!strcmp(cnt->conf.netcam_http,"keep_alive")) {
+	if (!strcmp(cnt->conf.netcam_http, "keep_alive")) {
         	netcam->connect_http_10   = TRUE;
         	netcam->connect_http_11   = FALSE;
         	netcam->connect_keepalive = TRUE;
-	} else if (!strcmp(cnt->conf.netcam_http,"1.0") || !strcmp(cnt->conf.netcam_http,"1.0")) {
+	} else if (!strcmp(cnt->conf.netcam_http, "1.0") || !strcmp(cnt->conf.netcam_http, "1.0")) {
         	netcam->connect_http_10   = TRUE;
         	netcam->connect_http_11   = FALSE;
         	netcam->connect_keepalive = FALSE;
-	} else if (!strcmp(cnt->conf.netcam_http,"1.1")) {
+	} else if (!strcmp(cnt->conf.netcam_http, "1.1")) {
         	netcam->connect_http_10   = FALSE;
         	netcam->connect_http_11   = TRUE;
         	netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default */
@@ -2390,15 +2384,15 @@ int netcam_start(struct context *cnt)
 	/* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic */
 	netcam->sock = -1;
 
-	if ((url.service) && (!strcmp(url.service, "http")) ){
+	if ((url.service) && (!strcmp(url.service, "http")) ) {
 		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "netcam_start: now calling netcam_setup_html()");
 		retval = netcam_setup_html(netcam, &url);
-	} else if ((url.service) && (!strcmp(url.service, "ftp")) ){
+	} else if ((url.service) && (!strcmp(url.service, "ftp")) ) {
 		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "netcam_start: now calling netcam_setup_ftp");
 		retval = netcam_setup_ftp(netcam, &url);
-	} else if ((url.service) && (!strcmp(url.service, "file")) ){
+	} else if ((url.service) && (!strcmp(url.service, "file")) ) {
 		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "netcam_start: now calling netcam_setup_file()");
 		retval = netcam_setup_file(netcam, &url);
