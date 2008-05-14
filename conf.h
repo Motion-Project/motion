@@ -58,12 +58,12 @@ struct config {
 	int ffmpeg_vbr;
 	int ffmpeg_deinterlace;
 	const char *ffmpeg_video_codec;
-	int webcam_port;
-	int webcam_quality;
-	int webcam_motion;
-	int webcam_maxrate;
-	int webcam_localhost;
-	int webcam_limit;
+	int stream_port;
+	int stream_quality;
+	int stream_motion;
+	int stream_maxrate;
+	int stream_localhost;
+	int stream_limit;
 	int control_port;
 	int control_localhost;
 	int control_html_output;

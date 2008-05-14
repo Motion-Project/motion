@@ -48,7 +48,7 @@
 #endif
 
 #include "conf.h"
-#include "webcam.h"
+#include "stream.h"
 #include "webhttpd.h"
 
 /**
@@ -140,8 +140,8 @@
 #define CONNECTION_KO "Lost connection"
 #define CONNECTION_OK "Connection OK"
 
-#define DEF_MAXSTREAMS          10   /* Maximum number of webcam clients per camera */
-#define DEF_MAXWEBQUEUE         10   /* Maximum number of webcam client in queue */
+#define DEF_MAXSTREAMS          10   /* Maximum number of stream clients per camera */
+#define DEF_MAXWEBQUEUE         10   /* Maximum number of stream client in queue */
 
 #define DEF_TIMESTAMP      "%Y-%m-%d\\n%T"
 #define DEF_EVENTSTAMP     "%Y%m%d%H%M%S"
@@ -363,7 +363,7 @@ struct context {
 	int pipe;
 	int mpipe;
 
-	struct webcam webcam;
+	struct stream stream;
 	int stream_count;
 	
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)

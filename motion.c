@@ -429,12 +429,12 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 
 	/* Limit framerate */
 	if (img->shot < conf->frame_limit) {
-		/* If config option webcam_motion is enabled, send the latest motion detected image
-		 * to the webcam but only if it is not the first shot within a second. This is to
-		 * avoid double frames since we already have sent a frame to the webcam.
+		/* If config option stream_motion is enabled, send the latest motion detected image
+		 * to the stream but only if it is not the first shot within a second. This is to
+		 * avoid double frames since we already have sent a frame to the stream.
 		 * We also disable this in setup_mode.
 		 */
-		if (conf->webcam_motion && !conf->setup_mode && img->shot != 1) {
+		if (conf->stream_motion && !conf->setup_mode && img->shot != 1) {
 			event(cnt, EVENT_WEBCAM, img->image, NULL, NULL, &img->timestamp_tm);
 		}
 
@@ -808,12 +808,12 @@ static int motion_init(struct context *cnt)
 	/* Set threshold value */
 	cnt->threshold = cnt->conf.max_changes;
 
-	/* Initialize webcam server if webcam port is specified to not 0 */
-	if (cnt->conf.webcam_port) {
-		if ( webcam_init(cnt) == -1 ) {
-			motion_log(LOG_ERR, 1, "Problem enabling stream server in port %d", cnt->conf.webcam_port);
+	/* Initialize stream server if stream port is specified to not 0 */
+	if (cnt->conf.stream_port) {
+		if ( stream_init(cnt) == -1 ) {
+			motion_log(LOG_ERR, 1, "Problem enabling stream server in port %d", cnt->conf.stream_port);
 			cnt->finish = 1;
-		}else 	motion_log(LOG_DEBUG, 0, "Started stream webcam server in port %d", cnt->conf.webcam_port);
+		}else 	motion_log(LOG_DEBUG, 0, "Started stream stream server in port %d", cnt->conf.stream_port);
 	}
 
 	/* Prevent first few frames from triggering motion... */
@@ -838,7 +838,7 @@ static int motion_init(struct context *cnt)
  */
 static void motion_cleanup(struct context *cnt)
 {
-	/* Stop webcam */
+	/* Stop stream */
 	event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
 
 	if (cnt->video_dev >= 0){
@@ -1456,7 +1456,7 @@ static void *motion_loop(void *arg)
 				draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
 			}
 
-			/* Add changed pixels to motion-images (for webcam) in setup_mode
+			/* Add changed pixels to motion-images (for stream) in setup_mode
 			   and always overlay smartmask (not only when motion is detected) */
 			if (cnt->conf.setup_mode) {
 				char tmp[PATH_MAX];
@@ -1766,21 +1766,21 @@ static void *motion_loop(void *arg)
 
 	/***** MOTION LOOP - VIDEO LOOPBACK SECTION *****/
 
-		/* feed last image and motion image to video device pipes and the webcam clients
-		 * In setup mode we send the special setup mode image to both webcam and vloopback pipe
+		/* feed last image and motion image to video device pipes and the stream clients
+		 * In setup mode we send the special setup mode image to both stream and vloopback pipe
 		 * In normal mode we feed the latest image to vloopback device and we send
-		 * the image to the webcam. We always send the first image in a second to the webcam.
-		 * Other image are sent only when the config option webcam_motion is off
-		 * The result is that with webcam_motion on the webcam stream is normally at the minimal
+		 * the image to the stream. We always send the first image in a second to the stream.
+		 * Other image are sent only when the config option stream_motion is off
+		 * The result is that with stream_motion on the stream stream is normally at the minimal
 		 * 1 frame per second but the minute motion is detected the motion_detected() function
-		 * sends all detected pictures to the webcam except the 1st per second which is already sent.
+		 * sends all detected pictures to the stream except the 1st per second which is already sent.
 		 */
 		if (cnt->conf.setup_mode) {
 			event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
 			event(cnt, EVENT_WEBCAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
 		} else {
 			event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, &cnt->current_image->timestamp_tm);
-			if (!cnt->conf.webcam_motion || cnt->shots == 1)
+			if (!cnt->conf.stream_motion || cnt->shots == 1)
 				event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
@@ -2176,34 +2176,34 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
 {
 	int i;
 
-	/* Check the webcam port number for conflicts.
+	/* Check the stream port number for conflicts.
 	 * First we check for conflict with the control port.
 	 * Second we check for that two threads does not use the same port number
-	 * for the webcam. If a duplicate port is found the webcam feature gets disabled (port = 0)
+	 * for the stream. If a duplicate port is found the stream feature gets disabled (port = 0)
 	 * for this thread and a warning is written to console and syslog.
 	 */
 
-	if (cnt->conf.webcam_port != 0) {
+	if (cnt->conf.stream_port != 0) {
 		/* Compare against the control port. */
-		if (cnt_list[0]->conf.control_port == cnt->conf.webcam_port) {
+		if (cnt_list[0]->conf.control_port == cnt->conf.stream_port) {
 			motion_log(LOG_ERR, 0,
-			           "Webcam port number %d for thread %d conflicts with the control port",
-			           cnt->conf.webcam_port, cnt->threadnr);
-			motion_log(LOG_ERR, 0, "Webcam feature for thread %d is disabled.", cnt->threadnr);
-			cnt->conf.webcam_port = 0;
+			           "Stream port number %d for thread %d conflicts with the control port",
+			           cnt->conf.stream_port, cnt->threadnr);
+			motion_log(LOG_ERR, 0, "Stream feature for thread %d is disabled.", cnt->threadnr);
+			cnt->conf.stream_port = 0;
 		}
 
-		/* Compare against webcam ports of other threads. */
+		/* Compare against stream ports of other threads. */
 		for (i = 1; cnt_list[i]; i++) {
 			if (cnt_list[i] == cnt)
 				continue;
-			if (cnt_list[i]->conf.webcam_port == cnt->conf.webcam_port) {
+			if (cnt_list[i]->conf.stream_port == cnt->conf.stream_port) {
 				motion_log(LOG_ERR, 0,
-				           "Webcam port number %d for thread %d conflicts with thread %d",
-				           cnt->conf.webcam_port, cnt->threadnr, cnt_list[i]->threadnr);
+				           "Stream port number %d for thread %d conflicts with thread %d",
+				           cnt->conf.stream_port, cnt->threadnr, cnt_list[i]->threadnr);
 				motion_log(LOG_ERR, 0,
-				           "Webcam feature for thread %d is disabled.", cnt->threadnr);
-				cnt->conf.webcam_port = 0;
+				           "Stream feature for thread %d is disabled.", cnt->threadnr);
+				cnt->conf.stream_port = 0;
 			}
 		}
 	}
@@ -2316,7 +2316,7 @@ int main (int argc, char **argv)
 			}
 
 			if (cnt_list[0]->conf.setup_mode)
-				motion_log(LOG_ERR, 0, "Webcam port %d", cnt_list[i]->conf.webcam_port);
+				motion_log(LOG_ERR, 0, "Stream port %d", cnt_list[i]->conf.stream_port);
 
 			start_motion_thread(cnt_list[i], &thread_attr);
 		}

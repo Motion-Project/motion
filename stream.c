@@ -1,6 +1,6 @@
 /*
- *	webcam.c
- *	Streaming webcam using jpeg images over a multipart/x-mixed-replace stream
+ *	stream.c ( based in stream.c )
+ *	Streaming stream using jpeg images over a multipart/x-mixed-replace stream
  *	Copyright (C) 2002 Jeroen Vreeken (pe1rxq@amsat.org)
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 
 
 /* This function sets up a TCP/IP socket for incoming requests. It is called only during
- * initialisation of Motion from the function webcam_init
+ * initialisation of Motion from the function stream_init
  * The function sets up a a socket on the port number given by _port_.
  * If the parameter _local_ is not zero the socket is setup to only accept connects from localhost.
  * Otherwise any client IP address is accepted. The function returns an integer representing the socket.
@@ -51,7 +51,7 @@ int http_bindsock(int port, int local)
 	optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
 
 	if (optval != 0) {
-		motion_log(LOG_ERR, 1, "getaddrinfo() for webcam socket failed: %s", gai_strerror(optval));
+		motion_log(LOG_ERR, 1, "getaddrinfo() for stream socket failed: %s", gai_strerror(optval));
 		freeaddrinfo(res);
 		return -1;
 	}
@@ -70,33 +70,33 @@ int http_bindsock(int port, int local)
 			/* Reuse Address */ 
 			setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof( int ) );
 
-			motion_log(LOG_INFO, 0, "webcam testing : %s addr: %s port: %s",
+			motion_log(LOG_INFO, 0, "stream testing : %s addr: %s port: %s",
 			                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
 			if (bind(sl, res->ai_addr, res->ai_addrlen) == 0){
-				motion_log(LOG_INFO, 0, "webcam Binded : %s addr: %s port: %s",
+				motion_log(LOG_INFO, 0, "stream Binded : %s addr: %s port: %s",
 				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);	
 				break;
 			}
 
-			motion_log(LOG_ERR, 1, "webcam bind() failed, retrying ");
+			motion_log(LOG_ERR, 1, "stream bind() failed, retrying ");
 			close(sl);
 			sl = -1;
 		}
-		motion_log(LOG_ERR, 1, "webcam socket failed, retrying");
+		motion_log(LOG_ERR, 1, "stream socket failed, retrying");
 		res = res->ai_next;
 	}
 
 	freeaddrinfo(ressave);
 
 	if (sl < 0) {
-		motion_log(LOG_ERR, 1, "webcam creating socket/bind ERROR");
+		motion_log(LOG_ERR, 1, "stream creating socket/bind ERROR");
 		return -1;
 	}
 	
 
 	if (listen(sl, DEF_MAXWEBQUEUE) == -1) {
-		motion_log(LOG_ERR, 1, "webcam listen() ERROR");
+		motion_log(LOG_ERR, 1, "stream listen() ERROR");
 		close(sl);
 		sl = -1;
 	}
@@ -124,15 +124,15 @@ static int http_acceptsock(int sl)
 }
 
 
-/* Webcam flush sends any outstanding data to all connected clients.
+/* stream flush sends any outstanding data to all connected clients.
  * It continuously goes through the client list until no data is able
  * to be sent (either because there isn't any, or because the clients
  * are not able to accept it).
  */
-static void webcam_flush(struct webcam *list, int *stream_count, int lim)
+static void stream_flush(struct stream *list, int *stream_count, int lim)
 {
 	int written;            /* the number of bytes actually written */
-	struct webcam *client;  /* pointer to the client being served */
+	struct stream *client;  /* pointer to the client being served */
 	int workdone = 0;       /* flag set any time data is successfully
 	                           written */
 
@@ -193,7 +193,7 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 			/* If the client is no longer connected, or the total
 			 * number of frames already sent to this client is
 			 * greater than our configuration limit, disconnect
-			 * the client and free the webcam struct
+			 * the client and free the stream struct
 			 */
 			if ( (written < 0 && errno != EAGAIN) ||
 			     (lim && !client->tmpbuffer && client->nr > lim) ) {
@@ -228,9 +228,9 @@ static void webcam_flush(struct webcam *list, int *stream_count, int lim)
 /* Routine to create a new "tmpbuffer", which is a common
  * object used by all clients connected to a single camera
  */
-static struct webcam_buffer *webcam_tmpbuffer(int size)
+static struct stream_buffer *stream_tmpbuffer(int size)
 {
-	struct webcam_buffer *tmpbuffer = mymalloc(sizeof(struct webcam_buffer));
+	struct stream_buffer *tmpbuffer = mymalloc(sizeof(struct stream_buffer));
 	tmpbuffer->ref = 0;
 	tmpbuffer->ptr = mymalloc(size);
 		
@@ -238,9 +238,9 @@ static struct webcam_buffer *webcam_tmpbuffer(int size)
 }
 
 
-static void webcam_add_client(struct webcam *list, int sc)
+static void stream_add_client(struct stream *list, int sc)
 {
-	struct webcam *new = mymalloc(sizeof(struct webcam));
+	struct stream *new = mymalloc(sizeof(struct stream));
 	static const char header[] = "HTTP/1.0 200 OK\r\n"
 			"Server: Motion/"VERSION"\r\n"
 			"Connection: close\r\n"
@@ -250,11 +250,11 @@ static void webcam_add_client(struct webcam *list, int sc)
 			"Pragma: no-cache\r\n"
 			"Content-Type: multipart/x-mixed-replace; boundary=--BoundaryString\r\n\r\n";
 
-	memset(new, 0, sizeof(struct webcam));
+	memset(new, 0, sizeof(struct stream));
 	new->socket = sc;
 	
-	if ((new->tmpbuffer = webcam_tmpbuffer(sizeof(header))) == NULL) {
-		motion_log(LOG_ERR, 1, "Error creating tmpbuffer in webcam_add_client");
+	if ((new->tmpbuffer = stream_tmpbuffer(sizeof(header))) == NULL) {
+		motion_log(LOG_ERR, 1, "Error creating tmpbuffer in stream_add_client");
 	} else {
 		memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
 		new->tmpbuffer->size = sizeof(header)-1;
@@ -270,7 +270,7 @@ static void webcam_add_client(struct webcam *list, int sc)
 }
 
 
-static void webcam_add_write(struct webcam *list, struct webcam_buffer *tmpbuffer, unsigned int fps)
+static void stream_add_write(struct stream *list, struct stream_buffer *tmpbuffer, unsigned int fps)
 {
 	struct timeval curtimeval;
 	unsigned long int curtime;
@@ -296,12 +296,12 @@ static void webcam_add_write(struct webcam *list, struct webcam_buffer *tmpbuffe
 }
 
 
-/* We walk through the chain of webcam structs until we reach the end.
+/* We walk through the chain of stream structs until we reach the end.
  * Here we check if the tmpbuffer points to NULL
  * We return 1 if it finds a list->tmpbuffer which is a NULL pointer which would
  * be the next client ready to be sent a new image. If not a 0 is returned.
  */
-static int webcam_check_write(struct webcam *list)
+static int stream_check_write(struct stream *list)
 {
 	while (list->next) {
 		list = list->next;
@@ -317,29 +317,29 @@ static int webcam_check_write(struct webcam *list)
  * The function setup the incoming tcp socket that the clients connect to
  * The function returns an integer representing the socket.
  */
-int webcam_init(struct context *cnt)
+int stream_init(struct context *cnt)
 {
-	cnt->webcam.socket = http_bindsock(cnt->conf.webcam_port, cnt->conf.webcam_localhost);
-	cnt->webcam.next = NULL;
-	cnt->webcam.prev = NULL;
-	return cnt->webcam.socket;
+	cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost);
+	cnt->stream.next = NULL;
+	cnt->stream.prev = NULL;
+	return cnt->stream.socket;
 }
 
 /* This function is called from the motion_loop when it ends
  * and motion is terminated or restarted
  */
-void webcam_stop(struct context *cnt)
+void stream_stop(struct context *cnt)
 {	
-	struct webcam *list;
-	struct webcam *next = cnt->webcam.next;
+	struct stream *list;
+	struct stream *next = cnt->stream.next;
 
 	if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Closing webcam listen socket & active webcam sockets");
+		motion_log(-1, 0, "Closing stream listen socket & active stream sockets");
 	else
-		motion_log(LOG_INFO, 0, "Closing webcam listen socket & active webcam sockets");
+		motion_log(LOG_INFO, 0, "Closing stream listen socket & active stream sockets");
 	
-	close(cnt->webcam.socket);
-	cnt->webcam.socket = -1;
+	close(cnt->stream.socket);
+	cnt->stream.socket = -1;
 
 	while (next) {
 		list = next;
@@ -355,31 +355,31 @@ void webcam_stop(struct context *cnt)
 	}
 
 	if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Closed webcam listen socket & active webcam sockets");
+		motion_log(-1, 0, "Closed stream listen socket & active stream sockets");
 	else
-		motion_log(LOG_INFO, 0, "Closed webcam listen socket & active webcam sockets");
+		motion_log(LOG_INFO, 0, "Closed stream listen socket & active stream sockets");
 }
 
-/* webcam_put is the starting point of the webcam loop. It is called from
+/* stream_put is the starting point of the stream loop. It is called from
  * the motion_loop with the argument 'image' pointing to the latest frame.
- * If config option 'webcam_motion' is 'on' this function is called once
+ * If config option 'stream_motion' is 'on' this function is called once
  * per second (frame 0) and when Motion is detected excl pre_capture.
- * If config option 'webcam_motion' is 'off' this function is called once
+ * If config option 'stream_motion' is 'off' this function is called once
  * per captured picture frame.
  * It is always run in setup mode for each picture frame captured and with
  * the special setup image.
  * The function does two things:
  * It looks for possible waiting new clients and adds them.
  * It sends latest picture frame to all connected clients.
- * Note: Clients that have disconnected are handled in the webcam_flush()
+ * Note: Clients that have disconnected are handled in the stream_flush()
  * function
  */
-void webcam_put(struct context *cnt, unsigned char *image)
+void stream_put(struct context *cnt, unsigned char *image)
 {
 	struct timeval timeout; 
-	struct webcam_buffer *tmpbuffer;
+	struct stream_buffer *tmpbuffer;
 	fd_set fdread;
-	int sl = cnt->webcam.socket;
+	int sl = cnt->stream.socket;
 	int sc;
 	/* the following string has an extra 16 chars at end for length */
 	const char jpeghead[] = "--BoundaryString\r\n"
@@ -394,32 +394,32 @@ void webcam_put(struct context *cnt, unsigned char *image)
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 	FD_ZERO(&fdread);
-	FD_SET(cnt->webcam.socket, &fdread);
+	FD_SET(cnt->stream.socket, &fdread);
 	
 	/* If we have not reached the max number of allowed clients per
 	 * thread we will check to see if new clients are waiting to connect.
-	 * If this is the case we add the client as a new webcam struct and
-	 * add this to the end of the chain of webcam structs that are linked
+	 * If this is the case we add the client as a new stream struct and
+	 * add this to the end of the chain of stream structs that are linked
 	 * to each other.
 	 */
 	if ((cnt->stream_count < DEF_MAXSTREAMS) &&
 	    (select(sl+1, &fdread, NULL, NULL, &timeout)>0)) {
 		sc = http_acceptsock(sl);
-		webcam_add_client(&cnt->webcam, sc);
+		stream_add_client(&cnt->stream, sc);
 		cnt->stream_count++;
 	}
 	
 	/* call flush to send any previous partial-sends which are waiting */
-	webcam_flush(&cnt->webcam, &cnt->stream_count, cnt->conf.webcam_limit);
+	stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
 	
 	/* Check if any clients have available buffers */
-	if (webcam_check_write(&cnt->webcam)) {
+	if (stream_check_write(&cnt->stream)) {
 		/* yes - create a new tmpbuffer for current image.
 		 * Note that this should create a buffer which is *much* larger
 		 * than necessary, but it is difficult to estimate the
 		 * minimum size actually required.
 		 */
-		tmpbuffer = webcam_tmpbuffer(cnt->imgs.size);
+		tmpbuffer = stream_tmpbuffer(cnt->imgs.size);
 		
 		/* check if allocation went ok */
 		if (tmpbuffer) {
@@ -443,7 +443,7 @@ void webcam_put(struct context *cnt, unsigned char *image)
 
 			/* create a jpeg image and place into tmpbuffer */
 			tmpbuffer->size = put_picture_memory(cnt, wptr, cnt->imgs.size, image,
-			                                     cnt->conf.webcam_quality);
+			                                     cnt->conf.stream_quality);
 
 			/* fill in the image length into the header */
 			imgsize = sprintf(len, "%9ld\r\n\r\n", tmpbuffer->size);
@@ -461,7 +461,7 @@ void webcam_put(struct context *cnt, unsigned char *image)
 			/* and finally put this buffer to all clients with
 			 * no outstanding data from previous frames.
 			 */
-			webcam_add_write(&cnt->webcam, tmpbuffer, cnt->conf.webcam_maxrate);
+			stream_add_write(&cnt->stream, tmpbuffer, cnt->conf.stream_maxrate);
 		} else {
 			motion_log(LOG_ERR, 1, "Error creating tmpbuffer");
 		}
@@ -470,7 +470,7 @@ void webcam_put(struct context *cnt, unsigned char *image)
 	/* Now we call flush again.  This time (assuming some clients were
 	 * ready for the new frame) the new data will be written out.
 	 */
-	webcam_flush(&cnt->webcam, &cnt->stream_count, cnt->conf.webcam_limit);
+	stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
 	
 	return;
 }

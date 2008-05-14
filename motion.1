@@ -570,35 +570,35 @@ Values: Max 4095 characters / Default: /dev/video0 (FreeBSD: /dev/bktr0)
 .br
 The video device to be used for capturing. Default for Linux is /dev/video0. for FreeBSD the default is /dev/bktr0.
 .TP
-.B webcam_limit integer
+.B stream_limit integer
 Values: 0 - 2147483647 / Default: 0 (unlimited)
 .br
-Limit the number of frames to number frames. After 'webcam_limit' number of frames the connection will be closed by motion. The value 0 means unlimited.
+Limit the number of frames to number frames. After 'stream_limit' number of frames the connection will be closed by motion. The value 0 means unlimited.
 .TP
-.B webcam_localhost boolean
+.B stream_localhost boolean
 Values: on, off / Default: on
 .br
-Limits the access to the webcam to the localhost.
+Limits the access to the stream to the localhost.
 .TP
-.B webcam_maxrate integer
+.B stream_maxrate integer
 Values: 1 - 100 / Default: 1
 .br
-Limit the framerate of the webcam in frames per second. Default is 1. Set the value to 100 for practically unlimited.
+Limit the framerate of the stream in frames per second. Default is 1. Set the value to 100 for practically unlimited.
 .TP
-.B webcam_motion boolean
+.B stream_motion boolean
 Values: on, off / Default: off
 .br
-If set to 'on' Motion sends slows down the webcam stream to 1 picture per second when no motion is detected. When motion is detected the stream runs as defined by webcam_maxrate. When 'off' the webcam stream always runs as defined by webcam_maxrate.
+If set to 'on' Motion sends slows down the stream to 1 picture per second when no motion is detected. When motion is detected the stream runs as defined by stream_maxrate. When 'off' the stream always runs as defined by stream_maxrate.
 .TP
-.B webcam_port integer
+.B stream_port integer
 Values: 0 - 65535 / Default: 0 (disabled)
 .br
-TCP port on which motion will listen for incoming connects with its webcam server.
+TCP port on which motion will listen for incoming connects with its stream server.
 .TP
-.B webcam_quality integer
+.B stream_quality integer
 Values: 1 - 100 / Default: 50
 .br
-Quality setting in percent for the mjpeg picture frames transferred over the webcam connection. Keep it low to restrict needed bandwidth.
+Quality setting in percent for the mjpeg picture frames transferred over the stream connection. Keep it low to restrict needed bandwidth.
 .TP
 .B width integer
 Values: Device Dependent / Default: 352

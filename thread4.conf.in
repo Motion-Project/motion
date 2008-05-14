@@ -49,11 +49,11 @@ target_dir /usr/local/apache2/htdocs/cam4
 
 
 ############################################################
-# Live Webcam Server
+# Live Stream Server
 ############################################################
 
 # The mini-http server listens to this port for requests (default: 0 = disabled)
-webcam_port 8084
+stream_port 8084
 
 # Command to be executed when a picture (.ppm|.jpg) is saved (default: none)
 # The filename of the picture is appended as an argument for the command.

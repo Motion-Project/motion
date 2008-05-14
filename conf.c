@@ -83,12 +83,12 @@ struct config conf_template = {
 	ffmpeg_bps:            DEF_FFMPEG_BPS,
 	ffmpeg_vbr:            DEF_FFMPEG_VBR,
 	ffmpeg_video_codec:    DEF_FFMPEG_CODEC,
-	webcam_port:           0,
-	webcam_quality:        50,
-	webcam_motion:         0,
-	webcam_maxrate:        1,
-	webcam_localhost:      1,
-	webcam_limit:          0,
+	stream_port:           0,
+	stream_quality:        50,
+	stream_motion:         0,
+	stream_maxrate:        1,
+	stream_localhost:      1,
+	stream_limit:          0,
 	control_port:          0,
 	control_localhost:     1,
 	control_html_output:   1,
@@ -869,56 +869,56 @@ config_param config_params[] = {
 	},
 #endif /* HAVE_FFMPEG */
 	{
-	"webcam_port",
+	"stream_port",
 	"\n############################################################\n"
-	"# Live Webcam Server\n"
+	"# Live Stream Server\n"
 	"############################################################\n\n"
 	"# The mini-http server listens to this port for requests (default: 0 = disabled)",
 	0,
-	CONF_OFFSET(webcam_port),
+	CONF_OFFSET(stream_port),
 	copy_int,
 	print_int
 	},
 	{
-	"webcam_quality",
+	"stream_quality",
 	"# Quality of the jpeg images produced (default: 50)",
 	0,
-	CONF_OFFSET(webcam_quality),
+	CONF_OFFSET(stream_quality),
 	copy_int,
 	print_int
 	},
 	{
-	"webcam_motion",
+	"stream_motion",
 	"# Output frames at 1 fps when no motion is detected and increase to the\n"
-	"# rate given by webcam_maxrate when motion is detected (default: off)",
+	"# rate given by stream_maxrate when motion is detected (default: off)",
 	0,
-	CONF_OFFSET(webcam_motion),
+	CONF_OFFSET(stream_motion),
 	copy_bool,
 	print_bool
 	},
 	{
-	"webcam_maxrate",
-	"# Maximum framerate for webcam streams (default: 1)",
+	"stream_maxrate",
+	"# Maximum framerate for streams (default: 1)",
 	0,
-	CONF_OFFSET(webcam_maxrate),
+	CONF_OFFSET(stream_maxrate),
 	copy_int,
 	print_int
 	},
 	{
-	"webcam_localhost",
-	"# Restrict webcam connections to localhost only (default: on)",
+	"stream_localhost",
+	"# Restrict stream connections to localhost only (default: on)",
 	0,
-	CONF_OFFSET(webcam_localhost),
+	CONF_OFFSET(stream_localhost),
 	copy_bool,
 	print_bool
 	},
 	{
-	"webcam_limit",
+	"stream_limit",
 	"# Limits the number of images per connection (default: 0 = unlimited)\n"
-	"# Number can be defined by multiplying actual webcam rate by desired number of seconds\n"
-	"# Actual webcam rate is the smallest of the numbers framerate and webcam_maxrate",
+	"# Number can be defined by multiplying actual stream rate by desired number of seconds\n"
+	"# Actual stream rate is the smallest of the numbers framerate and stream_maxrate",
 	0,
-	CONF_OFFSET(webcam_limit),
+	CONF_OFFSET(stream_limit),
 	copy_int,
 	print_int
 	},

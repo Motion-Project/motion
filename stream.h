@@ -1,7 +1,7 @@
 /*
- *      webcam.h
+ *      stream.h
  *      
- *      Include file for webcam.c
+ *      Include file for stream.c
  *      Copyright (C) 2002 Jeroen Vreeken (pe1rxq@amsat.org)
  *
  *      This program is free software; you can redistribute it and/or modify
@@ -18,28 +18,28 @@
  *      along with this program; if not, write to the Free Software
  *      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-#ifndef _INCLUDE_WEBCAM_H_
-#define _INCLUDE_WEBCAM_H_
+#ifndef _INCLUDE_STREAM_H_
+#define _INCLUDE_STREAM_H_
 
-struct webcam_buffer {
+struct stream_buffer {
 	unsigned char *ptr;
 	int ref;
 	long size;
 };
 
-struct webcam {
+struct stream {
 	int socket;
 	FILE *fwrite;
-	struct webcam_buffer *tmpbuffer;
+	struct stream_buffer *tmpbuffer;
 	long filepos;
 	int nr;
 	unsigned long int last;
-	struct webcam *prev;
-	struct webcam *next;
+	struct stream *prev;
+	struct stream *next;
 };
 
-int webcam_init(struct context *);
-void webcam_put(struct context *, unsigned char *);
-void webcam_stop(struct context *);
+int stream_init(struct context *);
+void stream_put(struct context *, unsigned char *);
+void stream_stop(struct context *);
 
-#endif /* _INCLUDE_WEBCAM_H_ */
+#endif /* _INCLUDE_STREAM_H_ */

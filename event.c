@@ -196,22 +196,22 @@ static void on_event_end_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		exec_command(cnt, cnt->conf.on_event_end, NULL, 0);
 }
 
-static void event_stop_webcam(struct context *cnt, int type ATTRIBUTE_UNUSED,
+static void event_stop_stream(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *dummy1 ATTRIBUTE_UNUSED,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct tm *tm ATTRIBUTE_UNUSED)
 {
-	if ((cnt->conf.webcam_port) && (cnt->webcam.socket != -1)){
-		webcam_stop(cnt);
+	if ((cnt->conf.stream_port) && (cnt->stream.socket != -1)){
+		stream_stop(cnt);
 	}
 }
 
-static void event_webcam_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
+static void event_stream_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
 {
-	if (cnt->conf.webcam_port)
-		webcam_put(cnt, img);
+	if (cnt->conf.stream_port)
+		stream_put(cnt, img);
 }
 
 #ifndef WITHOUT_V4L
@@ -648,7 +648,7 @@ struct event_handlers event_handlers[] = {
 #endif /* WITHOUT_V4L */
 	{
 	EVENT_WEBCAM,
-	event_webcam_put
+	event_stream_put
 	},
 #ifdef HAVE_FFMPEG
 	{
@@ -686,7 +686,7 @@ struct event_handlers event_handlers[] = {
 	},
 	{
 	EVENT_STOP,
-	event_stop_webcam
+	event_stop_stream
 	},
 	{0, NULL}
 };

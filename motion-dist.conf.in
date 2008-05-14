@@ -390,29 +390,29 @@ timelapse_filename %Y%m%d-timelapse
 
 
 ############################################################
-# Live Webcam Server
+# Live Stream Server
 ############################################################
 
 # The mini-http server listens to this port for requests (default: 0 = disabled)
-webcam_port 8081
+stream_port 8081
 
 # Quality of the jpeg images produced (default: 50)
-webcam_quality 50
+stream_quality 50
 
 # Output frames at 1 fps when no motion is detected and increase to the
-# rate given by webcam_maxrate when motion is detected (default: off)
-webcam_motion off
+# rate given by stream_maxrate when motion is detected (default: off)
+stream_motion off
 
-# Maximum framerate for webcam streams (default: 1)
-webcam_maxrate 1
+# Maximum framerate for stream streams (default: 1)
+stream_maxrate 1
 
-# Restrict webcam connections to localhost only (default: on)
-webcam_localhost on
+# Restrict stream connections to localhost only (default: on)
+stream_localhost on
 
 # Limits the number of images per connection (default: 0 = unlimited)
-# Number can be defined by multiplying actual webcam rate by desired number of seconds
-# Actual webcam rate is the smallest of the numbers framerate and webcam_maxrate
-webcam_limit 0
+# Number can be defined by multiplying actual stream rate by desired number of seconds
+# Actual stream rate is the smallest of the numbers framerate and stream_maxrate
+stream_limit 0
 
 
 ############################################################
