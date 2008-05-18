@@ -35,7 +35,7 @@ CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\"  \
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@ 
 VIDEO_OBJ    = @VIDEO@
-OBJ          = motion.o conf.o draw.o $(VIDEO_OBJ) netcam.o \
+OBJ          = motion.o logger.o conf.o draw.o $(VIDEO_OBJ) netcam.o \
 	       netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 	       alg.o event.o picture.o rotate.o webhttpd.o \
 	       stream.o @FFMPEG_OBJ@

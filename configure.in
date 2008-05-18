@@ -572,7 +572,7 @@ else
 	if test "${MYSQL_LIBS}" = "yes"; then
 		AC_MSG_CHECKING(autodect mysql libs)
         	# Autodetect
-		for w in /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib64; do
+		for w in /usr/lib64 /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql; do
 			# check for plain setups
 			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
 				MYSQL_LIBDIR=$w
@@ -715,7 +715,9 @@ else
 			PGSQL_INCLUDE="-I$PGSQL_INCDIR"
 			PGSQL_LIBDIR=$PGSQL_DIR/lib
 
-			if test -f $PGSQL_DIR/lib/pgsql/libpq.so ; then
+			if test -f /usr/lib64/libpq.so ; then
+				PGSQL_LIBDIR=/usr/lib64
+			elif test -f $PGSQL_DIR/lib/pgsql/libpq.so ; then
 				PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql 
 			elif test -f $PGSQL_DIR/lib/postgresql/libpq.so ; then
 				PGSQL_LIBDIR=$PGSQL_DIR/lib/postgresql

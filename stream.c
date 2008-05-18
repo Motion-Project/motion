@@ -51,7 +51,7 @@ int http_bindsock(int port, int local)
 	optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
 
 	if (optval != 0) {
-		motion_log(LOG_ERR, 1, "getaddrinfo() for stream socket failed: %s", gai_strerror(optval));
+		motion_log(LOG_ERR, 1, "getaddrinfo() for motion-stream socket failed: %s", gai_strerror(optval));
 		freeaddrinfo(res);
 		return -1;
 	}
@@ -70,33 +70,33 @@ int http_bindsock(int port, int local)
 			/* Reuse Address */ 
 			setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof( int ) );
 
-			motion_log(LOG_INFO, 0, "stream testing : %s addr: %s port: %s",
+			motion_log(LOG_INFO, 0, "motion-stream testing : %s addr: %s port: %s",
 			                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
 			if (bind(sl, res->ai_addr, res->ai_addrlen) == 0){
-				motion_log(LOG_INFO, 0, "stream Binded : %s addr: %s port: %s",
+				motion_log(LOG_INFO, 0, "motion-stream Binded : %s addr: %s port: %s",
 				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);	
 				break;
 			}
 
-			motion_log(LOG_ERR, 1, "stream bind() failed, retrying ");
+			motion_log(LOG_ERR, 1, "motion-stream bind() failed, retrying ");
 			close(sl);
 			sl = -1;
 		}
-		motion_log(LOG_ERR, 1, "stream socket failed, retrying");
+		motion_log(LOG_ERR, 1, "motion-stream socket failed, retrying");
 		res = res->ai_next;
 	}
 
 	freeaddrinfo(ressave);
 
 	if (sl < 0) {
-		motion_log(LOG_ERR, 1, "stream creating socket/bind ERROR");
+		motion_log(LOG_ERR, 1, "motion-stream creating socket/bind ERROR");
 		return -1;
 	}
 	
 
 	if (listen(sl, DEF_MAXWEBQUEUE) == -1) {
-		motion_log(LOG_ERR, 1, "stream listen() ERROR");
+		motion_log(LOG_ERR, 1, "motion-stream listen() ERROR");
 		close(sl);
 		sl = -1;
 	}
@@ -334,9 +334,9 @@ void stream_stop(struct context *cnt)
 	struct stream *next = cnt->stream.next;
 
 	if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Closing stream listen socket & active stream sockets");
+		motion_log(-1, 0, "Closing motion-stream listen socket & active motion-stream sockets");
 	else
-		motion_log(LOG_INFO, 0, "Closing stream listen socket & active stream sockets");
+		motion_log(LOG_INFO, 0, "Closing motion-stream listen socket & active motion-stream sockets");
 	
 	close(cnt->stream.socket);
 	cnt->stream.socket = -1;
@@ -355,9 +355,9 @@ void stream_stop(struct context *cnt)
 	}
 
 	if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Closed stream listen socket & active stream sockets");
+		motion_log(-1, 0, "Closed motion-stream listen socket & active motion-stream sockets");
 	else
-		motion_log(LOG_INFO, 0, "Closed stream listen socket & active stream sockets");
+		motion_log(LOG_INFO, 0, "Closed motion-stream listen socket & active motion-stream sockets");
 }
 
 /* stream_put is the starting point of the stream loop. It is called from

@@ -89,13 +89,10 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
 					peeking at the next character.  */
 					res = rbuf_peek(netcam, &next);
 
-					if (res == 0)
-					{
+					if (res == 0) {
 						(*hdr)[i] = '\0';
 						return HG_EOF;
-					}
-					else if (res == -1)
-					{
+					} else if (res == -1) {
 						(*hdr)[i] = '\0';
 						return HG_ERROR;
 					}
@@ -114,13 +111,10 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
 				(*hdr)[i] = '\0';
 				break;
 			}
-		} else if (res == 0)
-		{
+		} else if (res == 0) {
 			(*hdr)[i] = '\0';
 			return HG_EOF;
-		}
-		else
-		{
+		} else {
 			(*hdr)[i] = '\0';
 			return HG_ERROR;
 		}
@@ -303,9 +297,9 @@ int rbuf_peek(netcam_context_ptr netcam, char *store)
 */
 int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
 {
-	if (!netcam->response->buffer_left)
+	if (!netcam->response->buffer_left) {
 		return 0;
-	else {
+	} else {
 		int howmuch = MINVAL ((int)netcam->response->buffer_left, maxsize);
 
 		if (where)

@@ -122,31 +122,27 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 	 */
 	{
 		char sqlquery[PATH_MAX];
-		int ret;
 	
 		mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query, &cnt->current_image->timestamp_tm, filename, sqltype);
 		
-
 #ifdef HAVE_MYSQL
 		if (cnt->conf.mysql_db) {
-			ret = mysql_query(cnt->database, sqlquery);
-			if (ret != 0){
+			if (mysql_query(cnt->database, sqlquery) != 0){
 				int error_code = mysql_errno(cnt->database);
 				
 				motion_log(LOG_ERR, 1, "Mysql query failed %s error code %d",
-						mysql_error(cnt->database), error_code);
+				           mysql_error(cnt->database), error_code);
 				/* Try to reconnect ONCE if fails continue and discard this sql query */
 				if (error_code >= 2000){
 					cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
 					mysql_init(cnt->database);
-					if (!mysql_real_connect(cnt->database, cnt->conf.mysql_host, 
-								cnt->conf.mysql_user, cnt->conf.mysql_password, 
-								cnt->conf.mysql_db, 0, NULL, 0)) {
-						motion_log(LOG_ERR, 0, "Cannot reconnect to MySQL database %s on host %s with user %s", cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
+					if (!mysql_real_connect(cnt->database, cnt->conf.mysql_host, cnt->conf.mysql_user, 
+					                        cnt->conf.mysql_password, cnt->conf.mysql_db, 0, NULL, 0)) {
+						motion_log(LOG_ERR, 0, "Cannot reconnect to MySQL database %s on host %s with user %s", 
+						           cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
 						motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
 					}else mysql_query(cnt->database, sqlquery);
 				}	
-				
 			}	
 		}
 #endif /* HAVE_MYSQL */
@@ -163,7 +159,6 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 			}
 		}
 #endif /* HAVE_PGSQL */
-
 	}
 }
 
@@ -201,9 +196,8 @@ static void event_stop_stream(struct context *cnt, int type ATTRIBUTE_UNUSED,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct tm *tm ATTRIBUTE_UNUSED)
 {
-	if ((cnt->conf.stream_port) && (cnt->stream.socket != -1)){
+	if ((cnt->conf.stream_port) && (cnt->stream.socket != -1))
 		stream_stop(cnt);
-	}
 }
 
 static void event_stream_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
@@ -264,7 +258,7 @@ static void event_imagem_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *newimg ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
 {
-	struct config *conf=&cnt->conf;
+	struct config *conf = &cnt->conf;
 	char fullfilenamem[PATH_MAX];
 	char filename[PATH_MAX];
 	char filenamem[PATH_MAX];
@@ -294,7 +288,7 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
 	char fullfilename[PATH_MAX];
 
-	if ( strcmp(cnt->conf.snappath, "lastsnap") ) {
+	if (strcmp(cnt->conf.snappath, "lastsnap")) {
 		char filename[PATH_MAX];
 		char filepath[PATH_MAX];
 		char linkpath[PATH_MAX];
@@ -500,7 +494,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 	else
 		u = img + width * height;
 	
-	v = u+(width*height)/4;
+	v = u + (width * height) / 4;
 	if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v) == -1){
 		cnt->finish = 1;
 		cnt->restart = 0;
@@ -549,7 +543,7 @@ static void event_ffmpeg_closefile(struct context *cnt,
 		if (cnt->ffmpeg_new->udata)
 			free(cnt->ffmpeg_new->udata);
 		ffmpeg_close(cnt->ffmpeg_new);
-		cnt->ffmpeg_new=NULL;
+		cnt->ffmpeg_new = NULL;
 
 		event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
 	}
@@ -557,7 +551,7 @@ static void event_ffmpeg_closefile(struct context *cnt,
 		if (cnt->ffmpeg_motion->udata)
 			free(cnt->ffmpeg_motion->udata);
 		ffmpeg_close(cnt->ffmpeg_motion);
-		cnt->ffmpeg_motion=NULL;
+		cnt->ffmpeg_motion = NULL;
 
 		event(cnt, EVENT_FILECLOSE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, NULL);
 	}
@@ -572,7 +566,7 @@ static void event_ffmpeg_timelapseend(struct context *cnt,
 		if (cnt->ffmpeg_timelapse->udata)
 			free(cnt->ffmpeg_timelapse->udata);
 		ffmpeg_close(cnt->ffmpeg_timelapse);
-		cnt->ffmpeg_timelapse=NULL;
+		cnt->ffmpeg_timelapse = NULL;
 
 		event(cnt, EVENT_FILECLOSE, NULL, cnt->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, NULL);
 	}
@@ -647,7 +641,7 @@ struct event_handlers event_handlers[] = {
 #endif /* BSD */
 #endif /* WITHOUT_V4L */
 	{
-	EVENT_WEBCAM,
+	EVENT_STREAM,
 	event_stream_put
 	},
 #ifdef HAVE_FFMPEG

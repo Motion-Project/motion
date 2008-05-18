@@ -18,7 +18,7 @@
 #define EVENT_STOP              5
 #define EVENT_TIMELAPSE         6
 #define EVENT_TIMELAPSEEND      7
-#define EVENT_WEBCAM            8
+#define EVENT_STREAM            8
 #define EVENT_IMAGE_DETECTED    9
 #define EVENT_IMAGEM_DETECTED   10
 #define EVENT_IMAGE_SNAPSHOT    11
@@ -30,7 +30,7 @@
 #define EVENT_AREA_DETECTED     17
 #define EVENT_CAMERA_LOST       18
 #define EVENT_FFMPEG_PUT        19
-#
+
 
 typedef void(* event_handler)(struct context *, int, unsigned char *, char *, void *, struct tm *);
 

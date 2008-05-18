@@ -47,6 +47,7 @@
 #include <libpq-fe.h>
 #endif
 
+#include "logger.h"
 #include "conf.h"
 #include "stream.h"
 #include "webhttpd.h"
@@ -404,5 +405,4 @@ void * myrealloc(void *, size_t, const char *);
 FILE * myfopen(const char *, const char *);
 size_t mystrftime(struct context *, char *, size_t, const char *, const struct tm *, const char *, int);
 int create_path(const char *);
-void motion_log(int, int, const char *, ...);
 #endif /* _INCLUDE_MOTION_H */

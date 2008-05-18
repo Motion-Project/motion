@@ -9,16 +9,11 @@
 #ifndef WITHOUT_V4L
 
 /* Common stuff: */
-//#include "motion.h"
-///* for rotation */
 #include "rotate.h"     /* already includes motion.h */
 #include "video.h"
-/* for rotation */
-//#include "rotate.h"
 
 
 /* for the v4l stuff: */
-//#include "pwc-ioctl.h"	/* not needed here only in track */
 #include <sys/mman.h>
 #include <math.h>
 #include <sys/utsname.h>
@@ -177,7 +172,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 		}
 
 		if (MAP_FAILED == map) {
-			motion_log(LOG_ERR,1,"MAP_FAILED");
+			motion_log(LOG_ERR, 1, "MAP_FAILED");
 			return (NULL);
 		}
 		viddev->v4l_curbuffer = 0;
@@ -368,10 +363,10 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
 		viddev->input = input;
 		viddev->width = width;
 		viddev->height = height;
-		viddev->freq =freq;
+		viddev->freq = freq;
 		viddev->tuner_number = tuner_number;
 		/* skip a few frames if needed */
-		for (i=0; i < skip; i++)
+		for (i = 0; i < skip; i++)
 			v4l_next(viddev, map, width, height);
 	} else {
 		/* No round robin - we only adjust picture controls */
@@ -418,7 +413,7 @@ static int v4l_open_vidpipe(void)
 			return -1;
 		}
 		
-		fprintf(stderr,"\t%s", buffer);
+		fprintf(stderr, "\t%s", buffer);
 		
 		/* Read explanation line */
 		
@@ -430,11 +425,11 @@ static int v4l_open_vidpipe(void)
 		while (fgets(buffer, 255, vloopbacks)) {
 			if (strlen(buffer) > 1) {
 				buffer[strlen(buffer)-1] = 0;
-				loop=strtok(buffer, "\t");
-				input=strtok(NULL, "\t");
-				istatus=strtok(NULL, "\t");
-				output=strtok(NULL, "\t");
-				ostatus=strtok(NULL, "\t");
+				loop = strtok(buffer, "\t");
+				input = strtok(NULL, "\t");
+				istatus = strtok(NULL, "\t");
+				output = strtok(NULL, "\t");
+				ostatus = strtok(NULL, "\t");
 				if (istatus[0] == '-') {
 					snprintf(pipepath, 255, "/dev/%s", input);
 					pipe_fd = open(pipepath, O_RDWR);
@@ -457,11 +452,11 @@ static int v4l_open_vidpipe(void)
 		int tfd;
 		int tnum;
 
-		if ((dir=opendir(prefix)) == NULL) {
+		if ((dir = opendir(prefix)) == NULL) {
 			motion_log(LOG_ERR, 1, "Failed to open '%s'", prefix);
 			return -1;
 		}
-		while ((dirp=readdir(dir)) != NULL) {
+		while ((dirp = readdir(dir)) != NULL) {
 			if (!strncmp(dirp->d_name, "video", 5)) {
 				strncpy(buffer, prefix, 255);
 				strncat(buffer, dirp->d_name, 255);
@@ -472,7 +467,7 @@ static int v4l_open_vidpipe(void)
 						continue;
 					}
 					ptr = strtok(buffer, " ");
-					if (strcmp(ptr,"Video")) {
+					if (strcmp(ptr, "Video")) {
 						close(fd);
 						continue;
 					}
@@ -483,7 +478,7 @@ static int v4l_open_vidpipe(void)
 						close(fd);
 						continue;
 					}
-					if ((ptr=strtok(buffer, " ")) == NULL) {
+					if ((ptr = strtok(buffer, " ")) == NULL) {
 						close(fd);
 						continue;
 					}
@@ -491,7 +486,7 @@ static int v4l_open_vidpipe(void)
 					if (tnum < low) {
 						strcpy(buffer, "/dev/");
 						strcat(buffer, dirp->d_name);
-						if ((tfd=open(buffer, O_RDWR)) >= 0) {
+						if ((tfd = open(buffer, O_RDWR)) >= 0) {
 							strcpy(pipepath, buffer);
 							if (pipe_fd >= 0) {
 								close(pipe_fd);
@@ -529,7 +524,7 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
 		motion_log(LOG_ERR, 1, "ioctl (VIDIOCGPICT)");
 		return(-1);
 	}
-	vid_pic.palette=type;
+	vid_pic.palette = type;
 	if (ioctl(dev, VIDIOCSPICT, &vid_pic) == -1) {
 		motion_log(LOG_ERR, 1, "ioctl (VIDIOCSPICT)");
 		return(-1);

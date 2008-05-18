@@ -435,7 +435,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		 * We also disable this in setup_mode.
 		 */
 		if (conf->stream_motion && !conf->setup_mode && img->shot != 1) {
-			event(cnt, EVENT_WEBCAM, img->image, NULL, NULL, &img->timestamp_tm);
+			event(cnt, EVENT_STREAM, img->image, NULL, NULL, &img->timestamp_tm);
 		}
 
 		/* Save motion jpeg, if configured */
@@ -732,7 +732,7 @@ static int motion_init(struct context *cnt)
 		}
 		#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
 		my_bool  my_true = TRUE;
-		mysql_options(cnt->database,MYSQL_OPT_RECONNECT,&my_true);
+		mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &my_true);
 		#endif
 	}
 #endif /* HAVE_MYSQL */
@@ -790,9 +790,9 @@ static int motion_init(struct context *cnt)
 			motion_log(LOG_ERR, 0, "Failed to read mask image. Mask feature disabled.");
 		} else {
 			if (cnt->conf.setup_mode)
-				motion_log(-1, 0, "Maskfile \"%s\" loaded.",cnt->conf.mask_file);
+				motion_log(-1, 0, "Maskfile \"%s\" loaded.", cnt->conf.mask_file);
 			else  
-				motion_log(LOG_INFO, 0, "Maskfile \"%s\" loaded.",cnt->conf.mask_file);
+				motion_log(LOG_INFO, 0, "Maskfile \"%s\" loaded.", cnt->conf.mask_file);
 		}
 	} else
 		cnt->imgs.mask = NULL;
@@ -811,9 +811,9 @@ static int motion_init(struct context *cnt)
 	/* Initialize stream server if stream port is specified to not 0 */
 	if (cnt->conf.stream_port) {
 		if ( stream_init(cnt) == -1 ) {
-			motion_log(LOG_ERR, 1, "Problem enabling stream server in port %d", cnt->conf.stream_port);
+			motion_log(LOG_ERR, 1, "Problem enabling motion-stream server in port %d", cnt->conf.stream_port);
 			cnt->finish = 1;
-		}else 	motion_log(LOG_DEBUG, 0, "Started stream stream server in port %d", cnt->conf.stream_port);
+		}else 	motion_log(LOG_DEBUG, 0, "Started motion-stream server in port %d", cnt->conf.stream_port);
 	}
 
 	/* Prevent first few frames from triggering motion... */
@@ -1702,7 +1702,7 @@ static void *motion_loop(void *arg)
 			    (time_current_frame % 60 < time_last_frame % 60) &&
 			    cnt->shots == 0) {
 
-				if (strcasecmp(cnt->conf.timelapse_mode,"manual") == 0)
+				if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0)
 				;/* No action */
 
 				/* If we are daily, raise timelapseend event at midnight */
@@ -1777,11 +1777,11 @@ static void *motion_loop(void *arg)
 		 */
 		if (cnt->conf.setup_mode) {
 			event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
-			event(cnt, EVENT_WEBCAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
+			event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
 		} else {
 			event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, &cnt->current_image->timestamp_tm);
 			if (!cnt->conf.stream_motion || cnt->shots == 1)
-				event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+				event(cnt, EVENT_STREAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
 		event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
@@ -2290,7 +2290,7 @@ int main (int argc, char **argv)
 			 */
 			motion_shutdown();
 			restart = 0; /* only one reset for now */
-			motion_log(LOG_INFO,0,"motion restarted");
+			motion_log(LOG_INFO, 0, "motion restarted");
 #ifndef WITHOUT_V4L
 			SLEEP(5, 0); // maybe some cameras needs less time
 #endif
@@ -2305,7 +2305,7 @@ int main (int argc, char **argv)
 			/* If i is 0 it means no thread files and we then set the thread number to 1 */
 			cnt_list[i]->threadnr = i ? i : 1;
 
-			if ( strcmp(cnt_list[i]->conf_filename,"") )
+			if ( strcmp(cnt_list[i]->conf_filename, "") )
 				motion_log(LOG_INFO, 0, "Thread %d is from %s", cnt_list[i]->threadnr, cnt_list[i]->conf_filename );
 
 			if (cnt_list[0]->conf.setup_mode) {
@@ -2328,7 +2328,7 @@ int main (int argc, char **argv)
 			pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
 
 		if (cnt_list[0]->conf.setup_mode)
-			motion_log(-1, 0,"Waiting for threads to finish, pid: %d", getpid());
+			motion_log(-1, 0, "Waiting for threads to finish, pid: %d", getpid());
 
 		/* Crude way of waiting for all threads to finish - check the thread
 		 * counter (because we cannot do join on the detached threads).
@@ -2704,84 +2704,6 @@ size_t mystrftime(struct context *cnt, char *s, size_t max, const char *userform
 	format = formatstring;
 
 	return strftime(s, max, format, tm);
-}
-
-/**
- * motion_log
- *
- *	This routine is used for printing all informational, debug or error
- *	messages produced by any of the other motion functions.  It always
- *	produces a message of the form "[n] {message}", and (if the param
- *	'errno_flag' is set) follows the message with the associated error
- *	message from the library.
- *
- * Parameters:
- *
- * 	level           logging level for the 'syslog' function
- * 	                (-1 implies no syslog message should be produced)
- * 	errno_flag      if set, the log message should be followed by the
- * 	                error message.
- * 	fmt             the format string for producing the message
- * 	ap              variable-length argument list
- *
- * Returns:
- * 	                Nothing
- */
-void motion_log(int level, int errno_flag, const char *fmt, ...)
-{
-	int errno_save, n;
-	char buf[1024];
-#if (!defined(BSD))
-	char msg_buf[100];
-#endif
-	va_list ap;
-	int threadnr;
-
-	/* If pthread_getspecific fails (e.g., because the thread's TLS doesn't
-	 * contain anything for thread number, it returns NULL which casts to zero,
-	 * which is nice because that's what we want in that case.
-	 */
-	threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
-
-	/*
-	 * First we save the current 'error' value.  This is required because
-	 * the subsequent calls to vsnprintf could conceivably change it!
-	 */
-	errno_save = errno;
-
-	/* Prefix the message with the thread number */
-	n = snprintf(buf, sizeof(buf), "[%d] ", threadnr);
-
-	/* Next add the user's message */
-	va_start(ap, fmt);
-	n += vsnprintf(buf + n, sizeof(buf) - n, fmt, ap);
-
-	/* If errno_flag is set, add on the library error message */
-	if (errno_flag) {
-		strcat(buf, ": ");
-		n += 2;
-		/*
-		 * this is bad - apparently gcc/libc wants to use the non-standard GNU
-		 * version of strerror_r, which doesn't actually put the message into
-		 * my buffer :-(.  I have put in a 'hack' to get around this.
-		 */
-#if (defined(BSD))
-		strerror_r(errno_save, buf + n, sizeof(buf) - n);	/* 2 for the ': ' */
-#else
-		strcat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)));
-#endif
-	}
-	/* If 'level' is not negative, send the message to the syslog */
-	if (level >= 0)
-		syslog(level, buf);
-
-	/* For printing to stderr we need to add a newline */
-	strcat(buf, "\n");
-	fputs(buf, stderr);
-	fflush(stderr);
-
-	/* Clean up the argument list routine */
-	va_end(ap);
 }
 
 
