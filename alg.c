@@ -618,11 +618,11 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 	unsigned char *out = cnt->imgs.out;
 	int width = cnt->imgs.width;
 	int height = cnt->imgs.height;
-	int done = 0, i, len = strlen(cnt->conf.despeckle);
+	int done = 0, i, len = strlen(cnt->conf.despeckle_filter);
 	unsigned char *common_buffer = cnt->imgs.common_buffer;
 
 	for (i = 0; i < len; i++) {
-		switch (cnt->conf.despeckle[i]) {
+		switch (cnt->conf.despeckle_filter[i]) {
 		case 'E':
 			if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0) i = len;
 			done = 1;
@@ -648,7 +648,7 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 		}
 	}
 
-	/* If conf.despeckle contains any valid action EeDdl */
+	/* If conf.despeckle_filter contains any valid action EeDdl */
 	if (done){
 		if (done != 2) cnt->imgs.labelsize_max = 0; // Disable Labeling
 		return diffs;

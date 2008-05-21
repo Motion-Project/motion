@@ -358,7 +358,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			const char *value = NULL;
 			char *retval = NULL;
 			/*call list*/
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n<ul>", thread, thread);
 				send_template(client_socket, res);
@@ -447,7 +447,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -486,7 +486,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							/* FIXME need to assure that is a valid value */
 							url_decode(Value, strlen(Value));
 							conf_cmdparse(cnt + thread, config_params[i].param_name, Value);
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								sprintf(res,
 									"<a href=/%hu/config/list>&lt;&ndash; back</a>"
 									"<br><br>\n<b>Thread %hu</b>\n"
@@ -505,7 +505,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							}
 						} else {
 							/*error*/
-							if (cnt[0]->conf.control_html_output)
+							if (cnt[0]->conf.webcontrol_html_output)
 								response_client(client_socket, not_valid_syntax, NULL);
 							else
 								response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -536,7 +536,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							type = strdup("unknown");
 						}
 
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res,
 								"<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
 							        "<b>Thread %hu</b>\n<ul><li><a href=/%hu/config/set?%s>%s</a>" 
@@ -556,14 +556,14 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 					}
 				} else {
 					/*error*/
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_found_response_valid_command, NULL);
 					else
 						response_client(client_socket, not_found_response_valid_command_raw, NULL);
 				}
 			} else {
 				/* Show param_name dialogue only for html output */
-				if ( (cnt[0]->conf.control_html_output) && (command[0] != '\0') &&
+				if ( (cnt[0]->conf.webcontrol_html_output) && (command[0] != '\0') &&
 				     (((length_uri = length_uri - strlen(command)) == 0 )) ) {
 					i=0;
 					while (config_params[i].param_name != NULL) {
@@ -639,20 +639,20 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						send_template_end_client(client_socket);
 						free(text_help);
 					} else {
-						if (cnt[0]->conf.control_html_output)
+						if (cnt[0]->conf.webcontrol_html_output)
 							response_client(client_socket, not_found_response_valid_command, NULL);
 						else
 							response_client(client_socket, not_found_response_valid_command_raw, NULL);
 					}
 				} else {
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_found_response_valid_command, NULL);
 					else
 						response_client(client_socket, not_found_response_valid_command_raw, NULL);
 				}
 			}
 		} else if (length_uri == 0) {
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, set_template);
 				sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n"
 				             "<form name='n'>\n<select name='onames'>\n", thread, thread );
@@ -680,7 +680,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -724,7 +724,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						type = config_type(&config_params[i]);
 						if (!strcmp(type, "unknown")) {
 							/*error doesn't exists this param_name */
-							if (cnt[0]->conf.control_html_output)
+							if (cnt[0]->conf.webcontrol_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
 							else
 								response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -744,7 +744,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 
 							if (value == NULL)
 								value = config_params[i].print(cnt, NULL, i, 0);
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hu/config/get>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hu</b><br>\n<ul><li>%s = %s &nbsp;&nbsp;"
@@ -765,21 +765,21 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						}
 					} else {
 						/*error*/
-						if (cnt[0]->conf.control_html_output)
+						if (cnt[0]->conf.webcontrol_html_output)
 							response_client(client_socket, not_found_response_valid_command, NULL);
 						else
 							response_client(client_socket, not_found_response_valid_command_raw, NULL);
 					}
 				} else {
 					/*error*/
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_found_response_valid_command, NULL);
 					else
 						response_client(client_socket, not_found_response_valid_command_raw, NULL);
 				}
 			}
 		} else if (length_uri == 0) {
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b><br>\n"	
 				             "<form action=get>\n"
@@ -804,7 +804,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_valid_syntax, NULL);
 			else
 				response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -813,7 +813,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			pointer = pointer + 5;
 			length_uri = length_uri - 5;
 			if (length_uri == 0) {
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>"
 					             "Are you sure? <a href=/%hu/config/writeyes>Yes</a>\n", thread, thread);
@@ -827,7 +827,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 				}
 			} else {
 				/*error*/
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, not_found_response_valid_command, NULL);
 				else
 					response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -838,7 +838,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 		length_uri = length_uri - 8;
 		if (length_uri == 0) {
 			conf_print(cnt);
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>  write done !\n",
 				             thread, thread);
@@ -851,7 +851,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			}
 			else
@@ -859,7 +859,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 		}
 	} else {
 		/*error*/
-		if (cnt[0]->conf.control_html_output)
+		if (cnt[0]->conf.webcontrol_html_output)
 			response_client(client_socket, not_found_response_valid_command, NULL);
 		else
 			response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -898,7 +898,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 				cnt[thread]->makemovie = 1;
 			}
 
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
 				             "makemovie for thread %hu done<br>\n", thread, thread);
@@ -911,7 +911,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -930,7 +930,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			}
 
 			cnt[thread]->snapshot = 1;
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
 				             "snapshot for thread %hu done<br>\n", thread, thread);
@@ -943,7 +943,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -957,7 +957,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			if (thread == 0) {
 				motion_log(LOG_DEBUG, 0, "httpd restart");
 				kill(getpid(),SIGHUP);
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "restart in progress ... bye<br>\n<a href='/'>Home</a>");
 					send_template(client_socket, res);
@@ -975,7 +975,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 					cnt[thread]->finish = 1;
 				}
 				cnt[thread]->restart = 1;
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
 					             "restart for thread %hu done<br>\n", thread, thread);
@@ -988,7 +988,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 				}
 			}
 		} else {
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1002,7 +1002,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			if (thread == 0) {
 				motion_log(LOG_DEBUG, 0, "httpd quit");
 				kill(getpid(),SIGQUIT);
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "quit in progress ... bye");
 					send_template(client_socket, res);
@@ -1019,7 +1019,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 				cnt[thread]->makemovie = 1;
 				cnt[thread]->finish = 1;
 				cnt[thread]->watchdog = WATCHDOG_OFF;
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					send_template_ini_client(client_socket, ini_template);
 					sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
 					             "quit for thread %hu done<br>\n", thread, thread);
@@ -1033,13 +1033,13 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
 	} else {
-		if (cnt[0]->conf.control_html_output)
+		if (cnt[0]->conf.webcontrol_html_output)
 			response_client(client_socket, not_found_response_valid_command, NULL);
 		else
 			response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1068,7 +1068,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 		if (length_uri == 0) {
 			/*call status*/
 			
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br><b>Thread %hu</b>" 
 				             " Detection status %s\n", thread, thread, 
@@ -1083,7 +1083,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1102,7 +1102,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				cnt[thread]->pause = 0;
 			}
 
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
 				             " Detection resumed\n", thread, thread);
@@ -1115,7 +1115,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1134,7 +1134,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 				cnt[thread]->pause = 1;
 			}
 			
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
 				             " Detection paused\n", thread, thread);
@@ -1147,7 +1147,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			}
 		} else {
 			/*error*/
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1158,7 +1158,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 		if (length_uri == 0) {
 			
 			/*call connection*/	
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n", thread);
 				send_template(client_socket, res);
@@ -1195,13 +1195,13 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 			}	
 		}else{
 			/*error*/
-			 if (cnt[0]->conf.control_html_output)
+			 if (cnt[0]->conf.webcontrol_html_output)
 				 response_client(client_socket, not_found_response_valid_command, NULL);
 			 else
 				 response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}	
 	} else {
-		if (cnt[0]->conf.control_html_output)
+		if (cnt[0]->conf.webcontrol_html_output)
 			response_client(client_socket, not_found_response_valid_command, NULL);
 		else
 			response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1249,7 +1249,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			if (( question != '=' ) || (command[0] == '\0')) {
 				/* no valid syntax */
 				motion_log(LOG_WARNING, 0, "httpd debug race 1");
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, not_valid_syntax, NULL);
 				else
 					response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1299,7 +1299,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			} else {
 				/* no valid syntax */
 				motion_log(LOG_WARNING, 0, "httpd debug race 2");
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, not_valid_syntax, NULL);
 				else
 					response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1311,7 +1311,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			if ( !warningkill ) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 3");
 				/* error value */
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, error_value, NULL);
 				else
 					response_client(client_socket, error_value_raw, NULL);
@@ -1334,7 +1334,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					// Add the number of frame to skip for motion detection
 					cnt[thread]->moved = track_move(pancnt, pancnt->video_dev, &cent, &pancnt->imgs, 1);
 					if (cnt[thread]->moved) {
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b><br>\n"
@@ -1349,7 +1349,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 						}
 					} else {
 					/*error in track action*/
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b>\n", thread, thread);
 							response_client(client_socket, track_error, res);
@@ -1371,7 +1371,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					// Add the number of frame to skip for motion detection
 					cnt[thread]->moved = track_move(tiltcnt, tiltcnt->video_dev, &cent, &tiltcnt->imgs, 1);
 					if (cnt[thread]->moved) {	
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b><br>\n"
@@ -1386,7 +1386,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 						}
 					} else {
 						/*error in track action*/
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b>\n", thread, thread);
 							response_client(client_socket, track_error, res);
@@ -1400,7 +1400,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					// 1000 is out of range for pwc
 					cnt[thread]->moved = track_center(setcnt, setcnt->video_dev, 1, atoi(x_value), 1000);
 					if (cnt[thread]->moved) {
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b><br>\n"
@@ -1415,7 +1415,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 						}
 					} else {
 						/*error in track action*/
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b>\n", thread, thread);
 							response_client(client_socket, track_error, res);
@@ -1430,7 +1430,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					// 1000 is out of range for pwc
 					cnt[thread]->moved = track_center(setcnt, setcnt->video_dev, 1, 1000, atoi(y_value));
 					if (cnt[thread]->moved) {
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b><br>\n"
@@ -1445,7 +1445,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 						}
 					} else {
 						/*error in track action*/
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b>\n", thread, thread);
 							response_client(client_socket, track_error, res);
@@ -1464,14 +1464,14 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			if ( ( question != '&' ) || (command[0] == '\0') ) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 4");
 				if ( strstr(pointer, "&")) {
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, error_value, NULL);
 					else
 						response_client(client_socket, error_value_raw, NULL);
 				}	
 				/* no valid syntax */
 				else{	
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_valid_syntax, NULL);
 					else
 						response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1488,7 +1488,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				if ( (pan) || (!tilt) || (X) || (Y) ) {
 					motion_log(LOG_WARNING, 0, "httpd debug race 5");
 					/* no valid syntax */
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_valid_syntax, NULL);
 					else
 						response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1503,7 +1503,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				if ( (tilt) || (!pan) || (X) || (Y) ) {
 					/* no valid syntax */
 					motion_log(LOG_WARNING, 0, "httpd debug race 6");
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_valid_syntax, NULL);
 					else
 						response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1519,7 +1519,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					motion_log(LOG_WARNING, 0, "httpd debug race 7");
 					
 					/* no valid syntax */
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_valid_syntax, NULL);
 					else
 						response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1534,7 +1534,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				if ( (Y) || (!X) || (pan) || (tilt) ) {
 					motion_log(LOG_WARNING, 0, "httpd debug race 8");
 					/* no valid syntax */
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_valid_syntax, NULL);
 					else
 						response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1545,7 +1545,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			} else {
 				motion_log(LOG_WARNING, 0, "httpd debug race 9");
 				/* no valid syntax */
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, not_valid_syntax, NULL);
 				else
 					response_client(client_socket, not_valid_syntax_raw, NULL);
@@ -1557,14 +1557,14 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			if ( ( warningkill < 2 ) && (question != '=') ) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 10");
 				/* no valid syntax */
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, not_valid_syntax, NULL);
 				else
 					response_client(client_socket, not_valid_syntax_raw, NULL);
 				return 1;
 			}else if (( question == '=') && ( warningkill == 1)) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 11");
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, error_value, NULL);
 				else
 					response_client(client_socket, error_value_raw, NULL);
@@ -1593,7 +1593,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 
 			if (length_uri != 0) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 12");
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, error_value, NULL);
 				else
 					response_client(client_socket, error_value_raw, NULL);
@@ -1607,7 +1607,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				setcnt = cnt[thread];
 				cnt[thread]->moved = track_center(setcnt, setcnt->video_dev, 1, atoi(x_value), atoi(y_value));
 				if (cnt[thread]->moved) {
-					if (cnt[0]->conf.control_html_output) {
+					if (cnt[0]->conf.webcontrol_html_output) {
 						send_template_ini_client(client_socket, ini_template);
 						sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 						             "<b>Thread %hu</b><br>\n"
@@ -1622,7 +1622,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					}
 				} else {
 					/*error in track action*/
-					if (cnt[0]->conf.control_html_output) {
+					if (cnt[0]->conf.webcontrol_html_output) {
 						sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 						             "<b>Thread %hu</b>\n", thread, thread);
 						response_client(client_socket, track_error, res);
@@ -1654,7 +1654,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					SLEEP(1,0);
 					cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, &cent, &relativecnt->imgs, 1);
 					if (cnt[thread]->moved) {
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b><br>\n"
@@ -1671,7 +1671,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					}
 					else{
 						/*error in track tilt*/	
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b>\n", thread, thread);
 							response_client(client_socket, track_error, res);
@@ -1680,7 +1680,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				}
 
 				/*error in track pan*/
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br><b>Thread %hu</b>\n", 
 					             thread, thread);
 					response_client(client_socket, track_error, res);
@@ -1688,7 +1688,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					response_client(client_socket, track_error_raw, NULL);
 			}
 		} else if (length_uri == 0) {
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b><br>\n"
 				             "<form action='set'>\n"
@@ -1710,7 +1710,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			}
 		} else {
 			/* error not valid command */
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1719,7 +1719,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 		pointer = pointer+6;
 		length_uri = length_uri-6;
 		if (length_uri==0) {
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
 				             "<br>track auto %s", thread, thread, 
@@ -1734,7 +1734,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			}
 		} else {
 			/* error not valid command */
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			}
 			else
@@ -1760,7 +1760,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					/* auto value=0|1|status*/
 
 					if (!strcmp(command, "status")) {
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							send_template_ini_client(client_socket, ini_template);
 							sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 							             "<b>Thread %hu</b><br>"
@@ -1781,7 +1781,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 						if (active > -1 && active < 2) {
 							autocnt = cnt[thread];
 							autocnt->track.active = active;
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
 								             "<b>Thread %hu</b>"
@@ -1795,20 +1795,20 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 								send_template_raw(client_socket, res);
 							}
 						} else {
-							if (cnt[0]->conf.control_html_output)
+							if (cnt[0]->conf.webcontrol_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
 							else
 								response_client(client_socket, not_found_response_valid_command_raw, NULL);
 						}
 					}
 				} else {
-					if (cnt[0]->conf.control_html_output)
+					if (cnt[0]->conf.webcontrol_html_output)
 						response_client(client_socket, not_found_response_valid_command, NULL);
 					else
 						response_client(client_socket, not_found_response_valid_command_raw, NULL);
 				}
 			} else {
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					response_client(client_socket, not_found_response_valid_command, NULL);
 				else
 					response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1816,7 +1816,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 		}
 		else if (length_uri == 0) {
 
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n"
 				             "<form action='auto'><select name='value'>\n"
@@ -1833,13 +1833,13 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 				send_template_raw(client_socket, res);
 			}
 		} else {
-			if (cnt[0]->conf.control_html_output)
+			if (cnt[0]->conf.webcontrol_html_output)
 				response_client(client_socket, not_found_response_valid_command, NULL);
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
 	} else {
-		if (cnt[0]->conf.control_html_output)
+		if (cnt[0]->conf.webcontrol_html_output)
 			response_client(client_socket, not_found_response_valid_command, NULL);
 		else
 			response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1871,7 +1871,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 		/* ROOT_URI -> GET / */
 		if (! (strcmp (url, "/")) ) {
 			unsigned short int y;
-			if (cnt[0]->conf.control_html_output) {
+			if (cnt[0]->conf.webcontrol_html_output) {
 				send_template_ini_client(client_socket, ini_template);
 				sprintf(res, "<b>Motion "VERSION" Running [%hu] Threads</b><br>\n"
 				             "<a href='/0/'>All</a><br>\n", i);
@@ -1927,7 +1927,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 						pointer = pointer + 6;
 						length_uri = length_uri - 6;
 						if (length_uri == 0) {
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hd</b><br>\n"
@@ -1949,7 +1949,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 							length_uri--;
 							config(pointer, res, length_uri, thread, client_socket, cnt);
 						} else {
-							if (cnt[0]->conf.control_html_output)
+							if (cnt[0]->conf.webcontrol_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
 							else
 								response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -1961,7 +1961,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 						length_uri = length_uri - 6;
 						/* call action() */
 						if (length_uri == 0) {
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hd</b><br>\n"
@@ -1986,7 +1986,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 							return ret;
 
 						} else {
-							if (cnt[0]->conf.control_html_output)
+							if (cnt[0]->conf.webcontrol_html_output)
 								response_client(client_socket, not_found_response_valid_command,NULL);
 							else
 								response_client(client_socket, not_found_response_valid_command_raw,NULL);
@@ -1997,7 +1997,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 						pointer = pointer + 9;
 						length_uri = length_uri - 9;
 						if (length_uri == 0) {
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hd</b><br>\n"
@@ -2019,7 +2019,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 							/* call detection() */
 							detection(pointer, res, length_uri, thread, client_socket, cnt);
 						} else {
-							if (cnt[0]->conf.control_html_output)
+							if (cnt[0]->conf.webcontrol_html_output)
 								response_client(client_socket, not_found_response_valid_command, NULL);
 							else
 								response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -2030,7 +2030,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 						pointer = pointer + 5;
 						length_uri = length_uri - 5;
 						if (length_uri == 0) {
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								send_template_ini_client(client_socket, ini_template);
 								sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hd</b><br>\n"
@@ -2054,7 +2054,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 								track(pointer, res, length_uri, thread, client_socket, cnt);
 							} else {
 								/* error track not enable */
-								if (cnt[0]->conf.control_html_output) {
+								if (cnt[0]->conf.webcontrol_html_output) {
 									sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
 									response_client(client_socket, not_track, res);
 								}
@@ -2062,7 +2062,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 									response_client(client_socket, not_track_raw, NULL);
 							}
 						} else {
-							if (cnt[0]->conf.control_html_output) {
+							if (cnt[0]->conf.webcontrol_html_output) {
 								sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
 								response_client(client_socket, not_found_response_valid_command, res);
 							}
@@ -2070,7 +2070,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 								response_client(client_socket, not_found_response_valid_command_raw, NULL);
 						}
 					} else {
-						if (cnt[0]->conf.control_html_output) {
+						if (cnt[0]->conf.webcontrol_html_output) {
 							sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
 							response_client(client_socket, not_found_response_valid_command, res);
 						}
@@ -2079,7 +2079,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 					}
 				} else {
 					/* /thread_number/ requested */
-					if (cnt[0]->conf.control_html_output) {
+					if (cnt[0]->conf.webcontrol_html_output) {
 						send_template_ini_client(client_socket, ini_template);
 						sprintf(res, "<a href=/>&lt;&ndash; back</a><br><br>\n<b>Thread %hd</b><br>\n"
 						             "<a href='/%hd/config'>config</a><br>\n"
@@ -2096,7 +2096,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 					}
 				}
 			} else {
-				if (cnt[0]->conf.control_html_output) {
+				if (cnt[0]->conf.webcontrol_html_output) {
 					sprintf(res, "<a href=/>&lt;&ndash; back</a>\n");
 					response_client(client_socket, not_found_response_valid, res);
 				}
@@ -2106,7 +2106,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 		}
 		free(res);
 	} else {
-		if (cnt[0]->conf.control_html_output)
+		if (cnt[0]->conf.webcontrol_html_output)
 			response_client(client_socket, not_found_response_template,NULL);
 		else
 			response_client(client_socket, not_found_response_template_raw,NULL);
@@ -2185,7 +2185,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			/* Check Protocol */
 			if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) {
 				/* We don't understand this protocol.  Report a bad response.  */
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					warningkill = write(client_socket, bad_request_response, sizeof (bad_request_response));
 				else
 					warningkill = write(client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
@@ -2198,7 +2198,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 				/* This server only implements the GET method.  If client
 				uses other method, report the failure.  */
 				char response[1024];
-				if (cnt[0]->conf.control_html_output)
+				if (cnt[0]->conf.webcontrol_html_output)
 					snprintf(response, sizeof (response), bad_method_response_template, method);
 				else
 					snprintf(response, sizeof (response), bad_method_response_template_raw, method);
@@ -2222,11 +2222,11 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 						return 1;
 					}
 
-					// Don't allow to change control_authentication from http control
+					// Don't allow to change webcontrol_authentication from http control
 					// If it has to be allowed reenable check_authentication()
 					/*if ( !check_authentication(auth, authentication,
-					                           strlen(cnt[0]->conf.control_authentication),
-					                           cnt[0]->conf.control_authentication)) {
+					                           strlen(cnt[0]->conf.webcontrol_authentication),
+					                           cnt[0]->conf.webcontrol_authentication)) {
 					*/
 
 					if (strcmp(auth, authentication)) {
@@ -2322,9 +2322,9 @@ void httpd_run(struct context **cnt)
 	hints.ai_family	= AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	snprintf(portnumber, sizeof(portnumber), "%u", cnt[0]->conf.control_port);
+	snprintf(portnumber, sizeof(portnumber), "%u", cnt[0]->conf.webcontrol_port);
 
-	val = getaddrinfo(cnt[0]->conf.control_localhost ? "localhost" : NULL, portnumber, &hints, &res);
+	val = getaddrinfo(cnt[0]->conf.webcontrol_localhost ? "localhost" : NULL, portnumber, &hints, &res);
 
 	/* check != 0 to allow FreeBSD compatibility */ 
 	if (val != 0) {
@@ -2380,15 +2380,15 @@ void httpd_run(struct context **cnt)
 	motion_log(LOG_DEBUG, 0, "motion-httpd/"VERSION" running, accepting connections");
 	motion_log(LOG_DEBUG, 0, "motion-httpd: waiting for data on %s port TCP %s", hbuf, sbuf);
 
-	if (cnt[0]->conf.control_authentication != NULL ) {
+	if (cnt[0]->conf.webcontrol_authentication != NULL ) {
 		char *userpass = NULL;
-		size_t auth_size = strlen(cnt[0]->conf.control_authentication);
+		size_t auth_size = strlen(cnt[0]->conf.webcontrol_authentication);
 
 		authentication = (char *) mymalloc(BASE64_LENGTH(auth_size) + 1);
 		userpass = mymalloc(auth_size + 4);
 		/* base64_encode can read 3 bytes after the end of the string, initialize it */
 		memset(userpass, 0, auth_size + 4);
-		strcpy(userpass, cnt[0]->conf.control_authentication);
+		strcpy(userpass, cnt[0]->conf.webcontrol_authentication);
 		base64_encode(userpass, authentication, auth_size);
 		free(userpass);
 	}

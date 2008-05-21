@@ -18,7 +18,6 @@
 #endif
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #define __USE_GNU
 #include <string.h>
@@ -26,7 +25,6 @@
 #include <fcntl.h>
 #include <time.h>
 #include <signal.h>
-#include <syslog.h>
 #include <limits.h>
 #include <errno.h>
 #include <sys/time.h>
@@ -314,7 +312,7 @@ struct context {
 	struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
 	unsigned short int new_img;
 
-	int locate;
+	int locate_motion;
 	struct rotdata rotate_data;              /* rotation data is thread-specific */
 
 	int noise;

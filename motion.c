@@ -199,7 +199,7 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
 		cnt->imgs.preview_image.diffs = 1;
 
 	/* If we have locate on it is already done */
-	if (cnt->locate == LOCATE_PREVIEW) {
+	if (cnt->locate_motion == LOCATE_PREVIEW) {
 		alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
 	}
 }
@@ -381,7 +381,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 	struct coord *location = &img->location;
 
 	/* Draw location */
-	if (cnt->locate == LOCATE_ON)
+	if (cnt->locate_motion == LOCATE_ON)
 		alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
 
 	/* Calculate how centric motion is if configured preview center*/
@@ -506,6 +506,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 			      cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
 			      &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
 
+#ifdef HAVE_FFMPEG
 			/* Check if we must add any "filler" frames into movie to keep up fps */
 			if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) {
 				/* movie_last_shoot is -1 when file is created,
@@ -540,6 +541,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 			 * only when we not are within first sec */
 			if (cnt->movie_last_shot >= 0)
 				cnt->movie_last_shot = cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot;
+#endif			
 		}
 
 		/* Mark the image as saved */
@@ -767,7 +769,7 @@ static int motion_init(struct context *cnt)
 
 	cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
 			cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-			cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
+			cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
 			cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
 
@@ -1318,7 +1320,7 @@ static void *motion_loop(void *arg)
 				}
 
 				/* Despeckle feature
-				 * First we run (as given by the despeckle option iterations
+				 * First we run (as given by the despeckle_filter option iterations
 				 * of erode and dilate algorithms.
 				 * Finally we run the labelling feature.
 				 * All this is done in the alg_despeckle code.
@@ -1326,7 +1328,7 @@ static void *motion_loop(void *arg)
 				cnt->current_image->total_labels = 0;
 				cnt->imgs.largest_label = 0;
 				olddiffs = 0;
-				if (cnt->conf.despeckle && cnt->current_image->diffs > 0) {
+				if (cnt->conf.despeckle_filter && cnt->current_image->diffs > 0) {
 					olddiffs = cnt->current_image->diffs;
 					cnt->current_image->diffs = alg_despeckle(cnt, olddiffs);
 				}else if (cnt->imgs.labelsize_max)
@@ -1639,11 +1641,11 @@ static void *motion_loop(void *arg)
 				char msg[1024] = "\0";
 				char part[100];
 
-				if (cnt->conf.despeckle) {
+				if (cnt->conf.despeckle_filter) {
 					snprintf(part, 99, "Raw changes: %5d - changes after '%s': %5d",
-					         olddiffs, cnt->conf.despeckle, cnt->current_image->diffs);
+					         olddiffs, cnt->conf.despeckle_filter, cnt->current_image->diffs);
 					strcat(msg, part);
-					if (strchr(cnt->conf.despeckle, 'l')){
+					if (strchr(cnt->conf.despeckle_filter, 'l')){
 						sprintf(part, " - labels: %3d", cnt->current_image->total_labels);
 						strcat(msg, part);
 					}
@@ -1689,8 +1691,6 @@ static void *motion_loop(void *arg)
 	/***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
 
 #ifdef HAVE_FFMPEG
-
-
 
 		if (cnt->conf.timelapse) {
 
@@ -1802,12 +1802,12 @@ static void *motion_loop(void *arg)
 			else
 				cnt->new_img = NEWIMG_OFF;
 
-			if (strcasecmp(cnt->conf.locate, "on") == 0)
-				cnt->locate = LOCATE_ON;
-			else if (strcasecmp(cnt->conf.locate, "preview") == 0)
-				cnt->locate = LOCATE_PREVIEW;
+			if (strcasecmp(cnt->conf.locate_motion, "on") == 0)
+				cnt->locate_motion = LOCATE_ON;
+			else if (strcasecmp(cnt->conf.locate_motion, "preview") == 0)
+				cnt->locate_motion = LOCATE_PREVIEW;
 			else
-				cnt->locate = LOCATE_OFF;
+				cnt->locate_motion = LOCATE_OFF;
 
 			/* Sanity check for smart_mask_speed, silly value disables smart mask */
 			if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
@@ -1832,7 +1832,7 @@ static void *motion_loop(void *arg)
 			 */
 			cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
 			                cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-			                cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
+			                cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
 			                cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
 
@@ -2185,7 +2185,7 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
 
 	if (cnt->conf.stream_port != 0) {
 		/* Compare against the control port. */
-		if (cnt_list[0]->conf.control_port == cnt->conf.stream_port) {
+		if (cnt_list[0]->conf.webcontrol_port == cnt->conf.stream_port) {
 			motion_log(LOG_ERR, 0,
 			           "Stream port number %d for thread %d conflicts with the control port",
 			           cnt->conf.stream_port, cnt->threadnr);
@@ -2324,7 +2324,7 @@ int main (int argc, char **argv)
 		/* Create a thread for the control interface if requested. Create it
 		 * detached and with 'motion_web_control' as the thread function.
 		 */
-		if (cnt_list[0]->conf.control_port)
+		if (cnt_list[0]->conf.webcontrol_port)
 			pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
 
 		if (cnt_list[0]->conf.setup_mode)

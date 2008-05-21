@@ -58,7 +58,7 @@ struct config conf_template = {
 	gap:                   DEF_GAP,
 	maxmpegtime:           DEF_MAXMPEGTIME,
 	snapshot_interval:     0,
-	locate:                "off",
+	locate_motion:         "off",
 	input:                 IN_DEFAULT,
 	norm:                  0,
 	frame_limit:           DEF_MAXFRAMERATE,
@@ -89,10 +89,10 @@ struct config conf_template = {
 	stream_maxrate:        1,
 	stream_localhost:      1,
 	stream_limit:          0,
-	control_port:          0,
-	control_localhost:     1,
-	control_html_output:   1,
-	control_authentication:NULL,
+	webcontrol_port:       0,
+	webcontrol_localhost:  1,
+	webcontrol_html_output:  1,
+	webcontrol_authentication: NULL,
 	frequency:             0,
 	tuner_number:          0,
 	timelapse:             0,
@@ -114,7 +114,7 @@ struct config conf_template = {
 	smart_mask_speed:      0,
 	sql_log_image:         1,
 	sql_log_snapshot:      1,
-	sql_log_mpeg:          0,
+	sql_log_movie:         0,
 	sql_log_timelapse:     0,
 	sql_query:             DEF_SQL_QUERY,
 	mysql_db:              NULL,
@@ -142,7 +142,7 @@ struct config conf_template = {
 	text_right:            DEF_TIMESTAMP,
 	text_event:            DEF_EVENTSTAMP,
 	text_double:           0,
-	despeckle:             NULL,
+	despeckle_filter:      NULL,
 	area_detect:           NULL,
 	minimum_motion_frames: 1,
 	pid_file:              NULL,
@@ -470,13 +470,13 @@ config_param config_params[] = {
 	print_bool
 	},
 	{
-	"despeckle",
+	"despeckle_filter",
 	"# Despeckle motion image using (e)rode or (d)ilate or (l)abel (Default: not defined)\n"
 	"# Recommended value is EedDl. Any combination (and number of) of E, e, d, and D is valid.\n"
 	"# (l)abeling must only be used once and the 'l' must be the last letter.\n"
 	"# Comment out to disable",
 	0,
-	CONF_OFFSET(despeckle),
+	CONF_OFFSET(despeckle_filter),
 	copy_string,
 	print_string
 	},
@@ -719,7 +719,7 @@ config_param config_params[] = {
 	print_int
 	},
 	{
-	"locate",
+	"locate_motion",
 	"\n############################################################\n"
 	"# Text Display\n"
 	"# %Y = year, %m = month, %d = date,\n"
@@ -736,7 +736,7 @@ config_param config_params[] = {
 	"# Valid values: on, off and preview (default: off)\n"
 	"# Set to 'preview' will only draw a box in preview_shot pictures.",
 	0,
-	CONF_OFFSET(locate),
+	CONF_OFFSET(locate_motion),
 	copy_string,
 	print_string
 	},
@@ -923,38 +923,38 @@ config_param config_params[] = {
 	print_int
 	},
 	{
-	"control_port",
+	"webcontrol_port",
 	"\n############################################################\n"
 	"# HTTP Based Control\n"
 	"############################################################\n\n"
 	"# TCP/IP port for the http server to listen on (default: 0 = disabled)",
 	1,
-	CONF_OFFSET(control_port),
+	CONF_OFFSET(webcontrol_port),
 	copy_int,
 	print_int
 	},
 	{
-	"control_localhost",
+	"webcontrol_localhost",
 	"# Restrict control connections to localhost only (default: on)",
 	1,
-	CONF_OFFSET(control_localhost),
+	CONF_OFFSET(webcontrol_localhost),
 	copy_bool,
 	print_bool
 	},
 	{
-	"control_html_output",
+	"webcontrol_html_output",
 	"# Output for http server, select off to choose raw text plain (default: on)",
 	1,
-	CONF_OFFSET(control_html_output),
+	CONF_OFFSET(webcontrol_html_output),
 	copy_bool,
 	print_bool
 	},
 	{
-	"control_authentication",
+	"webcontrol_authentication",
 	"# Authentication for the http based control. Syntax username:password\n"
 	"# Default: not defined (Disabled)",
 	1,
-	CONF_OFFSET(control_authentication),
+	CONF_OFFSET(webcontrol_authentication),
 	copy_string,
 	print_string
 	},	
@@ -1195,10 +1195,10 @@ config_param config_params[] = {
 	print_bool
 	},
 	{
-	"sql_log_mpeg",
-	"# Log to the database when creating motion triggered mpeg file (default: off)",
+	"sql_log_movie",
+	"# Log to the database when creating motion triggered movie file (default: off)",
 	0,
-	CONF_OFFSET(sql_log_mpeg),
+	CONF_OFFSET(sql_log_movie),
 	copy_bool,
 	print_bool
 	},

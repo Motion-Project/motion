@@ -32,7 +32,7 @@ struct config {
 	int gap;
 	int maxmpegtime;
 	int snapshot_interval;
-	const char *locate;
+	const char *locate_motion;
 	int input;
 	int norm;
 	int frame_limit;
@@ -64,10 +64,10 @@ struct config {
 	int stream_maxrate;
 	int stream_localhost;
 	int stream_limit;
-	int control_port;
-	int control_localhost;
-	int control_html_output;
-	const char *control_authentication;
+	int webcontrol_port;
+	int webcontrol_localhost;
+	int webcontrol_html_output;
+	const char *webcontrol_authentication;
 	unsigned long frequency;
 	int tuner_number;
 	int timelapse;
@@ -89,7 +89,7 @@ struct config {
 	int smart_mask_speed;
 	int sql_log_image;
 	int sql_log_snapshot;
-	int sql_log_mpeg;
+	int sql_log_movie;
 	int sql_log_timelapse;
 	const char *sql_query;
 	const char *mysql_db;
@@ -117,7 +117,7 @@ struct config {
 	const char *text_right;
 	const char *text_event;
 	int text_double;
-	const char *despeckle;
+	const char *despeckle_filter;
 	const char *area_detect;
 	int minimum_motion_frames;
 	char *pid_file;
