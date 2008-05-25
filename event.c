@@ -114,7 +114,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 	int sqltype = (unsigned long)arg;
 
 	/* Only log the file types we want */
-	if (!(cnt->conf.mysql_db || cnt->conf.pgsql_db) || (sqltype & cnt->sql_mask) == 0) 
+	if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) 
 		return;
 
 	/* We place the code in a block so we only spend time making space in memory
@@ -126,7 +126,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 		mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query, &cnt->current_image->timestamp_tm, filename, sqltype);
 		
 #ifdef HAVE_MYSQL
-		if (cnt->conf.mysql_db) {
+		if (!strcmp(cnt->conf.database_type, "mysql")) {
 			if (mysql_query(cnt->database, sqlquery) != 0){
 				int error_code = mysql_errno(cnt->database);
 				
@@ -136,10 +136,10 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 				if (error_code >= 2000){
 					cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
 					mysql_init(cnt->database);
-					if (!mysql_real_connect(cnt->database, cnt->conf.mysql_host, cnt->conf.mysql_user, 
-					                        cnt->conf.mysql_password, cnt->conf.mysql_db, 0, NULL, 0)) {
+					if (!mysql_real_connect(cnt->database, cnt->conf.database_host, cnt->conf.database_user, 
+					                        cnt->conf.database_password, cnt->conf.database_dbname, 0, NULL, 0)) {
 						motion_log(LOG_ERR, 0, "Cannot reconnect to MySQL database %s on host %s with user %s", 
-						           cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
+						           cnt->conf.database_dbname, cnt->conf.database_host, cnt->conf.database_user);
 						motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
 					}else mysql_query(cnt->database, sqlquery);
 				}	
@@ -148,10 +148,10 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 #endif /* HAVE_MYSQL */
 
 #ifdef HAVE_PGSQL
-		if (cnt->conf.pgsql_db) {
+		if (!strcmp(cnt->conf.database_type, "postgresql")) {
 			PGresult *res;
 
-			res = PQexec(cnt->database_pg, sqlquery);
+			res = PQexec(cnt->database, sqlquery);
 
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				motion_log(LOG_ERR, 1, "PGSQL query failed");

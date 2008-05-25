@@ -80,6 +80,36 @@ Values: on, off / Default: off
 .br
 Start in daemon (background) mode and release terminal. This option must be placed in motion.conf and not in a thread config file.
 .TP
+.B database_dbname string
+Values: Max 4095 characters / Default: Not defined
+.br
+Name of the database.
+.TP
+.B database_host string
+Values: Max 4095 characters / Default: localhost 
+.br
+IP address or domain name for the database server. Use "localhost" if motion and database runs on the same server.
+.TP
+.B database_password string
+Values: Max 4095 characters / Default: Not defined
+.br
+The database password.
+.TP
+.B database_port integer
+Values: 0 - 65535 / Default: Not defined
+.br
+The database server port number.
+.TP
+.B database_type discrete strings 
+Values: mysql, postgresql / Default: Not defined
+.br
+The database type ( mysql , postgresql ).
+.TP
+.B database_user string
+Values: Max 4095 characters / Default: Not defined
+.br
+The database user name.
+.TP
 .B despeckle_filter string
 Values: EedDl / Default: Not defined
 .br
@@ -105,7 +135,7 @@ Values: on, off / Default: off
 .br
 Use ffmpeg to deinterlace video. Necessary if you use an analog camera and see horizontal combing on moving objects in video or pictures.
 .TP
-.B ffmpeg_timelapse boolean
+.B ffmpeg_timelapse integer 
 Values: 0 - 2147483647 / Default: 0 (disabled)
 .br
 Create a timelapse movie saving a picture frame at the interval in seconds set by this parameter. Set it to 0 if not used.
@@ -130,7 +160,7 @@ Values: 2 - 100 / Default: 100 (no limit)
 .br
 Maximum number of frames to be captured from the camera per second.
 .TP
-.B frequency boolean
+.B frequency integer 
 Values: 0 - 999999 / Default: 0 (Not set)
 .br
 The frequency to set the tuner to (kHz). Valid range: per tuner spec, default: 0 (Don't set it)
@@ -165,7 +195,7 @@ Values: 0 - 100 / Default: 0 (disabled)
 .br
 Ignore sudden massive light intensity changes given as a percentage of the picture area that changed intensity.
 .TP
-.B locate_motion boolean
+.B locate_motion discrete strings 
 Values: on, off, preview / Default: off
 .br
 Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved mpeg movie.
@@ -185,7 +215,7 @@ Values: 0 - 2147483647 / Default: 0
 .br
 Minimum time in seconds between the capturing picture frames from the camera. Default: 0 = disabled - the capture rate is given by the camera framerate.
 .TP
-.B minimum_motion_frames boolean
+.B minimum_motion_frames integer 
 Values: 1 - 1000s / Default: 1
 .br
 Picture frames must contain motion at least the specified number of frames in a row before they are detected as true motion. At the default of 1, all motion is detected. Valid range is 1 to thousands, but it is recommended to keep it within 1-5.
@@ -199,26 +229,6 @@ The video4linux video loopback input device for motion images. If a particular p
 Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S
 .br
 File path for motion triggered ffmpeg movies (mpeg) relative to target_dir. This was previously called ffmpeg_filename.
-.TP
-.B mysql_db string
-Values: Max 4095 characters / Default: Not defined
-.br
-Name of the MySQL database.
-.TP
-.B mysql_host string
-Values: Max 4095 characters / Default: localhost 
-.br
-IP address or domain name for the MySQL server. Use "localhost" if motion and MySQL runs on the same server.
-.TP
-.B mysql_password string
-Values: Max 4095 characters / Default: Not defined
-.br
-The MySQL password.
-.TP
-.B mysql_user string
-Values: Max 4095 characters / Default: Not defined
-.br
-The MySQL user name.
 .TP
 .B netcam_http discrete string
 Values: 1.0 , keep_alive, 1.1 / Default: 1.0
@@ -250,7 +260,7 @@ Values: on, off / Default: on
 .br
 Activates the automatic tuning of noise level.
 .TP
-.B norm discrete strings
+.B norm integer 
 Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour) / Default: 0 (PAL)
 .br
 Select the norm of the video device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
@@ -309,31 +319,6 @@ Output pictures with only the moving object. This feature generates the special 
 Values: on, off, first, best, center / Default: on
 .br
 Normal image is an image that is stored when motion is detected. It is the same image that was taken by the camera. I.e. not a motion image like defined by output_motion. Default is that normal images are stored.
-.TP
-.B pgsql_db string
-Values: Max 4095 characters / Default: Not defined
-.br
-Name of the PostgreSQL database.
-.TP
-.B pgsql_host string
-Values: Max 4095 characters / Default: localhost 
-.br
-IP address or domain name for the PostgreSQL server. Use "localhost" if motion and PostgreSQL runs on the same server.
-.TP
-.B pgsql_password string
-Values: Max 4095 characters / Default: Not defined
-.br
-The PostgreSQL password.
-.TP
-.B pgsql_port integer
-Values: 0 - 65535 / Default: 5432
-.br
-The PostgreSQL server port number.
-.TP
-.B pgsql_user string
-Values: Max 4095 characters / Default: Not defined
-.br
-The PostgreSQL user name.
 .TP
 .B post_capture integer
 Values: 0 - 2147483647 / Default: 0 (disabled)
@@ -555,7 +540,7 @@ Values: Max 4095 characters / Default: /dev/tuner0
 .br
 The tuner device used for controlling the tuner in a tuner card. This option is only used when Motion is compiled for FreeBSD.
 .TP
-.B v4l2_palette intenger
+.B v4l2_palette discrete strings 
 Values: 0 - 8 / Default: 8
 .br
 Allow to choose preferable palette to be use by motion to capture from those supported by your videodevice.

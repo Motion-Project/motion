@@ -112,15 +112,19 @@ struct config conf_template = {
 	on_event_end:          NULL,
 	mask_file:             NULL,
 	smart_mask_speed:      0,
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)	
 	sql_log_image:         1,
 	sql_log_snapshot:      1,
 	sql_log_movie:         0,
 	sql_log_timelapse:     0,
 	sql_query:             DEF_SQL_QUERY,
-	mysql_db:              NULL,
-	mysql_host:            "localhost",
-	mysql_user:            NULL,
-	mysql_password:        NULL,
+	database_type:         NULL,
+	database_dbname:       NULL,
+	database_host:         "localhost",
+	database_user:         NULL,
+	database_password:     NULL,
+	database_port:         0,
+#endif	
 	on_picture_save:       NULL,
 	on_motion_detected:    NULL,
 	on_area_detected:      NULL,
@@ -132,11 +136,6 @@ struct config conf_template = {
 	netcam_userpass:       NULL,
 	netcam_http:           "1.0",    /* Choices: 1.0, 1.1, or keep_alive */
 	netcam_proxy:          NULL,
-	pgsql_db:              NULL,
-	pgsql_host:            "localhost",
-	pgsql_user:            NULL,
-	pgsql_password:        NULL,
-	pgsql_port:            5432,
 	text_changes:          0,
 	text_left:             NULL,
 	text_right:            DEF_TIMESTAMP,
@@ -1224,91 +1223,59 @@ config_param config_params[] = {
 	copy_string,
 	print_string
 	},
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
-
-#ifdef HAVE_MYSQL
 	{
-	"mysql_db",
+	"database_type",
 	"\n############################################################\n"
-	"# Database Options For MySQL\n"
+	"# Database Options \n"
 	"############################################################\n\n"
-	"# Mysql database to log to (default: not defined)",
+	"# database type : mysql, postgresql (default : not defined)",
 	0,
-	CONF_OFFSET(mysql_db),
+	CONF_OFFSET(database_type),
 	copy_string,
 	print_string
 	},
 	{
-	"mysql_host",
+	"database_dbname",	
+	"# database to log to (default: not defined)",
+	0,
+	CONF_OFFSET(database_dbname),
+	copy_string,
+	print_string	
+	},	
+	{
+	"database_host",
 	"# The host on which the database is located (default: not defined)",
 	0,
-	CONF_OFFSET(mysql_host),
+	CONF_OFFSET(database_host),
 	copy_string,
 	print_string
 	},
 	{
-	"mysql_user",
-	"# User account name for MySQL database (default: not defined)",
+	"database_user",
+	"# User account name for database (default: not defined)",
 	0,
-	CONF_OFFSET(mysql_user),
+	CONF_OFFSET(database_user),
 	copy_string,
 	print_string
 	},
 	{
-	"mysql_password",
-	"# User password for MySQL database (default: not defined)",
+	"database_password",
+	"# User password for database (default: not defined)",
 	0,
-	CONF_OFFSET(mysql_password),
-	copy_string,
-	print_string
-	},
-#endif /* HAVE_MYSQL */
-
-#ifdef HAVE_PGSQL
-	{
-	"pgsql_db",
-	"\n############################################################\n"
-	"# Database Options For PostgreSQL\n"
-	"############################################################\n\n"
-	"# PostgreSQL database to log to (default: not defined)",
-	0,
-	CONF_OFFSET(pgsql_db),
+	CONF_OFFSET(database_password),
 	copy_string,
 	print_string
 	},
 	{
-	"pgsql_host",
-	"# The host on which the database is located (default: not defined)",
+	"database_port",
+	"# Port on which the database is located (default: not defined)\n"
+	"# mysql 3306 , postgresql 5432 (default: not defined)",
 	0,
-	CONF_OFFSET(pgsql_host),
-	copy_string,
-	print_string
-	},
-	{
-	"pgsql_user",
-	"# User account name for PostgreSQL database (default: not defined)",
-	0,
-	CONF_OFFSET(pgsql_user),
-	copy_string,
-	print_string
-	},
-	{
-	"pgsql_password",
-	"# User password for PostgreSQL database (default: not defined)",
-	0,
-	CONF_OFFSET(pgsql_password),
-	copy_string,
-	print_string
-	},
-	{
-	"pgsql_port",
-	"# Port on which the PostgreSQL database is located (default: 5432)",
-	0,
-	CONF_OFFSET(pgsql_port),
+	CONF_OFFSET(database_port),
 	copy_int,
 	print_int
 	},
-#endif /* HAVE_PGSQL */
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
 	{
 	"video_pipe",
 	"\n############################################################\n"

@@ -566,40 +566,27 @@ sql_query insert into security(camera, filename, frame, file_type, time_stamp, e
 
 
 ############################################################
-# Database Options For MySQL
+# Database Options 
 ############################################################
 
-# Mysql database to log to (default: not defined)
-; mysql_db value
+# database type : mysql, postgresql (default : not defined)
+; database_type value
+
+# database to log to (default: not defined)
+; database_dbname value
 
 # The host on which the database is located (default: localhost)
-; mysql_host value
+; database_host value
 
-# User account name for MySQL database (default: not defined)
-; mysql_user value
+# User account name for database (default: not defined)
+; database_user value
 
-# User password for MySQL database (default: not defined)
-; mysql_password value
+# User password for database (default: not defined)
+; database_password value
 
-
-############################################################
-# Database Options For PostgreSQL
-############################################################
-
-# PostgreSQL database to log to (default: not defined)
-; pgsql_db value
-
-# The host on which the database is located (default: localhost)
-; pgsql_host value
-
-# User account name for PostgreSQL database (default: not defined)
-; pgsql_user value
-
-# User password for PostgreSQL database (default: not defined)
-; pgsql_password value
-
-# Port on which the PostgreSQL database is located (default: 5432)
-; pgsql_port 5432
+# Port on which the database is located 
+#  mysql 3306 , postgresql 5432 (default: not defined)
+; database_port value
 
 
 ############################################################

@@ -721,56 +721,60 @@ static int motion_init(struct context *cnt)
 #endif /* BSD */
 #endif /*WITHOUT_V4L*/
 
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+	if (cnt->conf.database_type) {
+
 #ifdef HAVE_MYSQL
-	if(cnt->conf.mysql_db) {
-		cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
-		mysql_init(cnt->database);
-		if (!mysql_real_connect(cnt->database, cnt->conf.mysql_host, cnt->conf.mysql_user,
-		    cnt->conf.mysql_password, cnt->conf.mysql_db, 0, NULL, 0)) {
-			motion_log(LOG_ERR, 0, "Cannot connect to MySQL database %s on host %s with user %s",
-			           cnt->conf.mysql_db, cnt->conf.mysql_host, cnt->conf.mysql_user);
-			motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
-			return -2;
+		if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {	       	
+			cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
+			mysql_init(cnt->database);
+			if (!mysql_real_connect(cnt->database, cnt->conf.database_host, cnt->conf.database_user,
+			    cnt->conf.database_password, cnt->conf.database_dbname, 0, NULL, 0)) {
+				motion_log(LOG_ERR, 0, "Cannot connect to MySQL database %s on host %s with user %s",
+			        cnt->conf.database_dbname, cnt->conf.database_host, cnt->conf.database_user);
+				motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
+				return -2;
+			}
+			#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
+			my_bool  my_true = TRUE;
+			mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &my_true);
+			#endif
 		}
-		#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-		my_bool  my_true = TRUE;
-		mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &my_true);
-		#endif
-	}
 #endif /* HAVE_MYSQL */
 
 #ifdef HAVE_PGSQL
-	if (cnt->conf.pgsql_db) {
-		char connstring[255];
+		if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
+			char connstring[255];
 
-		/* create the connection string.
-		   Quote the values so we can have null values (blank)*/
-		snprintf(connstring, 255,
-		         "dbname='%s' host='%s' user='%s' password='%s' port='%d'",
-		         cnt->conf.pgsql_db, /* dbname */
-		         (cnt->conf.pgsql_host ? cnt->conf.pgsql_host : ""), /* host (may be blank) */
-		         (cnt->conf.pgsql_user ? cnt->conf.pgsql_user : ""), /* user (may be blank) */
-		         (cnt->conf.pgsql_password ? cnt->conf.pgsql_password : ""), /* password (may be blank) */
-		          cnt->conf.pgsql_port
-		);
+			/* create the connection string.
+			   Quote the values so we can have null values (blank)*/
+			snprintf(connstring, 255,
+			         "dbname='%s' host='%s' user='%s' password='%s' port='%d'",
+			          cnt->conf.database_dbname, /* dbname */
+			          (cnt->conf.database_host ? cnt->conf.database_host : ""), /* host (may be blank) */
+			          (cnt->conf.database_user ? cnt->conf.database_user : ""), /* user (may be blank) */
+			          (cnt->conf.database_password ? cnt->conf.database_password : ""), /* password (may be blank) */
+			          cnt->conf.database_port
+			);
 
-		cnt->database_pg = PQconnectdb(connstring);
-		if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
-			motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
-			           cnt->conf.pgsql_db, PQerrorMessage(cnt->database_pg));
-			return -2;
+			cnt->database = PQconnectdb(connstring);
+			if (PQstatus(cnt->database_dbbame) == CONNECTION_BAD) {
+				motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
+				           cnt->conf.database_dbname, PQerrorMessage(cnt->database));
+				return -2;
+			}
 		}
-	}
 #endif /* HAVE_PGSQL */
+	
 
-
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
 	/* Set the sql mask file according to the SQL config options*/
 
 	cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
 			cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
 			cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
 			cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
+	}
+
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
 
 	/* Load the mask file if any */

@@ -92,10 +92,12 @@ struct config {
 	int sql_log_movie;
 	int sql_log_timelapse;
 	const char *sql_query;
-	const char *mysql_db;
-	const char *mysql_host;
-	const char *mysql_user;
-	const char *mysql_password;
+	const char *database_type;
+	const char *database_dbname;
+	const char *database_host;
+	const char *database_user;
+	const char *database_password;
+	int database_port;
 	char *on_picture_save;
 	char *on_area_detected;
 	char *on_motion_detected;
@@ -107,11 +109,6 @@ struct config {
 	const char *netcam_userpass;
 	const char *netcam_http;
 	const char *netcam_proxy;
-	const char *pgsql_db;
-	const char *pgsql_host;
-	const char *pgsql_user;
-	const char *pgsql_password;
-	int pgsql_port;
 	int text_changes;
 	const char *text_left;
 	const char *text_right;
