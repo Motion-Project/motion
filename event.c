@@ -225,7 +225,7 @@ static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
 const char *imageext(struct context *cnt)
 {
-	if (cnt->conf.ppm)
+	if (cnt->imgs.picture_type == IMAGE_TYPE_PPM)
 		return "ppm";
 	return "jpg";
 }
@@ -238,16 +238,16 @@ static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	char filename[PATH_MAX];
 
 	if (cnt->new_img & NEWIMG_ON) {
-		const char *jpegpath;
+		const char *imagepath;
 
-		/* conf.jpegpath would normally be defined but if someone deleted it by control interface
+		/* conf.imagepath would normally be defined but if someone deleted it by control interface
 		   it is better to revert to the default than fail */
-		if (cnt->conf.jpegpath)
-			jpegpath = cnt->conf.jpegpath;
+		if (cnt->conf.imagepath)
+			imagepath = cnt->conf.imagepath;
 		else
-			jpegpath = DEF_JPEGPATH;
+			imagepath = DEF_IMAGEPATH;
 			
-		mystrftime(cnt, filename, sizeof(filename), jpegpath, currenttime_tm, NULL, 0);
+		mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tm, NULL, 0);
 		snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
 		put_picture(cnt, fullfilename, newimg, FTYPE_IMAGE);
@@ -264,16 +264,16 @@ static void event_imagem_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	char filenamem[PATH_MAX];
 
 	if (conf->motion_img) {
-		const char *jpegpath;
+		const char *imagepath;
 
-		/* conf.jpegpath would normally be defined but if someone deleted it by control interface
+		/* conf.imagepath would normally be defined but if someone deleted it by control interface
 		   it is better to revert to the default than fail */
-		if (cnt->conf.jpegpath)
-			jpegpath = cnt->conf.jpegpath;
+		if (cnt->conf.imagepath)
+			imagepath = cnt->conf.imagepath;
 		else
-			jpegpath = DEF_JPEGPATH;
+			imagepath = DEF_IMAGEPATH;
 			
-		mystrftime(cnt, filename, sizeof(filename), jpegpath, currenttime_tm, NULL, 0);
+		mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tm, NULL, 0);
 		/* motion images gets same name as normal images plus an appended 'm' */
 		snprintf(filenamem, PATH_MAX, "%sm", filename);
 		snprintf(fullfilenamem, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filenamem, imageext(cnt));

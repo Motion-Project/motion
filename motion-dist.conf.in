@@ -229,9 +229,9 @@ output_motion off
 # The quality (in percent) to be used by the jpeg compression (default: 75)
 quality 75
 
-# Output ppm images instead of jpeg (default: off)
-ppm off
-
+# Type of output images
+# Valid values: jpeg, ppm (default: jpeg)
+picture_type jpeg
 
 ############################################################
 # FFMPEG related options
@@ -339,7 +339,7 @@ text_double off
 
 ############################################################
 # Target Directories and filenames For Images And Films
-# For the options snapshot_, jpeg_, movie_ and timelapse_filename
+# For the options snapshot_, picture_, movie_ and timelapse_filename
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
@@ -371,7 +371,7 @@ snapshot_filename %v-%Y%m%d%H%M%S-snapshot
 # File extension .jpg or .ppm is automatically added so do not include this
 # Set to 'preview' together with best-preview feature enables special naming
 # convention for preview shots. See motion guide for details
-jpeg_filename %v-%Y%m%d%H%M%S-%q
+picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S

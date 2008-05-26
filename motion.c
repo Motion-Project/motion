@@ -654,6 +654,12 @@ static int motion_init(struct context *cnt)
 	cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.labels));
 	cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(cnt->imgs.labelsize));
 
+	/* Set output picture type */
+	if (!strcmp(cnt->conf.picture_type, "ppm"))
+		cnt->imgs.picture_type = IMAGE_TYPE_PPM;
+	else
+		cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
+
 	/* allocate buffer here for preview buffer */
 	cnt->imgs.preview_image.image = mymalloc(cnt->imgs.size);
 
@@ -758,7 +764,7 @@ static int motion_init(struct context *cnt)
 			);
 
 			cnt->database_pg = PQconnectdb(connstring);
-			if (PQstatus(cnt->database_dbbame) == CONNECTION_BAD) {
+			if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
 				motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
 				           cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
 				return -2;

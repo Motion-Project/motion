@@ -495,7 +495,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
 
 void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality)
 {
-	if (cnt->conf.ppm) {
+	if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
 		put_ppm_bgr24_file(picture, image, cnt->imgs.width, cnt->imgs.height);
 	} else {
 		switch (cnt->imgs.type) {
@@ -642,10 +642,10 @@ void put_fixed_mask(struct context *cnt, const char *file)
 void preview_save(struct context *cnt)
 {
 #ifdef HAVE_FFMPEG
-	int use_jpegpath;
+	int use_imagepath;
 	int basename_len;
 #endif /* HAVE_FFMPEG */
-	const char *jpegpath;
+	const char *imagepath;
 	char previewname[PATH_MAX];
 	char filename[PATH_MAX];
 	struct image_data *saved_current_image;
@@ -658,9 +658,9 @@ void preview_save(struct context *cnt)
 
 #ifdef HAVE_FFMPEG
 		/* Use filename of movie i.o. jpeg_filename when set to 'preview' */
-		use_jpegpath = strcmp(cnt->conf.jpegpath, "preview");
+		use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 	
-		if (cnt->ffmpeg_new && !use_jpegpath){
+		if (cnt->ffmpeg_new && !use_imagepath){
 			/* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
 			basename_len = strlen(cnt->newfilename) - 3;
 			strncpy(previewname, cnt->newfilename, basename_len);
@@ -670,18 +670,18 @@ void preview_save(struct context *cnt)
 		} else
 #endif /* HAVE_FFMPEG */
 		{
-			/* Save best preview-shot also when no movies are recorded or jpegpath
+			/* Save best preview-shot also when no movies are recorded or imagepath
 			 * is used. Filename has to be generated - nothing available to reuse! */
 			//printf("preview_shot: different filename or picture only!\n");
 
-			/* conf.jpegpath would normally be defined but if someone deleted it by control interface
+			/* conf.imagepath would normally be defined but if someone deleted it by control interface
 			 * it is better to revert to the default than fail */
-			if (cnt->conf.jpegpath)
-				jpegpath = cnt->conf.jpegpath;
+			if (cnt->conf.imagepath)
+				imagepath = cnt->conf.imagepath;
 			else
-				jpegpath = (char *)DEF_JPEGPATH;
+				imagepath = (char *)DEF_IMAGEPATH;
 			
-			mystrftime(cnt, filename, sizeof(filename), jpegpath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0);
+			mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0);
 			snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
 			put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);

@@ -63,7 +63,7 @@ struct config conf_template = {
 	norm:                  0,
 	frame_limit:           DEF_MAXFRAMERATE,
 	quiet:                 1,
-	ppm:                   0,
+	picture_type:          "jpeg",
 	noise:                 DEF_NOISELEVEL,
 	noise_tune:            1,
 	minimum_frame_time:    0,
@@ -104,7 +104,7 @@ struct config conf_template = {
 	v4l2_palette:          8,		
 	vidpipe:               NULL,
 	filepath:              NULL,
-	jpegpath:              DEF_JPEGPATH,
+	imagepath:             DEF_IMAGEPATH,
 	moviepath:             DEF_MOVIEPATH,
 	snappath:              DEF_SNAPPATH,
 	timepath:              DEF_TIMEPATH,
@@ -608,12 +608,13 @@ config_param config_params[] = {
 	print_int
 	},
 	{
-	"ppm",
-	"# Output ppm images instead of jpeg (default: off)",
+	"picture_type",	
+	"# Type of output images\n"
+	"# Valid values: jpeg, ppm (default: jpeg)",
 	0,
-	CONF_OFFSET(ppm),
-	copy_bool,
-	print_bool
+	CONF_OFFSET(picture_type),
+	copy_string,
+	print_string
 	},
 #ifdef HAVE_FFMPEG
 	{
@@ -794,7 +795,7 @@ config_param config_params[] = {
 	"target_dir",
 	"\n############################################################\n"
 	"# Target Directories and filenames For Images And Films\n"
-	"# For the options snapshot_, jpeg_, movie_ and timelapse_filename\n"
+	"# For the options snapshot_, picture_, movie_ and timelapse_filename\n"
 	"# you can use conversion specifiers\n"
 	"# %Y = year, %m = month, %d = date,\n"
 	"# %H = hour, %M = minute, %S = second,\n"
@@ -827,16 +828,16 @@ config_param config_params[] = {
 	print_string
 	},
 	{
-	"jpeg_filename",
+	"picture_filename",
 	"# File path for motion triggered images (jpeg or ppm) relative to target_dir\n"
-	"# Default: "DEF_JPEGPATH"\n"
+	"# Default: "DEF_IMAGEPATH"\n"
 	"# Default value is equivalent to legacy oldlayout option\n"
 	"# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H/%M/%S-%q\n"
 	"# File extension .jpg or .ppm is automatically added so do not include this\n"
 	"# Set to 'preview' together with best-preview feature enables special naming\n"
 	"# convention for preview shots. See motion guide for details",
 	0,
-	CONF_OFFSET(jpegpath),
+	CONF_OFFSET(imagepath),
 	copy_string,
 	print_string
 	},

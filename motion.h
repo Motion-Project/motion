@@ -146,7 +146,7 @@
 #define DEF_EVENTSTAMP     "%Y%m%d%H%M%S"
 
 #define DEF_SNAPPATH       "%v-%Y%m%d%H%M%S-snapshot"
-#define DEF_JPEGPATH       "%v-%Y%m%d%H%M%S-%q"
+#define DEF_IMAGEPATH      "%v-%Y%m%d%H%M%S-%q"
 #define DEF_MOVIEPATH      "%v-%Y%m%d%H%M%S"
 #define DEF_TIMEPATH       "%Y%m%d-timelapse"
 
@@ -154,6 +154,11 @@
 
 /* Do not break this line into two or more. Must be ONE line */
 #define DEF_SQL_QUERY "sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')"
+
+
+/* OUTPUT Image types */
+#define IMAGE_TYPE_JPEG        0
+#define IMAGE_TYPE_PPM         1
 
 /* Filetype defines */
 #define FTYPE_IMAGE            1
@@ -166,7 +171,7 @@
 #define FTYPE_MPEG_ANY    (FTYPE_MPEG | FTYPE_MPEG_MOTION | FTYPE_MPEG_TIMELAPSE)
 #define FTYPE_IMAGE_ANY   (FTYPE_IMAGE | FTYPE_IMAGE_SNAPSHOT | FTYPE_IMAGE_MOTION)
 
-/* What types of jpeg files do we want to have */
+/* What types of images files do we want to have */
 #define NEWIMG_OFF       0
 #define NEWIMG_ON        1
 #define NEWIMG_FIRST     2
@@ -271,6 +276,7 @@ struct images {
 	int width;
 	int height;
 	int type;
+	int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */		
 	int size;
 	int motionsize;
 	int labelgroup_max;

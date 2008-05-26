@@ -37,7 +37,7 @@ struct config {
 	int norm;
 	int frame_limit;
 	int quiet;
-	int ppm;
+	const char *picture_type;
 	int noise;
 	int noise_tune;
 	int minimum_frame_time;
@@ -79,7 +79,7 @@ struct config {
 	short unsigned int v4l2_palette;
 	const char *vidpipe;
 	const char *filepath;
-	const char *jpegpath;
+	const char *imagepath;
 	const char *moviepath;
 	const char *snappath;
 	const char *timepath;

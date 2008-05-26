@@ -118,17 +118,17 @@ Despeckle motion image using combinations of (E/e)rode or (D/d)ilate. And ending
 .B ffmpeg_bps integer
 Values: 0 - 9999999 / Default: 400000
 .br
-Bitrate of mpegs produced by ffmpeg. Bitrate is bits per second. Default: 400000 (400kbps). Higher value mans better quality and larger files. Option requires that ffmpeg libraries are installed.
+Bitrate of movies produced by ffmpeg. Bitrate is bits per second. Default: 400000 (400kbps). Higher value mans better quality and larger files. Option requires that ffmpeg libraries are installed.
 .TP
 .B ffmpeg_cap_motion boolean
 Values: on, off / Default: off
 .br
-Use ffmpeg libraries to encode motion type mpeg movies where you only see the pixels that changes.
+Use ffmpeg libraries to encode motion type movies where you only see the pixels that changes.
 .TP
 .B ffmpeg_cap_new boolean
 Values: on, off / Default: off
 .br
-Use ffmpeg libraries to encode mpeg movies in realtime.
+Use ffmpeg libraries to encode movies in realtime.
 .TP
 .B ffmpeg_deinterlace boolean
 Values: on, off / Default: off
@@ -153,7 +153,7 @@ Enables and defines variable bitrate for the ffmpeg encoder. ffmpeg_bps is ignor
 .B ffmpeg_video_codec discrete strings
 Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf , flv , ffv1, mov / Default: mpeg4
 .br
-Codec to be used by ffmpeg for the video compression. Timelapse mpegs are always made in mpeg1 format independent from this option.
+Codec to be used by ffmpeg for the video compression. Timelapse movies are always made in mpeg1 format independent from this option.
 .TP
 .B framerate integer
 Values: 2 - 100 / Default: 100 (no limit)
@@ -185,11 +185,6 @@ Values: 0 - 7, 8 = disabled / Default: 8 (disabled)
 .br
 Input channel to use expressed as an integer number starting from 0. Should normally be set to 1 for video/TV cards, and 8 for USB cameras.
 .TP
-.B jpeg_filename string
-Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S-%q
-.br
-File path for motion triggered images (jpeg or ppm) relative to target_dir. Value 'preview' makes a jpeg filename with the same name body as the associated saved mpeg movie file.
-.TP
 .B lightswitch integer
 Values: 0 - 100 / Default: 0 (disabled)
 .br
@@ -198,7 +193,7 @@ Ignore sudden massive light intensity changes given as a percentage of the pictu
 .B locate_motion discrete strings 
 Values: on, off, preview / Default: off
 .br
-Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved mpeg movie.
+Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved movie.
 .TP
 .B mask_file string
 Values: Max 4095 characters / Default: Not defined
@@ -228,7 +223,7 @@ The video4linux video loopback input device for motion images. If a particular p
 .B movie_filename string
 Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S
 .br
-File path for motion triggered ffmpeg movies (mpeg) relative to target_dir. This was previously called ffmpeg_filename.
+File path for motion triggered ffmpeg movies relative to target_dir. This was previously called ffmpeg_filename.
 .TP
 .B netcam_http discrete string
 Values: 1.0 , keep_alive, 1.1 / Default: 1.0
@@ -298,7 +293,7 @@ Command to be executed when an ffmpeg movie is closed at the end of an event. Yo
 .B on_movie_start string
 Values: Max 4095 characters / Default: Not defined
 .br
-Command to be executed when an mpeg movie is created. You can use Conversion Specifiers and spaces as part of the command. Use %f for passing filename (with full path) to the command.
+Command to be executed when a movie is created. You can use Conversion Specifiers and spaces as part of the command. Use %f for passing filename (with full path) to the command.
 .TP
 .B on_picture_save string
 Values: Max 4095 characters / Default: Not defined
@@ -320,20 +315,25 @@ Values: on, off, first, best, center / Default: on
 .br
 Normal image is an image that is stored when motion is detected. It is the same image that was taken by the camera. I.e. not a motion image like defined by output_motion. Default is that normal images are stored.
 .TP
+.B picture_filename string
+Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S-%q
+.br
+File path for motion triggered images (jpeg or ppm) relative to target_dir. Value 'preview' makes a jpeg filename with the same name body   as the associated saved movie file.
+.TP
+.B picture_type discrete strings
+Values: jpeg , ppm / Default: jpeg
+.br
+Type of images motion will trigger when motion is detected. 
+.TP
 .B post_capture integer
 Values: 0 - 2147483647 / Default: 0 (disabled)
 .br
 Specifies the number of frames to be captured after motion has been detected.
 .TP
-.B ppm boolean
-Values: on, off / Default: off
-.br
-Output ppm images instead of jpeg. This uses less CPU time, but causes a LOT of hard disk I/O, and it is generally slower than jpeg.
-.TP
 .B pre_capture integer
 Values: 0 - 100s / Default: 0 (disabled)
 .br
-Specifies the number of previous frames to be outputted at motion detection. Recommended range: 0 to 5, default=0. Do not use large values! Large values will cause Motion to skip video frames and cause unsmooth mpegs. To smooth mpegs use larger values of post_capture instead.
+Specifies the number of previous frames to be outputted at motion detection. Recommended range: 0 to 5, default=0. Do not use large values! Large values will cause Motion to skip video frames and cause unsmooth movies. To smooth movies use larger values of post_capture instead.
 .TP
 .B process_id_file string
 Values: Max 4095 characters / Default: Not defined
@@ -353,7 +353,7 @@ Be quiet, don't output beeps when detecting motion.
 .B rotate discrete strings
 Values: 0, 90, 180, 270 / Default: 0 (not rotated)
 .br
-Rotate image the given number of degrees. The rotation affects all saved images as well as mpeg movies.
+Rotate image the given number of degrees. The rotation affects all saved images as well as movies.
 .TP
 .B roundrobin_frames integer
 Values: 1 - 2147483647 / Default: 1
@@ -398,7 +398,7 @@ Log to the database when creating motion triggered image file.
 .B sql_log_movie boolean
 Values: on, off / Default: off
 .br
-Log to the database when creating motion triggered mpeg file.
+Log to the database when creating motion triggered movie file.
 .TP
 .B sql_log_snapshot boolean
 Values: on, off / Default: on
@@ -408,7 +408,7 @@ Log to the database when creating a snapshot image file.
 .B sql_log_timelapse boolean
 Values: on, off / Default: off
 .br
-Log to the database when creating timelapse mpeg file
+Log to the database when creating timelapse movie file
 .TP
 .B sql_query string
 Values: Max 4095 characters / Default: insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
@@ -468,7 +468,7 @@ Activates the automatic tuning of threshold level.
 .B timelapse_filename string
 Values: Max 4095 characters / Default: %v-%Y%m%d-timelapse
 .br
-File path for timelapse mpegs relative to target_dir (ffmpeg only).
+File path for timelapse movies relative to target_dir (ffmpeg only).
 .TP
 .B track_auto boolean
 Values: on, off / Default: off
@@ -597,17 +597,17 @@ Motion responds to the following signals:
 The config file will be reread.
 .TP
 .B SIGTERM
-If needed motion will create an mpeg file of the last event and exit
+If needed motion will create a movie file of the last event and exit
 .TP
 .B SIGUSR1
-Motion will create an mpeg file of the current event.
+Motion will create a movie file of the current event.
 .SH NOTES
 .TP
 .B Snapshot
 A snapshot is a picture taken at regular intervals independently of any movement in the picture.
 .TP
 .B Motion image
-A "motion" image/mpeg shows the pixels that have actually changed during the last frames. These pictures are not very useful for normal presentation to the public but they are quite useful for testing and tuning and making mask files as you can see exactly where motion sees something moving. Motion is shown in greytones. If labelling is enabled the largest area is marked as blue. Smart mask is shown in read.
+A "motion" image/movie shows the pixels that have actually changed during the last frames. These pictures are not very useful for normal presentation to the public but they are quite useful for testing and tuning and making mask files as you can see exactly where motion sees something moving. Motion is shown in greytones. If labelling is enabled the largest area is marked as blue. Smart mask is shown in read.
 .TP
 .B Normal image
 A "normal" image is the real image taken by the camera with text overlayed.
@@ -745,7 +745,7 @@ Either 'AM' or 'PM' according to the given time value, or the corresponding stri
 Like %p but in lowercase: `am' or `pm' or a corresponding string for the current locale.
 .TP
 .B %q
-Picture frame number within current second. For jpeg filenames this should always be included in the filename if you save more then 1 picture per second to ensure unique filenames. It is not needed in filenames for mpegs.
+Picture frame number within current second. For jpeg filenames this should always be included in the filename if you save more then 1 picture per second to ensure unique filenames. It is not needed in filenames for movies.
 .TP
 .B %Q
 Number of detected labels found by the despeckle feature
