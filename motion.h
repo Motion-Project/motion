@@ -119,7 +119,7 @@
 
 /* Minimum time between two 'actions' (email, sms, external) */
 #define DEF_GAP                 60  /* 1 minutes */
-#define DEF_MAXMPEGTIME       3600  /* 60 minutes */
+#define DEF_MAXMOVIETIME       3600  /* 60 minutes */
 
 #define DEF_FFMPEG_BPS      400000
 #define DEF_FFMPEG_VBR           0
@@ -147,7 +147,7 @@
 
 #define DEF_SNAPPATH       "%v-%Y%m%d%H%M%S-snapshot"
 #define DEF_JPEGPATH       "%v-%Y%m%d%H%M%S-%q"
-#define DEF_MPEGPATH       "%v-%Y%m%d%H%M%S"
+#define DEF_MOVIEPATH      "%v-%Y%m%d%H%M%S"
 #define DEF_TIMEPATH       "%Y%m%d-timelapse"
 
 #define DEF_TIMELAPSE_MODE "daily"

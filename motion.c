@@ -757,10 +757,10 @@ static int motion_init(struct context *cnt)
 			          cnt->conf.database_port
 			);
 
-			cnt->database = PQconnectdb(connstring);
+			cnt->database_pg = PQconnectdb(connstring);
 			if (PQstatus(cnt->database_dbbame) == CONNECTION_BAD) {
 				motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
-				           cnt->conf.database_dbname, PQerrorMessage(cnt->database));
+				           cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
 				return -2;
 			}
 		}
@@ -1587,11 +1587,11 @@ static void *motion_loop(void *arg)
 				}
 			}
 			
-			/* Is the mpeg movie to long? Then make movies
-			 * First test for max mpegtime
+			/* Is the movie too long? Then make movies
+			 * First test for max_movie_time
 			 */
-			if (cnt->conf.maxmpegtime && cnt->event_nr == cnt->prev_event)
-				if (cnt->currenttime - cnt->eventtime >= cnt->conf.maxmpegtime)
+			if (cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event)
+				if (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time)
 					cnt->makemovie = 1;
 
 			/* Now test for quiet longer than 'gap' OR make movie as decided in
@@ -1748,14 +1748,14 @@ static void *motion_loop(void *arg)
 			}
 
 			/* If ffmpeg timelapse is enabled and time since epoch MOD ffmpeg_timelaps = 0
-			 * add a timelapse frame to the timelapse mpeg.
+			 * add a timelapse frame to the timelapse movie.
 			 */
 			if (cnt->shots == 0 &&
 				time_current_frame % cnt->conf.timelapse <= time_last_frame % cnt->conf.timelapse)
 				event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
 		}
 
-		/* if timelapse mpeg is in progress but conf.timelapse is zero then close timelapse file
+		/* if timelapse movie is in progress but conf.timelapse is zero then close timelapse file
 		 * This is an important feature that allows manual roll-over of timelapse file using the http
 		 * remote control via a cron job.
 		 */

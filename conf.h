@@ -30,7 +30,7 @@ struct config {
 	int motion_img;
 	int output_all;
 	int gap;
-	int maxmpegtime;
+	int max_movie_time;
 	int snapshot_interval;
 	const char *locate_motion;
 	int input;
@@ -80,7 +80,7 @@ struct config {
 	const char *vidpipe;
 	const char *filepath;
 	const char *jpegpath;
-	const char *mpegpath;
+	const char *moviepath;
 	const char *snappath;
 	const char *timepath;
 	char *on_event_start;

@@ -151,7 +151,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 		if (!strcmp(cnt->conf.database_type, "postgresql")) {
 			PGresult *res;
 
-			res = PQexec(cnt->database, sqlquery);
+			res = PQexec(cnt->database_pg, sqlquery);
 
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				motion_log(LOG_ERR, 1, "PGSQL query failed");
@@ -355,7 +355,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	int height = cnt->imgs.height;
 	unsigned char *convbuf, *y, *u, *v;
 	char stamp[PATH_MAX];
-	const char *mpegpath;
+	const char *moviepath;
 
 	if (!cnt->conf.ffmpeg_cap_new && !cnt->conf.ffmpeg_cap_motion)
 		return;
@@ -373,14 +373,14 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
 	/* conf.mpegpath would normally be defined but if someone deleted it by control interface
 	   it is better to revert to the default than fail */
-	if (cnt->conf.mpegpath)
-		mpegpath = cnt->conf.mpegpath;
+	if (cnt->conf.moviepath)
+		moviepath = cnt->conf.moviepath;
 	else
-		mpegpath = DEF_MPEGPATH;
+		moviepath = DEF_MOVIEPATH;
 
-	mystrftime(cnt, stamp, sizeof(stamp), mpegpath, currenttime_tm, NULL, 0);
+	mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tm, NULL, 0);
 
-	/* motion mpegs get the same name as normal mpegs plus an appended 'm' */
+	/* motion movies get the same name as normal movies plus an appended 'm' */
 	/* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
 	snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
 	snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);

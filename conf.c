@@ -56,7 +56,7 @@ struct config conf_template = {
 	motion_img:            0,
 	output_all:            0,
 	gap:                   DEF_GAP,
-	maxmpegtime:           DEF_MAXMPEGTIME,
+	max_movie_time:        DEF_MAXMOVIETIME,
 	snapshot_interval:     0,
 	locate_motion:         "off",
 	input:                 IN_DEFAULT,
@@ -105,7 +105,7 @@ struct config conf_template = {
 	vidpipe:               NULL,
 	filepath:              NULL,
 	jpegpath:              DEF_JPEGPATH,
-	mpegpath:              DEF_MPEGPATH,
+	moviepath:             DEF_MOVIEPATH,
 	snappath:              DEF_SNAPPATH,
 	timepath:              DEF_TIMEPATH,
 	on_event_start:        NULL,
@@ -275,7 +275,7 @@ config_param config_params[] = {
 	{
 	"rotate",
 	"# Rotate image this number of degrees. The rotation affects all saved images as\n"
-	"# well as mpeg movies. Valid values: 0 (default = no rotation), 90, 180 and 270.",
+	"# well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.",
 	0,
 	CONF_OFFSET(rotate_deg),
 	copy_int,
@@ -533,7 +533,7 @@ config_param config_params[] = {
 	"# was detected that will be output at motion detection.\n"
 	"# Recommended range: 0 to 5 (default: 0)\n"
 	"# Do not use large values! Large values will cause Motion to skip video frames and\n"
-	"# cause unsmooth mpegs. To smooth mpegs use larger values of post_capture instead.",
+	"# cause unsmooth movies. To smooth movies use larger values of post_capture instead.",
 	0,
 	CONF_OFFSET(pre_capture),
 	copy_int,
@@ -552,18 +552,18 @@ config_param config_params[] = {
 	"# Gap is the seconds of no motion detection that triggers the end of an event\n"
 	"# An event is defined as a series of motion images taken within a short timeframe.\n"
 	"# Recommended value is 60 seconds (Default). The value 0 is allowed and disables\n"
-	"# events causing all Motion to be written to one single mpeg file and no pre_capture.",
+	"# events causing all Motion to be written to one single movie file and no pre_capture.",
 	0,
 	CONF_OFFSET(gap),
 	copy_int,
 	print_int
 	},
 	{
-	"max_mpeg_time",
-	"# Maximum length in seconds of an mpeg movie\n"
-	"# When value is exceeded a new mpeg file is created. (Default: 0 = infinite)",
+	"max_movie_time",
+	"# Maximum length in seconds of a movie\n"
+	"# When value is exceeded a new movie file is created. (Default: 0 = infinite)",
 	0,
-	CONF_OFFSET(maxmpegtime),
+	CONF_OFFSET(max_movie_time),
 	copy_int,
 	print_int
 	},
@@ -620,11 +620,11 @@ config_param config_params[] = {
 	"ffmpeg_cap_new",
 	"\n############################################################\n"
 	"# FFMPEG related options\n"
-	"# Film (mpeg) file output, and deinterlacing of the video input\n"
+	"# Film (movie) file output, and deinterlacing of the video input\n"
 	"# The options movie_filename and timelapse_filename are also used\n"
 	"# by the ffmpeg feature\n"
 	"############################################################\n\n"
-	"# Use ffmpeg to encode mpeg movies in realtime (default: off)",
+	"# Use ffmpeg to encode movies in realtime (default: off)",
 	0,
 	CONF_OFFSET(ffmpeg_cap_new),
 	copy_bool,
@@ -680,7 +680,7 @@ config_param config_params[] = {
 	{
 	"ffmpeg_video_codec",
 	"# Codec to used by ffmpeg for the video compression.\n"
-	"# Timelapse mpegs are always made in mpeg1 format independent from this option.\n"
+	"# Timelapse movies are always made in mpeg1 format independent from this option.\n"
 	"# Supported formats are: mpeg1 (ffmpeg-0.4.8 only), mpeg4 (default), and msmpeg4.\n"
 	"# mpeg1 - gives you files with extension .mpg\n"
 	"# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
@@ -794,7 +794,7 @@ config_param config_params[] = {
 	"target_dir",
 	"\n############################################################\n"
 	"# Target Directories and filenames For Images And Films\n"
-	"# For the options snapshot_, jpeg_, mpeg_ and timelapse_filename\n"
+	"# For the options snapshot_, jpeg_, movie_ and timelapse_filename\n"
 	"# you can use conversion specifiers\n"
 	"# %Y = year, %m = month, %d = date,\n"
 	"# %H = hour, %M = minute, %S = second,\n"
@@ -843,20 +843,20 @@ config_param config_params[] = {
 #ifdef HAVE_FFMPEG
 	{
 	"movie_filename",
-	"# File path for motion triggered ffmpeg films (mpeg) relative to target_dir\n"
-	"# Default: "DEF_MPEGPATH"\n"
+	"# File path for motion triggered ffmpeg films (movies) relative to target_dir\n"
+	"# Default: "DEF_MOVIEPATH"\n"
 	"# Default value is equivalent to legacy oldlayout option\n"
 	"# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S\n"
 	"# File extension .mpg or .avi is automatically added so do not include this\n"
 	"# This option was previously called ffmpeg_filename",
 	0,
-	CONF_OFFSET(mpegpath),
+	CONF_OFFSET(moviepath),
 	copy_string,
 	print_string
 	},
 	{
 	"timelapse_filename",
-	"# File path for timelapse mpegs relative to target_dir\n"
+	"# File path for timelapse movies relative to target_dir\n"
 	"# Default: "DEF_TIMEPATH"\n"
 	"# Default value is near equivalent to legacy oldlayout option\n"
 	"# For Motion 3.0 compatible mode choose: %Y/%m/%d-timelapse\n"
@@ -1203,7 +1203,7 @@ config_param config_params[] = {
 	},
 	{
 	"sql_log_timelapse",
-	"# Log to the database when creating timelapse mpeg file (default: off)",
+	"# Log to the database when creating timelapse movie file (default: off)",
 	0,
 	CONF_OFFSET(sql_log_timelapse),
 	copy_bool,

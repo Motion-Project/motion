@@ -63,7 +63,7 @@ norm 0
 frequency 0
 
 # Rotate image this number of degrees. The rotation affects all saved images as
-# well as mpeg movies. Valid values: 0 (default = no rotation), 90, 180 and 270.
+# well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.
 rotate 0
 
 # Image width (pixels). Valid range: Camera dependent, default: 352
@@ -191,7 +191,7 @@ minimum_motion_frames 1
 # was detected that will be output at motion detection.
 # Recommended range: 0 to 5 (default: 0)
 # Do not use large values! Large values will cause Motion to skip video frames and
-# cause unsmooth mpegs. To smooth mpegs use larger values of post_capture instead.
+# cause unsmooth movies. To smooth movies use larger values of post_capture instead.
 pre_capture 0
 
 # Number of frames to capture after motion is no longer detected (default: 0)
@@ -200,12 +200,12 @@ post_capture 0
 # Gap is the seconds of no motion detection that triggers the end of an event
 # An event is defined as a series of motion images taken within a short timeframe.
 # Recommended value is 60 seconds (Default). The value 0 is allowed and disables
-# events causing all Motion to be written to one single mpeg file and no pre_capture.
+# events causing all Motion to be written to one single movie file and no pre_capture.
 gap 60
 
-# Maximum length in seconds of an mpeg movie
-# When value is exceeded a new mpeg file is created. (Default: 0 = infinite)
-max_mpeg_time 0
+# Maximum length in seconds of a movie
+# When value is exceeded a new movie file is created. (Default: 0 = infinite)
+max_movie_time 0
 
 # Always save images even if there was no motion (default: off)
 output_all off
@@ -235,12 +235,12 @@ ppm off
 
 ############################################################
 # FFMPEG related options
-# Film (mpeg) file output, and deinterlacing of the video input
+# Film (movies) file output, and deinterlacing of the video input
 # The options movie_filename and timelapse_filename are also used
 # by the ffmpeg feature
 ############################################################
 
-# Use ffmpeg to encode mpeg movies in realtime (default: off)
+# Use ffmpeg to encode movies in realtime (default: off)
 ffmpeg_cap_new on
 
 # Use ffmpeg to make movies with only the pixels moving
@@ -339,7 +339,7 @@ text_double off
 
 ############################################################
 # Target Directories and filenames For Images And Films
-# For the options snapshot_, jpeg_, mpeg_ and timelapse_filename
+# For the options snapshot_, jpeg_, movie_ and timelapse_filename
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
@@ -373,7 +373,7 @@ snapshot_filename %v-%Y%m%d%H%M%S-snapshot
 # convention for preview shots. See motion guide for details
 jpeg_filename %v-%Y%m%d%H%M%S-%q
 
-# File path for motion triggered ffmpeg films (mpeg) relative to target_dir
+# File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
 # Default value is equivalent to legacy oldlayout option
 # For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S
@@ -381,7 +381,7 @@ jpeg_filename %v-%Y%m%d%H%M%S-%q
 # This option was previously called ffmpeg_filename
 movie_filename %v-%Y%m%d%H%M%S
 
-# File path for timelapse mpegs relative to target_dir
+# File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
 # Default value is near equivalent to legacy oldlayout option
 # For Motion 3.0 compatible mode choose: %Y/%m/%d-timelapse
@@ -552,7 +552,7 @@ sql_log_snapshot on
 # Log to the database when creating motion triggered movie file (default: off)
 sql_log_movie off
 
-# Log to the database when creating timelapse mpeg file (default: off)
+# Log to the database when creating timelapse movies file (default: off)
 sql_log_timelapse off
 
 # SQL query string that is sent to the database
