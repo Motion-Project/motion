@@ -155,7 +155,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 {
 	char *s;
 	int i;
-	const char *re = "(http|ftp)://(((.*):(.*))@)?"
+	const char *re = "(http|ftp|mjpg)://(((.*):(.*))@)?"
 	                 "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^:]*))";
 	regex_t pattbuf;
 	regmatch_t matches[10];
@@ -297,7 +297,7 @@ static void check_quote(char *str)
  */
 static long netcam_check_content_length(char *header)
 {
-	long length=-1;	/* note this is a long, not an int */
+	long length = -1;	/* note this is a long, not an int */
 
 	if (!header_process(header, "Content-Length", header_extract_number, &length)) {
 		/*
@@ -387,6 +387,7 @@ static int netcam_check_close(char *header)
  *      0               Content-type not recognized
  *      1               image/jpeg
  *      2               multipart/x-mixed-replace or multipart/mixed
+ *      3               application/octet-stream (used by WVC200 Linksys IP Camera)
  *
  */
 static int netcam_check_content_type(char *header)
@@ -402,6 +403,8 @@ static int netcam_check_content_type(char *header)
 	} else if (!strcmp(content_type, "multipart/x-mixed-replace") ||
 	           !strcmp(content_type, "multipart/mixed")) {
 		ret = 2;
+	} else if (!strcmp(content_type, "application/octet-stream")) {
+		ret = 3;
 	} else
 		ret = 0;
 
@@ -446,7 +449,7 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
 	 * If this is a "streaming" camera, the stream header must be
 	 * preceded by a "boundary" string
 	 */
-	if (netcam->caps.streaming) {
+	if (netcam->caps.streaming == NCS_MULTIPART) {
 		while (1) {
 			retval = header_get(netcam, &header, HG_NONE);
 
@@ -624,14 +627,14 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 						else
 							motion_log(LOG_DEBUG, 0, "Non-streaming camera (keep-alive not set)");
 					}
-					netcam->caps.streaming = 0;
+					netcam->caps.streaming = NCS_UNSUPPORTED;
 					break;
 
 				case 2:         /* streaming */
 					if (SETUP)
 						motion_log(LOG_DEBUG, 0, "Streaming camera");
 
-					netcam->caps.streaming = 1;
+					netcam->caps.streaming = NCS_MULTIPART;
 
 					if ((boundary = strstr(header, "boundary="))) {
 						/*
@@ -657,6 +660,11 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 						}
 					}
 					break;
+				case 3:        /* MJPG-Block style streaming */
+					if (SETUP)
+						motion_log(LOG_DEBUG, 0, "Streaming camera probably using MJPG-blocks,"
+						           " consider using mjpg:// netcam_url.");
+					break;
 
 				default:{       /* error */
 						motion_log(LOG_ERR, 0, "Unrecognized content type");
@@ -672,13 +680,13 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 			netcam->receiving->content_length = ret;
 		} else if (netcam_check_keepalive(header) == TRUE) {
 			/* Note that we have received a Keep-Alive header, and thus the socket can be left open */
-			aliveflag=TRUE;
+			aliveflag = TRUE;
 			netcam->keepalive_thisconn = TRUE;
 			/* This flag will not be set when a Streaming cam is in use, but that */
 			/* does not matter as the test below looks at Streaming state also.   */
 		} else if (netcam_check_close(header) == TRUE) {
 			/* Note that we have received a Connection: close header */
-			closeflag=TRUE;
+			closeflag = TRUE;
 			/* This flag is acted upon below */
 			if (debug_level > CAMERA_INFO) /* Changed criterion and moved up from below to catch headers that cause returns */
 				motion_log(LOG_DEBUG, 0, "Found Conn:close header ('%s')", header);
@@ -687,7 +695,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 	}
 	free(header);
 
-	if (!netcam->caps.streaming && netcam->connect_keepalive) {
+	if (netcam->caps.streaming == NCS_UNSUPPORTED && netcam->connect_keepalive) {
 		
 		/*
 		 * If we are a non-streaming (ie. Jpeg) netcam and keepalive is configured 
@@ -774,7 +782,6 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
  */
 static void netcam_disconnect(netcam_context_ptr netcam)
 {
-
 	if (netcam->sock > 0) {
 		if (close(netcam->sock) < 0)
 			motion_log(LOG_ERR, 1, "netcam_disconnect");
@@ -826,46 +833,47 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 		}
 		if (debug_level > CAMERA_INFO )
 			motion_log(LOG_DEBUG, 0, "netcam_connect with no keepalive, new socket created fd %d", netcam->sock);
-	} else {       /* We are in keepalive mode, check for invalid socket */
-		if (netcam->sock == -1) {
-			/* Must be first time, or closed, create a new socket */
-			if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-				motion_log(LOG_ERR, 1, "netcam_connect with keepalive set, invalid socket." 
-				                       "This could be the first time. Creating a new one failed.");
-				return -1;
-			}
-			if (debug_level > CAMERA_INFO )
-				motion_log(LOG_DEBUG, 0, "netcam_connect with keepalive set, invalid socket."
-				                         "This could be first time, created a new one with fd %d", netcam->sock);
 
-			/* Record that this connection has not yet received a Keep-Alive header */
-			netcam->keepalive_thisconn = FALSE;
-
-			/* Check the socket status for the keepalive option */
-			if (getsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
-				motion_log(LOG_ERR, 1, "netcam_connect : getsockopt()");
-				return -1;
-			}
-			if (debug_level > CAMERA_INFO) {
-				if (optval == 1)	
-					motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is ON");
-				else
-					motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is OFF");
-			}
-	
-			/* Set the option active */
-			optval = 1;
-			optlen = sizeof(optval);
-			if(setsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
-				motion_log(LOG_ERR, 1, "netcam_connect : setsockopt()");
-				return -1;
-			}
-			if (debug_level > CAMERA_INFO )
-				motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE set on socket.");
-		} else if (debug_level > CAMERA_INFO ) {
-			motion_log(LOG_DEBUG, 0, "netcam_connect re-using socket %d since keepalive is set.", netcam->sock);
+	} else if (netcam->sock == -1) {   /* We are in keepalive mode, check for invalid socket */
+		/* Must be first time, or closed, create a new socket */
+		if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+			motion_log(LOG_ERR, 1, "netcam_connect with keepalive set, invalid socket." 
+			                       "This could be the first time. Creating a new one failed.");
+			return -1;
 		}
+		if (debug_level > CAMERA_INFO )
+			motion_log(LOG_DEBUG, 0, "netcam_connect with keepalive set, invalid socket."
+			                         "This could be first time, created a new one with fd %d", netcam->sock);
+
+		/* Record that this connection has not yet received a Keep-Alive header */
+		netcam->keepalive_thisconn = FALSE;
+
+		/* Check the socket status for the keepalive option */
+		if (getsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+			motion_log(LOG_ERR, 1, "netcam_connect : getsockopt()");
+			return -1;
+		}
+		if (debug_level > CAMERA_INFO) {
+			if (optval == 1)	
+				motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is ON");
+			else
+				motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE is OFF");
+		}
+
+		/* Set the option active */
+		optval = 1;
+		optlen = sizeof(optval);
+		if(setsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
+			motion_log(LOG_ERR, 1, "netcam_connect : setsockopt()");
+			return -1;
+		}
+		if (debug_level > CAMERA_INFO )
+			motion_log(LOG_DEBUG, 0, "netcam_connect: SO_KEEPALIVE set on socket.");
+
+	} else if (debug_level > CAMERA_INFO ) {
+			motion_log(LOG_DEBUG, 0, "netcam_connect re-using socket %d since keepalive is set.", netcam->sock);
 	}
+	
 
 	/* lookup the hostname given in the netcam URL */
 	if ((ret = getaddrinfo(netcam->connect_host, NULL, NULL, &res)) != 0) {
@@ -983,16 +991,29 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
  */
 static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 {
+	int min_size_to_alloc;
+	int real_alloc;
+	int new_size;
+
 	if ((buff->size - buff->used) >= numbytes)
 		return;
 
-	if (debug_level > CAMERA_INFO)
-		motion_log(-1, 0, "expanding buffer from %d to %d bytes",
-		           (int) buff->size, (int) buff->size + NETCAM_BUFFSIZE);
+	min_size_to_alloc = numbytes - (buff->size - buff->used);
+	real_alloc = ((min_size_to_alloc / NETCAM_BUFFSIZE) * NETCAM_BUFFSIZE);
 
-	buff->ptr = myrealloc(buff->ptr, buff->size + NETCAM_BUFFSIZE,
+	if ((min_size_to_alloc - real_alloc) > 0)
+		real_alloc += NETCAM_BUFFSIZE;
+
+	new_size = buff->size + real_alloc;
+	
+	if (debug_level > CAMERA_INFO)
+		motion_log(-1, 0, "expanding buffer from [%d/%d] to [%d/%d] bytes.",
+		           (int) buff->used, (int) buff->size,
+		           (int) buff->used, new_size);
+
+	buff->ptr = myrealloc(buff->ptr, new_size,
 	                      "netcam_check_buf_size");
-	buff->size += NETCAM_BUFFSIZE;
+	buff->size = new_size;
 }
 
 /**
@@ -1281,7 +1302,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 
 	pthread_mutex_unlock(&netcam->mutex);
 
-	if (!netcam->caps.streaming) {
+	if (netcam->caps.streaming == NCS_UNSUPPORTED) {
 		if (!netcam->connect_keepalive) {
 			if (debug_level > CAMERA_INFO )
 	 			motion_log(LOG_DEBUG, 0, "netcam_read_html_jpeg disconnecting netcam since keep-alive not set." );
@@ -1290,6 +1311,276 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 			motion_log(LOG_DEBUG, 0, "netcam_read_html_jpeg leaving netcam connected." );
 		}
 	}
+
+	return 0;
+}
+
+/**
+ * netcam_http_request
+ *
+ * This routine initiates a connection on the specified netcam,
+ * for which every parameter has already been set (url, etc).
+ * It uses the HTTP protocol, which is what many IP cameras use.
+ * If this function succeeds, the HTTP response along with the
+ * headers are already processed, and you can start reading contents
+ * from here.
+ *
+ * Parameters:
+ *      netcam          Pointer to a netcam_context structure
+ *
+ * Returns:             0 on success, -1 if an error occurs.
+ */
+static int netcam_http_request(netcam_context_ptr netcam)
+{
+	int ix;
+
+	/*
+	 * Our basic initialisation has been completed.  Now we will attempt
+	 * to connect with the camera so that we can then get a "header"
+	 * in order to find out what kind of camera we are dealing with,
+	 * as well as what are the picture dimensions.  Note that for
+	 * this initial connection, any failure will cause an error
+	 * return from netcam_start (unlike later possible attempts at
+	 * re-connecting, if the network connection is later interrupted).
+	 */
+	for (ix = 0; ix < MAX_HEADER_RETRIES; ix++) {
+		/*
+		 * netcam_connect does an automatic netcam_close, so it's
+		 * safe to include it as part of this loop
+		 * (Not always true now Keep-Alive is implemented)
+		 */
+		if (debug_level > CAMERA_INFO)
+			motion_log(-1, 0, "netcam_http_request: about to try to connect, time #%d", ix );
+		if (netcam_connect(netcam, 0) != 0) {
+			motion_log(LOG_ERR, 0, "Failed to open camera - check your config and that netcamera is online");
+
+			/* Fatal error on startup */
+			ix = MAX_HEADER_RETRIES;
+			break;;
+		}
+
+		if (netcam_read_first_header(netcam) >= 0)
+			break;
+
+		motion_log(LOG_ERR, 0, "Error reading first header - re-trying");
+	}
+
+	if (ix == MAX_HEADER_RETRIES) {
+		motion_log(LOG_ERR, 0, "Failed to read first camera header - giving up for now");
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
+ * netcam_mjpg_buffer_refill
+ *
+ * This routing reads content from the MJPG-camera until the response
+ * buffer of the specified netcam_context is full. If the connection is
+ * lost during this operation, it tries to re-connect.
+ *
+ * Parameters:
+ *      netcam          Pointer to a netcam_context structure
+ *
+ * Returns:             The number of read bytes,
+ *                      or -1 if an fatal connection error occurs.
+ */
+static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
+{
+	int retval;
+
+	if (netcam->response->buffer_left > 0)
+		return netcam->response->buffer_left;
+	while (1) {
+		retval = rbuf_read_bufferful(netcam);
+		if (retval <= 0) { /* If we got 0, we timeoutted. */
+			motion_log(-1, 0, "netcam_mjpg_buffer_refill: Read error, trying to reconnect..");
+			/* We may have lost the connexion */
+			if (netcam_http_request(netcam) < 0) {
+				motion_log(-1, 0, "netcam_mjpg_buffer_refill: lost the cam.");
+				return -1; /* We REALLY lost the cam... bail out for now. */
+			}
+		}
+		if (retval > 0)
+			break;
+	}
+
+	netcam->response->buffer_left = retval;
+	netcam->response->buffer_pos = netcam->response->buffer;
+	
+	motion_log(LOG_DEBUG, 0, "Refilled buffer with [%d] bytes from the network.", retval); 
+
+	return retval;
+}
+
+/**
+ * netcam_read_mjpg_jpeg
+ *
+ *     This routine reads from a netcam using a MJPG-chunk based 
+ *     protocol, used by Linksys WVC200 for example.
+ *     This implementation has been made by reverse-engineering
+ *     the protocol, so it may contain bugs and should be considered as
+ *     experimental.
+ *
+ * Protocol explanation:
+ *
+ *     The stream consists of JPG pictures, spanned across multiple
+ *     MJPG chunks (in general 3 chunks, altough that's not guaranteed).
+ * 
+ *     Each data chunk can range from 1 to 65535 bytes + a header, altough
+ *     i have not seen anything bigger than 20000 bytes + a header.
+ *
+ *     One MJPG chunk is constituted by a header plus the chunk data.
+ *     The chunk header is of fixed size, and the following data size
+ *     and position in the frame is specified in the chunk header.
+ *
+ *     From what i have seen on WVC200 cameras, the stream always begins
+ *     on JPG frame boundary, so you don't have to worry about beginning
+ *     in the middle of a frame.
+ *
+ *     See netcam.h for the mjpg_header structure and more details.
+ *
+ * Parameters:
+ *      netcam          Pointer to a netcam_context structure
+ *
+ * Returns:             0 if an image was obtained from the camera,
+ *                      or -1 if an error occurred.
+ */
+static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
+{
+	netcam_buff_ptr buffer;
+	netcam_buff *xchg;
+	struct timeval curtime;
+	mjpg_header mh;
+	size_t read_bytes;
+	int retval;
+
+	/*
+	 * Initialisation - set our local pointers to the context
+	 * information
+	 */
+	buffer = netcam->receiving;
+	/* Assure the target buffer is empty */
+	buffer->used = 0;
+
+	if (netcam_mjpg_buffer_refill(netcam) < 0)
+		return -1;
+
+	/* Loop until we have a complete JPG. */
+	while (1) {
+		read_bytes = 0;
+		while (read_bytes < sizeof(mh)) {
+
+			/* Transfer what we have in buffer in the header structure */
+			retval = rbuf_flush(netcam, ((char *)&mh) + read_bytes, sizeof(mh) - read_bytes);
+
+			read_bytes += retval;
+			if (debug_level > CAMERA_INFO) 
+				motion_log(-1, 0, "Read [%d/%d] header bytes.", read_bytes, sizeof(mh));
+
+
+			/* If we don't have received a full header, refill our buffer. */
+			if (read_bytes < sizeof(mh)) {
+				if (netcam_mjpg_buffer_refill(netcam) < 0)
+					return -1;
+			}
+		}
+
+		/* Now check the validity of our header. */
+		if (strncmp(mh.mh_magic, MJPG_MH_MAGIC, MJPG_MH_MAGIC_SIZE)) {
+			if (debug_level > CAMERA_INFO) 
+				motion_log(-1, 0, "Invalid header received, reconnecting");
+
+
+			/*
+			 * We shall reconnect to restart the stream, and get a chance
+			 * to resync.
+			 */
+			if (netcam_http_request(netcam) < 0)
+				return -1; /* We lost the cam... bail out. */
+			/* Even there, we need to resync. */
+			buffer->used = 0;
+			continue ;
+		}
+
+		/* Make room for the chunk. */
+		netcam_check_buffsize(buffer, (int) mh.mh_chunksize);
+
+		read_bytes = 0;
+		while (read_bytes < mh.mh_chunksize) {
+			retval = rbuf_flush(netcam, buffer->ptr + buffer->used + read_bytes,
+			                    mh.mh_chunksize - read_bytes);
+			read_bytes += retval;
+			if (debug_level > CAMERA_INFO) 
+				motion_log(-1, 0, "Read [%d/%d] chunk bytes, [%d/%d] total",
+				           read_bytes, mh.mh_chunksize, buffer->used + read_bytes,
+				           mh.mh_framesize);
+
+			if (retval < (int)(mh.mh_chunksize - read_bytes)){
+				/* motion_log(-1, 0, "Chunk incomplete, going to refill."); */
+				if (netcam_mjpg_buffer_refill(netcam) < 0){
+					return -1;
+				}
+			}
+		}
+		buffer->used += read_bytes;
+
+		if (debug_level > CAMERA_INFO) 
+			motion_log(-1, 0, "Chunk complete, buffer used [%d] bytes.", buffer->used); 
+
+
+		/* Is our JPG image complete ? */
+		if (mh.mh_framesize == buffer->used) {
+
+			if (debug_level > CAMERA_INFO) 
+				motion_log(-1, 0, "Image complete, buffer used [%d] bytes.", buffer->used);
+
+			break;	
+		}
+			/* motion_log(LOG_ERR, 0, " -> Rlen now at [%d] bytes", rlen); */
+	}
+
+	/*
+	 * read is complete - set the current 'receiving' buffer atomically
+	 * as 'latest', and make the buffer previously in 'latest' become
+	 * the new 'receiving'
+	 */
+	if (gettimeofday(&curtime, NULL) < 0) {
+		motion_log(LOG_ERR, 1, "gettimeofday in netcam_read_jpeg");
+	}
+
+	netcam->receiving->image_time = curtime;
+
+	/*
+	 * Calculate our "running average" time for this netcam's
+	 * frame transmissions (except for the first time).
+	 * Note that the average frame time is held in microseconds.
+	 */
+	if (netcam->last_image.tv_sec) {
+		netcam->av_frame_time = (9.0 * netcam->av_frame_time +
+		                         1000000.0 * (curtime.tv_sec - netcam->last_image.tv_sec) +
+		                         (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
+
+		if (debug_level > CAMERA_INFO) 
+			motion_log(-1, 0, "Calculated frame time %f", netcam->av_frame_time);
+	}
+	netcam->last_image = curtime;
+
+	pthread_mutex_lock(&netcam->mutex);
+
+	xchg = netcam->latest;
+	netcam->latest = netcam->receiving;
+	netcam->receiving = xchg;
+	netcam->imgcnt++;
+	/*
+	 * We have a new frame ready.  We send a signal so that
+	 * any thread (e.g. the motion main loop) waiting for the
+	 * next frame to become available may proceed.
+	 */
+	pthread_cond_signal(&netcam->pic_ready);
+
+	pthread_mutex_unlock(&netcam->mutex);
 
 	return 0;
 }
@@ -1509,7 +1800,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 }
 
 
-tfile_context *file_new_context(void) {
+tfile_context *file_new_context(void) 
+{
 	tfile_context *ret;
 
 	/* note that mymalloc will exit on any problem */
@@ -1521,7 +1813,8 @@ tfile_context *file_new_context(void) {
 	return ret;
 }
 
-void file_free_context(tfile_context* ctxt) {
+void file_free_context(tfile_context* ctxt) 
+{
 	if (ctxt == NULL)
 		return;
 
@@ -1531,7 +1824,8 @@ void file_free_context(tfile_context* ctxt) {
 	free(ctxt);
 }
 
-static int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url) {
+static int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url) 
+{
 
 	if ((netcam->file = file_new_context()) == NULL)
 		return -1;
@@ -1595,7 +1889,7 @@ static void *netcam_handler_loop(void *arg)
 
 	while (!netcam->finish) {
 		if (netcam->response) {    /* if html input */
-			if (!netcam->caps.streaming) {
+			if (netcam->caps.streaming == NCS_UNSUPPORTED) {
 				/* Non-streaming ie. jpeg */
 				if (!netcam->connect_keepalive || (netcam->connect_keepalive && netcam->keepalive_timeup)) {
 					/* If keepalive flag set but time up, time to close this socket */
@@ -1632,7 +1926,7 @@ static void *netcam_handler_loop(void *arg)
 					/* need to have a dynamic delay here */
 					continue;
 				}
-			} else {	/* Streaming */
+			} else if (netcam->caps.streaming == NCS_MULTIPART) {	/* Multipart Streaming */
 				if (netcam_read_next_header(netcam) < 0) {
 					if (netcam_connect(netcam, open_error) < 0) {
 						if (!open_error) { /* log first error */
@@ -1662,6 +1956,11 @@ static void *netcam_handler_loop(void *arg)
 					    "camera re-connected");
 					open_error = 0;
 				}
+			} else if (netcam->caps.streaming == NCS_BLOCK) { /* MJPG-Block streaming */
+				/*
+				 * Since we cannot move in the stream here, because we will read past the
+				 * MJPG-block-header, error handling is done while reading MJPG blocks.
+				 */
 			}
 		}
 		if (netcam->get_image(netcam) < 0) {
@@ -1685,7 +1984,7 @@ static void *netcam_handler_loop(void *arg)
 		 * If non-streaming, want to synchronize our thread with the
 		 * motion main-loop.
 		 */
-		if (!netcam->caps.streaming) {
+		if (netcam->caps.streaming == NCS_UNSUPPORTED) {
 			pthread_mutex_lock(&netcam->mutex);
 
 			/* before anything else, check for system shutdown */
@@ -1732,7 +2031,23 @@ static void *netcam_handler_loop(void *arg)
 	pthread_exit(NULL);
 }
 
-static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
+/**
+ * netcam_http_build_url
+ *
+ * This routing takes care of the url-processing part of the http protocol.
+ * This includes url scheme and parsing, proxy handling, http-authentication
+ * preparation, response buffer allocation and so on. At the end of this
+ * routine, we are ready to call netcam_http_request().
+ *
+ * Parameters:
+ *      netcam          Pointer to a netcam_context structure
+ *      url             Pointer to a netcam url structure
+ *
+ * Returns:             0 on success,
+ *                      or -1 if an fatal error occurs.
+ */
+static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url) 
+{
 	struct context *cnt = netcam->cnt;
 	const char *ptr;                  /* working var */
 	char *userpass;                   /* temp pointer to config value */
@@ -1745,7 +2060,7 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 	memset(netcam->response, 0, sizeof(struct rbuf));
 
 	if (debug_level > CAMERA_INFO)
-		motion_log(LOG_INFO, 0, "netcam_setup_html: Netcam has flags: HTTP1.0: %s HTTP1.1: %s Keep-Alive %s.", 
+		motion_log(LOG_INFO, 0, "netcam_http_build_url: Netcam has flags: HTTP1.0: %s HTTP1.1: %s Keep-Alive %s.", 
 		                        netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
 		                        netcam->connect_keepalive ? "ON":"OFF");
 
@@ -1886,48 +2201,44 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 		motion_log(-1, 0, "Camera connect string is ''%s''", netcam->connect_request);
 		motion_log(-1, 0, "End of camera connect string.");
 	}
+	return 0;
+}
+
+/**
+ * netcam_setup_html
+ *      This function will parse the netcam url, connect to the camera,
+ *      set its type to jpeg-based, detect multipart and keep-alive,
+ *      and the get_image method accordingly. The cam can be non-streaming
+ *      or multipart-streaming.
+ *
+ * Parameters
+ *
+ *      netcam  Pointer to the netcam_context for the camera
+ *      url     Pointer to the url of the camera
+ *
+ * Returns:     0 on success (camera link ok) or -1 if an error occurred.
+ *
+ */
+static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) 
+{
+	/*
+	 * This netcam is http-based, so build the required URL and
+	 * structures, like the connection-string and so on.
+	 */
+	if (netcam_http_build_url(netcam, url) < 0)
+		return -1;
 
 	/*
-	 * Our basic initialisation has been completed.  Now we will attempt
-	 * to connect with the camera so that we can then get a "header"
-	 * in order to find out what kind of camera we are dealing with,
-	 * as well as what are the picture dimensions.  Note that for
-	 * this initial connection, any failure will cause an error
-	 * return from netcam_start (unlike later possible attempts at
-	 * re-connecting, if the network connection is later interrupted).
+	 * Then we will send our http request and get headers.
 	 */
-	for (ix = 0; ix < MAX_HEADER_RETRIES; ix++) {
-		/*
-		 * netcam_connect does an automatic netcam_close, so it's
-		 * safe to include it as part of this loop
-		 * (Not always true now Keep-Alive is implemented)
-		 */
-		if (debug_level > CAMERA_INFO)
-			motion_log(-1, 0, "netcam_setup_html: about to try to connect, time #%d", ix );
-		if (netcam_connect(netcam, 0) != 0) {
-			motion_log(LOG_ERR, 0, "Failed to open camera - check your config and that netcamera is online");
-
-			/* Fatal error on startup */
-			ix = MAX_HEADER_RETRIES;
-			break;;
-		}
-
-		if (netcam_read_first_header(netcam) >= 0)
-			break;
-
-		motion_log(LOG_ERR, 0, "Error reading first header - re-trying");
-	}
-
-	if (ix == MAX_HEADER_RETRIES) {
-		motion_log(LOG_ERR, 0, "Failed to read first camera header - giving up for now");
-		return -1;
-	}
+	if (netcam_http_request(netcam) < 0)
+ 		return -1;
 
 	/*
 	 * If this is a streaming camera, we need to position just
 	 * past the boundary string and read the image header
 	 */
-	if (netcam->caps.streaming) {
+	if (netcam->caps.streaming == NCS_MULTIPART) {
 		if (netcam_read_next_header(netcam) < 0) {
 			motion_log(LOG_ERR, 0,
 			           "Failed to read first stream header - giving up for now");
@@ -1936,12 +2247,57 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
 	}
 
 	if (debug_level > CAMERA_INFO)
-		motion_log(-1, 0, "netcam_setup_html: connected, going on to read image.", ix );
+		motion_log(-1, 0, "netcam_setup_html: connected, going on to read image.");
 	netcam->get_image = netcam_read_html_jpeg;
 	return 0;
 }
 
-static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url) {
+/**
+ * netcam_setup_mjpg
+ *      This function will parse the netcam url, connect to the camera,
+ *      set its type to MJPG-Streaming, and the get_image method accordingly.
+ *
+ * Parameters
+ *
+ *      netcam  Pointer to the netcam_context for the camera
+ *      url     Pointer to the url of the camera
+ *
+ * Returns:     0 on success (camera link ok) or -1 if an error occurred.
+ *
+ */
+static int netcam_setup_mjpg(netcam_context_ptr netcam, struct url_t *url)
+{
+	/*
+	 * This netcam is http-based, so build the required URL and
+	 * structures, like the connection-string and so on.
+	 */
+	if (netcam_http_build_url(netcam, url) != 0)
+		return -1;
+
+	/*
+	 * Then we will send our http request and get headers.
+	 */
+	if (netcam_http_request(netcam) < 0)
+		return -1;
+
+	/*
+	 * We have a special type of streaming camera
+	 */
+	netcam->caps.streaming = NCS_BLOCK;
+
+	/*
+	 * We are positionned right just at the start of the first MJPG
+	 * header, so don't move anymore, initialization complete.
+	 */
+	if (debug_level > CAMERA_INFO)
+		motion_log(-1, 0, "netcam_setup_mjpg: connected, going on to read and decode MJPG chunks.");
+	netcam->get_image = netcam_read_mjpg_jpeg;
+
+	return 0;
+}
+
+static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url) 
+{
 	struct context *cnt = netcam->cnt;
 	const char *ptr;
 
@@ -2012,10 +2368,14 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url) {
  *      error reply from the system call.
  *
  */
-ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize) {
+ssize_t netcam_recv(netcam_context_ptr netcam, void *buffptr, size_t buffsize) 
+{
 	ssize_t retval;
 	fd_set fd_r;
 	struct timeval selecttime;
+
+	if (netcam->sock < 0)
+		return -1; /* We are not connected, it's impossible to receive data. */
 
 	FD_ZERO(&fd_r);
 	FD_SET(netcam->sock, &fd_r);
@@ -2089,7 +2449,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
 	 * netcam->mutex locked.
 	 */
 
-	if (!netcam->caps.streaming) {
+	if (netcam->caps.streaming == NCS_UNSUPPORTED) {
 		pthread_cond_signal(&netcam->cap_cond);
 	}
 
@@ -2219,7 +2579,7 @@ int netcam_next(struct context *cnt, unsigned char *image)
 	 * motion main-loop with the camera-handling thread through a signal,
 	 * together with a flag to say "start your next capture".
 	 */
-	if (!netcam->caps.streaming) {
+	if (netcam->caps.streaming == NCS_UNSUPPORTED) {
 		pthread_mutex_lock(&netcam->mutex);
 		netcam->start_capture = 1;
 		pthread_cond_signal(&netcam->cap_cond);
@@ -2396,9 +2756,14 @@ int netcam_start(struct context *cnt)
 		if (debug_level > CAMERA_INFO)
 			motion_log(-1, 0, "netcam_start: now calling netcam_setup_file()");
 		retval = netcam_setup_file(netcam, &url);
+	} else if ((url.service) && (!strcmp(url.service, "mjpg")) ) {
+		if (debug_level > CAMERA_INFO)
+			motion_log(-1, 0, "netcam_start: now calling netcam_setup_mjpg()");
+		strcpy(url.service, "http"); /* Put back a real URL service. */
+		retval = netcam_setup_mjpg(netcam, &url);
 	} else {
 		motion_log(LOG_ERR, 0, "Invalid netcam service  '%s' - "
-		                       "must be http or ftp", url.service);
+		                       "must be http, ftp, mjpg or file.", url.service);
 		netcam_url_free(&url);
 		return -1;
 	}

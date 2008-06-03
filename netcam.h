@@ -102,6 +102,10 @@ typedef struct file_context {
 	time_t    last_st_mtime;       /* time this image was modified */
 } tfile_context;
 
+#define NCS_UNSUPPORTED         0  /* streaming is not supported */
+#define NCS_MULTIPART           1  /* streaming is done via multipart */
+#define NCS_BLOCK               2  /* streaming is done via MJPG-block */
+
 /*
  * struct netcam_context contains all the structures and other data
  * for an individual netcam.
@@ -202,7 +206,7 @@ typedef struct netcam_context {
 
 
 	struct netcam_caps {        /* netcam capabilities: */
-		unsigned char streaming;        /*  1 - supported       */
+		unsigned char streaming;        /*  See the NCS_* defines */
 		unsigned char content_length;   /*  0 - unsupported     */
 	} caps;
 
@@ -248,7 +252,28 @@ typedef struct netcam_context {
 	                               occurred during decompression*/
 } netcam_context;
 
+#define MJPG_MH_MAGIC          "MJPG"
+#define MJPG_MH_MAGIC_SIZE          4
 
+/*
+ * MJPG Chunk header for MJPG streaming.
+ * Little-endian data is read from the network.
+ */
+typedef struct {
+	char mh_magic[MJPG_MH_MAGIC_SIZE];     /* must contain the string MJP
+	                                          not null-terminated. */
+	unsigned int mh_framesize;             /* Total size of the current 
+	                                          frame in bytes (~45kb on WVC200) */
+	unsigned short mh_framewidth;          /* Frame width in pixels */
+	unsigned short mh_frameheight;         /* Frame height in pixels */
+	unsigned int mh_frameoffset;           /* Offset of this chunk relative
+	                                          to the beginning of frame. */
+	unsigned short mh_chunksize;           /* The size of the chunk data
+	                                          following this header. */
+	char mh_reserved[30];                  /* Unknown data, seems to be
+	                                          constant between all headers */
+} mjpg_header;
+ 
 /*
  * Declare prototypes for our external entry points
  */
