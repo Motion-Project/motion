@@ -350,7 +350,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 	unsigned short int i;
 	struct context **cnt = userdata;
 
-	warningkill = sscanf(pointer, "%256[a-z]%c", command , &question);
+	warningkill = sscanf(pointer, "%255[a-z]%c", command , &question);
 	if (!strcmp(command, "list")) {
 		pointer = pointer + 4;
 		length_uri = length_uri - 4;
@@ -459,7 +459,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 		if ((length_uri != 0) && (question == '?')) {
 			pointer++;
 			length_uri--;
-			warningkill = sscanf(pointer,"%256[-0-9a-z_]%c", command, &question);
+			warningkill = sscanf(pointer,"%255[-0-9a-z_]%c", command, &question);
 			/*check command , question == '='  length_uri too*/
 			if ((question == '=') && (command[0] != '\0')) {
 				length_uri = length_uri - strlen(command) - 1;
@@ -480,7 +480,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 				if (config_params[i].param_name) {
 					if (length_uri > 0) {
 						char Value[1024] = {'\0'};
-						warningkill = sscanf(pointer,"%1024s", Value);
+						warningkill = sscanf(pointer,"%1023s", Value);
 						length_uri = length_uri - strlen(Value);
 						if ( (length_uri == 0) && (strlen(Value) > 0) ) {
 							/* FIXME need to assure that is a valid value */
@@ -694,12 +694,12 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 			/* 8 -> query=param_name FIXME minimum length param_name */
 			pointer++;
 			length_uri--;
-			warningkill = sscanf(pointer,"%256[-0-9a-z]%c", command, &question);
+			warningkill = sscanf(pointer,"%255[-0-9a-z]%c", command, &question);
 
 			if ( (question == '=') && (!strcmp(command, "query")) ) {
 				pointer = pointer + 6;
 				length_uri = length_uri - 6;
-				warningkill = sscanf(pointer, "%256[-0-9a-z_]", command);
+				warningkill = sscanf(pointer, "%255[-0-9a-z_]", command);
 				/*check if command exist, length_uri too*/
 				length_uri = length_uri-strlen(command);
 
@@ -884,7 +884,7 @@ static unsigned short int action(char *pointer, char *res, unsigned short int le
 	struct context **cnt = userdata;
 	unsigned short int i = 0;
 
-	warningkill = sscanf(pointer, "%256[a-z]" , command);
+	warningkill = sscanf(pointer, "%255[a-z]" , command);
 	if (!strcmp(command, "makemovie")) {
 		pointer = pointer + 9;
 		length_uri = length_uri - 9;
@@ -1061,7 +1061,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 	struct context **cnt = userdata;
 	unsigned short int i = 0;
 
-	warningkill = sscanf(pointer, "%256[a-z]" , command);
+	warningkill = sscanf(pointer, "%255[a-z]" , command);
 	if (!strcmp(command, "status")) {
 		pointer = pointer + 6;
 		length_uri = length_uri - 6;
@@ -1224,7 +1224,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 	char command[256] = {'\0'};
 	struct context **cnt = userdata;
 
-	warningkill = sscanf(pointer, "%256[a-z]%c", command, &question);
+	warningkill = sscanf(pointer, "%255[a-z]%c", command, &question);
 	if (!strcmp(command, "set")) {
 		pointer = pointer+3;
 		length_uri = length_uri-3;
@@ -1244,7 +1244,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			/* set?x=value&y=value */
 			/* pan= or x= | tilt= or y= */
 
-			warningkill = sscanf(pointer, "%256[a-z]%c" , command, &question);
+			warningkill = sscanf(pointer, "%255[a-z]%c" , command, &question);
 
 			if (( question != '=' ) || (command[0] == '\0')) {
 				/* no valid syntax */
@@ -1460,7 +1460,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 
 			/* Check Second parameter */
 
-			warningkill = sscanf(pointer, "%c%256[a-z]" , &question, command);
+			warningkill = sscanf(pointer, "%c%255[a-z]" , &question, command);
 			if ( ( question != '&' ) || (command[0] == '\0') ) {
 				motion_log(LOG_WARNING, 0, "httpd debug race 4");
 				if ( strstr(pointer, "&")) {
@@ -1749,11 +1749,11 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			length_uri--;
 			/* value= */
 
-			warningkill = sscanf(pointer, "%256[a-z]%c", query, &question);
+			warningkill = sscanf(pointer, "%255[a-z]%c", query, &question);
 			if ((question == '=') && (!strcmp(query, "value")) ) {
 				pointer = pointer + 6;
 				length_uri = length_uri - 6;
-				warningkill = sscanf(pointer, "%256[-0-9a-z]" , command);
+				warningkill = sscanf(pointer, "%255[-0-9a-z]" , command);
 				if ((command != NULL) && (strlen(command) > 0)) {
 					struct context *autocnt;
 
@@ -1920,7 +1920,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 				} 
 
 				if (length_uri!=0) {
-					warningkill = sscanf(pointer, "%256[a-z]%c" , command , &slash);
+					warningkill = sscanf(pointer, "%255[a-z]%c" , command , &slash);
 
 					/* config */
 					if (!strcmp(command, "config")) {
@@ -2129,7 +2129,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 	unsigned short int alive = 1;
 	unsigned short int ret = 1;
 	char buffer[1024] = {'\0'};
-	unsigned short int length = 1024;
+	unsigned short int length = 1023;
 	struct context **cnt = userdata;
 
 	/* lock the mutex */
