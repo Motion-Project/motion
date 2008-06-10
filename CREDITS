@@ -395,6 +395,7 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134
    * Fixed stepper when is used track_auto on.
    * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr.
+   * Fix a security issue in web control interface http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484572
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
