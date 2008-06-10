@@ -2147,14 +2147,14 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			return 1;
 		}
 		else {
-			char method[20];
-			char url[512];
-			char protocol[20];
+			char method[10]={'\0'};
+			char url[512]={'\0'};
+			char protocol[10]={'\0'};
 			char *authentication=NULL;
 
 			buffer[nread] = '\0';
 
-			warningkill = sscanf(buffer, "%s %s %s", method, url, protocol);
+			warningkill = sscanf(buffer, "%9s %511s %9s", method, url, protocol);
 
 			while ((strstr(buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)) {
 				readb = read(client_socket, buffer+nread, sizeof (buffer) - nread);

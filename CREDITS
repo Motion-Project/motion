@@ -397,6 +397,7 @@ Angel Carpintero
    * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr.
    * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6
      (Jeroen Massar & Angel Carpintero)
+   * Fix a security issue in web control interface http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484572
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

@@ -9,6 +9,11 @@ Features
 
 Bugfixes
 
+3.2.10.1 Summary of Changes
+
+Bugfixes
+    * Fix a security issue in web control interface http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484572
+      (Angel Carpintero)
 
 3.2.10 Summary of Changes
 
