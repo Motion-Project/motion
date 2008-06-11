@@ -200,7 +200,7 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
 
 	/* If we have locate on it is already done */
 	if (cnt->locate_motion == LOCATE_PREVIEW) {
-		alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
+		alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
 	}
 }
 
@@ -382,7 +382,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 
 	/* Draw location */
 	if (cnt->locate_motion == LOCATE_ON)
-		alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
+		alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
 
 	/* Calculate how centric motion is if configured preview center*/
 	if (cnt->new_img & NEWIMG_CENTER) {

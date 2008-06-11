@@ -127,6 +127,12 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 		cent->miny = height - 1;
 	else if (cent->miny < 0)
 		cent->miny = 0;
+
+	/* Align for better locate box handling */
+	cent->minx += cent->minx % 2;
+	cent->miny += cent->miny % 2;
+	cent->maxx -= cent->maxx % 2;
+	cent->maxy -= cent->maxy % 2;
 	
 	cent->width = cent->maxx - cent->minx;
 	cent->height = cent->maxy - cent->miny;
@@ -182,6 +188,119 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 			int maxx_y = cent->maxx+y*width;
 			new[minx_y] =~new[minx_y];
 			new[maxx_y] =~new[maxx_y];
+		}
+	}
+}
+
+
+/* draw a RED box around the movement */
+void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int mode)
+{
+	unsigned char *out = imgs->out;
+	unsigned char *new_u, *new_v;
+	int x, y, v, cwidth, cblock;
+
+	cwidth = width / 2;
+	cblock = imgs->motionsize /4;
+	x = imgs->motionsize;
+	v = x + cblock;
+	out = imgs->out;
+	new_u = new + x;
+	new_v = new + v;
+
+	/* Draw a box around the movement */
+	if (mode == LOCATE_BOTH){ /* both normal and motion image gets a box */
+		int width_miny = width * cent->miny;
+		int width_maxy = width * cent->maxy;
+		int cwidth_miny = cwidth * (cent->miny / 2);
+		int cwidth_maxy = cwidth * (cent->maxy / 2);
+		
+		for (x = cent->minx + 2; x <= cent->maxx - 2; x += 2) {
+			int width_miny_x = x + width_miny;
+			int width_maxy_x = x + width_maxy;
+			int cwidth_miny_x = x / 2 + cwidth_miny;
+			int cwidth_maxy_x = x / 2 + cwidth_maxy;
+			new_u[cwidth_miny_x] = 128;
+			new_u[cwidth_maxy_x] = 128;
+			new_v[cwidth_miny_x] = 255;
+			new_v[cwidth_maxy_x] = 255;
+			new[width_miny_x] = 128;
+			new[width_maxy_x] = 128;
+			new[width_miny_x + 1] = 128;
+			new[width_maxy_x + 1] = 128;
+			new[width_miny_x + width] = 128;
+			new[width_maxy_x + width] = 128;
+			new[width_miny_x + 1 + width] = 128;
+			new[width_maxy_x + 1 + width] = 128;
+			out[width_miny_x] =~out[width_miny_x];
+			out[width_maxy_x + width] =~out[width_maxy_x + width];
+			out[width_miny_x + 1] =~out[width_miny_x + 1];
+			out[width_maxy_x + 1 + width] =~out[width_maxy_x + 1 + width];
+		}
+		for (y = cent->miny; y <= cent->maxy; y += 2) {
+			int width_minx_y = cent->minx + y * width; 
+			int width_maxx_y = cent->maxx + y * width;
+			int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth; 
+			int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
+			new_u[cwidth_minx_y] = 128;
+			new_u[cwidth_maxx_y] = 128;
+			new_v[cwidth_minx_y] = 255;
+			new_v[cwidth_maxx_y] = 255;
+			new[width_minx_y] = 128;
+			new[width_maxx_y] = 128;
+			new[width_minx_y + width] = 128;
+			new[width_maxx_y + width] = 128;
+			new[width_minx_y + 1] = 128;
+			new[width_maxx_y + 1] = 128;
+			new[width_minx_y + width + 1] = 128;
+			new[width_maxx_y + width + 1] = 128;
+			out[width_minx_y + 1] =~out[width_minx_y + 1];
+			out[width_maxx_y] =~out[width_maxx_y];
+			out[width_minx_y + width + 1] =~out[width_minx_y + width + 1];
+			out[width_maxx_y + width] =~out[width_maxx_y + width];
+		}
+	}
+	else{ /* normal image only (e.g. preview shot) */
+		int width_miny = width * cent->miny;
+		int width_maxy = width * cent->maxy;
+		int cwidth_miny = cwidth * (cent->miny / 2);
+		int cwidth_maxy = cwidth * (cent->maxy / 2);
+		
+		for (x = cent->minx + 2; x <= cent->maxx - 2; x += 2) {
+			int width_miny_x = x + width_miny;
+			int width_maxy_x = x + width_maxy;
+			int cwidth_miny_x = x / 2 + cwidth_miny;
+			int cwidth_maxy_x = x / 2 + cwidth_maxy;
+			new_u[cwidth_miny_x] = 128;
+			new_u[cwidth_maxy_x] = 128;
+			new_v[cwidth_miny_x] = 255;
+			new_v[cwidth_maxy_x] = 255;
+			new[width_miny_x] = 128;
+			new[width_maxy_x] = 128;
+			new[width_miny_x + 1] = 128;
+			new[width_maxy_x + 1] = 128;
+			new[width_miny_x + width] = 128;
+			new[width_maxy_x + width] = 128;
+			new[width_miny_x + 1 + width] = 128;
+			new[width_maxy_x + 1 + width] = 128;
+		}
+		for (y = cent->miny; y <= cent->maxy; y += 2) {
+			int width_minx_y = cent->minx + y * width; 
+			int width_maxx_y = cent->maxx + y * width;
+			int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth; 
+			int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
+			new_u[cwidth_minx_y] = 128;
+			new_u[cwidth_maxx_y] = 128;
+			new_v[cwidth_minx_y] = 255;
+			new_v[cwidth_maxx_y] = 255;
+			new[width_minx_y] = 128;
+			new[width_maxx_y] = 128;
+			new[width_minx_y + width] = 128;
+			new[width_maxx_y + width] = 128;
+			new[width_minx_y + 1] = 128;
+			new[width_maxx_y + 1] = 128;
+			new[width_minx_y + width + 1] = 128;
+			new[width_maxx_y + width + 1] = 128;
 		}
 	}
 }
