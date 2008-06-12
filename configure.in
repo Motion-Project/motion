@@ -817,6 +817,9 @@ fi
 AC_CHECK_SIZEOF(short int)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long int)
+AC_CHECK_SIZEOF(long long)
+AC_CHECK_SIZEOF(int *)
+AC_CHECK_SIZEOF(void *)
 
 if test "$ac_cv_sizeof_short_int" = "4"; then
 	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short int\""
@@ -1087,7 +1090,7 @@ AC_LINK_IFELSE([
 
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -gdwarf-2 -g3"
+	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3 "
 fi
 
 CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"

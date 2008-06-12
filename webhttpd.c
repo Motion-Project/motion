@@ -189,11 +189,64 @@ static const char *request_auth_response_template=
 	"HTTP/1.0 401 Authorization Required\r\n"
 	"WWW-Authenticate: Basic realm=\"Motion Security Access\"\r\n";
 
+
+
+static ssize_t write_nonblock(int fd, const void *buf, size_t size)
+{
+	ssize_t nwrite = -1;
+	struct timeval tm;
+	fd_set fds;
+
+	tm.tv_sec = 1; /* Timeout in seconds */
+	tm.tv_usec = 0;
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds);
+
+	if ( select (fd + 1, NULL, &fds, NULL, &tm) > 0) {
+		if(FD_ISSET(fd, &fds)) {
+			if ( (nwrite = write(fd , buf, size)) < 0 ) {
+				if ( errno != EWOULDBLOCK )
+					return -1;
+			}
+		}
+	}
+
+	return nwrite;
+
+}
+
+
+static ssize_t read_nonblock(int fd ,void *buf, ssize_t size)
+{
+	ssize_t nread = -1;
+	struct timeval tm;
+	fd_set fds;
+
+	tm.tv_sec = 1; /* Timeout in seconds */
+	tm.tv_usec = 0;
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds);
+
+	if ( select (fd + 1, &fds, NULL, NULL, &tm) > 0) {
+		if(FD_ISSET(fd, &fds)) {
+			if ( (nread = read(fd , buf, size)) < 0 ) {
+				if ( errno != EWOULDBLOCK )
+					return -1;
+			}
+		}
+	}
+	return nread;
+
+}
+
+
+
+
 static void send_template_ini_client(int client_socket, const char *template)
 {
 	ssize_t nwrite = 0;
-	nwrite = write(client_socket, ok_response, strlen (ok_response));
-	nwrite += write(client_socket, template, strlen(template));
+	nwrite = write_nonblock(client_socket, ok_response, strlen (ok_response));
+	nwrite += write_nonblock(client_socket, template, strlen(template));
 	if (nwrite != (ssize_t)(strlen(ok_response) + strlen(template)))
 		motion_log(LOG_ERR, 1, "httpd send_template_ini_client");
 }
@@ -201,7 +254,7 @@ static void send_template_ini_client(int client_socket, const char *template)
 static void send_template_ini_client_raw(int client_socket)
 {
 	ssize_t nwrite = 0;
-	nwrite = write(client_socket, ok_response_raw, strlen (ok_response_raw));
+	nwrite = write_nonblock(client_socket, ok_response_raw, strlen (ok_response_raw));
 	if (nwrite != (ssize_t)strlen(ok_response_raw))
 		motion_log(LOG_ERR, 1, "httpd send_template_ini_client_raw");
 }
@@ -209,7 +262,7 @@ static void send_template_ini_client_raw(int client_socket)
 static void send_template(int client_socket, char *res)
 {
 	ssize_t nwrite = 0;
-	nwrite = write(client_socket, res, strlen(res));
+	nwrite = write_nonblock(client_socket, res, strlen(res));
 	if ( nwrite != (ssize_t)strlen(res))
 		motion_log(LOG_ERR, 1, "httpd send_template failure write");
 }
@@ -217,52 +270,24 @@ static void send_template(int client_socket, char *res)
 static void send_template_raw(int client_socket, char *res)
 {
 	ssize_t nwrite = 0;
-	nwrite = write(client_socket, res, strlen(res));
+	nwrite = write_nonblock(client_socket, res, strlen(res));
 }
 
 static void send_template_end_client(int client_socket)
 {
 	ssize_t nwrite = 0;
-	nwrite = write(client_socket, end_template, strlen(end_template));
+	nwrite = write_nonblock(client_socket, end_template, strlen(end_template));
 }
 
 static void response_client(int client_socket, const char *template, char *back)
 {
 	ssize_t nwrite = 0;
-	nwrite = write(client_socket, template, strlen(template));
+	nwrite = write_nonblock(client_socket, template, strlen(template));
 	if (back != NULL) {
 		send_template(client_socket, back);
 		send_template_end_client(client_socket);
 	}
 }
-
-
-/*
- * check_authentication
- *
- * return 1 on success
- * return 0 on error
- */
-#if 0
-static unsigned short int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
-{
-	unsigned short int ret=0;
-	char *userpass = NULL;
-
-	authentication = (char *) mymalloc(BASE64_LENGTH(size_auth) + 1);
-	userpass = mymalloc(size_auth + 4);
-	/* base64_encode can read 3 bytes after the end of the string, initialize it */
-	memset(userpass, 0, size_auth + 4);
-	strcpy(userpass, conf_auth);
-	base64_encode(userpass, authentication, size_auth);
-	free(userpass);
-
-	if (!strcmp(authentication, auth_base64))
-		ret=1;
-
-	return ret;
-}
-#endif
 
 
 static char *replace(const char *str, const char *old, const char *new)
@@ -626,7 +651,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							}
 							sprintf(res, "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
 							             "<b>Thread %hu</b>\n<form action=set?>\n"
-							             "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=50>\n"
+							             "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=80>\n"
 							             "<input type='submit' value='set'>\n"
 							             "&nbsp;&nbsp;&nbsp;&nbsp;"
 							             "<a href='%s#%s' target=_blank>[help]</a>"
@@ -2129,7 +2154,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 	unsigned short int alive = 1;
 	unsigned short int ret = 1;
 	char buffer[1024] = {'\0'};
-	unsigned short int length = 1023;
+	ssize_t length = 1023;
 	struct context **cnt = userdata;
 
 	/* lock the mutex */
@@ -2139,10 +2164,10 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 	{
 		ssize_t nread = 0, readb = -1;
 
-		nread = read(client_socket, buffer, length);
+		nread = read_nonblock(client_socket, buffer, length);
 
 		if (nread <= 0) {
-			motion_log(LOG_ERR, 1, "httpd First read");
+			motion_log(LOG_ERR, 1, "motion-httpd First Read Error");
 			pthread_mutex_unlock(&httpd_mutex);
 			return 1;
 		}
@@ -2156,8 +2181,19 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 
 			warningkill = sscanf(buffer, "%9s %511s %9s", method, url, protocol);
 
-			while ((strstr(buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)) {
-				readb = read(client_socket, buffer+nread, sizeof (buffer) - nread);
+			if ( warningkill != 3 ) {
+				if (cnt[0]->conf.webcontrol_html_output)
+					warningkill = write_nonblock(client_socket, bad_request_response, 
+					              sizeof (bad_request_response));
+				else
+					warningkill = write_nonblock(client_socket, bad_request_response_raw, 
+					              sizeof (bad_request_response_raw));
+				pthread_mutex_unlock(&httpd_mutex);
+				return 1;
+			}
+
+			while ((strstr(buffer, "\r\n\r\n") == NULL) && (readb != 0) && (nread < length)) {
+				readb = read_nonblock(client_socket, buffer+nread, sizeof (buffer) - nread);
 
 				if (readb == -1) {
 					nread = -1;
@@ -2167,7 +2203,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 				nread += readb;
 				
 				if (nread > length) {
-					motion_log(LOG_ERR, 1, "httpd End buffer reached waiting for buffer ending");
+					motion_log(LOG_ERR, 1, "motion-httpd End buffer reached waiting for buffer ending");
 					break;
 				}
 				buffer[nread] = '\0';
@@ -2176,7 +2212,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			/* Make sure the last read didn't fail.  If it did, there's a
 			problem with the connection, so give up.  */
 			if (nread == -1) {
-				motion_log(LOG_ERR, 1, "httpd READ");
+				motion_log(LOG_ERR, 1, "motion-httpd READ give up!");
 				pthread_mutex_unlock(&httpd_mutex);
 				return 1;
 			}
@@ -2186,9 +2222,11 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 			if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) {
 				/* We don't understand this protocol.  Report a bad response.  */
 				if (cnt[0]->conf.webcontrol_html_output)
-					warningkill = write(client_socket, bad_request_response, sizeof (bad_request_response));
+					warningkill = write_nonblock(client_socket, bad_request_response, 
+					              sizeof (bad_request_response));
 				else
-					warningkill = write(client_socket, bad_request_response_raw, sizeof (bad_request_response_raw));
+					warningkill = write_nonblock(client_socket, bad_request_response_raw, 
+					              sizeof (bad_request_response_raw));
 
 				pthread_mutex_unlock(&httpd_mutex);
 				return 1;
@@ -2202,7 +2240,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 					snprintf(response, sizeof (response), bad_method_response_template, method);
 				else
 					snprintf(response, sizeof (response), bad_method_response_template_raw, method);
-				warningkill = write(client_socket, response, strlen (response));
+				warningkill = write_nonblock(client_socket, response, strlen (response));
 				pthread_mutex_unlock(&httpd_mutex);
 				return 1;
 			}
@@ -2217,7 +2255,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 					} else {
 						char response[1024];
 						snprintf(response, sizeof (response), request_auth_response_template, method);
-						warningkill = write(client_socket, response, strlen (response));
+						warningkill = write_nonblock(client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
 						return 1;
 					}
@@ -2232,7 +2270,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 					if (strcmp(auth, authentication)) {
 						char response[1024] = {'\0'};
 						snprintf(response, sizeof (response), request_auth_response_template, method);
-						warningkill = write(client_socket, response, strlen (response));
+						warningkill = write_nonblock(client_socket, response, strlen (response));
 						pthread_mutex_unlock(&httpd_mutex);
 						return 1;
 					} else {
@@ -2243,7 +2281,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 					// Request Authorization
 					char response[1024] = {'\0'};
 					snprintf(response, sizeof (response), request_auth_response_template, method);
-					warningkill = write(client_socket, response, strlen (response));
+					warningkill = write_nonblock(client_socket, response, strlen (response));
 					pthread_mutex_unlock(&httpd_mutex);
 					return 1;
 				}

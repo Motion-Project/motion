@@ -81,11 +81,20 @@
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
+/* The size of `int *', as computed by sizeof. */
+#undef SIZEOF_INT_P
+
 /* The size of `long int', as computed by sizeof. */
 #undef SIZEOF_LONG_INT
 
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
 /* The size of `short int', as computed by sizeof. */
 #undef SIZEOF_SHORT_INT
+
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
