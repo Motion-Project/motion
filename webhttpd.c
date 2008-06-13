@@ -15,7 +15,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stddef.h>
-#include <stdint.h> 
 
 pthread_mutex_t httpd_mutex;
 

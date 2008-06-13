@@ -398,6 +398,9 @@ Angel Carpintero
    * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6
      (Jeroen Massar & Angel Carpintero)
    * Fix a security issue in web control interface http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484572
+   * Fix Problem Encoding 1280x1024 resolution videos
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727
+   * Add write/read nonblock functions in webhttpd( timeout on read/write).
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -1359,6 +1362,7 @@ Joerg Weber
    * Implemented a new reference frame algorithm to improve object recognition and location.
    * Improved smartmask feature: real moving objects don't trigger the mask anymore.
    * Added area_detect feature.
+   * Add draw a RED box around the movement as default.
 
 Dirk Wesenberg
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )

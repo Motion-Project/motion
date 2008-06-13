@@ -6,8 +6,14 @@ Features
      (Jeroen Massar & Angel Carpintero) 
    * Experimental approach for MJPEG streams (Motion JPEG) for network cameras 
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinksysWVC200SupportPatch ( ... )  
+   * Add draw a RED box around the movement as default (Joerg Weber)
+   * Add write/read nonblock functions in webhttpd( timeout on read/write). (Angel Carpintero) 
 
 Bugfixes
+   * Fix Problem Encoding 1280x1024 resolution videos
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
+
+ 
 
 3.2.10.1 Summary of Changes
 
