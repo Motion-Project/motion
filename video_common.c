@@ -9,12 +9,9 @@
  *
  */
 
-//#include "motion.h"
 /* for rotation */
 #include "rotate.h"	/* already includes motion.h */
 #include "video.h"
-/* for rotation */
-//#include "rotate.h"
 
 #ifdef MJPEGT 
 #include <mjpegtools/jpegutils.h>

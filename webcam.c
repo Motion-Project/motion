@@ -19,15 +19,11 @@
  */
 
 #include "picture.h"
-//#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/fcntl.h>
-//#include <sys/stat.h>
-
-
 
 
 /* This function sets up a TCP/IP socket for incoming requests. It is called only during

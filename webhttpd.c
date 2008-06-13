@@ -237,34 +237,6 @@ static void response_client(int client_socket, const char* template, char *back)
 }
 
 
-/*
- * check_authentication
- *
- * return 1 on success
- * return 0 on error
- */
-#if 0
-static unsigned short int check_authentication(char *authentication, char *auth_base64, size_t size_auth, const char *conf_auth)
-{
-	unsigned short int ret=0;
-	char *userpass = NULL;
-
-	authentication = (char *) mymalloc(BASE64_LENGTH(size_auth) + 1);
-	userpass = mymalloc(size_auth + 4);
-	/* base64_encode can read 3 bytes after the end of the string, initialize it */
-	memset(userpass, 0, size_auth + 4);
-	strcpy(userpass, conf_auth);
-	base64_encode(userpass, authentication, size_auth);
-	free(userpass);
-
-	if (!strcmp(authentication, auth_base64))
-		ret=1;
-
-	return ret;
-}
-#endif
-
-
 static char *replace(const char *str, const char *old, const char *new)
 {
     char *ret, *r;
@@ -2159,7 +2131,7 @@ static unsigned short int read_client(int client_socket, void *userdata, char *a
 
 			warningkill = sscanf (buffer, "%9s %511s %9s", method, url, protocol);
 
-			while ((strstr (buffer, "\r\n\r\n") == NULL) && (readb!=0) && (nread < length)){
+			while ((strstr (buffer, "\r\n\r\n") == NULL) && (readb != 0) && (nread < length)){
 				readb = read (client_socket, buffer+nread, sizeof (buffer) - nread);
 
 				if (readb == -1){

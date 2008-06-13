@@ -8,12 +8,8 @@
  */
 
 /* Common stuff: */
-//#include "motion.h"
-/* for rotation */
 #include "rotate.h"     /* already includes motion.h */
 #include "video_freebsd.h"
-/* for rotation */
-//#include "rotate.h"
 
 #ifndef WITHOUT_V4L
 

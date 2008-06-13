@@ -1,3 +1,8 @@
+
+Bugfixes
+    * Fix Problem Encoding 1280x1024 resolution videos  
+      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
+
 3.2.10.1 Summary of Changes
 
 Bugfixes
