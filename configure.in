@@ -316,7 +316,7 @@ AC_MSG_RESULT($MJPEG_SUPPORT)
 #
 # Check for libavcodec and libavformat from ffmpeg
 #
-FFMPEG="yes"
+FFMPEG_DIR="yes"
 FFMPEG_OK="no_found"
 FFMPEG_OBJ=""
 AC_ARG_WITH(ffmpeg,
@@ -326,23 +326,22 @@ AC_ARG_WITH(ffmpeg,
                           If this is not specified motion will try to find
                           the libraries in /usr and /usr/local.
                           ],
-FFMPEG="$withval"
+FFMPEG_DIR="$withval"
 )
 #
 # --without-ffmpeg or with-ffmpeg=no
 #
-if test "${FFMPEG}" = "no"; then
+if test "${FFMPEG_DIR}" = "no"; then
 	AC_MSG_CHECKING(for ffmpeg)
 	AC_MSG_RESULT(skipping)
 #
 # with-ffmpeg=<dir> or nothing
 #
-else if test "${FFMPEG}" = "yes"; then
+else if test "${FFMPEG_DIR}" = "yes"; then
 	# AUTODETECT STATIC/SHARED LIB 
 	AC_MSG_CHECKING(for ffmpeg autodetecting)
 
-# weird hack to fix debian problem TO BE REMOVED
-
+	# weird hack to fix debian problem TO BE REMOVED
 	if test -f /usr/bin/ffmpeg-config; then
 		FFMPEG_LIBS_DEB="`ffmpeg-config --libs avformat`"
 		FFMPEG_CFLAGS_DEB="`ffmpeg-config --cflags`"
@@ -351,15 +350,18 @@ else if test "${FFMPEG}" = "yes"; then
 	elif test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
 		AC_MSG_RESULT(found in /usr/lib64)
 		FFMPEG_OK="found"
-		FFMPEG="/usr/lib64"
+		FFMPEG_LIB="/usr/lib64"
+		FFMPEG_DIR="/usr"
 	elif test -f /usr/lib/libavcodec.a -o -f /usr/lib/libavcodec.so && test -f /usr/lib/libavformat.a -o -f /usr/lib/libavformat.so ; then
 		AC_MSG_RESULT(found in /usr/lib)
 		FFMPEG_OK="found"
-		FFMPEG="/usr/lib"
+		FFMPEG_LIB="/usr/lib"
+		FFMPEG_DIR="/usr"
 	elif test -f /usr/local/lib/libavcodec.a -o -f /usr/local/lib/libavcodec.so && test -f /usr/local/lib/libavformat.a -o -f /usr/local/lib/libavformat.so ; then
 		AC_MSG_RESULT(found in /usr/local/lib)
 		FFMPEG_OK="found"
-		FFMPEG="/usr/local/lib"
+		FFMPEG_LIB="/usr/local/lib"
+		FFMPEG_DIR="/usr/local"
 	else
 		AC_MSG_RESULT(not found)
 		echo ""
@@ -374,17 +376,18 @@ else if test "${FFMPEG}" = "yes"; then
 		echo ""		
 	fi 
 else
-	AC_MSG_CHECKING(for ffmpeg in -> [${FFMPEG}] <-)
-	if test -f ${FFMPEG}/lib/libavcodec.a -o -f ${FFMPEG}/lib/libavcodec.so && test -f ${FFMPEG}/lib/libavformat.a -o -f ${FFMPEG}/lib/libavformat.so ; then
+	AC_MSG_CHECKING(for ffmpeg in -> [${FFMPEG_DIR}] <-)
+	if test -f ${FFMPEG_DIR}/lib/libavcodec.a -o -f ${FFMPEG_DIR}/lib/libavcodec.so && test -f ${FFMPEG_DIR}/lib/libavformat.a -o -f ${FFMPEG_DIR}/lib/libavformat.so ; then
 		AC_MSG_RESULT(found)
 		FFMPEG_OK="found"
-		FFMPEG="${FFMPEG}/lib"
-	elif test -f ${FFMPEG}/libavcodec.a -o -f ${FFMPEG}/libavcodec.so && test -f ${FFMPEG}/libavformat.a -o -f ${FFMPEG}/libavformat.so ; then
+		FFMPEG_LIB="${FFMPEG_DIR}/lib"
+	elif test -f ${FFMPEG_DIR}/libavcodec.a -o -f ${FFMPEG_DIR}/libavcodec.so && test -f ${FFMPEG_DIR}/libavformat.a -o -f ${FFMPEG_DIR}/libavformat.so ; then
 		AC_MSG_RESULT(found)
+		FFMPEG_LIB="${FFMPEG_DIR}"
 		FFMPEG_OK="found"
 	else
 		AC_MSG_RESULT(not found)
-		if test "${FFMPEG}" != "no"; then
+		if test "${FFMPEG_OK}" != "found"; then
 			echo ""
 			echo "**********************************************"
 			echo "* libavcodec.a or libavcodec.so or           *"
@@ -404,23 +407,23 @@ fi
 #
 
 if test "${FFMPEG_OK}" = "found"; then
-	AC_MSG_CHECKING(for ffmpeg headers)
+	AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
 	
 	if test "${FFMPEG_CFLAGS_DEB}" != "" ; then
 		FFMPEG_CFLAGS="${FFMPEG_CFLAGS_DEB}"
 		AC_MSG_RESULT(found for debian)
-	elif test -f ${FFMPEG}/include/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG}/include/avformat.h)
-		FFMPEG_CFLAGS="-I${FFMPEG}/include"
-	elif test -f ${FFMPEG}/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG}/avformat.h)
-		FFMPEG_CFLAGS="-I${FFMPEG}"
-	elif test -f `AS_DIRNAME([${FFMPEG}])`/include/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG}/include/avformat.h)
-		FFMPEG_CFLAGS="-I`AS_DIRNAME([${FFMPEG}])`/include"
-	elif test -f `AS_DIRNAME([${FFMPEG}])`/include/ffmpeg/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG}/include/ffmpeg/avformat.h)
-		FFMPEG_CFLAGS="-I`AS_DIRNAME([${FFMPEG}])`/include/ffmpeg"
+	elif test -f ${FFMPEG_DIR}/include/avformat.h; then
+		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
+		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
+	elif test -f ${FFMPEG_DIR}/avformat.h; then
+		AC_MSG_RESULT(found ${FFMPEG_DIR}/avformat.h)
+		FFMPEG_CFLAGS="-I${FFMPEG_DIR}"
+	elif test -f ${FFMPEG_DIR}/include/ffmpeg/avformat.h; then
+		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/avformat.h)
+		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg"
+	elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
+		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
+		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
 	else
 		AC_MSG_RESULT(not found)
 		FFMPEG_OK="no_found"
@@ -442,8 +445,8 @@ if test "${FFMPEG_OK}" = "found"; then
 		if test "${FFMPEG_LIBS_DEB}" != ""; then
 			TEMP_LIBS="$TEMP_LIBS ${FFMPEG_LIBS_DEB}"
 		else
-			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG} -lavformat -lavcodec -lm -lz"
-			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG}"
+			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} -lavformat -lavcodec -lavutil -lm -lz"
+			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
 		fi
 
 		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
