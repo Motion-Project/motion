@@ -91,11 +91,11 @@ minimum_frame_time 0
 
 
 # The setting for keep-alive of network socket, should improve performance on compatible net cameras.
-# 1.0 : the historical implementation using HTTP/1.0, closing the socket after each http request.
-# keep_alive : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
-# 1.1 : Use HTTP/1.1 requests that support keep alive as default.
-# Default: 1.0
-; netcam_http value
+# off : the historical implementation using HTTP/1.0, closing the socket after each http request.
+# force : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
+# on : Use HTTP/1.1 requests that support keep alive as default.
+# Default: off 
+netcam_keepalive off
 
 # URL to use for a netcam proxy server, if required, e.g. "http://myproxy".
 # If a port number other than 80 is needed, use "http://myproxy:1234".
@@ -197,18 +197,18 @@ pre_capture 0
 # Number of frames to capture after motion is no longer detected (default: 0)
 post_capture 0
 
-# Gap is the seconds of no motion detection that triggers the end of an event
+# Event Gap is the seconds of no motion detection that triggers the end of an event
 # An event is defined as a series of motion images taken within a short timeframe.
 # Recommended value is 60 seconds (Default). The value 0 is allowed and disables
 # events causing all Motion to be written to one single movie file and no pre_capture.
-gap 60
+event_gap 60
 
 # Maximum length in seconds of a movie
 # When value is exceeded a new movie file is created. (Default: 0 = infinite)
 max_movie_time 0
 
 # Always save images even if there was no motion (default: off)
-output_all off
+emulate_motion off
 
 
 ############################################################
@@ -221,10 +221,10 @@ output_all off
 # Picture with most motion of an event is saved when set to 'best'.
 # Picture with motion nearest center of picture is saved when set to 'center'.
 # Can be used as preview shot for the corresponding movie.
-output_normal on
+output_pictures on
 
 # Output pictures with only the pixels moving object (ghost images) (default: off)
-output_motion off
+output_debug_pictures off
 
 # The quality (in percent) to be used by the jpeg compression (default: 75)
 quality 75
@@ -241,11 +241,11 @@ picture_type jpeg
 ############################################################
 
 # Use ffmpeg to encode movies in realtime (default: off)
-ffmpeg_cap_new on
+ffmpeg_output_movies on
 
 # Use ffmpeg to make movies with only the pixels moving
 # object (ghost images) (default: off)
-ffmpeg_cap_motion off
+ffmpeg_output_debug_movies off
 
 # Use ffmpeg to encode a timelapse movie 
 # Default value 0 = off - else save frame every Nth second
@@ -306,8 +306,11 @@ snapshot_interval 0
 ############################################################
 
 # Locate and draw a box around the moving object.
-# Valid values: on, off and preview (default: off)
+# Valid values: on, off, red, preview, center, center_red (default: off)
+# Set to 'red' will draw a red box around the moving object.
 # Set to 'preview' will only draw a box in preview_shot pictures.
+# Set to 'center' will draw a little cross to mark center.
+# Set to 'redcross' will draw a little red cross to mark center.
 locate_motion off
 
 # Draws the timestamp using same options as C function strftime(3)
@@ -506,11 +509,11 @@ track_stepsize 40
 quiet on
 
 # Command to be executed when an event starts. (default: none)
-# An event starts at first motion detected after a period of no motion defined by gap 
+# An event starts at first motion detected after a period of no motion defined by event_gap 
 ; on_event_start value
 
 # Command to be executed when an event ends after a period of no motion
-# (default: none). The period of no motion is defined by option gap.
+# (default: none). The period of no motion is defined by option event_gap.
 ; on_event_end value
 
 # Command to be executed when a picture (.ppm|.jpg) is saved (default: none)

@@ -26,10 +26,10 @@ struct config {
 	int rotate_deg;
 	int max_changes;
 	int threshold_tune;
-	const char *output_normal;
+	const char *output_pictures;
 	int motion_img;
-	int output_all;
-	int gap;
+	int emulate_motion;
+	int event_gap;
 	int max_movie_time;
 	int snapshot_interval;
 	const char *locate_motion;
@@ -52,8 +52,8 @@ struct config {
 	int pre_capture;
 	int post_capture;
 	int switchfilter;
-	int ffmpeg_cap_new;
-	int ffmpeg_cap_motion;
+	int ffmpeg_output;
+	int ffmpeg_output_debug;
 	int ffmpeg_bps;
 	int ffmpeg_vbr;
 	int ffmpeg_deinterlace;
@@ -107,7 +107,7 @@ struct config {
 	const char *motionvidpipe;
 	const char *netcam_url;
 	const char *netcam_userpass;
-	const char *netcam_http;
+	const char *netcam_keepalive;
 	const char *netcam_proxy;
 	int text_changes;
 	const char *text_left;

@@ -1149,17 +1149,19 @@ int draw_text (unsigned char *image, int startx, int starty, int width, const ch
 
 int initialize_chars(void)
 {
-	unsigned int i = 0, x, y;
+	unsigned int i, x, y;
+	size_t draw_table_size;
 	
+	draw_table_size = sizeof(draw_table) / sizeof(struct draw_char);
+
 	/* Fill the structure 'big_table' with double sized characters. */
-	while(draw_table[i].ascii) {
+	for (i = 0; i < draw_table_size; i++) {
 		big_table[i].ascii = draw_table[i].ascii;
 		for(x = 0; x < 14; x++) {
 			for(y = 0; y < 16; y++) {
 				big_table[i].pix[y][x] = draw_table[i].pix[y/2][x/2];
 			}
 		}
-		i++;
 	}
 
 	/* first init all char ptr's to a space character */
@@ -1169,7 +1171,7 @@ int initialize_chars(void)
 	}
 			
 	/* build [big_]char_arr_ptr table to point to each available ascii */
-	for (i = 0; i < sizeof(draw_table) / sizeof(struct draw_char); i++) {
+	for (i = 0; i < draw_table_size; i++) {
 		small_char_arr_ptr[(int)draw_table[i].ascii] = &draw_table[i].pix[0][0];
 		big_char_arr_ptr[(int)draw_table[i].ascii] = &big_table[i].pix[0][0];
 	}

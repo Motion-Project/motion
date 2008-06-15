@@ -154,12 +154,14 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 	out = imgs->out;
 
 	/* Draw a box around the movement */
-	if (mode == LOCATE_BOTH){ /* both normal and motion image gets a box */
-		int width_miny = width*cent->miny;
-		int width_maxy = width*cent->maxy;
+	if (mode == LOCATE_BOTH) { /* both normal and motion image gets a box */
+		int width_miny = width * cent->miny;
+		int width_maxy = width * cent->maxy;
+
 		for (x = cent->minx; x <= cent->maxx; x++) {
-			int width_miny_x = x+width_miny;
-			int width_maxy_x = x+width_maxy;
+			int width_miny_x = x + width_miny;
+			int width_maxy_x = x + width_maxy;
+
 			new[width_miny_x] =~new[width_miny_x];
 			new[width_maxy_x] =~new[width_maxy_x];
 			out[width_miny_x] =~out[width_miny_x];
@@ -168,24 +170,40 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 		for (y = cent->miny; y <= cent->maxy; y++) {
 			int width_minx_y = cent->minx + y * width; 
 			int width_maxx_y = cent->maxx + y * width;
+
 			new[width_minx_y] =~new[width_minx_y];
 			new[width_maxx_y] =~new[width_maxx_y];
 			out[width_minx_y] =~out[width_minx_y];
 			out[width_maxx_y] =~out[width_maxx_y];
 		}
-	}
-	else{ /* normal image only (e.g. preview shot) */
+	} else if (mode == LOCATE_CENTER) {
+		int centy = cent->y * width;
+
+		for (x = cent->x - 10;  x <= cent->x + 10; x++) {
+			new[centy + x] =~new[centy + x];
+			out[centy + x] =~out[centy + x];
+		}
+
+		for (y = cent->y - 10; y <= cent->y + 10; y++) {
+			new[cent->x + y * width] =~new[cent->x + y * width];
+			out[cent->x + y * width] =~out[cent->x + y * width];
+		}       
+
+	} else { /* normal image only (e.g. preview shot) */
 		int width_miny = width * cent->miny;
 		int width_maxy = width * cent->maxy;
+
 		for (x = cent->minx; x <= cent->maxx; x++) {
-			int width_miny_x = width_miny+x;
-			int width_maxy_x = width_maxy+x;
+			int width_miny_x = width_miny + x;
+			int width_maxy_x = width_maxy + x;
+
 			new[width_miny_x] =~new[width_miny_x];
 			new[width_maxy_x] =~new[width_maxy_x];
 		}
 		for (y = cent->miny; y <= cent->maxy; y++) {
-			int minx_y = cent->minx+y*width;
-			int maxx_y = cent->maxx+y*width;
+			int minx_y = cent->minx + y * width;
+			int maxx_y = cent->maxx + y * width;
+
 			new[minx_y] =~new[minx_y];
 			new[maxx_y] =~new[maxx_y];
 		}
@@ -201,7 +219,7 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 	int x, y, v, cwidth, cblock;
 
 	cwidth = width / 2;
-	cblock = imgs->motionsize /4;
+	cblock = imgs->motionsize / 4;
 	x = imgs->motionsize;
 	v = x + cblock;
 	out = imgs->out;
@@ -209,7 +227,7 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 	new_v = new + v;
 
 	/* Draw a box around the movement */
-	if (mode == LOCATE_BOTH){ /* both normal and motion image gets a box */
+	if (mode == LOCATE_BOTH) { /* both normal and motion image gets a box */
 		int width_miny = width * cent->miny;
 		int width_maxy = width * cent->maxy;
 		int cwidth_miny = cwidth * (cent->miny / 2);
@@ -220,47 +238,77 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 			int width_maxy_x = x + width_maxy;
 			int cwidth_miny_x = x / 2 + cwidth_miny;
 			int cwidth_maxy_x = x / 2 + cwidth_maxy;
+
 			new_u[cwidth_miny_x] = 128;
 			new_u[cwidth_maxy_x] = 128;
 			new_v[cwidth_miny_x] = 255;
 			new_v[cwidth_maxy_x] = 255;
+
 			new[width_miny_x] = 128;
 			new[width_maxy_x] = 128;
+
 			new[width_miny_x + 1] = 128;
 			new[width_maxy_x + 1] = 128;
+
 			new[width_miny_x + width] = 128;
 			new[width_maxy_x + width] = 128;
+
 			new[width_miny_x + 1 + width] = 128;
 			new[width_maxy_x + 1 + width] = 128;
+
 			out[width_miny_x] =~out[width_miny_x];
 			out[width_maxy_x + width] =~out[width_maxy_x + width];
 			out[width_miny_x + 1] =~out[width_miny_x + 1];
 			out[width_maxy_x + 1 + width] =~out[width_maxy_x + 1 + width];
 		}
+
 		for (y = cent->miny; y <= cent->maxy; y += 2) {
 			int width_minx_y = cent->minx + y * width; 
 			int width_maxx_y = cent->maxx + y * width;
 			int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth; 
 			int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
+
 			new_u[cwidth_minx_y] = 128;
 			new_u[cwidth_maxx_y] = 128;
 			new_v[cwidth_minx_y] = 255;
 			new_v[cwidth_maxx_y] = 255;
+
 			new[width_minx_y] = 128;
 			new[width_maxx_y] = 128;
+
 			new[width_minx_y + width] = 128;
 			new[width_maxx_y + width] = 128;
+
 			new[width_minx_y + 1] = 128;
 			new[width_maxx_y + 1] = 128;
+
 			new[width_minx_y + width + 1] = 128;
 			new[width_maxx_y + width + 1] = 128;
+
 			out[width_minx_y + 1] =~out[width_minx_y + 1];
 			out[width_maxx_y] =~out[width_maxx_y];
 			out[width_minx_y + width + 1] =~out[width_minx_y + width + 1];
 			out[width_maxx_y + width] =~out[width_maxx_y + width];
 		}
-	}
-	else{ /* normal image only (e.g. preview shot) */
+	} else if (mode == LOCATE_CENTER) {
+		int cwidth_maxy = cwidth * (cent->y / 2);
+		
+		for (x = cent->x - 10; x <= cent->x + 10; x += 2) {
+			int cwidth_maxy_x = x / 2 + cwidth_maxy;
+
+			new_u[cwidth_maxy_x] = 128;
+			new_v[cwidth_maxy_x] = 255;
+		}
+
+		for (y = cent->y - 10; y <= cent->y + 10; y += 2) {
+			int cwidth_minx_y = (cent->x / 2) + (y / 2) * cwidth; 
+			
+			new_u[cwidth_minx_y] = 128;
+			new_v[cwidth_minx_y] = 255;
+		}
+
+
+	} else { /* normal image only (e.g. preview shot) */
 		int width_miny = width * cent->miny;
 		int width_maxy = width * cent->maxy;
 		int cwidth_miny = cwidth * (cent->miny / 2);
@@ -271,34 +319,45 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 			int width_maxy_x = x + width_maxy;
 			int cwidth_miny_x = x / 2 + cwidth_miny;
 			int cwidth_maxy_x = x / 2 + cwidth_maxy;
+
 			new_u[cwidth_miny_x] = 128;
 			new_u[cwidth_maxy_x] = 128;
 			new_v[cwidth_miny_x] = 255;
 			new_v[cwidth_maxy_x] = 255;
+
 			new[width_miny_x] = 128;
 			new[width_maxy_x] = 128;
+
 			new[width_miny_x + 1] = 128;
 			new[width_maxy_x + 1] = 128;
+
 			new[width_miny_x + width] = 128;
 			new[width_maxy_x + width] = 128;
+
 			new[width_miny_x + 1 + width] = 128;
 			new[width_maxy_x + 1 + width] = 128;
 		}
+
 		for (y = cent->miny; y <= cent->maxy; y += 2) {
 			int width_minx_y = cent->minx + y * width; 
 			int width_maxx_y = cent->maxx + y * width;
 			int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth; 
 			int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
+
 			new_u[cwidth_minx_y] = 128;
 			new_u[cwidth_maxx_y] = 128;
 			new_v[cwidth_minx_y] = 255;
 			new_v[cwidth_maxx_y] = 255;
+
 			new[width_minx_y] = 128;
 			new[width_maxx_y] = 128;
+
 			new[width_minx_y + width] = 128;
 			new[width_maxx_y + width] = 128;
+
 			new[width_minx_y + 1] = 128;
 			new[width_maxx_y + 1] = 128;
+
 			new[width_minx_y + width + 1] = 128;
 			new[width_maxx_y + width + 1] = 128;
 		}
@@ -463,6 +522,7 @@ static int alg_labeling(struct context *cnt)
 	int height = imgs->height;
 	int labelsize = 0;
 	int current_label = 2;
+
 	cnt->current_image->total_labels = 0;
 	imgs->labelsize_max = 0;
 	/* ALL labels above threshold are counted as labelgroup */
@@ -470,10 +530,10 @@ static int alg_labeling(struct context *cnt)
 	imgs->labels_above = 0;
 
 	/* init: 0 means no label set / not checked */
-	memset(labels, 0, width*height*sizeof(labels));
+	memset(labels, 0, width * height * sizeof(labels));
 	pixelpos = 0;
-	for (iy = 0; iy < height-1; iy++) {
-		for (ix = 0; ix < width-1; ix++, pixelpos++) {
+	for (iy = 0; iy < height - 1; iy++) {
+		for (ix = 0; ix < width - 1; ix++, pixelpos++) {
 			/* no motion - no label */
 			if( out[pixelpos] == 0 ) {
 				labels[pixelpos] = 1;
@@ -624,7 +684,7 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
 		if (y == height - 1)
 			memset(row3, 0, width);
 		else
-			memcpy(row3, yp+width, width);
+			memcpy(row3, yp + width, width);
 
 		/* Init mem and set blob to force an evaluation of the entire + shape. */
 		mem = MAX2(row2[0], row2[1]);
@@ -641,7 +701,7 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
 			} else {
 				/* Otherwise, we have to check both latest and mem. */
 				blob = MAX2(mem, latest);
-				mem = MAX2(row2[i], row2[i+1]);
+				mem = MAX2(row2[i], row2[i + 1]);
 			}
 
 			/* Write the max value (blob) to the image. */
@@ -663,6 +723,7 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
 {
 	int y, i, sum = 0;
 	char *Row1,*Row2,*Row3;
+
 	Row1 = buffer;
 	Row2 = Row1 + width;
 	Row3 = Row1 + 2 * width;
@@ -676,17 +737,17 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
 		else
 			memcpy(Row3, img + (y+1) * width, width);
 
-		for (i = width-2; i >= 1; i--) {
-			if (Row1[i-1] == 0 ||
-				Row1[i]   == 0 ||
-				Row1[i+1] == 0 ||
-				Row2[i-1] == 0 ||
-				Row2[i]   == 0 ||
-				Row2[i+1] == 0 ||
-				Row3[i-1] == 0 ||
-				Row3[i]   == 0 ||
-				Row3[i+1] == 0)
-				img[y*width+i] = 0;
+		for (i = width - 2; i >= 1; i--) {
+			if (Row1[i - 1] == 0 ||
+				Row1[i]     == 0 ||
+				Row1[i + 1] == 0 ||
+				Row2[i - 1] == 0 ||
+				Row2[i]     == 0 ||
+				Row2[i + 1] == 0 ||
+				Row3[i - 1] == 0 ||
+				Row3[i]     == 0 ||
+				Row3[i + 1] == 0)
+				img[y * width + i] = 0;
 			else
 				sum++;
 		}
@@ -700,11 +761,13 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 {
 	int y, i, sum = 0;
 	char *Row1,*Row2,*Row3;
+
 	Row1 = buffer;
 	Row2 = Row1 + width;
 	Row3 = Row1 + 2 * width;
 	memset(Row2, flag, width);
 	memcpy(Row3, img, width);
+
 	for (y = 0; y < height; y++) {
 		memcpy(Row1, Row2, width);
 		memcpy(Row2, Row3, width);
@@ -714,11 +777,11 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 			memcpy(Row3, img + (y + 1) * width, width);
 
 		for (i = width - 2; i >= 1; i--) {
-			if (Row1[i]   == 0 ||
-				Row2[i-1] == 0 ||
-				Row2[i]   == 0 ||
-				Row2[i+1] == 0 ||
-				Row3[i]   == 0)
+			if (Row1[i]     == 0 ||
+				Row2[i - 1] == 0 ||
+				Row2[i]     == 0 ||
+				Row2[i + 1] == 0 ||
+				Row3[i]     == 0)
 				img[y * width + i] = 0;
 			else
 				sum++;
@@ -782,7 +845,6 @@ int alg_despeckle(struct context *cnt, int olddiffs)
 void alg_tune_smartmask(struct context *cnt)
 {
 	int i, diff;
-	
 	int motionsize = cnt->imgs.motionsize;
 	unsigned char *smartmask = cnt->imgs.smartmask;
 	unsigned char *smartmask_final = cnt->imgs.smartmask_final;
@@ -796,7 +858,7 @@ void alg_tune_smartmask(struct context *cnt)
 		/* Increase smart_mask sensitivity based on the buffered values */
 		diff = smartmask_buffer[i]/sensitivity;
 		if (diff){
-			if (smartmask[i] <= diff+80)
+			if (smartmask[i] <= diff + 80)
 				smartmask[i] += diff;
 			else
 				smartmask[i] = 80;

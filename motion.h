@@ -33,6 +33,7 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
+#include <stdint.h>
 
 #define _LINUX_TIME_H 1
 #if (!defined(WITHOUT_V4L)) && (!defined(BSD))
@@ -118,7 +119,7 @@
 #define DEF_NOISELEVEL          32
 
 /* Minimum time between two 'actions' (email, sms, external) */
-#define DEF_GAP                 60  /* 1 minutes */
+#define DEF_EVENT_GAP            60  /* 1 minutes */
 #define DEF_MAXMOVIETIME       3600  /* 60 minutes */
 
 #define DEF_FFMPEG_BPS      400000
@@ -178,9 +179,12 @@
 #define NEWIMG_BEST      4
 #define NEWIMG_CENTER    8
 
-#define LOCATE_OFF       0
-#define LOCATE_ON        1
-#define LOCATE_PREVIEW   2
+#define LOCATE_OFF        0
+#define LOCATE_ON         1
+#define LOCATE_PREVIEW    2
+#define LOCATE_REDBOX     3
+#define LOCATE_CENTER     4 
+#define LOCATE_REDCROSS   5 
 
 #define LOCATE_NORMAL    0
 #define LOCATE_BOTH      1
@@ -384,8 +388,8 @@ struct context {
 #endif
 
 #ifdef HAVE_FFMPEG
-	struct ffmpeg *ffmpeg_new;
-	struct ffmpeg *ffmpeg_motion;
+	struct ffmpeg *ffmpeg_output;
+	struct ffmpeg *ffmpeg_output_debug;
 	struct ffmpeg *ffmpeg_timelapse;
 	struct ffmpeg *ffmpeg_smartmask;
 	char newfilename[PATH_MAX];

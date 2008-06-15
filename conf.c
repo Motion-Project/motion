@@ -52,10 +52,10 @@ struct config conf_template = {
 	rotate_deg:            0,
 	max_changes:           DEF_CHANGES,
 	threshold_tune:        0,
-	output_normal:         "on",
+	output_pictures:       "on",
 	motion_img:            0,
-	output_all:            0,
-	gap:                   DEF_GAP,
+	emulate_motion:        0,
+	event_gap:             DEF_EVENT_GAP,
 	max_movie_time:        DEF_MAXMOVIETIME,
 	snapshot_interval:     0,
 	locate_motion:         "off",
@@ -78,8 +78,8 @@ struct config conf_template = {
 	pre_capture:           0,
 	post_capture:          0,
 	switchfilter:          0,
-	ffmpeg_cap_new:        0,
-	ffmpeg_cap_motion:     0,
+	ffmpeg_output:         0,
+	ffmpeg_output_debug:   0,
 	ffmpeg_bps:            DEF_FFMPEG_BPS,
 	ffmpeg_vbr:            DEF_FFMPEG_VBR,
 	ffmpeg_video_codec:    DEF_FFMPEG_CODEC,
@@ -134,7 +134,7 @@ struct config conf_template = {
 	motionvidpipe:         NULL,
 	netcam_url:            NULL,
 	netcam_userpass:       NULL,
-	netcam_http:           "1.0",    /* Choices: 1.0, 1.1, or keep_alive */
+	netcam_keepalive:      "off",    /* Choices: off, force or on */
 	netcam_proxy:          NULL,
 	text_changes:          0,
 	text_left:             NULL,
@@ -335,14 +335,14 @@ config_param config_params[] = {
 	print_string
 	},
 	{
-	"netcam_http",
+	"netcam_keepalive",
 	"# The setting for keep-alive of network socket, should improve performance on compatible net cameras.\n"
-	"# 1.0 : the historical implementation using HTTP/1.0, closing the socket after each http request.\n"
-	"# keep_alive : Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
-	"# 1.1 : Use HTTP/1.1 requests that support keep alive as default.\n"
-	"# Default: 1.0",
+	"# off : the historical implementation using HTTP/1.0, closing the socket after each http request.\n"
+	"# force : Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
+	"# on : Use HTTP/1.1 requests that support keep alive as default.\n"
+	"# Default: off",
 	0,
-	CONF_OFFSET(netcam_http),
+	CONF_OFFSET(netcam_keepalive),
 	copy_string,
 	print_string
 	},
@@ -548,13 +548,13 @@ config_param config_params[] = {
 	print_int
 	},
 	{
-	"gap",
-	"# Gap is the seconds of no motion detection that triggers the end of an event\n"
+	"event_gap",
+	"# Event Gap is the seconds of no motion detection that triggers the end of an event\n"
 	"# An event is defined as a series of motion images taken within a short timeframe.\n"
 	"# Recommended value is 60 seconds (Default). The value 0 is allowed and disables\n"
 	"# events causing all Motion to be written to one single movie file and no pre_capture.",
 	0,
-	CONF_OFFSET(gap),
+	CONF_OFFSET(event_gap),
 	copy_int,
 	print_int
 	},
@@ -568,15 +568,15 @@ config_param config_params[] = {
 	print_int
 	},
 	{
-	"output_all",
+	"emulate_motion",
 	"# Always save images even if there was no motion (default: off)",
 	0,
-	CONF_OFFSET(output_all),
+	CONF_OFFSET(emulate_motion),
 	copy_bool,
 	print_bool
 	},
 	{
-	"output_normal",
+	"output_pictures",
 	"\n############################################################\n"
 	"# Image File Output\n"
 	"############################################################\n\n"
@@ -587,12 +587,12 @@ config_param config_params[] = {
 	"# Picture with motion nearest center of picture is saved when set to 'center'.\n"
 	"# Can be used as preview shot for the corresponding movie.",
 	0,
-	CONF_OFFSET(output_normal),
+	CONF_OFFSET(output_pictures),
 	copy_string,
 	print_string
 	},
 	{
-	"output_motion",
+	"output_debug_pictures",
 	"# Output pictures with only the pixels moving object (ghost images) (default: off)",
 	0,
 	CONF_OFFSET(motion_img),
@@ -618,7 +618,7 @@ config_param config_params[] = {
 	},
 #ifdef HAVE_FFMPEG
 	{
-	"ffmpeg_cap_new",
+	"ffmpeg_output_movies",
 	"\n############################################################\n"
 	"# FFMPEG related options\n"
 	"# Film (movie) file output, and deinterlacing of the video input\n"
@@ -627,16 +627,16 @@ config_param config_params[] = {
 	"############################################################\n\n"
 	"# Use ffmpeg to encode movies in realtime (default: off)",
 	0,
-	CONF_OFFSET(ffmpeg_cap_new),
+	CONF_OFFSET(ffmpeg_output),
 	copy_bool,
 	print_bool
 	},
 	{
-	"ffmpeg_cap_motion",
+	"ffmpeg_output_debug_movies",
 	"# Use ffmpeg to make movies with only the pixels moving\n"
 	"# object (ghost images) (default: off)",
 	0,
-	CONF_OFFSET(ffmpeg_cap_motion),
+	CONF_OFFSET(ffmpeg_output_debug),
 	copy_bool,
 	print_bool
 	},
@@ -733,8 +733,11 @@ config_param config_params[] = {
 	"# leading spaces\n"
 	"############################################################\n\n"
 	"# Locate and draw a box around the moving object.\n"
-	"# Valid values: on, off and preview (default: off)\n"
-	"# Set to 'preview' will only draw a box in preview_shot pictures.",
+	"# Valid values: on, off, red, preview, center, center_red (default: off)\n"
+	"# Set to 'red' will draw a red box around the moving object.\n"
+	"# Set to 'preview' will only draw a box in preview_shot pictures.\n"
+	"# Set to 'center' will draw a little cross to mark center.\n"
+	"# Set to 'redcross' will draw a little red cross to mark center.",
 	0,
 	CONF_OFFSET(locate_motion),
 	copy_string,
@@ -1100,7 +1103,7 @@ config_param config_params[] = {
 	{
 	"on_event_start",
 	"# Command to be executed when an event starts. (default: none)\n"
-	"# An event starts at first motion detected after a period of no motion defined by gap ",
+	"# An event starts at first motion detected after a period of no motion defined by event_gap ",
 	0,
 	CONF_OFFSET(on_event_start),
 	copy_string,
@@ -1109,7 +1112,7 @@ config_param config_params[] = {
 	{
 	"on_event_end",
 	"# Command to be executed when an event ends after a period of no motion\n"
-	"# (default: none). The period of no motion is defined by option gap.",
+	"# (default: none). The period of no motion is defined by option event_gap.",
 	0,
 	CONF_OFFSET(on_event_end),
 	copy_string,

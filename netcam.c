@@ -592,7 +592,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 					motion_log(-1, 0, "HTTP Result code %d", ret);
 				free(header);
 				if (netcam->connect_keepalive) {
-					/* Cannot unset netcam->cnt->conf.netcam_http as it is assigned const */
+					/* Cannot unset netcam->cnt->conf.netcam_keepalive as it is assigned const */
 					/* But we do unset the netcam keepalive flag which was set in netcam_start */
 					/* This message is logged as Information as it would be useful to know */
 					/* if your netcam often returns bad HTTP result codes */
@@ -2060,7 +2060,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
 	memset(netcam->response, 0, sizeof(struct rbuf));
 
 	if (debug_level > CAMERA_INFO)
-		motion_log(LOG_INFO, 0, "netcam_http_build_url: Netcam has flags: HTTP1.0: %s HTTP1.1: %s Keep-Alive %s.", 
+		motion_log(LOG_INFO, 0, "netcam_http_build_url: Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.", 
 		                        netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
 		                        netcam->connect_keepalive ? "ON":"OFF");
 
@@ -2722,22 +2722,22 @@ int netcam_start(struct context *cnt)
 	 * in the context structures (cnt->...) only.
 	 */
 
-	if (!strcmp(cnt->conf.netcam_http, "keep_alive")) {
+	if (!strcmp(cnt->conf.netcam_keepalive, "force")) {
         	netcam->connect_http_10   = TRUE;
         	netcam->connect_http_11   = FALSE;
         	netcam->connect_keepalive = TRUE;
-	} else if (!strcmp(cnt->conf.netcam_http, "1.0") || !strcmp(cnt->conf.netcam_http, "1.0")) {
+	} else if (!strcmp(cnt->conf.netcam_keepalive, "off")) {
         	netcam->connect_http_10   = TRUE;
         	netcam->connect_http_11   = FALSE;
         	netcam->connect_keepalive = FALSE;
-	} else if (!strcmp(cnt->conf.netcam_http, "1.1")) {
+	} else if (!strcmp(cnt->conf.netcam_keepalive, "on")) {
         	netcam->connect_http_10   = FALSE;
         	netcam->connect_http_11   = TRUE;
         	netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default */
 	}
 	if (debug_level > CAMERA_INFO)
-		motion_log(LOG_INFO, 0, "netcam_start: Netcam_http parameter '%s' converts to flags: HTTP1.0:" 
-		                        "%s HTTP1.1: %s Keep-Alive %s.", cnt->conf.netcam_http, 
+		motion_log(LOG_INFO, 0, "netcam_start: Netcam_http parameter '%s' converts to flags: HTTP/1.0:" 
+		                        "%s HTTP/1.1: %s Keep-Alive %s.", cnt->conf.netcam_keepalive, 
 		                        netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
 		                        netcam->connect_keepalive ? "ON":"OFF");
 

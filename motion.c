@@ -382,7 +382,13 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 
 	/* Draw location */
 	if (cnt->locate_motion == LOCATE_ON)
+		alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
+	else if (cnt->locate_motion == LOCATE_REDBOX)
 		alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
+	else if (cnt->locate_motion == LOCATE_CENTER)
+		alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CENTER);
+	else if (cnt->locate_motion == LOCATE_REDCROSS)
+		alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_CENTER);
 
 	/* Calculate how centric motion is if configured preview center*/
 	if (cnt->new_img & NEWIMG_CENTER) {
@@ -550,13 +556,13 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 		/* Store it as a preview image, only if it have motion */
 		if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_MOTION)
 		{
-			/* Check for most significant preview-shot when output_normal=best */
+			/* Check for most significant preview-shot when output_pictures=best */
 			if (cnt->new_img & NEWIMG_BEST) {
 				if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].diffs > cnt->imgs.preview_image.diffs) {
 					image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
 				}
 			}
-			/* Check for most significant preview-shot when output_normal=center */
+			/* Check for most significant preview-shot when output_pictures=center */
 			if (cnt->new_img & NEWIMG_CENTER) {
 				if(cnt->imgs.image_ring[cnt->imgs.image_ring_out].cent_dist < cnt->imgs.preview_image.cent_dist) {
 					image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
@@ -1435,16 +1441,16 @@ static void *motion_loop(void *arg)
 			 */
 
 			/* Smartmask overlay */
-			if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
+			if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug || cnt->conf.setup_mode) )
 				overlay_smartmask(cnt, cnt->imgs.out);
 
 			/* Largest labels overlay */
-			if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
+			if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug || cnt->conf.setup_mode) )
 				overlay_largest_label(cnt, cnt->imgs.out);
 
 
 			/* Fixed mask overlay */
-			if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_cap_motion || cnt->conf.setup_mode) )
+			if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug || cnt->conf.setup_mode) )
 				overlay_fixed_mask(cnt, cnt->imgs.out);
 
 			/* Initialize the double sized characters if needed. */
@@ -1507,11 +1513,11 @@ static void *motion_loop(void *arg)
 
 			/* If motion has been detected we take action and start saving
 			 * pictures and movies etc by calling motion_detected().
-			 * Is output_all enabled we always call motion_detected()
+			 * Is emulate_motion enabled we always call motion_detected()
 			 * If post_capture is enabled we also take care of this in the this
 			 * code section.
 			 */
-			if ( cnt->conf.output_all && (cnt->startup_frames == 0) ) {
+			if ( cnt->conf.emulate_motion && (cnt->startup_frames == 0) ) {
 				cnt->detecting_motion = 1;
 				/* Setup the postcap counter */
 				cnt->postcap = cnt->conf.post_capture;
@@ -1603,7 +1609,7 @@ static void *motion_loop(void *arg)
 			/* Now test for quiet longer than 'gap' OR make movie as decided in
 			 * previous statement.
 			 */
-			if (((cnt->currenttime - cnt->lasttime >= cnt->conf.gap) && cnt->conf.gap > 0) || cnt->makemovie) {
+			if (((cnt->currenttime - cnt->lasttime >= cnt->conf.event_gap) && cnt->conf.event_gap > 0) || cnt->makemovie) {
 				if (cnt->event_nr == cnt->prev_event || cnt->makemovie) {
 
 					/* Flush image buffer */
@@ -1801,19 +1807,25 @@ static void *motion_loop(void *arg)
 
 		/* Check for some config parameter changes but only every second */
 		if (cnt->shots == 0){
-			if (strcasecmp(cnt->conf.output_normal, "on") == 0)
+			if (strcasecmp(cnt->conf.output_pictures, "on") == 0)
 				cnt->new_img = NEWIMG_ON;
-			else if (strcasecmp(cnt->conf.output_normal, "first") == 0)
+			else if (strcasecmp(cnt->conf.output_pictures, "first") == 0)
 				cnt->new_img = NEWIMG_FIRST;
-			else if (strcasecmp(cnt->conf.output_normal, "best") == 0)
+			else if (strcasecmp(cnt->conf.output_pictures, "best") == 0)
 				cnt->new_img = NEWIMG_BEST;
-			else if (strcasecmp(cnt->conf.output_normal, "center") == 0)
+			else if (strcasecmp(cnt->conf.output_pictures, "center") == 0)
 				cnt->new_img = NEWIMG_CENTER;
 			else
 				cnt->new_img = NEWIMG_OFF;
 
 			if (strcasecmp(cnt->conf.locate_motion, "on") == 0)
 				cnt->locate_motion = LOCATE_ON;
+			else if (strcasecmp(cnt->conf.locate_motion, "redbox") == 0)
+				cnt->locate_motion = LOCATE_REDBOX;
+			else if (strcasecmp(cnt->conf.locate_motion, "center") == 0)
+				cnt->locate_motion = LOCATE_CENTER;
+			else if (strcasecmp(cnt->conf.locate_motion, "redcross") == 0)
+				cnt->locate_motion = LOCATE_REDCROSS;
 			else if (strcasecmp(cnt->conf.locate_motion, "preview") == 0)
 				cnt->locate_motion = LOCATE_PREVIEW;
 			else

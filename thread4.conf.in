@@ -13,12 +13,12 @@
 netcam_url http://192.168.1.6:8093/
 
 # The setting for keep-alive of network socket, should improve performance on compatible net cameras.
-# 1.0 : the historical implementation using HTTP/1.0, closing the socket after each http request.
-# keep_alive : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
-# 1.1 : Use HTTP/1.1 requests that support keep alive as default.
-# Default: 1.0
-netcam_http keep_alive
-
+# off : the historical implementation using HTTP/1.0, closing the socket after each http request.
+# force : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
+# on : Use HTTP/1.1 requests that support keep alive as default.
+# Default: off 
+netcam_keepalive force
+ 
 # The video input to be used (default: 8)
 # Should normally be set to 1 for video/TV cards, and 8 for USB cameras 
 input 1
@@ -31,7 +31,7 @@ text_left CAMERA 4
 
 ############################################################
 # Target Directories and filenames For Images And Films
-# For the options snapshot_, jpeg_, mpeg_ and timelapse_filename
+# For the options snapshot_, picture_, mpeg_ and timelapse_filename
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,

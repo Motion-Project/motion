@@ -8,6 +8,10 @@ Features
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinksysWVC200SupportPatch ( ... )  
    * Add draw a RED box around the movement as default (Joerg Weber)
    * Add write/read nonblock functions in webhttpd( timeout on read/write). (Angel Carpintero) 
+   * Added support for ffmpeg-2008-04-09 port version of FreeBSD. (Angel Carpintero)
+   * More changes in option names from http://www.lavrsen.dk/twiki/bin/view/Motion/IntuitiveOptionNamesDiscussion
+     (Angel Carpintero)
+   * motion_locate new parameter names : red , center , redcross  instead of only on, off. (Angel Carpintero)
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos

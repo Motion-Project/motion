@@ -24,7 +24,7 @@ text_left CAMERA 2
 
 ############################################################
 # Target Directories and filenames For Images And Films
-# For the options snapshot_, jpeg_, mpeg_ and timelapse_filename
+# For the options snapshot_, picture_, mpeg_ and timelapse_filename
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,

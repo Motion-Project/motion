@@ -357,7 +357,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	char stamp[PATH_MAX];
 	const char *moviepath;
 
-	if (!cnt->conf.ffmpeg_cap_new && !cnt->conf.ffmpeg_cap_motion)
+	if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug)
 		return;
 
 	cnt->movie_last_shot = -1;
@@ -385,7 +385,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 	snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
 	snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
-	if (cnt->conf.ffmpeg_cap_new) {
+	if (cnt->conf.ffmpeg_output) {
 		if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
 			convbuf = mymalloc((width * height) / 2);
 			y = img;
@@ -398,7 +398,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			u = img + width * height;
 			v = u + (width * height) / 4;
 		}
-		if ( (cnt->ffmpeg_new =
+		if ( (cnt->ffmpeg_output =
 		      ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
 		                  cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL) {
@@ -406,10 +406,10 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			cnt->finish = 1;
 			return;
 		}
-		((struct ffmpeg *)cnt->ffmpeg_new)->udata = convbuf;
+		((struct ffmpeg *)cnt->ffmpeg_output)->udata = convbuf;
 		event(cnt, EVENT_FILECREATE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
 	}
-	if (cnt->conf.ffmpeg_cap_motion) {
+	if (cnt->conf.ffmpeg_output_debug) {
 		if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
 			convbuf = mymalloc((width * height) / 2);
 			y = cnt->imgs.out;
@@ -423,7 +423,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			convbuf = NULL;
 		}
 
-		if ( (cnt->ffmpeg_motion =
+		if ( (cnt->ffmpeg_output_debug =
 		      ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
 		                  cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL){
@@ -431,7 +431,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			cnt->finish = 1;
 			return;
 		}
-		cnt->ffmpeg_motion->udata = convbuf;
+		cnt->ffmpeg_output_debug->udata = convbuf;
 		event(cnt, EVENT_FILECREATE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, NULL);
 	}
 }
@@ -506,7 +506,7 @@ static void event_ffmpeg_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
 {
-	if (cnt->ffmpeg_new)
+	if (cnt->ffmpeg_output)
 	{
 		int width = cnt->imgs.width;
 		int height = cnt->imgs.height;
@@ -519,14 +519,14 @@ static void event_ffmpeg_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
 			u = y + (width * height);
 		
 		v = u + (width * height) / 4;
-		if (ffmpeg_put_other_image(cnt->ffmpeg_new, y, u, v) == -1){
+		if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v) == -1){
 			cnt->finish = 1;
 			cnt->restart = 0;
 		}	
 	}
 	
-	if (cnt->ffmpeg_motion) {
-		if (ffmpeg_put_image(cnt->ffmpeg_motion) == -1){
+	if (cnt->ffmpeg_output_debug) {
+		if (ffmpeg_put_image(cnt->ffmpeg_output_debug) == -1){
 			cnt->finish = 1;
 			cnt->restart = 0;
 		}	
@@ -539,19 +539,19 @@ static void event_ffmpeg_closefile(struct context *cnt,
             struct tm *tm ATTRIBUTE_UNUSED)
 {
 	
-	if (cnt->ffmpeg_new) {
-		if (cnt->ffmpeg_new->udata)
-			free(cnt->ffmpeg_new->udata);
-		ffmpeg_close(cnt->ffmpeg_new);
-		cnt->ffmpeg_new = NULL;
+	if (cnt->ffmpeg_output) {
+		if (cnt->ffmpeg_output->udata)
+			free(cnt->ffmpeg_output->udata);
+		ffmpeg_close(cnt->ffmpeg_output);
+		cnt->ffmpeg_output = NULL;
 
 		event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
 	}
-	if (cnt->ffmpeg_motion) {
-		if (cnt->ffmpeg_motion->udata)
-			free(cnt->ffmpeg_motion->udata);
-		ffmpeg_close(cnt->ffmpeg_motion);
-		cnt->ffmpeg_motion = NULL;
+	if (cnt->ffmpeg_output_debug) {
+		if (cnt->ffmpeg_output_debug->udata)
+			free(cnt->ffmpeg_output_debug->udata);
+		ffmpeg_close(cnt->ffmpeg_output_debug);
+		cnt->ffmpeg_output_debug = NULL;
 
 		event(cnt, EVENT_FILECLOSE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, NULL);
 	}

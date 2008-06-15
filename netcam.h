@@ -158,13 +158,15 @@ typedef struct netcam_context {
 	                               specified as something else by
 	                               the user */
 
-	int connect_http_10;	    /* set to TRUE if HTTP 1.0 connection */
+	int connect_http_10;	    /* set to TRUE if HTTP 1.0 connection 
+	                               (netcam_keepalive off) */
 
-	int connect_http_11;	    /* set to TRUE if HTTP 1.1 connection */
+	int connect_http_11;	    /* set to TRUE if HTTP 1.1 connection 
+				       (netcam_keepalive on)  */
 
-	int connect_keepalive;      /* set to TRUE if connection maintained
-                                       after a request, otherwise FALSE to
-                                       close down the socket each time */
+	int connect_keepalive;      /* set to TRUE if connection maintained after 
+				       a request, otherwise FALSE to close down 
+				       the socket each time (netcam_keealive force) */
 
 	int keepalive_thisconn;     /* set to TRUE if cam has sent 'Keep-Alive' in this connection */
 

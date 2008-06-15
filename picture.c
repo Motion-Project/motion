@@ -660,7 +660,7 @@ void preview_save(struct context *cnt)
 		/* Use filename of movie i.o. jpeg_filename when set to 'preview' */
 		use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 	
-		if (cnt->ffmpeg_new && !use_imagepath){
+		if (cnt->ffmpeg_output && !use_imagepath){
 			/* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
 			basename_len = strlen(cnt->newfilename) - 3;
 			strncpy(previewname, cnt->newfilename, basename_len);
