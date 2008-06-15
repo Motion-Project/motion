@@ -628,7 +628,7 @@ static int motion_init(struct context *cnt)
 	motion_log(LOG_DEBUG, 0, "Thread %d started", (unsigned long)pthread_getspecific(tls_key_threadnr));
 
 	if (!cnt->conf.filepath)
-		cnt->conf.filepath = strdup(".");
+		cnt->conf.filepath = mystrdup(".");
 
 	/* set the device settings */
 	cnt->video_dev = vid_start(cnt);
@@ -2500,6 +2500,7 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 	return dummy;
 }
 
+
 /**
  * create_path
  *
@@ -2526,7 +2527,7 @@ int create_path(const char *path)
 		start = strchr(path, '/');
 
 	while(start) {
-		char *buffer = strdup(path);
+		char *buffer = mystrdup(path);
 		buffer[start-path] = 0x00;
 
 		if (mkdir(buffer, mode) == -1 && errno != EEXIST) {

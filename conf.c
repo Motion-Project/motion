@@ -35,7 +35,7 @@
 #ifndef HAVE_GET_CURRENT_DIR_NAME
 char *get_current_dir_name(void)
 {
-	char *buf = malloc(MAXPATHLEN);
+	char *buf = mymalloc(MAXPATHLEN);
 	getwd(buf);
 	return buf;
 }
@@ -1178,7 +1178,7 @@ config_param config_params[] = {
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
 	{
-	"sql_log_image",
+	"sql_log_picture",
 	"\n############################################################\n"
 	"# Common Options For MySQL and PostgreSQL database features.\n"
 	"# Options require the MySQL/PostgreSQL options to be active also.\n"
@@ -1832,7 +1832,7 @@ char *mystrcpy(char *to, const char *from)
 char *mystrdup(const char *from)
 {
 	char *tmp;
-	int stringlength;
+	size_t stringlength;
 
 	if (from == NULL || !strlen(from)) {
 		tmp = NULL;

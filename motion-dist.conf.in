@@ -546,8 +546,8 @@ quiet on
 # Options require the MySQL/PostgreSQL options to be active also.
 ############################################################
 
-# Log to the database when creating motion triggered image file  (default: on)
-sql_log_image on
+# Log to the database when creating motion triggered picture file  (default: on)
+sql_log_picture on
 
 # Log to the database when creating a snapshot image file (default: on)
 sql_log_snapshot on

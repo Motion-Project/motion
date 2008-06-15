@@ -304,7 +304,7 @@ static char *replace(const char *str, const char *old, const char *new)
     } else
         retlen = strlen(str);
 
-    ret = malloc(retlen + 1);
+    ret = mymalloc(retlen + 1);
 
     for (r = ret, p = str; (q = strstr(p, old)) != NULL; p = q + oldlen) {
         /* this is undefined if q - p > PTRDIFF_MAX */
@@ -407,7 +407,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 							
 							if (!strcmp(retval,"")) {
 								free(retval);
-								retval = strdup("No threads");
+								retval = mystrdup("No threads");
 							} else {
 								char *temp = retval;
 								size_t retval_miss = 0;
@@ -430,7 +430,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 								}
 								free(retval);
 								retval = NULL;
-								retval = strdup(thread_strings);
+								retval = mystrdup(thread_strings);
 							}
 							
 							sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
@@ -536,28 +536,28 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
 						}
 					} else {
 						char *type = NULL;
-						type = strdup(config_type(&config_params[i]));
+						type = mystrdup(config_type(&config_params[i]));
 
 						if (!strcmp(type, "string")) {
 							char *value = NULL;
 							conf_cmdparse(cnt+thread, config_params[i].param_name, value);
 							free(type);
-							type = strdup("(null)");
+							type = mystrdup("(null)");
 						} else if (!strcmp(type, "int")) {
 							free(type);
-							type = strdup("0");
+							type = mystrdup("0");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
 						} else if (!strcmp(type, "short")) {
 							free(type);
-							type = strdup("0");
+							type = mystrdup("0");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
 						} else if (!strcmp(type, "bool")) {
 							free(type);
-							type = strdup("off");
+							type = mystrdup("off");
 							conf_cmdparse(cnt+thread, config_params[i].param_name, type);
 						} else {
 							free(type);
-							type = strdup("unknown");
+							type = mystrdup("unknown");
 						}
 
 						if (cnt[0]->conf.webcontrol_html_output) {
@@ -1888,7 +1888,7 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 	if (*url == '/' ) {
 		unsigned short int i = 0;
 		char *res=NULL;
-		res = malloc(2048);
+		res = mymalloc(2048);
 
 		/* get the number of threads */
 		while (cnt[++i]);

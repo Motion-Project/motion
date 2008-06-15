@@ -173,7 +173,7 @@ int header_extract_number(const char *header, void *closure)
 /* Strdup HEADER, and place the pointer to CLOSURE.  */
 int header_strdup(const char *header, void *closure)
 {
-	*(char **)closure = strdup(header);
+	*(char **)closure = mystrdup(header);
 	return 1;
 }
 

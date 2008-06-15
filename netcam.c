@@ -129,7 +129,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
 	if (m.rm_so != -1) {
 		len = m.rm_eo - m.rm_so;
 
-		if ((match = (char *) malloc(len + 1)) != NULL) {
+		if ((match = (char *) mymalloc(len + 1)) != NULL) {
 			strncpy(match, input + m.rm_so, len);
 			match[len] = '\0';
 		}
@@ -644,7 +644,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 						if (netcam->boundary)
 							free(netcam->boundary);
 
-						netcam->boundary = strdup(boundary + 9);
+						netcam->boundary = mystrdup(boundary + 9);
 						/*
 						 * HTTP protocol apparently permits the boundary string
 						 * to be quoted (the Lumenera does this, which caused
@@ -2322,11 +2322,11 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
 		char *cptr;
 
 		if ((cptr = strchr(ptr, ':')) == NULL)
-			netcam->ftp->user = strdup(ptr);
+			netcam->ftp->user = mystrdup(ptr);
 		else {
 			netcam->ftp->user = mymalloc((cptr - ptr));
 			memcpy(netcam->ftp->user, ptr,(cptr - ptr));
-			netcam->ftp->passwd = strdup(cptr + 1);
+			netcam->ftp->passwd = mystrdup(cptr + 1);
 		}
 	}
 

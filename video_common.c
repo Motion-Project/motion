@@ -396,9 +396,9 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
 	unsigned char *y, *u, *v;
 	int loop;
 
-	yuv[0] = malloc(width * height * sizeof(yuv[0][0]));
-	yuv[1] = malloc(width * height / 4 * sizeof(yuv[1][0]));
-	yuv[2] = malloc(width * height / 4 * sizeof(yuv[2][0]));
+	yuv[0] = mymalloc(width * height * sizeof(yuv[0][0]));
+	yuv[1] = mymalloc(width * height / 4 * sizeof(yuv[1][0]));
+	yuv[2] = mymalloc(width * height / 4 * sizeof(yuv[2][0]));
 
 
 	decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
