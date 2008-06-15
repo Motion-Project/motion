@@ -121,8 +121,12 @@ URLProtocol mpeg1_file_protocol = {
  * file_procotol has been removed from avio.h
  * 
  */ 
-   
+
+#ifdef FFMPEG_NEW_INCLUDES
+#include <libavutil/avstring.h>
+#else
 #include "avstring.h"
+#endif
 
 static int file_open(URLContext *h, const char *filename, int flags)
 {

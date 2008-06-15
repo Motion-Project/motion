@@ -1,3 +1,5 @@
+Features
+    * Added support for ffmpeg-2008-04-09 port version of FreeBSD.
 
 Bugfixes
     * Fix Problem Encoding 1280x1024 resolution videos  

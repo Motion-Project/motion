@@ -3,7 +3,12 @@
 
 #ifdef HAVE_FFMPEG
 #include <errno.h>
+
+#ifdef FFMPEG_NEW_INCLUDES
+#include <libavformat/avformat.h>
+#else
 #include <avformat.h>
+#endif
 
 #ifndef AVERROR /* 0.4.8 & 0.4.9-pre1 */
 
