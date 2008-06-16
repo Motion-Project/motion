@@ -734,7 +734,7 @@ config_param config_params[] = {
 	"############################################################\n\n"
 	"# Locate and draw a box around the moving object.\n"
 	"# Valid values: on, off, red, preview, center, center_red (default: off)\n"
-	"# Set to 'red' will draw a red box around the moving object.\n"
+	"# Set to 'redbox' will draw a red box around the moving object.\n"
 	"# Set to 'preview' will only draw a box in preview_shot pictures.\n"
 	"# Set to 'center' will draw a little cross to mark center.\n"
 	"# Set to 'redcross' will draw a little red cross to mark center.",
