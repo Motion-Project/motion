@@ -23,15 +23,15 @@ mandir      = @mandir@
 sysconfdir  = @sysconfdir@
 datadir     = @datadir@
 datarootdir = @datarootdir@
-docdir      = @DOC_DIR@
-examplesdir = $(docdir)/examples
+docdir      = $(datadir)/doc/@PACKAGE_NAME@-@PACKAGE_VERSION@ 
+examplesdir = $(datadir)/@PACKAGE_NAME@-@PACKAGE_VERSION@/examples
 
 ################################################################################
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
 CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" \
-	       -Dsysconfdir=\"$(sysconfdir)\" -Ddocdir=\"$(docdir)\"
+	       -Dsysconfdir=\"$(sysconfdir)\" 
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@ 
 VIDEO_OBJ    = @VIDEO@
@@ -167,6 +167,7 @@ uninstall remove: pre-build-info
 	rm -f $(mandir)/man1/motion.1
 	rm -f $(sysconfdir)/motion-dist.conf
 	rm -rf $(docdir)
+	rm -rf $(examplesdir)
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Uninstall complete!"
 	@echo

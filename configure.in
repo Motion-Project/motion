@@ -1111,18 +1111,15 @@ if test $prefix = "NONE";then
 	else
 		BIN_PATH="$BIN_PATH/$bindir"
 	fi
-	DOC_DIR="$ac_default_prefix/share/doc/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 else
 	if test $exec_prefix = "NONE";then
 		BIN_PATH="$prefix/bin"
 	else
 		BIN_PATH="$prefix/$bindir"
 	fi
-	DOC_DIR="$prefix/share/doc/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 fi
 
 
-AC_SUBST(DOC_DIR)
 AC_SUBST(BIN_PATH)
 
 AC_CONFIG_FILES([
