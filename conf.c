@@ -966,7 +966,7 @@ config_param config_params[] = {
 	"\n############################################################\n"
 	"# Tracking (Pan/Tilt)\n"
 	"############################################################\n\n"
-	"# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo)\n"
+	"# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo, 6=servo)\n"
 	"# The generic type enables the definition of motion center and motion size to\n"
 	"# be used with the conversion specifiers for options like on_motion_detected",
 	0,
@@ -999,12 +999,28 @@ config_param config_params[] = {
 	print_short
 	},
 	{
+	"track_motorx_reverse",
+	"# Set motorx reverse (default: off)",
+	0,
+	TRACK_OFFSET(motorx_reverse),
+	copy_bool,
+	print_bool
+	},
+	{
 	"track_motory",
 	"# Motor number for y-axis (default: 0)",
 	0,
 	TRACK_OFFSET(motory),
 	copy_short,
 	print_short
+	},
+	{
+	"track_motory_reverse",
+	"# Set motory reverse (default: off)",
+	0,
+	TRACK_OFFSET(motory_reverse),
+	copy_bool,
+	print_bool
 	},
 	{
 	"track_maxx",
@@ -1015,10 +1031,42 @@ config_param config_params[] = {
 	print_short
 	},
 	{
+	"track_minx",
+	"# Minimum value on x-axis (default: 0)",
+	0,
+	TRACK_OFFSET(minx),
+	copy_short,
+	print_short
+	},
+	{
 	"track_maxy",
 	"# Maximum value on y-axis (default: 0)",
 	0,
 	TRACK_OFFSET(maxy),
+	copy_short,
+	print_short
+	},
+	{
+	"track_miny",
+	"# Minimum value on y-axis (default: 0)",
+	0,
+	TRACK_OFFSET(miny),
+	copy_short,
+	print_short
+	},
+	{
+	"track_homex",
+	"# Center value on x-axis (default: 0)",
+	0,
+	TRACK_OFFSET(homex),
+	copy_short,
+	print_short
+	},
+	{
+	"track_homey",
+	"# Center value on y-axis (default: 0)",
+	0,
+	TRACK_OFFSET(homey),
 	copy_short,
 	print_short
 	},

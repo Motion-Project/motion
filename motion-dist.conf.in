@@ -438,30 +438,48 @@ webcontrol_html_output on
 
 ############################################################
 # Tracking (Pan/Tilt)
-############################################################
+#############################################################
 
-# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo)
+# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo, 6=servo)
 # The generic type enables the definition of motion center and motion size to
 # be used with the conversion specifiers for options like on_motion_detected
-track_type 0
+track_type 0 
 
 # Enable auto tracking (default: off)
 track_auto off
 
 # Serial port of motor (default: none)
-; track_port value
+;track_port /dev/ttyS0
 
 # Motor number for x-axis (default: 0)
-track_motorx 0
+;track_motorx 0
+
+# Set motorx reverse (default: 0)
+;track_motorx_reverse 0
 
 # Motor number for y-axis (default: 0)
-track_motory 0
+;track_motory 1
+
+# Set motory reverse (default: 0)
+;track_motory_reverse 0
 
 # Maximum value on x-axis (default: 0)
-track_maxx 0
+;track_maxx 200
+
+# Minimum value on x-axis (default: 0)
+;track_minx 50
 
 # Maximum value on y-axis (default: 0)
-track_maxy 0
+;track_maxy 200
+
+# Minimum value on y-axis (default: 0)
+;track_miny 50
+
+# Center value on x-axis (default: 0)
+;track_homex 128
+
+# Center value on y-axis (default: 0)
+;track_homey 128
 
 # ID of an iomojo camera if used (default: 0)
 track_iomojo_id 0

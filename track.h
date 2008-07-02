@@ -10,6 +10,7 @@
 #define _INCLUDE_TRACK_H
 
 #include "alg.h"
+#include <termios.h>
 
 struct trackoptions {
 	int dev;
@@ -18,16 +19,18 @@ struct trackoptions {
 	char *port;
 	unsigned short int motorx;
 	unsigned short int motory;
-	unsigned short int maxx;
-	unsigned short int maxy;
+	int maxx;
+	int maxy;
+	int minx;
+	int miny;
 	unsigned short int stepsize;
 	unsigned short int speed;
+	unsigned short int homex;
+	unsigned short int homey;
 	unsigned short int iomojo_id;
 	unsigned short int active;
-	int panmin;
-	int panmax;
-	int tiltmin;
-	int tiltmax;
+	unsigned short int motorx_reverse;
+	unsigned short int motory_reverse;
 	unsigned short int minmaxfound;
 	unsigned short int step_angle_x;
 	unsigned short int step_angle_y;
@@ -53,6 +56,7 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 #define TRACK_TYPE_PWC          3
 #define TRACK_TYPE_GENERIC      4
 #define TRACK_TYPE_UVC          5
+#define TRACK_TYPE_SERVO        6
 
 /*
  * Some defines for the Serial stepper motor:
@@ -85,6 +89,51 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 #define STEPPER_COMMAND_DOWN_N  2
 #define STEPPER_COMMAND_UP      3
 #define STEPPER_COMMAND_DOWN    4
+
+
+
+/*
+ * Some defines for the Serial servo motor:
+ */
+
+/*
+ * Controlling:
+ * Three bytes are sent to the servo - BYTE1=SERVO_COMMAND BYTE2=COMMAND BYTE3=DATA
+ * eg, sending the command    01 02 08    would Command SERVO_COMMAND1 to move LEFT a total of 8 STEPS
+ *
+ * An extra command 0x08 has been added but here is the basic command set.
+ *
+ * 0x00 STATUS   - Current status byte will be returned, data byte ignored
+ * 0x01 LEFT_N   - Servo will take N Steps to the Left until it reaches the Servos safety limit
+ * 0x02 RIGHT_N  - Servo will take N Steps to the Right until it reaches the Servos safety limit
+ * 0x03 LEFT     - Servo will move to Left most position, data byte ignored.
+ * 0x04 RIGHT    - Servo will move to Right most position, data byte ignored.
+ * 0x05 SWEEP    - Servo will sweep between its extremes, data byte ignored.
+ * 0x06 STOP     -  Servo will Stop, data byte ignored
+ * 0x07 SPEED    - Set servos speed between 0 and 255.
+ * 0x08 ABSOLUTE - Set servo to absolute position between 0 and 255
+ * 0x09 POSITION - Get servo to absolute position between 0 and 255
+ * */
+
+#define SERVO_BAUDRATE        B9600
+
+#define SERVO_COMMAND_STATUS   0 
+#define SERVO_COMMAND_LEFT_N   1
+#define SERVO_COMMAND_RIGHT_N  2
+#define SERVO_COMMAND_LEFT     3
+#define SERVO_COMMAND_RIGHT    4
+#define SERVO_COMMAND_SWEEP    5
+#define SERVO_COMMAND_STOP     6
+#define SERVO_COMMAND_SPEED    7
+#define SERVO_COMMAND_ABSOLUTE 8
+#define SERVO_COMMAND_POSITION 9
+
+
+#define SERVO_COMMAND_UP_N     1
+#define SERVO_COMMAND_DOWN_N   2
+#define SERVO_COMMAND_UP       3
+#define SERVO_COMMAND_DOWN     4
+
 
 
 /*

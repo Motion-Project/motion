@@ -913,11 +913,12 @@ static void motion_cleanup(struct context *cnt)
 
 	rotate_deinit(cnt); /* cleanup image rotation data */
 
-	if(cnt->pipe != -1) {
+	if (cnt->pipe != -1) {
 		close(cnt->pipe);
 		cnt->pipe = -1;
 	}
-	if(cnt->mpipe != -1) {
+
+	if (cnt->mpipe != -1) {
 		close(cnt->mpipe);
 		cnt->mpipe = -1;
 	}
@@ -1012,6 +1013,9 @@ static void *motion_loop(void *arg)
 	for (j = 0; j < rolling_average_limit; j++)
 		rolling_average_data[j] = required_frame_time;
 
+
+	if (cnt->track.type)
+		cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
 	/* MAIN MOTION LOOP BEGINS HERE */
 	/* Should go on forever... unless you bought vaporware :) */

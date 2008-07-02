@@ -1675,7 +1675,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 					cent.height = relativecnt->imgs.height;
 					cent.x = 0;
 					cent.y = atoi(tiltvalue);
-					SLEEP(1,0);
+					// SLEEP(1,0);
 					cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, &cent, &relativecnt->imgs, 1);
 					if (cnt[thread]->moved) {
 						if (cnt[0]->conf.webcontrol_html_output) {
@@ -1739,6 +1739,32 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			else
 				response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
+	} else if (!strcmp(command, "center")) {
+		pointer = pointer+6;
+		length_uri = length_uri-6;
+		if (length_uri==0) {
+			struct context *setcnt;
+			setcnt = cnt[thread];
+			// 1000 is out of range for pwc
+			cnt[thread]->moved = track_center(setcnt, setcnt->video_dev, 1, 0, 0);
+			
+			if (cnt[0]->conf.webcontrol_html_output) {
+				send_template_ini_client(client_socket, ini_template);
+				sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
+				              "<br>track set center", thread, thread);
+				send_template(client_socket, res);
+				send_template_end_client(client_socket);
+			} else {
+				sprintf(res, "Thread %hu\n track set center\nDone\n", thread);
+				send_template_ini_client_raw(client_socket);
+				send_template_raw(client_socket, res);
+			}
+		} else {
+			/* error not valid command */
+			if (cnt[0]->conf.webcontrol_html_output) {
+				response_client(client_socket, not_found_response_valid_command, NULL);
+			} else response_client(client_socket, not_found_response_valid_command_raw, NULL);
+		}
 	} else if (!strcmp(command, "status")) {
 		pointer = pointer+6;
 		length_uri = length_uri-6;
@@ -1760,9 +1786,7 @@ static unsigned short int track(char *pointer, char *res, unsigned short int len
 			/* error not valid command */
 			if (cnt[0]->conf.webcontrol_html_output) {
 				response_client(client_socket, not_found_response_valid_command, NULL);
-			}
-			else
-				response_client(client_socket, not_found_response_valid_command_raw, NULL);
+			} else 	response_client(client_socket, not_found_response_valid_command_raw, NULL);
 		}
 	} else if (!strcmp(command, "auto")) {
 		pointer = pointer + 4;
@@ -2059,14 +2083,15 @@ static unsigned short int handle_get(int client_socket, const char *url, void *u
 								sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
 								             "<b>Thread %hd</b><br>\n"
 								             "<a href=/%hd/track/set>track set pan/tilt</a><br>\n"
+									     "<a href=/%hd/track/center>track center</a><br>\n"
 								             "<a href=/%hd/track/auto>track auto</a><br>\n"
 								             "<a href=/%hd/track/status>track status</a><br>\n",
-								             thread, thread, thread, thread, thread);
+								             thread, thread, thread, thread, thread, thread);
 								send_template(client_socket, res);
 								send_template_end_client(client_socket);
 							} else {
 								send_template_ini_client_raw(client_socket);
-								sprintf(res, "Thread %hd\nset pan/tilt\nauto\nstatus\n", thread);
+								sprintf(res, "Thread %hd\nset pan/tilt\ncenter\nauto\nstatus\n", thread);
 								send_template_raw(client_socket, res);
 							}
 						}
