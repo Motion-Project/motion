@@ -1244,7 +1244,7 @@ static unsigned short int detection(char *pointer, char *res, unsigned short int
 static unsigned short int track(char *pointer, char *res, unsigned short int length_uri, unsigned short int thread, 
 			int client_socket, void *userdata)
 {
-	char question;
+	char question='\0';
 	char command[256] = {'\0'};
 	struct context **cnt = userdata;
 

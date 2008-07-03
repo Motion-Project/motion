@@ -197,10 +197,11 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
 		if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
 			motion_log(LOG_ERR, 1, "%s: Unable to initialize serial device %s", 
 			           __FUNCTION__, cnt->track.port);
+			cnt->track.dev = -1;				   
 			return 0;
 		}
-		motion_log(LOG_INFO, 0, "Opened serial device %s and initialize, fd %i", 
-		           cnt->track.port, cnt->track.dev);
+		motion_log(LOG_INFO, 0, "$s: Opened serial device %s and initialize, fd %i", 
+		           __FUNCTION__, cnt->track.port, cnt->track.dev);
 	}
 
 	/* x-axis */
@@ -293,7 +294,7 @@ static int servo_open(struct context *cnt)
 	struct termios adtio;
 
 	if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
-		 motion_log(LOG_ERR, 1, "%s: Unable to open serial device %s",
+		motion_log(LOG_ERR, 1, "%s: Unable to open serial device %s",
 		            __FUNCTION__, cnt->track.port);
 		return 0;
 	}
@@ -310,6 +311,7 @@ static int servo_open(struct context *cnt)
 	if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
 		motion_log(LOG_INFO, 0, "%s: Unable to initialize serial device %s", 
 		           __FUNCTION__, cnt->track.port);
+		cnt->track.dev = -1;			   
 		return 0;
 	}
 
@@ -341,7 +343,7 @@ static unsigned short int servo_command(struct context *cnt, unsigned short int 
 
 	if (write(cnt->track.dev, buffer, 3) != 3){
 		motion_log(LOG_INFO, 0, "%s: port %s dev fd %i, motor %hu command %hu data %hu",
-		           cnt->track.port, cnt->track.dev, motor, command, data);
+		           __FUNCTION__, cnt->track.port, cnt->track.dev, motor, command, data);
 		return 0;
 	}
 
@@ -353,7 +355,7 @@ static unsigned short int servo_command(struct context *cnt, unsigned short int 
 	}
 
 	if (debug_level >= TRACK_DEBUG) 
-		motion_log(LOG_DEBUG, 0, "Command return %d", buffer[0]);
+		motion_log(LOG_DEBUG, 0, "%s: Command return %d", __FUNCTION__, buffer[0]);
 		
 
 	return buffer[0];
@@ -392,8 +394,9 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 
 			offset = cent->x * cnt->track.stepsize;
 
+
 			if ( (cnt->track.motorx_reverse && (offset > 0)) || 
-			     (!cnt->track.motory_reverse && (offset < 0)) ) 
+			     (!cnt->track.motorx_reverse && (offset < 0)) ) 
 				command = SERVO_COMMAND_LEFT_N;
 			else 
 				command = SERVO_COMMAND_RIGHT_N;
@@ -469,8 +472,14 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 			*/	
 
 			 /* Set Speed , TODO : it should be done only when speed changes */
+			 
 			servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
 			servo_command(cnt, cnt->track.motorx, command, data);
+
+			if (debug_level >= TRACK_DEBUG)
+			motion_log(LOG_DEBUG, 0, "%s: X cent->x %d, cent->y %d, reversex %d,"
+			           "reversey %d manual %d data %d command %d", __FUNCTION__, cent->x , cent->y,
+			           cnt->track.motorx_reverse, cnt->track.motory_reverse, manual, data , command);
 		}	
 
 		/* y-axis */
@@ -501,10 +510,16 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 			else if (data < cnt->track.miny)
 				data = cnt->track.miny;
 			*/	
+			
 	
 			 /* Set Speed , TODO : it should be done only when speed changes */
 			servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
 			servo_command(cnt, cnt->track.motory, command, data);
+ 		
+			if (debug_level >= TRACK_DEBUG)
+			motion_log(LOG_DEBUG, 0, "%s: Y cent->x %d, cent->y %d, reversex %d,"
+			           "reversey %d manual %d data %d command %d", __FUNCTION__, cent->x , cent->y,
+			           cnt->track.motorx_reverse, cnt->track.motory_reverse, manual, data , command);
 		}
 	}	
 
@@ -957,9 +972,10 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 	struct v4l2_control control_s;
 
 	if (debug_level >= TRACK_DEBUG) {
-		motion_log(LOG_DEBUG, 0, "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", 
-		           cnt->track.minx, cnt->track.maxx, cnt->track.miny, cnt->track.maxy );
-		motion_log(LOG_DEBUG, 0, "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ", x_angle, y_angle);
+		motion_log(LOG_DEBUG, 0, "%s: INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", 
+		           __FUNCTION__, cnt->track.minx, cnt->track.maxx, cnt->track.miny, cnt->track.maxy );
+		motion_log(LOG_DEBUG, 0, "%s: INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ", 
+		           __FUNCTION__, x_angle, y_angle);
 	}
 
 	if (x_angle <= cnt->track.maxx && x_angle >= cnt->track.minx)
@@ -979,7 +995,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 	pan.s16.tilt = -move_y_degrees * INCPANTILT;
 	
 	if (debug_level >= TRACK_DEBUG) 
-		motion_log(LOG_DEBUG, 0, "For_SET_ABS move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
+		motion_log(LOG_DEBUG, 0, "%s: For_SET_ABS move_X %d,move_Y %d", 
+		           __FUNCTION__, move_x_degrees, move_y_degrees);
 		
 	/* DWe 30.03.07 Must be broken in diff calls, because 
     	- one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
@@ -1015,8 +1032,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 		motion_log(LOG_DEBUG, 0, "%s: Found MINMAX = %d", __FUNCTION__, cnt->track.minmaxfound); 
 
 	if (cnt->track.dev != -1) {
-		motion_log(LOG_DEBUG, 0, "Before_ABS_Y_Angel : x= %d , Y= %d, ", 
-		           cnt->track.pan_angle, cnt->track.tilt_angle );
+		motion_log(LOG_DEBUG, 0, "%s: Before_ABS_Y_Angel : x= %d , Y= %d, ", 
+		           __FUNCTION__, cnt->track.pan_angle, cnt->track.tilt_angle );
 
 		if (move_x_degrees != -1) { 
 			cnt->track.pan_angle += move_x_degrees;
@@ -1027,8 +1044,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 		}
 
 		if (debug_level >= TRACK_DEBUG) 
-			motion_log(LOG_DEBUG, 0, " After_ABS_Y_Angel : x= %d , Y= %d , ", 
-			           cnt->track.pan_angle, cnt->track.tilt_angle );	
+			motion_log(LOG_DEBUG, 0, "%s: After_ABS_Y_Angel : x= %d , Y= %d", 
+			           __FUNCTION__, cnt->track.pan_angle, cnt->track.tilt_angle );	
 	}
 
 	return cnt->track.move_wait;
@@ -1186,7 +1203,8 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 	}
 	
   	if (debug_level >= TRACK_DEBUG) 
-		motion_log(LOG_DEBUG, 0, "Found MINMAX = %d", cnt->track.minmaxfound); 
+		motion_log(LOG_DEBUG, 0, "%s: Found MINMAX = %d", 
+		           __FUNCTION__, cnt->track.minmaxfound); 
 
 	if (cnt->track.minmaxfound == 1) {
 		if (debug_level >= TRACK_DEBUG) 
