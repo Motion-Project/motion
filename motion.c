@@ -451,7 +451,8 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 		}
 	}
 
-	if (cnt->track.type) {
+	/* if track enabled and auto track on */
+	if ((cnt->track.type) && (cnt->track.active)){
 		cnt->moved = track_move(cnt, dev, location, imgs, 0);
 	}
 }

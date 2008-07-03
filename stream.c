@@ -1,6 +1,6 @@
 /*
- *	stream.c ( based in stream.c )
- *	Streaming stream using jpeg images over a multipart/x-mixed-replace stream
+ *	stream.c ( based in webcam.c )
+ *	Streaming using jpeg images over a multipart/x-mixed-replace stream
  *	Copyright (C) 2002 Jeroen Vreeken (pe1rxq@amsat.org)
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -74,7 +74,7 @@ int http_bindsock(int port, int local)
 			                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
 			if (bind(sl, res->ai_addr, res->ai_addrlen) == 0){
-				motion_log(LOG_INFO, 0, "motion-stream Binded : %s addr: %s port: %s",
+				motion_log(LOG_INFO, 0, "motion-stream Bound : %s addr: %s port: %s",
 				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);	
 				break;
 			}

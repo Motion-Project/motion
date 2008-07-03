@@ -104,7 +104,8 @@ unsigned short int track_move(struct context *cnt, int dev, struct coord *cent, 
 {
 
 	if (debug_level >= TRACK_DEBUG)
-		motion_log(LOG_DEBUG, 0, "%s: manual %d", __FUNCTION__, manual);
+		motion_log(LOG_DEBUG, 0, "%s: manual %d track.active %d", 
+		           __FUNCTION__, manual, cnt->track.active);
 
 	if (!manual && !cnt->track.active)
 		return 0;
@@ -347,13 +348,13 @@ static unsigned short int servo_command(struct context *cnt, unsigned short int 
 	while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout+1);
 	
 	if (time(NULL) >= timeout+2) {
-		motion_log(LOG_INFO, 0, "%s: Status byte timeout!", __FUNCTION__);
+		motion_log(LOG_ERR, 0, "%s: Status byte timeout!", __FUNCTION__);
 		return 0;
 	}
 
-	if (debug_level >= TRACK_DEBUG) {
-		motion_log(LOG_INFO, 0, "Command return %d", buffer[0]);
-	}	
+	if (debug_level >= TRACK_DEBUG) 
+		motion_log(LOG_DEBUG, 0, "Command return %d", buffer[0]);
+		
 
 	return buffer[0];
 }
@@ -408,7 +409,6 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 			 /* Set Speed , TODO : it should be done only when speed changes */
 			servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
 			servo_command(cnt, cnt->track.motorx, command, data);
-			offset = 0;
 		}
 
 
@@ -541,18 +541,17 @@ static unsigned short int servo_center(struct context *cnt, int x_offset, int y_
 	}
 
 	
-	if (debug_level >= TRACK_DEBUG) {
+	if (debug_level >= TRACK_DEBUG) 
 		motion_log(LOG_DEBUG, 0, "%s: X-offset %d, Y-offset %d, x-position %d. y-position %d," 
 		           "reversex %d, reversey %d , stepsize %d", __FUNCTION__, x_offset, y_offset, 
 			   cnt->track.homex + (x_offset * cnt->track.stepsize), 
 		           cnt->track.homey + (y_offset * cnt->track.stepsize), 
 			   cnt->track.motorx_reverse, cnt->track.motory_reverse, 
 			   cnt->track.stepsize);	
-	}		   
 
 	/* x-axis */
 	if (cnt->track.motorx_reverse)
-		x_offset_abs = cnt->track.homex - (x_offset * cnt->track.stepsize);
+		x_offset_abs = (SERVO_REVERSE - cnt->track.homex) - (x_offset * cnt->track.stepsize);
 	else
 		x_offset_abs = cnt->track.homex + (x_offset * cnt->track.stepsize);
 
@@ -564,7 +563,7 @@ static unsigned short int servo_center(struct context *cnt, int x_offset, int y_
 
 	/* y-axis */
 	if (cnt->track.motory_reverse)
-		y_offset_abs = cnt->track.homey - (y_offset * cnt->track.stepsize);
+		y_offset_abs = (SERVO_REVERSE - cnt->track.homey) - (y_offset * cnt->track.stepsize);
 	else
 		y_offset_abs = cnt->track.homey + (y_offset * cnt->track.stepsize);
 

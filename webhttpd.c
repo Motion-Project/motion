@@ -2413,7 +2413,7 @@ void httpd_run(struct context **cnt)
 			setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( int ) );
 
 			if (bind(sd, res->ai_addr, res->ai_addrlen) == 0) {
-				motion_log(LOG_INFO, 0, "motion-httpd Binded : %s addr: %s port: %s",
+				motion_log(LOG_INFO, 0, "motion-httpd Bound : %s addr: %s port: %s",
 				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 				break;
 			}
