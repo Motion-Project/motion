@@ -392,7 +392,8 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 
 			offset = cent->x * cnt->track.stepsize;
 
-			if ((cnt->track.motorx_reverse) || (offset < 0))
+			if ( (cnt->track.motorx_reverse && (offset > 0)) || 
+			     (!cnt->track.motory_reverse && (offset < 0)) ) 
 				command = SERVO_COMMAND_LEFT_N;
 			else 
 				command = SERVO_COMMAND_RIGHT_N;
@@ -416,7 +417,8 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 
 			offset = cent->y * cnt->track.stepsize;	
 
-			if ((cnt->track.motory_reverse) || (offset < 0))
+			if ( (cnt->track.motory_reverse && (offset > 0)) || 
+			     (!cnt->track.motory_reverse && (offset < 0)) )
 				command = SERVO_COMMAND_UP_N;
 			else
 				command = SERVO_COMMAND_DOWN_N;
@@ -551,7 +553,7 @@ static unsigned short int servo_center(struct context *cnt, int x_offset, int y_
 
 	/* x-axis */
 	if (cnt->track.motorx_reverse)
-		x_offset_abs = (SERVO_REVERSE - cnt->track.homex) - (x_offset * cnt->track.stepsize);
+		x_offset_abs = (128 - cnt->track.homex) - (x_offset * cnt->track.stepsize) + 128;
 	else
 		x_offset_abs = cnt->track.homex + (x_offset * cnt->track.stepsize);
 
@@ -563,7 +565,7 @@ static unsigned short int servo_center(struct context *cnt, int x_offset, int y_
 
 	/* y-axis */
 	if (cnt->track.motory_reverse)
-		y_offset_abs = (SERVO_REVERSE - cnt->track.homey) - (y_offset * cnt->track.stepsize);
+		y_offset_abs = (128 - cnt->track.homey) - (y_offset * cnt->track.stepsize) + 128;
 	else
 		y_offset_abs = cnt->track.homey + (y_offset * cnt->track.stepsize);
 
@@ -910,7 +912,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 			return 0;
 		}
 
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, "%s: Reseting UVC camera to starting position", 
 			           __FUNCTION__);
 
@@ -925,7 +927,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 			return 0;
 		}
 
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, "%s: Getting camera range", __FUNCTION__);
 		
 
@@ -954,7 +956,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 
 	struct v4l2_control control_s;
 
-	if (debug_level >= CAMERA_DEBUG) {
+	if (debug_level >= TRACK_DEBUG) {
 		motion_log(LOG_DEBUG, 0, "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ", 
 		           cnt->track.minx, cnt->track.maxx, cnt->track.miny, cnt->track.maxy );
 		motion_log(LOG_DEBUG, 0, "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ", x_angle, y_angle);
@@ -976,7 +978,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 	pan.s16.pan = -move_x_degrees * INCPANTILT;
 	pan.s16.tilt = -move_y_degrees * INCPANTILT;
 	
-	if (debug_level >= CAMERA_DEBUG) 
+	if (debug_level >= TRACK_DEBUG) 
 		motion_log(LOG_DEBUG, 0, "For_SET_ABS move_X %d,move_Y %d", move_x_degrees, move_y_degrees);
 		
 	/* DWe 30.03.07 Must be broken in diff calls, because 
@@ -1009,7 +1011,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 		}	
 	}
 
-	if (debug_level >= CAMERA_DEBUG) 
+	if (debug_level >= TRACK_DEBUG) 
 		motion_log(LOG_DEBUG, 0, "%s: Found MINMAX = %d", __FUNCTION__, cnt->track.minmaxfound); 
 
 	if (cnt->track.dev != -1) {
@@ -1024,7 +1026,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 			cnt->track.tilt_angle += move_y_degrees;
 		}
 
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, " After_ABS_Y_Angel : x= %d , Y= %d , ", 
 			           cnt->track.pan_angle, cnt->track.tilt_angle );	
 	}
@@ -1057,7 +1059,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 			           __FUNCTION__);
 			return 0;
 		}
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, "%s: Reseting UVC camera to starting position", __FUNCTION__);
 		
 		/* set the "helpvalue" back to null because after reset CAM should be in x=0 and not 70 */
@@ -1124,7 +1126,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 			move_y_degrees = cnt->track.maxy - cnt->track.tilt_angle;
 	}
 
-	if (debug_level >= CAMERA_DEBUG) {
+	if (debug_level >= TRACK_DEBUG) {
 		motion_log(LOG_DEBUG, 0, "For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d", 
 		           cnt->track.minx, cnt->track.maxx, cnt->track.miny, cnt->track.maxy);
 		motion_log(LOG_DEBUG, 0, "For_SET_REL track_pan_Angel %d, track_tilt_Angel %d", 
@@ -1152,7 +1154,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 		control_s.id = V4L2_CID_PAN_RELATIVE;
 
 		control_s.value = pan.s16.pan;
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, " dev %d, addr= %d, control_S= %d, Wert= %d", 
 			           dev, VIDIOC_S_CTRL, &control_s, pan.s16.pan); 
 
@@ -1173,7 +1175,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 		control_s.id = V4L2_CID_TILT_RELATIVE;
 
 		control_s.value = pan.s16.tilt;
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, " dev %d,addr= %d, control_S= %d, Wert= %d", 
 			           dev, VIDIOC_S_CTRL, &control_s, pan.s16.tilt); 
 
@@ -1183,11 +1185,11 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 		}
 	}
 	
-  	if (debug_level >= CAMERA_DEBUG) 
+  	if (debug_level >= TRACK_DEBUG) 
 		motion_log(LOG_DEBUG, 0, "Found MINMAX = %d", cnt->track.minmaxfound); 
 
 	if (cnt->track.minmaxfound == 1) {
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, "Before_REL_Y_Angel : x= %d , Y= %d", 
 			           cnt->track.pan_angle, cnt->track.tilt_angle);
 	
@@ -1198,7 +1200,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
 		if (move_y_degrees != 0) 
 			cnt->track.tilt_angle += -pan.s16.tilt / INCPANTILT;
 		
-		if (debug_level >= CAMERA_DEBUG) 
+		if (debug_level >= TRACK_DEBUG) 
 			motion_log(LOG_DEBUG, 0, "After_REL_Y_Angel : x= %d , Y= %d", 
 			           cnt->track.pan_angle, cnt->track.tilt_angle);
 	}

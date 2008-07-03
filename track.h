@@ -115,7 +115,6 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
  * 0x09 POSITION - Get servo to absolute position between 0 and 255
  * */
 
-#define SERVO_REVERSE          255
 #define SERVO_BAUDRATE        B9600
 
 #define SERVO_COMMAND_STATUS   0 
