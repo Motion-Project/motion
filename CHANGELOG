@@ -16,7 +16,8 @@ Features
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
-
+   * Add a new parameter netcam_broken, to be less strict with some buggy network cameras firmwares.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
  
 
 3.2.10.1 Summary of Changes

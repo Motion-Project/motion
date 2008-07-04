@@ -241,6 +241,9 @@ typedef struct netcam_context {
 	unsigned int width;         /* info for decompression */
 	unsigned int height;
 
+	int JFIF_marker;            /* Debug to know if JFIF was present or not */
+	unsigned int netcam_broken; /* For network cameras with buggy firmwares */ 
+
 	struct timeval last_image;  /* time the most recent image was
 	                               received */
 

@@ -136,6 +136,7 @@ struct config conf_template = {
 	netcam_userpass:       NULL,
 	netcam_keepalive:      "off",    /* Choices: off, force or on */
 	netcam_proxy:          NULL,
+	netcam_broken:         0,
 	text_changes:          0,
 	text_left:             NULL,
 	text_right:            DEF_TIMESTAMP,
@@ -355,6 +356,15 @@ config_param config_params[] = {
 	CONF_OFFSET(netcam_proxy),
 	copy_string,
 	print_string
+	},
+	{
+	"netcam_broken",
+	"# Set less strict jpeg checks for network cameras with a poor/buggy firmware.\n"
+	"# Default: off",	
+	0,
+	CONF_OFFSET(netcam_broken),
+	copy_bool,
+	print_bool	
 	},
 	{
 	"auto_brightness",

@@ -102,6 +102,10 @@ netcam_keepalive off
 # Default: not defined
 ; netcam_proxy value 
 
+# Set less strict jpeg checks for network cameras with a poor/buggy firmware.
+# Default: off
+netcam_broken off
+
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.
 # If brightness is zero auto_brightness will adjust to average brightness value 128.
