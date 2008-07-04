@@ -107,6 +107,7 @@ struct config {
 	const char *netcam_userpass;
 	const char *netcam_http;
 	const char *netcam_proxy;
+	unsigned int netcam_broken;
 	const char *pgsql_db;
 	const char *pgsql_host;
 	const char *pgsql_user;

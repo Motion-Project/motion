@@ -420,6 +420,9 @@ Dag Erlandsson
    * Added preview center feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter
    * Fixed timestamp for preview pictures.
+   * Add a new parameter netcam_broken, to be less strict with some buggy network cameras firmwares.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218
+
      
 Stephen Farrugia
    * Fixing the division by zero problem.

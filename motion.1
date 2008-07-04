@@ -165,7 +165,7 @@ Values: 0 - 100 / Default: 0 (disabled)
 .br
 Ignore sudden massive light intensity changes given as a percentage of the picture area that changed intensity.
 .TP
-.B locate boolean
+.B locate discrete string 
 Values: on, off, preview / Default: off
 .br
 Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved mpeg movie.
@@ -219,6 +219,11 @@ The MySQL password.
 Values: Max 4095 characters / Default: Not defined
 .br
 The MySQL user name.
+.TP
+.B netcam_broken boolean
+Values: on, off / Default: off
+.br
+Set less strict jpeg checks for network cameras with a poor/buggy firmware.
 .TP
 .B netcam_http discrete string
 Values: 1.0 , keep_alive, 1.1 / Default: 1.0

@@ -2430,6 +2430,9 @@ int netcam_start(struct context *cnt)
 		                       "on first frame - giving up!");
 		return -1;
 	}
+
+	netcam->netcam_broken = cnt->conf.netcam_broken;
+	netcam->JFIF_marker = 0;
 	netcam_get_dimensions(netcam);
 
 	/* Motion currently requires that image height and width is a
