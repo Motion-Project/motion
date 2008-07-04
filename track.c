@@ -103,10 +103,6 @@ unsigned short int track_move(struct context *cnt, int dev, struct coord *cent, 
                               unsigned short int manual)
 {
 
-	if (debug_level >= TRACK_DEBUG)
-		motion_log(LOG_DEBUG, 0, "%s: manual %d track.active %d", 
-		           __FUNCTION__, manual, cnt->track.active);
-
 	if (!manual && !cnt->track.active)
 		return 0;
 	if (cnt->track.type == TRACK_TYPE_STEPPER)
@@ -334,9 +330,6 @@ static unsigned short int servo_command(struct context *cnt, unsigned short int 
 
 
 	if (debug_level >= TRACK_DEBUG) {
-		motion_log(LOG_DEBUG, 0, "%s: GETS port %s dev fd %i, motor %hu command %hu data %hu",
-		           __FUNCTION__, cnt->track.port, cnt->track.dev, motor, command, data);
-
 		motion_log(LOG_DEBUG, 0, "%s: SENDS port %s dev fd %i, motor %hu command %hu data %hu",
 		           __FUNCTION__, cnt->track.port, cnt->track.dev, buffer[0], buffer[1], buffer[2]);
 	}
@@ -442,16 +435,18 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 
 	} else {
 
-		 /* x-axis */
-
+		/***** x-axis *****/
+		
+		/* Move left */
 		if (cent->x < imgs->width / 2) {
 			if (cnt->track.motorx_reverse)
-				command = SERVO_COMMAND_LEFT_N;
-			else
 				command = SERVO_COMMAND_RIGHT_N;
+			else
+				command = SERVO_COMMAND_LEFT_N;
 			data = imgs->width / 2 - cent->x;
 		}
 
+		/* Move right */	
 		if (cent->x > imgs->width / 2) {
 			if (cnt->track.motorx_reverse)
 				command = SERVO_COMMAND_LEFT_N;
@@ -459,6 +454,10 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 				command = SERVO_COMMAND_RIGHT_N;
 			data = cent->x - imgs->width / 2;
 		}
+
+
+		if (debug_level >= TRACK_DEBUG)
+			motion_log(LOG_DEBUG, 0, "%s: X offset %d", __FUNCTION__, data);
 
 		data = data * cnt->track.stepsize / imgs->width;
 
@@ -478,12 +477,14 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 
 			if (debug_level >= TRACK_DEBUG)
 			motion_log(LOG_DEBUG, 0, "%s: X cent->x %d, cent->y %d, reversex %d,"
-			           "reversey %d manual %d data %d command %d", __FUNCTION__, cent->x , cent->y,
-			           cnt->track.motorx_reverse, cnt->track.motory_reverse, manual, data , command);
+			           "reversey %d motorx %d data %d command %d", __FUNCTION__, 
+				   cent->x, cent->y, cnt->track.motorx_reverse, 
+				   cnt->track.motory_reverse, cnt->track.motorx, data, command);
 		}	
 
-		/* y-axis */
+		/***** y-axis *****/
 
+		/* Move down */	
 		if (cent->y < imgs->height / 2) {
 			if (cnt->track.motory_reverse)
 				command = SERVO_COMMAND_UP_N;
@@ -492,13 +493,17 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 			data = imgs->height / 2 - cent->y;
 		}
 
+		/* Move up */
 		if (cent->y > imgs->height / 2) {
 			if (cnt->track.motory_reverse)
-				command = SERVO_COMMAND_UP_N;
-			else
 				command = SERVO_COMMAND_DOWN_N;
+			else
+				command = SERVO_COMMAND_UP_N;
 			data = cent->y - imgs->height / 2;
 		}
+
+		if (debug_level >= TRACK_DEBUG)
+			motion_log(LOG_DEBUG, 0, "%s: Y offset %d", __FUNCTION__, data);
 
 		data = data * cnt->track.stepsize / imgs->height;
 
@@ -518,8 +523,9 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
  		
 			if (debug_level >= TRACK_DEBUG)
 			motion_log(LOG_DEBUG, 0, "%s: Y cent->x %d, cent->y %d, reversex %d,"
-			           "reversey %d manual %d data %d command %d", __FUNCTION__, cent->x , cent->y,
-			           cnt->track.motorx_reverse, cnt->track.motory_reverse, manual, data , command);
+			           "reversey %d motory %d data %d command %d", __FUNCTION__, 
+				   cent->x, cent->y, cnt->track.motorx_reverse, 
+				   cnt->track.motory_reverse, cnt->track.motory, command);
 		}
 	}	
 
