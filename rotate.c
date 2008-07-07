@@ -237,8 +237,8 @@ void rotate_init(struct context *cnt)
 	 * we have a value that is safe from changes caused by motion-control.
 	 */
 	if((cnt->conf.rotate_deg % 90) > 0) {
-		motion_log(LOG_ERR, 0, "Config option \"rotate\" not a multiple of 90: %d",
-		           cnt->conf.rotate_deg);
+		motion_log(LOG_ERR, 0, "%s: Config option \"rotate\" not a multiple of 90: %d",
+		           __FUNCTION__, cnt->conf.rotate_deg);
 		cnt->conf.rotate_deg = 0;     /* disable rotation */
 		cnt->rotate_data.degrees = 0; /* force return below */
 	} else {
@@ -268,37 +268,35 @@ void rotate_init(struct context *cnt)
 	/* If we're not rotating, let's exit once we have setup the capture dimensions
 	 * and output dimensions properly.
 	 */
-	if(cnt->rotate_data.degrees == 0) {
+	if(cnt->rotate_data.degrees == 0) 
 		return;
-	}
 
-	switch(cnt->imgs.type)
-	{
-	case VIDEO_PALETTE_YUV420P:
+	switch(cnt->imgs.type) {
+	
+		case VIDEO_PALETTE_YUV420P:
 		/* For YUV 4:2:0 planar, the memory block used for 90/270 degrees
 		 * rotation needs to be width x height x 1.5 bytes large. 
 		 */
-		size = cnt->imgs.width * cnt->imgs.height * 3 / 2;
+			size = cnt->imgs.width * cnt->imgs.height * 3 / 2;
 		break;
-	case VIDEO_PALETTE_GREY:
+		case VIDEO_PALETTE_GREY:
 		/* For greyscale, the memory block used for 90/270 degrees rotation
 		 * needs to be width x height bytes large.
 		 */
-		size = cnt->imgs.width * cnt->imgs.height;
+			size = cnt->imgs.width * cnt->imgs.height;
 		break;
-	default:
-		cnt->rotate_data.degrees = 0;
-		motion_log(LOG_ERR, 0, "Unsupported palette (%d), rotation is disabled",
-		           cnt->imgs.type);
+		default:
+			cnt->rotate_data.degrees = 0;
+			motion_log(LOG_ERR, 0, "%s: Unsupported palette (%d), rotation is disabled",
+			           __FUNCTION__, cnt->imgs.type);
 		return;
 	}
 
 	/* Allocate memory if rotating 90 or 270 degrees, because those rotations 
 	 * cannot be performed in-place (they can, but it would be too slow).
 	 */
-	if((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
+	if((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) 
 		cnt->rotate_data.temp_buf = mymalloc(size);
-	}
 }
 
 /** 
@@ -314,9 +312,8 @@ void rotate_init(struct context *cnt)
  */
 void rotate_deinit(struct context *cnt) 
 {
-	if(cnt->rotate_data.temp_buf) {
+	if(cnt->rotate_data.temp_buf) 
 		free(cnt->rotate_data.temp_buf);
-	}
 }
 
 /**

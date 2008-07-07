@@ -519,14 +519,15 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 		/* Report to syslog - suggest solution if the problem is access rights to target dir */
 		if (errno ==  EACCES) {
 			motion_log(LOG_ERR, 1,
-			           "Can't write picture to file %s - check access rights to target directory", file);
-			motion_log(LOG_ERR, 1, "Thread is going to finish due to this fatal error");
+			           "%s: Can't write picture to file %s - check access rights to target directory"
+			           "Thread is going to finish due to this fatal error",	   
+			             __FUNCTION__, file);
 			cnt->finish = 1;
 			cnt->restart = 0;
 			return;
 		} else {
 			/* If target dir is temporarily unavailable we may survive */
-			motion_log(LOG_ERR, 1, "Can't write picture to file %s", file);
+			motion_log(LOG_ERR, 1, "%s: Can't write picture to file %s", __FUNCTION__, file);
 			return;
 		}
 	}
@@ -546,12 +547,13 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 	line[255] = 0;
 	
 	if (!fgets(line, 255, picture)) {
-		motion_log(LOG_ERR, 1, "Could not read from ppm file");
+		motion_log(LOG_ERR, 1, "%s: Could not read from ppm file", __FUNCTION__);
 		return NULL;
 	}
 	
 	if (strncmp(line, "P5", 2)) {
-		motion_log(LOG_ERR, 1, "This is not a ppm file, starts with '%s'", line);
+		motion_log(LOG_ERR, 1, "%s: This is not a ppm file, starts with '%s'", 
+		           __FUNCTION__, line);
 		return NULL;
 	}
 	
@@ -563,12 +565,13 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
 	/* check size */
 	if (sscanf(line, "%d %d", &x, &y) != 2) {
-		motion_log(LOG_ERR, 1, "Failed reading size in pgm file");
+		motion_log(LOG_ERR, 1, "%s: Failed reading size in pgm file", __FUNCTION__);
 		return NULL;
 	}
 	
 	if (x != width || y != height) {
-		motion_log(LOG_ERR, 1, "Wrong image size %dx%d should be %dx%d", x, y, width, height);
+		motion_log(LOG_ERR, 1, "%s: Wrong image size %dx%d should be %dx%d", 
+		           __FUNCTION__, x, y, width, height);
 		return NULL;
 	}
 
@@ -579,7 +582,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 			return NULL;
 	
 	if (sscanf(line, "%d", &maxval) != 1) {
-		motion_log(LOG_ERR, 1, "Failed reading maximum value in pgm file");
+		motion_log(LOG_ERR, 1, "%s: Failed reading maximum value in pgm file", __FUNCTION__);
 		return NULL;
 	}
 	
@@ -589,7 +592,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 	
 	for (y = 0; y < height; y++) {
 		if ((int)fread(&image[y * width], 1, width, picture) != width)
-			motion_log(LOG_ERR, 1, "Failed reading image data from pgm file");
+			motion_log(LOG_ERR, 1, "%s: Failed reading image data from pgm file", __FUNCTION__);
 		
 		for (x = 0; x < width; x++) {
 			image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
@@ -612,10 +615,11 @@ void put_fixed_mask(struct context *cnt, const char *file)
 		/* Report to syslog - suggest solution if the problem is access rights to target dir */
 		if (errno ==  EACCES) {
 			motion_log(LOG_ERR, 1,
-			           "can't write mask file %s - check access rights to target directory", file);
+			           "%s: can't write mask file %s - check access rights to target directory", 
+			           __FUNCTION__, file);
 		} else {
 			/* If target dir is temporarily unavailable we may survive */
-			motion_log(LOG_ERR, 1, "can't write mask file %s", file);
+			motion_log(LOG_ERR, 1, "%s: can't write mask file %s", __FUNCTION__, file);
 		}
 		return;
 	}
@@ -628,14 +632,14 @@ void put_fixed_mask(struct context *cnt, const char *file)
 	
 	/* write pgm image data at once */
 	if ((int)fwrite(cnt->imgs.out, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
-		motion_log(LOG_ERR, 1, "Failed writing default mask as pgm file");
+		motion_log(LOG_ERR, 1, "%s: Failed writing default mask as pgm file", __FUNCTION__);
 		return;
 	}
 	
 	fclose(picture);
 
-	motion_log(LOG_ERR, 0, "Creating empty mask %s",cnt->conf.mask_file);
-	motion_log(LOG_ERR, 0, "Please edit this file and re-run motion to enable mask feature");
+	motion_log(LOG_ERR, 0, "%s: Creating empty mask %s\nPlease edit this file and "
+	           "re-run motion to enable mask feature", __FUNCTION__, cnt->conf.mask_file);
 }
 
 /* save preview_shot */

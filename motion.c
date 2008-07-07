@@ -105,7 +105,8 @@ static void image_ring_resize(struct context *cnt, int new_size)
 			smallest = cnt->imgs.image_ring_size;
 		}
 		if (cnt->imgs.image_ring_in == smallest - 1 || smallest == 0) {
-			motion_log(LOG_INFO, 0, "Resizing pre_capture buffer to %d items", new_size);
+			motion_log(LOG_INFO, 0, "%s: Resizing pre_capture buffer to %d items",
+			           __FUNCTION__, new_size);
 
 			/* Create memory for new ring buffer */
 			struct image_data *tmp;
@@ -356,9 +357,9 @@ static void motion_remove_pid(void)
 {
 	if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file) && (restart == 0)) {
 		if (!unlink(cnt_list[0]->conf.pid_file)) 
-		    motion_log(LOG_INFO, 0, "Removed process id file (pid file).");
+		    motion_log(LOG_INFO, 0, "%s: Removed process id file (pid file).", __FUNCTION__);
 		else 
-		    motion_log(LOG_INFO, 1, "Error removing pid file");
+		    motion_log(LOG_INFO, 1, "%s: Error removing pid file", __FUNCTION__);
 	}
 }
 
@@ -420,8 +421,9 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 			/* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
 			event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tm);
 
-			if (cnt->conf.setup_mode)
-				motion_log(-1, 0, "Motion detected - starting event %d", cnt->event_nr);
+			if (debug_level >= CAMERA_INFO)
+				motion_log(-1, 0, "%s: Motion detected - starting event %d", 
+				           __FUNCTION__, cnt->event_nr);
 
 			/* always save first motion frame as preview-shot, may be changed to an other one later */
 			if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)) {
@@ -523,7 +525,8 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 						int frames = cnt->movie_fps - (cnt->movie_last_shot + 1);
 						if (frames > 0) {
 							char tmp[15];
-							motion_log(LOG_DEBUG, 0, "Added %d fillerframes into movie", frames );
+							motion_log(LOG_DEBUG, 0, "%s: Added %d fillerframes into movie", 
+							           __FUNCTION__, frames );
 							sprintf(tmp, "Fillerframes %d", frames);
 							draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 40, 
 							          cnt->imgs.width, tmp, cnt->conf.text_double);
@@ -626,7 +629,8 @@ static int motion_init(struct context *cnt)
 	cnt->detecting_motion = 0;
 	cnt->makemovie = 0;
 
-	motion_log(LOG_DEBUG, 0, "Thread %d started", (unsigned long)pthread_getspecific(tls_key_threadnr));
+	motion_log(LOG_DEBUG, 0, "%s: Thread %d started", 
+	           __FUNCTION__, (unsigned long)pthread_getspecific(tls_key_threadnr));
 
 	if (!cnt->conf.filepath)
 		cnt->conf.filepath = mystrdup(".");
@@ -639,8 +643,9 @@ static int motion_init(struct context *cnt)
 	 * file options.
 	 */
 	if (cnt->video_dev < 0) {
-		motion_log(LOG_ERR, 0, "Could not fetch initial image from camera");
-		motion_log(LOG_ERR, 0, "Motion continues using width and height from config file(s)");
+		motion_log(LOG_ERR, 0, "%s: Could not fetch initial image from camera\n" 
+		           "Motion continues using width and height from config file(s)", 		
+		           __FUNCTION__);
 		cnt->imgs.width = cnt->conf.width;
 		cnt->imgs.height = cnt->conf.height;
 		cnt->imgs.size = cnt->conf.width * cnt->conf.height * 3 / 2;
@@ -697,7 +702,7 @@ static int motion_init(struct context *cnt)
 			memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
 			draw_text(cnt->imgs.image_virgin, 10, 20, cnt->imgs.width,
 			          "Error capturing first image", cnt->conf.text_double);
-			motion_log(LOG_ERR, 0, "Error capturing first image");
+			motion_log(LOG_ERR, 0, "%s: Error capturing first image", __FUNCTION__);
 		}
 	}
 
@@ -708,26 +713,26 @@ static int motion_init(struct context *cnt)
 #if (!defined(BSD))
 	/* open video loopback devices if enabled */
 	if (cnt->conf.vidpipe) {
-		if (cnt->conf.setup_mode)
-			motion_log(-1, 0, "Opening video loopback device for normal pictures");
+		if (debug_level >= CAMERA_DEBUG)
+			motion_log(-1, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
 		else 
-			motion_log(LOG_INFO, 0, "Opening video loopback device for normal pictures");
+			motion_log(LOG_INFO, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
 		/* vid_startpipe should get the output dimensions */
 		cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 		if (cnt->pipe < 0) {
-			motion_log(LOG_ERR, 0, "Failed to open video loopback");
+			motion_log(LOG_ERR, 0, "%s: Failed to open video loopback", __FUNCTION__);
 			return -1;
 		}
 	}
 	if (cnt->conf.motionvidpipe) {
-		if (cnt->conf.setup_mode)
-			motion_log(-1, 0, "Opening video loopback device for motion pictures");
+		if (debug_level >= CAMERA_DEBUG)
+			motion_log(-1, 0, "%s: Opening video loopback device for motion pictures", __FUNCTION__);
 		else 
-			motion_log(LOG_INFO, 0, "Opening video loopback device for motion pictures");
+			motion_log(LOG_INFO, 0, "%s: Opening video loopback device for motion pictures", __FUNCTION__);
 		/* vid_startpipe should get the output dimensions */
 		cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 		if (cnt->mpipe < 0) {
-			motion_log(LOG_ERR, 0, "Failed to open video loopback");
+			motion_log(LOG_ERR, 0, "%s: Failed to open video loopback", __FUNCTION__);
 			return -1;
 		}
 	}
@@ -743,9 +748,10 @@ static int motion_init(struct context *cnt)
 			mysql_init(cnt->database);
 			if (!mysql_real_connect(cnt->database, cnt->conf.database_host, cnt->conf.database_user,
 			    cnt->conf.database_password, cnt->conf.database_dbname, 0, NULL, 0)) {
-				motion_log(LOG_ERR, 0, "Cannot connect to MySQL database %s on host %s with user %s",
-			        cnt->conf.database_dbname, cnt->conf.database_host, cnt->conf.database_user);
-				motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
+				motion_log(LOG_ERR, 0, "%s: Cannot connect to MySQL database %s on host %s with user %s",
+			                   __FUNCTION__, cnt->conf.database_dbname, cnt->conf.database_host, 
+				          cnt->conf.database_user);
+				motion_log(LOG_ERR, 0, "%s: MySQL error was %s", __FUNCTION__, mysql_error(cnt->database));
 				return -2;
 			}
 			#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
@@ -772,8 +778,8 @@ static int motion_init(struct context *cnt)
 
 			cnt->database_pg = PQconnectdb(connstring);
 			if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
-				motion_log(LOG_ERR, 0, "Connection to PostgreSQL database '%s' failed: %s",
-				           cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
+				motion_log(LOG_ERR, 0, "%s: Connection to PostgreSQL database '%s' failed: %s",
+				           __FUNCTION__, cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
 				return -2;
 			}
 		}
@@ -800,18 +806,22 @@ static int motion_init(struct context *cnt)
 			cnt->imgs.mask = get_pgm(picture, cnt->imgs.width, cnt->imgs.height);
 			fclose(picture);
 		} else {
-			motion_log(LOG_ERR, 1, "Error opening mask file %s", cnt->conf.mask_file);
+			motion_log(LOG_ERR, 1, "%s: Error opening mask file %s", 
+			           __FUNCTION__, cnt->conf.mask_file);
 			/* Try to write an empty mask file to make it easier
 			   for the user to edit it */
 			put_fixed_mask(cnt, cnt->conf.mask_file);
 		}
 		if (!cnt->imgs.mask) {
-			motion_log(LOG_ERR, 0, "Failed to read mask image. Mask feature disabled.");
+			motion_log(LOG_ERR, 0, "%s: Failed to read mask image. Mask feature disabled.", 
+			           __FUNCTION__);
 		} else {
-			if (cnt->conf.setup_mode)
-				motion_log(-1, 0, "Maskfile \"%s\" loaded.", cnt->conf.mask_file);
+			if (debug_level >= CAMERA_DEBUG)
+				motion_log(-1, 0, "%s: Maskfile \"%s\" loaded.", 
+				           __FUNCTION__, cnt->conf.mask_file);
 			else  
-				motion_log(LOG_INFO, 0, "Maskfile \"%s\" loaded.", cnt->conf.mask_file);
+				motion_log(LOG_INFO, 0, "%s: Maskfile \"%s\" loaded.", 
+				           __FUNCTION__, cnt->conf.mask_file);
 		}
 	} else
 		cnt->imgs.mask = NULL;
@@ -830,9 +840,11 @@ static int motion_init(struct context *cnt)
 	/* Initialize stream server if stream port is specified to not 0 */
 	if (cnt->conf.stream_port) {
 		if ( stream_init(cnt) == -1 ) {
-			motion_log(LOG_ERR, 1, "Problem enabling motion-stream server in port %d", cnt->conf.stream_port);
+			motion_log(LOG_ERR, 1, "%s: Problem enabling motion-stream server in port %d", 
+			           __FUNCTION__, cnt->conf.stream_port);
 			cnt->finish = 1;
-		}else 	motion_log(LOG_DEBUG, 0, "Started motion-stream server in port %d", cnt->conf.stream_port);
+		}else 	motion_log(LOG_DEBUG, 0, "%s: Started motion-stream server in port %d", 
+			           __FUNCTION__, cnt->conf.stream_port);
 	}
 
 	/* Prevent first few frames from triggering motion... */
@@ -861,7 +873,7 @@ static void motion_cleanup(struct context *cnt)
 	event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
 
 	if (cnt->video_dev >= 0){
-		motion_log(LOG_DEBUG, 0, "Calling vid_close() from motion_cleanup");		
+		motion_log(LOG_DEBUG, 0, "%s: Calling vid_close() from motion_cleanup", __FUNCTION__);		
 		vid_close(cnt);
 	}
 
@@ -1127,18 +1139,18 @@ static void *motion_loop(void *arg)
 			if (cnt->video_dev < 0 &&
 			    cnt->currenttime % 10 == 0 && cnt->shots == 0) {
 				motion_log(LOG_ERR, 0,
-				           "Retrying until successful connection with camera");
+				           "%s: Retrying until successful connection with camera", __FUNCTION__);
 				cnt->video_dev = vid_start(cnt);
 
 				/* if the netcam has different dimensions than in the config file
 				 * we need to restart Motion to re-allocate all the buffers
 				 */
 				if (cnt->imgs.width != cnt->conf.width || cnt->imgs.height != cnt->conf.height) {
-					motion_log(LOG_ERR, 0, "Camera has finally become available");
-					motion_log(LOG_ERR, 0, "Camera image has different width and height "
-					                       "from what is in the config file. You should fix that");
-					motion_log(LOG_ERR, 0, "Restarting Motion thread to reinitialize all "
-					                       "image buffers to new picture dimensions");
+					motion_log(LOG_ERR, 0, "%s: Camera has finally become available\n"
+					           "Camera image has different width and height"
+					           "from what is in the config file. You should fix that\n"
+					           "Restarting Motion thread to reinitialize all "
+					           "image buffers to new picture dimensions", __FUNCTION__);
 					cnt->conf.width = cnt->imgs.width;
 					cnt->conf.height = cnt->imgs.height;
 					/* Break out of main loop terminating thread 
@@ -1170,7 +1182,7 @@ static void *motion_loop(void *arg)
 				/* If all is well reset missing_frame_counter */
 				if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
 					/* If we previously logged starting a grey image, now log video re-start */
-					motion_log(LOG_ERR, 0, "Video signal re-acquired");
+					motion_log(LOG_ERR, 0, "%s: Video signal re-acquired", __FUNCTION__);
 					// event for re-acquired video signal can be called here
 				}
 				cnt->missing_frame_counter = 0;
@@ -1199,7 +1211,8 @@ static void *motion_loop(void *arg)
 			// FATAL ERROR - leave the thread by breaking out of the main loop	
 			} else if (vid_return_code < 0) {
 				/* Fatal error - Close video device */
-				motion_log(LOG_ERR, 0, "Video device fatal error - Closing video device");
+				motion_log(LOG_ERR, 0, "%s: Video device fatal error - Closing video device", 
+				           __FUNCTION__);
 				vid_close(cnt);
 				/* Use virgin image, if we are not able to open it again next loop
 				 * a gray image with message is applied
@@ -1217,7 +1230,7 @@ static void *motion_loop(void *arg)
 			} else { 
 
 				if (debug_level >= CAMERA_VERBOSE)
-					motion_log(-1, 0, "vid_return_code %d", vid_return_code);
+					motion_log(-1, 0, "%s: vid_return_code %d", __FUNCTION__, vid_return_code);
 
 				/* Netcams that change dimensions while Motion is running will
 				 * require that Motion restarts to reinitialize all the many
@@ -1225,8 +1238,8 @@ static void *motion_loop(void *arg)
 				 * other way
 				 */
 				if (vid_return_code == NETCAM_RESTART_ERROR) {
-					motion_log(LOG_ERR, 0, "Restarting Motion thread to reinitialize all "
-					                       "image buffers");
+					motion_log(LOG_ERR, 0, "%s: Restarting Motion thread to reinitialize all "
+					           "image buffers", __FUNCTION__);
 					/* Break out of main loop terminating thread 
 					 * watchdog will start us again 
 					 * Set lost_connection flag on */
@@ -1268,7 +1281,8 @@ static void *motion_loop(void *arg)
 
 					/* Write error message only once */
 					if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
-						motion_log(LOG_ERR, 0, "Video signal lost - Adding grey image");
+						motion_log(LOG_ERR, 0, "%s: Video signal lost - Adding grey image", 
+						           __FUNCTION__);
 						// Event for lost video signal can be called from here
 						event(cnt, EVENT_CAMERA_LOST, NULL, NULL,
 						      NULL, cnt->currenttime_tm);
@@ -1278,7 +1292,8 @@ static void *motion_loop(void *arg)
 					 * Only try this when a device is open */
 					if ( (cnt->video_dev > 0) && 
 					     (cnt->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cnt->conf.frame_limit) ) {
-						motion_log(LOG_ERR, 0, "Video signal still lost - Trying to close video device");
+						motion_log(LOG_ERR, 0, "%s: Video signal still lost - "
+						           "Trying to close video device",__FUNCTION__);
 						vid_close(cnt);
 					}
 				}
@@ -1314,8 +1329,8 @@ static void *motion_loop(void *arg)
 				 */
 				if (cnt->conf.lightswitch && !cnt->lost_connection) {
 					if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
-						if (cnt->conf.setup_mode)
-							motion_log(-1, 0, "Lightswitch detected");
+						if (debug_level >= CAMERA_DEBUG)
+							motion_log(-1, 0, "%s: Lightswitch detected", __FUNCTION__);
 						if (cnt->moved < 5)
 							cnt->moved = 5;
 						cnt->current_image->diffs = 0;
@@ -1335,8 +1350,8 @@ static void *motion_loop(void *arg)
 					cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs, cnt->current_image->image);
 					if (cnt->current_image->diffs <= cnt->threshold) {
 						cnt->current_image->diffs = 0;
-						if (cnt->conf.setup_mode)
-							motion_log(-1, 0, "Switchfilter detected");
+						if (debug_level >= CAMERA_DEBUG)
+							motion_log(-1, 0, "%s: Switchfilter detected", __FUNCTION__);
 					}
 				}
 
@@ -1427,8 +1442,8 @@ static void *motion_loop(void *arg)
 					alg_update_reference_frame(cnt, RESET_REF_FRAME);
 					cnt->current_image->diffs = 0;
 					cnt->lightswitch_framecounter = 0;
-					if (cnt->conf.setup_mode)
-						motion_log(-1, 0, "micro-lightswitch!");
+					if (debug_level >= CAMERA_DEBUG)
+						motion_log(-1, 0, "%s: micro-lightswitch!", __FUNCTION__);
 				} else {
 	    					alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
 				}
@@ -1481,7 +1496,7 @@ static void *motion_loop(void *arg)
 
 			/* Add changed pixels to motion-images (for stream) in setup_mode
 			   and always overlay smartmask (not only when motion is detected) */
-			if (cnt->conf.setup_mode) {
+			if (debug_level >= CAMERA_DEBUG) {
 				char tmp[PATH_MAX];
 				sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs, cnt->current_image->total_labels, cnt->noise);
 				draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * text_size_factor,
@@ -1596,7 +1611,7 @@ static void *motion_loop(void *arg)
 							event(cnt, EVENT_AREA_DETECTED, NULL, NULL,
 							      NULL, cnt->currenttime_tm);
 							area_once = cnt->event_nr; /* Fire script only once per event */
-							if (cnt->conf.setup_mode)
+							if (debug_level >= CAMERA_DEBUG)
 								motion_log(-1, 0, "Motion in area %d detected.\n", z+1);
 							break;
 						}
@@ -1634,8 +1649,9 @@ static void *motion_loop(void *arg)
 					if (cnt->track.type)
 						cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
-					if (cnt->conf.setup_mode)
-						motion_log(-1, 0, "End of event %d", cnt->event_nr);
+					if (debug_level >= CAMERA_DEBUG)
+						motion_log(-1, 0, "%s: End of event %d", 
+						           __FUNCTION__, cnt->event_nr);
 
 					cnt->makemovie = 0;
 					/* Reset post capture */
@@ -1658,7 +1674,7 @@ static void *motion_loop(void *arg)
 		/***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
 			/* If setup_mode enabled output some numbers to console */
-			if (cnt->conf.setup_mode){
+			if (debug_level >= CAMERA_DEBUG){
 				char msg[1024] = "\0";
 				char part[100];
 
@@ -1757,9 +1773,10 @@ static void *motion_loop(void *arg)
 
 				/* If invalid we report in syslog once and continue in manual mode */
 				else {
-					motion_log(LOG_ERR, 0, "Invalid timelapse_mode argument '%s'",
-					           cnt->conf.timelapse_mode);
-					motion_log(LOG_ERR, 0, "Defaulting to manual timelapse mode");
+					motion_log(LOG_ERR, 0, "%s: Invalid timelapse_mode argument '%s'",
+					           __FUNCTION__, cnt->conf.timelapse_mode);
+					motion_log(LOG_ERR, 0, "%:s Defaulting to manual timelapse mode", 
+					           __FUNCTION__);
 					conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
 				}
 			}
@@ -1925,7 +1942,7 @@ err:
 		free(rolling_average_data);
 
 	cnt->lost_connection = 1;
-	motion_log(-1, 0, "Thread exiting");
+	motion_log(-1, 0, "%s: Thread exiting", __FUNCTION__);
 
 	motion_cleanup(cnt);
 
@@ -1973,7 +1990,7 @@ static void become_daemon(void)
 
 	/* fork */
 	if (fork()) {
-		motion_log(-1, 0, "Motion going to daemon mode");
+		motion_log(-1, 0, "%s: Motion going to daemon mode", __FUNCTION__);
 		exit(0);
 	}
 	
@@ -1989,8 +2006,8 @@ static void become_daemon(void)
 			(void)fprintf(pidf, "%d\n", getpid());
 			fclose(pidf);
 		} else {
-			motion_log(LOG_ERR, 1, "Exit motion, cannot create process id file (pid file) %s",
-			           cnt_list[0]->conf.pid_file);	
+			motion_log(LOG_ERR, 1, "%s: Exit motion, cannot create process id file (pid file) %s",
+			           __FUNCTION__, cnt_list[0]->conf.pid_file);	
 			exit(0);	
 		}
 	}
@@ -1998,7 +2015,7 @@ static void become_daemon(void)
 	/* changing dir to root enables people to unmount a disk
 	   without having to stop Motion */
 	if (chdir("/")) {
-		motion_log(LOG_ERR, 1, "Could not change directory");
+		motion_log(LOG_ERR, 1, "%s: Could not change directory", __FUNCTION__);
 	}
 
 #if (defined(BSD))
@@ -2031,8 +2048,8 @@ static void become_daemon(void)
 	
 	/* Now it is safe to add the PID creation to the logs */
 	if ( pidf )
-		motion_log(LOG_INFO, 0, "Created process id file %s. Process ID is %d",
-		           cnt_list[0]->conf.pid_file, getpid());
+		motion_log(LOG_INFO, 0, "%s: Created process id file %s. Process ID is %d",
+		           __FUNCTION__, cnt_list[0]->conf.pid_file, getpid());
 	
 	sigaction(SIGTTOU, &sig_ign_action, NULL);
 	sigaction(SIGTTIN, &sig_ign_action, NULL);
@@ -2131,7 +2148,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 	 */
 	cntlist_create(argc, argv);
 
-	motion_log(LOG_INFO, 0, "Motion "VERSION" Started");
+	motion_log(LOG_INFO, 0, "%s: Motion "VERSION" Started",  __FUNCTION__);
 
 	initialize_chars();
 
@@ -2141,7 +2158,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 		 */
 		if (cnt_list[0]->daemon && cnt_list[0]->conf.setup_mode == 0) {
 			become_daemon();
-			motion_log(LOG_INFO, 0, "Motion running as daemon process");
+			motion_log(LOG_INFO, 0, "%s: Motion running as daemon process",  __FUNCTION__);
 		}
 	}
 
@@ -2214,9 +2231,10 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
 		/* Compare against the control port. */
 		if (cnt_list[0]->conf.webcontrol_port == cnt->conf.stream_port) {
 			motion_log(LOG_ERR, 0,
-			           "Stream port number %d for thread %d conflicts with the control port",
-			           cnt->conf.stream_port, cnt->threadnr);
-			motion_log(LOG_ERR, 0, "Stream feature for thread %d is disabled.", cnt->threadnr);
+			           "%s: Stream port number %d for thread %d conflicts with the control port",
+			            __FUNCTION__, cnt->conf.stream_port, cnt->threadnr);
+			motion_log(LOG_ERR, 0, "%s: Stream feature for thread %d is disabled.", 
+			           __FUNCTION__, cnt->threadnr);
 			cnt->conf.stream_port = 0;
 		}
 
@@ -2226,10 +2244,11 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
 				continue;
 			if (cnt_list[i]->conf.stream_port == cnt->conf.stream_port) {
 				motion_log(LOG_ERR, 0,
-				           "Stream port number %d for thread %d conflicts with thread %d",
-				           cnt->conf.stream_port, cnt->threadnr, cnt_list[i]->threadnr);
+				           "%s: Stream port number %d for thread %d conflicts with thread %d",
+				            __FUNCTION__, cnt->conf.stream_port, cnt->threadnr, cnt_list[i]->threadnr);
 				motion_log(LOG_ERR, 0,
-				           "Stream feature for thread %d is disabled.", cnt->threadnr);
+				           "%s: Stream feature for thread %d is disabled.",  
+				           __FUNCTION__, cnt->threadnr);
 				cnt->conf.stream_port = 0;
 			}
 		}
@@ -2297,7 +2316,7 @@ int main (int argc, char **argv)
 	 * optimize motion detection and stuff.
 	 */
 	if(cnt_list[0]->conf.setup_mode)
-		motion_log(-1, 0, "Motion running in setup mode.");
+		motion_log(-1, 0, "%s: Motion running in setup mode.",  __FUNCTION__);
 
 	/* Create and a thread attribute for the threads we spawn later on.
 	 * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
@@ -2317,7 +2336,7 @@ int main (int argc, char **argv)
 			 */
 			motion_shutdown();
 			restart = 0; /* only one reset for now */
-			motion_log(LOG_INFO, 0, "motion restarted");
+			motion_log(LOG_INFO, 0, "%s: motion restarted",  __FUNCTION__);
 #ifndef WITHOUT_V4L
 			SLEEP(5, 0); // maybe some cameras needs less time
 #endif
@@ -2333,17 +2352,19 @@ int main (int argc, char **argv)
 			cnt_list[i]->threadnr = i ? i : 1;
 
 			if ( strcmp(cnt_list[i]->conf_filename, "") )
-				motion_log(LOG_INFO, 0, "Thread %d is from %s", cnt_list[i]->threadnr, cnt_list[i]->conf_filename );
+				motion_log(LOG_INFO, 0, "%s: Thread %d is from %s", 
+				           __FUNCTION__, cnt_list[i]->threadnr, cnt_list[i]->conf_filename );
 
-			if (cnt_list[0]->conf.setup_mode) {
-				motion_log(-1, 0, "Thread %d is device: %s input %d", cnt_list[i]->threadnr,
-				           cnt_list[i]->conf.netcam_url ? cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
-				           cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input
-				          );
+			if (debug_level >= CAMERA_DEBUG) {
+				motion_log(-1, 0, "%s: Thread %d is device: %s input %d",  __FUNCTION__, 
+				           cnt_list[i]->threadnr, cnt_list[i]->conf.netcam_url ? 
+					   cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
+				           cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input);
 			}
 
-			if (cnt_list[0]->conf.setup_mode)
-				motion_log(LOG_ERR, 0, "Stream port %d", cnt_list[i]->conf.stream_port);
+			if (debug_level >= CAMERA_DEBUG)
+				motion_log(LOG_ERR, 0, "%s: Stream port %d",  
+				           __FUNCTION__, cnt_list[i]->conf.stream_port);
 
 			start_motion_thread(cnt_list[i], &thread_attr);
 		}
@@ -2354,8 +2375,8 @@ int main (int argc, char **argv)
 		if (cnt_list[0]->conf.webcontrol_port)
 			pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
 
-		if (cnt_list[0]->conf.setup_mode)
-			motion_log(-1, 0, "Waiting for threads to finish, pid: %d", getpid());
+		if (debug_level >= CAMERA_DEBUG)
+			motion_log(-1, 0, "%s: Waiting for threads to finish, pid: %d", __FUNCTION__, getpid());
 
 		/* Crude way of waiting for all threads to finish - check the thread
 		 * counter (because we cannot do join on the detached threads).
@@ -2374,27 +2395,28 @@ int main (int argc, char **argv)
 			if ( ((motion_threads_running == 0 ) && finish ) || 
 			     ((motion_threads_running == 0 ) && (threads_running == 0)) ){
 			     if (debug_level >= CAMERA_DEBUG)
-				motion_log(LOG_INFO, 0, "DEBUG-1 threads_running %d motion_threads_running %d , finish %d", 
-				                         threads_running, motion_threads_running, finish);			     
+				motion_log(LOG_INFO, 0, "%s: DEBUG-1 threads_running %d motion_threads_running %d , finish %d", 
+				           __FUNCTION__, threads_running, motion_threads_running, finish);			     
 				break;
 			}	
 
 			for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
 				/* Check if threads wants to be restarted */
 				if ( (!cnt_list[i]->running) && (cnt_list[i]->restart) ) {
-					motion_log(LOG_INFO, 0, "Motion thread %d restart", cnt_list[i]->threadnr);
+					motion_log(LOG_INFO, 0, "%s: Motion thread %d restart", 
+					           __FUNCTION__, cnt_list[i]->threadnr);
 					start_motion_thread(cnt_list[i], &thread_attr);
 				}
 				if (cnt_list[i]->watchdog > WATCHDOG_OFF) {
 					cnt_list[i]->watchdog--;
 					if (cnt_list[i]->watchdog == 0) {
-						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, trying to do a graceful restart",
-						                          cnt_list[i]->threadnr);
+						motion_log(LOG_ERR, 0, "%s: Thread %d - Watchdog timeout, trying to do "
+						           "a graceful restart",  __FUNCTION__, cnt_list[i]->threadnr);
 						cnt_list[i]->finish = 1;
 					}
 					if (cnt_list[i]->watchdog == -60) {
-						motion_log(LOG_ERR, 0, "Thread %d - Watchdog timeout, did NOT restart graceful," 
-						                       "killing it!", cnt_list[i]->threadnr);
+						motion_log(LOG_ERR, 0, "%s: Thread %d - Watchdog timeout, did NOT restart graceful," 
+						           "killing it!", __FUNCTION__, cnt_list[i]->threadnr);
 						pthread_cancel(cnt_list[i]->thread_id);
 						pthread_mutex_lock(&global_lock);
 						threads_running--;
@@ -2406,14 +2428,14 @@ int main (int argc, char **argv)
 				}
 			}
 			if (debug_level >= CAMERA_DEBUG)
-				motion_log(LOG_INFO, 0, "DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
-				                         threads_running, motion_threads_running, finish);
+				motion_log(LOG_INFO, 0, "%s: DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
+				           __FUNCTION__, threads_running, motion_threads_running, finish);
 		}
 		/* Reset end main loop flag */
 		finish = 0;
 
-		if (cnt_list[0]->conf.setup_mode)
-			motion_log(LOG_DEBUG, 0, "Threads finished");
+		if (debug_level >= CAMERA_DEBUG)
+			motion_log(LOG_DEBUG, 0, "%s: Threads finished",  __FUNCTION__);
 
 		/* Rest for a while if we're supposed to restart. */
 		if (restart)
@@ -2424,7 +2446,7 @@ int main (int argc, char **argv)
 	// Be sure that http control exits fine
 	cnt_list[0]->finish = 1;
 	SLEEP(1, 0);
-	motion_log(LOG_INFO, 0, "Motion terminating");
+	motion_log(LOG_INFO, 0, "%s: Motion terminating",  __FUNCTION__);
 
 	/* Perform final cleanup. */
 	pthread_key_delete(tls_key_threadnr);
@@ -2458,7 +2480,8 @@ void * mymalloc(size_t nbytes)
 {
 	void *dummy = malloc(nbytes);
 	if (!dummy) {
-		motion_log(LOG_EMERG, 1, "Could not allocate %llu bytes of memory!", (unsigned long long)nbytes);
+		motion_log(LOG_EMERG, 1, "%s: Could not allocate %llu bytes of memory!", 
+		           __FUNCTION__, (unsigned long long)nbytes);
 		motion_remove_pid();
 		exit(1);
 	}
@@ -2489,14 +2512,14 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 	if (size == 0) {
 		free(ptr);
 		motion_log(LOG_WARNING, 0,
-		           "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!",
-		           desc, ptr);
+		           "%s: Warning! Function %s tries to resize memoryblock at %p to 0 bytes!",
+		            __FUNCTION__, desc, ptr);
 	} else {
 		dummy = realloc(ptr, size);
 		if (!dummy) {
 			motion_log(LOG_EMERG, 0,
-			           "Could not resize memory-block at offset %p to %llu bytes (function %s)!",
-			           ptr, (unsigned long long)size, desc);
+			           "%s: Could not resize memory-block at offset %p to %llu bytes (function %s)!",
+			            __FUNCTION__, ptr, (unsigned long long)size, desc);
 			motion_remove_pid();
 			exit(1);
 		}
@@ -2536,7 +2559,8 @@ int create_path(const char *path)
 		buffer[start-path] = 0x00;
 
 		if (mkdir(buffer, mode) == -1 && errno != EEXIST) {
-			motion_log(LOG_ERR, 1, "Problem creating directory %s", buffer);
+			motion_log(LOG_ERR, 1, "%s: Problem creating directory %s", 
+			           __FUNCTION__, buffer);
 			free(buffer);
 			return -1;
 		}
@@ -2590,7 +2614,8 @@ FILE * myfopen(const char *path, const char *mode)
 		 * 1: there was an other error while trying to open the file for the first time
 		 * 2: could still not open the file after the path was created
 		 */
-		motion_log(LOG_ERR, 1, "Error opening file %s with mode %s", path, mode);
+		motion_log(LOG_ERR, 1, "%s: Error opening file %s with mode %s",  
+		           __FUNCTION__, path, mode);
 
 		return NULL;
 	}

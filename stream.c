@@ -51,7 +51,8 @@ int http_bindsock(int port, int local)
 	optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
 
 	if (optval != 0) {
-		motion_log(LOG_ERR, 1, "getaddrinfo() for motion-stream socket failed: %s", gai_strerror(optval));
+		motion_log(LOG_ERR, 1, "%s: getaddrinfo() for motion-stream socket failed: %s", 
+		           __FUNCTION__, gai_strerror(optval));
 		freeaddrinfo(res);
 		return -1;
 	}
@@ -70,33 +71,33 @@ int http_bindsock(int port, int local)
 			/* Reuse Address */ 
 			setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof( int ) );
 
-			motion_log(LOG_INFO, 0, "motion-stream testing : %s addr: %s port: %s",
-			                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
+			motion_log(LOG_INFO, 0, "%s: motion-stream testing : %s addr: %s port: %s",
+			           __FUNCTION__, res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
 			if (bind(sl, res->ai_addr, res->ai_addrlen) == 0){
-				motion_log(LOG_INFO, 0, "motion-stream Bound : %s addr: %s port: %s",
-				                         res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);	
+				motion_log(LOG_INFO, 0, "%s: motion-stream Bound : %s addr: %s port: %s",
+				           __FUNCTION__, res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);	
 				break;
 			}
 
-			motion_log(LOG_ERR, 1, "motion-stream bind() failed, retrying ");
+			motion_log(LOG_ERR, 1, "%s: motion-stream bind() failed, retrying", __FUNCTION__);
 			close(sl);
 			sl = -1;
 		}
-		motion_log(LOG_ERR, 1, "motion-stream socket failed, retrying");
+		motion_log(LOG_ERR, 1, "%s: motion-stream socket failed, retrying", __FUNCTION__);
 		res = res->ai_next;
 	}
 
 	freeaddrinfo(ressave);
 
 	if (sl < 0) {
-		motion_log(LOG_ERR, 1, "motion-stream creating socket/bind ERROR");
+		motion_log(LOG_ERR, 1, "%s: motion-stream creating socket/bind ERROR", __FUNCTION__);
 		return -1;
 	}
 	
 
 	if (listen(sl, DEF_MAXWEBQUEUE) == -1) {
-		motion_log(LOG_ERR, 1, "motion-stream listen() ERROR");
+		motion_log(LOG_ERR, 1, "%s: motion-stream listen() ERROR", __FUNCTION__);
 		close(sl);
 		sl = -1;
 	}
@@ -118,7 +119,7 @@ static int http_acceptsock(int sl)
 		return sc;
 	}
 	
-	motion_log(LOG_ERR, 1, "motion-stream accept()");
+	motion_log(LOG_ERR, 1, "%s: motion-stream accept()", __FUNCTION__);
 
 	return -1;
 }
@@ -254,7 +255,7 @@ static void stream_add_client(struct stream *list, int sc)
 	new->socket = sc;
 	
 	if ((new->tmpbuffer = stream_tmpbuffer(sizeof(header))) == NULL) {
-		motion_log(LOG_ERR, 1, "Error creating tmpbuffer in stream_add_client");
+		motion_log(LOG_ERR, 1, "%s: Error creating tmpbuffer in stream_add_client", __FUNCTION__);
 	} else {
 		memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
 		new->tmpbuffer->size = sizeof(header)-1;
@@ -333,10 +334,12 @@ void stream_stop(struct context *cnt)
 	struct stream *list;
 	struct stream *next = cnt->stream.next;
 
-	if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Closing motion-stream listen socket & active motion-stream sockets");
+	if (debug_level >= CAMERA_VERBOSE)
+		motion_log(-1, 0, "%s: Closing motion-stream listen socket"
+		                  " & active motion-stream sockets", __FUNCTION__);
 	else
-		motion_log(LOG_INFO, 0, "Closing motion-stream listen socket & active motion-stream sockets");
+		motion_log(LOG_INFO, 0, "%s: Closing motion-stream listen socket" 
+		           " & active motion-stream sockets", __FUNCTION__);
 	
 	close(cnt->stream.socket);
 	cnt->stream.socket = -1;
@@ -354,10 +357,12 @@ void stream_stop(struct context *cnt)
 		free(list);
 	}
 
-	if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Closed motion-stream listen socket & active motion-stream sockets");
+	if (debug_level >= CAMERA_VERBOSE)
+		motion_log(-1, 0, "%s: Closed motion-stream listen socket"
+		           " & active motion-stream sockets", __FUNCTION__);
 	else
-		motion_log(LOG_INFO, 0, "Closed motion-stream listen socket & active motion-stream sockets");
+		motion_log(LOG_INFO, 0, "%s: Closed motion-stream listen socket" 
+		           " & active motion-stream sockets", __FUNCTION__);
 }
 
 /* stream_put is the starting point of the stream loop. It is called from
@@ -463,7 +468,7 @@ void stream_put(struct context *cnt, unsigned char *image)
 			 */
 			stream_add_write(&cnt->stream, tmpbuffer, cnt->conf.stream_maxrate);
 		} else {
-			motion_log(LOG_ERR, 1, "Error creating tmpbuffer");
+			motion_log(LOG_ERR, 1, "%s: Error creating tmpbuffer", __FUNCTION__);
 		}
 	}
 	

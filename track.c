@@ -41,6 +41,7 @@ struct trackoptions track_template = {
 
 /* Add your own center and move functions here: */
 
+static unsigned short int servo_position(struct context *cnt, short unsigned int motor);
 
 static unsigned short int servo_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
 static unsigned short int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
@@ -232,12 +233,15 @@ static unsigned short int stepper_move(struct context *cnt, struct coord *cent, 
 	unsigned short int command = 0, data = 0;
 
 	if (cnt->track.dev < 0) {
-		motion_log(LOG_INFO, 0, "No device %s started yet , trying stepper_center()", cnt->track.port);	
-		if (!stepper_center(cnt, 0, 0)){
+		motion_log(LOG_INFO, 0, "%s: No device %s started yet , trying stepper_center()", 
+		           __FUNCTION__, cnt->track.port);	
+
+		if (!stepper_center(cnt, 0, 0)) {
 			motion_log(LOG_ERR, 1, "%s: failed to initialize stepper device on %s , fd [%i].", 
 			           __FUNCTION__, cnt->track.port, cnt->track.dev);	
 			return 0;
 		}
+
 		motion_log(LOG_INFO, 0, "%s: succeed , device started %s , fd [%i]", 
 		           __FUNCTION__, cnt->track.port, cnt->track.dev);	
 	}
@@ -354,6 +358,18 @@ static unsigned short int servo_command(struct context *cnt, unsigned short int 
 	return buffer[0];
 }
 
+
+static unsigned short int servo_position(struct context *cnt, short unsigned int motor)
+{
+	unsigned short int ret = 0;
+
+	ret = servo_command(cnt, motor, SERVO_COMMAND_POSITION, 0);
+
+	return ret;
+}
+
+
+
 /*
  * servo_move()
  *
@@ -382,9 +398,10 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 	
 	if (manual) {
 		int offset;
+		int position;
 
 		if (cent->x) {
-
+			position = servo_position(cnt, cnt->track.motorx);
 			offset = cent->x * cnt->track.stepsize;
 
 
@@ -394,14 +411,14 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 			else 
 				command = SERVO_COMMAND_RIGHT_N;
 
-			// TODO: need to get position to avoid overflow limits
-			/*if ((offset > cnt->track.maxx) || (offset < cnt->track.minx)){
-				motion_log(LOG_INFO, 0, "%s: x %d value out of range!", 
-				           __FUNCTION__, offset);
-				return 0;		   
-			}*/
+			data = abs(offset);
 
-			data = abs(offset);	
+			if ((data + position > cnt->track.maxx) || (position - offset < cnt->track.minx)) {	
+				motion_log(LOG_INFO, 0, "%s: x %d value out of range! (%d - %d)", 
+				           __FUNCTION__, data, cnt->track.minx, cnt->track.maxx);
+				return 0;		   
+			}
+
 
 			 /* Set Speed , TODO : it should be done only when speed changes */
 			servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
@@ -410,7 +427,7 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 
 
 		if (cent->y) {
-
+			position = servo_position(cnt, cnt->track.motory);
 			offset = cent->y * cnt->track.stepsize;	
 
 			if ( (cnt->track.motory_reverse && (offset > 0)) || 
@@ -419,14 +436,14 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 			else
 				command = SERVO_COMMAND_DOWN_N;
 
-			// TODO: need to get position to avoid overflow limits
-			/*if ((offset > cnt->track.maxy) || (offset < cnt->track.miny)) {
-				motion_log(LOG_INFO, 0, "%s: y %d value out of range!", 
-				           __FUNCTION__, offset);
-				return 0;					   
-			}*/
-			
 			data = abs(offset);
+
+			if ((data + position > cnt->track.maxy) || (position - offset < cnt->track.miny)) {	
+				motion_log(LOG_INFO, 0, "%s: y %d value out of range! (%d - %d)", 
+				           __FUNCTION__, data, cnt->track.miny, cnt->track.maxy);
+				return 0;					   
+			}
+			
 			
 			 /* Set Speed , TODO : it should be done only when speed changes */
 			servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
@@ -434,6 +451,7 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 		}
 
 	} else {
+		int position;
 
 		/***** x-axis *****/
 		
@@ -462,13 +480,15 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 		data = data * cnt->track.stepsize / imgs->width;
 
 		if (data && command) {
+
 			// TODO: need to get position to avoid overflow limits
-			/*
-			if (data > cnt->track.maxx)
-				data = cnt->track.maxx;
-			else if (data < cnt->track.minx)
-				data = cnt->track.minx;
-			*/	
+			position = servo_position(cnt, cnt->track.motorx);	
+
+			if ((position + data > cnt->track.maxx) || (position - data < cnt->track.minx)) {
+				motion_log(LOG_INFO, 0, "%s: x %d value out of range! (%d - %d)",
+				__FUNCTION__, data, cnt->track.minx, cnt->track.maxx);
+				return 0;
+			}	
 
 			 /* Set Speed , TODO : it should be done only when speed changes */
 			 
@@ -508,15 +528,16 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
 		data = data * cnt->track.stepsize / imgs->height;
 
 		if (data && command) {
+
 			// TODO: need to get position to avoid overflow limits
-			/*
-			if (data > cnt->track.maxy)
-				data = cnt->track.maxy;
-			else if (data < cnt->track.miny)
-				data = cnt->track.miny;
-			*/	
-			
-	
+			position = servo_position(cnt, cnt->track.motory);
+
+			if ((position + data > cnt->track.maxy) || (position - data < cnt->track.miny)) {
+				motion_log(LOG_INFO, 0, "%s: y %d value out of range! (%d - %d)",
+				           __FUNCTION__, data, cnt->track.miny, cnt->track.maxy);
+				return 0;
+			}
+
 			 /* Set Speed , TODO : it should be done only when speed changes */
 			servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
 			servo_command(cnt, cnt->track.motory, command, data);

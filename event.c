@@ -47,12 +47,12 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
 		execl("/bin/sh", "sh", "-c", stamp, " &", NULL);
 
 		/* if above function succeeds the program never reach here */
-		motion_log(LOG_ERR, 1, "Unable to start external command '%s'", stamp);
+		motion_log(LOG_ERR, 1, "%s: Unable to start external command '%s'", __FUNCTION__, stamp);
 
 		exit(1);
 	}
-	else if (cnt->conf.setup_mode)
-		motion_log(-1, 0, "Executing external command '%s'", stamp);
+	else if (debug_level >= CAMERA_VERBOSE)
+		motion_log(-1, 0, "%s: Executing external command '%s'", __FUNCTION__, stamp);
 }
 
 /* 
@@ -63,7 +63,8 @@ static void event_newfile(struct context *cnt ATTRIBUTE_UNUSED,
             int type ATTRIBUTE_UNUSED, unsigned char *dummy ATTRIBUTE_UNUSED,
             char *filename, void *ftype, struct tm *tm ATTRIBUTE_UNUSED)
 {
-	motion_log(-1, 0, "File of type %ld saved to: %s", (unsigned long)ftype, filename);
+	motion_log(-1, 0, "%s: File of type %ld saved to: %s", __FUNCTION__, 
+	          (unsigned long)ftype, filename);
 }
 
 
@@ -130,17 +131,20 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 			if (mysql_query(cnt->database, sqlquery) != 0){
 				int error_code = mysql_errno(cnt->database);
 				
-				motion_log(LOG_ERR, 1, "Mysql query failed %s error code %d",
-				           mysql_error(cnt->database), error_code);
+				motion_log(LOG_ERR, 1, "%s: Mysql query failed %s error code %d",
+				           __FUNCTION__, mysql_error(cnt->database), error_code);
 				/* Try to reconnect ONCE if fails continue and discard this sql query */
 				if (error_code >= 2000){
 					cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
 					mysql_init(cnt->database);
 					if (!mysql_real_connect(cnt->database, cnt->conf.database_host, cnt->conf.database_user, 
 					                        cnt->conf.database_password, cnt->conf.database_dbname, 0, NULL, 0)) {
-						motion_log(LOG_ERR, 0, "Cannot reconnect to MySQL database %s on host %s with user %s", 
-						           cnt->conf.database_dbname, cnt->conf.database_host, cnt->conf.database_user);
-						motion_log(LOG_ERR, 0, "MySQL error was %s", mysql_error(cnt->database));
+						motion_log(LOG_ERR, 0, "%s: Cannot reconnect to MySQL database "
+						           "%s on host %s with user %s MySQL error was %s",
+						           __FUNCTION__, cnt->conf.database_dbname, 
+						           cnt->conf.database_host, cnt->conf.database_user,
+							   mysql_error(cnt->database));
+
 					}else mysql_query(cnt->database, sqlquery);
 				}	
 			}	
@@ -154,7 +158,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 			res = PQexec(cnt->database_pg, sqlquery);
 
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				motion_log(LOG_ERR, 1, "PGSQL query failed");
+				motion_log(LOG_ERR, 1, "%s: PGSQL query failed", __FUNCTION__);
 				PQclear(res);
 			}
 		}
@@ -216,7 +220,7 @@ static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
 	if (*(int *)devpipe >= 0) {
 		if (vid_putpipe(*(int *)devpipe, img, cnt->imgs.size) == -1)
-			motion_log(LOG_ERR, 1, "Failed to put image into video pipe");
+			motion_log(LOG_ERR, 1, "%s: Failed to put image into video pipe", __FUNCTION__);
 	}
 }
 #endif /* BSD */
@@ -310,7 +314,8 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
 		remove(linkpath);
 		if (symlink(filename, linkpath)) {
-			motion_log(LOG_ERR, 1, "Could not create symbolic link [%s]", filename);
+			motion_log(LOG_ERR, 1, "%s: Could not create symbolic link [%s]", 
+			           __FUNCTION__, filename);
 			return;
 		}
 	} else {
@@ -402,7 +407,8 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		      ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
 		                  cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL) {
-			motion_log(LOG_ERR, 1, "ffopen_open error creating (new) file [%s]", cnt->newfilename);
+			motion_log(LOG_ERR, 1, "s%: ffopen_open error creating (new) file [%s]", 
+			           __FUNCTION__, cnt->newfilename);
 			cnt->finish = 1;
 			return;
 		}
@@ -427,7 +433,8 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		      ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
 		                  cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL){
-			motion_log(LOG_ERR, 1, "ffopen_open error creating (motion) file [%s]", cnt->motionfilename);
+			motion_log(LOG_ERR, 1, "%s: ffopen_open error creating (motion) file [%s]", 
+			           __FUNCTION__, cnt->motionfilename);
 			cnt->finish = 1;
 			return;
 		}
@@ -478,7 +485,8 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 		      ffmpeg_open((char *)TIMELAPSE_CODEC, cnt->timelapsefilename, y, u, v,
 		                  cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
 		                  cnt->conf.ffmpeg_vbr)) == NULL) {
-			motion_log(LOG_ERR, 1, "ffopen_open error creating (timelapse) file [%s]", cnt->timelapsefilename);
+			motion_log(LOG_ERR, 1, "%s: ffopen_open error creating (timelapse) file [%s]", 
+			           __FUNCTION__, cnt->timelapsefilename);
 			cnt->finish = 1;
 			return;
 		}

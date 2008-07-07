@@ -172,7 +172,7 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
 	if ((len = recv(ctxt->control_file_desc,
 	&ctxt->control_buffer[ctxt->control_buffer_index],
 	size, 0)) < 0) {
-		motion_log(LOG_ERR, 1, "recv failed in ftp_get_more");
+		motion_log(LOG_ERR, 1, "%s: recv failed in ftp_get_more", __FUNCTION__);
 		close(ctxt->control_file_desc);
 		ctxt->control_file_desc = -1;
 		return(-1);
@@ -265,7 +265,7 @@ static int ftp_send_user(ftp_context_pointer ctxt) {
 	len = strlen(buf);
 	res = send(ctxt->control_file_desc, buf, len, 0);
 	if (res < 0) {
-		motion_log(LOG_ERR, 1, "send failed in ftp_send_user");
+		motion_log(LOG_ERR, 1, "%s: send failed in ftp_send_user", __FUNCTION__);
 		return(res);
 	}
 	return(0);
@@ -288,7 +288,7 @@ static int ftp_send_passwd(ftp_context_pointer ctxt) {
 	len = strlen(buf);
 	res = send(ctxt->control_file_desc, buf, len, 0);
 	if (res < 0) {
-		motion_log(LOG_ERR, 1, "send failed in ftp_send_passwd");
+		motion_log(LOG_ERR, 1, "%s: send failed in ftp_send_passwd", __FUNCTION__);
 		return(res);
 	}
 	return(0);
@@ -318,7 +318,7 @@ static int ftp_quit(ftp_context_pointer ctxt) {
 	len = strlen(buf);
 	res = send(ctxt->control_file_desc, buf, len, 0);
 	if (res < 0) {
-		motion_log(LOG_ERR, 1, "send failed in ftp_quit");
+		motion_log(LOG_ERR, 1, "%s: send failed in ftp_quit", __FUNCTION__);
 		return(res);
 	}
 	return(0);
@@ -362,13 +362,13 @@ int ftp_connect(netcam_context_ptr netcam) {
 
 	hp = gethostbyname (netcam->connect_host);
 	if (hp == NULL) {
-		motion_log(LOG_ERR, 1, "gethostbyname failed in ftp_connect");
+		motion_log(LOG_ERR, 1, "%s: gethostbyname failed in ftp_connect", __FUNCTION__);
 		return (-1);
 	}
 	if ((unsigned int) hp->h_length >
 	sizeof(((struct sockaddr_in *)&ctxt->ftp_address)->sin_addr)) {
-		motion_log(LOG_ERR, 1, "gethostbyname address mismatch "
-		"in ftp_connect");
+		motion_log(LOG_ERR, 1, "%s: gethostbyname address mismatch "
+		           "in ftp_connect", __FUNCTION__);
 		return (-1);
 	}
 
@@ -382,7 +382,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 	addrlen = sizeof (struct sockaddr_in);
 
 	if (ctxt->control_file_desc < 0) {
-		motion_log(LOG_ERR, 1, "socket failed");
+		motion_log(LOG_ERR, 1, "%s: socket failed", __FUNCTION__);
 		return(-1);
 	}
 
@@ -391,7 +391,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 	*/
 	if (connect(ctxt->control_file_desc, (struct sockaddr *) &ctxt->ftp_address,
 	addrlen) < 0) {
-		motion_log(LOG_ERR, 1, "Failed to create a connection");
+		motion_log(LOG_ERR, 1, "%s: Failed to create a connection", __FUNCTION__);
 		close(ctxt->control_file_desc);
 		ctxt->control_file_desc = -1;
 		return(-1);
@@ -442,7 +442,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 		case 2:
 		break;
 		case 3:
-			motion_log(LOG_ERR, 0, "FTP server asking for ACCT on anonymous");
+			motion_log(LOG_ERR, 0, "%s: FTP server asking for ACCT on anonymous", __FUNCTION__);
 		case 1:
 		case 4:
 		case 5:
@@ -487,13 +487,13 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 	memset (&data_address, 0, sizeof(data_address));
 	ctxt->data_file_desc = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (ctxt->data_file_desc < 0) {
-		motion_log(LOG_ERR, 1, "socket failed");
+		motion_log(LOG_ERR, 1, "%s: socket failed", __FUNCTION__);
 		return (-1);
 	}
 	on = 1;
 	if (setsockopt(ctxt->data_file_desc, SOL_SOCKET, SO_REUSEADDR,
 	(char *)&on, sizeof(on)) < 0) {
-		motion_log(LOG_ERR, 1, "setting socket option SO_REUSEADDR");
+		motion_log(LOG_ERR, 1, "%s: setting socket option SO_REUSEADDR", __FUNCTION__);
 		return -1;
 	}
 
@@ -506,7 +506,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 		len = strlen (buf);
 		res = send(ctxt->control_file_desc, buf, len, 0);
 		if (res < 0) {
-			motion_log(LOG_ERR, 1, "send failed in ftp_get_connection");
+			motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_connection", __FUNCTION__);
 			close(ctxt->data_file_desc);
 			ctxt->data_file_desc = -1;
 			return(res);
@@ -533,7 +533,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 		cur++;
 		if (sscanf (cur, "%u,%u,%u,%u,%u,%u", &temp[0], &temp[1], &temp[2],
 		&temp[3], &temp[4], &temp[5]) != 6) {
-			motion_log(LOG_ERR, 0, "Invalid answer to PASV");
+			motion_log(LOG_ERR, 0, "%s: Invalid answer to PASV", __FUNCTION__);
 			if (ctxt->data_file_desc != -1) {
 				close (ctxt->data_file_desc);
 				ctxt->data_file_desc = -1;
@@ -548,7 +548,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 		/* Now try to connect to the data port */
 		if (connect(ctxt->data_file_desc, (struct sockaddr *) &data_address,
 		    data_address_length) < 0) {
-			motion_log(LOG_ERR, 1, "Failed to create a data connection");
+			motion_log(LOG_ERR, 1, "%s: Failed to create a data connection", __FUNCTION__);
 			close(ctxt->data_file_desc);
 			ctxt->data_file_desc = -1;
 			return (-1);
@@ -567,7 +567,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 		/* bind to the socket - should give us a unique port */
 		if (bind(ctxt->data_file_desc, (struct sockaddr *) &data_address,
 		    data_address_length) < 0) {
-			motion_log(LOG_ERR, 1, "bind failed");
+			motion_log(LOG_ERR, 1, "%s: bind failed", __FUNCTION__);
 			close(ctxt->data_file_desc);
 			ctxt->data_file_desc = -1;
 			return (-1);
@@ -579,7 +579,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 
 		/* set up a 'listen' on the port to get the server's connection */
 		if (listen(ctxt->data_file_desc, 1) < 0) {
-			motion_log(LOG_ERR, 1, "listen failed");
+			motion_log(LOG_ERR, 1, "%s: listen failed", __FUNCTION__);
 			close(ctxt->data_file_desc);
 			ctxt->data_file_desc = -1;
 			return (-1);
@@ -599,7 +599,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 		res = send(ctxt->control_file_desc, buf, len, 0);
 
 		if (res < 0) {
-			motion_log(LOG_ERR, 1, "send failed in ftp_get_connection");
+			motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_connection", __FUNCTION__);
 			close(ctxt->data_file_desc);
 			ctxt->data_file_desc = -1;
 			return(res);
@@ -707,7 +707,7 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
 	res = send(ctxt->control_file_desc, buf, len, 0);
 
 	if (res < 0) {
-		motion_log(LOG_ERR, 1, "send failed in ftp_get_socket");
+		motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_socket", __FUNCTION__);
 		close(ctxt->data_file_desc);
 		ctxt->data_file_desc = -1;
 		return(res);
@@ -732,7 +732,7 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
 
 		if ((acfd = accept(ctxt->data_file_desc, (struct sockaddr *)&data_address,
 		    &data_address_length)) < 0) {
-			motion_log(LOG_ERR, 1, "accept in ftp_get_socket");
+			motion_log(LOG_ERR, 1, "%s: accept in ftp_get_socket", __FUNCTION__);
 			close(ctxt->data_file_desc);
 			ctxt->data_file_desc = -1;
 			return -1;
@@ -768,7 +768,7 @@ int ftp_send_type(ftp_context_pointer ctxt, char type) {
 	res = send(ctxt->control_file_desc, buf, len, 0);
 
 	if (res < 0) {
-		motion_log(LOG_ERR, 1, "send failed in ftp_get_socket");
+		motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_socket", __FUNCTION__);
 		close(ctxt->data_file_desc);
 		ctxt->data_file_desc = -1;
 		return(res);
@@ -817,7 +817,7 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len) {
 
 	if (len <= 0) {
 		if (len < 0)
-			motion_log(LOG_ERR, 1, "recv failed in ftp_read");
+			motion_log(LOG_ERR, 1, "%s: recv failed in ftp_read", __FUNCTION__);
 		ftp_close_connection(ctxt);
 	}
 

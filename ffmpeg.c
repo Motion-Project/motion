@@ -206,7 +206,8 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 /* ffmpeg_init initializes for libavformat. */
 void ffmpeg_init()
 {
-	motion_log(LOG_INFO, 0, "ffmpeg LIBAVCODEC_BUILD %d LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, LIBAVFORMAT_BUILD);
+	motion_log(LOG_INFO, 0, "%s: ffmpeg LIBAVCODEC_BUILD %d LIBAVFORMAT_BUILD %d", 
+	           __FUNCTION__, LIBAVCODEC_BUILD, LIBAVFORMAT_BUILD);
 	av_register_all();
 
 #if LIBAVCODEC_BUILD > 4680
@@ -255,7 +256,8 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 		}
 #ifdef FFMPEG_NO_NONSTD_MPEG1
 	} else if (strcmp(codec, "mpeg1") == 0) {
-		motion_log(LOG_ERR, 0, "*** mpeg1 support for normal videos has been disabled ***");
+		motion_log(LOG_ERR, 0, "%s: *** mpeg1 support for normal videos has been disabled ***", 
+		           __FUNCTION__);
 		return NULL;
 #endif
 	} else if (strcmp(codec, "mpeg4") == 0) {
@@ -286,12 +288,13 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 		ext = ".mov";
 		of = guess_format("mov", NULL, NULL);		
 	} else {
-		motion_log(LOG_ERR, 0, "ffmpeg_video_codec option value %s is not supported", codec);
+		motion_log(LOG_ERR, 0, "%s: ffmpeg_video_codec option value %s is not supported", 
+		           __FUNCTION__, codec);
 		return NULL;
 	}
 
 	if (!of) {
-		motion_log(LOG_ERR, 0, "Could not guess format for %s", codec);
+		motion_log(LOG_ERR, 0, "%s: Could not guess format for %s", __FUNCTION__, codec);
 		return NULL;
 	}
 
@@ -331,7 +334,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	/* allocation the output media context */
 	ffmpeg->oc = av_mallocz(sizeof(AVFormatContext));
 	if (!ffmpeg->oc) {
-		motion_log(LOG_ERR, 1, "Memory error while allocating output media context");
+		motion_log(LOG_ERR, 1, "%s: Memory error while allocating output media context", __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
 	}
@@ -350,13 +353,13 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	if (ffmpeg->oc->oformat->video_codec != CODEC_ID_NONE) {
 		ffmpeg->video_st = av_new_stream(ffmpeg->oc, 0);
 		if (!ffmpeg->video_st) {
-			motion_log(LOG_ERR, 1, "av_new_stream - could not alloc stream");
+			motion_log(LOG_ERR, 1, "%s: av_new_stream - could not alloc stream", __FUNCTION__);
 			ffmpeg_cleanups(ffmpeg);
 			return (NULL);
 		}
 	} else {
 		/* We did not get a proper video codec. */
-		motion_log(LOG_ERR, 0, "Failed to obtain a proper video codec");
+		motion_log(LOG_ERR, 0, "%s: Failed to obtain a proper video codec", __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
 	}
@@ -404,7 +407,8 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
 	/* set the output parameters (must be done even if no parameters). */
 	if (av_set_parameters(ffmpeg->oc, NULL) < 0) {
-		motion_log(LOG_ERR, 0, "ffmpeg av_set_parameters error: Invalid output format parameters");
+		motion_log(LOG_ERR, 0, "%s: av_set_parameters error: Invalid output format parameters", 
+		           __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
 	}
@@ -416,7 +420,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 		codec and allocate the necessary encode buffers */
 	codec = avcodec_find_encoder(c->codec_id);
 	if (!codec) {
-		motion_log(LOG_ERR, 1, "Codec not found");
+		motion_log(LOG_ERR, 1, "%s: Codec not found", __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
 	}
@@ -431,7 +435,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	if (avcodec_open(c, codec) < 0) {
 		/* Release the lock. */
 		pthread_mutex_unlock(&global_lock);
-		motion_log(LOG_ERR, 1, "avcodec_open - could not open codec");
+		motion_log(LOG_ERR, 1, "%s: avcodec_open - could not open codec", __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
 	}
@@ -452,7 +456,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 	/* allocate the encoded raw picture */
 	ffmpeg->picture = avcodec_alloc_frame();
 	if (!ffmpeg->picture) {
-		motion_log(LOG_ERR, 1, "avcodec_alloc_frame - could not alloc frame");
+		motion_log(LOG_ERR, 1, "%s: avcodec_alloc_frame - could not alloc frame", __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (NULL);
 	}
@@ -494,20 +498,22 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
 				/* and retry opening the file (use file_proto) */
 				if (url_fopen(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
-					motion_log(LOG_ERR, 1, "url_fopen - error opening file %s", filename);
+					motion_log(LOG_ERR, 1, "%s: url_fopen - error opening file %s", 
+					           __FUNCTION__, filename);
 					ffmpeg_cleanups(ffmpeg);
 					return (NULL);
 				}
 				/* Permission denied */
 			} else if (errno ==  EACCES) {
 				motion_log(LOG_ERR, 1,
-				           "url_fopen - error opening file %s"
-				           " ... check access rights to target directory", filename);
+				           "%s: url_fopen - error opening file %s"
+				           " ... check access rights to target directory", 
+					   __FUNCTION__, filename);
 				/* create path for file... */
 				ffmpeg_cleanups(ffmpeg);
 				return (NULL);
 			} else {
-				motion_log(LOG_ERR, 1, "Error opening file %s", filename);
+				motion_log(LOG_ERR, 1, "%s: Error opening file %s", __FUNCTION__, filename);
 				ffmpeg_cleanups(ffmpeg);
 				return (NULL);
 			}
@@ -673,7 +679,7 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
 	}
 	
 	if (ret != 0) {
-		motion_log(LOG_ERR, 1, "Error while writing video frame");
+		motion_log(LOG_ERR, 1, "%s: Error while writing video frame", __FUNCTION__);
 		ffmpeg_cleanups(ffmpeg);
 		return (-1);
 	}
@@ -695,7 +701,7 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
 
 	picture = avcodec_alloc_frame();
 	if (!picture) {
-		motion_log(LOG_ERR, 1, "Could not alloc frame");
+		motion_log(LOG_ERR, 1, "%s: Could not alloc frame", __FUNCTION__);
 		return NULL;
 	}
 
@@ -735,7 +741,7 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
 	
 	picture = avcodec_alloc_frame();
 	if (!picture) {
-		motion_log(LOG_ERR, 1, "Could not alloc frame");
+		motion_log(LOG_ERR, 1, "%s: Could not alloc frame", __FUNCTION__);
 		return;
 	}
 	
@@ -777,7 +783,7 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const c
 		vsnprintf(buf, sizeof(buf), fmt, vl);
 
 		/* If the debug_level is correct then send the message to the motion logging routine. */
-		motion_log(LOG_ERR, 0, "ffmpeg_avcodec_log: %s - flag %d", buf, errno_flag);
+		motion_log(LOG_ERR, 0, "%s: %s - flag %d", __FUNCTION__, buf, errno_flag);
 	}
 }
 

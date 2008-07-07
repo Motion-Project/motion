@@ -1459,7 +1459,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 	}
 
 	/* We reached the end of config_params without finding a matching option */
-	motion_log(LOG_ERR, 0, "Unknown config option \"%s\"", cmd);
+	motion_log(LOG_ERR, 0, "%s: Unknown config option \"%s\"", __FUNCTION__, cmd);
 
 	return cnt;
 }
@@ -1550,7 +1550,8 @@ void conf_print(struct context **cnt)
 	FILE *conffile;
 
 	for (thread = 0; cnt[thread]; thread++) {
-		motion_log(LOG_INFO, 0, "Writing config file to %s", cnt[thread]->conf_filename);
+		motion_log(LOG_INFO, 0, "%s: Writing config file to %s", 
+		           __FUNCTION__, cnt[thread]->conf_filename);
 		conffile = myfopen(cnt[thread]->conf_filename, "w");
 		if (!conffile)
 			continue;
@@ -1658,9 +1659,10 @@ struct context ** conf_load (struct context **cnt)
 	if (!fp) {      /* Commandline didn't work, try current dir */
 		char *path = NULL;
 		if (cnt[0]->conf_filename[0])
-			motion_log(-1, 1, "Configfile %s not found - trying defaults.", filename);
+			motion_log(-1, 1, "%s: Configfile %s not found - trying defaults.", 
+			           __FUNCTION__, filename);
 		if ( (path = get_current_dir_name()) == NULL) {
-			motion_log(LOG_ERR, 1, "Error get_current_dir_name");
+			motion_log(LOG_ERR, 1, "%s: Error get_current_dir_name", __FUNCTION__);
 			exit(-1);
 		}
 		snprintf(filename, PATH_MAX, "%s/motion.conf", path);
@@ -1674,18 +1676,21 @@ struct context ** conf_load (struct context **cnt)
 			snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
 			fp = fopen(filename, "r");
 			if (!fp)        /* there is no config file.... use defaults */
-				motion_log(-1, 1, "could not open configfile %s", filename);
+				motion_log(-1, 1, "%s: could not open configfile %s", 
+				           __FUNCTION__, filename);
 		}
 	}
 
 	/* Now we process the motion.conf config file and close it*/
 	if (fp) {
 		strcpy(cnt[0]->conf_filename, filename);
-		motion_log(LOG_INFO, 0, "Processing thread 0 - config file %s", filename);
+		motion_log(LOG_INFO, 0, "%s: Processing thread 0 - config file %s", 
+		           __FUNCTION__, filename);
 		cnt = conf_process(cnt, fp);
 		fclose(fp);
 	} else {
-		motion_log(LOG_INFO, 0, "Not config file to process using default values");
+		motion_log(LOG_INFO, 0, "%s: Not config file to process using default values", 
+		           __FUNCTION__);
 	}
 	
 
@@ -2032,7 +2037,8 @@ static struct context **config_thread(struct context **cnt, const char *str,
 
 	fp = fopen(str, "r");
 	if (!fp) {
-		motion_log(LOG_ERR, 1, "Thread config file %s not found", str);
+		motion_log(LOG_ERR, 1, "%s: Thread config file %s not found", 
+		           __FUNCTION__, str);
 		return cnt;
 	}
 
@@ -2066,7 +2072,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
 
 	/* process the thread's config file and notify user on console */
 	strcpy(cnt[i]->conf_filename, str);
-	motion_log(LOG_INFO, 0, "Processing config file %s", str);
+	motion_log(LOG_INFO, 0, "%s: Processing config file %s", __FUNCTION__, str);
 	conf_process(cnt+i, fp);
 	
 	/* Finally we close the thread config file */
