@@ -36,7 +36,7 @@
 int http_bindsock(int port, int local)
 {
 	int sl = -1, optval;
-	struct addrinfo hints, *res, *ressave;
+	struct addrinfo hints, *res = NULL, *ressave = NULL;
 	char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
 
@@ -45,7 +45,11 @@ int http_bindsock(int port, int local)
 	memset(&hints, 0, sizeof(struct addrinfo));
 	/* Use the AI_PASSIVE flag, which indicates we are using this address for a listen() */
 	hints.ai_flags = AI_PASSIVE;
+#if defined(BSD)
+	hints.ai_family = AF_INET;
+#else
 	hints.ai_family = AF_UNSPEC;
+#endif
 	hints.ai_socktype = SOCK_STREAM;
 
 	optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
@@ -53,7 +57,9 @@ int http_bindsock(int port, int local)
 	if (optval != 0) {
 		motion_log(LOG_ERR, 1, "%s: getaddrinfo() for motion-stream socket failed: %s", 
 		           __FUNCTION__, gai_strerror(optval));
-		freeaddrinfo(res);
+		
+		if (res != NULL)
+			freeaddrinfo(res);
 		return -1;
 	}
 

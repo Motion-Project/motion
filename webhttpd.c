@@ -2375,9 +2375,13 @@ void httpd_run(struct context **cnt)
 	sigaction(SIGCHLD, &act, NULL);
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	/* PASSIVE as we are going to listen */
+	/* AI_PASSIVE as we are going to listen */
 	hints.ai_flags = AI_PASSIVE;
+#if defined(BSD)
+	hints.ai_family = AF_INET;
+#else
 	hints.ai_family	= AF_UNSPEC;
+#endif
 	hints.ai_socktype = SOCK_STREAM;
 
 	snprintf(portnumber, sizeof(portnumber), "%u", cnt[0]->conf.webcontrol_port);
@@ -2388,7 +2392,9 @@ void httpd_run(struct context **cnt)
 	if (val != 0) {
 		motion_log(LOG_ERR, 1, "%s: getaddrinfo() for httpd socket failed: %s",
 		           __FUNCTION__, gai_strerror(val));
-		freeaddrinfo(res);
+		if (res)
+			freeaddrinfo(res);
+		pthread_mutex_destroy(&httpd_mutex);
 		return;
 	}
 
@@ -2430,6 +2436,7 @@ void httpd_run(struct context **cnt)
 	if (sd < 0) {
 		motion_log(LOG_ERR, 1, "%s: motion-httpd ERROR bind() [interface %s port %s]", 
 		           __FUNCTION__, hbuf, sbuf);
+		pthread_mutex_destroy(&httpd_mutex);
 		return;
 	}
 	
@@ -2437,6 +2444,7 @@ void httpd_run(struct context **cnt)
 		motion_log(LOG_ERR, 1, "%s: motion-httpd ERROR listen() [interface %s port %s]", 
 		           __FUNCTION__, hbuf, sbuf);
 		close(sd);
+		pthread_mutex_destroy(&httpd_mutex);
 		return;
 	}
 

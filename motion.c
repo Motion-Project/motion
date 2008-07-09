@@ -643,7 +643,7 @@ static int motion_init(struct context *cnt)
 	 * file options.
 	 */
 	if (cnt->video_dev < 0) {
-		motion_log(LOG_ERR, 0, "%s: Could not fetch initial image from camera\n" 
+		motion_log(LOG_ERR, 0, "%s: Could not fetch initial image from camera" 
 		           "Motion continues using width and height from config file(s)", 		
 		           __FUNCTION__);
 		cnt->imgs.width = cnt->conf.width;
@@ -1496,7 +1496,7 @@ static void *motion_loop(void *arg)
 
 			/* Add changed pixels to motion-images (for stream) in setup_mode
 			   and always overlay smartmask (not only when motion is detected) */
-			if (debug_level >= CAMERA_DEBUG) {
+			if (debug_level >= CAMERA_VERBOSE) {
 				char tmp[PATH_MAX];
 				sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs, cnt->current_image->total_labels, cnt->noise);
 				draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * text_size_factor,
@@ -1673,8 +1673,8 @@ static void *motion_loop(void *arg)
 
 		/***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
-			/* If setup_mode enabled output some numbers to console */
-			if (debug_level >= CAMERA_DEBUG){
+			/* If CAMERA_VERBOSE enabled output some numbers to console */
+			if (debug_level >= CAMERA_VERBOSE){
 				char msg[1024] = "\0";
 				char part[100];
 
@@ -2394,7 +2394,7 @@ int main (int argc, char **argv)
 			}
 			if ( ((motion_threads_running == 0 ) && finish ) || 
 			     ((motion_threads_running == 0 ) && (threads_running == 0)) ){
-			     if (debug_level >= CAMERA_DEBUG)
+			     if (debug_level >= CAMERA_VERBOSE)
 				motion_log(LOG_INFO, 0, "%s: DEBUG-1 threads_running %d motion_threads_running %d , finish %d", 
 				           __FUNCTION__, threads_running, motion_threads_running, finish);			     
 				break;
@@ -2427,7 +2427,7 @@ int main (int argc, char **argv)
 					}
 				}
 			}
-			if (debug_level >= CAMERA_DEBUG)
+			if (debug_level >= CAMERA_VERBOSE)
 				motion_log(LOG_INFO, 0, "%s: DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
 				           __FUNCTION__, threads_running, motion_threads_running, finish);
 		}
