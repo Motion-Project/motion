@@ -2292,8 +2292,10 @@ void httpd_run(struct context **cnt)
 
 	/* create socket */
 	sd = socket(AF_INET, SOCK_STREAM, 0);
+
 	if (sd<0) {
 		motion_log(LOG_ERR, 1, "httpd socket");
+		pthread_mutex_destroy(&httpd_mutex);
 		return;
 	}
 
@@ -2312,12 +2314,14 @@ void httpd_run(struct context **cnt)
 	if (bind(sd, (struct sockaddr *) &servAddr, sizeof(servAddr))<0) {
 		motion_log(LOG_ERR, 1, "httpd bind()");
 		close(sd);
+		pthread_mutex_destroy(&httpd_mutex);
 		return;
 	}
 
 	if (listen(sd,5) == -1){
 		motion_log(LOG_ERR, 1, "httpd listen()");
 		close(sd);
+		pthread_mutex_destroy(&httpd_mutex);
 		return;
 	}
 
