@@ -1,155 +1,71 @@
 Formatting rules for Motion code.
-
-Motion is coded in accordance with the K&R formatting style.  Indentation is
-TAB based but done so that formatting never depends upon how a text editor or
-text viewer represents a TAB.
-
-Some people assume a tab is always at multiples of 8 positions, but many
-others choose to use 4 or 6.  If the source file does not take this into
-consideration, the text alignment looks awful when viewed with a tab setting
-which differs from the original.
-
-We want to ensure that no matter which motion source file you look at, the
-style looks the same.  In order to do that, the Motion project enforces some
-additional rules.
-
-Here are the basic rules.
+Version 2.0 - 15 Jul 2008
 
 Note: To understand them you must view this document with spaces and tabs
 visible.
 
 --------------------
 RULE 1
-Code is generally indented using TABS
+Code is generally indented using 4 spaces
 
-Example1
-
+Example
 /* allocate some memory and check if that succeeded or not. If it failed
  * do some error logging and bail out
  */
 void * mymalloc(size_t nbytes)
 {
-	void *dummy = malloc(nbytes);
-	if (!dummy) {
-		printf("Could not allocate %llu bytes of memory!\n", (unsigned long long) nbytes);
-		syslog(LOG_EMERG, "Could not allocate %llu bytes of memory!", (unsigned long long) nbytes);
-		exit(1);
-	}
-	
-	return dummy;
+    void *dummy = malloc(nbytes);
+    if (!dummy) {
+        printf("Could not allocate %llu bytes of memory!\n", (unsigned long long) nbytes);
+        syslog(LOG_EMERG, "Could not allocate %llu bytes of memory!", (unsigned long long) nbytes);
+        exit(1);
+    }
+    
+    return dummy;
 }
 
 --------------------
 RULE 2
 If a line or statement is broken into two lines you will normally want the text
-in the 2nd line to align with text in the first line. This alignment must be
-done by following these rules:
-    1. On the continuation line, first you put tabs to reach the same
-       indentation level as the line above.
-    2. Then you align with SPACES until the text in the 2nd line is aligned
-       with the desired text above.
+in the 2nd line to align with text in the first line.  The alignment is done
+using spaces making the code on the following lines appear in a natural way below
+the corresponding code above. Use common sense to enhance readability.
 
-Example 2
+Example
 /* allocate some memory and check if that succeeded or not. If it failed
  * do some error logging and bail out
  */
 void * mymalloc(size_t nbytes)
 {
-	void *dummy = malloc(nbytes);
-	if (!dummy) {
-		printf("Could not allocate %llu bytes of memory!\n",
-		       (unsigned long long) nbytes);
-		syslog(LOG_EMERG, "Could not allocate %llu bytes of memory!",
-		       (unsigned long long) nbytes);
-		exit(1);
-	}
-	
-	return dummy;
+    void *dummy = malloc(nbytes);
+    if (!dummy) {
+        printf("Could not allocate %llu bytes of memory!\n",
+               (unsigned long long) nbytes);
+        syslog(LOG_EMERG, "Could not allocate %llu bytes of memory!",
+               (unsigned long long) nbytes);
+        exit(1);
+    }
+    
+    return dummy;
 }
 
-Never do this:
-WRONG EXAMPLE
-		printf("Could not allocate %llu bytes of memory!\n",
-			(unsigned long long) nbytes);
-
-The reason is that the 3rd tab will be shown with whatever width is given by
-the editor or viewer. The result is that you never know where the text ends.
-The alignment of the text is very important for the readability of the code.
+Example
+    cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
+                    cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
+                    cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
+                    cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 
 
-GOOD EXAMPLE
-	cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-	                cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-	                cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-	                cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 
-BAD EXAMPLE
-	cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-			cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-			cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-			cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
-
-
-GOOD EXAMPLE
-	char msg[] = "This is a very long message which we would like to break"
-	             "into two lines or more because otherwise the line gets"
-	             "too long to read. We align them below each other for readability"
-
-BAD EXAMPLE
-	char msg[] =	"This is a very long message which we would like to break"
-			"into two lines or more because otherwise the line gets"
-			"too long to read. We align them below each other for readability"
-
-Again, a different tab setting destroys alignment.
+Example
+    char msg[] = "This is a very long message which we would like to break"
+                 "into two lines or more because otherwise the line gets"
+                 "too long to read. We align them below each other for readability"
 
 --------------------
 RULE 3
-Never use TABS to align anything other than the start of line indentation.
-
-WRONG EXAMPLE
- *
- *	cnt		Pointer to the motion context structure
- *	level		logging level for the 'syslog' function
- *			(-1 implies no syslog message should be produced)
- *	errno_flag	if set, the log message should be followed by the
- *			error message.
- *	fmt		the format string for producing the message
- *	ap		variable-length argument list
- 
-THE CORRECT WAY
- *
- *      cnt             Pointer to the motion context structure
- *      level           logging level for the 'syslog' function
- *                      (-1 implies no syslog message should be produced)
- *      errno_flag      if set, the log message should be followed by the
- *                      error message.
- *      fmt             the format string for producing the message
- *      ap              variable-length argument list
-
-Again the reason is that the aligment of the text when using tabs is
-depending on the tab settings in editor or viewer.
-
-BAD EXAMPLE
-
-void function_a(void someparam)
-{
-	int	myvar1		/* explanation */
-	char	hellomyvar2	/* explanation */
-
-In this bad example the variable names will not align if the tab setting is
-not 8 positions. At 4 positions, for example, the variable names (as well as
-the comments) are no longer aligned.
-
-GOOD EXAMPLE
-void function_a(void someparam)
-{
-	int myvar1              /* explanation */
-	char hellomyvar2        /* explanation */
-
-Don't try and align variables. It does not become very readable when one type
-is int and another is unsigned long long int. There is too much white space
-between a short type name and the variable name. Comments after the variable
-name look good, provided that you use spaces to align them.
+Never use TABS to align anything. A tab may be 4 positions in one editor
+and 8 in another. A space is always a space. 
 
 --------------------
 RULE 4
@@ -164,11 +80,11 @@ GOOD EXAMPLE
  */
 type function_name(parameters)
 {
-	declarations
-	declarations
-	
-	statements
-	statements
+    declarations
+    declarations
+    
+    statements
+    statements
 }
 
 Do not split the function declaration into two lines.
@@ -179,41 +95,38 @@ BAD EXAMPLE
 
 type
 function_name(parameters) {
-	declarations
-	declarations
-	
-	statements
-	statements
+    declarations
+    declarations
+    
+    statements
+    statements
 }
 
 --------------------
 RULE 5
 Blocks follow K&R.
-Kenneth Lavrsen actually hates the K&R syntax, but it is the most generally
-accepted way, it was the way Motion was coded when Kenneth took over the
-project and it is now the way in which we will continue.
 
 GOOD EXAMPLE
 
 if ((picture=fopen(cnt->conf.mask_file, "r"))) {
-	cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
-	fclose(picture);
+    cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
+    fclose(picture);
 } else {
-	put_fixed_mask(cnt, cnt->conf.mask_file);
-	printf("Hello world\n");
+    put_fixed_mask(cnt, cnt->conf.mask_file);
+    printf("Hello world\n");
 }
 
 
 BAD EXAMPLE (even though Kenneth loves this one personally)
 if ((picture=fopen(cnt->conf.mask_file, "r")))
 {
-	cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
-	fclose(picture);
+    cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
+    fclose(picture);
 }
 else
 {
-	put_fixed_mask(cnt, cnt->conf.mask_file);
-	printf("Hello world\n");
+    put_fixed_mask(cnt, cnt->conf.mask_file);
+    printf("Hello world\n");
 }
 
 --------------------
@@ -229,13 +142,13 @@ To ensure that Motion code looks homogeneous and to enhance readability:
   6. The '*' for pointers should be just before the variable name with no
      space.
 
-BAD EXAMPLES
-int function_name (int * par1 , int par2,int par3){
-if (var1==2||var2==3){
-
 GOOD EXAMPLES
 int function_name(int *par1, int par2, int par3) {
 if (var1==2 || var2==3) {
+
+BAD EXAMPLES
+int function_name (int * par1 , int par2,int par3){
+if (var1==2||var2==3){
 
 --------------------
 RULE 7
@@ -282,7 +195,7 @@ if (cnt->event_nr==cnt->prev_event||cnt->makemovie) (bad)
 if (cnt->event_nr == cnt->prev_event || cnt->makemovie) (good)
 
 frame_delay=(1000000L/cnt->conf.low_cpu)-frame_delay-elapsedtime; (bad)
-frame_delay = (1000000L/cnt->conf.low_cpu) - frame_delay - elapsedtime; (good)
+frame_delay = (1000000L / cnt->conf.low_cpu) - frame_delay - elapsedtime; (good)
 
 
 --------------------
@@ -291,11 +204,9 @@ This document can probably be enhanced more as time goes by.
 Hope it helps developers to understand the ideas.
 
 What happens if I do not follow the rules?
-Your code will probably be accepted, but Kenneth will have to spend a lot of
+Your code will probably be accepted, but developers will have to spend a lot of
 time rewriting the code to follow the standard. If this happens, he may make
-a less-than-complimentary remark.  Please help Kenneth by at least trying to
-follow the spirit of this document.  We all have our coding preferences, but
+a less-than-complimentary remark.  Please help the developers by at least trying
+to follow the spirit of this document.  We all have our coding preferences, but
 if Motion is coded in 40 different styles, readability (and at the end
 quality) will become bad.
-
-
