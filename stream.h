@@ -22,20 +22,20 @@
 #define _INCLUDE_STREAM_H_
 
 struct stream_buffer {
-	unsigned char *ptr;
-	int ref;
-	long size;
+    unsigned char *ptr;
+    int ref;
+    long size;
 };
 
 struct stream {
-	int socket;
-	FILE *fwrite;
-	struct stream_buffer *tmpbuffer;
-	long filepos;
-	int nr;
-	unsigned long int last;
-	struct stream *prev;
-	struct stream *next;
+    int socket;
+    FILE *fwrite;
+    struct stream_buffer *tmpbuffer;
+    long filepos;
+    int nr;
+    unsigned long int last;
+    struct stream *prev;
+    struct stream *next;
 };
 
 int stream_init(struct context *);

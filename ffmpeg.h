@@ -36,19 +36,19 @@
 
 struct ffmpeg {
 #ifdef HAVE_FFMPEG
-	AVFormatContext *oc;
-	AVStream *video_st;
-	AVCodecContext *c;
+    AVFormatContext *oc;
+    AVStream *video_st;
+    AVCodecContext *c;
 
-	AVFrame *picture;       /* contains default image pointers */
-	uint8_t *video_outbuf;
-	int video_outbuf_size;
+    AVFrame *picture;       /* contains default image pointers */
+    uint8_t *video_outbuf;
+    int video_outbuf_size;
 
-	void *udata;            /* U & V planes for greyscale images */
-	int vbr;                /* variable bitrate setting */
-	char codec[20];         /* codec name */
+    void *udata;            /* U & V planes for greyscale images */
+    int vbr;                /* variable bitrate setting */
+    char codec[20];         /* codec name */
 #else
-	int dummy;
+    int dummy;
 #endif
 };
 
@@ -61,28 +61,28 @@ void ffmpeg_init(void);
  * timelapse video, use TIMELAPSE_CODEC as codec name.
  */
 struct ffmpeg *ffmpeg_open(
-	char *ffmpeg_video_codec, 
-	char *filename, 
-	unsigned char *y,    /* YUV420 Y plane */
-	unsigned char *u,    /* YUV420 U plane */
-	unsigned char *v,    /* YUV420 V plane */
-	int width,
-	int height, 
-	int rate,            /* framerate, fps */
-	int bps,             /* bitrate; bits per second */
-	int vbr              /* variable bitrate */
-	);
+    char *ffmpeg_video_codec, 
+    char *filename, 
+    unsigned char *y,    /* YUV420 Y plane */
+    unsigned char *u,    /* YUV420 U plane */
+    unsigned char *v,    /* YUV420 V plane */
+    int width,
+    int height, 
+    int rate,            /* framerate, fps */
+    int bps,             /* bitrate; bits per second */
+    int vbr              /* variable bitrate */
+    );
 
 /* Puts the image pointed to by the picture member of struct ffmpeg. */
 int ffmpeg_put_image(struct ffmpeg *);
 
 /* Puts the image defined by u, y and v (YUV420 format). */
 int ffmpeg_put_other_image(
-	struct ffmpeg *ffmpeg, 
-	unsigned char *y, 
-	unsigned char *u, 
-	unsigned char *v
-	);
+    struct ffmpeg *ffmpeg, 
+    unsigned char *y, 
+    unsigned char *u, 
+    unsigned char *v
+    );
 
 /* Closes the mpeg file. */
 void ffmpeg_close(struct ffmpeg *);

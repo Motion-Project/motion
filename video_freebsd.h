@@ -1,9 +1,10 @@
-/*	video_freebsd.h
+/*
+ * video_freebsd.h
  *
- *	Include file for video_freebsd.c
- *      Copyright 2004 by Angel Carpintero (ack@telefonica.net)
- *      This software is distributed under the GNU public license version 2
- *      See also the file 'COPYING'.
+ *    Include file for video_freebsd.c
+ *    Copyright 2004 by Angel Carpintero (ack@telefonica.net)
+ *    This software is distributed under the GNU public license version 2
+ *    See also the file 'COPYING'.
  *
  */
 
@@ -37,30 +38,30 @@
 */
 
 /* video4linux error codes */
-#define V4L_GENERAL_ERROR    0x01          /* binary 000001 */
-#define V4L_BTTVLOST_ERROR   0x05          /* binary 000101 */
+#define V4L_GENERAL_ERROR  0x01   /* binary 000001 */
+#define V4L_BTTVLOST_ERROR 0x05   /* binary 000101 */
 #define V4L_FATAL_ERROR      -1
 
-#define NORM_DEFAULT	0x00800 // METEOR_FMT_AUTOMODE 
-#define NORM_PAL	0x00200 // METEOR_FMT_PAL 
-#define NORM_NTSC	0x00100 // METEOR_FMT_NTSC 
-#define NORM_SECAM	0x00400 // METEOR_FMT_SECAM
-#define NORM_PAL_NC	0x00200 // METEOR_FMT_PAL /* Greyscale howto ?! FIXME */
+#define NORM_DEFAULT    0x00800 // METEOR_FMT_AUTOMODE 
+#define NORM_PAL        0x00200 // METEOR_FMT_PAL 
+#define NORM_NTSC       0x00100 // METEOR_FMT_NTSC 
+#define NORM_SECAM      0x00400 // METEOR_FMT_SECAM
+#define NORM_PAL_NC     0x00200 // METEOR_FMT_PAL /* Greyscale howto ?! FIXME */
 
-#define NORM_DEFAULT_NEW	 BT848_IFORM_F_AUTO 
-#define NORM_PAL_NEW		 BT848_IFORM_F_PALBDGHI	
-#define NORM_NTSC_NEW		 BT848_IFORM_F_NTSCM
-#define NORM_SECAM_NEW		 BT848_IFORM_F_SECAM	         	
-#define NORM_PAL_NC_NEW		 BT848_IFORM_F_AUTO /* FIXME */	
+#define NORM_DEFAULT_NEW      BT848_IFORM_F_AUTO 
+#define NORM_PAL_NEW          BT848_IFORM_F_PALBDGHI    
+#define NORM_NTSC_NEW         BT848_IFORM_F_NTSCM
+#define NORM_SECAM_NEW        BT848_IFORM_F_SECAM                 
+#define NORM_PAL_NC_NEW       BT848_IFORM_F_AUTO /* FIXME */    
 
-#define PAL	0
-#define NTSC	1
-#define SECAM	2
-#define PAL_NC	3	
+#define PAL                   0
+#define NTSC                  1
+#define SECAM                 2
+#define PAL_NC                3    
 
-#define PAL_HEIGHT 576
-#define SECAM_HEIGHT 576
-#define NTSC_HEIGHT 480
+#define PAL_HEIGHT          576
+#define SECAM_HEIGHT        576
+#define NTSC_HEIGHT         480
 
 #define BSD_VIDFMT_NONE       0
 #define BSD_VIDFMT_YV12       1
@@ -73,50 +74,50 @@
 #define BSD_VIDFMT_LAST       8
 
 
-#define IN_DEFAULT      0 
-#define IN_COMPOSITE    0
-#define IN_TV           1
-#define IN_COMPOSITE2   2
-#define IN_SVIDEO       3
+#define IN_DEFAULT            0 
+#define IN_COMPOSITE          0
+#define IN_TV                 1
+#define IN_COMPOSITE2         2
+#define IN_SVIDEO             3
 
-#define CAPTURE_SINGLE    0
-#define CAPTURE_CONTINOUS 1
+#define CAPTURE_SINGLE        0
+#define CAPTURE_CONTINOUS     1
 
-#define VIDEO_DEVICE "/dev/bktr0"
-#define TUNER_DEVICE "/dev/tuner0"
+#define VIDEO_DEVICE          "/dev/bktr0"
+#define TUNER_DEVICE          "/dev/tuner0"
 
 struct video_dev {
-	struct video_dev *next;
-	int usage_count;
-	int fd_bktr;
-	int fd_tuner;
-	const char *video_device;
-	const char *tuner_device;
-	unsigned short input;
-	unsigned short norm;
-	int width;
-	int height;
-	int contrast;
-	int saturation;
-	int hue;
-	int brightness;
-	int channel;
-	int channelset;
-	unsigned long freq;
+    struct video_dev *next;
+    int usage_count;
+    int fd_bktr;
+    int fd_tuner;
+    const char *video_device;
+    const char *tuner_device;
+    unsigned short input;
+    unsigned short norm;
+    int width;
+    int height;
+    int contrast;
+    int saturation;
+    int hue;
+    int brightness;
+    int channel;
+    int channelset;
+    unsigned long freq;
 
-	pthread_mutex_t mutex;
-	pthread_mutexattr_t attr;
-	int owner;
-	int frames;
-	
-	/* Device type specific stuff: */
-#ifndef WITHOUT_V4L	
- 	int capture_method;	
-	int v4l_fmt;
-	unsigned char *v4l_buffers[2];
-	int v4l_curbuffer;
-	int v4l_maxbuffer;
-	int v4l_bufsize;
+    pthread_mutex_t mutex;
+    pthread_mutexattr_t attr;
+    int owner;
+    int frames;
+    
+    /* Device type specific stuff: */
+#ifndef WITHOUT_V4L    
+     int capture_method;    
+    int v4l_fmt;
+    unsigned char *v4l_buffers[2];
+    int v4l_curbuffer;
+    int v4l_maxbuffer;
+    int v4l_bufsize;
 #endif
 };
 

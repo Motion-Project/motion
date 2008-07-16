@@ -1,16 +1,16 @@
 /*
- *	netcam.h
+ *    netcam.h
  *
- *	Include file for handling network cameras.
+ *    Include file for handling network cameras.
  *
- *	This code was inspired by the original netcam.c module
- *	written by Jeroen Vreeken and enhanced by several Motion
- *	project contributors, particularly Angel Carpintero and
- *	Christopher Price.
- *	
- *	Copyright 2005, William M. Brack
- *	This software is distributed under the GNU Public license
- *	Version 2.  See also the file 'COPYING'.
+ *    This code was inspired by the original netcam.c module
+ *    written by Jeroen Vreeken and enhanced by several Motion
+ *    project contributors, particularly Angel Carpintero and
+ *    Christopher Price.
+ *    
+ *    Copyright 2005, William M. Brack
+ *    This software is distributed under the GNU Public license
+ *    Version 2.  See also the file 'COPYING'.
  */
 #ifndef _INCLUDE_NETCAM_H
 #define _INCLUDE_NETCAM_H
@@ -75,11 +75,11 @@ typedef struct netcam_context *netcam_context_ptr;
  * when attempting to connect to the netcam.
  */
 struct url_t {
-	char *service;
-	char *userpass;
-	char *host;
-	int port;
-	char *path;
+    char *service;
+    char *userpass;
+    char *host;
+    int port;
+    char *path;
 };
 
 /*
@@ -88,18 +88,18 @@ struct url_t {
  * which are each described using a struct netcam_image_buff
  */
 typedef struct netcam_image_buff {
-	char *ptr;
-	int content_length;
-	size_t size;                    /* total allocated size */
-	size_t used;                    /* bytes already used */
-	struct timeval image_time;      /* time this image was received */
+    char *ptr;
+    int content_length;
+    size_t size;                    /* total allocated size */
+    size_t used;                    /* bytes already used */
+    struct timeval image_time;      /* time this image was received */
 } netcam_buff;
 typedef netcam_buff *netcam_buff_ptr;
 
 typedef struct file_context {
-	char      *path;               /* the path within the URL */
-	int       control_file_desc;   /* file descriptor for the control socket */
-	time_t    last_st_mtime;       /* time this image was modified */
+    char      *path;               /* the path within the URL */
+    int       control_file_desc;   /* file descriptor for the control socket */
+    time_t    last_st_mtime;       /* time this image was modified */
 } tfile_context;
 
 #define NCS_UNSUPPORTED         0  /* streaming is not supported */
@@ -111,150 +111,150 @@ typedef struct file_context {
  * for an individual netcam.
  */
 typedef struct netcam_context {
-	struct context *cnt;        /* pointer to parent motion
-	                               context structure */
+    struct context *cnt;        /* pointer to parent motion
+                                   context structure */
 
-	int finish;                 /* flag to break the camera-
-	                               handling thread out of it's
-	                               infinite loop in emergency */
+    int finish;                 /* flag to break the camera-
+                                   handling thread out of it's
+                                   infinite loop in emergency */
 
-	int threadnr;               /* motion's thread number for
-	                               the camera-handling thread
-	                               (if required).  Used for
-	                               error reporting */
+    int threadnr;               /* motion's thread number for
+                                   the camera-handling thread
+                                   (if required).  Used for
+                                   error reporting */
 
-	pthread_t thread_id;        /* thread i.d. for a camera-
-	                               handling thread (if required).
-	                               Not currently used, but may be
-	                               useful in the future */
+    pthread_t thread_id;        /* thread i.d. for a camera-
+                                   handling thread (if required).
+                                   Not currently used, but may be
+                                   useful in the future */
 
-	pthread_mutex_t mutex;      /* mutex used with conditional waits */
+    pthread_mutex_t mutex;      /* mutex used with conditional waits */
 
-	pthread_cond_t exiting;     /* pthread condition structure to let
-	                               the camera-handler acknowledge that
-	                               it's finished */
+    pthread_cond_t exiting;     /* pthread condition structure to let
+                                   the camera-handler acknowledge that
+                                   it's finished */
 
-	pthread_cond_t cap_cond;    /* pthread condition structure to
-	                               initiate next capture request (used
-	                               only with non-streaming cameras */
+    pthread_cond_t cap_cond;    /* pthread condition structure to
+                                   initiate next capture request (used
+                                   only with non-streaming cameras */
 
-	pthread_cond_t pic_ready;   /* pthread condition structure used
-	                                for synchronisation between the
-	                                camera handler and the motion main
-	                                loop, showing new frame is ready */
-	
-	int start_capture;          /* besides our signalling condition,
-	                               we also keep a flag to assure the
-	                               camera-handler will always start
-	                               a new cycle as soon as possible,
-	                               even if it's not currently waiting
-	                               on the condition. */
+    pthread_cond_t pic_ready;   /* pthread condition structure used
+                                    for synchronisation between the
+                                    camera handler and the motion main
+                                    loop, showing new frame is ready */
+    
+    int start_capture;          /* besides our signalling condition,
+                                   we also keep a flag to assure the
+                                   camera-handler will always start
+                                   a new cycle as soon as possible,
+                                   even if it's not currently waiting
+                                   on the condition. */
 
-	char *connect_host;         /* the host to connect to (may be
-	                               either the camera host, or
-	                               possibly a proxy) */
-	
-	int connect_port;           /* usually will be 80, but can be
-	                               specified as something else by
-	                               the user */
+    char *connect_host;         /* the host to connect to (may be
+                                   either the camera host, or
+                                   possibly a proxy) */
+    
+    int connect_port;           /* usually will be 80, but can be
+                                   specified as something else by
+                                   the user */
 
-	int connect_http_10;	    /* set to TRUE if HTTP 1.0 connection 
-	                               (netcam_keepalive off) */
+    int connect_http_10;        /* set to TRUE if HTTP 1.0 connection 
+                                   (netcam_keepalive off) */
 
-	int connect_http_11;	    /* set to TRUE if HTTP 1.1 connection 
-				       (netcam_keepalive on)  */
+    int connect_http_11;        /* set to TRUE if HTTP 1.1 connection 
+                                   (netcam_keepalive on)  */
 
-	int connect_keepalive;      /* set to TRUE if connection maintained after 
-				       a request, otherwise FALSE to close down 
-				       the socket each time (netcam_keealive force) */
+    int connect_keepalive;      /* set to TRUE if connection maintained after 
+                                   a request, otherwise FALSE to close down 
+                                   the socket each time (netcam_keealive force) */
 
-	int keepalive_thisconn;     /* set to TRUE if cam has sent 'Keep-Alive' in this connection */
+    int keepalive_thisconn;     /* set to TRUE if cam has sent 'Keep-Alive' in this connection */
 
-	int keepalive_timeup;       /* set to TRUE if it is time to close netcam's socket,
-	                               and then re-open it with Keep-Alive set again.
-	                               Even Keep-Alive netcams need a close/open sometimes. */
+    int keepalive_timeup;       /* set to TRUE if it is time to close netcam's socket,
+                                   and then re-open it with Keep-Alive set again.
+                                   Even Keep-Alive netcams need a close/open sometimes. */
 
-	char *connect_request;      /* contains the complete string
-	                               required for connection to the
-	                               camera */
+    char *connect_request;      /* contains the complete string
+                                   required for connection to the
+                                   camera */
 
-	int sock;                   /* fd for the camera's socket.
-	                               Note that this value is also
-	                               present within the struct
-	                               rbuf *response. */
+    int sock;                   /* fd for the camera's socket.
+                                   Note that this value is also
+                                   present within the struct
+                                   rbuf *response. */
 
-	struct timeval timeout;     /* The current timeout setting for
-	                               the socket. */
+    struct timeval timeout;     /* The current timeout setting for
+                                   the socket. */
 
-	struct rbuf *response;      /* this structure (defined in the
-	                               netcam_wget module) contains
-	                               the context for an HTTP
-	                               connection.  Note that this
-	                               structure includes a large
-	                               buffer for the HTTP data */
+    struct rbuf *response;      /* this structure (defined in the
+                                   netcam_wget module) contains
+                                   the context for an HTTP
+                                   connection.  Note that this
+                                   structure includes a large
+                                   buffer for the HTTP data */
 
-	struct ftp_context *ftp;    /* this structure contains the
-	                               context for FTP connection */
+    struct ftp_context *ftp;    /* this structure contains the
+                                   context for FTP connection */
 
-	struct file_context *file;  /* this structure contains the
-	                               context for FILE connection */
+    struct file_context *file;  /* this structure contains the
+                                   context for FILE connection */
 
-	int (*get_image)(netcam_context_ptr);
-	                            /* Function to fetch the image from
-	                               the netcam.  It is initialised in
-	                               netcam_setup depending upon whether
-	                               the picture source is from an http
-	                               server or from an ftp server */
+    int (*get_image)(netcam_context_ptr);
+                                /* Function to fetch the image from
+                                   the netcam.  It is initialised in
+                                   netcam_setup depending upon whether
+                                   the picture source is from an http
+                                   server or from an ftp server */
 
 
-	struct netcam_caps {        /* netcam capabilities: */
-		unsigned char streaming;        /*  See the NCS_* defines */
-		unsigned char content_length;   /*  0 - unsupported     */
-	} caps;
+    struct netcam_caps {        /* netcam capabilities: */
+        unsigned char streaming;        /*  See the NCS_* defines */
+        unsigned char content_length;   /*  0 - unsupported     */
+    } caps;
 
-	char *boundary;             /* 'boundary' string when used to
-	                               separate mjpeg images */
+    char *boundary;             /* 'boundary' string when used to
+                                   separate mjpeg images */
 
-	size_t boundary_length;     /* string length of the boundary
-	                               string */
+    size_t boundary_length;     /* string length of the boundary
+                                   string */
 
-	                            /* Three separate buffers are used
-	                               for handling the data.  Their
-	                               definitions follow: */
-	
-	netcam_buff_ptr latest;     /* This buffer contains the latest
-	                               frame received from the camera */
+                                /* Three separate buffers are used
+                                   for handling the data.  Their
+                                   definitions follow: */
+    
+    netcam_buff_ptr latest;     /* This buffer contains the latest
+                                   frame received from the camera */
 
-	netcam_buff_ptr receiving;  /* This buffer is used for receiving
-	                               data from the camera */
+    netcam_buff_ptr receiving;  /* This buffer is used for receiving
+                                   data from the camera */
 
-	netcam_buff_ptr jpegbuf;    /* This buffer is used for jpeg
-	                               decompression */
+    netcam_buff_ptr jpegbuf;    /* This buffer is used for jpeg
+                                   decompression */
 
-	int imgcnt;                 /* count for # of received jpegs */
-	int imgcnt_last;            /* remember last count to check if a new
-	                               image arrived */
+    int imgcnt;                 /* count for # of received jpegs */
+    int imgcnt_last;            /* remember last count to check if a new
+                                   image arrived */
 
-	int error_count;            /* simple count of number of errors since
-	                               last good frame was received */
-	
-	unsigned int width;         /* info for decompression */
-	unsigned int height;
+    int error_count;            /* simple count of number of errors since
+                                   last good frame was received */
+    
+    unsigned int width;         /* info for decompression */
+    unsigned int height;
 
-	int JFIF_marker;            /* Debug to know if JFIF was present or not */
-	unsigned int netcam_broken; /* For network cameras with buggy firmwares */ 
+    int JFIF_marker;            /* Debug to know if JFIF was present or not */
+    unsigned int netcam_broken; /* For network cameras with buggy firmwares */ 
 
-	struct timeval last_image;  /* time the most recent image was
-	                               received */
+    struct timeval last_image;  /* time the most recent image was
+                                   received */
 
-	float av_frame_time;        /* "running average" of time between
-	                               successive frames (microseconds) */
+    float av_frame_time;        /* "running average" of time between
+                                   successive frames (microseconds) */
 
-	struct jpeg_error_mgr jerr;
-	jmp_buf setjmp_buffer;
+    struct jpeg_error_mgr jerr;
+    jmp_buf setjmp_buffer;
 
-	int jpeg_error;             /* flag to show error or warning
-	                               occurred during decompression*/
+    int jpeg_error;             /* flag to show error or warning
+                                   occurred during decompression*/
 } netcam_context;
 
 #define MJPG_MH_MAGIC          "MJPG"
@@ -265,18 +265,18 @@ typedef struct netcam_context {
  * Little-endian data is read from the network.
  */
 typedef struct {
-	char mh_magic[MJPG_MH_MAGIC_SIZE];     /* must contain the string MJP
-	                                          not null-terminated. */
-	unsigned int mh_framesize;             /* Total size of the current 
-	                                          frame in bytes (~45kb on WVC200) */
-	unsigned short mh_framewidth;          /* Frame width in pixels */
-	unsigned short mh_frameheight;         /* Frame height in pixels */
-	unsigned int mh_frameoffset;           /* Offset of this chunk relative
-	                                          to the beginning of frame. */
-	unsigned short mh_chunksize;           /* The size of the chunk data
-	                                          following this header. */
-	char mh_reserved[30];                  /* Unknown data, seems to be
-	                                          constant between all headers */
+    char mh_magic[MJPG_MH_MAGIC_SIZE];     /* must contain the string MJP
+                                              not null-terminated. */
+    unsigned int mh_framesize;             /* Total size of the current 
+                                              frame in bytes (~45kb on WVC200) */
+    unsigned short mh_framewidth;          /* Frame width in pixels */
+    unsigned short mh_frameheight;         /* Frame height in pixels */
+    unsigned int mh_frameoffset;           /* Offset of this chunk relative
+                                              to the beginning of frame. */
+    unsigned short mh_chunksize;           /* The size of the chunk data
+                                              following this header. */
+    char mh_reserved[30];                  /* Unknown data, seems to be
+                                              constant between all headers */
 } mjpg_header;
  
 /*

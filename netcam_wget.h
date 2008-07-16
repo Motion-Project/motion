@@ -1,6 +1,6 @@
 /*
 Copyright (C) 1995, 1996, 1997, 1998, 2000, 2001, 2002
-	Free Software Foundation, Inc.
+    Free Software Foundation, Inc.
 
 Additional Copyright (C) 2004-2005 Christopher Price,
 Angel Carpintero, and other contributing authors.
@@ -31,11 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 /* Retrieval stream */
 struct rbuf
 {
-	char buffer[4096];      /* the input buffer */
-	char *buffer_pos;       /* current position in the buffer */
-	size_t buffer_left;     /* number of bytes left in the buffer:
-	                           buffer_left = buffer_end - buffer_pos */
-	int ret;                /* used by RBUF_READCHAR macro */
+    char buffer[4096];      /* the input buffer */
+    char *buffer_pos;       /* current position in the buffer */
+    size_t buffer_left;     /* number of bytes left in the buffer:
+                               buffer_left = buffer_end - buffer_pos */
+    int ret;                /* used by RBUF_READCHAR macro */
 };
 
 /* Read a character from RBUF.  If there is anything in the buffer,
@@ -50,12 +50,12 @@ struct rbuf
    should return the character or EOF, and in case of error store it
    to rbuf->err or something.  */
 
-#define RBUF_READCHAR(netcam, store)	\
-((netcam)->response->buffer_left ? (--(netcam)->response->buffer_left,	\
-*((char *) (store)) = *(netcam)->response->buffer_pos++, 1)	\
-: ((netcam)->response->buffer_pos = (netcam)->response->buffer,	\
-((((netcam)->response->ret = rbuf_read_bufferful (netcam)) <= 0)	\
-? (netcam)->response->ret : ((netcam)->response->buffer_left = (netcam->response)->ret - 1,	\
+#define RBUF_READCHAR(netcam, store)    \
+((netcam)->response->buffer_left ? (--(netcam)->response->buffer_left,    \
+*((char *) (store)) = *(netcam)->response->buffer_pos++, 1)    \
+: ((netcam)->response->buffer_pos = (netcam)->response->buffer,    \
+((((netcam)->response->ret = rbuf_read_bufferful (netcam)) <= 0)    \
+? (netcam)->response->ret : ((netcam)->response->buffer_left = (netcam->response)->ret - 1,    \
 *((char *) (store)) = *(netcam)->response->buffer_pos++,1))))
 
 /* Function declarations */
@@ -76,8 +76,16 @@ void base64_encode(const char *, char *, int);
 char *strdupdelim(const char *, const char *);
 int http_process_type(const char *, void *);
 
-enum { HG_OK, HG_ERROR, HG_EOF};
-enum header_get_flags{ HG_NONE = 0,HG_NO_CONTINUATIONS = 0x2 };
+enum {
+    HG_OK, 
+    HG_ERROR, 
+    HG_EOF
+};
+
+enum header_get_flags{
+    HG_NONE = 0,
+    HG_NO_CONTINUATIONS = 0x2
+};
 
 int header_get (netcam_context_ptr, char **, enum header_get_flags);
 int header_process (const char *, const char *,

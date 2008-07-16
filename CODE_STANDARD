@@ -118,6 +118,7 @@ if ((picture=fopen(cnt->conf.mask_file, "r"))) {
 
 
 BAD EXAMPLE (even though Kenneth loves this one personally)
+
 if ((picture=fopen(cnt->conf.mask_file, "r")))
 {
     cnt->imgs.mask=get_pgm(cnt, picture, cnt->imgs.width, cnt->imgs.height);
@@ -128,6 +129,40 @@ else
     put_fixed_mask(cnt, cnt->conf.mask_file);
     printf("Hello world\n");
 }
+
+
+
+GOOD EXAMPLE 
+
+switch (expr) {
+case ABC:
+case DEF:
+    statement;
+    break;
+case UVW:
+    statement;
+    break;
+default:
+    /* default case */
+    statement;
+}
+
+BAD EXAMPLE
+
+switch (expr) {
+    case ABC:
+    case DEF:
+        statement;
+    break;
+    case UVW:
+        statement;
+    break;
+    default:
+        /* default case */
+        statement;
+}
+
+
 
 --------------------
 RULE 6

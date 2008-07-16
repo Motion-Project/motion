@@ -1,126 +1,126 @@
 /*
-  **
-  ** conf.h - function prototypes for the config handling routines
-  **
-  ** Originally written for the dproxy package by Matthew Pratt.
-  **
-  ** Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
-  **
-  ** This software is licensed under the terms of the GNU General
-  ** Public License (GPL). Please see the file COPYING for details.
-  **
-  **
-*/
+ *
+ * conf.h - function prototypes for the config handling routines
+ *
+ * Originally written for the dproxy package by Matthew Pratt.
+ *
+ * Copyright 2000 Jeroen Vreeken (pe1rxq@chello.nl)
+ *
+ * This software is licensed under the terms of the GNU General
+ * Public License (GPL). Please see the file COPYING for details.
+ *
+ *
+ */
 
 #ifndef _INCLUDE_CONF_H
 #define _INCLUDE_CONF_H
 
 /* 
-	more parameters may be added later.
+    more parameters may be added later.
  */
 struct config {
-	int setup_mode;
-	int width;
-	int height;
-	int quality;
-	int rotate_deg;
-	int max_changes;
-	int threshold_tune;
-	const char *output_pictures;
-	int motion_img;
-	int emulate_motion;
-	int event_gap;
-	int max_movie_time;
-	int snapshot_interval;
-	const char *locate_motion;
-	int input;
-	int norm;
-	int frame_limit;
-	int quiet;
-	const char *picture_type;
-	int noise;
-	int noise_tune;
-	int minimum_frame_time;
-	int lightswitch;
-	int autobright;
-	int brightness;
-	int contrast;
-	int saturation;
-	int hue;
-	int roundrobin_frames;
-	int roundrobin_skip;
-	int pre_capture;
-	int post_capture;
-	int switchfilter;
-	int ffmpeg_output;
-	int ffmpeg_output_debug;
-	int ffmpeg_bps;
-	int ffmpeg_vbr;
-	int ffmpeg_deinterlace;
-	const char *ffmpeg_video_codec;
-	int stream_port;
-	int stream_quality;
-	int stream_motion;
-	int stream_maxrate;
-	int stream_localhost;
-	int stream_limit;
-	int webcontrol_port;
-	int webcontrol_localhost;
-	int webcontrol_html_output;
-	const char *webcontrol_authentication;
-	unsigned long frequency;
-	int tuner_number;
-	int timelapse;
-	const char *timelapse_mode; 
+    int setup_mode;
+    int width;
+    int height;
+    int quality;
+    int rotate_deg;
+    int max_changes;
+    int threshold_tune;
+    const char *output_pictures;
+    int motion_img;
+    int emulate_motion;
+    int event_gap;
+    int max_movie_time;
+    int snapshot_interval;
+    const char *locate_motion;
+    int input;
+    int norm;
+    int frame_limit;
+    int quiet;
+    const char *picture_type;
+    int noise;
+    int noise_tune;
+    int minimum_frame_time;
+    int lightswitch;
+    int autobright;
+    int brightness;
+    int contrast;
+    int saturation;
+    int hue;
+    int roundrobin_frames;
+    int roundrobin_skip;
+    int pre_capture;
+    int post_capture;
+    int switchfilter;
+    int ffmpeg_output;
+    int ffmpeg_output_debug;
+    int ffmpeg_bps;
+    int ffmpeg_vbr;
+    int ffmpeg_deinterlace;
+    const char *ffmpeg_video_codec;
+    int stream_port;
+    int stream_quality;
+    int stream_motion;
+    int stream_maxrate;
+    int stream_localhost;
+    int stream_limit;
+    int webcontrol_port;
+    int webcontrol_localhost;
+    int webcontrol_html_output;
+    const char *webcontrol_authentication;
+    unsigned long frequency;
+    int tuner_number;
+    int timelapse;
+    const char *timelapse_mode; 
 #if (defined(BSD))
-	const char *tuner_device;
+    const char *tuner_device;
 #endif
-	const char *video_device;
-	short unsigned int v4l2_palette;
-	const char *vidpipe;
-	const char *filepath;
-	const char *imagepath;
-	const char *moviepath;
-	const char *snappath;
-	const char *timepath;
-	char *on_event_start;
-	char *on_event_end;
-	const char *mask_file;
-	int smart_mask_speed;
-	int sql_log_image;
-	int sql_log_snapshot;
-	int sql_log_movie;
-	int sql_log_timelapse;
-	const char *sql_query;
-	const char *database_type;
-	const char *database_dbname;
-	const char *database_host;
-	const char *database_user;
-	const char *database_password;
-	int database_port;
-	char *on_picture_save;
-	char *on_area_detected;
-	char *on_motion_detected;
-	char *on_movie_start;
-	char *on_movie_end;
-	char *on_camera_lost;
-	const char *motionvidpipe;
-	const char *netcam_url;
-	const char *netcam_userpass;
-	const char *netcam_keepalive;
-	const char *netcam_proxy;
-	unsigned int netcam_broken;
-	int text_changes;
-	const char *text_left;
-	const char *text_right;
-	const char *text_event;
-	int text_double;
-	const char *despeckle_filter;
-	const char *area_detect;
-	int minimum_motion_frames;
-	char *pid_file;
-	int argc;
-	char **argv;
+    const char *video_device;
+    short unsigned int v4l2_palette;
+    const char *vidpipe;
+    const char *filepath;
+    const char *imagepath;
+    const char *moviepath;
+    const char *snappath;
+    const char *timepath;
+    char *on_event_start;
+    char *on_event_end;
+    const char *mask_file;
+    int smart_mask_speed;
+    int sql_log_image;
+    int sql_log_snapshot;
+    int sql_log_movie;
+    int sql_log_timelapse;
+    const char *sql_query;
+    const char *database_type;
+    const char *database_dbname;
+    const char *database_host;
+    const char *database_user;
+    const char *database_password;
+    int database_port;
+    char *on_picture_save;
+    char *on_area_detected;
+    char *on_motion_detected;
+    char *on_movie_start;
+    char *on_movie_end;
+    char *on_camera_lost;
+    const char *motionvidpipe;
+    const char *netcam_url;
+    const char *netcam_userpass;
+    const char *netcam_keepalive;
+    const char *netcam_proxy;
+    unsigned int netcam_broken;
+    int text_changes;
+    const char *text_left;
+    const char *text_right;
+    const char *text_event;
+    int text_double;
+    const char *despeckle_filter;
+    const char *area_detect;
+    int minimum_motion_frames;
+    char *pid_file;
+    int argc;
+    char **argv;
 };
 
 /** 
@@ -133,12 +133,12 @@ typedef const char *(* conf_print_func)(struct context **, char **, int, unsigne
  * description for parameters in the config file
  */
 typedef struct {
-	const char *param_name;           /* name for this parameter                  */
-	const char *param_help;           /* short explanation for parameter          */
-	unsigned short int main_thread;   /* belong only to main thread when value>0  */
-	int conf_value;                   /* pointer to a field in struct context     */
-	conf_copy_func  copy;             /* a function to set the value in 'config'  */
-	conf_print_func print;            /* a function to output the value to a file */
+    const char *param_name;           /* name for this parameter                  */
+    const char *param_help;           /* short explanation for parameter          */
+    unsigned short int main_thread;   /* belong only to main thread when value>0  */
+    int conf_value;                   /* pointer to a field in struct context     */
+    conf_copy_func  copy;             /* a function to set the value in 'config'  */
+    conf_print_func print;            /* a function to output the value to a file */
 } config_param; 
 
 

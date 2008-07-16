@@ -1,9 +1,9 @@
-/*	track.h
+/*    track.h
  *
- *	Experimental motion tracking.
+ *    Experimental motion tracking.
  *
- *	Copyright 2000, Jeroen Vreeken
- *	This program is published under the GNU Public license
+ *    Copyright 2000, Jeroen Vreeken
+ *    This program is published under the GNU Public license
  */
 
 #ifndef _INCLUDE_TRACK_H
@@ -13,31 +13,31 @@
 #include <termios.h>
 
 struct trackoptions {
-	int dev;
-	/* Config options: */
-	unsigned short int type;
-	char *port;
-	unsigned short int motorx;
-	unsigned short int motory;
-	int maxx;
-	int maxy;
-	int minx;
-	int miny;
-	unsigned short int stepsize;
-	unsigned short int speed;
-	unsigned short int homex;
-	unsigned short int homey;
-	unsigned short int iomojo_id;
-	unsigned short int active;
-	unsigned short int motorx_reverse;
-	unsigned short int motory_reverse;
-	unsigned short int minmaxfound;
-	unsigned short int step_angle_x;
-	unsigned short int step_angle_y;
-	unsigned short int move_wait;
-	/* UVC */
-	int pan_angle; // degrees
-	int tilt_angle; // degrees
+    int dev;
+    /* Config options: */
+    unsigned short int type;
+    char *port;
+    unsigned short int motorx;
+    unsigned short int motory;
+    int maxx;
+    int maxy;
+    int minx;
+    int miny;
+    unsigned short int stepsize;
+    unsigned short int speed;
+    unsigned short int homex;
+    unsigned short int homey;
+    unsigned short int iomojo_id;
+    unsigned short int active;
+    unsigned short int motorx_reverse;
+    unsigned short int motory_reverse;
+    unsigned short int minmaxfound;
+    unsigned short int step_angle_x;
+    unsigned short int step_angle_y;
+    unsigned short int move_wait;
+    /* UVC */
+    int pan_angle; // degrees
+    int tilt_angle; // degrees
 };
 
 extern struct trackoptions track_template;
@@ -140,7 +140,7 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
  * Some defines for the Iomojo Smilecam:
  */
 
-#define IOMOJO_BAUDRATE	B19200
+#define IOMOJO_BAUDRATE    B19200
 
 #define IOMOJO_CHECKPOWER_CMD   0xff
 #define IOMOJO_CHECKPOWER_RET   'Q'
@@ -169,9 +169,9 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
  */
 
 #ifdef MOTION_V4L2
-#define V4L2_CID_PAN_RELATIVE		(V4L2_CID_PRIVATE_BASE+7)
-#define V4L2_CID_TILT_RELATIVE		(V4L2_CID_PRIVATE_BASE+8)
-#define V4L2_CID_PANTILT_RESET		(V4L2_CID_PRIVATE_BASE+9)
+#define V4L2_CID_PAN_RELATIVE        (V4L2_CID_PRIVATE_BASE+7)
+#define V4L2_CID_TILT_RELATIVE        (V4L2_CID_PRIVATE_BASE+8)
+#define V4L2_CID_PANTILT_RESET        (V4L2_CID_PRIVATE_BASE+9)
 
 #define INCPANTILT 64 // 1 degree
 #endif /* MOTION_V4L2 */
