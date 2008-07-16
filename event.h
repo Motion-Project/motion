@@ -1,11 +1,11 @@
 /*
- *	event.h
+ *    event.h
  *
- *	Include file for event.c
+ *    Include file for event.c
  *
- *	Copyright Jeroen Vreeken, 2002
- *	This software is distributed under the GNU Public License Version 2
- *	see also the file 'COPYING'.
+ *    Copyright Jeroen Vreeken, 2002
+ *    This software is distributed under the GNU Public License Version 2
+ *    see also the file 'COPYING'.
  *
  */
 #ifndef _INCLUDE_EVENT_H_

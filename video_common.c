@@ -2,15 +2,15 @@
  *
  *      Video stream functions for motion.
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
- *      	  2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)	
- *      	  2007 by Angel Carpinteo (ack@telefonica.net)
+ *                2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)    
+ *                2007 by Angel Carpinteo (ack@telefonica.net)
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.
  *
  */
 
 /* for rotation */
-#include "rotate.h"	/* already includes motion.h */
+#include "rotate.h"    /* already includes motion.h */
 #include "video.h"
 
 #ifdef MJPEGT 
@@ -23,12 +23,12 @@ typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 
-#define CLAMP(x)        ((x)<0?0:((x)>255)?255:(x))
+#define CLAMP(x)  ((x)<0?0:((x)>255)?255:(x))
 
 typedef struct {
-	int is_abs;
-	int len;
-	int val;
+    int is_abs;
+    int len;
+    int val;
 } code_table_t;
 
 /*
@@ -42,55 +42,55 @@ typedef struct {
  */
 static void sonix_decompress_init(code_table_t * table)
 {
-	int i;
-	int is_abs, val, len;
+    int i;
+    int is_abs, val, len;
 
-	for (i = 0; i < 256; i++) {
-		is_abs = 0;
-		val = 0;
-		len = 0;
-		if ((i & 0x80) == 0) {
-			/* code 0 */
-			val = 0;
-			len = 1;
-		} else if ((i & 0xE0) == 0x80) {
-			/* code 100 */
-			val = +4;
-			len = 3;
-		} else if ((i & 0xE0) == 0xA0) {
-			/* code 101 */
-			val = -4;
-			len = 3;
-		} else if ((i & 0xF0) == 0xD0) {
-			/* code 1101 */
-			val = +11;
-			len = 4;
-		} else if ((i & 0xF0) == 0xF0) {
-			/* code 1111 */
-			val = -11;
-			len = 4;
-		} else if ((i & 0xF8) == 0xC8) {
-			/* code 11001 */
-			val = +20;
-			len = 5;
-		} else if ((i & 0xFC) == 0xC0) {
-			/* code 110000 */
-			val = -20;
-			len = 6;
-		} else if ((i & 0xFC) == 0xC4) {
-			/* code 110001xx: unknown */
-			val = 0;
-			len = 8;
-		} else if ((i & 0xF0) == 0xE0) {
-			/* code 1110xxxx */
-			is_abs = 1;
-			val = (i & 0x0F) << 4;
-			len = 8;
-		}
-		table[i].is_abs = is_abs;
-		table[i].val = val;
-		table[i].len = len;
-	}
+    for (i = 0; i < 256; i++) {
+        is_abs = 0;
+        val = 0;
+        len = 0;
+        if ((i & 0x80) == 0) {
+            /* code 0 */
+            val = 0;
+            len = 1;
+        } else if ((i & 0xE0) == 0x80) {
+            /* code 100 */
+            val = +4;
+            len = 3;
+        } else if ((i & 0xE0) == 0xA0) {
+            /* code 101 */
+            val = -4;
+            len = 3;
+        } else if ((i & 0xF0) == 0xD0) {
+            /* code 1101 */
+            val = +11;
+            len = 4;
+        } else if ((i & 0xF0) == 0xF0) {
+            /* code 1111 */
+            val = -11;
+            len = 4;
+        } else if ((i & 0xF8) == 0xC8) {
+            /* code 11001 */
+            val = +20;
+            len = 5;
+        } else if ((i & 0xFC) == 0xC0) {
+            /* code 110000 */
+            val = -20;
+            len = 6;
+        } else if ((i & 0xFC) == 0xC4) {
+            /* code 110001xx: unknown */
+            val = 0;
+            len = 8;
+        } else if ((i & 0xF0) == 0xE0) {
+            /* code 1110xxxx */
+            is_abs = 1;
+            val = (i & 0x0F) << 4;
+            len = 8;
+        }
+        table[i].is_abs = is_abs;
+        table[i].val = val;
+        table[i].len = len;
+    }
 }
 
 /*
@@ -109,74 +109,74 @@ static void sonix_decompress_init(code_table_t * table)
  */
 int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int height)
 {
-	int row, col;
-	int val;
-	int bitpos;
-	unsigned char code;
-	unsigned char *addr;
+    int row, col;
+    int val;
+    int bitpos;
+    unsigned char code;
+    unsigned char *addr;
 
-	/* local storage */
-	static code_table_t table[256];
-	static int init_done = 0;
+    /* local storage */
+    static code_table_t table[256];
+    static int init_done = 0;
 
-	if (!init_done) {
-		init_done = 1;
-		sonix_decompress_init(table);
-		/* do sonix_decompress_init first! */
-		//return -1; // so it has been done and now fall through
-	}
+    if (!init_done) {
+        init_done = 1;
+        sonix_decompress_init(table);
+        /* do sonix_decompress_init first! */
+        //return -1; // so it has been done and now fall through
+    }
 
-	bitpos = 0;
-	for (row = 0; row < height; row++) {
+    bitpos = 0;
+    for (row = 0; row < height; row++) {
 
-		col = 0;
+        col = 0;
 
-		/* first two pixels in first two rows are stored as raw 8-bit */
-		if (row < 2) {
-			addr = inp + (bitpos >> 3);
-			code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
-			bitpos += 8;
-			*outp++ = code;
+        /* first two pixels in first two rows are stored as raw 8-bit */
+        if (row < 2) {
+            addr = inp + (bitpos >> 3);
+            code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
+            bitpos += 8;
+            *outp++ = code;
 
-			addr = inp + (bitpos >> 3);
-			code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
-			bitpos += 8;
-			*outp++ = code;
+            addr = inp + (bitpos >> 3);
+            code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
+            bitpos += 8;
+            *outp++ = code;
 
-			col += 2;
-		}
+            col += 2;
+        }
 
-		while (col < width) {
-			/* get bitcode from bitstream */
-			addr = inp + (bitpos >> 3);
-			code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
+        while (col < width) {
+            /* get bitcode from bitstream */
+            addr = inp + (bitpos >> 3);
+            code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
 
-			/* update bit position */
-			bitpos += table[code].len;
+            /* update bit position */
+            bitpos += table[code].len;
 
-			/* calculate pixel value */
-			val = table[code].val;
-			if (!table[code].is_abs) {
-				/* value is relative to top and left pixel */
-				if (col < 2) {
-					/* left column: relative to top pixel */
-					val += outp[-2 * width];
-				} else if (row < 2) {
-					/* top row: relative to left pixel */
-					val += outp[-2];
-				} else {
-					/* main area: average of left pixel and top pixel */
-					val += (outp[-2] + outp[-2 * width]) / 2;
-				}
-			}
+            /* calculate pixel value */
+            val = table[code].val;
+            if (!table[code].is_abs) {
+                /* value is relative to top and left pixel */
+                if (col < 2) {
+                    /* left column: relative to top pixel */
+                    val += outp[-2 * width];
+                } else if (row < 2) {
+                    /* top row: relative to left pixel */
+                    val += outp[-2];
+                } else {
+                    /* main area: average of left pixel and top pixel */
+                    val += (outp[-2] + outp[-2 * width]) / 2;
+                }
+            }
 
-			/* store pixel */
-			*outp++ = CLAMP(val);
-			col++;
-		}
-	}
+            /* store pixel */
+            *outp++ = CLAMP(val);
+            col++;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -189,242 +189,242 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
 
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height)
 {
-	long int i;
-	unsigned char *rawpt, *scanpt;
-	long int size;
+    long int i;
+    unsigned char *rawpt, *scanpt;
+    long int size;
 
-	rawpt = src;
-	scanpt = dst;
-	size = width * height;
+    rawpt = src;
+    scanpt = dst;
+    size = width * height;
 
-	for (i = 0; i < size; i++) {
-		if (((i / width) & 1) == 0) {	// %2 changed to & 1
-			if ((i & 1) == 0) {
-				/* B */
-				if ((i > width) && ((i % width) > 0)) {
-					*scanpt++ = *rawpt;     /* B */
-					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt + width) + *(rawpt - width)) / 4;	/* G */
-					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
-				} else {
-					/* first line or left column */
-					*scanpt++ = *rawpt;     /* B */
-					*scanpt++ = (*(rawpt + 1) + *(rawpt + width)) / 2;	/* G */
-					*scanpt++ = *(rawpt + width + 1);       /* R */
-				}
-			} else {
-				/* (B)G */
-				if ((i > width) && ((i % width) < (width - 1))) {
-					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* B */
-					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* R */
-				} else {
-					/* first line or right column */
-					*scanpt++ = *(rawpt - 1);       /* B */
-					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = *(rawpt + width);   /* R */
-				}
-			}
-		} else {
-			if ((i & 1) == 0) {
-				/* G(R) */
-				if ((i < (width * (height - 1))) && ((i % width) > 0)) {
-					*scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* B */
-					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* R */
-				} else {
-					/* bottom line or left column */
-					*scanpt++ = *(rawpt - width);   /* B */
-					*scanpt++ = *rawpt;	/* G */
-					*scanpt++ = *(rawpt + 1);       /* R */
-				}
-			} else {
-				/* R */
-				if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
-					*scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* B */
-					*scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt - width) + *(rawpt + width)) / 4;	/* G */
-					*scanpt++ = *rawpt;     /* R */
-				} else {
-					/* bottom line or right column */
-					*scanpt++ = *(rawpt - width - 1);       /* B */
-					*scanpt++ = (*(rawpt - 1) + *(rawpt - width)) / 2;	/* G */
-					*scanpt++ = *rawpt;     /* R */
-				}
-			}
-		}
-		rawpt++;
-	}
+    for (i = 0; i < size; i++) {
+        if (((i / width) & 1) == 0) {    // %2 changed to & 1
+            if ((i & 1) == 0) {
+                /* B */
+                if ((i > width) && ((i % width) > 0)) {
+                    *scanpt++ = *rawpt;     /* B */
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt + width) + *(rawpt - width)) / 4;    /* G */
+                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
+                } else {
+                    /* first line or left column */
+                    *scanpt++ = *rawpt;     /* B */
+                    *scanpt++ = (*(rawpt + 1) + *(rawpt + width)) / 2;    /* G */
+                    *scanpt++ = *(rawpt + width + 1);       /* R */
+                }
+            } else {
+                /* (B)G */
+                if ((i > width) && ((i % width) < (width - 1))) {
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* B */
+                    *scanpt++ = *rawpt;    /* G */
+                    *scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* R */
+                } else {
+                    /* first line or right column */
+                    *scanpt++ = *(rawpt - 1);       /* B */
+                    *scanpt++ = *rawpt;    /* G */
+                    *scanpt++ = *(rawpt + width);   /* R */
+                }
+            }
+        } else {
+            if ((i & 1) == 0) {
+                /* G(R) */
+                if ((i < (width * (height - 1))) && ((i % width) > 0)) {
+                    *scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* B */
+                    *scanpt++ = *rawpt;    /* G */
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* R */
+                } else {
+                    /* bottom line or left column */
+                    *scanpt++ = *(rawpt - width);   /* B */
+                    *scanpt++ = *rawpt;    /* G */
+                    *scanpt++ = *(rawpt + 1);       /* R */
+                }
+            } else {
+                /* R */
+                if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
+                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* B */
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt - width) + *(rawpt + width)) / 4;    /* G */
+                    *scanpt++ = *rawpt;     /* R */
+                } else {
+                    /* bottom line or right column */
+                    *scanpt++ = *(rawpt - width - 1);       /* B */
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt - width)) / 2;    /* G */
+                    *scanpt++ = *rawpt;     /* R */
+                }
+            }
+        }
+        rawpt++;
+    }
 
 }
 
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
-	unsigned char *src, *dest, *src2, *dest2;
-	int i, j;
+    unsigned char *src, *dest, *src2, *dest2;
+    int i, j;
 
-	/* Create the Y plane */
-	src = cap_map;
-	dest = map;
-	for (i = width * height; i > 0; i--) {
-		*dest++ = *src;
-		src += 2;
-	}
-	/* Create U and V planes */
-	src = cap_map + 1;
-	src2 = cap_map + width * 2 + 1;
-	dest = map + width * height;
-	dest2 = dest + (width * height) / 4;
-	for (i = height / 2; i > 0; i--) {
-		for (j = width / 2; j > 0; j--) {
-			*dest = ((int) *src + (int) *src2) / 2;
-			src += 2;
-			src2 += 2;
-			dest++;
-			*dest2 = ((int) *src + (int) *src2) / 2;
-			src += 2;
-			src2 += 2;
-			dest2++;
-		}
-		src += width * 2;
-		src2 += width * 2;
-	}
+    /* Create the Y plane */
+    src = cap_map;
+    dest = map;
+    for (i = width * height; i > 0; i--) {
+        *dest++ = *src;
+        src += 2;
+    }
+    /* Create U and V planes */
+    src = cap_map + 1;
+    src2 = cap_map + width * 2 + 1;
+    dest = map + width * height;
+    dest2 = dest + (width * height) / 4;
+    for (i = height / 2; i > 0; i--) {
+        for (j = width / 2; j > 0; j--) {
+            *dest = ((int) *src + (int) *src2) / 2;
+            src += 2;
+            src2 += 2;
+            dest++;
+            *dest2 = ((int) *src + (int) *src2) / 2;
+            src += 2;
+            src2 += 2;
+            dest2++;
+        }
+        src += width * 2;
+        src2 += width * 2;
+    }
 }
 
 void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
 {
-	uint8_t *pY = map;
-	uint8_t *pU = pY + (width * height);
-	uint8_t *pV = pU + (width * height) / 4;
-	uint32_t uv_offset = width * 4 * sizeof(uint8_t);
-	uint32_t ix, jx;
+    uint8_t *pY = map;
+    uint8_t *pU = pY + (width * height);
+    uint8_t *pV = pU + (width * height) / 4;
+    uint32_t uv_offset = width * 4 * sizeof(uint8_t);
+    uint32_t ix, jx;
 
-	for (ix = 0; ix < height; ix++) {
-		for (jx = 0; jx < width; jx += 2) {
-			uint16_t calc;
-			if ((ix&1) == 0) {
-				calc = *cap_map;
-				calc += *(cap_map + uv_offset);
-				calc /= 2;
-				*pU++ = (uint8_t) calc;
-			}
-			cap_map++;
-			*pY++ = *cap_map++;
-			if ((ix&1) == 0) {
-				calc = *cap_map;
-				calc += *(cap_map + uv_offset);
-				calc /= 2;
-				*pV++ = (uint8_t) calc;
-			}
-			cap_map++;
-			*pY++ = *cap_map++;
-		}
-	}
+    for (ix = 0; ix < height; ix++) {
+        for (jx = 0; jx < width; jx += 2) {
+            uint16_t calc;
+
+            if ((ix&1) == 0) {
+                calc = *cap_map;
+                calc += *(cap_map + uv_offset);
+                calc /= 2;
+                *pU++ = (uint8_t) calc;
+            }
+
+            cap_map++;
+            *pY++ = *cap_map++;
+
+            if ((ix&1) == 0) {
+                calc = *cap_map;
+                calc += *(cap_map + uv_offset);
+                calc /= 2;
+                *pV++ = (uint8_t) calc;
+            }
+
+            cap_map++;
+            *pY++ = *cap_map++;
+        }
+    }
 }
 
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
-	unsigned char *y, *u, *v;
-	unsigned char *r, *g, *b;
-	int i, loop;
+    unsigned char *y, *u, *v;
+    unsigned char *r, *g, *b;
+    int i, loop;
 
-	b = cap_map;
-	g = b + 1;
-	r = g + 1;
-	y = map;
-	u = y + width * height;
-	v = u + (width * height) / 4;
-	memset(u, 0, width * height / 4);
-	memset(v, 0, width * height / 4);
+    b = cap_map;
+    g = b + 1;
+    r = g + 1;
+    y = map;
+    u = y + width * height;
+    v = u + (width * height) / 4;
+    memset(u, 0, width * height / 4);
+    memset(v, 0, width * height / 4);
 
-	for (loop = 0; loop < height; loop++) {
-		for (i = 0; i < width; i += 2) {
-			*y++ = (9796 ** r + 19235 ** g + 3736 ** b) >> 15;
-			*u += ((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32;
-			*v += ((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32;
-			r += 3;
-			g += 3;
-			b += 3;
-			*y++ = (9796 ** r + 19235 ** g + 3736 ** b) >> 15;
-			*u += ((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32;
-			*v += ((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32;
-			r += 3;
-			g += 3;
-			b += 3;
-			u++;
-			v++;
-		}
+    for (loop = 0; loop < height; loop++) {
+        for (i = 0; i < width; i += 2) {
+            *y++ = (9796 ** r + 19235 ** g + 3736 ** b) >> 15;
+            *u += ((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32;
+            *v += ((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32;
+            r += 3;
+            g += 3;
+            b += 3;
+            *y++ = (9796 ** r + 19235 ** g + 3736 ** b) >> 15;
+            *u += ((-4784 ** r - 9437 ** g + 14221 ** b) >> 17) + 32;
+            *v += ((20218 ** r - 16941 ** g - 3277 ** b) >> 17) + 32;
+            r += 3;
+            g += 3;
+            b += 3;
+            u++;
+            v++;
+        }
 
-		if ((loop & 1) == 0) {
-			u -= width / 2;
-			v -= width / 2;
-		}
-	}
+        if ((loop & 1) == 0) {
+            u -= width / 2;
+            v -= width / 2;
+        }
+    }
 }
 
 int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff *buff, int width, int height)
 {
-	netcam_context netcam;
+    netcam_context netcam;
 
-	if (!buff || !dst)
-		return 3;
+    if (!buff || !dst)
+        return 3;
 
-	if (!buff->ptr)
-		return 2;	/* Error decoding MJPEG frame */
+    if (!buff->ptr)
+        return 2;    /* Error decoding MJPEG frame */
 
-	memset(&netcam, 0, sizeof(netcam));
-	netcam.imgcnt_last = 1;
-	netcam.latest = buff;
-	netcam.width = width;
-	netcam.height = height;
-	netcam.cnt = cnt;
+    memset(&netcam, 0, sizeof(netcam));
+    netcam.imgcnt_last = 1;
+    netcam.latest = buff;
+    netcam.width = width;
+    netcam.height = height;
+    netcam.cnt = cnt;
 
-	pthread_mutex_init(&netcam.mutex, NULL);
-	pthread_cond_init(&netcam.cap_cond, NULL);
-	pthread_cond_init(&netcam.pic_ready, NULL);
-	pthread_cond_init(&netcam.exiting, NULL);
+    pthread_mutex_init(&netcam.mutex, NULL);
+    pthread_cond_init(&netcam.cap_cond, NULL);
+    pthread_cond_init(&netcam.pic_ready, NULL);
+    pthread_cond_init(&netcam.exiting, NULL);
 
-	if (setjmp(netcam.setjmp_buffer)) {
-		return NETCAM_GENERAL_ERROR | NETCAM_JPEG_CONV_ERROR;
-	}
+    if (setjmp(netcam.setjmp_buffer)) 
+        return NETCAM_GENERAL_ERROR | NETCAM_JPEG_CONV_ERROR;
 
-	return netcam_proc_jpeg(&netcam, dst);
+    return netcam_proc_jpeg(&netcam, dst);
 }
 
 #ifdef MJPEGT 
 void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
 {
-	uint8_t *yuv[3];
-	unsigned char *y, *u, *v;
-	int loop;
+    uint8_t *yuv[3];
+    unsigned char *y, *u, *v;
+    int loop;
 
-	yuv[0] = mymalloc(width * height * sizeof(yuv[0][0]));
-	yuv[1] = mymalloc(width * height / 4 * sizeof(yuv[1][0]));
-	yuv[2] = mymalloc(width * height / 4 * sizeof(yuv[2][0]));
+    yuv[0] = mymalloc(width * height * sizeof(yuv[0][0]));
+    yuv[1] = mymalloc(width * height / 4 * sizeof(yuv[1][0]));
+    yuv[2] = mymalloc(width * height / 4 * sizeof(yuv[2][0]));
 
 
-	decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
+    decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
 
-	y = map;
-	u = y + width * height;
-	v = u + (width * height) / 4;
-	memset(y, 0, width * height);
-	memset(u, 0, width * height / 4);
-	memset(v, 0, width * height / 4);
+    y = map;
+    u = y + width * height;
+    v = u + (width * height) / 4;
+    memset(y, 0, width * height);
+    memset(u, 0, width * height / 4);
+    memset(v, 0, width * height / 4);
 
-	for(loop = 0; loop < width * height; loop++) {
-		*map++ = yuv[0][loop];
-	}
+    for(loop = 0; loop < width * height; loop++) 
+        *map++ = yuv[0][loop];
+    
+    for(loop = 0; loop < width * height / 4; loop++) 
+        *map++ = yuv[1][loop];
+    
+    for(loop = 0; loop < width * height / 4; loop++) 
+        *map++ = yuv[2][loop];
 
-	for(loop = 0; loop < width * height / 4; loop++) {
-		*map++ = yuv[1][loop];
-	}
-
-	for(loop = 0; loop < width * height / 4; loop++) {
-		*map++ = yuv[2][loop];
-	}
-
-	free(yuv[0]);
-	free(yuv[1]);
-	free(yuv[2]);
+    free(yuv[0]);
+    free(yuv[1]);
+    free(yuv[2]);
 }
 #endif
 
@@ -454,49 +454,51 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 {
 
-	int brightness_window_high;
-	int brightness_window_low;
-	int brightness_target;
-	int i, j = 0, avg = 0, step = 0;
-	unsigned char *image = cnt->imgs.image_virgin; /* Or cnt->current_image ? */
+    int brightness_window_high;
+    int brightness_window_low;
+    int brightness_target;
+    int i, j = 0, avg = 0, step = 0;
+    unsigned char *image = cnt->imgs.image_virgin; /* Or cnt->current_image ? */
 
-	int make_change = 0;
+    int make_change = 0;
 
-	if (cnt->conf.brightness)
-		brightness_target = cnt->conf.brightness;
-	else
-		brightness_target = 128;
+    if (cnt->conf.brightness)
+        brightness_target = cnt->conf.brightness;
+    else
+        brightness_target = 128;
 
-	brightness_window_high = MIN2(brightness_target + AUTOBRIGHT_HYSTERESIS, 255);
-	brightness_window_low = MAX2(brightness_target - AUTOBRIGHT_HYSTERESIS, 1);
+    brightness_window_high = MIN2(brightness_target + AUTOBRIGHT_HYSTERESIS, 255);
+    brightness_window_low = MAX2(brightness_target - AUTOBRIGHT_HYSTERESIS, 1);
 
-	for (i = 0; i < cnt->imgs.motionsize; i += 101) {
-		avg += image[i];
-		j++;
-	}
-	avg = avg / j;
+    for (i = 0; i < cnt->imgs.motionsize; i += 101) {
+        avg += image[i];
+        j++;
+    }
+    avg = avg / j;
 
-	/* average is above window - turn down brightness - go for the target */
-	if (avg > brightness_window_high) {
-		step = MIN2((avg - brightness_target) / AUTOBRIGHT_DAMPER + 1, viddev->brightness - AUTOBRIGHT_MIN);
-		if (viddev->brightness > step + 1 - AUTOBRIGHT_MIN) {
-			viddev->brightness -= step;
-			make_change = 1;
-		}
-	} else if (avg < brightness_window_low) {
-		/* average is below window - turn up brightness - go for the target */
-		step = MIN2((brightness_target - avg) / AUTOBRIGHT_DAMPER + 1, AUTOBRIGHT_MAX - viddev->brightness);
-		if (viddev->brightness < AUTOBRIGHT_MAX - step) {
-			viddev->brightness += step;
-			make_change = 1;
-		}
-	}
+    /* average is above window - turn down brightness - go for the target */
+    if (avg > brightness_window_high) {
+        step = MIN2((avg - brightness_target) / AUTOBRIGHT_DAMPER + 1, viddev->brightness - AUTOBRIGHT_MIN);
 
-	return make_change;
+        if (viddev->brightness > step + 1 - AUTOBRIGHT_MIN) {
+            viddev->brightness -= step;
+            make_change = 1;
+        }
+    } else if (avg < brightness_window_low) {
+        /* average is below window - turn up brightness - go for the target */
+        step = MIN2((brightness_target - avg) / AUTOBRIGHT_DAMPER + 1, AUTOBRIGHT_MAX - viddev->brightness);
+        
+        if (viddev->brightness < AUTOBRIGHT_MAX - step) {
+            viddev->brightness += step;
+            make_change = 1;
+        }
+    }
+
+    return make_change;
 }
 
 /*****************************************************************************
-	Wrappers calling the actual capture routines
+    Wrappers calling the actual capture routines
  *****************************************************************************/
 
 #ifndef WITHOUT_V4L
@@ -523,7 +525,7 @@ static struct video_dev *viddevs = NULL;
  */
 void vid_init(void)
 {
-	pthread_mutex_init(&vid_mutex, NULL);
+    pthread_mutex_init(&vid_mutex, NULL);
 }
 
 /**
@@ -533,10 +535,10 @@ void vid_init(void)
  */
 void vid_cleanup(void)
 {
-	pthread_mutex_destroy(&vid_mutex);
+    pthread_mutex_destroy(&vid_mutex);
 }
 
-#endif	/* WITHOUT_V4L */
+#endif    /* WITHOUT_V4L */
 
 /**
  * vid_close
@@ -546,76 +548,76 @@ void vid_cleanup(void)
 void vid_close(struct context *cnt)
 {
 #ifndef WITHOUT_V4L
-	struct video_dev *dev = viddevs;
-	struct video_dev *prev = NULL;
+    struct video_dev *dev = viddevs;
+    struct video_dev *prev = NULL;
 #endif /* WITHOUT_V4L */ 
 
-	/* Cleanup the netcam part */
-	if(cnt->netcam) {
-		motion_log(LOG_DEBUG, 0, "%s: calling netcam_cleanup", __FUNCTION__);
-		netcam_cleanup(cnt->netcam, 0);
-		cnt->netcam = NULL;
-		return;
-	}
+    /* Cleanup the netcam part */
+    if (cnt->netcam) {
+        motion_log(LOG_DEBUG, 0, "%s: calling netcam_cleanup", __FUNCTION__);
+        netcam_cleanup(cnt->netcam, 0);
+        cnt->netcam = NULL;
+        return;
+    }
 
 #ifndef WITHOUT_V4L
 
-	/* Cleanup the v4l part */
-	pthread_mutex_lock(&vid_mutex);
-	while (dev) {
-		if (dev->fd == cnt->video_dev)
-			break;
-		prev = dev;
-		dev = dev->next;
-	}
-	pthread_mutex_unlock(&vid_mutex);
+    /* Cleanup the v4l part */
+    pthread_mutex_lock(&vid_mutex);
+    while (dev) {
+        if (dev->fd == cnt->video_dev)
+            break;
+        prev = dev;
+        dev = dev->next;
+    }
+    pthread_mutex_unlock(&vid_mutex);
 
-	/* Set it as closed in thread context */
-	cnt->video_dev = -1;
+    /* Set it as closed in thread context */
+    cnt->video_dev = -1;
 
-	if (dev == NULL) {
-		motion_log(LOG_ERR, 0, "%s: Unable to find video device", __FUNCTION__);
-		return;
-	}
+    if (dev == NULL) {
+        motion_log(LOG_ERR, 0, "%s: Unable to find video device", __FUNCTION__);
+        return;
+    }
 
-	if( --dev->usage_count == 0) {
-		motion_log(LOG_INFO, 0, "%s: Closing video device %s", __FUNCTION__, dev->video_device);
+    if (--dev->usage_count == 0) {
+        motion_log(LOG_INFO, 0, "%s: Closing video device %s", __FUNCTION__, dev->video_device);
 #ifdef MOTION_V4L2
-		if (dev->v4l2) {
-			v4l2_close(dev);
-			v4l2_cleanup(dev);
-		} else {
+        if (dev->v4l2) {
+            v4l2_close(dev);
+            v4l2_cleanup(dev);
+        } else {
 #endif
-			close(dev->fd);
-			munmap(viddevs->v4l_buffers[0], viddevs->size_map);
-			munmap(viddevs->v4l_buffers[1], viddevs->size_map);
+            close(dev->fd);
+            munmap(viddevs->v4l_buffers[0], viddevs->size_map);
+            munmap(viddevs->v4l_buffers[1], viddevs->size_map);
 #ifdef MOTION_V4L2
-		}
+        }
 #endif
-		dev->fd = -1;
-		pthread_mutex_lock(&vid_mutex);
-		/* Remove from list */
-		if (prev == NULL)
-			viddevs = dev->next;
-		else
-			prev->next = dev->next;
-		pthread_mutex_unlock(&vid_mutex);
+        dev->fd = -1;
+        pthread_mutex_lock(&vid_mutex);
+        /* Remove from list */
+        if (prev == NULL)
+            viddevs = dev->next;
+        else
+            prev->next = dev->next;
+        pthread_mutex_unlock(&vid_mutex);
 
-		pthread_mutexattr_destroy(&dev->attr);
-		pthread_mutex_destroy(&dev->mutex);
-		free(dev);
-	} else {
-		motion_log(LOG_INFO, 0, "%s: Still %d users of video device %s, so we don't close it now", 
-		           __FUNCTION__, dev->usage_count, dev->video_device);
-		/* There is still at least one thread using this device 
-		 * If we own it, release it
-		 */
-		if (dev->owner == cnt->threadnr) {
-			dev->frames = 0;
-			dev->owner = -1;
-			pthread_mutex_unlock(&dev->mutex);
-		}
-	}
+        pthread_mutexattr_destroy(&dev->attr);
+        pthread_mutex_destroy(&dev->mutex);
+        free(dev);
+    } else {
+        motion_log(LOG_INFO, 0, "%s: Still %d users of video device %s, so we don't close it now", 
+                   __FUNCTION__, dev->usage_count, dev->video_device);
+        /* There is still at least one thread using this device 
+         * If we own it, release it
+         */
+        if (dev->owner == cnt->threadnr) {
+            dev->frames = 0;
+            dev->owner = -1;
+            pthread_mutex_unlock(&dev->mutex);
+        }
+    }
 #endif /* WITHOUT_V4L */
 }
 
@@ -646,175 +648,175 @@ void vid_close(struct context *cnt)
  */
 static int vid_v4lx_start(struct context *cnt)
 {
-	struct config *conf = &cnt->conf;
-	int fd = -1;
-	struct video_dev *dev;
+    struct config *conf = &cnt->conf;
+    int fd = -1;
+    struct video_dev *dev;
 
-	int width, height, input, norm, tuner_number;
-	unsigned long frequency;
+    int width, height, input, norm, tuner_number;
+    unsigned long frequency;
 
-	/* We use width and height from conf in this function. They will be assigned
-	 * to width and height in imgs here, and cap_width and cap_height in 
-	 * rotate_data won't be set until in rotate_init.
-	 * Motion requires that width and height is a multiple of 16 so we check
-	 * for this first.
-	 */
-	if (conf->width % 16) {
-		motion_log(LOG_ERR, 0, "%s: config image width (%d) is not modulo 16", 
-		           __FUNCTION__, conf->width);
-		return -1;
-	}
+    /* We use width and height from conf in this function. They will be assigned
+     * to width and height in imgs here, and cap_width and cap_height in 
+     * rotate_data won't be set until in rotate_init.
+     * Motion requires that width and height is a multiple of 16 so we check
+     * for this first.
+     */
+    if (conf->width % 16) {
+        motion_log(LOG_ERR, 0, "%s: config image width (%d) is not modulo 16", 
+                   __FUNCTION__, conf->width);
+        return -1;
+    }
 
-	if (conf->height % 16) {
-		motion_log(LOG_ERR, 0, "%s: config image height (%d) is not modulo 16",
-	  	           __FUNCTION__, conf->height);
-		return -1;
-	}
+    if (conf->height % 16) {
+        motion_log(LOG_ERR, 0, "%s: config image height (%d) is not modulo 16",
+                     __FUNCTION__, conf->height);
+        return -1;
+    }
 
-	width = conf->width;
-	height = conf->height;
-	input = conf->input;
-	norm = conf->norm;
-	frequency = conf->frequency;
-	tuner_number = conf->tuner_number;
+    width = conf->width;
+    height = conf->height;
+    input = conf->input;
+    norm = conf->norm;
+    frequency = conf->frequency;
+    tuner_number = conf->tuner_number;
 
-	pthread_mutex_lock(&vid_mutex);
+    pthread_mutex_lock(&vid_mutex);
 
-	/* Transfer width and height from conf to imgs. The imgs values are the ones
-	 * that is used internally in Motion. That way, setting width and height via
-	 * http remote control won't screw things up.
-	 */
-	cnt->imgs.width = width;
-	cnt->imgs.height = height;
+    /* Transfer width and height from conf to imgs. The imgs values are the ones
+     * that is used internally in Motion. That way, setting width and height via
+     * http remote control won't screw things up.
+     */
+    cnt->imgs.width = width;
+    cnt->imgs.height = height;
 
-	/* First we walk through the already discovered video devices to see
-	 * if we have already setup the same device before. If this is the case
-	 * the device is a Round Robin device and we set the basic settings
-	 * and return the file descriptor
-	 */
-	dev = viddevs;
-	while (dev) {
-		if (!strcmp(conf->video_device, dev->video_device)) {
-			dev->usage_count++;
-			cnt->imgs.type = dev->v4l_fmt;
-			switch (cnt->imgs.type) {
-			case VIDEO_PALETTE_GREY:
-				cnt->imgs.motionsize = width * height;
-				cnt->imgs.size = width * height;
-				break;
-			case VIDEO_PALETTE_YUYV:
-			case VIDEO_PALETTE_RGB24:
-			case VIDEO_PALETTE_YUV422:
-				cnt->imgs.type = VIDEO_PALETTE_YUV420P;
-			case VIDEO_PALETTE_YUV420P:
-				cnt->imgs.motionsize = width * height;
-				cnt->imgs.size = (width * height * 3) / 2;
-				break;
-			}
-			pthread_mutex_unlock(&vid_mutex);
-			return dev->fd;
-		}
-		dev = dev->next;
-	}
+    /* First we walk through the already discovered video devices to see
+     * if we have already setup the same device before. If this is the case
+     * the device is a Round Robin device and we set the basic settings
+     * and return the file descriptor
+     */
+    dev = viddevs;
+    while (dev) {
+        if (!strcmp(conf->video_device, dev->video_device)) {
+            dev->usage_count++;
+            cnt->imgs.type = dev->v4l_fmt;
+            switch (cnt->imgs.type) {
+            case VIDEO_PALETTE_GREY:
+                cnt->imgs.motionsize = width * height;
+                cnt->imgs.size = width * height;
+                break;
+            case VIDEO_PALETTE_YUYV:
+            case VIDEO_PALETTE_RGB24:
+            case VIDEO_PALETTE_YUV422:
+                cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+            case VIDEO_PALETTE_YUV420P:
+                cnt->imgs.motionsize = width * height;
+                cnt->imgs.size = (width * height * 3) / 2;
+                break;
+            }
+            pthread_mutex_unlock(&vid_mutex);
+            return dev->fd;
+        }
+        dev = dev->next;
+    }
 
-	dev = mymalloc(sizeof(struct video_dev));
-	memset(dev, 0, sizeof(struct video_dev));
+    dev = mymalloc(sizeof(struct video_dev));
+    memset(dev, 0, sizeof(struct video_dev));
 
-	dev->video_device = conf->video_device;
+    dev->video_device = conf->video_device;
 
-	fd = open(dev->video_device, O_RDWR);
+    fd = open(dev->video_device, O_RDWR);
 
-	if (fd < 0) {
-		motion_log(LOG_ERR, 1, "%s: Failed to open video device %s", 
-		           __FUNCTION__, conf->video_device);
-		free(dev);
-		pthread_mutex_unlock(&vid_mutex);
-		return -1;
-	}
+    if (fd < 0) {
+        motion_log(LOG_ERR, 1, "%s: Failed to open video device %s", 
+                   __FUNCTION__, conf->video_device);
+        free(dev);
+        pthread_mutex_unlock(&vid_mutex);
+        return -1;
+    }
 
-	pthread_mutexattr_init(&dev->attr);
-	pthread_mutex_init(&dev->mutex, &dev->attr);
+    pthread_mutexattr_init(&dev->attr);
+    pthread_mutex_init(&dev->mutex, &dev->attr);
 
-	dev->usage_count = 1;
-	dev->fd = fd;
-	dev->input = input;
-	dev->height = height;
-	dev->width = width;
-	dev->freq = frequency;
-	dev->tuner_number = tuner_number;
+    dev->usage_count = 1;
+    dev->fd = fd;
+    dev->input = input;
+    dev->height = height;
+    dev->width = width;
+    dev->freq = frequency;
+    dev->tuner_number = tuner_number;
 
-	/* We set brightness, contrast, saturation and hue = 0 so that they only get
-	 * set if the config is not zero.
-	 */
-	dev->brightness = 0;
-	dev->contrast = 0;
-	dev->saturation = 0;
-	dev->hue = 0;
-	dev->owner = -1;
-	dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
+    /* We set brightness, contrast, saturation and hue = 0 so that they only get
+     * set if the config is not zero.
+     */
+    dev->brightness = 0;
+    dev->contrast = 0;
+    dev->saturation = 0;
+    dev->hue = 0;
+    dev->owner = -1;
+    dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
 #ifdef MOTION_V4L2
-	/* First lets try V4L2 and if it's not supported V4L1 */
+    /* First lets try V4L2 and if it's not supported V4L1 */
 
-	dev->v4l2 = 1;
+    dev->v4l2 = 1;
 
-	if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
-		/* restore width & height before test with v4l
-		 * because could be changed in v4l2_start ()
-		 */
-		dev->width = width;
-		dev->height = height;
+    if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
+        /* restore width & height before test with v4l
+         * because could be changed in v4l2_start ()
+         */
+        dev->width = width;
+        dev->height = height;
 #endif
 
-		if (!v4l_start(dev, width, height, input, norm, frequency, tuner_number)) {
-			close(dev->fd);
-			pthread_mutexattr_destroy(&dev->attr);
-			pthread_mutex_destroy(&dev->mutex);
-			free(dev);
+        if (!v4l_start(dev, width, height, input, norm, frequency, tuner_number)) {
+            close(dev->fd);
+            pthread_mutexattr_destroy(&dev->attr);
+            pthread_mutex_destroy(&dev->mutex);
+            free(dev);
 
-			pthread_mutex_unlock(&vid_mutex);
-			return -1;
-		}
+            pthread_mutex_unlock(&vid_mutex);
+            return -1;
+        }
 #ifdef MOTION_V4L2
-		dev->v4l2 = 0;
-	}
+        dev->v4l2 = 0;
+    }
 #endif
-	if (dev->v4l2 == 0) {
-		motion_log(-1, 0, "%s: Using V4L1", __FUNCTION__);
-	} else {
-		motion_log(-1, 0, "%s: Using V4L2", __FUNCTION__);
-		/* Update width & height because could be changed in v4l2_start () */
-		width = dev->width;
-		height = dev->height;
-		cnt->imgs.width = width;
-		cnt->imgs.height = height;
-	}
+    if (dev->v4l2 == 0) {
+        motion_log(-1, 0, "%s: Using V4L1", __FUNCTION__);
+    } else {
+        motion_log(-1, 0, "%s: Using V4L2", __FUNCTION__);
+        /* Update width & height because could be changed in v4l2_start () */
+        width = dev->width;
+        height = dev->height;
+        cnt->imgs.width = width;
+        cnt->imgs.height = height;
+    }
 
-	cnt->imgs.type = dev->v4l_fmt;
+    cnt->imgs.type = dev->v4l_fmt;
 
-	switch (cnt->imgs.type) {
-	case VIDEO_PALETTE_GREY:
-		cnt->imgs.size = width * height;
-		cnt->imgs.motionsize = width * height;
-		break;
-	case VIDEO_PALETTE_YUYV:
-	case VIDEO_PALETTE_RGB24:
-	case VIDEO_PALETTE_YUV422:
-		cnt->imgs.type = VIDEO_PALETTE_YUV420P;
-	case VIDEO_PALETTE_YUV420P:
-		cnt->imgs.size = (width * height * 3) / 2;
-		cnt->imgs.motionsize = width * height;
-		break;
-	}
+    switch (cnt->imgs.type) {
+    case VIDEO_PALETTE_GREY:
+        cnt->imgs.size = width * height;
+        cnt->imgs.motionsize = width * height;
+        break;
+    case VIDEO_PALETTE_YUYV:
+    case VIDEO_PALETTE_RGB24:
+    case VIDEO_PALETTE_YUV422:
+        cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+    case VIDEO_PALETTE_YUV420P:
+        cnt->imgs.size = (width * height * 3) / 2;
+        cnt->imgs.motionsize = width * height;
+        break;
+    }
 
-	/* Insert into linked list */
-	dev->next = viddevs;
-	viddevs = dev;
+    /* Insert into linked list */
+    dev->next = viddevs;
+    viddevs = dev;
 
-	pthread_mutex_unlock(&vid_mutex);
+    pthread_mutex_unlock(&vid_mutex);
 
-return fd;
+    return fd;
 }
-#endif				/*WITHOUT_V4L */
+#endif                /*WITHOUT_V4L */
 
 
 
@@ -842,25 +844,25 @@ return fd;
 
 int vid_start(struct context *cnt)
 {
-	struct config *conf = &cnt->conf;
-	int dev = -1;
+    struct config *conf = &cnt->conf;
+    int dev = -1;
 
-	if (conf->netcam_url) {
-		dev = netcam_start(cnt);
-		if (dev < 0) {
-			netcam_cleanup(cnt->netcam, 1);
-			cnt->netcam = NULL;
-		}
-	}
+    if (conf->netcam_url) {
+        dev = netcam_start(cnt);
+        if (dev < 0) {
+            netcam_cleanup(cnt->netcam, 1);
+            cnt->netcam = NULL;
+        }
+    }
 #ifdef WITHOUT_V4L
-        else	
-		motion_log(LOG_ERR, 0, "%s: You must setup netcam_url", __FUNCTION__);
+    else    
+        motion_log(LOG_ERR, 0, "%s: You must setup netcam_url", __FUNCTION__);
 #else
-	else
-		dev = vid_v4lx_start(cnt);
-#endif	/*WITHOUT_V4L */
+    else
+        dev = vid_v4lx_start(cnt);
+#endif    /*WITHOUT_V4L */
 
-	return dev;
+    return dev;
 }
 
 /**
@@ -885,69 +887,67 @@ int vid_start(struct context *cnt)
  */
 int vid_next(struct context *cnt, unsigned char *map)
 {
-	int ret = -2;
-	struct config *conf = &cnt->conf;
+    int ret = -2;
+    struct config *conf = &cnt->conf;
 
-	if (conf->netcam_url) {
-		if (cnt->video_dev == -1)
-			return NETCAM_GENERAL_ERROR;
+    if (conf->netcam_url) {
+        if (cnt->video_dev == -1)
+            return NETCAM_GENERAL_ERROR;
 
-		return netcam_next(cnt, map);
-	}
+        return netcam_next(cnt, map);
+    }
 #ifndef WITHOUT_V4L
-	/* We start a new block so we can make declarations without breaking
-	 * gcc 2.95 or older
-	 */
-	{
-		struct video_dev *dev;
-		int width, height;
+    /* We start a new block so we can make declarations without breaking
+     * gcc 2.95 or older
+     */
+    {
+        struct video_dev *dev;
+        int width, height;
 
-		/* NOTE: Since this is a capture, we need to use capture dimensions. */
-		width = cnt->rotate_data.cap_width;
-		height = cnt->rotate_data.cap_height;
+        /* NOTE: Since this is a capture, we need to use capture dimensions. */
+        width = cnt->rotate_data.cap_width;
+        height = cnt->rotate_data.cap_height;
 
-		pthread_mutex_lock(&vid_mutex);
-		dev = viddevs;
-		while (dev) {
-			if (dev->fd == cnt->video_dev)
-				break;
-			dev = dev->next;
-		}
-		pthread_mutex_unlock(&vid_mutex);
+        pthread_mutex_lock(&vid_mutex);
+        dev = viddevs;
+        while (dev) {
+            if (dev->fd == cnt->video_dev)
+                break;
+            dev = dev->next;
+        }
+        pthread_mutex_unlock(&vid_mutex);
 
-		if (dev == NULL)
-			return V4L_FATAL_ERROR;
+        if (dev == NULL)
+            return V4L_FATAL_ERROR;
 
-		if (dev->owner != cnt->threadnr) {
-			pthread_mutex_lock(&dev->mutex);
-			dev->owner = cnt->threadnr;
-			dev->frames = conf->roundrobin_frames;
-		}
+        if (dev->owner != cnt->threadnr) {
+            pthread_mutex_lock(&dev->mutex);
+            dev->owner = cnt->threadnr;
+            dev->frames = conf->roundrobin_frames;
+        }
 #ifdef MOTION_V4L2
-		if (dev->v4l2) {
-			v4l2_set_input(cnt, dev, map, width, height, conf);
-
-			ret = v4l2_next(cnt, dev, map, width, height);
-		} else {
+        if (dev->v4l2) {
+            v4l2_set_input(cnt, dev, map, width, height, conf);
+            ret = v4l2_next(cnt, dev, map, width, height);
+        } else {
 #endif
-			v4l_set_input(cnt, dev, map, width, height, conf->input, conf->norm,
-				      conf->roundrobin_skip, conf->frequency, conf->tuner_number);
-
-			ret = v4l_next(dev, map, width, height);
+            v4l_set_input(cnt, dev, map, width, height, conf->input, conf->norm,
+                          conf->roundrobin_skip, conf->frequency, conf->tuner_number);
+            ret = v4l_next(dev, map, width, height);
 #ifdef MOTION_V4L2
-		}
+        }
 #endif
-		if (--dev->frames <= 0) {
-			dev->owner = -1;
-			dev->frames = 0;
-			pthread_mutex_unlock(&dev->mutex);
-		}
+        if (--dev->frames <= 0) {
+            dev->owner = -1;
+            dev->frames = 0;
+            pthread_mutex_unlock(&dev->mutex);
+        }
 
-		if (cnt->rotate_data.degrees > 0) {
-			/* rotate the image as specified */
-			rotate_map(cnt, map);
-		}
-	}
-#endif				/*WITHOUT_V4L */
-	return ret;
+        /* rotate the image as specified */
+        if (cnt->rotate_data.degrees > 0) 
+            rotate_map(cnt, map);
+        
+    }
+#endif                /*WITHOUT_V4L */
+    return ret;
 }

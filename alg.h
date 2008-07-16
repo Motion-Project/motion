@@ -1,9 +1,9 @@
-/*	alg.h
+/*    alg.h
  *
- *	Detect changes in a video stream.
- *	Copyright 2001 by Jeroen Vreeken (pe1rxq@amsat.org)
- *	This software is distributed under the GNU public license version 2
- *	See also the file 'COPYING'.
+ *    Detect changes in a video stream.
+ *    Copyright 2001 by Jeroen Vreeken (pe1rxq@amsat.org)
+ *    This software is distributed under the GNU public license version 2
+ *    See also the file 'COPYING'.
  *
  */
 
@@ -13,22 +13,22 @@
 #include "motion.h"
 
 struct coord {
-	int x;
-	int y;
-	int width;
-	int height;
-	int minx;
-	int maxx;
-	int miny;
-	int maxy;
+    int x;
+    int y;
+    int width;
+    int height;
+    int minx;
+    int maxx;
+    int miny;
+    int maxy;
 };
 
 struct segment {
-	struct coord coord;
-	int width;
-	int height;
-	int open;
-	int count;
+    struct coord coord;
+    int width;
+    int height;
+    int open;
+    int count;
 };
 
 void alg_locate_center_size(struct images *, int width, int height, struct coord *);
