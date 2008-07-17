@@ -1,6 +1,6 @@
-/*	motion.h
+/*    motion.h
  *
- *	Include file for motion.c
+ *    Include file for motion.c
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.
@@ -135,8 +135,8 @@
                                      * and then we show a grey image instead
                                      */
 
-#define WATCHDOG_TMO 30  /* 10 sec max motion_loop interval */
-#define WATCHDOG_OFF -127 /* Turn off watchdog, used when we wants to quit a thread */
+#define WATCHDOG_TMO            30  /* 10 sec max motion_loop interval */
+#define WATCHDOG_OFF          -127  /* Turn off watchdog, used when we wants to quit a thread */
 
 #define CONNECTION_KO "Lost connection"
 #define CONNECTION_OK "Connection OK"
@@ -144,46 +144,46 @@
 #define DEF_MAXSTREAMS          10  /* Maximum number of webcam clients per camera */
 #define DEF_MAXWEBQUEUE         10  /* Maximum number of webcam client in queue */
 
-#define DEF_TIMESTAMP      "%Y-%m-%d\\n%T"
-#define DEF_EVENTSTAMP     "%Y%m%d%H%M%S"
+#define DEF_TIMESTAMP           "%Y-%m-%d\\n%T"
+#define DEF_EVENTSTAMP          "%Y%m%d%H%M%S"
 
-#define DEF_SNAPPATH       "%v-%Y%m%d%H%M%S-snapshot"
-#define DEF_JPEGPATH       "%v-%Y%m%d%H%M%S-%q"
-#define DEF_MPEGPATH       "%v-%Y%m%d%H%M%S"
-#define DEF_TIMEPATH       "%Y%m%d-timelapse"
+#define DEF_SNAPPATH            "%v-%Y%m%d%H%M%S-snapshot"
+#define DEF_JPEGPATH            "%v-%Y%m%d%H%M%S-%q"
+#define DEF_MPEGPATH            "%v-%Y%m%d%H%M%S"
+#define DEF_TIMEPATH            "%Y%m%d-timelapse"
 
-#define DEF_TIMELAPSE_MODE "daily"
+#define DEF_TIMELAPSE_MODE      "daily"
 
 /* Do not break this line into two or more. Must be ONE line */
 #define DEF_SQL_QUERY "sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')"
 
 /* Filetype defines */
-#define FTYPE_IMAGE            1
-#define FTYPE_IMAGE_SNAPSHOT   2
-#define FTYPE_IMAGE_MOTION     4
-#define FTYPE_MPEG             8
-#define FTYPE_MPEG_MOTION     16
-#define FTYPE_MPEG_TIMELAPSE  32
+#define FTYPE_IMAGE             1
+#define FTYPE_IMAGE_SNAPSHOT    2
+#define FTYPE_IMAGE_MOTION      4
+#define FTYPE_MPEG              8
+#define FTYPE_MPEG_MOTION      16
+#define FTYPE_MPEG_TIMELAPSE   32
 
 #define FTYPE_MPEG_ANY    (FTYPE_MPEG | FTYPE_MPEG_MOTION | FTYPE_MPEG_TIMELAPSE)
 #define FTYPE_IMAGE_ANY   (FTYPE_IMAGE | FTYPE_IMAGE_SNAPSHOT | FTYPE_IMAGE_MOTION)
 
 /* What types of jpeg files do we want to have */
-#define NEWIMG_OFF       0
-#define NEWIMG_ON        1
-#define NEWIMG_FIRST     2
-#define NEWIMG_BEST      4
-#define NEWIMG_CENTER    8
+#define NEWIMG_OFF              0
+#define NEWIMG_ON               1
+#define NEWIMG_FIRST            2
+#define NEWIMG_BEST             4
+#define NEWIMG_CENTER           8
 
-#define LOCATE_OFF       0
-#define LOCATE_ON        1
-#define LOCATE_PREVIEW   2
+#define LOCATE_OFF              0
+#define LOCATE_ON               1
+#define LOCATE_PREVIEW          2
 
-#define LOCATE_NORMAL    0
-#define LOCATE_BOTH      1
+#define LOCATE_NORMAL           0
+#define LOCATE_BOTH             1
 
-#define UPDATE_REF_FRAME 1
-#define RESET_REF_FRAME  2
+#define UPDATE_REF_FRAME        1
+#define RESET_REF_FRAME         2
 
 /* Forward declaration, used in track.h */
 struct images;
@@ -198,29 +198,29 @@ struct images;
  * so we only have to send it out when/if we want.
  */
 /* A image can have detected motion in it, but dosn't trigger an event, if we use minimum_motion_frames */
-#define IMAGE_MOTION     1
-#define IMAGE_TRIGGER    2
-#define IMAGE_SAVE       4
-#define IMAGE_SAVED      8
-#define IMAGE_PRECAP    16
-#define IMAGE_POSTCAP   32
+#define IMAGE_MOTION            1
+#define IMAGE_TRIGGER           2
+#define IMAGE_SAVE              4
+#define IMAGE_SAVED             8
+#define IMAGE_PRECAP           16
+#define IMAGE_POSTCAP          32
 
 struct image_data {
-	unsigned char *image;
-	int diffs;
-	time_t timestamp;         /* Timestamp when image was captured */
-	struct tm timestamp_tm;
-	int shot;                 /* Sub second timestamp count */
+    unsigned char *image;
+    int diffs;
+    time_t timestamp;         /* Timestamp when image was captured */
+    struct tm timestamp_tm;
+    int shot;                 /* Sub second timestamp count */
 
-	/* movement center to img center distance 
-	 * Note Dist is calculated distX*distX + distY*distY */
-	unsigned long cent_dist;
+    /* movement center to img center distance 
+     * Note Dist is calculated distX*distX + distY*distY */
+    unsigned long cent_dist;
 
-	unsigned int flags;       /* Se IMAGE_* defines */
+    unsigned int flags;       /* Se IMAGE_* defines */
 
-	struct coord location;      /* coordinates for center and size of last motion detection*/
+    struct coord location;    /* coordinates for center and size of last motion detection*/
 
-	int total_labels;
+    int total_labels;
 };
 
 /* DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
@@ -253,140 +253,140 @@ int draw_text (unsigned char *image, int startx, int starty, int width, const ch
 int initialize_chars(void);
 
 struct images {
-	struct image_data *image_ring;    /* The base address of the image ring buffer */
-	int image_ring_size;
-	int image_ring_in;                /* Index in image ring buffer we last added a image into */
-	int image_ring_out;               /* Index in image ring buffer we want to process next time */
+    struct image_data *image_ring;    /* The base address of the image ring buffer */
+    int image_ring_size;
+    int image_ring_in;                /* Index in image ring buffer we last added a image into */
+    int image_ring_out;               /* Index in image ring buffer we want to process next time */
 
-	unsigned char *ref;               /* The reference frame */
-	unsigned char *out;               /* Picture buffer for motion images */
-	int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
-	unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
-	struct image_data preview_image;  /* Picture buffer for best image when enables */
-	unsigned char *mask;              /* Buffer for the mask file */
-	unsigned char *smartmask;
-	unsigned char *smartmask_final;
-	unsigned char *common_buffer;
-	int *smartmask_buffer;
-	int *labels;
-	int *labelsize;
-	int width;
-	int height;
-	int type;
-	int size;
-	int motionsize;
-	int labelgroup_max;
-	int labels_above;
-	int labelsize_max;
-	int largest_label;
+    unsigned char *ref;               /* The reference frame */
+    unsigned char *out;               /* Picture buffer for motion images */
+    int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
+    unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
+    struct image_data preview_image;  /* Picture buffer for best image when enables */
+    unsigned char *mask;              /* Buffer for the mask file */
+    unsigned char *smartmask;
+    unsigned char *smartmask_final;
+    unsigned char *common_buffer;
+    int *smartmask_buffer;
+    int *labels;
+    int *labelsize;
+    int width;
+    int height;
+    int type;
+    int size;
+    int motionsize;
+    int labelgroup_max;
+    int labels_above;
+    int labelsize_max;
+    int largest_label;
 };
 
 /* Contains data for image rotation, see rotate.c. */
 struct rotdata {
-	/* Temporary buffer for 90 and 270 degrees rotation. */
-	unsigned char *temp_buf;
-	/* Degrees to rotate; copied from conf.rotate_deg. This is the value
-	 * that is actually used. The value of conf.rotate_deg cannot be used
-	 * because it can be changed by motion-control, and changing rotation
-	 * while Motion is running just causes problems.
-	 */
-	int degrees;
-	/* Capture width and height - different from output width and height if 
-	 * rotating 90 or 270 degrees. */
-	int cap_width;
-	int cap_height;
+    /* Temporary buffer for 90 and 270 degrees rotation. */
+    unsigned char *temp_buf;
+    /* Degrees to rotate; copied from conf.rotate_deg. This is the value
+     * that is actually used. The value of conf.rotate_deg cannot be used
+     * because it can be changed by motion-control, and changing rotation
+     * while Motion is running just causes problems.
+     */
+    int degrees;
+    /* Capture width and height - different from output width and height if 
+     * rotating 90 or 270 degrees. */
+    int cap_width;
+    int cap_height;
 };
 
 /*
-	these used to be global variables but now each thread will have its
-	own context
+    these used to be global variables but now each thread will have its
+    own context
  */
 struct context {
-	char conf_filename[PATH_MAX];
-	int threadnr;
-	unsigned short int daemon;
-	char pid_file[PATH_MAX];
+    char conf_filename[PATH_MAX];
+    int threadnr;
+    unsigned short int daemon;
+    char pid_file[PATH_MAX];
 
-	struct config conf;
-	struct images imgs;
-	struct trackoptions track;
-	struct netcam_context *netcam;
-	struct image_data *current_image;	/* Pointer to a structure where the image, diffs etc is stored */
-	unsigned short int new_img;
+    struct config conf;
+    struct images imgs;
+    struct trackoptions track;
+    struct netcam_context *netcam;
+    struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
+    unsigned short int new_img;
 
-	int locate;
-	struct rotdata rotate_data;		/* rotation data is thread-specific */
+    int locate;
+    struct rotdata rotate_data;              /* rotation data is thread-specific */
 
-	int noise;
-	int threshold;
-	int diffs_last[THRESHOLD_TUNE_LENGTH];
-	int smartmask_speed;
+    int noise;
+    int threshold;
+    int diffs_last[THRESHOLD_TUNE_LENGTH];
+    int smartmask_speed;
 
-	/* Commands to the motion thread */
-	volatile unsigned short int snapshot;    /* Make a snapshot */
-	volatile unsigned short int makemovie;   /* End a movie */
-	volatile unsigned short int finish;      /* End the thread */
-	volatile unsigned short int restart;     /* Restart the thread when it ends */
-	/* Is the motion thread running */
-	volatile unsigned short int running;
-	volatile int watchdog;
+    /* Commands to the motion thread */
+    volatile unsigned short int snapshot;    /* Make a snapshot */
+    volatile unsigned short int makemovie;   /* End a movie */
+    volatile unsigned short int finish;      /* End the thread */
+    volatile unsigned short int restart;     /* Restart the thread when it ends */
+    /* Is the motion thread running */
+    volatile unsigned short int running;
+    volatile int watchdog;
 
-	pthread_t thread_id;
+    pthread_t thread_id;
 
-	int event_nr;
-	int prev_event;
-	int lightswitch_framecounter;
-	char text_event_string[PATH_MAX];	/* The text for conv. spec. %C -
-						we assume PATH_MAX normally 4096 characters is fine */
-	int postcap;				/* downcounter, frames left to to send post event */
+    int event_nr;
+    int prev_event;
+    int lightswitch_framecounter;
+    char text_event_string[PATH_MAX];       /* The text for conv. spec. %C -
+                                            we assume PATH_MAX normally 4096 characters is fine */
+    int postcap;                            /* downcounter, frames left to to send post event */
 
-	short int shots;
-	unsigned short int detecting_motion;
-	struct tm *currenttime_tm;
-	struct tm *eventtime_tm;
+    short int shots;
+    unsigned short int detecting_motion;
+    struct tm *currenttime_tm;
+    struct tm *eventtime_tm;
 
-	time_t currenttime;
-	time_t lasttime;
-	time_t eventtime;
-	time_t connectionlosttime;		/* timestamp from connection lost */
+    time_t currenttime;
+    time_t lasttime;
+    time_t eventtime;
+    time_t connectionlosttime;              /* timestamp from connection lost */
 
-	int lastrate;
-	unsigned short int startup_frames;
-	unsigned short int moved;
-	unsigned short int pause;
-	int missing_frame_counter;		/* counts failed attempts to fetch picture frame from camera */
-	unsigned short int lost_connection;	
+    int lastrate;
+    unsigned short int startup_frames;
+    unsigned short int moved;
+    unsigned short int pause;
+    int missing_frame_counter;              /* counts failed attempts to fetch picture frame from camera */
+    unsigned short int lost_connection;    
 
 #if (defined(BSD))
-	int tuner_dev;
+    int tuner_dev;
 #endif
-	int video_dev;
-	int pipe;
-	int mpipe;
+    int video_dev;
+    int pipe;
+    int mpipe;
 
-	struct webcam webcam;
-	int stream_count;
-	
+    struct webcam webcam;
+    int stream_count;
+    
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
-	int sql_mask;
+    int sql_mask;
 #endif
 
 #ifdef HAVE_MYSQL
-	MYSQL *database;
+    MYSQL *database;
 #endif
 
 #ifdef HAVE_PGSQL
-	PGconn *database_pg;
+    PGconn *database_pg;
 #endif
 
 #ifdef HAVE_FFMPEG
-	struct ffmpeg *ffmpeg_new;
-	struct ffmpeg *ffmpeg_motion;
-	struct ffmpeg *ffmpeg_timelapse;
-	struct ffmpeg *ffmpeg_smartmask;
-	char newfilename[PATH_MAX];
-	char motionfilename[PATH_MAX];
-	char timelapsefilename[PATH_MAX];
+    struct ffmpeg *ffmpeg_new;
+    struct ffmpeg *ffmpeg_motion;
+    struct ffmpeg *ffmpeg_timelapse;
+    struct ffmpeg *ffmpeg_smartmask;
+    char newfilename[PATH_MAX];
+    char motionfilename[PATH_MAX];
+    char timelapsefilename[PATH_MAX];
 #endif
 };
 

@@ -15,21 +15,21 @@
 #define FTP_BUF_SIZE    1024
 
 typedef struct ftp_context {
-	char      *path;               /* the path within the URL */
-	char      *user;               /* user string */
-	char      *passwd;             /* passwd string */
-	struct    sockaddr_in ftp_address; /* the socket addr structure */
-	int       passive;             /* flag show passive/active mode used */
-	int       control_file_desc;   /* file descriptor for the control socket */
-	int       data_file_desc;      /* file descriptor for the data socket */
-	int       state;               /* WRITE / READ / CLOSED */
-	int       returnValue;         /* the protocol return value */
+    char      *path;               /* the path within the URL */
+    char      *user;               /* user string */
+    char      *passwd;             /* passwd string */
+    struct    sockaddr_in ftp_address; /* the socket addr structure */
+    int       passive;             /* flag show passive/active mode used */
+    int       control_file_desc;   /* file descriptor for the control socket */
+    int       data_file_desc;      /* file descriptor for the data socket */
+    int       state;               /* WRITE / READ / CLOSED */
+    int       returnValue;         /* the protocol return value */
 
-	/* buffer for data received from the control connection */
-	char      control_buffer[FTP_BUF_SIZE + 1];
-	int       control_buffer_index;
-	int       control_buffer_used;
-	int       control_buffer_answer;
+    /* buffer for data received from the control connection */
+    char      control_buffer[FTP_BUF_SIZE + 1];
+    int       control_buffer_index;
+    int       control_buffer_used;
+    int       control_buffer_answer;
 } ftp_context, *ftp_context_pointer;
 
 /* The public interface */

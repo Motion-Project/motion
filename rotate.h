@@ -1,12 +1,12 @@
 /*
- *	rotate.h
+ *    rotate.h
  *
- *	Include file for handling image rotation.
+ *    Include file for handling image rotation.
  *
- *	Copyright 2004-2005, Per Jonsson (per@pjd.nu)
+ *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
  *
- *	This software is distributed under the GNU Public license
- *	Version 2.  See also the file 'COPYING'.
+ *    This software is distributed under the GNU Public license
+ *    Version 2.  See also the file 'COPYING'.
  */
 #ifndef _INCLUDE_ROTATE_H
 #define _INCLUDE_ROTATE_H

@@ -1,5 +1,5 @@
 /*
- *	picture.h
+ *    picture.h
  *
  *      Copyright 2002 by Jeroen Vreeken (pe1rxq@amsat.org)
  *      Portions of this file are Copyright by Lionnel Maugis
