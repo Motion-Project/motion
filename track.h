@@ -1,9 +1,9 @@
-/*	track.h
+/*    track.h
  *
- *	Experimental motion tracking.
+ *    Experimental motion tracking.
  *
- *	Copyright 2000, Jeroen Vreeken
- *	This program is published under the GNU Public license
+ *    Copyright 2000, Jeroen Vreeken
+ *    This program is published under the GNU Public license
  */
 
 #ifndef _INCLUDE_TRACK_H
@@ -12,29 +12,29 @@
 #include "alg.h"
 
 struct trackoptions {
-	int dev;
-	/* Config options: */
-	unsigned short int type;
-	char *port;
-	unsigned short int motorx;
-	unsigned short int motory;
-	unsigned short int maxx;
-	unsigned short int maxy;
-	unsigned short int stepsize;
-	unsigned short int speed;
-	unsigned short int iomojo_id;
-	unsigned short int active;
-	int panmin;
-	int panmax;
-	int tiltmin;
-	int tiltmax;
-	unsigned short int minmaxfound;
-	unsigned short int step_angle_x;
-	unsigned short int step_angle_y;
-	unsigned short int move_wait;
+    int dev;
+    /* Config options: */
+    unsigned short int type;
+    char *port;
+    unsigned short int motorx;
+    unsigned short int motory;
+    unsigned short int maxx;
+    unsigned short int maxy;
+    unsigned short int stepsize;
+    unsigned short int speed;
+    unsigned short int iomojo_id;
+    unsigned short int active;
+    int panmin;
+    int panmax;
+    int tiltmin;
+    int tiltmax;
+    unsigned short int minmaxfound;
+    unsigned short int step_angle_x;
+    unsigned short int step_angle_y;
+    unsigned short int move_wait;
 // UVC
-	int pan_angle; // degrees
-	int tilt_angle; // degrees
+    int pan_angle; // degrees
+    int tilt_angle; // degrees
 };
 
 extern struct trackoptions track_template;
@@ -43,7 +43,7 @@ unsigned short int track_center(struct context *, int, unsigned short int, int, 
 unsigned short int track_move(struct context *, int, struct coord *, struct images *, unsigned short int);
 
 /*
-	Some default values:
+    Some default values:
  */
 #define TRACK_SPEED             255
 #define TRACK_STEPSIZE          40
@@ -55,7 +55,7 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 #define TRACK_TYPE_UVC          5
 
 /*
-	Some defines for the Serial stepper motor:
+    Some defines for the Serial stepper motor:
  */
 
 #define STEPPER_BAUDRATE        B9600
@@ -88,10 +88,10 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 
 
 /*
-	Some defines for the Iomojo Smilecam:
+    Some defines for the Iomojo Smilecam:
  */
 
-#define IOMOJO_BAUDRATE	B19200
+#define IOMOJO_BAUDRATE    B19200
 
 #define IOMOJO_CHECKPOWER_CMD   0xff
 #define IOMOJO_CHECKPOWER_RET   'Q'
@@ -109,7 +109,7 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
 #ifndef WITHOUT_V4L
 
 /*
-	Defines for the Logitech QuickCam Orbit/Sphere USB webcam
+    Defines for the Logitech QuickCam Orbit/Sphere USB webcam
 */
 
 #define LQOS_VERTICAL_DEGREES   180
@@ -120,9 +120,9 @@ unsigned short int track_move(struct context *, int, struct coord *, struct imag
  */
 
 #ifdef MOTION_V4L2
-#define V4L2_CID_PAN_RELATIVE		(V4L2_CID_PRIVATE_BASE+7)
-#define V4L2_CID_TILT_RELATIVE		(V4L2_CID_PRIVATE_BASE+8)
-#define V4L2_CID_PANTILT_RESET		(V4L2_CID_PRIVATE_BASE+9)
+#define V4L2_CID_PAN_RELATIVE   (V4L2_CID_PRIVATE_BASE+7)
+#define V4L2_CID_TILT_RELATIVE  (V4L2_CID_PRIVATE_BASE+8)
+#define V4L2_CID_PANTILT_RESET  (V4L2_CID_PRIVATE_BASE+9)
 
 #define INCPANTILT 64 // 1 degree
 #endif /* MOTION_V4L2 */

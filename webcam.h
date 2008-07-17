@@ -22,20 +22,20 @@
 #define _INCLUDE_WEBCAM_H_
 
 struct webcam_buffer {
-	unsigned char *ptr;
-	int ref;
-	long size;
+    unsigned char *ptr;
+    int ref;
+    long size;
 };
 
 struct webcam {
-	int socket;
-	FILE *fwrite;
-	struct webcam_buffer *tmpbuffer;
-	long filepos;
-	int nr;
-	unsigned long int last;
-	struct webcam *prev;
-	struct webcam *next;
+    int socket;
+    FILE *fwrite;
+    struct webcam_buffer *tmpbuffer;
+    long filepos;
+    int nr;
+    unsigned long int last;
+    struct webcam *prev;
+    struct webcam *next;
 };
 
 int webcam_init(struct context *);
