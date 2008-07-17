@@ -375,10 +375,11 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (debug_level >= CAMERA_DEBUG) 
         motion_log(LOG_DEBUG, 0, "%s FPS %d", __FUNCTION__, cnt->movie_fps);
 
-    if (cnt->movie_fps > 30)
+    if (cnt->movie_fps > 30) 
         cnt->movie_fps = 30;
-    if (cnt->movie_fps < 2)
+    else if (cnt->movie_fps < 2) 
         cnt->movie_fps = 2;
+        
 
     /* conf.mpegpath would normally be defined but if someone deleted it by control interface
        it is better to revert to the default than fail */

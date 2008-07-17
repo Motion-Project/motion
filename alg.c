@@ -79,10 +79,12 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
                         xdist += x - cent->x;
                     else if (x < cent->x)
                         xdist += cent->x - x;
+
                     if (y > cent->y)
                         ydist += y - cent->y;
                     else if (y < cent->y)
                         ydist += cent->y - y;
+
                     centc++;
                 }
             }    
@@ -96,10 +98,12 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
                         xdist += x - cent->x;
                     else if (x < cent->x)
                         xdist += cent->x - x;
+
                     if (y > cent->y)
                         ydist += y - cent->y;
                     else if (y < cent->y)
                         ydist += cent->y - y;
+
                     centc++;
                 }
             }    
@@ -121,14 +125,17 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
         cent->maxx = width - 1;
     else if (cent->maxx < 0)
         cent->maxx = 0;
+
     if (cent->maxy > height - 1)
         cent->maxy = height - 1;
     else if (cent->maxy < 0)
         cent->maxy = 0;
+
     if (cent->minx > width - 1)
         cent->minx = width - 1;
     else if (cent->minx < 0)
         cent->minx = 0;
+
     if (cent->miny > height - 1)
         cent->miny = height - 1;
     else if (cent->miny < 0)
@@ -412,7 +419,8 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
     if (count > 3)  /* avoid divide by zero */
         sum /= count / 3;
     
-    cnt->noise = 4 + (cnt->noise + sum) / 2;  /* 5: safe, 4: regular, 3: more sensitive */
+    /* 5: safe, 4: regular, 3: more sensitive */
+    cnt->noise = 4 + (cnt->noise + sum) / 2;
 }
 
 void alg_threshold_tune(struct context *cnt, int diffs, int motion)
@@ -427,11 +435,10 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
         diffs = cnt->threshold / 4;
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
-    
         sum += cnt->diffs_last[i];
         
-        if (cnt->diffs_last[i+1] && !motion)
-            cnt->diffs_last[i] = cnt->diffs_last[i+1];
+        if (cnt->diffs_last[i + 1] && !motion)
+            cnt->diffs_last[i] = cnt->diffs_last[i + 1];
         else
             cnt->diffs_last[i] = cnt->threshold / 4;
 
@@ -508,7 +515,7 @@ static int iflood(int x, int y, int width, int height,
         l = x + 1;
         
         if (l < x1)
-            PUSH(y, l, x1-1, -dy);  /* leak on left? */
+            PUSH(y, l, x1 - 1, -dy);  /* leak on left? */
         
         x = x1 + 1;
         
@@ -518,10 +525,10 @@ static int iflood(int x, int y, int width, int height,
                 count++;
             }
             
-            PUSH(y, l, x-1, dy);
+            PUSH(y, l, x - 1, dy);
             
-            if (x > x2+1)
-                PUSH(y, x2+1, x-1, -dy);  /* leak on right? */
+            if (x > x2 + 1)
+                PUSH(y, x2 + 1, x - 1, -dy);  /* leak on right? */
             
             skip:
             
@@ -912,8 +919,10 @@ void alg_tune_smartmask(struct context *cnt)
             smartmask_final[i] = 255;
     }
     /* Further expansion (here:erode due to inverted logic!) of the mask */
-    diff = erode9(smartmask_final, cnt->imgs.width, cnt->imgs.height, cnt->imgs.common_buffer, 255);
-    diff = erode5(smartmask_final, cnt->imgs.width, cnt->imgs.height, cnt->imgs.common_buffer, 255);
+    diff = erode9(smartmask_final, cnt->imgs.width, cnt->imgs.height, 
+                  cnt->imgs.common_buffer, 255);
+    diff = erode5(smartmask_final, cnt->imgs.width, cnt->imgs.height, 
+                  cnt->imgs.common_buffer, 255);
 }
 
 /* Increment for *smartmask_buffer in alg_diff_standard. */
@@ -936,7 +945,7 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 #endif
 
     i = imgs->motionsize;
-    memset(out+i, 128, i/2); /* motion pictures are now b/w i.o. green */
+    memset(out + i, 128, i / 2); /* motion pictures are now b/w i.o. green */
     /* Keeping this memset in the MMX case when zeroes are necessarily 
      * written anyway seems to be beneficial in terms of speed. Perhaps a
      * cache thing?
@@ -1282,7 +1291,7 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
  *
  */
 /* Seconds */
-#define ACCEPT_STATIC_OBJECT_TIME 0
+#define ACCEPT_STATIC_OBJECT_TIME 10
 #define EXCLUDE_LEVEL_PERCENT 20
 void alg_update_reference_frame(struct context *cnt, int action) 
 {
@@ -1328,7 +1337,9 @@ void alg_update_reference_frame(struct context *cnt, int action)
         } /* end for i */
 
     } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup */
-        memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size); /* copy fresh image */
-        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));  /* reset static objects */
+        /* copy fresh image */
+        memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
+        /* reset static objects */
+        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn)); 
     }
 }
