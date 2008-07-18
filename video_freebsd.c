@@ -369,8 +369,8 @@ static int set_input(struct video_dev *viddev, unsigned short input)
 {
     int actport;
     int portdata[] = { METEOR_INPUT_DEV0, METEOR_INPUT_DEV1,
-                     METEOR_INPUT_DEV2, METEOR_INPUT_DEV3,
-                     METEOR_INPUT_DEV_SVIDEO  };
+                       METEOR_INPUT_DEV2, METEOR_INPUT_DEV3,
+                       METEOR_INPUT_DEV_SVIDEO  };
 
     if (input >= array_elem(portdata)) {
         motion_log(LOG_INFO, 0, "%s: Channel Port %d out of range (0-4)", __FUNCTION__, input);
@@ -655,16 +655,15 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
 
     /*
     if (ioctl(dev_bktr, METEORSACTPIXFMT, &pixelformat) < 0) {
-            motion_log(LOG_ERR, 1, "set encoding method BSD_VIDFMT_I420"); 
-        return(NULL);
-        }
+        motion_log(LOG_ERR, 1, "set encoding method BSD_VIDFMT_I420"); 
+        return NULL;
+    }
 
 
     NEEDED !? FIXME 
 
-    if (setup_pixelformat(viddev) == -1) {
-        return (NULL);
-    }
+    if (setup_pixelformat(viddev) == -1)
+        return NULL;
     */
 
     if (freq) {
@@ -674,9 +673,8 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
      TODO missing implementation
         set_channelset(viddev);
         set_channel(viddev);
-        if (set_freq (viddev, freq) == -1) {
-            return (NULL);
-        }
+        if (set_freq (viddev, freq) == -1)
+            return NULL;
     */
     }
 
@@ -831,7 +829,7 @@ static int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int
     } else if (ioctl(dev_bktr, METEORCAPTUR, &single) < 0) {
         motion_log(LOG_ERR, 1, "%s: Error capturing using single method", __FUNCTION__);
         sigprocmask(SIG_UNBLOCK, &old, NULL);
-        return (-1);
+        return -1;
     }
 
     /*undo the signal blocking*/

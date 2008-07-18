@@ -135,7 +135,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
         }
     }
 
-    return (match);
+    return match;
 }
 
 /**
@@ -778,6 +778,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
             }
         }
     }
+
     return retval;
 }
 
@@ -838,6 +839,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
         if (debug_level > CAMERA_INFO)
             motion_log(LOG_DEBUG, 0, "%s: disconnecting netcam " 
                        "since keep-alive not set.", __FUNCTION__);
+
         netcam_disconnect(netcam);
 
         /* create a new socket */
@@ -846,6 +848,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
                        "to create socket failed.", __FUNCTION__);
             return -1;
         }
+
         if (debug_level > CAMERA_INFO)
             motion_log(LOG_DEBUG, 0, "%s: with no keepalive, "
                        "new socket created fd %d", __FUNCTION__, netcam->sock);
@@ -889,8 +892,8 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
             motion_log(LOG_DEBUG, 0, "%s: SO_KEEPALIVE set on socket.", __FUNCTION__);
 
     } else if (debug_level > CAMERA_INFO) {
-            motion_log(LOG_DEBUG, 0, "%s: re-using socket %d since keepalive is set.", 
-                       __FUNCTION__, netcam->sock);
+        motion_log(LOG_DEBUG, 0, "%s: re-using socket %d since keepalive is set.", 
+                   __FUNCTION__, netcam->sock);
     }
     
 
@@ -1251,7 +1254,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                     }
 
                     memmove(netcam->response->buffer, ptr,
-                             netcam->response->buffer_left);
+                            netcam->response->buffer_left);
                 }       /* end of boundary split over buffer */
 
                 retval = netcam_recv(netcam, netcam->response->buffer +

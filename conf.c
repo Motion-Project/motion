@@ -1378,7 +1378,7 @@ config_param config_params[] = {
 /* conf_cmdline sets the conf struct options as defined by the command line.
  * Any option already set from a config file are overridden.
  */
-static void conf_cmdline (struct context *cnt, short int thread)
+static void conf_cmdline(struct context *cnt, short int thread)
 {
     struct config *conf = &cnt->conf;
     int c;
@@ -1622,7 +1622,7 @@ void conf_print(struct context **cnt)
  *   for each thread cnt[i] so that the command line options overrides any
  *   option given by motion.conf or a thread config file.
  **************************************************************************/
-struct context ** conf_load(struct context **cnt)
+struct context **conf_load(struct context **cnt)
 {
     FILE *fp = NULL;
     char filename[PATH_MAX];
@@ -1683,6 +1683,7 @@ struct context ** conf_load(struct context **cnt)
         fp = fopen (filename, "r");
         free(path);
     }
+
     if (!fp) {     /* specified file does not exist... try default file */
         snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
         fp = fopen(filename, "r");
@@ -1738,7 +1739,7 @@ struct context ** conf_load(struct context **cnt)
  * 3. Change the cnt member (char*) pointing to the string in reserved memory
  * This ensures that we can free and malloc the string if it is later changed
  */
-void malloc_strings (struct context * cnt)
+void malloc_strings(struct context *cnt)
 {
     unsigned short int i = 0;
     char **val;
@@ -1787,7 +1788,7 @@ void malloc_strings (struct context * cnt)
  * by the function. Values 1, yes and on are converted to 1 ignoring case.
  * Any other value is converted to 0.
  */
-static struct context **copy_bool (struct context **cnt, const char *str, int val_ptr)
+static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
@@ -1812,7 +1813,7 @@ static struct context **copy_bool (struct context **cnt, const char *str, int va
 /* copy_int assigns a config option to a new integer value.
  * The integer is given as a string in str which is converted to integer by the function.
  */
-static struct context ** copy_int(struct context **cnt, const char *str, int val_ptr)
+static struct context **copy_int(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
@@ -1832,7 +1833,7 @@ static struct context ** copy_int(struct context **cnt, const char *str, int val
 /* copy_short assigns a config option to a new short value.
  * The integer is given as a string in str which is converted to short by the function.
  */ 
-static struct context ** copy_short(struct context **cnt, const char *str, int val_ptr)
+static struct context **copy_short(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
@@ -2013,7 +2014,7 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 
 
 static const char *print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned short int threadnr) 
+                               int parm, unsigned short int threadnr) 
 {
     static char retval[20];
     int val = config_params[parm].conf_value;
@@ -2116,7 +2117,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
     return cnt;
 }
 
-static void usage ()
+static void usage()
 {
     printf("motion Version "VERSION", Copyright 2000-2005 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen\n");
     printf("\nusage:\tmotion [options]\n");

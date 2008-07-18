@@ -507,11 +507,6 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
  */
 static pthread_mutex_t vid_mutex;
 
-/* for the v4l stuff: */
-#include <sys/mman.h>
-#include <sys/utsname.h>
-#include <dirent.h>
-
 /* Here we setup the viddevs structure which is used globally in the vid_*
  * functions.
  */
