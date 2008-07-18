@@ -414,17 +414,14 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
     memset(u, 0, width * height / 4);
     memset(v, 0, width * height / 4);
 
-    for(loop = 0; loop < width * height; loop++) {
+    for(loop = 0; loop < width * height; loop++)
         *map++=yuv[0][loop];
-    }
 
-    for(loop = 0; loop < width * height / 4; loop++) {
+    for(loop = 0; loop < width * height / 4; loop++)
         *map++=yuv[1][loop];
-    }
 
-    for(loop = 0; loop < width * height / 4; loop++) {
+    for(loop = 0; loop < width * height / 4; loop++)
         *map++=yuv[2][loop];
-    }
 
     free(yuv[0]);
     free(yuv[1]);
@@ -508,11 +505,6 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
  * devices during initialization of each thread
  */
 static pthread_mutex_t vid_mutex;
-
-/* for the v4l stuff: */
-#include <sys/mman.h>
-#include <sys/utsname.h>
-#include <dirent.h>
 
 /* Here we setup the viddevs structure which is used globally in the vid_*
  * functions.
@@ -598,11 +590,13 @@ void vid_close(struct context *cnt)
 #endif
         dev->fd = -1;
         pthread_mutex_lock(&vid_mutex);
+
         /* Remove from list */
         if (prev == NULL)
             viddevs = dev->next;
         else
             prev->next = dev->next;
+
         pthread_mutex_unlock(&vid_mutex);
 
         pthread_mutexattr_destroy(&dev->attr);
@@ -927,7 +921,6 @@ int vid_next(struct context *cnt, unsigned char *map)
 #ifdef MOTION_V4L2
         if (dev->v4l2) {
             v4l2_set_input(cnt, dev, map, width, height, conf);
-
             ret = v4l2_next(cnt, dev, map, width, height);
         } else {
 #endif
@@ -944,10 +937,10 @@ int vid_next(struct context *cnt, unsigned char *map)
             pthread_mutex_unlock(&dev->mutex);
         }
 
-        if (cnt->rotate_data.degrees > 0) {
-            /* rotate the image as specified */
+        /* rotate the image as specified */
+        if (cnt->rotate_data.degrees > 0)
             rotate_map(cnt, map);
-        }
+        
     }
 #endif                /*WITHOUT_V4L */
     return ret;

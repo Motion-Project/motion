@@ -94,33 +94,33 @@ static int ftp_parse_response(char *buf, int len) {
     int val = 0;
 
     if (len < 3)
-        return(-1);
+        return -1;
 
     if ((*buf >= '0') && (*buf <= '9'))
         val = val * 10 + (*buf - '0');
     else
-        return(0);
+        return 0;
 
     buf++;
 
     if ((*buf >= '0') && (*buf <= '9'))
         val = val * 10 + (*buf - '0');
     else
-        return(0);
+        return 0;
 
     buf++;
 
     if ((*buf >= '0') && (*buf <= '9'))
         val = val * 10 + (*buf - '0');
     else
-        return(0);
+        return 0;
 
     buf++;
 
     if (*buf == '-')
-        return(-val);
+        return -val;
 
-    return(val);
+    return val;
 }
 
 /**
@@ -140,24 +140,24 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
 
     /* Validate that our context structure is valid */
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     if ((ctxt->control_buffer_index < 0) || (ctxt->control_buffer_index > FTP_BUF_SIZE))
-        return(-1);
+        return -1;
 
     if ((ctxt->control_buffer_used < 0) || (ctxt->control_buffer_used > FTP_BUF_SIZE))
-        return(-1);
+        return -1;
 
     if (ctxt->control_buffer_index > ctxt->control_buffer_used)
-        return(-1);
+        return -1;
 
     /*
     * First pack the control buffer
     */
     if (ctxt->control_buffer_index > 0) {
         memmove(&ctxt->control_buffer[0],
-        &ctxt->control_buffer[ctxt->control_buffer_index],
-        ctxt->control_buffer_used - ctxt->control_buffer_index);
+                &ctxt->control_buffer[ctxt->control_buffer_index],
+                ctxt->control_buffer_used - ctxt->control_buffer_index);
 
         ctxt->control_buffer_used -= ctxt->control_buffer_index;
         ctxt->control_buffer_index = 0;
@@ -165,19 +165,18 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
     size = FTP_BUF_SIZE - ctxt->control_buffer_used;
 
     if (size == 0) 
-        return(0);
+        return 0;
     
 
     /*
     * Read the amount left on the control connection
     */
     if ((len = recv(ctxt->control_file_desc,
-    &ctxt->control_buffer[ctxt->control_buffer_index],
-    size, 0)) < 0) {
+         &ctxt->control_buffer[ctxt->control_buffer_index], size, 0)) < 0) {
         motion_log(LOG_ERR, 1, "recv failed in ftp_get_more");
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     ctxt->control_buffer_used += len;
@@ -203,7 +202,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
     int res = -1, cur = -1;
 
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     get_more:
     /*
@@ -439,7 +438,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     if (res != 2) {
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     /*
@@ -449,7 +448,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     if (res < 0) {
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     res = ftp_get_response(ctxt);
@@ -466,7 +465,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     default:
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     res = ftp_send_passwd(ctxt);
@@ -688,7 +687,7 @@ static int ftp_close_connection(ftp_context_pointer ctxt) {
     struct timeval tv;
 
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     close(ctxt->data_file_desc);
     ctxt->data_file_desc = -1;

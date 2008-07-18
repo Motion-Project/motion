@@ -46,121 +46,121 @@ char *get_current_dir_name(void)
 
 
 struct config conf_template = {
-    width:                 DEF_WIDTH,
-    height:                DEF_HEIGHT,
-    quality:               DEF_QUALITY,
-    rotate_deg:            0,
-    max_changes:           DEF_CHANGES,
-    threshold_tune:        0,
-    output_normal:         "on",
-    motion_img:            0,
-    output_all:            0,
-    gap:                   DEF_GAP,
-    maxmpegtime:           DEF_MAXMPEGTIME,
-    snapshot_interval:     0,
-    locate:                "off",
-    input:                 IN_DEFAULT,
-    norm:                  0,
-    frame_limit:           DEF_MAXFRAMERATE,
-    quiet:                 1,
-    ppm:                   0,
-    noise:                 DEF_NOISELEVEL,
-    noise_tune:            1,
-    minimum_frame_time:    0,
-    lightswitch:           0,
-    autobright:            0,
-    brightness:            0,
-    contrast:              0,
-    saturation:            0,
-    hue:                   0,
-    roundrobin_frames:     1,
-    roundrobin_skip:       1,
-    pre_capture:           0,
-    post_capture:          0,
-    switchfilter:          0,
-    ffmpeg_cap_new:        0,
-    ffmpeg_cap_motion:     0,
-    ffmpeg_bps:            DEF_FFMPEG_BPS,
-    ffmpeg_vbr:            DEF_FFMPEG_VBR,
-    ffmpeg_video_codec:    DEF_FFMPEG_CODEC,
-    webcam_port:           0,
-    webcam_quality:        50,
-    webcam_motion:         0,
-    webcam_maxrate:        1,
-    webcam_localhost:      1,
-    webcam_limit:          0,
-    control_port:          0,
-    control_localhost:     1,
-    control_html_output:   1,
-    control_authentication:NULL,
-    frequency:             0,
-    tuner_number:          0,
-    timelapse:             0,
-    timelapse_mode:        DEF_TIMELAPSE_MODE,
+    width:                      DEF_WIDTH,
+    height:                     DEF_HEIGHT,
+    quality:                    DEF_QUALITY,
+    rotate_deg:                 0,
+    max_changes:                DEF_CHANGES,
+    threshold_tune:             0,
+    output_normal:              "on",
+    motion_img:                 0,
+    output_all:                 0,
+    gap:                        DEF_GAP,
+    maxmpegtime:                DEF_MAXMPEGTIME,
+    snapshot_interval:          0,
+    locate:                     "off",
+    input:                      IN_DEFAULT,
+    norm:                       0,
+    frame_limit:                DEF_MAXFRAMERATE,
+    quiet:                      1,
+    ppm:                        0,
+    noise:                      DEF_NOISELEVEL,
+    noise_tune:                 1,
+    minimum_frame_time:         0,
+    lightswitch:                0,
+    autobright:                 0,
+    brightness:                 0,
+    contrast:                   0,
+    saturation:                 0,
+    hue:                        0,
+    roundrobin_frames:          1,
+    roundrobin_skip:            1,
+    pre_capture:                0,
+    post_capture:               0,
+    switchfilter:               0,
+    ffmpeg_cap_new:             0,
+    ffmpeg_cap_motion:          0,
+    ffmpeg_bps:                 DEF_FFMPEG_BPS,
+    ffmpeg_vbr:                 DEF_FFMPEG_VBR,
+    ffmpeg_video_codec:         DEF_FFMPEG_CODEC,
+    webcam_port:                0,
+    webcam_quality:             50,
+    webcam_motion:              0,
+    webcam_maxrate:             1,
+    webcam_localhost:           1,
+    webcam_limit:               0,
+    control_port:               0,
+    control_localhost:          1,
+    control_html_output:        1,
+    control_authentication:     NULL,
+    frequency:                  0,
+    tuner_number:               0,
+    timelapse:                  0,
+    timelapse_mode:             DEF_TIMELAPSE_MODE,
 #if (defined(BSD))
-    tuner_device:          NULL,
+    tuner_device:               NULL,
 #endif
-    video_device:          VIDEO_DEVICE,
-    v4l2_palette:          8,        
-    vidpipe:               NULL,
-    filepath:              NULL,
-    jpegpath:              DEF_JPEGPATH,
-    mpegpath:              DEF_MPEGPATH,
-    snappath:              DEF_SNAPPATH,
-    timepath:              DEF_TIMEPATH,
-    on_event_start:        NULL,
-    on_event_end:          NULL,
-    mask_file:             NULL,
-    smart_mask_speed:      0,
-    sql_log_image:         1,
-    sql_log_snapshot:      1,
-    sql_log_mpeg:          0,
-    sql_log_timelapse:     0,
-    sql_query:             DEF_SQL_QUERY,
-    mysql_db:              NULL,
-    mysql_host:            "localhost",
-    mysql_user:            NULL,
-    mysql_password:        NULL,
-    on_picture_save:       NULL,
-    on_motion_detected:    NULL,
-    on_area_detected:      NULL,
-    on_movie_start:        NULL,
-    on_movie_end:          NULL,
-    on_camera_lost:        NULL,
-    motionvidpipe:         NULL,
-    netcam_url:            NULL,
-    netcam_userpass:       NULL,
-    netcam_http:           "1.0",    /* Choices: 1.0, 1.1, or keep_alive */
-    netcam_proxy:          NULL,
-    netcam_broken:         0,
-    pgsql_db:              NULL,
-    pgsql_host:            "localhost",
-    pgsql_user:            NULL,
-    pgsql_password:        NULL,
-    pgsql_port:            5432,
-    text_changes:          0,
-    text_left:             NULL,
-    text_right:            DEF_TIMESTAMP,
-    text_event:            DEF_EVENTSTAMP,
-    text_double:           0,
-    despeckle:             NULL,
-    area_detect:           NULL,
-    minimum_motion_frames: 1,
-    pid_file:              NULL,
+    video_device:               VIDEO_DEVICE,
+    v4l2_palette:               8,        
+    vidpipe:                    NULL,
+    filepath:                   NULL,
+    jpegpath:                   DEF_JPEGPATH,
+    mpegpath:                   DEF_MPEGPATH,
+    snappath:                   DEF_SNAPPATH,
+    timepath:                   DEF_TIMEPATH,
+    on_event_start:             NULL,
+    on_event_end:               NULL,
+    mask_file:                  NULL,
+    smart_mask_speed:           0,
+    sql_log_image:              1,
+    sql_log_snapshot:           1,
+    sql_log_mpeg:               0,
+    sql_log_timelapse:          0,
+    sql_query:                  DEF_SQL_QUERY,
+    mysql_db:                   NULL,
+    mysql_host:                 "localhost",
+    mysql_user:                 NULL,
+    mysql_password:             NULL,
+    on_picture_save:            NULL,
+    on_motion_detected:         NULL,
+    on_area_detected:           NULL,
+    on_movie_start:             NULL,
+    on_movie_end:               NULL,
+    on_camera_lost:             NULL,
+    motionvidpipe:              NULL,
+    netcam_url:                 NULL,
+    netcam_userpass:            NULL,
+    netcam_http:                "1.0",    /* Choices: 1.0, 1.1, or keep_alive */
+    netcam_proxy:               NULL,
+    netcam_broken:              0,
+    pgsql_db:                   NULL,
+    pgsql_host:                 "localhost",
+    pgsql_user:                 NULL,
+    pgsql_password:             NULL,
+    pgsql_port:                 5432,
+    text_changes:               0,
+    text_left:                  NULL,
+    text_right:                 DEF_TIMESTAMP,
+    text_event:                 DEF_EVENTSTAMP,
+    text_double:                0,
+    despeckle:                  NULL,
+    area_detect:                NULL,
+    minimum_motion_frames:      1,
+    pid_file:                   NULL,
 };
 
 
 
-static struct context **copy_bool(struct context **, const char *, int);
-static struct context **copy_int(struct context **, const char *, int);
-static struct context **copy_short(struct context **, const char *, int);
-static struct context **config_thread(struct context **cnt, const char *str, int val);
+static struct context ** copy_bool(struct context **, const char *, int);
+static struct context ** copy_int(struct context **, const char *, int);
+static struct context ** copy_short(struct context **, const char *, int);
+static struct context ** config_thread(struct context **cnt, const char *str, int val);
 
-static const char *print_bool(struct context **, char **, int, unsigned short int);
-static const char *print_int(struct context **, char **, int, unsigned short int);
-static const char *print_short(struct context **, char **, int, unsigned short int);
-static const char *print_string(struct context **, char **, int, unsigned short int);
-static const char *print_thread(struct context **, char **, int, unsigned short int);
+static const char * print_bool(struct context **, char **, int, unsigned short int);
+static const char * print_int(struct context **, char **, int, unsigned short int);
+static const char * print_short(struct context **, char **, int, unsigned short int);
+static const char * print_string(struct context **, char **, int, unsigned short int);
+static const char * print_thread(struct context **, char **, int, unsigned short int);
 
 static void usage(void);
 
@@ -770,7 +770,7 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-     {
+    {
     "text_changes",
     "# Draw the number of changed pixed on the images (default: off)\n"
     "# Will normally be set to off except when you setup and adjust the motion settings\n"
@@ -1353,13 +1353,13 @@ config_param config_params[] = {
     config_thread,
     print_thread
     },
-{ NULL, NULL, 0, 0, NULL, NULL }
+    { NULL, NULL, 0, 0, NULL, NULL }
 };
 
 /* conf_cmdline sets the conf struct options as defined by the command line.
  * Any option already set from a config file are overridden.
  */
-static void conf_cmdline (struct context *cnt, short int thread)
+static void conf_cmdline(struct context *cnt, short int thread)
 {
     struct config *conf = &cnt->conf;
     int c;
@@ -1370,29 +1370,29 @@ static void conf_cmdline (struct context *cnt, short int thread)
      */
     while ((c = getopt(conf->argc, conf->argv, "c:d:hns?p:")) != EOF)
         switch (c) {
-            case 'c':
-                if (thread == -1) 
-                    strcpy(cnt->conf_filename, optarg);
-                break;
-            case 'n':
-                cnt->daemon = 0;
-                break;
-            case 's':
-                conf->setup_mode = 1;
-                break;
-            case 'd':
-                /* no validation - just take what user gives */
-                debug_level = (unsigned short int)atoi(optarg);
-                break;
-            case 'p':
-                if (thread == -1) 
-                    strcpy(cnt->pid_file, optarg);
-                break;    
-            case 'h':
-            case '?':
-            default:
-                usage();
-                exit(1);
+        case 'c':
+            if (thread == -1) 
+                strcpy(cnt->conf_filename, optarg);
+            break;
+        case 'n':
+            cnt->daemon = 0;
+            break;
+        case 's':
+            conf->setup_mode = 1;
+            break;
+        case 'd':
+            /* no validation - just take what user gives */
+            debug_level = (unsigned short int)atoi(optarg);
+            break;
+        case 'p':
+            if (thread == -1) 
+                strcpy(cnt->pid_file, optarg);
+            break;    
+        case 'h':
+        case '?':
+        default:
+            usage();
+            exit(1);
         }
     optind = 1;
 }
@@ -1404,7 +1404,7 @@ static void conf_cmdline (struct context *cnt, short int thread)
  * By calling the function pointed to by config_params[i].copy the option gets
  * assigned.
  */
-struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
+struct context ** conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
 {
     unsigned short int i = 0;
 
@@ -1457,7 +1457,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
  * For each option/argument pair the function conf_cmdparse is called which takes
  * care of assigning the value to the option in the config structures.
  */
-static struct context **conf_process(struct context **cnt, FILE *fp)
+static struct context ** conf_process(struct context **cnt, FILE *fp)
 {
     /* process each line from the config file */
     
@@ -1471,9 +1471,9 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
             /* trim white space and any CR or LF at the end of the line */
             end = line + strlen(line) - 1; /* Point to the last non-null character in the string */
-            while (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r') {
+            while (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')
                 end--;
-            }
+
             *(end+1) = '\0';
             
             /* If line is only whitespace we continue to the next line */
@@ -1482,24 +1482,24 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
             /* trim leading whitespace from the line and find command */
             beg = line;
-            while (*beg == ' ' || *beg == '\t') {
+            
+            while (*beg == ' ' || *beg == '\t')
                 beg++;
-            }
 
             cmd = beg; /* command starts here */
 
-            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0') {
+            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0')
                 beg++;
-            }
+            
             *beg = '\0'; /* command string terminates here */
 
             /* trim space between command and argument */
             beg++;
 
             if (strlen(beg) > 0) {
-                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r') {
+                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r')
                     beg++;
-                }
+                
 
                 /* If argument is in "" we will strip them off
                    It is important that we can use "" so that we can use
@@ -1532,7 +1532,7 @@ void conf_print(struct context **cnt)
     unsigned short int i, thread;
     FILE *conffile;
 
-    for (thread=0; cnt[thread]; thread++) {
+    for (thread = 0; cnt[thread]; thread++) {
         motion_log(LOG_INFO, 0, "Writing config file to %s",cnt[thread]->conf_filename);
         conffile=myfopen(cnt[thread]->conf_filename, "w");
 
@@ -1578,7 +1578,7 @@ void conf_print(struct context **cnt)
 
         fprintf(conffile, "\n");
         fclose(conffile);
-        conffile=NULL;
+        conffile = NULL;
     }
 }
 
@@ -1600,7 +1600,7 @@ void conf_print(struct context **cnt)
  *   for each thread cnt[i] so that the command line options overrides any
  *   option given by motion.conf or a thread config file.
  **************************************************************************/
-struct context ** conf_load (struct context **cnt)
+struct context ** conf_load(struct context **cnt)
 {
     FILE *fp = NULL;
     char filename[PATH_MAX];
@@ -1639,18 +1639,21 @@ struct context ** conf_load (struct context **cnt)
     cnt[0]->pid_file[0] = 0;
 
     conf_cmdline(cnt[0], -1);
-    if (cnt[0]->conf_filename[0]){ /* User has supplied filename on commandline*/
+    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on commandline*/
         strcpy(filename, cnt[0]->conf_filename);
         fp = fopen (filename, "r");
     }
-    if (!fp){      /* Commandline didn't work, try current dir */
+
+    if (!fp) {      /* Commandline didn't work, try current dir */
         char *path = NULL;
         if (cnt[0]->conf_filename[0])
             motion_log(-1, 1, "Configfile %s not found - trying defaults.", filename);
-        if ((path = get_current_dir_name()) == NULL){
+        
+        if ((path = get_current_dir_name()) == NULL) {
             motion_log(LOG_ERR, 1, "Error get_current_dir_name");
             exit(-1);
         }
+
         snprintf(filename, PATH_MAX, "%s/motion.conf", path);
         fp = fopen (filename, "r");
         free(path);
@@ -1670,7 +1673,7 @@ struct context ** conf_load (struct context **cnt)
     if (fp) {
         strcpy(cnt[0]->conf_filename, filename);
         motion_log(LOG_INFO, 0, "Processing thread 0 - config file %s",filename);
-        cnt=conf_process(cnt, fp);
+        cnt = conf_process(cnt, fp);
         fclose(fp);
     } else {
         motion_log(LOG_INFO, 0, "Not config file to process using default values");
@@ -1685,8 +1688,8 @@ struct context ** conf_load (struct context **cnt)
      * so we go through each thread and overrides any set command line
      * options
      */
-    i=-1;
-    while(cnt[++i])
+    i = -1;
+    while (cnt[++i])
         conf_cmdline(cnt[i], i);
 
     /* if pid file was passed from command line copy to main thread conf struct */
@@ -1704,7 +1707,7 @@ struct context ** conf_load (struct context **cnt)
  * 3. Change the cnt member (char*) pointing to the string in reserved memory
  * This ensures that we can free and malloc the string if it is later changed
  */
-void malloc_strings (struct context * cnt)
+void malloc_strings(struct context * cnt)
 {
     unsigned short int i = 0;
     char **val;
@@ -1753,7 +1756,7 @@ void malloc_strings (struct context * cnt)
  * by the function. Values 1, yes and on are converted to 1 ignoring case.
  * Any other value is converted to 0.
  */
-static struct context **copy_bool (struct context **cnt, const char *str, int val_ptr)
+static struct context ** copy_bool(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
@@ -1782,7 +1785,7 @@ static struct context ** copy_int(struct context **cnt, const char *str, int val
 
     i = -1;
     while (cnt[++i]) {
-        tmp = (char *)cnt[i]+val_ptr;
+        tmp = (char *)cnt[i] + val_ptr;
         *((int *)tmp) = atoi(str);
         if (cnt[0]->threadnr)
             return cnt;
@@ -1800,7 +1803,7 @@ static struct context ** copy_short(struct context **cnt, const char *str, int v
 
     i = -1;
     while (cnt[++i]) {
-        tmp = (char *)cnt[i]+val_ptr;
+        tmp = (char *)cnt[i] + val_ptr;
         *((short int *)tmp) = atoi(str);
         if (cnt[0]->threadnr)
             return cnt;
@@ -1815,7 +1818,7 @@ static struct context ** copy_short(struct context **cnt, const char *str, int v
  * a freshly malloc()'d string with the value from str,
  * or NULL if str is blank
  */
-struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
+struct context ** copy_string(struct context **cnt, const char *str, int val_ptr)
 {
     char **tmp;
     int i;
@@ -1854,7 +1857,7 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
  * when the motion program is terminated normally instead of relying on the
  * OS to clean up.
  */
-char *mystrcpy(char *to, const char *from)
+char * mystrcpy(char *to, const char *from)
 {
     /* free the memory used by the to string, if such memory exists,
      * and return a pointer to a freshly malloc()'d string with the
@@ -1875,7 +1878,7 @@ char *mystrcpy(char *to, const char *from)
  * variable PATH_MAX to ensure that config options can always contain
  * a really long path but no more than that.
  */
-char *mystrdup(const char *from)
+char * mystrdup(const char *from)
 {
     char *tmp;
     int stringlength;
@@ -1899,7 +1902,7 @@ char *mystrdup(const char *from)
     return tmp;
 }
 
-const char *config_type(config_param *configparam)
+const char * config_type(config_param *configparam)
 {
     if (configparam->copy == copy_string)
         return "string";
@@ -1913,8 +1916,8 @@ const char *config_type(config_param *configparam)
     return "unknown";
 }
 
-static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                              int parm, unsigned short int threadnr)
+static const char * print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                               int parm, unsigned short int threadnr)
 {
     int val = config_params[parm].conf_value;
 
@@ -1934,9 +1937,9 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  * option in thread 0. If the value is the same, NULL is returned which means that
  * the option is not written to the thread config file.
  */
-static const char *print_string(struct context **cnt,
-                                char **str ATTRIBUTE_UNUSED, int parm,
-                                unsigned short int threadnr)
+static const char * print_string(struct context **cnt,
+                                 char **str ATTRIBUTE_UNUSED, int parm,
+                                 unsigned short int threadnr)
 {
     int val = config_params[parm].conf_value;
     const char **cptr0, **cptr1;
@@ -1950,8 +1953,8 @@ static const char *print_string(struct context **cnt,
     return *cptr1;
 }
 
-static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned short int threadnr)
+static const char * print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                              int parm, unsigned short int threadnr)
 {
     static char retval[20];
     int val = config_params[parm].conf_value;
@@ -1966,8 +1969,8 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 }
 
 
-static const char *print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned short int threadnr) 
+static const char * print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+                                int parm, unsigned short int threadnr) 
 {
     static char retval[20];
     int val = config_params[parm].conf_value;
@@ -1981,8 +1984,8 @@ static const char *print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED
     return retval;
 }
 
-static const char *print_thread(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned short int threadnr)
+static const char * print_thread(struct context **cnt, char **str,
+                                 int parm ATTRIBUTE_UNUSED, unsigned short int threadnr)
 {
     char *retval;
     unsigned short int i=0;
@@ -2011,8 +2014,8 @@ static const char *print_thread(struct context **cnt, char **str,
  * val  - is not used. It is defined to be function header compatible with
  *        copy_int, copy_bool and copy_string.
  */
-static struct context **config_thread(struct context **cnt, const char *str,
-                                      int val ATTRIBUTE_UNUSED)
+static struct context ** config_thread(struct context **cnt, const char *str,
+                                       int val ATTRIBUTE_UNUSED)
 {
     int i;
     FILE *fp;
@@ -2066,7 +2069,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
     return cnt;
 }
 
-static void usage ()
+static void usage()
 {
     printf("motion Version "VERSION", Copyright 2000-2005 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen\n");
     printf("\nusage:\tmotion [options]\n");

@@ -470,7 +470,7 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
                        "with JPEG image - expected %dx%d, JPEG %dx%d",
                        " retval %d", __FUNCTION__, netcam->width, netcam->height,
                        cinfo.output_width, cinfo.output_height, retval);
-                   return retval;        
+            return retval;        
         }
     }
 

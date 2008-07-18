@@ -135,7 +135,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
         }
     }
 
-    return (match);
+    return match;
 }
 
 /**
@@ -402,9 +402,10 @@ static int netcam_check_content_type(char *header)
     } else if (!strcmp(content_type, "multipart/x-mixed-replace") ||
                !strcmp(content_type, "multipart/mixed")) {
         ret = 2;
-    } else
+    } else {
         ret = 0;
-
+    }
+            
     if (content_type)
         free(content_type);
 
@@ -432,7 +433,8 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
     /*
      * return if not connected
      */
-    if (netcam->sock == -1) return -1;
+    if (netcam->sock == -1) 
+        return -1;
     /*
      * We are expecting a header which *must* contain a mime-type of
      * image/jpeg, and *might* contain a Content-Length.
@@ -583,6 +585,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
             free(header);
             return -1;
         }
+
         if (firstflag) {
             if ((ret = http_result_code(header)) != 200) {
                 if (debug_level > CAMERA_INFO)
@@ -606,6 +609,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
             free(header);
             continue;
         }
+
         if (*header == 0)                  /* blank line received */
             break;
 
@@ -748,12 +752,12 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                  * If it's not set, then we will not try again to use Keep-Alive.
                  */
                 if (!netcam->keepalive_thisconn) {
-                        netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
+                    netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
                     motion_log(LOG_INFO, 0, "Removed netcam Keep-Alive flag because 'Connection: close' "
                                             "header received. Netcam does not support Keep-Alive. Motion "
                                             "continues in non-Keep-Alive.");
                 } else {
-                        netcam->keepalive_timeup = TRUE;    /* We will close and re-open keep-alive */
+                    netcam->keepalive_timeup = TRUE;    /* We will close and re-open keep-alive */
                     motion_log(LOG_INFO, 0, "Keep-Alive has reached end of valid period. Motion will close " 
                                             "netcam, then resume Keep-Alive with a new socket.");
                 }
@@ -1360,8 +1364,7 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
         netcam->av_frame_time =
           ((9.0 * netcam->av_frame_time) + 1000000.0 *
           (curtime.tv_sec - netcam->last_image.tv_sec) +
-          (curtime.tv_usec- netcam->last_image.tv_usec))
-          / 10.0;
+          (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
         if (debug_level > CAMERA_INFO)
             motion_log(-1, 0, "Calculated frame time %f", netcam->av_frame_time);
@@ -1387,7 +1390,6 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
      * next frame to become available may proceed.
      */
     pthread_cond_signal(&netcam->pic_ready);
-
     pthread_mutex_unlock(&netcam->mutex);
 
     return 0;
@@ -1427,25 +1429,23 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
             return -1;
         }
     
-        if (debug_level > CAMERA_VERBOSE) {
+        if (debug_level > CAMERA_VERBOSE) 
             motion_log(-1, 0, "statbuf.st_mtime[%d] != last_st_mtime[%d]", statbuf.st_mtime,  netcam->file->last_st_mtime);
-        }
-
+        
         if (loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000))) { //its waits POLLING_TIMEOUT
             motion_log(-1, 0, "waiting new file image timeout" );
             return -1;
         }
 
-        if (debug_level > CAMERA_VERBOSE) {
+        if (debug_level > CAMERA_VERBOSE)
             motion_log(-1, 0, "delay waiting new file image ");
-        }
-
+        
         //SLEEP(netcam->timeout.tv_sec, netcam->timeout.tv_usec*1000 ); //its waits 5seconds - READ_TIMEOUT
         SLEEP( 0, POLLING_TIME ); // its waits 500ms
         /*return -1;*/
         loop_counter++;
 
-    } while(statbuf.st_mtime==netcam->file->last_st_mtime);
+    } while (statbuf.st_mtime==netcam->file->last_st_mtime);
 
     netcam->file->last_st_mtime = statbuf.st_mtime;
     if (debug_level > CAMERA_INFO) 
@@ -1478,7 +1478,6 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
     if (gettimeofday(&curtime, NULL) < 0) 
         motion_log(LOG_ERR, 1, "gettimeofday in netcam_read_jpeg");
     
-
     netcam->receiving->image_time = curtime;
     /*
      * Calculate our "running average" time for this netcam's
@@ -1637,19 +1636,16 @@ static void *netcam_handler_loop(void *arg)
                     }
 
                     if (open_error) {          /* log re-connection */
-                        motion_log(LOG_ERR, 0,
-                                   "camera re-connected");
+                        motion_log(LOG_ERR, 0, "camera re-connected");
                         open_error = 0;
                     }
                 }
                 /* Send our request and look at the response */
                 if ((retval = netcam_read_first_header(netcam)) != 1) {
                     if (retval > 0) {
-                        motion_log(LOG_ERR, 0,
-                                   "Unrecognized image header (%d)", retval);
+                        motion_log(LOG_ERR, 0, "Unrecognized image header (%d)", retval);
                     } else if (retval != -1) {
-                        motion_log(LOG_ERR, 0,
-                                   "Error in header (%d)", retval);
+                        motion_log(LOG_ERR, 0, "Error in header (%d)", retval);
                     }
                     /* need to have a dynamic delay here */
                     continue;
@@ -1658,8 +1654,7 @@ static void *netcam_handler_loop(void *arg)
                 if (netcam_read_next_header(netcam) < 0) {
                     if (netcam_connect(netcam, open_error) < 0) {
                         if (!open_error) { /* log first error */
-                            motion_log(LOG_ERR, 0,
-                                "re-opening camera (streaming)");
+                            motion_log(LOG_ERR, 0, "re-opening camera (streaming)");
                             open_error = 1;
                         }
                         SLEEP(5,0);
@@ -1668,20 +1663,16 @@ static void *netcam_handler_loop(void *arg)
 
                     if ((retval = netcam_read_first_header(netcam) != 2)) {
                         if (retval > 0) {
-                            motion_log(LOG_ERR, 0,
-                                       "Unrecognized image header (%d)",
-                                 retval);
+                            motion_log(LOG_ERR, 0, "Unrecognized image header (%d)", retval);
                         } else if (retval != -1) {
-                            motion_log(LOG_ERR, 0,
-                                       "Error in header (%d)", retval);
+                            motion_log(LOG_ERR, 0, "Error in header (%d)", retval);
                         }
                         /* FIXME need some limit */
                         continue;
                     }
                 }
                 if (open_error) {          /* log re-connection */
-                    motion_log(LOG_ERR, 0,
-                               "camera re-connected");
+                    motion_log(LOG_ERR, 0, "camera re-connected");
                     open_error = 0;
                 }
             }
@@ -1864,12 +1855,11 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url) {
     * which is read-only.
     */
  
-    if (netcam->connect_keepalive) {
+    if (netcam->connect_keepalive)
         ix += strlen(connect_req_keepalive);
-    } else {
+    else
         ix += strlen(connect_req_close);
-    }
-
+    
     /* Point to either the HTTP 1.0 or 1.1 request header set     */
     /* If the configuration is anything other than 1.1, use 1.0   */
     /* as a default. This avoids a chance of being left with none */
@@ -2157,15 +2147,12 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     if (netcam->connect_host != NULL) 
         free(netcam->connect_host);
     
-
     if (netcam->connect_request != NULL) 
         free(netcam->connect_request);
     
-
     if (netcam->boundary != NULL) 
         free(netcam->boundary);
     
-
     if (netcam->latest != NULL) {
         if (netcam->latest->ptr != NULL) 
             free(netcam->latest->ptr);
@@ -2192,11 +2179,9 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     else 
         netcam_disconnect(netcam);
     
-
     if (netcam->response != NULL) 
         free(netcam->response);
     
-
     pthread_mutex_destroy(&netcam->mutex);
     pthread_cond_destroy(&netcam->cap_cond);
     pthread_cond_destroy(&netcam->pic_ready);
@@ -2297,7 +2282,7 @@ int netcam_start(struct context *cnt)
      * and clear all the entries.
      */
     cnt->netcam = (struct netcam_context *)
-              mymalloc(sizeof(struct netcam_context));
+                   mymalloc(sizeof(struct netcam_context));
     memset(cnt->netcam, 0, sizeof(struct netcam_context));
     netcam = cnt->netcam;           /* Just for clarity in remaining code */
     netcam->cnt = cnt;              /* Fill in the "parent" info */
