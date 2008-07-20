@@ -231,7 +231,8 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
     return cnt->track.move_wait;
 }
 
-static unsigned short int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs)
+static unsigned short int stepper_move(struct context *cnt, 
+                                       struct coord *cent, struct images *imgs)
 {
     unsigned short int command = 0, data = 0;
 
@@ -326,8 +327,8 @@ static int servo_open(struct context *cnt)
 }
 
 
-static unsigned short int servo_command(struct context *cnt, unsigned short int motor, unsigned short int command, 
-                                        unsigned short int data)
+static unsigned short int servo_command(struct context *cnt, unsigned short int motor, 
+                                        unsigned short int command, unsigned short int data)
 {
     unsigned char buffer[3];
     time_t timeout = time(NULL);
@@ -380,8 +381,8 @@ static unsigned short int servo_position(struct context *cnt, short unsigned int
  * - Does relative movements to current position.
  *
  */ 
-static unsigned short int servo_move(struct context *cnt, struct coord *cent, struct images *imgs, 
-                                     short unsigned int manual)
+static unsigned short int servo_move(struct context *cnt, struct coord *cent, 
+                                     struct images *imgs, short unsigned int manual)
 {
     unsigned short int command = 0;
     unsigned short int data = 0;
@@ -557,7 +558,7 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent, st
     return cnt->track.move_wait;
 }
 
-static unsigned short int servo_status(struct context *cnt,  unsigned short int motor)
+static unsigned short int servo_status(struct context *cnt, unsigned short int motor)
 {
     return servo_command(cnt, motor, SERVO_COMMAND_STATUS, 0);
 }
@@ -620,7 +621,6 @@ static unsigned short int servo_center(struct context *cnt, int x_offset, int y_
         servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
         ret = servo_command(cnt, cnt->track.motory, SERVO_COMMAND_ABSOLUTE, y_offset_abs); 
     }    
-
 
     return cnt->track.move_wait;
 }
@@ -854,8 +854,8 @@ static unsigned short int lqos_center(struct context *cnt, int dev, int x_angle,
     return cnt->track.move_wait;
 }
 
-static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, 
-                                    unsigned short int manual)
+static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *cent, 
+                                    struct images *imgs, unsigned short int manual)
 {
     int delta_x = cent->x - (imgs->width / 2);
     int delta_y = cent->y - (imgs->height / 2);
@@ -970,7 +970,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 
         queryctrl.id = V4L2_CID_PAN_RELATIVE;
         if (ioctl(dev, VIDIOC_QUERYCTRL, &queryctrl) < 0) {
-            motion_log(LOG_ERR, 1, "%s: ioctl querycontrol error %d", __FUNCTION__, errno);
+            motion_log(LOG_ERR, 1, "%s: ioctl querycontrol", __FUNCTION__);
             return 0;
         }
 
@@ -1084,8 +1084,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
     return cnt->track.move_wait;
 }
 
-static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, 
-                                   unsigned short int manual)
+static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, 
+                                   struct images *imgs, unsigned short int manual)
 {
     /* RELATIVE MOVING : Act.Position +/- X and Y */
     
@@ -1210,7 +1210,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
                        dev, VIDIOC_S_CTRL, &control_s, pan.s16.pan); 
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-                motion_log(LOG_ERR, 1, "%s: Failed to move UVC camera!", __FUNCTION__);
+            motion_log(LOG_ERR, 1, "%s: Failed to move UVC camera!", __FUNCTION__);
             return 0;
         }
     }

@@ -174,9 +174,9 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
     endp = src + size;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width) {
+        for (j = 0; j < height; j++, src -= width) 
             *dst++ = *src;
-        }
+        
     }
 }
 
@@ -379,7 +379,6 @@ int rotate_map(struct context *cnt, unsigned char *map)
         
         /* then copy back from the temp buffer to map */
         memcpy(map, cnt->rotate_data.temp_buf, size);
-
         break;
         
     case 180:

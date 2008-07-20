@@ -445,13 +445,11 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
          */
         if (conf->stream_motion && !conf->setup_mode && img->shot != 1) 
             event(cnt, EVENT_STREAM, img->image, NULL, NULL, &img->timestamp_tm);
-        
 
         /* Save motion jpeg, if configured */
         /* Output the image_out (motion) picture. */
         if (conf->motion_img) 
             event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tm);
-        
     }
 
     /* if track enabled and auto track on */
@@ -511,6 +509,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                 draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30, cnt->imgs.width, t, 
                           cnt->conf.text_double);
             }
+
             /* Output the picture to jpegs and ffmpeg */
             event(cnt, EVENT_IMAGE_DETECTED,
                   cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
@@ -548,6 +547,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                 /* We are out of sync! Properbly we got motion - no motion - motion */
                 cnt->movie_last_shot = -1;
             }
+
             /* Save last shot added to movie
              * only when we not are within first sec */
             if (cnt->movie_last_shot >= 0)
@@ -658,6 +658,7 @@ static int motion_init(struct context *cnt)
     cnt->imgs.ref = mymalloc(cnt->imgs.size);
     cnt->imgs.out = mymalloc(cnt->imgs.size);
     memset(cnt->imgs.out, 0, cnt->imgs.size);
+
     /* contains the moving objects of ref. frame */
     cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn));
     cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
@@ -699,6 +700,7 @@ static int motion_init(struct context *cnt)
                 break;
             SLEEP(2, 0);
         }
+
         if (i >= 5) {
             memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
             draw_text(cnt->imgs.image_virgin, 10, 20, cnt->imgs.width,
@@ -718,8 +720,10 @@ static int motion_init(struct context *cnt)
             motion_log(-1, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
         else 
             motion_log(LOG_INFO, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
+
         /* vid_startpipe should get the output dimensions */
         cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
+
         if (cnt->pipe < 0) {
             motion_log(LOG_ERR, 0, "%s: Failed to open video loopback", __FUNCTION__);
             return -1;
@@ -759,10 +763,10 @@ static int motion_init(struct context *cnt)
                 motion_log(LOG_ERR, 0, "%s: MySQL error was %s", __FUNCTION__, mysql_error(cnt->database));
                 return -2;
             }
-            #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-            my_bool  my_true = TRUE;
+#if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
+            my_bool my_true = TRUE;
             mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &my_true);
-            #endif
+#endif
         }
 #endif /* HAVE_MYSQL */
 
@@ -817,6 +821,7 @@ static int motion_init(struct context *cnt)
                for the user to edit it */
             put_fixed_mask(cnt, cnt->conf.mask_file);
         }
+
         if (!cnt->imgs.mask) {
             motion_log(LOG_ERR, 0, "%s: Failed to read mask image. Mask feature disabled.", 
                        __FUNCTION__);
@@ -1018,16 +1023,27 @@ static void *motion_loop(void *arg)
         text_size_factor = 1;
 
     /* Initialize area detection */
-    area_minx[0] = area_minx[3] = area_minx[6] = area_miny[0] = area_miny[1] = area_miny[2] = 0;
-    area_minx[1] = area_minx[4] = area_minx[7] = area_maxx[0] = area_maxx[3] = area_maxx[6] = cnt->imgs.width / 3;
-    area_minx[2] = area_minx[5] = area_minx[8] = area_maxx[1] = area_maxx[4] = area_maxx[7] = cnt->imgs.width / 3 * 2;
-    area_miny[3] = area_miny[4] = area_miny[5] = area_maxy[0] = area_maxy[1] = area_maxy[2] = cnt->imgs.height / 3;
-    area_miny[6] = area_miny[7] = area_miny[8] = area_maxy[3] = area_maxy[4] = area_maxy[5] = cnt->imgs.height / 3 * 2;
+    area_minx[0] = area_minx[3] = area_minx[6] = 0;
+    area_miny[0] = area_miny[1] = area_miny[2] = 0;
+
+    area_minx[1] = area_minx[4] = area_minx[7] = cnt->imgs.width / 3;
+    area_maxx[0] = area_maxx[3] = area_maxx[6] = cnt->imgs.width / 3;
+
+    area_minx[2] = area_minx[5] = area_minx[8] = cnt->imgs.width / 3 * 2;
+    area_maxx[1] = area_maxx[4] = area_maxx[7] = cnt->imgs.width / 3 * 2;
+
+    area_miny[3] = area_miny[4] = area_miny[5] = cnt->imgs.height / 3;
+    area_maxy[0] = area_maxy[1] = area_maxy[2] = cnt->imgs.height / 3;
+
+    area_miny[6] = area_miny[7] = area_miny[8] = cnt->imgs.height / 3 * 2;
+    area_maxy[3] = area_maxy[4] = area_maxy[5] = cnt->imgs.height / 3 * 2;
+
     area_maxx[2] = area_maxx[5] = area_maxx[8] = cnt->imgs.width;
     area_maxy[6] = area_maxy[7] = area_maxy[8] = cnt->imgs.height;
     
     /* Work out expected frame rate based on config setting */
-    if (cnt->conf.frame_limit < 2) cnt->conf.frame_limit = 2;
+    if (cnt->conf.frame_limit < 2) 
+        cnt->conf.frame_limit = 2;
 
     required_frame_time = 1000000L / cnt->conf.frame_limit;
 
@@ -1066,6 +1082,7 @@ static void *motion_loop(void *arg)
          * are attempted. */
         if (cnt->conf.minimum_motion_frames < 1)
             cnt->conf.minimum_motion_frames = 1;
+
         if (cnt->conf.pre_capture < 0)
             cnt->conf.pre_capture = 0;
 
@@ -1078,7 +1095,6 @@ static void *motion_loop(void *arg)
         if (cnt->imgs.image_ring_size != frame_buffer_size) 
             image_ring_resize(cnt, frame_buffer_size);
         
-
         /* Get time for current frame */
         cnt->currenttime = time(NULL);
 
@@ -1211,7 +1227,6 @@ static void *motion_loop(void *arg)
                 /* Deinterlace the image with ffmpeg, before the image is modified. */
                 if (cnt->conf.ffmpeg_deinterlace) 
                     ffmpeg_deinterlace(cnt->current_image->image, cnt->imgs.width, cnt->imgs.height);
-                
 #endif
 
                 /* save the newly captured still virgin image to a buffer
@@ -1275,7 +1290,7 @@ static void *motion_loop(void *arg)
 
                 /* Increase missing_frame_counter
                  * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
-                 * After 30 seconds we put a grey error image in the buffer
+                 * After MISSING_FRAMES_TIMEOUT seconds we put a grey error image in the buffer
                  * If we still have not yet received the initial image from a camera
                  * we go straight for the grey error image.
                  */
@@ -1370,7 +1385,8 @@ static void *motion_loop(void *arg)
                  * because with Round Robin this is controlled by roundrobin_skip.
                  */
                 if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
-                    cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs, cnt->current_image->image);
+                    cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs, 
+                                                                 cnt->current_image->image);
                     
                     if (cnt->current_image->diffs <= cnt->threshold) {
                         cnt->current_image->diffs = 0;
@@ -1601,7 +1617,6 @@ static void *motion_loop(void *arg)
                         pos = cnt->imgs.image_ring_size-1;
                     else 
                         pos--;
-                    
                 }
 
                 if (frame_count >= cnt->conf.minimum_motion_frames) {
@@ -1785,46 +1800,38 @@ static void *motion_loop(void *arg)
                 (time_current_frame % 60 < time_last_frame % 60) &&
                 cnt->shots == 0) {
 
-                if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0)
-                ;/* No action */
+                if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0) {
+                    ;/* No action */
 
                 /* If we are daily, raise timelapseend event at midnight */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
 
                 /* handle the hourly case */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
                     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
-
-                /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
+                
+                /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */    
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_wday == 0 && 
                         cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, 
                               &cnt->current_image->timestamp_tm);
-                }
-
-                /* If we are weekly-monday, raise timelapseend event at midnight on monday */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
+                /* If we are weekly-monday, raise timelapseend event at midnight on monday */    
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_wday == 1 && 
                         cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, 
                               &cnt->current_image->timestamp_tm);
-                }
-
-                /* If we are monthly, raise timelapseend event at midnight on first day of month */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
+                /* If we are monthly, raise timelapseend event at midnight on first day of month */    
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_mday == 1 && 
                         cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, 
                               &cnt->current_image->timestamp_tm);
-                }
-
-                /* If invalid we report in syslog once and continue in manual mode */
-                else {
+                /* If invalid we report in syslog once and continue in manual mode */    
+                } else {
                     motion_log(LOG_ERR, 0, "%s: Invalid timelapse_mode argument '%s'",
                                __FUNCTION__, cnt->conf.timelapse_mode);
                     motion_log(LOG_ERR, 0, "%:s Defaulting to manual timelapse mode", 
@@ -1840,15 +1847,13 @@ static void *motion_loop(void *arg)
                 time_last_frame % cnt->conf.timelapse)
                 event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL, 
                       &cnt->current_image->timestamp_tm);
-        }
-
-        /* if timelapse movie is in progress but conf.timelapse is zero then close timelapse file
+        } else if (cnt->ffmpeg_timelapse) {
+         /* if timelapse movie is in progress but conf.timelapse is zero then close timelapse file
          * This is an important feature that allows manual roll-over of timelapse file using the http
          * remote control via a cron job.
          */
-        else if (cnt->ffmpeg_timelapse)
             event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
-
+        }
 
 #endif /* HAVE_FFMPEG */
 
@@ -1912,6 +1917,7 @@ static void *motion_loop(void *arg)
             /* Sanity check for smart_mask_speed, silly value disables smart mask */
             if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
                 cnt->conf.smart_mask_speed = 0;
+
             /* Has someone changed smart_mask_speed or framerate? */
             if (cnt->conf.smart_mask_speed != cnt->smartmask_speed || 
                 smartmask_lastrate != cnt->lastrate) {
@@ -1919,6 +1925,7 @@ static void *motion_loop(void *arg)
                     memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
                     memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
                 }
+
                 smartmask_lastrate = cnt->lastrate;
                 cnt->smartmask_speed = cnt->conf.smart_mask_speed;
                 /* Decay delay - based on smart_mask_speed (framerate independent)
@@ -2009,6 +2016,7 @@ err:
 
     if (!cnt->restart)
         cnt->watchdog = WATCHDOG_OFF;
+
     cnt->running = 0;
     cnt->finish = 0;
 
@@ -2299,6 +2307,7 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
         for (i = 1; cnt_list[i]; i++) {
             if (cnt_list[i] == cnt)
                 continue;
+
             if (cnt_list[i]->conf.stream_port == cnt->conf.stream_port) {
                 motion_log(LOG_ERR, 0,
                            "%s: Stream port number %d for thread %d conflicts with thread %d",
@@ -2489,6 +2498,7 @@ int main (int argc, char **argv)
                     }
                 }
             }
+
             if (debug_level >= CAMERA_VERBOSE)
                 motion_log(LOG_INFO, 0, "%s: DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
                            __FUNCTION__, threads_running, motion_threads_running, finish);
@@ -2617,7 +2627,7 @@ int create_path(const char *path)
     else
         start = strchr(path, '/');
 
-    while(start) {
+    while (start) {
         char *buffer = mystrdup(path);
         buffer[start-path] = 0x00;
 
@@ -2629,7 +2639,6 @@ int create_path(const char *path)
         }
 
         free(buffer);
-
         start = strchr(start + 1, '/');
     }
 

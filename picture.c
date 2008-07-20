@@ -293,10 +293,12 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
     jpeg_start_compress(&cjpeg, TRUE);
 
     row_ptr[0] = image;
+
     for (y = 0; y < height; y++) {
         jpeg_write_scanlines(&cjpeg, row_ptr, 1);
         row_ptr[0] += width;
     }
+
     jpeg_finish_compress(&cjpeg);
     jpeg_destroy_compress(&cjpeg);
 }
@@ -489,6 +491,8 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     case VIDEO_PALETTE_GREY:
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
+    default:
+        motion_log(LOG_ERR, 0, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
     }
 
     return 0;
@@ -506,6 +510,8 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
         case VIDEO_PALETTE_GREY:
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
             break;
+        default:
+            motion_log(LOG_ERR, 0, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
         }
     }
 }
@@ -522,7 +528,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
             motion_log(LOG_ERR, 1,
                        "%s: Can't write picture to file %s - check access rights to target directory"
                        "Thread is going to finish due to this fatal error",       
-                         __FUNCTION__, file);
+                        __FUNCTION__, file);
             cnt->finish = 1;
             cnt->restart = 0;
             return;
@@ -595,9 +601,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
         if ((int)fread(&image[y * width], 1, width, picture) != width)
             motion_log(LOG_ERR, 1, "%s: Failed reading image data from pgm file", __FUNCTION__);
         
-        for (x = 0; x < width; x++) {
+        for (x = 0; x < width; x++)
             image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
-        }
+        
     }    
 
     return image;
