@@ -291,7 +291,7 @@ static void sig_handler(int signo)
             i = -1;
             while (cnt_list[++i]) {
                 if (cnt_list[i]->conf.snapshot_interval) 
-                    cnt_list[i]->snapshot=1;
+                    cnt_list[i]->snapshot = 1;
                     
             }
         }
@@ -302,7 +302,7 @@ static void sig_handler(int signo)
         if (cnt_list) {
             i = -1;
             while (cnt_list[++i])
-                cnt_list[i]->makemovie=1;
+                cnt_list[i]->makemovie = 1;
         }
         break;
     case SIGHUP:
@@ -318,12 +318,12 @@ static void sig_handler(int signo)
         if (cnt_list) {
             i = -1;
             while (cnt_list[++i]) {
-                cnt_list[i]->makemovie=1;
-                cnt_list[i]->finish=1;
+                cnt_list[i]->makemovie = 1;
+                cnt_list[i]->finish = 1;
                 /* don't restart thread when it ends, 
                  * all threads restarts if global restart is set 
                  */
-                cnt_list[i]->restart=0;
+                cnt_list[i]->restart = 0;
             }
         }
         /* Set flag we want to quit main check threads loop
@@ -498,8 +498,8 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
             if (cnt->new_img & NEWIMG_BEST) {
                 if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].diffs > cnt->imgs.preview_image.diffs) 
                     image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
-                
             }
+
             /* Check for most significant preview-shot when output_normal=center */
             if (cnt->new_img & NEWIMG_CENTER) {
                 if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].cent_dist < cnt->imgs.preview_image.cent_dist) 
@@ -640,8 +640,10 @@ static int motion_init(struct context *cnt)
     if (cnt->conf.vidpipe) {
         if (cnt->conf.setup_mode)
             motion_log(-1, 0, "Opening video loopback device for normal pictures");
+
         /* vid_startpipe should get the output dimensions */
         cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
+
         if (cnt->pipe < 0) {
             motion_log(LOG_ERR, 0, "Failed to open video loopback");
             return -1;
@@ -650,8 +652,10 @@ static int motion_init(struct context *cnt)
     if (cnt->conf.motionvidpipe) {
         if (cnt->conf.setup_mode)
             motion_log(-1, 0, "Opening video loopback device for motion pictures");
+
         /* vid_startpipe should get the output dimensions */
         cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
+
         if (cnt->mpipe < 0) {
             motion_log(LOG_ERR, 0, "Failed to open video loopback");
             return -1;
@@ -673,7 +677,7 @@ static int motion_init(struct context *cnt)
             return -2;
         }
         #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-        my_bool  my_true = TRUE;
+        my_bool my_true = TRUE;
         mysql_options(cnt->database,MYSQL_OPT_RECONNECT,&my_true);
         #endif
     }
@@ -709,9 +713,9 @@ static int motion_init(struct context *cnt)
     /* Set the sql mask file according to the SQL config options*/
 
     cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-            cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-            cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-            cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
+                    cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
+                    cnt->conf.sql_log_mpeg * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
+                    cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
 
     /* Load the mask file if any */
@@ -736,8 +740,9 @@ static int motion_init(struct context *cnt)
             if (cnt->conf.setup_mode)
                 motion_log(-1, 0, "Maskfile \"%s\" loaded.",cnt->conf.mask_file);
         }
+
     } else {
-        cnt->imgs.mask=NULL;
+        cnt->imgs.mask = NULL;
     }    
 
     /* Always initialize smart_mask - someone could turn it on later... */
@@ -961,8 +966,8 @@ static void *motion_loop(void *arg)
     rolling_average_data = mymalloc(sizeof(rolling_average_data) * rolling_average_limit);
 
     /* Preset history buffer with expected frame rate */
-    for (j=0; j< rolling_average_limit; j++)
-        rolling_average_data[j]=required_frame_time;
+    for (j = 0; j < rolling_average_limit; j++)
+        rolling_average_data[j] = required_frame_time;
 
 
     /* MAIN MOTION LOOP BEGINS HERE */
@@ -1192,7 +1197,7 @@ static void *motion_loop(void *arg)
 
                 /* Increase missing_frame_counter
                  * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
-                 * After 30 seconds we put a grey error image in the buffer
+                 * After MISSING_FRAMES_TIMEOUT seconds we put a grey error image in the buffer
                  * If we still have not yet received the initial image from a camera
                  * we go straight for the grey error image.
                  */
@@ -1267,8 +1272,10 @@ static void *motion_loop(void *arg)
                     if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                         if (cnt->conf.setup_mode)
                             motion_log(-1, 0, "Lightswitch detected");
+
                         if (cnt->moved < 5)
                             cnt->moved = 5;
+
                         cnt->current_image->diffs = 0;
                         alg_update_reference_frame(cnt, RESET_REF_FRAME);
                     }
@@ -1288,6 +1295,7 @@ static void *motion_loop(void *arg)
                     
                     if (cnt->current_image->diffs <= cnt->threshold) {
                         cnt->current_image->diffs = 0;
+
                         if (cnt->conf.setup_mode)
                             motion_log(-1, 0, "Switchfilter detected");
                     }
@@ -1389,7 +1397,7 @@ static void *motion_loop(void *arg)
                         motion_log(-1, 0, "micro-lightswitch!");
 
                 } else {
-                            alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+                    alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
                 }
 
                 previous_diffs = cnt->current_image->diffs;
@@ -1419,11 +1427,10 @@ static void *motion_loop(void *arg)
                 overlay_fixed_mask(cnt, cnt->imgs.out);
 
             /* Initialize the double sized characters if needed. */
-            if (cnt->conf.text_double && text_size_factor == 1)
+            if (cnt->conf.text_double && text_size_factor == 1) {
                 text_size_factor = 2;
-
             /* If text_double is set to off, then reset the scaling text_size_factor. */
-            else if (!cnt->conf.text_double && text_size_factor == 2) {
+            } else if (!cnt->conf.text_double && text_size_factor == 2) {
                 text_size_factor = 1;
             }
 
@@ -1436,7 +1443,8 @@ static void *motion_loop(void *arg)
                 else
                     sprintf(tmp, "-");
 
-                draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
+                draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10, cnt->imgs.width, 
+                          tmp, cnt->conf.text_double);
             }
 
             /* Add changed pixels to motion-images (for webcam) in setup_mode
@@ -1474,7 +1482,9 @@ static void *motion_loop(void *arg)
                 /* flag this image, it have motion */
                 cnt->current_image->flags |= IMAGE_MOTION;
                 cnt->lightswitch_framecounter++; /* micro lightswitch */
-            } else cnt->lightswitch_framecounter = 0;
+            } else {
+                cnt->lightswitch_framecounter = 0;
+            }    
 
             /* If motion has been detected we take action and start saving
              * pictures and movies etc by calling motion_detected().
@@ -1543,11 +1553,14 @@ static void *motion_loop(void *arg)
 
             /* Simple hack to recognize motion in a specific area */
             /* Do we need a new coversion specifier as well?? */
-            if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && (cnt->current_image->flags & IMAGE_TRIGGER)) {
+            if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) && 
+                (cnt->current_image->flags & IMAGE_TRIGGER)) {
+
                 j = strlen(cnt->conf.area_detect);
 
                 for (i = 0; i < j; i++) {
                     z = cnt->conf.area_detect[i] - 49; /* 1 becomes 0 */
+
                     if ((z >= 0) && (z < 9)) {
                         if (cnt->current_image->location.x > area_minx[z] &&
                             cnt->current_image->location.x < area_maxx[z] &&
@@ -1556,8 +1569,10 @@ static void *motion_loop(void *arg)
                             event(cnt, EVENT_AREA_DETECTED, NULL, NULL,
                                   NULL, cnt->currenttime_tm);
                             area_once = cnt->event_nr; /* Fire script only once per event */
+                            
                             if (cnt->conf.setup_mode)
                                 motion_log(-1, 0, "Motion in area %d detected.\n", z+1);
+
                             break;
                         }
                     }
@@ -1626,6 +1641,7 @@ static void *motion_loop(void *arg)
                     snprintf(part, 99, "Raw changes: %5d - changes after '%s': %5d",
                              olddiffs, cnt->conf.despeckle, cnt->current_image->diffs);
                     strcat(msg, part);
+
                     if (strchr(cnt->conf.despeckle, 'l')){
                         sprintf(part, " - labels: %3d", cnt->current_image->total_labels);
                         strcat(msg, part);
@@ -1664,9 +1680,10 @@ static void *motion_loop(void *arg)
         time_current_frame = cnt->currenttime;
 
         if ((cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
-              time_current_frame % cnt->conf.snapshot_interval <= time_last_frame % cnt->conf.snapshot_interval) ||
+            time_current_frame % cnt->conf.snapshot_interval <= time_last_frame % cnt->conf.snapshot_interval) ||
             cnt->snapshot) {
-            event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+            event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, 
+                  &cnt->current_image->timestamp_tm);
             cnt->snapshot = 0;
         }
 
@@ -1687,40 +1704,37 @@ static void *motion_loop(void *arg)
                 (time_current_frame % 60 < time_last_frame % 60) &&
                 cnt->shots == 0) {
 
-                if (strcasecmp(cnt->conf.timelapse_mode,"manual") == 0)
-                ;/* No action */
+                if (strcasecmp(cnt->conf.timelapse_mode,"manual") == 0) {
+                    ;/* No action */
 
                 /* If we are daily, raise timelapseend event at midnight */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_hour == 0)
-                        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
+                        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, 
+                              &cnt->current_image->timestamp_tm);
 
                 /* handle the hourly case */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
-                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, 
+                          &cnt->current_image->timestamp_tm);
 
                 /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_wday == 0 && cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
 
-                /* If we are weekly-monday, raise timelapseend event at midnight on monday */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
+                /* If we are weekly-monday, raise timelapseend event at midnight on monday */    
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_wday == 1 && cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
 
-                /* If we are monthly, raise timelapseend event at midnight on first day of month */
-                else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
+                /* If we are monthly, raise timelapseend event at midnight on first day of month */    
+                } else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
                     if (cnt->current_image->timestamp_tm.tm_mday == 1 && cnt->current_image->timestamp_tm.tm_hour == 0)
                         event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-                }
 
-                /* If invalid we report in syslog once and continue in manual mode */
-                else {
+                /* If invalid we report in syslog once and continue in manual mode */    
+                } else {
                     motion_log(LOG_ERR, 0, "Invalid timelapse_mode argument '%s'",
                                cnt->conf.timelapse_mode);
                     motion_log(LOG_ERR, 0, "Defaulting to manual timelapse mode");
@@ -1733,16 +1747,15 @@ static void *motion_loop(void *arg)
              */
             if (cnt->shots == 0 &&
                 time_current_frame % cnt->conf.timelapse <= time_last_frame % cnt->conf.timelapse)
-                event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
-        }
-
+                event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL, 
+                      &cnt->current_image->timestamp_tm);
+        } else if (cnt->ffmpeg_timelapse) {
         /* if timelapse mpeg is in progress but conf.timelapse is zero then close timelapse file
          * This is an important feature that allows manual roll-over of timelapse file using the http
          * remote control via a cron job.
          */
-        else if (cnt->ffmpeg_timelapse)
             event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
-
+        }
 
 #endif /* HAVE_FFMPEG */
 
@@ -1764,9 +1777,12 @@ static void *motion_loop(void *arg)
             event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
             event(cnt, EVENT_WEBCAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
         } else {
-            event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, &cnt->current_image->timestamp_tm);
+            event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, &cnt->pipe, 
+                  &cnt->current_image->timestamp_tm);
+
             if (!cnt->conf.webcam_motion || cnt->shots == 1)
-                event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+                event(cnt, EVENT_WEBCAM, cnt->current_image->image, NULL, NULL, 
+                      &cnt->current_image->timestamp_tm);
         }
 
         event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
@@ -1797,6 +1813,7 @@ static void *motion_loop(void *arg)
             /* Sanity check for smart_mask_speed, silly value disables smart mask */
             if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
                 cnt->conf.smart_mask_speed = 0;
+
             /* Has someone changed smart_mask_speed or framerate? */
             if (cnt->conf.smart_mask_speed != cnt->smartmask_speed || smartmask_lastrate != cnt->lastrate){
                 if (cnt->conf.smart_mask_speed == 0){
@@ -1853,7 +1870,7 @@ static void *motion_loop(void *arg)
         /* Calculate 10 second average and use deviation in delay calculation */
         rolling_average = 0L;
 
-        for (j=0; j < rolling_average_limit; j++)
+        for (j = 0; j < rolling_average_limit; j++)
             rolling_average += rolling_average_data[j];
 
         rolling_average /= rolling_average_limit;
@@ -1893,6 +1910,7 @@ err:
 
     if (!cnt->restart)
         cnt->watchdog=WATCHDOG_OFF;
+
     cnt->running = 0;
     cnt->finish = 0;
 
@@ -2017,7 +2035,7 @@ static void cntlist_create(int argc, char *argv[])
      * and a NULL pointer which indicates that end of the array of pointers to
      * thread context structures.
      */
-    cnt_list = mymalloc(sizeof(struct context *)*2);
+    cnt_list = mymalloc(sizeof(struct context *) * 2);
 
     /* Now we reserve room for thread 0's context structure and let cnt_list[0] point to it */
     cnt_list[0] = mymalloc(sizeof(struct context));
@@ -2054,9 +2072,9 @@ static void motion_shutdown(void)
 
     motion_remove_pid();
     
-    while (cnt_list[++i]){
+    while (cnt_list[++i])
         context_destroy(cnt_list[i]);
-    }
+    
     free(cnt_list);
     cnt_list = NULL;
 #ifndef WITHOUT_V4L
@@ -2182,6 +2200,7 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
         for (i = 1; cnt_list[i]; i++) {
             if (cnt_list[i] == cnt)
                 continue;
+
             if (cnt_list[i]->conf.webcam_port == cnt->conf.webcam_port) {
                 motion_log(LOG_ERR, 0,
                            "Webcam port number %d for thread %d conflicts with thread %d",
@@ -2204,8 +2223,8 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
     /* Set a flag that we want this thread running */
     cnt->restart = 1;
 
-    /* Give the thread 30s to start */
-    cnt->watchdog = 30;
+    /* Give the thread WATCHDOG_TMO seconds to start */
+    cnt->watchdog = WATCHDOG_TMO;
 
     /* Create the actual thread. Use 'motion_loop' as the thread
      * function.
@@ -2492,7 +2511,7 @@ int create_path(const char *path)
     else
         start = strchr(path, '/');
 
-    while(start) {
+    while (start) {
         char *buffer = strdup(path);
         buffer[start-path] = 0x00;
 

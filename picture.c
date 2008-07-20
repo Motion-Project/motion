@@ -293,11 +293,13 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
 
     jpeg_start_compress(&cjpeg, TRUE);
 
-    row_ptr[0]=image;
+    row_ptr[0] = image;
+
     for (y = 0; y < height; y++) {
         jpeg_write_scanlines(&cjpeg, row_ptr, 1);
         row_ptr[0] += width;
     }
+
     jpeg_finish_compress(&cjpeg);
     jpeg_destroy_compress(&cjpeg);
 }
@@ -420,7 +422,7 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
     
     /* set y to mask + motion-pixel to keep motion pixels visible on grey background*/
     for (i = 0; i < imgs->motionsize; i++){
-        pixel = 255-mask[i]+motion_img[i];
+        pixel = 255 - mask[i] + motion_img[i];
         if (pixel > 255)
             *out = 255;
         else
@@ -484,12 +486,14 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
                        unsigned char *image, int quality)
 {
     switch (cnt->imgs.type) {
-        case VIDEO_PALETTE_YUV420P:
-            return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                           cnt->imgs.width, cnt->imgs.height, quality);
-        case VIDEO_PALETTE_GREY:
-            return put_jpeg_grey_memory(dest_image, image_size, image,
-                                        cnt->imgs.width, cnt->imgs.height, quality);
+    case VIDEO_PALETTE_YUV420P:
+        return put_jpeg_yuv420p_memory(dest_image, image_size, image,
+                                       cnt->imgs.width, cnt->imgs.height, quality);
+    case VIDEO_PALETTE_GREY:
+        return put_jpeg_grey_memory(dest_image, image_size, image,
+                                    cnt->imgs.width, cnt->imgs.height, quality);
+    default:
+        motion_log(LOG_ERR, 0, "Unknow image type %d", cnt->imgs.type);            
     }
 
     return 0;
@@ -501,12 +505,14 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
         put_ppm_bgr24_file(picture, image, cnt->imgs.width, cnt->imgs.height);
     } else {
         switch (cnt->imgs.type) {
-            case VIDEO_PALETTE_YUV420P:
-                put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
-                break;
-            case VIDEO_PALETTE_GREY:
-                put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
-                break;
+        case VIDEO_PALETTE_YUV420P:
+            put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
+            break;
+        case VIDEO_PALETTE_GREY:
+            put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
+            break;
+        default :
+            motion_log(LOG_ERR, 0, "Unknow image type %d", cnt->imgs.type);
         }
     }
 }
@@ -593,9 +599,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
         if ((int)fread(&image[y * width], 1, width, picture) != width)
             motion_log(LOG_ERR, 1, "Failed reading image data from pgm file");
         
-        for (x = 0; x < width; x++) {
+        for (x = 0; x < width; x++)
             image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
-        }
+        
     }    
 
     return image;
@@ -664,7 +670,7 @@ void preview_save(struct context *cnt)
         /* Use filename of movie i.o. jpeg_filename when set to 'preview' */
         use_jpegpath = strcmp(cnt->conf.jpegpath, "preview");
     
-        if (cnt->ffmpeg_new && !use_jpegpath){
+        if (cnt->ffmpeg_new && !use_jpegpath) {
             /* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
             basename_len = strlen(cnt->newfilename) - 3;
             strncpy(previewname, cnt->newfilename, basename_len);

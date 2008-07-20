@@ -400,7 +400,8 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             u = img + width * height;
             v = u + (width * height) / 4;
         }
-        fps=cnt->lastrate;
+
+        fps = cnt->lastrate;
 
         if (debug_level >= CAMERA_DEBUG) 
             motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__, fps);
@@ -411,9 +412,9 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             fps = 2;
 
         if ((cnt->ffmpeg_new =
-              ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
-                          cnt->imgs.width, cnt->imgs.height, fps, cnt->conf.ffmpeg_bps,
-                          cnt->conf.ffmpeg_vbr)) == NULL) {
+             ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
+                         cnt->imgs.width, cnt->imgs.height, fps, cnt->conf.ffmpeg_bps,
+                         cnt->conf.ffmpeg_vbr)) == NULL) {
             motion_log(LOG_ERR, 1, "ffopen_open error creating (new) file [%s]",cnt->newfilename);
             cnt->finish = 1;
             return;
@@ -447,11 +448,11 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             fps = 2;
 
         if ((cnt->ffmpeg_motion =
-              ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
-                          cnt->imgs.width, cnt->imgs.height, fps, cnt->conf.ffmpeg_bps,
-                          cnt->conf.ffmpeg_vbr)) == NULL){
+             ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
+                         cnt->imgs.width, cnt->imgs.height, fps, cnt->conf.ffmpeg_bps,
+                         cnt->conf.ffmpeg_vbr)) == NULL) {
             motion_log(LOG_ERR, 1, "ffopen_open error creating (motion) file [%s]", cnt->motionfilename);
-            cnt->finish=1;
+            cnt->finish = 1;
             return;
         }
         cnt->ffmpeg_motion->udata = convbuf;
@@ -498,9 +499,9 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         }
         
         if ((cnt->ffmpeg_timelapse =
-              ffmpeg_open((char *)TIMELAPSE_CODEC, cnt->timelapsefilename, y, u, v,
-                          cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
-                          cnt->conf.ffmpeg_vbr)) == NULL) {
+             ffmpeg_open((char *)TIMELAPSE_CODEC, cnt->timelapsefilename, y, u, v,
+                         cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
+                         cnt->conf.ffmpeg_vbr)) == NULL) {
             motion_log(LOG_ERR, 1, "ffopen_open error creating (timelapse) file [%s]", cnt->timelapsefilename);
             cnt->finish=1;
             return;
@@ -580,6 +581,7 @@ static void event_ffmpeg_timelapseend(struct context *cnt,
     if (cnt->ffmpeg_timelapse) {
         if (cnt->ffmpeg_timelapse->udata)
             free(cnt->ffmpeg_timelapse->udata);
+
         ffmpeg_close(cnt->ffmpeg_timelapse);
         cnt->ffmpeg_timelapse = NULL;
 
@@ -614,7 +616,6 @@ struct event_handlers event_handlers[] = {
     EVENT_FILECREATE,
     event_newfile
     },
-
     {
     EVENT_MOTION,
     event_beep

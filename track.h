@@ -32,7 +32,7 @@ struct trackoptions {
     unsigned short int step_angle_x;
     unsigned short int step_angle_y;
     unsigned short int move_wait;
-// UVC
+    // UVC
     int pan_angle; // degrees
     int tilt_angle; // degrees
 };

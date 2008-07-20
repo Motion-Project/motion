@@ -145,10 +145,12 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
             } else {
                 freq = (freq * 10) / 625;
             }
+
             if (ioctl(dev, VIDIOCSFREQ, &freq) == -1) {
                 motion_log(LOG_ERR, 1, "ioctl (VIDIOCSFREQ)");
                 return (NULL);
             }
+
             if (cnt->conf.setup_mode)
                 motion_log(-1, 0, "Frequency set");
         }
@@ -162,6 +164,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
     } else {
         map = mmap(0, vid_buf.size, PROT_READ|PROT_WRITE, MAP_SHARED, dev, 0);
         viddev->size_map = vid_buf.size;
+
         if (vid_buf.frames > 1) {
             viddev->v4l_maxbuffer = 2;
             viddev->v4l_buffers[0] = map;
@@ -185,6 +188,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
             motion_log(LOG_DEBUG, 1, "Failed with YUV420P, trying YUV422 palette");
             viddev->v4l_fmt = VIDEO_PALETTE_YUV422;
             vid_mmap.format = viddev->v4l_fmt;
+
             /* Try again... */
             if (ioctl(dev, VIDIOCMCAPTURE, &vid_mmap) == -1) {
                 motion_log(LOG_DEBUG, 1, "Failed with YUV422, trying YUYV palette");
@@ -195,8 +199,8 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
                     motion_log(LOG_DEBUG, 1, "Failed with YUYV, trying RGB24 palette");
                     viddev->v4l_fmt = VIDEO_PALETTE_RGB24;
                     vid_mmap.format = viddev->v4l_fmt;
+
                     /* Try again... */
-                
                     if (ioctl(dev, VIDIOCMCAPTURE, &vid_mmap) == -1) {
                         motion_log(LOG_DEBUG, 1, "Failed with RGB24, trying GREYSCALE palette");
                         viddev->v4l_fmt = VIDEO_PALETTE_GREY;
@@ -328,8 +332,8 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
     
     if (input != viddev->input || width != viddev->width || height != viddev->height ||
         freq != viddev->freq || tuner_number != viddev->tuner_number) {
-        if (freq) {
 
+        if (freq) {
             memset(&vid_tuner, 0, sizeof(struct video_tuner));
 
             vid_tuner.tuner = tuner_number;
@@ -362,6 +366,7 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
                 return;
             }
         }
+
         v4l_picture_controls(cnt, viddev);
         viddev->input = input;
         viddev->width = width;
@@ -463,6 +468,7 @@ static int v4l_open_vidpipe(void)
             motion_log(LOG_ERR, 1, "Failed to open '%s'", prefix);
             return -1;
         }
+
         while ((dirp=readdir(dir)) != NULL) {
             if (!strncmp(dirp->d_name, "video", 5)) {
                 strncpy(buffer, prefix, 255);
@@ -534,24 +540,25 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
     } else {
         dev = open(dev_name, O_RDWR);
     }
+
     if (dev < 0)
-        return(-1);
+        return -1;
 
     if (ioctl(dev, VIDIOCGPICT, &vid_pic) == -1) {
         motion_log(LOG_ERR, 1, "ioctl (VIDIOCGPICT)");
-        return(-1);
+        return -1;
     }
 
     vid_pic.palette=type;
 
     if (ioctl(dev, VIDIOCSPICT, &vid_pic) == -1) {
         motion_log(LOG_ERR, 1, "ioctl (VIDIOCSPICT)");
-        return(-1);
+        return -1;
     }
 
     if (ioctl(dev, VIDIOCGWIN, &vid_win) == -1) {
         motion_log(LOG_ERR, 1, "ioctl (VIDIOCGWIN)");
-        return(-1);
+        return -1;
     }
 
     vid_win.height = height;
@@ -559,7 +566,7 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
 
     if (ioctl(dev, VIDIOCSWIN, &vid_win) == -1) {
         motion_log(LOG_ERR, 1, "ioctl (VIDIOCSWIN)");
-        return(-1);
+        return -1;
     }
 
     return dev;

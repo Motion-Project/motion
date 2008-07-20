@@ -272,8 +272,7 @@ void rotate_init(struct context *cnt)
         return;
     
 
-    switch(cnt->imgs.type)
-    {
+    switch(cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         /* For YUV 4:2:0 planar, the memory block used for 90/270 degrees
          * rotation needs to be width x height x 1.5 bytes large. 
@@ -367,8 +366,7 @@ int rotate_map(struct context *cnt, unsigned char *map)
         wh4 = wh / 4;
         w2 = width / 2;
         h2 = height / 2;
-    }
-    else { /* VIDEO_PALETTE_GREY */
+    } else { /* VIDEO_PALETTE_GREY */
         size = wh;
     }
 
@@ -386,7 +384,6 @@ int rotate_map(struct context *cnt, unsigned char *map)
         
         /* then copy back from the temp buffer to map */
         memcpy(map, cnt->rotate_data.temp_buf, size);
-
         break;
         
     case 180:

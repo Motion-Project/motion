@@ -55,14 +55,15 @@ unsigned short int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
     if (!manual && !cnt->track.active)
         return 0;
 
-    if (cnt->track.type == TRACK_TYPE_STEPPER){
+    if (cnt->track.type == TRACK_TYPE_STEPPER) {
         unsigned short int ret;
         ret = stepper_center(cnt, xoff, yoff);
         if (!ret) {
                 motion_log(LOG_ERR, 1, "track_center: internal error (stepper_center)");
                 return 0;        
-        }
-        else return ret;    
+        } else {
+            return ret;    
+        }    
     }
 #ifndef WITHOUT_V4L    
     else if (cnt->track.type == TRACK_TYPE_PWC)
@@ -105,7 +106,8 @@ unsigned short int track_move(struct context *cnt, int dev, struct coord *cent,
     else if (cnt->track.type == TRACK_TYPE_GENERIC)
         return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
 
-    motion_log(LOG_ERR, 1, "track_move: internal error, %hu is not a known track-type", cnt->track.type);
+    motion_log(LOG_ERR, 1, "track_move: internal error, %hu is not a known track-type", 
+               cnt->track.type);
 
     return 0;
 }
@@ -127,7 +129,8 @@ static unsigned short int stepper_command(struct context *cnt, unsigned short in
     buffer[0] = motor;
     buffer[1] = command;
     buffer[2] = data;
-    if (write(cnt->track.dev, buffer, 3) != 3){
+
+    if (write(cnt->track.dev, buffer, 3) != 3) {
         motion_log(LOG_ERR, 1, "stepper_command port %s dev fd %i, motor %hu command %hu data %hu",
                                cnt->track.port, cnt->track.dev, motor, command, data);
         return 0;
@@ -206,7 +209,8 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
     return cnt->track.move_wait;
 }
 
-static unsigned short int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs)
+static unsigned short int stepper_move(struct context *cnt, struct coord *cent, 
+                                       struct images *imgs)
 {
     unsigned short int command = 0, data = 0;
 
@@ -217,7 +221,8 @@ static unsigned short int stepper_move(struct context *cnt, struct coord *cent, 
                                     cnt->track.port, cnt->track.dev);    
             return 0;
         }
-        motion_log(LOG_INFO, 0, "stepper_center() succeed , device started %s , fd [%i]", cnt->track.port, cnt->track.dev);    
+        motion_log(LOG_INFO, 0, "stepper_center() succeed , device started %s , fd [%i]", 
+                   cnt->track.port, cnt->track.dev);    
     }
 
     /* x-axis */
@@ -264,7 +269,8 @@ static unsigned short int stepper_move(struct context *cnt, struct coord *cent, 
 
 ******************************************************************************/
 
-static char iomojo_command(struct context *cnt, char *command, unsigned short int len, unsigned short int ret)
+static char iomojo_command(struct context *cnt, char *command, 
+                           unsigned short int len, unsigned short int ret)
 {
     char buffer[1];
     time_t timeout = time(NULL);
@@ -292,7 +298,7 @@ static void iomojo_setspeed(struct context *cnt, unsigned short int speed)
     command[1] = cnt->track.iomojo_id;
     command[2] = speed;
     
-    if (iomojo_command(cnt, command, 3, 1)!=IOMOJO_SETSPEED_RET)
+    if (iomojo_command(cnt, command, 3, 1) != IOMOJO_SETSPEED_RET)
         motion_log(LOG_ERR, 1, "Unable to set camera speed");
 }
 
@@ -368,7 +374,8 @@ static unsigned short int iomojo_center(struct context *cnt, int x_offset, int y
     return cnt->track.move_wait;
 }
 
-static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs)
+static unsigned short int iomojo_move(struct context *cnt, int dev, 
+                                      struct coord *cent, struct images *imgs)
 {
     char command[5];
     int direction = 0;
@@ -421,6 +428,7 @@ static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord
             i = 25 * ny / 90;
         else
             i = 25 * nx / 90;
+
         return i;
     }
 
@@ -573,7 +581,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
     };
     union pantilt pan;
 
-    if (cnt->track.dev==-1) {
+    if (cnt->track.dev == -1) {
 
         int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
         struct v4l2_control control_s;
@@ -587,7 +595,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
         }
         motion_log(LOG_DEBUG, 0, "Reseting UVC camera to starting position");
 
-        SLEEP(8,0)
+        SLEEP(8, 0)
 
         /* Get camera range */
         struct v4l2_queryctrl queryctrl;
@@ -595,9 +603,10 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
         queryctrl.id = V4L2_CID_PAN_RELATIVE;
 
         if (ioctl(dev, VIDIOC_QUERYCTRL, &queryctrl) < 0) {
-            motion_log(LOG_ERR, 1, "ioctl querycontrol error %d",errno);
+            motion_log(LOG_ERR, 1, "ioctl querycontrol");
             return 0;
         }
+
         motion_log(LOG_DEBUG, 0, "Getting camera range");
         
 
@@ -681,7 +690,7 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
 
     motion_log(LOG_DEBUG, 0,"Found MINMAX = %d", cnt->track.minmaxfound); 
 
-    if (cnt->track.dev!=-1) {
+    if (cnt->track.dev != -1) {
         motion_log(LOG_DEBUG, 0," Before_ABS_Y_Angel : x= %d , Y= %d , ", 
                    cnt->track.pan_angle, cnt->track.tilt_angle );
         if (move_x_degrees != -1)  
@@ -697,7 +706,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
     return cnt->track.move_wait;
 }
 
-static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, unsigned short int manual)
+static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, 
+                                   struct images *imgs, unsigned short int manual)
 {
     /* RELATIVE MOVING : Act.Position +/- X and Y */
     

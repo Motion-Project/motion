@@ -448,9 +448,9 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
  * the camera device.
  */
 #define AUTOBRIGHT_HYSTERESIS 10
-#define AUTOBRIGHT_DAMPER 5
-#define AUTOBRIGHT_MAX 255
-#define AUTOBRIGHT_MIN 0
+#define AUTOBRIGHT_DAMPER      5
+#define AUTOBRIGHT_MAX       255
+#define AUTOBRIGHT_MIN         0
 
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 {
@@ -603,7 +603,8 @@ void vid_close(struct context *cnt)
         pthread_mutex_destroy(&dev->mutex);
         free(dev);
     } else {
-        motion_log(LOG_INFO, 0, "Still %d users of video device %s, so we don't close it now", dev->usage_count, dev->video_device);
+        motion_log(LOG_INFO, 0, "Still %d users of video device %s, so we don't close it now", 
+                   dev->usage_count, dev->video_device);
         /* There is still at least one thread using this device 
          * If we own it, release it
          */

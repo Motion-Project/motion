@@ -64,24 +64,24 @@
 #define u32 unsigned int
 #define s32 signed int
 
-#define MMAP_BUFFERS 4
-#define MIN_MMAP_BUFFERS 2
+#define MMAP_BUFFERS        4
+#define MIN_MMAP_BUFFERS    2
 
 #ifndef V4L2_PIX_FMT_SBGGR8
 /* see http://www.siliconimaging.com/RGB%20Bayer.htm */
-#define V4L2_PIX_FMT_SBGGR8  v4l2_fourcc('B','A','8','1')    /*  8  BGBG.. GRGR.. */
+#define V4L2_PIX_FMT_SBGGR8             v4l2_fourcc('B','A','8','1')    /*  8  BGBG.. GRGR.. */
 #endif
 
 #ifndef V4L2_PIX_FMT_MJPEG
-#define V4L2_PIX_FMT_MJPEG    v4l2_fourcc('M','J','P','G')    /* Motion-JPEG   */
+#define V4L2_PIX_FMT_MJPEG              v4l2_fourcc('M','J','P','G')    /* Motion-JPEG   */
 #endif
 
 #ifndef V4L2_PIX_FMT_SN9C10X
-#define V4L2_PIX_FMT_SN9C10X v4l2_fourcc('S','9','1','0')    /* SN9C10x compression */
+#define V4L2_PIX_FMT_SN9C10X            v4l2_fourcc('S','9','1','0')    /* SN9C10x compression */
 #endif
 
-#define ZC301_V4L2_CID_DAC_MAGN     V4L2_CID_PRIVATE_BASE
-#define ZC301_V4L2_CID_GREEN_BALANCE     (V4L2_CID_PRIVATE_BASE+1)
+#define ZC301_V4L2_CID_DAC_MAGN         V4L2_CID_PRIVATE_BASE
+#define ZC301_V4L2_CID_GREEN_BALANCE    (V4L2_CID_PRIVATE_BASE+1)
 
 static const u32 queried_ctrls[] = {
     V4L2_CID_BRIGHTNESS,
@@ -102,7 +102,6 @@ static const u32 queried_ctrls[] = {
 };
 
 typedef struct {
-
     int fd;
     char map;
     u32 fps;
@@ -134,7 +133,6 @@ static int xioctl(int fd, int request, void *arg)
 
 static int v4l2_get_capability(src_v4l2_t * s)
 {
-
     if (xioctl(s->fd, VIDIOC_QUERYCAP, &s->cap) < 0) {
         motion_log(LOG_ERR, 0, "Not a V4L2 device?");
         return -1;
@@ -147,26 +145,37 @@ static int v4l2_get_capability(src_v4l2_t * s)
 
     if (s->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
         motion_log(LOG_INFO, 0, "- VIDEO_CAPTURE");
+
     if (s->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT)
         motion_log(LOG_INFO, 0, "- VIDEO_OUTPUT");
+
     if (s->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY)
         motion_log(LOG_INFO, 0, "- VIDEO_OVERLAY");
+
     if (s->cap.capabilities & V4L2_CAP_VBI_CAPTURE)
         motion_log(LOG_INFO, 0, "- VBI_CAPTURE");
+
     if (s->cap.capabilities & V4L2_CAP_VBI_OUTPUT)
         motion_log(LOG_INFO, 0, "- VBI_OUTPUT");
+
     if (s->cap.capabilities & V4L2_CAP_RDS_CAPTURE)
         motion_log(LOG_INFO, 0, "- RDS_CAPTURE");
+
     if (s->cap.capabilities & V4L2_CAP_TUNER)
         motion_log(LOG_INFO, 0, "- TUNER");
+
     if (s->cap.capabilities & V4L2_CAP_AUDIO)
         motion_log(LOG_INFO, 0, "- AUDIO");
+
     if (s->cap.capabilities & V4L2_CAP_READWRITE)
         motion_log(LOG_INFO, 0, "- READWRITE");
+
     if (s->cap.capabilities & V4L2_CAP_ASYNCIO)
         motion_log(LOG_INFO, 0, "- ASYNCIO");
+
     if (s->cap.capabilities & V4L2_CAP_STREAMING)
         motion_log(LOG_INFO, 0, "- STREAMING");
+
     if (s->cap.capabilities & V4L2_CAP_TIMEPERFRAME)
         motion_log(LOG_INFO, 0, "- TIMEPERFRAME");
 
@@ -190,6 +199,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
     /* Set the input. */
     memset (&input, 0, sizeof (input));
     input.index = in;
+
     if (xioctl(s->fd, VIDIOC_ENUMINPUT, &input) == -1) {
         motion_log(LOG_ERR, 1, "Unable to query input %d VIDIOC_ENUMINPUT", in);
         return -1;
@@ -312,7 +322,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
                     index_format = cnt->conf.v4l2_palette;
                     motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
                                fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24);
-                    i=10;
+                    i = 10;
                     break;
                 }
                 index_format = i;
@@ -640,29 +650,24 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
     s->fps = cnt->conf.frame_limit;
     s->pframe = -1;
 
-    if (v4l2_get_capability(s)) {
+    if (v4l2_get_capability(s)) 
         goto err;
-    }
-
-    if (v4l2_select_input(s, input, norm, freq, tuner_number)) {
+    
+    if (v4l2_select_input(s, input, norm, freq, tuner_number))
         goto err;
-    }
-
-    if (v4l2_set_pix_format(cnt ,s, &width, &height)) {
+    
+    if (v4l2_set_pix_format(cnt ,s, &width, &height))
         goto err;
-    }
-
-    if (v4l2_scan_controls(s)) {
+  
+    if (v4l2_scan_controls(s))
         goto err;
-    }
-
+   
 #if 0
     v4l2_set_fps(s);
 #endif
-    if (v4l2_set_mmap(s)) {
+    if (v4l2_set_mmap(s)) 
         goto err;
-    }
-
+    
     viddev->size_map = 0;
     viddev->v4l_buffers[0] = NULL;
     viddev->v4l_maxbuffer = 1;
@@ -678,9 +683,10 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
 
     return (void *) 1;
 
-      err:
+err:
     if (s)
         free(s);
+
     viddev->v4l2_private = NULL;
     viddev->v4l2 = 0;
     return NULL;
@@ -720,28 +726,29 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
             unsigned int counter = 0;
             if (debug_level > CAMERA_VIDEO)
                 motion_log(LOG_DEBUG, 0, "set_input_skip_frame switch_time=%ld:%ld", 
-                        switchTime.tv_sec, switchTime.tv_usec);
+                           switchTime.tv_sec, switchTime.tv_usec);
 
             /* Avoid hang using the number of mmap buffers */
-            while(counter < s->req.count)
-            {
+            while(counter < s->req.count) {
                 counter++;
                 if (v4l2_next(cnt, viddev, map, width, height))
                     break;
                 
                 if (s->buf.timestamp.tv_sec > switchTime.tv_sec || 
-                   (s->buf.timestamp.tv_sec == switchTime.tv_sec && s->buf.timestamp.tv_usec > switchTime.tv_usec))
+                   (s->buf.timestamp.tv_sec == switchTime.tv_sec && s->buf.timestamp.tv_usec > 
+                    switchTime.tv_usec))
                     break;
 
                 if (debug_level > CAMERA_VIDEO)
                     motion_log(LOG_DEBUG, 0, "got frame before switch timestamp=%ld:%ld", 
-                        s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
+                               s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
             }
         }
 
         /* skip a few frames if needed */
         for (i = 1; i < skip; i++)
             v4l2_next(cnt, viddev, map, width, height);
+
     } else {
         /* No round robin - we only adjust picture controls */
         v4l2_picture_controls(cnt, viddev);
@@ -784,7 +791,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
            driver might dequeue an (empty) buffer despite
            returning an error, or even stop capturing.
         */
-        if (errno == EIO ){
+        if (errno == EIO) {
             s->pframe++; 
             if ((u32)s->pframe >= s->req.count) s->pframe=0;
             s->buf.index = s->pframe;
@@ -870,6 +877,7 @@ void v4l2_cleanup(struct video_dev *viddev)
 
         for (i = 0; i < s->req.count; i++)
             munmap(s->buffers[i].ptr, s->buffers[i].size);
+
         free(s->buffers);
         s->buffers = NULL;
     }
