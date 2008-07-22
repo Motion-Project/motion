@@ -1,7 +1,7 @@
 /*
  *      logger.h
  *
- *      Include file for logger.h 
+ *      Include file for logger.c 
  *
  *      Copyright 2005, William M. Brack 
  *      Copyright 2008 by Angel Carpintero  (ack@telefonica.net)

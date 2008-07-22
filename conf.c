@@ -165,9 +165,9 @@ static void usage(void);
 
 /* Pointer magic to determine relative addresses of variables to a
    struct context pointer */
-#define CNT_OFFSET(varname) ((int)&((struct context *)NULL)->varname)
-#define CONF_OFFSET(varname) ((int)&((struct context *)NULL)->conf.varname) 
-#define TRACK_OFFSET(varname) ((int)&((struct context *)NULL)->track.varname) 
+#define CNT_OFFSET(varname) ((long)&((struct context *)NULL)->varname)
+#define CONF_OFFSET(varname) ((long)&((struct context *)NULL)->conf.varname) 
+#define TRACK_OFFSET(varname) ((long)&((struct context *)NULL)->track.varname) 
 
 config_param config_params[] = {
     {

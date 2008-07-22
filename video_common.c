@@ -23,7 +23,7 @@ typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 
-#define CLAMP(x)  ((x)<0?0:((x)>255)?255:(x))
+#define CLAMP(x)  ((x) < 0 ? 0 : ((x) > 255) ? 255 : (x))
 
 typedef struct {
     int is_abs;
@@ -203,8 +203,10 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
                 /* B */
                 if ((i > width) && ((i % width) > 0)) {
                     *scanpt++ = *rawpt;     /* B */
-                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt + width) + *(rawpt - width)) / 4;    /* G */
-                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + 
+                                *(rawpt + width) + *(rawpt - width)) / 4;    /* G */
+                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + 
+                                *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
                 } else {
                     /* first line or left column */
                     *scanpt++ = *rawpt;     /* B */
@@ -240,8 +242,10 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
             } else {
                 /* R */
                 if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
-                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* B */
-                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + *(rawpt - width) + *(rawpt + width)) / 4;    /* G */
+                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + 
+                                *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* B */
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + 
+                                *(rawpt - width) + *(rawpt + width)) / 4;    /* G */
                     *scanpt++ = *rawpt;     /* R */
                 } else {
                     /* bottom line or right column */

@@ -144,11 +144,11 @@ typedef struct {
 
 extern config_param config_params[];
 
-struct context **conf_load (struct context **);
+struct context **conf_load(struct context **);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
 const char *config_type(config_param *);
-void conf_print (struct context **);
-void malloc_strings (struct context *);
+void conf_print(struct context **);
+void malloc_strings(struct context *);
 char *mystrdup(const char *);
 char *mystrcpy(char *, const char *);
 struct context **copy_string(struct context **, const char *, int);
