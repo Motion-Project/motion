@@ -503,7 +503,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
                          cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr)) == NULL) {
             motion_log(LOG_ERR, 1, "ffopen_open error creating (timelapse) file [%s]", cnt->timelapsefilename);
-            cnt->finish=1;
+            cnt->finish = 1;
             return;
         }
         

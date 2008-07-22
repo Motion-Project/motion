@@ -23,7 +23,7 @@ typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 
-#define CLAMP(x)    ((x)<0?0:((x)>255)?255:(x))
+#define CLAMP(x)  ((x) < 0 ? 0 : ((x) > 255) ? 255 : (x))
 
 typedef struct {
     int is_abs;

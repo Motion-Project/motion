@@ -166,9 +166,9 @@ static void usage(void);
 
 /* Pointer magic to determine relative addresses of variables to a
    struct context pointer */
-#define CNT_OFFSET(varname) ((int)&((struct context *)NULL)->varname)
-#define CONF_OFFSET(varname) ((int)&((struct context *)NULL)->conf.varname) 
-#define TRACK_OFFSET(varname) ((int)&((struct context *)NULL)->track.varname) 
+#define CNT_OFFSET(varname) ((long)&((struct context *)NULL)->varname)
+#define CONF_OFFSET(varname) ((long)&((struct context *)NULL)->conf.varname) 
+#define TRACK_OFFSET(varname) ((long)&((struct context *)NULL)->track.varname) 
 
 config_param config_params[] = {
     {
@@ -1404,7 +1404,7 @@ static void conf_cmdline(struct context *cnt, short int thread)
  * By calling the function pointed to by config_params[i].copy the option gets
  * assigned.
  */
-struct context ** conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
+struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
 {
     unsigned short int i = 0;
 
@@ -1457,7 +1457,7 @@ struct context ** conf_cmdparse(struct context **cnt, const char *cmd, const cha
  * For each option/argument pair the function conf_cmdparse is called which takes
  * care of assigning the value to the option in the config structures.
  */
-static struct context ** conf_process(struct context **cnt, FILE *fp)
+static struct context **conf_process(struct context **cnt, FILE *fp)
 {
     /* process each line from the config file */
     
@@ -1600,7 +1600,7 @@ void conf_print(struct context **cnt)
  *   for each thread cnt[i] so that the command line options overrides any
  *   option given by motion.conf or a thread config file.
  **************************************************************************/
-struct context ** conf_load(struct context **cnt)
+struct context **conf_load(struct context **cnt)
 {
     FILE *fp = NULL;
     char filename[PATH_MAX];
@@ -1658,6 +1658,7 @@ struct context ** conf_load(struct context **cnt)
         fp = fopen (filename, "r");
         free(path);
     }
+
     if (!fp) {     /* specified file does not exist... try default file */
         snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
         fp = fopen(filename, "r");
@@ -1756,19 +1757,20 @@ void malloc_strings(struct context * cnt)
  * by the function. Values 1, yes and on are converted to 1 ignoring case.
  * Any other value is converted to 0.
  */
-static struct context ** copy_bool(struct context **cnt, const char *str, int val_ptr)
+static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
 
     i = -1;
     while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
+        tmp = (char *)cnt[i] + (int)val_ptr;
         if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str,"on")) {
             *((int *)tmp) = 1;
         } else {
             *((int *)tmp) = 0;
         }
+
         if (cnt[0]->threadnr)
             return cnt;
     }
@@ -1778,7 +1780,7 @@ static struct context ** copy_bool(struct context **cnt, const char *str, int va
 /* copy_int assigns a config option to a new integer value.
  * The integer is given as a string in str which is converted to integer by the function.
  */
-static struct context ** copy_int(struct context **cnt, const char *str, int val_ptr)
+static struct context **copy_int(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
@@ -1796,7 +1798,7 @@ static struct context ** copy_int(struct context **cnt, const char *str, int val
 /* copy_short assigns a config option to a new short value.
  * The integer is given as a string in str which is converted to short by the function.
  */ 
-static struct context ** copy_short(struct context **cnt, const char *str, int val_ptr)
+static struct context **copy_short(struct context **cnt, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
@@ -1818,7 +1820,7 @@ static struct context ** copy_short(struct context **cnt, const char *str, int v
  * a freshly malloc()'d string with the value from str,
  * or NULL if str is blank
  */
-struct context ** copy_string(struct context **cnt, const char *str, int val_ptr)
+struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 {
     char **tmp;
     int i;
@@ -1857,7 +1859,7 @@ struct context ** copy_string(struct context **cnt, const char *str, int val_ptr
  * when the motion program is terminated normally instead of relying on the
  * OS to clean up.
  */
-char * mystrcpy(char *to, const char *from)
+char *mystrcpy(char *to, const char *from)
 {
     /* free the memory used by the to string, if such memory exists,
      * and return a pointer to a freshly malloc()'d string with the
@@ -1878,7 +1880,7 @@ char * mystrcpy(char *to, const char *from)
  * variable PATH_MAX to ensure that config options can always contain
  * a really long path but no more than that.
  */
-char * mystrdup(const char *from)
+char *mystrdup(const char *from)
 {
     char *tmp;
     int stringlength;
@@ -1902,7 +1904,7 @@ char * mystrdup(const char *from)
     return tmp;
 }
 
-const char * config_type(config_param *configparam)
+const char *config_type(config_param *configparam)
 {
     if (configparam->copy == copy_string)
         return "string";
@@ -1916,7 +1918,7 @@ const char * config_type(config_param *configparam)
     return "unknown";
 }
 
-static const char * print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
                                int parm, unsigned short int threadnr)
 {
     int val = config_params[parm].conf_value;
@@ -1937,7 +1939,7 @@ static const char * print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED
  * option in thread 0. If the value is the same, NULL is returned which means that
  * the option is not written to the thread config file.
  */
-static const char * print_string(struct context **cnt,
+static const char *print_string(struct context **cnt,
                                  char **str ATTRIBUTE_UNUSED, int parm,
                                  unsigned short int threadnr)
 {
@@ -1953,7 +1955,7 @@ static const char * print_string(struct context **cnt,
     return *cptr1;
 }
 
-static const char * print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
                               int parm, unsigned short int threadnr)
 {
     static char retval[20];
@@ -1969,7 +1971,7 @@ static const char * print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 }
 
 
-static const char * print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+static const char *print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
                                 int parm, unsigned short int threadnr) 
 {
     static char retval[20];
@@ -1984,11 +1986,11 @@ static const char * print_short(struct context **cnt, char **str ATTRIBUTE_UNUSE
     return retval;
 }
 
-static const char * print_thread(struct context **cnt, char **str,
+static const char *print_thread(struct context **cnt, char **str,
                                  int parm ATTRIBUTE_UNUSED, unsigned short int threadnr)
 {
     char *retval;
-    unsigned short int i=0;
+    unsigned short int i = 0;
 
     if (!str || threadnr)
         return NULL;
@@ -2014,7 +2016,7 @@ static const char * print_thread(struct context **cnt, char **str,
  * val  - is not used. It is defined to be function header compatible with
  *        copy_int, copy_bool and copy_string.
  */
-static struct context ** config_thread(struct context **cnt, const char *str,
+static struct context **config_thread(struct context **cnt, const char *str,
                                        int val ATTRIBUTE_UNUSED)
 {
     int i;
@@ -2031,7 +2033,7 @@ static struct context ** config_thread(struct context **cnt, const char *str,
     }
 
     /* Find the current number of threads defined. */
-    i=-1;
+    i = -1;
     while (cnt[++i]);
 
     /* Make space for the threads + the terminating NULL pointer

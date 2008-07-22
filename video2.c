@@ -313,8 +313,8 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
         short int i;
 
         motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal,
-               fmt.pixelformat >> 0, fmt.pixelformat >> 8,
-               fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);
+                   fmt.pixelformat >> 0, fmt.pixelformat >> 8,
+                   fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);
 
         for (i = 0; supported_formats[i]; i++)
             if (supported_formats[i] == fmt.pixelformat && i > index_format) {
@@ -570,7 +570,7 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
                 switch (ctrl->type) {
                 case V4L2_CTRL_TYPE_INTEGER:
                     value = control.value =
-                        (value * (ctrl->maximum - ctrl->minimum) / 256) + ctrl->minimum;
+                            (value * (ctrl->maximum - ctrl->minimum) / 256) + ctrl->minimum;
                     ret = xioctl(s->fd, VIDIOC_S_CTRL, &control);
                     break;
 
@@ -586,8 +586,8 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
 
                 if (debug_level > CAMERA_VIDEO)
                     motion_log(LOG_INFO, 0, "setting control \"%s\" to %d (ret %d %s) %s", ctrl->name,
-                        value, ret, ret ? strerror(errno) : "",
-                        ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "Control is DISABLED!" : "");
+                               value, ret, ret ? strerror(errno) : "",
+                               ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "Control is DISABLED!" : "");
 
                 return 0;
             }
@@ -793,7 +793,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         */
         if (errno == EIO) {
             s->pframe++; 
-            if ((u32)s->pframe >= s->req.count) s->pframe=0;
+            if ((u32)s->pframe >= s->req.count) s->pframe = 0;
             s->buf.index = s->pframe;
 
             motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__, s->pframe);

@@ -205,6 +205,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
                         motion_log(LOG_DEBUG, 1, "Failed with RGB24, trying GREYSCALE palette");
                         viddev->v4l_fmt = VIDEO_PALETTE_GREY;
                         vid_mmap.format = viddev->v4l_fmt;
+
                         /* Try one last time... */
                         if (ioctl(dev, VIDIOCMCAPTURE, &vid_mmap) == -1) {
                             motion_log(LOG_ERR, 1, "Failed with all supported palettes "
@@ -267,7 +268,7 @@ int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int height
     struct video_mmap vid_mmap;
     unsigned char *cap_map;
 
-    sigset_t  set, old;
+    sigset_t set, old;
 
     /* MMAP method is used */
     vid_mmap.format = viddev->v4l_fmt;
@@ -535,12 +536,11 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
     struct video_picture vid_pic;
     struct video_window vid_win;
 
-    if (!strcmp(dev_name, "-")) {
+    if (!strcmp(dev_name, "-"))
         dev = v4l_open_vidpipe();
-    } else {
+    else
         dev = open(dev_name, O_RDWR);
-    }
-
+    
     if (dev < 0)
         return -1;
 
@@ -549,7 +549,7 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
         return -1;
     }
 
-    vid_pic.palette=type;
+    vid_pic.palette = type;
 
     if (ioctl(dev, VIDIOCSPICT, &vid_pic) == -1) {
         motion_log(LOG_ERR, 1, "ioctl (VIDIOCSPICT)");
