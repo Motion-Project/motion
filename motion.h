@@ -18,7 +18,6 @@
 #endif
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #define __USE_GNU
 #include <string.h>
@@ -35,6 +34,7 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
+#include <stdint.h>
 
 #define _LINUX_TIME_H 1
 #if (!defined(WITHOUT_V4L)) && (!defined(BSD))

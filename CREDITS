@@ -398,6 +398,8 @@ Angel Carpintero
    * Fix a security issue in web control interface http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484572
    * Fix Problem Encoding 1280x1024 resolution videos
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727
+   * Remove mjpegtools dependencies and integrate only needed functions from library.
+   * Fix rotate for v4l2 devices using JPEG / MJPEG palettes.
 
  
 Jared D
