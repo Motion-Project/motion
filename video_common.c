@@ -12,12 +12,7 @@
 /* for rotation */
 #include "rotate.h"    /* already includes motion.h */
 #include "video.h"
-
-#ifdef MJPEGT 
-#include <mjpegtools/jpegutils.h>
-#include <mjpegtools/mjpeg_types.h>
-#endif
-
+#include "jpegutils.h"
 
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
@@ -396,19 +391,34 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff *buff,
     return netcam_proc_jpeg(&netcam, dst);
 }
 
-#ifdef MJPEGT 
-void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
+
+/*
+ * mjpegtoyuv420p
+ *
+ * Return values
+ *  -1 on fatal error
+ *  0  on success
+ *  2  if jpeg lib threw a "corrupt jpeg data" warning.  
+ *     in this case, "a damaged output image is likely."
+ */
+
+int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
 {
     uint8_t *yuv[3];
     unsigned char *y, *u, *v;
-    int loop;
+    int loop, ret;
 
     yuv[0] = mymalloc(width * height * sizeof(yuv[0][0]));
     yuv[1] = mymalloc(width * height / 4 * sizeof(yuv[1][0]));
     yuv[2] = mymalloc(width * height / 4 * sizeof(yuv[2][0]));
 
 
-    decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
+    ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
+
+    if (ret == 1) {
+        motion_log(LOG_ERR, 0, "%s: Corrupt image ... continue", __FUNCTION__);
+        ret = 2;
+    }
 
     y = map;
     u = y + width * height;
@@ -429,8 +439,9 @@ void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int h
     free(yuv[0]);
     free(yuv[1]);
     free(yuv[2]);
+
+    return ret;
 }
-#endif
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))

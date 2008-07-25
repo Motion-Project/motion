@@ -835,14 +835,14 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
             memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);
             return 0;
 
+        case V4L2_PIX_FMT_JPEG:            
         case V4L2_PIX_FMT_MJPEG:
-#ifdef MJPEGT
-            mjpegtoyuv420p(map, (unsigned char *) the_buffer->ptr, width, height, s->buffers[s->buf.index].content_length);
-            return 0;
-#endif
+            return mjpegtoyuv420p(map, (unsigned char *) the_buffer->ptr, width, height, 
+                                  s->buffers[s->buf.index].content_length);
+/*            return 0;
         case V4L2_PIX_FMT_JPEG:
             return conv_jpeg2yuv420(cnt, map, the_buffer, width, height);
-
+*/
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
             bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *) the_buffer->ptr, width, height);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);

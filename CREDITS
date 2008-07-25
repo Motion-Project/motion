@@ -403,6 +403,8 @@ Angel Carpintero
    * Add write/read nonblock functions in webhttpd( timeout on read/write).
    * Add a new parameter netcam_broken, to be less strict with some buggy network cameras firmwares.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218
+   * Remove mjpegtools dependencies and integrate only needed functions from library.  
+   * Fix rotate for v4l2 devices using JPEG / MJPEG palettes.
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

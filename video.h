@@ -83,9 +83,7 @@ int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff
 int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int height);
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
-#ifdef MJPEGT 
-void mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size);
-#endif
+int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size);
 
 #ifndef WITHOUT_V4L
 /* video functions, video.c */

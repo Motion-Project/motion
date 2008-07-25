@@ -12,6 +12,7 @@ Features
    * More changes in option names from http://www.lavrsen.dk/twiki/bin/view/Motion/IntuitiveOptionNamesDiscussion
      (Angel Carpintero)
    * motion_locate new parameter names : red , center , redcross  instead of only on, off. (Angel Carpintero)
+   * Remove mjpegtools dependencies and integrate only needed functions from library. (Angel Carpintero)
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos
@@ -19,6 +20,8 @@ Bugfixes
    * Add a new parameter netcam_broken, to be less strict with some buggy network cameras firmwares.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
    * Fix round robin in BSD switching to METEOR_CAP_SINGLE. (Angel Carpintero) 
+   * Fix rotate for v4l2 devices using JPEG / MJPEG palettes. (Angel Carpintero)
+
 
 3.2.10.1 Summary of Changes
 
