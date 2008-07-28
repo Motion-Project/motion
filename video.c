@@ -110,7 +110,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
 
     if (ioctl (dev, VIDIOCGCAP, &vid_caps) == -1) {
         motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCGCAP)", __FUNCTION__);
-        return (NULL);
+        return NULL;
     }
 
     if (vid_caps.type & VID_TYPE_MONOCHROME)
@@ -127,7 +127,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
             vid_chnl.norm    = norm;
             if (ioctl (dev, VIDIOCSCHAN, &vid_chnl) == -1) {
                 motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCSCHAN)", __FUNCTION__);
-                return (NULL);
+                return NULL;
             }
         }
     }
@@ -146,7 +146,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
 
             if (ioctl(dev, VIDIOCSFREQ, &freq) == -1) {
                 motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCSFREQ)", __FUNCTION__);
-                return (NULL);
+                return NULL;
             }
 
             if (debug_level >= CAMERA_VERBOSE)
@@ -173,7 +173,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
 
         if (MAP_FAILED == map) {
             motion_log(LOG_ERR, 1, "%s: MAP_FAILED", __FUNCTION__);
-            return (NULL);
+            return NULL;
         }
 
         viddev->v4l_curbuffer = 0;
@@ -206,11 +206,12 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
                                    "GREYSCALE palette", __FUNCTION__);
                         viddev->v4l_fmt = VIDEO_PALETTE_GREY;
                         vid_mmap.format = viddev->v4l_fmt;
+
                         /* Try one last time... */
                         if (ioctl(dev, VIDIOCMCAPTURE, &vid_mmap) == -1) {
                             motion_log(LOG_ERR, 1, "%s: Failed with all supported palettes "
                                            "- giving up", __FUNCTION__);
-                            return (NULL);
+                            return NULL;
                         }
                     }
                 }
@@ -549,23 +550,23 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
     }
 
     if (dev < 0)
-        return(-1);
+        return -1;
 
     if (ioctl(dev, VIDIOCGPICT, &vid_pic) == -1) {
         motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCGPICT)", __FUNCTION__);
-        return(-1);
+        return -1;
     }
 
     vid_pic.palette = type;
 
     if (ioctl(dev, VIDIOCSPICT, &vid_pic) == -1) {
         motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCSPICT)", __FUNCTION__);
-        return(-1);
+        return -1;
     }
 
     if (ioctl(dev, VIDIOCGWIN, &vid_win) == -1) {
         motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCGWIN)", __FUNCTION__);
-        return(-1);
+        return -1;
     }
 
     vid_win.height = height;
@@ -573,7 +574,7 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
 
     if (ioctl(dev, VIDIOCSWIN, &vid_win) == -1) {
         motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCSWIN)", __FUNCTION__);
-        return(-1);
+        return -1;
     }
 
     return dev;

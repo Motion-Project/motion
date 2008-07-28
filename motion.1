@@ -55,26 +55,6 @@ Values: 0 - 255 / Default: 0 (disabled)
 .br
 The contrast level for the video device.
 .TP
-.B webcontrol_authentication string
-Values: Max 4096 characters / Default: Not defined
-.br
-To protect HTTP Control by username and password, use this option for HTTP 1.1 Basic authentication. The string is specified as username:password. Do not specify this option for no authentication. This option must be placed in motion.conf and not in a thread config file.
-.TP
-.B webcontrol_html_output boolean
-Values: on, off / Default: on
-.br
-Enable HTML in the answer sent back to a browser connecting to the webcontrol_port. This option must be placed in motion.conf and not in a thread config file.
-.TP
-.B webcontrol_localhost boolean
-Values: on, off / Default: on
-.br
-Limits the webcontrol to the localhost. This option must be placed in motion.conf and not in a thread config file.
-.TP
-.B webcontrol_port integer
-Values: 0 - 65535 / Default: 0 (disabled)
-.br
-Sets the port number for the http (html using browser) based remote webcontrol. This option must be placed in motion.conf and not in a thread config file.
-.TP
 .B daemon boolean
 Values: on, off / Default: off
 .br
@@ -114,6 +94,25 @@ The database user name.
 Values: EedDl / Default: Not defined
 .br
 Despeckle motion image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
+.TP
+.B emulate_motion boolean
+Values: on, off / Default: off
+.br
+Picture are saved continuously as if motion was detected all the time.
+.TP
+.B event_gap integer
+Values: 0 - 2147483647 / Default: 60
+.br
+Event Gap is the seconds of no motion detection that triggers the end of an event. An event is defined as a series of motion images taken   within a short timeframe.
+.TP
+.B extpipe string
+Values: Max 4095 characters / Default: Not defined
+.br
+pipe raw video to generally - 'STDIN', allowing to use an external video encoder.
+.br
+i.ex with memcoder :
+.br
+extpipe mencoder -demuxer rawvideo -rawvideo w=320:h=240:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:     threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
 .TP
 .B ffmpeg_bps integer
 Values: 0 - 9999999 / Default: 400000
@@ -164,11 +163,6 @@ Maximum number of frames to be captured from the camera per second.
 Values: 0 - 999999 / Default: 0 (Not set)
 .br
 The frequency to set the tuner to (kHz). Valid range: per tuner spec, default: 0 (Don't set it)
-.TP
-.B event_gap integer
-Values: 0 - 2147483647 / Default: 60
-.br
-Event Gap is the seconds of no motion detection that triggers the end of an event. An event is defined as a series of motion images taken within a short timeframe.
 .TP
 .B height integer
 Values: Device Dependent / Default: 288
@@ -304,11 +298,6 @@ Command to be executed when a movie is created. You can use Conversion Specifier
 Values: Max 4095 characters / Default: Not defined
 .br
 Command to be executed when an image is saved. You can use Conversion Specifiers and spaces as part of the command. Use %f for passing filename (with full path) to the command.
-.TP
-.B emulate_motion boolean
-Values: on, off / Default: off
-.br
-Picture are saved continuously as if motion was detected all the time.
 .TP
 .B output_debug_pictures boolean
 Values: on, off / Default: off
@@ -545,6 +534,11 @@ Values: Max 4095 characters / Default: /dev/tuner0
 .br
 The tuner device used for controlling the tuner in a tuner card. This option is only used when Motion is compiled for FreeBSD.
 .TP
+.B use_extpipe boolean
+Values: on, off / Default: off
+.br
+Enables extpipe to use an external video encoder feeding with YUV420 using a pipe .
+.TP
 .B v4l2_palette discrete strings 
 Values: 0 - 8 / Default: 8
 .br
@@ -589,6 +583,27 @@ TCP port on which motion will listen for incoming connects with its stream serve
 Values: 1 - 100 / Default: 50
 .br
 Quality setting in percent for the mjpeg picture frames transferred over the stream connection. Keep it low to restrict needed bandwidth.
+.TP
+.B webcontrol_authentication string
+Values: Max 4096 characters / Default: Not defined
+.br
+To protect HTTP Control by username and password, use this option for HTTP 1.1 Basic authentication. The string is specified as username:   password. Do not specify this option for no authentication. This option must be placed in motion.conf and not in a thread config file.
+.TP
+.B webcontrol_html_output boolean
+Values: on, off / Default: on
+.br
+Enable HTML in the answer sent back to a browser connecting to the webcontrol_port. This option must be placed in motion.conf and not in a  thread config file.
+.TP
+.B webcontrol_localhost boolean
+Values: on, off / Default: on
+.br
+Limits the webcontrol to the localhost. This option must be placed in motion.conf and not in a thread config file.
+.TP
+.B webcontrol_port integer
+Values: 0 - 65535 / Default: 0 (disabled)
+.br
+Sets the port number for the http (html using browser) based remote webcontrol. This option must be placed in motion.conf and not in a thread config file.
+
 .TP
 .B width integer
 Values: Device Dependent / Default: 352

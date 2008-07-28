@@ -18,13 +18,15 @@
 
 
 /* Debug levels */
-#define CAMERA_WARNINGS         3   /* warnings only */
-#define TRACK_DEBUG             4   /* track debug */
-#define CAMERA_INFO             5   /* info debug */
+#define CAMERA_ALERT            1   /* alerts only             */
+#define CAMERA_CRITICAL         2   /* critical only           */
+#define CAMERA_WARNINGS         3   /* warnings only           */
+#define TRACK_DEBUG             4   /* track debug             */
+#define CAMERA_INFO             5   /* info debug              */
 #define CAMERA_VIDEO            6   /* debug video not verbose */
-#define CAMERA_DEBUG            7   /* debug but not verbose */
-#define CAMERA_VERBOSE          8   /* verbose level */
-#define CAMERA_ALL              9   /* everything */
+#define CAMERA_DEBUG            7   /* debug but not verbose   */
+#define CAMERA_VERBOSE          8   /* verbose level           */
+#define CAMERA_ALL              9   /* everything              */
 
 void motion_log(int, int, const char *, ...);
 

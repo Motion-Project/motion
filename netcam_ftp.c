@@ -91,33 +91,33 @@ static int ftp_parse_response(char *buf, int len) {
     int val = 0;
 
     if (len < 3)
-        return(-1);
+        return -1;
 
     if ((*buf >= '0') && (*buf <= '9'))
         val = val * 10 + (*buf - '0');
     else
-        return(0);
+        return 0;
 
     buf++;
 
     if ((*buf >= '0') && (*buf <= '9'))
         val = val * 10 + (*buf - '0');
     else
-        return(0);
+        return 0;
 
     buf++;
 
     if ((*buf >= '0') && (*buf <= '9'))
         val = val * 10 + (*buf - '0');
     else
-        return(0);
+        return 0;
 
     buf++;
 
     if (*buf == '-')
-        return(-val);
+        return -val;
 
-    return(val);
+    return val;
 }
 
 /**
@@ -137,16 +137,16 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
 
     /* Validate that our context structure is valid */
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     if ((ctxt->control_buffer_index < 0) || (ctxt->control_buffer_index > FTP_BUF_SIZE))
-        return(-1);
+        return -1;
 
     if ((ctxt->control_buffer_used < 0) || (ctxt->control_buffer_used > FTP_BUF_SIZE))
-        return(-1);
+        return -1;
 
     if (ctxt->control_buffer_index > ctxt->control_buffer_used)
-        return(-1);
+        return -1;
 
     /*
     * First pack the control buffer
@@ -162,7 +162,7 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
     size = FTP_BUF_SIZE - ctxt->control_buffer_used;
 
     if (size == 0) 
-        return(0);
+        return 0;
     
     /*
     * Read the amount left on the control connection
@@ -172,13 +172,13 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
         motion_log(LOG_ERR, 1, "%s: recv failed in ftp_get_more", __FUNCTION__);
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     ctxt->control_buffer_used += len;
     ctxt->control_buffer[ctxt->control_buffer_used] = 0;
 
-    return(len);
+    return len;
 }
 
 /**
@@ -198,7 +198,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
     int res = -1, cur = -1;
 
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     get_more:
     /*
@@ -206,13 +206,14 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
     * and analyzed.
     */
     len = ftp_get_more(ctxt);
-    if (len < 0) {
-        return(-1);
-    }
 
-    if ((ctxt->control_buffer_used == 0) && (len == 0)) {
-        return(-1);
-    }
+    if (len < 0) 
+        return -1;
+    
+
+    if ((ctxt->control_buffer_used == 0) && (len == 0)) 
+        return -1;
+    
 
     ptr = &ctxt->control_buffer[ctxt->control_buffer_index];
     end = &ctxt->control_buffer[ctxt->control_buffer_used];
@@ -228,9 +229,15 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
             res = cur;
             ptr += 3;
             ctxt->control_buffer_answer = ptr - ctxt->control_buffer;
-            while ((ptr < end) && (*ptr != '\n')) ptr++;
-            if (*ptr == '\n') ptr++;
-            if (*ptr == '\r') ptr++;
+            while ((ptr < end) && (*ptr != '\n')) 
+                ptr++;
+
+            if (*ptr == '\n') 
+                ptr++;
+
+            if (*ptr == '\r') 
+                ptr++;
+
             break;
         }
 
@@ -241,6 +248,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
             ctxt->control_buffer_index = ctxt->control_buffer_used;
             goto get_more;
         }
+
         if (*ptr != '\r') 
             ptr++;
     }
@@ -250,7 +258,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
 
     ctxt->control_buffer_index = ptr - ctxt->control_buffer;
 
-    return(res / 100);
+    return (res / 100);
 }
 
 /**
@@ -273,9 +281,9 @@ static int ftp_send_user(ftp_context_pointer ctxt) {
 
     if (res < 0) {
         motion_log(LOG_ERR, 1, "%s: send failed in ftp_send_user", __FUNCTION__);
-        return(res);
+        return res;
     }
-    return(0);
+    return 0;
 }
 
 /**
@@ -298,10 +306,10 @@ static int ftp_send_passwd(ftp_context_pointer ctxt) {
 
     if (res < 0) {
         motion_log(LOG_ERR, 1, "%s: send failed in ftp_send_passwd", __FUNCTION__);
-        return(res);
+        return res;
     }
 
-    return(0);
+    return 0;
 }
 
 /**
@@ -322,7 +330,7 @@ static int ftp_quit(ftp_context_pointer ctxt) {
     int len, res;
 
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     snprintf(buf, sizeof(buf), "QUIT\r\n");
     len = strlen(buf);
@@ -330,10 +338,10 @@ static int ftp_quit(ftp_context_pointer ctxt) {
 
     if (res < 0) {
         motion_log(LOG_ERR, 1, "%s: send failed in ftp_quit", __FUNCTION__);
-        return(res);
+        return res;
     }
 
-    return(0);
+    return 0;
 }
 
 /**
@@ -361,10 +369,10 @@ int ftp_connect(netcam_context_ptr netcam) {
     ctxt = netcam->ftp;
 
     if (ctxt == NULL)
-        return(-1);
+        return -1;
 
     if (netcam->connect_host == NULL)
-        return(-1);
+        return -1;
 
     /*
     * do the blocking DNS query.
@@ -380,14 +388,14 @@ int ftp_connect(netcam_context_ptr netcam) {
 
     if (hp == NULL) {
         motion_log(LOG_ERR, 1, "%s: gethostbyname failed in ftp_connect", __FUNCTION__);
-        return (-1);
+        return -1;
     }
 
     if ((unsigned int) hp->h_length > 
          sizeof(((struct sockaddr_in *)&ctxt->ftp_address)->sin_addr)) {
         motion_log(LOG_ERR, 1, "%s: gethostbyname address mismatch "
                    "in ftp_connect", __FUNCTION__);
-        return (-1);
+        return -1;
     }
 
     /*
@@ -401,7 +409,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 
     if (ctxt->control_file_desc < 0) {
         motion_log(LOG_ERR, 1, "%s: socket failed", __FUNCTION__);
-        return(-1);
+        return -1;
     }
 
     /*
@@ -412,7 +420,7 @@ int ftp_connect(netcam_context_ptr netcam) {
         motion_log(LOG_ERR, 1, "%s: Failed to create a connection", __FUNCTION__);
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     /*
@@ -423,7 +431,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     if (res != 2) {
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     /*
@@ -434,14 +442,14 @@ int ftp_connect(netcam_context_ptr netcam) {
     if (res < 0) {
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     res = ftp_get_response(ctxt);
 
     switch (res) {
     case 2:
-        return(0);
+        return 0;
     case 3:
         break;
     case 1:
@@ -451,7 +459,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     default:
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     res = ftp_send_passwd(ctxt);
@@ -459,7 +467,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     if (res < 0) {
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     res = ftp_get_response(ctxt);
@@ -476,10 +484,10 @@ int ftp_connect(netcam_context_ptr netcam) {
         close(ctxt->control_file_desc); 
         ctxt->control_file_desc = -1;
         ctxt->control_file_desc = -1;
-        return(-1);
+        return-1;
     }
 
-    return(0);
+    return 0;
 }
 
 /**
@@ -505,7 +513,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
     unsigned int data_address_length;
 
     if (ctxt == NULL)
-    return(-1);
+    return -1;
 
     /* set up a socket for our data address */
     if (ctxt->data_file_desc != -1)
@@ -516,7 +524,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 
     if (ctxt->data_file_desc < 0) {
         motion_log(LOG_ERR, 1, "%s: socket failed", __FUNCTION__);
-        return (-1);
+        return -1;
     }
 
     on = 1;
@@ -540,7 +548,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
             motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_connection", __FUNCTION__);
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
-            return(res);
+            return res;
         }
         /* check server's answer */
         res = ftp_get_response(ctxt);
@@ -549,7 +557,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
             if (res == 5) {
                 close(ctxt->data_file_desc);
                 ctxt->data_file_desc = -1;
-                return(-1);
+                return -1;
             } else {
                 /*
                 * retry with an active connection
@@ -565,14 +573,14 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
         while (((*cur < '0') || (*cur > '9')) && *cur != '\0')
             cur++;
 
-        if (sscanf (cur, "%u,%u,%u,%u,%u,%u", &temp[0], &temp[1], &temp[2],
+        if (sscanf(cur, "%u,%u,%u,%u,%u,%u", &temp[0], &temp[1], &temp[2],
             &temp[3], &temp[4], &temp[5]) != 6) {
             motion_log(LOG_ERR, 0, "%s: Invalid answer to PASV", __FUNCTION__);
             if (ctxt->data_file_desc != -1) {
                 close (ctxt->data_file_desc);
                 ctxt->data_file_desc = -1;
             }
-            return (-1);
+            return -1;
         }
 
         for (i = 0; i < 6; i++)
@@ -587,7 +595,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
             motion_log(LOG_ERR, 1, "%s: Failed to create a data connection", __FUNCTION__);
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
-            return (-1);
+            return -1;
         }
     } else {
         /*
@@ -606,7 +614,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
             motion_log(LOG_ERR, 1, "%s: bind failed", __FUNCTION__);
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
-            return (-1);
+            return -1;
         }
 
         /* we get the port number by reading back in the sockaddr */
@@ -618,7 +626,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
             motion_log(LOG_ERR, 1, "%s: listen failed", __FUNCTION__);
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
-            return (-1);
+            return -1;
         }
 
         /* now generate the PORT command */
@@ -638,7 +646,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
             motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_connection", __FUNCTION__);
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
-            return(res);
+            return res;
         }
 
         res = ftp_get_response(ctxt);
@@ -646,11 +654,11 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
         if (res != 2) {
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
-            return(-1);
+            return -1;
         }
     }
 
-    return(ctxt->data_file_desc);
+    return ctxt->data_file_desc;
 }
 
 /**
@@ -671,7 +679,7 @@ static int ftp_close_connection(ftp_context_pointer ctxt) {
     struct timeval tv;
 
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
-        return(-1);
+        return -1;
 
     close(ctxt->data_file_desc);
     ctxt->data_file_desc = -1;
@@ -688,7 +696,7 @@ static int ftp_close_connection(ftp_context_pointer ctxt) {
     if (res < 0) {
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-        return(-1);
+        return -1;
     }
 
     if (res == 0) {             /* timeout */
@@ -700,11 +708,11 @@ static int ftp_close_connection(ftp_context_pointer ctxt) {
         if (res != 2) {            /* should be positive completion (2) */
             close(ctxt->control_file_desc);
             ctxt->control_file_desc = -1;
-            return(-1);
+            return -1;
         }
     }
 
-    return(0);
+    return 0;
 }
 
 /**
@@ -726,13 +734,13 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
     int acfd;
 
     if ((ctxt == NULL) || (ctxt->path == NULL))
-        return(-1);
+        return -1;
 
     /* Set up the data connection */
     ctxt->data_file_desc = ftp_get_connection(ctxt);
 
     if (ctxt->data_file_desc == -1)
-        return(-1);
+        return -1;
 
     /* generate a "retrieve" command for the file */
     snprintf(buf, sizeof(buf), "RETR %s\r\n", ctxt->path);
@@ -746,7 +754,7 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
         motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_socket", __FUNCTION__);
         close(ctxt->data_file_desc);
         ctxt->data_file_desc = -1;
-        return(res);
+        return res;
     }
 
     /* check the answer */
@@ -755,7 +763,7 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
     if (res != 1) {
         close(ctxt->data_file_desc);
         ctxt->data_file_desc = -1;
-        return(-res);
+        return -res;
     }
 
     /*
@@ -778,7 +786,7 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
         ctxt->data_file_desc = acfd;
     }
 
-    return(ctxt->data_file_desc);
+    return ctxt->data_file_desc;
 }
 /**
 * ftp_send_type
@@ -807,7 +815,7 @@ int ftp_send_type(ftp_context_pointer ctxt, char type) {
         motion_log(LOG_ERR, 1, "%s: send failed in ftp_get_socket", __FUNCTION__);
         close(ctxt->data_file_desc);
         ctxt->data_file_desc = -1;
-        return(res);
+        return res;
     }
 
     res = ftp_get_response(ctxt);
@@ -815,7 +823,7 @@ int ftp_send_type(ftp_context_pointer ctxt, char type) {
     if (res != 2) {
         close(ctxt->data_file_desc);
         ctxt->data_file_desc = -1;
-        return(-res);
+        return -res;
     }
 
     return 0;
@@ -838,16 +846,16 @@ int ftp_send_type(ftp_context_pointer ctxt, char type) {
 */
 int ftp_read(ftp_context_pointer ctxt, void *dest, int len) {
     if (ctxt == NULL)
-        return(-1);
+        return -1;
 
     if (ctxt->data_file_desc < 0)
-        return(0);
+        return 0;
 
     if (dest == NULL)
-        return(-1);
+        return -1;
 
     if (len <= 0)
-        return(0);
+        return 0;
 
     len = recv(ctxt->data_file_desc, dest, len, 0);
 
@@ -857,7 +865,7 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len) {
         ftp_close_connection(ctxt);
     }
 
-    return(len);
+    return len;
 }
 
 
@@ -874,7 +882,7 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len) {
 */
 int ftp_close(ftp_context_pointer ctxt) {
     if (ctxt == NULL)
-        return(-1);
+        return -1;
 
     if (ctxt->data_file_desc >= 0) {
         close(ctxt->data_file_desc);
@@ -888,5 +896,5 @@ int ftp_close(ftp_context_pointer ctxt) {
     }
 
     ftp_free_context(ctxt);
-    return(0);
+    return 0;
 }

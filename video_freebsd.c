@@ -631,11 +631,11 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
         if (!freq) {
             motion_log(LOG_ERR, 0, "%s: Not valid Frequency [%lu] for Source input [%i]",
                        __FUNCTION__, freq, input);
-            return (NULL);
+            return NULL;
         } else if (set_freq(viddev, freq) == -1) {
             motion_log(LOG_ERR, 0, "%s: Frequency [%lu] Source input [%i]", 
                        __FUNCTION__, freq, input);
-            return (NULL);
+            return NULL;
         }
     }
     
@@ -643,21 +643,21 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
 
     if ((dummy = set_input(viddev, input)) == -1) {
         motion_log(LOG_ERR, 0, "%s: set input [%d]", __FUNCTION__, input);
-        return (NULL);
+        return NULL;
     }
 
     viddev->input = dummy;
 
     if ((dummy = set_input_format(viddev, norm)) == -1) {
         motion_log(LOG_ERR, 0, "%s: set input format [%d]", __FUNCTION__, norm);
-        return (NULL);
+        return NULL;
     }
 
     viddev->norm = dummy;
 
     if (set_geometry(viddev, width, height) == -1) {
         motion_log(LOG_ERR, 0, "%s: set geometry [%d]x[%d]", __FUNCTION__, width, height);
-        return (NULL);
+        return NULL;
     }
 
     /*
@@ -701,7 +701,7 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
 
     if (map == MAP_FAILED) {
         motion_log(LOG_ERR, 1, "%s: mmap failed", __FUNCTION__);
-        return (NULL);
+        return NULL;
     }
 
     /* FIXME double buffer */ 

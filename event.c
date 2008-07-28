@@ -339,13 +339,6 @@ static void event_camera_lost(struct context *cnt, int type ATTRIBUTE_UNUSED,
         exec_command(cnt, cnt->conf.on_camera_lost, NULL, 0);
 }
 
-#ifdef HAVE_FFMPEG
-static void grey2yuv420p(unsigned char *u, unsigned char *v, int width, int height)
-{
-    memset(u, 128, width * height / 4);
-    memset(v, 128, width * height / 4);
-}
-
 static void on_movie_end_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
                                  unsigned char *dummy ATTRIBUTE_UNUSED, char *filename,
                                  void *arg, struct tm *tm ATTRIBUTE_UNUSED)
@@ -355,6 +348,138 @@ static void on_movie_end_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if ((filetype & FTYPE_MPEG_ANY) && cnt->conf.on_movie_end)
         exec_command(cnt, cnt->conf.on_movie_end, filename, filetype);
 }
+
+static void event_extpipe_end(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *dummy ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
+{
+    if (cnt->extpipe_open) {
+        cnt->extpipe_open = 0;
+        fflush(cnt->extpipe);
+        motion_log(LOG_INFO, 0, "%s: CLOSING: extpipe file desc %d, error state %d", 
+                   __FUNCTION__, fileno(cnt->extpipe), ferror(cnt->extpipe));
+        motion_log(LOG_INFO, 0, "%s: pclose return: %d", __FUNCTION__, pclose(cnt->extpipe));
+        event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
+    }
+}
+
+static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *dummy ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
+{
+    if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
+        char stamp[PATH_MAX] = "";
+        char extpipefilename[PATH_MAX] = "";
+        const char *moviepath;
+        /* conf.mpegpath would normally be defined but if someone deleted it by control interface
+           it is better to revert to the default than fail */
+        if (cnt->conf.moviepath) {
+            moviepath = cnt->conf.moviepath;
+        } else {
+            moviepath = DEF_MOVIEPATH;
+            if (debug_level >= CAMERA_INFO)
+                motion_log(LOG_INFO, 0, "%s: moviepath: %s", __FUNCTION__, moviepath);
+        }
+
+        mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tm, NULL, 0);
+        snprintf(extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
+
+        /* Open a dummy file to check if path is correct */
+        if (myfopen(extpipefilename, "w") == NULL) {
+            if (errno == ENOENT) {
+                /* create path for file ... */
+                if (create_path(extpipefilename) == -1) {
+                    motion_log(LOG_ERR, 1, "%s: error opening file %s",
+                               __FUNCTION__, extpipefilename);          
+                    return ;
+                }
+
+                /* and retry opening the file (use file_proto) */
+                if (myfopen(extpipefilename, "w") == NULL) {
+                    motion_log(LOG_ERR, 1, "%s: error opening file %s",
+                               __FUNCTION__, extpipefilename);
+                    return ;
+                }
+
+                /* Permission denied */
+            } else if (errno ==  EACCES) {
+                motion_log(LOG_ERR, 1, "%s: error opening file %s ... check access "
+                           "rights to target directory", __FUNCTION__, extpipefilename);
+                return ;
+            } else {
+
+            }    
+
+        }            
+                
+        unlink(extpipefilename);
+
+        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tm, extpipefilename, 0);
+
+        if (debug_level >= CAMERA_INFO) {
+            motion_log(LOG_INFO, 0, "%s: pipe: %s", __FUNCTION__, stamp);
+            motion_log(LOG_INFO, 0, "%s: cnt->moviefps: %d", __FUNCTION__, cnt->movie_fps);
+        }
+
+        event(cnt, EVENT_FILECREATE, NULL, extpipefilename, (void *)FTYPE_MPEG, NULL);
+        cnt->extpipe = popen(stamp, "w");
+
+        if (cnt->extpipe == NULL) {
+            motion_log(LOG_ERR, 1, "%s: popen failed", __FUNCTION__);
+            return;
+        }
+
+        setbuf(cnt->extpipe, NULL);
+        cnt->extpipe_open = 1;
+    }
+}
+
+static void event_extpipe_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
+{
+    /* Check use_extpipe enabled and ext_pipe not NULL*/
+    if ((cnt->conf.useextpipe) && (cnt->extpipe != NULL)) {
+        if (debug_level >= CAMERA_DEBUG)
+            motion_log(LOG_INFO, 0, "%s:", __FUNCTION__);
+        /* Check that is open */
+        if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
+            if (!fwrite(img, cnt->imgs.size, 1, cnt->extpipe))
+                motion_log(LOG_ERR, 1, "%s: Error writting in pipe , state error %d",
+                           __FUNCTION__, ferror(cnt->extpipe));
+        } else {    
+            motion_log(LOG_ERR, 0, "%s: pipe %s not created or closed already ", 
+                       __FUNCTION__, cnt->extpipe);
+        }    
+    }        
+}
+
+
+static void event_new_video(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *dummy ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
+{
+    cnt->movie_last_shot = -1;
+
+    cnt->movie_fps = cnt->lastrate;
+
+    if (debug_level >= CAMERA_INFO) 
+        motion_log(LOG_DEBUG, 0, "%s FPS %d", __FUNCTION__, cnt->movie_fps);
+
+    if (cnt->movie_fps > 30) 
+        cnt->movie_fps = 30;
+    else if (cnt->movie_fps < 2) 
+        cnt->movie_fps = 2;
+}
+
+#ifdef HAVE_FFMPEG
+
+static void grey2yuv420p(unsigned char *u, unsigned char *v, int width, int height)
+{
+    memset(u, 128, width * height / 4);
+    memset(v, 128, width * height / 4);
+}
+
 
 static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
@@ -366,21 +491,9 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
     char stamp[PATH_MAX];
     const char *moviepath;
 
-    if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug)
+    if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug) 
         return;
-
-    cnt->movie_last_shot = -1;
-    cnt->movie_fps = cnt->lastrate;
-
-    if (debug_level >= CAMERA_DEBUG) 
-        motion_log(LOG_DEBUG, 0, "%s FPS %d", __FUNCTION__, cnt->movie_fps);
-
-    if (cnt->movie_fps > 30) 
-        cnt->movie_fps = 30;
-    else if (cnt->movie_fps < 2) 
-        cnt->movie_fps = 2;
-        
-
+    
     /* conf.mpegpath would normally be defined but if someone deleted it by control interface
        it is better to revert to the default than fail */
     if (cnt->conf.moviepath)
@@ -413,7 +526,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
              ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr)) == NULL) {
-            motion_log(LOG_ERR, 1, "s%: ffopen_open error creating (new) file [%s]", 
+            motion_log(LOG_ERR, 1, "%s: ffopen_open error creating (new) file [%s]", 
                        __FUNCTION__, cnt->newfilename);
             cnt->finish = 1;
             return;
@@ -620,7 +733,6 @@ struct event_handlers event_handlers[] = {
     EVENT_FILECREATE,
     event_newfile
     },
-
     {
     EVENT_MOTION,
     event_beep
@@ -665,6 +777,10 @@ struct event_handlers event_handlers[] = {
     EVENT_STREAM,
     event_stream_put
     },
+    {
+    EVENT_FIRSTMOTION,
+    event_new_video
+    },
 #ifdef HAVE_FFMPEG
     {
     EVENT_FIRSTMOTION,
@@ -690,11 +806,27 @@ struct event_handlers event_handlers[] = {
     EVENT_TIMELAPSEEND,
     event_ffmpeg_timelapseend
     },
+#endif /* HAVE_FFMPEG */
     {
     EVENT_FILECLOSE,
     on_movie_end_command
     },
-#endif /* HAVE_FFMPEG */
+    {
+    EVENT_FIRSTMOTION,
+    event_create_extpipe 
+    },
+    {
+    EVENT_IMAGE_DETECTED,
+    event_extpipe_put
+    },
+    {
+    EVENT_FFMPEG_PUT,
+    event_extpipe_put
+    },
+    {
+    EVENT_ENDMOTION,
+    event_extpipe_end
+    },
     {
     EVENT_CAMERA_LOST,
     event_camera_lost

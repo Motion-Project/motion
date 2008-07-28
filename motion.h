@@ -100,7 +100,6 @@
 #define VIDEO_PALETTE_COMPONENT 7       /* start of component entries */
 #endif
 
-
 /* Default picture settings */
 #define DEF_WIDTH              352
 #define DEF_HEIGHT             288
@@ -302,6 +301,8 @@ struct rotdata {
     own context
  */
 struct context {
+    FILE *extpipe;
+    int extpipe_open;
     char conf_filename[PATH_MAX];
     int threadnr;
     unsigned short int daemon;
@@ -379,16 +380,17 @@ struct context {
     PGconn *database_pg;
 #endif
 
+    short int movie_fps;
+    char newfilename[PATH_MAX];
+    short int movie_last_shot;
+
 #ifdef HAVE_FFMPEG
     struct ffmpeg *ffmpeg_output;
     struct ffmpeg *ffmpeg_output_debug;
     struct ffmpeg *ffmpeg_timelapse;
     struct ffmpeg *ffmpeg_smartmask;
-    char newfilename[PATH_MAX];
-    char motionfilename[PATH_MAX];
     char timelapsefilename[PATH_MAX];
-    short int movie_fps;
-    short int movie_last_shot;
+    char motionfilename[PATH_MAX];
 #endif
 };
 

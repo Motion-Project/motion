@@ -515,7 +515,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                   cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
                   &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
 
-#ifdef HAVE_FFMPEG
+//#ifdef HAVE_FFMPEG
             /* Check if we must add any "filler" frames into movie to keep up fps */
             if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) {
                 /* movie_last_shoot is -1 when file is created,
@@ -534,7 +534,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                     }
                     /* Check how many frames it was last sec */
                     while ((cnt->movie_last_shot + 1) < cnt->movie_fps) {
-                        /* Add a filler frame into ffmpeg */
+                        /* Add a filler frame into encoder */
                         event(cnt, EVENT_FFMPEG_PUT,
                               cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
                               &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
@@ -552,7 +552,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
              * only when we not are within first sec */
             if (cnt->movie_last_shot >= 0)
                 cnt->movie_last_shot = cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot;
-#endif            
+//#endif            
         }
 
         /* Mark the image as saved */
@@ -2796,7 +2796,13 @@ size_t mystrftime(struct context *cnt, char *s, size_t max, const char *userform
                     ++pos_userformat;
                 break;
 
-            case 'f': // filename
+            case 'f': // filename -- or %fps
+                if ((*(pos_userformat+1) == 'p') && (*(pos_userformat+2) == 's')) {
+                    sprintf(tempstr, "%d", cnt->movie_fps);
+                    pos_userformat += 2;
+                    break;
+                }
+
                 if (filename)
                     snprintf(tempstr, PATH_MAX, "%s", filename);
                 else

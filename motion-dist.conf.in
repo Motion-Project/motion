@@ -289,6 +289,22 @@ ffmpeg_deinterlace off
 
 
 ############################################################
+# External pipe to video encoder
+# Replacement for FFMPEG builtin encoder for ffmpeg_output_movies only.
+# The options movie_filename and timelapse_filename are also used
+# by the ffmpeg feature
+#############################################################
+
+# Bool to enable or disable extpipe (default: off)
+use_extpipe off
+
+# External program (full path and opts) to pipe raw video to
+# Generally, use '-' for STDIN...
+;extpipe mencoder -demuxer rawvideo -rawvideo w=320:h=240:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
+
+
+
+############################################################
 # Snapshots (Traditional Periodic Webcam File Output)
 ############################################################
 

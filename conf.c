@@ -79,6 +79,8 @@ struct config conf_template = {
     post_capture:                   0,
     switchfilter:                   0,
     ffmpeg_output:                  0,
+    extpipe:                        NULL,
+    useextpipe:                     0,
     ffmpeg_output_debug:            0,
     ffmpeg_bps:                     DEF_FFMPEG_BPS,
     ffmpeg_vbr:                     DEF_FFMPEG_VBR,
@@ -717,6 +719,29 @@ config_param config_params[] = {
     print_bool
     },
 #endif /* HAVE_FFMPEG */
+    {
+    "use_extpipe",    
+    "\n############################################################\n"
+    "# External pipe to video encoder\n"    
+    "# Replacement for FFMPEG builtin encoder for ffmpeg_output_movies only.\n"
+    "# The options movie_filename and timelapse_filename are also used\n"
+    "# by the ffmpeg feature\n"
+    "############################################################\n\n"
+    "# Bool to enable or disable extpipe (default: off)",
+    0,
+    CONF_OFFSET(useextpipe),
+    copy_bool,
+    print_bool
+    },
+    {
+    "extpipe",
+    "# External program (full path and opts) to pipe raw video to\n"
+    "# Generally, use '-' for STDIN...",
+    0,
+    CONF_OFFSET(extpipe),
+    copy_string,
+    print_string
+    },
     {
     "snapshot_interval",
     "\n############################################################\n"
