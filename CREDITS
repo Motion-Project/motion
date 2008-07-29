@@ -497,6 +497,10 @@ Andrew Hamilton
      http://www.lavrsen.dk/twiki/bin/view/Motion/LosslessEncoding 
    * Added mov , Quicktime file format (Andrew Hamilton).
 
+Gerrit Hannaert
+
+   * Fix v4l2_palette http://www.lavrsen.dk/twiki/bin/view/Motion/UvcvideoMjpegPatch
+
 Peter Holik
    * Netcam First Header patch. If an error with jpeg decompression occured at
      connecting to a mjpeg streaming webcam, this patch skips this jpeg and tries

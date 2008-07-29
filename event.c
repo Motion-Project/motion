@@ -407,7 +407,7 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
                            "rights to target directory", __FUNCTION__, extpipefilename);
                 return ;
             } else {
-
+                motion_log(LOG_ERR, 1, "%s: error opening file %s", __FUNCTION__, extpipefilename);
             }    
 
         }            

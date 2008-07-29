@@ -21,7 +21,7 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
    * Fix round robin in BSD switching to METEOR_CAP_SINGLE. (Angel Carpintero) 
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes. (Angel Carpintero)
-
+   * Fix v4l2_palette http://www.lavrsen.dk/twiki/bin/view/Motion/UvcvideoMjpegPatch (Gerrit Hannaert)
 
 3.2.10.1 Summary of Changes
 
