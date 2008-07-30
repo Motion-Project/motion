@@ -335,7 +335,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (!ffmpeg->oc) {
         motion_log(LOG_ERR, 1, "Memory error while allocating output media context");
         ffmpeg_cleanups(ffmpeg);
-        return (NULL);
+        return NULL;
     }
 
     /* Setup output format */
@@ -356,13 +356,13 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
         if (!ffmpeg->video_st) {
             motion_log(LOG_ERR, 1, "av_new_stream - could not alloc stream");
             ffmpeg_cleanups(ffmpeg);
-            return (NULL);
+            return NULL;
         }
     } else {
         /* We did not get a proper video codec. */
         motion_log(LOG_ERR, 0, "Failed to obtain a proper video codec");
         ffmpeg_cleanups(ffmpeg);
-        return (NULL);
+        return NULL;
     }
 
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
@@ -410,7 +410,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (av_set_parameters(ffmpeg->oc, NULL) < 0) {
         motion_log(LOG_ERR, 0, "ffmpeg av_set_parameters error: Invalid output format parameters");
         ffmpeg_cleanups(ffmpeg);
-        return (NULL);
+        return NULL;
     }
 
     /* Dump the format settings.  This shows how the various streams relate to each other */
@@ -423,7 +423,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (!codec) {
         motion_log(LOG_ERR, 1, "Codec not found");
         ffmpeg_cleanups(ffmpeg);
-        return (NULL);
+        return NULL;
     }
     
     /* Set the picture format - need in ffmpeg starting round April-May 2005 */
@@ -438,7 +438,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
         pthread_mutex_unlock(&global_lock);
         motion_log(LOG_ERR, 1, "avcodec_open - could not open codec");
         ffmpeg_cleanups(ffmpeg);
-        return (NULL);
+        return NULL;
     }
 
     /* Release the lock. */
@@ -459,7 +459,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (!ffmpeg->picture) {
         motion_log(LOG_ERR, 1, "avcodec_alloc_frame - could not alloc frame");
         ffmpeg_cleanups(ffmpeg);
-        return (NULL);
+        return NULL;
     }
 
     /* set variable bitrate if requested */
@@ -494,27 +494,26 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
                 /* create path for file (don't use file_proto)... */
                 if (create_path(filename) == -1) {
                     ffmpeg_cleanups(ffmpeg);
-                    return (NULL);
+                    return NULL;
                 }
 
                 /* and retry opening the file (use file_proto) */
                 if (url_fopen(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
                     motion_log(LOG_ERR, 1, "url_fopen - error opening file %s",filename);
                     ffmpeg_cleanups(ffmpeg);
-                    return (NULL);
+                    return NULL;
                 }
                 /* Permission denied */
             } else if (errno ==  EACCES) {
                 motion_log(LOG_ERR, 1,
                            "url_fopen - error opening file %s"
                            " ... check access rights to target directory", filename);
-                /* create path for file... */
                 ffmpeg_cleanups(ffmpeg);
-                return (NULL);
+                return NULL;
             } else {
                 motion_log(LOG_ERR, 1, "Error opening file %s", filename);
                 ffmpeg_cleanups(ffmpeg);
-                return (NULL);
+                return NULL;
             }
         }
     }

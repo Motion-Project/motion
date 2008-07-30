@@ -261,7 +261,7 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
 
     ctxt->control_buffer_index = ptr - ctxt->control_buffer;
 
-    return(res / 100);
+    return (res / 100);
 }
 
 /**
@@ -284,7 +284,7 @@ static int ftp_send_user(ftp_context_pointer ctxt) {
     
     if (res < 0) {
         motion_log(LOG_ERR, 1, "send failed in ftp_send_user");
-        return(res);
+        return res;
     }
 
     return 0;
@@ -310,7 +310,7 @@ static int ftp_send_passwd(ftp_context_pointer ctxt) {
     
     if (res < 0) {
         motion_log(LOG_ERR, 1, "send failed in ftp_send_passwd");
-        return(res);
+        return res;
     }
 
     return 0;
@@ -455,7 +455,7 @@ int ftp_connect(netcam_context_ptr netcam) {
 
     switch (res) {
     case 2:
-        return(0);
+        return 0;
     case 3:
         break;
     case 1:

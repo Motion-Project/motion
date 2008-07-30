@@ -438,7 +438,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
         }
 
         if (debug_level >= CAMERA_DEBUG) 
-            motion_log(LOG_DEBUG, 0, "%s FPS %d",__FUNCTION__, fps);
+            motion_log(LOG_DEBUG, 0, "%s FPS %d", __FUNCTION__, fps);
 
         fps = cnt->lastrate;
 

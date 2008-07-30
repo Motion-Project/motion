@@ -317,7 +317,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
                    fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);
 
         for (i = 0; supported_formats[i]; i++)
-            if (supported_formats[i] == fmt.pixelformat && i > index_format) {
+            if (supported_formats[i] == fmt.pixelformat) {
                 if (cnt->conf.v4l2_palette == i) {
                     index_format = cnt->conf.v4l2_palette;
                     motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
@@ -374,7 +374,8 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
                 struct v4l2_jpegcompression v4l2_jpeg;
 
                 if (xioctl(s->fd, VIDIOC_G_JPEGCOMP, &v4l2_jpeg) == -1) {
-                    motion_log(LOG_ERR, 0, "VIDIOC_G_JPEGCOMP not supported but it should");
+                    motion_log(LOG_ERR, 0, "VIDIOC_G_JPEGCOMP not supported but it should be (does your "
+                               "webcam driver support this ioctl?)");
                 } else {
                     v4l2_jpeg.jpeg_markers |= V4L2_JPEG_MARKER_DHT;
                     if (xioctl(s->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)

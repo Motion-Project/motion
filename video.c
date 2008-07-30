@@ -112,7 +112,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 
     if (ioctl (dev, VIDIOCGCAP, &vid_caps) == -1) {
         motion_log(LOG_ERR, 1, "ioctl (VIDIOCGCAP)");
-        return (NULL);
+        return NULL;
     }
 
     if (vid_caps.type & VID_TYPE_MONOCHROME)
@@ -129,7 +129,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
             vid_chnl.norm    = norm;
             if (ioctl (dev, VIDIOCSCHAN, &vid_chnl) == -1) {
                 motion_log(LOG_ERR, 1, "ioctl (VIDIOCSCHAN)");
-                return (NULL);
+                return NULL;
             }
         }
     }
@@ -148,7 +148,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 
             if (ioctl(dev, VIDIOCSFREQ, &freq) == -1) {
                 motion_log(LOG_ERR, 1, "ioctl (VIDIOCSFREQ)");
-                return (NULL);
+                return NULL;
             }
 
             if (cnt->conf.setup_mode)
@@ -176,7 +176,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
 
         if (MAP_FAILED == map) {
             motion_log(LOG_ERR,1,"MAP_FAILED");
-            return (NULL);
+            return NULL;
         }
 
         viddev->v4l_curbuffer = 0;
@@ -210,7 +210,7 @@ unsigned char *v4l_start(struct context *cnt, struct video_dev *viddev, int widt
                         if (ioctl(dev, VIDIOCMCAPTURE, &vid_mmap) == -1) {
                             motion_log(LOG_ERR, 1, "Failed with all supported palettes "
                                                     "- giving up");
-                            return (NULL);
+                            return NULL;
                         }
                     }
                 }

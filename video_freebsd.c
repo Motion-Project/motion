@@ -673,7 +673,7 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
         set_channelset(viddev);
         set_channel(viddev);
         if (set_freq (viddev, freq) == -1) {
-            return (NULL);
+            return NULL;
         }
     */
     }
@@ -692,7 +692,7 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
 
     if (map == MAP_FAILED){
         motion_log(LOG_ERR, 1, "%s: mmap failed", __FUNCTION__);
-        return (NULL);
+        return NULL;
     }
 
     /* FIXME double buffer */ 
