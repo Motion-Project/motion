@@ -405,6 +405,8 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218
    * Remove mjpegtools dependencies and integrate only needed functions from library.  
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes.
+   * External pipe to allow external video encoders 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Bill Payne, Angel Carpintero)
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -1078,6 +1080,10 @@ Onakra
 
 Mikko Paananen
    * Changed netcam open to use pipes and fixed authentication.
+
+Bill Payne,
+   * External pipe to allow external video encoders 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Angel Carpintero, Bill Payne)
 
 Bowser Pete
    * Add swf codec to video creation.
