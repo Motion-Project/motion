@@ -51,8 +51,8 @@
  */
 
 
-static void jpeg_buffer_src (j_decompress_ptr cinfo, unsigned char *buffer,
-                             long num);
+static void jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer,
+                            long num);
 static void jpeg_buffer_dest(j_compress_ptr cinfo, unsigned char *buffer,
                              long len);
 static void jpeg_skip_ff(j_decompress_ptr cinfo);
@@ -71,9 +71,9 @@ static void jpeg_skip_ff(j_decompress_ptr cinfo);
  * before any data is actually read.
  */
 
-static void init_source(j_decompress_ptr cinfo)
+static void init_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
 {
-   /* no work necessary here */
+    /* no work necessary here */
 }
 
 
@@ -118,7 +118,7 @@ static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
  * after all data has been read.  Often a no-op.
  */
 
-static void term_source(j_decompress_ptr cinfo)
+static void term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
 {
     /* no work necessary here */
 }
@@ -184,7 +184,7 @@ static void jpeg_skip_ff(j_decompress_ptr cinfo)
  * before any data is actually written.
  */
 
-static void init_destination (j_compress_ptr cinfo)
+static void init_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 {
     /* No work necessary here */
 }
@@ -216,7 +216,7 @@ static boolean empty_output_buffer(j_compress_ptr cinfo)
  * for error exit.
  */
 
-static void term_destination(j_compress_ptr cinfo)
+static void term_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 {
     /* no work necessary here */
 }
