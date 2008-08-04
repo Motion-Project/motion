@@ -400,7 +400,7 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727
    * Remove mjpegtools dependencies and integrate only needed functions from library.
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes.
-
+   * Allow change/setup framerate in FreeBSD using pwcbsd.
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
