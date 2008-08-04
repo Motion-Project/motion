@@ -103,7 +103,6 @@ static const u32 queried_ctrls[] = {
 
 typedef struct {
     int fd;
-    char map;
     u32 fps;
 
     struct v4l2_capability cap;
@@ -120,20 +119,20 @@ typedef struct {
 
 } src_v4l2_t;
 
-static int xioctl(int fd, int request, void *arg)
+static int xioctl(int fd, int request, void *arg) 
 {
-    int r;
+    int ret;
 
     do
-        r = ioctl(fd, request, arg);
-    while (-1 == r && EINTR == errno);
+        ret = ioctl(fd, request, arg);
+    while (-1 == ret && EINTR == errno);
 
-    return r;
+    return ret;
 }
 
-static int v4l2_get_capability(src_v4l2_t * s)
+static int v4l2_get_capability(src_v4l2_t * vid_source) 
 {
-    if (xioctl(s->fd, VIDIOC_QUERYCAP, &s->cap) < 0) {
+    if (xioctl(vid_source->fd, VIDIOC_QUERYCAP, &vid_source->cap) < 0) {
         motion_log(LOG_ERR, 0, "%s: Not a V4L2 device?", __FUNCTION__);
         return -1;
     }
@@ -142,34 +141,35 @@ static int v4l2_get_capability(src_v4l2_t * s)
                "cap.card: \"%s\"\n"
                "cap.bus_info: \"%s\"\n"
                "cap.capabilities=0x%08X\n------------------------", __FUNCTION__,           
-               s->cap.driver, s->cap.card, s->cap.bus_info, s->cap.capabilities);
+               vid_source->cap.driver, vid_source->cap.card, vid_source->cap.bus_info, 
+               vid_source->cap.capabilities);
 
-    if (s->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
+    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
         motion_log(LOG_INFO, 0, "- VIDEO_CAPTURE");
-    if (s->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT)
+    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT)
         motion_log(LOG_INFO, 0, "- VIDEO_OUTPUT");
-    if (s->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY)
+    if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY)
         motion_log(LOG_INFO, 0, "- VIDEO_OVERLAY");
-    if (s->cap.capabilities & V4L2_CAP_VBI_CAPTURE)
+    if (vid_source->cap.capabilities & V4L2_CAP_VBI_CAPTURE)
         motion_log(LOG_INFO, 0, "- VBI_CAPTURE");
-    if (s->cap.capabilities & V4L2_CAP_VBI_OUTPUT)
+    if (vid_source->cap.capabilities & V4L2_CAP_VBI_OUTPUT)
         motion_log(LOG_INFO, 0, "- VBI_OUTPUT");
-    if (s->cap.capabilities & V4L2_CAP_RDS_CAPTURE)
+    if (vid_source->cap.capabilities & V4L2_CAP_RDS_CAPTURE)
         motion_log(LOG_INFO, 0, "- RDS_CAPTURE");
-    if (s->cap.capabilities & V4L2_CAP_TUNER)
+    if (vid_source->cap.capabilities & V4L2_CAP_TUNER)
         motion_log(LOG_INFO, 0, "- TUNER");
-    if (s->cap.capabilities & V4L2_CAP_AUDIO)
+    if (vid_source->cap.capabilities & V4L2_CAP_AUDIO)
         motion_log(LOG_INFO, 0, "- AUDIO");
-    if (s->cap.capabilities & V4L2_CAP_READWRITE)
+    if (vid_source->cap.capabilities & V4L2_CAP_READWRITE)
         motion_log(LOG_INFO, 0, "- READWRITE");
-    if (s->cap.capabilities & V4L2_CAP_ASYNCIO)
+    if (vid_source->cap.capabilities & V4L2_CAP_ASYNCIO)
         motion_log(LOG_INFO, 0, "- ASYNCIO");
-    if (s->cap.capabilities & V4L2_CAP_STREAMING)
+    if (vid_source->cap.capabilities & V4L2_CAP_STREAMING)
         motion_log(LOG_INFO, 0, "- STREAMING");
-    if (s->cap.capabilities & V4L2_CAP_TIMEPERFRAME)
+    if (vid_source->cap.capabilities & V4L2_CAP_TIMEPERFRAME)
         motion_log(LOG_INFO, 0, "- TIMEPERFRAME");
 
-    if (!s->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
+    if (!vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
         motion_log(LOG_ERR, 0, "%s: Device does not support capturing.", __FUNCTION__);
         return -1;
     }
@@ -177,7 +177,8 @@ static int v4l2_get_capability(src_v4l2_t * s)
     return 0;
 }
 
-static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long freq_, int tuner_number ATTRIBUTE_UNUSED)
+static int v4l2_select_input(src_v4l2_t * vid_source, int in, int norm, unsigned long freq_, 
+                             int tuner_number ATTRIBUTE_UNUSED)
 {
     struct v4l2_input input;
     struct v4l2_standard standard;
@@ -190,7 +191,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
     memset (&input, 0, sizeof (input));
     input.index = in;
 
-    if (xioctl(s->fd, VIDIOC_ENUMINPUT, &input) == -1) {
+    if (xioctl(vid_source->fd, VIDIOC_ENUMINPUT, &input) == -1) {
         motion_log(LOG_ERR, 1, "%s: Unable to query input %d. VIDIOC_ENUMINPUT", 
                    __FUNCTION__, in);
         return -1;
@@ -206,14 +207,14 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
     if ((input.type & V4L2_INPUT_TYPE_CAMERA) && (debug_level >= CAMERA_VIDEO)) 
         motion_log(LOG_INFO, 0, "- CAMERA");
 
-    if (xioctl(s->fd, VIDIOC_S_INPUT, &in) == -1) {
+    if (xioctl(vid_source->fd, VIDIOC_S_INPUT, &in) == -1) {
         motion_log(LOG_ERR, 1, "%s: Error selecting input %d VIDIOC_S_INPUT", 
                    __FUNCTION__, in);
         return -1;
     }
 
     /* Set video standard usually webcams doesn't support the ioctl or return V4L2_STD_UNKNOWN */
-    if (xioctl(s->fd, VIDIOC_G_STD, &std_id) == -1) {
+    if (xioctl(vid_source->fd, VIDIOC_G_STD, &std_id) == -1) {
         if (debug_level >= CAMERA_VIDEO)
             motion_log(LOG_INFO, 0, "%s: Device doesn't support VIDIOC_G_STD", __FUNCTION__);
         std_id = 0;    // V4L2_STD_UNKNOWN = 0
@@ -223,7 +224,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
         memset(&standard, 0, sizeof(standard));
         standard.index = 0;
 
-        while (xioctl(s->fd, VIDIOC_ENUMSTD, &standard) == 0) {
+        while (xioctl(vid_source->fd, VIDIOC_ENUMSTD, &standard) == 0) {
             if ((standard.id & std_id)  && (debug_level >= CAMERA_VIDEO)) 
                 motion_log(LOG_INFO, 0, "- video standard %s", standard.name);
             
@@ -241,7 +242,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
             std_id = V4L2_STD_PAL;
         }
 
-        if (xioctl(s->fd, VIDIOC_S_STD, &std_id) == -1) 
+        if (xioctl(vid_source->fd, VIDIOC_S_STD, &std_id) == -1) 
             motion_log(LOG_ERR, 1, "%s: Error selecting standard method %d VIDIOC_S_STD", 
                        __FUNCTION__, std_id);
         
@@ -257,7 +258,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
         memset(&tuner, 0, sizeof(struct v4l2_tuner));
         tuner.index = input.tuner;
 
-        if (xioctl(s->fd, VIDIOC_G_TUNER, &tuner) == -1) {
+        if (xioctl(vid_source->fd, VIDIOC_G_TUNER, &tuner) == -1) {
             motion_log(LOG_ERR, 1, "%s: turner %d VIDIOC_G_TUNER", __FUNCTION__, tuner.index);    
             return 0;
         }
@@ -268,7 +269,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
         freq.type = V4L2_TUNER_ANALOG_TV;
         freq.frequency = (freq_ / 1000) * 16;
 
-        if (xioctl(s->fd, VIDIOC_S_FREQUENCY, &freq) == -1) {
+        if (xioctl(vid_source->fd, VIDIOC_S_FREQUENCY, &freq) == -1) {
             motion_log(LOG_ERR, 1, "%s: freq %ul VIDIOC_S_FREQUENCY", __FUNCTION__, freq.frequency);
             return 0;
         }
@@ -277,7 +278,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
     return 0;
 }
 
-static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, int *height)
+static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int *width, int *height)
 {
     struct v4l2_fmtdesc fmt;
     short int v4l2_pal;
@@ -303,7 +304,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 
     motion_log(LOG_INFO, 0, "%s: Supported palettes:", __FUNCTION__);
 
-    while (xioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
+    while (xioctl(vid_source->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
         short int i;
 
         motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal, fmt.pixelformat >> 0, 
@@ -334,29 +335,29 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
         
         u32 pixformat = supported_formats[index_format];
 
-        memset(&s->fmt, 0, sizeof(struct v4l2_format));
-        s->fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        s->fmt.fmt.pix.width = *width;
-        s->fmt.fmt.pix.height = *height;
-        s->fmt.fmt.pix.pixelformat = pixformat;
-        s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
+        memset(&vid_source->fmt, 0, sizeof(struct v4l2_format));
+        vid_source->fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        vid_source->fmt.fmt.pix.width = *width;
+        vid_source->fmt.fmt.pix.height = *height;
+        vid_source->fmt.fmt.pix.pixelformat = pixformat;
+        vid_source->fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
-        if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
+        if (xioctl(vid_source->fd, VIDIOC_TRY_FMT, &vid_source->fmt) != -1 && vid_source->fmt.fmt.pix.pixelformat == pixformat) {
             motion_log(LOG_INFO, 0, "%s: index_format %d Test palette %c%c%c%c (%dx%d)", 
                        __FUNCTION__, index_format, pixformat >> 0, pixformat >> 8, 
                        pixformat >> 16, pixformat >> 24, *width, *height);
 
-            if (s->fmt.fmt.pix.width != (unsigned int) *width
-                || s->fmt.fmt.pix.height != (unsigned int) *height) {
+            if (vid_source->fmt.fmt.pix.width != (unsigned int) *width
+                || vid_source->fmt.fmt.pix.height != (unsigned int) *height) {
 
                 motion_log(LOG_INFO, 0, "%s: Adjusting resolution from %ix%i to %ix%i.", 
-                            __FUNCTION__, *width, *height, s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
+                            __FUNCTION__, *width, *height, vid_source->fmt.fmt.pix.width, vid_source->fmt.fmt.pix.height);
 
-                *width = s->fmt.fmt.pix.width;
-                *height = s->fmt.fmt.pix.height;
+                *width = vid_source->fmt.fmt.pix.width;
+                *height = vid_source->fmt.fmt.pix.height;
             }
 
-            if (xioctl(s->fd, VIDIOC_S_FMT, &s->fmt) == -1) {
+            if (xioctl(vid_source->fd, VIDIOC_S_FMT, &vid_source->fmt) == -1) {
                 motion_log(LOG_ERR, 1, "%s: Error setting pixel format.\nVIDIOC_S_FMT: ",
                            __FUNCTION__);
                 return -1;
@@ -364,14 +365,14 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 
             motion_log(LOG_INFO, 0, "%s: Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage "
                        "%d colorspace %08x", __FUNCTION__, pixformat >> 0, pixformat >> 8, 
-                       pixformat >> 16, pixformat >> 24, *width, *height, s->fmt.fmt.pix.bytesperline, 
-                       s->fmt.fmt.pix.sizeimage, s->fmt.fmt.pix.colorspace);
+                       pixformat >> 16, pixformat >> 24, *width, *height, vid_source->fmt.fmt.pix.bytesperline, 
+                       vid_source->fmt.fmt.pix.sizeimage, vid_source->fmt.fmt.pix.colorspace);
 
             /* TODO: Review when it has been tested */
             if (pixformat == V4L2_PIX_FMT_MJPEG) {
                 struct v4l2_jpegcompression v4l2_jpeg;
 
-                if (xioctl(s->fd, VIDIOC_G_JPEGCOMP, &v4l2_jpeg) == -1) {
+                if (xioctl(vid_source->fd, VIDIOC_G_JPEGCOMP, &v4l2_jpeg) == -1) {
                     motion_log(LOG_ERR, 1, "%s: VIDIOC_G_JPEGCOMP not supported but it should be " 
                                "(does your webcam driver support this ioctl?)", __FUNCTION__);
                     // uvcvideo doesn't seem to have this, even SVN version ?!
@@ -379,7 +380,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
                     // kill the thread here?
                 } else {
                     v4l2_jpeg.jpeg_markers |= V4L2_JPEG_MARKER_DHT;
-                    if (xioctl(s->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)
+                    if (xioctl(vid_source->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)
                         motion_log(LOG_ERR, 1, "%s: VIDIOC_S_JPEGCOMP ", 
                                    __FUNCTION__);
                 }
@@ -399,97 +400,96 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
 }
 
 #if 0
-static void v4l2_set_fps(src_v4l2_t * s) {
+static void v4l2_set_fps(src_v4l2_t * vid_source) {
     struct v4l2_streamparm* setfps;
 
     setfps = (struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
     memset(setfps, 0, sizeof(struct v4l2_streamparm));
-    setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    setfps->parm.capture.timeperframe.numerator = 1;
-    setfps->parm.capture.timeperframe.denominator = s->fps;
+    setfpvid_source->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    setfpvid_source->parm.capture.timeperframe.numerator = 1;
+    setfpvid_source->parm.capture.timeperframe.denominator = vid_source->fps;
 
-    if (xioctl(s->fd, VIDIOC_S_PARM, setfps) == -1) 
+    if (xioctl(vid_source->fd, VIDIOC_S_PARM, setfps) == -1) 
         motion_log(LOG_ERR, 1, "%s: v4l2_set_fps VIDIOC_S_PARM", __FUNCTION__);
     
 
 }
 #endif
 
-static int v4l2_set_mmap(src_v4l2_t * s)
+static int v4l2_set_mmap(src_v4l2_t * vid_source)
 {
     enum v4l2_buf_type type;
-    u32 b;
+    u32 buffer_index;
 
     /* Does the device support streaming? */
-    if (!s->cap.capabilities & V4L2_CAP_STREAMING)
+    if (!vid_source->cap.capabilities & V4L2_CAP_STREAMING)
         return -1;
 
-    memset(&s->req, 0, sizeof(struct v4l2_requestbuffers));
+    memset(&vid_source->req, 0, sizeof(struct v4l2_requestbuffers));
 
-    s->req.count = MMAP_BUFFERS;
-    s->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    s->req.memory = V4L2_MEMORY_MMAP;
+    vid_source->req.count = MMAP_BUFFERS;
+    vid_source->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vid_source->req.memory = V4L2_MEMORY_MMAP;
 
-    if (xioctl(s->fd, VIDIOC_REQBUFS, &s->req) == -1) {
+    if (xioctl(vid_source->fd, VIDIOC_REQBUFS, &vid_source->req) == -1) {
         motion_log(LOG_ERR, 1, "%s: Error requesting buffers %d for memory map. VIDIOC_REQBUFS",
-                   s->req.count ,__FUNCTION__);
+                   vid_source->req.count ,__FUNCTION__);
         return -1;
     }
 
-    motion_log(LOG_DEBUG, 0, "%s: mmap information: frames=%d", __FUNCTION__, s->req.count);
+    motion_log(LOG_DEBUG, 0, "%s: mmap information: frames=%d", __FUNCTION__, vid_source->req.count);
 
-    if (s->req.count < MIN_MMAP_BUFFERS) {
+    if (vid_source->req.count < MIN_MMAP_BUFFERS) {
         motion_log(LOG_ERR, 1, "%s: Insufficient buffer memory %d < MIN_MMAP_BUFFERS.",
-                   s->req.count, __FUNCTION__);
+                   vid_source->req.count, __FUNCTION__);
         return -1;
     }
 
-    s->buffers = calloc(s->req.count, sizeof(netcam_buff));
+    vid_source->buffers = calloc(vid_source->req.count, sizeof(netcam_buff));
 
-    if (!s->buffers) {
+    if (!vid_source->buffers) {
         motion_log(LOG_ERR, 1, "%s: Out of memory.", __FUNCTION__);
         return -1;
     }
 
-    for (b = 0; b < s->req.count; b++) {
+    for (buffer_index = 0; buffer_index < vid_source->req.count; buffer_index++) {
         struct v4l2_buffer buf;
 
         memset(&buf, 0, sizeof(struct v4l2_buffer));
 
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = b;
+        buf.index = buffer_index;
 
-        if (xioctl(s->fd, VIDIOC_QUERYBUF, &buf) == -1) {
+        if (xioctl(vid_source->fd, VIDIOC_QUERYBUF, &buf) == -1) {
             motion_log(LOG_ERR, 1, "%s: Error querying buffer %i\nVIDIOC_QUERYBUF: ",
-                       __FUNCTION__, b);
-            free(s->buffers);
+                       __FUNCTION__, buffer_index);
+            free(vid_source->buffers);
             return -1;
         }
 
-        s->buffers[b].size = buf.length;
-        s->buffers[b].ptr = mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, s->fd, buf.m.offset);
+        vid_source->buffers[buffer_index].size = buf.length;
+        vid_source->buffers[buffer_index].ptr = mmap(NULL, buf.length, PROT_READ | PROT_WRITE, 
+                                                     MAP_SHARED, vid_source->fd, buf.m.offset);
 
-        if (s->buffers[b].ptr == MAP_FAILED) {
+        if (vid_source->buffers[buffer_index].ptr == MAP_FAILED) {
             motion_log(LOG_ERR, 1, "%s: Error mapping buffer %i nmmap", 
-                       __FUNCTION__, b);
-            free(s->buffers);
+                       __FUNCTION__, buffer_index);
+            free(vid_source->buffers);
             return -1;
         }
 
-        motion_log(LOG_DEBUG, 0, "%s: %i length=%d", __FUNCTION__, b, buf.length);
+        motion_log(LOG_DEBUG, 0, "%s: %i length=%d", __FUNCTION__, buffer_index, buf.length);
     }
 
-    s->map = -1;
+    for (buffer_index = 0; buffer_index < vid_source->req.count; buffer_index++) {
+        memset(&vid_source->buf, 0, sizeof(struct v4l2_buffer));
 
-    for (b = 0; b < s->req.count; b++) {
-        memset(&s->buf, 0, sizeof(struct v4l2_buffer));
+        vid_source->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        vid_source->buf.memory = V4L2_MEMORY_MMAP;
+        vid_source->buf.index = buffer_index;
 
-        s->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        s->buf.memory = V4L2_MEMORY_MMAP;
-        s->buf.index = b;
-
-        if (xioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1) {
+        if (xioctl(vid_source->fd, VIDIOC_QBUF, &vid_source->buf) == -1) {
             motion_log(LOG_ERR, 1, "%s: VIDIOC_QBUF", __FUNCTION__);
             return -1;
         }
@@ -497,7 +497,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (xioctl(s->fd, VIDIOC_STREAMON, &type) == -1) {
+    if (xioctl(vid_source->fd, VIDIOC_STREAMON, &type) == -1) {
         motion_log(LOG_ERR, 1, "%s: Error starting stream. VIDIOC_STREAMON", 
                    __FUNCTION__);
         return -1;
@@ -506,7 +506,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
     return 0;
 }
 
-static int v4l2_scan_controls(src_v4l2_t * s)
+static int v4l2_scan_controls(src_v4l2_t * vid_source)
 {
     int count, i;
     struct v4l2_queryctrl queryctrl;
@@ -515,15 +515,15 @@ static int v4l2_scan_controls(src_v4l2_t * s)
 
     for (i = 0, count = 0; queried_ctrls[i]; i++) {
         queryctrl.id = queried_ctrls[i];
-        if (xioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
+        if (xioctl(vid_source->fd, VIDIOC_QUERYCTRL, &queryctrl))
             continue;
 
         count++;
-        s->ctrl_flags |= 1 << i;
+        vid_source->ctrl_flags |= 1 << i;
     }
 
     if (count) {
-        struct v4l2_queryctrl *ctrl = s->controls = calloc(count, sizeof(struct v4l2_queryctrl));
+        struct v4l2_queryctrl *ctrl = vid_source->controls = calloc(count, sizeof(struct v4l2_queryctrl));
 
         if (!ctrl) {
             motion_log(LOG_ERR, 1, "%s: Insufficient buffer memory.", __FUNCTION__);
@@ -531,11 +531,11 @@ static int v4l2_scan_controls(src_v4l2_t * s)
         }
 
         for (i = 0; queried_ctrls[i]; i++) {
-            if (s->ctrl_flags & (1 << i)) {
+            if (vid_source->ctrl_flags & (1 << i)) {
                 struct v4l2_control control;
 
                 queryctrl.id = queried_ctrls[i];
-                if (xioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
+                if (xioctl(vid_source->fd, VIDIOC_QUERYCTRL, &queryctrl))
                     continue;
 
                 memcpy(ctrl, &queryctrl, sizeof(struct v4l2_queryctrl));
@@ -544,9 +544,9 @@ static int v4l2_scan_controls(src_v4l2_t * s)
                            __FUNCTION__,ctrl->id, ctrl->name, ctrl->minimum, ctrl->maximum,
                            ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "!DISABLED!" : "");
 
-                memset (&control, 0, sizeof (control));
+                memset(&control, 0, sizeof (control));
                 control.id = queried_ctrls[i];
-                xioctl(s->fd, VIDIOC_G_CTRL, &control);
+                xioctl(vid_source->fd, VIDIOC_G_CTRL, &control);
                 motion_log(LOG_INFO, 0, "%s: \t\"%s\", default %d, current %d", __FUNCTION__,
                            ctrl->name, ctrl->default_value, control.value);
 
@@ -558,17 +558,17 @@ static int v4l2_scan_controls(src_v4l2_t * s)
     return 0;
 }
 
-static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
+static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
 {
     int i, count;
 
-    if (!s->controls)
+    if (!vid_source->controls)
         return -1;
 
     for (i = 0, count = 0; queried_ctrls[i]; i++) {
-        if (s->ctrl_flags & (1 << i)) {
+        if (vid_source->ctrl_flags & (1 << i)) {
             if (cid == queried_ctrls[i]) {
-                struct v4l2_queryctrl *ctrl = s->controls + count;
+                struct v4l2_queryctrl *ctrl = vid_source->controls + count;
                 struct v4l2_control control;
                 int ret;
 
@@ -579,12 +579,12 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
                 case V4L2_CTRL_TYPE_INTEGER:
                     value = control.value =
                         (value * (ctrl->maximum - ctrl->minimum) / 256) + ctrl->minimum;
-                    ret = xioctl(s->fd, VIDIOC_S_CTRL, &control);
+                    ret = xioctl(vid_source->fd, VIDIOC_S_CTRL, &control);
                     break;
 
                 case V4L2_CTRL_TYPE_BOOLEAN:
                     value = control.value = value ? 1 : 0;
-                    ret = xioctl(s->fd, VIDIOC_S_CTRL, &control);
+                    ret = xioctl(vid_source->fd, VIDIOC_S_CTRL, &control);
                     break;
 
                 default:
@@ -608,33 +608,33 @@ static int v4l2_set_control(src_v4l2_t * s, u32 cid, int value)
 
 static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
 {
-    src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+    src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
 
     if (cnt->conf.contrast && cnt->conf.contrast != viddev->contrast) {
         viddev->contrast = cnt->conf.contrast;
-        v4l2_set_control(s, V4L2_CID_CONTRAST, viddev->contrast);
+        v4l2_set_control(vid_source, V4L2_CID_CONTRAST, viddev->contrast);
     }
 
     if (cnt->conf.saturation && cnt->conf.saturation != viddev->saturation) {
         viddev->saturation = cnt->conf.saturation;
-        v4l2_set_control(s, V4L2_CID_SATURATION, viddev->saturation);
+        v4l2_set_control(vid_source, V4L2_CID_SATURATION, viddev->saturation);
     }
 
     if (cnt->conf.hue && cnt->conf.hue != viddev->hue) {
         viddev->hue = cnt->conf.hue;
-        v4l2_set_control(s, V4L2_CID_HUE, viddev->hue);
+        v4l2_set_control(vid_source, V4L2_CID_HUE, viddev->hue);
     }
 
     if (cnt->conf.autobright) {
         if (vid_do_autobright(cnt, viddev)) {
-            if (v4l2_set_control(s, V4L2_CID_BRIGHTNESS, viddev->brightness))
-                v4l2_set_control(s, V4L2_CID_GAIN, viddev->brightness);
+            if (v4l2_set_control(vid_source, V4L2_CID_BRIGHTNESS, viddev->brightness))
+                v4l2_set_control(vid_source, V4L2_CID_GAIN, viddev->brightness);
         }
     } else {
         if (cnt->conf.brightness && cnt->conf.brightness != viddev->brightness) {
             viddev->brightness = cnt->conf.brightness;
-            if (v4l2_set_control(s, V4L2_CID_BRIGHTNESS, viddev->brightness))
-                v4l2_set_control(s, V4L2_CID_GAIN, viddev->brightness);
+            if (v4l2_set_control(vid_source, V4L2_CID_BRIGHTNESS, viddev->brightness))
+                v4l2_set_control(vid_source, V4L2_CID_GAIN, viddev->brightness);
         }
     }
 
@@ -645,35 +645,35 @@ static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
 unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int width, int height,
               int input, int norm, unsigned long freq, int tuner_number)
 {
-    src_v4l2_t *s;
+    src_v4l2_t *vid_source;
 
     /* Allocate memory for the state structure. */
-    if (!(s = calloc(sizeof(src_v4l2_t), 1))) {
+    if (!(vid_source = calloc(sizeof(src_v4l2_t), 1))) {
         motion_log(LOG_ERR, 1, "%s: Out of memory.", __FUNCTION__);
         goto err;
     }
 
-    viddev->v4l2_private = s;
-    s->fd = viddev->fd;
-    s->fps = cnt->conf.frame_limit;
-    s->pframe = -1;
+    viddev->v4l2_private = vid_source;
+    vid_source->fd = viddev->fd;
+    vid_source->fps = cnt->conf.frame_limit;
+    vid_source->pframe = -1;
 
-    if (v4l2_get_capability(s)) 
+    if (v4l2_get_capability(vid_source)) 
         goto err;
     
-    if (v4l2_select_input(s, input, norm, freq, tuner_number)) 
+    if (v4l2_select_input(vid_source, input, norm, freq, tuner_number)) 
         goto err;
     
-    if (v4l2_set_pix_format(cnt, s, &width, &height)) 
+    if (v4l2_set_pix_format(cnt, vid_source, &width, &height)) 
         goto err;
     
-    if (v4l2_scan_controls(s)) 
+    if (v4l2_scan_controls(vid_source)) 
         goto err;
 
 #if 0
-    v4l2_set_fps(s);
+    v4l2_set_fps(vid_source);
 #endif
-    if (v4l2_set_mmap(s)) 
+    if (v4l2_set_mmap(vid_source)) 
         goto err;
     
     viddev->size_map = 0;
@@ -692,8 +692,8 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
     return (void *) 1;
 
 err:
-    if (s)
-        free(s);
+    if (vid_source)
+        free(vid_source);
     viddev->v4l2_private = NULL;
     viddev->v4l2 = 0;
     return NULL;
@@ -702,17 +702,20 @@ err:
 void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, 
                     int width, int height, struct config *conf)
 {
-    int i;
     int input = conf->input;
     int norm = conf->norm;
-    int skip = conf->roundrobin_skip;
     unsigned long freq = conf->frequency;
     int tuner_number = conf->tuner_number;
 
     if (input != viddev->input || width != viddev->width || height != viddev->height ||
         freq != viddev->freq || tuner_number != viddev->tuner_number) {
 
+        unsigned int i;    
         struct timeval switchTime;
+        unsigned int skip = conf->roundrobin_skip;
+       
+        if (conf->roundrobin_skip < 0) 
+            skip = 1;
 
         v4l2_select_input((src_v4l2_t *) viddev->v4l2_private, input, norm, freq, tuner_number);
 
@@ -729,7 +732,7 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 
         /* Skip all frames captured before switchtime, capture 1 after switchtime */
         {
-            src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+            src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
             unsigned int counter = 0;
 
             if (debug_level >= CAMERA_VIDEO)
@@ -737,18 +740,20 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
                            __FUNCTION__, switchTime.tv_sec, switchTime.tv_usec);
 
             /* Avoid hang using the number of mmap buffers */
-            while(counter < s->req.count) {
+            while(counter < vid_source->req.count) {
                 counter++;
                 if (v4l2_next(cnt, viddev, map, width, height))
                     break;
 
-                if (s->buf.timestamp.tv_sec > switchTime.tv_sec || 
-                (s->buf.timestamp.tv_sec == switchTime.tv_sec && s->buf.timestamp.tv_usec > switchTime.tv_usec))
+                if (vid_source->buf.timestamp.tv_sec > switchTime.tv_sec || 
+                   (vid_source->buf.timestamp.tv_sec == switchTime.tv_sec && 
+                    vid_source->buf.timestamp.tv_usec > switchTime.tv_usec))
                     break;
 
                 if (debug_level >= CAMERA_VIDEO)
                     motion_log(LOG_DEBUG, 0, "%s: got frame before switch timestamp=%ld:%ld", 
-                               __FUNCTION__, s->buf.timestamp.tv_sec, s->buf.timestamp.tv_usec);
+                               __FUNCTION__, vid_source->buf.timestamp.tv_sec, 
+                               vid_source->buf.timestamp.tv_usec);
             }
         }
 
@@ -764,7 +769,7 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height)
 {
     sigset_t set, old;
-    src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+    src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
 
     if (viddev->v4l_fmt != VIDEO_PALETTE_YUV420P) 
         return V4L_FATAL_ERROR;
@@ -778,49 +783,51 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     sigaddset(&set, SIGHUP);
     pthread_sigmask(SIG_BLOCK, &set, &old);
 
-    if (s->pframe >= 0) {
-        if (xioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1) {
+    if (vid_source->pframe >= 0) {
+        if (xioctl(vid_source->fd, VIDIOC_QBUF, &vid_source->buf) == -1) {
             motion_log(LOG_ERR, 1, "%s: VIDIOC_QBUF", __FUNCTION__);
+            pthread_sigmask(SIG_UNBLOCK, &old, NULL);
             return -1;
         }
     }
 
-    memset(&s->buf, 0, sizeof(struct v4l2_buffer));
+    memset(&vid_source->buf, 0, sizeof(struct v4l2_buffer));
 
-    s->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    s->buf.memory = V4L2_MEMORY_MMAP;
+    vid_source->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vid_source->buf.memory = V4L2_MEMORY_MMAP;
 
-    if (xioctl(s->fd, VIDIOC_DQBUF, &s->buf) == -1) {
+    if (xioctl(vid_source->fd, VIDIOC_DQBUF, &vid_source->buf) == -1) {
 
         /* some drivers return EIO when there is no signal, 
            driver might dequeue an (empty) buffer despite
            returning an error, or even stop capturing.
         */
         if (errno == EIO) {
-            s->pframe++; 
-            if ((u32)s->pframe >= s->req.count) s->pframe = 0;
-            s->buf.index = s->pframe;
-
-            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF: EIO (s->pframe %d)", __FUNCTION__, s->pframe);
-
+            vid_source->pframe++; 
+            if ((u32)vid_source->pframe >= vid_source->req.count) 
+                vid_source->pframe = 0;
+            vid_source->buf.index = vid_source->pframe;
+            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF: EIO (vid_source->pframe %d)", 
+                       __FUNCTION__, vid_source->pframe);
             return 1;
         }
 
         motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF", __FUNCTION__);
+        pthread_sigmask(SIG_UNBLOCK, &old, NULL);
 
         return -1;
     }
 
-    s->pframe = s->buf.index;
-    s->buffers[s->buf.index].used = s->buf.bytesused;
-    s->buffers[s->buf.index].content_length = s->buf.bytesused;
+    vid_source->pframe = vid_source->buf.index;
+    vid_source->buffers[vid_source->buf.index].used = vid_source->buf.bytesused;
+    vid_source->buffers[vid_source->buf.index].content_length = vid_source->buf.bytesused;
 
     pthread_sigmask(SIG_UNBLOCK, &old, NULL);    /*undo the signal blocking */
 
     {
-        netcam_buff *the_buffer = &s->buffers[s->buf.index];
+        netcam_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
 
-        switch (s->fmt.fmt.pix.pixelformat) {
+        switch (vid_source->fmt.fmt.pix.pixelformat) {
         case V4L2_PIX_FMT_RGB24:
             conv_rgb24toyuv420p(map, (unsigned char *) the_buffer->ptr, width, height);
             return 0;
@@ -841,7 +848,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_JPEG:            
         case V4L2_PIX_FMT_MJPEG:
             return mjpegtoyuv420p(map, (unsigned char *) the_buffer->ptr, width, height, 
-                                  s->buffers[s->buf.index].content_length);
+                                  vid_source->buffers[vid_source->buf.index].content_length);
 /*            return 0;
         case V4L2_PIX_FMT_JPEG:
             return conv_jpeg2yuv420(cnt, map, the_buffer, width, height);
@@ -864,35 +871,35 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
 void v4l2_close(struct video_dev *viddev)
 {
-    src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+    src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
     enum v4l2_buf_type type;
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    xioctl(s->fd, VIDIOC_STREAMOFF, &type);
-    close(s->fd);
-    s->fd = -1;
+    xioctl(vid_source->fd, VIDIOC_STREAMOFF, &type);
+    close(vid_source->fd);
+    vid_source->fd = -1;
 }
 
 void v4l2_cleanup(struct video_dev *viddev)
 {
-    src_v4l2_t *s = (src_v4l2_t *) viddev->v4l2_private;
+    src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
 
-    if (s->buffers) {
+    if (vid_source->buffers) {
         unsigned int i;
 
-        for (i = 0; i < s->req.count; i++)
-            munmap(s->buffers[i].ptr, s->buffers[i].size);
+        for (i = 0; i < vid_source->req.count; i++)
+            munmap(vid_source->buffers[i].ptr, vid_source->buffers[i].size);
 
-        free(s->buffers);
-        s->buffers = NULL;
+        free(vid_source->buffers);
+        vid_source->buffers = NULL;
     }
 
-    if (s->controls) {
-        free(s->controls);
-        s->controls = NULL;
+    if (vid_source->controls) {
+        free(vid_source->controls);
+        vid_source->controls = NULL;
     }
 
-    free(s);
+    free(vid_source);
     viddev->v4l2_private = NULL;
 }
 

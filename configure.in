@@ -1112,10 +1112,10 @@ Makefile
 AC_OUTPUT
 
 echo ""
-echo "   *********************"
-echo "     Configure status    "
+echo "   **************************"
+echo "      Configure status       "
 echo "      ${PACKAGE_NAME} ${PACKAGE_VERSION}"
-echo "   *********************"
+echo "   **************************"
 echo 
 
 
