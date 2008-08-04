@@ -3,6 +3,7 @@
 Features
     * Added support for ffmpeg-2008-04-09 port version of FreeBSD.
     * Remove mjpegtools dependencies and integrate only needed functions from library. (Angel Carpintero)
+    * Allow change/setup framerate in FreeBSD using pwcbsd. (Angel Carpintero)
 
 Bugfixes
     * Fix Problem Encoding 1280x1024 resolution videos  
