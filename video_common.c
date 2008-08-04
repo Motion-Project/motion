@@ -764,6 +764,7 @@ static int vid_v4lx_start(struct context *cnt)
     dev->hue = 0;
     dev->owner = -1;
     dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
+    dev->fps = 0;
 #ifdef MOTION_V4L2
     /* First lets try V4L2 and if it's not supported V4L1 */
 

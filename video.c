@@ -57,7 +57,38 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
         vid_pic.hue = cnt->conf.hue * 256;
         viddev->hue = cnt->conf.hue;
     }
+
+/* Only tested with PWCBSD in FreeBSD */    
+#if defined(PWCBSD)   
+    if (cnt->conf.frame_limit != viddev->fps) {
+        struct video_window vw;
+        int fps;
+
+        if (ioctl(dev, VIDIOCGWIN, &vw) == -1) { 
+            motion_log(LOG_ERR, 1, "%s: ioctl VIDIOCGWIN", __FUNCTION__);
+        } else {
+            fps = vw.flags  >> PWC_FPS_SHIFT;
+            motion_log(LOG_DEBUG, 0, "%s: Get Current framerate %d .. trying %d", 
+                       __FUNCTION__, fps, cnt->conf.frame_limit);
+        }
+
+        fps = cnt->conf.frame_limit;
+        vw.flags = fps << PWC_FPS_SHIFT;
     
+        if (ioctl(dev, VIDIOCSWIN, &vw) == -1) {
+            motion_log(LOG_ERR, 1, "%s: ioctl VIDIOCSWIN", __FUNCTION__);                
+        } else if (ioctl(dev, VIDIOCGWIN, &vw) == -1) {
+            motion_log(LOG_ERR, 1, "%s: ioctl VIDIOCGWIN", __FUNCTION__);
+        } else {
+            fps = vw.flags  >> PWC_FPS_SHIFT;
+            motion_log(LOG_DEBUG, 0, "%s: Set new framerate %d", __FUNCTION__, fps);
+        }  
+
+        viddev->fps = fps;        
+    }    
+#endif
+
+
     if (cnt->conf.autobright) {
         
         if (vid_do_autobright(cnt, viddev)) {

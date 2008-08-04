@@ -14,6 +14,7 @@
 #ifndef WITHOUT_V4L
 #include <linux/videodev.h>
 #include <sys/mman.h>
+#include "pwc-ioctl.h"
 #endif
 
 /* video4linux stuff */
@@ -49,7 +50,8 @@ struct video_dev {
     int hue;
     unsigned long freq;
     int tuner_number;
-    
+    int fps;
+
     pthread_mutex_t mutex;
     pthread_mutexattr_t attr;
     int owner;
