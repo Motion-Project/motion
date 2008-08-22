@@ -173,12 +173,13 @@
 #define LOCATE_OFF        0
 #define LOCATE_ON         1
 #define LOCATE_PREVIEW    2
-#define LOCATE_REDBOX     3
-#define LOCATE_CENTER     4 
-#define LOCATE_REDCROSS   5 
+#define LOCATE_BOX        1
+#define LOCATE_REDBOX     2
+#define LOCATE_CROSS      4
+#define LOCATE_REDCROSS   8
 
-#define LOCATE_NORMAL     0
-#define LOCATE_BOTH       1
+#define LOCATE_NORMAL     1
+#define LOCATE_BOTH       2
 
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
@@ -315,7 +316,8 @@ struct context {
     struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
     unsigned short int new_img;
 
-    int locate_motion;
+    int locate_motion_mode;
+    int locate_motion_style;
     struct rotdata rotate_data;              /* rotation data is thread-specific */
 
     int noise;

@@ -200,10 +200,17 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
     if (cnt->imgs.preview_image.diffs == 0)
         cnt->imgs.preview_image.diffs = 1;
 
-    /* If we have locate on it is already done */
-    if (cnt->locate_motion == LOCATE_PREVIEW) 
-        alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_NORMAL);
-    
+    /* draw locate box here when mode = LOCATE_PREVIEW */
+    if (cnt->locate_motion_mode == LOCATE_PREVIEW) {
+        if (cnt->locate_motion_style == LOCATE_BOX)
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_BOX, LOCATE_NORMAL);
+        else if (cnt->locate_motion_style == LOCATE_REDBOX)
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDBOX, LOCATE_NORMAL);
+        else if (cnt->locate_motion_style == LOCATE_CROSS)
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_CROSS, LOCATE_NORMAL);
+        else if (cnt->locate_motion_style == LOCATE_REDCROSS)
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDCROSS, LOCATE_NORMAL);
+    }
 }
 
 /**
@@ -383,14 +390,16 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     struct coord *location = &img->location;
 
     /* Draw location */
-    if (cnt->locate_motion == LOCATE_ON)
-        alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
-    else if (cnt->locate_motion == LOCATE_REDBOX)
-        alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_BOTH);
-    else if (cnt->locate_motion == LOCATE_CENTER)
-        alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CENTER);
-    else if (cnt->locate_motion == LOCATE_REDCROSS)
-        alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_CENTER);
+    if (cnt->locate_motion_mode == LOCATE_ON) {
+        if (cnt->locate_motion_style == LOCATE_BOX)
+            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOX, LOCATE_BOTH);
+        else if (cnt->locate_motion_style == LOCATE_REDBOX)
+            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDBOX, LOCATE_BOTH);
+        else if (cnt->locate_motion_style == LOCATE_CROSS)
+            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS, LOCATE_BOTH);
+        else if (cnt->locate_motion_style == LOCATE_REDCROSS)
+            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS, LOCATE_BOTH);
+    }
 
     /* Calculate how centric motion is if configured preview center*/
     if (cnt->new_img & NEWIMG_CENTER) {
@@ -1901,18 +1910,23 @@ static void *motion_loop(void *arg)
             else
                 cnt->new_img = NEWIMG_OFF;
 
-            if (strcasecmp(cnt->conf.locate_motion, "on") == 0)
-                cnt->locate_motion = LOCATE_ON;
-            else if (strcasecmp(cnt->conf.locate_motion, "redbox") == 0)
-                cnt->locate_motion = LOCATE_REDBOX;
-            else if (strcasecmp(cnt->conf.locate_motion, "center") == 0)
-                cnt->locate_motion = LOCATE_CENTER;
-            else if (strcasecmp(cnt->conf.locate_motion, "redcross") == 0)
-                cnt->locate_motion = LOCATE_REDCROSS;
-            else if (strcasecmp(cnt->conf.locate_motion, "preview") == 0)
-                cnt->locate_motion = LOCATE_PREVIEW;
+            if (strcasecmp(cnt->conf.locate_motion_mode, "on") == 0)
+                cnt->locate_motion_mode = LOCATE_ON;
+            else if (strcasecmp(cnt->conf.locate_motion_mode, "preview") == 0)
+                cnt->locate_motion_mode = LOCATE_PREVIEW;
             else
-                cnt->locate_motion = LOCATE_OFF;
+                cnt->locate_motion_mode = LOCATE_OFF;
+
+            if (strcasecmp(cnt->conf.locate_motion_style, "box") == 0)
+                cnt->locate_motion_style = LOCATE_BOX;
+            else if (strcasecmp(cnt->conf.locate_motion_style, "redbox") == 0)
+                cnt->locate_motion_style = LOCATE_REDBOX;
+            else if (strcasecmp(cnt->conf.locate_motion_style, "cross") == 0)
+                cnt->locate_motion_style = LOCATE_CROSS;
+            else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0)
+                cnt->locate_motion_style = LOCATE_REDCROSS;
+	    else
+                cnt->locate_motion_style = LOCATE_BOX;
 
             /* Sanity check for smart_mask_speed, silly value disables smart mask */
             if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)

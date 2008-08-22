@@ -58,7 +58,8 @@ struct config conf_template = {
     event_gap:                      DEF_EVENT_GAP,
     max_movie_time:                 DEF_MAXMOVIETIME,
     snapshot_interval:              0,
-    locate_motion:                  "off",
+    locate_motion_mode:             "off",
+    locate_motion_style:            "box",
     input:                          IN_DEFAULT,
     norm:                           0,
     frame_limit:                    DEF_MAXFRAMERATE,
@@ -754,7 +755,7 @@ config_param config_params[] = {
     print_int
     },
     {
-    "locate_motion",
+    "locate_motion_mode",
     "\n############################################################\n"
     "# Text Display\n"
     "# %Y = year, %m = month, %d = date,\n"
@@ -768,13 +769,23 @@ config_param config_params[] = {
     "# leading spaces\n"
     "############################################################\n\n"
     "# Locate and draw a box around the moving object.\n"
-    "# Valid values: on, off, red, preview, center, center_red (default: off)\n"
-    "# Set to 'redbox' will draw a red box around the moving object.\n"
-    "# Set to 'preview' will only draw a box in preview_shot pictures.\n"
-    "# Set to 'center' will draw a little cross to mark center.\n"
+    "# Valid values: on, off, preview (default: off)\n"
+    "# Set to 'preview' will only draw a box in preview_shot pictures.",
+    0,
+    CONF_OFFSET(locate_motion_mode),
+    copy_string,
+    print_string
+    },
+    {
+    "locate_motion_style",
+    "# Set the look and style of the locate box if enabled.\n"
+    "# Valid values: box, redbox, cross, redcross (default: box)\n"
+    "# Set to 'box' will draw the traditional box.\n"
+    "# Set to 'redbox' will draw a red box.\n"
+    "# Set to 'cross' will draw a little cross to mark center.\n"
     "# Set to 'redcross' will draw a little red cross to mark center.",
     0,
-    CONF_OFFSET(locate_motion),
+    CONF_OFFSET(locate_motion_style),
     copy_string,
     print_string
     },

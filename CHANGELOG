@@ -16,6 +16,8 @@ Features
    * External pipe to allow external video encoders 
      http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Bill Payne, Angel Carpintero)
    * Allow change/setup framerate in FreeBSD using pwcbsd. (Angel Carpintero)
+   * Split locate_motion into separate 'mode' and 'style' option to allow all
+     possible combinations. (Joerg Weber)
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos

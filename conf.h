@@ -32,7 +32,8 @@ struct config {
     int event_gap;
     int max_movie_time;
     int snapshot_interval;
-    const char *locate_motion;
+    const char *locate_motion_mode;
+    const char *locate_motion_style;
     int input;
     int norm;
     int frame_limit;

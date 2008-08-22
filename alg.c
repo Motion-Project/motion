@@ -159,15 +159,35 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 
 
 /* draw a box around the movement */
-void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int mode)
+void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int style, int mode)
 {
     unsigned char *out = imgs->out;
     int x, y;
 
     out = imgs->out;
 
-    /* Draw a box around the movement */
-    if (mode == LOCATE_BOTH) { /* both normal and motion image gets a box */
+    /* debug image always gets a 'normal' box */
+    if (mode == LOCATE_BOTH) {
+        int width_miny = width * cent->miny;
+        int width_maxy = width * cent->maxy;
+
+        for (x = cent->minx; x <= cent->maxx; x++) {
+            int width_miny_x = x + width_miny;
+            int width_maxy_x = x + width_maxy;
+
+            out[width_miny_x] =~out[width_miny_x];
+            out[width_maxy_x] =~out[width_maxy_x];
+        }
+
+        for (y = cent->miny; y <= cent->maxy; y++) {
+            int width_minx_y = cent->minx + y * width; 
+            int width_maxx_y = cent->maxx + y * width;
+
+            out[width_minx_y] =~out[width_minx_y];
+            out[width_maxx_y] =~out[width_maxx_y];
+        }
+    }
+    if (style == LOCATE_BOX) { /* draw a box on normal images */
         int width_miny = width * cent->miny;
         int width_maxy = width * cent->maxy;
 
@@ -177,8 +197,6 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 
             new[width_miny_x] =~new[width_miny_x];
             new[width_maxy_x] =~new[width_maxy_x];
-            out[width_miny_x] =~out[width_miny_x];
-            out[width_maxy_x] =~out[width_maxy_x];
         }
 
         for (y = cent->miny; y <= cent->maxy; y++) {
@@ -187,11 +205,8 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 
             new[width_minx_y] =~new[width_minx_y];
             new[width_maxx_y] =~new[width_maxx_y];
-            out[width_minx_y] =~out[width_minx_y];
-            out[width_maxx_y] =~out[width_maxx_y];
         }
-
-    } else if (mode == LOCATE_CENTER) {
+    } else if (style == LOCATE_CROSS) { /* draw a cross on normal images */
         int centy = cent->y * width;
 
         for (x = cent->x - 10;  x <= cent->x + 10; x++) {
@@ -203,32 +218,12 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
             new[cent->x + y * width] =~new[cent->x + y * width];
             out[cent->x + y * width] =~out[cent->x + y * width];
         }       
-
-    } else { /* normal image only (e.g. preview shot) */
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-
-        for (x = cent->minx; x <= cent->maxx; x++) {
-            int width_miny_x = width_miny + x;
-            int width_maxy_x = width_maxy + x;
-
-            new[width_miny_x] =~new[width_miny_x];
-            new[width_maxy_x] =~new[width_maxy_x];
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y++) {
-            int minx_y = cent->minx + y * width;
-            int maxx_y = cent->maxx + y * width;
-
-            new[minx_y] =~new[minx_y];
-            new[maxx_y] =~new[maxx_y];
-        }
     }
 }
 
 
 /* draw a RED box around the movement */
-void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int mode)
+void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int style, int mode)
 {
     unsigned char *out = imgs->out;
     unsigned char *new_u, *new_v;
@@ -242,8 +237,28 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
     new_u = new + x;
     new_v = new + v;
 
-    /* Draw a box around the movement */
-    if (mode == LOCATE_BOTH) { /* both normal and motion image gets a box */
+    /* debug image always gets a 'normal' box */
+    if (mode == LOCATE_BOTH) {
+        int width_miny = width * cent->miny;
+        int width_maxy = width * cent->maxy;
+
+        for (x = cent->minx; x <= cent->maxx; x++) {
+            int width_miny_x = x + width_miny;
+            int width_maxy_x = x + width_maxy;
+
+            out[width_miny_x] =~out[width_miny_x];
+            out[width_maxy_x] =~out[width_maxy_x];
+        }
+
+        for (y = cent->miny; y <= cent->maxy; y++) {
+            int width_minx_y = cent->minx + y * width; 
+            int width_maxx_y = cent->maxx + y * width;
+
+            out[width_minx_y] =~out[width_minx_y];
+            out[width_maxx_y] =~out[width_maxx_y];
+        }
+    }
+    if (style == LOCATE_REDBOX) { /* draw a red box on normal images */
         int width_miny = width * cent->miny;
         int width_maxy = width * cent->maxy;
         int cwidth_miny = cwidth * (cent->miny / 2);
@@ -271,11 +286,6 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 
             new[width_miny_x + 1 + width] = 128;
             new[width_maxy_x + 1 + width] = 128;
-
-            out[width_miny_x] =~out[width_miny_x];
-            out[width_maxy_x + width] =~out[width_maxy_x + width];
-            out[width_miny_x + 1] =~out[width_miny_x + 1];
-            out[width_maxy_x + 1 + width] =~out[width_maxy_x + 1 + width];
         }
 
         for (y = cent->miny; y <= cent->maxy; y += 2) {
@@ -300,14 +310,8 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 
             new[width_minx_y + width + 1] = 128;
             new[width_maxx_y + width + 1] = 128;
-
-            out[width_minx_y + 1] =~out[width_minx_y + 1];
-            out[width_maxx_y] =~out[width_maxx_y];
-            out[width_minx_y + width + 1] =~out[width_minx_y + width + 1];
-            out[width_maxx_y + width] =~out[width_maxx_y + width];
         }
-
-    } else if (mode == LOCATE_CENTER) {
+    } else if (style == LOCATE_REDCROSS) { /* draw a red cross on normal images */
         int cwidth_maxy = cwidth * (cent->y / 2);
         
         for (x = cent->x - 10; x <= cent->x + 10; x += 2) {
@@ -323,64 +327,8 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
             new_u[cwidth_minx_y] = 128;
             new_v[cwidth_minx_y] = 255;
         }
-
-
-    } else { /* normal image only (e.g. preview shot) */
-        int width_miny = width * cent->miny;
-        int width_maxy = width * cent->maxy;
-        int cwidth_miny = cwidth * (cent->miny / 2);
-        int cwidth_maxy = cwidth * (cent->maxy / 2);
-        
-        for (x = cent->minx + 2; x <= cent->maxx - 2; x += 2) {
-            int width_miny_x = x + width_miny;
-            int width_maxy_x = x + width_maxy;
-            int cwidth_miny_x = x / 2 + cwidth_miny;
-            int cwidth_maxy_x = x / 2 + cwidth_maxy;
-
-            new_u[cwidth_miny_x] = 128;
-            new_u[cwidth_maxy_x] = 128;
-            new_v[cwidth_miny_x] = 255;
-            new_v[cwidth_maxy_x] = 255;
-
-            new[width_miny_x] = 128;
-            new[width_maxy_x] = 128;
-
-            new[width_miny_x + 1] = 128;
-            new[width_maxy_x + 1] = 128;
-
-            new[width_miny_x + width] = 128;
-            new[width_maxy_x + width] = 128;
-
-            new[width_miny_x + 1 + width] = 128;
-            new[width_maxy_x + 1 + width] = 128;
-        }
-
-        for (y = cent->miny; y <= cent->maxy; y += 2) {
-            int width_minx_y = cent->minx + y * width; 
-            int width_maxx_y = cent->maxx + y * width;
-            int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth; 
-            int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
-
-            new_u[cwidth_minx_y] = 128;
-            new_u[cwidth_maxx_y] = 128;
-            new_v[cwidth_minx_y] = 255;
-            new_v[cwidth_maxx_y] = 255;
-
-            new[width_minx_y] = 128;
-            new[width_maxx_y] = 128;
-
-            new[width_minx_y + width] = 128;
-            new[width_maxx_y + width] = 128;
-
-            new[width_minx_y + 1] = 128;
-            new[width_maxx_y + 1] = 128;
-
-            new[width_minx_y + width + 1] = 128;
-            new[width_maxx_y + width + 1] = 128;
-        }
     }
 }
-
 
 
 #define NORM               100
