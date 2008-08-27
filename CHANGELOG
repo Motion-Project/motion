@@ -22,7 +22,7 @@ Features
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
-   * Add a new parameter netcam_broken, to be less strict with some buggy network cameras firmwares.
+   * Add a new parameter netcam_tolerant_check, to be less strict with some buggy network cameras firmwares.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
    * Fix round robin in BSD switching to METEOR_CAP_SINGLE. (Angel Carpintero) 
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes. (Angel Carpintero)

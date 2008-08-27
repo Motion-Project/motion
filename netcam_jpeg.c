@@ -219,7 +219,7 @@ static void netcam_output_message(j_common_ptr cinfo)
      * care about.
      */
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && 
-        (cinfo->err->msg_code == JWRN_NOT_SEQUENTIAL) && (!netcam->netcam_broken))      
+        (cinfo->err->msg_code == JWRN_NOT_SEQUENTIAL) && (!netcam->netcam_tolerant_check))      
         netcam->jpeg_error |= 2;    /* Set flag to show problem */
     /*
      * We only display and log errors when debug_level

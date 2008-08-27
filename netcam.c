@@ -2867,7 +2867,7 @@ int netcam_start(struct context *cnt)
         return -1;
     }
 
-    netcam->netcam_broken = cnt->conf.netcam_broken;
+    netcam->netcam_tolerant_check = cnt->conf.netcam_tolerant_check;
     netcam->JFIF_marker = 0;
     netcam_get_dimensions(netcam);
 

@@ -139,7 +139,7 @@ struct config conf_template = {
     netcam_userpass:                NULL,
     netcam_keepalive:               "off",
     netcam_proxy:                   NULL,
-    netcam_broken:                  0,
+    netcam_tolerant_check:          0,
     text_changes:                   0,
     text_left:                      NULL,
     text_right:                     DEF_TIMESTAMP,
@@ -361,11 +361,11 @@ config_param config_params[] = {
     print_string
     },
     {
-    "netcam_broken",
+    "netcam_tolerant_check",
     "# Set less strict jpeg checks for network cameras with a poor/buggy firmware.\n"
     "# Default: off",    
     0,
-    CONF_OFFSET(netcam_broken),
+    CONF_OFFSET(netcam_tolerant_check),
     copy_bool,
     print_bool    
     },
