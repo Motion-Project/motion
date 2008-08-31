@@ -104,7 +104,7 @@ minimum_frame_time 0
 
 # Set less strict jpeg checks for network cameras with a poor/buggy firmware.
 # Default: off
-netcam_broken off
+netcam_tolerant_check off
 
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.

@@ -611,7 +611,7 @@ static int v4l_putpipe (int dev, unsigned char *image, int size)
 
 int vid_startpipe(const char *dev_name, int width, int height, int type)
 {
-    return v4l_startpipe( dev_name, width, height, type);
+    return v4l_startpipe(dev_name, width, height, type);
 }
 
 int vid_putpipe (int dev, unsigned char *image, int size)

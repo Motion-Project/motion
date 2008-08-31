@@ -401,6 +401,8 @@ Angel Carpintero
    * Remove mjpegtools dependencies and integrate only needed functions from library.
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes.
    * Allow change/setup framerate in FreeBSD using pwcbsd.
+   * Add a new parameter netcam_tolerant_check, to be less strict with some buggy network cameras firmwares.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -422,9 +424,6 @@ Dag Erlandsson
    * Added preview center feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter
    * Fixed timestamp for preview pictures.
-   * Add a new parameter netcam_broken, to be less strict with some buggy network cameras firmwares.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218
-
      
 Stephen Farrugia
    * Fixing the division by zero problem.
