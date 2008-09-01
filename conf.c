@@ -217,14 +217,14 @@ config_param config_params[] = {
     },
     {
     "v4l2_palette",
-    "# v4l2_palette allow to choose preferable palette to be use by motion\n"
-    "# to capture from those supported by your videodevice. ( default: 8)\n"
-    "# i.ex if your videodevice supports V4L2_PIX_FMT_SBGGR8 and\n"
-    "# V4L2_PIX_FMT_MJPEG by default motion will use V4L2_PIX_FMT_MJPEG so\n"
-    "# set v4l2_palette 1 to force motion use V4L2_PIX_FMT_SBGGR8 instead.\n" 
+    "# v4l2_palette allows to choose preferable palette to be use by motion\n"
+    "# to capture from those supported by your videodevice. (default: 8)\n"
+    "# E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and\n"
+    "# V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.\n"
+    "# Setting v4l2_palette to 1 forces motion to use V4L2_PIX_FMT_SBGGR8\n"
+    "# instead.\n"
     "#\n"
     "# Values :\n"
-    "#\n"
     "# V4L2_PIX_FMT_SN9C10X : 0  'S910'\n"
     "# V4L2_PIX_FMT_SBGGR8  : 1  'BA81'\n"
     "# V4L2_PIX_FMT_MJPEG   : 2  'MJPEG'\n"
@@ -341,9 +341,9 @@ config_param config_params[] = {
     {
     "netcam_keepalive",
     "# The setting for keep-alive of network socket, should improve performance on compatible net cameras.\n"
-    "# off : the historical implementation using HTTP/1.0, closing the socket after each http request.\n"
-    "# force : Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
-    "# on : Use HTTP/1.1 requests that support keep alive as default.\n"
+    "# off:   The historical implementation using HTTP/1.0, closing the socket after each http request.\n"
+    "# force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
+    "# on:    Use HTTP/1.1 requests that support keep alive as default.\n"
     "# Default: off",
     0,
     CONF_OFFSET(netcam_keepalive),
@@ -1263,7 +1263,7 @@ config_param config_params[] = {
     "# Command to be executed when a camera can't be opened or if it is lost\n"
     "# NOTE: There is situations when motion don't detect a lost camera!\n"
     "# It depends on the driver, some drivers dosn't detect a lost camera at all\n"
-    "# Some hangs the motion thread. Some even hangs the PC! (default: none)\n",
+    "# Some hangs the motion thread. Some even hangs the PC! (default: none)",
     0,
     CONF_OFFSET(on_camera_lost),
     copy_string,
