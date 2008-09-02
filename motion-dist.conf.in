@@ -28,14 +28,14 @@ setup_mode off
 # for FreeBSD default is /dev/bktr0
 videodevice /dev/video0
 
-# v4l2_palette allow to choose preferable palette to be use by motion
-# to capture from those supported by your videodevice. ( default: 8)
-# i.ex if your videodevice supports V4L2_PIX_FMT_SBGGR8 and
-# V4L2_PIX_FMT_MJPEG by default motion will use V4L2_PIX_FMT_MJPEG so
-# set v4l2_palette 1 to force motion use V4L2_PIX_FMT_SBGGR8 instead. 
+# v4l2_palette allows to choose preferable palette to be use by motion
+# to capture from those supported by your videodevice. (default: 8)
+# E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and
+# V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.
+# Setting v4l2_palette to 1 forces motion to use V4L2_PIX_FMT_SBGGR8
+# instead.
 #
 # Values :
-#
 # V4L2_PIX_FMT_SN9C10X : 0  'S910'
 # V4L2_PIX_FMT_SBGGR8  : 1  'BA81'
 # V4L2_PIX_FMT_MJPEG   : 2  'MJPEG'
@@ -89,12 +89,11 @@ minimum_frame_time 0
 # Syntax is user:password
 ; netcam_userpass value
 
-
 # The setting for keep-alive of network socket, should improve performance on compatible net cameras.
-# off : the historical implementation using HTTP/1.0, closing the socket after each http request.
-# force : Use HTTP/1.0 requests with keep alive header to reuse the same connection.
-# on : Use HTTP/1.1 requests that support keep alive as default.
-# Default: off 
+# off:   The historical implementation using HTTP/1.0, closing the socket after each http request.
+# force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.
+# on:    Use HTTP/1.1 requests that support keep alive as default.
+# Default: off
 netcam_keepalive off
 
 # URL to use for a netcam proxy server, if required, e.g. "http://myproxy".
@@ -104,7 +103,7 @@ netcam_keepalive off
 
 # Set less strict jpeg checks for network cameras with a poor/buggy firmware.
 # Default: off
-netcam_broken off
+netcam_tolerant_check off
 
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.
