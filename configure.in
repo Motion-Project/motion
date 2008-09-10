@@ -82,7 +82,6 @@ TEMP_LIBS="-lm ${TEMP_LIBS}"
 TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
 TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
 
-
 if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
 
 	AC_MSG_CHECKING(bktr headers in /usr/include/dev/bktr)
@@ -792,15 +791,15 @@ fi
 
 
 # Check sizes of integer types
-AC_CHECK_SIZEOF(short int)
+AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long int)
 AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(int *)
 AC_CHECK_SIZEOF(void *)
 
-if test "$ac_cv_sizeof_short_int" = "4"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short int\""
+if test "$ac_cv_sizeof_short" = "4"; then
+	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short\""
 else
 	if test "$ac_cv_sizeof_int" = "4"; then
 		TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"int\""

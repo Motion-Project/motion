@@ -325,12 +325,17 @@ snapshot_interval 0
 ############################################################
 
 # Locate and draw a box around the moving object.
-# Valid values: on, off, red, preview, center, center_red (default: off)
-# Set to 'redbox' will draw a red box around the moving object.
+# Valid values: on, off, preview (default: off)
 # Set to 'preview' will only draw a box in preview_shot pictures.
-# Set to 'center' will draw a little cross to mark center.
+locate_motion_mode off
+
+# Set the look and style of the locate box if enabled.
+# Valid values: box, redbox, cross, redcross (default: box)
+# Set to 'box' will draw the traditional box.
+# Set to 'redbox' will draw a red box.
+# Set to 'cross' will draw a little cross to mark center.
 # Set to 'redcross' will draw a little red cross to mark center.
-locate_motion off
+locate_motion_style box 
 
 # Draws the timestamp using same options as C function strftime(3)
 # Default: %Y-%m-%d\n%T = date in ISO format and time in 24 hour clock
