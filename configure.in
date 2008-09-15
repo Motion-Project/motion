@@ -798,7 +798,7 @@ AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(int *)
 AC_CHECK_SIZEOF(void *)
 
-if test "$ac_cv_sizeof_short_int" = "4"; then
+if test "$ac_cv_sizeof_short" = "4"; then
 	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short\""
 else
 	if test "$ac_cv_sizeof_int" = "4"; then
