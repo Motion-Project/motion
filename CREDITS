@@ -403,6 +403,8 @@ Angel Carpintero
    * Allow change/setup framerate in FreeBSD using pwcbsd.
    * Add a new parameter netcam_tolerant_check, to be less strict with some buggy network cameras firmwares.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218
+   * Get rid of ffmpeg-config in configure.in for debian.
+
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
