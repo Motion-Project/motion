@@ -315,13 +315,7 @@ else if test "${FFMPEG_DIR}" = "yes"; then
 	# AUTODETECT STATIC/SHARED LIB 
 	AC_MSG_CHECKING(for ffmpeg autodetecting)
 
-	# weird hack to fix debian problem TO BE REMOVED
-	if test -f /usr/bin/ffmpeg-config; then
-		FFMPEG_LIBS_DEB="`ffmpeg-config --libs avformat`"
-		FFMPEG_CFLAGS_DEB="`ffmpeg-config --cflags`"
-		FFMPEG_OK="found"
-		AC_MSG_RESULT(found for debian)
-	elif test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
+	if test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
 		AC_MSG_RESULT(found in /usr/lib64)
 		FFMPEG_OK="found"
 		FFMPEG_LIB="/usr/lib64"
@@ -383,10 +377,7 @@ fi
 if test "${FFMPEG_OK}" = "found"; then
 	AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
 	
-	if test "${FFMPEG_CFLAGS_DEB}" != "" ; then
-		FFMPEG_CFLAGS="${FFMPEG_CFLAGS_DEB}"
-		AC_MSG_RESULT(found for debian)
-	elif test -f ${FFMPEG_DIR}/include/avformat.h; then
+	if test -f ${FFMPEG_DIR}/include/avformat.h; then
 		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
 		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
 	elif test -f ${FFMPEG_DIR}/avformat.h; then
@@ -416,13 +407,8 @@ if test "${FFMPEG_OK}" = "found"; then
 #
 
 	if  test "${FFMPEG_OK}" = "found"; then	
-		if test "${FFMPEG_LIBS_DEB}" != ""; then
-			TEMP_LIBS="$TEMP_LIBS ${FFMPEG_LIBS_DEB}"
-		else
-			TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} -lavformat -lavcodec -lavutil -lm -lz"
-			TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
-		fi
-
+		TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} -lavformat -lavcodec -lavutil -lm -lz"
+		TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
 		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
 
 		FFMPEG_OBJ="ffmpeg.o"

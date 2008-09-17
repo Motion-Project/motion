@@ -408,6 +408,8 @@ Angel Carpintero
    * External pipe to allow external video encoders 
      http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Bill Payne, Angel Carpintero)
    * Allow change/setup framerate in FreeBSD using pwcbsd
+   * Get rid of ffmpeg-config in configure.in for debian.
+
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

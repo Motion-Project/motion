@@ -18,6 +18,7 @@ Features
    * Allow change/setup framerate in FreeBSD using pwcbsd. (Angel Carpintero)
    * Split locate_motion into separate 'mode' and 'style' option to allow all
      possible combinations. (Joerg Weber)
+   * Get rid of ffmpeg-config in configure.in for debian. (Angel Carpintero)
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos
