@@ -1,4 +1,4 @@
-.TH MOTION 1 2008-08-02 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2008-09-20 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
@@ -35,8 +35,8 @@ These are the options that can be used in the config file.
 All number values are integer numbers (no decimals allowed).
 Boolean options can be on or off (values "1", "yes" and "on" all means true and any other value means false).
 .TP
-.B area_detect integer
-Values: 0 - 999999999 / Default: Not defined
+.B area_detect string
+Values: 1 - 999999999 / Default: Not defined
 .br
 Detect motion center in predefined areas. A script (on_area_detected) is started immediately when motion center is detected in one of the given areas, but only once during an event even if there is motion in a different configured area.
 .TP
@@ -103,7 +103,7 @@ Use ffmpeg libraries to encode mpeg movies in realtime.
 .B ffmpeg_deinterlace boolean
 Values: on, off / Default: off
 .br
-Use ffmpeg to deinterlace video. Necessary if you use an analog camera and see horizontal combing on moving objects in video or pictures.
+Use ffmpeg to deinterlace video. Necessary if you use an analog camera and see horizontal combing on moving objects in video or pictures. 
 .TP
 .B ffmpeg_timelapse boolean
 Values: 0 - 2147483647 / Default: 0 (disabled)
@@ -121,7 +121,7 @@ Values: 0, 2 - 31 / Default: 0 (disabled)
 Enables and defines variable bitrate for the ffmpeg encoder. ffmpeg_bps is ignored if variable bitrate is enabled. Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps, or the range 2 - 31 where 2 means best quality and 31 is worst.
 .TP
 .B ffmpeg_video_codec discrete strings
-Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf , flv , ffv1, mov / Default: mpeg4
+Values: mpeg1 (ffmpeg-0.4.8 only), mpeg4, msmpeg4, swf, flv, ffv1, mov / Default: mpeg4
 .br
 Codec to be used by ffmpeg for the video compression. Timelapse mpegs are always made in mpeg1 format independent from this option.
 .TP
@@ -140,7 +140,7 @@ Values: 0 - 2147483647 / Default: 60
 .br
 Gap is the seconds of no motion detection that triggers the end of an event. An event is defined as a series of motion images taken within a short timeframe.
 .TP
-.B height integer
+.B height  integer
 Values: Device Dependent / Default: 288
 .br
 The height of each frame in pixels.
@@ -150,7 +150,7 @@ Values: 0 - 255 / Default: 0 (disabled)
 .br
 The hue level for the video device.
 .TP
-.B input integer
+.B input  integer
 Values: 0 - 7, 8 = disabled / Default: 8 (disabled)
 .br
 Input channel to use expressed as an integer number starting from 0. Should normally be set to 1 for video/TV cards, and 8 for USB cameras.
@@ -160,20 +160,20 @@ Values: Max 4095 characters / Default: %v-%Y%m%d%H%M%S-%q
 .br
 File path for motion triggered images (jpeg or ppm) relative to target_dir. Value 'preview' makes a jpeg filename with the same name body as the associated saved mpeg movie file.
 .TP
-.B lightswitch integer
+.B lightswitch  integer
 Values: 0 - 100 / Default: 0 (disabled)
 .br
 Ignore sudden massive light intensity changes given as a percentage of the picture area that changed intensity.
 .TP
-.B locate discrete string 
+.B locate boolean
 Values: on, off, preview / Default: off
 .br
-Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved mpeg movie.
+Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved mpeg movie. 
 .TP
 .B mask_file string
 Values: Max 4095 characters / Default: Not defined
 .br
-PGM file to use as a sensitivity mask. This picture MUST have the same width and height as the frames being captured and be in binary format.
+PGM file to use as a sensitivity mask. This picture MUST have the same width and height as the frames being captured and be in binary format. 
 .TP
 .B max_mpeg_time integer
 Values: 0 (infinite) - 2147483647 / Default: 3600
@@ -206,7 +206,7 @@ Values: Max 4095 characters / Default: Not defined
 Name of the MySQL database.
 .TP
 .B mysql_host string
-Values: Max 4095 characters / Default: localhost 
+Values: Max 4095 characters / Default: localhost
 .br
 IP address or domain name for the MySQL server. Use "localhost" if motion and MySQL runs on the same server.
 .TP
@@ -220,20 +220,20 @@ Values: Max 4095 characters / Default: Not defined
 .br
 The MySQL user name.
 .TP
-.B netcam_tolerant_check boolean
-Values: on, off / Default: off
+.B netcam_http discrete strings
+Values: 1.0, keep_alive, 1.1 / Default: 1.0
 .br
-Set less strict jpeg checks for network cameras with a poor/buggy firmware.
-.TP
-.B netcam_http discrete string
-Values: 1.0 , keep_alive, 1.1 / Default: 1.0
-.br
-The setting for keep-alive of network socket, should improve performance on compatible net cameras.
+The setting for keep-alive of network socket, should improve performance on compatible net cameras. ( new in 3.2.10 ) <br />
 .TP
 .B netcam_proxy string
 Values: Max 4095 characters / Default: Not defined
 .br
 URL to use for a netcam proxy server, if required. The syntax is http://myproxy:portnumber
+.TP
+.B netcam_tolerant_check boolean
+Values: on, off  / Default: off
+.br
+Set less strict jpeg checks for network cameras with a poor/buggy firmware.
 .TP
 .B netcam_url string
 Values: Max 4095 characters / Default: Not defined
@@ -263,12 +263,12 @@ Select the norm of the video device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PA
 .B on_area_detected string
 Values: Max 4095 characters / Default: Not defined
 .br
-Command to be executed when motion in a predefined area is detected, check option area_detect.
+Command to be executed when motion in a predefined area is detected. Check option area_detect.
 .TP
-.B on_camera_lost
+.B on_camera_lost string
 Values: Max 4095 characters / Default: Not defined
 .br
-Command to be executed when a camera can't be opened or if it is lost. You can use Conversion Specifiers and spaces as part of the command. Use %f for passing filename (with full path) to the command.
+Command to be executed when a camera can't be opened or if it is lost. You can use Conversion Specifiers and spaces as part of the command. Use %f for passing filename (with full path) to the command. (new in 3.2.10)
 .TP
 .B on_event_end string
 Values: Max 4095 characters / Default: Not defined
@@ -311,7 +311,7 @@ Values: on, off / Default: off
 Output pictures with only the moving object. This feature generates the special motion type movies where you only see the pixels that changes as a graytone image. If labelling is enabled you see the largest area in blue. Smartmask is shown in red.
 .TP
 .B output_normal discrete strings
-Values: on, off, first, best, center / Default: on
+Values: on, off, first, best, center (since 3.2.10) / Default: on
 .br
 Normal image is an image that is stored when motion is detected. It is the same image that was taken by the camera. I.e. not a motion image like defined by output_motion. Default is that normal images are stored.
 .TP
@@ -321,14 +321,14 @@ Values: Max 4095 characters / Default: Not defined
 Name of the PostgreSQL database.
 .TP
 .B pgsql_host string
-Values: Max 4095 characters / Default: localhost 
+Values: Max 4095 characters / Default: localhost
 .br
 IP address or domain name for the PostgreSQL server. Use "localhost" if motion and PostgreSQL runs on the same server.
 .TP
 .B pgsql_password string
 Values: Max 4095 characters / Default: Not defined
 .br
-The PostgreSQL password.
+The PostgreSQL password. 
 .TP
 .B pgsql_port integer
 Values: 0 - 65535 / Default: 5432
@@ -338,10 +338,10 @@ The PostgreSQL server port number.
 .B pgsql_user string
 Values: Max 4095 characters / Default: Not defined
 .br
-The PostgreSQL user name.
+The PostgreSQL user name. 
 .TP
 .B post_capture integer
-Values: 0 - 2147483647 / Default: 0 (disabled)
+Values: 0 - 2147483647  / Default: 0 (disabled)
 .br
 Specifies the number of frames to be captured after motion has been detected.
 .TP
@@ -393,7 +393,7 @@ The colour saturation level for the video device.
 .B setup_mode boolean
 Values: on, off / Default: off
 .br
-Run Motion in setup mode.
+Run Motion in setup mode. 
 .TP
 .B smart_mask_speed integer
 Values: 0 - 10 / Default: 0 (disabled)
@@ -431,7 +431,7 @@ Values: on, off / Default: off
 Log to the database when creating timelapse mpeg file
 .TP
 .B sql_query string
-Values: Max 4095 characters / Default: insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
+Values: Max 4095 characters / Default: insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C') 
 .br
 SQL query string that is sent to the database. The values for each field are given by using convertion specifiers
 .TP
@@ -458,17 +458,17 @@ Draw characters at twice normal size on images.
 .B text_event string
 Values: Max 4095 characters / Default: %Y%m%d%H%M%S
 .br
-This option defines the value of the special event conversion specifier %C. You can use any conversion specifier in this option except %C. Date and time values are from the timestamp of the first image in the current event.
+This option defines the value of the speciel event conversion specifier %C. You can use any conversion specifier in this option except %C. Date and time values are from the timestamp of the first image in the current event.
 .TP
 .B text_left string
 Values: Max 4095 characters / Default: Not defined
 .br
-User defined text overlayed on each in the lower left corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > | , . : - + _ \n and conversion specifiers (codes starting by a %).
+User defined text overlayed on each in the lower left corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > , . : - + _ \n and vertical bar and conversion specifiers (codes starting by a %).
 .TP
 .B text_right string
 Values: Max 4095 characters / Default: %Y-%m-%d\n%T
 .br
-User defined text overlayed on each in the lower right corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > | , . : - + _ \n and conversion specifiers (codes starting by a %). Default: %Y-%m-%d\n%T = date in ISO format and time in 24 hour clock
+User defined text overlayed on each in the lower right corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > , . : - + _ \n and vertical bar and conversion specifiers (codes starting by a %). Default: %Y-%m-%d\n%T = date in ISO format and time in 24 hour clock
 .TP
 .B thread string
 Values: Max 4095 characters / Default: Not defined
@@ -483,7 +483,7 @@ Threshold for declaring motion. The threshold is the number of changed pixels co
 .B threshold_tune boolean
 Values: on, off / Default: off
 .br
-Activates the automatic tuning of threshold level.
+Activates the automatic tuning of threshold level. ( It's broken )
 .TP
 .B timelapse_filename string
 Values: Max 4095 characters / Default: %v-%Y%m%d-timelapse
@@ -496,17 +496,17 @@ Values: on, off / Default: off
 Enable auto tracking
 .TP
 .B track_iomojo_id integer
-Values: 0 - 65535 / Default: 0
+Values: 0 - 65535 / Default: 0 
 .br
 Use this option if you have an iomojo smilecam connected to the serial port instead of a general stepper motor controller.
 .TP
 .B track_maxx integer
-Values: 0 - 65535 / Default: 0
+Values: 0 - 65535 / Default: 0 
 .br
 The maximum position for servo x.
 .TP
 .B track_maxy integer
-Values: 0 - 65535 / Default: 0
+Values: 0 - 65535 / Default: 0 
 .br
 The maximum position for servo y.
 .TP
@@ -551,7 +551,7 @@ Values: 0 - 255 / Default: 40
 Number of steps to make.
 .TP
 .B track_type discrete strings
-Values: 0 (none), 1 (stepper), 2 (iomojo), 3 (pwc), 4 (generic), 5 (uvcvideo)  / Default: 0 (None)
+Values: 0 (none), 1 (stepper), 2 (iomojo), 3 (pwc), 4 (generic), 5 (uvcvideo) / Default: 0 (None)
 .br
 Type of tracker.
 .TP
@@ -563,17 +563,17 @@ The tuner device used for controlling the tuner in a tuner card. This option is 
 .B v4l2_palette integer
 Values: 0 - 8 / Default: 8
 .br
-Allow to choose preferable palette to be use by motion to capture from those supported by your videodevice.
-.TP
-.B video_pipe string
-Values: Max 4095 characters / Default: Not defined
-.br
-The video4linux video loopback input device for normal images. If a particular pipe is to be used then use the device filename of this pipe. If a dash '-' is given motion will use /proc/video/vloopback/vloopbacks to locate a free pipe.
+Allow to choose preferable palette to be use by motion<br /> to capture from those supported by your videodevice. ( new in 3.2.10 )
 .TP
 .B videodevice string
 Values: Max 4095 characters / Default: /dev/video0 (FreeBSD: /dev/bktr0)
 .br
 The video device to be used for capturing. Default for Linux is /dev/video0. for FreeBSD the default is /dev/bktr0.
+.TP
+.B video_pipe string
+Values: Max 4095 characters / Default: Not defined
+.br
+The video4linux video loopback input device for normal images. If a particular pipe is to be used then use the device filename of this pipe. If a dash '-' is given motion will use /proc/video/vloopback/vloopbacks to locate a free pipe.
 .TP
 .B webcam_limit integer
 Values: 0 - 2147483647 / Default: 0 (unlimited)
@@ -609,7 +609,6 @@ Quality setting in percent for the mjpeg picture frames transferred over the web
 Values: Device Dependent / Default: 352
 .br
 The width in pixels of each frame. Valid range is camera dependent.
-
 .SH SIGNALS
 Motion responds to the following signals:
 .TP
@@ -679,9 +678,9 @@ If you run the http control command http://host:port/0/config/writeyes, motion w
 .TP
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_area_detected, on_camera_lost, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
+
 .br
 In text_left and text_right you can additionally use '\n' for new line.
-
 .TP
 .B %a
 The abbreviated weekday name according to the current locale.
@@ -823,7 +822,6 @@ The time-zone as hour offset from GMT.
 .TP
 .B %Z
 The time zone or name or abbreviation.
-
 .TP
 .B More information
 Motion homepage: http://motion.sourceforge.net/
