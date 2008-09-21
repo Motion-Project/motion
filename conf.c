@@ -1250,7 +1250,7 @@ config_param config_params[] = {
     },
     {
     "mysql_host",
-    "# The host on which the database is located (default: not defined)",
+    "# The host on which the database is located (default: localhost)",
     0,
     CONF_OFFSET(mysql_host),
     copy_string,
@@ -1288,7 +1288,7 @@ config_param config_params[] = {
     },
     {
     "pgsql_host",
-    "# The host on which the database is located (default: not defined)",
+    "# The host on which the database is located (default: localhost)",
     0,
     CONF_OFFSET(pgsql_host),
     copy_string,
