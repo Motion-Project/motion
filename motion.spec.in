@@ -46,8 +46,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr (-,root,root,-)
+%{_datadir}/%{name}-%{version}/examples/motion-dist.conf
+%{_datadir}/%{name}-%{version}/examples/motion.init-Debian
+%{_datadir}/%{name}-%{version}/examples/motion.init-FreeBSD.sh
+%{_datadir}/%{name}-%{version}/examples/motion.init-RH
+%{_datadir}/%{name}-%{version}/examples/thread1.conf
+%{_datadir}/%{name}-%{version}/examples/thread2.conf
+%{_datadir}/%{name}-%{version}/examples/thread3.conf
+%{_datadir}/%{name}-%{version}/examples/thread4.conf
 %doc CHANGELOG COPYING CREDITS INSTALL README motion_guide.html
-%doc motion-dist.conf thread1.conf thread2.conf thread3.conf thread4.conf
 %dir %{_sysconfdir}/%{name}
 %config %{_sysconfdir}/%{name}/motion.conf
 %{_bindir}/motion
