@@ -94,7 +94,7 @@ minimum_frame_time 0
 # keep_alive:  Use HTTP/1.0 requests with keep alive header to reuse the same connection.
 # 1.1:         Use HTTP/1.1 requests that support keep alive as default.
 # Default: 1.0
-; netcam_http value
+; netcam_http 1.0
 
 # URL to use for a netcam proxy server, if required, e.g. "http://myproxy".
 # If a port number other than 80 is needed, use "http://myproxy:1234".
@@ -536,9 +536,9 @@ quiet on
 ; on_movie_end value
 
 # Command to be executed when a camera can't be opened or if it is lost
-# NOTE: There is situations when motion don't detect a lost camera!
-# It depends on the driver, some drivers dosn't detect a lost camera at all
-# Some hangs the motion thread. Some even hangs the PC! (default: none)
+# NOTE: There is situations when motion doesn't detect a lost camera!
+# It depends on the driver, some drivers don't detect a lost camera at all
+# Some hang the motion thread. Some even hang the PC! (default: none)
 ; on_camera_lost value
 
 ############################################################
