@@ -1418,8 +1418,6 @@ static void *motion_loop(void *arg)
                 if (cnt->conf.despeckle_filter && cnt->current_image->diffs > 0) {
                     olddiffs = cnt->current_image->diffs;
                     cnt->current_image->diffs = alg_despeckle(cnt, olddiffs);
-                    if (cnt->current_image->diffs > cnt->threshold)  //jw
-                        motion_log(LOG_DEBUG, 0, "Labels: %d Diffs: %d", cnt->current_image->total_labels, cnt->current_image->diffs);  //jw
                 } else if (cnt->imgs.labelsize_max) {
                     cnt->imgs.labelsize_max = 0; /* Disable labeling if enabled */
                 }
@@ -1499,9 +1497,6 @@ static void *motion_loop(void *arg)
                     alg_update_reference_frame(cnt, RESET_REF_FRAME);
                     cnt->current_image->diffs = 0;
                     cnt->lightswitch_framecounter = 0;
-                    motion_log(LOG_INFO, 0, "lightswitch_framecounter: %d  previous_diffs: %d  diffs: %d  location.x: %d  location.y: %d", 
-                               cnt->lightswitch_framecounter, previous_diffs, cnt->current_image->diffs, 
-                               cnt->current_image->location.x, cnt->current_image->location.y);  //jw
 
                     if (debug_level >= CAMERA_DEBUG)
                         motion_log(-1, 0, "%s: micro-lightswitch!", __FUNCTION__);
