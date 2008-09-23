@@ -1382,7 +1382,8 @@ Joerg Weber
    * Add draw a RED box around the movement as default.
    * Split locate_motion into separate 'mode' and 'style' option to allow all
      possible combinations.
-
+   * Gapless_event mode.
+   
 Dirk Wesenberg
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch	

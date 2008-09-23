@@ -202,8 +202,10 @@ post_capture 0
 
 # Event Gap is the seconds of no motion detection that triggers the end of an event
 # An event is defined as a series of motion images taken within a short timeframe.
-# Recommended value is 60 seconds (Default). The value 0 is allowed and disables
-# events causing all Motion to be written to one single movie file and no pre_capture.
+# Recommended value is 60 seconds (Default). A value of 0 allows to generate 'gapless'
+# movies - an event ends right after post_capture if any. The value -1 is allowed and
+# disables events causing all Motion to be written to one single movie file and no
+# pre_capture.
 event_gap 60
 
 # Maximum length in seconds of a movie
