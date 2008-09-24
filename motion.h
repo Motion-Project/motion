@@ -384,6 +384,7 @@ struct context {
 
     short int movie_fps;
     char newfilename[PATH_MAX];
+    char extpipefilename[PATH_MAX];
     short int movie_last_shot;
 
 #ifdef HAVE_FFMPEG

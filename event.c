@@ -359,7 +359,7 @@ static void event_extpipe_end(struct context *cnt, int type ATTRIBUTE_UNUSED,
         motion_log(LOG_INFO, 0, "%s: CLOSING: extpipe file desc %d, error state %d", 
                    __FUNCTION__, fileno(cnt->extpipe), ferror(cnt->extpipe));
         motion_log(LOG_INFO, 0, "%s: pclose return: %d", __FUNCTION__, pclose(cnt->extpipe));
-        event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
+        event(cnt, EVENT_FILECLOSE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, NULL);
     }
 }
 
@@ -369,7 +369,6 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
     if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
         char stamp[PATH_MAX] = "";
-        char extpipefilename[PATH_MAX] = "";
         const char *moviepath;
         /* conf.mpegpath would normally be defined but if someone deleted it by control interface
            it is better to revert to the default than fail */
@@ -382,46 +381,46 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
         }
 
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tm, NULL, 0);
-        snprintf(extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
+        snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
         /* Open a dummy file to check if path is correct */
-        if (myfopen(extpipefilename, "w") == NULL) {
+        if (myfopen(cnt->extpipefilename, "w") == NULL) {
             if (errno == ENOENT) {
                 /* create path for file ... */
-                if (create_path(extpipefilename) == -1) {
+                if (create_path(cnt->extpipefilename) == -1) {
                     motion_log(LOG_ERR, 1, "%s: error opening file %s",
-                               __FUNCTION__, extpipefilename);          
+                               __FUNCTION__, cnt->extpipefilename);          
                     return ;
                 }
 
                 /* and retry opening the file (use file_proto) */
-                if (myfopen(extpipefilename, "w") == NULL) {
+                if (myfopen(cnt->extpipefilename, "w") == NULL) {
                     motion_log(LOG_ERR, 1, "%s: error opening file %s",
-                               __FUNCTION__, extpipefilename);
+                               __FUNCTION__, cnt->extpipefilename);
                     return ;
                 }
 
                 /* Permission denied */
             } else if (errno ==  EACCES) {
                 motion_log(LOG_ERR, 1, "%s: error opening file %s ... check access "
-                           "rights to target directory", __FUNCTION__, extpipefilename);
+                           "rights to target directory", __FUNCTION__, cnt->extpipefilename);
                 return ;
             } else {
-                motion_log(LOG_ERR, 1, "%s: error opening file %s", __FUNCTION__, extpipefilename);
+                motion_log(LOG_ERR, 1, "%s: error opening file %s", __FUNCTION__, cnt->extpipefilename);
             }    
 
         }            
                 
-        unlink(extpipefilename);
+        unlink(cnt->extpipefilename);
 
-        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tm, extpipefilename, 0);
+        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tm, cnt->extpipefilename, 0);
 
         if (debug_level >= CAMERA_INFO) {
             motion_log(LOG_INFO, 0, "%s: pipe: %s", __FUNCTION__, stamp);
             motion_log(LOG_INFO, 0, "%s: cnt->moviefps: %d", __FUNCTION__, cnt->movie_fps);
         }
 
-        event(cnt, EVENT_FILECREATE, NULL, extpipefilename, (void *)FTYPE_MPEG, NULL);
+        event(cnt, EVENT_FILECREATE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, NULL);
         cnt->extpipe = popen(stamp, "w");
 
         if (cnt->extpipe == NULL) {

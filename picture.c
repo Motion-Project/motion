@@ -652,10 +652,8 @@ void put_fixed_mask(struct context *cnt, const char *file)
 /* save preview_shot */
 void preview_save(struct context *cnt)
 {
-#ifdef HAVE_FFMPEG
     int use_imagepath;
     int basename_len;
-#endif /* HAVE_FFMPEG */
     const char *imagepath;
     char previewname[PATH_MAX];
     char filename[PATH_MAX];
@@ -667,20 +665,26 @@ void preview_save(struct context *cnt)
         /* Set global context to the image we are processing */
         cnt->current_image = &cnt->imgs.preview_image;
 
-#ifdef HAVE_FFMPEG
         /* Use filename of movie i.o. jpeg_filename when set to 'preview' */
         use_imagepath = strcmp(cnt->conf.imagepath, "preview");
-    
-        if (cnt->ffmpeg_output && !use_imagepath) {
-            /* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
-            basename_len = strlen(cnt->newfilename) - 3;
-            strncpy(previewname, cnt->newfilename, basename_len);
+
+        if ( (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) 
+            && !use_imagepath) {
+
+            if (cnt->conf.useextpipe && cnt->extpipe) {
+                basename_len = strlen(cnt->extpipefilename) + 1;
+                strncpy(previewname, cnt->extpipefilename, basename_len);
+                previewname[basename_len - 1] = '.';    
+            } else {       
+                /* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
+                basename_len = strlen(cnt->newfilename) - 3;
+                strncpy(previewname, cnt->newfilename, basename_len);
+            }    
+
             previewname[basename_len] = '\0';
             strcat(previewname, imageext(cnt));
             put_picture(cnt, previewname, cnt->imgs.preview_image.image , FTYPE_IMAGE);
-        } else
-#endif /* HAVE_FFMPEG */
-        {
+        } else {
             /* Save best preview-shot also when no movies are recorded or imagepath
              * is used. Filename has to be generated - nothing available to reuse! */
             //printf("preview_shot: different filename or picture only!\n");
