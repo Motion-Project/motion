@@ -20,6 +20,7 @@ Features
      possible combinations. (Joerg Weber)
    * Get rid of ffmpeg-config in configure.in for debian. (Angel Carpintero)
    * Implement 'gapless' event mode to allow for recording of movies without 'holes'. (Joerg Weber)
+   * Limit detection rate to 3fps at framerates above 5fps, to reduce CPU load. (Joerg Weber)
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos

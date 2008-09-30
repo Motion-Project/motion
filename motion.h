@@ -318,6 +318,7 @@ struct context {
 
     int locate_motion_mode;
     int locate_motion_style;
+    int process_thisframe;
     struct rotdata rotate_data;              /* rotation data is thread-specific */
 
     int noise;

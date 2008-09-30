@@ -203,13 +203,13 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
     /* draw locate box here when mode = LOCATE_PREVIEW */
     if (cnt->locate_motion_mode == LOCATE_PREVIEW) {
         if (cnt->locate_motion_style == LOCATE_BOX)
-            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_BOX, LOCATE_NORMAL);
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_BOX, LOCATE_NORMAL, cnt->process_thisframe);
         else if (cnt->locate_motion_style == LOCATE_REDBOX)
-            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDBOX, LOCATE_NORMAL);
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDBOX, LOCATE_NORMAL, cnt->process_thisframe);
         else if (cnt->locate_motion_style == LOCATE_CROSS)
-            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_CROSS, LOCATE_NORMAL);
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_CROSS, LOCATE_NORMAL, cnt->process_thisframe);
         else if (cnt->locate_motion_style == LOCATE_REDCROSS)
-            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDCROSS, LOCATE_NORMAL);
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDCROSS, LOCATE_NORMAL, cnt->process_thisframe);
     }
 }
 
@@ -375,7 +375,7 @@ static void motion_remove_pid(void)
  * motion_detected
  *
  *   Called from 'motion_loop' when motion is detected
- *   Can be called when no motion if output_all is set!
+ *   Can be called when no motion if emulate_motion is set!
  *
  * Parameters:
  *
@@ -392,13 +392,13 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     /* Draw location */
     if (cnt->locate_motion_mode == LOCATE_ON) {
         if (cnt->locate_motion_style == LOCATE_BOX)
-            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOX, LOCATE_BOTH);
+            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOX, LOCATE_BOTH, cnt->process_thisframe);
         else if (cnt->locate_motion_style == LOCATE_REDBOX)
-            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDBOX, LOCATE_BOTH);
+            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDBOX, LOCATE_BOTH, cnt->process_thisframe);
         else if (cnt->locate_motion_style == LOCATE_CROSS)
-            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS, LOCATE_BOTH);
+            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS, LOCATE_BOTH, cnt->process_thisframe);
         else if (cnt->locate_motion_style == LOCATE_REDCROSS)
-            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS, LOCATE_BOTH);
+            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS, LOCATE_BOTH, cnt->process_thisframe);
     }
 
     /* Calculate how centric motion is if configured preview center*/
@@ -993,7 +993,7 @@ static void *motion_loop(void *arg)
     int i, j, z = 0;
     time_t lastframetime = 0;
     int frame_buffer_size;
-    unsigned short int ref_frame_limit = 0;
+    unsigned short int rate_limit = 0;
     int area_once = 0;
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int smartmask_ratio = 0;
@@ -1012,6 +1012,7 @@ static void *motion_loop(void *arg)
     int vid_return_code = 0;        /* Return code used when calling vid_next */
     int minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; /* time in seconds to skip between capturing images */
     unsigned short int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
+    struct image_data *old_image;
 
     /* Next two variables are used for snapshot and timelapse feature
      * time_last_frame is set to 1 so that first coming timelapse or second = 0
@@ -1086,6 +1087,15 @@ static void *motion_loop(void *arg)
         gettimeofday(&tv1, NULL);
         timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
 
+        /* Calculate detection rate limit. Above 5fps we limit the detection
+         * rate to 3fps to reduce load at higher framerates. */
+        cnt->process_thisframe = 0;
+        rate_limit++;
+        if (rate_limit >= (cnt->lastrate / 3)) {
+            rate_limit = 0;
+            cnt->process_thisframe = 1;
+        }
+
         /* since we don't have sanity checks done when options are set,
          * this sanity check must go in the main loop :(, before pre_captures
          * are attempted. */
@@ -1154,17 +1164,11 @@ static void *motion_loop(void *arg)
             }
 
             /* cnt->current_image points to position in ring where to store image, diffs etc. */
+            old_image = cnt->current_image;
             cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_in];
 
             /* Init/clear current_image */
-            {
-                /* Store time with pre_captured image */
-                cnt->current_image->timestamp = cnt->currenttime;
-                localtime_r(&cnt->current_image->timestamp, &cnt->current_image->timestamp_tm);
-
-                /* Store shot number with pre_captured image */
-                cnt->current_image->shot = cnt->shots;
-
+            if (cnt->process_thisframe) {
                 /* set diffs to 0 now, will be written after we calculated diffs in new image */
                 cnt->current_image->diffs = 0;
 
@@ -1175,7 +1179,23 @@ static void *motion_loop(void *arg)
                 /* Clear location data */
                 memset(&cnt->current_image->location, 0, sizeof(cnt->current_image->location));
                 cnt->current_image->total_labels = 0;
+            } else if (cnt->current_image && old_image) {
+                /* not processing this frame: save some important values for next image */                    cnt->current_image->diffs = old_image->diffs;
+                cnt->current_image->timestamp = old_image->timestamp;
+                cnt->current_image->timestamp_tm = old_image->timestamp_tm;
+                cnt->current_image->shot = old_image->shot;
+                cnt->current_image->cent_dist = old_image->cent_dist;
+                cnt->current_image->flags = old_image->flags;
+                cnt->current_image->location = old_image->location;
+                cnt->current_image->total_labels = old_image->total_labels;
             }
+
+            /* Store time with pre_captured image */
+            cnt->current_image->timestamp = cnt->currenttime;
+            localtime_r(&cnt->current_image->timestamp, &cnt->current_image->timestamp_tm);
+
+            /* Store shot number with pre_captured image */
+            cnt->current_image->shot = cnt->shots;
 
         /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
             /* If a camera is not available we keep on retrying every 10 seconds
@@ -1355,75 +1375,77 @@ static void *motion_loop(void *arg)
              *   fraction of the pixels. If this detects possible motion alg_diff_standard
              *   is called.
              */
-            if (cnt->threshold && !cnt->pause) {
-                /* if we've already detected motion and we want to see if there's
-                 * still motion, don't bother trying the fast one first. IF there's
-                 * motion, the alg_diff will trigger alg_diff_standard
-                 * anyway
-                 */
-                if (cnt->detecting_motion || cnt->conf.setup_mode)
-                    cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin);
-                else
-                    cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin);
+            if (cnt->process_thisframe) {
+                if (cnt->threshold && !cnt->pause) {
+                    /* if we've already detected motion and we want to see if there's
+                     * still motion, don't bother trying the fast one first. IF there's
+                     * motion, the alg_diff will trigger alg_diff_standard
+                     * anyway
+                     */
+                    if (cnt->detecting_motion || cnt->conf.setup_mode)
+                        cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin);
+                    else
+                        cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin);
 
-                /* Lightswitch feature - has light intensity changed?
-                 * This can happen due to change of light conditions or due to a sudden change of the camera
-                 * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
-                 * 5 frames to allow the camera to settle.
-                 * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
-                 */
-                if (cnt->conf.lightswitch && !cnt->lost_connection) {
-                    if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
-                        if (debug_level >= CAMERA_DEBUG)
-                            motion_log(-1, 0, "%s: Lightswitch detected", __FUNCTION__);
+                    /* Lightswitch feature - has light intensity changed?
+                     * This can happen due to change of light conditions or due to a sudden change of the camera
+                     * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
+                     * 5 frames to allow the camera to settle.
+                     * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
+                     */
+                    if (cnt->conf.lightswitch && !cnt->lost_connection) {
+                        if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
+                            if (debug_level >= CAMERA_DEBUG)
+                                motion_log(-1, 0, "%s: Lightswitch detected", __FUNCTION__);
 
-                        if (cnt->moved < 5)
-                            cnt->moved = 5;
+                            if (cnt->moved < 5)
+                                cnt->moved = 5;
 
-                        cnt->current_image->diffs = 0;
-                        alg_update_reference_frame(cnt, RESET_REF_FRAME);
+                            cnt->current_image->diffs = 0;
+                            alg_update_reference_frame(cnt, RESET_REF_FRAME);
+                        }
                     }
-                }
 
-                /* Switchfilter feature tries to detect a change in the video signal
-                 * from one camera to the next. This is normally used in the Round
-                 * Robin feature. The algorithm is not very safe.
-                 * The algorithm takes a little time so we only call it when needed
-                 * ie. when feature is enabled and diffs>threshold.
-                 * We do not suspend motion detection like we did for lightswitch
-                 * because with Round Robin this is controlled by roundrobin_skip.
-                 */
-                if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
-                    cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs, 
-                                                                 cnt->current_image->image);
+                    /* Switchfilter feature tries to detect a change in the video signal
+                     * from one camera to the next. This is normally used in the Round
+                     * Robin feature. The algorithm is not very safe.
+                     * The algorithm takes a little time so we only call it when needed
+                     * ie. when feature is enabled and diffs>threshold.
+                     * We do not suspend motion detection like we did for lightswitch
+                     * because with Round Robin this is controlled by roundrobin_skip.
+                     */
+                    if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
+                        cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs, 
+                                                                     cnt->current_image->image);
                     
-                    if (cnt->current_image->diffs <= cnt->threshold) {
-                        cnt->current_image->diffs = 0;
+                        if (cnt->current_image->diffs <= cnt->threshold) {
+                            cnt->current_image->diffs = 0;
                         
-                        if (debug_level >= CAMERA_DEBUG)
-                            motion_log(-1, 0, "%s: Switchfilter detected", __FUNCTION__);
+                            if (debug_level >= CAMERA_DEBUG)
+                                motion_log(-1, 0, "%s: Switchfilter detected", __FUNCTION__);
+                        }
                     }
-                }
 
-                /* Despeckle feature
-                 * First we run (as given by the despeckle_filter option iterations
-                 * of erode and dilate algorithms.
-                 * Finally we run the labelling feature.
-                 * All this is done in the alg_despeckle code.
-                 */
-                cnt->current_image->total_labels = 0;
-                cnt->imgs.largest_label = 0;
-                olddiffs = 0;
+                    /* Despeckle feature
+                     * First we run (as given by the despeckle_filter option iterations
+                     * of erode and dilate algorithms.
+                     * Finally we run the labelling feature.
+                     * All this is done in the alg_despeckle code.
+                     */
+                    cnt->current_image->total_labels = 0;
+                    cnt->imgs.largest_label = 0;
+                    olddiffs = 0;
                 
-                if (cnt->conf.despeckle_filter && cnt->current_image->diffs > 0) {
-                    olddiffs = cnt->current_image->diffs;
-                    cnt->current_image->diffs = alg_despeckle(cnt, olddiffs);
-                } else if (cnt->imgs.labelsize_max) {
-                    cnt->imgs.labelsize_max = 0; /* Disable labeling if enabled */
-                }
+                    if (cnt->conf.despeckle_filter && cnt->current_image->diffs > 0) {
+                        olddiffs = cnt->current_image->diffs;
+                        cnt->current_image->diffs = alg_despeckle(cnt, olddiffs);
+                    } else if (cnt->imgs.labelsize_max) {
+                        cnt->imgs.labelsize_max = 0; /* Disable labeling if enabled */
+                    }
 
-            } else if (!cnt->conf.setup_mode) {
-                cnt->current_image->diffs = 0;
+                } else if (!cnt->conf.setup_mode) {
+                    cnt->current_image->diffs = 0;
+                }
             }
 
             /* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
@@ -1460,34 +1482,31 @@ static void *motion_loop(void *arg)
             /* if we are not noise tuning lets make sure that remote controlled
              * changes of noise_level are used.
              */
-            if (!cnt->conf.noise_tune)
-                cnt->noise = cnt->conf.noise;
+            if (cnt->process_thisframe) {
+                if (!cnt->conf.noise_tune)
+                    cnt->noise = cnt->conf.noise;
 
-            /* threshold tuning if enabled
-             * if we are not threshold tuning lets make sure that remote controlled
-             * changes of threshold are used.
-             */
-            if (cnt->conf.threshold_tune)
-                alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
-            else
-                cnt->threshold = cnt->conf.max_changes;
+                /* threshold tuning if enabled
+                 * if we are not threshold tuning lets make sure that remote controlled
+                 * changes of threshold are used.
+                 */
+                if (cnt->conf.threshold_tune)
+                    alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
+                else
+                    cnt->threshold = cnt->conf.max_changes;
 
-            /* If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
-               we find the center and size coordinates of the motion to be used for text overlays and later
-               for adding the locate rectangle */
-            if (cnt->current_image->diffs > cnt->threshold)
-                 alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
+                /* If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
+                   we find the center and size coordinates of the motion to be used for text overlays and later
+                   for adding the locate rectangle */
+                if (cnt->current_image->diffs > cnt->threshold)
+                    alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
 
-            /* Update reference frame. */
-            /* micro-lighswitch: e.g. neighbors cat switched on the motion sensitive *
-             * frontdoor illumination. Updates are rate-limited to 3 per second at   *
-             * framerates above 5fps to save CPU resources and to keep sensitivity   *
-             * at a constant level.                                                  *
-             */
-            ref_frame_limit++;
-
-            if (ref_frame_limit >= (cnt->lastrate / 3)) {
-                ref_frame_limit = 0;
+                /* Update reference frame. */
+                /* micro-lighswitch: e.g. neighbors cat switched on the motion sensitive *
+                 * frontdoor illumination. Updates are rate-limited to 3 per second at   *
+                 * framerates above 5fps to save CPU resources and to keep sensitivity   *
+                 * at a constant level.                                                  *
+                 */
 
                 if ((cnt->current_image->diffs > cnt->threshold) && 
                     (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window */
@@ -1555,7 +1574,7 @@ static void *motion_loop(void *arg)
 
             /* Add changed pixels to motion-images (for stream) in setup_mode
                and always overlay smartmask (not only when motion is detected) */
-            if (debug_level >= CAMERA_VERBOSE) {
+            if (cnt->conf.setup_mode) {
                 char tmp[PATH_MAX];
                 sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs, 
                         cnt->current_image->total_labels, cnt->noise);
@@ -1745,7 +1764,7 @@ static void *motion_loop(void *arg)
         /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
             /* If CAMERA_VERBOSE enabled output some numbers to console */
-            if (debug_level >= CAMERA_VERBOSE) {
+            if (cnt->conf.setup_mode) {
                 char msg[1024] = "\0";
                 char part[100];
 
@@ -1928,7 +1947,7 @@ static void *motion_loop(void *arg)
                 cnt->locate_motion_style = LOCATE_CROSS;
             else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0)
                 cnt->locate_motion_style = LOCATE_REDCROSS;
-	    else
+            else
                 cnt->locate_motion_style = LOCATE_BOX;
 
             /* Sanity check for smart_mask_speed, silly value disables smart mask */
