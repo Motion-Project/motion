@@ -159,7 +159,8 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 
 
 /* draw a box around the movement */
-void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int style, int mode, int process_thisframe)
+void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
+                       int style, int mode, int process_thisframe)
 {
     unsigned char *out = imgs->out;
     int x, y;
@@ -223,7 +224,8 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 
 
 /* draw a RED box around the movement */
-void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new, int style, int mode, int process_thisframe)
+void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
+                           int style, int mode, int process_thisframe)
 {
     unsigned char *out = imgs->out;
     unsigned char *new_u, *new_v;
@@ -258,6 +260,7 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
             out[width_maxx_y] =~out[width_maxx_y];
         }
     }
+
     if (style == LOCATE_REDBOX) { /* draw a red box on normal images */
         int width_miny = width * cent->miny;
         int width_maxy = width * cent->maxy;

@@ -202,14 +202,20 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
 
     /* draw locate box here when mode = LOCATE_PREVIEW */
     if (cnt->locate_motion_mode == LOCATE_PREVIEW) {
-        if (cnt->locate_motion_style == LOCATE_BOX)
-            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_BOX, LOCATE_NORMAL, cnt->process_thisframe);
-        else if (cnt->locate_motion_style == LOCATE_REDBOX)
-            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDBOX, LOCATE_NORMAL, cnt->process_thisframe);
-        else if (cnt->locate_motion_style == LOCATE_CROSS)
-            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_CROSS, LOCATE_NORMAL, cnt->process_thisframe);
-        else if (cnt->locate_motion_style == LOCATE_REDCROSS)
-            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image, LOCATE_REDCROSS, LOCATE_NORMAL, cnt->process_thisframe);
+
+        if (cnt->locate_motion_style == LOCATE_BOX) {
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+                              LOCATE_BOX, LOCATE_NORMAL, cnt->process_thisframe);
+        } else if (cnt->locate_motion_style == LOCATE_REDBOX) {
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+                                  LOCATE_REDBOX, LOCATE_NORMAL, cnt->process_thisframe);
+        } else if (cnt->locate_motion_style == LOCATE_CROSS) {
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+                              LOCATE_CROSS, LOCATE_NORMAL, cnt->process_thisframe);
+        } else if (cnt->locate_motion_style == LOCATE_REDCROSS) {
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+                                  LOCATE_REDCROSS, LOCATE_NORMAL, cnt->process_thisframe);
+        }     
     }
 }
 
@@ -391,14 +397,20 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
 
     /* Draw location */
     if (cnt->locate_motion_mode == LOCATE_ON) {
-        if (cnt->locate_motion_style == LOCATE_BOX)
-            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOX, LOCATE_BOTH, cnt->process_thisframe);
-        else if (cnt->locate_motion_style == LOCATE_REDBOX)
-            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDBOX, LOCATE_BOTH, cnt->process_thisframe);
-        else if (cnt->locate_motion_style == LOCATE_CROSS)
-            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS, LOCATE_BOTH, cnt->process_thisframe);
-        else if (cnt->locate_motion_style == LOCATE_REDCROSS)
-            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS, LOCATE_BOTH, cnt->process_thisframe);
+
+        if (cnt->locate_motion_style == LOCATE_BOX) {
+            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOX,
+                              LOCATE_BOTH, cnt->process_thisframe);
+        } else if (cnt->locate_motion_style == LOCATE_REDBOX) {
+            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDBOX,
+                                  LOCATE_BOTH, cnt->process_thisframe);
+        } else if (cnt->locate_motion_style == LOCATE_CROSS) {
+            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS, 
+                              LOCATE_BOTH, cnt->process_thisframe);
+        }else if (cnt->locate_motion_style == LOCATE_REDCROSS) {
+            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS, 
+                                  LOCATE_BOTH, cnt->process_thisframe);
+        }    
     }
 
     /* Calculate how centric motion is if configured preview center*/
@@ -513,10 +525,10 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
                 mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q", 
                            &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm, NULL, 0);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 20, cnt->imgs.width, tmp, 
-                          cnt->conf.text_double);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30, cnt->imgs.width, t, 
-                          cnt->conf.text_double);
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 20, 
+                          cnt->imgs.width, tmp, cnt->conf.text_double);
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30, 
+                          cnt->imgs.width, t, cnt->conf.text_double);
             }
 
             /* Output the picture to jpegs and ffmpeg */
@@ -1180,7 +1192,8 @@ static void *motion_loop(void *arg)
                 memset(&cnt->current_image->location, 0, sizeof(cnt->current_image->location));
                 cnt->current_image->total_labels = 0;
             } else if (cnt->current_image && old_image) {
-                /* not processing this frame: save some important values for next image */                    cnt->current_image->diffs = old_image->diffs;
+                /* not processing this frame: save some important values for next image */
+                cnt->current_image->diffs = old_image->diffs;
                 cnt->current_image->timestamp = old_image->timestamp;
                 cnt->current_image->timestamp_tm = old_image->timestamp_tm;
                 cnt->current_image->shot = old_image->shot;
@@ -1338,6 +1351,7 @@ static void *motion_loop(void *arg)
                         tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
                     else
                         tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
+
                     localtime_r(&cnt->connectionlosttime, &tmptime);
                     memset(cnt->current_image->image, 0x80, cnt->imgs.size);
                     mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
@@ -1449,11 +1463,10 @@ static void *motion_loop(void *arg)
             }
 
             /* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
-            if (cnt->smartmask_speed && (cnt->event_nr != cnt->prev_event)) {
-                if (!--smartmask_count) {
-                    alg_tune_smartmask(cnt);
-                    smartmask_count = smartmask_ratio;
-                }
+            if ((cnt->smartmask_speed && (cnt->event_nr != cnt->prev_event)) && 
+                (!--smartmask_count)) {
+                alg_tune_smartmask(cnt);
+                smartmask_count = smartmask_ratio;
             }
 
             /* cnt->moved is set by the tracking code when camera has been asked to move.
@@ -1474,10 +1487,10 @@ static void *motion_loop(void *arg)
             /* if noise tuning was selected, do it now. but only when
              * no frames have been recorded and only once per second
              */
-            if (cnt->conf.noise_tune && cnt->shots == 0) {
-                if (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold))
-                    alg_noise_tune(cnt, cnt->imgs.image_virgin);
-            }
+            if ((cnt->conf.noise_tune && cnt->shots == 0) &&
+                 (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold)))
+                alg_noise_tune(cnt, cnt->imgs.image_virgin);
+            
 
             /* if we are not noise tuning lets make sure that remote controlled
              * changes of noise_level are used.
@@ -1673,9 +1686,9 @@ static void *motion_loop(void *arg)
             } else {
                 /* Done with postcap, so just have the image in the precap buffer */
                 cnt->current_image->flags |= IMAGE_PRECAP;
-		/* gapless movie feature */
-		if ((cnt->conf.event_gap == 0) && (cnt->detecting_motion == 1))
-		    cnt->makemovie = 1;
+                /* gapless movie feature */
+                if ((cnt->conf.event_gap == 0) && (cnt->detecting_motion == 1))
+                    cnt->makemovie = 1;
                 cnt->detecting_motion = 0;
             }
 
@@ -1711,9 +1724,9 @@ static void *motion_loop(void *arg)
             /* Is the movie too long? Then make movies
              * First test for max_movie_time
              */
-            if (cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event)
-                if (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time)
-                    cnt->makemovie = 1;
+            if ((cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event) &&
+                (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time))
+                cnt->makemovie = 1;
 
             /* Now test for quiet longer than 'gap' OR make movie as decided in
              * previous statement.
