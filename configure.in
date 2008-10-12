@@ -375,32 +375,35 @@ fi
 #
 
 if test "${FFMPEG_OK}" = "found"; then
-	AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
+    AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
 	
-	if test -f ${FFMPEG_DIR}/include/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
-		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
-	elif test -f ${FFMPEG_DIR}/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG_DIR}/avformat.h)
-		FFMPEG_CFLAGS="-I${FFMPEG_DIR}"
-	elif test -f ${FFMPEG_DIR}/include/ffmpeg/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/avformat.h)
-		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg"
-	elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
-		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
-		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
-	else
-		AC_MSG_RESULT(not found)
-		FFMPEG_OK="no_found"
-		echo "**********************************************"
-		echo "*       avformat.h not found:                *"
-		echo "*    ALL FFMPEG FEATURES DISABLED            *"
-		echo "*                                            *"
-		echo "* Please read the Motion Guide for help:     *"
-		echo "* http://motion.sourceforge.net              *"
-		echo "**********************************************"
-		echo ""
-	fi
+    if test -f ${FFMPEG_DIR}/include/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
+    elif test -f ${FFMPEG_DIR}/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}"
+    elif test -f ${FFMPEG_DIR}/include/ffmpeg/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg"
+    elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
+    elif test -f ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES" 
+    else
+        AC_MSG_RESULT(not found)
+        FFMPEG_OK="no_found"
+        echo "**********************************************"
+        echo "*       avformat.h not found:                *"
+        echo "*    ALL FFMPEG FEATURES DISABLED            *"
+        echo "*                                            *"
+        echo "* Please read the Motion Guide for help:     *"
+        echo "* http://motion.sourceforge.net              *"
+        echo "**********************************************"
+        echo ""
+    fi
 
 #
 # If ffmpeg libs and headers have been found 
