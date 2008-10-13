@@ -185,6 +185,7 @@ clean: pre-build-info
 dist: distclean updateguide
 	@chmod -R 644 *
 	@chmod 755 configure
+	@chmod 755 version.sh
 
 ################################################################################
 # DISTCLEAN removes all files generated during the configure step in addition  #
