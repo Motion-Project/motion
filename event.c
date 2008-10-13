@@ -370,6 +370,8 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
         char stamp[PATH_MAX] = "";
         const char *moviepath;
+        FILE *fd_dummy = NULL;
+
         /* conf.mpegpath would normally be defined but if someone deleted it by control interface
            it is better to revert to the default than fail */
         if (cnt->conf.moviepath) {
@@ -384,33 +386,23 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
         /* Open a dummy file to check if path is correct */
-        if (myfopen(cnt->extpipefilename, "w") == NULL) {
-            if (errno == ENOENT) {
-                /* create path for file ... */
-                if (create_path(cnt->extpipefilename) == -1) {
-                    motion_log(LOG_ERR, 1, "%s: error opening file %s",
-                               __FUNCTION__, cnt->extpipefilename);          
-                    return ;
-                }
+        fd_dummy = myfopen(cnt->extpipefilename, "w");
 
-                /* and retry opening the file (use file_proto) */
-                if (myfopen(cnt->extpipefilename, "w") == NULL) {
-                    motion_log(LOG_ERR, 1, "%s: error opening file %s",
-                               __FUNCTION__, cnt->extpipefilename);
-                    return ;
-                }
-
-                /* Permission denied */
-            } else if (errno ==  EACCES) {
+        /* TODO: trigger some warning instead of only log an error message */
+        if (fd_dummy == NULL) {
+            /* Permission denied */
+            if (errno ==  EACCES) {
                 motion_log(LOG_ERR, 1, "%s: error opening file %s ... check access "
                            "rights to target directory", __FUNCTION__, cnt->extpipefilename);
                 return ;
             } else {
                 motion_log(LOG_ERR, 1, "%s: error opening file %s", __FUNCTION__, cnt->extpipefilename);
+                return ;
             }    
 
         }            
-                
+        
+        fclose(fd_dummy);        
         unlink(cnt->extpipefilename);
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tm, cnt->extpipefilename, 0);

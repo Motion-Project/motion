@@ -8,29 +8,38 @@ Features
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinksysWVC200SupportPatch ( ... )  
    * Add draw a RED box around the movement as default (Joerg Weber)
    * Add write/read nonblock functions in webhttpd( timeout on read/write). (Angel Carpintero) 
-   * Added support for ffmpeg-2008-04-09 port version of FreeBSD. (Angel Carpintero)
    * More changes in option names from http://www.lavrsen.dk/twiki/bin/view/Motion/IntuitiveOptionNamesDiscussion
      (Angel Carpintero)
    * motion_locate new parameter names : red , center , redcross  instead of only on, off. (Angel Carpintero)
-   * Remove mjpegtools dependencies and integrate only needed functions from library. (Angel Carpintero)
    * External pipe to allow external video encoders 
      http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Bill Payne, Angel Carpintero)
-   * Allow change/setup framerate in FreeBSD using pwcbsd. (Angel Carpintero)
    * Split locate_motion into separate 'mode' and 'style' option to allow all
      possible combinations. (Joerg Weber)
-   * Get rid of ffmpeg-config in configure.in for debian. (Angel Carpintero)
    * Implement 'gapless' event mode to allow for recording of movies without 'holes'. (Joerg Weber)
    * Limit detection rate to 3fps at framerates above 5fps, to reduce CPU load. (Joerg Weber)
+
+Bugfixes
+   * Fix fd leaks in external pipe. (Angel Carpintero)
+
+3.2.11 Summary of Changes
+
+Features
+   * Added support for ffmpeg-2008-04-09 port version of FreeBSD.
+   * Remove mjpegtools dependencies and integrate only needed functions from library. (Angel Carpintero)
+   * Allow change/setup framerate in FreeBSD using pwcbsd. (Angel Carpintero)
+   * Get rid of ffmpeg-config in configure.in for debian. (Angel Carpintero)
+
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
    * Add a new parameter netcam_tolerant_check, to be less strict with some buggy network cameras firmwares.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
-   * Fix round robin in BSD switching to METEOR_CAP_SINGLE. (Angel Carpintero) 
+   * Fix round robin in BSD switching to METEOR_CAP_SINGLE. (Angel Carpintero)
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes. (Angel Carpintero)
    * Fix v4l2_palette http://www.lavrsen.dk/twiki/bin/view/Motion/UvcvideoMjpegPatch (Gerrit Hannaert)
    * Fix warning for x86_64 in conf.c using pointers LP64 compliant ( Angel Carpintero ).
+
 
 3.2.10.1 Summary of Changes
 
