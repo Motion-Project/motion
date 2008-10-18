@@ -65,7 +65,7 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 
     /* If errno_flag is set, add on the library error message */
     if (errno_flag) {
-        strcat(buf, ": ");
+        strncat(buf, ": ", 1024 - strlen(buf));
         n += 2;
         /*
          * this is bad - apparently gcc/libc wants to use the non-standard GNU
@@ -75,15 +75,15 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 #if (defined(BSD))
         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
 #else
-        strcat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)));
+        strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
     }
     /* If 'level' is not negative, send the message to the syslog */
     if (level >= 0)
-        syslog(level, buf);
+        syslog(level, "%s", buf);
 
     /* For printing to stderr we need to add a newline */
-    strcat(buf, "\n");
+    strncat(buf, "\n", 1024 - strlen(buf));
     fputs(buf, stderr);
     fflush(stderr);
 

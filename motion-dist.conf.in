@@ -591,16 +591,16 @@ quiet on
 ############################################################
 
 # Log to the database when creating motion triggered picture file  (default: on)
-sql_log_picture on
+; sql_log_picture on
 
 # Log to the database when creating a snapshot image file (default: on)
-sql_log_snapshot on
+; sql_log_snapshot on
 
 # Log to the database when creating motion triggered movie file (default: off)
-sql_log_movie off
+; sql_log_movie off
 
 # Log to the database when creating timelapse movies file (default: off)
-sql_log_timelapse off
+; sql_log_timelapse off
 
 # SQL query string that is sent to the database
 # Use same conversion specifiers has for text features
@@ -609,7 +609,7 @@ sql_log_timelapse off
 # %f = filename with full path
 # Default value:
 # insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
+; sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 
 
 ############################################################

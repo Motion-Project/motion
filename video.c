@@ -374,9 +374,9 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
                 motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCGTUNER)", __FUNCTION__);
             } else {
                 if (vid_tuner.flags & VIDEO_TUNER_LOW) 
-                    frequnits = freq*16; /* steps of 1/16 KHz */
+                    frequnits = freq * 16; /* steps of 1/16 KHz */
                 else 
-                    frequnits = (freq*10)/625;
+                    frequnits = (freq * 10) / 625;
                 
                 if (ioctl(dev, VIDIOCSFREQ, &frequnits) == -1) {
                     motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCSFREQ)", __FUNCTION__);
@@ -453,7 +453,7 @@ static int v4l_open_vidpipe(void)
         }
         
         /* Read vloopback version*/
-        if (!fgets(buffer, 255, vloopbacks)) {
+        if (!fgets(buffer, sizeof(buffer), vloopbacks)) {
             motion_log(LOG_ERR, 1, "%s: Unable to read vloopback version", __FUNCTION__);
             return -1;
         }
@@ -462,13 +462,13 @@ static int v4l_open_vidpipe(void)
         
         /* Read explanation line */
         
-        if (!fgets(buffer, 255, vloopbacks)) {
+        if (!fgets(buffer, sizeof(buffer), vloopbacks)) {
             motion_log(LOG_ERR, 1, "%s: Unable to read vloopback explanation line", 
                        __FUNCTION__);
             return -1;
         }
         
-        while (fgets(buffer, 255, vloopbacks)) {
+        while (fgets(buffer, sizeof(buffer), vloopbacks)) {
             if (strlen(buffer) > 1) {
                 buffer[strlen(buffer)-1] = 0;
                 loop = strtok(buffer, "\t");
@@ -478,7 +478,7 @@ static int v4l_open_vidpipe(void)
                 ostatus = strtok(NULL, "\t");
 
                 if (istatus[0] == '-') {
-                    snprintf(pipepath, 255, "/dev/%s", input);
+                    snprintf(pipepath, sizeof(pipepath), "/dev/%s", input);
                     pipe_fd = open(pipepath, O_RDWR);
 
                     if (pipe_fd >= 0) {
@@ -508,9 +508,9 @@ static int v4l_open_vidpipe(void)
 
         while ((dirp = readdir(dir)) != NULL) {
             if (!strncmp(dirp->d_name, "video", 5)) {
-                strncpy(buffer, prefix, 255);
-                strncat(buffer, dirp->d_name, 255);
-                strncat(buffer, "/name", 255);
+                strncpy(buffer, prefix, sizeof(buffer));
+                strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
+                strncat(buffer, "/name", sizeof(buffer) - strlen(buffer));
 
                 if ((fd = open(buffer, O_RDONLY)) >= 0) {
                     if ((read(fd, buffer, sizeof(buffer)-1)) < 0) {
@@ -543,9 +543,9 @@ static int v4l_open_vidpipe(void)
 
                     if (tnum < low) {
                         strcpy(buffer, "/dev/");
-                        strcat(buffer, dirp->d_name);
+                        strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
                         if ((tfd = open(buffer, O_RDWR)) >= 0) {
-                            strcpy(pipepath, buffer);
+                            strncpy(pipepath, buffer, sizeof(pipepath));
 
                             if (pipe_fd >= 0) 
                                 close(pipe_fd);

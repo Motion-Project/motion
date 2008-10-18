@@ -17,9 +17,13 @@ Features
      possible combinations. (Joerg Weber)
    * Implement 'gapless' event mode to allow for recording of movies without 'holes'. (Joerg Weber)
    * Limit detection rate to 3fps at framerates above 5fps, to reduce CPU load. (Joerg Weber)
+   * Fix warning for syslog() , Added support for some new bayer palettes introduced in kernel 2.6.27. 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
+     Increased buffer in ffmpeg to allow encoding at 1600x1200 (Angel Carpintero)
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
+   * Avoid possible stack smashing in v4l_open_vidpipe(). (Angel Carpintero)
 
 3.2.11 Summary of Changes
 

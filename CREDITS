@@ -410,6 +410,10 @@ Angel Carpintero
    * Allow change/setup framerate in FreeBSD using pwcbsd
    * Get rid of ffmpeg-config in configure.in for debian.
    * Fix warning for x86_64 in conf.c using pointers LP64 compliant.
+   * Fix warning for syslog() , Added support for some new bayer palettes introduced in kernel 2.6.27.
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
+     Increased buffer in ffmpeg to allow encoding at 1600x1200
+   * Avoid possible stack smashing in v4l_open_vidpipe().
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

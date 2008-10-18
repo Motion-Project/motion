@@ -455,7 +455,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
         /* allocate output buffer */
         /* XXX: API change will be done */
         /* ffmpeg->video_outbuf_size = 200000 */
-        ffmpeg->video_outbuf_size = ffmpeg->c->width * 256;
+        ffmpeg->video_outbuf_size = ffmpeg->c->width * 512;
         ffmpeg->video_outbuf = mymalloc(ffmpeg->video_outbuf_size);
     }
 

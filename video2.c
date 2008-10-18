@@ -17,7 +17,7 @@
         V4L2_PIX_FMT_YUV422P,
         V4L2_PIX_FMT_YUV420,   (tested)
         V4L2_PIX_FMT_YUYV      (tested)
- 
+
  *  - setting tuner - NOT TESTED 
  *  - access to V4L2 device controls is missing. Partially added but requires some improvements likely.
  *  - changing resolution at run-time may not work. 
@@ -31,7 +31,13 @@
  * Default sensor settings used by ZC0301 driver are very reasonable choosen.
  * apparently brigthness should be controlled automatically by motion still for light compensation.
  * it can be done by adjusting ADC gain and also exposure time.
- 
+
+ * Kernel 2.6.27
+    
+ V4L2_PIX_FMT_SGBRG8   v4l2_fourcc('G', 'B', 'R', 'G')   8  GBGB.. RGRG.. 
+ V4L2_PIX_FMT_SBGGR16  v4l2_fourcc('B', 'Y', 'R', '2')  16  BGBG.. GRGR.. 
+ V4L2_PIX_FMT_SPCA561  v4l2_fourcc('S', '5', '6', '1') 
+
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -80,6 +86,18 @@
 #define V4L2_PIX_FMT_SN9C10X v4l2_fourcc('S','9','1','0')  /* SN9C10x compression */
 #endif
 
+#ifndef V4L2_PIX_FMT_SGBRG8
+#define V4L2_PIX_FMT_SGBRG8  v4l2_fourcc('G', 'B', 'R', 'G') /*  8  GBGB.. RGRG.. */
+#endif
+
+#ifndef V4L2_PIX_FMT_SBGGR16
+#define V4L2_PIX_FMT_SBGGR16 v4l2_fourcc('B', 'Y', 'R', '2') /* 16  BGBG.. GRGR.. */
+#endif
+
+#ifndef V4L2_PIX_FMT_SPCA561
+#define V4L2_PIX_FMT_SPCA561  v4l2_fourcc('S', '5', '6', '1') /* compressed GBRG bayer */
+#endif
+ 
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
@@ -285,7 +303,10 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
 
     static const u32 supported_formats[] = {    /* higher index means better chance to be used */
         V4L2_PIX_FMT_SN9C10X,
+        V4L2_PIX_FMT_SBGGR16,
         V4L2_PIX_FMT_SBGGR8,
+        V4L2_PIX_FMT_SPCA561,
+        V4L2_PIX_FMT_SGBRG8,
         V4L2_PIX_FMT_MJPEG,
         V4L2_PIX_FMT_JPEG,
         V4L2_PIX_FMT_RGB24,
@@ -853,6 +874,10 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_JPEG:
             return conv_jpeg2yuv420(cnt, map, the_buffer, width, height);
 */
+        /* FIXME: quick hack to allow work all bayer formats */            
+        case V4L2_PIX_FMT_SBGGR16:            
+        case V4L2_PIX_FMT_SGBRG8:            
+        case V4L2_PIX_FMT_SPCA561:            
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
             bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *) the_buffer->ptr, width, height);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
