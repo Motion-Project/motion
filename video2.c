@@ -34,9 +34,15 @@
 
  * Kernel 2.6.27
     
+ V4L2_PIX_FMT_SPCA501 v4l2_fourcc('S', '5', '0', '1')  YUYV per line 
+ V4L2_PIX_FMT_SPCA505 v4l2_fourcc('S', '5', '0', '5')  YYUV per line 
+ V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8')  YUVY per line 
  V4L2_PIX_FMT_SGBRG8   v4l2_fourcc('G', 'B', 'R', 'G')   8  GBGB.. RGRG.. 
  V4L2_PIX_FMT_SBGGR16  v4l2_fourcc('B', 'Y', 'R', '2')  16  BGBG.. GRGR.. 
- V4L2_PIX_FMT_SPCA561  v4l2_fourcc('S', '5', '6', '1') 
+ V4L2_PIX_FMT_SPCA561 v4l2_fourcc('S', '5', '6', '1')  compressed GBRG bayer 
+ V4L2_PIX_FMT_PJPG     v4l2_fourcc('P', 'J', 'P', 'G')  Pixart 73xx JPEG
+ V4L2_PIX_FMT_PAC207 v4l2_fourcc('P', '2', '0', '7') compressed BGGR bayer 
+
 
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -97,7 +103,12 @@
 #ifndef V4L2_PIX_FMT_SPCA561
 #define V4L2_PIX_FMT_SPCA561  v4l2_fourcc('S', '5', '6', '1') /* compressed GBRG bayer */
 #endif
- 
+
+#ifndef V4L2_PIX_FMT_PJPG
+#define V4L2_PIX_FMT_PJPG     v4l2_fourcc('P', 'J', 'P', 'G') /* Pixart 73xx JPEG */
+#endif
+
+
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
@@ -866,6 +877,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
             memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);
             return 0;
 
+        case V4L2_PIX_FMT_PJPG:            
         case V4L2_PIX_FMT_JPEG:            
         case V4L2_PIX_FMT_MJPEG:
             return mjpegtoyuv420p(map, (unsigned char *) the_buffer->ptr, width, height, 

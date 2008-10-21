@@ -668,9 +668,12 @@ void preview_save(struct context *cnt)
         /* Use filename of movie i.o. jpeg_filename when set to 'preview' */
         use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 
-        if ( (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) 
+#ifdef HAVE_FFMPEG        
+        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) 
             && !use_imagepath) {
-
+#else
+        if ((cnt->conf.useextpipe && cnt->extpipe) && !use_imagepath) {            
+#endif            
             if (cnt->conf.useextpipe && cnt->extpipe) {
                 basename_len = strlen(cnt->extpipefilename) + 1;
                 strncpy(previewname, cnt->extpipefilename, basename_len);
