@@ -115,7 +115,7 @@ struct config conf_template = {
     on_event_end:                   NULL,
     mask_file:                      NULL,
     smart_mask_speed:               0,
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)    
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     sql_log_image:                  1,
     sql_log_snapshot:               1,
     sql_log_movie:                  0,
@@ -124,10 +124,13 @@ struct config conf_template = {
     database_type:                  NULL,
     database_dbname:                NULL,
     database_host:                  "localhost",
-    database_user:                   NULL,
+    database_user:                  NULL,
     database_password:              NULL,
     database_port:                  0,
+#ifdef HAVE_SQLITE3    
+    sqlite3_db:                     NULL,
 #endif    
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */ 
     on_picture_save:                NULL,
     on_motion_detected:             NULL,
     on_area_detected:               NULL,
@@ -1270,12 +1273,12 @@ config_param config_params[] = {
     print_string
     },
 
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     {
     "sql_log_picture",
     "\n############################################################\n"
-    "# Common Options For MySQL and PostgreSQL database features.\n"
-    "# Options require the MySQL/PostgreSQL options to be active also.\n"
+    "# Common Options for database features.\n"
+    "# Options require the database options to be active also.\n"
     "############################################################\n\n"
     "# Log to the database when creating motion triggered image file  (default: on)",
     0,
@@ -1326,7 +1329,7 @@ config_param config_params[] = {
     "\n############################################################\n"
     "# Database Options \n"
     "############################################################\n\n"
-    "# database type : mysql, postgresql (default : not defined)",
+    "# database type : mysql, postgresql, sqlite3 (default : not defined)",
     0,
     CONF_OFFSET(database_type),
     copy_string,
@@ -1373,7 +1376,21 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
+#ifdef HAVE_SQLITE3
+    {
+    "sqlite3_db",
+    "\n############################################################\n"
+    "# Database Options For SQLite3\n"
+    "############################################################\n\n"
+    "# SQLite3 database to log to (default: not defined)",
+    0,
+    CONF_OFFSET(sqlite3_db),
+    copy_string,
+    print_string
+    },
+#endif /* HAVE_SQLITE3 */
+
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
     {
     "video_pipe",
     "\n############################################################\n"

@@ -106,7 +106,7 @@ static void on_motion_detected_command(struct context *cnt,
         exec_command(cnt, cnt->conf.on_motion_detected, NULL, 0);
 }
 
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
 
 static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             unsigned char *dummy ATTRIBUTE_UNUSED,
@@ -166,10 +166,22 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             }
         }
 #endif /* HAVE_PGSQL */
+
+#ifdef HAVE_SQLITE3
+        if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.sqlite3_db)) {
+            int res;
+            char *errmsg = 0;
+            res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+            if( res != SQLITE_OK ) {
+                motion_log(LOG_ERR, 0, "%s: SQLite error was %s", __FUNCTION__,  errmsg);
+                sqlite3_free(errmsg);
+            }
+        }
+#endif /* HAVE_SQLITE3 */
     }
 }
 
-#endif /* defined HAVE_MYSQL || defined HAVE_PGSQL */
+#endif /* defined HAVE_MYSQL || defined HAVE_PGSQL || defined(HAVE_SQLITE3) */
 
 static void on_area_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *dummy1 ATTRIBUTE_UNUSED,
@@ -710,7 +722,7 @@ struct event_handlers {
 };
 
 struct event_handlers event_handlers[] = {
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) 
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) 
     {
     EVENT_FILECREATE,
     event_sqlnewfile

@@ -414,6 +414,8 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
      Increased buffer in ffmpeg to allow encoding at 1600x1200
    * Avoid possible stack smashing in v4l_open_vidpipe().
+   * Allow compile with OpenSuse ffmpeg package (15594svn-20081010)
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
@@ -447,6 +449,9 @@ Miguel Freitas
 Aaron Gage
    * Pointed me to the vid_mmap/int problem when calling SYNC in
      video.c
+
+Giacomo Graziosi
+   * Sqlite3 support http://www.lavrsen.dk/twiki/bin/view/Motion/SQLite3Patch
 
 Christophe Grenier
    * Fixed some file descriptor leaks in webcam.c and netcam.c.

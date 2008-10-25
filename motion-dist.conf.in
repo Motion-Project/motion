@@ -585,10 +585,10 @@ quiet on
 # Some hangs the motion thread. Some even hangs the PC! (default: none)
 ; on_camera_lost value
 
-############################################################
-# Common Options For MySQL and PostgreSQL database features.
-# Options require the MySQL/PostgreSQL options to be active also.
-############################################################
+#####################################################################
+# Common Options for database features.
+# Options require database options to be active also.
+#####################################################################
 
 # Log to the database when creating motion triggered picture file  (default: on)
 ; sql_log_picture on
@@ -616,7 +616,7 @@ quiet on
 # Database Options 
 ############################################################
 
-# database type : mysql, postgresql (default : not defined)
+# database type : mysql, postgresql, sqlite3 (default : not defined)
 ; database_type value
 
 # database to log to (default: not defined)
@@ -634,6 +634,14 @@ quiet on
 # Port on which the database is located 
 #  mysql 3306 , postgresql 5432 (default: not defined)
 ; database_port value
+
+############################################################
+# Database Options For SQLite3
+############################################################
+ 
+# SQLite3 database (file path) (default: not defined)
+; sqlite3_db value
+
 
 
 ############################################################

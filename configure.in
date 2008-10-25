@@ -446,6 +446,26 @@ fi
 
 
 #
+# Check SQLITE3
+#
+
+SQLITE3_SUPPORT="no"
+saved_CFLAGS=$CFLAGS
+saved_LIBS=$LIBS
+
+AC_CHECK_LIB(sqlite3, sqlite3_open,
+[
+TEMP_LIBS="$TEMP_LIBS -lsqlite3"
+SQLITE3_SUPPORT="yes"
+AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 support])
+]
+)
+
+CFLAGS=$saved_CFLAGS
+LIBS=$saved_LIBS
+
+
+#
 # Check Mysql
 #
 
@@ -1168,6 +1188,12 @@ else
 	echo "FFmpeg Support:      No"
 fi
 
+if test "${SQLITE3_SUPPORT}" = "yes"; then
+	echo "SQLite3 Support:     Yes"
+else
+	echo "SQLite3 Support:     No"
+fi
+
 if test "${MYSQL_SUPPORT}" = "yes"; then
 	echo "MYSQL Support:       Yes"
 else
@@ -1181,9 +1207,11 @@ else
 fi
 echo 
 
+
 echo "CFLAGS: $CFLAGS"
 echo "LIBS: $LIBS"
 echo "LDFLAGS: $LDFLAGS"
+
 
 echo
 echo  "Install prefix:       $prefix"

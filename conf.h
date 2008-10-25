@@ -100,6 +100,7 @@ struct config {
     const char *database_host;
     const char *database_user;
     const char *database_password;
+    const char *sqlite3_db;
     int database_port;
     char *on_picture_save;
     char *on_area_detected;

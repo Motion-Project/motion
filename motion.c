@@ -768,8 +768,24 @@ static int motion_init(struct context *cnt)
 #endif /* BSD */
 #endif /*WITHOUT_V4L*/
 
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
+        motion_log(LOG_INFO, 0, "%s: Database backend %s", __FUNCTION__, 
+                  cnt->conf.database_type);
+        
+#ifdef HAVE_SQLITE3
+    if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.sqlite3_db) {
+        motion_log(LOG_INFO, 0, "%s: DB %s", __FUNCTION__,
+                   cnt->conf.sqlite3_db);
+
+		if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
+			motion_log(LOG_ERR, 0, "%s: Can't open database %s : %s\n", __FUNCTION__, 
+                       cnt->conf.sqlite3_db, sqlite3_errmsg(cnt->database_sqlite3));
+			sqlite3_close(cnt->database_sqlite3);
+			exit(1);
+		}
+    }
+#endif /* HAVE_SQLITE3 */
 
 #ifdef HAVE_MYSQL
         if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {               
@@ -824,7 +840,7 @@ static int motion_init(struct context *cnt)
                         cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
     }
 
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
@@ -991,6 +1007,12 @@ static void motion_cleanup(struct context *cnt)
         free(cnt->eventtime_tm);
         cnt->eventtime_tm = NULL;
     }
+
+#ifdef HAVE_SQLITE3    
+    /* Close the SQLite database */
+    if (cnt->conf.sqlite3_db)
+        sqlite3_close(cnt->database_sqlite3);
+#endif /* HAVE_SQLITE3 */
 }
 
 /**
@@ -1982,7 +2004,8 @@ static void *motion_loop(void *arg)
                 smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
             }
 
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+
             /* Set the sql mask file according to the SQL config options
              * We update it for every frame in case the config was updated
              * via remote control.
@@ -1991,7 +2014,7 @@ static void *motion_loop(void *arg)
                             cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
                             cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
                             cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) */
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
 
         }
 

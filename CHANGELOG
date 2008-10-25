@@ -20,10 +20,13 @@ Features
    * Fix warning for syslog() , Added support for some new bayer palettes introduced in kernel 2.6.27. 
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
      Increased buffer in ffmpeg to allow encoding at 1600x1200 (Angel Carpintero)
+   * Sqlite3 support http://www.lavrsen.dk/twiki/bin/view/Motion/SQLite3Patch (Giacomo Graziosi)
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
    * Avoid possible stack smashing in v4l_open_vidpipe(). (Angel Carpintero)
+   * Allow compile with OpenSuse ffmpeg package (15594svn-20081010) 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400 (Angel Carpintero)
 
 3.2.11 Summary of Changes
 

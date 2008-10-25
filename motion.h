@@ -17,6 +17,11 @@
 #include <mysql.h>
 #endif
 
+#ifdef HAVE_SQLITE3
+#include <sqlite3.h>
+#endif
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #define __USE_GNU
@@ -371,8 +376,12 @@ struct context {
     struct stream stream;
     int stream_count;
     
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL)
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     int sql_mask;
+#endif
+
+#ifdef HAVE_SQLITE3
+    sqlite3 *database_sqlite3;
 #endif
 
 #ifdef HAVE_MYSQL
