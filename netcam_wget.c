@@ -280,8 +280,10 @@ int rbuf_peek(netcam_context_ptr netcam, char *store)
         res = netcam_recv (netcam, netcam->response->buffer,
                            sizeof (netcam->response->buffer));
 
-        if (res <= 0)
+        if (res <= 0) {
+            *store = '\0';
             return res;
+        }
 
         netcam->response->buffer_left = res;
     }

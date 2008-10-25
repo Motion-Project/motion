@@ -18,9 +18,6 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have SQLITE3 support */
-#undef HAVE_SQLITE3
-
 /* Define to 1 if you have MySQL support */
 #undef HAVE_MYSQL
 
@@ -29,6 +26,9 @@
 
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
+
+/* Define to 1 if you have SQLITE3 support */
+#undef HAVE_SQLITE3
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -93,8 +93,8 @@
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
-/* The size of `short int', as computed by sizeof. */
-#undef SIZEOF_SHORT_INT
+/* The size of `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
 
 /* The size of `void *', as computed by sizeof. */
 #undef SIZEOF_VOID_P

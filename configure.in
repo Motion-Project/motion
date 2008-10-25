@@ -450,19 +450,31 @@ fi
 #
 
 SQLITE3_SUPPORT="no"
-saved_CFLAGS=$CFLAGS
-saved_LIBS=$LIBS
-
-AC_CHECK_LIB(sqlite3, sqlite3_open,
-[
-TEMP_LIBS="$TEMP_LIBS -lsqlite3"
-SQLITE3_SUPPORT="yes"
-AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 support])
-]
+AC_ARG_WITH(sqlite3,
+    [  --without-sqlite3       Disable sqlite3 support in motion.
+    ],
+    SQLITE3="$withval"
+    # if not given argument, assume standard
 )
 
-CFLAGS=$saved_CFLAGS
-LIBS=$saved_LIBS
+if test "${SQLITE3}" = "no"; then
+    AC_MSG_CHECKING(for sqlite3)
+    AC_MSG_RESULT(skipping)
+else
+    saved_CFLAGS=$CFLAGS
+    saved_LIBS=$LIBS
+
+    AC_CHECK_LIB(sqlite3, sqlite3_open,
+    [
+    TEMP_LIBS="$TEMP_LIBS -lsqlite3"
+    SQLITE3_SUPPORT="yes"
+    AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 support])
+    ]
+    )
+
+    CFLAGS=$saved_CFLAGS
+    LIBS=$saved_LIBS
+fi    
 
 
 #
@@ -763,7 +775,6 @@ AC_CHECK_FUNCS(get_current_dir_name)
 # Check if v4l2 is available
 SUPPORTED_V4L2=false
 SUPPORTED_V4L2_old=false
-
 
 if test "${V4L}" = "no"; then
 	AC_MSG_CHECKING(for V42L support)
