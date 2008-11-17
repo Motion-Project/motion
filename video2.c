@@ -829,26 +829,21 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     vid_source->buf.memory = V4L2_MEMORY_MMAP;
 
     if (xioctl(vid_source->fd, VIDIOC_DQBUF, &vid_source->buf) == -1) {
-
-        /* some drivers return EIO when there is no signal, 
-           driver might dequeue an (empty) buffer despite
-           returning an error, or even stop capturing.
-        */
-        if (errno == EIO) {
-            vid_source->pframe++; 
-            if ((u32)vid_source->pframe >= vid_source->req.count) 
-                vid_source->pframe = 0;
-            vid_source->buf.index = vid_source->pframe;
-            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF: EIO (vid_source->pframe %d)", 
-                       __FUNCTION__, vid_source->pframe);
+        switch (errno) {
+        case EAGAIN:
+            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF (EAGAIN:)", __FUNCTION__);
+            pthread_sigmask(SIG_UNBLOCK, &old, NULL);
             return 1;
+        case EIO: /* Ignore or better return 1 and discard this image */
+            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF (EIO)", __FUNCTION__);
+            pthread_sigmask(SIG_UNBLOCK, &old, NULL);
+            return 2;
+        default:
+            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF", __FUNCTION__);
+            pthread_sigmask(SIG_UNBLOCK, &old, NULL);
+            return -1;
         }
-
-        motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF", __FUNCTION__);
-        pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-
-        return -1;
-    }
+    }        
 
     vid_source->pframe = vid_source->buf.index;
     vid_source->buffers[vid_source->buf.index].used = vid_source->buf.bytesused;

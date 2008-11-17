@@ -893,7 +893,7 @@ int vid_start(struct context *cnt)
  *    -1                        Fatal V4L error
  *    -2                        Fatal Netcam error
  *    Positive numbers...
- *    with bit 0 set            Non fatal V4L error (not implemented)
+ *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
 int vid_next(struct context *cnt, unsigned char *map)

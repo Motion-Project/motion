@@ -426,7 +426,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     codec = avcodec_find_encoder(c->codec_id);
 
     if (!codec) {
-        motion_log(LOG_ERR, 1, "%s: Codec not found", __FUNCTION__);
+        motion_log(LOG_ERR, 0, "%s: Codec %s not found", __FUNCTION__, ffmpeg_video_codec);
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
@@ -441,7 +441,8 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (avcodec_open(c, codec) < 0) {
         /* Release the lock. */
         pthread_mutex_unlock(&global_lock);
-        motion_log(LOG_ERR, 1, "%s: avcodec_open - could not open codec", __FUNCTION__);
+        motion_log(LOG_ERR, 0, "%s: avcodec_open - could not open codec %s", __FUNCTION__, 
+                   ffmpeg_video_codec);
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
@@ -463,7 +464,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     ffmpeg->picture = avcodec_alloc_frame();
 
     if (!ffmpeg->picture) {
-        motion_log(LOG_ERR, 1, "%s: avcodec_alloc_frame - could not alloc frame", __FUNCTION__);
+        motion_log(LOG_ERR, 0, "%s: avcodec_alloc_frame - could not alloc frame", __FUNCTION__);
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
