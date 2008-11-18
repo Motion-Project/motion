@@ -37,11 +37,11 @@
  V4L2_PIX_FMT_SPCA501 v4l2_fourcc('S', '5', '0', '1')  YUYV per line 
  V4L2_PIX_FMT_SPCA505 v4l2_fourcc('S', '5', '0', '5')  YYUV per line 
  V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8')  YUVY per line 
- V4L2_PIX_FMT_SGBRG8   v4l2_fourcc('G', 'B', 'R', 'G')   8  GBGB.. RGRG.. 
- V4L2_PIX_FMT_SBGGR16  v4l2_fourcc('B', 'Y', 'R', '2')  16  BGBG.. GRGR.. 
+ V4L2_PIX_FMT_SGBRG8  v4l2_fourcc('G', 'B', 'R', 'G')   8  GBGB.. RGRG.. 
+ V4L2_PIX_FMT_SBGGR16 v4l2_fourcc('B', 'Y', 'R', '2')  16  BGBG.. GRGR.. 
  V4L2_PIX_FMT_SPCA561 v4l2_fourcc('S', '5', '6', '1')  compressed GBRG bayer 
- V4L2_PIX_FMT_PJPG     v4l2_fourcc('P', 'J', 'P', 'G')  Pixart 73xx JPEG
- V4L2_PIX_FMT_PAC207 v4l2_fourcc('P', '2', '0', '7') compressed BGGR bayer 
+ V4L2_PIX_FMT_PJPG    v4l2_fourcc('P', 'J', 'P', 'G')  Pixart 73xx JPEG
+ V4L2_PIX_FMT_PAC207  v4l2_fourcc('P', '2', '0', '7')  compressed BGGR bayer 
 
 
  *
@@ -213,8 +213,8 @@ static int v4l2_select_input(src_v4l2_t * vid_source, int in, int norm, unsigned
     struct v4l2_standard standard;
     v4l2_std_id std_id;
 
-    if (in == 8)
-        in = 0;
+    if (in == IN_DEFAULT)
+        in = IN_TV;
 
     /* Set the input. */
     memset (&input, 0, sizeof (input));
@@ -315,9 +315,9 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
     static const u32 supported_formats[] = {    /* higher index means better chance to be used */
         V4L2_PIX_FMT_SN9C10X,
         V4L2_PIX_FMT_SBGGR16,
-        V4L2_PIX_FMT_SBGGR8,
         V4L2_PIX_FMT_SPCA561,
         V4L2_PIX_FMT_SGBRG8,
+        V4L2_PIX_FMT_SBGGR8,
         V4L2_PIX_FMT_MJPEG,
         V4L2_PIX_FMT_JPEG,
         V4L2_PIX_FMT_RGB24,
@@ -348,7 +348,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
                     index_format = cnt->conf.v4l2_palette;
                     motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
                                fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24);
-                    i = 10;
+                    i = sizeof(supported_formats)/sizeof(u32);
                     break;
                 }
                 index_format = i;

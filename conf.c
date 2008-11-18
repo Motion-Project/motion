@@ -104,7 +104,7 @@ struct config conf_template = {
     tuner_device:                   NULL,
 #endif
     video_device:                   VIDEO_DEVICE,
-    v4l2_palette:                   8,        
+    v4l2_palette:                   11,        
     vidpipe:                        NULL,
     filepath:                       NULL,
     imagepath:                      DEF_IMAGEPATH,
@@ -224,19 +224,22 @@ config_param config_params[] = {
     "# to capture from those supported by your videodevice. (default: 8)\n"
     "# E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and\n"
     "# V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.\n"
-    "# Setting v4l2_palette to 1 forces motion to use V4L2_PIX_FMT_SBGGR8\n"
+    "# Setting v4l2_palette to 4 forces motion to use V4L2_PIX_FMT_SBGGR8\n"
     "# instead.\n"
     "#\n"
     "# Values :\n"
-    "# V4L2_PIX_FMT_SN9C10X : 0  'S910'\n"
-    "# V4L2_PIX_FMT_SBGGR8  : 1  'BA81'\n"
-    "# V4L2_PIX_FMT_MJPEG   : 2  'MJPEG'\n"
-    "# V4L2_PIX_FMT_JPEG    : 3  'JPEG'\n"
-    "# V4L2_PIX_FMT_RGB24   : 4  'RGB3'\n"
-    "# V4L2_PIX_FMT_UYVY    : 5  'UYVY'\n"
-    "# V4L2_PIX_FMT_YUYV    : 6  'YUYV'\n"
-    "# V4L2_PIX_FMT_YUV422P : 7  '422P'\n"
-    "# V4L2_PIX_FMT_YUV420  : 8  'YU12'",
+    "# V4L2_PIX_FMT_SN9C10X  :  0  'S910'\n"
+    "# V4L2_PIX_FMT_SBGGR16  :  1  'BYR2'\n" 
+    "# V4L2_PIX_FMT_SPCA561  :  2  'S651'\n"
+    "# V4L2_PIX_FMT_SGBRG8   :  3  'GBRG'\n"
+    "# V4L2_PIX_FMT_SBGGR8   :  4  'BA81'\n"
+    "# V4L2_PIX_FMT_MJPEG    :  5  'MJPEG'\n"
+    "# V4L2_PIX_FMT_JPEG     :  6  'JPEG'\n"
+    "# V4L2_PIX_FMT_RGB24    :  7  'RGB3'\n"
+    "# V4L2_PIX_FMT_UYVY     :  8  'UYVY'\n"
+    "# V4L2_PIX_FMT_YUYV     :  9  'YUYV'\n" 
+    "# V4L2_PIX_FMT_YUV422P  : 10  '422P'\n"
+    "# V4L2_PIX_FMT_YUV420   : 11  'YU12'\n",
     0,
     CONF_OFFSET(v4l2_palette),
     copy_short,
