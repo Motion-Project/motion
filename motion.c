@@ -746,7 +746,7 @@ static int motion_init(struct context *cnt)
         cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 
         if (cnt->pipe < 0) {
-            motion_log(LOG_ERR, 0, "%s: Failed to open video loopback", __FUNCTION__);
+            motion_log(LOG_ERR, 0, "%s: Failed to open video loopback for normal pictures", __FUNCTION__);
             return -1;
         }
     }
@@ -761,7 +761,7 @@ static int motion_init(struct context *cnt)
         cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
 
         if (cnt->mpipe < 0) {
-            motion_log(LOG_ERR, 0, "%s: Failed to open video loopback", __FUNCTION__);
+            motion_log(LOG_ERR, 0, "%s: Failed to open video loopback for motion pictures", __FUNCTION__);
             return -1;
         }
     }

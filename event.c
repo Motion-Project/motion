@@ -771,8 +771,12 @@ struct event_handlers event_handlers[] = {
 #ifndef WITHOUT_V4L
 #if (!defined(BSD))
     {
-    EVENT_IMAGE | EVENT_IMAGEM,
+    EVENT_IMAGE,
     event_vid_putpipe
+    },
+    {
+    EVENT_IMAGEM,
+    event_vid_putpipe     
     },
 #endif /* BSD */
 #endif /* WITHOUT_V4L */

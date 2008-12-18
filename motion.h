@@ -105,6 +105,8 @@
 #define VIDEO_PALETTE_COMPONENT 7       /* start of component entries */
 #endif
 
+#define DEF_PALETTE             11
+
 /* Default picture settings */
 #define DEF_WIDTH              352
 #define DEF_HEIGHT             288

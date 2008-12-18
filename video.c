@@ -562,7 +562,7 @@ static int v4l_open_vidpipe(void)
         closedir(dir);
 
         if (pipe_fd >= 0)
-            motion_log(-1, 0, "%s: Opened input of %s", __FUNCTION__, pipepath);
+            motion_log(-1, 0, "%s: Opened %s as input", __FUNCTION__, pipepath);
     }
 
     return pipe_fd;
@@ -578,10 +578,13 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
         dev = v4l_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR);
+        motion_log(-1, 0, "%s: Opened %s as input", __FUNCTION__, dev_name);
     }
 
-    if (dev < 0)
+    if (dev < 0) {
+        motion_log(LOG_ERR, 1, "%s: Opening %s as input failed", __FUNCTION__, dev_name);
         return -1;
+    }
 
     if (ioctl(dev, VIDIOCGPICT, &vid_pic) == -1) {
         motion_log(LOG_ERR, 1, "%s: ioctl (VIDIOCGPICT)", __FUNCTION__);

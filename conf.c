@@ -104,7 +104,7 @@ struct config conf_template = {
     tuner_device:                   NULL,
 #endif
     video_device:                   VIDEO_DEVICE,
-    v4l2_palette:                   11,        
+    v4l2_palette:                   DEF_PALETTE,        
     vidpipe:                        NULL,
     filepath:                       NULL,
     imagepath:                      DEF_IMAGEPATH,

@@ -375,7 +375,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
         vid_source->fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
         if (xioctl(vid_source->fd, VIDIOC_TRY_FMT, &vid_source->fmt) != -1 && vid_source->fmt.fmt.pix.pixelformat == pixformat) {
-            motion_log(LOG_INFO, 0, "%s: index_format %d Test palette %c%c%c%c (%dx%d)", 
+            motion_log(LOG_INFO, 0, "%s: index_format %d Testing palette %c%c%c%c (%dx%d)", 
                        __FUNCTION__, index_format, pixformat >> 0, pixformat >> 8, 
                        pixformat >> 16, pixformat >> 24, *width, *height);
 
