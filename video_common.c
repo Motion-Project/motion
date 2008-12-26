@@ -3,7 +3,7 @@
  *      Video stream functions for motion.
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  *                2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)    
- *                2007 by Angel Carpinteo (ack@telefonica.net)
+ *                2007 by Angel Carpintero (ack@telefonica.net)
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.
  *
@@ -362,35 +362,6 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
         }
     }
 }
-
-int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff *buff, int width, int height)
-{
-    netcam_context netcam;
-
-    if (!buff || !dst)
-        return 3;
-
-    if (!buff->ptr)
-        return 2;    /* Error decoding MJPEG frame */
-
-    memset(&netcam, 0, sizeof(netcam));
-    netcam.imgcnt_last = 1;
-    netcam.latest = buff;
-    netcam.width = width;
-    netcam.height = height;
-    netcam.cnt = cnt;
-
-    pthread_mutex_init(&netcam.mutex, NULL);
-    pthread_cond_init(&netcam.cap_cond, NULL);
-    pthread_cond_init(&netcam.pic_ready, NULL);
-    pthread_cond_init(&netcam.exiting, NULL);
-
-    if (setjmp(netcam.setjmp_buffer)) 
-        return NETCAM_GENERAL_ERROR | NETCAM_JPEG_CONV_ERROR;
-
-    return netcam_proc_jpeg(&netcam, dst);
-}
-
 
 /*
  * mjpegtoyuv420p

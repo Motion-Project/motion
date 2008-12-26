@@ -62,7 +62,6 @@
 #ifdef MOTION_V4L2
 
 #include "motion.h"
-#include "netcam.h"
 #include "video.h"
 
 #ifdef MOTION_V4L2_OLD
@@ -139,7 +138,7 @@ typedef struct {
     struct v4l2_requestbuffers req;
     struct v4l2_buffer buf;
 
-    netcam_buff *buffers;
+    video_buff *buffers;
 
     s32 pframe;
 
@@ -477,7 +476,7 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
         return -1;
     }
 
-    vid_source->buffers = calloc(vid_source->req.count, sizeof(netcam_buff));
+    vid_source->buffers = calloc(vid_source->req.count, sizeof(video_buff));
 
     if (!vid_source->buffers) {
         motion_log(LOG_ERR, 1, "%s: Out of memory.", __FUNCTION__);
@@ -857,20 +856,20 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     pthread_sigmask(SIG_UNBLOCK, &old, NULL);    /*undo the signal blocking */
 
     {
-        netcam_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
+        video_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
 
         switch (vid_source->fmt.fmt.pix.pixelformat) {
         case V4L2_PIX_FMT_RGB24:
-            conv_rgb24toyuv420p(map, (unsigned char *) the_buffer->ptr, width, height);
+            conv_rgb24toyuv420p(map, the_buffer->ptr, width, height);
             return 0;
 
         case V4L2_PIX_FMT_UYVY:
-            conv_uyvyto420p(map, (unsigned char *) the_buffer->ptr, (unsigned)width, (unsigned)height);
+            conv_uyvyto420p(map, the_buffer->ptr, (unsigned)width, (unsigned)height);
             return 0;
 
         case V4L2_PIX_FMT_YUYV:
         case V4L2_PIX_FMT_YUV422P:
-            conv_yuv422to420p(map, (unsigned char *) the_buffer->ptr, width, height);
+            conv_yuv422to420p(map, the_buffer->ptr, width, height);
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
@@ -880,23 +879,20 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_PJPG:            
         case V4L2_PIX_FMT_JPEG:            
         case V4L2_PIX_FMT_MJPEG:
-            return mjpegtoyuv420p(map, (unsigned char *) the_buffer->ptr, width, height, 
+            return mjpegtoyuv420p(map, the_buffer->ptr, width, height, 
                                   vid_source->buffers[vid_source->buf.index].content_length);
-/*            return 0;
-        case V4L2_PIX_FMT_JPEG:
-            return conv_jpeg2yuv420(cnt, map, the_buffer, width, height);
-*/
+        
         /* FIXME: quick hack to allow work all bayer formats */            
         case V4L2_PIX_FMT_SBGGR16:            
         case V4L2_PIX_FMT_SGBRG8:            
         case V4L2_PIX_FMT_SPCA561:            
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
-            bayer2rgb24(cnt->imgs.common_buffer, (unsigned char *) the_buffer->ptr, width, height);
+            bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
 
         case V4L2_PIX_FMT_SN9C10X:
-            sonix_decompress(map, (unsigned char *) the_buffer->ptr, width, height);
+            sonix_decompress(map, the_buffer->ptr, width, height);
             bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;

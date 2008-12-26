@@ -14,6 +14,7 @@
 #ifndef WITHOUT_V4L
 #include <linux/videodev.h>
 #include <sys/mman.h>
+#include "vloopback_motion.h"
 #include "pwc-ioctl.h"
 #endif
 
@@ -35,6 +36,15 @@
 #define V4L_FATAL_ERROR      -1
 
 #define VIDEO_DEVICE "/dev/video0"
+
+typedef struct video_image_buff {
+    unsigned char *ptr;
+    int content_length;
+    size_t size;                    /* total allocated size */
+    size_t used;                    /* bytes already used */
+    struct timeval image_time;      /* time this image was received */
+} video_buff;
+
 
 struct video_dev {
     struct video_dev *next;
@@ -81,7 +91,6 @@ void vid_init(void);
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height);
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
-int conv_jpeg2yuv420(struct context *cnt, unsigned char *dst, netcam_buff * buff, int width, int height);
 int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int height);
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
@@ -89,8 +98,6 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
 
 #ifndef WITHOUT_V4L
 /* video functions, video.c */
-int vid_startpipe(const char *dev_name, int width, int height, int);
-int vid_putpipe(int dev, unsigned char *image, int);
 unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
                          int input, int norm, unsigned long freq, int tuner_number);
 void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height, int input,

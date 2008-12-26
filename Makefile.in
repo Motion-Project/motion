@@ -34,8 +34,8 @@ CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(s
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@ 
 VIDEO_OBJ    = @VIDEO@
-OBJ          = motion.o logger.o conf.o draw.o jpegutils.o $(VIDEO_OBJ) netcam.o \
-			   netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
+OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(VIDEO_OBJ) \
+			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
 			   stream.o @FFMPEG_OBJ@
 SRC          = $(OBJ:.o=.c)
@@ -126,6 +126,18 @@ $(DEPEND_FILE): *.h $(SRC)
 # DEP, DEPEND and FASTDEP generate the dependency file.                        #
 ################################################################################
 dep depend fastdep: $(DEPEND_FILE)
+
+################################################################################
+# CURRENT, BUILD current svn trunk.                                            #
+################################################################################
+current: distclean svn autotools all
+
+svn:
+	svn update
+
+autotools:
+	autoconf
+	./configure --with-developer-flags 
 
 ################################################################################
 # INSTALL installs all relevant files.                                         #
