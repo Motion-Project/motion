@@ -558,11 +558,12 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
     return cnt->track.move_wait;
 }
 
+#if 0
 static unsigned short int servo_status(struct context *cnt, unsigned short int motor)
 {
     return servo_command(cnt, motor, SERVO_COMMAND_STATUS, 0);
 }
-
+#endif
 
 /*
  * servo_center()

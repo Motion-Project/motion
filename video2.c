@@ -272,7 +272,7 @@ static int v4l2_select_input(src_v4l2_t * vid_source, int in, int norm, unsigned
 
         if (xioctl(vid_source->fd, VIDIOC_S_STD, &std_id) == -1) 
             motion_log(LOG_ERR, 1, "%s: Error selecting standard method %d VIDIOC_S_STD", 
-                       __FUNCTION__, std_id);
+                       __FUNCTION__, (int)std_id);
         
     }
 
@@ -464,7 +464,7 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
 
     if (xioctl(vid_source->fd, VIDIOC_REQBUFS, &vid_source->req) == -1) {
         motion_log(LOG_ERR, 1, "%s: Error requesting buffers %d for memory map. VIDIOC_REQBUFS",
-                   vid_source->req.count ,__FUNCTION__);
+                   __FUNCTION__, vid_source->req.count);
         return -1;
     }
 
@@ -472,7 +472,7 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
 
     if (vid_source->req.count < MIN_MMAP_BUFFERS) {
         motion_log(LOG_ERR, 1, "%s: Insufficient buffer memory %d < MIN_MMAP_BUFFERS.",
-                   vid_source->req.count, __FUNCTION__);
+                   __FUNCTION__, vid_source->req.count);
         return -1;
     }
 
