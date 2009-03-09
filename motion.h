@@ -21,6 +21,10 @@
 #include <sqlite3.h>
 #endif
 
+#ifdef HAVE_PGSQL
+#include <libpq-fe.h>
+#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,10 +50,6 @@
 #endif
 
 #include <pthread.h>
-
-#ifdef HAVE_PGSQL
-#include <libpq-fe.h>
-#endif
 
 #include "logger.h"
 #include "conf.h"
@@ -255,7 +255,7 @@ struct image_data {
  */
 
 /* date/time drawing, draw.c */
-int draw_text (unsigned char *image, int startx, int starty, int width, const char *text, unsigned short int factor);
+int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor);
 int initialize_chars(void);
 
 struct images {
@@ -313,15 +313,16 @@ struct context {
     int extpipe_open;
     char conf_filename[PATH_MAX];
     int threadnr;
-    unsigned short int daemon;
+    unsigned int daemon;
     char pid_file[PATH_MAX];
+    char log_file[PATH_MAX];
 
     struct config conf;
     struct images imgs;
     struct trackoptions track;
     struct netcam_context *netcam;
     struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
-    unsigned short int new_img;
+    unsigned int new_img;
 
     int locate_motion_mode;
     int locate_motion_style;
@@ -334,25 +335,25 @@ struct context {
     int smartmask_speed;
 
     /* Commands to the motion thread */
-    volatile unsigned short int snapshot;    /* Make a snapshot */
-    volatile unsigned short int makemovie;   /* End a movie */
-    volatile unsigned short int finish;      /* End the thread */
-    volatile unsigned short int restart;     /* Restart the thread when it ends */
+    volatile unsigned int snapshot;    /* Make a snapshot */
+    volatile unsigned int makemovie;   /* End a movie */
+    volatile unsigned int finish;      /* End the thread */
+    volatile unsigned int restart;     /* Restart the thread when it ends */
     /* Is the motion thread running */
-    volatile unsigned short int running;
+    volatile unsigned int running;
     volatile int watchdog;
 
     pthread_t thread_id;
 
     int event_nr;
     int prev_event;
-    int lightswitch_framecounter;
+    unsigned int lightswitch_framecounter;
     char text_event_string[PATH_MAX];        /* The text for conv. spec. %C -
                                                     we assume PATH_MAX normally 4096 characters is fine */
     int postcap;                             /* downcounter, frames left to to send post event */
 
-    short int shots;
-    unsigned short int detecting_motion;
+    int shots;
+    unsigned int detecting_motion;
     struct tm *currenttime_tm;
     struct tm *eventtime_tm;
 
@@ -361,12 +362,12 @@ struct context {
     time_t eventtime;
     time_t connectionlosttime;               /* timestamp from connection lost */
 
-    int lastrate;
-    unsigned short int startup_frames;
-    unsigned short int moved;
-    unsigned short int pause;
+    unsigned int lastrate;
+    unsigned int startup_frames;
+    unsigned int moved;
+    unsigned int pause;
     int missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
-    unsigned short int lost_connection;    
+    unsigned int lost_connection;    
 
 #if (defined(BSD))
     int tuner_dev;
@@ -394,10 +395,10 @@ struct context {
     PGconn *database_pg;
 #endif
 
-    short int movie_fps;
+    int movie_fps;
     char newfilename[PATH_MAX];
     char extpipefilename[PATH_MAX];
-    short int movie_last_shot;
+    int movie_last_shot;
 
 #ifdef HAVE_FFMPEG
     struct ffmpeg *ffmpeg_output;
@@ -411,7 +412,8 @@ struct context {
 
 extern pthread_mutex_t global_lock;
 extern volatile int threads_running;
-extern unsigned short int debug_level;
+extern unsigned int debug_level;
+extern FILE *ptr_logfile;
 
 /* TLS keys below */
 extern pthread_key_t tls_key_threadnr; /* key for thread number */

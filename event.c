@@ -51,7 +51,7 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
 
         exit(1);
     } else if (debug_level >= CAMERA_VERBOSE) {
-        motion_log(-1, 0, "%s: Executing external command '%s'", __FUNCTION__, stamp);
+        motion_log(0, 0, "%s: Executing external command '%s'", __FUNCTION__, stamp);
     }    
 }
 
@@ -63,7 +63,7 @@ static void event_newfile(struct context *cnt ATTRIBUTE_UNUSED,
             int type ATTRIBUTE_UNUSED, unsigned char *dummy ATTRIBUTE_UNUSED,
             char *filename, void *ftype, struct tm *tm ATTRIBUTE_UNUSED)
 {
-    motion_log(-1, 0, "%s: File of type %ld saved to: %s", __FUNCTION__, 
+    motion_log(0, 0, "%s: File of type %ld saved to: %s", __FUNCTION__, 
               (unsigned long)ftype, filename);
 }
 

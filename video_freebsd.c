@@ -184,7 +184,7 @@ static int set_hue(int viddev, int new_hue)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
 
     return ioctlval;
 }
@@ -199,7 +199,7 @@ static int get_hue(int viddev , int *hue)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
     
     *hue = ioctlval; 
     return ioctlval;
@@ -216,7 +216,7 @@ static int set_saturation(int viddev, int new_saturation)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
 
     return ioctlval;
 }
@@ -231,7 +231,7 @@ static int get_saturation(int viddev , int *saturation)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
     
     *saturation = ioctlval;
     return ioctlval;
@@ -248,7 +248,7 @@ static int set_contrast(int viddev, int new_contrast)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
 
     return ioctlval;
 }
@@ -263,7 +263,7 @@ static int get_contrast(int viddev, int *contrast)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-         motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+         motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
     
     *contrast = ioctlval; 
     return ioctlval;
@@ -281,7 +281,7 @@ static int set_brightness(int viddev, int new_bright)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
     
     return ioctlval;
 }
@@ -297,7 +297,7 @@ static int get_brightness(int viddev, int *brightness)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, ioctlval);
     
     *brightness = ioctlval;
     return ioctlval;
@@ -368,7 +368,7 @@ static int set_freq(struct video_dev *viddev, unsigned long freq)
     VBI ?! (METEOR_INPUT_DEV_SVIDEO)
 */
 
-static int set_input(struct video_dev *viddev, unsigned short input)
+static int set_input(struct video_dev *viddev, unsigned input)
 {
     int actport;
     int portdata[] = { METEOR_INPUT_DEV0, METEOR_INPUT_DEV1,
@@ -400,7 +400,7 @@ static int set_input(struct video_dev *viddev, unsigned short input)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d]", __FUNCTION__, input);
+        motion_log(0, 0, "%s: to [%d]", __FUNCTION__, input);
     
     return input;
 }
@@ -441,7 +441,7 @@ static int set_geometry(struct video_dev *viddev, int width, int height)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to [%d/%d] Norm %d", __FUNCTION__, 
+        motion_log(0, 0, "%s: to [%d/%d] Norm %d", __FUNCTION__, 
                    width, height, viddev->norm);        
     
     return 0;
@@ -451,7 +451,7 @@ static int set_geometry(struct video_dev *viddev, int width, int height)
    set input format ( PAL, NTSC, SECAM, etc ... )
 */
 
-static int set_input_format(struct video_dev *viddev, unsigned short newformat) 
+static int set_input_format(struct video_dev *viddev, unsigned newformat) 
 {
     int input_format[] = { NORM_PAL_NEW, NORM_NTSC_NEW, NORM_SECAM_NEW, NORM_DEFAULT_NEW};
     int format;
@@ -478,7 +478,7 @@ static int set_input_format(struct video_dev *viddev, unsigned short newformat)
     }
 
     if (debug_level >= CAMERA_VIDEO)
-        motion_log(-1, 0, "%s: to %d", __FUNCTION__, newformat);
+        motion_log(0, 0, "%s: to %d", __FUNCTION__, newformat);
         
     return newformat;
 }
@@ -504,40 +504,40 @@ statict int setup_pixelformat(int bktr)
 
     switch (p.type) {
         case METEOR_PIXTYPE_RGB:
-            motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_RGB");
+            motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_RGB");
             switch (p.masks[0]) {
                 case 31744: // 15 bpp 
                     format = p.swap_bytes ? VIDEO_RGB15_LE : VIDEO_RGB15_BE;
-                    motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_RGB15");
+                    motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_RGB15");
                 break;
                 case 63488: // 16 bpp 
                     format = p.swap_bytes ? VIDEO_RGB16_LE : VIDEO_RGB16_BE;
-                    motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_RGB16");
+                    motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_RGB16");
                 break;
                 case 16711680: // 24/32 bpp 
                     if (p.Bpp == 3 && p.swap_bytes == 1) {
                         format = VIDEO_BGR24;
-                        motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_BGR24");
+                        motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_BGR24");
                     } else if (p.Bpp == 4 && p.swap_bytes == 1 && p.swap_shorts == 1) {
                         format = VIDEO_BGR32;
-                        motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_BGR32");
+                        motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_BGR32");
                         } else if (p.Bpp == 4 && p.swap_bytes == 0 && p.swap_shorts == 0) {
                             format = VIDEO_RGB32;
-                            motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_RGB32");
+                            motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_RGB VIDEO_RGB32");
                         }
                     }
                 break;
                 case METEOR_PIXTYPE_YUV:
                     format = VIDEO_YUV422P;
-                    motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_YUV");
+                    motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_YUV");
                 break;
                 case METEOR_PIXTYPE_YUV_12:
                     format = VIDEO_YUV422P;
-                    motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_YUV_12");
+                    motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_YUV_12");
                     break;
                 case METEOR_PIXTYPE_YUV_PACKED:
                     format = VIDEO_YUV422P;
-                    motion_log(-1, 0, "setup_pixelformat METEOR_PIXTYPE_YUV_PACKED");
+                    motion_log(0, 0, "setup_pixelformat METEOR_PIXTYPE_YUV_PACKED");
                 break;
     
             }
@@ -613,7 +613,7 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 
 */
 static unsigned char *v4l_start(struct video_dev *viddev, int width, int height, 
-                                unsigned short input, unsigned short norm, unsigned long freq)
+                                unsigned input, unsigned norm, unsigned long freq)
 {
     int dev_bktr = viddev->fd_bktr;
     struct sigaction act, old;
@@ -675,7 +675,7 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
 
     if (freq) {
         if (debug_level >= CAMERA_DEBUG)    
-            motion_log(-1, 0, "%s: Frequency set (no implemented yet", __FUNCTION__);
+            motion_log(0, 0, "%s: Frequency set (no implemented yet", __FUNCTION__);
     /*
      TODO missing implementation
         set_channelset(viddev);
@@ -869,7 +869,7 @@ static int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int
 /* set input & freq if needed FIXME not allowed use Tuner yet */
 
 static void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height,
-                          unsigned short input, unsigned short norm, int skip, unsigned long freq)
+                          unsigned input, unsigned norm, int skip, unsigned long freq)
 {
 
     if (input != viddev->input || norm != viddev->norm || freq != viddev->freq) {
@@ -1082,11 +1082,11 @@ int vid_start(struct context *cnt)
         struct video_dev *dev;
         int fd_tuner = -1;
         int width, height, capture_method;
-        unsigned short input, norm;
+        unsigned input, norm;
         unsigned long frequency;
 
 
-        motion_log(-1, 0, "%s: [%s]", __FUNCTION__, conf->video_device);
+        motion_log(0, 0, "%s: [%s]", __FUNCTION__, conf->video_device);
 
         /* We use width and height from conf in this function. They will be assigned
          * to width and height in imgs here, and cap_width and cap_height in 
@@ -1140,7 +1140,7 @@ int vid_start(struct context *cnt)
                     return -1;    
                 }    
                 
-                motion_log(-1, 0, "%s Reusing [%s] inputs [%d,%d] Change capture method "
+                motion_log(0, 0, "%s Reusing [%s] inputs [%d,%d] Change capture method "
                            "METEOR_CAP_SINGLE",  __FUNCTION__, dev->video_device, 
                            dev->input, conf->input);
 
@@ -1155,7 +1155,7 @@ int vid_start(struct context *cnt)
                 case VIDEO_PALETTE_YUV422:
                     cnt->imgs.type = VIDEO_PALETTE_YUV420P;
                 case VIDEO_PALETTE_YUV420P:
-                    motion_log(-1, 0, "%s VIDEO_PALETTE_YUV420P setting imgs.size "
+                    motion_log(0, 0, "%s VIDEO_PALETTE_YUV420P setting imgs.size "
                                "and imgs.motionsize", __FUNCTION__);
                     cnt->imgs.motionsize = width * height;
                     cnt->imgs.size = (width * height * 3) / 2;
@@ -1247,7 +1247,7 @@ int vid_start(struct context *cnt)
         case VIDEO_PALETTE_YUV422:
             cnt->imgs.type = VIDEO_PALETTE_YUV420P;
         case VIDEO_PALETTE_YUV420P:
-            motion_log(-1, 0, "%s: VIDEO_PALETTE_YUV420P imgs.type", __FUNCTION__);
+            motion_log(0, 0, "%s: VIDEO_PALETTE_YUV420P imgs.type", __FUNCTION__);
             cnt->imgs.size = (width * height * 3) / 2;
             cnt->imgs.motionsize = width * height;
             break;

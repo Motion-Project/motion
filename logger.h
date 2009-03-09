@@ -28,6 +28,8 @@
 #define CAMERA_VERBOSE          8   /* verbose level           */
 #define CAMERA_ALL              9   /* everything              */
 
+void set_log_mode(int mode);
+FILE * set_logfile(const char *logfile_name);
 void motion_log(int, int, const char *, ...);
 
 #endif 

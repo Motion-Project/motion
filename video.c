@@ -176,7 +176,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
             }
 
             if (debug_level >= CAMERA_VERBOSE)
-                motion_log(-1, 0, "%s: Frequency set", __FUNCTION__);
+                motion_log(0, 0, "%s: Frequency set", __FUNCTION__);
         }
     }
 

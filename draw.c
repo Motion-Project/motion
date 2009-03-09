@@ -1076,7 +1076,7 @@ struct big_char big_table[sizeof(draw_table) / sizeof(struct draw_char)];
 
 #define NEWLINE "\\n"
 
-static int draw_textn (unsigned char *image, int startx, int starty, int width, const char *text, int len, unsigned short int factor)
+static int draw_textn(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, int len, unsigned int factor)
 {
     int pos, x, y, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr, **char_arr_ptr;
@@ -1084,9 +1084,6 @@ static int draw_textn (unsigned char *image, int startx, int starty, int width, 
     if (startx > width / 2)
         startx -= len * (6 * (factor + 1));
 
-    if (startx < 0)
-        startx = 0;
-    
     if (startx + len * 6 * (factor + 1) >= width)
         len = (width-startx-1)/(6*(factor+1));
     
@@ -1124,7 +1121,7 @@ static int draw_textn (unsigned char *image, int startx, int starty, int width, 
     return 0;
 }
 
-int draw_text (unsigned char *image, int startx, int starty, int width, const char *text, unsigned short int factor)
+int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor)
 {
     int num_nl = 0;
     const char *end, *begin;

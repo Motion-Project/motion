@@ -41,37 +41,37 @@ struct trackoptions track_template = {
 
 /* Add your own center and move functions here: */
 
-static unsigned short int servo_position(struct context *cnt, short unsigned int motor);
+static unsigned int servo_position(struct context *cnt, unsigned int motor);
 
-static unsigned short int servo_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
-static unsigned short int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
-static unsigned short int iomojo_center(struct context *cnt, int xoff, int yoff);
+static unsigned int servo_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
+static unsigned int stepper_center(struct context *cnt, int xoff, int yoff ATTRIBUTE_UNUSED);
+static unsigned int iomojo_center(struct context *cnt, int xoff, int yoff);
 
-static unsigned short int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs);
-static unsigned short int servo_move(struct context *cnt, struct coord *cent, 
-                                     struct images *imgs, unsigned short int manual);
-static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
+static unsigned int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs);
+static unsigned int servo_move(struct context *cnt, struct coord *cent, 
+                                     struct images *imgs, unsigned int manual);
+static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 
 #ifndef WITHOUT_V4L
-static unsigned short int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
-static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *cent, 
-                                    struct images *imgs, unsigned short int manual);
+static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
+static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent, 
+                                    struct images *imgs, unsigned int manual);
 #ifdef MOTION_V4L2
-static unsigned short int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
-static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, 
-                                   struct images *imgs, unsigned short int manual);
+static unsigned int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
+static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent, 
+                                   struct images *imgs, unsigned int manual);
 #endif /* MOTION_V4L2 */
 #endif /* WITHOUT_V4L */
 
 /* Add a call to your functions here: */
-unsigned short int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED, 
-                                unsigned short int manual, int xoff, int yoff)
+unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED, 
+                                unsigned int manual, int xoff, int yoff)
 {
     if (!manual && !cnt->track.active)
         return 0;
 
     if (cnt->track.type == TRACK_TYPE_STEPPER) {
-        unsigned short int ret;
+        unsigned int ret;
         ret = stepper_center(cnt, xoff, yoff);
         if (!ret) {
             motion_log(LOG_ERR, 1, "%s: internal error", __FUNCTION__);
@@ -101,8 +101,8 @@ unsigned short int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
 }
 
 /* Add a call to your functions here: */
-unsigned short int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, 
-                              unsigned short int manual)
+unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs, 
+                              unsigned int manual)
 {
 
     if (!manual && !cnt->track.active)
@@ -139,8 +139,8 @@ unsigned short int track_move(struct context *cnt, int dev, struct coord *cent, 
 ******************************************************************************/
 
 
-static unsigned short int stepper_command(struct context *cnt, unsigned short int motor, 
-                                          unsigned short int command, unsigned short int data)
+static unsigned int stepper_command(struct context *cnt, unsigned int motor, 
+                                          unsigned int command, unsigned int data)
 {
     char buffer[3];
     time_t timeout = time(NULL);
@@ -166,13 +166,13 @@ static unsigned short int stepper_command(struct context *cnt, unsigned short in
 }
 
 
-static unsigned short int stepper_status(struct context *cnt,  unsigned short int motor)
+static unsigned int stepper_status(struct context *cnt,  unsigned int motor)
 {
     return stepper_command(cnt, motor, STEPPER_COMMAND_STATUS, 0);
 }
 
 
-static unsigned short int stepper_center(struct context *cnt, int x_offset, int y_offset)
+static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offset)
 {
     struct termios adtio;
 
@@ -231,10 +231,10 @@ static unsigned short int stepper_center(struct context *cnt, int x_offset, int 
     return cnt->track.move_wait;
 }
 
-static unsigned short int stepper_move(struct context *cnt, 
+static unsigned int stepper_move(struct context *cnt, 
                                        struct coord *cent, struct images *imgs)
 {
-    unsigned short int command = 0, data = 0;
+    unsigned int command = 0, data = 0;
 
     if (cnt->track.dev < 0) {
         motion_log(LOG_INFO, 0, "%s: No device %s started yet , trying stepper_center()", 
@@ -327,8 +327,8 @@ static int servo_open(struct context *cnt)
 }
 
 
-static unsigned short int servo_command(struct context *cnt, unsigned short int motor, 
-                                        unsigned short int command, unsigned short int data)
+static unsigned int servo_command(struct context *cnt, unsigned int motor, 
+                                        unsigned int command, unsigned int data)
 {
     unsigned char buffer[3];
     time_t timeout = time(NULL);
@@ -364,9 +364,9 @@ static unsigned short int servo_command(struct context *cnt, unsigned short int 
 }
 
 
-static unsigned short int servo_position(struct context *cnt, short unsigned int motor)
+static unsigned int servo_position(struct context *cnt, unsigned int motor)
 {
-    unsigned short int ret = 0;
+    unsigned int ret = 0;
 
     ret = servo_command(cnt, motor, SERVO_COMMAND_POSITION, 0);
 
@@ -381,11 +381,12 @@ static unsigned short int servo_position(struct context *cnt, short unsigned int
  * - Does relative movements to current position.
  *
  */ 
-static unsigned short int servo_move(struct context *cnt, struct coord *cent, 
-                                     struct images *imgs, short unsigned int manual)
+static unsigned int servo_move(struct context *cnt, struct coord *cent, 
+                                     struct images *imgs, unsigned int manual)
 {
-    unsigned short int command = 0;
-    unsigned short int data = 0;
+    unsigned int command = 0;
+    unsigned int data = 0;
+    unsigned int position;
 
     /* If device is not open yet , open and center */
     if (cnt->track.dev < 0) {
@@ -403,7 +404,6 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
     
     if (manual) {
         int offset;
-        int position;
 
         if (cent->x) {
             position = servo_position(cnt, cnt->track.motorx);
@@ -418,7 +418,8 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
 
             data = abs(offset);
 
-            if ((data + position > cnt->track.maxx) || (position - offset < cnt->track.minx)) {    
+            if ((data + position > (unsigned)cnt->track.maxx) || 
+                (position - offset < (unsigned)cnt->track.minx)) {    
                 motion_log(LOG_INFO, 0, "%s: x %d value out of range! (%d - %d)", 
                            __FUNCTION__, data, cnt->track.minx, cnt->track.maxx);
                 return 0;           
@@ -443,7 +444,8 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
 
             data = abs(offset);
 
-            if ((data + position > cnt->track.maxy) || (position - offset < cnt->track.miny)) {    
+            if ((data + position > (unsigned)cnt->track.maxy) || 
+                (position - offset < (unsigned)cnt->track.miny)) {    
                 motion_log(LOG_INFO, 0, "%s: y %d value out of range! (%d - %d)", 
                            __FUNCTION__, data, cnt->track.miny, cnt->track.maxy);
                 return 0;                       
@@ -456,8 +458,6 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
         }
 
     } else {
-        int position;
-
         /***** x-axis *****/
         
         /* Move left */
@@ -489,7 +489,8 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
             // TODO: need to get position to avoid overflow limits
             position = servo_position(cnt, cnt->track.motorx);    
 
-            if ((position + data > cnt->track.maxx) || (position - data < cnt->track.minx)) {
+            if ((position + data > (unsigned)cnt->track.maxx) || 
+                (position - data < (unsigned)cnt->track.minx)) {
                 motion_log(LOG_INFO, 0, "%s: x %d value out of range! (%d - %d)",
                 __FUNCTION__, data, cnt->track.minx, cnt->track.maxx);
                 return 0;
@@ -537,7 +538,8 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
             // TODO: need to get position to avoid overflow limits
             position = servo_position(cnt, cnt->track.motory);
 
-            if ((position + data > cnt->track.maxy) || (position - data < cnt->track.miny)) {
+            if ((position + data > (unsigned)cnt->track.maxy) || 
+                (position - data < (unsigned)cnt->track.miny)) {
                 motion_log(LOG_INFO, 0, "%s: y %d value out of range! (%d - %d)",
                            __FUNCTION__, data, cnt->track.miny, cnt->track.maxy);
                 return 0;
@@ -559,7 +561,7 @@ static unsigned short int servo_move(struct context *cnt, struct coord *cent,
 }
 
 #if 0
-static unsigned short int servo_status(struct context *cnt, unsigned short int motor)
+static unsigned int servo_status(struct context *cnt, unsigned int motor)
 {
     return servo_command(cnt, motor, SERVO_COMMAND_STATUS, 0);
 }
@@ -576,9 +578,9 @@ static unsigned short int servo_status(struct context *cnt, unsigned short int m
  *
  */
 
-static unsigned short int servo_center(struct context *cnt, int x_offset, int y_offset)
+static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset)
 {
-    unsigned short int ret = 0;
+    unsigned int ret = 0;
     int x_offset_abs;
     int y_offset_abs;
 
@@ -633,7 +635,7 @@ static unsigned short int servo_center(struct context *cnt, int x_offset, int y_
 
 ******************************************************************************/
 
-static char iomojo_command(struct context *cnt, char *command, unsigned short int len, unsigned short int ret)
+static char iomojo_command(struct context *cnt, char *command, int len, unsigned int ret)
 {
     char buffer[1];
     time_t timeout = time(NULL);
@@ -653,7 +655,7 @@ static char iomojo_command(struct context *cnt, char *command, unsigned short in
     return buffer[0];
 }
 
-static void iomojo_setspeed(struct context *cnt, unsigned short int speed)
+static void iomojo_setspeed(struct context *cnt, unsigned int speed)
 {
     char command[3];
     
@@ -675,7 +677,7 @@ static void iomojo_movehome(struct context *cnt)
     iomojo_command(cnt, command, 2, 0);
 }
 
-static unsigned short int iomojo_center(struct context *cnt, int x_offset, int y_offset)
+static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offset)
 {
     struct termios adtio;
     char command[5], direction = 0;
@@ -739,7 +741,7 @@ static unsigned short int iomojo_center(struct context *cnt, int x_offset, int y
     return cnt->track.move_wait;
 }
 
-static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord *cent, 
+static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, 
                                       struct images *imgs)
 {
     char command[5];
@@ -805,7 +807,7 @@ static unsigned short int iomojo_move(struct context *cnt, int dev, struct coord
 
 ******************************************************************************/
 #ifndef WITHOUT_V4L
-static unsigned short int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
+static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
     int reset = 3;
     struct pwc_mpt_angles pma;
@@ -855,8 +857,8 @@ static unsigned short int lqos_center(struct context *cnt, int dev, int x_angle,
     return cnt->track.move_wait;
 }
 
-static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *cent, 
-                                    struct images *imgs, unsigned short int manual)
+static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent, 
+                                    struct images *imgs, unsigned int manual)
 {
     int delta_x = cent->x - (imgs->width / 2);
     int delta_y = cent->y - (imgs->height / 2);
@@ -932,7 +934,7 @@ static unsigned short int lqos_move(struct context *cnt, int dev, struct coord *
 ******************************************************************************/
 #ifdef MOTION_V4L2
 
-static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
+static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
     /* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
     int move_x_degrees = 0, move_y_degrees = 0;
@@ -1085,8 +1087,8 @@ static unsigned short int uvc_center(struct context *cnt, int dev, int x_angle, 
     return cnt->track.move_wait;
 }
 
-static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *cent, 
-                                   struct images *imgs, unsigned short int manual)
+static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent, 
+                                   struct images *imgs, unsigned int manual)
 {
     /* RELATIVE MOVING : Act.Position +/- X and Y */
     
@@ -1099,7 +1101,7 @@ static unsigned short int uvc_move(struct context *cnt, int dev, struct coord *c
     /*         Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...? */
     /*         PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that  */  
     if ((cnt->track.minmaxfound != 1) || (cent->x == 7777)) {
-        unsigned short int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
+        unsigned int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
         struct v4l2_control control_s;
 
         control_s.id = V4L2_CID_PANTILT_RESET;

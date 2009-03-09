@@ -19,6 +19,7 @@
     more parameters may be added later.
  */
 struct config {
+    char *log_file;
     int setup_mode;
     int width;
     int height;
@@ -79,7 +80,7 @@ struct config {
     const char *tuner_device;
 #endif
     const char *video_device;
-    short unsigned int v4l2_palette;
+    int v4l2_palette;
     const char *vidpipe;
     const char *filepath;
     const char *imagepath;
@@ -131,7 +132,7 @@ struct config {
  * typedef for a param copy function. 
  */
 typedef struct context ** (* conf_copy_func)(struct context **, const char *, int);
-typedef const char *(* conf_print_func)(struct context **, char **, int, unsigned short int);
+typedef const char *(* conf_print_func)(struct context **, char **, int, unsigned int);
 
 /**
  * description for parameters in the config file
@@ -139,7 +140,7 @@ typedef const char *(* conf_print_func)(struct context **, char **, int, unsigne
 typedef struct {
     const char *param_name;           /* name for this parameter                  */
     const char *param_help;           /* short explanation for parameter          */
-    unsigned short int main_thread;   /* belong only to main thread when value>0  */
+    unsigned int main_thread;         /* belong only to main thread when value>0  */
     int conf_value;                   /* pointer to a field in struct context     */
     conf_copy_func  copy;             /* a function to set the value in 'config'  */
     conf_print_func print;            /* a function to output the value to a file */

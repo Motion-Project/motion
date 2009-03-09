@@ -343,7 +343,7 @@ void stream_stop(struct context *cnt)
     struct stream *next = cnt->stream.next;
 
     if (debug_level >= CAMERA_VERBOSE)
-        motion_log(-1, 0, "%s: Closing motion-stream listen socket"
+        motion_log(0, 0, "%s: Closing motion-stream listen socket"
                    " & active motion-stream sockets", __FUNCTION__);
     else
         motion_log(LOG_INFO, 0, "%s: Closing motion-stream listen socket" 
@@ -366,7 +366,7 @@ void stream_stop(struct context *cnt)
     }
 
     if (debug_level >= CAMERA_VERBOSE)
-        motion_log(-1, 0, "%s: Closed motion-stream listen socket"
+        motion_log(0, 0, "%s: Closed motion-stream listen socket"
                    " & active motion-stream sockets", __FUNCTION__);
     else
         motion_log(LOG_INFO, 0, "%s: Closed motion-stream listen socket" 

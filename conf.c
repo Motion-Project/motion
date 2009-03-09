@@ -152,20 +152,19 @@ struct config conf_template = {
     area_detect:                    NULL,
     minimum_motion_frames:          1,
     pid_file:                       NULL,
+    log_file:                       NULL,
 };
 
 
 
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
-static struct context **copy_short(struct context **, const char *, int);
 static struct context **config_thread(struct context **cnt, const char *str, int val);
 
-static const char *print_bool(struct context **, char **, int, unsigned short int);
-static const char *print_int(struct context **, char **, int, unsigned short int);
-static const char *print_short(struct context **, char **, int, unsigned short int);
-static const char *print_string(struct context **, char **, int, unsigned short int);
-static const char *print_thread(struct context **, char **, int, unsigned short int);
+static const char *print_bool(struct context **, char **, int, unsigned int);
+static const char *print_int(struct context **, char **, int, unsigned int);
+static const char *print_string(struct context **, char **, int, unsigned int);
+static const char *print_thread(struct context **, char **, int, unsigned int);
 
 static void usage(void);
 
@@ -207,6 +206,15 @@ config_param config_params[] = {
     print_bool
     },
     {
+    "logfile",
+    "# Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)",
+    1,
+    CONF_OFFSET(log_file),
+    copy_string,
+    print_string
+    },
+
+    {
     "videodevice",
     "\n###########################################################\n"
     "# Capture device options\n"
@@ -242,8 +250,8 @@ config_param config_params[] = {
     "# V4L2_PIX_FMT_YUV420   : 11  'YU12'\n",
     0,
     CONF_OFFSET(v4l2_palette),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
 #if (defined(BSD))
     {
@@ -1023,8 +1031,8 @@ config_param config_params[] = {
     "# be used with the conversion specifiers for options like on_motion_detected",
     0,
     TRACK_OFFSET(type),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_auto",
@@ -1047,8 +1055,8 @@ config_param config_params[] = {
     "# Motor number for x-axis (default: 0)",
     0,
     TRACK_OFFSET(motorx),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_motorx_reverse",
@@ -1063,8 +1071,8 @@ config_param config_params[] = {
     "# Motor number for y-axis (default: 0)",
     0,
     TRACK_OFFSET(motory),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_motory_reverse",
@@ -1079,56 +1087,56 @@ config_param config_params[] = {
     "# Maximum value on x-axis (default: 0)",
     0,
     TRACK_OFFSET(maxx),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_minx",
     "# Minimum value on x-axis (default: 0)",
     0,
     TRACK_OFFSET(minx),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_maxy",
     "# Maximum value on y-axis (default: 0)",
     0,
     TRACK_OFFSET(maxy),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_miny",
     "# Minimum value on y-axis (default: 0)",
     0,
     TRACK_OFFSET(miny),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_homex",
     "# Center value on x-axis (default: 0)",
     0,
     TRACK_OFFSET(homex),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_homey",
     "# Center value on y-axis (default: 0)",
     0,
     TRACK_OFFSET(homey),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_iomojo_id",
     "# ID of an iomojo camera if used (default: 0)",
     0,
     TRACK_OFFSET(iomojo_id),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_step_angle_x",
@@ -1137,8 +1145,8 @@ config_param config_params[] = {
     "# Currently only used with pwc type cameras",
     0,
     TRACK_OFFSET(step_angle_x),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_step_angle_y",
@@ -1147,8 +1155,8 @@ config_param config_params[] = {
     "# Currently only used with pwc type cameras",
     0,
     TRACK_OFFSET(step_angle_y),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_move_wait",
@@ -1156,24 +1164,24 @@ config_param config_params[] = {
     "# of picture frames (default: 10)",
     0,
     TRACK_OFFSET(move_wait),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_speed",
     "# Speed to set the motor to (stepper motor option) (default: 255)",
     0,
     TRACK_OFFSET(speed),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "track_stepsize",
     "# Number of steps to make (stepper motor option) (default: 40)",
     0,
     TRACK_OFFSET(stepsize),
-    copy_short,
-    print_short
+    copy_int,
+    print_int
     },
     {
     "quiet",
@@ -1434,7 +1442,7 @@ config_param config_params[] = {
 /* conf_cmdline sets the conf struct options as defined by the command line.
  * Any option already set from a config file are overridden.
  */
-static void conf_cmdline(struct context *cnt, short int thread)
+static void conf_cmdline(struct context *cnt, int thread)
 {
     struct config *conf = &cnt->conf;
     int c;
@@ -1443,7 +1451,7 @@ static void conf_cmdline(struct context *cnt, short int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "c:d:hns?p:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "c:d:hns?pl:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1) 
@@ -1457,12 +1465,16 @@ static void conf_cmdline(struct context *cnt, short int thread)
             break;
         case 'd':
             /* no validation - just take what user gives */
-            debug_level = (unsigned short int)atoi(optarg);
+            debug_level = (unsigned int)atoi(optarg);
              break;
         case 'p':
              if (thread == -1) 
                  strcpy(cnt->pid_file, optarg);
-             break;    
+             break;   
+        case 'l':
+            if (thread == -1) 
+                strcpy(cnt->log_file, optarg); 
+            break;    
         case 'h':
         case '?':
         default:
@@ -1482,7 +1494,7 @@ static void conf_cmdline(struct context *cnt, short int thread)
  */
 struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
 {
-    unsigned short int i = 0;
+    unsigned int i = 0;
 
     if (!cmd)
         return cnt;
@@ -1502,7 +1514,6 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
             /* We call the function given by the pointer config_params[i].copy
              * If the option is a bool, copy_bool is called.
              * If the option is an int, copy_int is called.
-             * If the option is a short, copy_short is called.
              * If the option is a string, copy_string is called.
              * If the option is a thread, config_thread is called.
              * The arguments to the function are:
@@ -1605,7 +1616,7 @@ void conf_print(struct context **cnt)
 {
     const char *retval;
     char *val;
-    unsigned short int i, thread;
+    unsigned int i, thread;
     FILE *conffile;
 
     for (thread = 0; cnt[thread]; thread++) {
@@ -1712,9 +1723,11 @@ struct context **conf_load(struct context **cnt)
      * 3. $HOME/.motion/motion.conf
      * 4. sysconfig/motion.conf
      */
-    /* Get filename & pid file from commandline */
+    /* Get filename , pid file & log file from commandline */
     cnt[0]->conf_filename[0] = 0;
     cnt[0]->pid_file[0] = 0;
+    cnt[0]->log_file[0] = 0;
+
 
     conf_cmdline(cnt[0], -1);
 
@@ -1727,7 +1740,7 @@ struct context **conf_load(struct context **cnt)
         char *path = NULL;
 
         if (cnt[0]->conf_filename[0])
-            motion_log(-1, 1, "%s: Configfile %s not found - trying defaults.", 
+            motion_log(0, 1, "%s: Configfile %s not found - trying defaults.", 
                        __FUNCTION__, filename);
 
         if ((path = get_current_dir_name()) == NULL) {
@@ -1749,7 +1762,7 @@ struct context **conf_load(struct context **cnt)
             fp = fopen(filename, "r");
 
             if (!fp)        /* there is no config file.... use defaults */
-                motion_log(-1, 1, "%s: could not open configfile %s", 
+                motion_log(0, 1, "%s: could not open configfile %s", 
                            __FUNCTION__, filename);
         }
     }
@@ -1784,6 +1797,9 @@ struct context **conf_load(struct context **cnt)
     if (cnt[0]->pid_file[0])    
         cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
 
+    if (cnt[0]->log_file[0])
+        cnt[0]->conf.log_file = mystrcpy(cnt[0]->conf.log_file, cnt[0]->log_file);
+
     return cnt;
 }
 
@@ -1797,7 +1813,7 @@ struct context **conf_load(struct context **cnt)
  */
 void malloc_strings(struct context *cnt)
 {
-    unsigned short int i = 0;
+    unsigned int i = 0;
     char **val;
     while (config_params[i].param_name != NULL) {
         if (config_params[i].copy == copy_string) { /* if member is a string */
@@ -1820,7 +1836,6 @@ void malloc_strings(struct context *cnt)
  *
  *   copy_bool   - convert a bool representation to int
  *   copy_int    - convert a string to int
- *   copy_short  - convert a string to short
  *   copy_string - just a string copy
  *
  * @param str     - A char *, pointing to a string representation of the
@@ -1878,27 +1893,6 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
     while (cnt[++i]) {
         tmp = (char *)cnt[i]+val_ptr;
         *((int *)tmp) = atoi(str);
-
-        if (cnt[0]->threadnr)
-            return cnt;
-    }
-
-    return cnt;
-}
-
-/* copy_short assigns a config option to a new short value.
- * The integer is given as a string in str which is converted to short by the function.
- */ 
-static struct context **copy_short(struct context **cnt, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+val_ptr;
-        *((short int *)tmp) = atoi(str);
 
         if (cnt[0]->threadnr)
             return cnt;
@@ -2007,8 +2001,6 @@ const char *config_type(config_param *configparam)
         return "string";
     if (configparam->copy == copy_int)
         return "int";
-    if (configparam->copy == copy_short)
-        return "short";
     if (configparam->copy == copy_bool)
         return "bool";
 
@@ -2016,7 +2008,7 @@ const char *config_type(config_param *configparam)
 }
 
 static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                              int parm, unsigned short int threadnr)
+                              int parm, unsigned int threadnr)
 {
     int val = config_params[parm].conf_value;
 
@@ -2038,7 +2030,7 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  */
 static const char *print_string(struct context **cnt,
                                 char **str ATTRIBUTE_UNUSED, int parm,
-                                unsigned short int threadnr)
+                                unsigned int threadnr)
 {
     int val = config_params[parm].conf_value;
     const char **cptr0, **cptr1;
@@ -2054,7 +2046,7 @@ static const char *print_string(struct context **cnt,
 }
 
 static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned short int threadnr)
+                             int parm, unsigned int threadnr)
 {
     static char retval[20];
     int val = config_params[parm].conf_value;
@@ -2069,26 +2061,11 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 }
 
 
-static const char *print_short(struct context **cnt, char **str ATTRIBUTE_UNUSED,
-                               int parm, unsigned short int threadnr) 
-{
-    static char retval[20];
-    int val = config_params[parm].conf_value;
-
-    if (threadnr &&
-        *(short int*)((char *)cnt[threadnr] + val) == *(short int*)((char *)cnt[0] + val))
-        return NULL;
-
-    sprintf(retval, "%d", *(short int*)((char *)cnt[threadnr] + val));
-
-    return retval;
-}
-
 static const char *print_thread(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned short int threadnr)
+                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
 {
     char *retval;
-    unsigned short int i = 0;
+    unsigned int i = 0;
 
     if (!str || threadnr)
         return NULL;
@@ -2184,6 +2161,7 @@ static void usage()
     printf("-c config\t\tFull path and filename of config file.\n");
     printf("-d level\t\tDebug mode.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
+    printf("-l log file \tFull path and filename of log file.\n");
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");

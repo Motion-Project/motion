@@ -15,26 +15,26 @@
 struct trackoptions {
     int dev;
     /* Config options: */
-    unsigned short int type;
+    unsigned int type;
     char *port;
-    unsigned short int motorx;
-    unsigned short int motory;
+    unsigned int motorx;
+    unsigned int motory;
     int maxx;
     int maxy;
     int minx;
     int miny;
-    unsigned short int stepsize;
-    unsigned short int speed;
-    unsigned short int homex;
-    unsigned short int homey;
-    unsigned short int iomojo_id;
-    unsigned short int active;
-    unsigned short int motorx_reverse;
-    unsigned short int motory_reverse;
-    unsigned short int minmaxfound;
-    unsigned short int step_angle_x;
-    unsigned short int step_angle_y;
-    unsigned short int move_wait;
+    unsigned int stepsize;
+    unsigned int speed;
+    unsigned int homex;
+    unsigned int homey;
+    unsigned int iomojo_id;
+    unsigned int active;
+    unsigned int motorx_reverse;
+    unsigned int motory_reverse;
+    unsigned int minmaxfound;
+    unsigned int step_angle_x;
+    unsigned int step_angle_y;
+    unsigned int move_wait;
     /* UVC */
     int pan_angle; // degrees
     int tilt_angle; // degrees
@@ -42,8 +42,8 @@ struct trackoptions {
 
 extern struct trackoptions track_template;
 
-unsigned short int track_center(struct context *, int, unsigned short int, int, int);
-unsigned short int track_move(struct context *, int, struct coord *, struct images *, unsigned short int);
+unsigned int track_center(struct context *, int, unsigned int, int, int);
+unsigned int track_move(struct context *, int, struct coord *, struct images *, unsigned int);
 
 /*
  * Some default values:

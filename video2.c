@@ -309,7 +309,7 @@ static int v4l2_select_input(src_v4l2_t * vid_source, int in, int norm, unsigned
 static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int *width, int *height)
 {
     struct v4l2_fmtdesc fmt;
-    short int v4l2_pal;
+    int v4l2_pal;
 
     static const u32 supported_formats[] = {    /* higher index means better chance to be used */
         V4L2_PIX_FMT_SN9C10X,
@@ -327,7 +327,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
         0
     };
 
-    short int index_format = -1;
+    int index_format = -1;
 
     memset(&fmt, 0, sizeof(struct v4l2_fmtdesc));
     fmt.index = v4l2_pal = 0;
@@ -336,7 +336,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
     motion_log(LOG_INFO, 0, "%s: Supported palettes:", __FUNCTION__);
 
     while (xioctl(vid_source->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
-        short int i;
+        int i;
 
         motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal, fmt.pixelformat >> 0, 
                    fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);

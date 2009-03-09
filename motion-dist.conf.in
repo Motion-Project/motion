@@ -20,6 +20,10 @@ process_id_file /var/run/motion/motion.pid
 # Start in Setup-Mode, daemon disabled. (default: off)
 setup_mode off
 
+
+# Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)
+;logfile
+
 ###########################################################
 # Capture device options
 ############################################################

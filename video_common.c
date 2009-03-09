@@ -763,9 +763,9 @@ static int vid_v4lx_start(struct context *cnt)
     }
 #endif
     if (dev->v4l2 == 0) {
-        motion_log(-1, 0, "%s: Using V4L1", __FUNCTION__);
+        motion_log(1, 0, "%s: Using V4L1", __FUNCTION__);
     } else {
-        motion_log(-1, 0, "%s: Using V4L2", __FUNCTION__);
+        motion_log(1, 0, "%s: Using V4L2", __FUNCTION__);
         /* Update width & height because could be changed in v4l2_start () */
         width = dev->width;
         height = dev->height;

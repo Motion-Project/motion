@@ -93,8 +93,8 @@ struct video_dev {
     int fd_tuner;
     const char *video_device;
     const char *tuner_device;
-    unsigned short input;
-    unsigned short norm;
+    unsigned input;
+    unsigned norm;
     int width;
     int height;
     int contrast;

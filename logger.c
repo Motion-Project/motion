@@ -13,6 +13,45 @@
 #include "logger.h"   /* already includes motion.h */
 #include <stdarg.h>
 
+static int log_mode = 1;
+static FILE *logfile;
+
+/**
+ * set_log_mode
+ *
+ *  Set mode of logging , could be using syslog or files.
+ */ 
+void set_log_mode(int mode)
+{
+    log_mode = mode;
+}
+
+/**
+ * set_logfile
+ *
+ *  Set logfile to be used instead of syslog.
+ */
+FILE * set_logfile(const char *logfile_name)
+{
+    return logfile = myfopen(logfile_name, "a");
+}
+
+
+/**
+ * str_time
+ *
+ * Return string with human readable time
+ */ 
+static char *str_time(void)
+{
+    static char buffer[16];
+    time_t now = 0;
+
+    now = time(0);
+    strftime(buffer, 16, "%b %d %H:%M:%S", localtime(&now));
+    return buffer;
+}
+
 /**
  * motion_log
  *
@@ -56,8 +95,13 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
      */
     errno_save = errno;
 
+    /* Prefix the message with the time and thread number */
+    if (!log_mode) {
+        n = snprintf(buf, sizeof(buf), "[%s] [%d] ", str_time(), threadnr);
+    } else {    
     /* Prefix the message with the thread number */
-    n = snprintf(buf, sizeof(buf), "[%d] ", threadnr);
+        n = snprintf(buf, sizeof(buf), "[%d] ", threadnr);
+    }
 
     /* Next add the user's message */
     va_start(ap, fmt);
@@ -78,15 +122,20 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
         strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
     }
-    /* If 'level' is not negative, send the message to the syslog */
-    if (level >= 0)
+
+    if (!log_mode) {
+        strncat(buf, "\n", 1024 - strlen(buf));
+        fputs(buf, logfile);
+        fflush(logfile);
+
+    /* If log_mode, send the message to the syslog */    
+    } else {   
         syslog(level, "%s", buf);
-
-    /* For printing to stderr we need to add a newline */
-    strncat(buf, "\n", 1024 - strlen(buf));
-    fputs(buf, stderr);
-    fflush(stderr);
-
+        strncat(buf, "\n", 1024 - strlen(buf));
+        fputs(buf, stderr);
+        fflush(stderr);
+    } 
+     
     /* Clean up the argument list routine */
     va_end(ap);
 }

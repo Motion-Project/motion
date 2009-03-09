@@ -62,11 +62,15 @@ volatile int threads_running = 0;
  * debug_level is for developers, normally used to control which
  * types of messages get output.
  */
-unsigned short int debug_level;
+unsigned int debug_level;
 
 /* Set this when we want main to end or restart
  */
-volatile unsigned short int finish = 0;
+volatile unsigned int finish = 0;
+
+/* Log file used instead of stderr and syslog
+ */ 
+FILE *ptr_logfile = NULL;
 
 /**
  * restart
@@ -75,7 +79,7 @@ volatile unsigned short int finish = 0;
  *   finished running, 'main' checks if 'restart' is true and if so starts
  *   up again (instead of just quitting).
  */
-unsigned short int restart = 0;
+unsigned int restart = 0;
 
 /**
  * image_ring_resize
@@ -152,7 +156,7 @@ static void image_ring_resize(struct context *cnt, int new_size)
  */
 static void image_ring_destroy(struct context *cnt)
 {
-    unsigned short int i;
+    int i;
     
     /* Exit if don't have any ring */
     if (cnt->imgs.image_ring == NULL)
@@ -267,7 +271,7 @@ static void context_init (struct context *cnt)
  */
 static void context_destroy(struct context *cnt)
 {
-    unsigned short int j;
+    unsigned int j;
 
     /* Free memory allocated for config parameters */
     for (j = 0; config_params[j].param_name != NULL; j++) {
@@ -291,7 +295,7 @@ static void context_destroy(struct context *cnt)
  */
 static void sig_handler(int signo)
 {
-    short int i;
+    int i;
 
     switch(signo) {
     case SIGALRM:
@@ -375,6 +379,10 @@ static void motion_remove_pid(void)
         else 
             motion_log(LOG_INFO, 1, "%s: Error removing pid file", __FUNCTION__);
     }
+
+    if (ptr_logfile) 
+        fclose(ptr_logfile);
+
 }
 
 /**
@@ -444,7 +452,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tm);
 
             if (debug_level >= CAMERA_INFO)
-                motion_log(-1, 0, "%s: Motion detected - starting event %d", 
+                motion_log(0, 0, "%s: Motion detected - starting event %d", 
                            __FUNCTION__, cnt->event_nr);
 
             /* always save first motion frame as preview-shot, may be changed to an other one later */
@@ -738,7 +746,7 @@ static int motion_init(struct context *cnt)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         if (debug_level >= CAMERA_DEBUG)
-            motion_log(-1, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
+            motion_log(0, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
         else 
             motion_log(LOG_INFO, 0, "%s: Opening video loopback device for normal pictures", __FUNCTION__);
 
@@ -753,7 +761,7 @@ static int motion_init(struct context *cnt)
 
     if (cnt->conf.motionvidpipe) {
         if (debug_level >= CAMERA_DEBUG)
-            motion_log(-1, 0, "%s: Opening video loopback device for motion pictures", __FUNCTION__);
+            motion_log(0, 0, "%s: Opening video loopback device for motion pictures", __FUNCTION__);
         else 
             motion_log(LOG_INFO, 0, "%s: Opening video loopback device for motion pictures", __FUNCTION__);
 
@@ -864,7 +872,7 @@ static int motion_init(struct context *cnt)
                        __FUNCTION__);
         } else {
             if (debug_level >= CAMERA_DEBUG)
-                motion_log(-1, 0, "%s: Maskfile \"%s\" loaded.", 
+                motion_log(0, 0, "%s: Maskfile \"%s\" loaded.", 
                            __FUNCTION__, cnt->conf.mask_file);
             else  
                 motion_log(LOG_INFO, 0, "%s: Maskfile \"%s\" loaded.", 
@@ -1027,16 +1035,16 @@ static void *motion_loop(void *arg)
     int i, j, z = 0;
     time_t lastframetime = 0;
     int frame_buffer_size;
-    unsigned short int rate_limit = 0;
+    unsigned int rate_limit = 0;
     int area_once = 0;
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int smartmask_ratio = 0;
     int smartmask_count = 20;
-    int smartmask_lastrate = 0;
+    unsigned int smartmask_lastrate = 0;
     int olddiffs = 0;
     int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
-    unsigned short int text_size_factor;
-    unsigned short int passflag = 0;
+    unsigned int text_size_factor;
+    unsigned int passflag = 0;
     long int *rolling_average_data = NULL;
     long int rolling_average_limit, required_frame_time, frame_delay, delay_time_nsec;
     int rolling_frame = 0;
@@ -1045,7 +1053,7 @@ static void *motion_loop(void *arg)
     unsigned long long int timenow = 0, timebefore = 0;
     int vid_return_code = 0;        /* Return code used when calling vid_next */
     int minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; /* time in seconds to skip between capturing images */
-    unsigned short int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
+    unsigned int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
     struct image_data *old_image;
 
     /* Next two variables are used for snapshot and timelapse feature
@@ -1329,7 +1337,7 @@ static void *motion_loop(void *arg)
             } else { 
 
                 if (debug_level >= CAMERA_VERBOSE)
-                    motion_log(-1, 0, "%s: vid_return_code %d", __FUNCTION__, vid_return_code);
+                    motion_log(0, 0, "%s: vid_return_code %d", __FUNCTION__, vid_return_code);
 
                 /* Netcams that change dimensions while Motion is running will
                  * require that Motion restarts to reinitialize all the many
@@ -1432,7 +1440,7 @@ static void *motion_loop(void *arg)
                     if (cnt->conf.lightswitch && !cnt->lost_connection) {
                         if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                             if (debug_level >= CAMERA_DEBUG)
-                                motion_log(-1, 0, "%s: Lightswitch detected", __FUNCTION__);
+                                motion_log(0, 0, "%s: Lightswitch detected", __FUNCTION__);
 
                             if (cnt->moved < 5)
                                 cnt->moved = 5;
@@ -1458,7 +1466,7 @@ static void *motion_loop(void *arg)
                             cnt->current_image->diffs = 0;
                         
                             if (debug_level >= CAMERA_DEBUG)
-                                motion_log(-1, 0, "%s: Switchfilter detected", __FUNCTION__);
+                                motion_log(0, 0, "%s: Switchfilter detected", __FUNCTION__);
                         }
                     }
 
@@ -1553,7 +1561,7 @@ static void *motion_loop(void *arg)
                     cnt->lightswitch_framecounter = 0;
 
                     if (debug_level >= CAMERA_DEBUG)
-                        motion_log(-1, 0, "%s: micro-lightswitch!", __FUNCTION__);
+                        motion_log(0, 0, "%s: micro-lightswitch!", __FUNCTION__);
                 } else {
                     alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
                 }
@@ -1736,7 +1744,7 @@ static void *motion_loop(void *arg)
                             area_once = cnt->event_nr; /* Fire script only once per event */
 
                             if (debug_level >= CAMERA_DEBUG)
-                                motion_log(-1, 0, "Motion in area %d detected.\n", z+1);
+                                motion_log(0, 0, "Motion in area %d detected.\n", z+1);
                             break;
                         }
                     }
@@ -1775,7 +1783,7 @@ static void *motion_loop(void *arg)
                         cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
                     if (debug_level >= CAMERA_DEBUG)
-                        motion_log(-1, 0, "%s: End of event %d", 
+                        motion_log(0, 0, "%s: End of event %d", 
                                    __FUNCTION__, cnt->event_nr);
 
                     cnt->makemovie = 0;
@@ -1826,7 +1834,7 @@ static void *motion_loop(void *arg)
                     strcat(msg, part);
                 }
 
-                motion_log(-1, 0, "%s", msg);
+                motion_log(0, 0, "%s", msg);
             }
 
         } /* get_image end */
@@ -2078,7 +2086,7 @@ err:
         free(rolling_average_data);
 
     cnt->lost_connection = 1;
-    motion_log(-1, 0, "%s: Thread exiting", __FUNCTION__);
+    motion_log(0, 0, "%s: Thread exiting", __FUNCTION__);
 
     motion_cleanup(cnt);
 
@@ -2127,7 +2135,7 @@ static void become_daemon(void)
 
     /* fork */
     if (fork()) {
-        motion_log(-1, 0, "%s: Motion going to daemon mode", __FUNCTION__);
+        motion_log(0, 0, "%s: Motion going to daemon mode", __FUNCTION__);
         exit(0);
     }
     
@@ -2144,7 +2152,9 @@ static void become_daemon(void)
             fclose(pidf);
         } else {
             motion_log(LOG_ERR, 1, "%s: Exit motion, cannot create process id file (pid file) %s",
-                       __FUNCTION__, cnt_list[0]->conf.pid_file);    
+                       __FUNCTION__, cnt_list[0]->conf.pid_file);
+            if (ptr_logfile) 
+                fclose(ptr_logfile);    
             exit(0);    
         }
     }
@@ -2284,6 +2294,19 @@ static void motion_startup(int daemonize, int argc, char *argv[])
      * configuration.
      */
     cntlist_create(argc, argv);
+
+    if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file,"syslog",6))) {
+        set_log_mode(0);
+        ptr_logfile = set_logfile(cnt_list[0]->conf.log_file);
+        if (ptr_logfile) {
+
+        } else {
+            motion_log(LOG_ERR, 1, "%s: Exit motion, cannot create log file %s",
+                       __FUNCTION__, cnt_list[0]->conf.log_file);
+            exit(0);
+        }
+
+    }
 
     motion_log(LOG_INFO, 0, "%s: Motion "VERSION" Started",  __FUNCTION__);
 
@@ -2454,7 +2477,7 @@ int main (int argc, char **argv)
      * optimize motion detection and stuff.
      */
     if (cnt_list[0]->conf.setup_mode)
-        motion_log(-1, 0, "%s: Motion running in setup mode.",  __FUNCTION__);
+        motion_log(0, 0, "%s: Motion running in setup mode.",  __FUNCTION__);
 
     /* Create and a thread attribute for the threads we spawn later on.
      * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
@@ -2494,7 +2517,7 @@ int main (int argc, char **argv)
                            __FUNCTION__, cnt_list[i]->threadnr, cnt_list[i]->conf_filename);
 
             if (debug_level >= CAMERA_DEBUG) 
-                motion_log(-1, 0, "%s: Thread %d is device: %s input %d",  __FUNCTION__, 
+                motion_log(0, 0, "%s: Thread %d is device: %s input %d",  __FUNCTION__, 
                            cnt_list[i]->threadnr, cnt_list[i]->conf.netcam_url ? 
                            cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
                            cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input);
@@ -2514,7 +2537,7 @@ int main (int argc, char **argv)
             pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
 
         if (debug_level >= CAMERA_DEBUG)
-            motion_log(-1, 0, "%s: Waiting for threads to finish, pid: %d", __FUNCTION__, getpid());
+            motion_log(0, 0, "%s: Waiting for threads to finish, pid: %d", __FUNCTION__, getpid());
 
         /* Crude way of waiting for all threads to finish - check the thread
          * counter (because we cannot do join on the detached threads).

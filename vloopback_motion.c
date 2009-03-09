@@ -83,7 +83,7 @@ static int v4l_open_vidpipe(void)
                     pipe_fd = open(pipepath, O_RDWR);
 
                     if (pipe_fd >= 0) {
-                        motion_log(-1, 0, "%s: \tInput:  /dev/%s \tOutput: /dev/%s",
+                        motion_log(0, 0, "%s: \tInput:  /dev/%s \tOutput: /dev/%s",
                                    __FUNCTION__, input, output);
                         break;
                     }
@@ -163,7 +163,7 @@ static int v4l_open_vidpipe(void)
         closedir(dir);
 
         if (pipe_fd >= 0)
-            motion_log(-1, 0, "%s: Opened %s as input", __FUNCTION__, pipepath);
+            motion_log(0, 0, "%s: Opened %s as input", __FUNCTION__, pipepath);
     }
 
     return pipe_fd;
@@ -179,7 +179,7 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
         dev = v4l_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR);
-        motion_log(-1, 0, "%s: Opened %s as input", __FUNCTION__, dev_name);
+        motion_log(0, 0, "%s: Opened %s as input", __FUNCTION__, dev_name);
     }
 
     if (dev < 0) {

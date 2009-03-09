@@ -294,13 +294,13 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
             pthread_mutex_unlock(&netcam->mutex);
             
             if (debug_level > CAMERA_WARNINGS)
-                motion_log(-1, 0, "%s: no new pic, no signal rcvd", __FUNCTION__);
+                motion_log(0, 0, "%s: no new pic, no signal rcvd", __FUNCTION__);
                 
             return NETCAM_GENERAL_ERROR | NETCAM_NOTHING_NEW_ERROR;
         }
         
         if (debug_level > CAMERA_VERBOSE)
-            motion_log(-1, 0, "%s: ***new pic delay successful***", __FUNCTION__);
+            motion_log(0, 0, "%s: ***new pic delay successful***", __FUNCTION__);
     }
     
     netcam->imgcnt_last = netcam->imgcnt;
