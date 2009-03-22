@@ -183,6 +183,11 @@ URLProtocol file_protocol = {
     file_write,
     file_seek,
     file_close,
+#if LIBAVFORMAT_BUILD >= (52<<16 | 31<<8)    
+    NULL,
+    NULL,
+    NULL,
+#endif
 };
 
 #endif
@@ -224,7 +229,11 @@ void ffmpeg_init()
     mpeg1_file_protocol.url_close = file_protocol.url_close;
 
     /* Register the append file protocol. */
+#if LIBAVFORMAT_BUILD >= (52<<16 | 31<<8)
+    av_register_protocol(&mpeg1_file_protocol);
+#else        
     register_protocol(&mpeg1_file_protocol);
+#endif    
 }
 
 /* Obtains the output format used for the specified codec. For mpeg4 codecs,
