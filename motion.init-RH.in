@@ -1,83 +1,105 @@
 #!/bin/bash
 #
-# Startup script for the Motion Detection System 
+# motion        Startup script for the Motion Detection System 
 #
-# chkconfig: - 85 15
-# description: Motion Detection System.  It is used to detect \
-#              movement based on compare images.
-# processname: @PACKAGE_NAME@ 
-# pidfile: /var/run/@PACKAGE_NAME@.pid
-# config: /etc/@PACKAGE_NAME@.conf
+# chkconfig:    - 85 15
+# description:  Motion detection system.  It is used to detect movement based \
+#               on compare images.
+# processname:  @PACKAGE_NAME@ 
+# pidfile:      /var/run/@PACKAGE_NAME@.pid
+# config:       /etc/@PACKAGE_NAME@.conf
+#
+### BEGIN INIT INFO
+# Provides: motion
+# Required-Start: $local_fs
+# Required-Stop: $local_fs
+# Default-Start: 
+# Default-Stop: 
+# Short-Description: Start and stop motion detection system
+# Description: The Motion detection system is used to detect movement based
+#              on image comparison.
+### END INIT INFO
 
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-
-
-motion=${MOTION-@BIN_PATH@/@PACKAGE_NAME@}
-prog=@PACKAGE_NAME@
-PIDFILE=/var/run/@PACKAGE_NAME@.pid
-RETVAL=0
-
+motion=${MOTION-/usr/bin/motion}
+prog=motion
+pidfile=/var/run/motion.pid
+lockfile=/var/lock/subsys/motion
 
 start() {
-	echo -n $"Starting $prog: "
-	daemon $motion 
-	RETVAL=$?
-	echo
-	[ $RETVAL = 0 ] && touch /var/lock/subsys/@PACKAGE_NAME@
-	return $RETVAL
+    [ -x $exec ] || exit 5
+    [ -f $config ] || exit 6
+    echo -n $"Starting $prog: "
+    daemon $motion 2> /dev/null
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
 }
+
 stop() {
-	echo -n $"Stopping $prog: "
-	killproc $motion
-	RETVAL=$?
-	echo
-	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/@PACKAGE_NAME@
+    echo -n $"Stopping $prog: "
+    killproc $motion
+    retval=$?
+    echo
+    [ $retval = 0 ] && rm -f $lockfile
 }
-stopsafe() {
-	echo -n $"Stopping $prog: ( for restarting ) "
-	killproc $motion
-	RETVAL=$?
-	sleep 10s
-	echo
-	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/@PACKAGE_NAME@
+
+restart() {
+    stop
+    start
 }
+
 reload() {
-	echo -n $"Reloading $prog: "
-	killproc $motion -HUP
-	RETVAL=$?
-	echo
+    echo -n $"Reloading $prog configuration: "
+    killproc $motion -HUP
+    retval=$?
+    echo
+    return $retval
 }
+
+rh_status() { 
+    # run checks to determine if the service is running or use generic status
+    status $prog
+}
+          
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
 
 # See how we were called.
 case "$1" in
-	start)
-		start
-		;;
-	stop)
-		stop
-		;;
-	status)
-		status $motion
-		RETVAL=$?
-		;;
-	restart)
-		stopsafe
-		start
-		;;
-	condrestart)
-		if [ -f /var/run/@PACKAGE_NAME@.pid ] ; then
-			stop
-			start
-		fi
-		;;
-	reload)
-		reload
-		;;
-	*)
-		echo $"Usage: $prog {start|stop|restart|condrestart|reload|status}"
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;        
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        #force_reload
+        reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+                echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
 		exit 1
 esac
-
-exit $RETVAL
+exit $?

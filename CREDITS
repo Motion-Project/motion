@@ -275,7 +275,7 @@ Angel Carpintero
    * Added the %t conversion specifier to show the thread number.
      http://www.lavrsen.dk/twiki/bin/view/Motion/ThreadConversionSpecifierPatch
    * Fixed bug related to init of mutex in netcam code.
-   * Netcam_ftp code fixes (Angel Carpintero and Asbjørn Pettersen)
+   * Netcam_ftp code fixes (Angel Carpintero and AsbjÃ¸rn Pettersen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamWithFtpEnhancements
    * Enhanced ffmpeg detection.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BetterFFmpegDetection
@@ -560,7 +560,7 @@ Peter Ilin
    * Patch for handling vloopback pipes better when Motion receives
      SIGTERM or SIGHUB
 
-Per Jönsson
+Per JÃ¶nsson
    * Added the rotate feature.
    * Improved the Makefile with automatic check of dependencies and
      nicer output for the user.
@@ -586,7 +586,7 @@ Per Jönsson
    * Implemented Threadnr in TLS (thread-local storage)patch. It puts the thread
      number into TLS and modifies motion_log() so that we do not have to drag the
      cnt struct around just to be able to print the thread number in the log and
-     on the console. (Per Jönsson with additional removal of unused cnt by
+     on the console. (Per JÃ¶nsson with additional removal of unused cnt by
      Kenneth Lavrsen).
      http://www.lavrsen.dk/twiki/bin/view/Motion/ThreadNrTlsPatch
    * Simplified rotation code based on the fact that images must have dimensions
@@ -896,7 +896,7 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Implemented Threadnr in TLS (thread-local storage)patch. It puts the thread
      number into TLS and modifies motion_log() so that we do not have to drag the
      cnt struct around just to be able to print the thread number in the log and
-     on the console. (Per Jönsson with additional removal of unused cnt by
+     on the console. (Per JÃ¶nsson with additional removal of unused cnt by
      Kenneth Lavrsen).
      http://www.lavrsen.dk/twiki/bin/view/Motion/ThreadNrTlsPatch
    * Removed old unused code related to read mode (not mmap) from V4L devices.
@@ -1100,8 +1100,8 @@ Bill Payne,
 Bowser Pete
    * Add swf codec to video creation.
 
-Asbjørn Pettersen
-   * Netcam_ftp code fixes (Angel Carpintero and Asbjørn Pettersen)
+AsbjÃ¸rn Pettersen
+   * Netcam_ftp code fixes (Angel Carpintero and AsbjÃ¸rn Pettersen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamWithFtpEnhancements
 
 Pawel Pierscionek

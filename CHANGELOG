@@ -449,7 +449,7 @@ snap1
    * Implemented Threadnr in TLS (thread-local storage)patch. It puts the thread
      number into TLS and modifies motion_log() so that we do not have to drag the
      cnt struct around just to be able to print the thread number in the log and
-     on the console. (Per Jönsson with additional removal of unused cnt by
+     on the console. (Per JÃ¶nsson with additional removal of unused cnt by
      Kenneth Lavrsen).
      http://www.lavrsen.dk/twiki/bin/view/Motion/ThreadNrTlsPatch
    * Moved the motion_loop initialization into a new function motion_init
@@ -479,7 +479,7 @@ snap1
 
 snap2
    * Simplified rotation code based on the fact that images must have dimensions
-     that are a multiple of 16 (Per Jönsson)
+     that are a multiple of 16 (Per JÃ¶nsson)
      http://www.lavrsen.dk/twiki/bin/view/Motion/RotateSimplificationPatch
    * Switchfilter feature repaired. It was called inside motion_detected()
      after overlays on cnt->img.out were added which meant that the feature also
@@ -540,7 +540,7 @@ snap4
    * Fixed bug related to init of mutex in netcam code (Angel Carpintero).
    * Improved fix for netcam mutex init (Bill Brack).
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamFixPthreadInit
-   * Netcam_ftp code fixes (Angel Carpintero and Asbjørn Pettersen)
+   * Netcam_ftp code fixes (Angel Carpintero and AsbjÃ¸rn Pettersen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamWithFtpEnhancements
    * Enhanced ffmpeg detection (Angel Carpintero).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BetterFFmpegDetection
@@ -740,7 +740,7 @@ snap3
 
 snap4
    * Fixed the ffmpeg code so that Motion also compiles against libavcodec
-     build 4754 or later. (Per Jönsson)
+     build 4754 or later. (Per JÃ¶nsson)
    * Above change in configure script for 64 bit ffmpeg support also implemented
      in the freeBSD configure (Angel Carpintero)
    * Webhttp control interface fixed so it also works in FreeBSD (Angel
@@ -846,7 +846,7 @@ snap10
       * Fixed a bug when not motion.conf is found
       * Removed printf from all files
       * Fixed the conf_list[] index in motion.c
-   * RotateBswapFix Patch v 2 (Per Jönsson) including:
+   * RotateBswapFix Patch v 2 (Per JÃ¶nsson) including:
       * cleanup in code comments
       * fix for __bswap_32 macro collision
       * fixed bug where initialization would be incomplete for invalid degrees
@@ -862,7 +862,7 @@ snap10
 
 snap11
    * Updated the ffmpeg.c code so that Motion can now be built with ffmpeg CVS
-     release from the June/July 2005 timeframe (Per Jönsson).
+     release from the June/July 2005 timeframe (Per JÃ¶nsson).
      http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegCodecPatch
    * Improved error handling of missing picture frames from camera. Especially
      network cameras will often not be able to provide a picture frame from time
@@ -1375,12 +1375,12 @@ snap8
      also in general) (by Joerg Weber)
    * Improved the picture control function so that cameras are only probed
      when needed to avoid USB errors. (Kenneth Lavrsen)
-   * Implemented new ffmpeg patch (Per Jönsson)
+   * Implemented new ffmpeg patch (Per JÃ¶nsson)
      http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegPatch049
    * Implemented new preview patch (Joerg Weber)
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewShotsPatch
    * Removed commented code from obsolete Berkeley and Prediction features
-   * Implemented labelling speed patch (Per Jönsson)
+   * Implemented labelling speed patch (Per JÃ¶nsson)
      http://www.lavrsen.dk/twiki/bin/view/Motion/LabelingSpeedPatch
 
 snap9
@@ -1390,7 +1390,7 @@ snap9
      Price and Angel Carpintero).
      http://www.lavrsen.dk/twiki/bin/view/Motion/StreamingNetcamWithoutCurl
    * Implemented a significant speed improvement in the motion detection
-     algorithm (by Per Jönsson).
+     algorithm (by Per JÃ¶nsson).
      http://www.lavrsen.dk/twiki/bin/view/Motion/AlgDiffStandardMmxPatch
    * Fixed a small bug which caused in jumpy mpeg1 videos with ffmpeg 0.4.8.
 
@@ -1575,7 +1575,7 @@ snap4
      exits normally.
 
 snap5
-   * Added Per Jönsson's rotate feature. When set to non-zero some extra
+   * Added Per JÃ¶nsson's rotate feature. When set to non-zero some extra
      CPU time is used for the rotation.
    * Kenneth Lavrsen changed the ffmpeg code so that mpeg1 files are
      created using the libavcodec method and mpeg4 and msmpeg4 are created
