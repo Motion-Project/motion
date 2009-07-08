@@ -21,6 +21,7 @@ Features
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
      Increased buffer in ffmpeg to allow encoding at 1600x1200 (Angel Carpintero)
    * Sqlite3 support http://www.lavrsen.dk/twiki/bin/view/Motion/SQLite3Patch (Giacomo Graziosi)
+   * New RPM SPEC file and startup scripts compliant with Fedora 10 guidelines and above (Steven Moix)
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
