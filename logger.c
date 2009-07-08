@@ -33,7 +33,7 @@ void set_log_mode(int mode)
  */
 FILE * set_logfile(const char *logfile_name)
 {
-    return logfile = myfopen(logfile_name, "a");
+    return logfile = myfopen(logfile_name, "a", 0);
 }
 
 

@@ -76,7 +76,9 @@ static unsigned char mpeg1_trailer[] = {0x00, 0x00, 0x01, 0xb7};
 static int file_open_append(URLContext *h, const char *filename, int flags)
 {
     const char *colon;
-    int access_flags, fd;
+    const char *mode;
+    FILE *fh;
+    size_t bufsize = 0;
 
     /* Skip past the protocol part of filename. */
     colon = strchr(filename, ':');
@@ -86,18 +88,20 @@ static int file_open_append(URLContext *h, const char *filename, int flags)
     
 
     if (flags & URL_RDWR) {
-        access_flags = O_CREAT | O_APPEND | O_RDWR;
+        mode = "ab+";
+        bufsize = BUFSIZE_1MEG;
     } else if (flags & URL_WRONLY) {
-        access_flags = O_CREAT | O_APPEND | O_WRONLY;
+        mode = "ab";
+        bufsize = BUFSIZE_1MEG;
     } else {
-        access_flags = O_RDONLY;
+        mode = "rb";
     }
 
-    fd = open(filename, access_flags, 0666);
-    if (fd < 0) 
+    fh = myfopen(filename, mode, bufsize);
+    if (fh == NULL)
         return AVERROR(ENOENT);
     
-    h->priv_data = (void *)(size_t)fd;
+    h->priv_data = (void *)fh;
     return 0;
 }
 
@@ -131,49 +135,52 @@ URLProtocol mpeg1_file_protocol = {
 
 static int file_open(URLContext *h, const char *filename, int flags)
 {
-    int access_flags, fd;
-                              
+    const char *mode;
+    FILE *fh;
+    size_t bufsize = 0;
+
     av_strstart(filename, "file:", &filename);
 
     if (flags & URL_RDWR) {
-        access_flags = O_CREAT | O_TRUNC | O_RDWR;
+        mode = "wb+";
+        bufsize = BUFSIZE_1MEG;
     } else if (flags & URL_WRONLY) {
-        access_flags = O_CREAT | O_TRUNC | O_WRONLY;
+        mode = "wb";
+        bufsize = BUFSIZE_1MEG;
     } else {
-        access_flags = O_RDONLY;
+        mode = "rb";
     }
-#ifdef O_BINARY
-    access_flags |= O_BINARY;
-#endif
-    fd = open(filename, access_flags, 0666);
-    if (fd < 0)
+    fh = myfopen(filename, mode, bufsize);
+    if (fh == NULL)
         return AVERROR(ENOENT);
-    h->priv_data = (void *)(size_t)fd;
+    h->priv_data = (void *)fh;
     return 0;
 }
 
 static int file_read(URLContext *h, unsigned char *buf, int size)
 {
-    int fd = (size_t)h->priv_data;
-    return read(fd, buf, size);
+    FILE *fh = (FILE *)h->priv_data;
+    return fread(buf, 1, size, fh);
 }
          
 static int file_write(URLContext *h, unsigned char *buf, int size)
 {
-    int fd = (size_t)h->priv_data;
-    return write(fd, buf, size);
+    FILE *fh = (FILE *)h->priv_data;
+    return fwrite(buf, 1, size, fh);
 }
 
 static int64_t file_seek(URLContext *h, int64_t pos, int whence)
 {
-    int fd = (size_t)h->priv_data;
-    return lseek(fd, pos, whence);
+    FILE *fh = (FILE *)h->priv_data;
+    if (fseek(fh, pos, whence))
+        return -1;
+    return ftell(fh);
 }
 
 static int file_close(URLContext *h)
 {
-    int fd = (size_t)h->priv_data;
-    return close(fd);
+    FILE *fh = (FILE *)h->priv_data;
+    return myfclose(fh);
 }
 
 URLProtocol file_protocol = {

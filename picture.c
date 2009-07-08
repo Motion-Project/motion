@@ -521,7 +521,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 {
     FILE *picture;
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "w", BUFSIZE_1MEG);
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir */
         if (errno ==  EACCES) {
@@ -540,7 +540,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
     }
 
     put_picture_fd(cnt, picture, image, cnt->conf.quality);
-    fclose(picture);
+    myfclose(picture);
     event(cnt, EVENT_FILECREATE, NULL, file, (void *)(unsigned long)ftype, NULL);
 }
 
@@ -617,7 +617,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
 {
     FILE *picture;
 
-    picture = myfopen(file, "w");
+    picture = myfopen(file, "w", BUFSIZE_1MEG);
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir */
         if (errno ==  EACCES) {
@@ -643,7 +643,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
         return;
     }
     
-    fclose(picture);
+    myfclose(picture);
 
     motion_log(LOG_ERR, 0, "%s: Creating empty mask %s\nPlease edit this file and "
                "re-run motion to enable mask feature", __FUNCTION__, cnt->conf.mask_file);

@@ -381,7 +381,7 @@ static void motion_remove_pid(void)
     }
 
     if (ptr_logfile) 
-        fclose(ptr_logfile);
+        myfclose(ptr_logfile);
 
 }
 
@@ -415,7 +415,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
         } else if (cnt->locate_motion_style == LOCATE_CROSS) {
             alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS, 
                               LOCATE_BOTH, cnt->process_thisframe);
-        }else if (cnt->locate_motion_style == LOCATE_REDCROSS) {
+        } else if (cnt->locate_motion_style == LOCATE_REDCROSS) {
             alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS, 
                                   LOCATE_BOTH, cnt->process_thisframe);
         }    
@@ -786,12 +786,12 @@ static int motion_init(struct context *cnt)
         motion_log(LOG_INFO, 0, "%s: DB %s", __FUNCTION__,
                    cnt->conf.sqlite3_db);
 
-		if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
-			motion_log(LOG_ERR, 0, "%s: Can't open database %s : %s\n", __FUNCTION__, 
+        if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
+            motion_log(LOG_ERR, 0, "%s: Can't open database %s : %s\n", __FUNCTION__, 
                        cnt->conf.sqlite3_db, sqlite3_errmsg(cnt->database_sqlite3));
-			sqlite3_close(cnt->database_sqlite3);
-			exit(1);
-		}
+            sqlite3_close(cnt->database_sqlite3);
+            exit(1);
+        }
     }
 #endif /* HAVE_SQLITE3 */
 
@@ -2145,16 +2145,16 @@ static void become_daemon(void)
      * for an enter.
      */
     if (cnt_list[0]->conf.pid_file) {
-        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+");
+        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+", 0);
     
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
-            fclose(pidf);
+            myfclose(pidf);
         } else {
             motion_log(LOG_ERR, 1, "%s: Exit motion, cannot create process id file (pid file) %s",
                        __FUNCTION__, cnt_list[0]->conf.pid_file);
             if (ptr_logfile) 
-                fclose(ptr_logfile);    
+                myfclose(ptr_logfile);    
             exit(0);    
         }
     }
@@ -2740,6 +2740,13 @@ int create_path(const char *path)
     return 0;
 }
 
+#define MYBUFCOUNT 32
+struct MyBuffer {
+    FILE* fh;
+    char* buffer;
+    size_t bufsize;
+} buffers[MYBUFCOUNT];
+
 /**
  * myfopen
  *
@@ -2747,17 +2754,25 @@ int create_path(const char *path)
  *   (which is: path does not exist), the path is created and then things are
  *   tried again. This is faster then trying to create that path over and over
  *   again. If someone removes the path after it was created, myfopen will
- *   recreate the path automatically.
+ *   recreate the path automatically. If the bufsize is set to > 0, we will
+ *   allocate (or re-use) write buffers to use instead of the default ones.
+ *   This gives us much higher throughput in many cases.
  *
  * Parameters:
  *
  *   path - path to the file to open
  *   mode - open mode
+ *   bufsize - size of write buffers, 0 == OS default
  *
  * Returns: the file stream object
  */
-FILE * myfopen(const char *path, const char *mode)
+FILE * myfopen(const char *path, const char *mode, size_t bufsize)
 {
+    static int bufferInit = 0;
+    if (!bufferInit) {
+        bufferInit = 1;
+        memset(buffers, 0x00, sizeof(buffers));
+    }
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
 
@@ -2772,21 +2787,85 @@ FILE * myfopen(const char *path, const char *mode)
 
             /* and retry opening the file */
             dummy = fopen(path, mode);
-            if (dummy)
-                return dummy;
         }
+    }
+ 
+    if (dummy) {
+        if (bufsize > 0) {
+            int i = 0;
+            for (i = 0; i < MYBUFCOUNT; i++) {
+                int first = -1;
+                if (!buffers[i].fh) {
+                    if (first == -1)
+                        first = i;
+                    if (buffers[i].buffer == NULL ||
+                        buffers[i].bufsize >= bufsize ||
+                        (i == (MYBUFCOUNT - 1) && first >= 0)) {
+                        if (buffers[i].buffer == NULL) {
+                            /* We are allocating a new buffer */
+                            buffers[i].fh = dummy;
+                            buffers[i].buffer = mymalloc(bufsize);
+                            buffers[i].bufsize = bufsize;
+                        }
+                        else if (buffers[i].bufsize >= bufsize) {
+                            /* We are using an old buffer */
+                            buffers[i].fh = dummy;
+                        }
+                        else {
+                            /* We are reusing an old buffer, but it is too
+                             * small, realloc it */
+                            i = first;
+                            buffers[i].fh = dummy;
+                            buffers[i].buffer = myrealloc(buffers[i].buffer,
+                                                          bufsize, "myfopen");
+                            buffers[i].bufsize = bufsize;
+                        }
 
+                        if (buffers[i].buffer == NULL) {
+                            /* our allocation failed, so just use the default
+                             * OS buffers */
+                            buffers[i].fh = NULL;
+                            buffers[i].bufsize = 0;
+                        }
+                        else {
+                            setvbuf(buffers[i].fh, buffers[i].buffer,
+                                    _IOFBF, buffers[i].bufsize);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    } else {
         /* two possibilities
-         * 1: there was an other error while trying to open the file for the first time
+         * 1: there was an other error while trying to open the file for the
+         * first time
          * 2: could still not open the file after the path was created
          */
         motion_log(LOG_ERR, 1, "%s: Error opening file %s with mode %s",  
                    __FUNCTION__, path, mode);
-
-        return NULL;
     }
 
     return dummy;
+}
+
+int myfclose(FILE* fh)
+{
+    int i = 0;
+    int rval = fclose(fh);
+    for (i = 0; i < MYBUFCOUNT; i++) {
+        if (buffers[i].fh == fh) {
+            buffers[i].fh = NULL;
+#if 0 /* Don't free the buffers for now, reuse them instead */
+            if (buffers[i].buffer)
+                free(buffers[i].buffer);
+                buffers[i].buffer = NULL;
+                buffers[i].bufsize = 0;
+#endif
+            break;
+        }
+    }
+    return rval;
 }
 
 /**

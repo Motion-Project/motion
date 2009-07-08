@@ -172,7 +172,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             int res;
             char *errmsg = 0;
             res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
-            if( res != SQLITE_OK ) {
+            if (res != SQLITE_OK ) {
                 motion_log(LOG_ERR, 0, "%s: SQLite error was %s", __FUNCTION__,  errmsg);
                 sqlite3_free(errmsg);
             }
@@ -398,7 +398,7 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
         /* Open a dummy file to check if path is correct */
-        fd_dummy = myfopen(cnt->extpipefilename, "w");
+        fd_dummy = myfopen(cnt->extpipefilename, "w", 0);
 
         /* TODO: trigger some warning instead of only log an error message */
         if (fd_dummy == NULL) {
@@ -414,7 +414,7 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
         }            
         
-        fclose(fd_dummy);        
+        myfclose(fd_dummy);        
         unlink(cnt->extpipefilename);
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tm, cnt->extpipefilename, 0);

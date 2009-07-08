@@ -191,6 +191,8 @@
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
 
+#define BUFSIZE_1MEG      (1024 * 1024)
+
 /* Forward declaration, used in track.h */
 struct images;
 
@@ -421,7 +423,8 @@ extern pthread_key_t tls_key_threadnr; /* key for thread number */
 int http_bindsock(int, int);
 void * mymalloc(size_t);
 void * myrealloc(void *, size_t, const char *);
-FILE * myfopen(const char *, const char *);
+FILE * myfopen(const char *, const char *, size_t);
+int myfclose(FILE *);
 size_t mystrftime(struct context *, char *, size_t, const char *, const struct tm *, const char *, int);
 int create_path(const char *);
 #endif /* _INCLUDE_MOTION_H */

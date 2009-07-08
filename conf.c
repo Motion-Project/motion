@@ -1623,7 +1623,7 @@ void conf_print(struct context **cnt)
         motion_log(LOG_INFO, 0, "%s: Writing config file to %s", 
                    __FUNCTION__, cnt[thread]->conf_filename);
         
-        conffile = myfopen(cnt[thread]->conf_filename, "w");
+        conffile = myfopen(cnt[thread]->conf_filename, "w", 0);
         
         if (!conffile)
             continue;
@@ -1666,7 +1666,7 @@ void conf_print(struct context **cnt)
         }
 
         fprintf(conffile, "\n");
-        fclose(conffile);
+        myfclose(conffile);
         conffile = NULL;
     }
 }
