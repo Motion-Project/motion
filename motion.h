@@ -28,7 +28,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
