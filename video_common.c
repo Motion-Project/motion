@@ -570,8 +570,7 @@ void vid_close(struct context *cnt)
         } else {
 #endif
             close(dev->fd);
-            munmap(viddevs->v4l_buffers[0], viddevs->size_map);
-            munmap(viddevs->v4l_buffers[1], viddevs->size_map);
+            munmap(viddevs->v4l_buffers[0], dev->size_map);
 #ifdef MOTION_V4L2
         }
 #endif

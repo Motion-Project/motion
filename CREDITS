@@ -551,6 +551,9 @@ Peter Holik
      From mailing list 23 Dec 2005.
    * Avoid open file descriptor when connecting to network cameras fails 
      http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
+   * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
+
 
 Wesley Hosking
    * For pointing me to the absence of a frame length check using

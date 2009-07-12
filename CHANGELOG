@@ -22,6 +22,8 @@ Features
      Increased buffer in ffmpeg to allow encoding at 1600x1200 (Angel Carpintero)
    * Sqlite3 support http://www.lavrsen.dk/twiki/bin/view/Motion/SQLite3Patch (Giacomo Graziosi)
    * New RPM SPEC file and startup scripts compliant with Fedora 10 guidelines and above (Steven Moix)
+   * Increase write buffer size for writing image files and ffmpegs 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionWriteBuffersPatch (Craig West)
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
@@ -47,6 +49,8 @@ Bugfixes
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes. (Angel Carpintero)
    * Fix v4l2_palette http://www.lavrsen.dk/twiki/bin/view/Motion/UvcvideoMjpegPatch (Gerrit Hannaert)
    * Fix warning for x86_64 in conf.c using pointers LP64 compliant ( Angel Carpintero ).
+   * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) ( Peter Holik )
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
 
 
 3.2.10.1 Summary of Changes
