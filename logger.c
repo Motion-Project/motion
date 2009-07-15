@@ -77,7 +77,7 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 {
     int errno_save, n;
     char buf[1024];
-#if (!defined(BSD))
+#if (!defined(BSD)) && (!(_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
     char msg_buf[100];
 #endif
     va_list ap;
@@ -117,7 +117,9 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
 #if (defined(BSD))
-        strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+        strerror_r(errno_save, buf + n, sizeof(buf) - n);
 #else
         strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif

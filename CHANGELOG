@@ -30,8 +30,9 @@ Bugfixes
    * Avoid possible stack smashing in v4l_open_vidpipe(). (Angel Carpintero)
    * Allow compile with OpenSuse ffmpeg package (15594svn-20081010) 
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400 (Angel Carpintero)
-   * Fix warning for __USE_GNU redefined  
+   * Fix warning for __USE_GNU redefined (Peter Holik) 
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x122137 (Peter Holik)
+   * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
 
