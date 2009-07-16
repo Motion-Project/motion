@@ -10,6 +10,7 @@ Source0:        http://prdownloads.sourceforge.net/%{name}/%{name}-%{version}.ta
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  libjpeg-devel ffmpeg-devel zlib-devel
+Requires: libv4l
 Requires(post): chkconfig
 Requires(preun): chkconfig initscripts
 Requires(postun): initscripts
@@ -42,6 +43,9 @@ sed -i 's|sql_log_snapshot|; sql_log_snapshot|g' %{buildroot}%{_sysconfdir}/%{na
 sed -i 's|sql_log_mpeg|; sql_log_mpeg|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 sed -i 's|sql_log_timelapse|; sql_log_timelapse|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 sed -i 's|sql_query|; sql_query|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
+#We set the log file and target directory
+sed -i 's|;logfile|logfile /var/log/motion.log|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
+sed -i 's|target_dir /usr/local/apache2/htdocs/cam1|target_dir /var/motion|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 #We install our startup script
 install -D -m 0755 motion.init-RH %{buildroot}%{_initrddir}/%{name}
 

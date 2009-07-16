@@ -32,7 +32,20 @@ start() {
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
-    daemon $motion 2> /dev/null
+    # We try to determine which architecture we have so we can 
+    # load libv4l to support more USB cameras. x86_64 and ppc64
+    # are both supported by rpmfusion.
+    case $(uname -i) in
+        "x86_64" )
+            #We load libv4l for 64 Bit x86 architectures
+            LD_PRELOAD=/usr/lib64/libv4l/v4l2convert.so daemon $motion 2> /dev/null ;;
+        "ppc64" )
+            #We load libv4l for 64 Bit PPC architectures
+            LD_PRELOAD=/usr/lib64/libv4l/v4l2convert.so daemon $motion 2> /dev/null ;;
+        * )
+            #Default case, we load libv4l for all 32 Bit architectures
+            LD_PRELOAD=/usr/lib/libv4l/v4l2convert.so daemon $motion 2> /dev/null ;;
+    esac
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
