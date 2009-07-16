@@ -692,7 +692,7 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
     /* That is the buffer size for capture images ,
      so is dependent of color space of input format / FIXME */
 
-    viddev->v4l_bufsize = (((width * height * 3 / 2)) * sizeof(unsigned char *));
+    viddev->v4l_bufsize = (((width * height * 3 / 2)) * sizeof(unsigned char));
     viddev->v4l_fmt = VIDEO_PALETTE_YUV420P;
     
 

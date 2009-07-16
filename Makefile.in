@@ -136,8 +136,19 @@ svn:
 	svn update
 
 autotools:
+	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.in
 	autoconf
 	./configure --with-developer-flags 
+
+build-commit: distclean svn set-version all
+
+set-version:
+	@sed -i 's/.\/version.sh/.\/commit-version.sh/g' configure.in
+	autoconf
+	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.in
+	./configure --with-developer-flags
+
+
 
 ################################################################################
 # INSTALL installs all relevant files.                                         #

@@ -1411,6 +1411,9 @@ Tristan Willy
 Robert Eugene Wood
    * Inverse pixels for locate box.
 
+Andreas Wrede
+  * Allow compile with NetBSD and make LP64 compliant video_freebsd.c 
+
 Damian Wrobel
    * Fix a segfault adding correct size to be used for bayer2rgb24(). 
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x30x175913

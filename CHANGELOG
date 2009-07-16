@@ -35,7 +35,7 @@ Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
-
+   * Allow compile with NetBSD and make LP64 compliant video_freebsd.c (Andreas Wrede)
 
 
 3.2.11 Summary of Changes

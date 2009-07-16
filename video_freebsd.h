@@ -14,8 +14,13 @@
 #ifndef WITHOUT_V4L
 
 #ifdef OLD_BKTR
+
+#ifdef __NetBSD__
+#include <dev/ic/bt8xx.h>
+#else
 #include <machine/ioctl_meteor.h>
 #include <machine/ioctl_bt848.h>
+#endif
 #else
 #include <dev/bktr/ioctl_meteor.h>
 #include <dev/bktr/ioctl_bt848.h>
