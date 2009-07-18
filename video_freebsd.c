@@ -1057,7 +1057,7 @@ void vid_close(struct context *cnt)
                 pthread_mutex_unlock(&dev->mutex);
         }
     }
-#endif /* WITHOUT_V4L */
+#endif /* !WITHOUT_V4L */
 }
 
 
@@ -1259,7 +1259,7 @@ int vid_start(struct context *cnt)
     
         pthread_mutex_unlock(&vid_mutex);
     }
-#endif /* WITHOUT_V4L */
+#endif /* !WITHOUT_V4L */
 
     /* FIXME needed tuner device ?! */
     return fd_bktr;
@@ -1340,6 +1340,6 @@ int vid_next(struct context *cnt, unsigned char *map)
         rotate_map(cnt, map);
      
     
-#endif /*WITHOUT_V4L*/
+#endif /* !WITHOUT_V4L */
     return ret;
 }

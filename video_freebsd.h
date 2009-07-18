@@ -13,21 +13,17 @@
 
 #ifndef WITHOUT_V4L
 
-#ifdef OLD_BKTR
-
 #ifdef __NetBSD__
 #include <dev/ic/bt8xx.h>
-#else
+#elif defined(OLD_BKTR)
 #include <machine/ioctl_meteor.h>
 #include <machine/ioctl_bt848.h>
-#endif
 #else
 #include <dev/bktr/ioctl_meteor.h>
 #include <dev/bktr/ioctl_bt848.h>
 #endif
 
-
-#endif
+#endif /* !WITHOUT_V4L */
 
 /* bktr (video4linux) stuff FIXME more modes not only these */
 

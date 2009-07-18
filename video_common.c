@@ -598,7 +598,7 @@ void vid_close(struct context *cnt)
             pthread_mutex_unlock(&dev->mutex);
         }
     }
-#endif /* WITHOUT_V4L */
+#endif /* !WITHOUT_V4L */
 }
 
 #ifndef WITHOUT_V4L
@@ -797,7 +797,7 @@ static int vid_v4lx_start(struct context *cnt)
 
     return fd;
 }
-#endif                /*WITHOUT_V4L */
+#endif /* !WITHOUT_V4L */
 
 
 

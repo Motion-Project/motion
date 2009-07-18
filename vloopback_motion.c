@@ -8,7 +8,7 @@
  *    See also the file 'COPYING'.
  *
  */
-#ifndef WITHOUT_V4L
+#if !defined(WITHOUT_V4L) && !defined(BSD)
 
 //#include "video.h"
 #include "vloopback_motion.h"
@@ -230,4 +230,4 @@ int vid_putpipe (int dev, unsigned char *image, int size)
 {
     return v4l_putpipe(dev, image, size);
 }
-#endif /*WITHOUT_V4L*/
+#endif /* !WITHOUT_V4L && !BSD */

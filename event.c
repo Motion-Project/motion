@@ -227,8 +227,7 @@ static void event_stream_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
         stream_put(cnt, img);
 }
 
-#ifndef WITHOUT_V4L
-#if (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
 static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
             struct tm *tm ATTRIBUTE_UNUSED)
@@ -238,8 +237,7 @@ static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             motion_log(LOG_ERR, 1, "%s: Failed to put image into video pipe", __FUNCTION__);
     }
 }
-#endif /* BSD */
-#endif /* WITHOUT_V4L */
+#endif /* !WITHOUT_V4L && !BSD */
 
 const char *imageext(struct context *cnt)
 {
@@ -768,8 +766,7 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
-#ifndef WITHOUT_V4L
-#if (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
     {
     EVENT_IMAGE,
     event_vid_putpipe
@@ -778,8 +775,7 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGEM,
     event_vid_putpipe     
     },
-#endif /* BSD */
-#endif /* WITHOUT_V4L */
+#endif /* !WITHOUT_V4L && !BSD */
     {
     EVENT_STREAM,
     event_stream_put

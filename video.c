@@ -408,4 +408,4 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
         v4l_picture_controls(cnt, viddev);
     }
 }
-#endif /*WITHOUT_V4L*/
+#endif /* !WITHOUT_V4L */

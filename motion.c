@@ -741,8 +741,7 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#ifndef WITHOUT_V4L
-#if (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         if (debug_level >= CAMERA_DEBUG)
@@ -773,8 +772,7 @@ static int motion_init(struct context *cnt)
             return -1;
         }
     }
-#endif /* BSD */
-#endif /*WITHOUT_V4L*/
+#endif /* !WITHOUT_V4L && !BSD */
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
