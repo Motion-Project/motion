@@ -24,6 +24,7 @@ Features
    * New RPM SPEC file and startup scripts compliant with Fedora 10 guidelines and above (Steven Moix)
    * Increase write buffer size for writing image files and ffmpegs 
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionWriteBuffersPatch (Craig West)
+   * Fixed mask overlay in setup mode is now green instead of white (Joerg Weber)
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)

@@ -410,23 +410,42 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
     }
 }
 
-/* copy fixed mask as an overlay into motion images and movies */
+/* copy fixed mask as green overlay into motion images and movies */
 void overlay_fixed_mask(struct context *cnt, unsigned char *out)
 {
-    int i;
+    int i, x, v, width, height, line;
     struct images *imgs = &cnt->imgs;
-    unsigned char *motion_img = imgs->out;
     unsigned char *mask = imgs->mask;
-    int pixel;
+    unsigned char *out_y, *out_u, *out_v;
     
-    /* set y to mask + motion-pixel to keep motion pixels visible on grey background*/
+    i = imgs->motionsize;
+    v = i + ((imgs->motionsize) / 4);
+    width = imgs->width;
+    height = imgs->height;
+
+    /* set U and V to 0 to make fixed mask appear green */
+    out_v = out + v;
+    out_u = out + i;
+    for (i = 0; i < height; i += 2) {
+        line = i * width;
+        for (x = 0; x < width; x += 2) {
+            if (mask[line + x] == 0 || mask[line + x + 1] == 0 ||
+                mask[line + width + x] == 0 || 
+                mask[line + width + x + 1] == 0) {
+
+                *out_v = 0;
+                *out_u = 0;
+            }
+            out_v++;
+            out_u++;
+        }
+    }
+    out_y = out;
+    /* set colour intensity for mask */
     for (i = 0; i < imgs->motionsize; i++) {
-        pixel = 255-mask[i]+motion_img[i];
-        if (pixel > 255)
-            *out = 255;
-        else
-            *out = pixel;
-        out++;
+        if (mask[i] == 0)
+            *out_y = 0;
+        out_y++;
     }
 }
 

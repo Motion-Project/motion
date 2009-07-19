@@ -1400,6 +1400,7 @@ Joerg Weber
      possible combinations.
    * Gapless_event mode.
    * Limit detection rate to 3fps at framerates above 5fps, to reduce CPU load.
+   * Fixed mask overlay in setup mode is now green instead of white.
    
 Dirk Wesenberg
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
