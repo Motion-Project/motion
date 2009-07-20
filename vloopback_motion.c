@@ -8,10 +8,8 @@
  *    See also the file 'COPYING'.
  *
  */
-#if !defined(WITHOUT_V4L) && !defined(BSD)
-
-//#include "video.h"
 #include "vloopback_motion.h"
+#ifndef BSD
 #include <sys/utsname.h>
 #include <dirent.h>
 

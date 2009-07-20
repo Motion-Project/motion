@@ -86,6 +86,7 @@ struct config conf_template = {
     ffmpeg_bps:                     DEF_FFMPEG_BPS,
     ffmpeg_vbr:                     DEF_FFMPEG_VBR,
     ffmpeg_video_codec:             DEF_FFMPEG_CODEC,
+    ipv6_enabled:                   0,
     stream_port:                    0,
     stream_quality:                 50,
     stream_motion:                  0,
@@ -932,6 +933,17 @@ config_param config_params[] = {
     },
 #endif /* HAVE_FFMPEG */
     {
+    "ipv6_enabled",
+    "\n############################################################\n"
+    "# Global Network Options\n"
+    "############################################################\n\n"
+    "# Enable or disable IPV6 for http control and stream (default: 0 = disabled)",
+    0,
+    CONF_OFFSET(ipv6_enabled),
+    copy_int,
+    print_int
+    },
+    {
     "stream_port",
     "\n############################################################\n"
     "# Live Stream Server\n"
@@ -1020,7 +1032,7 @@ config_param config_params[] = {
     CONF_OFFSET(webcontrol_authentication),
     copy_string,
     print_string
-    },    
+    },   
     {
     "track_type",
     "\n############################################################\n"

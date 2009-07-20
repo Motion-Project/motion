@@ -62,6 +62,7 @@ struct config {
     int ffmpeg_vbr;
     int ffmpeg_deinterlace;
     const char *ffmpeg_video_codec;
+    int ipv6_enabled;
     int stream_port;
     int stream_quality;
     int stream_motion;

@@ -2368,7 +2368,10 @@ void httpd_run(struct context **cnt)
 #if defined(BSD)
     hints.ai_family = AF_INET;
 #else
-    hints.ai_family    = AF_UNSPEC;
+    if (!cnt[0]->conf.ipv6_enabled)
+        hints.ai_family = AF_INET;
+    else
+        hints.ai_family = AF_UNSPEC;
 #endif
     hints.ai_socktype = SOCK_STREAM;
 

@@ -33,7 +33,7 @@
  * If the parameter _local_ is not zero the socket is setup to only accept connects from localhost.
  * Otherwise any client IP address is accepted. The function returns an integer representing the socket.
  */
-int http_bindsock(int port, int local)
+int http_bindsock(int port, int local, int ipv6_enabled)
 {
     int sl = -1, optval;
     struct addrinfo hints, *res = NULL, *ressave = NULL;
@@ -48,7 +48,10 @@ int http_bindsock(int port, int local)
 #if defined(BSD)
     hints.ai_family = AF_INET;
 #else
-    hints.ai_family = AF_UNSPEC;
+    if (!ipv6_enabled)
+        hints.ai_family = AF_INET;
+    else
+        hints.ai_family = AF_UNSPEC;
 #endif
     hints.ai_socktype = SOCK_STREAM;
 
@@ -328,7 +331,7 @@ static int stream_check_write(struct stream *list)
  */
 int stream_init(struct context *cnt)
 {
-    cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost);
+    cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost, cnt->conf.ipv6_enabled);
     cnt->stream.next = NULL;
     cnt->stream.prev = NULL;
     return cnt->stream.socket;

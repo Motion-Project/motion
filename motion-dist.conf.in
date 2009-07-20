@@ -424,6 +424,11 @@ movie_filename %v-%Y%m%d%H%M%S
 # File extension .mpg is automatically added so do not include this
 timelapse_filename %Y%m%d-timelapse
 
+############################################################
+# Global Network Options
+############################################################
+# Enable or disable IPV6 for http control and stream (default: 0 = disabled)
+ipv6_enabled 0
 
 ############################################################
 # Live Stream Server
