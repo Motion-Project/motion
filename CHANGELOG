@@ -39,6 +39,8 @@ Bugfixes
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
    * Allow compile with NetBSD and make LP64 compliant video_freebsd.c (Andreas Wrede)
    * Avoid compile vloopback in BSD (Angel Carpintero)
+   * Fix segfault for new libjpeg v7 (Angel Carpintero)
+
 
 3.2.11 Summary of Changes
 

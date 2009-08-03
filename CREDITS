@@ -418,6 +418,8 @@ Angel Carpintero
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400
    * Avoid segfault detecting strerror_r() version GNU or SUSv3.
    * Fix fd leaks in external pipe. 
+   * Fix segfault for new libjpeg v7.
+
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
