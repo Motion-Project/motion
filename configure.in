@@ -301,7 +301,7 @@ if test x$JPEG_SUPPORT != xyes ; then
    }
   ],
   [AC_MSG_RESULT(yes)]
-  TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_JPEV_V7",
+  TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_JPEGLIB_V7",
   [
    AC_MSG_RESULT(no)
   ]

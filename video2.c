@@ -398,16 +398,18 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
                        pixformat >> 16, pixformat >> 24, *width, *height, vid_source->fmt.fmt.pix.bytesperline, 
                        vid_source->fmt.fmt.pix.sizeimage, vid_source->fmt.fmt.pix.colorspace);
 
-            /* TODO: Review when it has been tested */
+
+            /* 
+             * VIDIOC_S_JPEGCOMP use is deprecated 
+             * http://thread.gmane.org/gmane.linux.drivers.video-input-infrastructure/6320/focus=6425 
+            
+
             if (pixformat == V4L2_PIX_FMT_MJPEG) {
                 struct v4l2_jpegcompression v4l2_jpeg;
 
                 if (xioctl(vid_source->fd, VIDIOC_G_JPEGCOMP, &v4l2_jpeg) == -1) {
                     motion_log(LOG_ERR, 1, "%s: VIDIOC_G_JPEGCOMP not supported but it should be " 
                                "(does your webcam driver support this ioctl?)", __FUNCTION__);
-                    // uvcvideo doesn't seem to have this, even SVN version ?!
-                    // http://lists.berlios.de/pipermail/linux-uvc-devel/2007-April/001578.html
-                    // kill the thread here?
                 } else {
                     v4l2_jpeg.jpeg_markers |= V4L2_JPEG_MARKER_DHT;
                     if (xioctl(vid_source->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)
@@ -415,6 +417,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
                                    __FUNCTION__);
                 }
             }
+            */
             return 0;
         }
 
