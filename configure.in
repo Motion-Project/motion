@@ -283,8 +283,33 @@ if test x$JPEG_SUPPORT != xyes ; then
 		echo
 	]
   )
-fi
 
+  
+  AC_MSG_CHECKING([libjpeg v7 ?])
+  saved_CFLAGS=$CFLAGS
+  saved_LIBS=$LIBS
+  CFLAGS="${FFMPEG_CFLAGS}"
+  LIBS="$TEMP_LIBS"
+
+  AC_COMPILE_IFELSE(
+  [
+   #include <jpeglib.h>
+   struct jpeg_compress_struct jpeg_comp_st;
+   int main(void){
+     jpeg_comp_st.do_fancy_downsampling = FALSE;
+     return 0;
+   }
+  ],
+  [AC_MSG_RESULT(yes)]
+  TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_JPEV_V7",
+  [
+   AC_MSG_RESULT(no)
+  ]
+  )
+  CFLAGS=$saved_CFLAGS
+  LIBS=$saved_LIBS
+
+fi
 
 
 #
