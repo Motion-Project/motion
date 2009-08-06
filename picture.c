@@ -117,7 +117,8 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
     cinfo.raw_data_in = TRUE; // supply downsampled data
-#ifdef HAVE_JPEGLIB_V7
+#if JPEG_LIB_VERSION >= 70
+#warning using JPEG_LIB_VERSION >= 70    
     cinfo.do_fancy_downsampling = FALSE;  // fix segfaulst with v7
 #endif    
     cinfo.comp_info[0].h_samp_factor = 2;
@@ -234,7 +235,8 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
     cinfo.raw_data_in = TRUE; // supply downsampled data
-#ifdef HAVE_JPEGLIB_V7
+#if JPEG_LIB_VERSION >= 70
+#warning using JPEG_LIB_VERSION >= 70
     cinfo.do_fancy_downsampling = FALSE;  // fix segfaulst with v7
 #endif
     cinfo.comp_info[0].h_samp_factor = 2;
