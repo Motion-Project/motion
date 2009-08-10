@@ -387,7 +387,8 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
     ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
 
     if (ret == 1) {
-        motion_log(LOG_ERR, 0, "%s: Corrupt image ... continue", __FUNCTION__);
+        if (debug_level >= CAMERA_WARNINGS)
+            motion_log(LOG_ERR, 0, "%s: Corrupt image ... continue", __FUNCTION__);
         ret = 2;
     }
 
