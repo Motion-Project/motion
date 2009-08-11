@@ -19,7 +19,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -37,7 +39,7 @@
 #include <stdint.h>
 
 #define _LINUX_TIME_H 1
-#if (!defined(WITHOUT_V4L)) && (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
 #include <linux/videodev.h>
 #endif
 

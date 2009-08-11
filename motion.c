@@ -634,8 +634,7 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#ifndef WITHOUT_V4L
-#if (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         if (cnt->conf.setup_mode)
@@ -661,8 +660,7 @@ static int motion_init(struct context *cnt)
             return -1;
         }
     }
-#endif /* BSD */
-#endif /*WITHOUT_V4L*/
+#endif /*WITHOUT_V4L && !BSD */
 
 #ifdef HAVE_MYSQL
     if (cnt->conf.mysql_db) {
@@ -2738,7 +2736,7 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 {
     int errno_save, n;
     char buf[1024];
-#if (!defined(BSD))
+#if (!defined(BSD)) && (!(_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
     char msg_buf[100];
 #endif
     va_list ap;
@@ -2765,8 +2763,9 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 
     /* If errno_flag is set, add on the library error message */
     if (errno_flag) {
-        strcat(buf, ": ");
+        strncat(buf, ": ", 1024 - strlen(buf));
         n += 2;
+
         /*
          * this is bad - apparently gcc/libc wants to use the non-standard GNU
          * version of strerror_r, which doesn't actually put the message into
@@ -2774,13 +2773,15 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
          */
 #if (defined(BSD))
         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+        strerror_r(errno_save, buf + n, sizeof(buf) - n);
 #else
-        strcat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)));
+        strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
     }
     /* If 'level' is not negative, send the message to the syslog */
     if (level >= 0)
-        syslog(level, buf);
+        syslog(level, "%s", buf);
 
     /* For printing to stderr we need to add a newline */
     strcat(buf, "\n");

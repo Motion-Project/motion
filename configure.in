@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script
 
-AC_INIT(motion, esyscmd(['./version.sh']))
+AC_INIT(motion, "3.2.11.1")
 AC_CONFIG_SRCDIR([motion.c])
 AC_CONFIG_HEADERS(config.h)
 
@@ -273,7 +273,10 @@ fi
 #
 if test x$JPEG_SUPPORT != xyes ; then
   # Checks for libraries
-  LDFLAGS=$TEMP_LDFLAGS
+  LDFLAGS="$TEMP_LDFLAGS"
+
+  AC_MSG_CHECKING(for libjpeg)
+  echo
 
   AC_CHECK_LIB(jpeg, jpeg_set_defaults, [
 		TEMP_LIBS="$TEMP_LIBS -ljpeg"

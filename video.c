@@ -503,9 +503,9 @@ static int v4l_open_vidpipe(void)
 
         while ((dirp=readdir(dir)) != NULL) {
             if (!strncmp(dirp->d_name, "video", 5)) {
-                strncpy(buffer, prefix, 255);
-                strncat(buffer, dirp->d_name, 255);
-                strncat(buffer, "/name", 255);
+                strncpy(buffer, prefix, sizeof(buffer));
+                strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
+                strncat(buffer, "/name", sizeof(buffer) - strlen(buffer));
                 if ((fd = open(buffer, O_RDONLY)) >= 0) {
                     if ((read(fd, buffer, sizeof(buffer)-1)) < 0) {
                         close(fd);
@@ -537,9 +537,9 @@ static int v4l_open_vidpipe(void)
 
                     if (tnum < low) {
                         strcpy(buffer, "/dev/");
-                        strcat(buffer, dirp->d_name);
+                        strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
                         if ((tfd=open(buffer, O_RDWR)) >= 0) {
-                            strcpy(pipepath, buffer);
+                            strncpy(pipepath, buffer, sizeof(pipepath));
 
                             if (pipe_fd >= 0) 
                                 close(pipe_fd);

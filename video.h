@@ -106,6 +106,6 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 void v4l2_close(struct video_dev *viddev);
 void v4l2_cleanup(struct video_dev *viddev);
 
-#endif
+#endif /* WITHOUT_V4L */
 
 #endif                /* _INCLUDE_VIDEO_H */

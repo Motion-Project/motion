@@ -164,7 +164,7 @@ static int file_write(URLContext *h, unsigned char *buf, int size)
     return write(fd, buf, size);
 }
 
-static offset_t file_seek(URLContext *h, offset_t pos, int whence)
+static int64_t file_seek(URLContext *h, int64_t pos, int whence)
 {
     int fd = (size_t)h->priv_data;
     return lseek(fd, pos, whence);

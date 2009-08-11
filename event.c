@@ -12,7 +12,7 @@
 #include "ffmpeg.h"    /* must be first to avoid 'shadow' warning */
 #include "picture.h"    /* already includes motion.h */
 #include "event.h"
-#if (!defined(BSD)) 
+#if !defined(BSD) 
 #include "video.h"
 #endif
 
@@ -220,8 +220,7 @@ static void event_webcam_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
         webcam_put(cnt, img);
 }
 
-#ifndef WITHOUT_V4L
-#if (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
 static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
             struct tm *tm ATTRIBUTE_UNUSED)
@@ -231,8 +230,7 @@ static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             motion_log(LOG_ERR, 1, "Failed to put image into video pipe");
     }
 }
-#endif /* BSD */
-#endif /* WITHOUT_V4L */
+#endif /* WITHOUT_V4L && !BSD */
 
 
 const char *imageext(struct context *cnt)
@@ -648,14 +646,12 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
-#ifndef WITHOUT_V4L
-#if (!defined(BSD))
+#if !defined(WITHOUT_V4L) && !defined(BSD)
     {
     EVENT_IMAGE | EVENT_IMAGEM,
     event_vid_putpipe
     },
-#endif /* BSD */
-#endif /* WITHOUT_V4L */
+#endif /* WITHOUT_V4L && !BSD */
     {
     EVENT_WEBCAM,
     event_webcam_put
