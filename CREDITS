@@ -408,7 +408,10 @@ Angel Carpintero
    * Fix fd leaks in external pipe. 
    * Avoid possible stack smashing in v4l_open_vidpipe(). 
    * Allow compile with OpenSuse ffmpeg package (15594svn-20081010)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400
+   * Better detection of ffmpeg  
+     http://www.lavrsen.dk/foswiki/pub/Motion/ReleaseNoteMotion3x2x11/ffmpeg-detection.diff.gz 
+     (Angel Carpintero) 
    * Fix warning for syslog().
    * Fix segfault for new libjpeg v7.
 
