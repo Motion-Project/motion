@@ -392,6 +392,9 @@ if test "${FFMPEG_OK}" = "found"; then
 	elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
 		AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
 		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
+    elif test -f ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES" 
 	else
 		AC_MSG_RESULT(not found)
 		FFMPEG_OK="no_found"

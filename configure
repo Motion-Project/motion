@@ -3265,6 +3265,10 @@ echo "${ECHO_T}found ${FFMPEG_DIR}/include/ffmpeg/avformat.h" >&6; }
 		{ echo "$as_me:$LINENO: result: found ${FFMPEG_DIR}/include/libavformat/avformat.h" >&5
 echo "${ECHO_T}found ${FFMPEG_DIR}/include/libavformat/avformat.h" >&6; }
 		FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
+    elif test -f ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h; then
+        { echo "$as_me:$LINENO: result: found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h" >&5
+echo "${ECHO_T}found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h" >&6; }
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES"
 	else
 		{ echo "$as_me:$LINENO: result: not found" >&5
 echo "${ECHO_T}not found" >&6; }
