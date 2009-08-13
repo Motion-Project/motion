@@ -1785,7 +1785,7 @@ struct context **conf_load(struct context **cnt)
         motion_log(LOG_INFO, 0, "%s: Processing thread 0 - config file %s", 
                    __FUNCTION__, filename);
         cnt = conf_process(cnt, fp);
-        fclose(fp);
+        myfclose(fp);
     } else {
         motion_log(LOG_INFO, 0, "%s: Not config file to process using default values", 
                    __FUNCTION__);
@@ -2157,7 +2157,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
     conf_process(cnt+i, fp);
     
     /* Finally we close the thread config file */
-    fclose(fp);
+    myfclose(fp);
 
     return cnt;
 }

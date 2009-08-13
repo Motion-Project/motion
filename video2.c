@@ -6,17 +6,26 @@
  *              2007 Angel Carpintero (ack@telefonica.net)
  
  * Supported features and TODO
- *  - preferred palette is JPEG which seems to be very popular for many 640x480 usb cams
- *  - other supported palettes (NOT TESTED)
- *      V4L2_PIX_FMT_SBGGR8    (sonix)    
- *      V4L2_PIX_FMT_SN9C10X   (sonix)
- *      V4L2_PIX_FMT_MJPEG,    (tested)
- *      V4L2_PIX_FMT_JPEG,     (tested)
-        V4L2_PIX_FMT_RGB24,
-        V4L2_PIX_FMT_UYVY,     (tested)
-        V4L2_PIX_FMT_YUV422P,
-        V4L2_PIX_FMT_YUV420,   (tested)
-        V4L2_PIX_FMT_YUYV      (tested)
+   - preferred palette is JPEG which seems to be very popular for many 640x480 usb cams
+   - other supported palettes (NOT TESTED)
+       V4L2_PIX_FMT_SBGGR8    (sonix)    
+       V4L2_PIX_FMT_SN9C10X   (sonix)
+       V4L2_PIX_FMT_SBGGR16,
+       V4L2_PIX_FMT_SBGGR8,
+       V4L2_PIX_FMT_SPCA561,
+       V4L2_PIX_FMT_SGBRG8,
+       V4L2_PIX_FMT_PAC207,
+       V4L2_PIX_FMT_PJPG,
+       V4L2_PIX_FMT_MJPEG,    (tested)
+       V4L2_PIX_FMT_JPEG,     (tested)
+       V4L2_PIX_FMT_RGB24,
+       V4L2_PIX_FMT_SPCA501,
+       V4L2_PIX_FMT_SPCA505,
+       V4L2_PIX_FMT_SPCA508,
+       V4L2_PIX_FMT_UYVY,     (tested)
+       V4L2_PIX_FMT_YUV422P,
+       V4L2_PIX_FMT_YUV420,   (tested)
+       V4L2_PIX_FMT_YUYV      (tested)
 
  *  - setting tuner - NOT TESTED 
  *  - access to V4L2 device controls is missing. Partially added but requires some improvements likely.
@@ -99,12 +108,29 @@
 #endif
 
 #ifndef V4L2_PIX_FMT_SPCA561
-#define V4L2_PIX_FMT_SPCA561  v4l2_fourcc('S', '5', '6', '1') /* compressed GBRG bayer */
+#define V4L2_PIX_FMT_SPCA561 v4l2_fourcc('S', '5', '6', '1') /* compressed GBRG bayer */
 #endif
 
 #ifndef V4L2_PIX_FMT_PJPG
-#define V4L2_PIX_FMT_PJPG     v4l2_fourcc('P', 'J', 'P', 'G') /* Pixart 73xx JPEG */
+#define V4L2_PIX_FMT_PJPG    v4l2_fourcc('P', 'J', 'P', 'G') /* Pixart 73xx JPEG */
 #endif
+
+#ifndef V4L2_PIX_FMT_PAC207
+#define V4L2_PIX_FMT_PAC207  v4l2_fourcc('P', '2', '0', '7') /* compressed BGGR bayer */
+#endif
+
+#ifndef V4L2_PIX_FMT_SPCA501
+#define V4L2_PIX_FMT_SPCA501 v4l2_fourcc('S', '5', '0', '1') /*  YUYV per line */ 
+#endif
+
+#ifndef V4L2_PIX_FMT_SPCA505
+#define V4L2_PIX_FMT_SPCA505 v4l2_fourcc('S', '5', '0', '5') /* YYUV per line  */
+#endif
+
+#ifndef V4L2_PIX_FMT_SPCA508
+#define V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8') /* YUVY per line  */
+#endif
+
 
 
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
@@ -312,15 +338,20 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
 
     static const u32 supported_formats[] = {    /* higher index means better chance to be used */
         V4L2_PIX_FMT_SN9C10X,
-        V4L2_PIX_FMT_SBGGR16,
+        V4L2_PIX_FMT_SBGGR16, 
+        V4L2_PIX_FMT_SBGGR8,
         V4L2_PIX_FMT_SPCA561,
         V4L2_PIX_FMT_SGBRG8,
-        V4L2_PIX_FMT_SBGGR8,
+        V4L2_PIX_FMT_PAC207,
+        V4L2_PIX_FMT_PJPG,
         V4L2_PIX_FMT_MJPEG,
         V4L2_PIX_FMT_JPEG,
-        V4L2_PIX_FMT_RGB24,
-        V4L2_PIX_FMT_UYVY,
-        V4L2_PIX_FMT_YUYV,
+        V4L2_PIX_FMT_RGB24,  
+        V4L2_PIX_FMT_SPCA501, 
+        V4L2_PIX_FMT_SPCA505, 
+        V4L2_PIX_FMT_SPCA508, 
+        V4L2_PIX_FMT_UYVY,  
+        V4L2_PIX_FMT_YUYV,  
         V4L2_PIX_FMT_YUV422P,
         V4L2_PIX_FMT_YUV420,
         0
@@ -506,7 +537,7 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
                                                      MAP_SHARED, vid_source->fd, buf.m.offset);
 
         if (vid_source->buffers[buffer_index].ptr == MAP_FAILED) {
-            motion_log(LOG_ERR, 1, "%s: Error mapping buffer %i nmmap", 
+            motion_log(LOG_ERR, 1, "%s: Error mapping buffer %i mmap", 
                        __FUNCTION__, buffer_index);
             free(vid_source->buffers);
             return -1;

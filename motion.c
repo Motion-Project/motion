@@ -850,13 +850,13 @@ static int motion_init(struct context *cnt)
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
-        if ((picture = fopen(cnt->conf.mask_file, "r"))) {
+        if ((picture = myfopen(cnt->conf.mask_file, "r", 0))) {
             /* NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
              * width and height from imgs.
              */
             cnt->imgs.mask = get_pgm(picture, cnt->imgs.width, cnt->imgs.height);
-            fclose(picture);
+            myfclose(picture);
         } else {
             motion_log(LOG_ERR, 1, "%s: Error opening mask file %s", 
                        __FUNCTION__, cnt->conf.mask_file);
@@ -2730,10 +2730,12 @@ int create_path(const char *path)
             free(buffer);
             return -1;
         }
+        motion_log(LOG_INFO, 0, "%s: creating directory %s", __FUNCTION__);
 
         free(buffer);
         start = strchr(start + 1, '/');
     }
+
 
     return 0;
 }

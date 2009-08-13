@@ -89,7 +89,7 @@ static int v4l_open_vidpipe(void)
             }
         }
 
-        fclose(vloopbacks);
+        myfclose(vloopbacks);
     } else {
         DIR *dir;
         struct dirent *dirp;
