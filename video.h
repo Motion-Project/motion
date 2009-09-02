@@ -52,6 +52,7 @@ struct video_dev {
     int fd;
     const char *video_device;
     int input;
+    int norm;
     int width;
     int height;
     int brightness;
@@ -83,8 +84,8 @@ struct video_dev {
 };
 
 /* video functions, video_common.c */
-int vid_start(struct context *);
-int vid_next(struct context *, unsigned char *map);
+int vid_start(struct context *cnt);
+int vid_next(struct context *cnt, unsigned char *map);
 void vid_close(struct context *cnt);
 void vid_cleanup(void);
 void vid_init(void);
@@ -100,8 +101,8 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
 /* video functions, video.c */
 unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
                          int input, int norm, unsigned long freq, int tuner_number);
-void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height, int input,
-                   int norm, int skip, unsigned long freq, int tuner_number);
+void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height,
+                   struct config *conf);
 int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int height);
 
 /* video2.c */
@@ -114,4 +115,4 @@ void v4l2_close(struct video_dev *viddev);
 void v4l2_cleanup(struct video_dev *viddev);
 #endif /* WITHOUT_V4L */
 
-#endif				/* _INCLUDE_VIDEO_H */
+#endif /* _INCLUDE_VIDEO_H */

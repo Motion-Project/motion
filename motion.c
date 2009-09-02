@@ -2730,12 +2730,14 @@ int create_path(const char *path)
             free(buffer);
             return -1;
         }
-        motion_log(LOG_INFO, 0, "%s: creating directory %s", __FUNCTION__);
 
-        free(buffer);
         start = strchr(start + 1, '/');
-    }
 
+        if (!start)
+            motion_log(LOG_INFO, 0, "%s: creating directory %s", __FUNCTION__, buffer);
+        
+        free(buffer);
+    }
 
     return 0;
 }

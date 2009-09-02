@@ -88,6 +88,7 @@
                 while (nanosleep(&tv, &tv) == -1); \
         } 
 
+#define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 #if defined(WITHOUT_V4L) || defined(BSD)
  

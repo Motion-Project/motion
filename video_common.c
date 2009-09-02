@@ -721,6 +721,7 @@ static int vid_v4lx_start(struct context *cnt)
     dev->usage_count = 1;
     dev->fd = fd;
     dev->input = input;
+    dev->norm = norm;
     dev->height = height;
     dev->width = width;
     dev->freq = frequency;
@@ -913,8 +914,7 @@ int vid_next(struct context *cnt, unsigned char *map)
             ret = v4l2_next(cnt, dev, map, width, height);
         } else {
 #endif
-            v4l_set_input(cnt, dev, map, width, height, conf->input, conf->norm,
-                          conf->roundrobin_skip, conf->frequency, conf->tuner_number);
+            v4l_set_input(cnt, dev, map, width, height, conf);
             ret = v4l_next(dev, map, width, height);
 #ifdef MOTION_V4L2
         }
