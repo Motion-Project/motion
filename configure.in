@@ -1146,20 +1146,20 @@ else
 fi
 
 if test "${PTHREAD_SUPPORT}" = "yes"; then
-	echo "pthread Support:     Yes"
+	echo "pthread support:     Yes"
 else
-	echo "pthread Support:     No"
+	echo "pthread support:     No"
 	echo "**********************************************"
         echo "** Fatal Error YOU MUST HAVE pthread Support *"
         echo "**********************************************" 
 fi
 
 if test "${JPEG_SUPPORT_MMX}" = "yes"; then
-	echo "jpeg-mmx Support:    Yes"
+	echo "jpeg-mmx support:    Yes"
 elif test "${JPEG_SUPPORT}" = "yes"; then
-	echo "jpeg Support:        Yes"
+	echo "jpeg support:        Yes"
 else
-	echo "jpeg Support:        No"
+	echo "jpeg support:        No"
 	echo "**********************************************"
         echo "** Fatal Error YOU MUST HAVE jpeg Support  ***"
         echo "**********************************************"
@@ -1180,40 +1180,40 @@ if test "${FreeBSD}" != ""; then
 
 else
 	if test "${V4L}" = "yes"; then
-		echo "V4L included:        Yes"
+		echo "V4L support:         Yes"
 	else
-		echo "V4L included:        No"
+		echo "V4L support:         No"
 	fi
 
 	if test x$SUPPORTED_V4L2 = xtrue; then
-		echo "V4L2 supported:      Yes"	
+		echo "V4L2 support:        Yes"	
 	else
-		echo "V4L2 supported:      No"
+		echo "V4L2 support:        No"
 	fi
 fi
 
 if test "${FFMPEG_OK}" = "found"; then
-	echo "FFmpeg Support:      Yes"
+	echo "FFmpeg support:      Yes"
 else
-	echo "FFmpeg Support:      No"
+	echo "FFmpeg support:      No"
 fi
 
 if test "${SQLITE3_SUPPORT}" = "yes"; then
-	echo "SQLite3 Support:     Yes"
+	echo "SQLite3 support:     Yes"
 else
-	echo "SQLite3 Support:     No"
+	echo "SQLite3 support:     No"
 fi
 
 if test "${MYSQL_SUPPORT}" = "yes"; then
-	echo "MYSQL Support:       Yes"
+	echo "MYSQL support:       Yes"
 else
-	echo "MYSQL Support:       No"
+	echo "MYSQL support:       No"
 fi
 
 if test "${PGSQL_SUPPORT}" = "yes"; then
-	echo "PostgreSQL Support:  Yes"
+	echo "PostgreSQL support:  Yes"
 else
-	echo "PostgreSQL Support:  No"
+	echo "PostgreSQL support:  No"
 fi
 echo 
 
