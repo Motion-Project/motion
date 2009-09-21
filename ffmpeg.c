@@ -760,28 +760,23 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
  */
 void ffmpeg_deinterlace(unsigned char *img, int width, int height)
 {
-    AVFrame *picture;
+    AVPicture picture;
     int width2 = width / 2;
     
-    picture = avcodec_alloc_frame();
-
-    if (!picture) {
-        motion_log(LOG_ERR, 1, "%s: Could not alloc frame", __FUNCTION__);
-        return;
-    }
-    
-    picture->data[0] = img;
-    picture->data[1] = img + width * height;
-    picture->data[2] = picture->data[1] + (width * height) / 4;
-    picture->linesize[0] = width;
-    picture->linesize[1] = width2;
-    picture->linesize[2] = width2;
+    picture.data[0] = img;
+    picture.data[1] = img + width * height;
+    picture.data[2] = picture.data[1] + (width * height) / 4;
+    picture.linesize[0] = width;
+    picture.linesize[1] = width2;
+    picture.linesize[2] = width2;
     
     /* We assume using 'PIX_FMT_YUV420P' always */
-    avpicture_deinterlace((AVPicture *)picture, (AVPicture *)picture, PIX_FMT_YUV420P, width, height);
-    
-    av_free(picture);
-    
+    avpicture_deinterlace(&picture, &picture, PIX_FMT_YUV420P, width, height);
+
+#ifndef __SSE_MATH__
+    __asm__ __volatile__ ( "emms");
+#endif
+
     return;
 }
 

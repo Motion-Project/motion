@@ -27,6 +27,12 @@ Features
    * Fixed mask overlay in setup mode is now green instead of white (Joerg Weber)
    * Add new config option 'ipv6_enabled' to enable/disable IPV6 (Angel Carpintero)
    * Remove VIDIOC_S_JPEGCOMP support is deprecated. (Angel Carpintero) 
+   * Use static memory allocation in ffmpeg_deinterlace() (Peter Holik)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegDeinterlaceStatic 
+   * Atom optimizacion in configure.in (Peter Holik)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/AtomOptimizations
+   * Allow to change Standard method ( PAL / NECAM / SECAM ) (Angel Carpintero)
+
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
@@ -41,6 +47,7 @@ Bugfixes
    * Allow compile with NetBSD and make LP64 compliant video_freebsd.c (Andreas Wrede)
    * Avoid compile vloopback in BSD (Angel Carpintero)
    * Fix segfault for new libjpeg v7 (Angel Carpintero)
+
 
 
 3.2.11 Summary of Changes

@@ -553,7 +553,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
         /* Report to syslog - suggest solution if the problem is access rights to target dir */
         if (errno ==  EACCES) {
             motion_log(LOG_ERR, 1,
-                       "%s: Can't write picture to file %s - check access rights to target directory"
+                       "%s: Can't write picture to file %s - check access rights to target directory\n"
                        "Thread is going to finish due to this fatal error",       
                         __FUNCTION__, file);
             cnt->finish = 1;

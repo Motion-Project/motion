@@ -890,6 +890,7 @@ if test -e "/proc/cpuinfo" ; then
 	intel[[152]]="-march=pentium4"
 	intel[[154]]="-march=pentium4"
 	intel[[614]]="-march=prescott"
+	intel[[628]]="-march=core2"
 	amd[[50]]="-march=i586"
 	amd[[51]]="-march=i586"
 	amd[[52]]="-march=i586"
@@ -960,6 +961,9 @@ if test -e "/proc/cpuinfo" ; then
 			;;
 		sse3)
 			CPU_FPU="-msse3"
+			;;
+		ssse3)
+			CPU_FPU="-mfpmath=sse -msse2 -mssse3"
 			;;
 		3dnow)
 			CPU_EXT="$CPU_EXT -m3dnow"
