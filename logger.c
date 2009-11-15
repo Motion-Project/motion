@@ -77,7 +77,8 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 {
     int errno_save, n;
     char buf[1024];
-#if (!defined(BSD)) && (!(_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
+/* GNU-specific strerror_r() */    
+#if (!defined(XSI_STRERROR_R))
     char msg_buf[100];
 #endif
     va_list ap;
@@ -116,11 +117,17 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
          * version of strerror_r, which doesn't actually put the message into
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
-#if (defined(BSD))
-         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
-#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
-        strerror_r(errno_save, buf + n, sizeof(buf) - n);
+#if defined(XSI_STRERROR_R)
+#warning "********************************"
+#warning "Using XSI-COMPLIANT strerror_r()"
+#warning "********************************"
+        /* XSI-compliant strerror_r() */
+        strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
 #else
+#warning "********************************"     
+#warning "Using GNU-COMPLIANT strerror_r()"
+#warning "********************************"
+        /* GNU-specific strerror_r() */
         strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
     }
