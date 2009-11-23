@@ -32,7 +32,9 @@ Features
    * Atom optimizacion in configure.in (Peter Holik)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/AtomOptimizations
    * Allow to change Standard method ( PAL / NECAM / SECAM ) (Angel Carpintero)
-
+   * Add authentication  methods 'Basic Authentication' and 'Digest Authentication' 
+     to the "Live Stream Server". (Michael Finsterbusch)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)

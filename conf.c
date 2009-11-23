@@ -93,6 +93,8 @@ struct config conf_template = {
     stream_maxrate:                 1,
     stream_localhost:               1,
     stream_limit:                   0,
+    stream_auth_method:             0,
+    stream_authentication:          NULL,
     webcontrol_port:                0,
     webcontrol_localhost:           1,
     webcontrol_html_output:         1,
@@ -1002,6 +1004,26 @@ config_param config_params[] = {
     CONF_OFFSET(stream_limit),
     copy_int,
     print_int
+    },
+    {
+    "stream_auth_method",
+    "# Set the authentication method (default: 0)\n"
+    "# 0 = disabled \n"
+    "# 1 = Basic authentication\n"
+    "# 2 = MD5 digest (the safer authentication)\n",
+    0,
+    CONF_OFFSET(stream_auth_method),
+    copy_int,
+    print_int
+    },
+    {
+    "stream_authentication",
+    "# Authentication for the http based control. Syntax username:password\n"
+    "# Default: not defined (Disabled)",
+    1,
+    CONF_OFFSET(stream_authentication),
+    copy_string,
+    print_string
     },
     {
     "webcontrol_port",
@@ -2179,7 +2201,7 @@ static void usage()
     printf("-c config\t\tFull path and filename of config file.\n");
     printf("-d level\t\tDebug mode.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
-    printf("-l log file \tFull path and filename of log file.\n");
+    printf("-l log file \t\tFull path and filename of log file.\n");
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");

@@ -69,6 +69,8 @@ struct config {
     int stream_maxrate;
     int stream_localhost;
     int stream_limit;
+    int stream_auth_method;
+    const char *stream_authentication;
     int webcontrol_port;
     int webcontrol_localhost;
     int webcontrol_html_output;

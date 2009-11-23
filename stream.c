@@ -18,6 +18,7 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "md5.h"
 #include "picture.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -26,6 +27,642 @@
 #include <ctype.h>
 #include <sys/fcntl.h>
 
+#define STREAM_REALM       "Motion Stream Security Access"
+#define KEEP_ALIVE_TIMEOUT 100
+
+typedef void* (*auth_handler)(void*);
+struct auth_param {
+    struct context *cnt;
+    int sock;
+    int sock_flags;
+    int* thread_count;
+    struct config *conf;
+};
+
+pthread_mutex_t stream_auth_mutex;
+
+static int set_sock_timeout(int sock, int sec)
+{
+    struct timeval tv;
+
+    tv.tv_sec = sec;
+    tv.tv_usec = 0;
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &tv, sizeof(tv))) {
+        motion_log(LOG_ERR, 1, "%s: set socket timeout failed", __FUNCTION__);
+        return 1;
+    }
+    return 0;
+}
+
+static int read_http_request(int sock, char* buffer, int buflen, char* uri, int uri_len)
+{
+    int nread = 0;
+    int ret,readb = 1;
+    char method[10] = {'\0'};
+    char url[512] = {'\0'};
+    char protocol[10] = {'\0'};
+
+    static const char *bad_request_response_raw =
+        "HTTP/1.0 400 Bad Request\r\n"
+        "Content-type: text/plain\r\n\r\n"
+        "Bad Request\n";
+
+    static const char *bad_method_response_template_raw =
+        "HTTP/1.0 501 Method Not Implemented\r\n"
+        "Content-type: text/plain\r\n\r\n"
+        "Method Not Implemented\n";
+
+    static const char *timeout_response_template_raw =
+        "HTTP/1.0 408 Request Timeout\r\n"
+        "Content-type: text/plain\r\n\r\n"
+        "Request Timeout\n";
+
+    buffer[0] = '\0';
+  
+    while ((strstr(buffer, "\r\n\r\n") == NULL) && (readb != 0) && (nread < buflen)) {
+  
+        readb = read(sock, buffer+nread, buflen - nread);
+
+        if (readb == -1) { 
+            nread = -1;
+            break;
+        }
+
+        nread += readb;
+
+        if (nread > buflen) { 
+            motion_log(LOG_ERR, 1, "%s: motion-stream End buffer reached waiting "
+                      "for buffer ending", __FUNCTION__);
+            break;
+        }
+
+        buffer[nread] = '\0';
+    }
+
+    /* Make sure the last read didn't fail.  If it did, there's a
+    problem with the connection, so give up.  */
+    if (nread == -1) {
+        if(errno == EAGAIN) { // Timeout
+            ret = write(sock, timeout_response_template_raw, strlen(timeout_response_template_raw));
+	        return 1;
+        }
+    
+        motion_log(LOG_ERR, 1, "%s: motion-stream READ give up!", __FUNCTION__);
+        return 1;
+    }
+  
+    ret = sscanf(buffer, "%9s %511s %9s", method, url, protocol);
+    
+    if (ret != 3) { 
+        ret=write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
+        return 1;
+    }
+
+    /* Check Protocol */
+    if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) { 
+        /* We don't understand this protocol.  Report a bad response.  */
+        ret = write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
+        return 1;
+    }
+
+    if (strcmp (method, "GET")) {
+        /* This server only implements the GET method.  If client
+        uses other method, report the failure.  */
+        char response[1024];
+        snprintf(response, sizeof(response), bad_method_response_template_raw, method);
+        ret = write(sock, response, strlen (response));
+
+        return 1;
+    }
+
+    if(uri)
+        strncpy(uri, url, uri_len);
+
+    return 0;
+}
+
+static void stream_add_client(struct stream *list, int sc);
+
+static void* handle_basic_auth(void* param)
+{
+    struct auth_param *p = (struct auth_param*)param;
+    char buffer[1024] = {'\0'};
+    ssize_t length = 1023;
+    char *auth, *h, *authentication;
+    int ret;
+    static const char *request_auth_response_template=
+        "HTTP/1.0 401 Authorization Required\r\n"
+        "Server: Motion/"VERSION"\r\n"
+        "Max-Age: 0\r\n"
+        "Expires: 0\r\n"
+        "Cache-Control: no-cache, private\r\n"
+        "Pragma: no-cache\r\n"
+        "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
+  
+    pthread_mutex_lock(&stream_auth_mutex);
+    p->thread_count++;
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    if (read_http_request(p->sock,buffer, length, NULL, 0))
+        goto Invalid_Request;
+    
+
+    auth = strstr(buffer, "Authorization: Basic");
+    
+    if (!auth)
+        goto Error;
+
+    auth += sizeof("Authorization: Basic");
+    h = strstr(auth, "\r\n");
+  
+    if(!h)
+        goto Error;
+
+    *h='\0';
+
+    if (p->conf->stream_authentication != NULL) {
+  
+        char *userpass = NULL;
+        size_t auth_size = strlen(p->conf->stream_authentication);
+
+        authentication = (char *) mymalloc(BASE64_LENGTH(auth_size) + 1);
+        userpass = mymalloc(auth_size + 4);
+        /* base64_encode can read 3 bytes after the end of the string, initialize it */
+        memset(userpass, 0, auth_size + 4);
+        strcpy(userpass, p->conf->stream_authentication);
+        base64_encode(userpass, authentication, auth_size);
+        free(userpass);
+
+        if (strcmp(auth, authentication)) {
+            free(authentication);
+            goto Error;
+        }
+        free(authentication);
+    }
+
+    // OK - Access
+
+    /* Set socket to non blocking */
+    if (fcntl(p->sock, F_SETFL, p->sock_flags) < 0) {
+        motion_log(LOG_ERR, 1, "%s: fcntl", __FUNCTION__);
+        goto Error;
+    }
+
+    /* lock the mutex */
+    pthread_mutex_lock(&stream_auth_mutex);
+  
+    stream_add_client(&p->cnt->stream, p->sock);
+    p->cnt->stream_count++;
+    p->thread_count--;
+
+    /* unlock the mutex */
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    free(p);
+    pthread_exit(NULL);
+
+Error:
+    ret = write(p->sock, request_auth_response_template, strlen (request_auth_response_template));
+
+Invalid_Request:
+    close(p->sock);
+
+    pthread_mutex_lock(&stream_auth_mutex);
+    p->thread_count--;
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    free(p);
+    pthread_exit(NULL);
+}
+
+
+/* calculate H(A1) as per HTTP Digest spec -- taken from RFC 2617*/
+#define HASHLEN 16
+typedef char HASH[HASHLEN];
+#define HASHHEXLEN 32
+typedef char HASHHEX[HASHHEXLEN+1];
+#define IN
+#define OUT
+
+static void CvtHex(IN HASH Bin, OUT HASHHEX Hex)
+{
+    unsigned short i;
+    unsigned char j;
+
+    for (i = 0; i < HASHLEN; i++) {
+        j = (Bin[i] >> 4) & 0xf;
+        if (j <= 9)
+            Hex[i*2] = (j + '0');
+         else
+            Hex[i*2] = (j + 'a' - 10);
+        j = Bin[i] & 0xf;
+        if (j <= 9)
+            Hex[i*2+1] = (j + '0');
+         else
+            Hex[i*2+1] = (j + 'a' - 10);
+    };
+    Hex[HASHHEXLEN] = '\0';
+};
+
+/* calculate H(A1) as per spec */
+static void DigestCalcHA1(
+    IN char * pszAlg,
+    IN char * pszUserName,
+    IN char * pszRealm,
+    IN char * pszPassword,
+    IN char * pszNonce,
+    IN char * pszCNonce,
+    OUT HASHHEX SessionKey
+    )
+{
+    MD5_CTX Md5Ctx;
+    HASH HA1;
+
+    MD5Init(&Md5Ctx);
+    MD5Update(&Md5Ctx, (unsigned char *)pszUserName, strlen(pszUserName));
+    MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+    MD5Update(&Md5Ctx, (unsigned char *)pszRealm, strlen(pszRealm));
+    MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+    MD5Update(&Md5Ctx, (unsigned char *)pszPassword, strlen(pszPassword));
+    MD5Final((unsigned char *)HA1, &Md5Ctx);
+
+    if (strcmp(pszAlg, "md5-sess") == 0) {
+        MD5Init(&Md5Ctx);
+        MD5Update(&Md5Ctx, (unsigned char *)HA1, HASHLEN);
+        MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+        MD5Update(&Md5Ctx, (unsigned char *)pszNonce, strlen(pszNonce));
+        MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+        MD5Update(&Md5Ctx, (unsigned char *)pszCNonce, strlen(pszCNonce));
+        MD5Final((unsigned char *)HA1, &Md5Ctx);
+    };
+    CvtHex(HA1, SessionKey);
+};
+
+/* calculate request-digest/response-digest as per HTTP Digest spec */
+static void DigestCalcResponse(
+    IN HASHHEX HA1,           /* H(A1) */
+    IN char * pszNonce,       /* nonce from server */
+    IN char * pszNonceCount,  /* 8 hex digits */
+    IN char * pszCNonce,      /* client nonce */
+    IN char * pszQop,         /* qop-value: "", "auth", "auth-int" */
+    IN char * pszMethod,      /* method from the request */
+    IN char * pszDigestUri,   /* requested URL */
+    IN HASHHEX HEntity,       /* H(entity body) if qop="auth-int" */
+    OUT HASHHEX Response      /* request-digest or response-digest */
+    )
+{
+    MD5_CTX Md5Ctx;
+    HASH HA2;
+    HASH RespHash;
+    HASHHEX HA2Hex;
+    
+    // calculate H(A2)
+    MD5Init(&Md5Ctx);
+    MD5Update(&Md5Ctx, (unsigned char *)pszMethod, strlen(pszMethod));
+    MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+    MD5Update(&Md5Ctx, (unsigned char *)pszDigestUri, strlen(pszDigestUri));
+  
+    if (strcmp(pszQop, "auth-int") == 0) {
+        MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+        MD5Update(&Md5Ctx, (unsigned char *)HEntity, HASHHEXLEN);
+    }
+    MD5Final((unsigned char *)HA2, &Md5Ctx);
+    CvtHex(HA2, HA2Hex);
+
+    // calculate response
+    MD5Init(&Md5Ctx);
+    MD5Update(&Md5Ctx, (unsigned char *)HA1, HASHHEXLEN);
+    MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+    MD5Update(&Md5Ctx, (unsigned char *)pszNonce, strlen(pszNonce));
+    MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+
+    if (*pszQop) {
+        MD5Update(&Md5Ctx, (unsigned char *)pszNonceCount, strlen(pszNonceCount));
+        MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+        MD5Update(&Md5Ctx, (unsigned char *)pszCNonce, strlen(pszCNonce));
+        MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+        MD5Update(&Md5Ctx, (unsigned char *)pszQop, strlen(pszQop));
+        MD5Update(&Md5Ctx, (unsigned char *)":", 1);
+    }
+    MD5Update(&Md5Ctx, (unsigned char *)HA2Hex, HASHHEXLEN);
+    MD5Final((unsigned char *)RespHash, &Md5Ctx);
+    CvtHex(RespHash, Response);
+};
+
+
+static void* handle_md5_digest(void* param)
+{
+    struct auth_param *p = (struct auth_param*)param;
+    char buffer[1024] = {'\0'};
+    ssize_t length = 1023;
+    char *auth, *h, *username, *realm, *uri, *nonce, *response;
+    int username_len, realm_len, uri_len, nonce_len, response_len;
+#define SERVER_NONCE_LEN 17
+    char server_nonce[SERVER_NONCE_LEN];
+#define SERVER_URI_LEN 512
+    char server_uri[SERVER_URI_LEN];
+    char* server_user = NULL, *server_pass = NULL;
+    int ret;
+    unsigned int rand1,rand2;
+    HASHHEX HA1;
+    HASHHEX HA2 = "";
+    HASHHEX server_response;
+    static const char *request_auth_response_template=
+        "HTTP/1.0 401 Authorization Required\r\n"
+        "Server: Motion/"VERSION"\r\n"
+        "Max-Age: 0\r\n"
+        "Expires: 0\r\n"
+        "Cache-Control: no-cache, private\r\n"
+        "Pragma: no-cache\r\n"
+        "WWW-Authenticate: Digest";
+    static const char *auth_failed_html_template=
+        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
+        "<HTML><HEAD>\r\n"
+        "<TITLE>401 Authorization Required</TITLE>\r\n"
+        "</HEAD><BODY>\r\n"
+        "<H1>Authorization Required</H1>\r\n"
+        "This server could not verify that you are authorized to access the document "
+        "requested.  Either you supplied the wrong credentials (e.g., bad password), "
+        "or your browser doesn't understand how to supply the credentials required.\r\n"
+        "</BODY></HTML>\r\n";
+    static const char *internal_error_template=
+        "HTTP/1.0 500 Internal Server Error\r\n"
+        "Server: Motion/"VERSION"\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: Close\r\n\r\n"
+        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
+        "<HTML><HEAD>\r\n"
+        "<TITLE>500 Internal Server Error</TITLE>\r\n"
+        "</HEAD><BODY>\r\n"
+        "<H1>500 Internal Server Error</H1>\r\n"
+        "</BODY></HTML>\r\n";
+  
+    pthread_mutex_lock(&stream_auth_mutex);
+    p->thread_count++;
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    set_sock_timeout(p->sock, KEEP_ALIVE_TIMEOUT);
+    srand(time(NULL));
+    rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    snprintf(server_nonce, SERVER_NONCE_LEN, "%08x%08x", rand1, rand2);
+  
+    if (!p->conf->stream_authentication) {
+        motion_log(LOG_ERR, 1, "%s: Error no authentication data", __FUNCTION__);
+        goto InternalError;
+    }
+    h = strstr(p->conf->stream_authentication, ":");
+  
+    if (!h) {
+        motion_log(LOG_ERR, 1, "%s: Error no authentication data (no ':' found)", __FUNCTION__);
+        goto InternalError;
+    }
+
+    server_user = (char*)malloc((h - p->conf->stream_authentication) + 1);
+    server_pass = (char*)malloc(strlen(h) + 1);
+  
+    if (!server_user || !server_pass) {
+        motion_log(LOG_ERR, 1, "%s: Error malloc failed", __FUNCTION__);
+        goto InternalError;
+    }
+
+    strncpy(server_user, p->conf->stream_authentication, h-p->conf->stream_authentication);
+    server_user[h - p->conf->stream_authentication] = '\0';
+    strncpy(server_pass, h + 1, strlen(h + 1));
+    server_pass[strlen(h + 1)] = '\0';
+
+    while(1) {
+        if(read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN - 1))
+            goto Invalid_Request;
+    
+
+        auth = strstr(buffer, "Authorization: Digest");
+        if(!auth)
+            goto Error;
+
+        auth += sizeof("Authorization: Digest");
+        h = strstr(auth, "\r\n");
+    
+        if (!h)
+            goto Error;
+        *h = '\0';
+
+        // Username
+        h=strstr(auth, "username=\"");
+        
+        if (!h)
+            goto Error;
+    
+        username = h + 10;
+        h = strstr(username + 1, "\"");
+   
+        if (!h)
+            goto Error;
+        
+        username_len = h - username;
+
+        // Realm
+        h = strstr(auth, "realm=\"");
+        if (!h)
+            goto Error;
+    
+        realm = h + 7;
+        h = strstr(realm + 1, "\"");
+    
+        if (!h)
+            goto Error;
+        
+        realm_len = h - realm;
+
+        // URI
+        h = strstr(auth, "uri=\"");
+        
+        if (!h)
+            goto Error;
+    
+        uri = h + 5;
+        h = strstr(uri + 1, "\"");
+    
+        if (!h)
+            goto Error;
+    
+        uri_len = h - uri;
+
+        // Nonce
+        h = strstr(auth, "nonce=\"");
+        
+        if (!h)
+            goto Error;
+        
+        nonce = h + 7;
+        h = strstr(nonce + 1, "\"");
+    
+        if (!h)
+            goto Error;
+    
+        nonce_len = h - nonce;
+
+        // Response
+        h = strstr(auth, "response=\"");
+    
+        if (!h)
+            goto Error;
+    
+        response = h + 10;
+        h = strstr(response + 1, "\"");
+    
+        if (!h)
+            goto Error;
+    
+        response_len = h - response;
+
+        username[username_len] = '\0';
+        realm[realm_len] = '\0';
+        uri[uri_len] = '\0';
+        nonce[nonce_len] = '\0';
+        response[response_len] = '\0';
+
+        DigestCalcHA1((char*)"md5", server_user, (char*)STREAM_REALM, server_pass, (char*)server_nonce, (char*)NULL, HA1);
+        DigestCalcResponse(HA1, server_nonce, NULL, NULL, (char*)"", (char*)"GET", server_uri, HA2, server_response);
+
+        if (strcmp(server_response, response) == 0)
+            break;
+Error:
+        rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+        rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+        snprintf(server_nonce, SERVER_NONCE_LEN, "%08x%08x", rand1, rand2);
+        snprintf(buffer, length, "%s realm=\""STREAM_REALM"\", nonce=\"%s\"\r\n"
+	            "Content-Type: text/html\r\n"
+	            "Keep-Alive: timeout=%i\r\n"
+	            "Connection: keep-alive\r\n"
+	            "Content-Length: %li\r\n\r\n",
+	            request_auth_response_template, server_nonce,
+	            KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
+        ret = write(p->sock, buffer, strlen(buffer));
+        ret = write(p->sock, auth_failed_html_template, strlen(auth_failed_html_template));
+    }
+
+    // OK - Access
+
+    /* Set socket to non blocking */
+    if (fcntl(p->sock, F_SETFL, p->sock_flags) < 0) {
+        motion_log(LOG_ERR, 1, "%s: fcntl", __FUNCTION__);
+        goto Error;
+    }
+
+    if(server_user)
+        free(server_user);
+  
+    if(server_pass)
+        free(server_pass);
+
+    /* lock the mutex */
+    pthread_mutex_lock(&stream_auth_mutex);
+
+    stream_add_client(&p->cnt->stream, p->sock);
+    p->cnt->stream_count++;
+
+    p->thread_count--;
+    /* unlock the mutex */
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    free(p);
+    pthread_exit(NULL);
+  
+InternalError:
+    if(server_user)
+        free(server_user);
+  
+    if(server_pass)
+        free(server_pass);
+
+    ret = write(p->sock, internal_error_template, strlen(internal_error_template));
+
+Invalid_Request:
+    close(p->sock);
+
+    pthread_mutex_lock(&stream_auth_mutex);
+    p->thread_count--;
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    free(p);
+    pthread_exit(NULL);
+}
+
+
+static void do_client_auth(struct context *cnt, int sc)
+{
+    pthread_t thread_id;
+    pthread_attr_t attr;
+    auth_handler handle_func;
+    struct auth_param* handle_param = NULL;
+    int flags;
+    static int first_call = 0;
+    static int thread_count = 0;
+  
+    if(first_call == 0) {
+        first_call = 1;
+        /* Initialize the mutex */
+        pthread_mutex_init(&stream_auth_mutex, NULL);
+    }
+  
+    switch(cnt->conf.stream_auth_method)
+    {
+    case 1: // Basic
+	  handle_func = handle_basic_auth;
+	  break;
+    case 2: // MD5 Digest
+	  handle_func = handle_md5_digest;
+	  break;
+    default:
+	  motion_log(LOG_ERR, 1, "%s: Error unknown stream authentication method", __FUNCTION__);
+	  goto Error;
+	  break;
+    }
+  
+    handle_param = mymalloc(sizeof(struct auth_param));
+    handle_param->cnt = cnt;
+    handle_param->sock = sc;
+    handle_param->conf = &cnt->conf;
+    handle_param->thread_count = &thread_count;
+  
+    /* Set socket to blocking */
+    if ((flags = fcntl(sc, F_GETFL, 0)) < 0) {
+        motion_log(LOG_ERR, 1, "%s: fcntl", __FUNCTION__);
+        goto Error;
+    }
+    handle_param->sock_flags = flags;
+
+    if (fcntl(sc, F_SETFL, flags & (~O_NONBLOCK)) < 0) {
+        motion_log(LOG_ERR, 1, "%s: fcntl", __FUNCTION__);
+        goto Error;
+    }
+
+    if (thread_count >= DEF_MAXSTREAMS)
+        goto Error;
+    
+    if (pthread_attr_init(&attr)) {
+        motion_log(LOG_ERR, 1, "%s: Error pthread_attr_init", __FUNCTION__);
+        goto Error;
+    }
+
+    if (pthread_create(&thread_id, &attr, handle_func, handle_param)) {
+        motion_log(LOG_ERR, 1, "%s: Error pthread_create", __FUNCTION__);
+        goto Error;
+    }
+    pthread_detach(thread_id);
+
+    if (pthread_attr_destroy(&attr))
+        motion_log(LOG_ERR, 1, "%s: Error pthread_attr_destroy", __FUNCTION__);
+
+    return;
+  
+Error:
+    close(sc);
+    if(handle_param)
+        free(handle_param);
+}
 
 /* This function sets up a TCP/IP socket for incoming requests. It is called only during
  * initialisation of Motion from the function stream_init
@@ -39,10 +676,9 @@ int http_bindsock(int port, int local, int ipv6_enabled)
     struct addrinfo hints, *res = NULL, *ressave = NULL;
     char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
-
     snprintf(portnumber, sizeof(portnumber), "%u", port);
-
     memset(&hints, 0, sizeof(struct addrinfo));
+
     /* Use the AI_PASSIVE flag, which indicates we are using this address for a listen() */
     hints.ai_flags = AI_PASSIVE;
 #if defined(BSD)
@@ -419,11 +1055,20 @@ void stream_put(struct context *cnt, unsigned char *image)
      * to each other.
      */
     if ((cnt->stream_count < DEF_MAXSTREAMS) &&
-        (select(sl+1, &fdread, NULL, NULL, &timeout)>0)) {
+        (select(sl + 1, &fdread, NULL, NULL, &timeout) > 0)) {
         sc = http_acceptsock(sl);
-        stream_add_client(&cnt->stream, sc);
-        cnt->stream_count++;
+	    if (cnt->conf.stream_auth_method == 0) {
+		    stream_add_client(&cnt->stream, sc);
+            cnt->stream_count++;
+	    } else 	{
+	        do_client_auth(cnt, sc);
+	    }
     }
+    
+    /* lock the mutex */
+    if (cnt->conf.stream_auth_method != 0)
+        pthread_mutex_lock(&stream_auth_mutex);
+
     
     /* call flush to send any previous partial-sends which are waiting */
     stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
@@ -488,5 +1133,9 @@ void stream_put(struct context *cnt, unsigned char *image)
      */
     stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
     
+    /* unlock the mutex */
+    if (cnt->conf.stream_auth_method != 0)
+        pthread_mutex_unlock(&stream_auth_mutex);
+
     return;
 }

@@ -350,7 +350,8 @@ Angel Carpintero
    * Added support for V4L2_PIX_FMT_SBGGR8 ( bayer ), V4L2_PIX_FMT_SN9C10X, V4L2_PIX_FMT_MJPEG and V4L2_PIX_FMT_UYVY. 
    * Added a FreeBSD directory to allow people from BSD to get a daily version and create a port. 
    * Removed mysql dependency from debian package and added a note to setup motion to run as daemon to create the pid file.
-   * Changed the way configure search mysql headers and libs, added 3 parameters to configure --without-mysql to disable support, --with-  mysql-include directory of mysql.h and --with-mysql-lib directory of libmysqlclient.a or libmysqlclient.so
+   * Changed the way configure search mysql headers and libs, added 3 parameters to configure --without-mysql to disable support, 
+     --with-mysql-include directory of mysql.h and --with-mysql-lib directory of libmysqlclient.a or libmysqlclient.so
    * Fix an error in FreeBSD , the use of capture even fields depends on height value.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610
    * Fixed autodetection for VIA cpu , no needed to use --without-optimizecpu. Added many others.
@@ -447,6 +448,12 @@ Dag Erlandsson
 Stephen Farrugia
    * Fixing the division by zero problem.
      This makes motion a lot more stable.
+
+Michael Finsterbusch
+
+   * Add authentication  methods 'Basic Authentication' and 'Digest Authentication' 
+     to the "Live Stream Server". 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
 
 Miguel Freitas
    * Came up with the round robing idea.

@@ -461,6 +461,16 @@ stream_localhost on
 # Actual stream rate is the smallest of the numbers framerate and stream_maxrate
 stream_limit 0
 
+# Set the authentication method (default: 0)
+# 0 = disabled 
+# 1 = Basic authentication
+# 2 = MD5 digest (the safer authentication)
+stream_auth_method 0
+
+# Authentication for the http based control. Syntax username:password
+# Default: not defined (Disabled)
+; stream_authentication username:password
+
 
 ############################################################
 # HTTP Based Control
