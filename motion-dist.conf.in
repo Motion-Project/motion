@@ -33,7 +33,7 @@ setup_mode off
 videodevice /dev/video0
 
 # v4l2_palette allows to choose preferable palette to be use by motion
-# to capture from those supported by your videodevice. (default: 16)
+# to capture from those supported by your videodevice. (default: 17)
 # E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and
 # V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.
 # Setting v4l2_palette to 2 forces motion to use V4L2_PIX_FMT_SBGGR8
@@ -45,20 +45,21 @@ videodevice /dev/video0
 # V4L2_PIX_FMT_SBGGR8  : 2  'BA81'
 # V4L2_PIX_FMT_SPCA561 : 3  'S561'
 # V4L2_PIX_FMT_SGBRG8  : 4  'GBRG'
-# V4L2_PIX_FMT_PAC207  : 5  'P207'
-# V4L2_PIX_FMT_PJPG    : 6  'PJPG'
-# V4L2_PIX_FMT_MJPEG   : 7  'MJPEG'
-# V4L2_PIX_FMT_JPEG    : 8  'JPEG'
-# V4L2_PIX_FMT_RGB24   : 9  'RGB3'
-# V4L2_PIX_FMT_SPCA501 : 10 'S501' 
-# V4L2_PIX_FMT_SPCA505 : 11 'S505' 
-# V4L2_PIX_FMT_SPCA508 : 12 'S508' 
-# V4L2_PIX_FMT_UYVY    : 13 'UYVY'
-# V4L2_PIX_FMT_YUYV    : 14 'YUYV'
-# V4L2_PIX_FMT_YUV422P : 15 '422P'
-# V4L2_PIX_FMT_YUV420  : 16 'YU12'
+# V4L2_PIX_FMT_SGRBG8  : 5  'GRBG'
+# V4L2_PIX_FMT_PAC207  : 6  'P207'
+# V4L2_PIX_FMT_PJPG    : 7  'PJPG'
+# V4L2_PIX_FMT_MJPEG   : 8  'MJPEG'
+# V4L2_PIX_FMT_JPEG    : 9  'JPEG'
+# V4L2_PIX_FMT_RGB24   : 10 'RGB3'
+# V4L2_PIX_FMT_SPCA501 : 11 'S501' 
+# V4L2_PIX_FMT_SPCA505 : 12 'S505' 
+# V4L2_PIX_FMT_SPCA508 : 13 'S508' 
+# V4L2_PIX_FMT_UYVY    : 14 'UYVY'
+# V4L2_PIX_FMT_YUYV    : 15 'YUYV'
+# V4L2_PIX_FMT_YUV422P : 16 '422P'
+# V4L2_PIX_FMT_YUV420  : 17 'YU12'
 #
-v4l2_palette 16
+v4l2_palette 17
 
 # Tuner device to be used for capturing using tuner as source (default /dev/tuner0)
 # This is ONLY used for FreeBSD. Leave it commented out for Linux

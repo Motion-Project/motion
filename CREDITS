@@ -1233,6 +1233,10 @@ Michael Reuschling
 Petter Reinholdtsen
    * Adding the install option to the makefile.
 
+Isaac Richte
+   * V4L2 fourcc GRBG not supported, updated default value for v4l2_palette 17.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x10x29x222753
+
 Marius Rieder
    * Handle mjpeg decoding and fix colour issue adding mjpegtools dependency
      http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue

@@ -47,6 +47,7 @@
  V4L2_PIX_FMT_SPCA505 v4l2_fourcc('S', '5', '0', '5')  YYUV per line 
  V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8')  YUVY per line 
  V4L2_PIX_FMT_SGBRG8  v4l2_fourcc('G', 'B', 'R', 'G')   8  GBGB.. RGRG.. 
+ V4L2_PIX_FMT_SGRBG8  v4l2_fourcc('G', 'R', 'B', 'G')   8  GRGR.. BGBG..
  V4L2_PIX_FMT_SBGGR16 v4l2_fourcc('B', 'Y', 'R', '2')  16  BGBG.. GRGR.. 
  V4L2_PIX_FMT_SPCA561 v4l2_fourcc('S', '5', '6', '1')  compressed GBRG bayer 
  V4L2_PIX_FMT_PJPG    v4l2_fourcc('P', 'J', 'P', 'G')  Pixart 73xx JPEG
@@ -101,6 +102,10 @@
 
 #ifndef V4L2_PIX_FMT_SGBRG8
 #define V4L2_PIX_FMT_SGBRG8  v4l2_fourcc('G', 'B', 'R', 'G') /*  8  GBGB.. RGRG.. */
+#endif
+
+#ifndef V4L2_PIX_FMT_SGRBG8
+#define V4L2_PIX_FMT_SGRBG8  v4l2_fourcc('G', 'R', 'B', 'G') /*  8  GRGR.. BGBG.. */
 #endif
 
 #ifndef V4L2_PIX_FMT_SBGGR16
@@ -364,6 +369,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
         V4L2_PIX_FMT_SBGGR8,
         V4L2_PIX_FMT_SPCA561,
         V4L2_PIX_FMT_SGBRG8,
+        V4L2_PIX_FMT_SGRBG8,
         V4L2_PIX_FMT_PAC207,
         V4L2_PIX_FMT_PJPG,
         V4L2_PIX_FMT_MJPEG,
@@ -932,7 +938,8 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         
         /* FIXME: quick hack to allow work all bayer formats */            
         case V4L2_PIX_FMT_SBGGR16:            
-        case V4L2_PIX_FMT_SGBRG8:            
+        case V4L2_PIX_FMT_SGBRG8: 
+        case V4L2_PIX_FMT_SGRBG8:           
         case V4L2_PIX_FMT_SPCA561:            
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
             bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);

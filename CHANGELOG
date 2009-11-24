@@ -35,6 +35,7 @@ Features
    * Add authentication  methods 'Basic Authentication' and 'Digest Authentication' 
      to the "Live Stream Server". (Michael Finsterbusch)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
+   
 
 Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
@@ -49,8 +50,8 @@ Bugfixes
    * Allow compile with NetBSD and make LP64 compliant video_freebsd.c (Andreas Wrede)
    * Avoid compile vloopback in BSD (Angel Carpintero)
    * Fix segfault for new libjpeg v7 (Angel Carpintero)
-
-
+   * V4L2 fourcc GRBG not supported, updated default value for v4l2_palette 17. (Isaac Richter)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x10x29x222753
 
 3.2.11 Summary of Changes
 
