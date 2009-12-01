@@ -626,6 +626,7 @@ void vid_close(struct context *cnt)
  * Returns
  *     device number
  *     -1 if failed to open device.
+ *     -3 image dimensions are not modulo 16
  */
 static int vid_v4lx_start(struct context *cnt)
 {
@@ -645,13 +646,13 @@ static int vid_v4lx_start(struct context *cnt)
     if (conf->width % 16) {
         motion_log(LOG_ERR, 0, "%s: config image width (%d) is not modulo 16", 
                    __FUNCTION__, conf->width);
-        return -1;
+        return -3;
     }
 
     if (conf->height % 16) {
         motion_log(LOG_ERR, 0, "%s: config image height (%d) is not modulo 16",
                      __FUNCTION__, conf->height);
-        return -1;
+        return -3;
     }
 
     width = conf->width;
@@ -699,6 +700,9 @@ static int vid_v4lx_start(struct context *cnt)
         }
         dev = dev->next;
     }
+
+    motion_log(1, 0, "%s: Using videodevice %s and input %d", 
+               __FUNCTION__, conf->video_device, conf->input);
 
     dev = mymalloc(sizeof(struct video_dev));
     memset(dev, 0, sizeof(struct video_dev));
@@ -823,6 +827,7 @@ static int vid_v4lx_start(struct context *cnt)
  * Returns
  *     device number
  *     -1 if failed to open device.
+ *     -3 image dimensions are not modulo 16
  */
 
 int vid_start(struct context *cnt)

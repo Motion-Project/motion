@@ -742,7 +742,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                     * Not quite sure what the correct course of action is here. In for testing.
                     */                                                                                                     
                 motion_log(LOG_INFO, 0, "%s: Info: No 'Connection: Keep-Alive' nor 'Connection: close' "
-                           "header received. Motion continues unchanged.", __FUNCTION__);
+                           "header received.\n Motion continues unchanged.", __FUNCTION__);
             } else {  
                 /* !aliveflag & closeflag 
                  * If not a streaming cam, and keepalive is set, and the flag shows we 
@@ -768,11 +768,11 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                 if (!netcam->keepalive_thisconn) {
                     netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
                     motion_log(LOG_INFO, 0, "%s: Removed netcam Keep-Alive flag because "
-                               "'Connection: close' header received. Netcam does not support " 
+                               "'Connection: close' header received.\n Netcam does not support " 
                                "Keep-Alive. Motion continues in non-Keep-Alive.", __FUNCTION__);
                 } else {
                     netcam->keepalive_timeup = TRUE;    /* We will close and re-open keep-alive */
-                    motion_log(LOG_INFO, 0, "Keep-Alive has reached end of valid period. Motion will close " 
+                    motion_log(LOG_INFO, 0, "Keep-Alive has reached end of valid period.\n Motion will close " 
                                "netcam, then resume Keep-Alive with a new socket.", __FUNCTION__);
                 }
             }
@@ -2677,7 +2677,9 @@ int netcam_next(struct context *cnt, unsigned char *image)
  *
  *      cnt     Pointer to the motion context structure for this device
  *
- * Returns:     0 on success, -1 on any failure
+ * Returns:     0 on success
+ *              -1 on any failure
+ *              -3 image dimensions are not modulo 16
  */
 
 int netcam_start(struct context *cnt)
@@ -2877,13 +2879,13 @@ int netcam_start(struct context *cnt)
     if (netcam->width % 16) {
         motion_log(LOG_ERR, 0, "%s: netcam image width (%d) is not modulo 16",
                    __FUNCTION__, netcam->width);
-        return -1;
+        return -3;
     }
 
     if (netcam->height % 16) {
         motion_log(LOG_ERR, 0, "%s: netcam image height (%d) is not modulo 16",
                    __FUNCTION__, netcam->height);
-        return -1;
+        return -3;
     }
 
     /* Fill in camera details into context structure */

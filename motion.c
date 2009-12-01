@@ -634,6 +634,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
  * Returns:     0 OK
  *             -1 Fatal error, open loopback error
  *             -2 Fatal error, open SQL database error
+ *             -3 Fatal error, image dimensions are not modulo 16
  */
 static int motion_init(struct context *cnt)
 {
@@ -671,7 +672,7 @@ static int motion_init(struct context *cnt)
      * So we need to guess height and width based on the config
      * file options.
      */
-    if (cnt->video_dev < 0) {
+    if (cnt->video_dev == -1) {
         motion_log(LOG_ERR, 0, "%s: Could not fetch initial image from camera " 
                    "Motion continues using width and height from config file(s)",         
                    __FUNCTION__);
@@ -680,6 +681,11 @@ static int motion_init(struct context *cnt)
         cnt->imgs.size = cnt->conf.width * cnt->conf.height * 3 / 2;
         cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+    } else if (cnt->video_dev == -2) {
+        motion_log(LOG_ERR, 0, "%s: Could not fetch initial image from camera "
+                   "Motion only supports width and height modulo 16",
+                  __FUNCTION__);
+        return -3;
     }
 
     image_ring_resize(cnt, 1); /* Create a initial precapture ring buffer with 1 frame */

@@ -118,15 +118,15 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
 #if defined(XSI_STRERROR_R)
-#warning "********************************"
-#warning "Using XSI-COMPLIANT strerror_r()"
-#warning "********************************"
+#warning "************************************"
+#warning "* Using XSI-COMPLIANT strerror_r() *"
+#warning "************************************"
         /* XSI-compliant strerror_r() */
         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
 #else
-#warning "********************************"     
-#warning "Using GNU-COMPLIANT strerror_r()"
-#warning "********************************"
+#warning "************************************"     
+#warning "* Using GNU-COMPLIANT strerror_r() *"
+#warning "************************************"
         /* GNU-specific strerror_r() */
         strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
