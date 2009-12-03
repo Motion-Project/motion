@@ -536,7 +536,7 @@ Error:
 	            "Content-Type: text/html\r\n"
 	            "Keep-Alive: timeout=%i\r\n"
 	            "Connection: keep-alive\r\n"
-	            "Content-Length: %li\r\n\r\n",
+	            "Content-Length: %Zu\r\n\r\n",
 	            request_auth_response_template, server_nonce,
 	            KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
         ret = write(p->sock, buffer, strlen(buffer));

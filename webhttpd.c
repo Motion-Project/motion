@@ -240,7 +240,7 @@ static ssize_t read_nonblock(int fd ,void *buf, ssize_t size)
 static void send_template_ini_client(int client_socket, const char *template)
 {
     ssize_t nwrite = 0;
-    nwrite = write_nonblock(client_socket, ok_response, strlen (ok_response));
+    nwrite = write_nonblock(client_socket, ok_response, strlen(ok_response));
     nwrite += write_nonblock(client_socket, template, strlen(template));
     if (nwrite != (ssize_t)(strlen(ok_response) + strlen(template)))
         motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
@@ -249,7 +249,7 @@ static void send_template_ini_client(int client_socket, const char *template)
 static void send_template_ini_client_raw(int client_socket)
 {
     ssize_t nwrite = 0;
-    nwrite = write_nonblock(client_socket, ok_response_raw, strlen (ok_response_raw));
+    nwrite = write_nonblock(client_socket, ok_response_raw, strlen(ok_response_raw));
     if (nwrite != (ssize_t)strlen(ok_response_raw))
         motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
 }
@@ -719,7 +719,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                 length_uri = length_uri - 6;
                 warningkill = sscanf(pointer, "%255[-0-9a-z_]", command);
                 /*check if command exist, length_uri too*/
-                length_uri = length_uri-strlen(command);
+                length_uri = length_uri - strlen(command);
 
                 if (length_uri == 0) {
                     const char *value = NULL;
@@ -2255,7 +2255,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     snprintf(response, sizeof (response), bad_method_response_template, method);
                 else
                     snprintf(response, sizeof (response), bad_method_response_template_raw, method);
-                warningkill = write_nonblock(client_socket, response, strlen (response));
+                warningkill = write_nonblock(client_socket, response, strlen(response));
                 pthread_mutex_unlock(&httpd_mutex);
                 return 1;
             }
@@ -2270,7 +2270,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     } else {
                         char response[1024];
                         snprintf(response, sizeof (response), request_auth_response_template, method);
-                        warningkill = write_nonblock(client_socket, response, strlen (response));
+                        warningkill = write_nonblock(client_socket, response, strlen(response));
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
                     }
@@ -2278,7 +2278,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     if (strcmp(auth, authentication)) {
                         char response[1024] = {'\0'};
                         snprintf(response, sizeof (response), request_auth_response_template, method);
-                        warningkill = write_nonblock(client_socket, response, strlen (response));
+                        warningkill = write_nonblock(client_socket, response, strlen(response));
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
                     } else {
@@ -2289,7 +2289,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     // Request Authorization
                     char response[1024] = {'\0'};
                     snprintf(response, sizeof (response), request_auth_response_template, method);
-                    warningkill = write_nonblock(client_socket, response, strlen (response));
+                    warningkill = write_nonblock(client_socket, response, strlen(response));
                     pthread_mutex_unlock(&httpd_mutex);
                     return 1;
                 }
