@@ -235,6 +235,9 @@ typedef struct netcam_context {
     int imgcnt_last;            /* remember last count to check if a new
                                    image arrived */
 
+    int warning_count;          /* simple count of number of warnings 
+                                   since last good frame was received */
+
     int error_count;            /* simple count of number of errors since
                                    last good frame was received */
     

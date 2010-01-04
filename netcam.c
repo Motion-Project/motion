@@ -447,6 +447,7 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
      *
      */
     netcam->caps.content_length = 0;
+
     /*
      * If this is a "streaming" camera, the stream header must be
      * preceded by a "boundary" string
@@ -469,7 +470,7 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
                                    __FUNCTION__, header);
                  }
 
-                 free(header);
+                free(header);
                 return -1;
             }
 
@@ -501,12 +502,17 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
             }
         }
 
-        if ((retval = (int) netcam_check_content_length(header)) > 0) {
-            netcam->caps.content_length = 1;       /* set flag */
-            netcam->receiving->content_length = (int) retval;
-        }
-
+        retval = (int) netcam_check_content_length(header);
         free(header);
+
+        if (retval > 0) {
+            netcam->caps.content_length = 1;       /* set flag */
+            netcam->receiving->content_length = retval;
+        } else {
+            netcam->receiving->content_length = 0;
+            motion_log(LOG_ERR, 0, "%s: Content-Length 0", __FUNCTION__);
+            return -1;
+        }
     }
 
     if (debug_level > CAMERA_INFO)
@@ -602,7 +608,9 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                     /* But we do unset the netcam keepalive flag which was set in netcam_start */
                     /* This message is logged as Information as it would be useful to know */
                     /* if your netcam often returns bad HTTP result codes */
-                    netcam->connect_keepalive = 0;
+                    netcam->connect_keepalive = FALSE;
+                    free((void *)netcam->cnt->conf.netcam_keepalive);
+                    netcam->cnt->conf.netcam_keepalive = strdup("off"); 
                     motion_log(LOG_INFO, 0, "%s: Removed netcam Keep-Alive flag"
                                "due to apparent closed HTTP connection.", __FUNCTION__);
                 }
@@ -686,8 +694,14 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
             if (SETUP)
                 motion_log(LOG_DEBUG, 0, "%s: Content-length present", __FUNCTION__);
 
-            netcam->caps.content_length = 1;     /* set flag */
-            netcam->receiving->content_length = ret;
+            if (ret > 0) {
+                netcam->caps.content_length = 1;     /* set flag */
+                netcam->receiving->content_length = ret;
+            } else { 
+                netcam->receiving->content_length = 0;
+                motion_log(LOG_ERR, 0, "%s: Content-length 0", __FUNCTION__);
+                retval = -2;
+            }
         } else if (netcam_check_keepalive(header) == TRUE) {
             /* Note that we have received a Keep-Alive header, and thus the socket can be left open */
             aliveflag = TRUE;
@@ -714,6 +728,16 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
         if (aliveflag) {
             if (closeflag) {
+                netcam->warning_count++;
+                if (netcam->warning_count > 3) {
+                    netcam->warning_count = 0;
+                    motion_log(LOG_INFO, 0, "%s: Info: Both 'Connection: Keep-Alive' and "
+                               "'Connection: close' header received. Motion removes keepalive.",
+                               __FUNCTION__);
+                    netcam->connect_keepalive = FALSE;
+                    free((void *)netcam->cnt->conf.netcam_keepalive);
+                    netcam->cnt->conf.netcam_keepalive = strdup("off");
+                } else
                    /*
                     * If not a streaming cam, and keepalive is set, and the flag shows we 
                     * did not see a Keep-Alive field returned from netcam and a Close field.
@@ -736,6 +760,16 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
             }
         } else { /* !aliveflag */
             if (!closeflag) {
+                netcam->warning_count++;
+
+                if (netcam->warning_count > 3) {
+                    netcam->warning_count = 0;
+                    motion_log(LOG_INFO, 0, "%s: No 'Connection: Keep-Alive' nor 'Connection: close' "
+                                "header received.\n Motion removes keepalive.", __FUNCTION__);
+                    netcam->connect_keepalive = FALSE;
+                    free((void *)netcam->cnt->conf.netcam_keepalive);
+                    netcam->cnt->conf.netcam_keepalive = strdup("off");
+                } else 
                    /*
                     * If not a streaming cam, and keepalive is set, and the flag shows we 
                     * did not see a Keep-Alive field returned from netcam nor a Close field.
@@ -767,6 +801,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                  */
                 if (!netcam->keepalive_thisconn) {
                     netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
+                    free((void *)netcam->cnt->conf.netcam_keepalive);
+                    netcam->cnt->conf.netcam_keepalive = strdup("off");
                     motion_log(LOG_INFO, 0, "%s: Removed netcam Keep-Alive flag because "
                                "'Connection: close' header received.\n Netcam does not support " 
                                "Keep-Alive. Motion continues in non-Keep-Alive.", __FUNCTION__);
@@ -1076,6 +1112,8 @@ static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
  *     1) If a Content-Length is present, set the variable "remaining"
  *        to be equal to that value, else set it to a "very large"
  *        number.
+ *        WARNING !!! Content-Length *must* to be greater than 0, even more
+ *        a jpeg image cannot be less than 300 bytes or so.
  *     2) While there is more data available from the camera:
  *        a) If there is a "boundary string" specified (from the initial
  *           header):
@@ -1339,12 +1377,12 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
     if (netcam->caps.streaming == NCS_UNSUPPORTED) {
         if (!netcam->connect_keepalive) {
             if (debug_level > CAMERA_INFO)
-                 motion_log(LOG_DEBUG, 0, "%s: netcam_read_html_jpeg disconnecting "
+                 motion_log(LOG_DEBUG, 0, "%s: disconnecting "
                            "netcam since keep-alive not set.", __FUNCTION__);
 
             netcam_disconnect(netcam);
         } else if (debug_level > CAMERA_INFO) {
-            motion_log(LOG_DEBUG, 0, "%s: netcam_read_html_jpeg leaving netcam connected.", 
+            motion_log(LOG_DEBUG, 0, "%s: leaving netcam connected.", 
                        __FUNCTION__);
         }
     }
@@ -2196,7 +2234,11 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
         ptr = mymalloc(strlen(url->service) + strlen(url->host)
                        + strlen(url->path) + 4);
         sprintf((char *)ptr, "http://%s%s", url->host, url->path);
-                netcam->connect_keepalive = 0; /* Disable Keepalive if proxy */
+        
+        netcam->connect_keepalive = FALSE; /* Disable Keepalive if proxy */
+        free((void *)netcam->cnt->conf.netcam_keepalive);
+        netcam->cnt->conf.netcam_keepalive = strdup("off");
+
         if (debug_level > CAMERA_INFO)
             motion_log(LOG_DEBUG, 0, "%s: Removed netcam_keepalive flag due to proxy set." 
                        "Proxy is incompatible with Keep-Alive.", __FUNCTION__);
