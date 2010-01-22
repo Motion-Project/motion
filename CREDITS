@@ -1053,6 +1053,8 @@ Kenneth Lavrsen (Currently project managing Motion)
    * Smartmask overlay feature did not set intensity correctly.
    * Fixed the thread number assignment which could goof up if netcams started very
      quickly before all thread were created at startup.
+   * Fixed name space clash with libjpeg8
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x01x22x084753
 
 Mike Lees
    * Added the onffmpegclose feature.
