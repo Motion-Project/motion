@@ -1770,7 +1770,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 {
     int loop_counter = 0;
 
-    if (debug_level > CAMERA_VERBOSE) {
+    if (debug_level >= CAMERA_ALL) {
         motion_log(0, 0, "%s: Begin", __FUNCTION__);
     }
 
@@ -1791,7 +1791,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
             return -1;
         }
     
-        if (debug_level > CAMERA_VERBOSE)
+        if (debug_level >= CAMERA_ALL)
             motion_log(0, 0, "%s: statbuf.st_mtime[%d] != last_st_mtime[%d]", 
                        __FUNCTION__, statbuf.st_mtime,  netcam->file->last_st_mtime);
         
@@ -1802,7 +1802,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
             return -1;
         }
 
-        if (debug_level > CAMERA_VERBOSE) 
+        if (debug_level >= CAMERA_ALL) 
             motion_log(0, 0, "%s: delay waiting new file image ", __FUNCTION__);
         
         //its waits 5seconds - READ_TIMEOUT
@@ -1885,7 +1885,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
     pthread_mutex_unlock(&netcam->mutex);
 
-    if (debug_level > CAMERA_VERBOSE)
+    if (debug_level >= CAMERA_ALL)
         motion_log(0, 0, "%s: End", __FUNCTION__);
     
     return 0;

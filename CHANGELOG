@@ -48,6 +48,7 @@ Bugfixes
    * Exit when image dimension are not modulo 16. (Angel Carpintero)
    * Avoid logs flooding using some options of netcam_keepalive and try to discard images with 
      weird header Content-Lenght 0. (Angel Carpintero)
+   * Only use post capture when we setup to record videos with external pipe or ffmpeg. (Angel Carpintero)   
 
 
 3.2.12 Summary of Changes

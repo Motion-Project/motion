@@ -528,7 +528,7 @@ static int alg_labeling(struct context *cnt)
             
             if (labelsize > 0) {
                 if (debug_level >= CAMERA_VERBOSE) 
-                    motion_log(LOG_DEBUG, 0,"%s: Label: %i (%i) Size: %i (%i,%i)\n", 
+                    motion_log(LOG_DEBUG, 0,"%s: Label: %i (%i) Size: %i (%i,%i)", 
                                __FUNCTION__, current_label, cnt->current_image->total_labels, 
                               labelsize, ix, iy);
 
@@ -553,7 +553,7 @@ static int alg_labeling(struct context *cnt)
 
     if (debug_level >= CAMERA_VERBOSE)
         motion_log(LOG_DEBUG, 0,"%s: %i Labels found. Largest connected Area: %i Pixel(s). "
-                   "Largest Label: %i\n", __FUNCTION__, imgs->largest_label, imgs->labelsize_max, 
+                   "Largest Label: %i", __FUNCTION__, imgs->largest_label, imgs->labelsize_max, 
                    cnt->current_image->total_labels);
     
     /* return group of significant labels */

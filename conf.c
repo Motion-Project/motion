@@ -25,7 +25,6 @@
  */
 #include "motion.h"
 
-
 #if (defined(BSD) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
@@ -41,9 +40,7 @@ char *get_current_dir_name(void)
 }
 #endif
 
-
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
-
 
 struct config conf_template = {
     width:                          DEF_WIDTH,
@@ -157,7 +154,6 @@ struct config conf_template = {
     pid_file:                       NULL,
     log_file:                       NULL,
 };
-
 
 
 static struct context **copy_bool(struct context **, const char *, int);

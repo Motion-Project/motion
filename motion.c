@@ -544,9 +544,10 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                   cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL, 
                   &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
 
-//#ifdef HAVE_FFMPEG
-            /* Check if we must add any "filler" frames into movie to keep up fps */
-            if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) {
+            /* Check if we must add any "filler" frames into movie to keep up fps 
+               Only if we are recording videos ( ffmpeg or extenal pipe )         */
+            if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
+                (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
                 /* movie_last_shoot is -1 when file is created,
                  * we don't know how many frames there is in first sec */
                 if (cnt->movie_last_shot >= 0) {
@@ -573,7 +574,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                 }
                 cnt->movie_last_shot = 0;
             } else if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot != (cnt->movie_last_shot + 1)) {
-                /* We are out of sync! Properbly we got motion - no motion - motion */
+                /* We are out of sync! Propably we got motion - no motion - motion */
                 cnt->movie_last_shot = -1;
             }
 
@@ -581,7 +582,6 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
              * only when we not are within first sec */
             if (cnt->movie_last_shot >= 0)
                 cnt->movie_last_shot = cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot;
-//#endif            
         }
 
         /* Mark the image as saved */
@@ -1670,8 +1670,16 @@ static void *motion_loop(void *arg)
              */
             if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
                 cnt->detecting_motion = 1;
-                /* Setup the postcap counter */
-                cnt->postcap = cnt->conf.post_capture;
+                if (debug_level >= CAMERA_DEBUG)
+                    motion_log(0, 0, "%s: Emulating motion %d", __FUNCTION__);
+
+                if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
+                    /* Setup the postcap counter */
+                    cnt->postcap = cnt->conf.post_capture;
+                    if (debug_level >= CAMERA_DEBUG)
+                        motion_log(0, 0, "%s: (Em) Init post capture %d", __FUNCTION__, cnt->postcap);
+                }
+
                 cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
                 motion_detected(cnt, cnt->video_dev, cnt->current_image);
             } else if ((cnt->current_image->flags & IMAGE_MOTION) && (cnt->startup_frames == 0)) {
@@ -1697,23 +1705,32 @@ static void *motion_loop(void *arg)
                 if (frame_count >= cnt->conf.minimum_motion_frames) {
                     cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
                     cnt->detecting_motion = 1;
-                    /* Setup the postcap counter */
-                    cnt->postcap = cnt->conf.post_capture;
+
+                    if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
+                        /* Setup the postcap counter */
+                        cnt->postcap = cnt->conf.post_capture;
+                        if (debug_level >= CAMERA_DEBUG)
+                            motion_log(0, 0, "%s: Setup post capture %d", __FUNCTION__, cnt->postcap);
+                    }
                     /* Mark all images in image_ring to be saved */
                     for (i = 0; i < cnt->imgs.image_ring_size; i++) 
                         cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
                     
-                } else if (cnt->postcap) { /* we have motion in this frame, 
-                                            but not enought frames for trigger. Check postcap */
+                } else if ((cnt->postcap) && 
+                  (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) { 
+                   /* we have motion in this frame, but not enought frames for trigger. Check postcap */
                     cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                     cnt->postcap--;
+                    if (debug_level >= CAMERA_DEBUG)
+                        motion_log(0, 0, "%s: post capture %d", __FUNCTION__, cnt->postcap);
                 } else {
                     cnt->current_image->flags |= IMAGE_PRECAP;
                 }
 
                 /* Always call motion_detected when we have a motion image */
                 motion_detected(cnt, cnt->video_dev, cnt->current_image);
-            } else if (cnt->postcap) {
+            } else if ((cnt->postcap) && 
+                      (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
                 /* No motion, doing postcap */
                 cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                 cnt->postcap--;
@@ -1748,7 +1765,7 @@ static void *motion_loop(void *arg)
                             area_once = cnt->event_nr; /* Fire script only once per event */
 
                             if (debug_level >= CAMERA_DEBUG)
-                                motion_log(0, 0, "Motion in area %d detected.\n", z+1);
+                                motion_log(0, 0, "Motion in area %d detected.", z+1);
                             break;
                         }
                     }
@@ -2561,7 +2578,7 @@ int main (int argc, char **argv)
 
             if (((motion_threads_running == 0) && finish) || 
                 ((motion_threads_running == 0) && (threads_running == 0))) {
-                if (debug_level >= CAMERA_VERBOSE)
+                if (debug_level >= CAMERA_ALL)
                     motion_log(LOG_INFO, 0, "%s: DEBUG-1 threads_running %d motion_threads_running %d "
                                ", finish %d", __FUNCTION__, threads_running, motion_threads_running, finish);                 
                 break;
@@ -2598,7 +2615,7 @@ int main (int argc, char **argv)
                 }
             }
 
-            if (debug_level >= CAMERA_VERBOSE)
+            if (debug_level >= CAMERA_ALL)
                 motion_log(LOG_INFO, 0, "%s: DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
                            __FUNCTION__, threads_running, motion_threads_running, finish);
         }
