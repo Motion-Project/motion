@@ -1,3 +1,10 @@
+3.2.12 Summary of Changes
+
+Bugfixes
+   * Fixed name space clash with libjpeg8 (Kenneth Lavrsen)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x01x22x084753
+
+
 3.2.11.1 Sumary of Changes
 
 Bugfixes

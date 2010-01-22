@@ -52,7 +52,7 @@ METHODDEF(void) term_destination(j_compress_ptr cinfo)
     dest->jpegsize = dest->bufsize - dest->pub.free_in_buffer;
 }
 
-static GLOBAL(void) jpeg_mem_dest(j_compress_ptr cinfo, JOCTET* buf, size_t bufsize)
+static GLOBAL(void) _jpeg_mem_dest(j_compress_ptr cinfo, JOCTET* buf, size_t bufsize)
 {
     mem_dest_ptr dest;
 
@@ -73,7 +73,7 @@ static GLOBAL(void) jpeg_mem_dest(j_compress_ptr cinfo, JOCTET* buf, size_t bufs
     dest->jpegsize = 0;
 }
 
-static GLOBAL(int) jpeg_mem_size(j_compress_ptr cinfo)
+static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
 {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
     return dest->jpegsize;
@@ -131,7 +131,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
 
-    jpeg_mem_dest(&cinfo, dest_image, image_size);    // data written to mem
+    _jpeg_mem_dest(&cinfo, dest_image, image_size);    // data written to mem
     
     jpeg_start_compress (&cinfo, TRUE);
 
@@ -147,7 +147,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     }
 
     jpeg_finish_compress(&cinfo);
-    jpeg_image_size = jpeg_mem_size(&cinfo);
+    jpeg_image_size = _jpeg_mem_size(&cinfo);
     jpeg_destroy_compress(&cinfo);
     
     return jpeg_image_size;
@@ -182,7 +182,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size,
 
     jpeg_set_quality(&cjpeg, quality, TRUE);
     cjpeg.dct_method = JDCT_FASTEST;
-    jpeg_mem_dest(&cjpeg, dest_image, image_size);  // data written to mem
+    _jpeg_mem_dest(&cjpeg, dest_image, image_size);  // data written to mem
 
     jpeg_start_compress (&cjpeg, TRUE);
 
@@ -194,7 +194,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size,
     }
     
     jpeg_finish_compress(&cjpeg);
-    dest_image_size = jpeg_mem_size(&cjpeg);
+    dest_image_size = _jpeg_mem_size(&cjpeg);
     jpeg_destroy_compress(&cjpeg);
 
     return dest_image_size;
