@@ -546,8 +546,13 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
             /* Check if we must add any "filler" frames into movie to keep up fps 
                Only if we are recording videos ( ffmpeg or extenal pipe )         */
+
             if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
+#ifdef HAVE_FFMPEG
                 (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+#else
+                (cnt->conf.useextpipe && cnt->extpipe)) {
+#endif
                 /* movie_last_shoot is -1 when file is created,
                  * we don't know how many frames there is in first sec */
                 if (cnt->movie_last_shot >= 0) {
@@ -1672,8 +1677,11 @@ static void *motion_loop(void *arg)
                 cnt->detecting_motion = 1;
                 if (debug_level >= CAMERA_DEBUG)
                     motion_log(0, 0, "%s: Emulating motion %d", __FUNCTION__);
-
+#ifdef HAVE_FFMPEG
                 if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
+#else
+		if (cnt->conf.useextpipe && cnt->extpipe) {
+#endif
                     /* Setup the postcap counter */
                     cnt->postcap = cnt->conf.post_capture;
                     if (debug_level >= CAMERA_DEBUG)
@@ -1705,8 +1713,11 @@ static void *motion_loop(void *arg)
                 if (frame_count >= cnt->conf.minimum_motion_frames) {
                     cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
                     cnt->detecting_motion = 1;
-
+#ifdef HAVE_FFMPEG
                     if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
+#else
+                    if (cnt->conf.useextpipe && cnt->extpipe) {
+#endif
                         /* Setup the postcap counter */
                         cnt->postcap = cnt->conf.post_capture;
                         if (debug_level >= CAMERA_DEBUG)
@@ -1717,7 +1728,11 @@ static void *motion_loop(void *arg)
                         cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
                     
                 } else if ((cnt->postcap) && 
-                  (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) { 
+#ifdef HAVE_FFMPEG
+                           (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+#else
+                           (cnt->conf.useextpipe && cnt->extpipe)) {			
+#endif 
                    /* we have motion in this frame, but not enought frames for trigger. Check postcap */
                     cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                     cnt->postcap--;
@@ -1730,7 +1745,11 @@ static void *motion_loop(void *arg)
                 /* Always call motion_detected when we have a motion image */
                 motion_detected(cnt, cnt->video_dev, cnt->current_image);
             } else if ((cnt->postcap) && 
+#ifdef HAVE_FFMPEG
                       (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+#else
+                      (cnt->conf.useextpipe && cnt->extpipe)) {	
+#endif
                 /* No motion, doing postcap */
                 cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                 cnt->postcap--;
