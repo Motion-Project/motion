@@ -942,11 +942,11 @@ config_param config_params[] = {
     "\n############################################################\n"
     "# Global Network Options\n"
     "############################################################\n\n"
-    "# Enable or disable IPV6 for http control and stream (default: 0 = disabled)",
+    "# Enable or disable IPV6 for http control and stream (default: off)",
     0,
     CONF_OFFSET(ipv6_enabled),
-    copy_int,
-    print_int
+    copy_bool,
+    print_bool
     },
     {
     "stream_port",
@@ -961,7 +961,7 @@ config_param config_params[] = {
     },
     {
     "stream_quality",
-    "# Quality of the jpeg images produced (default: 50)",
+    "# Quality of the jpeg (in percent) images produced (default: 50)",
     0,
     CONF_OFFSET(stream_quality),
     copy_int,
@@ -1015,7 +1015,7 @@ config_param config_params[] = {
     },
     {
     "stream_authentication",
-    "# Authentication for the http based control. Syntax username:password\n"
+    "# Authentication for the stream. Syntax username:password\n"
     "# Default: not defined (Disabled)",
     1,
     CONF_OFFSET(stream_authentication),

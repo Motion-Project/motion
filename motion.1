@@ -179,6 +179,11 @@ Values: 0 - 7, 8 = disabled / Default: 8 (disabled)
 .br
 Input channel to use expressed as an integer number starting from 0. Should normally be set to 1 for video/TV cards, and 8 for USB cameras.
 .TP
+.B ipv6_enabled boolean
+Values: on, off / Default: off
+.br
+Enable or disable IPV6 for http control and stream.
+.TP
 .B lightswitch integer
 Values: 0 - 100 / Default: 0 (disabled)
 .br
@@ -553,6 +558,16 @@ The video4linux video loopback input device for normal images. If a particular p
 Values: Max 4095 characters / Default: /dev/video0 (FreeBSD: /dev/bktr0)
 .br
 The video device to be used for capturing. Default for Linux is /dev/video0. for FreeBSD the default is /dev/bktr0.
+.TP
+.B stream_auth_method integer
+Values: 0 = disabled , 1 = Basic authentication ,2 = MD5 digest (the safer authentication). / Default: 0 (disabled) 
+.br
+Set the authentication method for stream.
+.TP
+.B stream_authentication string
+Values: username:password / Default: not defined (disabled)
+.br
+Authentication for the stream.
 .TP
 .B stream_limit integer
 Values: 0 - 2147483647 / Default: 0 (unlimited)

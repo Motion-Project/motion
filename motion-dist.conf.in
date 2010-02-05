@@ -434,8 +434,8 @@ timelapse_filename %Y%m%d-timelapse
 ############################################################
 # Global Network Options
 ############################################################
-# Enable or disable IPV6 for http control and stream (default: 0 = disabled)
-ipv6_enabled 0
+# Enable or disable IPV6 for http control and stream (default: off )
+ipv6_enabled off
 
 ############################################################
 # Live Stream Server
@@ -444,7 +444,7 @@ ipv6_enabled 0
 # The mini-http server listens to this port for requests (default: 0 = disabled)
 stream_port 8081
 
-# Quality of the jpeg images produced (default: 50)
+# Quality of the jpeg (in percent) images produced (default: 50)
 stream_quality 50
 
 # Output frames at 1 fps when no motion is detected and increase to the
@@ -468,7 +468,7 @@ stream_limit 0
 # 2 = MD5 digest (the safer authentication)
 stream_auth_method 0
 
-# Authentication for the http based control. Syntax username:password
+# Authentication for the stream. Syntax username:password
 # Default: not defined (Disabled)
 ; stream_authentication username:password
 
