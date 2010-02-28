@@ -8,12 +8,12 @@
  * Supported features and TODO
    - preferred palette is JPEG which seems to be very popular for many 640x480 usb cams
    - other supported palettes (NOT TESTED)
-       V4L2_PIX_FMT_SBGGR8    (sonix)    
        V4L2_PIX_FMT_SN9C10X   (sonix)
        V4L2_PIX_FMT_SBGGR16,
-       V4L2_PIX_FMT_SBGGR8,
+       V4L2_PIX_FMT_SBGGR8,   (sonix)
        V4L2_PIX_FMT_SPCA561,
        V4L2_PIX_FMT_SGBRG8,
+       V4L2_PIX_FMT_SGRBG8,
        V4L2_PIX_FMT_PAC207,
        V4L2_PIX_FMT_PJPG,
        V4L2_PIX_FMT_MJPEG,    (tested)
@@ -868,6 +868,11 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     sigaddset(&set, SIGHUP);
     pthread_sigmask(SIG_BLOCK, &set, &old);
 
+    if (debug_level == CAMERA_VIDEO) {
+        motion_log(LOG_DEBUG, 0, "%s: 1) vid_source->pframe %i", 
+                   __FUNCTION__, vid_source->pframe);
+    }
+
     if (vid_source->pframe >= 0) {
         if (xioctl(vid_source->fd, VIDIOC_QBUF, &vid_source->buf) == -1) {
             motion_log(LOG_ERR, 1, "%s: VIDIOC_QBUF", __FUNCTION__);
@@ -882,6 +887,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     vid_source->buf.memory = V4L2_MEMORY_MMAP;
 
     if (xioctl(vid_source->fd, VIDIOC_DQBUF, &vid_source->buf) == -1) {
+        int ret;
         /* some drivers return EIO when there is no signal, 
            driver might dequeue an (empty) buffer despite
            returning an error, or even stop capturing.
@@ -891,21 +897,39 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
             if ((u32)vid_source->pframe >= vid_source->req.count) 
                 vid_source->pframe = 0;
-                vid_source->buf.index = vid_source->pframe;
-                motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF: EIO (vid_source->pframe %d)", 
-                           __FUNCTION__, vid_source->pframe);
-                return 1;
+
+             vid_source->buf.index = vid_source->pframe;
+             motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF: EIO (vid_source->pframe %d)", 
+                        __FUNCTION__, vid_source->pframe);
+             ret = 1;
+        } else if (errno == EAGAIN) {
+            motion_log(LOG_INFO, 1, "%s: VIDIOC_DQBUF: EAGAIN (vid_source->pframe %d)",
+                       __FUNCTION__, vid_source->pframe);
+            ret = 1;
+        } else {
+            motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF", __FUNCTION__);
+            ret = -1;
         }
 
-        motion_log(LOG_ERR, 1, "%s: VIDIOC_DQBUF", __FUNCTION__);
         pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-        return -1;
+        return ret;
     }
 
+    if (debug_level == CAMERA_VIDEO) {
+        motion_log(LOG_DEBUG, 0, "%s: 2) vid_source->pframe %i", 
+                   __FUNCTION__, vid_source->pframe);
+    }
 
     vid_source->pframe = vid_source->buf.index;
     vid_source->buffers[vid_source->buf.index].used = vid_source->buf.bytesused;
     vid_source->buffers[vid_source->buf.index].content_length = vid_source->buf.bytesused;
+
+    if (debug_level == CAMERA_VIDEO) {
+        motion_log(LOG_DEBUG, 0, "%s: 3) vid_source->pframe %i vid_source->buf.index %i", 
+                   __FUNCTION__, vid_source->pframe, vid_source->buf.index);
+        motion_log(LOG_DEBUG, 0, "%s: vid_source->buf.bytesused %i", 
+                   __FUNCTION__, vid_source->buf.bytesused);
+    }
 
     pthread_sigmask(SIG_UNBLOCK, &old, NULL);    /*undo the signal blocking */
 
@@ -940,12 +964,13 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_SBGGR16:            
         case V4L2_PIX_FMT_SGBRG8: 
         case V4L2_PIX_FMT_SGRBG8:           
-        case V4L2_PIX_FMT_SPCA561:            
+        /* case V4L2_PIX_FMT_SPCA561: */            
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
             bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
 
+        case V4L2_PIX_FMT_SPCA561:            
         case V4L2_PIX_FMT_SN9C10X:
             sonix_decompress(map, the_buffer->ptr, width, height);
             bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
