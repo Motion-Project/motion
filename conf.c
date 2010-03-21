@@ -891,7 +891,7 @@ config_param config_params[] = {
     },
     {
     "webcam_quality",
-    "# Quality of the jpeg images produced (default: 50)",
+    "# Quality of the jpeg (in percent) images produced (default: 50)",
     0,
     CONF_OFFSET(webcam_quality),
     copy_int,

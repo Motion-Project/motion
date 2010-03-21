@@ -399,7 +399,7 @@ timelapse_filename %Y%m%d-timelapse
 # The mini-http server listens to this port for requests (default: 0 = disabled)
 webcam_port 8081
 
-# Quality of the jpeg images produced (default: 50)
+# Quality of the jpeg (in percent) images produced (default: 50) 
 webcam_quality 50
 
 # Output frames at 1 fps when no motion is detected and increase to the
