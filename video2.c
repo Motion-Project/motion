@@ -179,7 +179,7 @@ static int v4l2_get_capability(src_v4l2_t * s)
     if (s->cap.capabilities & V4L2_CAP_TIMEPERFRAME)
         motion_log(LOG_INFO, 0, "- TIMEPERFRAME");
 
-    if (!s->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
+    if ((!s->cap.capabilities) & V4L2_CAP_VIDEO_CAPTURE) {
         motion_log(LOG_ERR, 0, "Device does not support capturing.");
         return -1;
     }
@@ -419,7 +419,7 @@ static int v4l2_set_mmap(src_v4l2_t * s)
     u32 b;
 
     /* Does the device support streaming? */
-    if (!s->cap.capabilities & V4L2_CAP_STREAMING)
+    if ((!s->cap.capabilities) & V4L2_CAP_STREAMING)
         return -1;
 
     memset(&s->req, 0, sizeof(struct v4l2_requestbuffers));
