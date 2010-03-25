@@ -1680,7 +1680,7 @@ static void *motion_loop(void *arg)
 #ifdef HAVE_FFMPEG
                 if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
 #else
-		if (cnt->conf.useextpipe && cnt->extpipe) {
+                if (cnt->conf.useextpipe && cnt->extpipe) {
 #endif
                     /* Setup the postcap counter */
                     cnt->postcap = cnt->conf.post_capture;

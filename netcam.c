@@ -305,10 +305,13 @@ static long netcam_check_content_length(char *header)
          * we were able to recognize the header section and the
          * number we might as well try to use it.
          */
-        if (length > 0)
-            return length;
-        return -1;
+        if ((debug_level > CAMERA_INFO) && (length > 0))
+            motion_log(LOG_DEBUG, 0, "%s: malformed token Content-Length but value %ld", 
+                       __FUNCTION__, length);
     }
+
+    if (debug_level > CAMERA_INFO)
+        motion_log(LOG_DEBUG, 0, "%s: Content-Length %ld", __FUNCTION__, length);
 
     return length;
 }
@@ -397,6 +400,9 @@ static int netcam_check_content_type(char *header)
 
     if (!header_process(header, "Content-type", http_process_type, &content_type))
         return -1;
+
+    if (debug_level > CAMERA_INFO)
+        motion_log(LOG_DEBUG, 0, "%s: Content-type %s", __FUNCTION__, content_type);
 
     if (!strcmp(content_type, "image/jpeg")) {
         ret = 1;
@@ -502,17 +508,19 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
             }
         }
 
-        retval = (int) netcam_check_content_length(header);
-        free(header);
+        if ((retval = (int) netcam_check_content_length(header)) >= 0) {
+            if (retval > 0) {
+                netcam->caps.content_length = 1;       /* set flag */
+                netcam->receiving->content_length = retval;
+            } else {
+                netcam->receiving->content_length = 0;
+                motion_log(LOG_ERR, 0, "%s: Content-Length 0", __FUNCTION__);
+                free(header);free(header);
+                return -1;
+            }    
+        }    
 
-        if (retval > 0) {
-            netcam->caps.content_length = 1;       /* set flag */
-            netcam->receiving->content_length = retval;
-        } else {
-            netcam->receiving->content_length = 0;
-            motion_log(LOG_ERR, 0, "%s: Content-Length 0", __FUNCTION__);
-            return -1;
-        }
+        free(header);
     }
 
     if (debug_level > CAMERA_INFO)
@@ -542,11 +550,11 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
  *      netcam            Pointer to the netcam_context structure
  *
  * Returns:               Content-type code if successful, -1 if not
- *
+ *                                                         -2 if Content-length = 0
  */
 static int netcam_read_first_header(netcam_context_ptr netcam)
 {
-    int retval = -2;                         /* "Unknown err" */
+    int retval = -3;                         /* "Unknown err" */
     int ret;
     int firstflag = 1;
     int aliveflag = 0;    /* If we have seen a Keep-Alive header from cam */
@@ -2731,13 +2739,10 @@ int netcam_start(struct context *cnt)
     int retval;                       /* working var */
     struct url_t url;                 /* for parsing netcam URL */
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(0, 0, "%s: entered netcam_start()", __FUNCTION__);
-
     memset(&url, 0, sizeof(url));
-    if (SETUP)
-        motion_log(LOG_INFO, 0, "%s: Camera thread starting...", __FUNCTION__);
 
+    motion_log(LOG_INFO, 0, "%s: Network Camera thread starting... for url (%s)", 
+               __FUNCTION__, cnt->conf.netcam_url);
     /*
      * Create a new netcam_context for this camera
      * and clear all the entries.

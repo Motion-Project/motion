@@ -212,7 +212,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-
     {
     "videodevice",
     "\n###########################################################\n"
