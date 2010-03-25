@@ -5,7 +5,7 @@ Summary:        A motion detection system
 
 Group:          Applications/Multimedia
 License:        GPLv2+
-URL:            http://motion.sourceforge.net/
+URL:            http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome
 Source0:        http://prdownloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
