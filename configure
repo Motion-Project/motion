@@ -5283,7 +5283,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files thread1.conf thread2.conf thread3.conf thread4.conf motion-dist.conf motion.init-FreeBSD.sh motion.init-Debian motion.init-RH motion.spec Makefile"
+ac_config_files="$ac_config_files thread1.conf thread2.conf thread3.conf thread4.conf motion-dist.conf motion.init-FreeBSD.sh motion.init-Debian motion.init-Fedora motion.spec Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5971,7 +5971,7 @@ do
     "motion-dist.conf") CONFIG_FILES="$CONFIG_FILES motion-dist.conf" ;;
     "motion.init-FreeBSD.sh") CONFIG_FILES="$CONFIG_FILES motion.init-FreeBSD.sh" ;;
     "motion.init-Debian") CONFIG_FILES="$CONFIG_FILES motion.init-Debian" ;;
-    "motion.init-RH") CONFIG_FILES="$CONFIG_FILES motion.init-RH" ;;
+    "motion.init-Fedora") CONFIG_FILES="$CONFIG_FILES motion.init-Fedora" ;;
     "motion.spec") CONFIG_FILES="$CONFIG_FILES motion.spec" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 

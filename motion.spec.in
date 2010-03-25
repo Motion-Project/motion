@@ -10,6 +10,7 @@ Source0:        http://prdownloads.sourceforge.net/%{name}/%{name}-%{version}.ta
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  libjpeg-devel ffmpeg-devel zlib-devel
+#This requires comes from the startup script, it will be there until motion supports libv4l calls in the code
 Requires: libv4l
 Requires(post): chkconfig
 Requires(preun): chkconfig initscripts
@@ -27,7 +28,7 @@ without MySQL and PostgreSQL support.
 %setup -q
 
 %build
-%configure --sysconfdir=%{_sysconfdir}/%{name} --without-optimizecpu --with-ffmpeg --without-mysql --without-pgsql 
+%configure --sysconfdir=%{_sysconfdir}/%{name} --without-optimizecpu --with-ffmpeg --without-mysql --without-pgsql
 make %{?_smp_mflags}
 
 %install
@@ -43,11 +44,11 @@ sed -i 's|sql_log_snapshot|; sql_log_snapshot|g' %{buildroot}%{_sysconfdir}/%{na
 sed -i 's|sql_log_mpeg|; sql_log_mpeg|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 sed -i 's|sql_log_timelapse|; sql_log_timelapse|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 sed -i 's|sql_query|; sql_query|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
-#We set the log file and target directory
+#We set the log file and target directory - logging is for 3.3 branch
 sed -i 's|;logfile|logfile /var/log/motion.log|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 sed -i 's|target_dir /usr/local/apache2/htdocs/cam1|target_dir /var/motion|g' %{buildroot}%{_sysconfdir}/%{name}/motion.conf
 #We install our startup script
-install -D -m 0755 motion.init-RH %{buildroot}%{_initrddir}/%{name}
+install -D -m 0755 motion.init-Fedora %{buildroot}%{_initrddir}/%{name}
 
 %post
 #We add the motion init script to the services when installing
@@ -79,7 +80,7 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_datadir}/%{name}-%{version}/examples/motion-dist.conf
 %attr(0755,root,root) %{_datadir}/%{name}-%{version}/examples/motion.init-Debian
 %attr(0755,root,root) %{_datadir}/%{name}-%{version}/examples/motion.init-FreeBSD.sh
-%attr(0755,root,root) %{_datadir}/%{name}-%{version}/examples/motion.init-RH
+%attr(0755,root,root) %{_datadir}/%{name}-%{version}/examples/motion.init-Fedora
 %attr(0644,root,root) %{_datadir}/%{name}-%{version}/examples/thread1.conf
 %attr(0644,root,root) %{_datadir}/%{name}-%{version}/examples/thread2.conf
 %attr(0644,root,root) %{_datadir}/%{name}-%{version}/examples/thread3.conf
@@ -90,6 +91,22 @@ rm -rf %{buildroot}
 %attr(0755,root,root) %{_initrddir}/%{name}
 
 %changelog
+* Thu Mar 06 2010 Steven Moix <steven.moix@axianet.ch> - 3.2.12-1
+- New upstream release, important bugfixes only
+
+* Wed Oct 21 2009 Thorsten Leemhuis <fedora [AT] leemhuis [DOT] info> - 3.2.11.1-3
+- rebuild for new ffmpeg
+
+* Tue Aug 11 2009 Steven Moix <steven.moix@axianet.ch> - 3.2.11.1-1
+- Drop patch for ffmpeg 0.5 compatibility
+- Drop ffmpeg detection patch
+- Moved default output directory to /var/motion
+- New startup script with added v4l2convert to support more cameras - https://bugzilla.rpmfusion.org/show_bug.cgi?id=681
+- Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too)
+- Fix fd leaks in external pipe
+- Avoid possible stack smashing in v4l_open_vidpipe()
+- Fix segfault for new libjpeg v7
+
 * Mon Jul 06 2009 Steven Moix <steven.moix@axianet.ch> - 3.3.0-1
 - SPEC Preparation for the 3.3 branch
 
