@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+# motion        Startup script for the Motion Detection System 
+#
+# chkconfig:    - 85 15
+# description:  Motion detection system.  It is used to detect movement based \
+#               on compare images.
+# processname:  @PACKAGE_NAME@ 
+# pidfile:      /var/run/@PACKAGE_NAME@.pid
+# config:       /etc/@PACKAGE_NAME@.conf
+#
+### BEGIN INIT INFO
+# Provides: motion
+# Required-Start: $local_fs
+# Required-Stop: $local_fs
+# Default-Start: 
+# Default-Stop: 
+# Short-Description: Start and stop motion detection system
+# Description: The Motion detection system is used to detect movement based
+#              on image comparison.
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+motion=${MOTION-/usr/bin/motion}
+prog=motion
+pidfile=/var/run/motion.pid
+lockfile=/var/lock/subsys/motion
+
+start() {
+    [ -x $exec ] || exit 5
+    [ -f $config ] || exit 6
+    echo -n $"Starting $prog: "
+    # We try to determine which architecture we have so we can 
+    # load libv4l to support more USB cameras. x86_64 and ppc64
+    # are both supported by rpmfusion.
+    case $(uname -i) in
+        "x86_64" )
+            #We load libv4l for 64 Bit x86 architectures
+            LD_PRELOAD=/usr/lib64/libv4l/v4l2convert.so daemon $motion 2> /dev/null ;;
+        "ppc64" )
+            #We load libv4l for 64 Bit PPC architectures
+            LD_PRELOAD=/usr/lib64/libv4l/v4l2convert.so daemon $motion 2> /dev/null ;;
+        * )
+            #Default case, we load libv4l for all 32 Bit architectures
+            LD_PRELOAD=/usr/lib/libv4l/v4l2convert.so daemon $motion 2> /dev/null ;;
+    esac
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $motion
+    retval=$?
+    echo
+    [ $retval = 0 ] && rm -f $lockfile
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    echo -n $"Reloading $prog configuration: "
+    killproc $motion -HUP
+    retval=$?
+    echo
+    return $retval
+}
+
+rh_status() { 
+    # run checks to determine if the service is running or use generic status
+    status $prog
+}
+          
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+# See how we were called.
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;        
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        #force_reload
+        reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+                echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+		exit 1
+esac
+exit $?

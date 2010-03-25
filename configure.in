@@ -1097,7 +1097,7 @@ thread4.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
-motion.init-RH
+motion.init-Fedora
 motion.spec
 Makefile
 ])
