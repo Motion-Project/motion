@@ -15,7 +15,9 @@
 #include "motion.h"
 #include <syslog.h>
 
-
+/* Logging mode */
+#define LOGMODE_FILE            0   /* Log messages to file   */
+#define LOGMODE_SYSLOG          1   /* Log messages to syslog */
 
 /* Debug levels */
 #define CAMERA_ALERT            1   /* alerts only             */

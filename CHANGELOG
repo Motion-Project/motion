@@ -50,6 +50,7 @@ Bugfixes
      weird header Content-Lenght 0. (Angel Carpintero)
    * Only use post capture when we setup to record videos with external pipe or ffmpeg. (Angel Carpintero)   
    * Fix introduced bug for Content-Lenght = 0 in svn r476. (Angel Carpintero)
+   * Avoid segfault when motion cannot create a logfile. (Angel Carpintero)
 
 3.2.12 Summary of Changes
 

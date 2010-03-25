@@ -13,7 +13,7 @@
 #include "logger.h"   /* already includes motion.h */
 #include <stdarg.h>
 
-static int log_mode = 1;
+static int log_mode = LOGMODE_SYSLOG;
 static FILE *logfile;
 
 /**
@@ -33,7 +33,14 @@ void set_log_mode(int mode)
  */
 FILE * set_logfile(const char *logfile_name)
 {
-    return logfile = myfopen(logfile_name, "a", 0);
+    log_mode = LOGMODE_SYSLOG;  /* Setup temporary to let log if myfopen fails */
+    logfile = myfopen(logfile_name, "a", 0);
+
+    /* If logfile was opened correctly */
+    if (logfile)
+        log_mode = LOGMODE_FILE;
+
+    return logfile;
 }
 
 

@@ -2335,20 +2335,25 @@ static void motion_startup(int daemonize, int argc, char *argv[])
      */
     cntlist_create(argc, argv);
 
-    if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file,"syslog",6))) {
-        set_log_mode(0);
-        ptr_logfile = set_logfile(cnt_list[0]->conf.log_file);
-        if (ptr_logfile) {
+    motion_log(LOG_INFO, 0, "%s: Motion "VERSION" Started", __FUNCTION__);
 
+    if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file, "syslog", 6))) {
+        set_log_mode(LOGMODE_FILE);
+        ptr_logfile = set_logfile(cnt_list[0]->conf.log_file);
+
+        if (ptr_logfile) {
+            set_log_mode(LOGMODE_SYSLOG);
+            motion_log(LOG_INFO, 0, "%s: Logging to file (%s)", __FUNCTION__, 
+                       cnt_list[0]->conf.log_file);
+            set_log_mode(LOGMODE_FILE);
         } else {
             motion_log(LOG_ERR, 1, "%s: Exit motion, cannot create log file %s",
                        __FUNCTION__, cnt_list[0]->conf.log_file);
             exit(0);
         }
-
+    } else {
+        motion_log(LOG_INFO, 0, "%s: Logging to syslog", __FUNCTION__);
     }
-
-    motion_log(LOG_INFO, 0, "%s: Motion "VERSION" Started",  __FUNCTION__);
 
     initialize_chars();
 
