@@ -380,8 +380,13 @@ static void motion_remove_pid(void)
             motion_log(LOG_INFO, 1, "%s: Error removing pid file", __FUNCTION__);
     }
 
-    if (ptr_logfile) 
+    if (ptr_logfile) { 
+        motion_log(LOG_INFO, 0, "%s: Closing logfile (%s).", __FUNCTION__, 
+                   cnt_list[0]->conf.log_file);
+        set_log_mode(LOGMODE_SYSLOG);
         myfclose(ptr_logfile);
+        ptr_logfile = NULL;
+    }        
 
 }
 
@@ -2540,13 +2545,14 @@ int main (int argc, char **argv)
              * cleanup everything, and then initialize everything again
              * (including re-reading the config file(s)).
              */
+            motion_log(LOG_INFO, 0, "%s: Restarting motion.", __FUNCTION__);
             motion_shutdown();
             restart = 0; /* only one reset for now */
-            motion_log(LOG_INFO, 0, "%s: motion restarted",  __FUNCTION__);
 #ifndef WITHOUT_V4L
             SLEEP(5, 0); // maybe some cameras needs less time
 #endif
             motion_startup(0, argc, argv); /* 0 = skip daemon init */
+            motion_log(LOG_INFO, 0, "%s: Motion restarted",  __FUNCTION__);
         }
 
 

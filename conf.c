@@ -1803,7 +1803,7 @@ struct context **conf_load(struct context **cnt)
         }
     }
 
-    /* Now we process the motion.conf config file and close it*/
+    /* Now we process the motion.conf config file and close it */
     if (fp) {
         strcpy(cnt[0]->conf_filename, filename);
         motion_log(LOG_INFO, 0, "%s: Processing thread 0 - config file %s", 
