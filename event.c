@@ -122,14 +122,14 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
      */
     {
         char sqlquery[PATH_MAX];
-        int ret;
     
         mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query, 
                    &cnt->current_image->timestamp_tm, filename, sqltype);
         
-
 #ifdef HAVE_MYSQL
         if (cnt->conf.mysql_db) {
+            int ret;
+
             ret = mysql_query(cnt->database, sqlquery);
 
             if (ret != 0) {
