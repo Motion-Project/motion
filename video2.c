@@ -178,6 +178,9 @@ typedef struct {
 
 } src_v4l2_t;
 
+/**
+ * xioctl
+ */ 
 static int xioctl(int fd, int request, void *arg) 
 {
     int ret;
@@ -189,6 +192,9 @@ static int xioctl(int fd, int request, void *arg)
     return ret;
 }
 
+/**
+ * v4l2_get_capability
+ */ 
 static int v4l2_get_capability(src_v4l2_t * vid_source) 
 {
     if (xioctl(vid_source->fd, VIDIOC_QUERYCAP, &vid_source->cap) < 0) {
@@ -236,6 +242,9 @@ static int v4l2_get_capability(src_v4l2_t * vid_source)
     return 0;
 }
 
+/**
+ * v4l2_select_input
+ */ 
 static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_v4l2_t * vid_source, 
                              int in, int norm, unsigned long freq_, int tuner_number ATTRIBUTE_UNUSED)
 {
@@ -358,6 +367,9 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_
     return 0;
 }
 
+/**
+ * v4l2_set_pix_format
+ */
 static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int *width, int *height)
 {
     struct v4l2_fmtdesc fmtd;
@@ -494,6 +506,9 @@ static void v4l2_set_fps(src_v4l2_t * vid_source) {
 }
 #endif
 
+/**
+ * v4l2_set_mmap
+ */ 
 static int v4l2_set_mmap(src_v4l2_t * vid_source)
 {
     enum v4l2_buf_type type;
@@ -584,6 +599,9 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
     return 0;
 }
 
+/**
+ * v4l2_scan_controls
+ */ 
 static int v4l2_scan_controls(src_v4l2_t * vid_source)
 {
     int count, i;
@@ -636,6 +654,9 @@ static int v4l2_scan_controls(src_v4l2_t * vid_source)
     return 0;
 }
 
+/**
+ * v4l2_set_control
+ */ 
 static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
 {
     int i, count;
@@ -684,6 +705,9 @@ static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
     return -1;
 }
 
+/**
+ * v4l2_picture_controls
+ */ 
 static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
 {
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
@@ -719,7 +743,9 @@ static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
 }
 
 /* public functions */
-
+/**
+ * v4l2_start
+ */ 
 unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int width, int height,
               int input, int norm, unsigned long freq, int tuner_number)
 {
@@ -779,6 +805,9 @@ err:
     return NULL;
 }
 
+/**
+ * v4l2_set_input
+ */ 
 void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, 
                     int width, int height, struct config *conf)
 {
@@ -851,6 +880,9 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
     }
 }
 
+/** 
+ * v4l2_next
+ */ 
 int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height)
 {
     sigset_t set, old;
@@ -888,10 +920,11 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
     if (xioctl(vid_source->fd, VIDIOC_DQBUF, &vid_source->buf) == -1) {
         int ret;
-        /* some drivers return EIO when there is no signal, 
-           driver might dequeue an (empty) buffer despite
-           returning an error, or even stop capturing.
-        */
+        /* 
+         * Some drivers return EIO when there is no signal, 
+         * driver might dequeue an (empty) buffer despite
+         * returning an error, or even stop capturing.
+         */
         if (errno == EIO) {
             vid_source->pframe++; 
 
@@ -982,6 +1015,9 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     return 1;
 }
 
+/**
+ * v4l2_close
+ */
 void v4l2_close(struct video_dev *viddev)
 {
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
@@ -993,6 +1029,9 @@ void v4l2_close(struct video_dev *viddev)
     vid_source->fd = -1;
 }
 
+/**
+ * v4l2_cleanup
+ */ 
 void v4l2_cleanup(struct video_dev *viddev)
 {
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
@@ -1015,5 +1054,4 @@ void v4l2_cleanup(struct video_dev *viddev)
     free(vid_source);
     viddev->v4l2_private = NULL;
 }
-
 #endif /* !WITHOUT_V4L && MOTION_V4L2 */ 

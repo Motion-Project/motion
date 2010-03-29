@@ -26,9 +26,8 @@ typedef struct {
     int val;
 } code_table_t;
 
-/*
- *   sonix_decompress_init
- *   =====================
+/**
+ * sonix_decompress_init
  *   pre-calculates a locally stored table for efficient huffman-decoding.
  *
  *   Each entry at index x in the table represents the codeword
@@ -88,10 +87,9 @@ static void sonix_decompress_init(code_table_t * table)
     }
 }
 
-/*
- *   sonix_decompress
- *   ================
- *   decompresses an image encoded by a SN9C101 camera controller chip.
+/**
+ * sonix_decompress
+ *      decompresses an image encoded by a SN9C101 camera controller chip.
  *
  *   IN    width
  *         height
@@ -174,14 +172,14 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
     return 0;
 }
 
-/*
+/**
+ * bayer2rgb24 
  * BAYER2RGB24 ROUTINE TAKEN FROM:
  *
  * Sonix SN9C10x based webcam basic I/F routines
  * Takafumi Mizuno <taka-qce@ls-a.jp>
  *
  */
-
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height)
 {
     long int i;
@@ -255,6 +253,9 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
 
 }
 
+/**
+ * conv_yuv422to420p
+ */ 
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     unsigned char *src, *dest, *src2, *dest2;
@@ -288,6 +289,9 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
     }
 }
 
+/**
+ * conv_uyvyto420p
+ */ 
 void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
 {
     uint8_t *pY = map;
@@ -323,6 +327,9 @@ void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int wi
     }
 }
 
+/**
+ * conv_rgb24toyuv420p
+ */ 
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     unsigned char *y, *u, *v;
@@ -363,7 +370,7 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
     }
 }
 
-/*
+/**
  * mjpegtoyuv420p
  *
  * Return values
@@ -372,7 +379,6 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
  *  2  if jpeg lib threw a "corrupt jpeg data" warning.  
  *     in this case, "a damaged output image is likely."
  */
-
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
 {
     uint8_t *yuv[3];
@@ -438,6 +444,9 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
 #define AUTOBRIGHT_MAX 255
 #define AUTOBRIGHT_MIN 0
 
+/**
+ * vid_do_autobright
+ */ 
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 {
 
@@ -489,12 +498,14 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
  *****************************************************************************/
 
 #ifndef WITHOUT_V4L
-/* big lock for vid_start to ensure exclusive access to viddevs while adding 
+/*
+ * Big lock for vid_start to ensure exclusive access to viddevs while adding 
  * devices during initialization of each thread
  */
 static pthread_mutex_t vid_mutex;
 
-/* Here we setup the viddevs structure which is used globally in the vid_*
+/* 
+ * Here we setup the viddevs structure which is used globally in the vid_*
  * functions.
  */
 static struct video_dev *viddevs = NULL;
@@ -590,7 +601,8 @@ void vid_close(struct context *cnt)
     } else {
         motion_log(LOG_INFO, 0, "%s: Still %d users of video device %s, so we don't close it now", 
                    __FUNCTION__, dev->usage_count, dev->video_device);
-        /* There is still at least one thread using this device 
+        /* 
+         * There is still at least one thread using this device 
          * If we own it, release it
          */
         if (dev->owner == cnt->threadnr) {
@@ -637,7 +649,8 @@ static int vid_v4lx_start(struct context *cnt)
     int width, height, input, norm, tuner_number;
     unsigned long frequency;
 
-    /* We use width and height from conf in this function. They will be assigned
+    /*
+     * We use width and height from conf in this function. They will be assigned
      * to width and height in imgs here, and cap_width and cap_height in 
      * rotate_data won't be set until in rotate_init.
      * Motion requires that width and height is a multiple of 16 so we check
@@ -664,14 +677,16 @@ static int vid_v4lx_start(struct context *cnt)
 
     pthread_mutex_lock(&vid_mutex);
 
-    /* Transfer width and height from conf to imgs. The imgs values are the ones
+    /* 
+     * Transfer width and height from conf to imgs. The imgs values are the ones
      * that is used internally in Motion. That way, setting width and height via
      * http remote control won't screw things up.
      */
     cnt->imgs.width = width;
     cnt->imgs.height = height;
 
-    /* First we walk through the already discovered video devices to see
+    /* 
+     * First we walk through the already discovered video devices to see
      * if we have already setup the same device before. If this is the case
      * the device is a Round Robin device and we set the basic settings
      * and return the file descriptor
@@ -731,7 +746,8 @@ static int vid_v4lx_start(struct context *cnt)
     dev->freq = frequency;
     dev->tuner_number = tuner_number;
 
-    /* We set brightness, contrast, saturation and hue = 0 so that they only get
+    /* 
+     * We set brightness, contrast, saturation and hue = 0 so that they only get
      * set if the config is not zero.
      */
     dev->brightness = 0;
@@ -747,7 +763,8 @@ static int vid_v4lx_start(struct context *cnt)
     dev->v4l2 = 1;
 
     if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
-        /* restore width & height before test with v4l
+        /* 
+         * Restore width & height before test with v4l
          * because could be changed in v4l2_start ()
          */
         dev->width = width;
@@ -805,8 +822,6 @@ static int vid_v4lx_start(struct context *cnt)
 }
 #endif /* !WITHOUT_V4L */
 
-
-
 /**
  * vid_start
  *
@@ -829,7 +844,6 @@ static int vid_v4lx_start(struct context *cnt)
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 16
  */
-
 int vid_start(struct context *cnt)
 {
     struct config *conf = &cnt->conf;
@@ -885,7 +899,8 @@ int vid_next(struct context *cnt, unsigned char *map)
         return netcam_next(cnt, map);
     }
 #ifndef WITHOUT_V4L
-    /* We start a new block so we can make declarations without breaking
+    /* 
+     * We start a new block so we can make declarations without breaking
      * gcc 2.95 or older
      */
     {

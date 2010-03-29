@@ -84,7 +84,8 @@
 #endif
 
 
-/* The macro below defines a version of sleep using nanosleep
+/* 
+ *  The macro below defines a version of sleep using nanosleep
  * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping
  */
 #define SLEEP(seconds, nanoseconds) {              \
@@ -212,12 +213,14 @@ struct images;
 #include "track.h"
 #include "netcam.h"
 
-/* Structure to hold images information
+/* 
+ * Structure to hold images information
  * The idea is that this should have all information about a picture e.g. diffs, timestamp etc.
  * The exception is the label information, it uses a lot of memory
  * When the image is stored all texts motion marks etc. is written to the image
  * so we only have to send it out when/if we want.
  */
+
 /* A image can have detected motion in it, but dosn't trigger an event, if we use minimum_motion_frames */
 #define IMAGE_MOTION     1
 #define IMAGE_TRIGGER    2
@@ -233,8 +236,10 @@ struct image_data {
     struct tm timestamp_tm;
     int shot;                   /* Sub second timestamp count */
 
-    /* movement center to img center distance 
-     * Note Dist is calculated distX*distX + distY*distY */
+    /* 
+     * Movement center to img center distance 
+     * Note: Dist is calculated distX*distX + distY*distY 
+     */
     unsigned long cent_dist;
 
     unsigned int flags;         /* Se IMAGE_* defines */
@@ -244,7 +249,8 @@ struct image_data {
     int total_labels;
 };
 
-/* DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
+/* 
+ * DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
  * (and the corresponding height values, of course)
  * ===========================================================================
  * Location      Purpose
@@ -307,21 +313,24 @@ struct images {
 struct rotdata {
     /* Temporary buffer for 90 and 270 degrees rotation. */
     unsigned char *temp_buf;
-    /* Degrees to rotate; copied from conf.rotate_deg. This is the value
+    /* 
+     * Degrees to rotate; copied from conf.rotate_deg. This is the value
      * that is actually used. The value of conf.rotate_deg cannot be used
      * because it can be changed by motion-control, and changing rotation
      * while Motion is running just causes problems.
      */
     int degrees;
-    /* Capture width and height - different from output width and height if 
-     * rotating 90 or 270 degrees. */
+    /*
+     * Capture width and height - different from output width and height if 
+     * rotating 90 or 270 degrees. 
+     */
     int cap_width;
     int cap_height;
 };
 
 /*
-    these used to be global variables but now each thread will have its
-    own context
+ *  These used to be global variables but now each thread will have its
+ *  own context
  */
 struct context {
     FILE *extpipe;
@@ -364,7 +373,7 @@ struct context {
     int prev_event;
     unsigned int lightswitch_framecounter;
     char text_event_string[PATH_MAX];        /* The text for conv. spec. %C -
-                                                    we assume PATH_MAX normally 4096 characters is fine */
+                                                we assume PATH_MAX normally 4096 characters is fine */
     int postcap;                             /* downcounter, frames left to to send post event */
 
     int shots;

@@ -375,10 +375,9 @@ static unsigned int servo_position(struct context *cnt, unsigned int motor)
 
 
 
-/*
- * servo_move()
- *
- * - Does relative movements to current position.
+/**
+ * servo_move
+ *      Does relative movements to current position.
  *
  */ 
 static unsigned int servo_move(struct context *cnt, struct coord *cent, 
@@ -426,7 +425,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
             }
 
 
-             /* Set Speed , TODO : it should be done only when speed changes */
+            /* Set Speed , TODO : it should be done only when speed changes */
             servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
             servo_command(cnt, cnt->track.motorx, command, data);
         }
@@ -452,7 +451,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
             }
             
             
-             /* Set Speed , TODO : it should be done only when speed changes */
+            /* Set Speed , TODO : it should be done only when speed changes */
             servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
             servo_command(cnt, cnt->track.motory, command, data);
         }
@@ -496,7 +495,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
                 return 0;
             }    
 
-             /* Set Speed , TODO : it should be done only when speed changes */
+            /* Set Speed , TODO : it should be done only when speed changes */
              
             servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
             servo_command(cnt, cnt->track.motorx, command, data);
@@ -545,7 +544,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
                 return 0;
             }
 
-             /* Set Speed , TODO : it should be done only when speed changes */
+            /* Set Speed , TODO : it should be done only when speed changes */
             servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
             servo_command(cnt, cnt->track.motory, command, data);
          
@@ -567,14 +566,13 @@ static unsigned int servo_status(struct context *cnt, unsigned int motor)
 }
 #endif
 
-/*
- * servo_center()
+/**
+ * servo_center
+ *      Moves servo to home position.
+ *      Does absolute movements ( offsets relative to home position ).
  *
- * - Moves servo to home position.
- * - Does absolute movements ( offsets relative to home position ).
- *
- * Note : Using Clockwise as a convention for right , left , up , down  
- *        so left minx , right maxx , down miny , up maxy
+ *      Note : Using Clockwise as a convention for right , left , up , down  
+ *              so left minx , right maxx , down miny , up maxy
  *
  */
 
@@ -898,8 +896,10 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
         motion_log(LOG_ERR, 1, "%s: ioctl VIDIOCPWCMPTGANGLE", __FUNCTION__);
 
 
-    /* Check current position of camera and see if we need to adjust
-       values down to what is left to move */
+    /* 
+     * Check current position of camera and see if we need to adjust
+     * values down to what is left to move 
+     */
     if (move_x_degrees<0 && (cnt->track.minx - pma.pan) > move_x_degrees)
         move_x_degrees = (cnt->track.minx - pma.pan);
 
@@ -981,7 +981,7 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
             motion_log(LOG_DEBUG, 0, "%s: Getting camera range", __FUNCTION__);
         
 
-        /* DWe 30.03.07 The orig request failed : 
+       /* DWe 30.03.07 The orig request failed : 
         * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
         * Range X = -70 to +70 degrees              
         * Y = -30 to +30 degrees  
@@ -1021,11 +1021,11 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
             
 
     /*
-    tilt up: - value
-    tilt down: + value
-    pan left: - value
-    pan right: + value
-    */
+     * tilt up: - value
+     * tilt down: + value
+     * pan left: - value
+     * pan right: + value
+     */
     pan.s16.pan = -move_x_degrees * INCPANTILT;
     pan.s16.tilt = -move_y_degrees * INCPANTILT;
     
@@ -1034,9 +1034,9 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
                    __FUNCTION__, move_x_degrees, move_y_degrees);
         
     /* DWe 30.03.07 Must be broken in diff calls, because 
-        - one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
-        - The Webcam or uvcvideo does not like a call with a zero-move 
-    */
+     * one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
+     * The Webcam or uvcvideo does not like a call with a zero-move 
+     */
     
     if (move_x_degrees != 0) {
         control_s.id = V4L2_CID_PAN_RELATIVE;
@@ -1096,10 +1096,12 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
     int delta_y = cent->y - (imgs->height / 2);
     int move_x_degrees, move_y_degrees;
     
-    /* DWe 30.03.07 Does the request of act.position from WebCam work ? luvcview shows at every position 180 :( */
-    /*        Now we init the Web by call Reset, so we can sure, that we are at x/y = 0,0                 */
-    /*         Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...? */
-    /*         PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that  */  
+    /* 
+     *  DWe 30.03.07 Does the request of act.position from WebCam work ? luvcview shows at every position 180 :( 
+     *        Now we init the Web by call Reset, so we can sure, that we are at x/y = 0,0                 
+     *        Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...? 
+     *        PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that  
+     */  
     if ((cnt->track.minmaxfound != 1) || (cent->x == 7777)) {
         unsigned int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
         struct v4l2_control control_s;
@@ -1120,11 +1122,12 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
         cent->x = 0;
         SLEEP(8, 0);
         
-        /* DWe 30.03.07 The orig request failed : 
-        * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
-        * Range X = -70 to +70 degrees              
-        *    Y = -30 to +30 degrees  
-        */    
+        /* 
+         * DWe 30.03.07 The orig request failed : 
+         * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual 
+         * Range X = -70 to +70 degrees              
+         *       Y = -30 to +30 degrees  
+         */    
 
         cnt->track.minx = -4480 / INCPANTILT;
         cnt->track.miny = -1920 / INCPANTILT;
@@ -1165,7 +1168,7 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
     if (cnt->track.minmaxfound == 1) {
     /* 
      * Check current position of camera and see if we need to adjust
-     *  values down to what is left to move 
+     * values down to what is left to move 
      */
         if (move_x_degrees < 0 && (cnt->track.minx - cnt->track.pan_angle) > move_x_degrees)
             move_x_degrees = cnt->track.minx - cnt->track.pan_angle;
@@ -1189,19 +1192,19 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
     }    
 
     /*
-    tilt up: - value
-    tilt down: + value
-    pan left: - value
-    pan right: + value
-    */
+     * tilt up: - value
+     * tilt down: + value
+     * pan left: - value
+     * pan right: + value
+     */
 
     pan.s16.pan = -move_x_degrees * INCPANTILT;
     pan.s16.tilt = -move_y_degrees * INCPANTILT;
     
     /* DWe 30.03.07 Must be broken in diff calls, because 
-           - one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
-           - The Webcam or uvcvideo does not like a call with a zero-move 
-    */
+     * one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
+     * The Webcam or uvcvideo does not like a call with a zero-move 
+     */
 
     if (move_x_degrees != 0) {
 

@@ -233,7 +233,8 @@ void rotate_init(struct context *cnt)
     /* Make sure temp_buf isn't freed if it hasn't been allocated. */
     cnt->rotate_data.temp_buf = NULL;
 
-    /* Assign the value in conf.rotate_deg to rotate_data.degrees. This way,
+    /*
+     * Assign the value in conf.rotate_deg to rotate_data.degrees. This way,
      * we have a value that is safe from changes caused by motion-control.
      */
     if ((cnt->conf.rotate_deg % 90) > 0) {
@@ -245,7 +246,8 @@ void rotate_init(struct context *cnt)
         cnt->rotate_data.degrees = cnt->conf.rotate_deg % 360; /* range: 0..359 */
     }
 
-    /* Upon entrance to this function, imgs.width and imgs.height contain the
+    /*
+     * Upon entrance to this function, imgs.width and imgs.height contain the
      * capture dimensions (as set in the configuration file, or read from a 
      * netcam source). 
      *
@@ -265,7 +267,8 @@ void rotate_init(struct context *cnt)
         cnt->imgs.height = cnt->rotate_data.cap_width;
     }
 
-    /* If we're not rotating, let's exit once we have setup the capture dimensions
+    /*
+     * If we're not rotating, let's exit once we have setup the capture dimensions
      * and output dimensions properly.
      */
     if (cnt->rotate_data.degrees == 0) 
@@ -273,13 +276,15 @@ void rotate_init(struct context *cnt)
 
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
-        /* For YUV 4:2:0 planar, the memory block used for 90/270 degrees
+        /*
+         * For YUV 4:2:0 planar, the memory block used for 90/270 degrees
          * rotation needs to be width x height x 1.5 bytes large. 
          */
         size = cnt->imgs.width * cnt->imgs.height * 3 / 2;
         break;
     case VIDEO_PALETTE_GREY:
-        /* For greyscale, the memory block used for 90/270 degrees rotation
+        /* 
+         * For greyscale, the memory block used for 90/270 degrees rotation
          * needs to be width x height bytes large.
          */
         size = cnt->imgs.width * cnt->imgs.height;
@@ -291,7 +296,8 @@ void rotate_init(struct context *cnt)
         return;
     }
 
-    /* Allocate memory if rotating 90 or 270 degrees, because those rotations 
+    /*
+     * Allocate memory if rotating 90 or 270 degrees, because those rotations 
      * cannot be performed in-place (they can, but it would be too slow).
      */
     if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) 
@@ -333,7 +339,8 @@ void rotate_deinit(struct context *cnt)
  */
 int rotate_map(struct context *cnt, unsigned char *map)
 {
-    /* The image format is either YUV 4:2:0 planar, in which case the pixel 
+    /*
+     * The image format is either YUV 4:2:0 planar, in which case the pixel 
      * data is divided in three parts:
      *    Y - width x height bytes
      *    U - width x height / 4 bytes
@@ -349,7 +356,8 @@ int rotate_map(struct context *cnt, unsigned char *map)
     width = cnt->rotate_data.cap_width;
     height = cnt->rotate_data.cap_height;
 
-    /* Pre-calculate some stuff:
+    /*
+     * Pre-calculate some stuff:
      *  wh   - size of the Y plane, or the entire greyscale image
      *  size - size of the entire memory block
      *  wh4  - size of the U plane, and the V plane
@@ -382,7 +390,8 @@ int rotate_map(struct context *cnt, unsigned char *map)
         break;
         
     case 180:
-        /* 180 degrees is easy - just reverse the data within
+        /*
+         * 180 degrees is easy - just reverse the data within
          * Y, U and V.
          */
         reverse_inplace_quad(map, wh);

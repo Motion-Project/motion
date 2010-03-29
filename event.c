@@ -6,7 +6,6 @@
     Copyright Jeroen Vreeken, 2002
     This software is distributed under the GNU Public License Version 2
     see also the file 'COPYING'.
-
 */
 
 #include "ffmpeg.h"    /* must be first to avoid 'shadow' warning */
@@ -16,15 +15,15 @@
 #include "video.h"
 #endif
 
-/*
- *  Various functions (most doing the actual action)
- */
+/* Various functions (most doing the actual action) */
 
-/* Execute 'command' with 'arg' as its argument.
- * if !arg command is started with no arguments
- * Before we call execl we need to close all the file handles
- * that the fork inherited from the parent in order not to pass
- * the open handles on to the shell
+/**
+ * exec_command 
+ *      Execute 'command' with 'arg' as its argument.
+ *      if !arg command is started with no arguments
+ *      Before we call execl we need to close all the file handles
+ *      that the fork inherited from the parent in order not to pass
+ *      the open handles on to the shell
  */
 static void exec_command(struct context *cnt, char *command, char *filename, int filetype)
 {
@@ -56,7 +55,7 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
 }
 
 /* 
- *    Event handlers
+ * Event handlers
  */
 
 static void event_newfile(struct context *cnt ATTRIBUTE_UNUSED,
@@ -78,11 +77,13 @@ static void event_beep(struct context *cnt, int type ATTRIBUTE_UNUSED,
         printf("\a");
 }
 
-/* on_picture_save_command handles both on_picture_save and on_movie_start
- * If arg = FTYPE_IMAGE_ANY on_picture_save script is executed
- * If arg = FTYPE_MPEG_ANY on_movie_start script is executed
- * The scripts are executed with the filename of picture or movie appended
- * to the config parameter.
+/** 
+ * on_picture_save_command 
+ *      handles both on_picture_save and on_movie_start
+ *      If arg = FTYPE_IMAGE_ANY on_picture_save script is executed
+ *      If arg = FTYPE_MPEG_ANY on_movie_start script is executed
+ *      The scripts are executed with the filename of picture or movie appended
+ *      to the config parameter.
  */
 static void on_picture_save_command(struct context *cnt,
             int type ATTRIBUTE_UNUSED, unsigned char *dummy ATTRIBUTE_UNUSED,
@@ -118,7 +119,8 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
     if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0) 
         return;
 
-    /* We place the code in a block so we only spend time making space in memory
+    /* 
+     * We place the code in a block so we only spend time making space in memory
      * for the sqlquery and timestr when we actually need it.
      */
     {
@@ -257,8 +259,10 @@ static void event_image_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (cnt->new_img & NEWIMG_ON) {
         const char *imagepath;
 
-        /* conf.imagepath would normally be defined but if someone deleted it by control interface
-           it is better to revert to the default than fail */
+        /* 
+         *  conf.imagepath would normally be defined but if someone deleted it by control interface
+         *  it is better to revert to the default than fail 
+         */
         if (cnt->conf.imagepath)
             imagepath = cnt->conf.imagepath;
         else
@@ -283,8 +287,10 @@ static void event_imagem_detect(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (conf->motion_img) {
         const char *imagepath;
 
-        /* conf.imagepath would normally be defined but if someone deleted it by control interface
-           it is better to revert to the default than fail */
+        /* 
+         *  conf.imagepath would normally be defined but if someone deleted it by control interface
+         *  it is better to revert to the default than fail 
+         */
         if (cnt->conf.imagepath)
             imagepath = cnt->conf.imagepath;
         else
@@ -310,8 +316,10 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
         char filepath[PATH_MAX];
         char linkpath[PATH_MAX];
         const char *snappath;
-        /* conf.snappath would normally be defined but if someone deleted it by control interface
-           it is better to revert to the default than fail */
+        /* 
+         *  conf.snappath would normally be defined but if someone deleted it by control interface
+         *  it is better to revert to the default than fail 
+         */
         if (cnt->conf.snappath)
             snappath = cnt->conf.snappath;
         else
@@ -322,8 +330,10 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
         snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
         put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
 
-        /* Update symbolic link *after* image has been written so that
-           the link always points to a valid file. */
+        /* 
+         *  Update symbolic link *after* image has been written so that
+         *  the link always points to a valid file. 
+         */
         snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
         remove(linkpath);
 
@@ -382,8 +392,10 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
         const char *moviepath;
         FILE *fd_dummy = NULL;
 
-        /* conf.mpegpath would normally be defined but if someone deleted it by control interface
-           it is better to revert to the default than fail */
+        /* 
+         *  conf.mpegpath would normally be defined but if someone deleted it by control interface
+         *  it is better to revert to the default than fail 
+         */
         if (cnt->conf.moviepath) {
             moviepath = cnt->conf.moviepath;
         } else {
@@ -439,7 +451,7 @@ static void event_extpipe_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
 {
-    /* Check use_extpipe enabled and ext_pipe not NULL*/
+    /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cnt->conf.useextpipe) && (cnt->extpipe != NULL)) {
         if (debug_level >= CAMERA_DEBUG)
             motion_log(LOG_INFO, 0, "%s:", __FUNCTION__);
@@ -495,8 +507,10 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug) 
         return;
     
-    /* conf.mpegpath would normally be defined but if someone deleted it by control interface
-       it is better to revert to the default than fail */
+    /* 
+     *  conf.mpegpath would normally be defined but if someone deleted it by control interface
+     *  it is better to revert to the default than fail 
+     */
     if (cnt->conf.moviepath)
         moviepath = cnt->conf.moviepath;
     else
@@ -504,8 +518,10 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
     mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tm, NULL, 0);
 
-    /* motion movies get the same name as normal movies plus an appended 'm' */
-    /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
+    /* 
+     *  motion movies get the same name as normal movies plus an appended 'm' 
+     *  PATH_MAX - 4 to allow for .mpg to be appended without overflow 
+     */
     snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
     snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
@@ -579,8 +595,10 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         char tmp[PATH_MAX];
         const char *timepath;
 
-        /* conf.timepath would normally be defined but if someone deleted it by control interface
-           it is better to revert to the default than fail */
+        /* 
+         *  conf.timepath would normally be defined but if someone deleted it by control interface
+         *  it is better to revert to the default than fail 
+         */
         if (cnt->conf.timepath)
             timepath = cnt->conf.timepath;
         else
@@ -711,7 +729,7 @@ static void event_ffmpeg_timelapseend(struct context *cnt,
 
 
 /*  
- *    Starting point for all events
+ * Starting point for all events
  */
 
 struct event_handlers {
@@ -842,13 +860,15 @@ struct event_handlers event_handlers[] = {
 };
 
 
-/* The event functions are defined with the following parameters:
- * - Type as defined in event.h (EVENT_...)
- * - The global context struct cnt
- * - image - A pointer to unsigned char as used for images
- * - filename - A pointer to typically a string for a file path
- * - eventdata - A void pointer that can be cast to anything. E.g. FTYPE_...
- * - tm - A tm struct that carries a full time structure
+/**
+ * event 
+ *   defined with the following parameters:
+ *      - Type as defined in event.h (EVENT_...)
+ *      - The global context struct cnt
+ *      - image - A pointer to unsigned char as used for images
+ *      - filename - A pointer to typically a string for a file path
+ *      - eventdata - A void pointer that can be cast to anything. E.g. FTYPE_...
+ *      - tm - A tm struct that carries a full time structure
  * The split between unsigned images and signed filenames was introduced in 3.2.2
  * as a code reading friendly solution to avoid a stream of compiler warnings in gcc 4.0.
  */

@@ -17,7 +17,9 @@
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
-/* locate the center and size of the movement. */
+/* 
+ * alg_locate_center_size locates the center and size of the movement. 
+ */
 void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
 {
     unsigned char *out = imgs->out;
@@ -114,9 +116,11 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     if (centc) {
         cent->minx = cent->x - xdist / centc * 2;
         cent->maxx = cent->x + xdist / centc * 2;
-        /* Make the box a little bigger in y direction to make sure the
-           heads fit in so we multiply by 3 instead of 2 which seems to
-           to work well in practical */
+        /* 
+         * Make the box a little bigger in y direction to make sure the
+         * heads fit in so we multiply by 3 instead of 2 which seems to
+         * to work well in practical 
+         */
         cent->miny = cent->y - ydist / centc * 3;
         cent->maxy = cent->y + ydist / centc * 2;
     }
@@ -150,15 +154,19 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     cent->width = cent->maxx - cent->minx;
     cent->height = cent->maxy - cent->miny;
     
-    /* We want to center Y coordinate to be the center of the action.
-       The head of a person is important so we correct the cent.y coordinate
-       to match the correction to include a persons head that we just did above */
+    /*
+     * We want to center Y coordinate to be the center of the action.
+     * The head of a person is important so we correct the cent.y coordinate
+     * to match the correction to include a persons head that we just did above 
+     */
     cent->y = (cent->miny + cent->maxy) / 2;
     
 }
 
 
-/* draw a box around the movement */
+/* 
+ * alg_draw_location draws a box around the movement 
+ */
 void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
                        int style, int mode, int process_thisframe)
 {
@@ -223,7 +231,9 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 }
 
 
-/* draw a RED box around the movement */
+/* 
+ * alg_draw_red_location draws a RED box around the movement 
+ */
 void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
                            int style, int mode, int process_thisframe)
 {
@@ -410,13 +420,11 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
 }
 
 /*
-Labeling by Joerg Weber. Based on an idea from Hubert Mara.
-Floodfill enhanced by Ian McConnel based on code from
-http://www.acm.org/pubs/tog/GraphicsGems/
-http://www.codeproject.com/gdi/QuickFill.asp
-*/
+ * Labeling by Joerg Weber. Based on an idea from Hubert Mara.
+ * Floodfill enhanced by Ian McConnel based on code from
+ * http://www.acm.org/pubs/tog/GraphicsGems/
+ * http://www.codeproject.com/gdi/QuickFill.asp
 
-/*
  * Filled horizontal segment of scanline y for xl<=x<=xr.
  * Parent segment was on line y-dy.  dy=1 or -1
  */
@@ -560,10 +568,13 @@ static int alg_labeling(struct context *cnt)
     return imgs->labelgroup_max;
 }
 
-/* Dilates a 3x3 box */
+/* 
+ * dilate9 dilates a 3x3 box 
+ */
 static int dilate9(unsigned char *img, int width, int height, void *buffer)
 {
-    /* - row1, row2 and row3 represent lines in the temporary buffer 
+    /* 
+     * - row1, row2 and row3 represent lines in the temporary buffer 
      * - window is a sliding window containing max values of the columns
      *   in the 3x3 matrix
      * - widx is an index into the sliding window (this is faster than 
@@ -607,14 +618,16 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
         blob = MAX2(window[0], window[1]);
         widx = 2;
 
-        /* Iterate over the current row; index i is off by one to eliminate
+        /* 
+         * Iterate over the current row; index i is off by one to eliminate
          * a lot of +1es in the loop.
          */
         for (i = 2; i <= width - 1; i++) {
             /* Get the max value of the next column in the 3x3 matrix. */
             latest = window[widx] = MAX3(row1[i], row2[i], row3[i]);
 
-            /* If the value is larger than the current max, use it. Otherwise,
+            /* 
+             * If the value is larger than the current max, use it. Otherwise,
              * calculate a new max (because the new value may not be the max.
              */
             if (latest >= blob)
@@ -641,10 +654,13 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
     return sum;
 }
 
-/* Dilates a + shape */
+/* 
+ * dilate5 dilates a + shape 
+ */
 static int dilate5(unsigned char *img, int width, int height, void *buffer)
 {
-    /* - row1, row2 and row3 represent lines in the temporary buffer 
+    /* 
+     * - row1, row2 and row3 represent lines in the temporary buffer 
      * - mem holds the max value of the overlapping part of two + shapes
      */
     int y, i, sum = 0;
@@ -708,7 +724,9 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
     return sum;
 }
 
-/* Erodes a 3x3 box */
+/* 
+ *  erode9 erodes a 3x3 box 
+ */
 static int erode9(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
 {
     int y, i, sum = 0;
@@ -749,7 +767,9 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
     return sum;
 }
 
-/* Erodes in a + shape */
+/*
+ * erode5 erodes in a + shape 
+ */
 static int erode5(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
 {
     int y, i, sum = 0;
@@ -787,7 +807,7 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 }
 
 /* 
- * Despeckling routine to remove noisy detections.
+ * alg_despeckle despeckling routine to remove noisy detections.
  */
 int alg_despeckle(struct context *cnt, int olddiffs)
 {
@@ -839,7 +859,9 @@ int alg_despeckle(struct context *cnt, int olddiffs)
     return olddiffs;
 }
 
-/* Generate actual smartmask. Calculate sensitivity based on motion */
+/* 
+ * alg_tune_smartmask generates actual smartmask. Calculate sensitivity based on motion 
+ */
 void alg_tune_smartmask(struct context *cnt)
 {
     int i, diff;
@@ -897,14 +919,16 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 
     i = imgs->motionsize;
     memset(out + i, 128, i / 2); /* motion pictures are now b/w i.o. green */
-    /* Keeping this memset in the MMX case when zeroes are necessarily 
+    /* 
+     * Keeping this memset in the MMX case when zeroes are necessarily 
      * written anyway seems to be beneficial in terms of speed. Perhaps a
      * cache thing?
      */
     memset(out, 0, i);
 
 #ifdef HAVE_MMX
-    /* NOTE: The Pentium has two instruction pipes: U and V. I have grouped MMX
+    /* 
+     * NOTE: The Pentium has two instruction pipes: U and V. I have grouped MMX
      * instructions in pairs according to how I think they will be scheduled in 
      * the U and V pipes. Due to pairing constraints, the V pipe will sometimes
      * be empty (for example, memory access always goes into the U pipe).
@@ -917,14 +941,16 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
      * -- Per Jonsson
      */
 
-    /* To avoid a div, we work with differences multiplied by 255 in the
+    /* 
+     * To avoid a div, we work with differences multiplied by 255 in the
      * default case and *mask otherwise. Thus, the limit to compare with is
      * 255*(noise+1)-1).
      */
     mmtemp.uw[0] = mmtemp.uw[1] = mmtemp.uw[2] = mmtemp.uw[3] =
                    (unsigned short)(noise * 255 + 254);
     
-    /* Reset mm5 to zero, set the mm6 mask, and store the multiplied noise
+    /* 
+     * Reset mm5 to zero, set the mm6 mask, and store the multiplied noise
      * level as four words in mm7.
      */
     movq_m2r(mmtemp, mm7);             /* U */
@@ -933,7 +959,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
     pxor_r2r(mm5, mm5);                /* U */
     psrlw_i2r(8, mm6);                 /* V */
 
-    /* We must unload mm5 every 255th round, because the diffs accumulate
+    /* 
+     * We must unload mm5 every 255th round, because the diffs accumulate
      * in each packed byte, which can hold at most 255 diffs before it
      * gets saturated.
      */
@@ -961,7 +988,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
         punpckhbw_r2r(mm4, mm1);       /* U: mm1 =    d7    d6    d5    d4 */
 
         if (mask) {
-            /* Load and expand 8 mask bytes to words in mm2 and mm3. Then
+            /*
+             * Load and expand 8 mask bytes to words in mm2 and mm3. Then
              * multiply by mm0 and mm1, respectively.
              */
             movq_m2r(*mask, mm2);      /* U: mm2 = m7 m6 m5 m4 m3 m2 m1 m0 */
@@ -976,7 +1004,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 
             mask += 8;
         } else {
-            /* Not using mask - multiply the absolute differences by 255. We
+            /* 
+             * Not using mask - multiply the absolute differences by 255. We
              * do this by left-shifting 8 places and then subtracting dX.
              */
             movq_r2r(mm0, mm2);        /* U: mm2 =    d3    d2    d1    d0 */
@@ -989,7 +1018,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
             psubusw_r2r(mm3, mm1);     /* V */ 
         }
 
-        /* Next, compare the multiplied absolute differences with the multiplied
+        /* 
+         * Next, compare the multiplied absolute differences with the multiplied
          * noise level (repeated as 4 words in mm7), resulting in a "motion flag"
          * for each pixel.
          *
@@ -1016,12 +1046,14 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
         packuswb_r2r(mm1, mm0);        /* U: mm0 = f7 f6 f5 f4 f3 f2 f1 f0 */
 
         if (smartmask_speed) {
-            /* Apply the smartmask. Basically, if *smartmask_final is 0, the
+            /*
+             * Apply the smartmask. Basically, if *smartmask_final is 0, the
              * corresponding "motion flag" in mm0 will be reset.
              */
             movq_m2r(*smartmask_final, mm3); /* U: mm3 = s7 s6 s5 s4 s3 s2 s1 s0 */
 
-            /* ...but move the "motion flags" to memory before, in order to
+            /* 
+             * ...but move the "motion flags" to memory before, in order to
              * increment *smartmask_buffer properly below.
              */
             movq_r2m(mm0, mmtemp);           /* U */
@@ -1050,19 +1082,22 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 
         movq_m2r(*new, mm2);           /* U: mm1 = n7 n6 n5 n4 n3 n2 n1 n0 */
 
-        /* Cancel out pixels in *new according to the "motion flags" in mm0.
+        /*
+         * Cancel out pixels in *new according to the "motion flags" in mm0.
          * Each NX is either 0 or nX as from *new.
          */
         pand_r2r(mm0, mm2);            /* U: mm1 = N7 N6 N5 N4 N3 N2 N1 N0 */
         psubb_r2r(mm0, mm4);           /* V: mm4 = 0x01 where dX>noise */
 
-        /* mm5 holds 8 separate counts - each one is increased according to
+        /*
+         * mm5 holds 8 separate counts - each one is increased according to
          * the contents of mm4 (where each byte is either 0x00 or 0x01). 
          */
         movq_r2m(mm2, *out);           /* U: this will stall */
         paddusb_r2r(mm4, mm5);         /* V: add counts to mm5 */
         
-        /* Every 255th turn, we need to unload mm5 into the diffs variable,
+        /*
+         * Every 255th turn, we need to unload mm5 into the diffs variable,
          * because otherwise the packed bytes will get saturated.
          */
         if (--unload == 0) {
@@ -1080,7 +1115,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
         new += 8;
     }
 
-    /* Check if there are diffs left in mm5 that need to be copied to the
+    /* 
+     * Check if there are diffs left in mm5 that need to be copied to the
      * diffs variable. 
      */
     if (unload < 255) {
@@ -1092,7 +1128,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
     emms();
 
 #endif
-    /* Note that the non-MMX code is present even if the MMX code is present.
+    /*
+     * Note that the non-MMX code is present even if the MMX code is present.
      * This is necessary if the resolution is not a multiple of 8, in which
      * case the non-MMX code needs to take care of the remaining pixels.
      */
@@ -1105,11 +1142,13 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
             
         if (smartmask_speed) {
             if (curdiff > noise) {
-                /* increase smart_mask sensitivity every frame when motion
-                   is detected. (with speed=5, mask is increased by 1 every
-                   second. To be able to increase by 5 every second (with
-                   speed=10) we add 5 here. NOT related to the 5 at ratio-
-                   calculation. */
+                /* 
+                 * Increase smart_mask sensitivity every frame when motion
+                 * is detected. (with speed=5, mask is increased by 1 every
+                 * second. To be able to increase by 5 every second (with
+                 * speed=10) we add 5 here. NOT related to the 5 at ratio-
+                 * calculation. 
+                 */
                 if (cnt->event_nr != cnt->prev_event)
                     (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 /* apply smart_mask */
@@ -1132,8 +1171,8 @@ int alg_diff_standard (struct context *cnt, unsigned char *new)
 }
 
 /*
-    Very fast diff function, does not apply mask overlaying.
-*/
+ * alg_diff_fast very fast diff function, does not apply mask overlaying.
+ */
 static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char *new)
 {
     struct images *imgs = &cnt->imgs;
@@ -1162,9 +1201,10 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
     return 0;
 }
 
-/* alg_diff uses diff_fast to quickly decide if there is anything worth
+/* 
+ * alg_diff uses diff_fast to quickly decide if there is anything worth
  * sending to diff_standard.
-*/
+ */
 int alg_diff(struct context *cnt, unsigned char *new)
 {
     int diffs = 0;
@@ -1175,9 +1215,10 @@ int alg_diff(struct context *cnt, unsigned char *new)
     return diffs;
 }
 
-/* Detect a sudden massive change in the picture.
-   It is assumed to be the light being switched on or a camera displacement.
-   In any way the user doesn't think it is worth capturing.
+/* 
+ *  alg_lightswitch detects a sudden massive change in the picture.
+ *  It is assumed to be the light being switched on or a camera displacement.
+ *  In any way the user doesn't think it is worth capturing.
  */
 int alg_lightswitch(struct context *cnt, int diffs)
 {

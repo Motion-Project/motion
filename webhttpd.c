@@ -18,7 +18,8 @@
 
 pthread_mutex_t httpd_mutex;
 
-int warningkill; // This is a dummy variable use to kill warnings when not checking sscanf and similar functions
+// This is a dummy variable use to kill warnings when not checking sscanf and similar functions
+int warningkill;
 
 static const char *ini_template =
     "<html><head><title>Motion "VERSION"</title></head>\n"
@@ -57,7 +58,6 @@ static const char *ok_response_raw =
     "Cache-Control: private\r\n"
     "Pragma: no-cache\r\n"
     "Content-type: text/plain\r\n\r\n";
-
 
 static const char *bad_request_response =
     "HTTP/1.0 400 Bad Request\r\n"
@@ -188,7 +188,9 @@ static const char *request_auth_response_template=
     "HTTP/1.0 401 Authorization Required\r\n"
     "WWW-Authenticate: Basic realm=\"Motion Security Access\"\r\n";
 
-
+/**
+ * write_nonblock
+ */
 static ssize_t write_nonblock(int fd, const void *buf, size_t size)
 {
     ssize_t nwrite = -1;
@@ -212,7 +214,9 @@ static ssize_t write_nonblock(int fd, const void *buf, size_t size)
     return nwrite;
 }
 
-
+/**
+ * read_nonblock
+ */
 static ssize_t read_nonblock(int fd ,void *buf, ssize_t size)
 {
     ssize_t nread = -1;
@@ -236,7 +240,9 @@ static ssize_t read_nonblock(int fd ,void *buf, ssize_t size)
     return nread;
 }
 
-
+/**
+ * send_template_ini_client
+ */
 static void send_template_ini_client(int client_socket, const char *template)
 {
     ssize_t nwrite = 0;
@@ -246,6 +252,9 @@ static void send_template_ini_client(int client_socket, const char *template)
         motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
 }
 
+/**
+ * send_template_ini_client_raw
+ */
 static void send_template_ini_client_raw(int client_socket)
 {
     ssize_t nwrite = 0;
@@ -254,6 +263,9 @@ static void send_template_ini_client_raw(int client_socket)
         motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
 }
 
+/**
+ * send_template
+ */
 static void send_template(int client_socket, char *res)
 {
     ssize_t nwrite = 0;
@@ -262,18 +274,27 @@ static void send_template(int client_socket, char *res)
         motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
 }
 
+/**
+ * send_template_raw
+ */
 static void send_template_raw(int client_socket, char *res)
 {
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, res, strlen(res));
 }
 
+/**
+ * send_template_end_client
+ */
 static void send_template_end_client(int client_socket)
 {
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, end_template, strlen(end_template));
 }
 
+/**
+ * response_client
+ */
 static void response_client(int client_socket, const char *template, char *back)
 {
     ssize_t nwrite = 0;
@@ -284,7 +305,9 @@ static void response_client(int client_socket, const char *template, char *back)
     }
 }
 
-
+/**
+ * replace
+ */
 static char *replace(const char *str, const char *old, const char *new)
 {
     char *ret, *r;
@@ -315,9 +338,12 @@ static char *replace(const char *str, const char *old, const char *new)
     return ret;
 } 
 
-/*
-   This function decode the values from GET request following the http RFC.
-*/
+/**
+ * url_decode 
+ *      This function decode the values from GET request following the http RFC.
+ *
+ * Returns nothing.
+ */
 static void url_decode(char *urlencoded, size_t length)
 {
     char *data = urlencoded;
@@ -358,12 +384,12 @@ static void url_decode(char *urlencoded, size_t length)
 }
 
 
-/*
-    This function manages/parses the config action for motion ( set , get , write , list ).
-
-    return 1 to exit from function.
-*/
-
+/**
+ * config 
+ *      Manages/parses the config action for motion ( set , get , write , list ).
+ *
+ *   Returns 1 to exit from function.
+ */
 static unsigned int config(char *pointer, char *res, unsigned int length_uri, 
                                  unsigned int thread, int client_socket, void *userdata)
 {
@@ -382,7 +408,8 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
             /*call list*/
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n<ul>", thread, thread);
+                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n<ul>", 
+                        thread, thread);
                 send_template(client_socket, res);
 
                 for (i=0; config_params[i].param_name != NULL; i++) {
@@ -734,14 +761,15 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                             break;
                         i++;
                     }
-                    /* FIXME bool values or commented values maybe that should be
-                    solved with config_type */
-
+                    /* 
+                     * FIXME bool values or commented values maybe that should be
+                     * solved with config_type
+                     */
                     if (config_params[i].param_name) {
                         const char *type = NULL;
                         type = config_type(&config_params[i]);
                         if (!strcmp(type, "unknown")) {
-                            /*error doesn't exists this param_name */
+                            /* error doesn't exists this param_name */
                             if (cnt[0]->conf.webcontrol_html_output)
                                 response_client(client_socket, not_found_response_valid_command, NULL);
                             else
@@ -782,14 +810,14 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                             }
                         }
                     } else {
-                        /*error*/
+                        /* error */
                         if (cnt[0]->conf.webcontrol_html_output)
                             response_client(client_socket, not_found_response_valid_command, NULL);
                         else
                             response_client(client_socket, not_found_response_valid_command_raw, NULL);
                     }
                 } else {
-                    /*error*/
+                    /* error */
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_found_response_valid_command, NULL);
                     else
@@ -821,7 +849,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_valid_syntax, NULL);
             else
@@ -844,7 +872,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                     send_template_raw(client_socket, res);
                 }
             } else {
-                /*error*/
+                /* error */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_found_response_valid_command, NULL);
                 else
@@ -868,7 +896,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output) {
                 response_client(client_socket, not_found_response_valid_command, NULL);
             }
@@ -876,7 +904,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                 response_client(client_socket, not_found_response_valid_command_raw, NULL);
         }
     } else {
-        /*error*/
+        /* error */
         if (cnt[0]->conf.webcontrol_html_output)
             response_client(client_socket, not_found_response_valid_command, NULL);
         else
@@ -887,13 +915,14 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
 }
 
 
-/*
-    This function manages/parses the actions for motion ( makemovie , snapshot , restart , quit ).
-
-    return 0 for restart & quit
-    return 1 for makemovie & snaphost
-*/
-
+/**
+ * action
+ *      manages/parses the actions for motion ( makemovie , snapshot , restart , quit ).
+ *
+ * Returns 
+ *      0 for restart & quit
+ *      1 for makemovie & snaphost
+ */
 static unsigned int action(char *pointer, char *res, unsigned int length_uri, 
                                  unsigned int thread, int client_socket, void *userdata)
 {
@@ -907,7 +936,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 9;
         length_uri = length_uri - 9;
         if (length_uri == 0) {
-            /*call makemovie*/
+            /* call makemovie */
 
             if (thread == 0) {
                 while (cnt[++i])
@@ -928,7 +957,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
             else
@@ -938,7 +967,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 8;
         length_uri = length_uri - 8;
         if (length_uri == 0) {
-            /*call snapshot*/
+            /* call snapshot */
 
             if (thread == 0) {
                 while (cnt[++i])
@@ -960,7 +989,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
             else
@@ -970,7 +999,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 7;
         length_uri = length_uri - 7;
         if (length_uri == 0) {
-            /*call restart*/
+            /* call restart */
 
             if (thread == 0) {
                 motion_log(LOG_DEBUG, 0, "%s: httpd restart", __FUNCTION__);
@@ -1015,7 +1044,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 4;
         length_uri = length_uri - 4;
         if (length_uri == 0) {
-            /*call quit*/
+            /* call quit */
 
             if (thread == 0) {
                 motion_log(LOG_DEBUG, 0, "%s: httpd quit", __FUNCTION__);
@@ -1050,7 +1079,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
             else
@@ -1066,11 +1095,13 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
     return 1;
 }
 
-/*
-   This function manages/parses the detection actions for motion ( status , start , pause ).
-
-   return 1 to exit from function.
-*/
+/**
+ * detection 
+ *      manages/parses the detection actions for motion ( status , start , pause ).
+ *
+ * Returns
+ *      1 to exit from function.
+ */
 
 static unsigned int detection(char *pointer, char *res, unsigned int length_uri, 
                                     unsigned int thread, int client_socket, void *userdata)
@@ -1084,7 +1115,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 6;
         length_uri = length_uri - 6;
         if (length_uri == 0) {
-            /*call status*/
+            /* call status */
             
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
@@ -1100,7 +1131,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
             else
@@ -1110,7 +1141,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 5;
         length_uri = length_uri - 5;
         if (length_uri == 0) {
-            /*call start*/
+            /* call start */
 
             if (thread == 0) {
                 do {
@@ -1132,7 +1163,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
             else
@@ -1142,7 +1173,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer + 5;
         length_uri = length_uri - 5;
         if (length_uri == 0) {
-            /*call pause*/
+            /* call pause */
 
             if (thread == 0) {
                 do {
@@ -1164,7 +1195,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 send_template_raw(client_socket, res);
             }
         } else {
-            /*error*/
+            /* error */
             if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
             else
@@ -1175,7 +1206,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
         length_uri = length_uri - 10;
 
         if (length_uri == 0) {
-            /*call connection*/    
+            /* call connection */    
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
                 sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n", thread);
@@ -1212,7 +1243,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 
             }    
         } else {
-            /*error*/
+            /* error */
              if (cnt[0]->conf.webcontrol_html_output)
                  response_client(client_socket, not_found_response_valid_command, NULL);
              else
@@ -1229,12 +1260,13 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
 }
 
 
-/*
-   This function manages/parses the track action for motion ( set , pan , tilt , auto ).
-
-   return 1 to exit from function.
-*/
-
+/**
+ * track 
+ *      manages/parses the track action for motion ( set , pan , tilt , auto ).
+ *
+ * Returns
+ *      1 to exit from function.
+ */
 static unsigned int track(char *pointer, char *res, unsigned int length_uri, 
                                 unsigned int thread, int client_socket, void *userdata)
 {
@@ -1246,9 +1278,11 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
     if (!strcmp(command, "set")) {
         pointer = pointer+3;
         length_uri = length_uri-3;
-        /* FIXME need to check each value */
-        /* Relative movement set?pan=0&tilt=0 | set?pan=0 | set?tilt=0*/
-        /* Absolute movement set?x=0&y=0 | set?x=0 | set?y=0 */
+        /*
+         * FIXME need to check each value 
+         * Relative movement set?pan=0&tilt=0 | set?pan=0 | set?tilt=0
+         * Absolute movement set?x=0&y=0 | set?x=0 | set?y=0 
+         */
 
         if ((question == '?') && (length_uri > 2)) {
             char panvalue[12] = {'\0'}, tiltvalue[12] = {'\0'};
@@ -1258,9 +1292,11 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             pointer++;
             length_uri--;
-            /* set?pan=value&tilt=value */
-            /* set?x=value&y=value */
-            /* pan= or x= | tilt= or y= */
+            /* 
+             * set?pan=value&tilt=value 
+             * set?x=value&y=value 
+             * pan= or x= | tilt= or y= 
+             */
 
             warningkill = sscanf(pointer, "%255[a-z]%c" , command, &question);
 
@@ -1366,7 +1402,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             send_template_raw(client_socket, res);
                         }
                     } else {
-                    /*error in track action*/
+                    /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b>\n", thread, thread);
@@ -1403,7 +1439,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             send_template_raw(client_socket, res);
                         }
                     } else {
-                        /*error in track action*/
+                        /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b>\n", thread, thread);
@@ -1432,7 +1468,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             send_template_raw(client_socket, res);
                         }
                     } else {
-                        /*error in track action*/
+                        /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b>\n", thread, thread);
@@ -1462,7 +1498,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             send_template_raw(client_socket, res);
                         }
                     } else {
-                        /*error in track action*/
+                        /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b>\n", thread, thread);
@@ -1474,7 +1510,6 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 1;
             }
-
 
             /* Check Second parameter */
 
@@ -1615,7 +1650,6 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 return 1;
             }
 
-
             /* track set absolute ( x , y )*/
 
             if (X && Y) {
@@ -1636,7 +1670,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                         send_template_raw(client_socket, res);
                     }
                 } else {
-                    /*error in track action*/
+                    /* error in track action */
                     if (cnt[0]->conf.webcontrol_html_output) {
                         sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                      "<b>Thread %hu</b>\n", thread, thread);
@@ -1686,7 +1720,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                         return 1;
 
                     } else {
-                        /*error in track tilt*/    
+                        /* error in track tilt */    
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b>\n", thread, thread);
@@ -1697,7 +1731,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     }
                 }
 
-                /*error in track pan*/
+                /* error in track pan */
                 if (cnt[0]->conf.webcontrol_html_output) {
                     sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br><b>Thread %hu</b>\n", 
                                  thread, thread);
@@ -1802,7 +1836,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 if ((command != NULL) && (strlen(command) > 0)) {
                     struct context *autocnt;
 
-                    /* auto value=0|1|status*/
+                    /* auto value=0|1|status */
 
                     if (!strcmp(command, "status")) {
                         if (cnt[0]->conf.webcontrol_html_output) {
@@ -1894,14 +1928,15 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
 
 
-/*
-    parses the action requested for motion ( config , action , detection , track ) and call
-    to action function if needed.
-
-    return 0 on action restart or quit 
-    return 1 on success    
-*/
-
+/**
+ * handle_get
+ *      parses the action requested for motion ( config , action , detection , track )
+ *      and call to action function if needed.
+ *   
+ * Returns
+ *      0 on action restart or quit 
+ *      1 on success    
+ */
 static unsigned int handle_get(int client_socket, const char *url, void *userdata)
 {
     struct context **cnt = userdata;
@@ -1935,7 +1970,6 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                     send_template_raw(client_socket, res);
                 }
             }
-
         } else {
             char command[256] = {'\0'};
             char slash;
@@ -1989,7 +2023,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                                 send_template_raw(client_socket, res);
                             }
                         } else if ((slash == '/') && (length_uri >= 4)) {
-                            /*call config() */
+                            /* call config() */
                             pointer++;
                             length_uri--;
                             config(pointer, res, length_uri, thread, client_socket, cnt);
@@ -2157,14 +2191,15 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
 }
 
 
-/*
- -TODO-
- As usually web clients uses nonblocking connect/read
- read_client should handle nonblocking sockets.
- return 0 to quit or restart
- return 1 on success
-*/
-
+/**
+ * read_client
+ *      As usually web clients uses nonblocking connect/read
+ *      read_client should handle nonblocking sockets.
+ *
+ * Returns
+ *      0 to quit or restart
+ *      1 on success
+ */
 static unsigned int read_client(int client_socket, void *userdata, char *auth)
 {
     unsigned int alive = 1;
@@ -2224,8 +2259,10 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                 buffer[nread] = '\0';
             }
 
-            /* Make sure the last read didn't fail.  If it did, there's a
-            problem with the connection, so give up.  */
+            /* 
+             * Make sure the last read didn't fail.  If it did, there's a
+             * problem with the connection, so give up.  
+             */
             if (nread == -1) {
                 motion_log(LOG_ERR, 1, "%s: motion-httpd READ give up!", __FUNCTION__);
                 pthread_mutex_unlock(&httpd_mutex);
@@ -2248,8 +2285,10 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
             }
 
             if (strcmp (method, "GET")) {
-                /* This server only implements the GET method.  If client
-                uses other method, report the failure.  */
+                /* 
+                 * This server only implements the GET method.  If client
+                 * uses other method, report the failure.  
+                 */
                 char response[1024];
                 if (cnt[0]->conf.webcontrol_html_output)
                     snprintf(response, sizeof (response), bad_method_response_template, method);
@@ -2305,15 +2344,14 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
 }
 
 
-/*
-   acceptnonblocking
-   
-   This function waits timeout seconds for listen socket.
-   Returns :
-       -1 if the timeout expires or on accept error.
-    curfd (client socket) on accept success.
-*/
-
+/**
+ * acceptnonblocking
+ *      waits timeout seconds for listen socket.
+ *
+ * Returns 
+ *      -1 if the timeout expires or on accept error.
+ *      curfd (client socket) on accept success.
+ */
 static int acceptnonblocking(int serverfd, int timeout)
 {
     int curfd;
@@ -2339,10 +2377,10 @@ static int acceptnonblocking(int serverfd, int timeout)
 } 
 
 
-/*
-   Main function: Create the listening socket and waits client requests.
-*/
-
+/**
+ * httpd_run
+ *      Creates the listening socket and waits client requests.
+ */
 void httpd_run(struct context **cnt)
 {
     int sd = -1, client_socket_fd, val;
@@ -2483,6 +2521,10 @@ void httpd_run(struct context **cnt)
     pthread_mutex_destroy(&httpd_mutex);
 }
 
+/**
+ * motion_web_control
+ *      Calls main function httpd_run
+ */
 void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;

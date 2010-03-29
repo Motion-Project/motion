@@ -47,9 +47,7 @@ static void     netcam_error_exit(j_common_ptr);
 
 static void netcam_init_source(j_decompress_ptr cinfo)
 {
-    /*
-     * Get our "private" structure from the libjpeg structure
-     */
+    /* Get our "private" structure from the libjpeg structure */
     netcam_src_ptr  src = (netcam_src_ptr) cinfo->src;
     /*
      * Set the 'start_of_file' flag in our private structure
@@ -315,8 +313,10 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
     netcam->jpeg_error = 0;
     
     buff = netcam->jpegbuf;
-    /* prepare for the decompression */
-    /* Initialize the JPEG decompression object */
+    /*
+     * Prepare for the decompression 
+     * Initialize the JPEG decompression object 
+     */
     jpeg_create_decompress(cinfo);
 
     /* Set up own error exit routine */
@@ -343,13 +343,23 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
     return netcam->jpeg_error;
 }
 
+/**
+ * netcam_image_conv
+ *
+ * Parameters:
+ *      netcam          pointer to netcam_context
+ *      cinfo           pointer to JPEG decompression context
+ *      image           pointer to buffer of destination image (yuv420)
+ *
+ * Returns :  netcam->jpeg_error
+ */
 static int netcam_image_conv(netcam_context_ptr netcam,
                                struct jpeg_decompress_struct *cinfo,
                                unsigned char *image)
 {
     JSAMPARRAY      line;           /* array of decomp data lines */
     unsigned char  *wline;          /* will point to line[0] */
-/* Working variables */
+    /* Working variables */
     int             linesize, i;
     unsigned char  *upic, *vpic;
     unsigned char  *pic = image;
@@ -363,7 +373,7 @@ static int netcam_image_conv(netcam_context_ptr netcam,
         motion_log(LOG_ERR, 0, 
                    "%s: JPEG image size %dx%d, JPEG was %dx%d",
                    __FUNCTION__, netcam->width, netcam->height, width, height);
-        jpeg_destroy_decompress (cinfo);
+        jpeg_destroy_decompress(cinfo);
         netcam->jpeg_error |= 4;
         return netcam->jpeg_error;
     }
@@ -383,7 +393,7 @@ static int netcam_image_conv(netcam_context_ptr netcam,
     y = 0;
 
     while (cinfo->output_scanline < height) {
-        jpeg_read_scanlines (cinfo, line, 1);
+        jpeg_read_scanlines(cinfo, line, 1);
 
         for (i = 0; i < linesize; i += 3) {
             pic[i / 3] = wline[i];
@@ -401,8 +411,8 @@ static int netcam_image_conv(netcam_context_ptr netcam,
         }
     }
 
-    jpeg_finish_decompress (cinfo);
-    jpeg_destroy_decompress (cinfo);
+    jpeg_finish_decompress(cinfo);
+    jpeg_destroy_decompress(cinfo);
 
     if (netcam->cnt->rotate_data.degrees > 0) 
         /* rotate as specified */
@@ -423,7 +433,7 @@ static int netcam_image_conv(netcam_context_ptr netcam,
  *
  * Parameters:
  *    netcam    pointer to the netcam_context structure
- *      image     Pointer to a buffer for the returned image
+ *     image    pointer to a buffer for the returned image
  *
  * Returns: 
  *
@@ -456,7 +466,8 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
         return ret;
     }    
 
-    /* Do a sanity check on dimensions
+    /* 
+     * Do a sanity check on dimensions
      * If dimensions have changed we throw an
      * error message that will cause
      * restart of Motion

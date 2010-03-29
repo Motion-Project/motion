@@ -16,7 +16,7 @@
 #define _INCLUDE_CONF_H
 
 /* 
-    more parameters may be added later.
+ * More parameters may be added later.
  */
 struct config {
     char *log_file;
@@ -148,7 +148,6 @@ typedef struct {
     conf_copy_func  copy;             /* a function to set the value in 'config'  */
     conf_print_func print;            /* a function to output the value to a file */
 } config_param; 
-
 
 extern config_param config_params[];
 

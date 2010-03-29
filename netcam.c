@@ -439,9 +439,7 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
     int retval;
     char *header;
 
-    /*
-     * return if not connected
-     */
+    /* Return if not connected */
     if (netcam->sock == -1) 
         return -1;
     /*
@@ -592,7 +590,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
      * there may be a Content-length.
      *
      */
-    while (1) {                                 /* 'Do forever' */
+    while (1) {     /* 'Do forever' */
         ret = header_get(netcam, &header, HG_NONE);
 
         if (debug_level > CAMERA_INFO)    /* Changed criterion and moved up from below to catch headers that cause returns */
@@ -612,10 +610,12 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
                 free(header);
                 if (netcam->connect_keepalive) {
-                    /* Cannot unset netcam->cnt->conf.netcam_keepalive as it is assigned const */
-                    /* But we do unset the netcam keepalive flag which was set in netcam_start */
-                    /* This message is logged as Information as it would be useful to know */
-                    /* if your netcam often returns bad HTTP result codes */
+                    /* 
+                     * Cannot unset netcam->cnt->conf.netcam_keepalive as it is assigned const 
+                     * But we do unset the netcam keepalive flag which was set in netcam_start 
+                     * This message is logged as Information as it would be useful to know
+                     * if your netcam often returns bad HTTP result codes 
+                     */
                     netcam->connect_keepalive = FALSE;
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off"); 
@@ -662,10 +662,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                 netcam->caps.streaming = NCS_MULTIPART;
 
                 if ((boundary = strstr(header, "boundary="))) {
-                    /*
-                     * on error recovery this
-                     * may already be set
-                     * */
+                    /* On error recovery this may already be set */
                     if (netcam->boundary)
                         free(netcam->boundary);
 
@@ -714,13 +711,17 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
             /* Note that we have received a Keep-Alive header, and thus the socket can be left open */
             aliveflag = TRUE;
             netcam->keepalive_thisconn = TRUE;
-            /* This flag will not be set when a Streaming cam is in use, but that */
-            /* does not matter as the test below looks at Streaming state also.   */
+            /* 
+             * This flag will not be set when a Streaming cam is in use, but that 
+             * does not matter as the test below looks at Streaming state also.   
+             */
         } else if (netcam_check_close(header) == TRUE) {
             /* Note that we have received a Connection: close header */
             closeflag = TRUE;
-            /* This flag is acted upon below */
-            /* Changed criterion and moved up from below to catch headers that cause returns */
+            /* 
+             * This flag is acted upon below 
+             * Changed criterion and moved up from below to catch headers that cause returns 
+             */
             if (debug_level > CAMERA_INFO)
                 motion_log(LOG_DEBUG, 0, "%s: Found Conn: close header ('%s')", __FUNCTION__, header);
         }
@@ -730,9 +731,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
     if (netcam->caps.streaming == NCS_UNSUPPORTED && netcam->connect_keepalive) {
         
-        /*
-         * If we are a non-streaming (ie. Jpeg) netcam and keepalive is configured 
-         */
+        /* If we are a non-streaming (ie. Jpeg) netcam and keepalive is configured */
 
         if (aliveflag) {
             if (closeflag) {
@@ -755,7 +754,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                            "'Connection: close' header received. Motion continues unchanged.",
                            __FUNCTION__);
             } else {
-                    /* aliveflag && !closeflag 
+                    /* 
+                     * aliveflag && !closeflag 
                      *
                      * If not a streaming cam, and keepalive is set, and the flag shows we 
                      * just got a Keep-Alive field returned from netcam and no Close field.
@@ -786,7 +786,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                 motion_log(LOG_INFO, 0, "%s: Info: No 'Connection: Keep-Alive' nor 'Connection: close' "
                            "header received.\n Motion continues unchanged.", __FUNCTION__);
             } else {  
-                /* !aliveflag & closeflag 
+                /* 
+                 * !aliveflag & closeflag 
                  * If not a streaming cam, and keepalive is set, and the flag shows we 
                  * received a 'Connection: close' field returned from netcam. It is not likely
                  * we will get a Keep-Alive and Close header together - this is picked up by
@@ -1232,11 +1233,10 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                     rlen -= ix;
 
                     if (rlen <= 0)
-                        /* boundary not in buffer - go copy out
-                         */
+                        /* boundary not in buffer - go copy out */
                         break;
                     /*
-                     * not yet decided - continue
+                     * Not yet decided - continue
                      * through input
                      */
                     continue;
@@ -1301,7 +1301,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 
                     memmove(netcam->response->buffer, ptr,
                             netcam->response->buffer_left);
-                }       /* end of boundary split over buffer */
+                }   /* end of boundary split over buffer */
 
                 retval = netcam_recv(netcam, netcam->response->buffer +
                                      netcam->response->buffer_left,
@@ -1328,7 +1328,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
             /* !bptr shows we're processing split boundary */
             if (!bptr)
                 continue;
-        }             /* end of if (bptr) */
+        }   /* end of if (bptr) */
 
         /* boundary string not present, so just write out as much data as possible */
         if (remaining) {
@@ -1341,7 +1341,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
     }
 
     /*
-     * read is complete - set the current 'receiving' buffer atomically
+     * Read is complete - set the current 'receiving' buffer atomically
      * as 'latest', and make the buffer previously in 'latest' become
      * the new 'receiving'
      */

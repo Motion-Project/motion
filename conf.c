@@ -1816,7 +1816,8 @@ struct context **conf_load(struct context **cnt)
     }
     
 
-    /* For each thread (given by cnt[i]) being not null
+    /* 
+     * For each thread (given by cnt[i]) being not null
      * cnt is an array of pointers to a context type structure
      * cnt[0] is the default context structure
      * cnt[1], cnt[2], ... are context structures for each thread
@@ -1839,13 +1840,15 @@ struct context **conf_load(struct context **cnt)
     return cnt;
 }
 
-/* malloc_strings goes through the members of a context structure.
- * For each context structure member which is a pointer to a string it does this:
- * If the member points to a string and is not NULL
- * 1. Reserve (malloc) memory for the string
- * 2. Copy the original string to the reserved memory
- * 3. Change the cnt member (char*) pointing to the string in reserved memory
- * This ensures that we can free and malloc the string if it is later changed
+/** 
+ * malloc_strings 
+ *      goes through the members of a context structure.
+ *      For each context structure member which is a pointer to a string it does this:
+ *      If the member points to a string and is not NULL
+ *      1. Reserve (malloc) memory for the string
+ *      2. Copy the original string to the reserved memory
+ *      3. Change the cnt member (char*) pointing to the string in reserved memory
+ *      This ensures that we can free and malloc the string if it is later changed
  */
 void malloc_strings(struct context *cnt)
 {
@@ -1856,7 +1859,8 @@ void malloc_strings(struct context *cnt)
             /* val is made to point to a pointer to the current string */
             val = (char **)((char *)cnt+config_params[i].conf_value);
 
-            /* if there is a string, malloc() space for it, copy
+            /* 
+             * If there is a string, malloc() space for it, copy
              * the string to new space, and point to the new
              * string. we don't free() because we're copying a
              * static string.
@@ -1890,10 +1894,12 @@ void malloc_strings(struct context *cnt)
  * the function will only assign the value for the given thread.
  ***********************************************************************/
 
-/* copy_bool assigns a config option to a new boolean value.
- * The boolean is given as a string in str which is converted to 0 or 1 
- * by the function. Values 1, yes and on are converted to 1 ignoring case.
- * Any other value is converted to 0.
+/**
+ * copy_bool 
+ *      Assigns a config option to a new boolean value.
+ *      The boolean is given as a string in str which is converted to 0 or 1 
+ *      by the function. Values 1, yes and on are converted to 1 ignoring case.
+ *      Any other value is converted to 0.
  */
 static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr)
 {
@@ -1917,8 +1923,11 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
     return cnt;
 }
 
-/* copy_int assigns a config option to a new integer value.
- * The integer is given as a string in str which is converted to integer by the function.
+/** 
+ * copy_int 
+ *      Assigns a config option to a new integer value.
+ *      The integer is given as a string in str which is converted to integer
+ *      by the function.
  */
 static struct context **copy_int(struct context **cnt, const char *str, int val_ptr)
 {
@@ -1937,12 +1946,14 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
     return cnt;
 }
 
-/* copy_string assigns a new string value to a config option.
- * Strings are handled differently from bool and int.
- * the char *conf->option that we are working on is free()'d
- * (if memory for it has already been malloc()'d), and set to
- * a freshly malloc()'d string with the value from str,
- * or NULL if str is blank
+/**
+ * copy_string 
+ *      Assigns a new string value to a config option.
+ *      Strings are handled differently from bool and int.
+ *      the char *conf->option that we are working on is free()'d
+ *      (if memory for it has already been malloc()'d), and set to
+ *      a freshly malloc()'d string with the value from str,
+ *      or NULL if str is blank
  */
 struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 {
@@ -1954,12 +1965,14 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
     while (cnt[++i]) {
         tmp = (char **)((char *)cnt[i] + val_ptr);
 
-        /* mystrcpy assigns the new string value
+        /* 
+         * mystrcpy assigns the new string value
          * including free'ing and reserving new memory for it.
          */
         *tmp = mystrcpy(*tmp, str);
 
-        /* set the option on all threads if setting the option
+        /*
+         * Set the option on all threads if setting the option
          * for thread 0; otherwise just set that one thread's option
          */
         if (cnt[0]->threadnr)
@@ -1970,17 +1983,20 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 }
 
 
-/* mystrcpy is used to assign string type fields (e.g. config options)
- * In a way so that we the memory is malloc'ed to fit the string.
- * If a field is already pointing to a string (not NULL) the memory of the
- * old string is free'd and new memory is malloc'ed and filled with the
- * new string is copied into the the memory and with the char pointer
- * pointing to the new string.
+/** 
+ * mystrcpy
+ *      Is used to assign string type fields (e.g. config options)
+ *      In a way so that we the memory is malloc'ed to fit the string.
+ *      If a field is already pointing to a string (not NULL) the memory of the
+ *      old string is free'd and new memory is malloc'ed and filled with the
+ *      new string is copied into the the memory and with the char pointer
+ *      pointing to the new string.
  *
- * from - pointer to the new string we want to copy
- * to   - the pointer to the current string (or pointing to NULL)
- *        If not NULL the memory it points to is free'd.
- * function returns pointer to the new string which is in malloc'ed memory
+ *      from - pointer to the new string we want to copy
+ *      to   - the pointer to the current string (or pointing to NULL)
+ *              If not NULL the memory it points to is free'd.
+ *
+ * Returns pointer to the new string which is in malloc'ed memory
  * FIXME The strings that are malloc'ed with this function should be freed
  * when the motion program is terminated normally instead of relying on the
  * OS to clean up.
@@ -1999,12 +2015,15 @@ char *mystrcpy(char *to, const char *from)
 }
 
 
-/* mystrdup return a pointer to a freshly malloc()'d string with the same
- * value as the string that the input parameter 'from' points to,
- * or NULL if the from string is 0 characters.
- * The function truncates the string to the length given by the environment
- * variable PATH_MAX to ensure that config options can always contain
- * a really long path but no more than that.
+/**
+ * mystrdup
+ *      Truncates the string to the length given by the environment
+ *      variable PATH_MAX to ensure that config options can always contain
+ *      a really long path but no more than that.
+ *
+ * Returns a pointer to a freshly malloc()'d string with the same
+ *      value as the string that the input parameter 'from' points to,
+ *      or NULL if the from string is 0 characters.
  */
 char *mystrdup(const char *from)
 {
@@ -2019,7 +2038,8 @@ char *mystrdup(const char *from)
         tmp = (char *)mymalloc(stringlength + 1);
         strncpy(tmp, from, stringlength);
 
-        /* We must ensure the string always has a NULL terminator.
+        /* 
+         * We must ensure the string always has a NULL terminator.
          * This necessary because strncpy will not append a NULL terminator
          * if the original string is greater than stringlength.
          */
@@ -2058,11 +2078,15 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
         return "off";
 }
 
-/* print_string returns a pointer to a string containing the value of the config option
- * If the option is not defined NULL is returned.
- * If the thread number is not 0 the string is compared with the value of the same
- * option in thread 0. If the value is the same, NULL is returned which means that
- * the option is not written to the thread config file.
+/**
+ * print_string 
+ *      returns a pointer to a string containing the value of the config option,
+ *      If the thread number is not 0 the string is compared with the value of the same
+ *      option in thread 0.
+ *
+ * Returns If the option is not defined NULL is returned.
+ *         If the value is the same, NULL is returned which means that
+ *         the option is not written to the thread config file. 
  */
 static const char *print_string(struct context **cnt,
                                 char **str ATTRIBUTE_UNUSED, int parm,
@@ -2119,15 +2143,17 @@ static const char *print_thread(struct context **cnt, char **str,
     return NULL;
 }
 
-/* config_thread() is called during initial config file loading each time Motion
- * finds a thread option in motion.conf
- * The size of the context array is increased and the main context's values are
- * copied to the new thread.
+/**
+ * config_thread
+ *      Is called during initial config file loading each time Motion
+ *      finds a thread option in motion.conf
+ *      The size of the context array is increased and the main context's values are
+ *      copied to the new thread.
  *
- * cnt  - pointer to the array of pointers pointing to the context structures
- * str  - pointer to a string which is the filename of the thread config file
- * val  - is not used. It is defined to be function header compatible with
- *        copy_int, copy_bool and copy_string.
+ *      cnt  - pointer to the array of pointers pointing to the context structures
+ *      str  - pointer to a string which is the filename of the thread config file
+ *      val  - is not used. It is defined to be function header compatible with
+ *            copy_int, copy_bool and copy_string.
  */
 static struct context **config_thread(struct context **cnt, const char *str,
                                       int val ATTRIBUTE_UNUSED)
@@ -2151,7 +2177,8 @@ static struct context **config_thread(struct context **cnt, const char *str,
 
     while (cnt[++i]);
 
-    /* Make space for the threads + the terminating NULL pointer
+    /* 
+     * Make space for the threads + the terminating NULL pointer
      * in the array of pointers to context structures
      * First thread is 0 so the number of threads is i+1
      * plus an extra for the NULL pointer. This gives i+2
@@ -2164,7 +2191,8 @@ static struct context **config_thread(struct context **cnt, const char *str,
     /* And make this an exact clone of the context structure for thread 0 */
     memcpy(cnt[i], cnt[0], sizeof(struct context));
 
-    /* All the integers are copies of the actual value.
+    /*
+     * All the integers are copies of the actual value.
      * The strings are all pointers to strings so we need to create
      * unique malloc'ed space for all the strings that are not NULL and
      * change the string pointers to point to the new strings.

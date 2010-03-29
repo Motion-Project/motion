@@ -87,7 +87,8 @@ void ftp_free_context(ftp_context_pointer ctxt)
 *     +XXX for last line of response
 *     -XXX for response to be continued
 */
-static int ftp_parse_response(char *buf, int len) {
+static int ftp_parse_response(char *buf, int len) 
+{
     int val = 0;
 
     if (len < 3)
@@ -131,7 +132,8 @@ static int ftp_parse_response(char *buf, int len) {
 *
 * Returns the number of bytes read, < 0 indicates an error
 */
-static int ftp_get_more(ftp_context_pointer ctxt) {
+static int ftp_get_more(ftp_context_pointer ctxt) 
+{
     int len;
     int size;
 
@@ -148,9 +150,7 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
     if (ctxt->control_buffer_index > ctxt->control_buffer_used)
         return -1;
 
-    /*
-    * First pack the control buffer
-    */
+    /* First pack the control buffer */
     if (ctxt->control_buffer_index > 0) {
         memmove(&ctxt->control_buffer[0],
         &ctxt->control_buffer[ctxt->control_buffer_index],
@@ -164,9 +164,7 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
     if (size == 0) 
         return 0;
     
-    /*
-    * Read the amount left on the control connection
-    */
+    /* Read the amount left on the control connection */
     if ((len = recv(ctxt->control_file_desc,
          &ctxt->control_buffer[ctxt->control_buffer_index], size, 0)) < 0) {
         motion_log(LOG_ERR, 1, "%s: recv failed in ftp_get_more", __FUNCTION__);
@@ -192,7 +190,8 @@ static int ftp_get_more(ftp_context_pointer ctxt) {
 *
 * Returns the code number
 */
-static int ftp_get_response(ftp_context_pointer ctxt) {
+static int ftp_get_response(ftp_context_pointer ctxt) 
+{
     char *ptr, *end;
     int len;
     int res = -1, cur = -1;
@@ -202,9 +201,9 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
 
     get_more:
     /*
-    * Assumes everything up to control_buffer[control_buffer_index] has been read
-    * and analyzed.
-    */
+     * Assumes everything up to control_buffer[control_buffer_index] has been read
+     * and analyzed.
+     */
     len = ftp_get_more(ctxt);
 
     if (len < 0) 
@@ -222,10 +221,10 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
         cur = ftp_parse_response(ptr, end - ptr);
         if (cur > 0) {
             /*
-            * Successfully scanned the control code, skip
-            * till the end of the line, but keep the index to be
-            * able to analyze the result if needed.
-            */
+             * Successfully scanned the control code, skip
+             * till the end of the line, but keep the index to be
+             * able to analyze the result if needed.
+             */
             res = cur;
             ptr += 3;
             ctxt->control_buffer_answer = ptr - ctxt->control_buffer;
@@ -262,10 +261,11 @@ static int ftp_get_response(ftp_context_pointer ctxt) {
 }
 
 /**
-* Send the user authentication
+* ftp_send_user  
+*       Sends the user authentication
 */
-
-static int ftp_send_user(ftp_context_pointer ctxt) {
+static int ftp_send_user(ftp_context_pointer ctxt) 
+{
     char buf[200];
     int len;
     int res;
@@ -287,10 +287,11 @@ static int ftp_send_user(ftp_context_pointer ctxt) {
 }
 
 /**
-* Send the password authentication
+* ftp_send_passwd
+*       Sends the password authentication
 */
-
-static int ftp_send_passwd(ftp_context_pointer ctxt) {
+static int ftp_send_passwd(ftp_context_pointer ctxt) 
+{
     char buf[200];
     int len;
     int res;
@@ -323,9 +324,8 @@ static int ftp_send_passwd(ftp_context_pointer ctxt) {
 *
 * Returns -1 in case of error, 0 otherwise
 */
-
-
-static int ftp_quit(ftp_context_pointer ctxt) {
+static int ftp_quit(ftp_context_pointer ctxt) 
+{
     char buf[200];
     int len, res;
 
@@ -355,8 +355,8 @@ static int ftp_quit(ftp_context_pointer ctxt) {
 *
 * Returns -1 in case of error, 0 otherwise
 */
-
-int ftp_connect(netcam_context_ptr netcam) {
+int ftp_connect(netcam_context_ptr netcam) 
+{
     ftp_context_pointer ctxt;
     struct hostent *hp;
     int port;
@@ -374,9 +374,7 @@ int ftp_connect(netcam_context_ptr netcam) {
     if (netcam->connect_host == NULL)
         return -1;
 
-    /*
-    * do the blocking DNS query.
-    */
+    /* Do the blocking DNS query. */
     port = netcam->connect_port;
 
     if (port == 0)
@@ -398,9 +396,7 @@ int ftp_connect(netcam_context_ptr netcam) {
         return -1;
     }
 
-    /*
-    * Prepare the socket
-    */
+    /* Prepare the socket */
     ((struct sockaddr_in *)&ctxt->ftp_address)->sin_family = AF_INET;
     memcpy (&((struct sockaddr_in *)&ctxt->ftp_address)->sin_addr, hp->h_addr_list[0], hp->h_length);
     ((struct sockaddr_in *)&ctxt->ftp_address)->sin_port = (u_short)htons ((unsigned short)port);
@@ -412,9 +408,7 @@ int ftp_connect(netcam_context_ptr netcam) {
         return -1;
     }
 
-    /*
-    * Do the connect.
-    */
+    /* Do the connect. */
     if (connect(ctxt->control_file_desc, (struct sockaddr *) &ctxt->ftp_address,
         addrlen) < 0) {
         motion_log(LOG_ERR, 1, "%s: Failed to create a connection", __FUNCTION__);
@@ -423,9 +417,7 @@ int ftp_connect(netcam_context_ptr netcam) {
         return -1;
     }
 
-    /*
-    * Wait for the HELLO from the server.
-    */
+    /* Wait for the HELLO from the server. */
     res = ftp_get_response(ctxt);
 
     if (res != 2) {
@@ -434,9 +426,7 @@ int ftp_connect(netcam_context_ptr netcam) {
         return -1;
     }
 
-    /*
-    * Do the authentication
-    */
+    /* Do the authentication */
     res = ftp_send_user(ctxt);
 
     if (res < 0) {
@@ -501,8 +491,8 @@ int ftp_connect(netcam_context_ptr netcam) {
 *
 * Returns -1 in case of error, 0 otherwise
 */
-
-static int ftp_get_connection(ftp_context_pointer ctxt) {
+static int ftp_get_connection(ftp_context_pointer ctxt) 
+{
     char buf[200], *cur;
     int len, i;
     int res;
@@ -599,11 +589,11 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
         }
     } else {
         /*
-        * We want to bind to a port to receive the data.  To do this,
-        * we need the address of our host.  One easy way to get it is
-        * to get the info from the control connection that we have
-        * with the remote server
-        */
+         * We want to bind to a port to receive the data.  To do this,
+         * we need the address of our host.  One easy way to get it is
+         * to get the info from the control connection that we have
+         * with the remote server
+         */
         getsockname(ctxt->control_file_desc, (struct sockaddr *)&data_address,
                     &data_address_length);
         ((struct sockaddr_in *)&data_address)->sin_port = 0;
@@ -672,8 +662,8 @@ static int ftp_get_connection(ftp_context_pointer ctxt) {
 *
 * Returns -1 in case of error, 0 otherwise
 */
-
-static int ftp_close_connection(ftp_context_pointer ctxt) {
+static int ftp_close_connection(ftp_context_pointer ctxt) 
+{
     int res;
     fd_set rfd, efd;
     struct timeval tv;
@@ -726,9 +716,8 @@ static int ftp_close_connection(ftp_context_pointer ctxt) {
 *
 * Returns the socket for the data connection, or <0 in case of error
 */
-
-
-int ftp_get_socket(ftp_context_pointer ctxt) {
+int ftp_get_socket(ftp_context_pointer ctxt) 
+{
     char buf[300];
     int res, len;
     int acfd;
@@ -767,9 +756,9 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
     }
 
     /*
-    * if not a passive connection, need to do an accept to get the
-    * connection from the server
-    */
+     * If not a passive connection, need to do an accept to get the
+     * connection from the server
+     */
     if (!ctxt->passive) {
         struct sockaddr_in data_address;
         unsigned int data_address_length = sizeof(struct sockaddr_in);
@@ -801,7 +790,8 @@ int ftp_get_socket(ftp_context_pointer ctxt) {
 * Returns      0 for success, negative error code for failure
 *
 */
-int ftp_send_type(ftp_context_pointer ctxt, char type) {
+int ftp_send_type(ftp_context_pointer ctxt, char type) 
+{
     char buf[100], utype;
     int len, res;
 
@@ -844,7 +834,8 @@ int ftp_send_type(ftp_context_pointer ctxt, char type) {
 *              0 is an indication of an end of connection.
 *              -1 indicates a parameter error.
 */
-int ftp_read(ftp_context_pointer ctxt, void *dest, int len) {
+int ftp_read(ftp_context_pointer ctxt, void *dest, int len) 
+{
     if (ctxt == NULL)
         return -1;
 
@@ -880,7 +871,8 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len) {
 *
 * Returns -1 in case of error, 0 otherwise
 */
-int ftp_close(ftp_context_pointer ctxt) {
+int ftp_close(ftp_context_pointer ctxt) 
+{
     if (ctxt == NULL)
         return -1;
 

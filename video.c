@@ -13,6 +13,9 @@
 #include "rotate.h"     /* already includes motion.h */
 #include "video.h"
 
+/**
+ * v4l_picture_controls
+ */
 static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 {
     int dev = viddev->fd;
@@ -114,11 +117,18 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
 
 
 
-/*******************************************************************************************
+/*******************************************************************************
     Video4linux capture routines
-*/
+********************************************************************************/
 
-
+/**
+ * v4l_start
+ *      Initialize video device to start capturing and allocates memory map 
+ *      for video device.
+ *      
+ * Returns mmapped buffer for video device or NULL if any error happens.
+ *
+ */ 
 unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int input, 
                          int norm, unsigned long freq, int tuner_number)
 {
@@ -274,7 +284,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
 
 /**
  * v4l_next
- *                v4l_next fetches a video frame from a v4l device
+ *                Fetches a video frame from a v4l device
  *
  * Parameters:
  *     viddev     Pointer to struct containing video device handle amd device parameters
@@ -349,6 +359,21 @@ int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int height
     return 0;
 }
 
+/**
+ * v4l_set_input
+ *          Sets input for video device, adjust picture controls. 
+ *          If needed skip frames for round robin.
+ *
+ * Parameters:
+ *      cnt     Pointer to context struct
+ *      viddev  Pointer to struct containing video device handle amd device parameters
+ *      map     Pointer to the buffer in which the function puts the new image
+ *      width   Width of image in pixels
+ *      height  Height of image in pixels
+ *      conf    Pointer to config struct
+ *
+ * Returns nothing
+ */ 
 void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, 
                    int width, int height, struct config *conf)
 {

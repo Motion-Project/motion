@@ -13,6 +13,10 @@
 #include <sys/utsname.h>
 #include <dirent.h>
 
+/**
+ * v4l_open_vidpipe
+ *
+ */ 
 static int v4l_open_vidpipe(void)
 {
     int pipe_fd = -1;
@@ -167,6 +171,10 @@ static int v4l_open_vidpipe(void)
     return pipe_fd;
 }
 
+/**
+ * v4l_startpipe
+ *
+ */ 
 static int v4l_startpipe(const char *dev_name, int width, int height, int type)
 {
     int dev;
@@ -213,17 +221,28 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
     return dev;
 }
 
-static int v4l_putpipe (int dev, unsigned char *image, int size)
+/**
+ * v4l_putpipe
+ *
+ */ 
+static int v4l_putpipe(int dev, unsigned char *image, int size)
 {
     return write(dev, image, size);
 }
 
-
+/**
+ * vid_startpipe
+ *
+ */
 int vid_startpipe(const char *dev_name, int width, int height, int type)
 {
     return v4l_startpipe(dev_name, width, height, type);
 }
 
+/**
+ * vid_putpipe
+ *
+ */
 int vid_putpipe (int dev, unsigned char *image, int size)
 {
     return v4l_putpipe(dev, image, size);

@@ -41,6 +41,11 @@ struct auth_param {
 
 pthread_mutex_t stream_auth_mutex;
 
+/**
+ * set_sock_timeout 
+ *
+ * Returns : 0 or 1 on timeout 
+ */
 static int set_sock_timeout(int sock, int sec)
 {
     struct timeval tv;
@@ -55,6 +60,12 @@ static int set_sock_timeout(int sock, int sec)
     return 0;
 }
 
+/**
+ * read_http_request 
+ *
+ * 
+ * Returns : 1 on success or 0 if any error happens
+ */
 static int read_http_request(int sock, char* buffer, int buflen, char* uri, int uri_len)
 {
     int nread = 0;
@@ -100,50 +111,59 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
         buffer[nread] = '\0';
     }
 
-    /* Make sure the last read didn't fail.  If it did, there's a
-    problem with the connection, so give up.  */
+    /* 
+     * Make sure the last read didn't fail.  If it did, there's a
+     * problem with the connection, so give up.  
+     */
     if (nread == -1) {
         if(errno == EAGAIN) { // Timeout
             ret = write(sock, timeout_response_template_raw, strlen(timeout_response_template_raw));
-	        return 1;
+	        return 0;
         }
     
         motion_log(LOG_ERR, 1, "%s: motion-stream READ give up!", __FUNCTION__);
-        return 1;
+        return 0;
     }
   
     ret = sscanf(buffer, "%9s %511s %9s", method, url, protocol);
     
     if (ret != 3) { 
-        ret=write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
-        return 1;
+        ret = write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
+        return 0;
     }
 
     /* Check Protocol */
     if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) { 
-        /* We don't understand this protocol.  Report a bad response.  */
+        /* We don't understand this protocol. Report a bad response.  */
         ret = write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
-        return 1;
+        return 0;
     }
 
-    if (strcmp (method, "GET")) {
-        /* This server only implements the GET method.  If client
-        uses other method, report the failure.  */
+    if (strcmp(method, "GET")) {
+        /* 
+         * This server only implements the GET method. If client
+         * uses other method, report the failure.  
+         */
         char response[1024];
         snprintf(response, sizeof(response), bad_method_response_template_raw, method);
         ret = write(sock, response, strlen (response));
 
-        return 1;
+        return 0;
     }
 
     if(uri)
         strncpy(uri, url, uri_len);
 
-    return 0;
+    return 1;
 }
 
 static void stream_add_client(struct stream *list, int sc);
 
+/**
+ * handle_basic_auth
+ *
+ *
+ */ 
 static void* handle_basic_auth(void* param)
 {
     struct auth_param *p = (struct auth_param*)param;
@@ -164,7 +184,7 @@ static void* handle_basic_auth(void* param)
     p->thread_count++;
     pthread_mutex_unlock(&stream_auth_mutex);
 
-    if (read_http_request(p->sock,buffer, length, NULL, 0))
+    if (!read_http_request(p->sock,buffer, length, NULL, 0))
         goto Invalid_Request;
     
 
@@ -237,14 +257,16 @@ Invalid_Request:
 }
 
 
-/* calculate H(A1) as per HTTP Digest spec -- taken from RFC 2617*/
 #define HASHLEN 16
 typedef char HASH[HASHLEN];
 #define HASHHEXLEN 32
 typedef char HASHHEX[HASHHEXLEN+1];
 #define IN
 #define OUT
-
+/**
+ * CvtHex 
+ *      calculates H(A1) as per HTTP Digest spec -- taken from RFC 2617
+ */
 static void CvtHex(IN HASH Bin, OUT HASHHEX Hex)
 {
     unsigned short i;
@@ -265,7 +287,10 @@ static void CvtHex(IN HASH Bin, OUT HASHHEX Hex)
     Hex[HASHHEXLEN] = '\0';
 };
 
-/* calculate H(A1) as per spec */
+/** 
+ * DigestCalcHA1 
+ *      calculates H(A1) as per spec 
+ */
 static void DigestCalcHA1(
     IN char * pszAlg,
     IN char * pszUserName,
@@ -299,7 +324,10 @@ static void DigestCalcHA1(
     CvtHex(HA1, SessionKey);
 };
 
-/* calculate request-digest/response-digest as per HTTP Digest spec */
+/** 
+ * DigestCalcResponse 
+ *      calculates request-digest/response-digest as per HTTP Digest spec 
+ */
 static void DigestCalcResponse(
     IN HASHHEX HA1,           /* H(A1) */
     IN char * pszNonce,       /* nonce from server */
@@ -351,6 +379,11 @@ static void DigestCalcResponse(
 };
 
 
+/**
+ * handle_md5_digest
+ *
+ *
+ */ 
 static void* handle_md5_digest(void* param)
 {
     struct auth_param *p = (struct auth_param*)param;
@@ -433,7 +466,7 @@ static void* handle_md5_digest(void* param)
     server_pass[strlen(h + 1)] = '\0';
 
     while(1) {
-        if(read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN - 1))
+        if(!read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN - 1))
             goto Invalid_Request;
     
 
@@ -590,7 +623,11 @@ Invalid_Request:
     pthread_exit(NULL);
 }
 
-
+/**
+ * do_client_auth
+ *
+ *
+ */
 static void do_client_auth(struct context *cnt, int sc)
 {
     pthread_t thread_id;
@@ -664,11 +701,15 @@ Error:
         free(handle_param);
 }
 
-/* This function sets up a TCP/IP socket for incoming requests. It is called only during
- * initialisation of Motion from the function stream_init
- * The function sets up a a socket on the port number given by _port_.
- * If the parameter _local_ is not zero the socket is setup to only accept connects from localhost.
- * Otherwise any client IP address is accepted. The function returns an integer representing the socket.
+/** 
+ * http_bindsock 
+ *      Sets up a TCP/IP socket for incoming requests. It is called only during
+ *      initialisation of Motion from the function stream_init
+ *      The function sets up a a socket on the port number given by _port_.
+ *      If the parameter _local_ is not zero the socket is setup to only accept connects from localhost.
+ *      Otherwise any client IP address is accepted. The function returns an integer representing the socket.
+ *
+ * Returns: socket descriptor or -1 if any error happens
  */
 int http_bindsock(int port, int local, int ipv6_enabled)
 {
@@ -750,7 +791,12 @@ int http_bindsock(int port, int local, int ipv6_enabled)
     return sl;
 }
 
-
+/**
+ * http_acceptsock
+ *
+ *
+ * Returns: socket descriptor or -1 if any error happens.
+ */
 static int http_acceptsock(int sl)
 {
     int sc;
@@ -770,10 +816,12 @@ static int http_acceptsock(int sl)
 }
 
 
-/* stream flush sends any outstanding data to all connected clients.
- * It continuously goes through the client list until no data is able
- * to be sent (either because there isn't any, or because the clients
- * are not able to accept it).
+/** 
+ * stream_flush 
+ *      Sends any outstanding data to all connected clients.
+ *      It continuously goes through the client list until no data is able
+ *      to be sent (either because there isn't any, or because the clients
+ *      are not able to accept it).
  */
 static void stream_flush(struct stream *list, int *stream_count, int lim)
 {
@@ -789,7 +837,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
         /* If data waiting for client, try to send it */
         if (client->tmpbuffer) {
         
-            /* We expect that list->filepos < list->tmpbuffer->size
+            /* 
+             * We expect that list->filepos < list->tmpbuffer->size
              * should always be true.  The check is more for safety,
              * in case of trouble is some other part of the code.
              * Note that if it is false, the following section will
@@ -797,7 +846,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
              */
             if (client->filepos < client->tmpbuffer->size) {
                 
-                /* Here we are finally ready to write out the
+                /* 
+                 * Here we are finally ready to write out the
                  * data.  Remember that (because the socket
                  * has been set non-blocking) we may only
                  * write out part of the buffer.  The var
@@ -808,7 +858,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                           client->tmpbuffer->ptr + client->filepos,
                           client->tmpbuffer->size - client->filepos);
         
-                /* If any data has been written, update the
+                /* 
+                 * If any data has been written, update the
                  * data pointer and set the workdone flag
                  */
                 if (written > 0) {
@@ -818,7 +869,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
             } else
                 written = 0;
             
-            /* If we have written the entire buffer to the socket,
+            /* 
+             * If we have written the entire buffer to the socket,
              * or if there was some error (other than EAGAIN, which
              * means the system couldn't take it), this request is
              * finished.
@@ -836,7 +888,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 client->nr++;
             }
             
-            /* If the client is no longer connected, or the total
+            /*
+             * If the client is no longer connected, or the total
              * number of frames already sent to this client is
              * greater than our configuration limit, disconnect
              * the client and free the stream struct
@@ -856,9 +909,10 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 free(tmp);
                 (*stream_count)--;
             }
-        }        /* end if (client->tmpbuffer) */
+        }   /* end if (client->tmpbuffer) */
         
-        /* Step the the next client in the list.  If we get to the
+        /* 
+         * Step the the next client in the list.  If we get to the
          * end of the list, check if anything was written during
          * that loop; (if so) reset the 'workdone' flag and go back
          * to the beginning
@@ -869,11 +923,15 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
             client = list->next;
             workdone = 0;
         }
-    }            /* end while (client) */
+    }   /* end while (client) */
 }
 
-/* Routine to create a new "tmpbuffer", which is a common
- * object used by all clients connected to a single camera
+/**
+ * stream_tmpbuffer 
+ *      Routine to create a new "tmpbuffer", which is a common
+ *      object used by all clients connected to a single camera.
+ *
+ * Returns: new allocated stream_buffer.
  */
 static struct stream_buffer *stream_tmpbuffer(int size)
 {
@@ -884,7 +942,11 @@ static struct stream_buffer *stream_tmpbuffer(int size)
     return tmpbuffer;
 }
 
-
+/**
+ * stream_add_client
+ *
+ *
+ */
 static void stream_add_client(struct stream *list, int sc)
 {
     struct stream *new = mymalloc(sizeof(struct stream));
@@ -917,7 +979,11 @@ static void stream_add_client(struct stream *list, int sc)
     list->next = new;
 }
 
-
+/**
+ * stream_add_write
+ *
+ *
+ */
 static void stream_add_write(struct stream *list, struct stream_buffer *tmpbuffer, unsigned int fps)
 {
     struct timeval curtimeval;
@@ -944,10 +1010,14 @@ static void stream_add_write(struct stream *list, struct stream_buffer *tmpbuffe
 }
 
 
-/* We walk through the chain of stream structs until we reach the end.
- * Here we check if the tmpbuffer points to NULL
- * We return 1 if it finds a list->tmpbuffer which is a NULL pointer which would
- * be the next client ready to be sent a new image. If not a 0 is returned.
+/**
+ * stream_check_write 
+ *      We walk through the chain of stream structs until we reach the end.
+ *      Here we check if the tmpbuffer points to NULL.
+ *      We return 1 if it finds a list->tmpbuffer which is a NULL pointer which would
+ *      be the next client ready to be sent a new image. If not a 0 is returned.
+ *
+ * Returns: 
  */
 static int stream_check_write(struct stream *list)
 {
@@ -961,9 +1031,13 @@ static int stream_check_write(struct stream *list)
 }
 
 
-/* This function is called from motion.c for each motion thread starting up.
- * The function setup the incoming tcp socket that the clients connect to
- * The function returns an integer representing the socket.
+/**
+ * stream_init 
+ *      This function is called from motion.c for each motion thread starting up.
+ *      The function setup the incoming tcp socket that the clients connect to.
+ *      The function returns an integer representing the socket.
+ *
+ * Returns: stream socket descriptor.
  */
 int stream_init(struct context *cnt)
 {
@@ -973,8 +1047,10 @@ int stream_init(struct context *cnt)
     return cnt->stream.socket;
 }
 
-/* This function is called from the motion_loop when it ends
- * and motion is terminated or restarted
+/**
+ * stream_stop 
+ *      This function is called from the motion_loop when it ends
+ *      and motion is terminated or restarted.
  */
 void stream_stop(struct context *cnt)
 {    
@@ -1012,19 +1088,21 @@ void stream_stop(struct context *cnt)
                    " & active motion-stream sockets", __FUNCTION__);
 }
 
-/* stream_put is the starting point of the stream loop. It is called from
- * the motion_loop with the argument 'image' pointing to the latest frame.
- * If config option 'stream_motion' is 'on' this function is called once
- * per second (frame 0) and when Motion is detected excl pre_capture.
- * If config option 'stream_motion' is 'off' this function is called once
- * per captured picture frame.
- * It is always run in setup mode for each picture frame captured and with
- * the special setup image.
- * The function does two things:
- * It looks for possible waiting new clients and adds them.
- * It sends latest picture frame to all connected clients.
- * Note: Clients that have disconnected are handled in the stream_flush()
- * function
+/*
+ * stream_put 
+ *      Is the starting point of the stream loop. It is called from
+ *      the motion_loop with the argument 'image' pointing to the latest frame.
+ *      If config option 'stream_motion' is 'on' this function is called once
+ *      per second (frame 0) and when Motion is detected excl pre_capture.
+ *      If config option 'stream_motion' is 'off' this function is called once
+ *      per captured picture frame.
+ *      It is always run in setup mode for each picture frame captured and with
+ *      the special setup image.
+ *      The function does two things:
+ *          It looks for possible waiting new clients and adds them.
+ *          It sends latest picture frame to all connected clients.
+ *      Note: Clients that have disconnected are handled in the stream_flush()
+ *          function.
  */
 void stream_put(struct context *cnt, unsigned char *image)
 {
@@ -1040,7 +1118,8 @@ void stream_put(struct context *cnt, unsigned char *image)
     int headlength = sizeof(jpeghead) - 1;    /* don't include terminator */
     char len[20];    /* will be used for sprintf, must be >= 16 */
     
-    /* timeout struct used to timeout the time we wait for a client
+    /* 
+     * timeout struct used to timeout the time we wait for a client
      * and we do not wait at all
      */
     timeout.tv_sec = 0;
@@ -1048,7 +1127,8 @@ void stream_put(struct context *cnt, unsigned char *image)
     FD_ZERO(&fdread);
     FD_SET(cnt->stream.socket, &fdread);
     
-    /* If we have not reached the max number of allowed clients per
+    /* 
+     * If we have not reached the max number of allowed clients per
      * thread we will check to see if new clients are waiting to connect.
      * If this is the case we add the client as a new stream struct and
      * add this to the end of the chain of stream structs that are linked
@@ -1075,7 +1155,8 @@ void stream_put(struct context *cnt, unsigned char *image)
     
     /* Check if any clients have available buffers */
     if (stream_check_write(&cnt->stream)) {
-        /* yes - create a new tmpbuffer for current image.
+        /* 
+         * yes - create a new tmpbuffer for current image.
          * Note that this should create a buffer which is *much* larger
          * than necessary, but it is difficult to estimate the
          * minimum size actually required.
@@ -1086,14 +1167,16 @@ void stream_put(struct context *cnt, unsigned char *image)
         if (tmpbuffer) {
             int imgsize;
 
-            /* We need a pointer that points to the picture buffer
+            /* 
+             * We need a pointer that points to the picture buffer
              * just after the mjpeg header. We create a working pointer wptr
              * to be used in the call to put_picture_memory which we can change
              * and leave tmpbuffer->ptr intact.
              */
             unsigned char *wptr = tmpbuffer->ptr;
             
-            /* For web protocol, our image needs to be preceded
+            /*
+             * For web protocol, our image needs to be preceded
              * with a little HTTP, so we put that into the buffer
              * first.
              */
@@ -1113,13 +1196,15 @@ void stream_put(struct context *cnt, unsigned char *image)
             /* append a CRLF for good measure */
             memcpy(wptr + tmpbuffer->size, "\r\n", 2);
             
-            /* now adjust tmpbuffer->size to reflect the
+            /* 
+             * Now adjust tmpbuffer->size to reflect the
              * header at the beginning and the extra CRLF
              * at the end.
              */
             tmpbuffer->size += headlength + 2;
             
-            /* and finally put this buffer to all clients with
+            /*
+             * And finally put this buffer to all clients with
              * no outstanding data from previous frames.
              */
             stream_add_write(&cnt->stream, tmpbuffer, cnt->conf.stream_maxrate);
@@ -1128,7 +1213,8 @@ void stream_put(struct context *cnt, unsigned char *image)
         }
     }
     
-    /* Now we call flush again.  This time (assuming some clients were
+    /* 
+     * Now we call flush again.  This time (assuming some clients were
      * ready for the new frame) the new data will be written out.
      */
     stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);

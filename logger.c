@@ -91,7 +91,8 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
     va_list ap;
     int threadnr;
 
-    /* If pthread_getspecific fails (e.g., because the thread's TLS doesn't
+    /* 
+     * If pthread_getspecific fails (e.g., because the thread's TLS doesn't
      * contain anything for thread number, it returns NULL which casts to zero,
      * which is nice because that's what we want in that case.
      */
@@ -120,7 +121,7 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
         strncat(buf, ": ", 1024 - strlen(buf));
         n += 2;
         /*
-         * this is bad - apparently gcc/libc wants to use the non-standard GNU
+         * This is bad - apparently gcc/libc wants to use the non-standard GNU
          * version of strerror_r, which doesn't actually put the message into
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
@@ -155,5 +156,4 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
     /* Clean up the argument list routine */
     va_end(ap);
 }
-
 
