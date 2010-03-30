@@ -1502,11 +1502,11 @@ static void conf_cmdline(struct context *cnt, int thread)
         case 'd':
             /* no validation - just take what user gives */
             debug_level = (unsigned int)atoi(optarg);
-             break;
+            break;
         case 'p':
-             if (thread == -1) 
-                 strcpy(cnt->pid_file, optarg);
-             break;   
+            if (thread == -1) 
+                strcpy(cnt->pid_file, optarg);
+            break;   
         case 'l':
             if (thread == -1) 
                 strcpy(cnt->log_file, optarg); 

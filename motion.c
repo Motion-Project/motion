@@ -239,7 +239,7 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
  *
  * Returns: nothing
  */
-static void context_init (struct context *cnt)
+static void context_init(struct context *cnt)
 {
    /*
     * We first clear the entire structure to zero, then fill in any

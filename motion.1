@@ -3,7 +3,7 @@
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
 .B motion
-[ -hns ] [ -c config file path ] [ -d level ] [ -p process_id_file ]
+[ -hns ] [ -c config file path ] [ -d level ] [ -p process_id_file ] [ -l logfile ]
 .SH DESCRIPTION
 .I  Motion
 uses a video4linux device to detect motion. If motion is detected both normal
@@ -28,6 +28,9 @@ Run in debug mode, level 1-9.
 .TP
 .B \-p
 Full path and filename for process id file (pid file). E.g /var/run/motion.pid. Default is not defined. Pid file is only created when Motion is started in daemon mode.
+.TP
+.B \-l
+Full path and filename of log file.
 .TP
 .SH "CONFIG FILE OPTIONS"
 These are the options that can be used in the config file.
@@ -193,6 +196,11 @@ Ignore sudden massive light intensity changes given as a percentage of the pictu
 Values: on, off, redbox, center, redcross, preview / Default: off
 .br
 Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved movie.
+.TP
+.B logfile string
+Values: Max 4095 characters / Default: Not defined
+.br
+Use a file to save logs messages, if not defined stderr and syslog is used.
 .TP
 .B mask_file string
 Values: Max 4095 characters / Default: Not defined
