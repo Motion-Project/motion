@@ -35,6 +35,8 @@ Features
    * Add authentication  methods 'Basic Authentication' and 'Digest Authentication' 
      to the "Live Stream Server". (Michael Finsterbusch)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
+   * Implemented new logging system 
+      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionLog (Angel Carpintero)
    
 
 Bugfixes

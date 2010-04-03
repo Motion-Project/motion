@@ -17,7 +17,8 @@ void * mymalloc(size_t nbytes)
     void *dummy = malloc(nbytes);
     if (!dummy) {
         printf("Could not allocate %llu bytes of memory!\n", (unsigned long long) nbytes);
-        syslog(LOG_EMERG, "Could not allocate %llu bytes of memory!", (unsigned long long) nbytes);
+        syslog(EMERG, TYPE_ALL, "%s: Could not allocate %llu bytes of memory!", 
+               __FUNCTION__, (unsigned long long) nbytes);
         exit(1);
     }
     
@@ -41,8 +42,8 @@ void * mymalloc(size_t nbytes)
     if (!dummy) {
         printf("Could not allocate %llu bytes of memory!\n",
                (unsigned long long) nbytes);
-        syslog(LOG_EMERG, "Could not allocate %llu bytes of memory!",
-               (unsigned long long) nbytes);
+        syslog(EMERG, TYPE_ALL,"Could not allocate %llu bytes of memory!",
+               __FUNCTION__, (unsigned long long) nbytes);
         exit(1);
     }
     

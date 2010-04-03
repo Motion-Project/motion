@@ -393,8 +393,8 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
     ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
 
     if (ret == 1) {
-        if (debug_level >= CAMERA_WARNINGS)
-            motion_log(LOG_ERR, 0, "%s: Corrupt image ... continue", __FUNCTION__);
+        motion_log(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue", 
+                   __FUNCTION__);
         ret = 2;
     }
 
@@ -547,7 +547,7 @@ void vid_close(struct context *cnt)
 
     /* Cleanup the netcam part */
     if (cnt->netcam) {
-        motion_log(LOG_DEBUG, 0, "%s: calling netcam_cleanup", __FUNCTION__);
+        motion_log(DBG, TYPE_VIDEO, NO_ERRNO, "%s: calling netcam_cleanup", __FUNCTION__);
         netcam_cleanup(cnt->netcam, 0);
         cnt->netcam = NULL;
         return;
@@ -569,12 +569,13 @@ void vid_close(struct context *cnt)
     cnt->video_dev = -1;
 
     if (dev == NULL) {
-        motion_log(LOG_ERR, 0, "%s: Unable to find video device", __FUNCTION__);
+        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find video device", __FUNCTION__);
         return;
     }
 
     if (--dev->usage_count == 0) {
-        motion_log(LOG_INFO, 0, "%s: Closing video device %s", __FUNCTION__, dev->video_device);
+        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s", 
+                   __FUNCTION__, dev->video_device);
 #ifdef MOTION_V4L2
         if (dev->v4l2) {
             v4l2_close(dev);
@@ -599,7 +600,7 @@ void vid_close(struct context *cnt)
         pthread_mutex_destroy(&dev->mutex);
         free(dev);
     } else {
-        motion_log(LOG_INFO, 0, "%s: Still %d users of video device %s, so we don't close it now", 
+        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Still %d users of video device %s, so we don't close it now", 
                    __FUNCTION__, dev->usage_count, dev->video_device);
         /* 
          * There is still at least one thread using this device 
@@ -657,13 +658,13 @@ static int vid_v4lx_start(struct context *cnt)
      * for this first.
      */
     if (conf->width % 16) {
-        motion_log(LOG_ERR, 0, "%s: config image width (%d) is not modulo 16", 
+        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 16", 
                    __FUNCTION__, conf->width);
         return -3;
     }
 
     if (conf->height % 16) {
-        motion_log(LOG_ERR, 0, "%s: config image height (%d) is not modulo 16",
+        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 16",
                      __FUNCTION__, conf->height);
         return -3;
     }
@@ -716,7 +717,7 @@ static int vid_v4lx_start(struct context *cnt)
         dev = dev->next;
     }
 
-    motion_log(1, 0, "%s: Using videodevice %s and input %d", 
+    motion_log(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using videodevice %s and input %d", 
                __FUNCTION__, conf->video_device, conf->input);
 
     dev = mymalloc(sizeof(struct video_dev));
@@ -727,7 +728,7 @@ static int vid_v4lx_start(struct context *cnt)
     fd = open(dev->video_device, O_RDWR);
 
     if (fd < 0) {
-        motion_log(LOG_ERR, 1, "%s: Failed to open video device %s", 
+        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s", 
                    __FUNCTION__, conf->video_device);
         free(dev);
         pthread_mutex_unlock(&vid_mutex);
@@ -785,9 +786,9 @@ static int vid_v4lx_start(struct context *cnt)
     }
 #endif
     if (dev->v4l2 == 0) {
-        motion_log(1, 0, "%s: Using V4L1", __FUNCTION__);
+        motion_log(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L1", __FUNCTION__);
     } else {
-        motion_log(1, 0, "%s: Using V4L2", __FUNCTION__);
+        motion_log(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L2", __FUNCTION__);
         /* Update width & height because could be changed in v4l2_start () */
         width = dev->width;
         height = dev->height;
@@ -858,7 +859,7 @@ int vid_start(struct context *cnt)
     }
 #ifdef WITHOUT_V4L
     else    
-        motion_log(LOG_ERR, 0, "%s: You must setup netcam_url", __FUNCTION__);
+        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url", __FUNCTION__);
 #else
     else
         dev = vid_v4lx_start(cnt);

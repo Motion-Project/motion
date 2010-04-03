@@ -53,15 +53,6 @@
 #define MAX_HEADER_RETRIES      5     /* Max tries to find a header record */
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 
-/*
- * The macro NETCAM_DEBUG is for development testing of this module.
- * The macro SETUP is to assure that "configuration-setup" type messages
- * are also printed when NETCAM_DEBUG is set.  Set the following #if to
- * 1 to enable it, or 0 (normal setting) to disable it.
- */
-#define SETUP    (debug_level >= CAMERA_INFO)
-
-
 tfile_context *file_new_context(void);
 void file_free_context(tfile_context* ctxt);
 
@@ -164,8 +155,8 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
         re = "(file)://(((.*):(.*))@)?"
              "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
 
-    if (debug_level > CAMERA_DEBUG)
-        motion_log(0, 0, "%s: Entry netcam_url_parse data %s", __FUNCTION__, text_url);
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Entry netcam_url_parse data %s", 
+               __FUNCTION__, text_url);
 
     memset(parse_url, 0, sizeof(struct url_t));
     /*
@@ -179,8 +170,8 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
         if (regexec(&pattbuf, text_url, 10, matches, 0) != REG_NOMATCH) {
             for (i = 0; i < 10; i++) {
                 if ((s = netcam_url_match(matches[i], text_url)) != NULL) {
-                    if (debug_level > CAMERA_DEBUG)
-                        motion_log(0, 0, "%s: Parse case %d data %s", __FUNCTION__, i, s);
+                    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Parse case %d"
+                               " data %s", __FUNCTION__, i, s);
                     switch (i) {
                     case 1:
                         parse_url->service = s;
@@ -305,13 +296,13 @@ static long netcam_check_content_length(char *header)
          * we were able to recognize the header section and the
          * number we might as well try to use it.
          */
-        if ((debug_level > CAMERA_INFO) && (length > 0))
-            motion_log(LOG_DEBUG, 0, "%s: malformed token Content-Length but value %ld", 
-                       __FUNCTION__, length);
+        if (length > 0)
+            motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: malformed token"
+                       " Content-Length but value %ld", __FUNCTION__, length);
     }
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(LOG_DEBUG, 0, "%s: Content-Length %ld", __FUNCTION__, length);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Content-Length %ld", 
+               __FUNCTION__, length);
 
     return length;
 }
@@ -401,8 +392,8 @@ static int netcam_check_content_type(char *header)
     if (!header_process(header, "Content-type", http_process_type, &content_type))
         return -1;
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(LOG_DEBUG, 0, "%s: Content-type %s", __FUNCTION__, content_type);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Content-type %s", 
+               __FUNCTION__, content_type);
 
     if (!strcmp(content_type, "image/jpeg")) {
         ret = 1;
@@ -463,15 +454,13 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
             if (retval != HG_OK) {
                 /* Header reported as not-OK, check to see if it's null */
                 if (strlen(header) == 0) {
-                    if (debug_level > CAMERA_INFO)
-                        motion_log(LOG_DEBUG, 0, "%s: Error reading image header, " 
-                                   "streaming mode (1). Null header.", __FUNCTION__);
+                    motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Error reading image header, " 
+                               "streaming mode (1). Null header.", __FUNCTION__);
                 } else {
                     /* Header is not null. Output it in case it's a new camera with unknown headers. */
-                    if (debug_level > CAMERA_INFO)
-                        motion_log(LOG_ERR, 0, "%s: Error reading image header, "
-                                   "streaming mode (1). Unknown header '%s'", 
-                                   __FUNCTION__, header);
+                    motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Error reading image header, "
+                               "streaming mode (1). Unknown header '%s'", 
+                               __FUNCTION__, header);
                  }
 
                 free(header);
@@ -490,7 +479,8 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
         retval = header_get(netcam, &header, HG_NONE);
 
         if (retval != HG_OK) {
-            motion_log(LOG_ERR, 0, "%s: Error reading image header (2)", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error reading image header (2)", 
+                       __FUNCTION__);
             free(header);
             return -1;
         }
@@ -500,7 +490,8 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
 
         if ((retval = netcam_check_content_type(header)) >= 0) {
             if (retval != 1) {
-                motion_log(LOG_ERR, 0, "%s: Header not JPEG", __FUNCTION__);
+                motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Header not JPEG", 
+                           __FUNCTION__);
                 free(header);
                 return -1;
             }
@@ -512,8 +503,9 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
                 netcam->receiving->content_length = retval;
             } else {
                 netcam->receiving->content_length = 0;
-                motion_log(LOG_ERR, 0, "%s: Content-Length 0", __FUNCTION__);
-                free(header);free(header);
+                motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Content-Length 0", 
+                           __FUNCTION__);
+                free(header);
                 return -1;
             }    
         }    
@@ -521,8 +513,8 @@ static int netcam_read_next_header(netcam_context_ptr netcam)
         free(header);
     }
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(0, 0, "%s: Found image header record", __FUNCTION__);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Found image header record", 
+               __FUNCTION__);
 
     free(header);
     return 0;
@@ -559,12 +551,12 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
     int closeflag = 0;    /* If we have seen a Connection: close header from cam */
     char *header;
     char *boundary;
-    //struct context *cnt = netcam->cnt;       /* for conf debug_level */
 
     /* Send the initial command to the camera */
     if (send(netcam->sock, netcam->connect_request,
              strlen(netcam->connect_request), 0) < 0) {
-        motion_log(LOG_ERR, 1, "%s: Error sending 'connect' request", __FUNCTION__);
+        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: Error sending"
+                   " 'connect' request", __FUNCTION__);
         return -1;
     }
 
@@ -593,20 +585,20 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
     while (1) {     /* 'Do forever' */
         ret = header_get(netcam, &header, HG_NONE);
 
-        if (debug_level > CAMERA_INFO)    /* Changed criterion and moved up from below to catch headers that cause returns */
-            motion_log(LOG_DEBUG, 0, "%s: Received first header ('%s')", __FUNCTION__, header);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Received first header ('%s')", 
+                   __FUNCTION__, header);
 
         if (ret != HG_OK) {
-            if (debug_level > CAMERA_INFO)
-                motion_log(LOG_ERR, 0, "%s: Error reading first header (%s)", __FUNCTION__, header);
+            motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Error reading first header (%s)", 
+                       __FUNCTION__, header);
             free(header);
             return -1;
         }
 
         if (firstflag) {
             if ((ret = http_result_code(header)) != 200) {
-                if (debug_level > CAMERA_INFO)
-                    motion_log(0, 0, "%s: HTTP Result code %d", __FUNCTION__, ret);
+                motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: HTTP Result code %d",
+                           __FUNCTION__, ret);
 
                 free(header);
                 if (netcam->connect_keepalive) {
@@ -619,7 +611,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                     netcam->connect_keepalive = FALSE;
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off"); 
-                    motion_log(LOG_INFO, 0, "%s: Removed netcam Keep-Alive flag"
+                    motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Removed netcam Keep-Alive flag"
                                "due to apparent closed HTTP connection.", __FUNCTION__);
                 }
                 return ret;
@@ -644,20 +636,19 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
              */
             switch (ret) {
             case 1:         /* not streaming */
-                if (SETUP) {
-                    if (netcam->connect_keepalive) 
-                        motion_log(LOG_DEBUG, 0, "%s: Non-streaming camera " 
-                                   "(keep-alive set)", __FUNCTION__);
-                    else
-                        motion_log(LOG_DEBUG, 0, "%s: Non-streaming camera " 
-                                   "(keep-alive not set)", __FUNCTION__);
-                }
+                if (netcam->connect_keepalive) 
+                    motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Non-streaming camera " 
+                               "(keep-alive set)", __FUNCTION__);
+                else
+                    motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Non-streaming camera " 
+                               "(keep-alive not set)", __FUNCTION__);
+
                 netcam->caps.streaming = NCS_UNSUPPORTED;
                 break;
 
             case 2:         /* streaming */
-                if (SETUP)
-                    motion_log(LOG_DEBUG, 0, "%s: Streaming camera", __FUNCTION__);
+                motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Streaming camera", 
+                           __FUNCTION__);
 
                 netcam->caps.streaming = NCS_MULTIPART;
 
@@ -676,35 +667,32 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                      check_quote(netcam->boundary);
                      netcam->boundary_length = strlen(netcam->boundary);
 
-                     if (SETUP) 
-                        motion_log(LOG_DEBUG, 0, "%s: Boundary string [%s]",
-                                   __FUNCTION__, netcam->boundary);
+                     motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Boundary string [%s]",
+                                __FUNCTION__, netcam->boundary);
                         
                 }
                 break;
             case 3:        /* MJPG-Block style streaming */
-                if (SETUP)
-                    motion_log(LOG_DEBUG, 0, "%s: Streaming camera probably using MJPG-blocks,"
-                               " consider using mjpg:// netcam_url.", __FUNCTION__);
+                motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Streaming camera probably using MJPG-blocks,"
+                           " consider using mjpg:// netcam_url.", __FUNCTION__);
                 break;
 
             default:
                 /* error */
-                motion_log(LOG_ERR, 0, "%s: Unrecognized content type", __FUNCTION__);
+                motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Unrecognized content type", __FUNCTION__);
                 free(header);
                 return -1;
                 
             }
         } else if ((ret = (int) netcam_check_content_length(header)) >= 0) {
-            if (SETUP)
-                motion_log(LOG_DEBUG, 0, "%s: Content-length present", __FUNCTION__);
+            motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Content-length present", __FUNCTION__);
 
             if (ret > 0) {
                 netcam->caps.content_length = 1;     /* set flag */
                 netcam->receiving->content_length = ret;
             } else { 
                 netcam->receiving->content_length = 0;
-                motion_log(LOG_ERR, 0, "%s: Content-length 0", __FUNCTION__);
+                motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Content-length 0", __FUNCTION__);
                 retval = -2;
             }
         } else if (netcam_check_keepalive(header) == TRUE) {
@@ -722,8 +710,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
              * This flag is acted upon below 
              * Changed criterion and moved up from below to catch headers that cause returns 
              */
-            if (debug_level > CAMERA_INFO)
-                motion_log(LOG_DEBUG, 0, "%s: Found Conn: close header ('%s')", __FUNCTION__, header);
+             motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Found Conn: close header ('%s')", 
+                        __FUNCTION__, header);
         }
         free(header);
     }
@@ -738,7 +726,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                 netcam->warning_count++;
                 if (netcam->warning_count > 3) {
                     netcam->warning_count = 0;
-                    motion_log(LOG_INFO, 0, "%s: Info: Both 'Connection: Keep-Alive' and "
+                    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Both 'Connection: Keep-Alive' and "
                                "'Connection: close' header received. Motion removes keepalive.",
                                __FUNCTION__);
                     netcam->connect_keepalive = FALSE;
@@ -750,7 +738,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                     * did not see a Keep-Alive field returned from netcam and a Close field.
                     * Not quite sure what the correct course of action is here. In for testing.
                     */ 
-                motion_log(LOG_INFO, 0, "%s: Info: Both 'Connection: Keep-Alive' and "
+                motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Both 'Connection: Keep-Alive' and "
                            "'Connection: close' header received. Motion continues unchanged.",
                            __FUNCTION__);
             } else {
@@ -762,9 +750,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                      * No action, as this is the normal case. In debug we print a notification.
                      */
         
-                if (debug_level > CAMERA_INFO)
-                    motion_log(LOG_INFO, 0, "%s: Info: Received a Keep-Alive field in this"
-                               "set of headers.", __FUNCTION__);
+                motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Received a Keep-Alive field in this"
+                           "set of headers.", __FUNCTION__);
             }
         } else { /* !aliveflag */
             if (!closeflag) {
@@ -772,8 +759,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
                 if (netcam->warning_count > 3) {
                     netcam->warning_count = 0;
-                    motion_log(LOG_INFO, 0, "%s: No 'Connection: Keep-Alive' nor 'Connection: close' "
-                                "header received.\n Motion removes keepalive.", __FUNCTION__);
+                    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: No 'Connection: Keep-Alive' nor 'Connection: close'"
+                               " header received.\n Motion removes keepalive.", __FUNCTION__);
                     netcam->connect_keepalive = FALSE;
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off");
@@ -783,8 +770,8 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                     * did not see a Keep-Alive field returned from netcam nor a Close field.
                     * Not quite sure what the correct course of action is here. In for testing.
                     */                                                                                                     
-                motion_log(LOG_INFO, 0, "%s: Info: No 'Connection: Keep-Alive' nor 'Connection: close' "
-                           "header received.\n Motion continues unchanged.", __FUNCTION__);
+                motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: No 'Connection: Keep-Alive' nor 'Connection: close'"
+                           " header received.\n Motion continues unchanged.", __FUNCTION__);
             } else {  
                 /* 
                  * !aliveflag & closeflag 
@@ -812,13 +799,14 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
                     netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off");
-                    motion_log(LOG_INFO, 0, "%s: Removed netcam Keep-Alive flag because "
-                               "'Connection: close' header received.\n Netcam does not support " 
+                    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Removed netcam Keep-Alive flag because"
+                               " 'Connection: close' header received.\n Netcam does not support " 
                                "Keep-Alive. Motion continues in non-Keep-Alive.", __FUNCTION__);
                 } else {
                     netcam->keepalive_timeup = TRUE;    /* We will close and re-open keep-alive */
-                    motion_log(LOG_INFO, 0, "Keep-Alive has reached end of valid period.\n Motion will close " 
-                               "netcam, then resume Keep-Alive with a new socket.", __FUNCTION__);
+                    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "Keep-Alive has reached end of valid period.\n" 
+                               "Motion will close netcam, then resume Keep-Alive with a new socket.", 
+                               __FUNCTION__);
                 }
             }
         }
@@ -843,7 +831,7 @@ static void netcam_disconnect(netcam_context_ptr netcam)
 {
     if (netcam->sock > 0) {
         if (close(netcam->sock) < 0)
-            motion_log(LOG_ERR, 1, "%s: netcam_disconnect", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: netcam_disconnect", __FUNCTION__);
 
         netcam->sock = -1;
     }
@@ -881,75 +869,70 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 
     /* Assure any previous connection has been closed - IF we are not in keepalive */
     if (!netcam->connect_keepalive) {
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: disconnecting netcam " 
-                       "since keep-alive not set.", __FUNCTION__);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam " 
+                   "since keep-alive not set.", __FUNCTION__);
 
         netcam_disconnect(netcam);
 
         /* create a new socket */
         if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-            motion_log(LOG_ERR, 1, "%s:  with no keepalive, attempt "
+            motion_log(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s:  with no keepalive, attempt "
                        "to create socket failed.", __FUNCTION__);
             return -1;
         }
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: with no keepalive, "
-                       "new socket created fd %d", __FUNCTION__, netcam->sock);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: with no keepalive, "
+                   "new socket created fd %d", __FUNCTION__, netcam->sock);
 
     } else if (netcam->sock == -1) {   /* We are in keepalive mode, check for invalid socket */
         /* Must be first time, or closed, create a new socket */
         if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-            motion_log(LOG_ERR, 1, "%s: with keepalive set, invalid socket." 
+            motion_log(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: with keepalive set, invalid socket." 
                        "This could be the first time. Creating a new one failed.",
                        __FUNCTION__);
             return -1;
         }
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: with keepalive set, invalid socket."
-                       "This could be first time, created a new one with fd %d", 
-                       __FUNCTION__, netcam->sock);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: with keepalive set, invalid socket."
+                   "This could be first time, created a new one with fd %d", 
+                   __FUNCTION__, netcam->sock);
 
         /* Record that this connection has not yet received a Keep-Alive header */
         netcam->keepalive_thisconn = FALSE;
 
         /* Check the socket status for the keepalive option */
         if (getsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
-            motion_log(LOG_ERR, 1, "%s: getsockopt()", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: getsockopt()", __FUNCTION__);
             return -1;
         }
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: SO_KEEPALIVE is %s", __FUNCTION__, optval ? "ON":"OFF");
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: SO_KEEPALIVE is %s", 
+                   __FUNCTION__, optval ? "ON":"OFF");
 
         /* Set the option active */
         optval = 1;
         optlen = sizeof(optval);
 
         if (setsockopt(netcam->sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
-            motion_log(LOG_ERR, 1, "%s: setsockopt()", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: setsockopt()", __FUNCTION__);
             return -1;
         }
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: SO_KEEPALIVE set on socket.", __FUNCTION__);
-
-    } else if (debug_level > CAMERA_INFO) {
-        motion_log(LOG_DEBUG, 0, "%s: re-using socket %d since keepalive is set.", 
-                   __FUNCTION__, netcam->sock);
-    }
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: SO_KEEPALIVE set on socket.", 
+                   __FUNCTION__);
+    } 
     
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: re-using socket %d since keepalive is set.", 
+               __FUNCTION__, netcam->sock);
 
     /* lookup the hostname given in the netcam URL */
     if ((ret = getaddrinfo(netcam->connect_host, NULL, NULL, &res)) != 0) {
         if (!err_flag)
-            motion_log(LOG_ERR, 0, "%s: getaddrinfo() failed (%s): %s",
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: getaddrinfo() failed (%s): %s",
                        __FUNCTION__, netcam->connect_host, gai_strerror(ret));
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: disconnecting netcam (1)", __FUNCTION__);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam (1)",
+                    __FUNCTION__);
 
         netcam_disconnect(netcam);
         return -1;
@@ -972,14 +955,14 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
      */
 
     if ((saveflags = fcntl(netcam->sock, F_GETFL, 0)) < 0) {
-        motion_log(LOG_ERR, 1, "%s: fcntl(1) on socket", __FUNCTION__);
+        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: fcntl(1) on socket", __FUNCTION__);
         netcam_disconnect(netcam);
         return -1;
     }
 
     /* Set the socket non-blocking */
     if (fcntl(netcam->sock, F_SETFL, saveflags | O_NONBLOCK) < 0) {
-        motion_log(LOG_ERR, 1, "%s: fcntl(2) on socket", __FUNCTION__);
+        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: fcntl(2) on socket", __FUNCTION__);
         netcam_disconnect(netcam);
         return -1;
     }
@@ -992,12 +975,11 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     /* If the connect failed with anything except EINPROGRESS, error */
     if ((ret < 0) && (back_err != EINPROGRESS)) {
         if (!err_flag)
-            motion_log(LOG_ERR, 1, "%s: connect() failed (%d)", 
+            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: connect() failed (%d)", 
                        __FUNCTION__, back_err);
 
-        if (debug_level > CAMERA_INFO)    
-            motion_log(LOG_DEBUG, 0, "%s: disconnecting netcam (4)", 
-                       __FUNCTION__);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam (4)", 
+                   __FUNCTION__);
 
         netcam_disconnect(netcam);
         return -1;
@@ -1012,10 +994,11 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 
     if (ret == 0) {            /* 0 means timeout */
         if (!err_flag)
-            motion_log(LOG_ERR, 0, "%s: timeout on connect()", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: timeout on connect()", 
+                       __FUNCTION__);
         
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: disconnecting netcam (2)", __FUNCTION__);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam (2)", 
+                   __FUNCTION__);
         
         netcam_disconnect(netcam);
         return -1;
@@ -1029,7 +1012,8 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     len = sizeof(ret);
 
     if (getsockopt(netcam->sock, SOL_SOCKET, SO_ERROR, &ret, &len) < 0) {
-        motion_log(LOG_ERR, 0, "%s: getsockopt after connect", __FUNCTION__);
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: getsockopt after connect", 
+                   __FUNCTION__);
         netcam_disconnect(netcam);
         return -1;
     }
@@ -1037,10 +1021,11 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     /* If the return code is anything except 0, error on connect */
     if (ret) {
         if (!err_flag)
-            motion_log(LOG_ERR, 1, "%s: connect returned error", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: connect returned error", 
+                       __FUNCTION__);
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: disconnecting netcam (3)", __FUNCTION__);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam (3)",
+                    __FUNCTION__);
 
         netcam_disconnect(netcam);
         return -1;
@@ -1083,10 +1068,9 @@ static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 
     new_size = buff->size + real_alloc;
     
-    if (debug_level > CAMERA_INFO)
-        motion_log(0, 0, "%s: expanding buffer from [%d/%d] to [%d/%d] bytes.",
-                   __FUNCTION__, (int) buff->used, (int) buff->size,
-                   (int) buff->used, new_size);
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: expanding buffer from [%d/%d] to [%d/%d] bytes.",
+               __FUNCTION__, (int) buff->used, (int) buff->size,
+               (int) buff->used, new_size);
 
     buff->ptr = myrealloc(buff->ptr, new_size,
                           "netcam_check_buf_size");
@@ -1291,13 +1275,11 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                      * module netcam_wget.c to do this job!
                      */
 
-                    if (debug_level > CAMERA_INFO) {
-                        motion_log(0, 0,
-                                   "%s: Potential split boundary - "
-                                   "%d chars flushed, %d "
-                                   "re-positioned", __FUNCTION__, ix,
-                                   (int) netcam->response->buffer_left);
-                    }
+                    motion_log(NTC, TYPE_NETCAM, NO_ERRNO,
+                               "%s: Potential split boundary - "
+                               "%d chars flushed, %d "
+                               "re-positioned", __FUNCTION__, ix,
+                               (int) netcam->response->buffer_left);
 
                     memmove(netcam->response->buffer, ptr,
                             netcam->response->buffer_left);
@@ -1309,7 +1291,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                                      netcam->response->buffer_left);
 
                 if (retval <= 0) { /* this is a fatal error */
-                    motion_log(LOG_ERR, 1, "%s: recv() fail after boundary string", 
+                    motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: recv() fail after boundary string", 
                                __FUNCTION__);
                     return -1;
                 }
@@ -1346,7 +1328,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
      * the new 'receiving'
      */
     if (gettimeofday(&curtime, NULL) < 0) 
-        motion_log(LOG_ERR, 1, "%s: gettimeofday in netcam_read_jpeg", __FUNCTION__);
+        motion_log(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday", __FUNCTION__);
     
 
     netcam->receiving->image_time = curtime;
@@ -1361,9 +1343,8 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                                  1000000.0 * (curtime.tv_sec - netcam->last_image.tv_sec) +
                                  (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
-        if (debug_level > CAMERA_INFO) 
-            motion_log(0, 0, "%s: Calculated frame time %f", 
-                       __FUNCTION__, netcam->av_frame_time);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
+                   __FUNCTION__, netcam->av_frame_time);
     }
     netcam->last_image = curtime;
 
@@ -1384,15 +1365,13 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 
     if (netcam->caps.streaming == NCS_UNSUPPORTED) {
         if (!netcam->connect_keepalive) {
-            if (debug_level > CAMERA_INFO)
-                 motion_log(LOG_DEBUG, 0, "%s: disconnecting "
-                           "netcam since keep-alive not set.", __FUNCTION__);
+            motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting "
+                       "netcam since keep-alive not set.", __FUNCTION__);
 
             netcam_disconnect(netcam);
-        } else if (debug_level > CAMERA_INFO) {
-            motion_log(LOG_DEBUG, 0, "%s: leaving netcam connected.", 
-                       __FUNCTION__);
-        }
+        } 
+        motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: leaving netcam connected.", 
+                   __FUNCTION__);
     }
 
     return 0;
@@ -1432,12 +1411,11 @@ static int netcam_http_request(netcam_context_ptr netcam)
          * safe to include it as part of this loop
          * (Not always true now Keep-Alive is implemented)
          */
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s: about to try to connect, time #%d", 
-                       __FUNCTION__, ix);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: about to try to connect, time #%d", 
+                   __FUNCTION__, ix);
         
         if (netcam_connect(netcam, 0) != 0) {
-            motion_log(LOG_ERR, 0, "Failed to open camera - check your config "
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "Failed to open camera - check your config "
                        "and that netcamera is online", __FUNCTION__);
 
             /* Fatal error on startup */
@@ -1448,11 +1426,11 @@ static int netcam_http_request(netcam_context_ptr netcam)
         if (netcam_read_first_header(netcam) >= 0)
             break;
 
-        motion_log(LOG_ERR, 0, "%s: Error reading first header - re-trying", __FUNCTION__);
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error reading first header - re-trying", __FUNCTION__);
     }
 
     if (ix == MAX_HEADER_RETRIES) {
-        motion_log(LOG_ERR, 0, "%s: Failed to read first camera header "
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to read first camera header "
                    "- giving up for now", __FUNCTION__);
         return -1;
     }
@@ -1483,10 +1461,12 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
     while (1) {
         retval = rbuf_read_bufferful(netcam);
         if (retval <= 0) { /* If we got 0, we timeoutted. */
-            motion_log(0, 0, "%s: Read error, trying to reconnect..", __FUNCTION__);
+            motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: Read error,"
+                       " trying to reconnect..", __FUNCTION__);
             /* We may have lost the connexion */
             if (netcam_http_request(netcam) < 0) {
-                motion_log(0, 0, "%s: lost the cam.", __FUNCTION__);
+                motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: lost the cam.", 
+                           __FUNCTION__);
                 return -1; /* We REALLY lost the cam... bail out for now. */
             }
         }
@@ -1498,9 +1478,8 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
     netcam->response->buffer_left = retval;
     netcam->response->buffer_pos = netcam->response->buffer;
  
-    if (SETUP)   
-        motion_log(LOG_DEBUG, 0, "%s: Refilled buffer with [%d] bytes from the network.", 
-                   __FUNCTION__, retval); 
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Refilled buffer with [%d]"
+               " bytes from the network.", __FUNCTION__, retval); 
 
     return retval;
 }
@@ -1567,10 +1546,9 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
             retval = rbuf_flush(netcam, ((char *)&mh) + read_bytes, sizeof(mh) - read_bytes);
 
             read_bytes += retval;
-            if (debug_level > CAMERA_INFO) 
-                motion_log(0, 0, "%s: Read [%d/%d] header bytes.", 
-                           __FUNCTION__, read_bytes, sizeof(mh));
 
+            motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Read [%d/%d] header bytes.", 
+                       __FUNCTION__, read_bytes, sizeof(mh));
 
             /* If we don't have received a full header, refill our buffer. */
             if (read_bytes < sizeof(mh)) {
@@ -1581,11 +1559,8 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
 
         /* Now check the validity of our header. */
         if (strncmp(mh.mh_magic, MJPG_MH_MAGIC, MJPG_MH_MAGIC_SIZE)) {
-            if (debug_level > CAMERA_INFO) 
-                motion_log(0, 0, "%s: Invalid header received, reconnecting", 
-                           __FUNCTION__);
-
-
+            motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Invalid header received,"
+                       " reconnecting", __FUNCTION__);
             /*
              * We shall reconnect to restart the stream, and get a chance
              * to resync.
@@ -1605,13 +1580,12 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
             retval = rbuf_flush(netcam, buffer->ptr + buffer->used + read_bytes,
                                 mh.mh_chunksize - read_bytes);
             read_bytes += retval;
-            if (debug_level > CAMERA_INFO) 
-                motion_log(0, 0, "%s: Read [%d/%d] chunk bytes, [%d/%d] total",
-                           __FUNCTION__, read_bytes, mh.mh_chunksize, 
-                           buffer->used + read_bytes, mh.mh_framesize);
+            motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Read [%d/%d] chunk bytes,"
+                       " [%d/%d] total", __FUNCTION__, read_bytes, mh.mh_chunksize, 
+                       buffer->used + read_bytes, mh.mh_framesize);
 
             if (retval < (int)(mh.mh_chunksize - read_bytes)) {
-                /* motion_log(0, 0, "Chunk incomplete, going to refill."); */
+                /* motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "Chunk incomplete, going to refill."); */
                 if (netcam_mjpg_buffer_refill(netcam) < 0)
                     return -1;
                 
@@ -1619,21 +1593,18 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
         }
         buffer->used += read_bytes;
 
-        if (debug_level > CAMERA_INFO) 
-            motion_log(0, 0, "%s: Chunk complete, buffer used [%d] bytes.", 
-                       __FUNCTION__, buffer->used); 
-
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Chunk complete,"
+                   " buffer used [%d] bytes.", __FUNCTION__, buffer->used); 
 
         /* Is our JPG image complete ? */
         if (mh.mh_framesize == buffer->used) {
 
-            if (debug_level > CAMERA_INFO) 
-                motion_log(0, 0, "%s: Image complete, buffer used [%d] bytes.", 
-                           __FUNCTION__, buffer->used);
+            motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Image complete,"
+                       " buffer used [%d] bytes.", __FUNCTION__, buffer->used);
 
             break;    
         }
-            /* motion_log(LOG_ERR, 0, " -> Rlen now at [%d] bytes", rlen); */
+        /* motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Rlen now at [%d] bytes", __FUNCTION__, rlen); */
     }
 
     /*
@@ -1642,9 +1613,9 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
      * the new 'receiving'
      */
     if (gettimeofday(&curtime, NULL) < 0) 
-        motion_log(LOG_ERR, 1, "%s: gettimeofday in netcam_read_jpeg", __FUNCTION__);
+        motion_log(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday", 
+                   __FUNCTION__);
     
-
     netcam->receiving->image_time = curtime;
 
     /*
@@ -1657,9 +1628,8 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
                                  1000000.0 * (curtime.tv_sec - netcam->last_image.tv_sec) +
                                  (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
-        if (debug_level > CAMERA_INFO) 
-            motion_log(0, 0, "%s: Calculated frame time %f", 
-                       __FUNCTION__, netcam->av_frame_time);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
+                   __FUNCTION__, netcam->av_frame_time);
     }
     netcam->last_image = curtime;
 
@@ -1702,7 +1672,7 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
 
     /* Request the image from the remote server */
     if (ftp_get_socket(netcam->ftp) <= 0) {
-        motion_log(LOG_ERR, 0, "%s: ftp_get_socket failed in netcam_read_jpeg", 
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: ftp_get_socket failed", 
                    __FUNCTION__);
         return -1;
     }
@@ -1720,9 +1690,9 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
     } while (len > 0);
 
     if (gettimeofday(&curtime, NULL) < 0) 
-        motion_log(LOG_ERR, 1, "%s: gettimeofday in netcam_read_jpeg", __FUNCTION__);
+        motion_log(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday", 
+                   __FUNCTION__);
     
-
     netcam->receiving->image_time = curtime;
     /*
      * Calculate our "running average" time for this netcam's
@@ -1734,9 +1704,8 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
                                  (curtime.tv_sec - netcam->last_image.tv_sec) +
                                  (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s: Calculated frame time %f", 
-                       __FUNCTION__, netcam->av_frame_time);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
+                   __FUNCTION__, netcam->av_frame_time);
     }
 
     netcam->last_image = curtime;
@@ -1778,9 +1747,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 {
     int loop_counter = 0;
 
-    if (debug_level >= CAMERA_ALL) {
-        motion_log(0, 0, "%s: Begin", __FUNCTION__);
-    }
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Begin", __FUNCTION__);
 
     netcam_buff_ptr buffer;
     int len;
@@ -1795,23 +1762,24 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
     /*int fstat(int filedes, struct stat *buf);*/
     do {
         if (stat(netcam->file->path, &statbuf)) {
-            motion_log(0, 0, "%s: stat(%s) error", __FUNCTION__, netcam->file->path);
+            motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: stat(%s) error", 
+                       __FUNCTION__, netcam->file->path);
             return -1;
         }
     
-        if (debug_level >= CAMERA_ALL)
-            motion_log(0, 0, "%s: statbuf.st_mtime[%d] != last_st_mtime[%d]", 
-                       __FUNCTION__, statbuf.st_mtime,  netcam->file->last_st_mtime);
-        
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: statbuf.st_mtime[%d]"
+                   " != last_st_mtime[%d]", __FUNCTION__, statbuf.st_mtime, 
+                   netcam->file->last_st_mtime);
 
         /* its waits POLLING_TIMEOUT */
         if (loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000))) { 
-            motion_log(0, 0, "%s: waiting new file image timeout", __FUNCTION__);
+            motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: waiting new file image"
+                       " timeout", __FUNCTION__);
             return -1;
         }
 
-        if (debug_level >= CAMERA_ALL) 
-            motion_log(0, 0, "%s: delay waiting new file image ", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: delay waiting new"
+                   " file image ", __FUNCTION__);
         
         //its waits 5seconds - READ_TIMEOUT
         //SLEEP(netcam->timeout.tv_sec, netcam->timeout.tv_usec*1000); 
@@ -1823,9 +1791,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
     netcam->file->last_st_mtime = statbuf.st_mtime;
     
-    if (debug_level > CAMERA_INFO)
-        motion_log(LOG_INFO, 0, "%s: processing new file image - st_mtime "
-                   "%d", __FUNCTION__, netcam->file->last_st_mtime);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: processing new file image -"
+               " st_mtime %d", __FUNCTION__, netcam->file->last_st_mtime);
     
     /* Assure there's enough room in the buffer */
     while (buffer->size < (size_t)statbuf.st_size)
@@ -1835,23 +1802,24 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
     /* Do the read */
     netcam->file->control_file_desc = open(netcam->file->path, O_RDONLY);
     if (netcam->file->control_file_desc < 0) {
-        motion_log(0, 0, "%s: open(%s) error: %d", __FUNCTION__, 
-                   netcam->file->path, netcam->file->control_file_desc);
+        motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: open(%s) error: %d", 
+                   __FUNCTION__, netcam->file->path, netcam->file->control_file_desc);
         return -1;
     }
 
-    if ((len = read(netcam->file->control_file_desc, buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
-        motion_log(0, 0, "%s: read(%s) error: %d", __FUNCTION__, 
-                   netcam->file->control_file_desc, len);
+    if ((len = read(netcam->file->control_file_desc, 
+                    buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
+        motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: read(%s) error: %d", 
+                   __FUNCTION__, netcam->file->control_file_desc, len);
         return -1;
     }
 
     buffer->used += len;
-
     close(netcam->file->control_file_desc);
 
     if (gettimeofday(&curtime, NULL) < 0)
-        motion_log(LOG_ERR, 1, "%s: gettimeofday in netcam_read_jpeg", __FUNCTION__);
+        motion_log(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday", 
+                   __FUNCTION__);
     
 
     netcam->receiving->image_time = curtime;
@@ -1865,9 +1833,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
                                  (curtime.tv_sec - netcam->last_image.tv_sec) +
                                  (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
     
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s: Calculated frame time %f", __FUNCTION__, 
-                       netcam->av_frame_time);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
+                   __FUNCTION__, netcam->av_frame_time);
     }
 
     netcam->last_image = curtime;
@@ -1893,8 +1860,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
     pthread_mutex_unlock(&netcam->mutex);
 
-    if (debug_level >= CAMERA_ALL)
-        motion_log(0, 0, "%s: End", __FUNCTION__);
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: End", 
+               __FUNCTION__);
     
     return 0;
 }
@@ -1939,9 +1906,8 @@ static int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url)
     netcam->file->path = url->path;
     url->path = NULL;
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(LOG_INFO, 0, "%s: netcam->file->path %s", 
-                   __FUNCTION__, netcam->file->path);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: netcam->file->path %s", 
+               __FUNCTION__, netcam->file->path);
 
     netcam_url_free(url);
 
@@ -1974,9 +1940,8 @@ static void *netcam_handler_loop(void *arg)
      */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
 
-    if (SETUP)
-        motion_log(LOG_INFO, 0, "%s: Camera handler thread [%d]  started",
-                   __FUNCTION__, netcam->threadnr);
+    motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera handler thread [%d]"
+               " started", __FUNCTION__, netcam->threadnr);
 
     /*
      * The logic of our loop is very simple.  If this is a non-
@@ -1993,12 +1958,13 @@ static void *netcam_handler_loop(void *arg)
         if (netcam->response) {    /* if html input */
             if (netcam->caps.streaming == NCS_UNSUPPORTED) {
                 /* Non-streaming ie. jpeg */
-                if (!netcam->connect_keepalive || (netcam->connect_keepalive && netcam->keepalive_timeup)) {
+                if (!netcam->connect_keepalive || 
+                    (netcam->connect_keepalive && netcam->keepalive_timeup)) {
                     /* If keepalive flag set but time up, time to close this socket */
                     if (netcam->connect_keepalive && netcam->keepalive_timeup) {
-                        motion_log(LOG_INFO, 0, "%s: Closing netcam socket as Keep-Alive" 
-                                   "time is up (camera sent Close field). A reconnect should happen.",
-                                   __FUNCTION__);
+                        motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Closing netcam socket"
+                                   " as Keep-Alive time is up (camera sent Close field). A reconnect"
+                                   " should happen.", __FUNCTION__);
                         netcam_disconnect(netcam);
                         netcam->keepalive_timeup = FALSE;
                     }
@@ -2006,7 +1972,7 @@ static void *netcam_handler_loop(void *arg)
                     /* And the netcam_connect call below will open a new one */
                     if (netcam_connect(netcam, open_error) < 0) {
                         if (!open_error) { /* log first error */
-                            motion_log(LOG_ERR, 0,
+                            motion_log(WRN, TYPE_NETCAM, NO_ERRNO,
                                        "%s: re-opening camera (non-streaming)", __FUNCTION__);
                             open_error = 1;
                         }
@@ -2016,7 +1982,7 @@ static void *netcam_handler_loop(void *arg)
                     }
 
                     if (open_error) {          /* log re-connection */
-                        motion_log(LOG_ERR, 0,
+                        motion_log(WRN, TYPE_NETCAM, NO_ERRNO,
                                    "%s: camera re-connected", __FUNCTION__);
                         open_error = 0;
                     }
@@ -2024,10 +1990,10 @@ static void *netcam_handler_loop(void *arg)
                 /* Send our request and look at the response */
                 if ((retval = netcam_read_first_header(netcam)) != 1) {
                     if (retval > 0) {
-                        motion_log(LOG_ERR, 0, "%s: Unrecognized image header (%d)", 
-                                   __FUNCTION__, retval);
+                        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Unrecognized image"
+                                   " header (%d)", __FUNCTION__, retval);
                     } else if (retval != -1) {
-                        motion_log(LOG_ERR, 0, "%s: Error in header (%d)", 
+                        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error in header (%d)", 
                                    __FUNCTION__, retval);
                     }
                     /* need to have a dynamic delay here */
@@ -2037,7 +2003,7 @@ static void *netcam_handler_loop(void *arg)
                 if (netcam_read_next_header(netcam) < 0) {
                     if (netcam_connect(netcam, open_error) < 0) {
                         if (!open_error) { /* log first error */
-                            motion_log(LOG_ERR, 0,
+                            motion_log(ERR, TYPE_NETCAM, NO_ERRNO,
                                        "%s: re-opening camera (streaming)", 
                                        __FUNCTION__);
                             open_error = 1;
@@ -2048,11 +2014,11 @@ static void *netcam_handler_loop(void *arg)
 
                     if ((retval = netcam_read_first_header(netcam) != 2)) {
                         if (retval > 0) {
-                            motion_log(LOG_ERR, 0,
+                            motion_log(ERR, TYPE_NETCAM, NO_ERRNO,
                                       "%s: Unrecognized image header (%d)", __FUNCTION__, 
                                       retval);
                         } else if (retval != -1) {
-                            motion_log(LOG_ERR, 0,
+                            motion_log(ERR, TYPE_NETCAM, NO_ERRNO,
                                        "%s: Error in header (%d)", __FUNCTION__, retval);
                         }
                         /* FIXME need some limit */
@@ -2060,7 +2026,7 @@ static void *netcam_handler_loop(void *arg)
                     }
                 }
                 if (open_error) {          /* log re-connection */
-                    motion_log(LOG_ERR, 0,
+                    motion_log(ERR, TYPE_NETCAM, NO_ERRNO,
                                "%s: camera re-connected", __FUNCTION__);
                     open_error = 0;
                 }
@@ -2072,12 +2038,14 @@ static void *netcam_handler_loop(void *arg)
             }
         }
         if (netcam->get_image(netcam) < 0) {
-            motion_log(LOG_ERR, 0, "%s: Error getting jpeg image", __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error getting jpeg image", 
+                       __FUNCTION__);
             /* if FTP connection, attempt to re-connect to server */
             if (netcam->ftp) {
                 close(netcam->ftp->control_file_desc);
                 if (ftp_connect(netcam) < 0) 
-                    motion_log(LOG_ERR, 0, "%s: Trying to re-connect", __FUNCTION__);
+                    motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Trying to re-connect", 
+                               __FUNCTION__);
                 
             }
             continue;
@@ -2125,8 +2093,8 @@ static void *netcam_handler_loop(void *arg)
     pthread_mutex_unlock(&global_lock);
 
     /* log out a termination message */
-    motion_log(LOG_INFO, 0, "%s: netcam camera handler: finish set, exiting", 
-               __FUNCTION__);
+    motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: netcam camera handler:"
+               " finish set, exiting", __FUNCTION__);
 
     /* setting netcam->thread_id to zero shows netcam_cleanup we're done */
     netcam->thread_id = 0;
@@ -2168,10 +2136,10 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
     netcam->response = (struct rbuf *) mymalloc(sizeof(struct rbuf));
     memset(netcam->response, 0, sizeof(struct rbuf));
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(LOG_INFO, 0, "%s: Netcam has flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.", 
-                   __FUNCTION__, netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
-                   netcam->connect_keepalive ? "ON":"OFF");
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Netcam has flags:"
+               " HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.", __FUNCTION__, 
+               netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
+               netcam->connect_keepalive ? "ON":"OFF");
 
     /*
      * The network camera may require a username and password.  If
@@ -2247,9 +2215,9 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
         free((void *)netcam->cnt->conf.netcam_keepalive);
         netcam->cnt->conf.netcam_keepalive = strdup("off");
 
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_DEBUG, 0, "%s: Removed netcam_keepalive flag due to proxy set." 
-                       "Proxy is incompatible with Keep-Alive.", __FUNCTION__);
+        motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: "
+                  "Removed netcam_keepalive flag due to proxy set." 
+                  "Proxy is incompatible with Keep-Alive.", __FUNCTION__);
     } else {
         /* if no proxy, set as netcam_url path */
         ptr = url->path;
@@ -2312,9 +2280,9 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
     free((void *)ptr);
     netcam_url_free(url);         /* Cleanup the url data */
 
-    if (debug_level > CAMERA_INFO) 
-        motion_log(0, 0, "%s: Camera connect string is ''%s'' End of camera connect string.",
-                   __FUNCTION__, netcam->connect_request);
+    motion_log(INF , TYPE_NETCAM, NO_ERRNO, "%s: Camera connect"
+               " string is ''%s'' End of camera connect string.",
+               __FUNCTION__, netcam->connect_request);
     return 0;
 }
 
@@ -2354,14 +2322,15 @@ static int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url)
      */
     if (netcam->caps.streaming == NCS_MULTIPART) {
         if (netcam_read_next_header(netcam) < 0) {
-            motion_log(LOG_ERR, 0, "%s: Failed to read first stream header - "
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed "
+                       "to read first stream header - "
                        "giving up for now", __FUNCTION__);
             return -1;
         }
     }
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(0, 0, "%s: connected, going on to read image.", __FUNCTION__);
+    motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: connected,"
+               " going on to read image.", __FUNCTION__);
 
     netcam->get_image = netcam_read_html_jpeg;
     return 0;
@@ -2404,9 +2373,8 @@ static int netcam_setup_mjpg(netcam_context_ptr netcam, struct url_t *url)
      * We are positionned right just at the start of the first MJPG
      * header, so don't move anymore, initialization complete.
      */
-    if (debug_level > CAMERA_INFO)
-        motion_log(0, 0, "%s: connected, going on to read and decode MJPG chunks.", 
-                   __FUNCTION__);
+    motion_log(NTC, TYPE_NETCAM, NO_ERRNO, "%s: connected,"
+               " going on to read and decode MJPG chunks.", __FUNCTION__);
 
     netcam->get_image = netcam_read_mjpg_jpeg;
 
@@ -2429,9 +2397,9 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
     netcam->ftp->path = url->path;
     url->path = NULL;
 
-    if (cnt->conf.netcam_userpass != NULL)
+    if (cnt->conf.netcam_userpass != NULL) {
         ptr = cnt->conf.netcam_userpass;
-    else {
+    } else {
         ptr = url->userpass;  /* don't set this one NULL, gets freed */
     }
 
@@ -2459,7 +2427,8 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
     }
 
     if (ftp_send_type(netcam->ftp, 'I') < 0) {
-        motion_log(LOG_ERR, 0, "%s: Error sending TYPE I to ftp server", __FUNCTION__);
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error sending"
+                   " TYPE I to ftp server", __FUNCTION__);
         return -1;
     }
 
@@ -2595,7 +2564,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
          * Although this shouldn't happen, if it *does* happen we will
          * log it (just for the programmer's information)
          */
-        motion_log(0, 0, "%s: No response from camera "
+        motion_log(EMG, TYPE_NETCAM, NO_ERRNO, "%s: No response from camera "
                    "handler - it must have already died",
                    __FUNCTION__);
         pthread_mutex_lock(&global_lock);
@@ -2682,9 +2651,8 @@ int netcam_next(struct context *cnt, unsigned char *image)
     netcam = cnt->netcam;
 
     if (!netcam->latest->used) {
-        if (debug_level) 
-            motion_log(LOG_INFO, 0, "%s: netcam_next called with no data in buffer", 
-                       __FUNCTION__);
+        motion_log(WRN, TYPE_NETCAM, NO_ERRNO, "%s: called with no data in buffer", 
+                   __FUNCTION__);
         
         return NETCAM_NOTHING_NEW_ERROR;
     }
@@ -2741,8 +2709,8 @@ int netcam_start(struct context *cnt)
 
     memset(&url, 0, sizeof(url));
 
-    motion_log(LOG_INFO, 0, "%s: Network Camera thread starting... for url (%s)", 
-               __FUNCTION__, cnt->conf.netcam_url);
+    motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Network Camera thread"
+               " starting... for url (%s)", __FUNCTION__, cnt->conf.netcam_url);
     /*
      * Create a new netcam_context for this camera
      * and clear all the entries.
@@ -2788,15 +2756,15 @@ int netcam_start(struct context *cnt)
         netcam_url_parse(&url, cnt->conf.netcam_proxy);
 
         if (!url.host) {
-            motion_log(LOG_ERR, 0, "%s: Invalid netcam_proxy (%s)",
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Invalid netcam_proxy (%s)",
                        __FUNCTION__, cnt->conf.netcam_proxy);
             netcam_url_free(&url);
             return -1;
         }
 
         if (url.userpass) {
-            motion_log(LOG_ERR, 0, "%s: Username/password not allowed on a proxy URL",
-                       __FUNCTION__);
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Username/password"
+                       " not allowed on a proxy URL", __FUNCTION__);
             netcam_url_free(&url);
             return -1;
         }
@@ -2818,7 +2786,7 @@ int netcam_start(struct context *cnt)
     netcam_url_parse(&url, cnt->conf.netcam_url);
 
     if (!url.host) {
-        motion_log(LOG_ERR, 0, "%s: Invalid netcam_url (%s)", 
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Invalid netcam_url (%s)", 
                    __FUNCTION__, cnt->conf.netcam_url);
         netcam_url_free(&url);
         return -1;
@@ -2852,38 +2820,38 @@ int netcam_start(struct context *cnt)
             netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default */
     }
 
-    if (debug_level > CAMERA_INFO)
-        motion_log(LOG_INFO, 0, "%s: Netcam_http parameter '%s' converts to flags: HTTP/1.0:" 
-                   "%s HTTP/1.1: %s Keep-Alive %s.", __FUNCTION__, cnt->conf.netcam_keepalive, 
-                   netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
-                   netcam->connect_keepalive ? "ON":"OFF");
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: Netcam_http parameter '%s'"
+               " converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.", 
+               __FUNCTION__, cnt->conf.netcam_keepalive, 
+               netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0", 
+               netcam->connect_keepalive ? "ON":"OFF");
 
     /* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic */
     netcam->sock = -1;
 
     if ((url.service) && (!strcmp(url.service, "http"))) {
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s: now calling netcam_setup_html()", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
+                   " netcam_setup_html()", __FUNCTION__);
 
         retval = netcam_setup_html(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "ftp"))) {
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s:: now calling netcam_setup_ftp", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
+                   " netcam_setup_ftp", __FUNCTION__);
 
         retval = netcam_setup_ftp(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "file"))) {
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s: now calling netcam_setup_file()", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
+                   " netcam_setup_file()", __FUNCTION__);
 
         retval = netcam_setup_file(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "mjpg"))) {
-        if (debug_level > CAMERA_INFO)
-            motion_log(0, 0, "%s: now calling netcam_setup_mjpg()", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
+                   " netcam_setup_mjpg()", __FUNCTION__);
 
         strcpy(url.service, "http"); /* Put back a real URL service. */
         retval = netcam_setup_mjpg(netcam, &url);
     } else {
-        motion_log(LOG_ERR, 0, "%s: Invalid netcam service  '%s' - "
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Invalid netcam service '%s' - "
                    "must be http, ftp, mjpg or file.", __FUNCTION__, url.service);
         netcam_url_free(&url);
         return -1;
@@ -2900,8 +2868,8 @@ int netcam_start(struct context *cnt)
      * these to set the required image buffer(s) in our netcam_struct.
      */
     if ((retval = netcam->get_image(netcam)) != 0) {
-        motion_log(LOG_ERR, 0, "%s: Failed trying to read first image - retval:%d", 
-                   __FUNCTION__, retval);
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed trying to "
+                   "read first image - retval:%d", __FUNCTION__, retval);
         return -1;
     }
 
@@ -2911,7 +2879,7 @@ int netcam_start(struct context *cnt)
      * occurs during startup, we will just abandon this attempt.
      */
     if (setjmp(netcam->setjmp_buffer)) {
-        motion_log(LOG_ERR, 0, "%s: libjpeg decompression failure "
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: libjpeg decompression failure "
                    "on first frame - giving up!", __FUNCTION__);
         return -1;
     }
@@ -2924,14 +2892,14 @@ int netcam_start(struct context *cnt)
      * multiple of 16. So we check for this.
      */
     if (netcam->width % 16) {
-        motion_log(LOG_ERR, 0, "%s: netcam image width (%d) is not modulo 16",
-                   __FUNCTION__, netcam->width);
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: netcam image width (%d)"
+                   " is not modulo 16", __FUNCTION__, netcam->width);
         return -3;
     }
 
     if (netcam->height % 16) {
-        motion_log(LOG_ERR, 0, "%s: netcam image height (%d) is not modulo 16",
-                   __FUNCTION__, netcam->height);
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: netcam image height (%d)"
+                   " is not modulo 16", __FUNCTION__, netcam->height);
         return -3;
     }
 
@@ -2954,8 +2922,8 @@ int netcam_start(struct context *cnt)
 
     if ((retval = pthread_create(&netcam->thread_id, &handler_attribute,
                                  &netcam_handler_loop, netcam)) < 0) {
-        motion_log(LOG_ERR, 1, "%s: Starting camera handler thread [%d]", 
-                   __FUNCTION__, netcam->threadnr);
+        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: Starting camera"
+                   " handler thread [%d]", __FUNCTION__, netcam->threadnr);
         return -1;
     }
 

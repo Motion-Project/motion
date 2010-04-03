@@ -149,21 +149,21 @@
 #define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
 #define WATCHDOG_OFF          -127   /* Turn off watchdog, used when we wants to quit a thread */
 
-#define CONNECTION_KO "Lost connection"
-#define CONNECTION_OK "Connection OK"
+#define CONNECTION_KO           "Lost connection"
+#define CONNECTION_OK           "Connection OK"
 
 #define DEF_MAXSTREAMS          10   /* Maximum number of stream clients per camera */
 #define DEF_MAXWEBQUEUE         10   /* Maximum number of stream client in queue */
 
-#define DEF_TIMESTAMP      "%Y-%m-%d\\n%T"
-#define DEF_EVENTSTAMP     "%Y%m%d%H%M%S"
+#define DEF_TIMESTAMP           "%Y-%m-%d\\n%T"
+#define DEF_EVENTSTAMP          "%Y%m%d%H%M%S"
 
-#define DEF_SNAPPATH       "%v-%Y%m%d%H%M%S-snapshot"
-#define DEF_IMAGEPATH      "%v-%Y%m%d%H%M%S-%q"
-#define DEF_MOVIEPATH      "%v-%Y%m%d%H%M%S"
-#define DEF_TIMEPATH       "%Y%m%d-timelapse"
+#define DEF_SNAPPATH            "%v-%Y%m%d%H%M%S-snapshot"
+#define DEF_IMAGEPATH           "%v-%Y%m%d%H%M%S-%q"
+#define DEF_MOVIEPATH           "%v-%Y%m%d%H%M%S"
+#define DEF_TIMEPATH            "%Y%m%d-timelapse"
 
-#define DEF_TIMELAPSE_MODE "daily"
+#define DEF_TIMELAPSE_MODE      "daily"
 
 /* Do not break this line into two or more. Must be ONE line */
 #define DEF_SQL_QUERY "sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')"
@@ -340,6 +340,7 @@ struct context {
     unsigned int daemon;
     char pid_file[PATH_MAX];
     char log_file[PATH_MAX];
+    char log_type_str[6];
 
     struct config conf;
     struct images imgs;
@@ -437,6 +438,7 @@ struct context {
 extern pthread_mutex_t global_lock;
 extern volatile int threads_running;
 extern unsigned int debug_level;
+extern unsigned int debug_type;
 extern FILE *ptr_logfile;
 
 /* TLS keys below */

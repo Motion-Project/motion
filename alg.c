@@ -535,10 +535,9 @@ static int alg_labeling(struct context *cnt)
             labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
             
             if (labelsize > 0) {
-                if (debug_level >= CAMERA_VERBOSE) 
-                    motion_log(LOG_DEBUG, 0,"%s: Label: %i (%i) Size: %i (%i,%i)", 
-                               __FUNCTION__, current_label, cnt->current_image->total_labels, 
-                              labelsize, ix, iy);
+                motion_log(DBG, TYPE_ALL, NO_ERRNO, "%s: Label: %i (%i) Size: %i (%i,%i)", 
+                           __FUNCTION__, current_label, cnt->current_image->total_labels, 
+                           labelsize, ix, iy);
 
                 /* Label above threshold? Mark it again (add 32768 to labelnumber) */
                 if (labelsize > cnt->threshold) {
@@ -559,10 +558,9 @@ static int alg_labeling(struct context *cnt)
         pixelpos++; /* compensate for ix<width-1 */
     }
 
-    if (debug_level >= CAMERA_VERBOSE)
-        motion_log(LOG_DEBUG, 0,"%s: %i Labels found. Largest connected Area: %i Pixel(s). "
-                   "Largest Label: %i", __FUNCTION__, imgs->largest_label, imgs->labelsize_max, 
-                   cnt->current_image->total_labels);
+    motion_log(DBG, TYPE_ALL, NO_ERRNO, "%s: %i Labels found. Largest connected Area: %i Pixel(s). "
+               "Largest Label: %i", __FUNCTION__, imgs->largest_label, imgs->labelsize_max, 
+               cnt->current_image->total_labels);
     
     /* return group of significant labels */
     return imgs->labelgroup_max;

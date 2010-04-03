@@ -15,11 +15,84 @@
 
 static int log_mode = LOGMODE_SYSLOG;
 static FILE *logfile;
+static unsigned int log_level = LEVEL_DEFAULT;
+static unsigned int log_type = TYPE_DEFAULT;
+
+static const char *log_type_str[] = {NULL, "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL" };
+static const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL" };
+
+
+/**
+ * get_log_type
+ *
+ *
+ * Returns: index of log type or 0 if not valid type.
+ */
+int get_log_type(const char *type)
+{
+    unsigned int i, ret = 0;
+    unsigned int maxtype = sizeof(log_type_str)/sizeof(const char *);
+
+    for (i = 1;i < maxtype; i++) {
+        /* printf("Debug %s\n", log_type_str[i]); */
+        if (!strncasecmp(type, log_type_str[i], 3)) {
+            ret = i;
+            break;
+        }    
+    }
+
+    return ret;
+}
+
+/**
+ * get_log_type_str
+ *      Gets string value for type log level.
+ *
+ * Returns: name of type log level.
+ */
+const char* get_log_type_str(unsigned int type)
+{
+    return log_type_str[type];
+}
+
+/**
+ * set_log_type
+ *      Sets log type level.
+ *
+ * Returns: nothing.
+ */
+void set_log_type(unsigned int type)
+{
+    log_type = type;
+}
+
+/**
+ * get_log_level_str
+ *      Gets string value for log level.
+ *
+ * Returns: name of log level.
+ */ 
+const char* get_log_level_str(unsigned int level)
+{
+    return log_level_str[SHOW_LEVEL_VALUE(level)];
+}
+
+/**
+ * set_log_level
+ *      Sets log level.
+ *
+ * Returns nothing.
+ */
+void set_log_level(unsigned int level)
+{
+    log_level = level;
+}
 
 /**
  * set_log_mode
+ *      Sets mode of logging , could be using syslog or files.
  *
- *  Set mode of logging , could be using syslog or files.
+ * Returns: nothing.
  */ 
 void set_log_mode(int mode)
 {
@@ -28,8 +101,9 @@ void set_log_mode(int mode)
 
 /**
  * set_logfile
+ *      Sets logfile to be used instead of syslog.
  *
- *  Set logfile to be used instead of syslog.
+ * Returns: pointer to log file.
  */
 FILE * set_logfile(const char *logfile_name)
 {
@@ -43,11 +117,10 @@ FILE * set_logfile(const char *logfile_name)
     return logfile;
 }
 
-
 /**
  * str_time
  *
- * Return string with human readable time
+ * Return: string with human readable time
  */ 
 static char *str_time(void)
 {
@@ -71,7 +144,9 @@ static char *str_time(void)
  * Parameters:
  *
  *     level           logging level for the 'syslog' function
- *                     (-1 implies no syslog message should be produced)
+ *                     
+ *     type            logging type.
+ *
  *     errno_flag      if set, the log message should be followed by the
  *                     error message.
  *     fmt             the format string for producing the message
@@ -80,7 +155,7 @@ static char *str_time(void)
  * Returns:
  *                     Nothing
  */
-void motion_log(int level, int errno_flag, const char *fmt, ...)
+void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, ...)
 {
     int errno_save, n;
     char buf[1024];
@@ -90,6 +165,18 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
 #endif
     va_list ap;
     int threadnr;
+
+    /* Exit if level is greater than log_level */
+    if ((unsigned int)level > log_level)
+        return;
+
+    //printf("Level %d <= Log_level %d ", level, log_level);
+
+    /* Exit if type is greater than log_type */
+    if (type > log_type)
+        return;
+
+    //printf("Type %d <= Log_type %d\n---------\n", type, log_type);
 
     /* 
      * If pthread_getspecific fails (e.g., because the thread's TLS doesn't
@@ -104,12 +191,23 @@ void motion_log(int level, int errno_flag, const char *fmt, ...)
      */
     errno_save = errno;
 
-    /* Prefix the message with the time and thread number */
+    /* 
+     * Prefix the message with the log level string, log type string,
+     * time and thread number. i.ex [ERR] [ENC] [Apr 03 00:08:44] [1] blah
+     *
+     */
     if (!log_mode) {
-        n = snprintf(buf, sizeof(buf), "[%s] [%d] ", str_time(), threadnr);
+        n = snprintf(buf, sizeof(buf), "[%s] [%s] [%d] [%s]", 
+                     get_log_level_str(level), get_log_type_str(type), 
+                     threadnr, str_time());
     } else {    
-    /* Prefix the message with the thread number */
-        n = snprintf(buf, sizeof(buf), "[%d] ", threadnr);
+    /* 
+     * Prefix the message with the log level string, log type string
+     * and thread number. i.ex [DBG] [TRK] [1] blah
+     */
+        n = snprintf(buf, sizeof(buf), "[%s] [%s] [%d]", 
+                     get_log_level_str(level), get_log_type_str(type), 
+                     threadnr);
     }
 
     /* Next add the user's message */

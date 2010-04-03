@@ -24,6 +24,12 @@ setup_mode off
 # Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)
 ;logfile
 
+# Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 4 / ERR) 
+log_level 4
+
+# Filter to log messages by type (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL) 
+log_type all
+
 ###########################################################
 # Capture device options
 ############################################################

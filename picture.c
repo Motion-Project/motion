@@ -519,7 +519,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
     default:
-        motion_log(LOG_ERR, 0, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
     }
 
     return 0;
@@ -538,7 +538,7 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
             break;
         default:
-            motion_log(LOG_ERR, 0, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
+            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
         }
     }
 }
@@ -552,7 +552,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir */
         if (errno ==  EACCES) {
-            motion_log(LOG_ERR, 1,
+            motion_log(ERR, TYPE_ALL, SHOW_ERRNO,
                        "%s: Can't write picture to file %s - check access rights to target directory\n"
                        "Thread is going to finish due to this fatal error",       
                         __FUNCTION__, file);
@@ -561,7 +561,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive */
-            motion_log(LOG_ERR, 1, "%s: Can't write picture to file %s", __FUNCTION__, file);
+            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Can't write picture to file %s", __FUNCTION__, file);
             return;
         }
     }
@@ -581,12 +581,12 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     line[255] = 0;
     
     if (!fgets(line, 255, picture)) {
-        motion_log(LOG_ERR, 1, "%s: Could not read from ppm file", __FUNCTION__);
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not read from ppm file", __FUNCTION__);
         return NULL;
     }
     
     if (strncmp(line, "P5", 2)) {
-        motion_log(LOG_ERR, 1, "%s: This is not a ppm file, starts with '%s'", 
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: This is not a ppm file, starts with '%s'", 
                    __FUNCTION__, line);
         return NULL;
     }
@@ -599,12 +599,12 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* check size */
     if (sscanf(line, "%d %d", &x, &y) != 2) {
-        motion_log(LOG_ERR, 1, "%s: Failed reading size in pgm file", __FUNCTION__);
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading size in pgm file", __FUNCTION__);
         return NULL;
     }
     
     if (x != width || y != height) {
-        motion_log(LOG_ERR, 1, "%s: Wrong image size %dx%d should be %dx%d", 
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Wrong image size %dx%d should be %dx%d", 
                    __FUNCTION__, x, y, width, height);
         return NULL;
     }
@@ -616,7 +616,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
             return NULL;
     
     if (sscanf(line, "%d", &maxval) != 1) {
-        motion_log(LOG_ERR, 1, "%s: Failed reading maximum value in pgm file", __FUNCTION__);
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading maximum value in pgm file", __FUNCTION__);
         return NULL;
     }
     
@@ -626,7 +626,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     
     for (y = 0; y < height; y++) {
         if ((int)fread(&image[y * width], 1, width, picture) != width)
-            motion_log(LOG_ERR, 1, "%s: Failed reading image data from pgm file", __FUNCTION__);
+            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading image data from pgm file", __FUNCTION__);
         
         for (x = 0; x < width; x++)
             image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
@@ -648,12 +648,12 @@ void put_fixed_mask(struct context *cnt, const char *file)
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir */
         if (errno ==  EACCES) {
-            motion_log(LOG_ERR, 1,
+            motion_log(ERR, TYPE_ALL, SHOW_ERRNO,
                        "%s: can't write mask file %s - check access rights to target directory", 
                        __FUNCTION__, file);
         } else {
             /* If target dir is temporarily unavailable we may survive */
-            motion_log(LOG_ERR, 1, "%s: can't write mask file %s", __FUNCTION__, file);
+            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: can't write mask file %s", __FUNCTION__, file);
         }
         return;
     }
@@ -666,13 +666,13 @@ void put_fixed_mask(struct context *cnt, const char *file)
     
     /* write pgm image data at once */
     if ((int)fwrite(cnt->imgs.out, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
-        motion_log(LOG_ERR, 1, "%s: Failed writing default mask as pgm file", __FUNCTION__);
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed writing default mask as pgm file", __FUNCTION__);
         return;
     }
     
     myfclose(picture);
 
-    motion_log(LOG_ERR, 0, "%s: Creating empty mask %s\nPlease edit this file and "
+    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Creating empty mask %s\nPlease edit this file and "
                "re-run motion to enable mask feature", __FUNCTION__, cnt->conf.mask_file);
 }
 

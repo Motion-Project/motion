@@ -249,7 +249,8 @@ static void send_template_ini_client(int client_socket, const char *template)
     nwrite = write_nonblock(client_socket, ok_response, strlen(ok_response));
     nwrite += write_nonblock(client_socket, template, strlen(template));
     if (nwrite != (ssize_t)(strlen(ok_response) + strlen(template)))
-        motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
+        motion_log(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write", 
+                   __FUNCTION__);
 }
 
 /**
@@ -260,7 +261,8 @@ static void send_template_ini_client_raw(int client_socket)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, ok_response_raw, strlen(ok_response_raw));
     if (nwrite != (ssize_t)strlen(ok_response_raw))
-        motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
+        motion_log(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write", 
+                   __FUNCTION__);
 }
 
 /**
@@ -271,7 +273,8 @@ static void send_template(int client_socket, char *res)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, res, strlen(res));
     if (nwrite != (ssize_t)strlen(res))
-        motion_log(LOG_ERR, 1, "%s: failure write", __FUNCTION__);
+        motion_log(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write", 
+                   __FUNCTION__);
 }
 
 /**
@@ -1002,7 +1005,8 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             /* call restart */
 
             if (thread == 0) {
-                motion_log(LOG_DEBUG, 0, "%s: httpd restart", __FUNCTION__);
+                motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd restart", 
+                           __FUNCTION__);
                 kill(getpid(),SIGHUP);
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
@@ -1016,7 +1020,8 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 0; // to restart
             } else {
-                motion_log(LOG_DEBUG, 0, "%s: httpd restart thread %d", __FUNCTION__, thread);
+                motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd restart thread %d", 
+                           __FUNCTION__, thread);
                 if (cnt[thread]->running) {
                     cnt[thread]->makemovie = 1;
                     cnt[thread]->finish = 1;
@@ -1047,7 +1052,8 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             /* call quit */
 
             if (thread == 0) {
-                motion_log(LOG_DEBUG, 0, "%s: httpd quit", __FUNCTION__);
+                motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd quit", 
+                           __FUNCTION__);
                 kill(getpid(),SIGQUIT);
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
@@ -1061,7 +1067,8 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 0; // to quit
             } else {
-                motion_log(LOG_DEBUG, 0, "%s: httpd quit thread %d", __FUNCTION__, thread);
+                motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd quit thread %d", 
+                           __FUNCTION__, thread);
                 cnt[thread]->restart = 0;
                 cnt[thread]->makemovie = 1;
                 cnt[thread]->finish = 1;
@@ -1302,7 +1309,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             if ((question != '=') || (command[0] == '\0')) {
                 /* no valid syntax */
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 1", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 1", 
+                           __FUNCTION__);
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
                 else
@@ -1352,7 +1360,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 }
             } else {
                 /* no valid syntax */
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 2", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 2", 
+                           __FUNCTION__);
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
                 else
@@ -1363,7 +1372,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             /* first value check for error */
             
             if (!warningkill) {
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 3", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 3", 
+                           __FUNCTION__);
                 /* error value */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, error_value, NULL);
@@ -1515,7 +1525,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             warningkill = sscanf(pointer, "%c%255[a-z]" , &question, command);
             if ((question != '&') || (command[0] == '\0')) {
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 4", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 4", 
+                           __FUNCTION__);
                 if (strstr(pointer, "&")) {
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, error_value, NULL);
@@ -1539,7 +1550,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer = pointer + 3;
                 length_uri = length_uri - 3;
                 if (pan || !tilt || X || Y) {
-                    motion_log(LOG_WARNING, 0, "%s: httpd debug race 5", __FUNCTION__);
+                    motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 5", 
+                               __FUNCTION__);
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
@@ -1555,7 +1567,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 length_uri = length_uri - 4;
                 if (tilt || !pan || X || Y) {
                     /* no valid syntax */
-                    motion_log(LOG_WARNING, 0, "%s: httpd debug race 6", __FUNCTION__);
+                    motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 6", 
+                               __FUNCTION__);
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
                     else
@@ -1569,7 +1582,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer++;
                 length_uri--;
                 if (X || !Y || pan || tilt) {
-                    motion_log(LOG_WARNING, 0, "%s: httpd debug race 7", __FUNCTION__);
+                    motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 7", 
+                               __FUNCTION__);
                     
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
@@ -1585,7 +1599,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer++;
                 length_uri--;
                 if (Y || !X || pan || tilt) {
-                    motion_log(LOG_WARNING, 0, "%s: httpd debug race 8", __FUNCTION__);
+                    motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 8", 
+                               __FUNCTION__);
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
@@ -1597,7 +1612,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 warningkill = sscanf(pointer, "%c%10[-0-9]" , &question, y_value);
 
             } else {
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 9", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 9", 
+                           __FUNCTION__);
                 /* no valid syntax */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
@@ -1609,7 +1625,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             /* Second value check */
 
             if ((warningkill < 2) && (question != '=')) {
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 10", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 10", 
+                           __FUNCTION__);
                 /* no valid syntax */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
@@ -1617,7 +1634,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     response_client(client_socket, not_valid_syntax_raw, NULL);
                 return 1;
             } else if ((question == '=') && (warningkill == 1)) {
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 11", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 11", 
+                           __FUNCTION__);
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, error_value, NULL);
                 else
@@ -1642,7 +1660,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             
             
             if (length_uri != 0) {
-                motion_log(LOG_WARNING, 0, "%s: httpd debug race 12", __FUNCTION__);
+                motion_log(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 12", 
+                           __FUNCTION__);
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, error_value, NULL);
                 else
@@ -1692,7 +1711,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 cent.y = 0;
                 cent.x = atoi(panvalue);
                 // Add the number of frame to skip for motion detection
-                cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, &cent, &relativecnt->imgs, 1);
+                cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, 
+                                                &cent, &relativecnt->imgs, 1);
 
                 if (cnt[thread]->moved) {
                     /* move tilt */
@@ -1702,7 +1722,8 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     cent.x = 0;
                     cent.y = atoi(tiltvalue);
                     // SLEEP(1,0);
-                    cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, &cent, &relativecnt->imgs, 1);
+                    cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, 
+                                                    &cent, &relativecnt->imgs, 1);
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
@@ -2217,7 +2238,8 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
         nread = read_nonblock(client_socket, buffer, length);
 
         if (nread <= 0) {
-            motion_log(LOG_ERR, 1, "%s: motion-httpd First Read Error", __FUNCTION__);
+            motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd First Read Error", 
+                       __FUNCTION__);
             pthread_mutex_unlock(&httpd_mutex);
             return 1;
         } else {
@@ -2252,8 +2274,8 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                 nread += readb;
                 
                 if (nread > length) {
-                    motion_log(LOG_ERR, 1, "%s: motion-httpd End buffer reached waiting "
-                               "for buffer ending", __FUNCTION__);
+                    motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd End buffer"
+                               " reached waiting for buffer ending", __FUNCTION__);
                     break;
                 }
                 buffer[nread] = '\0';
@@ -2264,7 +2286,8 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
              * problem with the connection, so give up.  
              */
             if (nread == -1) {
-                motion_log(LOG_ERR, 1, "%s: motion-httpd READ give up!", __FUNCTION__);
+                motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd READ give up!", 
+                           __FUNCTION__);
                 pthread_mutex_unlock(&httpd_mutex);
                 return 1;
             }
@@ -2419,7 +2442,7 @@ void httpd_run(struct context **cnt)
 
     /* check != 0 to allow FreeBSD compatibility */ 
     if (val != 0) {
-        motion_log(LOG_ERR, 1, "%s: getaddrinfo() for httpd socket failed: %s",
+        motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for httpd socket failed: %s",
                    __FUNCTION__, gai_strerror(val));
         if (res)
             freeaddrinfo(res);
@@ -2436,7 +2459,7 @@ void httpd_run(struct context **cnt)
         getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
                     sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
 
-        motion_log(LOG_INFO, 0, "%s: motion-httpd testing : %s addr: %s port: %s", 
+        motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd testing : %s addr: %s port: %s", 
                    __FUNCTION__, res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
         if (sd >= 0) {
@@ -2445,40 +2468,43 @@ void httpd_run(struct context **cnt)
             setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
 
             if (bind(sd, res->ai_addr, res->ai_addrlen) == 0) {
-                motion_log(LOG_INFO, 0, "%s: motion-httpd Bound : %s addr: %s port: %s",
-                           __FUNCTION__, res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
+                motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Bound : %s addr: %s"
+                           " port: %s", __FUNCTION__, res->ai_family == AF_INET ? "IPV4":"IPV6", 
+                           hbuf, sbuf);
                 break;
             }
 
-            motion_log(LOG_ERR, 1, "%s: motion-httpd failed bind() interface %s / port %s, retrying", 
-                       __FUNCTION__, hbuf, sbuf);
+            motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd failed bind() interface %s"
+                       " / port %s, retrying", __FUNCTION__, hbuf, sbuf);
             close(sd);
             sd = -1;
         }
-        motion_log(LOG_ERR, 1, "%s: motion-httpd socket failed interface %s / port %s, retrying", 
-                   __FUNCTION__, hbuf, sbuf);
+        motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd socket failed interface %s"
+                   " / port %s, retrying", __FUNCTION__, hbuf, sbuf);
         res = res->ai_next;
     }
 
     freeaddrinfo(ressave);
 
     if (sd < 0) {
-        motion_log(LOG_ERR, 1, "%s: motion-httpd ERROR bind() [interface %s port %s]", 
-                   __FUNCTION__, hbuf, sbuf);
+        motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR bind()"
+                   " [interface %s port %s]", __FUNCTION__, hbuf, sbuf);
         pthread_mutex_destroy(&httpd_mutex);
         return;
     }
     
     if (listen(sd,5) == -1) {
-        motion_log(LOG_ERR, 1, "%s: motion-httpd ERROR listen() [interface %s port %s]", 
-                   __FUNCTION__, hbuf, sbuf);
+        motion_log(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR listen()"
+                   " [interface %s port %s]", __FUNCTION__, hbuf, sbuf);
         close(sd);
         pthread_mutex_destroy(&httpd_mutex);
         return;
     }
 
-    motion_log(LOG_DEBUG, 0, "%s: motion-httpd/"VERSION" running, accepting connections", __FUNCTION__);
-    motion_log(LOG_DEBUG, 0, "%s: motion-httpd: waiting for data on %s port TCP %s", __FUNCTION__, hbuf, sbuf);
+    motion_log(DBG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd/"VERSION" running,"
+               " accepting connections", __FUNCTION__);
+    motion_log(DBG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd: waiting for data"
+               " on %s port TCP %s", __FUNCTION__, hbuf, sbuf);
 
     if (cnt[0]->conf.webcontrol_authentication != NULL) {
         char *userpass = NULL;
@@ -2499,13 +2525,15 @@ void httpd_run(struct context **cnt)
 
         if (client_socket_fd < 0) {
             if ((!cnt[0]) || (cnt[0]->finish)) {
-                motion_log(0, 0, "%s: motion-httpd - Finishing", __FUNCTION__);
+                motion_log(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Finishing", 
+                           __FUNCTION__);
                 closehttpd = 1;
             }
         } else {
             /* Get the Client request */
             client_sent_quit_message = read_client(client_socket_fd, cnt, authentication);
-            motion_log(0, 0, "%s: motion-httpd - Read from client", __FUNCTION__);
+            motion_log(ERR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Read from client",
+                        __FUNCTION__);
 
             /* Close Connection */
             if (client_socket_fd)
@@ -2517,7 +2545,7 @@ void httpd_run(struct context **cnt)
     if (authentication != NULL) 
         free(authentication);
     close(sd);
-    motion_log(LOG_DEBUG, 0, "%s: motion-httpd Closing", __FUNCTION__);
+    motion_log(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Closing", __FUNCTION__);
     pthread_mutex_destroy(&httpd_mutex);
 }
 
@@ -2529,6 +2557,6 @@ void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
     httpd_run(cnt);
-    motion_log(LOG_DEBUG, 0, "%s: motion-httpd thread exit", __FUNCTION__);
+    motion_log(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd thread exit", __FUNCTION__);
     pthread_exit(NULL);
 }

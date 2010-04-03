@@ -153,6 +153,8 @@ struct config conf_template = {
     minimum_motion_frames:          1,
     pid_file:                       NULL,
     log_file:                       NULL,
+    log_level:                      LEVEL_DEFAULT,
+    log_type_str:                   NULL,
 };
 
 
@@ -211,6 +213,22 @@ config_param config_params[] = {
     CONF_OFFSET(log_file),
     copy_string,
     print_string
+    },
+    {
+    "log_level",
+    "# Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 4 / ERR)",
+    1,
+    CONF_OFFSET(log_level),
+    copy_int,
+    print_int    
+    },
+    {
+    "log_type",
+    "# Filter to log messages by type (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",    
+    1,
+    CONF_OFFSET(log_type_str),    
+    copy_string,
+    print_string    
     },
     {
     "videodevice",
@@ -1475,7 +1493,7 @@ config_param config_params[] = {
     { NULL, NULL, 0, 0, NULL, NULL }
 };
 
-/* conf_cmdline sets the conf struct options as defined by the command line.
+/* conf_cmdline sets the conf struct options as defined by the Command-line.
  * Any option already set from a config file are overridden.
  */
 static void conf_cmdline(struct context *cnt, int thread)
@@ -1487,7 +1505,7 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "c:d:hns?pl:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "c:d:hns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1) 
@@ -1501,8 +1519,13 @@ static void conf_cmdline(struct context *cnt, int thread)
             break;
         case 'd':
             /* no validation - just take what user gives */
-            debug_level = (unsigned int)atoi(optarg);
+            if (thread == -1)
+                debug_level = (unsigned int)atoi(optarg);
             break;
+        case 'k':
+            if (thread == -1)
+                strcpy(cnt->log_type_str, optarg);
+            break;    
         case 'p':
             if (thread == -1) 
                 strcpy(cnt->pid_file, optarg);
@@ -1565,7 +1588,8 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     }
 
     /* We reached the end of config_params without finding a matching option */
-    motion_log(LOG_ERR, 0, "%s: Unknown config option \"%s\"", __FUNCTION__, cmd);
+    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknown config option \"%s\"", 
+               __FUNCTION__, cmd);
 
     return cnt;
 }
@@ -1656,7 +1680,7 @@ void conf_print(struct context **cnt)
     FILE *conffile;
 
     for (thread = 0; cnt[thread]; thread++) {
-        motion_log(LOG_INFO, 0, "%s: Writing config file to %s", 
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Writing config file to %s", 
                    __FUNCTION__, cnt[thread]->conf_filename);
         
         conffile = myfopen(cnt[thread]->conf_filename, "w", 0);
@@ -1710,7 +1734,7 @@ void conf_print(struct context **cnt)
 /**************************************************************************
  * conf_load is the main function, called from motion.c
  * The function sets the important context structure "cnt" including
- * loading the config parameters from config files and command line.
+ * loading the config parameters from config files and Command-line.
  * The following takes place in the function:
  * - The default start values for cnt stored in the struct conf_template
  *   are copied to cnt[0] which is the default context structure common to
@@ -1721,8 +1745,8 @@ void conf_print(struct context **cnt)
  * - motion.conf is opened and processed. The process populates the cnt[0] and
  *   for each thread config file it populates a cnt[1], cnt[2]... for each
  *   thread
- * - Finally it process the options given in the command line. This is done
- *   for each thread cnt[i] so that the command line options overrides any
+ * - Finally it process the options given in the Command-line. This is done
+ *   for each thread cnt[i] so that the Command-line options overrides any
  *   option given by motion.conf or a thread config file.
  **************************************************************************/
 struct context **conf_load(struct context **cnt)
@@ -1745,7 +1769,7 @@ struct context **conf_load(struct context **cnt)
      * 2. Copy the conf_template given string to the reserved memory
      * 3. Change the cnt[0] member (char*) pointing to the string in reserved memory
      * This ensures that we can free and malloc the string when changed
-     * via http remote control or config file or command line options
+     * via http remote control or config file or Command-line options
      */
     malloc_strings(cnt[0]);
 
@@ -1754,33 +1778,33 @@ struct context **conf_load(struct context **cnt)
     cnt[0]->conf.argc = argc;
 
     /* Open the motion.conf file. We try in this sequence:
-     * 1. commandline
+     * 1. Command-line
      * 2. current working directory
      * 3. $HOME/.motion/motion.conf
      * 4. sysconfig/motion.conf
      */
-    /* Get filename , pid file & log file from commandline */
+    /* Get filename , pid file & log file from Command-line */
+    cnt[0]->log_type_str[0] = 0;
     cnt[0]->conf_filename[0] = 0;
     cnt[0]->pid_file[0] = 0;
     cnt[0]->log_file[0] = 0;
 
-
     conf_cmdline(cnt[0], -1);
 
-    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on commandline*/
+    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on Command-line*/
         strcpy(filename, cnt[0]->conf_filename);
         fp = fopen (filename, "r");
     }
 
-    if (!fp) {      /* Commandline didn't work, try current dir */
+    if (!fp) {      /* Command-line didn't work, try current dir */
         char *path = NULL;
 
         if (cnt[0]->conf_filename[0])
-            motion_log(0, 1, "%s: Configfile %s not found - trying defaults.", 
+            motion_log(EMG, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.", 
                        __FUNCTION__, filename);
 
         if ((path = get_current_dir_name()) == NULL) {
-            motion_log(LOG_ERR, 1, "%s: Error get_current_dir_name", __FUNCTION__);
+            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name", __FUNCTION__);
             exit(-1);
         }
 
@@ -1798,7 +1822,7 @@ struct context **conf_load(struct context **cnt)
             fp = fopen(filename, "r");
 
             if (!fp)        /* there is no config file.... use defaults */
-                motion_log(0, 1, "%s: could not open configfile %s", 
+                motion_log(EMG, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s", 
                            __FUNCTION__, filename);
         }
     }
@@ -1806,12 +1830,12 @@ struct context **conf_load(struct context **cnt)
     /* Now we process the motion.conf config file and close it */
     if (fp) {
         strcpy(cnt[0]->conf_filename, filename);
-        motion_log(LOG_INFO, 0, "%s: Processing thread 0 - config file %s", 
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s", 
                    __FUNCTION__, filename);
         cnt = conf_process(cnt, fp);
         myfclose(fp);
     } else {
-        motion_log(LOG_INFO, 0, "%s: Not config file to process using default values", 
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Not config file to process using default values", 
                    __FUNCTION__);
     }
     
@@ -1822,7 +1846,7 @@ struct context **conf_load(struct context **cnt)
      * cnt[0] is the default context structure
      * cnt[1], cnt[2], ... are context structures for each thread
      * Command line options always wins over config file options
-     * so we go through each thread and overrides any set command line
+     * so we go through each thread and overrides any set Command-line
      * options
      */
     i = -1;
@@ -1830,12 +1854,16 @@ struct context **conf_load(struct context **cnt)
     while (cnt[++i])
         conf_cmdline(cnt[i], i);
 
-    /* if pid file was passed from command line copy to main thread conf struct */
+    /* if pid file was passed from Command-line copy to main thread conf struct */
     if (cnt[0]->pid_file[0])    
         cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
 
     if (cnt[0]->log_file[0])
         cnt[0]->conf.log_file = mystrcpy(cnt[0]->conf.log_file, cnt[0]->log_file);
+
+    if (cnt[0]->log_type_str[0])
+        cnt[0]->conf.log_type_str = mystrcpy(cnt[0]->conf.log_type_str, cnt[0]->log_type_str);
+
 
     return cnt;
 }
@@ -2167,7 +2195,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
     fp = fopen(str, "r");
 
     if (!fp) {
-        motion_log(LOG_ERR, 1, "%s: Thread config file %s not found", 
+        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Thread config file %s not found", 
                    __FUNCTION__, str);
         return cnt;
     }
@@ -2183,7 +2211,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
      * First thread is 0 so the number of threads is i+1
      * plus an extra for the NULL pointer. This gives i+2
      */
-    cnt = myrealloc(cnt, sizeof(struct context *)*(i+2), "config_thread");
+    cnt = myrealloc(cnt, sizeof(struct context *) * (i + 2), "config_thread");
 
     /* Now malloc space for an additional context structure for thread nr. i */
     cnt[i] = mymalloc(sizeof(struct context));
@@ -2201,11 +2229,12 @@ static struct context **config_thread(struct context **cnt, const char *str,
     malloc_strings(cnt[i]);
     
     /* Mark the end if the array of pointers to context structures */
-    cnt[i+1] = NULL;
+    cnt[i + 1] = NULL;
 
     /* process the thread's config file and notify user on console */
     strcpy(cnt[i]->conf_filename, str);
-    motion_log(LOG_INFO, 0, "%s: Processing config file %s", __FUNCTION__, str);
+    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Processing config file %s", 
+               __FUNCTION__, str);
     conf_process(cnt+i, fp);
     
     /* Finally we close the thread config file */
@@ -2223,7 +2252,8 @@ static void usage()
     printf("-n\t\t\tRun in non-daemon mode.\n");
     printf("-s\t\t\tRun in setup mode.\n");
     printf("-c config\t\tFull path and filename of config file.\n");
-    printf("-d level\t\tDebug mode.\n");
+    printf("-d level\t\tLog level (1-9) (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). default: 4 / ERR.\n");
+    printf("-k type\t\t\tType of log (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
     printf("-l log file \t\tFull path and filename of log file.\n");
     printf("-h\t\t\tShow this screen.\n");

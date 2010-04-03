@@ -81,8 +81,8 @@ static boolean netcam_fill_input_buffer(j_decompress_ptr cinfo)
         src->buffer = (JOCTET *) src->data;
     } else {
         /* Insert a fake EOI marker - as per jpeglib recommendation */
-        if (debug_level >= CAMERA_VERBOSE)
-            motion_log(LOG_INFO, 0, "%s: **fake EOI inserted**", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: **fake EOI inserted**", 
+                   __FUNCTION__);
         src->buffer[0] = (JOCTET) 0xFF;
         src->buffer[1] = (JOCTET) JPEG_EOI;    /* 0xD9 */
         nbytes = 2;
@@ -176,9 +176,8 @@ static void netcam_error_exit(j_common_ptr cinfo)
     /* need to "cleanup" the aborted decompression */
     jpeg_destroy (cinfo);
 
-    if (debug_level >= CAMERA_VERBOSE) 
-        motion_log(LOG_ERR, 0, "%s: netcam->jpeg_error %d", __FUNCTION__, 
-                   netcam->jpeg_error);
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: netcam->jpeg_error %d", 
+               __FUNCTION__, netcam->jpeg_error);
         
     /* jump back to wherever we started */
     longjmp(netcam->setjmp_buffer, 1);
@@ -219,21 +218,15 @@ static void netcam_output_message(j_common_ptr cinfo)
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && 
         (cinfo->err->msg_code == JWRN_NOT_SEQUENTIAL) && (!netcam->netcam_tolerant_check))      
         netcam->jpeg_error |= 2;    /* Set flag to show problem */
+   
     /*
-     * We only display and log errors when debug_level
-     * is non-zero.  The reasoning here is that these kinds
-     * of errors are only produced when the input data is
-     * wrong, and that indicates a network problem rather
-     * than a problem with the content.
+     * Format the message according to library standards.
+     * Write it out to the motion log.
      */
-    if (debug_level >= CAMERA_VERBOSE) {
-        /*
-         * Format the message according to library standards.
-         * Write it out to the motion log.
-         */
-        (*cinfo->err->format_message)(cinfo, buffer);
-        motion_log(LOG_ERR, 0, "%s: %s", __FUNCTION__, buffer);
-    }
+     (*cinfo->err->format_message)(cinfo, buffer);
+     motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: %s", 
+                __FUNCTION__, buffer);
+    
 }
 
 /**
@@ -291,14 +284,14 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
         if (retcode) {    /* we assume a non-zero reply is ETIMEOUT */
             pthread_mutex_unlock(&netcam->mutex);
             
-            if (debug_level > CAMERA_WARNINGS)
-                motion_log(0, 0, "%s: no new pic, no signal rcvd", __FUNCTION__);
+            motion_log(WRN, TYPE_NETCAM, NO_ERRNO, 
+                       "%s: no new pic, no signal rcvd", __FUNCTION__);
                 
             return NETCAM_GENERAL_ERROR | NETCAM_NOTHING_NEW_ERROR;
         }
         
-        if (debug_level >= CAMERA_VERBOSE)
-            motion_log(0, 0, "%s: ***new pic delay successful***", __FUNCTION__);
+        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, 
+                   "%s: ***new pic delay successful***", __FUNCTION__);
     }
     
     netcam->imgcnt_last = netcam->imgcnt;
@@ -337,8 +330,8 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
     /* Start the decompressor */
     jpeg_start_decompress(cinfo);
 
-    if (debug_level >= CAMERA_VERBOSE)
-        motion_log(LOG_INFO, 0, "%s: jpeg_error %d", __FUNCTION__, netcam->jpeg_error);
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: jpeg_error %d", 
+               __FUNCTION__, netcam->jpeg_error);
 
     return netcam->jpeg_error;
 }
@@ -370,7 +363,7 @@ static int netcam_image_conv(netcam_context_ptr netcam,
     height = cinfo->output_height;
 
     if (width && ((width != netcam->width) || (height != netcam->height))) {
-        motion_log(LOG_ERR, 0, 
+        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, 
                    "%s: JPEG image size %dx%d, JPEG was %dx%d",
                    __FUNCTION__, netcam->width, netcam->height, width, height);
         jpeg_destroy_decompress(cinfo);
@@ -418,9 +411,8 @@ static int netcam_image_conv(netcam_context_ptr netcam,
         /* rotate as specified */
         rotate_map(netcam->cnt, image);
 
-    if (debug_level >= CAMERA_VERBOSE)
-        motion_log(LOG_INFO, 0, "%s: jpeg_error %d", __FUNCTION__, 
-                   netcam->jpeg_error);
+    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: jpeg_error %d", __FUNCTION__, 
+               netcam->jpeg_error);
  
     return netcam->jpeg_error;
 }
@@ -454,15 +446,14 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
      * decompress it.  netcam_init_jpeg uses
      * netcam->mutex to do this;
      */
-    if (debug_level > CAMERA_INFO) 
-        motion_log(LOG_INFO, 0, "%s: processing jpeg image - content length "
-                   "%d", __FUNCTION__, netcam->latest->content_length);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: processing jpeg image"
+               " - content length %d", __FUNCTION__, netcam->latest->content_length);
     
     ret = netcam_init_jpeg(netcam, &cinfo);
     
     if (ret != 0) {
-        if (debug_level > CAMERA_INFO)
-            motion_log(LOG_ERR, 0, "%s: ret %d", __FUNCTION__, ret);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: ret %d", 
+                   __FUNCTION__, ret);
         return ret;
     }    
 
@@ -476,7 +467,7 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
         if ((cinfo.output_width != netcam->width) ||
             (cinfo.output_height != netcam->height)) {
             retval = NETCAM_RESTART_ERROR;
-            motion_log(LOG_ERR, 0, "%s: Camera width/height mismatch "
+            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Camera width/height mismatch "
                        "with JPEG image - expected %dx%d, JPEG %dx%d",
                        " retval %d", __FUNCTION__, netcam->width, netcam->height,
                        cinfo.output_width, cinfo.output_height, retval);
@@ -489,9 +480,8 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
     
     if (ret != 0) {
         retval |= NETCAM_JPEG_CONV_ERROR;
-        if (debug_level > CAMERA_INFO) 
-            motion_log(LOG_ERR, 0, "%s: ret %d retval %d", __FUNCTION__, 
-                       ret, retval);
+        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: ret %d retval %d", 
+                   __FUNCTION__, ret, retval);
     }    
 
     return retval;
@@ -523,7 +513,6 @@ void netcam_get_dimensions(netcam_context_ptr netcam)
 
     jpeg_destroy_decompress(&cinfo);
 
-    if (debug_level > CAMERA_INFO) 
-        motion_log(LOG_ERR, 0, "%s: JFIF_marker %s PRESENT ret %d", 
-                   __FUNCTION__, netcam->JFIF_marker ? "IS" : "NOT", ret);
+    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: JFIF_marker %s PRESENT ret %d", 
+               __FUNCTION__, netcam->JFIF_marker ? "IS" : "NOT", ret);
 }

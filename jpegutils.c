@@ -201,8 +201,9 @@ static void init_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 static boolean empty_output_buffer(j_compress_ptr cinfo)
 {
     /*FIXME: */
-    motion_log(LOG_ERR, 0, "%s: Given jpeg buffer was too small", __FUNCTION__);
-    ERREXIT (cinfo, JERR_BUFFER_SIZE);    /* shouldn't be FILE_WRITE but BUFFER_OVERRUN! */
+    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small", 
+               __FUNCTION__);
+    ERREXIT (cinfo, JERR_BUFFER_SIZE);  /* shouldn't be FILE_WRITE but BUFFER_OVERRUN! */
     return TRUE;
 }
 
@@ -335,7 +336,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
             nsymbols += bits[len];
 
         if (nsymbols < 1 || nsymbols > 256)
-            motion_log(LOG_ERR, 0, "%s: Given jpeg buffer was too small", 
+            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small", 
                        __FUNCTION__);      
 
         memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
@@ -507,8 +508,8 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     jpeg_start_decompress (&dinfo);
 
     if (dinfo.output_components != 3) {
-        motion_log(LOG_ERR, 0, "%s: Output components of JPEG image = %d, must be 3", 
-                   __FUNCTION__, dinfo.output_components);
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Output components of JPEG image"
+                   " = %d, must be 3", __FUNCTION__, dinfo.output_components);
         goto ERR_EXIT;
     }
 
@@ -519,15 +520,16 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
     if ((hsf[0] != 2 && hsf[0] != 1) || hsf[1] != 1 || hsf[2] != 1 ||
         (vsf[0] != 1 && vsf[0] != 2) || vsf[1] != 1 || vsf[2] != 1) {
-        motion_log(LOG_ERR, 0, "%s: Unsupported sampling factors, hsf=(%d, %d, %d) "
-                   "vsf=(%d, %d, %d) !", __FUNCTION__, hsf[0], hsf[1], hsf[2], vsf[0], vsf[1], vsf[2]);
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported sampling factors,"
+                   " hsf=(%d, %d, %d) vsf=(%d, %d, %d) !", __FUNCTION__, hsf[0], hsf[1],
+                   hsf[2], vsf[0], vsf[1], vsf[2]);
         goto ERR_EXIT;
     }
 
     if (hsf[0] == 1) {
         if (height % 8 != 0) {
-            motion_log(LOG_ERR, 0, "%s: YUV 4:4:4 sampling, but image height %d "
-                       "not dividable by 8 !", __FUNCTION__, height);
+            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: YUV 4:4:4 sampling, but image"
+                       " height %d not dividable by 8 !", __FUNCTION__, height);
             goto ERR_EXIT;       
         }
 
@@ -546,7 +548,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     } else if (2 * dinfo.output_height == height) {
         numfields = 2;
     } else {
-        motion_log(LOG_ERR, 0, "%s: Read JPEG: requested height = %d, "
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
                    "height of image = %d", __FUNCTION__, height, dinfo.output_height);
         goto ERR_EXIT;
     }
@@ -554,7 +556,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        motion_log(LOG_ERR, 0, "%s: Image width of %d exceeds max", 
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
                    __FUNCTION__, dinfo.output_width);
         goto ERR_EXIT;
     }
@@ -604,8 +606,8 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                 yl = yc = (1 - field);
                 break;
             default:
-                motion_log(LOG_ERR, 0, "%s: Input is interlaced but no interlacing set", 
-                           __FUNCTION__);
+                motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced but"
+                           " no interlacing set", __FUNCTION__);
                 goto ERR_EXIT;
             }
         } else {
@@ -810,8 +812,8 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     dinfo.dct_method = JDCT_IFAST;
     
     if (dinfo.jpeg_color_space != JCS_GRAYSCALE) { 
-        motion_log(LOG_ERR, 0, "%s: Expected grayscale colorspace for JPEG raw decoding", 
-                   __FUNCTION__);
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Expected grayscale colorspace"
+                   " for JPEG raw decoding", __FUNCTION__);
         goto ERR_EXIT;
     }
 
@@ -828,7 +830,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     } else if (2 * dinfo.output_height == height) {
         numfields = 2;
     } else {
-        motion_log(LOG_ERR, 0, "%s: Read JPEG: requested height = %d, "
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
                    "height of image = %d", __FUNCTION__, height, dinfo.output_height);
         goto ERR_EXIT;
     }
@@ -836,7 +838,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        motion_log(LOG_ERR, 0, "%s: Image width of %d exceeds max", 
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
                    __FUNCTION__, dinfo.output_width);
         goto ERR_EXIT;
     }
@@ -886,8 +888,8 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                 yl = yc = (1 - field);
                 break;
             default:
-                motion_log(LOG_ERR, 0, "%s: Input is interlaced but no interlacing set", 
-                           __FUNCTION__);
+                motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
+                           " but no interlacing set", __FUNCTION__);
                 goto ERR_EXIT;
             }
         } else {
@@ -976,7 +978,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                 }
                 break;
                /*
-                * should be case Y4M_CHROMA_420JPEG: but use default: for compatibility. Some
+                * Should be case Y4M_CHROMA_420JPEG: but use default: for compatibility. Some
                 * pass things like '420' in with the expectation that anything other than
                 * Y4M_CHROMA_422 will default to 420JPEG.
                 */
@@ -1098,14 +1100,14 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
 
     if ((width > 4096) || (height > 4096)) {
-        motion_log(LOG_ERR, 0, "%s: Image dimensions (%dx%d) exceed lavtools' max "
-                   "(4096x4096)", __FUNCTION__, width, height);
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) exceed"
+                  " lavtools' max (4096x4096)", __FUNCTION__, width, height);
         goto ERR_EXIT;
     }
 
     if ((width % 16) || (height % 16)) {
-        motion_log(LOG_ERR, 0, "%s: Image dimensions (%dx%d) not multiples of 16", 
-                   __FUNCTION__, width, height);
+        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) not"
+                   " multiples of 16", __FUNCTION__, width, height);
         goto ERR_EXIT;
     }
 
@@ -1119,8 +1121,8 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
     default:
         numfields = 1;
         if (height > 2048) {
-            motion_log(LOG_ERR, 0, "%s: Image height (%d) exceeds lavtools max "
-                       "for non-interlaced frames", __FUNCTION__, height);
+            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image height (%d) exceeds"
+                       " lavtools max for non-interlaced frames", __FUNCTION__, height);
             goto ERR_EXIT;
         }
     }
@@ -1146,8 +1148,8 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
                 yl = yc = (1 - field);
                 break;
             default:
-                motion_log(LOG_ERR, 0, "%s: Input is interlaced but no interlacing set", 
-                           __FUNCTION__);
+                motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
+                           " but no interlacing set", __FUNCTION__);
                 goto ERR_EXIT;
             }
 

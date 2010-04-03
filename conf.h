@@ -19,6 +19,8 @@
  * More parameters may be added later.
  */
 struct config {
+    unsigned int log_level;
+    char *log_type_str;
     char *log_file;
     int setup_mode;
     int width;
@@ -40,7 +42,7 @@ struct config {
     int frame_limit;
     int quiet;
     int useextpipe; /* ext_pipe on or off */
-    const char *extpipe; /* full command line for pipe -- must accept YUV420P images  */
+    const char *extpipe; /* full Command-line for pipe -- must accept YUV420P images  */
     const char *picture_type;
     int noise;
     int noise_tune;
