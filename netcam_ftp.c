@@ -8,7 +8,7 @@
 *      See also the file 'COPYING'.
 *
 */
-#include "motion.h"  /* needs to come first, because _GNU_SOURCE_ set there */
+#include "motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
 
 #include <ctype.h>
 #include <netdb.h>
@@ -18,36 +18,36 @@
 /**
 * ftp_new_context
 *
-*      Create a new FTP context structure
+*      Create a new FTP context structure.
 *
 * Parameters
 *
 *       None
 *
-* Returns:     Pointer to the newly-created structure, NULL if error
+* Returns:     Pointer to the newly-created structure, NULL if error.
 *
 */
 ftp_context_pointer ftp_new_context(void)
 {
     ftp_context_pointer ret;
 
-    /* note that mymalloc will exit on any problem */
+    /* Note that mymalloc will exit on any problem. */
     ret = mymalloc(sizeof(ftp_context));
 
     memset(ret, 0, sizeof(ftp_context));
-    ret->control_file_desc = -1;                /* no control connection yet */
-    ret->data_file_desc = -1;                   /* no data connection yet */
+    ret->control_file_desc = -1;                /* No control connection yet. */
+    ret->data_file_desc = -1;                   /* No data connection yet. */
     return ret;
 }
 
 /**
 * ftp_free_context
 *
-*      Free the resources allocated for this context
+*      Free the resources allocated for this context.
 *
 * Parameters
 *
-*      ctxt    Pointer to the ftp_context structure
+*      ctxt    Pointer to the ftp_context structure.
 *
 * Returns:     Nothing
 *
@@ -79,8 +79,8 @@ void ftp_free_context(ftp_context_pointer ctxt)
 *
 * Parameters:
 *
-*      buf     the buffer containing the response
-*      len     the buffer length
+*      buf     the buffer containing the response.
+*      len     the buffer length.
 *
 * Returns:
 *     0 for errors
@@ -124,11 +124,11 @@ static int ftp_parse_response(char *buf, int len)
 /**
 * ftp_get_more
 *
-*      Read more information from the FTP control connection
+*      Read more information from the FTP control connection.
 *
 * Parameters:
 *
-*      ctxt    pointer to an FTP context
+*      ctxt    pointer to an FTP context.
 *
 * Returns the number of bytes read, < 0 indicates an error
 */
@@ -137,7 +137,7 @@ static int ftp_get_more(ftp_context_pointer ctxt)
     int len;
     int size;
 
-    /* Validate that our context structure is valid */
+    /* Validate that our context structure is valid. */
     if ((ctxt == NULL) || (ctxt->control_file_desc < 0))
         return -1;
 
@@ -150,7 +150,7 @@ static int ftp_get_more(ftp_context_pointer ctxt)
     if (ctxt->control_buffer_index > ctxt->control_buffer_used)
         return -1;
 
-    /* First pack the control buffer */
+    /* First pack the control buffer. */
     if (ctxt->control_buffer_index > 0) {
         memmove(&ctxt->control_buffer[0],
         &ctxt->control_buffer[ctxt->control_buffer_index],
@@ -164,10 +164,10 @@ static int ftp_get_more(ftp_context_pointer ctxt)
     if (size == 0) 
         return 0;
     
-    /* Read the amount left on the control connection */
+    /* Read the amount left on the control connection. */
     if ((len = recv(ctxt->control_file_desc,
-         &ctxt->control_buffer[ctxt->control_buffer_index], size, 0)) < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: recv failed in ftp_get_more", __FUNCTION__);
+                    &ctxt->control_buffer[ctxt->control_buffer_index], size, 0)) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: recv failed in ftp_get_more");
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
         return -1;
@@ -201,8 +201,8 @@ static int ftp_get_response(ftp_context_pointer ctxt)
 
     get_more:
     /*
-     * Assumes everything up to control_buffer[control_buffer_index] has been read
-     * and analyzed.
+     * Assumes everything up to control_buffer[control_buffer_index] 
+     * has been read and analyzed.
      */
     len = ftp_get_more(ctxt);
 
@@ -262,7 +262,7 @@ static int ftp_get_response(ftp_context_pointer ctxt)
 
 /**
 * ftp_send_user  
-*       Sends the user authentication
+*       Sends the user authentication.
 */
 static int ftp_send_user(ftp_context_pointer ctxt) 
 {
@@ -280,7 +280,7 @@ static int ftp_send_user(ftp_context_pointer ctxt)
     res = send(ctxt->control_file_desc, buf, len, 0);
 
     if (res < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_send_user", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_send_user");
         return res;
     }
     return 0;
@@ -288,7 +288,7 @@ static int ftp_send_user(ftp_context_pointer ctxt)
 
 /**
 * ftp_send_passwd
-*       Sends the password authentication
+*       Sends the password authentication.
 */
 static int ftp_send_passwd(ftp_context_pointer ctxt) 
 {
@@ -306,7 +306,7 @@ static int ftp_send_passwd(ftp_context_pointer ctxt)
     res = send(ctxt->control_file_desc, buf, len, 0);
 
     if (res < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_send_passwd", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_send_passwd");
         return res;
     }
 
@@ -337,7 +337,7 @@ static int ftp_quit(ftp_context_pointer ctxt)
     res = send(ctxt->control_file_desc, buf, len, 0);
 
     if (res < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_quit", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_quit");
         return res;
     }
 
@@ -347,13 +347,13 @@ static int ftp_quit(ftp_context_pointer ctxt)
 /**
 * ftp_connect
 *
-*      Tries to open a control connection
+*      Tries to open a control connection.
 *
 * Parameters:
 *
 *      ctxt    an FTP context
 *
-* Returns -1 in case of error, 0 otherwise
+* Returns -1 in case of error, 0 otherwise.
 */
 int ftp_connect(netcam_context_ptr netcam) 
 {
@@ -385,14 +385,14 @@ int ftp_connect(netcam_context_ptr netcam)
     hp = gethostbyname (netcam->connect_host);
 
     if (hp == NULL) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gethostbyname failed in ftp_connect", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gethostbyname failed in ftp_connect");
         return -1;
     }
 
     if ((unsigned int) hp->h_length > 
          sizeof(((struct sockaddr_in *)&ctxt->ftp_address)->sin_addr)) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gethostbyname address mismatch "
-                   "in ftp_connect", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gethostbyname address mismatch "
+                   "in ftp_connect");
         return -1;
     }
 
@@ -404,14 +404,14 @@ int ftp_connect(netcam_context_ptr netcam)
     addrlen = sizeof (struct sockaddr_in);
 
     if (ctxt->control_file_desc < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: socket failed", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: socket failed");
         return -1;
     }
 
     /* Do the connect. */
     if (connect(ctxt->control_file_desc, (struct sockaddr *) &ctxt->ftp_address,
         addrlen) < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: Failed to create a connection", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: Failed to create a connection");
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
         return -1;
@@ -465,8 +465,7 @@ int ftp_connect(netcam_context_ptr netcam)
     case 2:
         break;
     case 3:
-        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FTP server asking for ACCT on anonymous", 
-                   __FUNCTION__);
+        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: FTP server asking for ACCT on anonymous");
     case 1:
     case 4:
     case 5:
@@ -488,7 +487,7 @@ int ftp_connect(netcam_context_ptr netcam)
 *
 * Parameters:
 *
-*      ctxt    pointer to an FTP context
+*      ctxt    pointer to an FTP context.
 *
 * Returns -1 in case of error, 0 otherwise
 */
@@ -506,7 +505,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
     if (ctxt == NULL)
     return -1;
 
-    /* set up a socket for our data address */
+    /* Set up a socket for our data address. */
     if (ctxt->data_file_desc != -1)
         close(ctxt->data_file_desc);
 
@@ -514,7 +513,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
     ctxt->data_file_desc = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (ctxt->data_file_desc < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: socket failed", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: socket failed");
         return -1;
     }
 
@@ -522,8 +521,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
 
     if (setsockopt(ctxt->data_file_desc, SOL_SOCKET, SO_REUSEADDR,
         (char *)&on, sizeof(on)) < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: setting socket option SO_REUSEADDR", 
-                   __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: setting socket option SO_REUSEADDR");
         return -1;
     }
 
@@ -531,19 +529,18 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
     data_address_length = sizeof (struct sockaddr_in);
 
     if (ctxt->passive) {
-        /* send PASV command over control channel */
+        /* Send PASV command over control channel. */
         snprintf (buf, sizeof(buf), "PASV\r\n");
         len = strlen (buf);
         res = send(ctxt->control_file_desc, buf, len, 0);
        
         if (res < 0) {
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_connection", 
-                       __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_connection");
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
             return res;
         }
-        /* check server's answer */
+        /* Check server's answer */
         res = ftp_get_response(ctxt);
        
         if (res != 2) {
@@ -552,15 +549,13 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
                 ctxt->data_file_desc = -1;
                 return -1;
             } else {
-                /*
-                * retry with an active connection
-                */
+                /* Retry with an active connection. */
                 close(ctxt->data_file_desc);
                 ctxt->data_file_desc = -1;
                 ctxt->passive = 0;
             }
         }
-        /* parse the IP address and port supplied by the server */
+        /* Parse the IP address and port supplied by the server. */
         cur = &ctxt->control_buffer[ctxt->control_buffer_answer];
 
         while (((*cur < '0') || (*cur > '9')) && *cur != '\0')
@@ -568,7 +563,7 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
 
         if (sscanf(cur, "%u,%u,%u,%u,%u,%u", &temp[0], &temp[1], &temp[2],
             &temp[3], &temp[4], &temp[5]) != 6) {
-            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Invalid answer to PASV", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Invalid answer to PASV");
             if (ctxt->data_file_desc != -1) {
                 close (ctxt->data_file_desc);
                 ctxt->data_file_desc = -1;
@@ -582,11 +577,10 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
         memcpy (&((struct sockaddr_in *)&data_address)->sin_addr, &ad[0], 4);
         memcpy (&((struct sockaddr_in *)&data_address)->sin_port, &ad[4], 2);
 
-        /* Now try to connect to the data port */
+        /* Now try to connect to the data port. */
         if (connect(ctxt->data_file_desc, (struct sockaddr *) &data_address,
             data_address_length) < 0) {
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: Failed to create a data connection", 
-                       __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: Failed to create a data connection");
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
             return -1;
@@ -596,34 +590,34 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
          * We want to bind to a port to receive the data.  To do this,
          * we need the address of our host.  One easy way to get it is
          * to get the info from the control connection that we have
-         * with the remote server
+         * with the remote server.
          */
         getsockname(ctxt->control_file_desc, (struct sockaddr *)&data_address,
                     &data_address_length);
         ((struct sockaddr_in *)&data_address)->sin_port = 0;
 
-        /* bind to the socket - should give us a unique port */
+        /* Bind to the socket - should give us a unique port. */
         if (bind(ctxt->data_file_desc, (struct sockaddr *) &data_address,
             data_address_length) < 0) {
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: bind failed", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: bind failed");
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
             return -1;
         }
 
-        /* we get the port number by reading back in the sockaddr */
+        /* We get the port number by reading back in the sockaddr. */
         getsockname(ctxt->data_file_desc, (struct sockaddr *)&data_address,
                     &data_address_length);
 
-        /* set up a 'listen' on the port to get the server's connection */
+        /* Set up a 'listen' on the port to get the server's connection. */
         if (listen(ctxt->data_file_desc, 1) < 0) {
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: listen failed", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: listen failed");
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
             return -1;
         }
 
-        /* now generate the PORT command */
+        /* Now generate the PORT command. */
         adp = (unsigned char *) &((struct sockaddr_in *)&data_address)->sin_addr;
         portp = (unsigned char *) &((struct sockaddr_in *)&data_address)->sin_port;
         snprintf(buf, sizeof(buf), "PORT %d,%d,%d,%d,%d,%d\r\n", 
@@ -633,12 +627,11 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
         buf[sizeof(buf) - 1] = 0;
         len = strlen(buf);
 
-        /* send the PORT command to the server */
+        /* Send the PORT command to the server. */
         res = send(ctxt->control_file_desc, buf, len, 0);
 
         if (res < 0) {
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_connection", 
-                       __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_connection");
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
             return res;
@@ -659,11 +652,11 @@ static int ftp_get_connection(ftp_context_pointer ctxt)
 /**
 * ftp_close_connection
 *
-*      Close the data connection from the server
+*      Close the data connection from the server.
 *
 * Parameters:
 *
-*      ctxt    Pointer to an FTP context
+*      ctxt    Pointer to an FTP context.
 *
 * Returns -1 in case of error, 0 otherwise
 */
@@ -679,7 +672,7 @@ static int ftp_close_connection(ftp_context_pointer ctxt)
     close(ctxt->data_file_desc);
     ctxt->data_file_desc = -1;
 
-    /* Check for data on the control channel */
+    /* Check for data on the control channel. */
     tv.tv_sec = 15;
     tv.tv_usec = 0;
     FD_ZERO(&rfd);
@@ -694,13 +687,13 @@ static int ftp_close_connection(ftp_context_pointer ctxt)
         return -1;
     }
 
-    if (res == 0) {             /* timeout */
+    if (res == 0) {             /* Timeout */
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;
-    } else {                    /* read the response */
+    } else {                    /* Read the response */
         res = ftp_get_response(ctxt);
 
-        if (res != 2) {            /* should be positive completion (2) */
+        if (res != 2) {         /* Should be positive completion (2) */
             close(ctxt->control_file_desc);
             ctxt->control_file_desc = -1;
             return -1;
@@ -730,29 +723,28 @@ int ftp_get_socket(ftp_context_pointer ctxt)
     if ((ctxt == NULL) || (ctxt->path == NULL))
         return -1;
 
-    /* Set up the data connection */
+    /* Set up the data connection. */
     ctxt->data_file_desc = ftp_get_connection(ctxt);
 
     if (ctxt->data_file_desc == -1)
         return -1;
 
-    /* generate a "retrieve" command for the file */
+    /* Generate a "retrieve" command for the file. */
     snprintf(buf, sizeof(buf), "RETR %s\r\n", ctxt->path);
     buf[sizeof(buf) - 1] = 0;
     len = strlen(buf);
 
-    /* send it to the server */
+    /* Send it to the server. */
     res = send(ctxt->control_file_desc, buf, len, 0);
 
     if (res < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_socket", 
-                   __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_socket");
         close(ctxt->data_file_desc);
         ctxt->data_file_desc = -1;
         return res;
     }
 
-    /* check the answer */
+    /* Check the answer */
     res = ftp_get_response(ctxt);
 
     if (res != 1) {
@@ -763,7 +755,7 @@ int ftp_get_socket(ftp_context_pointer ctxt)
 
     /*
      * If not a passive connection, need to do an accept to get the
-     * connection from the server
+     * connection from the server.
      */
     if (!ctxt->passive) {
         struct sockaddr_in data_address;
@@ -771,7 +763,7 @@ int ftp_get_socket(ftp_context_pointer ctxt)
 
         if ((acfd = accept(ctxt->data_file_desc, (struct sockaddr *)&data_address,
             &data_address_length)) < 0) {
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: accept in ftp_get_socket", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: accept in ftp_get_socket");
             close(ctxt->data_file_desc);
             ctxt->data_file_desc = -1;
             return -1;
@@ -786,14 +778,14 @@ int ftp_get_socket(ftp_context_pointer ctxt)
 /**
 * ftp_send_type
 *
-*     Send a TYPE (either 'I' or 'A') command to the server
+*     Send a TYPE (either 'I' or 'A') command to the server.
 *
 * Parameters
 *
 *      ctxt    pointer to the ftp_context
 *      type    ascii character ('I' or 'A')
 *
-* Returns      0 for success, negative error code for failure
+* Returns      0 for success, negative error code for failure.
 *
 */
 int ftp_send_type(ftp_context_pointer ctxt, char type) 
@@ -802,13 +794,13 @@ int ftp_send_type(ftp_context_pointer ctxt, char type)
     int len, res;
 
     utype = toupper(type);
-    /* Assure transfer will be in "image" mode */
+    /* Assure transfer will be in "image" mode. */
     snprintf(buf, sizeof(buf), "TYPE I\r\n");
     len = strlen(buf);
     res = send(ctxt->control_file_desc, buf, len, 0);
 
     if (res < 0) {
-        motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_socket", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: send failed in ftp_get_socket");
         close(ctxt->data_file_desc);
         ctxt->data_file_desc = -1;
         return res;
@@ -858,7 +850,7 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len)
 
     if (len <= 0) {
         if (len < 0)
-            motion_log(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: recv failed in ftp_read", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: recv failed in ftp_read");
         ftp_close_connection(ctxt);
     }
 
@@ -869,13 +861,13 @@ int ftp_read(ftp_context_pointer ctxt, void *dest, int len)
 /**
 * ftp_close
 *
-*      Close the connection and both control and transport
+*      Close the connection and both control and transport.
 *
 * Parameters:
 *
-*      ctxt    Pointer to an FTP context
+*      ctxt    Pointer to an FTP context.
 *
-* Returns -1 in case of error, 0 otherwise
+* Returns -1 in case of error, 0 otherwise.
 */
 int ftp_close(ftp_context_pointer ctxt) 
 {

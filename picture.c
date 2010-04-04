@@ -15,8 +15,9 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
-/* The following declarations and 5 functions are jpeg related 
- * functions used by put_jpeg_grey_memory and put_jpeg_yuv420p_memory
+/* 
+ * The following declarations and 5 functions are jpeg related 
+ * functions used by put_jpeg_grey_memory and put_jpeg_yuv420p_memory.
  */
 typedef struct {
     struct jpeg_destination_mgr pub;
@@ -80,15 +81,19 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
 }
 
 
-/* put_jpeg_yuv420p_memory converts an input image in the YUV420P format into a jpeg image and puts
- * it in a memory buffer.
+/**
+ * put_jpeg_yuv420p_memory 
+ *      Converts an input image in the YUV420P format into a jpeg image and puts
+ *      it in a memory buffer.
  * Inputs:
  * - image_size is the size of the input image buffer.
  * - input_image is the image in YUV420P format.
  * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
+ *
  * Output:
  * - dest_image is a pointer to the jpeg image buffer
+ *
  * Returns buffer size of jpeg image     
  */
 static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
@@ -106,7 +111,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     data[1] = cb;
     data[2] = cr;
 
-    cinfo.err = jpeg_std_error(&jerr);  // errors get written to stderr 
+    cinfo.err = jpeg_std_error(&jerr);  // Errors get written to stderr 
     
     jpeg_create_compress(&cinfo);
     cinfo.image_width = width;
@@ -116,10 +121,10 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
-    cinfo.raw_data_in = TRUE; // supply downsampled data
+    cinfo.raw_data_in = TRUE; // Supply downsampled data
 #if JPEG_LIB_VERSION >= 70
 #warning using JPEG_LIB_VERSION >= 70    
-    cinfo.do_fancy_downsampling = FALSE;  // fix segfaulst with v7
+    cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
 #endif    
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 2;
@@ -131,7 +136,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
 
-    _jpeg_mem_dest(&cinfo, dest_image, image_size);    // data written to mem
+    _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
     
     jpeg_start_compress (&cinfo, TRUE);
 
@@ -154,15 +159,20 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     return jpeg_image_size;
 }
 
-/* put_jpeg_grey_memory converts an input image in the grayscale format into a jpeg image
+/**
+ * put_jpeg_grey_memory 
+ *      Converts an input image in the grayscale format into a jpeg image.
+ *
  * Inputs:
  * - image_size is the size of the input image buffer.
  * - input_image is the image in grayscale format.
  * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
+ *
  * Output:
  * - dest_image is a pointer to the jpeg image buffer
- * Returns buffer size of jpeg image     
+ *
+ * Returns buffer size of jpeg image.     
  */
 static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsigned char *input_image, int width, int height, int quality)
 {
@@ -175,14 +185,14 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
     jpeg_create_compress(&cjpeg);
     cjpeg.image_width = width;
     cjpeg.image_height = height;
-    cjpeg.input_components = 1; /* one colour component */
+    cjpeg.input_components = 1; /* One colour component */
     cjpeg.in_color_space = JCS_GRAYSCALE;
 
     jpeg_set_defaults(&cjpeg);
 
     jpeg_set_quality(&cjpeg, quality, TRUE);
     cjpeg.dct_method = JDCT_FASTEST;
-    _jpeg_mem_dest(&cjpeg, dest_image, image_size);  // data written to mem
+    _jpeg_mem_dest(&cjpeg, dest_image, image_size);  // Data written to mem
 
     jpeg_start_compress (&cjpeg, TRUE);
 
@@ -200,14 +210,19 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
     return dest_image_size;
 }
 
-/* put_jpeg_yuv420p_file converts an YUV420P coded image to a jpeg image and writes
- * it to an already open file.
+/**
+ * put_jpeg_yuv420p_file 
+ *      Converts an YUV420P coded image to a jpeg image and writes
+ *      it to an already open file.
+ *
  * Inputs:
  * - image is the image in YUV420P format.
  * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
+ *
  * Output:
  * - The jpeg is written directly to the file given by the file pointer fp
+ *
  * Returns nothing
  */
 static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int height, int quality)
@@ -224,7 +239,7 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
     data[1] = cb;
     data[2] = cr;
 
-    cinfo.err = jpeg_std_error(&jerr);  // errors get written to stderr 
+    cinfo.err = jpeg_std_error(&jerr);  // Errors get written to stderr 
     
     jpeg_create_compress(&cinfo);
     cinfo.image_width = width;
@@ -234,10 +249,10 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
-    cinfo.raw_data_in = TRUE; // supply downsampled data
+    cinfo.raw_data_in = TRUE; // Supply downsampled data
 #if JPEG_LIB_VERSION >= 70
 #warning using JPEG_LIB_VERSION >= 70
-    cinfo.do_fancy_downsampling = FALSE;  // fix segfaulst with v7
+    cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
 #endif
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 2;
@@ -249,7 +264,7 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
     jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
 
-    jpeg_stdio_dest(&cinfo, fp);        // data written to file
+    jpeg_stdio_dest(&cinfo, fp);        // Data written to file
     jpeg_start_compress(&cinfo, TRUE);
 
     for (j = 0; j < height; j += 16) {
@@ -268,14 +283,18 @@ static void put_jpeg_yuv420p_file(FILE *fp, unsigned char *image, int width, int
 }
 
 
-/* put_jpeg_grey_file converts an greyscale image to a jpeg image and writes
- * it to an already open file.
+/**
+ * put_jpeg_grey_file 
+ *      Converts an greyscale image to a jpeg image and writes
+ *      it to an already open file.
+ *
  * Inputs:
  * - image is the image in greyscale format.
  * - width and height are the dimensions of the image
  * - quality is the jpeg encoding quality 0-100%
  * Output:
  * - The jpeg is written directly to the file given by the file pointer fp
+ *
  * Returns nothing
  */
 static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height, int quality)
@@ -289,7 +308,7 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
     jpeg_create_compress(&cjpeg);
     cjpeg.image_width = width;
     cjpeg.image_height = height;
-    cjpeg.input_components = 1; /* one colour component */
+    cjpeg.input_components = 1; /* One colour component */
     cjpeg.in_color_space = JCS_GRAYSCALE;
 
     jpeg_set_defaults(&cjpeg);
@@ -312,13 +331,17 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
 }
 
 
-/* put_ppm_bgr24_file converts an greyscale image to a PPM image and writes
- * it to an already open file.
+/** 
+ * put_ppm_bgr24_file 
+ *      Converts an greyscale image to a PPM image and writes
+ *      it to an already open file.
  * Inputs:
  * - image is the image in YUV420P format.
  * - width and height are the dimensions of the image
+ *
  * Output:
  * - The PPM is written directly to the file given by the file pointer fp
+ *
  * Returns nothing
  */
 static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, int height)
@@ -331,9 +354,10 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
     int warningkiller;
     unsigned char rgb[3];
     
-    /*    ppm header
-     *    width height
-     *    maxval
+    /* 
+     *  ppm header
+     *  width height
+     *  maxval
      */
     fprintf(picture, "P6\n");
     fprintf(picture, "%d %d\n", width, height);
@@ -379,7 +403,12 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
     }
 }
 
-/* copy smartmask as an overlay into motion images and movies */
+/**
+ * overlay_smartmask 
+ *      Copies smartmask as an overlay into motion images and movies.
+ *
+ * Returns nothing.
+ */
 void overlay_smartmask(struct context *cnt, unsigned char *out)
 {
     int i, x, v, width, height, line;
@@ -392,7 +421,7 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
     width = imgs->width;
     height = imgs->height;
 
-    /* set V to 255 to make smartmask appear red */
+    /* Set V to 255 to make smartmask appear red. */
     out_v = out + v;
     out_u = out + i;
     for (i = 0; i < height; i += 2) {
@@ -410,7 +439,7 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
         }
     }
     out_y = out;
-    /* set colour intensity for smartmask */
+    /* Set colour intensity for smartmask. */
     for (i = 0; i < imgs->motionsize; i++) {
         if (smartmask[i] == 0)
             *out_y = 0;
@@ -418,7 +447,12 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
     }
 }
 
-/* copy fixed mask as green overlay into motion images and movies */
+/**
+ * overlay_fixed_mask 
+ *      Copies fixed mask as green overlay into motion images and movies.
+ *
+ * Returns nothing.
+ */
 void overlay_fixed_mask(struct context *cnt, unsigned char *out)
 {
     int i, x, v, width, height, line;
@@ -431,7 +465,7 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
     width = imgs->width;
     height = imgs->height;
 
-    /* set U and V to 0 to make fixed mask appear green */
+    /* Set U and V to 0 to make fixed mask appear green. */
     out_v = out + v;
     out_u = out + i;
     for (i = 0; i < height; i += 2) {
@@ -449,7 +483,7 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
         }
     }
     out_y = out;
-    /* set colour intensity for mask */
+    /* Set colour intensity for mask. */
     for (i = 0; i < imgs->motionsize; i++) {
         if (mask[i] == 0)
             *out_y = 0;
@@ -457,7 +491,12 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
     }
 }
 
-/* copy largest label as an overlay into motion images and movies */
+/**
+ * overlay_largest_label
+ *      Copies largest label as an overlay into motion images and movies.
+ *
+ * Returns nothing. 
+ */
 void overlay_largest_label(struct context *cnt, unsigned char *out)
 {
     int i, x, v, width, height, line;
@@ -470,7 +509,7 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
     width = imgs->width;
     height = imgs->height;
 
-    /* set U to 255 to make label appear blue */
+    /* Set U to 255 to make label appear blue. */
     out_u = out + i;
     out_v = out + v;
     for (i = 0; i < height; i += 2) {
@@ -488,7 +527,7 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
         }
     }
     out_y = out;
-    /* set intensity for coloured label to have better visibility */
+    /* Set intensity for coloured label to have better visibility. */
     for (i = 0; i < imgs->motionsize; i++) {
         if (*labels++ & 32768)
             *out_y = 0;
@@ -496,17 +535,21 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
     }
 }
 
-/* put_picture_mem is used for the webcam feature. Depending on the image type
- * (colour YUV420P or greyscale) the corresponding put_jpeg_X_memory function is called.
+/** 
+ * put_picture_mem 
+ *      Is used for the webcam feature. Depending on the image type
+ *      (colour YUV420P or greyscale) the corresponding put_jpeg_X_memory function is called.
  * Inputs:
  * - cnt is the global context struct and only cnt->imgs.type is used.
  * - image_size is the size of the input image buffer
  * - *image points to the image buffer that contains the YUV420P or Grayscale image about to be put
  * - quality is the jpeg quality setting from the config file.
+ *
  * Output:
  * - **dest_image is a pointer to a pointer that points to the destination buffer in which the
  *   converted image it put
- * Function returns the dest_image_size if successful. Otherwise 0.
+ *
+ * Returns the dest_image_size if successful. Otherwise 0.
  */ 
 int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size,
                        unsigned char *image, int quality)
@@ -519,7 +562,8 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
     default:
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d", 
+                   cnt->imgs.type);    
     }
 
     return 0;
@@ -538,7 +582,8 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
             break;
         default:
-            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d", __FUNCTION__, cnt->imgs.type);    
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d", 
+                       cnt->imgs.type);    
         }
     }
 }
@@ -550,18 +595,19 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 
     picture = myfopen(file, "w", BUFSIZE_1MEG);
     if (!picture) {
-        /* Report to syslog - suggest solution if the problem is access rights to target dir */
+        /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
-            motion_log(ERR, TYPE_ALL, SHOW_ERRNO,
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
                        "%s: Can't write picture to file %s - check access rights to target directory\n"
                        "Thread is going to finish due to this fatal error",       
-                        __FUNCTION__, file);
+                        file);
             cnt->finish = 1;
             cnt->restart = 0;
             return;
         } else {
-            /* If target dir is temporarily unavailable we may survive */
-            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Can't write picture to file %s", __FUNCTION__, file);
+            /* If target dir is temporarily unavailable we may survive. */
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Can't write picture to file %s", 
+                       file);
             return;
         }
     }
@@ -571,7 +617,11 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
     event(cnt, EVENT_FILECREATE, NULL, file, (void *)(unsigned long)ftype, NULL);
 }
 
-/* Get the pgm file used as fixed mask */
+/**
+ * get_pgm
+ *      Get the pgm file used as fixed mask 
+ *
+ */
 unsigned char *get_pgm(FILE *picture, int width, int height)
 {
     int x = 0 , y = 0, maxval;
@@ -581,31 +631,31 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     line[255] = 0;
     
     if (!fgets(line, 255, picture)) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not read from ppm file", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not read from ppm file");
         return NULL;
     }
     
     if (strncmp(line, "P5", 2)) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: This is not a ppm file, starts with '%s'", 
-                   __FUNCTION__, line);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: This is not a ppm file, starts with '%s'", 
+                   line);
         return NULL;
     }
     
-    /* skip comment */
+    /* Skip comment */
     line[0] = '#';
     while (line[0] == '#')
         if (!fgets(line, 255, picture))
             return NULL;
 
-    /* check size */
+    /* Check size */
     if (sscanf(line, "%d %d", &x, &y) != 2) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading size in pgm file", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading size in pgm file");
         return NULL;
     }
     
     if (x != width || y != height) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Wrong image size %dx%d should be %dx%d", 
-                   __FUNCTION__, x, y, width, height);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Wrong image size %dx%d should be %dx%d", 
+                   x, y, width, height);
         return NULL;
     }
 
@@ -616,17 +666,17 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
             return NULL;
     
     if (sscanf(line, "%d", &maxval) != 1) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading maximum value in pgm file", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading maximum value in pgm file");
         return NULL;
     }
     
-    /* read data */
+    /* Read data */
     
     image = mymalloc(width * height);
     
     for (y = 0; y < height; y++) {
         if ((int)fread(&image[y * width], 1, width, picture) != width)
-            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading image data from pgm file", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading image data from pgm file");
         
         for (x = 0; x < width; x++)
             image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
@@ -636,9 +686,13 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     return image;
 }
 
-/* If a mask file is asked for but does not exist this function
- * creates an empty mask file in the right binary pgm format and
- * and the right size - easy to edit with Gimp or similar tool.
+/**
+ * put_fixed_mask 
+ *      If a mask file is asked for but does not exist this function
+ *      creates an empty mask file in the right binary pgm format and
+ *      and the right size - easy to edit with Gimp or similar tool.
+ *
+ * Returns nothing.
  */
 void put_fixed_mask(struct context *cnt, const char *file)
 {
@@ -646,37 +700,42 @@ void put_fixed_mask(struct context *cnt, const char *file)
 
     picture = myfopen(file, "w", BUFSIZE_1MEG);
     if (!picture) {
-        /* Report to syslog - suggest solution if the problem is access rights to target dir */
+        /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
-            motion_log(ERR, TYPE_ALL, SHOW_ERRNO,
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
                        "%s: can't write mask file %s - check access rights to target directory", 
-                       __FUNCTION__, file);
+                       file);
         } else {
-            /* If target dir is temporarily unavailable we may survive */
-            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: can't write mask file %s", __FUNCTION__, file);
+            /* If target dir is temporarily unavailable we may survive. */
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: can't write mask file %s", file);
         }
         return;
     }
-    memset(cnt->imgs.out, 255, cnt->imgs.motionsize); /* initialize to unset */
+    memset(cnt->imgs.out, 255, cnt->imgs.motionsize); /* Initialize to unset */
     
-    /* Write pgm-header */
+    /* Write pgm-header. */
     fprintf(picture, "P5\n");
     fprintf(picture, "%d %d\n", cnt->conf.width, cnt->conf.height);
     fprintf(picture, "%d\n", 255);
     
-    /* write pgm image data at once */
+    /* Write pgm image data at once. */
     if ((int)fwrite(cnt->imgs.out, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed writing default mask as pgm file", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed writing default mask as pgm file");
         return;
     }
     
     myfclose(picture);
 
-    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Creating empty mask %s\nPlease edit this file and "
-               "re-run motion to enable mask feature", __FUNCTION__, cnt->conf.mask_file);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Creating empty mask %s\nPlease edit this file and "
+               "re-run motion to enable mask feature", cnt->conf.mask_file);
 }
 
-/* save preview_shot */
+/**
+ * preview_save
+ *      save preview_shot
+ *
+ * Returns nothing. 
+ */
 void preview_save(struct context *cnt)
 {
     int use_imagepath;
@@ -687,12 +746,12 @@ void preview_save(struct context *cnt)
     struct image_data *saved_current_image;
 
     if (cnt->imgs.preview_image.diffs) {
-        /* Save current global context */
+        /* Save current global context. */
         saved_current_image = cnt->current_image;
-        /* Set global context to the image we are processing */
+        /* Set global context to the image we are processing. */
         cnt->current_image = &cnt->imgs.preview_image;
 
-        /* Use filename of movie i.o. jpeg_filename when set to 'preview' */
+        /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 
 #ifdef HAVE_FFMPEG        
@@ -706,7 +765,7 @@ void preview_save(struct context *cnt)
                 strncpy(previewname, cnt->extpipefilename, basename_len);
                 previewname[basename_len - 1] = '.';    
             } else {       
-                /* Replace avi/mpg with jpg/ppm and keep the rest of the filename */
+                /* Replace avi/mpg with jpg/ppm and keep the rest of the filename. */
                 basename_len = strlen(cnt->newfilename) - 3;
                 strncpy(previewname, cnt->newfilename, basename_len);
             }    
@@ -715,12 +774,15 @@ void preview_save(struct context *cnt)
             strcat(previewname, imageext(cnt));
             put_picture(cnt, previewname, cnt->imgs.preview_image.image , FTYPE_IMAGE);
         } else {
-            /* Save best preview-shot also when no movies are recorded or imagepath
-             * is used. Filename has to be generated - nothing available to reuse! */
-            //printf("preview_shot: different filename or picture only!\n");
-
-            /* conf.imagepath would normally be defined but if someone deleted it by control interface
-             * it is better to revert to the default than fail */
+            /* 
+             * Save best preview-shot also when no movies are recorded or imagepath
+             * is used. Filename has to be generated - nothing available to reuse! 
+             */
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: different filename or picture only!");
+            /*
+             * conf.imagepath would normally be defined but if someone deleted it by 
+             * control interface it is better to revert to the default than fail. 
+             */
             if (cnt->conf.imagepath)
                 imagepath = cnt->conf.imagepath;
             else
@@ -732,7 +794,7 @@ void preview_save(struct context *cnt)
             put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);
         }
 
-        /* restore global context values */
+        /* Restore global context values. */
         cnt->current_image = saved_current_image;
     }
 }

@@ -63,8 +63,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
    `:', thus you can use it to retrieve, say, HTTP status line.
 
    All trailing whitespace is stripped from the header, and it is
-   zero-terminated.  */
-   
+   zero-terminated.  
+ */
 int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flags)
 {
     int i;
@@ -85,9 +85,11 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                 if (!((flags & HG_NO_CONTINUATIONS) || i == 0
                     || (i == 1 && (*hdr)[0] == '\r'))) {
                     char next;
-                    /* If the header is non-empty, we need to check if
-                    it continues on to the other line.  We do that by
-                    peeking at the next character.  */
+                    /* 
+                     * If the header is non-empty, we need to check if
+                     * it continues on to the other line.  We do that by
+                     * peeking at the next character.  
+                     */
                     res = rbuf_peek(netcam, &next);
 
                     if (res == 0) {
@@ -97,15 +99,16 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                         (*hdr)[i] = '\0';
                         return HG_ERROR;
                     }
-                    /*  If the next character is HT or SP, just continue.  */
-
+                    /* If the next character is HT or SP, just continue. */
                     if (next == '\t' || next == ' ')
                         continue;
                 }
 
-                /* Strip trailing whitespace.  (*hdr)[i] is the newline;
-                decrement I until it points to the last available
-                whitespace.  */
+                /*
+                 * Strip trailing whitespace.  (*hdr)[i] is the newline;
+                 * decrement I until it points to the last available
+                 * whitespace.  
+                 */
                 while (i > 0 && isspace((*hdr)[i - 1]))
                     --i;
                     
@@ -124,13 +127,17 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
     return HG_OK;
 }
 
-/* Check whether HEADER begins with NAME and, if yes, skip the `:' and
-   the whitespace, and call PROCFUN with the arguments of HEADER's
-   contents (after the `:' and space) and ARG.  Otherwise, return 0.  */
-int header_process (const char *header, const char *name,
+/**
+ * header_process
+ * 
+ *  Check whether HEADER begins with NAME and, if yes, skip the `:' and
+ *  the whitespace, and call PROCFUN with the arguments of HEADER's
+ *  contents (after the `:' and space) and ARG.  Otherwise, return 0. 
+ */
+int header_process(const char *header, const char *name,
                     int (*procfun)(const char *, void *), void *arg)
 {
-    /* Check whether HEADER matches NAME.  */
+    /* Check whether HEADER matches NAME. */
     while (*name && (tolower (*name) == tolower (*header)))
         ++name, ++header;
 
@@ -141,10 +148,14 @@ int header_process (const char *header, const char *name,
     return ((*procfun) (header, arg));
 }
 
-/* Helper functions for use with header_process().  */
+/* Helper functions for use with header_process(). */
 
-/* Extract a long integer from HEADER and store it to CLOSURE.  If an
-   error is encountered, return 0, else 1.  */
+/**
+ * header_extract_number
+ * 
+ *  Extract a long integer from HEADER and store it to CLOSURE.  If an
+ *  error is encountered, return 0, else 1.  
+ */
 int header_extract_number(const char *header, void *closure)
 {
     const char *p = header;
@@ -160,7 +171,7 @@ int header_extract_number(const char *header, void *closure)
     /* Skip trailing whitespace. */
     p += skip_lws (p);
 
-    /* We return the value, even if a format error follows */
+    /* We return the value, even if a format error follows. */
     *(long *)closure = result;
 
     /* Indicate failure if trailing garbage is present. */
@@ -170,7 +181,11 @@ int header_extract_number(const char *header, void *closure)
     return 1;
 }
 
-/* Strdup HEADER, and place the pointer to CLOSURE.  */
+/**
+ * header_strdup
+ * 
+ *  Strdup HEADER, and place the pointer to CLOSURE.  
+ */
 int header_strdup(const char *header, void *closure)
 {
     *(char **)closure = mystrdup(header);
@@ -178,8 +193,11 @@ int header_strdup(const char *header, void *closure)
 }
 
 
-/* Skip LWS (linear white space), if present.  Returns number of
-   characters to skip.  */
+/**
+ * skip_lws
+ *  Skip LWS (linear white space), if present.  Returns number of
+ *  characters to skip.  
+ */
 int skip_lws(const char *string)
 {
     const char *p = string;
@@ -191,11 +209,13 @@ int skip_lws(const char *string)
 }
 
 
-/*
-    Encode the string S of length LENGTH to base64 format and place it
-    to STORE.  STORE will be 0-terminated, and must point to a writable
-    buffer of at least 1+BASE64_LENGTH(length) bytes.  
-*/
+/**
+ * base64_encode
+ *
+ *   Encode the string S of length LENGTH to base64 format and place it
+ *   to STORE.  STORE will be 0-terminated, and must point to a writable
+ *   buffer of at least 1+BASE64_LENGTH(length) bytes.  
+ */
 void base64_encode(const char *s, char *store, int length)
 {
     /* Conversion table.  */
@@ -213,7 +233,7 @@ void base64_encode(const char *s, char *store, int length)
     int i;
     unsigned char *p = (unsigned char *)store;
 
-    /* Transform the 3x8 bits to 4x6 bits, as required by base64.  */
+    /* Transform the 3x8 bits to 4x6 bits, as required by base64. */
     for (i = 0; i < length; i += 3) {
         *p++ = tbl[s[0] >> 2];
         *p++ = tbl[((s[0] & 3) << 4) + (s[1] >> 4)];
@@ -222,7 +242,7 @@ void base64_encode(const char *s, char *store, int length)
         s += 3;
     }
     
-    /* Pad the result if necessary...  */
+    /* Pad the result if necessary... */
     if (i == length + 1)
         *(p - 1) = '=';
     else if (i == length + 2)
@@ -232,6 +252,9 @@ void base64_encode(const char *s, char *store, int length)
     *p = '\0';
 }
 
+/**
+ * strdupdelim
+ */ 
 char *strdupdelim(const char *beg, const char *end)
 {
     char *res = (char *)mymalloc(end - beg + 1);
@@ -241,6 +264,9 @@ char *strdupdelim(const char *beg, const char *end)
     return res;
 }
 
+/**
+ * http_process_type
+ */ 
 int http_process_type(const char *hdr, void *arg)
 {
     char **result = (char **)arg;
@@ -257,8 +283,11 @@ int http_process_type(const char *hdr, void *arg)
     return 1;
 }
 
-/* This is a simple implementation of buffering IO-read functions.  */
-
+/**
+ * rbuf_initialize
+ * 
+ *  This is a simple implementation of buffering IO-read functions.  
+ */
 void rbuf_initialize(netcam_context_ptr netcam)
 {
     netcam->response->buffer_pos = netcam->response->buffer;
@@ -271,7 +300,11 @@ int rbuf_read_bufferful(netcam_context_ptr netcam)
                        sizeof (netcam->response->buffer));
 }
 
-/* Like rbuf_readchar(), only don't move the buffer position.  */
+/**
+ * rbuf_peek
+ * 
+ *  Like rbuf_readchar(), only don't move the buffer position.  
+ */
 int rbuf_peek(netcam_context_ptr netcam, char *store)
 {
     if (!netcam->response->buffer_left) {
@@ -292,11 +325,13 @@ int rbuf_peek(netcam_context_ptr netcam, char *store)
     return 1;
 }
 
-/* 
-    Flush RBUF's buffer to WHERE.  Flush MAXSIZE bytes at most.
-    Returns the number of bytes actually copied.  If the buffer is
-    empty, 0 is returned.  
-*/
+/**
+ * rbuf_flush
+ * 
+ *   Flush RBUF's buffer to WHERE.  Flush MAXSIZE bytes at most.
+ *   Returns the number of bytes actually copied.  If the buffer is
+ *   empty, 0 is returned.  
+ */
 int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
 {
     if (!netcam->response->buffer_left) {
@@ -313,16 +348,20 @@ int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
     }
 }
 
-/* Get the HTTP result code */
+/**
+ * http_result_code
+ *
+ *  Get the HTTP result code 
+ */
 int http_result_code(const char *header)
 {
     char *cptr;
 
-    /* assure the header starts out right */
+    /* Assure the header starts out right. */
     if (strncmp(header, "HTTP", 4))
         return -1;
 
-    /* find the space following the HTTP/1.x */
+    /* Find the space following the HTTP/1.x */
     if ((cptr = strchr(header+4, ' ')) == NULL)
         return -1;
 

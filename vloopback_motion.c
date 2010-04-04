@@ -27,8 +27,7 @@ static int v4l_open_vidpipe(void)
     struct utsname uts;
 
     if (uname(&uts) < 0) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to execute uname", 
-                   __FUNCTION__);
+        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to execute uname");
         return -1; 
     }
 
@@ -36,8 +35,7 @@ static int v4l_open_vidpipe(void)
     minor = strtok(NULL, ".");
 
     if ((major == NULL) || (minor == NULL) || (strcmp(major, "2"))) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to decipher OS version", 
-                   __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to decipher OS version"); 
         return -1;
     }
 
@@ -52,15 +50,14 @@ static int v4l_open_vidpipe(void)
         vloopbacks = fopen("/proc/video/vloopback/vloopbacks", "r");
 
         if (!vloopbacks) {
-            motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open "
-                       "'/proc/video/vloopback/vloopbacks'", __FUNCTION__);
+            MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open "
+                       "'/proc/video/vloopback/vloopbacks'");
             return -1;
         }
         
         /* Read vloopback version*/
         if (!fgets(buffer, sizeof(buffer), vloopbacks)) {
-            motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to read vloopback version", 
-                       __FUNCTION__);
+            MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to read vloopback version"); 
             return -1;
         }
         
@@ -69,8 +66,8 @@ static int v4l_open_vidpipe(void)
         /* Read explanation line */
         
         if (!fgets(buffer, sizeof(buffer), vloopbacks)) {
-            motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to read vloopback"
-                       " explanation line", __FUNCTION__);
+            MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to read vloopback"
+                       " explanation line");
             return -1;
         }
         
@@ -88,8 +85,8 @@ static int v4l_open_vidpipe(void)
                     pipe_fd = open(pipepath, O_RDWR);
 
                     if (pipe_fd >= 0) {
-                        motion_log(EMG, TYPE_VIDEO, NO_ERRNO, "%s: \tInput:  /dev/%s "
-                                   "\tOutput: /dev/%s", __FUNCTION__, input, output);
+                        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: \tInput:  /dev/%s "
+                                   "\tOutput: /dev/%s",  input, output);
                         break;
                     }
                 }
@@ -108,8 +105,8 @@ static int v4l_open_vidpipe(void)
         int tnum;
 
         if ((dir = opendir(prefix)) == NULL) {
-            motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open '%s'", 
-                       __FUNCTION__, prefix);
+            MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open '%s'", 
+                       prefix);
             return -1;
         }
 
@@ -169,8 +166,8 @@ static int v4l_open_vidpipe(void)
         closedir(dir);
 
         if (pipe_fd >= 0)
-            motion_log(EMG, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as input", 
-                       __FUNCTION__, pipepath);
+            MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as input", 
+                       pipepath);
     }
 
     return pipe_fd;
@@ -190,33 +187,30 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
         dev = v4l_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR);
-        motion_log(EMG, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as input", 
-                   __FUNCTION__, dev_name);
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as input", 
+                   dev_name);
     }
 
     if (dev < 0) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Opening %s as input failed", 
-                   __FUNCTION__, dev_name);
+        MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: Opening %s as input failed", 
+                   dev_name);
         return -1;
     }
 
     if (ioctl(dev, VIDIOCGPICT, &vid_pic) == -1) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCGPICT)", 
-                   __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCGPICT)");
         return -1;
     }
 
     vid_pic.palette = type;
 
     if (ioctl(dev, VIDIOCSPICT, &vid_pic) == -1) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCSPICT)", 
-                   __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCSPICT)"); 
         return -1;
     }
 
     if (ioctl(dev, VIDIOCGWIN, &vid_win) == -1) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCGWIN)", 
-                   __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCGWIN)");
         return -1;
     }
 
@@ -224,8 +218,7 @@ static int v4l_startpipe(const char *dev_name, int width, int height, int type)
     vid_win.width = width;
 
     if (ioctl(dev, VIDIOCSWIN, &vid_win) == -1) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCSWIN)", 
-                   __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCSWIN)"); 
         return -1;
     }
 

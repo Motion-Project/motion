@@ -1090,7 +1090,7 @@ AC_LINK_IFELSE([
 
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3 "
+	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
 fi
 
 CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"
@@ -1142,91 +1142,87 @@ echo
 
 
 if test "${Darwin}" != ""; then
-	echo "OS             :     Darwin"
+    echo "OS             :     Darwin"
 elif test "${FreeBSD}" != ""; then
-	echo "OS             :     *BSD"		
+    echo "OS             :     *BSD"		
 else 
-	echo "OS             :     Linux"
+    echo "OS             :     Linux"
 fi
 
 if test "${PTHREAD_SUPPORT}" = "yes"; then
-	echo "pthread support:     Yes"
+    echo "pthread support:     Yes"
 else
-	echo "pthread support:     No"
-	echo "**********************************************"
-        echo "** Fatal Error YOU MUST HAVE pthread Support *"
-        echo "**********************************************" 
+    echo "pthread support:     No"
+    echo "**********************************************"
+    echo "** Fatal Error YOU MUST HAVE pthread Support *"
+    echo "**********************************************" 
 fi
 
 if test "${JPEG_SUPPORT_MMX}" = "yes"; then
-	echo "jpeg-mmx support:    Yes"
+    echo "jpeg-mmx support:    Yes"
 elif test "${JPEG_SUPPORT}" = "yes"; then
-	echo "jpeg support:        Yes"
+    echo "jpeg support:        Yes"
 else
-	echo "jpeg support:        No"
-	echo "**********************************************"
-        echo "** Fatal Error YOU MUST HAVE jpeg Support  ***"
-        echo "**********************************************"
+    echo "jpeg support:        No"
+    echo "**********************************************"
+    echo "** Fatal Error YOU MUST HAVE jpeg Support  ***"
+    echo "**********************************************"
 fi
 
 if test "${FreeBSD}" != ""; then
 	if test "${BKTR}" = "yes"; then
-        	echo "BKTR included:       Yes"
+        echo "BKTR included:       Yes"
 	else
-        	echo "BKTR included:       No"
+        echo "BKTR included:       No"
 	fi
 
 	if test "${PWCBSD}" = "yes"; then
-		echo "PWCBSD include:      Yes"
+        echo "PWCBSD include:      Yes"
 	else
-		echo "PWCBSD include:      No"
+        echo "PWCBSD include:      No"
 	fi
 
 else
 	if test "${V4L}" = "yes"; then
-		echo "V4L support:         Yes"
+        echo "V4L support:         Yes"
 	else
-		echo "V4L support:         No"
+        echo "V4L support:         No"
 	fi
 
 	if test x$SUPPORTED_V4L2 = xtrue; then
-		echo "V4L2 support:        Yes"	
+        echo "V4L2 support:        Yes"	
 	else
-		echo "V4L2 support:        No"
+        echo "V4L2 support:        No"
 	fi
 fi
 
 if test "${FFMPEG_OK}" = "found"; then
-	echo "FFmpeg support:      Yes"
+    echo "FFmpeg support:      Yes"
 else
-	echo "FFmpeg support:      No"
+    echo "FFmpeg support:      No"
 fi
 
 if test "${SQLITE3_SUPPORT}" = "yes"; then
-	echo "SQLite3 support:     Yes"
+    echo "SQLite3 support:     Yes"
 else
-	echo "SQLite3 support:     No"
+    echo "SQLite3 support:     No"
 fi
 
 if test "${MYSQL_SUPPORT}" = "yes"; then
-	echo "MYSQL support:       Yes"
+    echo "MYSQL support:       Yes"
 else
-	echo "MYSQL support:       No"
+    echo "MYSQL support:       No"
 fi
 
 if test "${PGSQL_SUPPORT}" = "yes"; then
-	echo "PostgreSQL support:  Yes"
+    echo "PostgreSQL support:  Yes"
 else
-	echo "PostgreSQL support:  No"
+    echo "PostgreSQL support:  No"
 fi
 echo 
-
-
 echo "CFLAGS: $CFLAGS"
 echo "LIBS: $LIBS"
 echo "LDFLAGS: $LDFLAGS"
-
-
 echo
 echo  "Install prefix:       $prefix"
 echo

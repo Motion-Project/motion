@@ -46,14 +46,14 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
         execl("/bin/sh", "sh", "-c", stamp, " &", NULL);
 
         /* if above function succeeds the program never reach here */
-        motion_log(ALR, TYPE_EVENTS, SHOW_ERRNO, "%s: Unable to start external command '%s'", 
-                   __FUNCTION__, stamp);
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO, "%s: Unable to start external command '%s'", 
+                   stamp);
 
         exit(1);
     }
 
-    motion_log(DBG, TYPE_EVENTS, NO_ERRNO, "%s: Executing external command '%s'", 
-               __FUNCTION__, stamp);
+    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, "%s: Executing external command '%s'", 
+               stamp);
 }
 
 /* 
@@ -64,8 +64,8 @@ static void event_newfile(struct context *cnt ATTRIBUTE_UNUSED,
             int type ATTRIBUTE_UNUSED, unsigned char *dummy ATTRIBUTE_UNUSED,
             char *filename, void *ftype, struct tm *tm ATTRIBUTE_UNUSED)
 {
-    motion_log(EMG, TYPE_EVENTS, NO_ERRNO, "%s: File of type %ld saved to: %s", 
-               __FUNCTION__, (unsigned long)ftype, filename);
+    MOTION_LOG(EMG, TYPE_EVENTS, NO_ERRNO, "%s: File of type %ld saved to: %s", 
+               (unsigned long)ftype, filename);
 }
 
 
@@ -136,8 +136,8 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             if (mysql_query(cnt->database, sqlquery) != 0) {
                 int error_code = mysql_errno(cnt->database);
                 
-                motion_log(ERR, TYPE_DB, SHOW_ERRNO, "%s: Mysql query failed %s error code %d",
-                           __FUNCTION__, mysql_error(cnt->database), error_code);
+                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: Mysql query failed %s error code %d",
+                           mysql_error(cnt->database), error_code);
                 /* Try to reconnect ONCE if fails continue and discard this sql query */
                 if (error_code >= 2000) {
                     cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
@@ -146,9 +146,9 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
                     if (!mysql_real_connect(cnt->database, cnt->conf.database_host, 
                                             cnt->conf.database_user, cnt->conf.database_password, 
                                             cnt->conf.database_dbname, 0, NULL, 0)) {
-                        motion_log(ALR, TYPE_DB, NO_ERRNO, "%s: Cannot reconnect to MySQL"
+                        MOTION_LOG(ALR, TYPE_DB, NO_ERRNO, "%s: Cannot reconnect to MySQL"
                                    " database %s on host %s with user %s MySQL error was %s",
-                                   __FUNCTION__, cnt->conf.database_dbname, 
+                                   cnt->conf.database_dbname, 
                                    cnt->conf.database_host, cnt->conf.database_user,
                                    mysql_error(cnt->database));
                     } else {
@@ -166,8 +166,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             res = PQexec(cnt->database_pg, sqlquery);
 
             if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-                motion_log(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query failed", 
-                           __FUNCTION__);
+                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query failed");
                 PQclear(res);
             }
         }
@@ -179,8 +178,8 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             char *errmsg = 0;
             res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
             if (res != SQLITE_OK ) {
-                motion_log(ERR, TYPE_DB, NO_ERRNO, "%s: SQLite error was %s", 
-                           __FUNCTION__,  errmsg);
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: SQLite error was %s", 
+                           errmsg);
                 sqlite3_free(errmsg);
             }
         }
@@ -241,8 +240,7 @@ static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
     if (*(int *)devpipe >= 0) {
         if (vid_putpipe(*(int *)devpipe, img, cnt->imgs.size) == -1)
-            motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Failed to put image into video pipe", 
-                       __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Failed to put image into video pipe");
     }
 }
 #endif /* !WITHOUT_V4L && !BSD */
@@ -344,8 +342,8 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
         remove(linkpath);
 
         if (symlink(filename, linkpath)) {
-            motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Could not create symbolic link [%s]", 
-                       __FUNCTION__, filename);
+            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Could not create symbolic link [%s]", 
+                       filename);
             return;
         }
     } else {
@@ -382,10 +380,10 @@ static void event_extpipe_end(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (cnt->extpipe_open) {
         cnt->extpipe_open = 0;
         fflush(cnt->extpipe);
-        motion_log(ERR, TYPE_EVENTS, NO_ERRNO, "%s: CLOSING: extpipe file desc %d, error state %d", 
-                   __FUNCTION__, fileno(cnt->extpipe), ferror(cnt->extpipe));
-        motion_log(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pclose return: %d", 
-                   __FUNCTION__, pclose(cnt->extpipe));
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: CLOSING: extpipe file desc %d, error state %d", 
+                   fileno(cnt->extpipe), ferror(cnt->extpipe));
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pclose return: %d", 
+                   pclose(cnt->extpipe));
         event(cnt, EVENT_FILECLOSE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, NULL);
     }
 }
@@ -407,8 +405,8 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             moviepath = cnt->conf.moviepath;
         } else {
             moviepath = DEF_MOVIEPATH;
-            motion_log(NTC, TYPE_EVENTS, NO_ERRNO, "%s: moviepath: %s", 
-                       __FUNCTION__, moviepath);
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: moviepath: %s", 
+                       moviepath);
         }
 
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tm, NULL, 0);
@@ -421,13 +419,13 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
         if (fd_dummy == NULL) {
             /* Permission denied */
             if (errno ==  EACCES) {
-                motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s ..." 
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s ..." 
                            "check access rights to target directory", 
-                           __FUNCTION__, cnt->extpipefilename);
+                           cnt->extpipefilename);
                 return ;
             } else {
-                motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s", 
-                           __FUNCTION__, cnt->extpipefilename);
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s", 
+                           cnt->extpipefilename);
                 return ;
             }    
 
@@ -438,16 +436,16 @@ static void event_create_extpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tm, cnt->extpipefilename, 0);
 
-        motion_log(NTC, TYPE_EVENTS, NO_ERRNO, "%s: pipe: %s", 
-                   __FUNCTION__, stamp);
-        motion_log(NTC, TYPE_EVENTS, NO_ERRNO, "%s: cnt->moviefps: %d", 
-                  __FUNCTION__, cnt->movie_fps);
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: pipe: %s", 
+                   stamp);
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: cnt->moviefps: %d", 
+                   cnt->movie_fps);
 
         event(cnt, EVENT_FILECREATE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, NULL);
         cnt->extpipe = popen(stamp, "w");
 
         if (cnt->extpipe == NULL) {
-            motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: popen failed", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: popen failed");
             return;
         }
 
@@ -462,16 +460,16 @@ static void event_extpipe_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
     /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cnt->conf.useextpipe) && (cnt->extpipe != NULL)) {
-        motion_log(DBG, TYPE_EVENTS, NO_ERRNO, "%s:", __FUNCTION__);
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, "%s:");
 
         /* Check that is open */
         if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
             if (!fwrite(img, cnt->imgs.size, 1, cnt->extpipe))
-                motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Error writting in pipe , state error %d",
-                           __FUNCTION__, ferror(cnt->extpipe));
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Error writting in pipe , state error %d",
+                           ferror(cnt->extpipe));
         } else {    
-            motion_log(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pipe %s not created or closed already ", 
-                       __FUNCTION__, cnt->extpipe);
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pipe %s not created or closed already ", 
+                       cnt->extpipe);
         }    
     }        
 }
@@ -485,8 +483,8 @@ static void event_new_video(struct context *cnt, int type ATTRIBUTE_UNUSED,
 
     cnt->movie_fps = cnt->lastrate;
 
-    motion_log(NTC, TYPE_EVENTS, NO_ERRNO, "%s FPS %d", 
-               __FUNCTION__, cnt->movie_fps);
+    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s FPS %d", 
+               cnt->movie_fps);
 
     if (cnt->movie_fps > 30) 
         cnt->movie_fps = 30;
@@ -552,8 +550,8 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr)) == NULL) {
-            motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]", 
-                       __FUNCTION__, cnt->newfilename);
+            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]", 
+                       cnt->newfilename);
             cnt->finish = 1;
             return;
         }
@@ -580,8 +578,8 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
             ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr)) == NULL) {
-            motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]", 
-                       __FUNCTION__, cnt->motionfilename);
+            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]", 
+                       cnt->motionfilename);
             cnt->finish = 1;
             return;
         }
@@ -635,8 +633,8 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             ffmpeg_open((char *)TIMELAPSE_CODEC, cnt->timelapsefilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr)) == NULL) {
-            motion_log(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating "
-                       "(timelapse) file [%s]", __FUNCTION__, cnt->timelapsefilename);
+            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating "
+                       "(timelapse) file [%s]", cnt->timelapsefilename);
             cnt->finish = 1;
             return;
         }

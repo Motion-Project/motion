@@ -1493,15 +1493,20 @@ config_param config_params[] = {
     { NULL, NULL, 0, 0, NULL, NULL }
 };
 
-/* conf_cmdline sets the conf struct options as defined by the Command-line.
- * Any option already set from a config file are overridden.
+/**
+ * conf_cmdline 
+ *      Sets the conf struct options as defined by the Command-line.
+ *      Any option already set from a config file are overridden.
+ *
+ * Returns nothing.
  */
 static void conf_cmdline(struct context *cnt, int thread)
 {
     struct config *conf = &cnt->conf;
     int c;
 
-    /* For the string options, we free() if necessary and malloc()
+    /*
+     * For the string options, we free() if necessary and malloc()
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
@@ -1518,7 +1523,7 @@ static void conf_cmdline(struct context *cnt, int thread)
             conf->setup_mode = 1;
             break;
         case 'd':
-            /* no validation - just take what user gives */
+            /* No validation - just take what user gives. */
             if (thread == -1)
                 debug_level = (unsigned int)atoi(optarg);
             break;
@@ -1545,11 +1550,15 @@ static void conf_cmdline(struct context *cnt, int thread)
 }
 
 
-/* conf_cmdparse sets a config option given by 'cmd' to the value given by 'arg1'.
- * Based on the name of the option it searches through the struct 'config_params'
- * for an option where the config_params[i].param_name matches the option.
- * By calling the function pointed to by config_params[i].copy the option gets
- * assigned.
+/**
+ * conf_cmdparse 
+ *      Sets a config option given by 'cmd' to the value given by 'arg1'.
+ *      Based on the name of the option it searches through the struct 'config_params'
+ *      for an option where the config_params[i].param_name matches the option.
+ *      By calling the function pointed to by config_params[i].copy the option gets
+ *      assigned.
+ *
+ * Returns context struct.
  */
 struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
 {
@@ -1558,28 +1567,30 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     if (!cmd)
         return cnt;
 
-    /* We search through config_params until we find a param_name that matches
-     * our option given by cmd (or reach the end = NULL)
+    /* 
+     * We search through config_params until we find a param_name that matches
+     * our option given by cmd (or reach the end = NULL).
      */
     while (config_params[i].param_name != NULL) {
         if (!strncasecmp(cmd, config_params[i].param_name , 255 + 50)) { // Why +50?
     
-            /* if config_param is string we don't want to check arg1 */        
+            /* If config_param is string we don't want to check arg1. */        
             if (strcmp(config_type(&config_params[i]), "string")) {
                 if (config_params[i].conf_value && !arg1)
                     return cnt;
             }
             
-            /* We call the function given by the pointer config_params[i].copy
+            /* 
+             * We call the function given by the pointer config_params[i].copy
              * If the option is a bool, copy_bool is called.
              * If the option is an int, copy_int is called.
              * If the option is a string, copy_string is called.
              * If the option is a thread, config_thread is called.
              * The arguments to the function are:
-             *  cnt  - a pointer to the context structure
-             *  arg1 - a pointer to the new option value (represented as string)
+             *  cnt  - a pointer to the context structure.
+             *  arg1 - a pointer to the new option value (represented as string).
              *  config_params[i].conf_value - an integer value which is a pointer
-             *    to the context structure member relative to the pointer cnt.
+             *  to the context structure member relative to the pointer cnt.
              */
             cnt = config_params[i].copy(cnt, arg1, config_params[i].conf_value);
             return cnt;
@@ -1587,26 +1598,30 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
         i++;
     }
 
-    /* We reached the end of config_params without finding a matching option */
-    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unknown config option \"%s\"", 
-               __FUNCTION__, cmd);
+    /* We reached the end of config_params without finding a matching option. */
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s: Unknown config option \"%s\"", 
+               cmd);
 
     return cnt;
 }
 
-/* conf_process walks through an already open config file line by line
- * Any line starting with '#' or ';' or empty lines are ignored as a comments.
- * Any non empty line is process so that the first word is the name of an option 'cnd'
- * and the rest of the line is the argument 'arg1'
- * White space before the first word, between option and argument and end of the line
- * is discarded. A '=' between option and first word in argument is also discarded.
- * Quotation marks round the argument are also discarded.
- * For each option/argument pair the function conf_cmdparse is called which takes
- * care of assigning the value to the option in the config structures.
+/** 
+ * conf_process 
+ *      Walks through an already open config file line by line
+ *      Any line starting with '#' or ';' or empty lines are ignored as a comments.
+ *      Any non empty line is process so that the first word is the name of an option 'cnd'
+ *      and the rest of the line is the argument 'arg1'
+ *      White space before the first word, between option and argument and end of the line
+ *      is discarded. A '=' between option and first word in argument is also discarded.
+ *      Quotation marks round the argument are also discarded.
+ *      For each option/argument pair the function conf_cmdparse is called which takes
+ *      care of assigning the value to the option in the config structures.
+ *
+ * Returns context struct.
  */
 static struct context **conf_process(struct context **cnt, FILE *fp)
 {
-    /* process each line from the config file */
+    /* Process each line from the config file. */
     
     char line[PATH_MAX], *cmd = NULL, *arg1 = NULL;
     char *beg = NULL, *end = NULL;
@@ -1616,31 +1631,31 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
             
             arg1 = NULL;
 
-            /* trim white space and any CR or LF at the end of the line */
-            end = line + strlen(line) - 1; /* Point to the last non-null character in the string */
+            /* Trim white space and any CR or LF at the end of the line. */
+            end = line + strlen(line) - 1; /* Point to the last non-null character in the string. */
             while (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r') 
                 end--;
             
             *(end+1) = '\0';
             
-            /* If line is only whitespace we continue to the next line */
+            /* If line is only whitespace we continue to the next line. */
             if (strlen(line) == 0)
                 continue;
 
-            /* trim leading whitespace from the line and find command */
+            /* Trim leading whitespace from the line and find command. */
             beg = line;
             while (*beg == ' ' || *beg == '\t') 
                 beg++;
             
 
-            cmd = beg; /* command starts here */
+            cmd = beg; /* Command starts here. */
 
             while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0') 
                 beg++;
             
-            *beg = '\0'; /* command string terminates here */
+            *beg = '\0'; /* Command string terminates here. */
 
-            /* trim space between command and argument */
+            /* Trim space between command and argument. */
             beg++;
 
             if (strlen(beg) > 0) {
@@ -1648,9 +1663,11 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
                     beg++;
                 
 
-                /* If argument is in "" we will strip them off
-                   It is important that we can use "" so that we can use
-                   leading spaces in text_left and text_right */
+                /* 
+                 * If argument is in "" we will strip them off
+                 * It is important that we can use "" so that we can use
+                 * leading spaces in text_left and text_right.
+                 */
                 if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
                     (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
                     beg[strlen(beg)-1] = '\0';
@@ -1659,7 +1676,7 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
                 
                 arg1 = beg; /* Argument starts here */
             }
-            /* else arg1 stays null pointer */
+            /* Else arg1 stays null pointer */
 
             cnt = conf_cmdparse(cnt, cmd, arg1);
         }
@@ -1669,8 +1686,12 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 }
 
 
-/* conf_print is used to write out the config file(s) motion.conf and any thread
- * config files. The function is called when using http remote control.
+/** 
+ * conf_print 
+ *       Is used to write out the config file(s) motion.conf and any thread
+ *       config files. The function is called when using http remote control.
+ *
+ * Returns nothing.
  */
 void conf_print(struct context **cnt)
 {
@@ -1680,8 +1701,8 @@ void conf_print(struct context **cnt)
     FILE *conffile;
 
     for (thread = 0; cnt[thread]; thread++) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Writing config file to %s", 
-                   __FUNCTION__, cnt[thread]->conf_filename);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Writing config file to %s", 
+                   cnt[thread]->conf_filename);
         
         conffile = myfopen(cnt[thread]->conf_filename, "w", 0);
         
@@ -1694,11 +1715,13 @@ void conf_print(struct context **cnt)
 
         for (i = 0; config_params[i].param_name; i++) {
             retval = config_params[i].print(cnt, NULL, i, thread);
-            /*If config parameter has a value (not NULL) print it to the config file*/
+            /* If config parameter has a value (not NULL) print it to the config file. */
             if (retval) {
                 fprintf(conffile, "%s\n", config_params[i].param_help);
-                /* If the option is a text_* and first char is a space put
-                   quotation marks around to allow leading spaces */
+                /* 
+                 * If the option is a text_* and first char is a space put
+                 * quotation marks around to allow leading spaces.
+                 */
                 if (strncmp(config_params[i].param_name, "text", 4) || strncmp(retval, " ", 1))
                     fprintf(conffile, "%s %s\n\n", config_params[i].param_name, retval);
                 else
@@ -1706,10 +1729,12 @@ void conf_print(struct context **cnt)
             } else {
                 val = NULL;
                 config_params[i].print(cnt, &val, i, thread);
-                /* It can either be a thread file parameter or a disabled parameter
-                   If it is a thread parameter write it out
-                   Else write the disabled option to the config file but with a
-                   comment mark in front of the parameter name */
+                /* 
+                 * It can either be a thread file parameter or a disabled parameter.
+                 * If it is a thread parameter write it out.
+                 * Else write the disabled option to the config file but with a
+                 * comment mark in front of the parameter name. 
+                 */
                 if (val) {
                     fprintf(conffile, "%s\n", config_params[i].param_help);
                     fprintf(conffile, "%s\n", val);
@@ -1731,8 +1756,9 @@ void conf_print(struct context **cnt)
     }
 }
 
-/**************************************************************************
- * conf_load is the main function, called from motion.c
+/**
+ * conf_load 
+ * Is the main function, called from motion.c
  * The function sets the important context structure "cnt" including
  * loading the config parameters from config files and Command-line.
  * The following takes place in the function:
@@ -1748,28 +1774,32 @@ void conf_print(struct context **cnt)
  * - Finally it process the options given in the Command-line. This is done
  *   for each thread cnt[i] so that the Command-line options overrides any
  *   option given by motion.conf or a thread config file.
- **************************************************************************/
+ *
+ * Returns context struct.
+ */
 struct context **conf_load(struct context **cnt)
 {
     FILE *fp = NULL;
     char filename[PATH_MAX];
     int i;
-    /* We preserve argc and argv because they get overwritten by the memcpy command */
+    /* We preserve argc and argv because they get overwritten by the memcpy command. */
     char **argv = cnt[0]->conf.argv;
     int argc = cnt[0]->conf.argc;
 
-    /* Copy the template config structure with all the default config values
+    /* 
+     * Copy the template config structure with all the default config values
      * into cnt[0]->conf
      */
     memcpy(&cnt[0]->conf, &conf_template, sizeof(struct config));
     
-    /* For each member of cnt[0] which is a pointer to a string
-     * if the member points to a string in conf_template and is not NULL
-     * 1. Reserve (malloc) memory for the string
-     * 2. Copy the conf_template given string to the reserved memory
-     * 3. Change the cnt[0] member (char*) pointing to the string in reserved memory
+    /* 
+     * For each member of cnt[0] which is a pointer to a string
+     * if the member points to a string in conf_template and is not NULL.
+     * 1. Reserve (malloc) memory for the string.
+     * 2. Copy the conf_template given string to the reserved memory.
+     * 3. Change the cnt[0] member (char*) pointing to the string in reserved memory.
      * This ensures that we can free and malloc the string when changed
-     * via http remote control or config file or Command-line options
+     * via http remote control or config file or Command-line options.
      */
     malloc_strings(cnt[0]);
 
@@ -1777,13 +1807,14 @@ struct context **conf_load(struct context **cnt)
     cnt[0]->conf.argv = argv;
     cnt[0]->conf.argc = argc;
 
-    /* Open the motion.conf file. We try in this sequence:
+    /*
+     * Open the motion.conf file. We try in this sequence:
      * 1. Command-line
      * 2. current working directory
      * 3. $HOME/.motion/motion.conf
      * 4. sysconfig/motion.conf
      */
-    /* Get filename , pid file & log file from Command-line */
+    /* Get filename , pid file & log file from Command-line. */
     cnt[0]->log_type_str[0] = 0;
     cnt[0]->conf_filename[0] = 0;
     cnt[0]->pid_file[0] = 0;
@@ -1791,20 +1822,20 @@ struct context **conf_load(struct context **cnt)
 
     conf_cmdline(cnt[0], -1);
 
-    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on Command-line*/
+    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on Command-line. */
         strcpy(filename, cnt[0]->conf_filename);
         fp = fopen (filename, "r");
     }
 
-    if (!fp) {      /* Command-line didn't work, try current dir */
+    if (!fp) {  /* Command-line didn't work, try current dir. */
         char *path = NULL;
 
         if (cnt[0]->conf_filename[0])
-            motion_log(EMG, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.", 
-                       __FUNCTION__, filename);
+            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.", 
+                       filename);
 
         if ((path = get_current_dir_name()) == NULL) {
-            motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name", __FUNCTION__);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
             exit(-1);
         }
 
@@ -1813,7 +1844,7 @@ struct context **conf_load(struct context **cnt)
         free(path);
     }
 
-    if (!fp) {     /* specified file does not exist... try default file */
+    if (!fp) {  /* Specified file does not exist... try default file. */
         snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
         fp = fopen(filename, "r");
 
@@ -1821,22 +1852,21 @@ struct context **conf_load(struct context **cnt)
             snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
             fp = fopen(filename, "r");
 
-            if (!fp)        /* there is no config file.... use defaults */
-                motion_log(EMG, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s", 
-                           __FUNCTION__, filename);
+            if (!fp) /* There is no config file.... use defaults. */
+                MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s", 
+                           filename);
         }
     }
 
-    /* Now we process the motion.conf config file and close it */
+    /* Now we process the motion.conf config file and close it. */
     if (fp) {
         strcpy(cnt[0]->conf_filename, filename);
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s", 
-                   __FUNCTION__, filename);
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s", 
+                   filename);
         cnt = conf_process(cnt, fp);
         myfclose(fp);
     } else {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Not config file to process using default values", 
-                   __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Not config file to process using default values"); 
     }
     
 
@@ -1847,14 +1877,14 @@ struct context **conf_load(struct context **cnt)
      * cnt[1], cnt[2], ... are context structures for each thread
      * Command line options always wins over config file options
      * so we go through each thread and overrides any set Command-line
-     * options
+     * options.
      */
     i = -1;
 
     while (cnt[++i])
         conf_cmdline(cnt[i], i);
 
-    /* if pid file was passed from Command-line copy to main thread conf struct */
+    /* if pid file was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->pid_file[0])    
         cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
 
@@ -1877,6 +1907,8 @@ struct context **conf_load(struct context **cnt)
  *      2. Copy the original string to the reserved memory
  *      3. Change the cnt member (char*) pointing to the string in reserved memory
  *      This ensures that we can free and malloc the string if it is later changed
+ *
+ * Returns nothing.
  */
 void malloc_strings(struct context *cnt)
 {
@@ -1884,7 +1916,7 @@ void malloc_strings(struct context *cnt)
     char **val;
     while (config_params[i].param_name != NULL) {
         if (config_params[i].copy == copy_string) { /* if member is a string */
-            /* val is made to point to a pointer to the current string */
+            /* val is made to point to a pointer to the current string. */
             val = (char **)((char *)cnt+config_params[i].conf_value);
 
             /* 
@@ -1928,6 +1960,8 @@ void malloc_strings(struct context *cnt)
  *      The boolean is given as a string in str which is converted to 0 or 1 
  *      by the function. Values 1, yes and on are converted to 1 ignoring case.
  *      Any other value is converted to 0.
+ *
+ * Returns context struct.
  */
 static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr)
 {
@@ -1956,6 +1990,8 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
  *      Assigns a config option to a new integer value.
  *      The integer is given as a string in str which is converted to integer
  *      by the function.
+ *
+ * Returns context struct.
  */
 static struct context **copy_int(struct context **cnt, const char *str, int val_ptr)
 {
@@ -1981,7 +2017,9 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
  *      the char *conf->option that we are working on is free()'d
  *      (if memory for it has already been malloc()'d), and set to
  *      a freshly malloc()'d string with the value from str,
- *      or NULL if str is blank
+ *      or NULL if str is blank.
+ *
+ * Returns context struct.
  */
 struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 {
@@ -2001,7 +2039,7 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
 
         /*
          * Set the option on all threads if setting the option
-         * for thread 0; otherwise just set that one thread's option
+         * for thread 0; otherwise just set that one thread's option.
          */
         if (cnt[0]->threadnr)
             return cnt;
@@ -2031,7 +2069,8 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
  */
 char *mystrcpy(char *to, const char *from)
 {
-    /* free the memory used by the to string, if such memory exists,
+    /* 
+     * Free the memory used by the to string, if such memory exists,
      * and return a pointer to a freshly malloc()'d string with the
      * same value as from.
      */
@@ -2069,7 +2108,7 @@ char *mystrdup(const char *from)
         /* 
          * We must ensure the string always has a NULL terminator.
          * This necessary because strncpy will not append a NULL terminator
-         * if the original string is greater than stringlength.
+         * if the original string is greater than string length.
          */
         tmp += stringlength;
         *tmp = '\0';
@@ -2079,6 +2118,12 @@ char *mystrdup(const char *from)
     return tmp;
 }
 
+/**
+ * config_type
+ *      Returns a pointer to string containing value the type of config parameter passed.
+ *
+ * Returns const char *.
+ */ 
 const char *config_type(config_param *configparam)
 {
     if (configparam->copy == copy_string)
@@ -2091,6 +2136,13 @@ const char *config_type(config_param *configparam)
     return "unknown";
 }
 
+
+/**
+ * print_bool
+ *      Returns a pointer to string containing boolean value 'on' / 'off' or NULL.
+ *
+ * Returns const char *.
+ */ 
 static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
                               int parm, unsigned int threadnr)
 {
@@ -2108,7 +2160,7 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
 
 /**
  * print_string 
- *      returns a pointer to a string containing the value of the config option,
+ *      Returns a pointer to a string containing the value of the config option,
  *      If the thread number is not 0 the string is compared with the value of the same
  *      option in thread 0.
  *
@@ -2123,7 +2175,7 @@ static const char *print_string(struct context **cnt,
     int val = config_params[parm].conf_value;
     const char **cptr0, **cptr1;
     
-    /* strcmp does not like NULL so we have to check for this also */
+    /* strcmp does not like NULL so we have to check for this also. */
     cptr0 = (const char **)((char *)cnt[0] + val);
     cptr1 = (const char **)((char *)cnt[threadnr] + val);
 
@@ -2162,7 +2214,8 @@ static const char *print_thread(struct context **cnt, char **str,
     retval[0] = 0;
 
     while (cnt[++i]) {
-        retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename)+10, "print_thread");
+        retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10, 
+                           "print_thread");
         sprintf(retval + strlen(retval), "thread %s\n", cnt[i]->conf_filename);
     }
 
@@ -2195,8 +2248,8 @@ static struct context **config_thread(struct context **cnt, const char *str,
     fp = fopen(str, "r");
 
     if (!fp) {
-        motion_log(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Thread config file %s not found", 
-                   __FUNCTION__, str);
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Thread config file %s not found", 
+                   str);
         return cnt;
     }
 
@@ -2208,8 +2261,8 @@ static struct context **config_thread(struct context **cnt, const char *str,
     /* 
      * Make space for the threads + the terminating NULL pointer
      * in the array of pointers to context structures
-     * First thread is 0 so the number of threads is i+1
-     * plus an extra for the NULL pointer. This gives i+2
+     * First thread is 0 so the number of threads is i + 1
+     * plus an extra for the NULL pointer. This gives i + 2
      */
     cnt = myrealloc(cnt, sizeof(struct context *) * (i + 2), "config_thread");
 
@@ -2228,21 +2281,27 @@ static struct context **config_thread(struct context **cnt, const char *str,
      */
     malloc_strings(cnt[i]);
     
-    /* Mark the end if the array of pointers to context structures */
+    /* Mark the end if the array of pointers to context structures. */
     cnt[i + 1] = NULL;
 
-    /* process the thread's config file and notify user on console */
+    /* Process the thread's config file and notify user on console. */
     strcpy(cnt[i]->conf_filename, str);
-    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Processing config file %s", 
-               __FUNCTION__, str);
-    conf_process(cnt+i, fp);
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s: Processing config file %s", 
+               str);
+    conf_process(cnt + i, fp);
     
-    /* Finally we close the thread config file */
+    /* Finally we close the thread config file. */
     myfclose(fp);
 
     return cnt;
 }
 
+/**
+ * usage
+ *      Prints usage and options allowed from Command-line.
+ *
+ * Returns nothing.
+ */ 
 static void usage()
 {
     printf("motion Version "VERSION", Copyright 2000-2005 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen\n");

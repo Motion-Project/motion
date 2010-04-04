@@ -21,7 +21,7 @@
  *                       - fix for __bswap_32 macro collision
  *                       - fixed bug where initialization would be
  *                         incomplete for invalid degrees of rotation
- *                       - now uses motion_log for error reporting
+ *                       - now uses MOTION_LOG for error reporting
  *      v4 (26-Oct-2004) - new fix for width/height from imgs/conf due to 
  *                         earlier misinterpretation
  *      v3 (11-Oct-2004) - cleanup of width/height from imgs/conf
@@ -238,12 +238,12 @@ void rotate_init(struct context *cnt)
      * we have a value that is safe from changes caused by motion-control.
      */
     if ((cnt->conf.rotate_deg % 90) > 0) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Config option \"rotate\" not a multiple of 90: %d",
-                   __FUNCTION__, cnt->conf.rotate_deg);
-        cnt->conf.rotate_deg = 0;     /* disable rotation */
-        cnt->rotate_data.degrees = 0; /* force return below */
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Config option \"rotate\" not a multiple of 90: %d",
+                    cnt->conf.rotate_deg);
+        cnt->conf.rotate_deg = 0;     /* Disable rotation. */
+        cnt->rotate_data.degrees = 0; /* Force return below. */
     } else {
-        cnt->rotate_data.degrees = cnt->conf.rotate_deg % 360; /* range: 0..359 */
+        cnt->rotate_data.degrees = cnt->conf.rotate_deg % 360; /* Range: 0..359 */
     }
 
     /*
@@ -291,8 +291,8 @@ void rotate_init(struct context *cnt)
         break;
     default:
         cnt->rotate_data.degrees = 0;
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported palette (%d), rotation is disabled",
-                   __FUNCTION__, cnt->imgs.type);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported palette (%d), rotation is disabled",
+                    cnt->imgs.type);
         return;
     }
 
@@ -348,7 +348,7 @@ int rotate_map(struct context *cnt, unsigned char *map)
      * or, it is in greyscale, in which case the pixel data simply consists 
      * of width x height bytes.
      */
-    int wh, wh4 = 0, w2 = 0, h2 = 0;  /* width*height, width*height/4 etc. */
+    int wh, wh4 = 0, w2 = 0, h2 = 0;  /* width * height, width * height / 4 etc. */
     int size, deg;
     int width, height;
 
@@ -376,16 +376,16 @@ int rotate_map(struct context *cnt, unsigned char *map)
 
     switch (deg) {
     case 90:
-        /* first do the Y part */
+        /* First do the Y part */
         rot90cw(map, cnt->rotate_data.temp_buf, wh, width, height);
         if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            /* then do U and V */
+            /* Then do U and V */
             rot90cw(map + wh, cnt->rotate_data.temp_buf + wh, wh4, w2, h2);
             rot90cw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4,
                     wh4, w2, h2);
         }
         
-        /* then copy back from the temp buffer to map */
+        /* Then copy back from the temp buffer to map. */
         memcpy(map, cnt->rotate_data.temp_buf, size);
         break;
         
@@ -403,21 +403,21 @@ int rotate_map(struct context *cnt, unsigned char *map)
 
     case 270:
 
-        /* first do the Y part */
+        /* First do the Y part */
         rot90ccw(map, cnt->rotate_data.temp_buf, wh, width, height);
         if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            /* then do U and V */
+            /* Then do U and V */
             rot90ccw(map + wh, cnt->rotate_data.temp_buf + wh, wh4, w2, h2);
             rot90ccw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4, 
                      wh4, w2, h2);
         }
         
-        /* then copy back from the temp buffer to map */
+        /* Then copy back from the temp buffer to map. */
         memcpy(map, cnt->rotate_data.temp_buf, size);
         break;
         
     default:
-        /* invalid */
+        /* Invalid */
         return -1;
     }
     

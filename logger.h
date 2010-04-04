@@ -50,6 +50,8 @@
 #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
 #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
+#define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, format, __FUNCTION__, ##args) 
+
 int get_log_type(const char* type);
 const char* get_log_type_str(unsigned int type);
 void set_log_type(unsigned int type);

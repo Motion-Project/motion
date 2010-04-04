@@ -19,7 +19,7 @@
 /*
  * netcam_source_mgr is a locally-defined structure to contain elements
  * which are not present in the standard libjpeg (the element 'pub' is a
- * pointer to the standard information)
+ * pointer to the standard information).
  */
 typedef struct {
     struct jpeg_source_mgr pub;
@@ -47,11 +47,11 @@ static void     netcam_error_exit(j_common_ptr);
 
 static void netcam_init_source(j_decompress_ptr cinfo)
 {
-    /* Get our "private" structure from the libjpeg structure */
+    /* Get our "private" structure from the libjpeg structure. */
     netcam_src_ptr  src = (netcam_src_ptr) cinfo->src;
     /*
      * Set the 'start_of_file' flag in our private structure
-     * (used by my_fill_input_buffer)
+     * (used by my_fill_input_buffer).
      */
     src->start_of_file = TRUE;
 }
@@ -81,8 +81,7 @@ static boolean netcam_fill_input_buffer(j_decompress_ptr cinfo)
         src->buffer = (JOCTET *) src->data;
     } else {
         /* Insert a fake EOI marker - as per jpeglib recommendation */
-        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: **fake EOI inserted**", 
-                   __FUNCTION__);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: **fake EOI inserted**");
         src->buffer[0] = (JOCTET) 0xFF;
         src->buffer[1] = (JOCTET) JPEG_EOI;    /* 0xD9 */
         nbytes = 2;
@@ -120,9 +119,9 @@ static void netcam_term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
  *    JPEG library decompression routine.
  *
  * Parameters:
- *    cinfo           pointer to the jpeg decompression object
- *    data            pointer to the image data received from a netcam
- *    length          total size of the image
+ *    cinfo           pointer to the jpeg decompression object.
+ *    data            pointer to the image data received from a netcam.
+ *    length          total size of the image.
  *
  * Returns:             Nothing
  * 
@@ -159,27 +158,27 @@ static void netcam_memory_src(j_decompress_ptr cinfo, char *data, int length)
  *
  * Parameters
  *
- *     cinfo           pointer to the decompression control structure
+ *     cinfo           pointer to the decompression control structure.
  *
  * Returns:             does an (ugly) longjmp to get back to netcam_jpeg
- *                      code
+ *                      code.
  *
  */
 static void netcam_error_exit(j_common_ptr cinfo)
 {
-    /* fetch our pre-stored pointer to the netcam context */
+    /* Fetch our pre-stored pointer to the netcam context. */
     netcam_context_ptr netcam = cinfo->client_data;
-    /* output the message associated with the error */
+    /* Output the message associated with the error. */
     (*cinfo->err->output_message)(cinfo);
-    /* set flag to show the decompression had errors */
+    /* Set flag to show the decompression had errors. */
     netcam->jpeg_error |= 1;
-    /* need to "cleanup" the aborted decompression */
+    /* Need to "cleanup" the aborted decompression. */
     jpeg_destroy (cinfo);
 
-    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: netcam->jpeg_error %d", 
-               __FUNCTION__, netcam->jpeg_error);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: netcam->jpeg_error %d", 
+               netcam->jpeg_error);
         
-    /* jump back to wherever we started */
+    /* Jump back to wherever we started. */
     longjmp(netcam->setjmp_buffer, 1);
 }
 
@@ -192,7 +191,7 @@ static void netcam_error_exit(j_common_ptr cinfo)
  *
  * Parameters
  *
- *     cinfo           pointer to the decompression control structure
+ *     cinfo           pointer to the decompression control structure.
  *
  * Returns              Nothing
  *
@@ -201,7 +200,7 @@ static void netcam_output_message(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
     
-    /* fetch our pre-stored pointer to the netcam context */
+    /* Fetch our pre-stored pointer to the netcam context. */
     netcam_context_ptr netcam = cinfo->client_data;
 
     /*
@@ -224,8 +223,7 @@ static void netcam_output_message(j_common_ptr cinfo)
      * Write it out to the motion log.
      */
      (*cinfo->err->format_message)(cinfo, buffer);
-     motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: %s", 
-                __FUNCTION__, buffer);
+     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: %s", buffer);
     
 }
 
@@ -236,10 +234,10 @@ static void netcam_output_message(j_common_ptr cinfo)
  *     decompression.
  *
  * Parameters:
- *     netcam          pointer to netcam_context
- *     cinfo           pointer to JPEG decompression context
+ *     netcam          pointer to netcam_context.
+ *     cinfo           pointer to JPEG decompression context.
  *
- * Returns:           Error code
+ * Returns:           Error code.
  */
 static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
 {
@@ -253,7 +251,7 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
      */
     pthread_mutex_lock(&netcam->mutex);
 
-    if (netcam->imgcnt_last == netcam->imgcnt) {    /* need to wait */
+    if (netcam->imgcnt_last == netcam->imgcnt) {    /* Need to wait */
         struct timespec waittime;
         struct timeval curtime;
         int retcode;
@@ -281,57 +279,57 @@ static int netcam_init_jpeg(netcam_context_ptr netcam, j_decompress_ptr cinfo)
                                              &netcam->mutex, &waittime);
         } while (retcode == EINTR);
         
-        if (retcode) {    /* we assume a non-zero reply is ETIMEOUT */
+        if (retcode) {    /* We assume a non-zero reply is ETIMEOUT */
             pthread_mutex_unlock(&netcam->mutex);
             
-            motion_log(WRN, TYPE_NETCAM, NO_ERRNO, 
-                       "%s: no new pic, no signal rcvd", __FUNCTION__);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, 
+                       "%s: no new pic, no signal rcvd");
                 
             return NETCAM_GENERAL_ERROR | NETCAM_NOTHING_NEW_ERROR;
         }
         
-        motion_log(DBG, TYPE_NETCAM, NO_ERRNO, 
-                   "%s: ***new pic delay successful***", __FUNCTION__);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, 
+                   "%s: ***new pic delay successful***");
     }
     
     netcam->imgcnt_last = netcam->imgcnt;
 
-    /* set latest buffer as "current" */
+    /* Set latest buffer as "current". */
     buff = netcam->latest;
     netcam->latest = netcam->jpegbuf;
     netcam->jpegbuf = buff;
     pthread_mutex_unlock(&netcam->mutex);
 
-    /* clear any error flag from previous work */
+    /* Clear any error flag from previous work. */
     netcam->jpeg_error = 0;
     
     buff = netcam->jpegbuf;
     /*
-     * Prepare for the decompression 
-     * Initialize the JPEG decompression object 
+     * Prepare for the decompression.
+     * Initialize the JPEG decompression object.
      */
     jpeg_create_decompress(cinfo);
 
-    /* Set up own error exit routine */
+    /* Set up own error exit routine. */
     cinfo->err = jpeg_std_error(&netcam->jerr);
     cinfo->client_data = netcam;
     netcam->jerr.error_exit = netcam_error_exit;
     netcam->jerr.output_message = netcam_output_message;
 
-    /* Specify the data source as our own routine */
+    /* Specify the data source as our own routine. */
     netcam_memory_src(cinfo, buff->ptr, buff->used);
 
-    /* Read file parameters (rejecting tables-only) */
+    /* Read file parameters (rejecting tables-only). */
     jpeg_read_header(cinfo, TRUE);
 
-    /* Override the desired colour space */
+    /* Override the desired colour space. */
     cinfo->out_color_space = JCS_YCbCr;
 
-    /* Start the decompressor */
+    /* Start the decompressor. */
     jpeg_start_decompress(cinfo);
 
-    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: jpeg_error %d", 
-               __FUNCTION__, netcam->jpeg_error);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: jpeg_error %d", 
+               netcam->jpeg_error);
 
     return netcam->jpeg_error;
 }
@@ -350,35 +348,35 @@ static int netcam_image_conv(netcam_context_ptr netcam,
                                struct jpeg_decompress_struct *cinfo,
                                unsigned char *image)
 {
-    JSAMPARRAY      line;           /* array of decomp data lines */
-    unsigned char  *wline;          /* will point to line[0] */
+    JSAMPARRAY      line;           /* Array of decomp data lines */
+    unsigned char  *wline;          /* Will point to line[0] */
     /* Working variables */
     int             linesize, i;
     unsigned char  *upic, *vpic;
     unsigned char  *pic = image;
-    unsigned char   y;              /* switch for decoding YUV data */
+    unsigned char   y;              /* Switch for decoding YUV data */
     unsigned int    width, height;
 
     width = cinfo->output_width;
     height = cinfo->output_height;
 
     if (width && ((width != netcam->width) || (height != netcam->height))) {
-        motion_log(ERR, TYPE_NETCAM, NO_ERRNO, 
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, 
                    "%s: JPEG image size %dx%d, JPEG was %dx%d",
-                   __FUNCTION__, netcam->width, netcam->height, width, height);
+                    netcam->width, netcam->height, width, height);
         jpeg_destroy_decompress(cinfo);
         netcam->jpeg_error |= 4;
         return netcam->jpeg_error;
     }
-    /* Set the output pointers (these come from YUV411P definition */
+    /* Set the output pointers (these come from YUV411P definition. */
     upic = pic + width * height;
     vpic = upic + (width * height) / 4;
 
 
-    /* YCbCr format will give us one byte each for YUV */
+    /* YCbCr format will give us one byte each for YUV. */
     linesize = cinfo->output_width * 3;
 
-    /* Allocate space for one line */
+    /* Allocate space for one line. */
     line = (cinfo->mem->alloc_sarray)((j_common_ptr) cinfo, JPOOL_IMAGE,
                                        cinfo->output_width * cinfo->output_components, 1);
 
@@ -408,10 +406,10 @@ static int netcam_image_conv(netcam_context_ptr netcam,
     jpeg_destroy_decompress(cinfo);
 
     if (netcam->cnt->rotate_data.degrees > 0) 
-        /* rotate as specified */
+        /* Rotate as specified */
         rotate_map(netcam->cnt, image);
 
-    motion_log(DBG, TYPE_NETCAM, NO_ERRNO, "%s: jpeg_error %d", __FUNCTION__, 
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: jpeg_error %d",  
                netcam->jpeg_error);
  
     return netcam->jpeg_error;
@@ -424,8 +422,8 @@ static int netcam_image_conv(netcam_context_ptr netcam,
  *    suitable for processing by motion.
  *
  * Parameters:
- *    netcam    pointer to the netcam_context structure
- *     image    pointer to a buffer for the returned image
+ *    netcam    pointer to the netcam_context structure.
+ *     image    pointer to a buffer for the returned image.
  *
  * Returns: 
  *
@@ -436,24 +434,23 @@ static int netcam_image_conv(netcam_context_ptr netcam,
  */
 int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 {
-    struct jpeg_decompress_struct cinfo;    /* decompression control struct */
-    int retval = 0;                         /* value returned to caller */
-    int ret;                                /* working var */
+    struct jpeg_decompress_struct cinfo;    /* Decompression control struct. */
+    int retval = 0;                         /* Value returned to caller. */
+    int ret;                                /* Working var. */
 
     /*
      * This routine is only called from the main thread.
      * We need to "protect" the "latest" image while we
      * decompress it.  netcam_init_jpeg uses
-     * netcam->mutex to do this;
+     * netcam->mutex to do this.
      */
-    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: processing jpeg image"
-               " - content length %d", __FUNCTION__, netcam->latest->content_length);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: processing jpeg image"
+               " - content length %d",  netcam->latest->content_length);
     
     ret = netcam_init_jpeg(netcam, &cinfo);
     
     if (ret != 0) {
-        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: ret %d", 
-                   __FUNCTION__, ret);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: ret %d", ret);
         return ret;
     }    
 
@@ -461,27 +458,27 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
      * Do a sanity check on dimensions
      * If dimensions have changed we throw an
      * error message that will cause
-     * restart of Motion
+     * restart of Motion.
      */
     if (netcam->width) {    /* 0 means not yet init'ed */
         if ((cinfo.output_width != netcam->width) ||
             (cinfo.output_height != netcam->height)) {
             retval = NETCAM_RESTART_ERROR;
-            motion_log(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Camera width/height mismatch "
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Camera width/height mismatch "
                        "with JPEG image - expected %dx%d, JPEG %dx%d",
-                       " retval %d", __FUNCTION__, netcam->width, netcam->height,
+                       " retval %d",  netcam->width, netcam->height,
                        cinfo.output_width, cinfo.output_height, retval);
             return retval;        
         }
     }
 
-    /* do the conversion */
+    /* Do the conversion */
     ret = netcam_image_conv(netcam, &cinfo, image);
     
     if (ret != 0) {
         retval |= NETCAM_JPEG_CONV_ERROR;
-        motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: ret %d retval %d", 
-                   __FUNCTION__, ret, retval);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: ret %d retval %d", 
+                   ret, retval);
     }    
 
     return retval;
@@ -491,18 +488,18 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
  * netcam_get_dimensions
  *
  *    This function gets the height and width of the JPEG image
- *    located in the supplied netcam_image_buffer
+ *    located in the supplied netcam_image_buffer.
  *
  * Parameters
  *
- *    netcam     pointer to the netcam context
+ *    netcam     pointer to the netcam context.
  *
- * Returns:   Nothing, but fills in width and height into context
+ * Returns:   Nothing, but fills in width and height into context.
  *
  */
 void netcam_get_dimensions(netcam_context_ptr netcam)
 {
-    struct jpeg_decompress_struct cinfo; /* decompression control struct */
+    struct jpeg_decompress_struct cinfo; /* Decompression control struct. */
     int ret;
 
     ret = netcam_init_jpeg(netcam, &cinfo);
@@ -513,6 +510,6 @@ void netcam_get_dimensions(netcam_context_ptr netcam)
 
     jpeg_destroy_decompress(&cinfo);
 
-    motion_log(INF, TYPE_NETCAM, NO_ERRNO, "%s: JFIF_marker %s PRESENT ret %d", 
-               __FUNCTION__, netcam->JFIF_marker ? "IS" : "NOT", ret);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: JFIF_marker %s PRESENT ret %d", 
+               netcam->JFIF_marker ? "IS" : "NOT", ret);
 }

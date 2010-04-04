@@ -133,7 +133,7 @@ static char *str_time(void)
 }
 
 /**
- * motion_log
+ * MOTION_LOG
  *
  *    This routine is used for printing all informational, debug or error
  *    messages produced by any of the other motion functions.  It always

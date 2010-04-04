@@ -12,7 +12,7 @@
 #include <ctype.h>
 #include "motion.h"
 
-/* highest ascii value is 126 (~) */
+/* Highest ascii value is 126 (~) */
 #define ASCII_MAX 127
 
 unsigned char *small_char_arr_ptr[ASCII_MAX];
@@ -1132,7 +1132,7 @@ int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, un
     const char *end, *begin;
     const int line_space = (factor + 1) * 9;
     
-    /* Count the number of newlines in "text" so we scroll it up the image */
+    /* Count the number of newlines in "text" so we scroll it up the image. */
     end = text;
 
     while ((end = strstr(end, NEWLINE))) {
@@ -1179,13 +1179,13 @@ int initialize_chars(void)
         }
     }
 
-    /* first init all char ptr's to a space character */
+    /* First init all char ptr's to a space character. */
     for (i = 0; i < ASCII_MAX; i++) {
         small_char_arr_ptr[i] = &draw_table[0].pix[0][0];
         big_char_arr_ptr[i] = &big_table[0].pix[0][0];
     }
             
-    /* build [big_]char_arr_ptr table to point to each available ascii */
+    /* Build [big_]char_arr_ptr table to point to each available ascii. */
     for (i = 0; i < draw_table_size; i++) {
         small_char_arr_ptr[(int)draw_table[i].ascii] = &draw_table[i].pix[0][0];
         big_char_arr_ptr[(int)draw_table[i].ascii] = &big_table[i].pix[0][0];

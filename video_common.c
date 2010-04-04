@@ -9,8 +9,8 @@
  *
  */
 
-/* for rotation */
-#include "rotate.h"    /* already includes motion.h */
+/* For rotation */
+#include "rotate.h"    /* Already includes motion.h */
 #include "video.h"
 #include "jpegutils.h"
 
@@ -89,7 +89,7 @@ static void sonix_decompress_init(code_table_t * table)
 
 /**
  * sonix_decompress
- *      decompresses an image encoded by a SN9C101 camera controller chip.
+ *      Decompresses an image encoded by a SN9C101 camera controller chip.
  *
  *   IN    width
  *         height
@@ -108,14 +108,14 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
     unsigned char code;
     unsigned char *addr;
 
-    /* local storage */
+    /* Local storage */
     static code_table_t table[256];
     static int init_done = 0;
 
     if (!init_done) {
         init_done = 1;
         sonix_decompress_init(table);
-        /* do sonix_decompress_init first! */
+        /* Do sonix_decompress_init first! */
         //return -1; // so it has been done and now fall through
     }
 
@@ -124,7 +124,7 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
 
         col = 0;
 
-        /* first two pixels in first two rows are stored as raw 8-bit */
+        /* First two pixels in first two rows are stored as raw 8-bit. */
         if (row < 2) {
             addr = inp + (bitpos >> 3);
             code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
@@ -140,30 +140,30 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
         }
 
         while (col < width) {
-            /* get bitcode from bitstream */
+            /* Get bitcode from bitstream. */
             addr = inp + (bitpos >> 3);
             code = (addr[0] << (bitpos & 7)) | (addr[1] >> (8 - (bitpos & 7)));
 
-            /* update bit position */
+            /* Update bit position. */
             bitpos += table[code].len;
 
-            /* calculate pixel value */
+            /* Calculate pixel value. */
             val = table[code].val;
             if (!table[code].is_abs) {
-                /* value is relative to top and left pixel */
+                /* Value is relative to top and left pixel. */
                 if (col < 2) {
-                    /* left column: relative to top pixel */
+                    /* Left column: relative to top pixel. */
                     val += outp[-2 * width];
                 } else if (row < 2) {
-                    /* top row: relative to left pixel */
+                    /* Top row: relative to left pixel. */
                     val += outp[-2];
                 } else {
-                    /* main area: average of left pixel and top pixel */
+                    /* Main area: average of left pixel and top pixel. */
                     val += (outp[-2] + outp[-2 * width]) / 2;
                 }
             }
 
-            /* store pixel */
+            /* Store pixel */
             *outp++ = CLAMP(val);
             col++;
         }
@@ -201,7 +201,7 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
                     *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + 
                                 *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
                 } else {
-                    /* first line or left column */
+                    /* First line or left column. */
                     *scanpt++ = *rawpt;     /* B */
                     *scanpt++ = (*(rawpt + 1) + *(rawpt + width)) / 2;    /* G */
                     *scanpt++ = *(rawpt + width + 1);       /* R */
@@ -213,7 +213,7 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
                     *scanpt++ = *rawpt;    /* G */
                     *scanpt++ = (*(rawpt + width) + *(rawpt - width)) / 2;  /* R */
                 } else {
-                    /* first line or right column */
+                    /* First line or right column. */
                     *scanpt++ = *(rawpt - 1);       /* B */
                     *scanpt++ = *rawpt;    /* G */
                     *scanpt++ = *(rawpt + width);   /* R */
@@ -227,7 +227,7 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
                     *scanpt++ = *rawpt;    /* G */
                     *scanpt++ = (*(rawpt - 1) + *(rawpt + 1)) / 2;  /* R */
                 } else {
-                    /* bottom line or left column */
+                    /* Bottom line or left column. */
                     *scanpt++ = *(rawpt - width);   /* B */
                     *scanpt++ = *rawpt;    /* G */
                     *scanpt++ = *(rawpt + 1);       /* R */
@@ -241,7 +241,7 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
                                 *(rawpt - width) + *(rawpt + width)) / 4;    /* G */
                     *scanpt++ = *rawpt;     /* R */
                 } else {
-                    /* bottom line or right column */
+                    /* Bottom line or right column. */
                     *scanpt++ = *(rawpt - width - 1);       /* B */
                     *scanpt++ = (*(rawpt - 1) + *(rawpt - width)) / 2;    /* G */
                     *scanpt++ = *rawpt;     /* R */
@@ -255,20 +255,22 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
 
 /**
  * conv_yuv422to420p
+ *
+ *
  */ 
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     unsigned char *src, *dest, *src2, *dest2;
     int i, j;
 
-    /* Create the Y plane */
+    /* Create the Y plane. */
     src = cap_map;
     dest = map;
     for (i = width * height; i > 0; i--) {
         *dest++ = *src;
         src += 2;
     }
-    /* Create U and V planes */
+    /* Create U and V planes. */
     src = cap_map + 1;
     src2 = cap_map + width * 2 + 1;
     dest = map + width * height;
@@ -291,6 +293,8 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 /**
  * conv_uyvyto420p
+ *
+ *
  */ 
 void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
 {
@@ -329,6 +333,8 @@ void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int wi
 
 /**
  * conv_rgb24toyuv420p
+ *
+ *
  */ 
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
@@ -393,8 +399,7 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
     ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
 
     if (ret == 1) {
-        motion_log(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue", 
-                   __FUNCTION__);
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue"); 
         ret = 2;
     }
 
@@ -472,7 +477,7 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
     }
     avg = avg / j;
 
-    /* average is above window - turn down brightness - go for the target */
+    /* Average is above window - turn down brightness - go for the target. */
     if (avg > brightness_window_high) {
         step = MIN2((avg - brightness_target) / AUTOBRIGHT_DAMPER + 1, viddev->brightness - AUTOBRIGHT_MIN);
 
@@ -481,7 +486,7 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
             make_change = 1;
         }
     } else if (avg < brightness_window_low) {
-        /* average is below window - turn up brightness - go for the target */
+        /* Average is below window - turn up brightness - go for the target. */
         step = MIN2((brightness_target - avg) / AUTOBRIGHT_DAMPER + 1, AUTOBRIGHT_MAX - viddev->brightness);
         
         if (viddev->brightness < AUTOBRIGHT_MAX - step) {
@@ -500,7 +505,7 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 #ifndef WITHOUT_V4L
 /*
  * Big lock for vid_start to ensure exclusive access to viddevs while adding 
- * devices during initialization of each thread
+ * devices during initialization of each thread.
  */
 static pthread_mutex_t vid_mutex;
 
@@ -514,7 +519,7 @@ static struct video_dev *viddevs = NULL;
  * vid_init
  *
  * Called from motion.c at the very beginning before setting up the threads.
- * Function prepares the vid_mutex
+ * Function prepares the vid_mutex.
  */
 void vid_init(void)
 {
@@ -524,7 +529,7 @@ void vid_init(void)
 /**
  * vid_cleanup
  *
- * vid_cleanup is called from motion.c when Motion is stopped or restarted
+ * vid_cleanup is called from motion.c when Motion is stopped or restarted.
  */
 void vid_cleanup(void)
 {
@@ -536,7 +541,7 @@ void vid_cleanup(void)
 /**
  * vid_close
  *
- * vid_close is called from motion.c when a Motion thread is stopped or restarted
+ * vid_close is called from motion.c when a Motion thread is stopped or restarted.
  */
 void vid_close(struct context *cnt)
 {
@@ -547,7 +552,7 @@ void vid_close(struct context *cnt)
 
     /* Cleanup the netcam part */
     if (cnt->netcam) {
-        motion_log(DBG, TYPE_VIDEO, NO_ERRNO, "%s: calling netcam_cleanup", __FUNCTION__);
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling netcam_cleanup");
         netcam_cleanup(cnt->netcam, 0);
         cnt->netcam = NULL;
         return;
@@ -565,17 +570,17 @@ void vid_close(struct context *cnt)
     }
     pthread_mutex_unlock(&vid_mutex);
 
-    /* Set it as closed in thread context */
+    /* Set it as closed in thread context. */
     cnt->video_dev = -1;
 
     if (dev == NULL) {
-        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find video device", __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find video device");
         return;
     }
 
     if (--dev->usage_count == 0) {
-        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s", 
-                   __FUNCTION__, dev->video_device);
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s", 
+                   dev->video_device);
 #ifdef MOTION_V4L2
         if (dev->v4l2) {
             v4l2_close(dev);
@@ -600,11 +605,11 @@ void vid_close(struct context *cnt)
         pthread_mutex_destroy(&dev->mutex);
         free(dev);
     } else {
-        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Still %d users of video device %s, so we don't close it now", 
-                   __FUNCTION__, dev->usage_count, dev->video_device);
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Still %d users of video device %s, so we don't close it now", 
+                   dev->usage_count, dev->video_device);
         /* 
          * There is still at least one thread using this device 
-         * If we own it, release it
+         * If we own it, release it.
          */
         if (dev->owner == cnt->threadnr) {
             dev->frames = 0;
@@ -658,14 +663,14 @@ static int vid_v4lx_start(struct context *cnt)
      * for this first.
      */
     if (conf->width % 16) {
-        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 16", 
-                   __FUNCTION__, conf->width);
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 16", 
+                   conf->width);
         return -3;
     }
 
     if (conf->height % 16) {
-        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 16",
-                     __FUNCTION__, conf->height);
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 16",
+                   conf->height);
         return -3;
     }
 
@@ -690,7 +695,7 @@ static int vid_v4lx_start(struct context *cnt)
      * First we walk through the already discovered video devices to see
      * if we have already setup the same device before. If this is the case
      * the device is a Round Robin device and we set the basic settings
-     * and return the file descriptor
+     * and return the file descriptor.
      */
     dev = viddevs;
     while (dev) {
@@ -717,8 +722,8 @@ static int vid_v4lx_start(struct context *cnt)
         dev = dev->next;
     }
 
-    motion_log(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using videodevice %s and input %d", 
-               __FUNCTION__, conf->video_device, conf->input);
+    MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using videodevice %s and input %d", 
+               conf->video_device, conf->input);
 
     dev = mymalloc(sizeof(struct video_dev));
     memset(dev, 0, sizeof(struct video_dev));
@@ -728,8 +733,8 @@ static int vid_v4lx_start(struct context *cnt)
     fd = open(dev->video_device, O_RDWR);
 
     if (fd < 0) {
-        motion_log(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s", 
-                   __FUNCTION__, conf->video_device);
+        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s", 
+                   conf->video_device);
         free(dev);
         pthread_mutex_unlock(&vid_mutex);
         return -1;
@@ -759,14 +764,14 @@ static int vid_v4lx_start(struct context *cnt)
     dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
     dev->fps = 0;
 #ifdef MOTION_V4L2
-    /* First lets try V4L2 and if it's not supported V4L1 */
+    /* First lets try V4L2 and if it's not supported V4L1. */
 
     dev->v4l2 = 1;
 
     if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
         /* 
          * Restore width & height before test with v4l
-         * because could be changed in v4l2_start ()
+         * because could be changed in v4l2_start().
          */
         dev->width = width;
         dev->height = height;
@@ -786,10 +791,10 @@ static int vid_v4lx_start(struct context *cnt)
     }
 #endif
     if (dev->v4l2 == 0) {
-        motion_log(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L1", __FUNCTION__);
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L1");
     } else {
-        motion_log(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L2", __FUNCTION__);
-        /* Update width & height because could be changed in v4l2_start () */
+        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L2");
+        /* Update width & height because could be changed in v4l2_start(). */
         width = dev->width;
         height = dev->height;
         cnt->imgs.width = width;
@@ -813,7 +818,7 @@ static int vid_v4lx_start(struct context *cnt)
         break;
     }
 
-    /* Insert into linked list */
+    /* Insert into linked list. */
     dev->next = viddevs;
     viddevs = dev;
 
@@ -859,7 +864,7 @@ int vid_start(struct context *cnt)
     }
 #ifdef WITHOUT_V4L
     else    
-        motion_log(ERR, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url", __FUNCTION__);
+        MOTION_LOG(EMG, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url");
 #else
     else
         dev = vid_v4lx_start(cnt);
@@ -902,7 +907,7 @@ int vid_next(struct context *cnt, unsigned char *map)
 #ifndef WITHOUT_V4L
     /* 
      * We start a new block so we can make declarations without breaking
-     * gcc 2.95 or older
+     * gcc 2.95 or older.
      */
     {
         struct video_dev *dev;
@@ -946,11 +951,11 @@ int vid_next(struct context *cnt, unsigned char *map)
             pthread_mutex_unlock(&dev->mutex);
         }
 
-        /* rotate the image as specified */
+        /* Rotate the image as specified. */
         if (cnt->rotate_data.degrees > 0) 
             rotate_map(cnt, map);
         
     }
-#endif                /*WITHOUT_V4L */
+#endif  /*WITHOUT_V4L */
     return ret;
 }

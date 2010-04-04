@@ -35,7 +35,7 @@
 #include <jerror.h>
 #include <assert.h>
 
- /*
+/*
  * jpeg_data:       buffer with input / output jpeg
  * len:             Length of jpeg buffer
  * itype:           0: Not interlaced
@@ -49,8 +49,6 @@
  * width            width of Y channel (width of U/V is width/2)
  * height           height of Y channel (height of U/V is height/2)
  */
-
-
 static void jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer,
                             long num);
 static void jpeg_buffer_dest(j_compress_ptr cinfo, unsigned char *buffer,
@@ -70,12 +68,10 @@ static void jpeg_skip_ff(j_decompress_ptr cinfo);
  * Initialize source --- called by jpeg_read_header
  * before any data is actually read.
  */
-
 static void init_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
 {
-    /* no work necessary here */
+    /* No work necessary here */
 }
-
 
 /*
  * Fill the input buffer --- called whenever buffer is emptied.
@@ -85,7 +81,6 @@ static void init_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
  * which is the JPEG EOI marker;
  *
  */
-
 static uint8_t EOI_data[2] = { 0xFF, 0xD9 };
 
 static boolean fill_input_buffer(j_decompress_ptr cinfo)
@@ -101,7 +96,6 @@ static boolean fill_input_buffer(j_decompress_ptr cinfo)
  * uninteresting data (such as an APPn marker).
  *
  */
-
 static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 {
     if (num_bytes > 0) {
@@ -117,27 +111,25 @@ static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
  * Terminate source --- called by jpeg_finish_decompress
  * after all data has been read.  Often a no-op.
  */
-
 static void term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
 {
-    /* no work necessary here */
+    /* No work necessary here */
 }
 
 
 /*
  * Prepare for input from a data buffer.
  */
-
 static void jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long num)
 {
 /* The source object and input buffer are made permanent so that a series
-* of JPEG images can be read from the same buffer by calling jpeg_buffer_src
-* only before the first one.  (If we discarded the buffer at the end of
-* one image, we'd likely lose the start of the next one.)
-* This makes it unsafe to use this manager and a different source
-* manager serially with the same JPEG object.  Caveat programmer.
-*/
-    if (cinfo->src == NULL) {    /* first time for this JPEG object? */
+ * of JPEG images can be read from the same buffer by calling jpeg_buffer_src
+ * only before the first one.  (If we discarded the buffer at the end of
+ * one image, we'd likely lose the start of the next one.)
+ * This makes it unsafe to use this manager and a different source
+ * manager serially with the same JPEG object.  Caveat programmer.
+ */
+    if (cinfo->src == NULL) {    /* First time for this JPEG object? */
         cinfo->src = (struct jpeg_source_mgr *)
                      (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
                      sizeof (struct jpeg_source_mgr));
@@ -146,7 +138,7 @@ static void jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long 
     cinfo->src->init_source = init_source;
     cinfo->src->fill_input_buffer = fill_input_buffer;
     cinfo->src->skip_input_data = skip_input_data;
-    cinfo->src->resync_to_restart = jpeg_resync_to_restart;    /* use default method */
+    cinfo->src->resync_to_restart = jpeg_resync_to_restart;    /* Use default method */
     cinfo->src->term_source = term_source;
     cinfo->src->bytes_in_buffer = num;
     cinfo->src->next_input_byte = (JOCTET *) buffer;
@@ -158,7 +150,6 @@ static void jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long 
  * particularly useful when reading several images from the same buffer:
  * It should be called to skip padding 0xff bytes beetween images.
  */
-
 static void jpeg_skip_ff(j_decompress_ptr cinfo)
 {
     while (cinfo->src->bytes_in_buffer > 1
@@ -183,7 +174,6 @@ static void jpeg_skip_ff(j_decompress_ptr cinfo)
  * Initialize destination --- called by jpeg_start_compress
  * before any data is actually written.
  */
-
 static void init_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 {
     /* No work necessary here */
@@ -197,13 +187,11 @@ static void init_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
  * If it gets called, the given jpeg buffer was too small.
  *
  */
-
 static boolean empty_output_buffer(j_compress_ptr cinfo)
 {
     /*FIXME: */
-    motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small", 
-               __FUNCTION__);
-    ERREXIT (cinfo, JERR_BUFFER_SIZE);  /* shouldn't be FILE_WRITE but BUFFER_OVERRUN! */
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small"); 
+    ERREXIT (cinfo, JERR_BUFFER_SIZE);  /* Shouldn't be FILE_WRITE but BUFFER_OVERRUN! */
     return TRUE;
 }
 
@@ -216,10 +204,9 @@ static boolean empty_output_buffer(j_compress_ptr cinfo)
  * application must deal with any cleanup that should happen even
  * for error exit.
  */
-
 static void term_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 {
-    /* no work necessary here */
+    /* No work necessary here */
 }
 
 
@@ -232,13 +219,14 @@ static void term_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 static void jpeg_buffer_dest(j_compress_ptr cinfo, unsigned char *buf, long len)
 {
 
-    /* The destination object is made permanent so that multiple JPEG images
-     * can be written to the same file without re-executing jpeg_stdio_dest.
+   /* 
+    * The destination object is made permanent so that multiple JPEG images
+    * can be written to the same file without re-executing jpeg_stdio_dest.
     * This makes it dangerous to use this manager and a different destination
     * manager serially with the same JPEG object, because their private object
     * sizes may be different.  Caveat programmer.
     */
-    if (cinfo->dest == NULL) {   /* first time for this JPEG object? */
+    if (cinfo->dest == NULL) {   /* First time for this JPEG object? */
         cinfo->dest = (struct jpeg_destination_mgr *)
                       (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
                       sizeof (struct jpeg_destination_mgr));
@@ -265,39 +253,40 @@ static void jpeg_buffer_dest(j_compress_ptr cinfo, unsigned char *buf, long len)
  *    The following kind of error handling is from the
  *    example.c file in the Independent JPEG Group's JPEG software
  */
-
 struct my_error_mgr {
     struct jpeg_error_mgr pub;   /* "public" fields */
-    jmp_buf setjmp_buffer;       /* for return to caller */
+    jmp_buf setjmp_buffer;       /* For return to caller */
 
-    /* original emit_message method */
+    /* Original emit_message method. */
     JMETHOD(void, original_emit_message, (j_common_ptr cinfo, int msg_level));
-    /* was a corrupt-data warning seen */
+    /* Was a corrupt-data warning seen. */
     int warning_seen;
 };
 
 static void my_error_exit(j_common_ptr cinfo)
 {
-    /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
+    /* cinfo->err really points to a my_error_mgr struct, so coerce pointer. */
     struct my_error_mgr *myerr = (struct my_error_mgr *) cinfo->err;
 
-    /* Always display the message. */
-    /* We could postpone this until after returning, if we chose. */
+    /* 
+     * Always display the message. 
+     * We could postpone this until after returning, if we chose. 
+     */
     (*cinfo->err->output_message) (cinfo);
 
-    /* Return control to the setjmp point */
+    /* Return control to the setjmp point. */
     longjmp (myerr->setjmp_buffer, 1);
 }
 
 static void my_emit_message(j_common_ptr cinfo, int msg_level)
 {
-    /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
+    /* cinfo->err really points to a my_error_mgr struct, so coerce pointer. */
     struct my_error_mgr *myerr = (struct my_error_mgr *) cinfo->err;
 
     if (msg_level < 0)
         myerr->warning_seen = 1;
 
-    /* call original emit_message() */
+    /* Call original emit_message() */
     (myerr->original_emit_message)(cinfo, msg_level);
 }
 
@@ -312,7 +301,7 @@ static unsigned char chr2[8][MAX_CHROMA_WIDTH];
 
 
 
-#if 1  /* generation of 'std' Huffman tables... */
+#if 1  /* Generation of 'std' Huffman tables... */
 
 static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, 
                            const UINT8 *bits, const UINT8 *val)
@@ -323,23 +312,23 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
     if (*htblptr == NULL)
         *htblptr = jpeg_alloc_huff_table((j_common_ptr) dinfo);
 
-        /* Copy the number-of-symbols-of-each-code-length counts */
-        memcpy((*htblptr)->bits, bits, sizeof((*htblptr)->bits));
+    /* Copy the number-of-symbols-of-each-code-length counts. */
+    memcpy((*htblptr)->bits, bits, sizeof((*htblptr)->bits));
 
-        /* Validate the counts.  We do this here mainly so we can copy the right
-         * number of symbols from the val[] array, without risking marching off
-         * the end of memory.  jchuff.c will do a more thorough test later.
-         */
-        nsymbols = 0;
+    /* 
+     * Validate the counts.  We do this here mainly so we can copy the right
+     * number of symbols from the val[] array, without risking marching off
+     * the end of memory.  jchuff.c will do a more thorough test later.
+     */
+    nsymbols = 0;
 
-        for (len = 1; len <= 16; len++)
-            nsymbols += bits[len];
+    for (len = 1; len <= 16; len++)
+        nsymbols += bits[len];
 
-        if (nsymbols < 1 || nsymbols > 256)
-            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small", 
-                       __FUNCTION__);      
+    if (nsymbols < 1 || nsymbols > 256)
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small"); 
 
-        memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
+    memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
 
 
@@ -450,7 +439,6 @@ static void guarantee_huff_tables(j_decompress_ptr dinfo)
  *        in this case, "a damaged output image is likely."
  *    
  */
-
 int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                      int itype, int ctype, unsigned int width, 
                      unsigned int height, unsigned char *raw0, 
@@ -481,7 +469,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     /* We set up the normal JPEG error routines, then override error_exit. */
     dinfo.err = jpeg_std_error (&jerr.pub);
     jerr.pub.error_exit = my_error_exit;
-    /* also hook the emit_message routine to note corrupt-data warnings */
+    /* Also hook the emit_message routine to note corrupt-data warnings. */
     jerr.original_emit_message = jerr.pub.emit_message;
     jerr.pub.emit_message = my_emit_message;
     jerr.warning_seen = 0;
@@ -497,9 +485,10 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
     jpeg_buffer_src (&dinfo, jpeg_data, len);
 
-    /* Read header, make some checks and try to figure out what the
-       user really wants */
-
+    /*
+     * Read header, make some checks and try to figure out what the
+     * user really wants. 
+     */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
     dinfo.out_color_space = JCS_YCbCr;
@@ -508,8 +497,8 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     jpeg_start_decompress (&dinfo);
 
     if (dinfo.output_components != 3) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Output components of JPEG image"
-                   " = %d, must be 3", __FUNCTION__, dinfo.output_components);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Output components of JPEG image"
+                   " = %d, must be 3", dinfo.output_components);
         goto ERR_EXIT;
     }
 
@@ -520,20 +509,20 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
     if ((hsf[0] != 2 && hsf[0] != 1) || hsf[1] != 1 || hsf[2] != 1 ||
         (vsf[0] != 1 && vsf[0] != 2) || vsf[1] != 1 || vsf[2] != 1) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported sampling factors,"
-                   " hsf=(%d, %d, %d) vsf=(%d, %d, %d) !", __FUNCTION__, hsf[0], hsf[1],
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported sampling factors,"
+                   " hsf=(%d, %d, %d) vsf=(%d, %d, %d) !", hsf[0], hsf[1],
                    hsf[2], vsf[0], vsf[1], vsf[2]);
         goto ERR_EXIT;
     }
 
     if (hsf[0] == 1) {
         if (height % 8 != 0) {
-            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: YUV 4:4:4 sampling, but image"
-                       " height %d not dividable by 8 !", __FUNCTION__, height);
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: YUV 4:4:4 sampling, but image"
+                       " height %d not dividable by 8 !", height);
             goto ERR_EXIT;       
         }
 
-        for (y = 0; y < 16; y++) { // allocate a special buffer for the extra sampling depth
+        for (y = 0; y < 16; y++) { // Allocate a special buffer for the extra sampling depth.
             row1_444[y] = (unsigned char *)malloc(dinfo.output_width * sizeof(char));
             row2_444[y] = (unsigned char *)malloc(dinfo.output_width * sizeof(char));
         }
@@ -541,23 +530,23 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
         scanarray[2] = row2_444; 
     }
 
-    /* Height match image height or be exact twice the image height */
+    /* Height match image height or be exact twice the image height. */
 
     if (dinfo.output_height == height) {
         numfields = 1;
     } else if (2 * dinfo.output_height == height) {
         numfields = 2;
     } else {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
-                   "height of image = %d", __FUNCTION__, height, dinfo.output_height);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
+                   "height of image = %d", height, dinfo.output_height);
         goto ERR_EXIT;
     }
 
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
-                   __FUNCTION__, dinfo.output_width);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
+                   dinfo.output_width);
         goto ERR_EXIT;
     }
 
@@ -569,7 +558,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
         else
             xsl = 0;
     } else if (width == 2 * dinfo.output_width / 3) {
-        /* special case of 3:2 downsampling */
+        /* Special case of 3:2 downsampling */
       hdown = 2;
       xsl = 0;
     } else {
@@ -606,8 +595,8 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                 yl = yc = (1 - field);
                 break;
             default:
-                motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced but"
-                           " no interlacing set", __FUNCTION__);
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced but"
+                           " no interlacing set");
                 goto ERR_EXIT;
             }
         } else {
@@ -615,7 +604,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
         }         
 
         while (dinfo.output_scanline < dinfo.output_height) {
-            /* read raw data */
+            /* Read raw data */
             jpeg_read_raw_data (&dinfo, scanarray, 8 * vsf[0]);
 
             for (y = 0; y < 8 * vsf[0]; yl += numfields, y++) {
@@ -706,10 +695,10 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                 break;
             default:
             /*
-            * should be case Y4M_CHROMA_420JPEG: but use default: for compatibility. Some
-            * pass things like '420' in with the expectation that anything other than
-            * Y4M_CHROMA_422 will default to 420JPEG.
-            */
+             * Should be case Y4M_CHROMA_420JPEG: but use default: for compatibility. Some
+             * pass things like '420' in with the expectation that anything other than
+             * Y4M_CHROMA_422 will default to 420JPEG.
+             */
                 if (vsf[0] == 1) {
                     /* Really downsample */
                     for (y = 0; y < 8 /*&& yc < height/2*/; y += 2, yc += numfields) {
@@ -724,7 +713,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
                 } else {
                     /* Just copy */
-                    for (y = 0; y < 8 /*&& yc < height/2 */; y++, yc += numfields) {
+                    for (y = 0; y < 8 /* && yc < height / 2 */; y++, yc += numfields) {
                         xd = yc * width / 2;
            
                         for (x = 0; x < width / 2; x++, xd++) {
@@ -743,7 +732,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     }
 
     if (hsf[0] == 1) {
-        for (y = 0; y < 16; y++) { // allocate a special buffer for the extra sampling depth
+        for (y = 0; y < 16; y++) { // Allocate a special buffer for the extra sampling depth.
             free(row1_444[y]);
             free(row2_444[y]);
         }
@@ -770,7 +759,6 @@ ERR_EXIT:
  * ctype            Chroma format for decompression.
  *                  Currently only Y4M_CHROMA_{420JPEG,422} are available
  */
-
 int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                          int itype, int ctype, unsigned int width, 
                          unsigned int height, unsigned char *raw0, 
@@ -803,17 +791,18 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
 
     jpeg_buffer_src (&dinfo, jpeg_data, len);
 
-    /* Read header, make some checks and try to figure out what the
-      user really wants */
-
+    /* 
+     * Read header, make some checks and try to figure out what the
+     * user really wants. 
+     */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
     dinfo.out_color_space = JCS_GRAYSCALE;
     dinfo.dct_method = JDCT_IFAST;
     
     if (dinfo.jpeg_color_space != JCS_GRAYSCALE) { 
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Expected grayscale colorspace"
-                   " for JPEG raw decoding", __FUNCTION__);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Expected grayscale colorspace"
+                   " for JPEG raw decoding");
         goto ERR_EXIT;
     }
 
@@ -823,23 +812,23 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     hsf[0] = 1; hsf[1] = 1; hsf[2] = 1;
     vsf[0]= 1; vsf[1] = 1; vsf[2] = 1;
 
-    /* Height match image height or be exact twice the image height */
+    /* Height match image height or be exact twice the image height. */
 
     if (dinfo.output_height == height) {
         numfields = 1;
     } else if (2 * dinfo.output_height == height) {
         numfields = 2;
     } else {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
-                   "height of image = %d", __FUNCTION__, height, dinfo.output_height);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
+                   "height of image = %d",  height, dinfo.output_height);
         goto ERR_EXIT;
     }
 
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
-                   __FUNCTION__, dinfo.output_width);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
+                    dinfo.output_width);
         goto ERR_EXIT;
     }
 
@@ -888,8 +877,8 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                 yl = yc = (1 - field);
                 break;
             default:
-                motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
-                           " but no interlacing set", __FUNCTION__);
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
+                           " but no interlacing set");
                 goto ERR_EXIT;
             }
         } else {
@@ -903,10 +892,10 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                 xd = yl * width;
                 xs = xsl;
 
-                if (hdown == 0) { // no horiz downsampling
+                if (hdown == 0) { // No horiz downsampling
                     for (x = 0; x < width; x++)
                         raw0[xd++] = row0[y][xs++];
-                } else if (hdown == 1) { // half the res
+                } else if (hdown == 1) { // Half the res
                     for (x = 0; x < width; x++, xs += 2)
                         raw0[xd++] = (row0[y][xs] + row0[y][xs + 1]) >> 1;
                 } else { // 2:3 downsampling
@@ -947,7 +936,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
             case Y4M_CHROMA_422:
                 if (vsf[0] == 1) {
                     /* Just copy */
-                    for (y = 0; y < 8 /*&& yc < height */; y++, yc += numfields) {
+                    for (y = 0; y < 8 /* && yc < height */; y++, yc += numfields) {
                         xd = yc * width / 2;
 
                         for (x = 0; x < width / 2; x++, xd++) {
@@ -957,7 +946,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                     }
                 } else {
                     /* upsample */
-                    for (y = 0; y < 8 /*&& yc < height */; y++) {
+                    for (y = 0; y < 8 /* && yc < height */; y++) {
                         xd = yc * width / 2;
                         
                         for (x = 0; x < width / 2; x++, xd++) {
@@ -1031,7 +1020,7 @@ ERR_EXIT:
  *                                                                 *
  *******************************************************************/
  
- /*
+/*
  * jpeg_data:       Buffer to hold output jpeg
  * len:             Length of buffer
  * itype:           0: Not interlaced
@@ -1040,7 +1029,6 @@ ERR_EXIT:
  * ctype            Chroma format for decompression.
  *                  Currently only Y4M_CHROMA_{420JPEG,422} are available
  */
-
 int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
                     int itype, int ctype, unsigned int width, 
                     unsigned int height, unsigned char *raw0, 
@@ -1100,14 +1088,14 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
 
     if ((width > 4096) || (height > 4096)) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) exceed"
-                  " lavtools' max (4096x4096)", __FUNCTION__, width, height);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) exceed"
+                  " lavtools' max (4096x4096)",  width, height);
         goto ERR_EXIT;
     }
 
     if ((width % 16) || (height % 16)) {
-        motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) not"
-                   " multiples of 16", __FUNCTION__, width, height);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) not"
+                   " multiples of 16", width, height);
         goto ERR_EXIT;
     }
 
@@ -1115,14 +1103,14 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
     switch (itype) {
     case Y4M_ILACE_TOP_FIRST:
-    case Y4M_ILACE_BOTTOM_FIRST: /* interlaced */
+    case Y4M_ILACE_BOTTOM_FIRST: /* Interlaced */
         numfields = 2;
         break;
     default:
         numfields = 1;
         if (height > 2048) {
-            motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Image height (%d) exceeds"
-                       " lavtools max for non-interlaced frames", __FUNCTION__, height);
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image height (%d) exceeds"
+                       " lavtools max for non-interlaced frames", height);
             goto ERR_EXIT;
         }
     }
@@ -1141,15 +1129,15 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
             jpeg_write_marker(&cinfo, JPEG_APP0 + 1, marker0, 40);
 
             switch (itype) {
-            case Y4M_ILACE_TOP_FIRST: /* top field first */
+            case Y4M_ILACE_TOP_FIRST: /* Top field first */
                 yl = yc = field;
                 break;
-            case Y4M_ILACE_BOTTOM_FIRST: /* bottom field first */
+            case Y4M_ILACE_BOTTOM_FIRST: /* Bottom field first */
                 yl = yc = (1 - field);
                 break;
             default:
-                motion_log(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
-                           " but no interlacing set", __FUNCTION__);
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
+                           " but no interlacing set");
                 goto ERR_EXIT;
             }
 
@@ -1184,7 +1172,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
     i = len - cinfo.dest->free_in_buffer;
 
     jpeg_destroy_compress (&cinfo);
-    return i;   /* size of jpeg */
+    return i;   /* Size of jpeg */
 
 ERR_EXIT:
     jpeg_destroy_compress (&cinfo);
