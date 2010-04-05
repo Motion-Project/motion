@@ -599,15 +599,13 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
         if (errno ==  EACCES) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
                        "%s: Can't write picture to file %s - check access rights to target directory\n"
-                       "Thread is going to finish due to this fatal error",       
-                        file);
+                       "Thread is going to finish due to this fatal error", file);
             cnt->finish = 1;
             cnt->restart = 0;
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Can't write picture to file %s", 
-                       file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Can't write picture to file %s", file);
             return;
         }
     }

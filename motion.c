@@ -2505,8 +2505,8 @@ static void setup_signals(struct sigaction *sig_handler_action, struct sigaction
     sigaction(SIGCHLD, sigchild_action, NULL);
     sigaction(SIGPIPE, sigchild_action, NULL);
     sigaction(SIGALRM, sig_handler_action, NULL);
-    sigaction(SIGHUP,  sig_handler_action, NULL);
-    sigaction(SIGINT,  sig_handler_action, NULL);
+    sigaction(SIGHUP, sig_handler_action, NULL);
+    sigaction(SIGINT, sig_handler_action, NULL);
     sigaction(SIGQUIT, sig_handler_action, NULL);
     sigaction(SIGTERM, sig_handler_action, NULL);
     sigaction(SIGUSR1, sig_handler_action, NULL);
@@ -2732,7 +2732,7 @@ int main (int argc, char **argv)
                     
                     if (cnt_list[i]->watchdog == 0) {
                         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, trying to do "
-                                   "a graceful restart",  cnt_list[i]->threadnr);
+                                   "a graceful restart", cnt_list[i]->threadnr);
                         cnt_list[i]->finish = 1;
                     }
 

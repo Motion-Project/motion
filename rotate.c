@@ -239,7 +239,7 @@ void rotate_init(struct context *cnt)
      */
     if ((cnt->conf.rotate_deg % 90) > 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Config option \"rotate\" not a multiple of 90: %d",
-                    cnt->conf.rotate_deg);
+                   cnt->conf.rotate_deg);
         cnt->conf.rotate_deg = 0;     /* Disable rotation. */
         cnt->rotate_data.degrees = 0; /* Force return below. */
     } else {

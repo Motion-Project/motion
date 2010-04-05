@@ -188,7 +188,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 
     /* 
      * Prefix the message with the log level string, log type string,
-     * time and thread number. i.ex [1] [ERR] [ENC] [Apr 03 00:08:44] blah
+     * time and thread number. e.g. [1] [ERR] [ENC] [Apr 03 00:08:44] blah
      *
      */
     if (!log_mode) {
@@ -198,17 +198,17 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     } else {    
     /* 
      * Prefix the message with the log level string, log type string
-     * and thread number. i.ex [1] [DBG] [TRK] blah
+     * and thread number. e.g. [1] [DBG] [TRK] blah
      */
         n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] ", 
                      threadnr, get_log_level_str(level), get_log_type_str(type));
     }
 
-    /* Next add the user's message */
+    /* Next add the user's message. */
     va_start(ap, fmt);
     n += vsnprintf(buf + n, sizeof(buf) - n, fmt, ap);
 
-    /* If errno_flag is set, add on the library error message */
+    /* If errno_flag is set, add on the library error message. */
     if (errno_flag) {
         strncat(buf, ": ", 1024 - strlen(buf));
         n += 2;
@@ -237,7 +237,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
         fputs(buf, logfile);
         fflush(logfile);
 
-    /* If log_mode, send the message to the syslog */    
+    /* If log_mode, send the message to the syslog. */    
     } else {   
         syslog(level, "%s", buf);
         strncat(buf, "\n", 1024 - strlen(buf));
@@ -245,7 +245,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
         fflush(stderr);
     } 
      
-    /* Clean up the argument list routine */
+    /* Clean up the argument list routine. */
     va_end(ap);
 }
 

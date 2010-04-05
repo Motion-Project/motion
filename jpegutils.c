@@ -820,7 +820,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
         numfields = 2;
     } else {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
-                   "height of image = %d",  height, dinfo.output_height);
+                   "height of image = %d", height, dinfo.output_height);
         goto ERR_EXIT;
     }
 
@@ -1089,7 +1089,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
     if ((width > 4096) || (height > 4096)) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) exceed"
-                  " lavtools' max (4096x4096)",  width, height);
+                  " lavtools' max (4096x4096)", width, height);
         goto ERR_EXIT;
     }
 

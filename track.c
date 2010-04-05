@@ -164,7 +164,7 @@ static unsigned int stepper_command(struct context *cnt, unsigned int motor,
 }
 
 
-static unsigned int stepper_status(struct context *cnt,  unsigned int motor)
+static unsigned int stepper_status(struct context *cnt, unsigned int motor)
 {
     return stepper_command(cnt, motor, STEPPER_COMMAND_STATUS, 0);
 }

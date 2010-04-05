@@ -116,7 +116,7 @@ Values: Max 4095 characters / Default: Not defined
 .br
 pipe raw video to generally - 'STDIN', allowing to use an external video encoder.
 .br
-i.ex with memcoder :
+e.g. using memcoder :
 .br
 extpipe mencoder -demuxer rawvideo -rawvideo w=320:h=240:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:     threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
 .TP

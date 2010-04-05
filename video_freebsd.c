@@ -183,7 +183,7 @@ static int set_hue(int viddev, int new_hue)
         return -1;
     }
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: to [%d]",  ioctlval);
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: to [%d]", ioctlval);
 
     return ioctlval;
 }

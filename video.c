@@ -426,7 +426,7 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
             
             if (ioctl (dev, VIDIOCSCHAN, &vid_chnl) == -1) {
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOCSCHAN) Input %d"
-                           " Standard method %d",  input, norm);
+                           " Standard method %d", input, norm);
                 return;
             } 
 

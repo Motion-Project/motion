@@ -30,7 +30,7 @@
  *  - setting tuner - NOT TESTED 
  *  - access to V4L2 device controls is missing. Partially added but requires some improvements likely.
  *  - changing resolution at run-time may not work. 
- *  - ucvideo svn r75 or above to work with MJPEG ( i.ex Logitech 5000 pro )
+ *  - ucvideo svn r75 or above to work with MJPEG ( e.g. Logitech 5000 pro )
  
  * This work is inspired by fswebcam and current design of motion.
  * This interface has been tested with ZC0301 driver from kernel 2.6.17.3 and Labtec's usb camera (PAS202 sensor)
@@ -204,7 +204,7 @@ static int v4l2_get_capability(src_v4l2_t * vid_source)
                "cap.driver: \"%s\"\n"
                "cap.card: \"%s\"\n"
                "cap.bus_info: \"%s\"\n"
-               "cap.capabilities=0x%08X\n------------------------",            
+               "cap.capabilities=0x%08X\n------------------------",  
                vid_source->cap.driver, vid_source->cap.card, vid_source->cap.bus_info, 
                vid_source->cap.capabilities);
 
@@ -469,7 +469,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
             }
 
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage "
-                       "%d colorspace %08x",  pixformat >> 0, pixformat >> 8, pixformat >> 16, 
+                       "%d colorspace %08x", pixformat >> 0, pixformat >> 8, pixformat >> 16, 
                        pixformat >> 24, *width, *height, vid_source->dst_fmt.fmt.pix.bytesperline, 
                        vid_source->dst_fmt.fmt.pix.sizeimage, vid_source->dst_fmt.fmt.pix.colorspace);
 

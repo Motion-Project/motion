@@ -445,7 +445,7 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
      * netcam->mutex to do this.
      */
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: processing jpeg image"
-               " - content length %d",  netcam->latest->content_length);
+               " - content length %d", netcam->latest->content_length);
     
     ret = netcam_init_jpeg(netcam, &cinfo);
     
@@ -466,7 +466,7 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
             retval = NETCAM_RESTART_ERROR;
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Camera width/height mismatch "
                        "with JPEG image - expected %dx%d, JPEG %dx%d",
-                       " retval %d",  netcam->width, netcam->height,
+                       " retval %d", netcam->width, netcam->height,
                        cinfo.output_width, cinfo.output_height, retval);
             return retval;        
         }

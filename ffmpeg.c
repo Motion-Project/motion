@@ -253,7 +253,7 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 void ffmpeg_init()
 {
     MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg LIBAVCODEC_BUILD %d"
-               " LIBAVFORMAT_BUILD %d",  LIBAVCODEC_BUILD, LIBAVFORMAT_BUILD);
+               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, LIBAVFORMAT_BUILD);
     av_register_all();
 
 #if LIBAVCODEC_BUILD > 4680

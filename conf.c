@@ -104,7 +104,7 @@ struct config conf_template = {
     tuner_device:                   NULL,
 #endif
     video_device:                   VIDEO_DEVICE,
-    v4l2_palette:                   DEF_PALETTE,        
+    v4l2_palette:                   DEF_PALETTE, 
     vidpipe:                        NULL,
     filepath:                       NULL,
     imagepath:                      DEF_IMAGEPATH,
@@ -224,9 +224,9 @@ config_param config_params[] = {
     },
     {
     "log_type",
-    "# Filter to log messages by type (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",    
+    "# Filter to log messages by type (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",  
     1,
-    CONF_OFFSET(log_type_str),    
+    CONF_OFFSET(log_type_str), 
     copy_string,
     print_string    
     },
@@ -400,7 +400,7 @@ config_param config_params[] = {
     {
     "netcam_tolerant_check",
     "# Set less strict jpeg checks for network cameras with a poor/buggy firmware.\n"
-    "# Default: off",    
+    "# Default: off", 
     0,
     CONF_OFFSET(netcam_tolerant_check),
     copy_bool,
@@ -658,7 +658,7 @@ config_param config_params[] = {
     print_int
     },
     {
-    "picture_type",    
+    "picture_type", 
     "# Type of output images\n"
     "# Valid values: jpeg, ppm (default: jpeg)",
     0,
@@ -758,7 +758,7 @@ config_param config_params[] = {
     },
 #endif /* HAVE_FFMPEG */
     {
-    "use_extpipe",    
+    "use_extpipe", 
     "\n############################################################\n"
     "# External pipe to video encoder\n"    
     "# Replacement for FFMPEG builtin encoder for ffmpeg_output_movies only.\n"
@@ -1074,7 +1074,7 @@ config_param config_params[] = {
     CONF_OFFSET(webcontrol_authentication),
     copy_string,
     print_string
-    },   
+    },
     {
     "track_type",
     "\n############################################################\n"
@@ -1401,13 +1401,13 @@ config_param config_params[] = {
     print_string
     },
     {
-    "database_dbname",    
+    "database_dbname", 
     "# database to log to (default: not defined)",
     0,
     CONF_OFFSET(database_dbname),
     copy_string,
     print_string    
-    },    
+    }, 
     {
     "database_host",
     "# The host on which the database is located (default: not defined)",
@@ -1462,7 +1462,7 @@ config_param config_params[] = {
     "# Video Loopback Device (vloopback project)\n"
     "############################################################\n\n"
     "# Output images to a video4linux loopback device\n"
-    "# The value '-' means next available (default: not defined)",    
+    "# The value '-' means next available (default: not defined)", 
     0,
     CONF_OFFSET(vidpipe),
     copy_string,

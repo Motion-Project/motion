@@ -1262,7 +1262,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,
                                "%s: Potential split boundary - "
                                "%d chars flushed, %d "
-                               "re-positioned",  ix,
+                               "re-positioned", ix,
                                (int) netcam->response->buffer_left);
 
                     memmove(netcam->response->buffer, ptr,

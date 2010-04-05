@@ -576,7 +576,7 @@ static int alg_labeling(struct context *cnt)
     }
 
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: %i Labels found. Largest connected Area: %i Pixel(s). "
-               "Largest Label: %i",  imgs->largest_label, imgs->labelsize_max, 
+               "Largest Label: %i", imgs->largest_label, imgs->labelsize_max, 
                cnt->current_image->total_labels);
     
     /* Return group of significant labels. */
