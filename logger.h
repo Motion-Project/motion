@@ -23,9 +23,7 @@
 #define SHOW_ERRNO              1   /* Flag to show message associated to errno */
 
 /* Log levels */
-#define LOG_CONSOLE            -1
-#define LOG_ALL                 8
-#define CONSOLE                 LOG_CONSOLE   /* -1 */
+#define LOG_ALL                 9
 #define EMG                     LOG_EMERG     /* syslog 0 motion 1 */
 #define ALR                     LOG_ALERT     /* syslog 1 motion 2 */
 #define CRT                     LOG_CRIT      /* syslog 2 motion 3 */
@@ -34,7 +32,7 @@
 #define NTC                     LOG_NOTICE    /* syslog 5 motion 6 */
 #define INF                     LOG_INFO      /* syslog 6 motion 7 */
 #define DBG                     LOG_DEBUG     /* syslog 7 motion 8 */
-#define ALL                     LOG_ALL       /* syslog 8 motion 9 */
+#define ALL                     LOG_ALL       /* syslog 7 motion 9 */
 #define LEVEL_DEFAULT           ERR           /* syslog 3 motion 4 default */
 #define SHOW_LEVEL_VALUE(x)     (x+1)
 

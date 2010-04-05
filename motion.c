@@ -58,13 +58,6 @@ struct context **cnt_list = NULL;
  */
 volatile int threads_running = 0;
 
-/*
- * debug_level is for developers, normally used to control which
- * types of messages get output.
- */
-unsigned int debug_level;
-unsigned int debug_type;
-
 /* Set this when we want main to end or restart */
 volatile unsigned int finish = 0;
 
@@ -540,7 +533,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
         cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_out];
 
         if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot < cnt->conf.frame_limit) {
-            if (debug_level >= DBG) {
+            if (cnt->log_level >= DBG) {
                 char tmp[32];
                 const char *t;
 
@@ -583,7 +576,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                  * we don't know how many frames there is in first sec 
                  */
                 if (cnt->movie_last_shot >= 0) {
-                    if (debug_level >= DBG) {
+                    if (cnt_list[0]->log_level >= DBG) {
                         int frames = cnt->movie_fps - (cnt->movie_last_shot + 1);
                         if (frames > 0) {
                             char tmp[15];
@@ -841,7 +834,7 @@ static int motion_init(struct context *cnt)
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Cannot connect to MySQL database %s on host %s with user %s",
                            cnt->conf.database_dbname, cnt->conf.database_host, 
                            cnt->conf.database_user);
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: MySQL error was %s",  mysql_error(cnt->database));
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: MySQL error was %s", mysql_error(cnt->database));
                 return -2;
             }
 #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
@@ -2273,7 +2266,7 @@ static void become_daemon(void)
             myfclose(pidf);
         } else {
             MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "%s: Exit motion, cannot create process"
-                       " id file (pid file) %s",  cnt_list[0]->conf.pid_file);
+                       " id file (pid file) %s", cnt_list[0]->conf.pid_file);
             if (ptr_logfile) 
                 myfclose(ptr_logfile);    
             exit(0);    
@@ -2421,17 +2414,17 @@ static void motion_startup(int daemonize, int argc, char *argv[])
      */
     cntlist_create(argc, argv);
 
-    debug_level = cnt_list[0]->conf.log_level;
-
     if ((cnt_list[0]->conf.log_level > ALL) ||
         (cnt_list[0]->conf.log_level == 0)) { 
         cnt_list[0]->conf.log_level = LEVEL_DEFAULT;
-        debug_level = cnt_list[0]->conf.log_level;
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Using default log level (%s) (%d)", 
-                   get_log_level_str(debug_level), SHOW_LEVEL_VALUE(debug_level));
+        cnt_list[0]->log_level = cnt_list[0]->conf.log_level;
+        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using default log level (%s) (%d)", 
+                   get_log_level_str(cnt_list[0]->log_level), SHOW_LEVEL_VALUE(cnt_list[0]->log_level));
+    } else {
+        cnt_list[0]->log_level = cnt_list[0]->conf.log_level - 1; // Let's make syslog compatible
     }
 
-    set_log_level(debug_level);   
+    set_log_level(cnt_list[0]->log_level);   
    
     MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started");
 
@@ -2441,7 +2434,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
         if (ptr_logfile) {
             set_log_mode(LOGMODE_SYSLOG);
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Logging to file (%s)",  
+            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Logging to file (%s)",  
                        cnt_list[0]->conf.log_file);
             set_log_mode(LOGMODE_FILE);
         } else {
@@ -2450,19 +2443,19 @@ static void motion_startup(int daemonize, int argc, char *argv[])
             exit(0);
         }
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Logging to syslog");
+        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Logging to syslog");
     }
 
-    if (!(debug_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
-        debug_type = TYPE_DEFAULT;
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Using default log type (%s)",  
-                   get_log_type_str(debug_type));
+    if (!(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
+        cnt_list[0]->log_type = TYPE_DEFAULT;
+        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using default log type (%s)",  
+                   get_log_type_str(cnt_list[0]->log_type));
     }
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Using log type (%s) log level (%s)", 
-               get_log_type_str(debug_type), get_log_level_str(debug_level));
+    MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using log type (%s) log level (%s)", 
+               get_log_type_str(cnt_list[0]->log_type), get_log_level_str(cnt_list[0]->log_level));
 
-    set_log_type(debug_type);
+    set_log_type(cnt_list[0]->log_type);
 
     initialize_chars();
 
@@ -2722,7 +2715,7 @@ int main (int argc, char **argv)
             if (((motion_threads_running == 0) && finish) || 
                 ((motion_threads_running == 0) && (threads_running == 0))) {
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: DEBUG-1 threads_running %d motion_threads_running %d "
-                           ", finish %d",  threads_running, motion_threads_running, finish);                 
+                           ", finish %d", threads_running, motion_threads_running, finish);                 
                 break;
             }    
 
@@ -2739,13 +2732,13 @@ int main (int argc, char **argv)
                     
                     if (cnt_list[i]->watchdog == 0) {
                         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, trying to do "
-                                   "a graceful restart",   cnt_list[i]->threadnr);
+                                   "a graceful restart",  cnt_list[i]->threadnr);
                         cnt_list[i]->finish = 1;
                     }
 
                     if (cnt_list[i]->watchdog == -60) {
                         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful," 
-                                   "killing it!",  cnt_list[i]->threadnr);
+                                   "killing it!", cnt_list[i]->threadnr);
                         pthread_cancel(cnt_list[i]->thread_id);
                         pthread_mutex_lock(&global_lock);
                         threads_running--;

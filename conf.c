@@ -1525,7 +1525,7 @@ static void conf_cmdline(struct context *cnt, int thread)
         case 'd':
             /* No validation - just take what user gives. */
             if (thread == -1)
-                debug_level = (unsigned int)atoi(optarg);
+                cnt->log_level = (unsigned int)atoi(optarg);
             break;
         case 'k':
             if (thread == -1)
@@ -1819,6 +1819,7 @@ struct context **conf_load(struct context **cnt)
     cnt[0]->conf_filename[0] = 0;
     cnt[0]->pid_file[0] = 0;
     cnt[0]->log_file[0] = 0;
+    cnt[0]->log_level = -1;
 
     conf_cmdline(cnt[0], -1);
 
@@ -1884,16 +1885,21 @@ struct context **conf_load(struct context **cnt)
     while (cnt[++i])
         conf_cmdline(cnt[i], i);
 
-    /* if pid file was passed from Command-line copy to main thread conf struct. */
+    /* If pid file was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->pid_file[0])    
         cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
 
+    /* If log file was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_file[0])
         cnt[0]->conf.log_file = mystrcpy(cnt[0]->conf.log_file, cnt[0]->log_file);
 
+    /* If log type string was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_type_str[0])
         cnt[0]->conf.log_type_str = mystrcpy(cnt[0]->conf.log_type_str, cnt[0]->log_type_str);
 
+    /* if log level was passed from Command-line copy to main thread conf struct. */
+    if (cnt[0]->log_level != -1) 
+        cnt[0]->conf.log_level = cnt[0]->log_level;
 
     return cnt;
 }

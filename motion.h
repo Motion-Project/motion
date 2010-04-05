@@ -341,6 +341,8 @@ struct context {
     char pid_file[PATH_MAX];
     char log_file[PATH_MAX];
     char log_type_str[6];
+    int log_level;
+    unsigned int log_type;
 
     struct config conf;
     struct images imgs;
@@ -437,8 +439,6 @@ struct context {
 
 extern pthread_mutex_t global_lock;
 extern volatile int threads_running;
-extern unsigned int debug_level;
-extern unsigned int debug_type;
 extern FILE *ptr_logfile;
 
 /* TLS keys below */

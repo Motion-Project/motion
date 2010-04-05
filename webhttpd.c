@@ -2474,7 +2474,7 @@ void httpd_run(struct context **cnt)
         return;
     }
     
-    if (listen(sd,5) == -1) {
+    if (listen(sd, DEF_MAXWEBQUEUE) == -1) {
         MOTION_LOG(EMG, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR listen()"
                    " [interface %s port %s]", hbuf, sbuf);
         close(sd);
@@ -2512,7 +2512,7 @@ void httpd_run(struct context **cnt)
         } else {
             /* Get the Client request */
             client_sent_quit_message = read_client(client_socket_fd, cnt, authentication);
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Read from client");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Read from client");
 
             /* Close Connection */
             if (client_socket_fd)
