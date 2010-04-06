@@ -771,13 +771,13 @@ static unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
         break;
     }
     
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "HUE [%d]", 
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: HUE [%d]", 
                get_hue(dev_bktr, &dummy));
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "SATURATION [%d]", 
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: SATURATION [%d]", 
                get_saturation(dev_bktr, &dummy));
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "BRIGHTNESS [%d]", 
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: BRIGHTNESS [%d]", 
                get_brightness(dev_bktr, &dummy));
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "CONTRAST [%d]", 
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: CONTRAST [%d]", 
                get_contrast(dev_bktr, &dummy));
     
     return map;

@@ -153,7 +153,7 @@ struct config conf_template = {
     minimum_motion_frames:          1,
     pid_file:                       NULL,
     log_file:                       NULL,
-    log_level:                      LEVEL_DEFAULT,
+    log_level:                      LEVEL_DEFAULT+10,
     log_type_str:                   NULL,
 };
 

@@ -209,29 +209,29 @@ static int v4l2_get_capability(src_v4l2_t * vid_source)
                vid_source->cap.capabilities);
 
     if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- VIDEO_CAPTURE");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - VIDEO_CAPTURE");
     if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OUTPUT)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OUTPUT");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - VIDEO_OUTPUT");
     if (vid_source->cap.capabilities & V4L2_CAP_VIDEO_OVERLAY)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OVERLAY");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - VIDEO_OVERLAY");
     if (vid_source->cap.capabilities & V4L2_CAP_VBI_CAPTURE)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- VBI_CAPTURE");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - VBI_CAPTURE");
     if (vid_source->cap.capabilities & V4L2_CAP_VBI_OUTPUT)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- VBI_OUTPUT");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - VBI_OUTPUT");
     if (vid_source->cap.capabilities & V4L2_CAP_RDS_CAPTURE)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- RDS_CAPTURE");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - RDS_CAPTURE");
     if (vid_source->cap.capabilities & V4L2_CAP_TUNER)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- TUNER");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - TUNER");
     if (vid_source->cap.capabilities & V4L2_CAP_AUDIO)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- AUDIO");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - AUDIO");
     if (vid_source->cap.capabilities & V4L2_CAP_READWRITE)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- READWRITE");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - READWRITE");
     if (vid_source->cap.capabilities & V4L2_CAP_ASYNCIO)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- ASYNCIO");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - ASYNCIO");
     if (vid_source->cap.capabilities & V4L2_CAP_STREAMING)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- STREAMING");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - STREAMING");
     if (vid_source->cap.capabilities & V4L2_CAP_TIMEPERFRAME)
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "- TIMEPERFRAME");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: - TIMEPERFRAME");
 
     if (!(vid_source->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Device does not support capturing."); 
@@ -271,10 +271,10 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_
                input.name, input.type, input.status);
 
     if (input.type & V4L2_INPUT_TYPE_TUNER)
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- TUNER");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: - TUNER");
 
     if (input.type & V4L2_INPUT_TYPE_CAMERA) 
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "- CAMERA");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: - CAMERA");
 
     if (xioctl(vid_source->fd, VIDIOC_S_INPUT, &input.index) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error selecting input %d VIDIOC_S_INPUT", 
@@ -407,7 +407,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
 
         int i;
 
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%i: %c%c%c%c (%s)", v4l2_pal, fmtd.pixelformat >> 0, 
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: (%i) %c%c%c%c (%s)", v4l2_pal, fmtd.pixelformat >> 0, 
                    fmtd.pixelformat >> 8, fmtd.pixelformat >> 16, fmtd.pixelformat >> 24, fmtd.description);
 
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: %d - %s (compressed : %d) (%#x)",
@@ -417,7 +417,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
             if (supported_formats[i] == fmtd.pixelformat) {
                 if (cnt->conf.v4l2_palette == i) {
                     index_format = cnt->conf.v4l2_palette;
-                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Selected palette %c%c%c%c", fmtd.pixelformat >> 0, 
+                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Selected palette %c%c%c%c", fmtd.pixelformat >> 0, 
                                fmtd.pixelformat >> 8, fmtd.pixelformat >> 16, fmtd.pixelformat >> 24);
                     i = sizeof(supported_formats)/sizeof(u32);
                     break;

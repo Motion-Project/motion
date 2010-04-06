@@ -2311,7 +2311,7 @@ static void become_daemon(void)
     
     /* Now it is safe to add the PID creation to the logs */
     if (pidf)
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Created process id file %s. Process ID is %d",
+        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Created process id file %s. Process ID is %d",
                    cnt_list[0]->conf.pid_file, getpid());
     
     sigaction(SIGTTOU, &sig_ign_action, NULL);
@@ -2446,8 +2446,10 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Logging to syslog");
     }
 
-    if (!(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
+    if ((cnt_list[0]->conf.log_type_str == NULL) || 
+        !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
         cnt_list[0]->log_type = TYPE_DEFAULT;
+        cnt_list[0]->conf.log_type_str = mystrcpy(cnt_list[0]->conf.log_type_str, "ALL");
         MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using default log type (%s)",  
                    get_log_type_str(cnt_list[0]->log_type));
     }
