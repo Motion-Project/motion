@@ -322,7 +322,7 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
                     index_format = cnt->conf.v4l2_palette;
                     motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
                                fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24);
-                    i = 10;
+                    i = sizeof(supported_formats)/sizeof(u32);
                     break;
                 }
                 index_format = i;
