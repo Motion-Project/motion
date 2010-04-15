@@ -336,6 +336,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
     } else if (strcmp(codec, "flv") == 0) {
         ext = ".flv";
         of = guess_format("flv", NULL, NULL);
+        of->video_codec = CODEC_ID_FLV1;
     } else if (strcmp(codec, "ffv1") == 0) {
         ext = ".avi";
         of = guess_format("avi", NULL, NULL);
@@ -345,7 +346,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
          * Requires strict_std_compliance to be <= -2 
          */
         if (of) 
-            of->video_codec = CODEC_ID_FLV1;
+            of->video_codec = CODEC_ID_FFV1;
         
     } else if (strcmp(codec, "mov") == 0) {
         ext = ".mov";

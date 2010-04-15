@@ -571,8 +571,8 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
             return -1;
         }
 
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: %i length=%d", 
-                   buffer_index, buf.length);
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: %i length=%d Address (%x)", 
+                   buffer_index, buf.length, vid_source->buffers[buffer_index].ptr);
     }
 
     for (buffer_index = 0; buffer_index < vid_source->req.count; buffer_index++) {
@@ -958,7 +958,10 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
     {
         video_buff *the_buffer = &vid_source->buffers[vid_source->buf.index];
-        
+
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: the_buffer index %d Address (%x)", 
+                   vid_source->buf.index, the_buffer->ptr);
+
         switch (vid_source->dst_fmt.fmt.pix.pixelformat) {
         case V4L2_PIX_FMT_RGB24:
             conv_rgb24toyuv420p(map, the_buffer->ptr, width, height);

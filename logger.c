@@ -169,8 +169,8 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     if ((unsigned int)level > log_level)
         return;
 
-    /* Exit if type is greater than log_type */
-    if (type > log_type)
+    /* Exit if type is not equal to log_type and not TYPE_ALL */
+    if ((type != log_type) && (type != TYPE_ALL))
         return;
 
     /* 
