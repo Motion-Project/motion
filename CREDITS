@@ -94,6 +94,7 @@ William M Brack
    * Fixed problem related to fetching images from Network camera and error
      handling when it fails. Motion would end in infinite loops.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
+   * Fix conv_uyvyto420p segfault.
 
 John Bray
    * Get current directory to allow write motion.conf properly 
@@ -414,7 +415,8 @@ Angel Carpintero
      (Angel Carpintero) 
    * Fix warning for syslog().
    * Fix segfault for new libjpeg v7.
-
+   * Fixed FFV1 codec encode with ffmpeg.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

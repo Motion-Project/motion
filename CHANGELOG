@@ -3,9 +3,9 @@
 Bugfixes
    * Fixed name space clash with libjpeg8 (Kenneth Lavrsen)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x01x22x084753
-
    * Fixed FFV1 codec encode with ffmpeg (Angel Carpintero)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553 
+   * Fix conv_uyvyto420p segfault ( William M Brack ) 
 
 3.2.11.1 Sumary of Changes
 
