@@ -301,7 +301,7 @@ void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int wi
     uint8_t *pY = map;
     uint8_t *pU = pY + (width * height);
     uint8_t *pV = pU + (width * height) / 4;
-    uint32_t uv_offset = width * 4 * sizeof(uint8_t);
+    uint32_t uv_offset = width * 2 * sizeof(uint8_t);
     uint32_t ix, jx;
 
     for (ix = 0; ix < height; ix++) {

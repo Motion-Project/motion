@@ -94,6 +94,7 @@ William M Brack
    * Fixed problem related to fetching images from Network camera and error
      handling when it fails. Motion would end in infinite loops.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
+   * Fix conv_uyvyto420p segfault.
 
 John Bray
    * Get current directory to allow write motion.conf properly 
@@ -425,6 +426,9 @@ Angel Carpintero
    * Avoid logs flooding using some options of netcam_keepalive and try to discard images with
      weird header Content-Lenght 0.
    * Only use post capture when we setup to record videos with external pipe or ffmpeg.
+   * Fixed FFV1 codec encode with ffmpeg.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553
+
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
