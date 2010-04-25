@@ -284,12 +284,82 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
     return 0;
 }
 
-static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, int *height)
+/* *
+ * v4l2_do_set_pix_format
+ * 
+ *          This routine does the actual request to the driver
+ * 
+ * Returns:  0  Ok
+ *          -1  Problems setting palette or not supported
+ * 
+ * Our algorithm for setting the picture format for the data which the
+ * driver returns to us will be as follows:
+ *
+ * First, we request that the format be set to whatever is in the config
+ * file (which is either the motion default, or a value chosen by the user).
+ * If that request is successful, we are finished.
+ *
+ * If the driver responds that our request is not accepted, we then enumerate
+ * the formats which the driver claims to be able to supply.  From this list,
+ * we choose whichever format is "most efficient" for motion.  The enumerated
+ * list is also printed to the motion log so that the user can consider
+ * choosing a different value for the config file.
+ *
+ * We then request the driver to set the format we have chosen.  That request
+ * should never fail, so if it does we log the fact and give up.
+ */
+static int v4l2_do_set_pix_format(u32 pixformat, src_v4l2_t * s,
+				  int *width, int *height)
+{
+    memset(&s->fmt, 0, sizeof(struct v4l2_format));
+    s->fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    s->fmt.fmt.pix.width = *width;
+    s->fmt.fmt.pix.height = *height;
+    s->fmt.fmt.pix.pixelformat = pixformat;
+    s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
+
+    if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 &&
+	       s->fmt.fmt.pix.pixelformat == pixformat) {
+        motion_log(LOG_INFO, 0, "Test palette %c%c%c%c (%dx%d)",
+                pixformat >> 0, pixformat >> 8, pixformat >> 16,
+                pixformat >> 24, *width, *height);
+
+        if (s->fmt.fmt.pix.width != (unsigned int) *width ||
+	        s->fmt.fmt.pix.height != (unsigned int) *height) {
+            motion_log(LOG_INFO, 0, "Adjusting resolution from %ix%i to %ix%i.",
+                       *width, *height, s->fmt.fmt.pix.width,
+		               s->fmt.fmt.pix.height);
+            *width = s->fmt.fmt.pix.width;
+            *height = s->fmt.fmt.pix.height;
+        }
+
+        if (xioctl(s->fd, VIDIOC_S_FMT, &s->fmt) == -1) {
+            motion_log(LOG_ERR, 1, "Error setting pixel format VIDIOC_S_FMT");
+            return -1;
+        }
+
+        motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d) bytesperlines "
+                   "%d sizeimage %d colorspace %08x", pixformat >> 0,
+                   pixformat >> 8, pixformat >> 16, pixformat >> 24,
+                   *width, *height, s->fmt.fmt.pix.bytesperline,
+                   s->fmt.fmt.pix.sizeimage, s->fmt.fmt.pix.colorspace);
+        return 0;
+    }
+    return -1;
+}
+
+/* This routine is called by the startup code to do the format setting */
+static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s,
+			       int *width, int *height)
 {
     struct v4l2_fmtdesc fmt;
     short int v4l2_pal;
 
-    static const u32 supported_formats[] = {    /* higher index means better chance to be used */
+    /* 
+     * Note that this array MUST exactly match the config file list.
+     * A higher index means better chance to be used 
+     */
+    static const u32 supported_formats[] = {
         V4L2_PIX_FMT_SN9C10X,
         V4L2_PIX_FMT_SBGGR8,
         V4L2_PIX_FMT_MJPEG,
@@ -298,39 +368,46 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
         V4L2_PIX_FMT_UYVY,
         V4L2_PIX_FMT_YUYV,
         V4L2_PIX_FMT_YUV422P,
-        V4L2_PIX_FMT_YUV420,
-        0
+        V4L2_PIX_FMT_YUV420	/* most efficient for motion */
     };
+    
+    int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
+    short int index_format = -1;	/* -1 says not yet chosen */
 
-    short int index_format = -1;
-
+    /* First we try a shortcut of just setting the config file value */
+    if (cnt->conf.v4l2_palette >= 0) {
+        char name[5] = {supported_formats[cnt->conf.v4l2_palette] >>  0,
+                        supported_formats[cnt->conf.v4l2_palette] >>  8,
+                        supported_formats[cnt->conf.v4l2_palette] >>  16,
+                        supported_formats[cnt->conf.v4l2_palette] >>  24, 0};
+                        
+        if (v4l2_do_set_pix_format(supported_formats[cnt->conf.v4l2_palette],
+            s, width, height) >= 0)
+            return 0;
+        
+        motion_log(LOG_INFO, 0, "Config palette index %d (%s) doesn't work.",
+		           cnt->conf.v4l2_palette, name);
+    }
+    /* Well, that didn't work, so we enumerate what the driver can offer */
+    	       
     memset(&fmt, 0, sizeof(struct v4l2_fmtdesc));
     fmt.index = v4l2_pal = 0;
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     motion_log(LOG_INFO, 0, "Supported palettes:");
+    
     while (xioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1) {
         short int i;
 
         motion_log(LOG_INFO, 0, "%i: %c%c%c%c (%s)", v4l2_pal,
                    fmt.pixelformat >> 0, fmt.pixelformat >> 8,
-                   fmt.pixelformat >> 16, fmt.pixelformat >> 24, fmt.description);
+                   fmt.pixelformat >> 16, fmt.pixelformat >> 24, 
+                   fmt.description);
 
-        for (i = 0; supported_formats[i]; i++)
-            if (supported_formats[i] == fmt.pixelformat) {
-                if (cnt->conf.v4l2_palette == i) {
-                    index_format = cnt->conf.v4l2_palette;
-                    motion_log(LOG_INFO, 0, "Selected palette %c%c%c%c", fmt.pixelformat >> 0, 
-                               fmt.pixelformat >> 8, fmt.pixelformat >> 16, fmt.pixelformat >> 24);
-                    i = sizeof(supported_formats)/sizeof(u32);
-                    break;
-                }
+        /* adjust index_format if larger value found */
+        for (i = index_format + 1; i < array_size; i++)
+            if (supported_formats[i] == fmt.pixelformat)
                 index_format = i;
-            }
-
-        /* Chosen our selected palette, break from while */
-        if (index_format == cnt->conf.v4l2_palette && index_format >= 0)
-            break;
 
         memset(&fmt, 0, sizeof(struct v4l2_fmtdesc));
         fmt.index = ++v4l2_pal;
@@ -338,58 +415,17 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * s, int *width, 
     }
 
     if (index_format >= 0) {
+        char name[5] = {supported_formats[index_format] >>  0,
+                        supported_formats[index_format] >>  8,
+                        supported_formats[index_format] >>  16,
+                        supported_formats[index_format] >>  24, 0};
+                
+        motion_log(LOG_INFO, 0, "Selected palette %s", name);
         
-        u32 pixformat = supported_formats[index_format];
-
-        memset(&s->fmt, 0, sizeof(struct v4l2_format));
-        s->fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        s->fmt.fmt.pix.width = *width;
-        s->fmt.fmt.pix.height = *height;
-        s->fmt.fmt.pix.pixelformat = pixformat;
-        s->fmt.fmt.pix.field = V4L2_FIELD_ANY;
-
-        if (xioctl(s->fd, VIDIOC_TRY_FMT, &s->fmt) != -1 && s->fmt.fmt.pix.pixelformat == pixformat) {
-            motion_log(LOG_INFO, 0, "index_format %d Test palette %c%c%c%c (%dx%d)", index_format, 
-                       pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height);
-
-            if (s->fmt.fmt.pix.width != (unsigned int) *width
-                || s->fmt.fmt.pix.height != (unsigned int) *height) {
-                motion_log(LOG_INFO, 0, "Adjusting resolution from %ix%i to %ix%i.", *width, *height,
-                           s->fmt.fmt.pix.width, s->fmt.fmt.pix.height);
-                *width = s->fmt.fmt.pix.width;
-                *height = s->fmt.fmt.pix.height;
-            }
-
-            if (xioctl(s->fd, VIDIOC_S_FMT, &s->fmt) == -1) {
-                motion_log(LOG_ERR, 1, "Error setting pixel format VIDIOC_S_FMT");
-                return -1;
-            }
-
-            motion_log(LOG_INFO, 0, "Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage %d colorspace %08x", 
-                       pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, *height, 
-                       s->fmt.fmt.pix.bytesperline, s->fmt.fmt.pix.sizeimage, s->fmt.fmt.pix.colorspace);
-
-            /* TODO: Review when it has been tested */
-            if (pixformat == V4L2_PIX_FMT_MJPEG) {
-                struct v4l2_jpegcompression v4l2_jpeg;
-
-                if (xioctl(s->fd, VIDIOC_G_JPEGCOMP, &v4l2_jpeg) == -1) {
-                    motion_log(LOG_ERR, 0, "VIDIOC_G_JPEGCOMP not supported but it should be (does your "
-                               "webcam driver support this ioctl?)");
-                } else {
-                    v4l2_jpeg.jpeg_markers |= V4L2_JPEG_MARKER_DHT;
-                    if (xioctl(s->fd, VIDIOC_S_JPEGCOMP, &v4l2_jpeg) == -1)
-                        motion_log(LOG_ERR, 1, "VIDIOC_S_JPEGCOMP");
-
-                }
-            }
+        if (v4l2_do_set_pix_format(supported_formats[index_format],
+            s, width, height) >= 0)
             return 0;
-        }
-
-        motion_log(LOG_ERR, 1, "VIDIOC_TRY_FMT failed for format %c%c%c%c", pixformat >> 0,
-                   pixformat >> 8, pixformat >> 16, pixformat >> 24);
-
-        return -1;
+        motion_log(LOG_ERR, 1, "VIDIOC_TRY_FMT failed for format %s", name);      
     }
 
     motion_log(LOG_ERR, 0, "Unable to find a compatible palette format.");
