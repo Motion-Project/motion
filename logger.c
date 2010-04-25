@@ -170,7 +170,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
         return;
 
     /* Exit if type is not equal to log_type and not TYPE_ALL */
-    if ((type != log_type) && (type != TYPE_ALL))
+    if ((log_type != TYPE_ALL) && (type != log_type))
         return;
 
     /* 

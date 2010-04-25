@@ -95,6 +95,7 @@ William M Brack
      handling when it fails. Motion would end in infinite loops.
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
    * Fix conv_uyvyto420p segfault.
+   * Enhancing the palette selection.
 
 John Bray
    * Get current directory to allow write motion.conf properly 

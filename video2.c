@@ -244,8 +244,9 @@ static int v4l2_get_capability(src_v4l2_t * vid_source)
 /**
  * v4l2_select_input
  */ 
-static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_v4l2_t * vid_source, 
-                             int in, int norm, unsigned long freq_, int tuner_number ATTRIBUTE_UNUSED)
+static int v4l2_select_input(struct config *conf, struct video_dev *viddev, 
+                             src_v4l2_t * vid_source, int in, int norm, 
+                             unsigned long freq_, int tuner_number ATTRIBUTE_UNUSED)
 {
     struct v4l2_input input;
     struct v4l2_standard standard;
@@ -262,13 +263,13 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_
     else input.index = in;
 
     if (xioctl(vid_source->fd, VIDIOC_ENUMINPUT, &input) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to query input %d. VIDIOC_ENUMINPUT", 
-                   input.index);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to query input %d."
+                   " VIDIOC_ENUMINPUT", input.index);
         return -1;
     }
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: name = \"%s\", type 0x%08X, status %08x", 
-               input.name, input.type, input.status);
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: name = \"%s\", type 0x%08X,"
+               " status %08x", input.name, input.type, input.status);
 
     if (input.type & V4L2_INPUT_TYPE_TUNER)
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: - TUNER");
@@ -277,14 +278,17 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: - CAMERA");
 
     if (xioctl(vid_source->fd, VIDIOC_S_INPUT, &input.index) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error selecting input %d VIDIOC_S_INPUT", 
-                   input.index);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error selecting input %d"
+                   " VIDIOC_S_INPUT", input.index);
         return -1;
     }
 
     viddev->input = conf->input = in;
     
-    /* Set video standard usually webcams doesn't support the ioctl or return V4L2_STD_UNKNOWN */
+    /* 
+     * Set video standard usually webcams doesn't support the ioctl or 
+     * return V4L2_STD_UNKNOWN 
+     */
     if (xioctl(vid_source->fd, VIDIOC_G_STD, &std_id) == -1) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Device doesn't support VIDIOC_G_STD"); 
         norm = std_id = 0;    // V4L2_STD_UNKNOWN = 0
@@ -313,11 +317,10 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_
             std_id = V4L2_STD_PAL;
         }
 
-        if (xioctl(vid_source->fd, VIDIOC_S_STD, &std_id) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error selecting standard method %d VIDIOC_S_STD", 
-                       (int)std_id);
-        }    
-    
+        if (xioctl(vid_source->fd, VIDIOC_S_STD, &std_id) == -1) 
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error selecting standard" 
+                       " method %d VIDIOC_S_STD", (int)std_id);
+            
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Set standard method %d", 
                    (int)std_id);
     }
@@ -366,15 +369,95 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev, src_
     return 0;
 }
 
+
+/* *
+ * v4l2_do_set_pix_format
+ * 
+ *          This routine does the actual request to the driver
+ * 
+ * Returns:  0  Ok
+ *          -1  Problems setting palette or not supported
+ * 
+ * Our algorithm for setting the picture format for the data which the
+ * driver returns to us will be as follows:
+ *
+ * First, we request that the format be set to whatever is in the config
+ * file (which is either the motion default, or a value chosen by the user).
+ * If that request is successful, we are finished.
+ *
+ * If the driver responds that our request is not accepted, we then enumerate
+ * the formats which the driver claims to be able to supply.  From this list,
+ * we choose whichever format is "most efficient" for motion.  The enumerated
+ * list is also printed to the motion log so that the user can consider
+ * choosing a different value for the config file.
+ *
+ * We then request the driver to set the format we have chosen.  That request
+ * should never fail, so if it does we log the fact and give up.
+ */
+static int v4l2_do_set_pix_format(u32 pixformat, src_v4l2_t * vid_source,
+                                  int *width, int *height)
+{
+    CLEAR(vid_source->dst_fmt);
+    vid_source->dst_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    vid_source->dst_fmt.fmt.pix.width = *width;
+    vid_source->dst_fmt.fmt.pix.height = *height;
+    vid_source->dst_fmt.fmt.pix.pixelformat = pixformat;
+    vid_source->dst_fmt.fmt.pix.field = V4L2_FIELD_ANY;
+    
+    if (xioctl(vid_source->fd, VIDIOC_TRY_FMT, &vid_source->dst_fmt) != -1 && 
+        vid_source->dst_fmt.fmt.pix.pixelformat == pixformat) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Testing palette %c%c%c%c (%dx%d)", 
+                   pixformat >> 0, pixformat >> 8, 
+                   pixformat >> 16, pixformat >> 24, *width, *height);
+
+        if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) *width || 
+            vid_source->dst_fmt.fmt.pix.height != (unsigned int) *height) {
+
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Adjusting resolution "
+                       "from %ix%i to %ix%i.", 
+                       *width, *height, vid_source->dst_fmt.fmt.pix.width, 
+                       vid_source->dst_fmt.fmt.pix.height);
+
+            *width = vid_source->dst_fmt.fmt.pix.width;
+            *height = vid_source->dst_fmt.fmt.pix.height;
+        }
+
+        if (xioctl(vid_source->fd, VIDIOC_S_FMT, &vid_source->dst_fmt) == -1) {
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error setting pixel "
+                       "format.\nVIDIOC_S_FMT: ");
+            return -1;
+        }
+
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Using palette %c%c%c%c (%dx%d)"
+                   " bytesperlines %d sizeimage %d colorspace %08x", pixformat >> 0, 
+                   pixformat >> 8, pixformat >> 16, pixformat >> 24, *width, 
+                   *height, vid_source->dst_fmt.fmt.pix.bytesperline, 
+                   vid_source->dst_fmt.fmt.pix.sizeimage, 
+                   vid_source->dst_fmt.fmt.pix.colorspace);
+
+        return 0;
+    }    
+        
+    return -1;
+}
+
 /**
  * v4l2_set_pix_format
+ * 
+ * Returns:  0  Ok
+ *          -1  Problems setting palette or not supported
  */
-static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int *width, int *height)
+static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
+                               int *width, int *height)
 {
     struct v4l2_fmtdesc fmtd;
     int v4l2_pal;
 
-    static const u32 supported_formats[] = {    /* higher index means better chance to be used */
+    /*
+     * Note that this array MUST exactly match the config file list.
+     * A higher index means better chance to be used 
+     */
+    static const u32 supported_formats[] = {   
         V4L2_PIX_FMT_SN9C10X,
         V4L2_PIX_FMT_SBGGR16, 
         V4L2_PIX_FMT_SBGGR8,
@@ -392,14 +475,29 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
         V4L2_PIX_FMT_UYVY,
         V4L2_PIX_FMT_YUYV,  
         V4L2_PIX_FMT_YUV422P,
-        V4L2_PIX_FMT_YUV420,
-        0
+        V4L2_PIX_FMT_YUV420 /* most efficient for motion */
     };
 
-    int index_format = -1;
+    int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
+    int index_format = -1; /* -1 says not yet chosen */
     CLEAR(fmtd);
     fmtd.index = v4l2_pal = 0;
     fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    /* First we try a shortcut of just setting the config file value */
+    if (cnt->conf.v4l2_palette >= 0) {
+        char name[5] = {supported_formats[cnt->conf.v4l2_palette] >>  0,
+                        supported_formats[cnt->conf.v4l2_palette] >>  8,
+                        supported_formats[cnt->conf.v4l2_palette] >>  16,
+                        supported_formats[cnt->conf.v4l2_palette] >>  24, 0};
+                        
+	    if (v4l2_do_set_pix_format(supported_formats[cnt->conf.v4l2_palette],
+	                               vid_source, width, height) >= 0)
+            return 0;
+
+	    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Config palette index %d (%s)"
+                   " doesn't work.", cnt->conf.v4l2_palette, name);
+    }
 
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Supported palettes:");
 
@@ -407,82 +505,42 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source, int
 
         int i;
 
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: (%i) %c%c%c%c (%s)", v4l2_pal, fmtd.pixelformat >> 0, 
-                   fmtd.pixelformat >> 8, fmtd.pixelformat >> 16, fmtd.pixelformat >> 24, fmtd.description);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: (%i) %c%c%c%c (%s)", 
+                   v4l2_pal, fmtd.pixelformat >> 0, 
+                   fmtd.pixelformat >> 8, fmtd.pixelformat >> 16,
+                   fmtd.pixelformat >> 24, fmtd.description);
 
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: %d - %s (compressed : %d) (%#x)",
                    fmtd.index, fmtd.description, fmtd.flags, fmtd.pixelformat);
 
-        for (i = 0; supported_formats[i]; i++)
-            if (supported_formats[i] == fmtd.pixelformat) {
-                if (cnt->conf.v4l2_palette == i) {
-                    index_format = cnt->conf.v4l2_palette;
-                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Selected palette %c%c%c%c", fmtd.pixelformat >> 0, 
-                               fmtd.pixelformat >> 8, fmtd.pixelformat >> 16, fmtd.pixelformat >> 24);
-                    i = sizeof(supported_formats)/sizeof(u32);
-                    break;
-                }
+         /* Adjust index_format if larger value found */
+        for (i = index_format + 1; i < array_size; i++)
+            if (supported_formats[i] == fmtd.pixelformat)
                 index_format = i;
-            }
 
-        /* Chosen our selected palette, break from while */
-        if (index_format == cnt->conf.v4l2_palette && index_format >= 0)
-            break;
-        
         CLEAR(fmtd);
         fmtd.index = ++v4l2_pal;
         fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
 
     if (index_format >= 0) {
-        
-        u32 pixformat = supported_formats[index_format];
+        char name[5] = {supported_formats[index_format] >>  0,
+                        supported_formats[index_format] >>  8,
+                        supported_formats[index_format] >>  16,
+                        supported_formats[index_format] >>  24, 0};
 
-        CLEAR(vid_source->dst_fmt);
-        CLEAR(vid_source->src_fmt);
-        vid_source->dst_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        vid_source->dst_fmt.fmt.pix.width = *width;
-        vid_source->dst_fmt.fmt.pix.height = *height;
-        vid_source->dst_fmt.fmt.pix.pixelformat = pixformat;
-        vid_source->dst_fmt.fmt.pix.field = V4L2_FIELD_ANY;
-
-        if (xioctl(vid_source->fd, VIDIOC_TRY_FMT, &vid_source->dst_fmt) != -1 && 
-            vid_source->dst_fmt.fmt.pix.pixelformat == pixformat) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: index_format %d Testing palette %c%c%c%c (%dx%d)", 
-                       index_format, pixformat >> 0, pixformat >> 8, 
-                       pixformat >> 16, pixformat >> 24, *width, *height);
-
-            if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) *width || 
-                vid_source->dst_fmt.fmt.pix.height != (unsigned int) *height) {
-
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Adjusting resolution from %ix%i to %ix%i.", 
-                           *width, *height, vid_source->dst_fmt.fmt.pix.width, 
-                           vid_source->dst_fmt.fmt.pix.height);
-
-                *width = vid_source->dst_fmt.fmt.pix.width;
-                *height = vid_source->dst_fmt.fmt.pix.height;
-            }
-
-            if (xioctl(vid_source->fd, VIDIOC_S_FMT, &vid_source->dst_fmt) == -1) {
-                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error setting pixel format.\nVIDIOC_S_FMT: ");
-                return -1;
-            }
-
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Using palette %c%c%c%c (%dx%d) bytesperlines %d sizeimage "
-                       "%d colorspace %08x", pixformat >> 0, pixformat >> 8, pixformat >> 16, 
-                       pixformat >> 24, *width, *height, vid_source->dst_fmt.fmt.pix.bytesperline, 
-                       vid_source->dst_fmt.fmt.pix.sizeimage, vid_source->dst_fmt.fmt.pix.colorspace);
-
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s Selected palette %s", name);
+    
+	    if (v4l2_do_set_pix_format(supported_formats[index_format],
+                                   vid_source, width, height) >= 0)
             return 0;
-        }
-
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: VIDIOC_TRY_FMT failed for format %c%c%c%c ", 
-                   pixformat >> 0, pixformat >> 8, pixformat >> 16, pixformat >> 24);
-
-        return -1;
+            
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_TRY_FMT failed for "
+                   "format %s", name);
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find a compatible palette format.");
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find a compatible"
+               " palette format.");
     
     return -1;
 }
@@ -523,7 +581,8 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
     vid_source->req.memory = V4L2_MEMORY_MMAP;
 
     if (xioctl(vid_source->fd, VIDIOC_REQBUFS, &vid_source->req) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error requesting buffers %d for memory map. VIDIOC_REQBUFS",
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error requesting buffers" 
+                   " %d for memory map. VIDIOC_REQBUFS",
                    vid_source->req.count);
         return -1;
     }
@@ -532,8 +591,8 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
                vid_source->req.count);
 
     if (vid_source->req.count < MIN_MMAP_BUFFERS) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Insufficient buffer memory %d < MIN_MMAP_BUFFERS.",
-                   vid_source->req.count);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Insufficient buffer memory" 
+                   " %d < MIN_MMAP_BUFFERS.", vid_source->req.count);
         return -1;
     }
 
@@ -554,8 +613,8 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
         buf.index = buffer_index;
 
         if (xioctl(vid_source->fd, VIDIOC_QUERYBUF, &buf) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error querying buffer %i\nVIDIOC_QUERYBUF: ",
-                       buffer_index);
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error querying buffer"
+                       " %i\nVIDIOC_QUERYBUF: ", buffer_index);
             free(vid_source->buffers);
             return -1;
         }
@@ -591,7 +650,8 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     if (xioctl(vid_source->fd, VIDIOC_STREAMON, &type) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error starting stream. VIDIOC_STREAMON"); 
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error starting stream."
+                   " VIDIOC_STREAMON"); 
         return -1;
     }
 
@@ -618,7 +678,8 @@ static int v4l2_scan_controls(src_v4l2_t * vid_source)
     }
 
     if (count) {
-        struct v4l2_queryctrl *ctrl = vid_source->controls = calloc(count, sizeof(struct v4l2_queryctrl));
+        struct v4l2_queryctrl *ctrl = vid_source->controls 
+                                    = calloc(count, sizeof(struct v4l2_queryctrl));
 
         if (!ctrl) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Insufficient buffer memory.");
@@ -635,7 +696,8 @@ static int v4l2_scan_controls(src_v4l2_t * vid_source)
 
                 memcpy(ctrl, &queryctrl, sizeof(struct v4l2_queryctrl));
 
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: found control 0x%08x, \"%s\", range %d,%d %s", 
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: found control 0x%08x, \"%s\","
+                           " range %d,%d %s", 
                            ctrl->id, ctrl->name, ctrl->minimum, ctrl->maximum,
                            ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "!DISABLED!" : "");
 
@@ -676,7 +738,7 @@ static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
                 switch (ctrl->type) {
                 case V4L2_CTRL_TYPE_INTEGER:
                     value = control.value =
-                        (value * (ctrl->maximum - ctrl->minimum) / 256) + ctrl->minimum;
+                            (value * (ctrl->maximum - ctrl->minimum) / 256) + ctrl->minimum;
                     ret = xioctl(vid_source->fd, VIDIOC_S_CTRL, &control);
                     break;
 
@@ -690,8 +752,8 @@ static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
                     return -1;
                 }
 
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: setting control \"%s\" to %d (ret %d %s) %s", 
-                           ctrl->name, value, ret, ret ? strerror(errno) : "",
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: setting control \"%s\" to %d"
+                           " (ret %d %s) %s", ctrl->name, value, ret, ret ? strerror(errno) : "",
                            ctrl->flags & V4L2_CTRL_FLAG_DISABLED ? "Control is DISABLED!" : "");
 
                 return 0;
@@ -824,7 +886,8 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
         if (conf->roundrobin_skip < 0) 
             skip = 1;
 
-        v4l2_select_input(conf, viddev, (src_v4l2_t *) viddev->v4l2_private, input, norm, freq, tuner_number);
+        v4l2_select_input(conf, viddev, (src_v4l2_t *) viddev->v4l2_private, 
+                          input, norm, freq, tuner_number);
 
         gettimeofday(&switchTime, NULL);
 
@@ -847,8 +910,8 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
             src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
             unsigned int counter = 0;
 
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: set_input_skip_frame switch_time=%ld:%ld", 
-                       switchTime.tv_sec, switchTime.tv_usec);
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: set_input_skip_frame "
+                       "switch_time=%ld:%ld", switchTime.tv_sec, switchTime.tv_usec);
 
             /* Avoid hang using the number of mmap buffers */
             while(counter < vid_source->req.count) {
@@ -861,7 +924,8 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
                     vid_source->buf.timestamp.tv_usec > switchTime.tv_usec))
                     break;
 
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: got frame before switch timestamp=%ld:%ld", 
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: got frame before "
+                           " switch timestamp=%ld:%ld", 
                            vid_source->buf.timestamp.tv_sec, 
                            vid_source->buf.timestamp.tv_usec);
             }
@@ -879,7 +943,8 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 /** 
  * v4l2_next
  */ 
-int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height)
+int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, 
+              int width, int height)
 {
     sigset_t set, old;
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
@@ -926,12 +991,12 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
                 vid_source->pframe = 0;
 
              vid_source->buf.index = vid_source->pframe;
-             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: VIDIOC_DQBUF: EIO (vid_source->pframe %d)", 
-                        vid_source->pframe);
+             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: VIDIOC_DQBUF: EIO "
+                        "(vid_source->pframe %d)", vid_source->pframe);
              ret = 1;
         } else if (errno == EAGAIN) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: VIDIOC_DQBUF: EAGAIN (vid_source->pframe %d)",
-                       vid_source->pframe);
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: VIDIOC_DQBUF: EAGAIN"
+                       " (vid_source->pframe %d)", vid_source->pframe);
             ret = 1;
         } else {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: VIDIOC_DQBUF");
@@ -949,8 +1014,8 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     vid_source->buffers[vid_source->buf.index].used = vid_source->buf.bytesused;
     vid_source->buffers[vid_source->buf.index].content_length = vid_source->buf.bytesused;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: 3) vid_source->pframe %i vid_source->buf.index %i", 
-               vid_source->pframe, vid_source->buf.index);
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: 3) vid_source->pframe %i "
+               "vid_source->buf.index %i", vid_source->pframe, vid_source->buf.index);
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: vid_source->buf.bytesused %i", 
                vid_source->buf.bytesused);
 
