@@ -15,6 +15,8 @@
 
 #ifdef __NetBSD__
 #include <dev/ic/bt8xx.h>
+#elif __OpenBSD__
+#include <dev/ic/bt8xx.h>
 #elif defined(OLD_BKTR)
 #include <machine/ioctl_meteor.h>
 #include <machine/ioctl_bt848.h>

@@ -463,6 +463,10 @@ Michael Finsterbusch
      to the "Live Stream Server". 
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
 
+Mark Feenstra
+   * Fix zombies on OpenBSD.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
+
 Miguel Freitas
    * Came up with the round robing idea.
 

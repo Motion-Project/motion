@@ -1146,6 +1146,16 @@ static void *motion_loop(void *arg)
     if (cnt->track.type)
         cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
+#ifdef __OpenBSD__
+    /* 
+     * FIXMARK 
+     * Fixes zombie issue on OpenBSD 4.6
+     */
+    struct sigaction sig_handler_action;
+    struct sigaction sigchild_action;
+    setup_signals(&sig_handler_action, &sigchild_action);
+#endif
+
     /*
      * MAIN MOTION LOOP BEGINS HERE 
      * Should go on forever... unless you bought vaporware :) 
