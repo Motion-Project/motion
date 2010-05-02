@@ -967,6 +967,15 @@ static void *motion_loop(void *arg)
     for (j = 0; j < rolling_average_limit; j++)
         rolling_average_data[j] = required_frame_time;
 
+#ifdef __OpenBSD__
+    /* 
+     * FIXMARK 
+     * Fixes zombie issue on OpenBSD 4.6
+     */
+    struct sigaction sig_handler_action;
+    struct sigaction sigchild_action;
+    setup_signals(&sig_handler_action, &sigchild_action);
+#endif
 
     /* MAIN MOTION LOOP BEGINS HERE */
     /* Should go on forever... unless you bought vaporware :) */

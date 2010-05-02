@@ -6,7 +6,9 @@ Bugfixes
    * Fixed FFV1 codec encode with ffmpeg (Angel Carpintero)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553 
    * Fix conv_uyvyto420p segfault ( William M Brack )
-   * Enhancing the palette selection ( William M Brack  
+   * Enhancing the palette selection ( William M Brack ) 
+   * Fix zombies on OpenBSD. (Mark Feenstra)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
 
 3.2.11.1 Sumary of Changes
 

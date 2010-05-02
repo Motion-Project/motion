@@ -444,6 +444,10 @@ Stephen Farrugia
    * Fixing the division by zero problem.
      This makes motion a lot more stable.
 
+Mark Feenstra
+   * Fix zombies on OpenBSD. 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
+
 Miguel Freitas
    * Came up with the round robing idea.
 
