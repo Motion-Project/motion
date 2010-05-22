@@ -1,8 +1,9 @@
-/* MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
+/*
+ * MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
  * taken from RFC 1321
  */
 
-/* 
+/*
  Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
 
@@ -27,7 +28,7 @@ documentation and/or software.
 
 #include "md5.h"
 
-/* 
+/*
  * Constants for MD5Transform routine.
  */
 
@@ -68,12 +69,12 @@ static unsigned char PADDING[64] = {
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
 
-/* 
+/*
  * ROTATE_LEFT rotates x left n bits.
  */
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
 
-/* 
+/*
  * FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
  * Rotation is separate from addition to prevent recomputation.
  */
@@ -183,7 +184,7 @@ void MD5Final (
   MD5_memset ((POINTER)context, 0, sizeof (*context));
 }
 
-/* 
+/*
  * MD5 basic transformation. Transforms state based on block.
  */
 static void MD5Transform (state, block)

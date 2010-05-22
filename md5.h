@@ -1,5 +1,6 @@
-/* MD5.H - header file for MD5C.C
-   taken from RFC 1321
+/*
+ *  MD5.H - header file for MD5C.C
+ *  taken from RFC 1321
  */
 
 #ifndef MD5_H
@@ -30,7 +31,7 @@ documentation and/or software.
 /* GLOBAL.H - RSAREF types and constants
  */
 
-/* 
+/*
  * PROTOTYPES should be set to one if and only if the compiler supports
  * function argument prototyping.
  * The following makes PROTOTYPES default to 0 if it has not already
@@ -50,7 +51,7 @@ typedef unsigned short int UINT2;
 /* UINT4 defines a four byte word */
 typedef unsigned int UINT4;
 
-/* 
+/*
  * PROTO_LIST is defined depending on how PROTOTYPES is defined above.
  * If using PROTOTYPES, then PROTO_LIST returns the list, otherwise it
  * returns an empty list.

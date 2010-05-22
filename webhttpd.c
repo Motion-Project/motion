@@ -5,7 +5,7 @@
  *
  *      Specs : http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpAPI
  *
- *      Copyright 2004-2005 by Angel Carpintero  (ack@telefonica.net)
+ *      Copyright 2004-2005 by Angel Carpintero  (motiondevelop@gmail.com)
  *      This software is distributed under the GNU Public License Version 2
  *      See also the file 'COPYING'.
  *
@@ -153,7 +153,7 @@ static const char *error_value_raw =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/plain\r\n\r\n"
     "Value Error";
-    
+
 static const char *not_found_response_valid_command =
     "HTTP/1.0 404 Not Valid Command\r\n"
     "Content-type: text/html\r\n\r\n"
@@ -249,7 +249,7 @@ static void send_template_ini_client(int client_socket, const char *template)
     nwrite = write_nonblock(client_socket, ok_response, strlen(ok_response));
     nwrite += write_nonblock(client_socket, template, strlen(template));
     if (nwrite != (ssize_t)(strlen(ok_response) + strlen(template)))
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
 }
 
 /**
@@ -260,7 +260,7 @@ static void send_template_ini_client_raw(int client_socket)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, ok_response_raw, strlen(ok_response_raw));
     if (nwrite != (ssize_t)strlen(ok_response_raw))
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
 }
 
 /**
@@ -271,7 +271,7 @@ static void send_template(int client_socket, char *res)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, res, strlen(res));
     if (nwrite != (ssize_t)strlen(res))
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
 }
 
 /**
@@ -336,10 +336,10 @@ static char *replace(const char *str, const char *old, const char *new)
     strcpy(r, p);
 
     return ret;
-} 
+}
 
 /**
- * url_decode 
+ * url_decode
  *      This function decode the values from GET request following the http RFC.
  *
  * Returns nothing.
@@ -372,7 +372,7 @@ static void url_decode(char *urlencoded, size_t length)
 
         } else if (*data == '+') {
             *urldecoded++ = ' ';
-        
+
         } else {
             *urldecoded++ = *data;
         }
@@ -385,12 +385,12 @@ static void url_decode(char *urlencoded, size_t length)
 
 
 /**
- * config 
+ * config
  *      Manages/parses the config action for motion ( set , get , write , list ).
  *
  *   Returns 1 to exit from function.
  */
-static unsigned int config(char *pointer, char *res, unsigned int length_uri, 
+static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                  unsigned int thread, int client_socket, void *userdata)
 {
     char question='\0';
@@ -408,28 +408,28 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
             /*call list*/
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n<ul>", 
+                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n<ul>",
                         thread, thread);
                 send_template(client_socket, res);
 
                 for (i=0; config_params[i].param_name != NULL; i++) {
 
-                    if ((thread != 0) && (config_params[i].main_thread)) 
+                    if ((thread != 0) && (config_params[i].main_thread))
                         continue;
 
                     value = config_params[i].print(cnt, NULL, i, thread);
 
                     if (value == NULL) {
                         retval = NULL;
-                    
-                        /* Only get the thread value for main thread */ 
+
+                        /* Only get the thread value for main thread */
                         if (thread == 0)
                             config_params[i].print(cnt, &retval, i, thread);
-                    
+
                         /* thread value*/
-                        
+
                         if (retval) {
-                            
+
                             if (!strcmp(retval,"")) {
                                 free(retval);
                                 retval = mystrdup("No threads");
@@ -439,7 +439,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                 size_t retval_len = strlen(retval);
                                 unsigned int ind = 0;
                                 char thread_strings[1024] = {'\0'};
-                                
+
                                 while (retval_miss != retval_len) {
                                     while (*temp != '\n') {
                                         thread_strings[ind++] = *temp;
@@ -457,14 +457,14 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                 retval = NULL;
                                 retval = mystrdup(thread_strings);
                             }
-                            
+
                             sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
                                     config_params[i].param_name, config_params[i].param_name, retval);
                             free(retval);
                         } else if (thread != 0) {
                             /* get the value from main thread for the rest of threads */
                             value = config_params[i].print(cnt, NULL, i, 0);
-                            
+
                             sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
                                     config_params[i].param_name, config_params[i].param_name,
                                     value ? value : "(not defined)");
@@ -473,7 +473,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                     config_params[i].param_name, config_params[i].param_name,
                                     "(not defined)");
                         }
-                        
+
                     } else {
                         sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
                                 config_params[i].param_name, config_params[i].param_name, value);
@@ -543,7 +543,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                     "</li></ul><b>Done</b>",
                                         thread, thread, thread, config_params[i].param_name,
                                         config_params[i].param_name, Value);
-                                
+
                                 send_template_ini_client(client_socket, ini_template);
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
@@ -584,10 +584,10 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res,
                                 "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
-                                    "<b>Thread %hu</b>\n<ul><li><a href=/%hu/config/set?%s>%s</a>" 
-                                    "= %s</li></ul><br><b>Done</b>", thread, thread, thread, 
+                                    "<b>Thread %hu</b>\n<ul><li><a href=/%hu/config/set?%s>%s</a>"
+                                    "= %s</li></ul><br><b>Done</b>", thread, thread, thread,
                                     config_params[i].param_name, config_params[i].param_name, type);
-                            
+
                             send_template_ini_client(client_socket, ini_template);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
@@ -623,10 +623,10 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                     }
                     /* param_name exists */
                     if (config_params[i].param_name) {
-                        const char *value = NULL;                            
+                        const char *value = NULL;
                         char *text_help = NULL;
                         char *sharp = NULL;
-                        
+
                         value = config_params[i].print(cnt, NULL, i, thread);
 
                         sharp = strstr(config_params[i].param_help, "#\n\n#");
@@ -635,21 +635,21 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                         sharp++;
 
                         text_help = replace(sharp, "\n#", "<br>");
-                        
+
                         send_template_ini_client(client_socket, ini_template);
                         if (!strcmp ("bool", config_type(&config_params[i]))) {
                             char option[80] = {'\0'};
-                    
+
                             if ((value == NULL) && (thread != 0))
                                 value = config_params[i].print(cnt, NULL, i, 0);
-                            
+
                             if (!strcmp ("on", value))
                                 sprintf(option, "<option value='on' selected>on</option>\n"
                                                 "<option value='off'>off</option>\n");
                             else
                                 sprintf(option, "<option value='on'>on</option>\n"
                                                 "<option value='off' selected>off</option>\n");
-                            
+
                             sprintf(res, "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
                                          "<b>Thread %hu</b>\n"
                                          "<form action=set?>\n"
@@ -662,11 +662,11 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                          config_params[i].param_name, config_params[i].param_name,
                                          option, TWIKI_URL, config_params[i].param_name, text_help);
                         } else {
-        
+
                             if (value == NULL) {
                                 if (thread != 0)
                                     /* get the value from main thread for the rest of threads */
-                                                                value = config_params[i].print(cnt, NULL, i, 0); 
+                                                                value = config_params[i].print(cnt, NULL, i, 0);
                                 if (value == NULL) value = "";
                             }
                             sprintf(res, "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
@@ -761,7 +761,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                             break;
                         i++;
                     }
-                    /* 
+                    /*
                      * FIXME bool values or commented values maybe that should be
                      * solved with config_type
                      */
@@ -795,8 +795,8 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                 sprintf(res, "<a href=/%hu/config/get>&lt;&ndash; back</a><br><br>\n"
                                              "<b>Thread %hu</b><br>\n<ul><li>%s = %s &nbsp;&nbsp;"
                                              "&nbsp;&nbsp;<a href='%s#%s' target=_blank>"
-                                             "[help]</a></li></ul><hr><i>%s</i>", 
-                                             thread, thread, config_params[i].param_name, value, 
+                                             "[help]</a></li></ul><hr><i>%s</i>",
+                                             thread, thread, config_params[i].param_name, value,
                                              TWIKI_URL, config_params[i].param_name, text_help);
 
                                 send_template(client_socket, res);
@@ -827,7 +827,7 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
         } else if (length_uri == 0) {
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b><br>\n"    
+                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b><br>\n"
                              "<form action=get>\n"
                              "<select name='query'>\n", thread, thread);
                 send_template(client_socket, res);
@@ -919,11 +919,11 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
  * action
  *      manages/parses the actions for motion ( makemovie , snapshot , restart , quit ).
  *
- * Returns 
+ * Returns
  *      0 for restart & quit
  *      1 for makemovie & snaphost
  */
-static unsigned int action(char *pointer, char *res, unsigned int length_uri, 
+static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                                  unsigned int thread, int client_socket, void *userdata)
 {
     /* parse action commands */
@@ -1002,7 +1002,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             /* call restart */
 
             if (thread == 0) {
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd restart");
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd is going to restart");
                 kill(getpid(),SIGHUP);
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
@@ -1016,7 +1016,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 0; // to restart
             } else {
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd restart thread %d", 
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd is going to restart thread %d",
                            thread);
                 if (cnt[thread]->running) {
                     cnt[thread]->makemovie = 1;
@@ -1048,7 +1048,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             /* call quit */
 
             if (thread == 0) {
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd quit");
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd quits");
                 kill(getpid(),SIGQUIT);
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
@@ -1062,7 +1062,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 0; // to quit
             } else {
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "%s: httpd quit thread %d", 
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd quits thread %d",
                            thread);
                 cnt[thread]->restart = 0;
                 cnt[thread]->makemovie = 1;
@@ -1098,14 +1098,14 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
 }
 
 /**
- * detection 
+ * detection
  *      manages/parses the detection actions for motion ( status , start , pause ).
  *
  * Returns
  *      1 to exit from function.
  */
 
-static unsigned int detection(char *pointer, char *res, unsigned int length_uri, 
+static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                                     unsigned int thread, int client_socket, void *userdata)
 {
     char command[256] = {'\0'};
@@ -1118,16 +1118,16 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
         length_uri = length_uri - 6;
         if (length_uri == 0) {
             /* call status */
-            
+
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br><b>Thread %hu</b>" 
-                             " Detection status %s\n", thread, thread, 
+                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br><b>Thread %hu</b>"
+                             " Detection status %s\n", thread, thread,
                              (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
-                sprintf(res, "Thread %hu Detection status %s\n", thread, 
+                sprintf(res, "Thread %hu Detection status %s\n", thread,
                              (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
                 send_template_ini_client_raw(client_socket);
                 send_template_raw(client_socket, res);
@@ -1155,7 +1155,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
+                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
                              " Detection resumed\n", thread, thread);
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
@@ -1184,10 +1184,10 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
             } else {
                 cnt[thread]->pause = 1;
             }
-            
+
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>" 
+                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
                              " Detection paused\n", thread, thread);
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
@@ -1208,49 +1208,49 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
         length_uri = length_uri - 10;
 
         if (length_uri == 0) {
-            /* call connection */    
+            /* call connection */
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
                 sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n", thread);
                 send_template(client_socket, res);
                 if (thread == 0) {
                     do{
-                        sprintf(res, "<b>Thread %hu</b> %s<br>\n", i, 
-                                     (!cnt[i]->running)? "NOT RUNNING" : 
+                        sprintf(res, "<b>Thread %hu</b> %s<br>\n", i,
+                                     (!cnt[i]->running)? "NOT RUNNING" :
                                      (cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
                         send_template(client_socket, res);
                     } while (cnt[++i]);
                 } else {
                     sprintf(res, "<b>Thread %hu</b> %s\n", thread,
-                                 (!cnt[thread]->running)? "NOT RUNNING" : 
+                                 (!cnt[thread]->running)? "NOT RUNNING" :
                                  (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
                     send_template(client_socket, res);
-                }    
+                }
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
                 if (thread == 0) {
                     do {
                         sprintf(res, "Thread %hu %s\n", i,
-                                     (!cnt[i]->running)? "NOT RUNNING" : 
+                                     (!cnt[i]->running)? "NOT RUNNING" :
                                                              (cnt[i]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
                         send_template_raw(client_socket, res);
                     } while (cnt[++i]);
-                } else {        
+                } else {
                     sprintf(res, "Thread %hu %s\n", thread,
-                                 (!cnt[thread]->running)? "NOT RUNNING" : 
+                                 (!cnt[thread]->running)? "NOT RUNNING" :
                                  (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
                     send_template_raw(client_socket, res);
-                }    
-                
-            }    
+                }
+
+            }
         } else {
             /* error */
              if (cnt[0]->conf.webcontrol_html_output)
                  response_client(client_socket, not_found_response_valid_command, NULL);
              else
                  response_client(client_socket, not_found_response_valid_command_raw, NULL);
-        }    
+        }
     } else {
         if (cnt[0]->conf.webcontrol_html_output)
             response_client(client_socket, not_found_response_valid_command, NULL);
@@ -1263,13 +1263,13 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
 
 
 /**
- * track 
+ * track
  *      manages/parses the track action for motion ( set , pan , tilt , auto ).
  *
  * Returns
  *      1 to exit from function.
  */
-static unsigned int track(char *pointer, char *res, unsigned int length_uri, 
+static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                                 unsigned int thread, int client_socket, void *userdata)
 {
     char question='\0';
@@ -1281,9 +1281,9 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
         pointer = pointer+3;
         length_uri = length_uri-3;
         /*
-         * FIXME need to check each value 
+         * FIXME need to check each value
          * Relative movement set?pan=0&tilt=0 | set?pan=0 | set?tilt=0
-         * Absolute movement set?x=0&y=0 | set?x=0 | set?y=0 
+         * Absolute movement set?x=0&y=0 | set?x=0 | set?y=0
          */
 
         if ((question == '?') && (length_uri > 2)) {
@@ -1294,10 +1294,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             pointer++;
             length_uri--;
-            /* 
-             * set?pan=value&tilt=value 
-             * set?x=value&y=value 
-             * pan= or x= | tilt= or y= 
+            /*
+             * set?pan=value&tilt=value
+             * set?x=value&y=value
+             * pan= or x= | tilt= or y=
              */
 
             warningkill = sscanf(pointer, "%255[a-z]%c" , command, &question);
@@ -1363,7 +1363,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             }
 
             /* first value check for error */
-            
+
             if (!warningkill) {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 3");
                 /* error value */
@@ -1394,7 +1394,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             send_template_ini_client(client_socket, ini_template);
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b><br>\n"
-                                         "track set relative pan=%s<br>\n", 
+                                         "track set relative pan=%s<br>\n",
                                          thread, thread, panvalue);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
@@ -1411,7 +1411,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
-                        }    
+                        }
                     }
                 } else if (tilt) {
                     struct coord cent;
@@ -1426,7 +1426,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     cent.y = atoi(tiltvalue);
                     // Add the number of frame to skip for motion detection
                     cnt[thread]->moved = track_move(tiltcnt, tiltcnt->video_dev, &cent, &tiltcnt->imgs, 1);
-                    if (cnt[thread]->moved) {    
+                    if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
@@ -1448,7 +1448,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
-                        }    
+                        }
                     }
                 } else if (X) {
                     /* X */
@@ -1477,7 +1477,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
-                        }    
+                        }
                     }
 
                 } else {
@@ -1507,7 +1507,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
-                        }    
+                        }
                     }
                 }
                 return 1;
@@ -1523,14 +1523,14 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                         response_client(client_socket, error_value, NULL);
                     else
                         response_client(client_socket, error_value_raw, NULL);
-                    
+
                 /* no valid syntax */
-                } else {    
+                } else {
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
                     else
                         response_client(client_socket, not_valid_syntax_raw, NULL);
-                }    
+                }
                 return 1;
             }
 
@@ -1572,7 +1572,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 length_uri--;
                 if (X || !Y || pan || tilt) {
                     MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 7");
-                    
+
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
@@ -1626,11 +1626,11 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     response_client(client_socket, error_value_raw, NULL);
                 return 1;
             }
-            
-            
+
+
             if (pan == 2) {
                 pointer = pointer + strlen(panvalue) + 1;
-                length_uri = length_uri - strlen(panvalue) - 1;    
+                length_uri = length_uri - strlen(panvalue) - 1;
             } else if (tilt == 2) {
                 pointer = pointer + strlen(tiltvalue) + 1;
                 length_uri = length_uri - strlen(tiltvalue) - 1;
@@ -1640,9 +1640,9 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             } else {
                 pointer = pointer + strlen(y_value) + 1;
                 length_uri = length_uri - strlen(y_value) - 1;
-            }    
-            
-            
+            }
+
+
             if (length_uri != 0) {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 12");
                 if (cnt[0]->conf.webcontrol_html_output)
@@ -1679,7 +1679,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                         response_client(client_socket, track_error, res);
                     } else {
                         response_client(client_socket, track_error_raw, NULL);
-                    }    
+                    }
                 }
                 /* track set relative ( pan , tilt )*/
             } else {
@@ -1694,7 +1694,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 cent.y = 0;
                 cent.x = atoi(panvalue);
                 // Add the number of frame to skip for motion detection
-                cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, 
+                cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev,
                                                 &cent, &relativecnt->imgs, 1);
 
                 if (cnt[thread]->moved) {
@@ -1705,7 +1705,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     cent.x = 0;
                     cent.y = atoi(tiltvalue);
                     // SLEEP(1,0);
-                    cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev, 
+                    cnt[thread]->moved = track_move(relativecnt, relativecnt->video_dev,
                                                     &cent, &relativecnt->imgs, 1);
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
@@ -1724,25 +1724,25 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                         return 1;
 
                     } else {
-                        /* error in track tilt */    
+                        /* error in track tilt */
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b>\n", thread, thread);
                             response_client(client_socket, track_error, res);
-                        } else { 
+                        } else {
                             response_client(client_socket, track_error_raw, NULL);
-                        }    
+                        }
                     }
                 }
 
                 /* error in track pan */
                 if (cnt[0]->conf.webcontrol_html_output) {
-                    sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br><b>Thread %hu</b>\n", 
+                    sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br><b>Thread %hu</b>\n",
                                  thread, thread);
                     response_client(client_socket, track_error, res);
                 } else {
                     response_client(client_socket, track_error_raw, NULL);
-                }    
+                }
             }
         } else if (length_uri == 0) {
             if (cnt[0]->conf.webcontrol_html_output) {
@@ -1780,7 +1780,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             setcnt = cnt[thread];
             // 1000 is out of range for pwc
             cnt[thread]->moved = track_center(setcnt, setcnt->video_dev, 1, 0, 0);
-            
+
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
                 sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
@@ -1794,9 +1794,9 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             }
         } else {
             /* error not valid command */
-            if (cnt[0]->conf.webcontrol_html_output) 
+            if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
-            else 
+            else
                 response_client(client_socket, not_found_response_valid_command_raw, NULL);
         }
     } else if (!strcmp(command, "status")) {
@@ -1806,21 +1806,21 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
                 sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
-                             "<br>track auto %s", thread, thread, 
+                             "<br>track auto %s", thread, thread,
                              (cnt[thread]->track.active)? "enabled":"disabled");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
-                sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread, 
+                sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread,
                              (cnt[thread]->track.active)? "enabled":"disabled");
                 send_template_ini_client_raw(client_socket);
                 send_template_raw(client_socket, res);
             }
         } else {
             /* error not valid command */
-            if (cnt[0]->conf.webcontrol_html_output) 
+            if (cnt[0]->conf.webcontrol_html_output)
                 response_client(client_socket, not_found_response_valid_command, NULL);
-            else     
+            else
                 response_client(client_socket, not_found_response_valid_command_raw, NULL);
         }
     } else if (!strcmp(command, "auto")) {
@@ -1847,12 +1847,12 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             send_template_ini_client(client_socket, ini_template);
                             sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                          "<b>Thread %hu</b><br>"
-                                     "track auto %s", thread, thread, 
+                                     "track auto %s", thread, thread,
                                     (cnt[thread]->track.active)? "enabled":"disabled");
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
-                            sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread, 
+                            sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread,
                                      (cnt[thread]->track.active)? "enabled":"disabled");
                             send_template_ini_client_raw(client_socket);
                             send_template_raw(client_socket, res);
@@ -1868,7 +1868,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                                 send_template_ini_client(client_socket, ini_template);
                                 sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
                                              "<b>Thread %hu</b>"
-                                             "<br>track auto %s<br>", thread, thread, 
+                                             "<br>track auto %s<br>", thread, thread,
                                              active ? "enabled":"disabled");
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
@@ -1936,10 +1936,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
  * handle_get
  *      parses the action requested for motion ( config , action , detection , track )
  *      and call to action function if needed.
- *   
+ *
  * Returns
- *      0 on action restart or quit 
- *      1 on success    
+ *      0 on action restart or quit
+ *      1 on success
  */
 static unsigned int handle_get(int client_socket, const char *url, void *userdata)
 {
@@ -1994,13 +1994,13 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                     length_uri = length_uri - 2;
                 } else {
                     pointer++;
-                    length_uri--;    
+                    length_uri--;
                 }
-                
+
                 if (slash == '/') {   /* slash found /2/ */
                     pointer++;
                     length_uri--;
-                } 
+                }
 
                 if (length_uri != 0) {
                     warningkill = sscanf(pointer, "%255[a-z]%c" , command , &slash);
@@ -2138,7 +2138,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                                     response_client(client_socket, not_track, res);
                                 } else {
                                     response_client(client_socket, not_track_raw, NULL);
-                                }    
+                                }
                             }
                         } else {
                             if (cnt[0]->conf.webcontrol_html_output) {
@@ -2146,7 +2146,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                                 response_client(client_socket, not_found_response_valid_command, res);
                             } else {
                                 response_client(client_socket, not_found_response_valid_command_raw, NULL);
-                            }    
+                            }
                         }
                     } else {
                         if (cnt[0]->conf.webcontrol_html_output) {
@@ -2154,7 +2154,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                             response_client(client_socket, not_found_response_valid_command, res);
                         } else {
                             response_client(client_socket, not_found_response_valid_command_raw, NULL);
-                        }    
+                        }
                     }
                 } else {
                     /* /thread_number/ requested */
@@ -2180,7 +2180,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                     response_client(client_socket, not_found_response_valid, res);
                 } else {
                     response_client(client_socket, not_found_response_valid_raw, NULL);
-                }    
+                }
             }
         }
         free(res);
@@ -2236,10 +2236,10 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
 
             if (warningkill != 3) {
                 if (cnt[0]->conf.webcontrol_html_output)
-                    warningkill = write_nonblock(client_socket, bad_request_response, 
+                    warningkill = write_nonblock(client_socket, bad_request_response,
                                   sizeof (bad_request_response));
                 else
-                    warningkill = write_nonblock(client_socket, bad_request_response_raw, 
+                    warningkill = write_nonblock(client_socket, bad_request_response_raw,
                                   sizeof (bad_request_response_raw));
                 pthread_mutex_unlock(&httpd_mutex);
                 return 1;
@@ -2254,18 +2254,18 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                 }
 
                 nread += readb;
-                
+
                 if (nread > length) {
-                    MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd End buffer"
+                    MOTION_LOG(WRN, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd End buffer"
                                " reached waiting for buffer ending");
                     break;
                 }
                 buffer[nread] = '\0';
             }
 
-            /* 
+            /*
              * Make sure the last read didn't fail.  If it did, there's a
-             * problem with the connection, so give up.  
+             * problem with the connection, so give up.
              */
             if (nread == -1) {
                 MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd READ give up!");
@@ -2278,10 +2278,10 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
             if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) {
                 /* We don't understand this protocol.  Report a bad response.  */
                 if (cnt[0]->conf.webcontrol_html_output)
-                    warningkill = write_nonblock(client_socket, bad_request_response, 
+                    warningkill = write_nonblock(client_socket, bad_request_response,
                                   sizeof (bad_request_response));
                 else
-                    warningkill = write_nonblock(client_socket, bad_request_response_raw, 
+                    warningkill = write_nonblock(client_socket, bad_request_response_raw,
                                   sizeof (bad_request_response_raw));
 
                 pthread_mutex_unlock(&httpd_mutex);
@@ -2289,9 +2289,9 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
             }
 
             if (strcmp (method, "GET")) {
-                /* 
+                /*
                  * This server only implements the GET method.  If client
-                 * uses other method, report the failure.  
+                 * uses other method, report the failure.
                  */
                 char response[1024];
                 if (cnt[0]->conf.webcontrol_html_output)
@@ -2352,7 +2352,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
  * acceptnonblocking
  *      waits timeout seconds for listen socket.
  *
- * Returns 
+ * Returns
  *      -1 if the timeout expires or on accept error.
  *      curfd (client socket) on accept success.
  */
@@ -2369,16 +2369,16 @@ static int acceptnonblocking(int serverfd, int timeout)
     tm.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(serverfd, &fds);
-    
+
     if (select(serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
-        if (FD_ISSET(serverfd, &fds)) { 
+        if (FD_ISSET(serverfd, &fds)) {
             if ((curfd = accept(serverfd, (struct sockaddr*)&client, &namelen)) > 0)
                 return curfd;
-        }    
+        }
     }
 
     return -1;
-} 
+}
 
 
 /**
@@ -2388,7 +2388,7 @@ static int acceptnonblocking(int serverfd, int timeout)
 void httpd_run(struct context **cnt)
 {
     int sd = -1, client_socket_fd, val;
-    unsigned int client_sent_quit_message = 1, closehttpd = 0; 
+    unsigned int client_sent_quit_message = 1, closehttpd = 0;
     struct addrinfo hints, *res, *ressave;
     struct sigaction act;
     char *authentication = NULL;
@@ -2421,9 +2421,9 @@ void httpd_run(struct context **cnt)
 
     val = getaddrinfo(cnt[0]->conf.webcontrol_localhost ? "localhost" : NULL, portnumber, &hints, &res);
 
-    /* check != 0 to allow FreeBSD compatibility */ 
+    /* check != 0 to allow FreeBSD compatibility */
     if (val != 0) {
-        MOTION_LOG(EMG, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for httpd socket failed: %s",
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for httpd socket failed: %s",
                    gai_strerror(val));
         if (res)
             freeaddrinfo(res);
@@ -2440,27 +2440,27 @@ void httpd_run(struct context **cnt)
         getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
                     sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
 
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd testing : %s addr: %s port: %s", 
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd testing : %s addr: %s port: %s",
                    res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
         if (sd >= 0) {
             val = 1;
-            /* Reuse Address */ 
+            /* Reuse Address */
             setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
 
             if (bind(sd, res->ai_addr, res->ai_addrlen) == 0) {
-                MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Bound : %s addr: %s"
-                           " port: %s", res->ai_family == AF_INET ? "IPV4":"IPV6", 
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Bound : %s addr: %s"
+                           " port: %s", res->ai_family == AF_INET ? "IPV4":"IPV6",
                            hbuf, sbuf);
                 break;
             }
 
-            MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd failed bind() interface %s"
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd failed bind() interface %s"
                        " / port %s, retrying", hbuf, sbuf);
             close(sd);
             sd = -1;
         }
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd socket failed interface %s"
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd socket failed interface %s"
                    " / port %s, retrying", hbuf, sbuf);
         res = res->ai_next;
     }
@@ -2468,23 +2468,23 @@ void httpd_run(struct context **cnt)
     freeaddrinfo(ressave);
 
     if (sd < 0) {
-        MOTION_LOG(EMG, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR bind()"
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR bind()"
                    " [interface %s port %s]", hbuf, sbuf);
         pthread_mutex_destroy(&httpd_mutex);
         return;
     }
-    
+
     if (listen(sd, DEF_MAXWEBQUEUE) == -1) {
-        MOTION_LOG(EMG, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR listen()"
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR listen()"
                    " [interface %s port %s]", hbuf, sbuf);
         close(sd);
         pthread_mutex_destroy(&httpd_mutex);
         return;
     }
 
-    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd/"VERSION" running,"
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd/"VERSION" running,"
                " accepting connections");
-    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd: waiting for data"
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd: waiting for data"
                " on %s port TCP %s", hbuf, sbuf);
 
     if (cnt[0]->conf.webcontrol_authentication != NULL) {
@@ -2500,13 +2500,13 @@ void httpd_run(struct context **cnt)
         free(userpass);
     }
 
-    while ((client_sent_quit_message) && (!closehttpd)) { 
+    while ((client_sent_quit_message) && (!closehttpd)) {
 
         client_socket_fd = acceptnonblocking(sd, 1);
 
         if (client_socket_fd < 0) {
             if ((!cnt[0]) || (cnt[0]->finish)) {
-                MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Finishing");
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Finishing");
                 closehttpd = 1;
             }
         } else {
@@ -2521,10 +2521,10 @@ void httpd_run(struct context **cnt)
 
     }
 
-    if (authentication != NULL) 
+    if (authentication != NULL)
         free(authentication);
     close(sd);
-    MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Closing");
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Closing");
     pthread_mutex_destroy(&httpd_mutex);
 }
 
@@ -2536,6 +2536,6 @@ void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
     httpd_run(cnt);
-    MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd thread exit");
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd thread exit");
     pthread_exit(NULL);
 }

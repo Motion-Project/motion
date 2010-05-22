@@ -2,8 +2,8 @@
  *
  *      Video stream functions for motion.
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
- *                2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)    
- *                2007 by Angel Carpintero (ack@telefonica.net)
+ *                2006 by Krzysztof Blaszkowski (kb@sysmikro.com.pl)
+ *                2007 by Angel Carpintero (motiondevelop@gmail.com)
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.
  *
@@ -173,7 +173,7 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
 }
 
 /**
- * bayer2rgb24 
+ * bayer2rgb24
  * BAYER2RGB24 ROUTINE TAKEN FROM:
  *
  * Sonix SN9C10x based webcam basic I/F routines
@@ -196,9 +196,9 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
                 /* B */
                 if ((i > width) && ((i % width) > 0)) {
                     *scanpt++ = *rawpt;     /* B */
-                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + 
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) +
                                 *(rawpt + width) + *(rawpt - width)) / 4;    /* G */
-                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + 
+                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) +
                                 *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* R */
                 } else {
                     /* First line or left column. */
@@ -235,9 +235,9 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
             } else {
                 /* R */
                 if (i < (width * (height - 1)) && ((i % width) < (width - 1))) {
-                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) + 
+                    *scanpt++ = (*(rawpt - width - 1) + *(rawpt - width + 1) +
                                 *(rawpt + width - 1) + *(rawpt + width + 1)) / 4;    /* B */
-                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) + 
+                    *scanpt++ = (*(rawpt - 1) + *(rawpt + 1) +
                                 *(rawpt - width) + *(rawpt + width)) / 4;    /* G */
                     *scanpt++ = *rawpt;     /* R */
                 } else {
@@ -257,7 +257,7 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
  * conv_yuv422to420p
  *
  *
- */ 
+ */
 void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     unsigned char *src, *dest, *src2, *dest2;
@@ -295,7 +295,7 @@ void conv_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, in
  * conv_uyvyto420p
  *
  *
- */ 
+ */
 void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
 {
     uint8_t *pY = map;
@@ -335,7 +335,7 @@ void conv_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int wi
  * conv_rgb24toyuv420p
  *
  *
- */ 
+ */
 void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     unsigned char *y, *u, *v;
@@ -382,7 +382,7 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
  * Return values
  *  -1 on fatal error
  *  0  on success
- *  2  if jpeg lib threw a "corrupt jpeg data" warning.  
+ *  2  if jpeg lib threw a "corrupt jpeg data" warning.
  *     in this case, "a damaged output image is likely."
  */
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
@@ -399,7 +399,7 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
     ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
 
     if (ret == 1) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue"); 
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue");
         ret = 2;
     }
 
@@ -410,13 +410,13 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
     memset(u, 0, width * height / 4);
     memset(v, 0, width * height / 4);
 
-    for(loop = 0; loop < width * height; loop++) 
+    for(loop = 0; loop < width * height; loop++)
         *map++ = yuv[0][loop];
-    
-    for(loop = 0; loop < width * height / 4; loop++) 
+
+    for(loop = 0; loop < width * height / 4; loop++)
         *map++ = yuv[1][loop];
-    
-    for(loop = 0; loop < width * height / 4; loop++) 
+
+    for(loop = 0; loop < width * height / 4; loop++)
         *map++ = yuv[2][loop];
 
     free(yuv[0]);
@@ -451,7 +451,7 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
 
 /**
  * vid_do_autobright
- */ 
+ */
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 {
 
@@ -488,7 +488,7 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
     } else if (avg < brightness_window_low) {
         /* Average is below window - turn up brightness - go for the target. */
         step = MIN2((brightness_target - avg) / AUTOBRIGHT_DAMPER + 1, AUTOBRIGHT_MAX - viddev->brightness);
-        
+
         if (viddev->brightness < AUTOBRIGHT_MAX - step) {
             viddev->brightness += step;
             make_change = 1;
@@ -504,12 +504,12 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 
 #ifndef WITHOUT_V4L
 /*
- * Big lock for vid_start to ensure exclusive access to viddevs while adding 
+ * Big lock for vid_start to ensure exclusive access to viddevs while adding
  * devices during initialization of each thread.
  */
 static pthread_mutex_t vid_mutex;
 
-/* 
+/*
  * Here we setup the viddevs structure which is used globally in the vid_*
  * functions.
  */
@@ -548,7 +548,7 @@ void vid_close(struct context *cnt)
 #ifndef WITHOUT_V4L
     struct video_dev *dev = viddevs;
     struct video_dev *prev = NULL;
-#endif /* WITHOUT_V4L */ 
+#endif /* WITHOUT_V4L */
 
     /* Cleanup the netcam part */
     if (cnt->netcam) {
@@ -574,12 +574,12 @@ void vid_close(struct context *cnt)
     cnt->video_dev = -1;
 
     if (dev == NULL) {
-        MOTION_LOG(EMG, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find video device");
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find video device");
         return;
     }
 
     if (--dev->usage_count == 0) {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s", 
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s",
                    dev->video_device);
 #ifdef MOTION_V4L2
         if (dev->v4l2) {
@@ -605,10 +605,10 @@ void vid_close(struct context *cnt)
         pthread_mutex_destroy(&dev->mutex);
         free(dev);
     } else {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Still %d users of video device %s, so we don't close it now", 
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Still %d users of video device %s, so we don't close it now",
                    dev->usage_count, dev->video_device);
-        /* 
-         * There is still at least one thread using this device 
+        /*
+         * There is still at least one thread using this device
          * If we own it, release it.
          */
         if (dev->owner == cnt->threadnr) {
@@ -627,8 +627,8 @@ void vid_close(struct context *cnt)
  *
  * Called from vid_start setup the V4L/V4L2 capture device
  * The function does the following:
- *   
- * - Setup basic V4L/V4L2 properties incl palette incl setting 
+ *
+ * - Setup basic V4L/V4L2 properties incl palette incl setting
  * - Open the device
  * - Returns the device number.
  *
@@ -657,19 +657,19 @@ static int vid_v4lx_start(struct context *cnt)
 
     /*
      * We use width and height from conf in this function. They will be assigned
-     * to width and height in imgs here, and cap_width and cap_height in 
+     * to width and height in imgs here, and cap_width and cap_height in
      * rotate_data won't be set until in rotate_init.
      * Motion requires that width and height is a multiple of 16 so we check
      * for this first.
      */
     if (conf->width % 16) {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 16", 
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 16",
                    conf->width);
         return -3;
     }
 
     if (conf->height % 16) {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 16",
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 16",
                    conf->height);
         return -3;
     }
@@ -683,7 +683,7 @@ static int vid_v4lx_start(struct context *cnt)
 
     pthread_mutex_lock(&vid_mutex);
 
-    /* 
+    /*
      * Transfer width and height from conf to imgs. The imgs values are the ones
      * that is used internally in Motion. That way, setting width and height via
      * http remote control won't screw things up.
@@ -691,7 +691,7 @@ static int vid_v4lx_start(struct context *cnt)
     cnt->imgs.width = width;
     cnt->imgs.height = height;
 
-    /* 
+    /*
      * First we walk through the already discovered video devices to see
      * if we have already setup the same device before. If this is the case
      * the device is a Round Robin device and we set the basic settings
@@ -722,7 +722,7 @@ static int vid_v4lx_start(struct context *cnt)
         dev = dev->next;
     }
 
-    MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using videodevice %s and input %d", 
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using videodevice %s and input %d",
                conf->video_device, conf->input);
 
     dev = mymalloc(sizeof(struct video_dev));
@@ -733,7 +733,7 @@ static int vid_v4lx_start(struct context *cnt)
     fd = open(dev->video_device, O_RDWR);
 
     if (fd < 0) {
-        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s", 
+        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s",
                    conf->video_device);
         free(dev);
         pthread_mutex_unlock(&vid_mutex);
@@ -752,7 +752,7 @@ static int vid_v4lx_start(struct context *cnt)
     dev->freq = frequency;
     dev->tuner_number = tuner_number;
 
-    /* 
+    /*
      * We set brightness, contrast, saturation and hue = 0 so that they only get
      * set if the config is not zero.
      */
@@ -769,7 +769,7 @@ static int vid_v4lx_start(struct context *cnt)
     dev->v4l2 = 1;
 
     if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
-        /* 
+        /*
          * Restore width & height before test with v4l
          * because could be changed in v4l2_start().
          */
@@ -791,9 +791,9 @@ static int vid_v4lx_start(struct context *cnt)
     }
 #endif
     if (dev->v4l2 == 0) {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L1");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L1");
     } else {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L2");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L2");
         /* Update width & height because could be changed in v4l2_start(). */
         width = dev->width;
         height = dev->height;
@@ -839,8 +839,8 @@ static int vid_v4lx_start(struct context *cnt)
  *   only copied to the from the conf struct to the imgs struct during program startup
  *   The width and height can no later be changed via http remote control as this would
  *   require major re-memory allocations of all image buffers.
- *    
- * - if the camera is V4L/V4L2 vid_v4lx_start is called 
+ *
+ * - if the camera is V4L/V4L2 vid_v4lx_start is called
  *
  * Parameters:
  *     cnt        Pointer to the context for this thread
@@ -863,8 +863,8 @@ int vid_start(struct context *cnt)
         }
     }
 #ifdef WITHOUT_V4L
-    else    
-        MOTION_LOG(EMG, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url");
+    else
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url");
 #else
     else
         dev = vid_v4lx_start(cnt);
@@ -905,7 +905,7 @@ int vid_next(struct context *cnt, unsigned char *map)
         return netcam_next(cnt, map);
     }
 #ifndef WITHOUT_V4L
-    /* 
+    /*
      * We start a new block so we can make declarations without breaking
      * gcc 2.95 or older.
      */
@@ -952,9 +952,9 @@ int vid_next(struct context *cnt, unsigned char *map)
         }
 
         /* Rotate the image as specified. */
-        if (cnt->rotate_data.degrees > 0) 
+        if (cnt->rotate_data.degrees > 0)
             rotate_map(cnt, map);
-        
+
     }
 #endif  /*WITHOUT_V4L */
     return ret;

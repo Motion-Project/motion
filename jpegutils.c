@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de>
  *  Copyright (C) 2001 pHilipp Zabel  <pzabel@gmx.de>
- *  Copyright (C) 2008 Angel Carpintero <ack@telefonica.net>
+ *  Copyright (C) 2008 Angel Carpintero <motiondevelop@gmail.com>
  *
  *  based on jdatasrc.c and jdatadst.c from the Independent
  *  JPEG Group's software by Thomas G. Lane
@@ -190,7 +190,7 @@ static void init_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 static boolean empty_output_buffer(j_compress_ptr cinfo)
 {
     /*FIXME: */
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small"); 
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small");
     ERREXIT (cinfo, JERR_BUFFER_SIZE);  /* Shouldn't be FILE_WRITE but BUFFER_OVERRUN! */
     return TRUE;
 }
@@ -219,7 +219,7 @@ static void term_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 static void jpeg_buffer_dest(j_compress_ptr cinfo, unsigned char *buf, long len)
 {
 
-   /* 
+   /*
     * The destination object is made permanent so that multiple JPEG images
     * can be written to the same file without re-executing jpeg_stdio_dest.
     * This makes it dangerous to use this manager and a different destination
@@ -268,9 +268,9 @@ static void my_error_exit(j_common_ptr cinfo)
     /* cinfo->err really points to a my_error_mgr struct, so coerce pointer. */
     struct my_error_mgr *myerr = (struct my_error_mgr *) cinfo->err;
 
-    /* 
-     * Always display the message. 
-     * We could postpone this until after returning, if we chose. 
+    /*
+     * Always display the message.
+     * We could postpone this until after returning, if we chose.
      */
     (*cinfo->err->output_message) (cinfo);
 
@@ -303,7 +303,7 @@ static unsigned char chr2[8][MAX_CHROMA_WIDTH];
 
 #if 1  /* Generation of 'std' Huffman tables... */
 
-static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, 
+static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
                            const UINT8 *bits, const UINT8 *val)
 /* Define a Huffman table */
 {
@@ -315,7 +315,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
     /* Copy the number-of-symbols-of-each-code-length counts. */
     memcpy((*htblptr)->bits, bits, sizeof((*htblptr)->bits));
 
-    /* 
+    /*
      * Validate the counts.  We do this here mainly so we can copy the right
      * number of symbols from the val[] array, without risking marching off
      * the end of memory.  jchuff.c will do a more thorough test later.
@@ -326,7 +326,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
         nsymbols += bits[len];
 
     if (nsymbols < 1 || nsymbols > 256)
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small"); 
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small");
 
     memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
@@ -341,12 +341,12 @@ static void std_huff_tables (j_decompress_ptr dinfo)
     { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
     static const UINT8 val_dc_luminance[] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-  
+
     static const UINT8 bits_dc_chrominance[17] =
     { /* 0-base */ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
     static const UINT8 val_dc_chrominance[] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-  
+
     static const UINT8 bits_ac_luminance[17] =
     { /* 0-base */ 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
     static const UINT8 val_ac_luminance[] =
@@ -371,7 +371,7 @@ static void std_huff_tables (j_decompress_ptr dinfo)
       0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea,
       0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
       0xf9, 0xfa };
-  
+
     static const UINT8 bits_ac_chrominance[17] =
     { /* 0-base */ 0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
     static const UINT8 val_ac_chrominance[] =
@@ -396,7 +396,7 @@ static void std_huff_tables (j_decompress_ptr dinfo)
       0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9,
       0xea, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
       0xf9, 0xfa };
-  
+
     add_huff_table(dinfo, &dinfo->dc_huff_tbl_ptrs[0],
                    bits_dc_luminance, val_dc_luminance);
     add_huff_table(dinfo, &dinfo->ac_huff_tbl_ptrs[0],
@@ -435,19 +435,19 @@ static void guarantee_huff_tables(j_decompress_ptr dinfo)
  * returns:
  *    -1 on fatal error
  *    0 on success
- *    1 if jpeg lib threw a "corrupt jpeg data" warning.  
+ *    1 if jpeg lib threw a "corrupt jpeg data" warning.
  *        in this case, "a damaged output image is likely."
- *    
+ *
  */
 int decode_jpeg_raw (unsigned char *jpeg_data, int len,
-                     int itype, int ctype, unsigned int width, 
-                     unsigned int height, unsigned char *raw0, 
+                     int itype, int ctype, unsigned int width,
+                     unsigned int height, unsigned char *raw0,
                      unsigned char *raw1, unsigned char *raw2)
 {
     int numfields, hsf[3], field, yl, yc;
     int i, xsl, xsc, xs, hdown;
     unsigned int x, y = 0, vsf[3], xd;
-    
+
     JSAMPROW row0[16] = { buf0[0], buf0[1], buf0[2], buf0[3],
                           buf0[4], buf0[5], buf0[6], buf0[7],
                           buf0[8], buf0[9], buf0[10], buf0[11],
@@ -487,7 +487,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
     /*
      * Read header, make some checks and try to figure out what the
-     * user really wants. 
+     * user really wants.
      */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
@@ -519,15 +519,15 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
         if (height % 8 != 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: YUV 4:4:4 sampling, but image"
                        " height %d not dividable by 8 !", height);
-            goto ERR_EXIT;       
+            goto ERR_EXIT;
         }
 
         for (y = 0; y < 16; y++) { // Allocate a special buffer for the extra sampling depth.
             row1_444[y] = (unsigned char *)malloc(dinfo.output_width * sizeof(char));
             row2_444[y] = (unsigned char *)malloc(dinfo.output_width * sizeof(char));
         }
-        scanarray[1] = row1_444; 
-        scanarray[2] = row2_444; 
+        scanarray[1] = row1_444;
+        scanarray[2] = row2_444;
     }
 
     /* Height match image height or be exact twice the image height. */
@@ -545,7 +545,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max",
                    dinfo.output_width);
         goto ERR_EXIT;
     }
@@ -601,7 +601,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
             }
         } else {
             yl = yc = 0;
-        }         
+        }
 
         while (dinfo.output_scanline < dinfo.output_height) {
             /* Read raw data */
@@ -622,7 +622,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                         raw0[xd] = (2 * row0[y][xs] + row0[y][xs + 1]) / 3;
                         raw0[xd + 1] = (2 * row0[y][xs + 2] + row0[y][xs + 1]) / 3;
                     }
-                }    
+                }
             }
 
             /* Horizontal downsampling of chroma */
@@ -631,7 +631,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                 xs = xsc;
 
                 if (hsf[0] == 1)
-                    for (x = 0; x < width / 2; x++, xs++) {           
+                    for (x = 0; x < width / 2; x++, xs++) {
                         row1[y][xs] = (row1_444[y][2*x] + row1_444[y][2*x + 1]) >> 1;
                         row2[y][xs] = (row2_444[y][2*x] + row2_444[y][2*x + 1]) >> 1;
                     }
@@ -641,12 +641,12 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                     for (x = 0; x < width / 2; x++, xs++) {
                         chr1[y][x] = row1[y][xs];
                         chr2[y][x] = row2[y][xs];
-                    } 
+                    }
                 } else if (hdown == 1) {
                     for (x = 0; x < width / 2; x++, xs += 2) {
                         chr1[y][x] = (row1[y][xs] + row1[y][xs + 1]) >> 1;
                         chr2[y][x] = (row2[y][xs] + row2[y][xs + 1]) >> 1;
-                    } 
+                    }
                 } else {
                     for (x = 0; x < width / 2; x += 2, xs += 3) {
                         chr1[y][x] = (2 * row1[y][xs] + row1[y][xs + 1]) / 3;
@@ -654,7 +654,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                         chr2[y][x] = (2 * row2[y][xs] + row2[y][xs + 1]) / 3;
                         chr2[y][x + 1] = (2 * row2[y][xs + 2] + row2[y][xs + 1]) / 3;
                     }
-                }    
+                }
             }
 
             /* Vertical resampling of chroma */
@@ -675,7 +675,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                     /* upsample */
                     for (y = 0; y < 8 /*&& yc < height */; y++) {
                         xd = yc * width / 2;
-                    
+
                         for (x = 0; x < width / 2; x++, xd++) {
                             raw1[xd] = chr1[y][x];
                             raw2[xd] = chr2[y][x];
@@ -715,7 +715,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                     /* Just copy */
                     for (y = 0; y < 8 /* && yc < height / 2 */; y++, yc += numfields) {
                         xd = yc * width / 2;
-           
+
                         for (x = 0; x < width / 2; x++, xd++) {
                             raw1[xd] = chr1[y][x];
                             raw2[xd] = chr2[y][x];
@@ -760,8 +760,8 @@ ERR_EXIT:
  *                  Currently only Y4M_CHROMA_{420JPEG,422} are available
  */
 int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
-                         int itype, int ctype, unsigned int width, 
-                         unsigned int height, unsigned char *raw0, 
+                         int itype, int ctype, unsigned int width,
+                         unsigned int height, unsigned char *raw0,
                          unsigned char *raw1, unsigned char *raw2)
 {
     int numfields, hsf[3], field, yl, yc, xsl, xsc, xs, xd, hdown;
@@ -791,16 +791,16 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
 
     jpeg_buffer_src (&dinfo, jpeg_data, len);
 
-    /* 
+    /*
      * Read header, make some checks and try to figure out what the
-     * user really wants. 
+     * user really wants.
      */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
     dinfo.out_color_space = JCS_GRAYSCALE;
     dinfo.dct_method = JDCT_IFAST;
-    
-    if (dinfo.jpeg_color_space != JCS_GRAYSCALE) { 
+
+    if (dinfo.jpeg_color_space != JCS_GRAYSCALE) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Expected grayscale colorspace"
                    " for JPEG raw decoding");
         goto ERR_EXIT;
@@ -827,7 +827,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max", 
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max",
                     dinfo.output_width);
         goto ERR_EXIT;
     }
@@ -883,7 +883,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
             }
         } else {
             yl = yc = 0;
-        }    
+        }
 
         while (dinfo.output_scanline < dinfo.output_height) {
             jpeg_read_raw_data (&dinfo, scanarray, 16);
@@ -903,7 +903,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                         raw0[xd] = (2 * row0[y][xs] + row0[y][xs + 1]) / 3;
                         raw0[xd + 1] = (2 * row0[y][xs + 2] + row0[y][xs + 1]) / 3;
                     }
-                }    
+                }
             }
 
 
@@ -914,12 +914,12 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                     for (x = 0; x < width / 2; x++, xs++) {
                         chr1[y][x] = 0; //row1[y][xs];
                         chr2[y][x] = 0; //row2[y][xs];
-                    } 
+                    }
                 } else if (hdown == 1) {
                     for (x = 0; x < width / 2; x++, xs += 2) {
                         chr1[y][x] = 0; //(row1[y][xs] + row1[y][xs + 1]) >> 1;
                         chr2[y][x] = 0; //(row2[y][xs] + row2[y][xs + 1]) >> 1;
-                    } 
+                    }
                 } else {
                     for (x = 0; x < width / 2; x += 2, xs += 3) {
                         chr1[y][x] = 0; //(2 * row1[y][xs] + row1[y][xs + 1]) / 3;
@@ -928,7 +928,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                         chr2[y][x] = 0; // (2 * row2[y][xs] + row2[y][xs + 1]) / 3;
                         chr2[y][x + 1] = 0;
                         //(2 * row2[y][xs + 2] + row2[y][xs + 1]) / 3;
-                    }   
+                    }
                 }
             }
 
@@ -948,7 +948,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                     /* upsample */
                     for (y = 0; y < 8 /* && yc < height */; y++) {
                         xd = yc * width / 2;
-                        
+
                         for (x = 0; x < width / 2; x++, xd++) {
                             raw1[xd] = 127; //chr1[y][x];
                             raw2[xd] = 127; //chr2[y][x];
@@ -956,7 +956,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
 
                         yc += numfields;
                         xd = yc * width / 2;
-                        
+
                         for (x = 0; x < width / 2; x++, xd++) {
                             raw1[xd] = 127; //chr1[y][x];
                             raw2[xd] = 127; //chr2[y][x];
@@ -1019,7 +1019,7 @@ ERR_EXIT:
  *                      may be interlaced                          *
  *                                                                 *
  *******************************************************************/
- 
+
 /*
  * jpeg_data:       Buffer to hold output jpeg
  * len:             Length of buffer
@@ -1030,8 +1030,8 @@ ERR_EXIT:
  *                  Currently only Y4M_CHROMA_{420JPEG,422} are available
  */
 int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
-                    int itype, int ctype, unsigned int width, 
-                    unsigned int height, unsigned char *raw0, 
+                    int itype, int ctype, unsigned int width,
+                    unsigned int height, unsigned char *raw0,
                     unsigned char *raw1, unsigned char *raw2)
 {
     int numfields, field, yl, yc, y, i;
@@ -1121,7 +1121,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
     for (field = 0; field < numfields; field++) {
         jpeg_start_compress (&cinfo, FALSE);
-      
+
         if (numfields == 2) {
             static const JOCTET marker0[40];
 
@@ -1144,7 +1144,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
         } else {
             yl = yc = 0;
         }
-        
+
         while (cinfo.next_scanline < cinfo.image_height) {
 
             for (y = 0; y < 8 * cinfo.comp_info[0].v_samp_factor;
@@ -1167,7 +1167,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
         (void) jpeg_finish_compress (&cinfo);
     }
-   
+
     /* FIXME */
     i = len - cinfo.dest->free_in_buffer;
 

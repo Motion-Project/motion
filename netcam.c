@@ -1446,7 +1446,7 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
                        " trying to reconnect..");
             /* We may have lost the connexion */
             if (netcam_http_request(netcam) < 0) {
-                MOTION_LOG(EMG, TYPE_NETCAM, NO_ERRNO, "%s: lost the cam.");
+                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: lost the cam.");
                 return -1; /* We REALLY lost the cam... bail out for now. */
             }
         }
@@ -1748,7 +1748,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
         /* its waits POLLING_TIMEOUT */
         if (loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000))) { 
-            MOTION_LOG(EMG, TYPE_NETCAM, NO_ERRNO, "%s: waiting new file image"
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: waiting new file image"
                        " timeout");
             return -1;
         }
@@ -2530,7 +2530,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
          * Although this shouldn't happen, if it *does* happen we will
          * log it (just for the programmer's information).
          */
-        MOTION_LOG(EMG, TYPE_NETCAM, NO_ERRNO, "%s: No response from camera "
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: No response from camera "
                    "handler - it must have already died");
         pthread_mutex_lock(&global_lock);
         threads_running--;

@@ -42,9 +42,9 @@ struct auth_param {
 pthread_mutex_t stream_auth_mutex;
 
 /**
- * set_sock_timeout 
+ * set_sock_timeout
  *
- * Returns : 0 or 1 on timeout 
+ * Returns : 0 or 1 on timeout
  */
 static int set_sock_timeout(int sock, int sec)
 {
@@ -54,16 +54,16 @@ static int set_sock_timeout(int sock, int sec)
     tv.tv_usec = 0;
 
     if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &tv, sizeof(tv))) {
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: set socket timeout failed");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: set socket timeout failed");
         return 1;
     }
     return 0;
 }
 
 /**
- * read_http_request 
+ * read_http_request
  *
- * 
+ *
  * Returns : 1 on success or 0 if any error happens
  */
 static int read_http_request(int sock, char* buffer, int buflen, char* uri, int uri_len)
@@ -90,19 +90,19 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
         "Request Timeout\n";
 
     buffer[0] = '\0';
-  
+
     while ((strstr(buffer, "\r\n\r\n") == NULL) && (readb != 0) && (nread < buflen)) {
-  
+
         readb = read(sock, buffer+nread, buflen - nread);
 
-        if (readb == -1) { 
+        if (readb == -1) {
             nread = -1;
             break;
         }
 
         nread += readb;
 
-        if (nread > buflen) { 
+        if (nread > buflen) {
             MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream End buffer reached"
                       " waiting for buffer ending");
             break;
@@ -111,38 +111,38 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
         buffer[nread] = '\0';
     }
 
-    /* 
+    /*
      * Make sure the last read didn't fail. If it did, there's a
-     * problem with the connection, so give up.  
+     * problem with the connection, so give up.
      */
     if (nread == -1) {
         if(errno == EAGAIN) { // Timeout
             ret = write(sock, timeout_response_template_raw, strlen(timeout_response_template_raw));
-	        return 0;
+            return 0;
         }
-    
+
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream READ give up!");
         return 0;
     }
-  
+
     ret = sscanf(buffer, "%9s %511s %9s", method, url, protocol);
-    
-    if (ret != 3) { 
+
+    if (ret != 3) {
         ret = write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
         return 0;
     }
 
     /* Check Protocol */
-    if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) { 
+    if (strcmp(protocol, "HTTP/1.0") && strcmp (protocol, "HTTP/1.1")) {
         /* We don't understand this protocol. Report a bad response. */
         ret = write(sock, bad_request_response_raw, sizeof(bad_request_response_raw));
         return 0;
     }
 
     if (strcmp(method, "GET")) {
-        /* 
+        /*
          * This server only implements the GET method. If client
-         * uses other method, report the failure.  
+         * uses other method, report the failure.
          */
         char response[1024];
         snprintf(response, sizeof(response), bad_method_response_template_raw, method);
@@ -163,7 +163,7 @@ static void stream_add_client(struct stream *list, int sc);
  * handle_basic_auth
  *
  *
- */ 
+ */
 static void* handle_basic_auth(void* param)
 {
     struct auth_param *p = (struct auth_param*)param;
@@ -179,30 +179,30 @@ static void* handle_basic_auth(void* param)
         "Cache-Control: no-cache, private\r\n"
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
-  
+
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
     pthread_mutex_unlock(&stream_auth_mutex);
 
     if (!read_http_request(p->sock,buffer, length, NULL, 0))
         goto Invalid_Request;
-    
+
 
     auth = strstr(buffer, "Authorization: Basic");
-    
+
     if (!auth)
         goto Error;
 
     auth += sizeof("Authorization: Basic");
     h = strstr(auth, "\r\n");
-  
+
     if(!h)
         goto Error;
 
     *h='\0';
 
     if (p->conf->stream_authentication != NULL) {
-  
+
         char *userpass = NULL;
         size_t auth_size = strlen(p->conf->stream_authentication);
 
@@ -231,7 +231,7 @@ static void* handle_basic_auth(void* param)
 
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
-  
+
     stream_add_client(&p->cnt->stream, p->sock);
     p->cnt->stream_count++;
     p->thread_count--;
@@ -264,7 +264,7 @@ typedef char HASHHEX[HASHHEXLEN+1];
 #define IN
 #define OUT
 /**
- * CvtHex 
+ * CvtHex
  *      Calculates H(A1) as per HTTP Digest spec -- taken from RFC 2617.
  */
 static void CvtHex(IN HASH Bin, OUT HASHHEX Hex)
@@ -287,8 +287,8 @@ static void CvtHex(IN HASH Bin, OUT HASHHEX Hex)
     Hex[HASHHEXLEN] = '\0';
 };
 
-/** 
- * DigestCalcHA1 
+/**
+ * DigestCalcHA1
  *      Calculates H(A1) as per spec.
  */
 static void DigestCalcHA1(
@@ -324,8 +324,8 @@ static void DigestCalcHA1(
     CvtHex(HA1, SessionKey);
 };
 
-/** 
- * DigestCalcResponse 
+/**
+ * DigestCalcResponse
  *      Calculates request-digest/response-digest as per HTTP Digest spec.
  */
 static void DigestCalcResponse(
@@ -344,13 +344,13 @@ static void DigestCalcResponse(
     HASH HA2;
     HASH RespHash;
     HASHHEX HA2Hex;
-    
+
     // Calculate H(A2)
     MD5Init(&Md5Ctx);
     MD5Update(&Md5Ctx, (unsigned char *)pszMethod, strlen(pszMethod));
     MD5Update(&Md5Ctx, (unsigned char *)":", 1);
     MD5Update(&Md5Ctx, (unsigned char *)pszDigestUri, strlen(pszDigestUri));
-  
+
     if (strcmp(pszQop, "auth-int") == 0) {
         MD5Update(&Md5Ctx, (unsigned char *)":", 1);
         MD5Update(&Md5Ctx, (unsigned char *)HEntity, HASHHEXLEN);
@@ -383,7 +383,7 @@ static void DigestCalcResponse(
  * handle_md5_digest
  *
  *
- */ 
+ */
 static void* handle_md5_digest(void* param)
 {
     struct auth_param *p = (struct auth_param*)param;
@@ -430,7 +430,7 @@ static void* handle_md5_digest(void* param)
         "</HEAD><BODY>\r\n"
         "<H1>500 Internal Server Error</H1>\r\n"
         "</BODY></HTML>\r\n";
-  
+
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
     pthread_mutex_unlock(&stream_auth_mutex);
@@ -440,13 +440,13 @@ static void* handle_md5_digest(void* param)
     rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     snprintf(server_nonce, SERVER_NONCE_LEN, "%08x%08x", rand1, rand2);
-  
+
     if (!p->conf->stream_authentication) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error no authentication data");
         goto InternalError;
     }
     h = strstr(p->conf->stream_authentication, ":");
-  
+
     if (!h) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error no authentication data (no ':' found)");
         goto InternalError;
@@ -454,7 +454,7 @@ static void* handle_md5_digest(void* param)
 
     server_user = (char*)malloc((h - p->conf->stream_authentication) + 1);
     server_pass = (char*)malloc(strlen(h) + 1);
-  
+
     if (!server_user || !server_pass) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error malloc failed");
         goto InternalError;
@@ -468,85 +468,85 @@ static void* handle_md5_digest(void* param)
     while(1) {
         if(!read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN - 1))
             goto Invalid_Request;
-    
+
         auth = strstr(buffer, "Authorization: Digest");
         if(!auth)
             goto Error;
 
         auth += sizeof("Authorization: Digest");
         h = strstr(auth, "\r\n");
-    
+
         if (!h)
             goto Error;
         *h = '\0';
 
         // Username
         h=strstr(auth, "username=\"");
-        
+
         if (!h)
             goto Error;
-    
+
         username = h + 10;
         h = strstr(username + 1, "\"");
-   
+
         if (!h)
             goto Error;
-        
+
         username_len = h - username;
 
         // Realm
         h = strstr(auth, "realm=\"");
         if (!h)
             goto Error;
-    
+
         realm = h + 7;
         h = strstr(realm + 1, "\"");
-    
+
         if (!h)
             goto Error;
-        
+
         realm_len = h - realm;
 
         // URI
         h = strstr(auth, "uri=\"");
-        
+
         if (!h)
             goto Error;
-    
+
         uri = h + 5;
         h = strstr(uri + 1, "\"");
-    
+
         if (!h)
             goto Error;
-    
+
         uri_len = h - uri;
 
         // Nonce
         h = strstr(auth, "nonce=\"");
-        
+
         if (!h)
             goto Error;
-        
+
         nonce = h + 7;
         h = strstr(nonce + 1, "\"");
-    
+
         if (!h)
             goto Error;
-    
+
         nonce_len = h - nonce;
 
         // Response
         h = strstr(auth, "response=\"");
-    
+
         if (!h)
             goto Error;
-    
+
         response = h + 10;
         h = strstr(response + 1, "\"");
-    
+
         if (!h)
             goto Error;
-    
+
         response_len = h - response;
 
         username[username_len] = '\0';
@@ -565,12 +565,12 @@ Error:
         rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
         snprintf(server_nonce, SERVER_NONCE_LEN, "%08x%08x", rand1, rand2);
         snprintf(buffer, length, "%s realm=\""STREAM_REALM"\", nonce=\"%s\"\r\n"
-	            "Content-Type: text/html\r\n"
-	            "Keep-Alive: timeout=%i\r\n"
-	            "Connection: keep-alive\r\n"
-	            "Content-Length: %Zu\r\n\r\n",
-	            request_auth_response_template, server_nonce,
-	            KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
+                "Content-Type: text/html\r\n"
+                "Keep-Alive: timeout=%i\r\n"
+                "Connection: keep-alive\r\n"
+                "Content-Length: %Zu\r\n\r\n",
+                request_auth_response_template, server_nonce,
+                KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
         ret = write(p->sock, buffer, strlen(buffer));
         ret = write(p->sock, auth_failed_html_template, strlen(auth_failed_html_template));
     }
@@ -585,7 +585,7 @@ Error:
 
     if(server_user)
         free(server_user);
-  
+
     if(server_pass)
         free(server_pass);
 
@@ -601,11 +601,11 @@ Error:
 
     free(p);
     pthread_exit(NULL);
-  
+
 InternalError:
     if(server_user)
         free(server_user);
-  
+
     if(server_pass)
         free(server_pass);
 
@@ -636,33 +636,33 @@ static void do_client_auth(struct context *cnt, int sc)
     int flags;
     static int first_call = 0;
     static int thread_count = 0;
-  
+
     if(first_call == 0) {
         first_call = 1;
         /* Initialize the mutex */
         pthread_mutex_init(&stream_auth_mutex, NULL);
     }
-  
+
     switch(cnt->conf.stream_auth_method)
     {
     case 1: // Basic
-	  handle_func = handle_basic_auth;
-	  break;
+      handle_func = handle_basic_auth;
+      break;
     case 2: // MD5 Digest
-	  handle_func = handle_md5_digest;
-	  break;
+      handle_func = handle_md5_digest;
+      break;
     default:
-	  MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error unknown stream authentication method");
-	  goto Error;
-	  break;
+      MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error unknown stream authentication method");
+      goto Error;
+      break;
     }
-  
+
     handle_param = mymalloc(sizeof(struct auth_param));
     handle_param->cnt = cnt;
     handle_param->sock = sc;
     handle_param->conf = &cnt->conf;
     handle_param->thread_count = &thread_count;
-  
+
     /* Set socket to blocking */
     if ((flags = fcntl(sc, F_GETFL, 0)) < 0) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: fcntl");
@@ -677,7 +677,7 @@ static void do_client_auth(struct context *cnt, int sc)
 
     if (thread_count >= DEF_MAXSTREAMS)
         goto Error;
-    
+
     if (pthread_attr_init(&attr)) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error pthread_attr_init");
         goto Error;
@@ -693,15 +693,15 @@ static void do_client_auth(struct context *cnt, int sc)
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error pthread_attr_destroy");
 
     return;
-  
+
 Error:
     close(sc);
     if(handle_param)
         free(handle_param);
 }
 
-/** 
- * http_bindsock 
+/**
+ * http_bindsock
  *      Sets up a TCP/IP socket for incoming requests. It is called only during
  *      initialisation of Motion from the function stream_init
  *      The function sets up a a socket on the port number given by _port_.
@@ -734,9 +734,9 @@ int http_bindsock(int port, int local, int ipv6_enabled)
     optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
 
     if (optval != 0) {
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for motion-stream socket failed: %s", 
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for motion-stream socket failed: %s",
                    gai_strerror(optval));
-        
+
         if (res != NULL)
             freeaddrinfo(res);
         return -1;
@@ -753,36 +753,36 @@ int http_bindsock(int port, int local, int ipv6_enabled)
 
         if (sl >= 0) {
             optval = 1;
-            /* Reuse Address */ 
+            /* Reuse Address */
             setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
 
-            MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-stream testing : %s addr: %s port: %s",
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-stream testing : %s addr: %s port: %s",
                        res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
 
             if (bind(sl, res->ai_addr, res->ai_addrlen) == 0) {
-                MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO, "%s: motion-stream Bound : %s addr: %s port: %s",
-                           res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);    
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-stream Bound : %s addr: %s port: %s",
+                           res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
                 break;
             }
 
-            MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream bind() failed, retrying");
+            MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream bind() failed, retrying");
             close(sl);
             sl = -1;
         }
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream socket failed, retrying");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream socket failed, retrying");
         res = res->ai_next;
     }
 
     freeaddrinfo(ressave);
 
     if (sl < 0) {
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream creating socket/bind ERROR");
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream creating socket/bind ERROR");
         return -1;
     }
-    
+
 
     if (listen(sl, DEF_MAXWEBQUEUE) == -1) {
-        MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream listen() ERROR");
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream listen() ERROR");
         close(sl);
         sl = -1;
     }
@@ -808,15 +808,15 @@ static int http_acceptsock(int sl)
         ioctl(sc, FIONBIO, &i);
         return sc;
     }
-    
-    MOTION_LOG(ALR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream accept()");
+
+    MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream accept()");
 
     return -1;
 }
 
 
-/** 
- * stream_flush 
+/**
+ * stream_flush
  *      Sends any outstanding data to all connected clients.
  *      It continuously goes through the client list until no data is able
  *      to be sent (either because there isn't any, or because the clients
@@ -832,11 +832,11 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
     client = list->next;
 
     while (client) {
-    
+
         /* If data waiting for client, try to send it. */
         if (client->tmpbuffer) {
-        
-            /* 
+
+            /*
              * We expect that list->filepos < list->tmpbuffer->size
              * should always be true.  The check is more for safety,
              * in case of trouble is some other part of the code.
@@ -844,8 +844,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
              * clean up.
              */
             if (client->filepos < client->tmpbuffer->size) {
-                
-                /* 
+
+                /*
                  * Here we are finally ready to write out the
                  * data.  Remember that (because the socket
                  * has been set non-blocking) we may only
@@ -853,11 +853,11 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                  * 'filepos' contains how much of the buffer
                  * has already been written.
                  */
-                written = write(client->socket, 
+                written = write(client->socket,
                           client->tmpbuffer->ptr + client->filepos,
                           client->tmpbuffer->size - client->filepos);
-        
-                /* 
+
+                /*
                  * If any data has been written, update the
                  * data pointer and set the workdone flag.
                  */
@@ -867,8 +867,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 }
             } else
                 written = 0;
-            
-            /* 
+
+            /*
              * If we have written the entire buffer to the socket,
              * or if there was some error (other than EAGAIN, which
              * means the system couldn't take it), this request is
@@ -881,12 +881,12 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                     free(client->tmpbuffer->ptr);
                     free(client->tmpbuffer);
                 }
-            
+
                 /* Mark this client's buffer as empty. */
                 client->tmpbuffer = NULL;
                 client->nr++;
             }
-            
+
             /*
              * If the client is no longer connected, or the total
              * number of frames already sent to this client is
@@ -898,10 +898,10 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 void *tmp;
 
                 close(client->socket);
-                
+
                 if (client->next)
                     client->next->prev = client->prev;
-                
+
                 client->prev->next = client->next;
                 tmp = client;
                 client = client->prev;
@@ -909,8 +909,8 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 (*stream_count)--;
             }
         }   /* End if (client->tmpbuffer) */
-        
-        /* 
+
+        /*
          * Step the the next client in the list.  If we get to the
          * end of the list, check if anything was written during
          * that loop; (if so) reset the 'workdone' flag and go back
@@ -926,7 +926,7 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
 }
 
 /**
- * stream_tmpbuffer 
+ * stream_tmpbuffer
  *      Routine to create a new "tmpbuffer", which is a common
  *      object used by all clients connected to a single camera.
  *
@@ -937,7 +937,7 @@ static struct stream_buffer *stream_tmpbuffer(int size)
     struct stream_buffer *tmpbuffer = mymalloc(sizeof(struct stream_buffer));
     tmpbuffer->ref = 0;
     tmpbuffer->ptr = mymalloc(size);
-        
+
     return tmpbuffer;
 }
 
@@ -961,20 +961,20 @@ static void stream_add_client(struct stream *list, int sc)
 
     memset(new, 0, sizeof(struct stream));
     new->socket = sc;
-    
+
     if ((new->tmpbuffer = stream_tmpbuffer(sizeof(header))) == NULL) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error creating tmpbuffer in stream_add_client");
     } else {
         memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
         new->tmpbuffer->size = sizeof(header)-1;
     }
-    
+
     new->prev = list;
     new->next = list->next;
-    
+
     if (new->next)
         new->next->prev = new;
-    
+
     list->next = new;
 }
 
@@ -990,10 +990,10 @@ static void stream_add_write(struct stream *list, struct stream_buffer *tmpbuffe
 
     gettimeofday(&curtimeval, NULL);
     curtime = curtimeval.tv_usec + 1000000L * curtimeval.tv_sec;
-    
+
     while (list->next) {
         list = list->next;
-        
+
         if (list->tmpbuffer == NULL && ((curtime - list->last) >= 1000000L / fps)) {
             list->last = curtime;
             list->tmpbuffer = tmpbuffer;
@@ -1001,7 +1001,7 @@ static void stream_add_write(struct stream *list, struct stream_buffer *tmpbuffe
             list->filepos = 0;
         }
     }
-    
+
     if (tmpbuffer->ref <= 0) {
         free(tmpbuffer->ptr);
         free(tmpbuffer);
@@ -1010,19 +1010,19 @@ static void stream_add_write(struct stream *list, struct stream_buffer *tmpbuffe
 
 
 /**
- * stream_check_write 
+ * stream_check_write
  *      We walk through the chain of stream structs until we reach the end.
  *      Here we check if the tmpbuffer points to NULL.
  *      We return 1 if it finds a list->tmpbuffer which is a NULL pointer which would
  *      be the next client ready to be sent a new image. If not a 0 is returned.
  *
- * Returns: 
+ * Returns:
  */
 static int stream_check_write(struct stream *list)
 {
     while (list->next) {
         list = list->next;
-        
+
         if (list->tmpbuffer == NULL)
             return 1;
     }
@@ -1031,7 +1031,7 @@ static int stream_check_write(struct stream *list)
 
 
 /**
- * stream_init 
+ * stream_init
  *      This function is called from motion.c for each motion thread starting up.
  *      The function setup the incoming tcp socket that the clients connect to.
  *      The function returns an integer representing the socket.
@@ -1040,7 +1040,7 @@ static int stream_check_write(struct stream *list)
  */
 int stream_init(struct context *cnt)
 {
-    cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost, 
+    cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost,
                                        cnt->conf.ipv6_enabled);
     cnt->stream.next = NULL;
     cnt->stream.prev = NULL;
@@ -1048,40 +1048,40 @@ int stream_init(struct context *cnt)
 }
 
 /**
- * stream_stop 
+ * stream_stop
  *      This function is called from the motion_loop when it ends
  *      and motion is terminated or restarted.
  */
 void stream_stop(struct context *cnt)
-{    
+{
     struct stream *list;
     struct stream *next = cnt->stream.next;
 
-    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "%s: Closing motion-stream listen socket" 
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: Closing motion-stream listen socket"
                " & active motion-stream sockets");
-    
+
     close(cnt->stream.socket);
     cnt->stream.socket = -1;
 
     while (next) {
         list = next;
         next = list->next;
-        
+
         if (list->tmpbuffer) {
             free(list->tmpbuffer->ptr);
             free(list->tmpbuffer);
         }
-        
+
         close(list->socket);
         free(list);
     }
 
-    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "%s: Closed motion-stream listen socket" 
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: Closed motion-stream listen socket"
                " & active motion-stream sockets");
 }
 
 /*
- * stream_put 
+ * stream_put
  *      Is the starting point of the stream loop. It is called from
  *      the motion_loop with the argument 'image' pointing to the latest frame.
  *      If config option 'stream_motion' is 'on' this function is called once
@@ -1098,7 +1098,7 @@ void stream_stop(struct context *cnt)
  */
 void stream_put(struct context *cnt, unsigned char *image)
 {
-    struct timeval timeout; 
+    struct timeval timeout;
     struct stream_buffer *tmpbuffer;
     fd_set fdread;
     int sl = cnt->stream.socket;
@@ -1109,8 +1109,8 @@ void stream_put(struct context *cnt, unsigned char *image)
                             "Content-Length:                ";
     int headlength = sizeof(jpeghead) - 1;    /* Don't include terminator. */
     char len[20];    /* Will be used for sprintf, must be >= 16 */
-    
-    /* 
+
+    /*
      * Timeout struct used to timeout the time we wait for a client
      * and we do not wait at all.
      */
@@ -1118,8 +1118,8 @@ void stream_put(struct context *cnt, unsigned char *image)
     timeout.tv_usec = 0;
     FD_ZERO(&fdread);
     FD_SET(cnt->stream.socket, &fdread);
-    
-    /* 
+
+    /*
      * If we have not reached the max number of allowed clients per
      * thread we will check to see if new clients are waiting to connect.
      * If this is the case we add the client as a new stream struct and
@@ -1129,44 +1129,44 @@ void stream_put(struct context *cnt, unsigned char *image)
     if ((cnt->stream_count < DEF_MAXSTREAMS) &&
         (select(sl + 1, &fdread, NULL, NULL, &timeout) > 0)) {
         sc = http_acceptsock(sl);
-	    if (cnt->conf.stream_auth_method == 0) {
-		    stream_add_client(&cnt->stream, sc);
+        if (cnt->conf.stream_auth_method == 0) {
+            stream_add_client(&cnt->stream, sc);
             cnt->stream_count++;
-	    } else 	{
-	        do_client_auth(cnt, sc);
-	    }
+        } else  {
+            do_client_auth(cnt, sc);
+        }
     }
-    
+
     /* Lock the mutex */
     if (cnt->conf.stream_auth_method != 0)
         pthread_mutex_lock(&stream_auth_mutex);
 
-    
+
     /* Call flush to send any previous partial-sends which are waiting. */
     stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
-    
+
     /* Check if any clients have available buffers. */
     if (stream_check_write(&cnt->stream)) {
-        /* 
+        /*
          * Yes - create a new tmpbuffer for current image.
          * Note that this should create a buffer which is *much* larger
          * than necessary, but it is difficult to estimate the
          * minimum size actually required.
          */
         tmpbuffer = stream_tmpbuffer(cnt->imgs.size);
-        
+
         /* Check if allocation was ok. */
         if (tmpbuffer) {
             int imgsize;
 
-            /* 
+            /*
              * We need a pointer that points to the picture buffer
              * just after the mjpeg header. We create a working pointer wptr
              * to be used in the call to put_picture_memory which we can change
              * and leave tmpbuffer->ptr intact.
              */
             unsigned char *wptr = tmpbuffer->ptr;
-            
+
             /*
              * For web protocol, our image needs to be preceded
              * with a little HTTP, so we put that into the buffer
@@ -1184,17 +1184,17 @@ void stream_put(struct context *cnt, unsigned char *image)
             /* Fill in the image length into the header. */
             imgsize = sprintf(len, "%9ld\r\n\r\n", tmpbuffer->size);
             memcpy(wptr - imgsize, len, imgsize);
-            
+
             /* Append a CRLF for good measure. */
             memcpy(wptr + tmpbuffer->size, "\r\n", 2);
-            
-            /* 
+
+            /*
              * Now adjust tmpbuffer->size to reflect the
              * header at the beginning and the extra CRLF
              * at the end.
              */
             tmpbuffer->size += headlength + 2;
-            
+
             /*
              * And finally put this buffer to all clients with
              * no outstanding data from previous frames.
@@ -1204,13 +1204,13 @@ void stream_put(struct context *cnt, unsigned char *image)
             MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: Error creating tmpbuffer");
         }
     }
-    
-    /* 
+
+    /*
      * Now we call flush again.  This time (assuming some clients were
      * ready for the new frame) the new data will be written out.
      */
     stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
-    
+
     /* Unlock the mutex */
     if (cnt->conf.stream_auth_method != 0)
         pthread_mutex_unlock(&stream_auth_mutex);

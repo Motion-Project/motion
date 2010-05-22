@@ -1,10 +1,10 @@
-/* 
+/*
  * jpegutils.h: Some Utility programs for dealing with
  *               JPEG encoded images
  *
  *  Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de>
  *  Copyright (C) 2001 pHilipp Zabel  <pzabel@gmx.de>
- *  Copyright (C) 2008 Angel Carpintero <ack@telenfonica.net>
+ *  Copyright (C) 2008 Angel Carpintero <motiondevelop@gmail.com>
  *
  */
 
@@ -44,17 +44,17 @@
 
 
 int decode_jpeg_raw(unsigned char *jpeg_data, int len,
-                    int itype, int ctype, unsigned int width, 
-                    unsigned int height, unsigned char *raw0, 
+                    int itype, int ctype, unsigned int width,
+                    unsigned int height, unsigned char *raw0,
                     unsigned char *raw1, unsigned char *raw2);
 
 int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
-                         int itype, int ctype, unsigned int width, 
-                         unsigned int height, unsigned char *raw0, 
+                         int itype, int ctype, unsigned int width,
+                         unsigned int height, unsigned char *raw0,
                          unsigned char *raw1, unsigned char *raw2);
 
 int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
-                    int itype, int ctype, unsigned int width, 
-                    unsigned int height, unsigned char *raw0, 
+                    int itype, int ctype, unsigned int width,
+                    unsigned int height, unsigned char *raw0,
                     unsigned char *raw1, unsigned char *raw2);
 #endif

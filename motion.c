@@ -104,7 +104,7 @@ static void image_ring_resize(struct context *cnt, int new_size)
             smallest = cnt->imgs.image_ring_size;
         
         if (cnt->imgs.image_ring_in == smallest - 1 || smallest == 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Resizing pre_capture buffer to %d items",
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Resizing pre_capture buffer to %d items",
                        new_size);
 
             /* Create memory for new ring buffer */
@@ -381,13 +381,13 @@ static void motion_remove_pid(void)
 {
     if ((cnt_list[0]->daemon) && (cnt_list[0]->conf.pid_file) && (restart == 0)) {
         if (!unlink(cnt_list[0]->conf.pid_file)) 
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Removed process id file (pid file).");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Removed process id file (pid file).");
         else 
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error removing pid file");
     }
 
     if (ptr_logfile) { 
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Closing logfile (%s).",  
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Closing logfile (%s).",  
                    cnt_list[0]->conf.log_file);
         set_log_mode(LOGMODE_SYSLOG);
         myfclose(ptr_logfile);
@@ -464,7 +464,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
             event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tm);
 
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Motion detected - starting event %d", 
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion detected - starting event %d", 
                        cnt->event_nr);
 
             /* always save first motion frame as preview-shot, may be changed to an other one later */
@@ -688,7 +688,7 @@ static int motion_init(struct context *cnt)
     cnt->detecting_motion = 0;
     cnt->makemovie = 0;
 
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Thread %d started", 
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d started", 
                (unsigned long)pthread_getspecific(tls_key_threadnr));
 
     if (!cnt->conf.filepath)
@@ -703,7 +703,7 @@ static int motion_init(struct context *cnt)
      * file options.
      */
     if (cnt->video_dev == -1) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera " 
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera " 
                    "Motion continues using width and height from config file(s)");
         cnt->imgs.width = cnt->conf.width;
         cnt->imgs.height = cnt->conf.height;
@@ -711,7 +711,7 @@ static int motion_init(struct context *cnt)
         cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     } else if (cnt->video_dev == -2) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera "
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera "
                    "Motion only supports width and height modulo 16");
         return -3;
     }
@@ -781,7 +781,7 @@ static int motion_init(struct context *cnt)
 #if !defined(WITHOUT_V4L) && !defined(BSD)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
 
         /* vid_startpipe should get the output dimensions */
         cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
@@ -793,7 +793,7 @@ static int motion_init(struct context *cnt)
     }
 
     if (cnt->conf.motionvidpipe) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for motion pictures"); 
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for motion pictures"); 
 
         /* vid_startpipe should get the output dimensions */
         cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
@@ -807,16 +807,16 @@ static int motion_init(struct context *cnt)
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Database backend %s",  
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: Database backend %s",  
                    cnt->conf.database_type);
         
 #ifdef HAVE_SQLITE3
     if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.sqlite3_db) {
-        MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: DB %s", 
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: DB %s", 
                    cnt->conf.sqlite3_db);
 
         if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
-            MOTION_LOG(EMG, TYPE_DB, NO_ERRNO, "%s: Can't open database %s : %s\n",  
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Can't open database %s : %s\n",  
                        cnt->conf.sqlite3_db, sqlite3_errmsg(cnt->database_sqlite3));
             sqlite3_close(cnt->database_sqlite3);
             exit(1);
@@ -904,7 +904,7 @@ static int motion_init(struct context *cnt)
         if (!cnt->imgs.mask) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to read mask image. Mask feature disabled."); 
         } else {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Maskfile \"%s\" loaded.", 
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Maskfile \"%s\" loaded.", 
                        cnt->conf.mask_file);
         }
     } else {
@@ -929,7 +929,7 @@ static int motion_init(struct context *cnt)
                        cnt->conf.stream_port);
             cnt->finish = 1;
         } else {  
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Started motion-stream server in port %d", 
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Started motion-stream server in port %d", 
                        cnt->conf.stream_port);
         }    
     }
@@ -960,7 +960,7 @@ static void motion_cleanup(struct context *cnt)
     event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
 
     if (cnt->video_dev >= 0) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Calling vid_close() from motion_cleanup");        
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Calling vid_close() from motion_cleanup");        
         vid_close(cnt);
     }
 
@@ -1296,7 +1296,7 @@ static void *motion_loop(void *arg)
              */
             if (cnt->video_dev < 0 &&
                 cnt->currenttime % 10 == 0 && cnt->shots == 0) {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,
                            "%s: Retrying until successful connection with camera");
                 cnt->video_dev = vid_start(cnt);
 
@@ -1305,7 +1305,7 @@ static void *motion_loop(void *arg)
                  * we need to restart Motion to re-allocate all the buffers
                  */
                 if (cnt->imgs.width != cnt->conf.width || cnt->imgs.height != cnt->conf.height) {
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Camera has finally become available\n"
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Camera has finally become available\n"
                                "Camera image has different width and height"
                                "from what is in the config file. You should fix that\n"
                                "Restarting Motion thread to reinitialize all "
@@ -1344,7 +1344,7 @@ static void *motion_loop(void *arg)
                 /* If all is well reset missing_frame_counter */
                 if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
                     /* If we previously logged starting a grey image, now log video re-start */
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Video signal re-acquired");
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal re-acquired");
                     // event for re-acquired video signal can be called here
                 }
                 cnt->missing_frame_counter = 0;
@@ -1402,7 +1402,7 @@ static void *motion_loop(void *arg)
                  * other way
                  */
                 if (vid_return_code == NETCAM_RESTART_ERROR) {
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Restarting Motion thread to reinitialize all "
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Restarting Motion thread to reinitialize all "
                                "image buffers");
                     /* 
                      * Break out of main loop terminating thread 
@@ -1452,7 +1452,7 @@ static void *motion_loop(void *arg)
 
                     /* Write error message only once */
                     if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
-                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Video signal lost - Adding grey image"); 
+                        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal lost - Adding grey image"); 
                         // Event for lost video signal can be called from here
                         event(cnt, EVENT_CAMERA_LOST, NULL, NULL,
                               NULL, cnt->currenttime_tm);
@@ -1504,7 +1504,7 @@ static void *motion_loop(void *arg)
                      */
                     if (cnt->conf.lightswitch && !cnt->lost_connection) {
                         if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
-                            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Lightswitch detected"); 
+                            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Lightswitch detected"); 
 
                             if (cnt->moved < 5)
                                 cnt->moved = 5;
@@ -1530,7 +1530,7 @@ static void *motion_loop(void *arg)
                         if (cnt->current_image->diffs <= cnt->threshold) {
                             cnt->current_image->diffs = 0;
                         
-                            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Switchfilter detected");
+                            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Switchfilter detected");
                         }
                     }
 
@@ -1632,7 +1632,7 @@ static void *motion_loop(void *arg)
                     cnt->current_image->diffs = 0;
                     cnt->lightswitch_framecounter = 0;
 
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: micro-lightswitch!"); 
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: micro-lightswitch!"); 
                 } else {
                     alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
                 }
@@ -1741,7 +1741,7 @@ static void *motion_loop(void *arg)
              */
             if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
                 cnt->detecting_motion = 1;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
 #ifdef HAVE_FFMPEG
                 if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
 #else
@@ -1946,7 +1946,7 @@ static void *motion_loop(void *arg)
                     strcat(msg, part);
                 }
 
-                MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: %s", msg);
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: %s", msg);
             }
 
         } /* get_image end */
@@ -2022,7 +2022,7 @@ static void *motion_loop(void *arg)
                 } else {
                     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Invalid timelapse_mode argument '%s'",
                                cnt->conf.timelapse_mode);
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%:s Defaulting to manual timelapse mode"); 
+                    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%:s Defaulting to manual timelapse mode"); 
                     conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
                 }
             }
@@ -2209,7 +2209,7 @@ err:
         free(rolling_average_data);
 
     cnt->lost_connection = 1;
-    MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Thread exiting");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread exiting");
 
     motion_cleanup(cnt);
 
@@ -2258,7 +2258,7 @@ static void become_daemon(void)
 
     /* fork */
     if (fork()) {
-        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Motion going to daemon mode");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion going to daemon mode");
         exit(0);
     }
     
@@ -2321,7 +2321,7 @@ static void become_daemon(void)
     
     /* Now it is safe to add the PID creation to the logs */
     if (pidf)
-        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Created process id file %s. Process ID is %d",
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Created process id file %s. Process ID is %d",
                    cnt_list[0]->conf.pid_file, getpid());
     
     sigaction(SIGTTOU, &sig_ign_action, NULL);
@@ -2428,7 +2428,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         (cnt_list[0]->conf.log_level == 0)) { 
         cnt_list[0]->conf.log_level = LEVEL_DEFAULT;
         cnt_list[0]->log_level = cnt_list[0]->conf.log_level;
-        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using default log level (%s) (%d)", 
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Using default log level (%s) (%d)", 
                    get_log_level_str(cnt_list[0]->log_level), SHOW_LEVEL_VALUE(cnt_list[0]->log_level));
     } else {
         cnt_list[0]->log_level = cnt_list[0]->conf.log_level - 1; // Let's make syslog compatible
@@ -2436,7 +2436,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     set_log_level(cnt_list[0]->log_level);   
    
-    MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started");
 
     if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file, "syslog", 6))) {
         set_log_mode(LOGMODE_FILE);
@@ -2444,7 +2444,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
         if (ptr_logfile) {
             set_log_mode(LOGMODE_SYSLOG);
-            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Logging to file (%s)",  
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Logging to file (%s)",  
                        cnt_list[0]->conf.log_file);
             set_log_mode(LOGMODE_FILE);
         } else {
@@ -2453,18 +2453,18 @@ static void motion_startup(int daemonize, int argc, char *argv[])
             exit(0);
         }
     } else {
-        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Logging to syslog");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Logging to syslog");
     }
 
     if ((cnt_list[0]->conf.log_type_str == NULL) || 
         !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
         cnt_list[0]->log_type = TYPE_DEFAULT;
         cnt_list[0]->conf.log_type_str = mystrcpy(cnt_list[0]->conf.log_type_str, "ALL");
-        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using default log type (%s)",  
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Using default log type (%s)",  
                    get_log_type_str(cnt_list[0]->log_type));
     }
 
-    MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Using log type (%s) log level (%s)", 
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Using log type (%s) log level (%s)", 
                get_log_type_str(cnt_list[0]->log_type), get_log_level_str(cnt_list[0]->log_level));
 
     set_log_type(cnt_list[0]->log_type);
@@ -2478,7 +2478,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
          */
         if (cnt_list[0]->daemon && cnt_list[0]->conf.setup_mode == 0) {
             become_daemon();
-            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Motion running as daemon process");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion running as daemon process");
         }
     }
 
@@ -2554,7 +2554,7 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                        "%s: Stream port number %d for thread %d conflicts with the control port",
                        cnt->conf.stream_port, cnt->threadnr);
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Stream feature for thread %d is disabled.", 
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Stream feature for thread %d is disabled.", 
                        cnt->threadnr);
             cnt->conf.stream_port = 0;
         }
@@ -2568,7 +2568,7 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                            "%s: Stream port number %d for thread %d conflicts with thread %d",
                            cnt->conf.stream_port, cnt->threadnr, cnt_list[i]->threadnr);
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,
                            "%s: Stream feature for thread %d is disabled.",  
                            cnt->threadnr);
                 cnt->conf.stream_port = 0;
@@ -2643,7 +2643,7 @@ int main (int argc, char **argv)
      * optimize motion detection and stuff.
      */
     if (cnt_list[0]->conf.setup_mode)
-        MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Motion running in setup mode.");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion running in setup mode.");
 
     /*
      * Create and a thread attribute for the threads we spawn later on.
@@ -2663,14 +2663,14 @@ int main (int argc, char **argv)
              * cleanup everything, and then initialize everything again
              * (including re-reading the config file(s)).
              */
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Restarting motion.");
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Restarting motion.");
             motion_shutdown();
             restart = 0; /* only one reset for now */
 #ifndef WITHOUT_V4L
             SLEEP(5, 0); // maybe some cameras needs less time
 #endif
             motion_startup(0, argc, argv); /* 0 = skip daemon init */
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Motion restarted");
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Motion restarted");
         }
 
         /* 
@@ -2682,15 +2682,15 @@ int main (int argc, char **argv)
             cnt_list[i]->threadnr = i ? i : 1;
 
             if (strcmp(cnt_list[i]->conf_filename, ""))
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d is from %s", 
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is from %s", 
                            cnt_list[i]->threadnr, cnt_list[i]->conf_filename);
 
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Thread %d is device: %s input %d", 
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is device: %s input %d", 
                        cnt_list[i]->threadnr, cnt_list[i]->conf.netcam_url ? 
                        cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
                        cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input);
             
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Stream port %d",  
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Stream port %d",  
                        cnt_list[i]->conf.stream_port);
 
             start_motion_thread(cnt_list[i], &thread_attr);
@@ -2703,7 +2703,7 @@ int main (int argc, char **argv)
         if (cnt_list[0]->conf.webcontrol_port)
             pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
 
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Waiting for threads to finish, pid: %d", 
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Waiting for threads to finish, pid: %d", 
                    getpid());
 
         /* 
@@ -2734,7 +2734,7 @@ int main (int argc, char **argv)
             for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
                 /* Check if threads wants to be restarted */
                 if ((!cnt_list[i]->running) && (cnt_list[i]->restart)) {
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Motion thread %d restart", 
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion thread %d restart", 
                                cnt_list[i]->threadnr);
                     start_motion_thread(cnt_list[i], &thread_attr);
                 }
@@ -2768,7 +2768,7 @@ int main (int argc, char **argv)
         /* Reset end main loop flag */
         finish = 0;
 
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Threads finished");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Threads finished");
 
         /* Rest for a while if we're supposed to restart. */
         if (restart)
@@ -2779,7 +2779,7 @@ int main (int argc, char **argv)
     // Be sure that http control exits fine
     cnt_list[0]->finish = 1;
     SLEEP(1, 0);
-    MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, "%s: Motion terminating");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion terminating");
 
     /* Perform final cleanup. */
     pthread_key_delete(tls_key_threadnr);
@@ -2902,7 +2902,7 @@ int create_path(const char *path)
         start = strchr(start + 1, '/');
 
         if (!start)
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: creating directory %s", buffer);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: creating directory %s", buffer);
         
         free(buffer);
     }

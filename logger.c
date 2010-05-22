@@ -1,10 +1,10 @@
 /*
  *      logger.c
  *
- *      Logger for motion 
+ *      Logger for motion
  *
- *      Copyright 2005, William M. Brack 
- *      Copyright 2008 by Angel Carpintero  (ack@telefonica.net)
+ *      Copyright 2005, William M. Brack
+ *      Copyright 2008 by Angel Carpintero  (motiondevelop@gmail.com)
  *      This software is distributed under the GNU Public License Version 2
  *      See also the file 'COPYING'.
  *
@@ -37,7 +37,7 @@ int get_log_type(const char *type)
         if (!strncasecmp(type, log_type_str[i], 3)) {
             ret = i;
             break;
-        }    
+        }
     }
 
     return ret;
@@ -70,7 +70,7 @@ void set_log_type(unsigned int type)
  *      Gets string value for log level.
  *
  * Returns: name of log level.
- */ 
+ */
 const char* get_log_level_str(unsigned int level)
 {
     return log_level_str[level];
@@ -92,7 +92,7 @@ void set_log_level(unsigned int level)
  *      Sets mode of logging , could be using syslog or files.
  *
  * Returns: nothing.
- */ 
+ */
 void set_log_mode(int mode)
 {
     log_mode = mode;
@@ -120,7 +120,7 @@ FILE * set_logfile(const char *logfile_name)
  * str_time
  *
  * Return: string with human readable time
- */ 
+ */
 static char *str_time(void)
 {
     static char buffer[16];
@@ -143,7 +143,7 @@ static char *str_time(void)
  * Parameters:
  *
  *     level           logging level for the 'syslog' function
- *                     
+ *
  *     type            logging type.
  *
  *     errno_flag      if set, the log message should be followed by the
@@ -158,7 +158,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 {
     int errno_save, n;
     char buf[1024];
-/* GNU-specific strerror_r() */    
+/* GNU-specific strerror_r() */
 #if (!defined(XSI_STRERROR_R))
     char msg_buf[100];
 #endif
@@ -173,7 +173,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     if ((log_type != TYPE_ALL) && (type != log_type))
         return;
 
-    /* 
+    /*
      * If pthread_getspecific fails (e.g., because the thread's TLS doesn't
      * contain anything for thread number, it returns NULL which casts to zero,
      * which is nice because that's what we want in that case.
@@ -186,21 +186,21 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
      */
     errno_save = errno;
 
-    /* 
+    /*
      * Prefix the message with the log level string, log type string,
      * time and thread number. e.g. [1] [ERR] [ENC] [Apr 03 00:08:44] blah
      *
      */
     if (!log_mode) {
-        n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] [%s] ", 
-                     threadnr, get_log_level_str(level), get_log_type_str(type), 
+        n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] [%s] ",
+                     threadnr, get_log_level_str(level), get_log_type_str(type),
                      str_time());
-    } else {    
-    /* 
+    } else {
+    /*
      * Prefix the message with the log level string, log type string
      * and thread number. e.g. [1] [DBG] [TRK] blah
      */
-        n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] ", 
+        n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] ",
                      threadnr, get_log_level_str(level), get_log_type_str(type));
     }
 
@@ -224,7 +224,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
         /* XSI-compliant strerror_r() */
         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
 #else
-#warning "************************************"     
+#warning "************************************"
 #warning "* Using GNU-COMPLIANT strerror_r() *"
 #warning "************************************"
         /* GNU-specific strerror_r() */
@@ -237,14 +237,14 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
         fputs(buf, logfile);
         fflush(logfile);
 
-    /* If log_mode, send the message to the syslog. */    
-    } else {   
+    /* If log_mode, send the message to the syslog. */
+    } else {
         syslog(level, "%s", buf);
         strncat(buf, "\n", 1024 - strlen(buf));
         fputs(buf, stderr);
         fflush(stderr);
-    } 
-     
+    }
+
     /* Clean up the argument list routine. */
     va_end(ap);
 }

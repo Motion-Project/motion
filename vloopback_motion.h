@@ -2,7 +2,7 @@
  *
  *  Include file for vloopback_motion.c
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
- *      Copyright 2008 by Angel Carpintero (ack@telefonica.net)
+ *      Copyright 2008 by Angel Carpintero (motiondevelop@gmail.com)
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.
  *

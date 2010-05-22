@@ -24,7 +24,7 @@ Run in non-daemon mode.
 Run in setup mode. Also forces non-daemon mode
 .TP
 .B \-d log level
-Set log level [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 4 / ERR)
+Set log level [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 6 / NTC)
 .TP
 .B \-k log type
 Set type of log (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)
@@ -72,7 +72,7 @@ Values: Max 4095 characters / Default: Not defined
 Name of the database.
 .TP
 .B database_host string
-Values: Max 4095 characters / Default: localhost 
+Values: Max 4095 characters / Default: localhost
 .br
 IP address or domain name for the database server. Use "localhost" if motion and database runs on the same server.
 .TP
@@ -86,7 +86,7 @@ Values: 0 - 65535 / Default: Not defined
 .br
 The database server port number.
 .TP
-.B database_type discrete strings 
+.B database_type discrete strings
 Values: mysql, postgresql / Default: Not defined
 .br
 The database type ( mysql , postgresql ).
@@ -140,7 +140,7 @@ Values: on, off / Default: off
 .br
 Use ffmpeg to deinterlace video. Necessary if you use an analog camera and see horizontal combing on moving objects in video or pictures.
 .TP
-.B ffmpeg_timelapse integer 
+.B ffmpeg_timelapse integer
 Values: 0 - 2147483647 / Default: 0 (disabled)
 .br
 Create a timelapse movie saving a picture frame at the interval in seconds set by this parameter. Set it to 0 if not used.
@@ -165,7 +165,7 @@ Values: 2 - 100 / Default: 100 (no limit)
 .br
 Maximum number of frames to be captured from the camera per second.
 .TP
-.B frequency integer 
+.B frequency integer
 Values: 0 - 999999 / Default: 0 (Not set)
 .br
 The frequency to set the tuner to (kHz). Valid range: per tuner spec, default: 0 (Don't set it)
@@ -195,7 +195,7 @@ Values: 0 - 100 / Default: 0 (disabled)
 .br
 Ignore sudden massive light intensity changes given as a percentage of the picture area that changed intensity.
 .TP
-.B locate_motion discrete strings 
+.B locate_motion discrete strings
 Values: on, off, redbox, center, redcross, preview / Default: off
 .br
 Locate and draw a box around the moving object. Value 'preview' makes Motion only draw a box on a saved preview jpeg image and not on the saved movie.
@@ -211,9 +211,9 @@ Values: Max 4095 characters / Default: Not defined
 Use a file to save logs messages, if not defined stderr and syslog is used.
 .TP
 .B log_level integer
-Values: 1 - 9 / Default: 4
+Values: 1 - 9 / Default: 6
 .br
-Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 4 / ERR).
+Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 6 / NTC).
 .TP
 .B log_type discrete strings
 Values: STR, ENC, NET, DBL, EVT, TRK, VID, ALL / Default: ALL
@@ -235,7 +235,7 @@ Values: 0 - 2147483647 / Default: 0
 .br
 Minimum time in seconds between the capturing picture frames from the camera. Default: 0 = disabled - the capture rate is given by the camera framerate.
 .TP
-.B minimum_motion_frames integer 
+.B minimum_motion_frames integer
 Values: 1 - 1000s / Default: 1
 .br
 Picture frames must contain motion at least the specified number of frames in a row before they are detected as true motion. At the default of 1, all motion is detected. Valid range is 1 to thousands, but it is recommended to keep it within 1-5.
@@ -285,7 +285,7 @@ Values: on, off / Default: on
 .br
 Activates the automatic tuning of noise level.
 .TP
-.B norm integer 
+.B norm integer
 Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour) / Default: 0 (PAL)
 .br
 Select the norm of the video device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
@@ -348,7 +348,7 @@ File path for motion triggered images (jpeg or ppm) relative to target_dir. Valu
 .B picture_type discrete strings
 Values: jpeg , ppm / Default: jpeg
 .br
-Type of images motion will trigger when motion is detected. 
+Type of images motion will trigger when motion is detected.
 .TP
 .B post_capture integer
 Values: 0 - 2147483647 / Default: 0 (disabled)
@@ -441,7 +441,7 @@ Values: Max 4095 characters / Default: insert into security(camera, filename, fr
 SQL query string that is sent to the database. The values for each field are given by using convertion specifiers
 .TP
 .B stream_auth_method integer
-Values: 0 = disabled , 1 = Basic authentication ,2 = MD5 digest (the safer authentication). / Default: 0 (disabled) 
+Values: 0 = disabled , 1 = Basic authentication ,2 = MD5 digest (the safer authentication). / Default: 0 (disabled)
 .br
 Set the authentication method for stream.
 .TP
@@ -610,7 +610,7 @@ Values: on, off / Default: off
 .br
 Enables extpipe to use an external video encoder feeding with YUV420 using a pipe .
 .TP
-.B v4l2_palette discrete strings 
+.B v4l2_palette discrete strings
 Values: 0 - 8 / Default: 8
 .br
 Allow to choose preferable palette to be use by motion to capture from those supported by your videodevice.
@@ -716,7 +716,7 @@ So always call the thread config files in the end of the motion.conf file. If yo
 .br
 If motion is built without specific features such as ffmpeg, mysql etc it will ignore the options that belongs to these features. You do not have to remove them or comment them out.
 .br
-If you run the webcontrol command http://host:port/0/config/writeyes, motion will overwrite motion.conf and all the thread.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do. 
+If you run the webcontrol command http://host:port/0/config/writeyes, motion will overwrite motion.conf and all the thread.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
 .TP
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, picture_filename, movie_filename, timelapse_filename, on_area_detected, on_camera_lost, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.

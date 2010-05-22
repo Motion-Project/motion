@@ -66,7 +66,7 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl VIDIOCGWIN");
         } else {
             fps = vw.flags  >> PWC_FPS_SHIFT;
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Get Current framerate %d .. trying %d", 
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Get Current framerate %d .. trying %d", 
                        fps, cnt->conf.frame_limit);
         }
 
@@ -79,7 +79,7 @@ static void v4l_picture_controls(struct context *cnt, struct video_dev *viddev)
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl VIDIOCGWIN");
         } else {
             fps = vw.flags  >> PWC_FPS_SHIFT;
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Set new framerate %d", fps);
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Set new framerate %d", fps);
         }  
 
         viddev->fps = fps;        
@@ -182,13 +182,13 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
                 return NULL;
             }
 
-            MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "%s: Set Tuner to %d Frequency set to %ul", 
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Set Tuner to %d Frequency set to %ul", 
                        tuner_number, freq);
         }
     }
 
     if (ioctl (dev, VIDIOCGMBUF, &vid_buf) == -1) {
-        MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: ioctl(VIDIOCGMBUF) - Error device"
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: ioctl(VIDIOCGMBUF) - Error device"
                    " does not support memory map\n V4L capturing using read is deprecated!\n"
                    "Motion only supports mmap.");
         return NULL;
@@ -206,7 +206,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
         }
 
         if (MAP_FAILED == map) {
-            MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: MAP_FAILED");
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: MAP_FAILED");
             return NULL;
         }
 
@@ -242,7 +242,7 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
 
                         /* Try one last time... */
                         if (ioctl(dev, VIDIOCMCAPTURE, &vid_mmap) == -1) {
-                            MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed with all supported palettes "
+                            MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed with all supported palettes "
                                        "- giving up");
                             return NULL;
                         }
@@ -255,23 +255,23 @@ unsigned char *v4l_start(struct video_dev *viddev, int width, int height,int inp
     switch (viddev->v4l_fmt) {
     case VIDEO_PALETTE_YUV420P:
         viddev->v4l_bufsize = (width * height * 3) / 2;
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_YUV420P palette");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_YUV420P palette");
         break;
     case VIDEO_PALETTE_YUV422:
         viddev->v4l_bufsize = (width * height * 2);
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_YUV422 palette");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_YUV422 palette");
         break;
     case VIDEO_PALETTE_YUYV:
         viddev->v4l_bufsize = (width * height * 2);
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_YUYV palette");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_YUYV palette");
         break;
     case VIDEO_PALETTE_RGB24:
         viddev->v4l_bufsize = (width * height * 3);
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_RGB24 palette");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_RGB24 palette");
         break;
     case VIDEO_PALETTE_GREY:
         viddev->v4l_bufsize = width * height;
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_GREY palette");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using VIDEO_PALETTE_GREY palette");
         break;
     }
 
@@ -409,7 +409,7 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
                     return;
                 }
 
-                 MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Set Tuner to %d Frequency to %ul",
+                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Set Tuner to %d Frequency to %ul",
                             tuner_number, frequnits);
             }
         }
@@ -430,7 +430,7 @@ void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char 
                 return;
             } 
 
-            MOTION_LOG(ALR, TYPE_VIDEO, NO_ERRNO, "%s: Set Input to %d Standard method to %d", 
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Set Input to %d Standard method to %d", 
                        input, norm);
         }
 

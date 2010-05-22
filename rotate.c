@@ -4,13 +4,13 @@
  *    Module for handling image rotation.
  *
  *    Copyright 2004-2005, Per Jonsson (per@pjd.nu)
- *    
+ *
  *    This software is distributed under the GNU Public license
  *    Version 2.  See also the file 'COPYING'.
  *
  *    Image rotation is a feature of Motion that can be used when the
  *    camera is mounted upside-down or on the side. The module only
- *    supports rotation in multiples of 90 degrees. Using rotation 
+ *    supports rotation in multiples of 90 degrees. Using rotation
  *    increases the Motion CPU usage slightly.
  *
  *    Version history:
@@ -22,7 +22,7 @@
  *                       - fixed bug where initialization would be
  *                         incomplete for invalid degrees of rotation
  *                       - now uses MOTION_LOG for error reporting
- *      v4 (26-Oct-2004) - new fix for width/height from imgs/conf due to 
+ *      v4 (26-Oct-2004) - new fix for width/height from imgs/conf due to
  *                         earlier misinterpretation
  *      v3 (11-Oct-2004) - cleanup of width/height from imgs/conf
  *      v2 (26-Sep-2004) - separation of capture/internal dimensions
@@ -49,18 +49,18 @@ typedef unsigned TYPE_32BIT __uint32;
 
 /**
  * The code below is copied (with modification) from bits/byteswap.h. It provides
- * a macro/function named rot__bswap_32 that swaps the bytes in a 32-bit integer, 
+ * a macro/function named rot__bswap_32 that swaps the bytes in a 32-bit integer,
  * preferably using the bswap assembler instruction if configure found support
  * for it.
  *
  * It would be neater to simply include byteswap.h and use the bswap_32 macro
  * defined there, but the problem is that the bswap asm instruction would then
- * only be used for certain processor architectures, excluding athlon (and 
+ * only be used for certain processor architectures, excluding athlon (and
  * probably athlon64 as well). Moreover, byteswap.h doesn't seem to exist on
  * FreeBSD. So, we rely on the HAVE_BSWAP macro defined by configure instead.
  *
- * Note that the macro names have been prefixed with "rot" in order to avoid 
- * collision since we have the include chain rotate.h -> motion.h -> netcam.h -> 
+ * Note that the macro names have been prefixed with "rot" in order to avoid
+ * collision since we have the include chain rotate.h -> motion.h -> netcam.h ->
  * netinet/in.h -> ... -> byteswap.h -> bits/byteswap.h.
  */
 
@@ -71,8 +71,8 @@ typedef unsigned TYPE_32BIT __uint32;
 
 #ifdef __GNUC__
 #    if (__GNUC__ >= 2) && (i386 || __i386 || __i386__)
-/* We're on an Intel-compatible platform, so we can use inline Intel assembler 
- * for the swapping. 
+/* We're on an Intel-compatible platform, so we can use inline Intel assembler
+ * for the swapping.
  */
 #        ifndef HAVE_BSWAP
 /* Bswap is not available, we have to use three instructions instead. */
@@ -108,7 +108,7 @@ typedef unsigned TYPE_32BIT __uint32;
 #    endif
 #else
 /* Not a GNU compiler. */
-static inline __uint32 rot__bswap_32(__uint32 __bsx) 
+static inline __uint32 rot__bswap_32(__uint32 __bsx)
 {
     return __bswap_constant_32 (__bsx);
 }
@@ -123,18 +123,18 @@ static inline __uint32 rot__bswap_32(__uint32 __bsx)
 
 /**
  * reverse_inplace_quad
- * 
+ *
  *  Reverses a block of memory in-place, 4 bytes at a time. This function
  *  requires the __uint32 type, which is 32 bits wide.
  *
  * Parameters:
- * 
+ *
  *   src  - the memory block to reverse
  *   size - the size (in bytes) of the memory block
  *
  * Returns: nothing
  */
-static void reverse_inplace_quad(unsigned char *src, int size) 
+static void reverse_inplace_quad(unsigned char *src, int size)
 {
     __uint32 *nsrc = (__uint32 *)src;              /* first quad */
     __uint32 *ndst = (__uint32 *)(src + size - 4); /* last quad */
@@ -149,13 +149,13 @@ static void reverse_inplace_quad(unsigned char *src, int size)
 
 /**
  * rot90cw
- * 
- *  Performs a 90 degrees clockwise rotation of the memory block pointed to 
- *  by src. The rotation is NOT performed in-place; dst must point to a 
+ *
+ *  Performs a 90 degrees clockwise rotation of the memory block pointed to
+ *  by src. The rotation is NOT performed in-place; dst must point to a
  *  receiving memory block the same size as src.
  *
  * Parameters:
- * 
+ *
  *   src    - pointer to the memory block (image) to rotate clockwise
  *   dst    - where to put the rotated memory block
  *   size   - the size (in bytes) of the memory blocks (both src and dst)
@@ -165,7 +165,7 @@ static void reverse_inplace_quad(unsigned char *src, int size)
  * Returns: nothing
  */
 static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
-                    int width, int height) 
+                    int width, int height)
 {
     unsigned char *endp;
     register unsigned char *base;
@@ -174,21 +174,21 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
     endp = src + size;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width) 
+        for (j = 0; j < height; j++, src -= width)
             *dst++ = *src;
-        
+
     }
 }
 
 /**
  * rot90ccw
- * 
+ *
  *  Performs a 90 degrees counterclockwise rotation of the memory block pointed
- *  to by src. The rotation is not performed in-place; dst must point to a 
- *  receiving memory block the same size as src. 
+ *  to by src. The rotation is not performed in-place; dst must point to a
+ *  receiving memory block the same size as src.
  *
  * Parameters:
- * 
+ *
  *   src    - pointer to the memory block (image) to rotate counterclockwise
  *   dst    - where to put the rotated memory block
  *   size   - the size (in bytes) of the memory blocks (both src and dst)
@@ -198,7 +198,7 @@ static void rot90cw(unsigned char *src, register unsigned char *dst, int size,
  * Returns: nothing
  */
 static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
-                            int size, int width, int height) 
+                            int size, int width, int height)
 {
     unsigned char *endp;
     register unsigned char *base;
@@ -208,28 +208,28 @@ static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
     dst = dst + size - 1;
     for (base = endp - width; base < endp; base++) {
         src = base;
-        for (j = 0; j < height; j++, src -= width) 
+        for (j = 0; j < height; j++, src -= width)
             *dst-- = *src;
-        
+
     }
 }
 
 /**
  * rotate_init
- * 
+ *
  *  Initializes rotation data - allocates memory and determines which function
  *  to use for 180 degrees rotation.
  *
  * Parameters:
- * 
+ *
  *   cnt - the current thread's context structure
  *
  * Returns: nothing
  */
-void rotate_init(struct context *cnt) 
+void rotate_init(struct context *cnt)
 {
     int size;
-    
+
     /* Make sure temp_buf isn't freed if it hasn't been allocated. */
     cnt->rotate_data.temp_buf = NULL;
 
@@ -238,7 +238,7 @@ void rotate_init(struct context *cnt)
      * we have a value that is safe from changes caused by motion-control.
      */
     if ((cnt->conf.rotate_deg % 90) > 0) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Config option \"rotate\" not a multiple of 90: %d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Config option \"rotate\" not a multiple of 90: %d",
                    cnt->conf.rotate_deg);
         cnt->conf.rotate_deg = 0;     /* Disable rotation. */
         cnt->rotate_data.degrees = 0; /* Force return below. */
@@ -248,8 +248,8 @@ void rotate_init(struct context *cnt)
 
     /*
      * Upon entrance to this function, imgs.width and imgs.height contain the
-     * capture dimensions (as set in the configuration file, or read from a 
-     * netcam source). 
+     * capture dimensions (as set in the configuration file, or read from a
+     * netcam source).
      *
      * If rotating 90 or 270 degrees, the capture dimensions and output dimensions
      * are not the same. Capture dimensions will be contained in cap_width and
@@ -271,19 +271,19 @@ void rotate_init(struct context *cnt)
      * If we're not rotating, let's exit once we have setup the capture dimensions
      * and output dimensions properly.
      */
-    if (cnt->rotate_data.degrees == 0) 
+    if (cnt->rotate_data.degrees == 0)
         return;
 
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         /*
          * For YUV 4:2:0 planar, the memory block used for 90/270 degrees
-         * rotation needs to be width x height x 1.5 bytes large. 
+         * rotation needs to be width x height x 1.5 bytes large.
          */
         size = cnt->imgs.width * cnt->imgs.height * 3 / 2;
         break;
     case VIDEO_PALETTE_GREY:
-        /* 
+        /*
          * For greyscale, the memory block used for 90/270 degrees rotation
          * needs to be width x height bytes large.
          */
@@ -291,61 +291,61 @@ void rotate_init(struct context *cnt)
         break;
     default:
         cnt->rotate_data.degrees = 0;
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported palette (%d), rotation is disabled",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unsupported palette (%d), rotation is disabled",
                     cnt->imgs.type);
         return;
     }
 
     /*
-     * Allocate memory if rotating 90 or 270 degrees, because those rotations 
+     * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).
      */
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) 
+    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270))
         cnt->rotate_data.temp_buf = mymalloc(size);
 }
 
-/** 
+/**
  * rotate_deinit
- * 
- *  Frees resources previously allocated by rotate_init. 
+ *
+ *  Frees resources previously allocated by rotate_init.
  *
  * Parameters:
- * 
+ *
  *   cnt - the current thread's context structure
  *
  * Returns: nothing
  */
-void rotate_deinit(struct context *cnt) 
+void rotate_deinit(struct context *cnt)
 {
-    if (cnt->rotate_data.temp_buf) 
+    if (cnt->rotate_data.temp_buf)
         free(cnt->rotate_data.temp_buf);
 }
 
 /**
  * rotate_map
- * 
+ *
  *  Main entry point for rotation. This is the function that is called from
  *  video.c/video_freebsd.c to perform the rotation.
  *
  * Parameters:
- * 
+ *
  *   map - pointer to the image/data to rotate
  *   cnt - the current thread's context structure
  *
- * Returns: 
- * 
+ * Returns:
+ *
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
 int rotate_map(struct context *cnt, unsigned char *map)
 {
     /*
-     * The image format is either YUV 4:2:0 planar, in which case the pixel 
+     * The image format is either YUV 4:2:0 planar, in which case the pixel
      * data is divided in three parts:
      *    Y - width x height bytes
      *    U - width x height / 4 bytes
      *    V - as U
-     * or, it is in greyscale, in which case the pixel data simply consists 
+     * or, it is in greyscale, in which case the pixel data simply consists
      * of width x height bytes.
      */
     int wh, wh4 = 0, w2 = 0, h2 = 0;  /* width * height, width * height / 4 etc. */
@@ -384,11 +384,11 @@ int rotate_map(struct context *cnt, unsigned char *map)
             rot90cw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4,
                     wh4, w2, h2);
         }
-        
+
         /* Then copy back from the temp buffer to map. */
         memcpy(map, cnt->rotate_data.temp_buf, size);
         break;
-        
+
     case 180:
         /*
          * 180 degrees is easy - just reverse the data within
@@ -408,19 +408,19 @@ int rotate_map(struct context *cnt, unsigned char *map)
         if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
             /* Then do U and V */
             rot90ccw(map + wh, cnt->rotate_data.temp_buf + wh, wh4, w2, h2);
-            rot90ccw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4, 
+            rot90ccw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4,
                      wh4, w2, h2);
         }
-        
+
         /* Then copy back from the temp buffer to map. */
         memcpy(map, cnt->rotate_data.temp_buf, size);
         break;
-        
+
     default:
         /* Invalid */
         return -1;
     }
-    
+
     return 0;
 }
 

@@ -1,5 +1,4 @@
-
-/**
+/*
  *      Much of the FTP routines was inspired by the nanoftp.c module from
  *      libxml2 (Copyright Daniel Veillard, 2003).  The routines have been
  *      modified to fit the needs of the Motion project.
@@ -7,7 +6,7 @@
  *      Copyright 2005, William M. Brack
  *      This software is distributed under the GNU Public license Version 2.
  *      See also the file 'COPYING'.
- *      
+ *
  */
 #ifndef _INCLUDE_NETCAM_FTP_H
 #define _INCLUDE_NETCAM_FTP_H
