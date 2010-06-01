@@ -115,8 +115,8 @@ unsigned short int track_move(struct context *cnt, int dev, struct coord *cent,
 
 /******************************************************************************
     Stepper motor on serial port
-    http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTracking
-    http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTrackerAPI
+    http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionTracking
+    http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionTrackerAPI
 ******************************************************************************/
 
 

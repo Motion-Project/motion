@@ -3,7 +3,7 @@
  *
  *      HTTP Control interface for motion.
  *
- *      Specs : http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpAPI
+ *      Specs : http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionHttpAPI
  *
  *      Copyright 2004-2005 by Angel Carpintero  (ack@telefonica.net)
  *      This software is distributed under the GNU Public License Version 2
@@ -585,7 +585,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
                                          "<a href='%s#%s' target=_blank>[help]</a>"
                                          "</form>\n<hr><i>%s</i>", thread, thread,
                                          config_params[i].param_name, config_params[i].param_name,
-                                         option, TWIKI_URL,config_params[i].param_name, text_help);
+                                         option, FOSWIKI_URL,config_params[i].param_name, text_help);
                         } else {
         
                             if (value == NULL){
@@ -602,7 +602,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
                                          "<a href='%s#%s' target=_blank>[help]</a>"
                                          "</form>\n<hr><i>%s</i>", thread, thread,
                                          config_params[i].param_name, config_params[i].param_name,
-                                         value, TWIKI_URL, config_params[i].param_name, text_help);
+                                         value, FOSWIKI_URL, config_params[i].param_name, text_help);
                         }
 
                         send_template(client_socket, res);
@@ -722,7 +722,7 @@ static unsigned short int config(char *pointer, char *res, unsigned short int le
                                              "&nbsp;&nbsp;<a href='%s#%s' target=_blank>"
                                              "[help]</a></li></ul><hr><i>%s</i>", 
                                              thread, thread, config_params[i].param_name, value, 
-                                             TWIKI_URL, config_params[i].param_name, text_help);
+                                             FOSWIKI_URL, config_params[i].param_name, text_help);
 
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);

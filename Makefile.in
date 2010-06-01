@@ -7,7 +7,7 @@
 # Please read the file COPYING for more info.                                  #
 ################################################################################
 # Please visit the Motion home page:                                           #
-# http://www.lavrsen.dk/twiki/bin/view/Motion                                  #
+# http://www.lavrsen.dk/foswiki/bin/view/Motion                                  #
 ################################################################################
 
 CC      = @CC@
@@ -199,14 +199,14 @@ distclean: clean
 	@echo
 
 ################################################################################
-# UPDATEGUIDE downloads the Motion Guide from TWiki.                           #
+# UPDATEGUIDE downloads the Motion Guide from the Motion Foswiki.              #
 ################################################################################
 updateguide: pre-build-info
 	@echo "Downloading Motion Guide. If it fails, please check your Internet connection."
 	@echo
-	wget www.lavrsen.dk/twiki/bin/view/Motion/MotionGuideOneLargeDocument?skin=text -O motion_guide.tmp
+	wget www.lavrsen.dk/foswiki/bin/view/Motion/MotionGuideOneLargeDocument?skin=text -O motion_guide.tmp
 	@echo "Cleaning up and fixing links..."
-	@cat motion_guide.tmp | sed -e 's/\?skin=text//g;s,"/twiki/,"http://www.lavrsen.dk/twiki/,g' > motion_guide.html
+	@cat motion_guide.tmp | sed -e 's/\?skin=text//g;s,"/foswiki/,"http://www.lavrsen.dk/foswiki/,g' > motion_guide.html
 	@rm -f motion_guide.tmp
 	@echo "All done, you should now have an up-to-date local copy of the Motion guide."
 	@echo

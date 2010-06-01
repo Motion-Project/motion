@@ -18,7 +18,7 @@ Bugfixes
    * Fix fd leaks in external pipe. (Angel Carpintero)
    * Avoid possible stack smashing in v4l_open_vidpipe(). (Angel Carpintero)
    * Allow compile with OpenSuse ffmpeg package (15594svn-20081010)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x10x25x070400 (Angel Carpintero)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SupportQuestion2008x10x25x070400 (Angel Carpintero)
    * Fix warning for syslog().  (Angel Carpintero)
    * Better detection of ffmpeg  
      http://www.lavrsen.dk/foswiki/pub/Motion/ReleaseNoteMotion3x2x11/ffmpeg-detection.diff.gz 
@@ -40,12 +40,12 @@ Features
 
 Bugfixes
    * Fix Problem Encoding 1280x1024 resolution videos  
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SupportQuestion2008x06x11x183727 (Angel Carpintero)
    * Add a new parameter netcam_tolerant_check, to be less strict with some buggy network cameras firmwares.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2008x06x19x123218 (Angel Carpintero)
    * Fix round robin in BSD switching to METEOR_CAP_SINGLE. (Angel Carpintero)   
    * Fix rotate for v4l2 devices using JPEG / MJPEG palettes. (Angel Carpintero)
-   * Fix v4l2_palette http://www.lavrsen.dk/twiki/bin/view/Motion/UvcvideoMjpegPatch (Gerrit Hannaert)
+   * Fix v4l2_palette http://www.lavrsen.dk/foswiki/bin/view/Motion/UvcvideoMjpegPatch (Gerrit Hannaert)
    * Fix warning for x86_64 in conf.c using pointers LP64 compliant ( Angel Carpintero ).
 
 3.2.10.1 Summary of Changes
@@ -59,9 +59,9 @@ Bugfixes
 
 Features
    * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign (Dag Erlandsson).
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/PreCaptureRedesign (Dag Erlandsson).
    * Added preview center feature.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter (Dag Erlandsson).	
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/PreviewCenter (Dag Erlandsson).	
    * Removed low_cpu feature, as it is not really compatible with pre_capture and a lot of other
      features rely on the pre_capture buffer behind the scenes. (Joerg Weber)
    * Removed night_compensate feature. This functionality is covered by noise_tune. (Joerg Weber)
@@ -69,8 +69,8 @@ Features
    * Improved smartmask feature: real moving objects don't trigger the mask anymore. (Joerg Weber)
    * Added area_detect feature. New config options: area_detect, on_area_detected. (Joerg Weber)
    * Added help in http control 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x181541 (Angel Carpintero)
-   * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2007x11x19x181541 (Angel Carpintero)
+   * Added Choose V4L2 palette http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2007x11x19x032318
      (Angel Carpintero)  
    * Improved http control ( 'back' link, select box, show current values when are going to be changed ). 
      (Angel Carpintero)
@@ -78,7 +78,7 @@ Features
    * Watchdog, restart hang threads (Dag Erlandsson)
    * Added ON_CAMERA_LOST event (Dag Erlandsson)
    * Motion start if a camera isn't there at start, retries to connect if lost (Dag Erlandsson)
-   * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
+   * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
     (Simon Walls)
    * Added mov , Quicktime file format (Andrew Hamilton).
    * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr
@@ -87,25 +87,25 @@ Features
 Bugfixes
    * Fixed a problem with locate and fixed mask overlay (Dag Erlandsson).
    * Preview pictures get the timestamp of moment they were captured (Dag Erlandsson).
-   * Fixed http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x23x093651 (Angel Carpintero)
+   * Fixed http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x10x23x093651 (Angel Carpintero)
    * Fix process_id_file when is passed from command line (Angel Carpintero)
-   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x27x150419 (Angel Carpintero)
-   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808 (Angel Carpintero)
+   * Fix http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x10x27x150419 (Angel Carpintero)
+   * Fix http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x11x25x102808 (Angel Carpintero)
    * Avoid random errors , initialising some structs for V4L1 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
    * Fix motion segfault because ffmpeg API change 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
    * Little fix in ffmpeg.c comparing version of LIBAVFORMAT_BUILD, since ffmpeg svn -r4486 LIBAVFORMAT_BUILD and
      LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
      (Angel Carpintero)	
-   * Fix choose v4l2 palette , http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x01x21x043812   (Onakra)
+   * Fix choose v4l2 palette , http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2008x01x21x043812   (Onakra)
    * Get current directory to allow write motion.conf properly 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray) 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray) 
    * Fix broken PostgreSQL detection for custom location, 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134 ( Angel Carpintero )
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2008x02x25x025134 ( Angel Carpintero )
    * Fixed stepper when is used track_auto on ( Angel Carpintero ).
    * Better debug in netcam for "Error reading image header" 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x27x092849 (Simon Walls)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2008x02x27x092849 (Simon Walls)
 
 
 3.2.9 Formal Release - Summary of Changes
@@ -115,20 +115,20 @@ Features
      ( no needed to deploy BSD port here ) directories. ( Angel Carpintero )
    * Added --chuid motion to debian init.d script. ( Angel Carpintero )
    * Added Flash video format (FLV) to ffmpeg.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x07x19x131921 (Timo Taskinen).
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2007x07x19x131921 (Timo Taskinen).
    * Added FFV1 ( FF video codec 1 ) codec , Lossless encoding
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LosslessEncoding (Andrew Hamilton).
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/LosslessEncoding (Andrew Hamilton).
 
 
 Bugfixes
    * Fix segfault in webhttpd.c on motion restart (Angel Carpintero)
-   * Fix segfault in debian http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x09x24x175945
+   * Fix segfault in debian http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x09x24x175945
      (Angel Carpintero)
    * Fix http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=391055 , change
      motion man page , -d requires level. (Angel Carpintero)
    * Handle mjpeg decoding and fix colour issue adding mjpegtools dependency
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegColorIssue
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MjpegToYUV420pPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MjpegColorIssue
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MjpegToYUV420pPatch
      (Marius Rieder, Angel Carpintero).
    * Add debug level > 5 to get logs from v4l2_select_input, v4l2_set_control and v4l2_set_input.
      (Angel Carpintero)
@@ -139,17 +139,17 @@ Bugfixes
 Features
    * Added connection status for all devices available from http web interface.
      (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x11x09x050638
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2006x11x09x050638
    * Improved deb packaging, install the init.d script. (Angel Carpintero).
    * Added swf codec to video creation (Bowser Pete, Andy Brown).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FFmpegSWFcreation
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FFmpegSWFcreation
    * Added V4L2 support (Krzysztof Blaszkowski, Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/VideoForLinuxTwoDiscussion,
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/VideoForLinuxTwoDiscussion,
    * Added support for V4L2_PIX_FMT_SBGGR8 ( bayer ), V4L2_PIX_FMT_SN9C10X,
      V4L2_PIX_FMT_MJPEG and V4L2_PIX_FMT_UYVY (Angel Carpintero).
    * ucvideo track pan/tilt support ( Michal Licko ,Dirk Wesenberg and
      Angel Carpintero )
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/LinuxUvcTrackingPatch 
    * Added a FreeBSD directory to allow people from BSD to get a daily version
      and create a port. (Angel Carpintero).
    * Removed mysql dependency from debian package and added a note to setup
@@ -164,18 +164,18 @@ Features
 Bugfixes
    * Removed a duplicate call to jpeg_destroy_decompress already is called from
      netcam_image_conv (Krzysztof Blaszkowski).
-   * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903,
+   * Fix http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x10x10x081903,
      reconnect to mysql if connection dropped (Angel Carpintero).
    * Fix memory management in ffmpeg.c  (Rafis Khayrullin).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432	
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x12x19x062432	
    * Fix of ffmpeg_avcodec_log code (Alain Guidez).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x25x074612
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x03x25x074612
    * Fix a segfault adding correct size to be used for bayer2rgb24()
      (Damian Wrobel)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x30x175913
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x03x30x175913
    * Fix an error in FreeBSD, the use of capture even fields depends on height
      value. (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610	
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x12x03x073610	
    * Fixed autodetection for VIA cpu, no needed to use --without-optimizecpu.
      Added many others (Angel Carpintero)
    * Fix, don't remove pid file when motion reload config file( HUP signal )
@@ -184,12 +184,12 @@ Bugfixes
    * Fixed the thread number assignment which could goof up if netcams started
      very quickly before all thread were created at startup. (Kenneth Lavrsen)
    * Fix RoundRobin v4l2 buffers in driver when switching input,
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x07x07x182605 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x07x07x182605 
      (Dag Erlandsson and Angel Carpintero).
    * Check EIO for VIDIOC_DQBUF to workaround saa7134 problem. 
      (Dag Erlandsson and Angel Carpintero).
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x06x05x012249 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2007x06x05x012249 
      (Jared D and Angel Carpintero).	
 	
 3.2.7 Formal Release - Summary of Changes
@@ -200,30 +200,30 @@ Features
      than 2 frames per second (Kenneth Lavrsen and Angel Carpintero)
    * Made the creation of reference frame and the decay mechanism depending
      on how much motion was detected relative to threshold setting (Joerg Weber)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ReferenceFramePatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ReferenceFramePatch
    * Added process_id_file feature (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x06x06x123003
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2006x06x06x123003
 
 Bugfixes
    * Fixed problem related to fetching images from Network camera and error
      handling when it fails. Motion would end in infinite loops (Bill Brack).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x10x000151
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x03x10x000151
    * Improved reporting of thread numbers during startup in setup mode.
      (Peter Smith and Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SlightlyImprovedThreadCreationLogging
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SlightlyImprovedThreadCreationLogging
    * Ffmpeg code mutex locking fix (Peter Smith)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x04x07x164654
    * Ffmpeg avicodec logging improved (Peter Smith and Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegAvicodecLogging
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegAvicodecLogging
    * Improved upon a few ambiguous log messages which may be emitted by the Event
      handling code with regards to Ffmpeg (Peter Smith)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LoggingEventFix
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/LoggingEventFix
    * Implemented a fix for the rare problem where some experienced that the
      move file names would only consist of the extension .mpg or .avi with no
      name in front. The root cause was the use of sprintf for appending to
      strings. (Mike Kenney and Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2005x09x05x133031
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x06x19x174238
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SupportQuestion2005x09x05x133031
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SupportQuestion2006x06x19x174238
    * Altered the risky use of sprintf to snprintf in all places related to
      use with config strings that can become very long (Kenneth Lavrsen)
    * Removed annoying debug messages (v4l_set_input really needed ?) in the FreeBSD
@@ -236,20 +236,20 @@ Bugfixes
    * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD (Angel Carpintero)
    * Fixed possible syntax error in configure related to MySQL (Angel Carpintero)
    * Avoid open file descriptor when connecting to network cameras fails (Peter Holik) 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/AvoidOpenfiledescriptors
    * Fixed http pause feature so that pausing thread 0 now pauses all threads.
      (GunnarSkjold)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x10x111239
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x07x10x111239
    * Put a new global mutex around avcodec_close to avoid problems with not thread
      safe functions in ffmpeg (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x04x07x164654
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x04x07x164654
    * On FreeBSD configure defines a redundant freebsd for motion. Fixed by replacing
      -D__freebsd_ by BSD macro  included in sys/param.h for BSD platforms.
      (JukkaUkkonen and Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x070417
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x07x08x070417
    * For BSD platforms changed to using native pthreads as default and adding
      linuxthreads as a optional parameter from configure. (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x07x08x071646
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x07x08x071646
    * Smartmask overlay feature did not set intensity correctly. (Kenneth Lavrsen)
 
 
@@ -257,14 +257,14 @@ Bugfixes
    * Fixed bug where variables time_last_frame and time_current_frame had been
      extended to also be used for snapshot feature but declaration was hidden
      between #ifdef HAVE_FFMPEG. (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x03x09x012244
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x03x09x012244
    * Fixed a bug that only allowed remote control of max 9 cameras. Now
      Motion can present up to 99 cameras in its http remote control interface
      (Angel Carpintero based on idea by Chuck Sheehan)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebHttpManyThreads
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/WebHttpManyThreads
    * text_changes now shows a '-' when motion detection is paused instead of
      just showing 0 (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2006x03x16x095713
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2006x03x16x095713
 
 3.2.5.1  Doc and man page correction
    * ffmpeg_filename has changed name to movie_filename to prepare for
@@ -285,30 +285,30 @@ Bugfixes
       * Remove cpu optimization (is broken)
    * Fixed memory leak in ffmpeg code. (Andrew Hamilton)
    * Fixed http control of pan and tilt (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x12x22x122649
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x12x22x122649
    * Fixed netcamera bug related to separating frames in an mjpeg stream.
      (Peter Holik). From mailing list 23 Dec 2005.
    * Fix related to connecting to the netcam (William Black)
      From mailing list 23 Dec 2005.
-   * Changed CHANGELOG to same bullet format as used by TWiki to make it easier
+   * Changed CHANGELOG to same bullet format as used by Foswiki to make it easier
      to write release notes (Kenneth Lavrsen)
    * Changed CREDITS to same bullet format as CHANGELOG (Kenneth Lavrsen)
    * Fixed sql_mask not initialised correctly (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x01x09x175603 
    * Fixed the management of strings from http remote control , setting to NULL 
      when they are set to "blank" and fixes a problem with despeckle , that didn't 
      allow to remove labeling action from http remote control. (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FixStringsAndDisableLabeling
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FixStringsAndDisableLabeling
    * Fix many typos in comments ( i ran aspell against the code ). Also there's a 
      fix to free cnt->eventtime_tm when motion exits. (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FixTypoInComments
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FixTypoInComments
    * Fix the problem that happens in FreeBSD and Debian Sarge because 
      version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Pete Shipley and Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x01x12x120335
    * Updated motion.spec. Changing D_FORTIFY_SOURCE=2 by D_FORTIFY_SOURCE=1 to fix
      problem related to building with ffmpeg. (Angel Carpintero)
    * Implemented fix for missed snapshots with slow network cameras (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x162149
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x02x07x162149
    * Added some constants in video.c function v4l_picture_controls() which can help
      people hack an optimal set of values for controlling auto brightness for their
      particular camera. For now I am do not want to add all of these to the already
@@ -316,19 +316,19 @@ Bugfixes
      permanently change the constants and add an additional auto brightness option.
      Or maybe a combined option that sets more constant based on an algorithm.
      (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x212816
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2006x02x07x212816
    * Fixed a syntax error in picture.c get_pgm() which caused the program to segfault 
      when a mask file size did not match the picture size. Now the program
      correctly gives an error message and continues without the mask. (Kenneth
      Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x08x150720
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x10x08x150720
    * Added Tilt support to stepper track. ( Angel Carpintero ).
    * CPU VIA Ezra C3 autodetection support added. (James Van Vleet)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/VIAEzraC3Patch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/VIAEzraC3Patch
    * Fixed mysql configure auto-detection for x64 systems. ( Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x03x02x152208
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SupportQuestion2006x03x02x152208
    * Added the ffmpeg_deinterlace feature (Andrew Hamilton)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionffmpegDeinterlace 	
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionffmpegDeinterlace 	
 
 3.2.4   Formal Release. Summary of changes
 
@@ -427,21 +427,21 @@ snap1
      We now encourage developers to ensure that new code is checked with
      --with-developer-flags and code made so that no new warnings shows originating
      from the motion sources.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ReduceWarningsPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ReduceWarningsPatch
    * Fixed error message with unknown config option (Bill Brack)
    * Fixed small mistake in allocating memory for cnt->imgs.common_buffer
      (Angel Carpintero).
    * Implemented a speed-up patch of the draw text feature (Peter Holik).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/DrawTextspeedup
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/DrawTextspeedup
    * http control updated: (null) messages replaced by "disabled", last parameter
      in conf/list are displayed correctly and only in Main thread. When motion runs
      with only one thread, it displays "No threads". (Angel Carpintero)
    * Enhanced compatibility with Lumenera (Bill Brack)
    * http control: selectbox instead of a textfield for changing boolean configs
      (Peter Holik and Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebhttpEnhancements.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/WebhttpEnhancements.
    * Introduced check for device image size being a multiple of 16 (Peter Holik).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamModulo16Patch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamModulo16Patch
    * Added the debian sub directory so that people can build the deb package
      (Angel Carpintero).
    * Sync configure.in.freebsd (adding support for jpeg-mmx, developer-flags and
@@ -452,7 +452,7 @@ snap1
      cnt struct around just to be able to print the thread number in the log and
      on the console. (Per Jönsson with additional removal of unused cnt by
      Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ThreadNrTlsPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ThreadNrTlsPatch
    * Moved the motion_loop initialisation into a new function motion_init
      (Bill Brack).
    * Removed old unused code related to read mode (not mmap) from V4L devices
@@ -481,7 +481,7 @@ snap1
 snap2
    * Simplified rotation code based on the fact that images must have dimensions
      that are a multiple of 16 (Per Jönsson)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/RotateSimplificationPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/RotateSimplificationPatch
    * Switchfilter feature repaired. It was called inside motion_detected()
      after overlays on cnt->img.out were added which meant that the feature also
      detected all the overlays, smartmasks, fixed mask and text. It is now moved
@@ -499,7 +499,7 @@ snap2
      and minimum_motion_frames images are time stamped before the event happens
      so %C in text_left/right does not have any effect on those images (Kenneth
      Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/EventConvertionSpecifierDiscussion
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/EventConvertionSpecifierDiscussion
    * Renamed some variables related to time to be better descriptive of function
      and type (Kenneth Lavrsen).
    * Added new option 'sql_user_text'. This can be defined with the same
@@ -511,10 +511,10 @@ snap2
 
 snap3
    * Enhancement to Netcam Code for Connection to Pixord Cameras (Bill Brack).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamFixPixordBug
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamFixPixordBug
    * Implemented fix to configure so that LDFLAGS from the environment are used
      when making the Makefile (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x09x15x185558
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x09x15x185558
    * Changed configure so that --with-jpeg-mmx is default off as a reaction to
      known problems seen when using the jpeg-mmx library (Angel Carpintero).
    * RPM specs file changed as suggested for use in the Livna repository.
@@ -523,28 +523,28 @@ snap3
      despeckle features are run. This should ensure that both algorithms work on
      raw unfiltered motion pixels which they both were designed for. (Kenneth
      Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x10x05x212444
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x10x05x212444
 
 snap4
    * Integrated NetcamWithFtp patch. To use ftp simply use a URL starting with
      ftp:// (Bill Brack). Code was additionally cleaned up by Kenneth Lavrsen.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamWithFTP
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamWithFTP
    * Changed error handling in vid_start so that failing to open the video
      device no longer causes an exit but a return with error code -1. (Kenneth
      Lavrsen)
    * Added the %t conversion specifier to show the thread number. (Angel
      Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ThreadConversionSpecifierPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ThreadConversionSpecifierPatch
    * Added help texts in conf.c and motion-dist.conf describing the %t
      specifier. Added a good example of use in motion-dist.conf. (Kenneth
      Lavrsen).
    * Fixed bug related to init of mutex in netcam code (Angel Carpintero).
    * Improved fix for netcam mutex init (Bill Brack).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamFixPthreadInit
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamFixPthreadInit
    * Netcam_ftp code fixes (Angel Carpintero and Asbjørn Pettersen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamWithFtpEnhancements
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamWithFtpEnhancements
    * Enhanced ffmpeg detection (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BetterFFmpegDetection
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BetterFFmpegDetection
    * Added two new conversion specifiers: %f which is filename (full path)
      and %n which is filetype (sqltype) valid in on_picture_save, on_movie_start,
      on_movie_end and sql_query. This also means that filename is no longer
@@ -584,7 +584,7 @@ snap5
    * Restored the function sigchild_handler so it contains the same code
      as before motion-3.2.1_snap9. They is done in an attempt to fix an old
      problem with zombie child processes that has shown up again.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x11x13x115016
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x11x13x115016
      (Kenneth Lavrsen).
    * Move the declaration of sig_handler_action and sigchild_action from
      the setup_signals function where they are local and will be destroyed
@@ -608,11 +608,11 @@ Release
      is re-enabled the minute the camera is standing still again. Feature
      originally made by Moshe Van Der Sterre. Kenneth Lavrsen extended it to
      be more generic.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PwcConfiguration
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/PwcConfiguration
    * New Feature: Motion is now also supported on MaxOSX with similar
      feature set as for Free BSD. See README.MacOSX for details how to install
      it. (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MacOSXPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MacOSXPatch
    * Added a work-around so people in FreeBSD that uses a capture card
      where input 1 is not tuner can use motion if frequency is set -1 in
      motion.conf or thread#.conf (Angel Carpintero).
@@ -629,11 +629,11 @@ Release
      not changed so that the ring buffer is used for timestamped images
      and the image used for detection is in a buffer cnt->imgs.image_virgin.
      (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x08x15x140701
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x08x15x140701
    * Auto brightness used the first image in ring buffer instead of the
      latest image and it used an image with time stamping. It now uses the new
      cnt->imgs.image_virgin buffer.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x08x15x160208
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x08x15x160208
    * Cleaned out unused code from httpd control (Angel Carpintero).
    * Option switch_filter used print_int instead of print_bool when motion.conf
      was saved (Kenneth Lavrsen).
@@ -704,15 +704,15 @@ Bug Fixes
 3.2.2   Detailed changes for 3.2.2
 snap1
    * Pthread deadlock in motion 3.2.1 fixed (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x26x125712
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x26x125712
    * http lockup bugfixes and ConvertSignalToSigaction only for webhttpd
      (Angel Carpintero)
    * alg_draw_location: Use temporary variables to store the values used in
      for() loops instead of compute them in each loop (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ImproveAlgDrawLocation
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ImproveAlgDrawLocation
    * Small speed boost to the function draw_textn (Andrew Hamilton and
      Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/DrawTextnImprovement
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/DrawTextnImprovement
    * Added two new convertion specifiers: %o for threshold and %Q for number
      of labels. (Kenneth Lavrsen)
    * Improved the config file description for pre_capture to get people to
@@ -723,7 +723,7 @@ snap2
      strdup to avoid segfault is target_dir parameter is not supplied in
      motion.conf. Moves out from signal handler the cleanup for pipe and mpipe.
      (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidCleanupSegfault
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/AvoidCleanupSegfault
    * Major code cleanup concerning signedness of chars all over the code to
      allow compilation with gcc4.0 (like in Fedora Core 4) without any
      errors or warnings. This will probably require that some of the not yet
@@ -752,27 +752,27 @@ snap4
    * Netcam First Header patch. If an error with jpeg decompression occurred at
      connecting to a mjpeg streaming webcam, this patch skips this jpeg and tries
      to decompress next jpeg up to MAX_HEADER_RETRIES (20) (Peter Holik).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamFirstHeader
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamFirstHeader
 
 snap5
    * Small improvement in framerate accuracy (Peter Holik).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FramerateAdjust
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FramerateAdjust
    * Fixed a bug in the autobrightness algorithm (Per Johnsson)
    * Fixed a bug in the webhttpd code related to pan/tilt. Bug was introduced in
      snap4 (Angel Carpintero, Kenneth Lavrsen).
    * Improved the labelling algorithm so that locate feature and tracking features
      includes all labelled areas above threshold (Joerg Weber).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ImprovedLabellingPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ImprovedLabellingPatch
    * Fixed bug reporting errors when creating symlink to last snap (Bill Maidment)
    * Changed all use of localtime to localtime_r which is threadsafe
      (Kenneth Lavrsen).
    * Implemented a modified version of the WebcamCompressInMemory so that Motion
      no longer uses the tmpfile() function for buffering the frames of the mjpeg
      stream (Peter Holik).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebcamCompressInMemory
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/WebcamCompressInMemory
    * Modified the WebcamCompressInMemory patch so that Motion now supports the
      mjpeg webcam stream while being setup for saving PPM images (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebcamCompressInMemory
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/WebcamCompressInMemory
    * Major clean-up of code in picture.c and webcam.c so that function names and
      variable names are less confusing. Also added many comments in picture.c.
      (Kenneth Lavrsen).
@@ -787,13 +787,13 @@ snap6
 
 snap7
    * Implemented WebcamShortWriteHandling patch (Bill Brack)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/WebcamShortWriteHandlingPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/WebcamShortWriteHandlingPatch
    * Implemented the libjpeg-mmx patch. Installing the MMX version of libjpeg
      can increase performance. Especially for machines with very little CPU power.
      It only modifies the configure script. If you do not have the libjpeg-mmx
      the configure script with ignore this and use the standard libjpeg.
      Note that RPMS will be built without this (Peter Holik and Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LibJpegMmx
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/LibJpegMmx
 
 snap8
    * Small code cleanup in webcam.c and picture.c and .h for the webcam code
@@ -803,19 +803,19 @@ snap8
      overflow every 71 minutes. (Bill Brack and Kenneth Lavrsen)
    * Implemented a fix/work around to a bug related to building and installing
      RPMs on Suse. (Paul Beltrani)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x07x14x212356
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x07x14x212356
    * Small speed optimization in the creation of reference frame (Peter Holik).
    * Complete rewrite of the Netcam code. Should fix many of the reported and
      still open netcam bugs. This is first release in a snapshot. Expect to find
      bugs. Testing is important. If you have a netcam please test this and report
      bugs.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamCodeRewritePatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamCodeRewritePatch
 
 snap9
    * Fixed bug related to disabled webcam or duplicate webcam port. Error log
      accept(): Socket operation on non-socket continuously written to syslog.
      (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x08x01x150922
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x08x01x150922
    * Fixed memory leak in webhttpd related to use of strdup (Angel Carpintero).
    * Improved the error reporting in the Netcam code and did a few minor
      corrections and code cleanups (Bill Brack).
@@ -823,21 +823,21 @@ snap9
      calls to printf and syslog. The implementation to actually use this has been
      implemented in video.c and the Netcam code files. Rest will be in next snap.
      This code change as no impact to the user (Bill Brack).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ErrorLoggingEnhancementPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ErrorLoggingEnhancementPatch
    * Fixed a bug in video.c so that VIDEO_PALETTE_GREY cameras now actually work
      (Bill Brack).
    * Implemented the conversion of signal to sigaction which should be more
      thread safe. Hopefully this still keeps Motion from making Zombies.
      (Christophe Grenier).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ConvertSignalToSigaction
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ConvertSignalToSigaction
    * Added new feature: Double size text. A new config option 'text_double' can
      be set 'on' and this scales the text to double size. Default is off.
      (Andrew Hamilton).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/TextScalingPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/TextScalingPatch
 
 snap10
    * Error Logging Enhancement Patch v 1.3 (Angel Carpintero) including:
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ErrorLoggingEnhancementPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ErrorLoggingEnhancementPatch
       * Populate the motion_log to the whole motion source code.
       * Fixed FreeBSD compilation.
       * Added the possibility to pass NULL as struct context *
@@ -853,9 +853,9 @@ snap10
       * fixed bug where initialization would be incomplete for invalid degrees
         of rotation
       * now uses motion_log for error reporting
-     http://www.lavrsen.dk/twiki/bin/view/Motion/RotateBswapFix
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/RotateBswapFix
    * Re-mplementation of optional Proxy Server for Network Cameras (Bill Brack).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamProxyServerPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamProxyServerPatch
    * Included a CODE_STANDARD text file to help new developers make patches
      that are easier to integrate without too much manual editing. (Kenneth
      Lavrsen)
@@ -864,7 +864,7 @@ snap10
 snap11
    * Updated the ffmpeg.c code so that Motion can now be built with ffmpeg CVS
      release from the June/July 2005 timeframe (Per Jönsson).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegCodecPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegCodecPatch
    * Improved error handling of missing picture frames from camera. Especially
      network cameras will often not be able to provide a picture frame from time
      to time. Motion would retry before and eventually and rather quickly exit
@@ -884,7 +884,7 @@ snap11
         "Without Locking" portion of his proposal).
      Version 2 however does not seems to recover when an mjpeg stream resumes
      after a period of not being available. (Bill Brack)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamErrorImprovementPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamErrorImprovementPatch
    * Note: Snap11 release as a developer sync release. Bug reports welcome.
      FreeBSD code changes not tested yet.
 
@@ -897,12 +897,12 @@ Release
    * http-control: Fixed segfault when motion is restarted from command line
      ( kill -s 1 pid_motion ). Improved control code so Motion can Restart and
      Finish 'smoothly'. (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionHttpControl
    * Changed the 5 second missed camera signal timeout to 30 seconds. (Kenneth
      Lavrsen)
    * Fixed bug where an extra jpeg is saved if you have output_normal=best
      and you stop motion after an event has ended. (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x08x05x173526
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x08x05x173526
 
 
 
@@ -910,19 +910,19 @@ Release
 snap1
    * Major new feature. XMLRPC is replaced by a simpler http remote control
      interface (implemented by Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionHttpControl
 
 snap2
    * Fixed netcam->userpass problem (Angel Carpintero)
    * Added support in configure for athlon64 from
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x30x190907
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x30x190907
      (Angel Carpintero and William M Brack)
    * Fixed some gcc warnings (William M Brack)
    * Code cleanup from a valgrind analysis (William M. Brack).
 
 snap3
    * Added Best Preview Patch (Joerg Weber)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BestPreviewShot
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BestPreviewShot
 
 snap4
    * Fix for tracking control with http control (Angel Carpintero)
@@ -932,7 +932,7 @@ snap4
      for daemon mode debugging.
      The patch is still being worked on and is not finished.
      Changes in the FreeBSD code are not yet tested.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/SetupModePatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/SetupModePatch
      Remove most command line options and replace them by an option to specify
      location to motion.conf and a few options related to setting up motion.
      (Joerg Weber). This is also included in SetupModePatch.
@@ -948,7 +948,7 @@ snap5
 
 snap6
    * Netcam fixes and debug code by Christopher Price
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamStabilityPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamStabilityPatch
      snap5_post1_video.c and snap5-post1 patches
    * Fixed netcam startup race condition.
    * Refactored image handling back to single unified function
@@ -1017,20 +1017,20 @@ snap9
 snap10
    * Fixed a problem when compiling with --without-v4l configuration.
      (Philip Marien)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x03x27x112843
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x03x27x112843
    * Threw away the file descriptor leak fix from snap 9 because it caused
      more trouble than it fixed. Removed the close_anything_open() and the
      cnt_list.control_socket_server field. Replaced it all with a simple
      piece of code that all server daemons call when started: setsid() followed
      by for (i=getdtablesize(); i>2; --i) close(i). Dirty and simple.
      (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x03x21x070534
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x03x21x070534
    * Fixed a bug where rate of fetching picture frames was disturned by
      the signal SIG_CHLD from exec_command programs terminating. The symptom
      was that the number of post_capture frames became inaccurate and motion
      in mpegs did not have constant time between frames. (Kenneth Lavrsen)
    * Fixed a bug where motion did not work with gap=1 (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x30x073616
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x30x073616
    * Added the feature gap=0 which now also works. It disables gap completely
      so that one single mpeg file is created. You can end the event from the
      remote control interface make movie feature using for example cron.
@@ -1058,11 +1058,11 @@ snap11
      Movie starts (mpeg file opened) --- onmpeg --- on_movie_start
      Movie ends (mpeg file closed) --- onffmpegclose --- on_movie_end
      Motion detected  --- New! --- on_motion_detected
-     http://www.lavrsen.dk/twiki/bin/view/Motion/OnXxxCommandsPatch and
-     http://www.lavrsen.dk/twiki/bin/view/Motion/OnXxxxFeatureDiscussion
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/OnXxxCommandsPatch and
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/OnXxxxFeatureDiscussion
      (Joerg Weber)
    * More Netcam Stability Fixes (snap10-post1-6) (Christopher Price)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamStabilityPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamStabilityPatch
       * Destroy mutexes in netcam_cleanup().
       * Add reconnection for netcam_start() - this may block other cameras
          from starting up!.
@@ -1093,11 +1093,11 @@ snap11
 
 snap12
    * Fixed a bug in the rgb2yuv420p function. (Daniel Ladd)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x03x30x011107
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x03x30x011107
    * Fixed a bug of locate feature for movement images combined with the
      new output_normal best feature (Joerg Weber)
    * More Netcam Stability Fixes (snap11-post1-4) (Christopher Price)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamStabilityPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamStabilityPatch
       * Reworked thread signal/wait conditions, should fix some race conditions.
       * Use gettimeofday() to determine thread timeouts, results in better accuracy.
       * Adjusted condition timeouts to smaller values due to usage of gettimeofday()
@@ -1112,7 +1112,7 @@ snap12
       * Fix bug in streaming camera without content-length, recent mod broke.
       * Fix bug in startup of single image reads without content-length.
    * Motion Guide refactored completely for 3.2.1 with better web navigation and
-     auto generation of pages. Makefile updated so that the Motion TWiki topic
+     auto generation of pages. Makefile updated so that the Motion Foswiki topic
      MotionGuideOneLargeDocument is fetched when updating the guide and making
      releases. (Kenneth Lavrsen).
 
@@ -1135,7 +1135,7 @@ snap13
       * Userpass now allowed in url (http://user:pass@example.com/).
        Netcam_userpass has precedence, it will override a userpass embedded in
        the url.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/NetcamStabilityPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/NetcamStabilityPatch
 
 snap14
    * Added basic authentication to the http control interface introducing new
@@ -1150,30 +1150,30 @@ snap14
 snap15
    * Added new feature which shows the fixed mask (in addition to the smart mask)
      in bright red on the Motion type images (Joerg Weber).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FixedMaskFileOnMotionImagesPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FixedMaskFileOnMotionImagesPatch
    * Added new feature. When you specify a mask file in the config file and start
      Motion, and the mask file does not exist, Motion will create a new clear
      (white) mask file for you in the right size. Then it is easy to simply
      open the file in your favourite paint program and add the masking in black
      (Joerg Weber).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FixedMaskFileOnMotionImagesPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FixedMaskFileOnMotionImagesPatch
    * Fixed a bug in the low_cpu feature where cpu load increased instead of
      decreasing because the framerate calculations were completely wrong. This was
      an old bug introduced in 3.0.1 (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x04x24x205933
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x04x24x205933
    * Improved the auto-brightness algorithm. When auto-brightness is enabled
      the brightness option becomes a target value for the brightness level.
      This should also close a bug report (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x02x26x195358
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x02x26x195358
    * http interface small fixes (motion-3.2.1_snap14-small-fixes 1.1) incl
      Add 'back' link to response_client errors (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionHttpControl
    * Started adding tuner_number as option. This is not fully implemented. First
      code is added and rest will be done in next snap. (Kenneth Lavrsen)
 
 snap16
    * Made the http control interface more RFC compliant (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x02x180550
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x02x180550
    * Made the http control HTML responses nicer to look at as sources and
      therefore easier to debug errors (Kenneth Lavrsen).
    * Code style cleanup of webhttpd.c (Kenneth Lavrsen).
@@ -1182,23 +1182,23 @@ snap16
      Carpintero. However this fix made Firefox flicker even more than it normally
      does. Final fix which works in both Palantir client, Firefox and Cambozola
      was made by Kenneth Lavrsen. This closes the following bugs:
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x02x205307,
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x07x042849
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x02x205307,
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x07x042849
 
 snap17
    * Fixed small bug when pre_capture buffer is resized during operation.
      (Joerg Weber).
    * In httpd control code: Fixed RAW syntax following API specs. (Angel
      Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionHttpControl
    * Added new conversion specifiers: %D (diffs), (noise) %K (motion center x),
      %L (motion center y), %i (locate width x) and %J (locate width y). These
      changes also required a refactoring of the alg_locate code. This change
      is part of the implementation of a generic tracking feature and it enables
      implementing external programs that can perform simple prediction features.
      (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ExtendReplaceConversionSpecifiersDiscussion
-     http://www.lavrsen.dk/twiki/bin/view/Motion/GenericTrackingPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ExtendReplaceConversionSpecifiersDiscussion
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/GenericTrackingPatch
    * Fixed a bug in switchfilter which caused motion detection to not work
      when the feature was enabled (Kenneth Lavrsen).
 
@@ -1206,26 +1206,26 @@ Release
    * Change the working directory to / in daemon mode. This way you don't have
      to kill motion to umount the partition from where you start it. (Christophe
      Grenier)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ChdirNetCamWgetPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ChdirNetCamWgetPatch
    * In netcam-wget header_get() didn't always in add a \0 string terminator.
      This was fixed by Christophe Grenier
-     http://www.lavrsen.dk/twiki/bin/view/Motion/ChdirNetCamWgetPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/ChdirNetCamWgetPatch
    * Fix for Unknown content type with lumenera cameras (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x06x174416
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x06x174416
    * MotionHttpControl Patch motion-3.2.1_snap18-pre1 v,1.0 19 May 2005.
      Fixed some HTTP response codes and added header copyrights. (Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpControl
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionHttpControl
    * Implemented pthread fix by Christophe Grenier.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PthreadFixPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/PthreadFixPatch
    * Fixed problem compiling "ffmpeg reports only YUV420 is supported" when
      ffmpeg is a recent CVS version.     (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x22x213229
-   * Man page updated. It is now semi-autogenerated in the Motion TWiki
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x22x213229
+   * Man page updated. It is now semi-autogenerated in the Motion Foswiki
      (Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionOptionsAlphabeticalManpage
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionOptionsAlphabeticalManpage
    * Bug fix in netcam code: Sometimes motion try to free an invalid memory area
      (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x05x21x105335
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x05x21x105335
    * Small configure fix related to --without-v4l (Angel Carpintero)
    * Fixes for http control HTML code (Angel Carpintero)
    * Added init script to RPM (Angel Carpintero)
@@ -1235,15 +1235,15 @@ Release
 snap1
    * Fixed bug which caused Motion 3.1.18 fail to save timelapse mpegs when
      setting ffmpeg_timelapse = 1 (fixed by Michael Reuschling)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x31x211756
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x31x211756
    * Fixed several bugs in new netcam code introduced in 3.1.18
      (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x16x030209
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x02x01x071546
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x02x03x035918
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x16x030209
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x02x01x071546
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x02x03x035918
    * Added patch that enables Motion to work with vloopback version 0.94
      and kernel 2.6.10+. (patch by William M Brack).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionAndVloopbackVideoDotCPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionAndVloopbackVideoDotCPatch
 
 snap2
    * Following bugfixes all by Angel Carpintero
@@ -1307,17 +1307,17 @@ Detailed changes for all 3.1.18 snapshot releases since 3.1.17
 snap1
    * Removed the Berkeley mpeg feature (code commented out)
    * Implemented a bugfixed version of
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BrightnessContrastPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BrightnessContrastPatch
      Released as snapshot for developers to merge other patches.
      The snap1 is not recommended for normal use.
 
 snap2
    * Improved the Makefile with automatic check of dependencies and
      nicer output for the user.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MakefileWithAutoDependencies
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MakefileWithAutoDependencies
    * Implemented first phase of the rotate patch. Need to fix the storage
      method for image height and width
-     http://www.lavrsen.dk/twiki/bin/view/Motion/RotatePatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/RotatePatch
 
 snap3
    * Implemented phase 2 of the rotate patch
@@ -1327,7 +1327,7 @@ snap4
    * Added the new smart mask feature. It is working but it is still under
      development. It currently outputs an extra smart mask timelapse movie
      when the normal timelapse is enabled. This will be removed in the final
-     version. http://www.lavrsen.dk/twiki/bin/view/Motion/PatchSmartMask
+     version. http://www.lavrsen.dk/foswiki/bin/view/Motion/PatchSmartMask
    * Added a new config option --without-optimizecpu which disables the
      CPU specific compiler optimizations introduced with the rotate phase 2
      patch. The purpose of the new option is to enable a packager to build
@@ -1344,7 +1344,7 @@ snap4
      getting lost when saving with xmlrpc. For text_left and text_right
      Motion now puts the string in quotation marks if the value starts with
      a leading space.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2004x10x24x135840
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2004x10x24x135840
 
 snap5
    * Implemented the November 10 update for smartmask
@@ -1353,7 +1353,7 @@ snap5
 
 snap6
    * Merged in the DilateNineSpeedPatch
-     http://www.lavrsen.dk/twiki/bin/view/Motion/DilateNineSpeedPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/DilateNineSpeedPatch
    * Changed a few image char definitions to unsigned char. Still many to fix.
 
 snap7
@@ -1364,10 +1364,10 @@ snap7
      The patch is now in ReleasedScheduled state for 3.1.18.
    * Implemented Angel Carpintero's FreeBSD auto-detection CPU/ARCH fix.
    * Merged in Per Johnsson's DilateFiveSpeedPatch
-     http://www.lavrsen.dk/twiki/bin/view/Motion/DilateFiveSpeedPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/DilateFiveSpeedPatch
    * Removed the prediction feature from the code (commented out for now).
    * Included fix by Jan X.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2004x11x13x202132
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2004x11x13x202132
 
 snap8
    * Implemented an improvement of Smartmask so that the mask is cleared when
@@ -1377,40 +1377,40 @@ snap8
    * Improved the picture control function so that cameras are only probed
      when needed to avoid USB errors. (Kenneth Lavrsen)
    * Implemented new ffmpeg patch (Per Jönsson)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/FfmpegPatch049
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegPatch049
    * Implemented new preview patch (Joerg Weber)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewShotsPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/PreviewShotsPatch
    * Removed commented code from obsolete Berkeley and Prediction features
    * Implemented labelling speed patch (Per Jönsson)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LabelingSpeedPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/LabelingSpeedPatch
 
 snap9
    * Implemented Streaming Netcam Without Curl which enables connecting to
      network cameras both with single jpeg frame mode and streaming mjpeg
      mode. This enables much higher framerates with Netcams. (by Christopher
      Price and Angel Carpintero).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/StreamingNetcamWithoutCurl
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/StreamingNetcamWithoutCurl
    * Implemented a significant speed improvement in the motion detection
      algorithm (by Per Jönsson).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/AlgDiffStandardMmxPatch
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/AlgDiffStandardMmxPatch
    * Fixed a small bug which caused in jumpy mpeg1 videos with ffmpeg 0.4.8.
 
 snap10
    * Corrected a small error in the usage help text
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x05x174139
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x05x174139
    * Improved the help text for config option night_compensate in docs,
      conf.c, motion man pages and config file.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x06x103939
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x06x103939
    * Improved the Netcam patch (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/pub/Motion/StreamingNetcamWithoutCurl/
+     http://www.lavrsen.dk/foswiki/pub/Motion/StreamingNetcamWithoutCurl/
      (pre2 patch fixes problem with not detecting Content-length and segfaults
      in netcam)
    * Improved the signal handling of ctrl-C as suggested by Per Jonsson
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x06x181426
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x06x181426
    * Implemented a POSIX compliant SIGCHLD signal handler as replacement for
      the traditional signal(SIGCHLD, SIG_IGN) which can cause floods of
      warnings in some RedHat versions. (Angel Carpintero and Kenneth Lavrsen)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2004x10x26x134906
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2004x10x26x134906
    * Changed the reporting of the changes of noise detection level so that
      it is only displayed in the console (daemon off) when the always_changes
      option is enabled. (Kenneth Lavrsen)
@@ -1423,7 +1423,7 @@ snap11
    * The noise tune value displayed in the upper left corner along with
      number of changed pixels is no longer displayed (was there for debugging).
    * Improved the Netcam patch (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/pub/Motion/StreamingNetcamWithoutCurl/
+     http://www.lavrsen.dk/foswiki/pub/Motion/StreamingNetcamWithoutCurl/
      (pre3 reconnection feature added)
    * Changed the SIGCHLD handler introduced in snap10 so that it is a shorter
      and faster function. Disabled this handler in the xmlrpc thread as this
@@ -1434,7 +1434,7 @@ snap11
      very high or the time was changes by ntp. Motion will now catch up a few
      seconds later if this happens. Also fixed the code for monthly rollover
      (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x23x133554
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x23x133554
 
 Release
    * Fixed a bug in the timelapse feature. Both the rollover events of the
@@ -1442,7 +1442,7 @@ Release
      very high or the time was changes by ntp. Motion will now catch up a few
      seconds later if this happens. Also fixed the code for monthly rollover
      (Kenneth Lavrsen).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2005x01x23x133554
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2005x01x23x133554
    * Small improvement in timelapse feature so that an image is added when
      the new mpeg is created and not waiting till the following timelapse
      (Kenneth Lavrsen).
@@ -1456,15 +1456,15 @@ snap1
      when Motion receives SIGTERM or SIGHUB.
    * Implemented fix for compiling errors when building the FreeBSD version
      without bktr support.
-     (http://www.lavrsen.dk/twiki/bin/view/Motion/FreeBSDFixCompile)
+     (http://www.lavrsen.dk/foswiki/bin/view/Motion/FreeBSDFixCompile)
    * Commented out many unnecessary syslog debug only messages. The commented
      out code was first patched by Mike Lees patch related to syslog causing
      instability and hanging motion processes.
-     (http://www.lavrsen.dk/twiki/bin/view/Motion/SyslogEventPatch).
+     (http://www.lavrsen.dk/foswiki/bin/view/Motion/SyslogEventPatch).
    * Included Kalle Andersson's patch that ensures that Motion detaches from
      the stdin and stout devices so that a secure shell that was used to start
      Motion in daemon mode does not hang when you exit the shell.
-     (http://www.lavrsen.dk/twiki/bin/view/Motion/DaemonDetachFromSTDIO)
+     (http://www.lavrsen.dk/foswiki/bin/view/Motion/DaemonDetachFromSTDIO)
 
 snap2
    * Implemented a new lightswitch feature so that is now triggers lightswitch
