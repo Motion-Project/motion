@@ -33,7 +33,7 @@ Set type of log (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)
 Full path and filename for process id file (pid file). E.g /var/run/motion.pid. Default is not defined. Pid file is only created when Motion is started in daemon mode.
 .TP
 .B \-l
-Full path and filename of log file.
+Full path and filename of log file. ( use -l syslog to log to stderr and syslog )
 .TP
 .SH "CONFIG FILE OPTIONS"
 These are the options that can be used in the config file.
@@ -208,7 +208,7 @@ Use a file to save logs messages, if not defined stderr and syslog is used.
 .B logfile string
 Values: Max 4095 characters / Default: Not defined
 .br
-Use a file to save logs messages, if not defined stderr and syslog is used.
+Use a file to save logs messages, if not defined stderr and syslog is used. ( if syslog is set then will log to stderr and syslog )
 .TP
 .B log_level integer
 Values: 1 - 9 / Default: 6
