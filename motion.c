@@ -2064,6 +2064,10 @@ static void *motion_loop(void *arg)
         if (cnt->conf.setup_mode) {
             event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
             event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
+#ifdef HAVE_SDL
+            if (cnt_list[0]->conf.sdl_threadnr == cnt->threadnr)
+                event(cnt, EVENT_SDL_PUT, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
+#endif
         } else {
             event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL, 
                   &cnt->pipe, &cnt->current_image->timestamp_tm);
@@ -2071,6 +2075,11 @@ static void *motion_loop(void *arg)
             if (!cnt->conf.stream_motion || cnt->shots == 1)
                 event(cnt, EVENT_STREAM, cnt->current_image->image, NULL, NULL, 
                       &cnt->current_image->timestamp_tm);
+#ifdef HAVE_SDL
+            if (cnt_list[0]->conf.sdl_threadnr == cnt->threadnr)
+                event(cnt, EVENT_SDL_PUT, cnt->current_image->image, NULL, NULL,
+                      &cnt->current_image->timestamp_tm);
+#endif
         }
 
         event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
@@ -2435,8 +2444,12 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     }
 
     set_log_level(cnt_list[0]->log_level);   
-   
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started");
+
+#ifdef HAVE_SDL
+     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started with SDL support");
+#else
+     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started");
+#endif
 
     if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file, "syslog", 6))) {
         set_log_mode(LOGMODE_FILE);
@@ -2696,6 +2709,12 @@ int main (int argc, char **argv)
             start_motion_thread(cnt_list[i], &thread_attr);
         }
 
+#ifdef HAVE_SDL
+        if (cnt_list[0]->conf.sdl_threadnr > 0)
+            sdl_start(cnt_list[cnt_list[1] != NULL ? cnt_list[0]->conf.sdl_threadnr : 0]->conf.width,
+                      cnt_list[cnt_list[1] != NULL ? cnt_list[0]->conf.sdl_threadnr : 0]->conf.height);
+#endif
+
         /* 
          * Create a thread for the control interface if requested. Create it
          * detached and with 'motion_web_control' as the thread function.
@@ -2775,6 +2794,11 @@ int main (int argc, char **argv)
             SLEEP(2, 0);
 
     } while (restart); /* loop if we're supposed to restart */
+
+#ifdef HAVE_SDL
+    sdl_stop();
+#endif
+
 
     // Be sure that http control exits fine
     cnt_list[0]->finish = 1;

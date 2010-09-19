@@ -64,6 +64,9 @@ struct config {
     int ffmpeg_vbr;
     int ffmpeg_deinterlace;
     const char *ffmpeg_video_codec;
+#ifdef HAVE_SDL
+    int sdl_threadnr;
+#endif
     int ipv6_enabled;
     int stream_port;
     int stream_quality;

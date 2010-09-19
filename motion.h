@@ -62,6 +62,11 @@
 #include "stream.h"
 #include "webhttpd.h"
 
+#ifdef HAVE_SDL
+#include "sdl.h"
+#endif
+
+
 /**
  * ATTRIBUTE_UNUSED:
  *

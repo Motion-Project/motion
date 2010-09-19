@@ -37,7 +37,7 @@ VIDEO_OBJ    = @VIDEO@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(VIDEO_OBJ) \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
-			   stream.o md5.o @FFMPEG_OBJ@
+			   stream.o md5.o @FFMPEG_OBJ@ @SDL_OBJ@
 SRC          = $(OBJ:.o=.c)
 DOC          = CHANGELOG COPYING CREDITS INSTALL README motion_guide.html
 EXAMPLES     = *.conf motion.init-Debian motion.init-Fedora motion.init-FreeBSD.sh

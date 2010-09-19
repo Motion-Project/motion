@@ -24,6 +24,9 @@
 /* Define to 1 if you have PostgreSQL support */
 #undef HAVE_PGSQL
 
+/* Define to 1 if you have SDL support */
+#undef HAVE_SDL
+
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 

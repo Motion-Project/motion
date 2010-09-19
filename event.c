@@ -233,6 +233,16 @@ static void event_stream_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
         stream_put(cnt, img);
 }
 
+#ifdef HAVE_SDL
+static void event_sdl_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
+            unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
+{
+    sdl_put(img, cnt->imgs.width, cnt->imgs.height);
+}
+#endif
+
+
 #if !defined(WITHOUT_V4L) && !defined(BSD)
 static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
@@ -791,6 +801,12 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
+#ifdef HAVE_SDL
+    {
+    EVENT_SDL_PUT,
+    event_sdl_put
+    },
+#endif
 #if !defined(WITHOUT_V4L) && !defined(BSD)
     {
     EVENT_IMAGE,

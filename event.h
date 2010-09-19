@@ -30,6 +30,7 @@
 #define EVENT_AREA_DETECTED     17
 #define EVENT_CAMERA_LOST       18
 #define EVENT_FFMPEG_PUT        19
+#define EVENT_SDL_PUT           20
 
 
 typedef void(* event_handler)(struct context *, int, unsigned char *, char *, void *, struct tm *);

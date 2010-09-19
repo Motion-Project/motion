@@ -206,6 +206,45 @@ else
 fi
 
 
+#
+# Check for sdl library
+#
+SDL_SUPPORT="yes"
+AC_ARG_WITH(sdl,
+[  --without-sdl           Compile without sdl support to get stream in SDL window.],
+[],
+[])
+AC_MSG_CHECKING(for sdl)
+if test "x$withval" = "xno"; then
+	AC_MSG_RESULT(skipped)
+    SDL_SUPPORT="no"
+else
+	if test "${FreeBSD}" != ""; then
+		CONFIG_SDL='sdl11-config'
+	else
+		CONFIG_SDL='sdl-config'
+	fi
+	if test -z "`($CONFIG_SDL --version) 2>/dev/null`" ;then
+		AC_MSG_RESULT(no)
+		if test "$withval" = "yes"; then
+			echo ""
+			echo "****************************************************"
+			echo "* sdl-config could not be found. Please install it *"
+			echo "* and remove the --with-sdl configure argument.    *"
+			echo "* libSDL can be found at http://www.libsdl.org     *"
+			echo "****************************************************"
+			echo ""
+		fi
+	else
+		AC_MSG_RESULT(yes)
+		SDL_SUPPORT="yes"
+		TEMP_LIBS="$TEMP_LIBS `${CONFIG_SDL} --libs`"
+		TEMP_CFLAGS="${TEMP_CFLAGS} `${CONFIG_SDL} --cflags`"
+		AC_DEFINE([HAVE_SDL],1,[Define to 1 if you have SDL support])
+		SDL_OBJ="sdl.o"
+		AC_SUBST(SDL_OBJ)
+	fi
+fi
 
 #
 # Check for the special mmx accelerated jpeg library
@@ -1194,6 +1233,12 @@ else
 	else
         echo "V4L2 support:        No"
 	fi
+fi
+
+if test "${SDL_SUPPORT}" = "yes"; then
+	echo "SDL support:         Yes"
+else
+	echo "SDL support:         No"
 fi
 
 if test "${FFMPEG_OK}" = "found"; then

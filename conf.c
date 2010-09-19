@@ -83,6 +83,9 @@ struct config conf_template = {
     ffmpeg_bps:                     DEF_FFMPEG_BPS,
     ffmpeg_vbr:                     DEF_FFMPEG_VBR,
     ffmpeg_video_codec:             DEF_FFMPEG_CODEC,
+#ifdef HAVE_SDL
+    sdl_threadnr:                   0,
+#endif
     ipv6_enabled:                   0,
     stream_port:                    0,
     stream_quality:                 50,
@@ -757,6 +760,19 @@ config_param config_params[] = {
     print_bool
     },
 #endif /* HAVE_FFMPEG */
+#ifdef HAVE_SDL
+     {
+    "sdl_threadnr",
+    "\n############################################################\n"
+    "# SDL Window\n"
+    "############################################################\n\n"
+    "# Number of motion thread to show in SDL Window (default: 0 = disabled)",
+    1,
+    CONF_OFFSET(sdl_threadnr),
+    copy_int,
+    print_int
+    },
+#endif /* HAVE_SDL */
     {
     "use_extpipe",
     "\n############################################################\n"
@@ -2320,11 +2336,10 @@ static void usage()
     printf("-d level\t\tLog level (1-9) (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). default: 6 / NTC.\n");
     printf("-k type\t\t\tType of log (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
-    printf("-l log file \t\tFull path and filename of log file. ( use -l syslog to log to stderr and syslog )\n");
+    printf("-l log file \t\tFull path and filename of log file.\n");
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");
     printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
-    printf("e.g run motion debugging video only , no daemon and logging to stderr and syslog :\n\n\t ./motion -n -l syslog -d 9 -k VID\n");
     printf("\n");
 }
