@@ -313,7 +313,7 @@ ffmpeg_deinterlace off
 ############################################################
 
 # Number of motion thread to show in SDL Window (default: 0 = disabled)
-0
+sdl_threadnr 0
 
 ############################################################
 # External pipe to video encoder
