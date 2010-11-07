@@ -37,6 +37,11 @@
 #    endif /* __GNUC__ */
 #endif /* LIBAVCODEC_BUILD > 4680 */
 
+#if defined LIBAVFORMAT_VERSION_MAJOR && defined LIBAVFORMAT_VERSION_MINOR 
+#if LIBAVFORMAT_VERSION_MAJOR < 53 && LIBAVFORMAT_VERSION_MINOR < 45
+    #define GUESS_NO_DEPRECATED 
+#endif
+#endif
 
 #if LIBAVFORMAT_BUILD >= 4616
 /*
@@ -253,7 +258,8 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 void ffmpeg_init()
 {
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg LIBAVCODEC_BUILD %d"
-               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, LIBAVFORMAT_BUILD);
+               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, 
+               LIBAVFORMAT_BUILD);
     av_register_all();
 
 #if LIBAVCODEC_BUILD > 4680
@@ -307,8 +313,11 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
          * We use "mpeg1video" for raw mpeg1 format. Using "mpeg" would
          * result in a muxed output file, which isn't appropriate here.
          */
-        of = guess_format("mpeg1video", NULL, NULL);
-
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);        
+#else
+        of = av_guess_format("mpeg1video", NULL, NULL);
+#endif 
         /* But we want the trailer to be correctly written. */
         if (of)
             of->write_trailer = mpeg1_write_trailer;
@@ -321,26 +330,44 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 #endif
     } else if (strcmp(codec, "mpeg4") == 0) {
         ext = ".avi";
-        of = guess_format("avi", NULL, NULL);
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);
+#else        
+        of = av_guess_format("avi", NULL, NULL);
+#endif        
     } else if (strcmp(codec, "msmpeg4") == 0) {
         ext = ".avi";
-        of = guess_format("avi", NULL, NULL);
-
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);
+#else        
+        of = av_guess_format("avi", NULL, NULL);
+#endif
         /* Manually override the codec id. */
         if (of)
             of->video_codec = CODEC_ID_MSMPEG4V2;
 
     } else if (strcmp(codec, "swf") == 0) {
         ext = ".swf";
-        of = guess_format("swf", NULL, NULL);
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);
+#else        
+        of = av_guess_format("swf", NULL, NULL);
+#endif        
     } else if (strcmp(codec, "flv") == 0) {
         ext = ".flv";
-        of = guess_format("flv", NULL, NULL);
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);
+#else        
+        of = av_guess_format("flv", NULL, NULL);
+#endif        
         of->video_codec = CODEC_ID_FLV1;
     } else if (strcmp(codec, "ffv1") == 0) {
         ext = ".avi";
-        of = guess_format("avi", NULL, NULL);
-
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);
+#else
+        of = av_guess_format("avi", NULL, NULL);
+#endif
         /*
          * Use the FFMPEG Lossless Video codec (experimental!).
          * Requires strict_std_compliance to be <= -2
@@ -350,7 +377,11 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 
     } else if (strcmp(codec, "mov") == 0) {
         ext = ".mov";
-        of = guess_format("mov", NULL, NULL);
+#ifdef GUESS_NO_DEPRECATED
+        of = guess_format("mpeg1video", NULL, NULL);
+#else        
+        of = av_guess_format("mov", NULL, NULL);
+#endif
     } else {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg_video_codec option value"
                    " %s is not supported", codec);
