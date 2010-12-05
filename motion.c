@@ -664,9 +664,12 @@ static int motion_init(struct context *cnt)
 
 #ifdef HAVE_MYSQL
     if (cnt->conf.mysql_db) {
+        // close database to be sure that we are not leaking
+        mysql_close(cnt->database);
+
         cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
         mysql_init(cnt->database);
-
+        
         if (!mysql_real_connect(cnt->database, cnt->conf.mysql_host, cnt->conf.mysql_user,
             cnt->conf.mysql_password, cnt->conf.mysql_db, 0, NULL, 0)) {
             motion_log(LOG_ERR, 0, "Cannot connect to MySQL database %s on host %s with user %s",
@@ -874,6 +877,18 @@ static void motion_cleanup(struct context *cnt)
         free(cnt->eventtime_tm);
         cnt->eventtime_tm = NULL;
     }
+
+#ifdef HAVE_MYSQL 
+    if (cnt->conf.mysql_db) { 
+        mysql_close(cnt->database); 
+    }
+#endif /* HAVE_MYSQL */
+
+#ifdef HAVE_PGSQL
+
+#endif /* HAVE_PGSQL */ 
+
+
 }
 
 /**
