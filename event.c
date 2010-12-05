@@ -140,6 +140,9 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
                            mysql_error(cnt->database), error_code);
                 /* Try to reconnect ONCE if fails continue and discard this sql query */
                 if (error_code >= 2000) {
+                    // Close connection before start a new connection
+                    mysql_close(cnt->database);
+
                     cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
                     mysql_init(cnt->database);
 

@@ -825,7 +825,10 @@ static int motion_init(struct context *cnt)
 #endif /* HAVE_SQLITE3 */
 
 #ifdef HAVE_MYSQL
-        if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {               
+        if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) { 
+            // close database to be sure that we are not leaking
+            mysql_close(cnt->database);
+
             cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
 
@@ -1044,6 +1047,16 @@ static void motion_cleanup(struct context *cnt)
         free(cnt->eventtime_tm);
         cnt->eventtime_tm = NULL;
     }
+
+#ifdef HAVE_MYSQL
+    if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {    
+        mysql_close(cnt->database); 
+    }
+#endif /* HAVE_MYSQL */
+
+#ifdef HAVE_PGSQL
+
+#endif /* HAVE_PGSQL */ 
 
 #ifdef HAVE_SQLITE3    
     /* Close the SQLite database */
