@@ -24,7 +24,7 @@
 #define NORM_NTSC       1
 #define NORM_SECAM      2
 #define NORM_PAL_NC     3
-#define IN_DEFAULT      8
+#define IN_DEFAULT     -1
 #define IN_TV           0
 #define IN_COMPOSITE    1
 #define IN_COMPOSITE2   2
