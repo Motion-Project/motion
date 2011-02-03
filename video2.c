@@ -252,10 +252,6 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
     struct v4l2_standard standard;
     v4l2_std_id std_id;
 
-    /*if (in == IN_DEFAULT)
-        in = IN_TV;
-    */
-
     /* Set the input. */
     memset(&input, 0, sizeof (input));
     if (in == IN_DEFAULT)

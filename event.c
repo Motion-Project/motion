@@ -155,7 +155,13 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
                                    cnt->conf.database_host, cnt->conf.database_user,
                                    mysql_error(cnt->database));
                     } else {
-                        mysql_query(cnt->database, sqlquery);
+                        MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to Mysql database '%s' Succeed",
+                                   cnt->conf.database_dbname);
+                        if (mysql_query(cnt->database, sqlquery) != 0) {
+                            int error_code = mysql_errno(cnt->database);
+                            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: after re-connection Mysql query failed %s error code %d",
+                                       mysql_error(cnt->database), error_code);
+                        }
                     }
                 }
             }
@@ -168,10 +174,27 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 
             res = PQexec(cnt->database_pg, sqlquery);
 
-            if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query failed");
+            if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
+
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Connection to PostgreSQL database '%s' failed: %s",
+                           cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
+                
+                // This function will close the connection to the server and attempt to reestablish a new connection to the same server, 
+                // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
+                PQreset(cnt->database_pg);
+
+                if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
+                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Re-Connection to PostgreSQL database '%s' failed: %s",
+                               cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
+                } else {
+                    MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to PostgreSQL database '%s' Succeed",
+                               cnt->conf.database_dbname);
+                }
+
+            } else if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query [%s] failed", sqlquery);
                 PQclear(res);
-            }
+            } 
         }
 #endif /* HAVE_PGSQL */
 

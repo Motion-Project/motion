@@ -429,7 +429,7 @@ Angel Carpintero
    * Only use post capture when we setup to record videos with external pipe or ffmpeg.
    * Fixed FFV1 codec encode with ffmpeg.
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553
-
+   * No PQfinish().
  
 Jared D
    * Change bayer2rgb24() to fix a problem with sn9c102 driver

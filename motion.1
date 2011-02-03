@@ -181,9 +181,9 @@ Values: 0 - 255 / Default: 0 (disabled)
 The hue level for the video device.
 .TP
 .B input integer
-Values: 0 - 7, 8 = disabled / Default: 8 (disabled)
+Values: -1 - 64, -1 = disabled / Default: -1 (disabled)
 .br
-Input channel to use expressed as an integer number starting from 0. Should normally be set to 1 for video/TV cards, and 8 for USB cameras.
+Input channel to use expressed as an integer number starting from -1. Should normally be set to 1 for video/TV cards, and -1 for USB cameras.
 .TP
 .B ipv6_enabled boolean
 Values: on, off / Default: off

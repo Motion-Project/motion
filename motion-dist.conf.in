@@ -71,9 +71,9 @@ v4l2_palette 17
 # This is ONLY used for FreeBSD. Leave it commented out for Linux
 ; tunerdevice /dev/tuner0
 
-# The video input to be used (default: 8)
-# Should normally be set to 0 or 1 for video/TV cards, and 8 for USB cameras
-input 8
+# The video input to be used (default: -1)
+# Should normally be set to 0 or 1 for video/TV cards, and -1 for USB cameras
+input -1
 
 # The video norm to use (only for video capture and TV tuner cards)
 # Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
@@ -649,6 +649,14 @@ quiet on
 # %n = the number representing the file_type
 # %f = filename with full path
 # Default value:
+# Create tables :
+## 
+# Mysql
+# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
+#
+# Postgresql
+# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
+#
 # insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 ; sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 

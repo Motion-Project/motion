@@ -1055,7 +1055,9 @@ static void motion_cleanup(struct context *cnt)
 #endif /* HAVE_MYSQL */
 
 #ifdef HAVE_PGSQL
-
+    if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
+        PQfinish(cnt->database_pg);
+    }
 #endif /* HAVE_PGSQL */ 
 
 #ifdef HAVE_SQLITE3    

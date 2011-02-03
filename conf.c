@@ -292,8 +292,8 @@ config_param config_params[] = {
 #endif
     {
     "input",
-    "# The video input to be used (default: 8)\n"
-    "# Should normally be set to 0 or 1 for video/TV cards, and 8 for USB cameras",
+    "# The video input to be used (default: -1)\n"
+    "# Should normally be set to 0 or 1 for video/TV cards, and -1 for USB cameras",
     0,
     CONF_OFFSET(input),
     copy_int,
@@ -1398,6 +1398,14 @@ config_param config_params[] = {
     "# Additional special conversion specifiers are\n"
     "# %n = the number representing the file_type\n"
     "# %f = filename with full path\n"
+    "# Create tables :\n"
+    "##\n"
+    "# Mysql\n"
+    "# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));\n"
+    "#\n"
+    "# Postgresql\n"
+    "# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);\n"
+    "#\n"
     "# Default value:\n"
     "# insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')",
     0,
