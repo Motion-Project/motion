@@ -1,6 +1,8 @@
 Bugfixes
    * No mysql_close
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x11x22x033859
+   * Input for webcams has to be set to -1
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x01x21x162309
 
 3.2.12 Summary of Changes
 

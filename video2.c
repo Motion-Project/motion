@@ -193,7 +193,7 @@ static int v4l2_select_input(src_v4l2_t * s, int in, int norm, unsigned long fre
     struct v4l2_standard standard;
     v4l2_std_id std_id;
 
-    if (in == 8)
+    if (in == IN_DEFAULT)
         in = 0;
 
     /* Set the input. */

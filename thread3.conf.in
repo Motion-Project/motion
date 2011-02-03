@@ -12,9 +12,9 @@
 # for FreeBSD default is /dev/bktr0 
 videodevice /dev/video2
 
-# The video input to be used (default: 8)
-# Should normally be set to 1 for video/TV cards, and 8 for USB cameras 
-input 8
+# The video input to be used (default: -1)
+# Should normally be set to 1 for video/TV cards, and -1 for USB cameras 
+input -1
 
 # Draw a user defined text on the images using same options as C function strftime(3)
 # Default: Not defined = no text
