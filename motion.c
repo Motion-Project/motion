@@ -1048,23 +1048,25 @@ static void motion_cleanup(struct context *cnt)
         cnt->eventtime_tm = NULL;
     }
 
+    if (cnt->conf.database_type) {
 #ifdef HAVE_MYSQL
-    if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {    
-        mysql_close(cnt->database); 
-    }
+        if ( (!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {    
+            mysql_close(cnt->database); 
+        }
 #endif /* HAVE_MYSQL */
 
 #ifdef HAVE_PGSQL
-    if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
-        PQfinish(cnt->database_pg);
-    }
+        if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
+            PQfinish(cnt->database_pg);
+        }
 #endif /* HAVE_PGSQL */ 
 
 #ifdef HAVE_SQLITE3    
-    /* Close the SQLite database */
-    if (cnt->conf.sqlite3_db)
-        sqlite3_close(cnt->database_sqlite3);
+        /* Close the SQLite database */
+        if (cnt->conf.sqlite3_db)
+            sqlite3_close(cnt->database_sqlite3);
 #endif /* HAVE_SQLITE3 */
+    }
 }
 
 /**
