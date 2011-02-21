@@ -131,6 +131,7 @@ struct config {
     const char *despeckle_filter;
     const char *area_detect;
     int minimum_motion_frames;
+    const char *exif_text;
     char *pid_file;
     int argc;
     char **argv;

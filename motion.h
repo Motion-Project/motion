@@ -454,6 +454,6 @@ void * mymalloc(size_t);
 void * myrealloc(void *, size_t, const char *);
 FILE * myfopen(const char *, const char *, size_t);
 int myfclose(FILE *);
-size_t mystrftime(struct context *, char *, size_t, const char *, const struct tm *, const char *, int);
+size_t mystrftime(const struct context *, char *, size_t, const char *, const struct tm *, const char *, int);
 int create_path(const char *);
 #endif /* _INCLUDE_MOTION_H */

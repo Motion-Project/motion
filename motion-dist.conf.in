@@ -392,6 +392,11 @@ text_event %Y%m%d%H%M%S
 text_double off
 
 
+# Text to include in a JPEG EXIF comment
+# May be any text, including conversion specifiers.
+# The EXIF timestamp is included independent of this text.
+;exif_text %i%J/%K%L
+
 ############################################################
 # Target Directories and filenames For Images And Films
 # For the options snapshot_, picture_, movie_ and timelapse_filename

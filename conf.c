@@ -154,6 +154,7 @@ struct config conf_template = {
     despeckle_filter:               NULL,
     area_detect:                    NULL,
     minimum_motion_frames:          1,
+    exif_text:                      NULL,
     pid_file:                       NULL,
     log_file:                       NULL,
     log_level:                      LEVEL_DEFAULT+10,
@@ -892,6 +893,16 @@ config_param config_params[] = {
     CONF_OFFSET(text_double),
     copy_bool,
     print_bool
+    },
+    {
+    "exif_text",
+    "# Text to include in a JPEG EXIF comment\n"
+    "# May be any text, including conversion specifiers.\n"
+    "# The EXIF timestamp is included independent of this text.",
+    0,
+    CONF_OFFSET(exif_text),
+    copy_string,
+    print_string
     },
     {
     "target_dir",

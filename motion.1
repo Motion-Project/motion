@@ -111,6 +111,11 @@ Values: 0 - 2147483647 / Default: 60
 .br
 Event Gap is the seconds of no motion detection that triggers the end of an event. An event is defined as a series of motion images taken   within a short timeframe.
 .TP
+.B exif_text string 
+Values:  Max 4095 characters /  Default: Not defined
+.br
+Text to include in a JPEG EXIF comment , may be any text, including conversion specifiers. The EXIF timestamp is included independent of this text.
+.TP
 .B extpipe string
 Values: Max 4095 characters / Default: Not defined
 .br

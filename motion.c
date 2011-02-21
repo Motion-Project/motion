@@ -3110,7 +3110,7 @@ int myfclose(FILE* fh)
  *
  * Returns: number of bytes written to the string s
  */
-size_t mystrftime(struct context *cnt, char *s, size_t max, const char *userformat,
+size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat,
                   const struct tm *tm, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";

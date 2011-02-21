@@ -260,7 +260,8 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
 
     if (xioctl(vid_source->fd, VIDIOC_ENUMINPUT, &input) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to query input %d."
-                   " VIDIOC_ENUMINPUT", input.index);
+                   " VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1", 
+                   input.index);
         return -1;
     }
 
