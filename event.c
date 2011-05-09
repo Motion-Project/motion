@@ -269,7 +269,7 @@ static void event_sdl_put(struct context *cnt, int type ATTRIBUTE_UNUSED,
 #endif
 
 
-#if !defined(WITHOUT_V4L) && !defined(BSD)
+#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(BSD)
 static void event_vid_putpipe(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
             struct tm *tm ATTRIBUTE_UNUSED)
@@ -833,7 +833,7 @@ struct event_handlers event_handlers[] = {
     event_sdl_put
     },
 #endif
-#if !defined(WITHOUT_V4L) && !defined(BSD)
+#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(BSD)
     {
     EVENT_IMAGE,
     event_vid_putpipe

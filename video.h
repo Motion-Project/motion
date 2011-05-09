@@ -11,9 +11,11 @@
 #define _INCLUDE_VIDEO_H
 
 #define _LINUX_TIME_H 1
-#ifndef WITHOUT_V4L
-#include <linux/videodev.h>
 #include <sys/mman.h>
+
+
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#include <linux/videodev.h>
 #include "vloopback_motion.h"
 #include "pwc-ioctl.h"
 #endif

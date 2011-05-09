@@ -9,7 +9,7 @@
  *
  */
 #include "vloopback_motion.h"
-#ifndef BSD
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L)) && (!defined(BSD))
 #include <sys/utsname.h>
 #include <dirent.h>
 

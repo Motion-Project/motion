@@ -51,7 +51,7 @@
 #include <stdint.h>
 
 #define _LINUX_TIME_H 1
-#if (!defined(WITHOUT_V4L)) && (!defined(BSD))
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L)) && (!defined(BSD))
 #include <linux/videodev.h>
 #endif
 
@@ -102,8 +102,8 @@
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
-#if defined(WITHOUT_V4L) || defined(BSD)
- 
+#if (!defined(HAVE_LINUX_VIDEODEV_H)) || defined(WITHOUT_V4L) || defined(BSD)
+
 #define VIDEO_PALETTE_GREY      1       /* Linear greyscale */
 #define VIDEO_PALETTE_HI240     2       /* High 240 cube (BT848) */
 #define VIDEO_PALETTE_RGB565    3       /* 565 16 bit RGB */

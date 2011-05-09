@@ -9,7 +9,7 @@
 #include <math.h>
 #include "motion.h"
 
-#ifndef WITHOUT_V4L
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
 #include "pwc-ioctl.h"
 #endif
 
@@ -52,7 +52,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
                                      struct images *imgs, unsigned int manual);
 static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 
-#ifndef WITHOUT_V4L
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
 static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
 static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
                                     struct images *imgs, unsigned int manual);
@@ -81,7 +81,7 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
     } else if (cnt->track.type == TRACK_TYPE_SERVO) {
         return servo_center(cnt, xoff, yoff);
     }
-#ifndef WITHOUT_V4L
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
     else if (cnt->track.type == TRACK_TYPE_PWC)
         return lqos_center(cnt, dev, xoff, yoff);
 #ifdef MOTION_V4L2
@@ -112,7 +112,7 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
         return stepper_move(cnt, cent, imgs);
     else if (cnt->track.type == TRACK_TYPE_SERVO)
         return servo_move(cnt, cent, imgs, manual);
-#ifndef WITHOUT_V4L
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
     else if (cnt->track.type == TRACK_TYPE_PWC)
         return lqos_move(cnt, dev, cent, imgs, manual);
 #ifdef MOTION_V4L2
@@ -787,7 +787,7 @@ static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent
     Logitech QuickCam Orbit camera tracking code by folkert@vanheusden.com
 
 ******************************************************************************/
-#ifndef WITHOUT_V4L
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
 static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
     int reset = 3;
