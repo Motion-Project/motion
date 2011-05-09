@@ -7,11 +7,11 @@
  *    See also the file 'COPYING'.
  *
  */
-#if (!defined(WITHOUT_V4L)) && (defined(HAVE_LINUX_VIDEODEV_H))
-
 /* Common stuff: */
 #include "rotate.h"     /* already includes motion.h */
 #include "video.h"
+
+#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L)
 
 /**
  * v4l_picture_controls
