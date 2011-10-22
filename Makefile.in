@@ -127,6 +127,18 @@ $(DEPEND_FILE): *.h $(SRC)
 ################################################################################
 dep depend fastdep: $(DEPEND_FILE)
 
+
+################################################################################
+# DEV, BUILD with developer flags                                              #
+################################################################################
+dev: distclean autotools all
+
+
+################################################################################
+# GIT, BUILD with developer flags                                              #
+################################################################################
+build-commit-git: distclean set-version-git all
+
 ################################################################################
 # CURRENT, BUILD current svn trunk.                                            #
 ################################################################################
@@ -148,15 +160,24 @@ set-version:
 	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.in
 	./configure --with-developer-flags
 
+set-version-git:
+	@sed -i 's/.\/version.sh/.\/git-commit-version.sh/g' configure.in
+	autoconf
+	@sed -i 's/.\/git-commit-version.sh/.\/version.sh/g' configure.in
+	./configure --with-developer-flags
+
+
 help:
 	@echo "--------------------------------------------------------------------------------"
-	@echo "make                 Build motion from local copy in your computer"	
-	@echo "make current         Build last version of motion from svn"
-	@echo "make build-commit    Build last version of motion and prepare to commit to svn"
-	@echo "make clean           Clean objects" 
-	@echo "make distclean       Clean everything"	
-	@echo "make install         Install binary , examples , docs and config files"
-	@echo "make uninstall       Uninstall all installed files"
+	@echo "make                   Build motion from local copy in your computer"	
+	@echo "make current           Build last version of motion from svn"
+	@echo "make dev               Build motion with dev flags"
+	@echo "make build-commit      Build last version of motion and prepare to commit to svn"
+	@echo "make build-commit-git  Build last version of motion and prepare to commit to git"
+	@echo "make clean             Clean objects" 
+	@echo "make distclean         Clean everything"	
+	@echo "make install           Install binary , examples , docs and config files"
+	@echo "make uninstall         Uninstall all installed files"
 	@echo "--------------------------------------------------------------------------------"
 	@echo
 

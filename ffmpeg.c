@@ -275,11 +275,11 @@ void ffmpeg_init()
     mpeg1_file_protocol.url_seek  = file_protocol.url_seek;
     mpeg1_file_protocol.url_close = file_protocol.url_close;
 
-    /* Register the append file protocol. */
-#if LIBAVFORMAT_BUILD >= (52<<16 | 31<<8)
+/* Register the append file protocol. */
+#ifdef HAVE_FFMPEG_AV_REGISTER_PROTOCOL
     av_register_protocol(&mpeg1_file_protocol);
 #else
-    register_protocol(&mpeg1_file_protocol);
+    av_register_protocol2(&mpeg1_file_protocol, sizeof(mpeg1_file_protocol));
 #endif
 }
 
@@ -472,7 +472,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
     c->codec_id   = ffmpeg->oc->oformat->video_codec;
+#if LIBAVCODEC_VERSION_MAJOR < 53    
     c->codec_type = CODEC_TYPE_VIDEO;
+#else
+    c->codec_type = AVMEDIA_TYPE_VIDEO;
+#endif    
     is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
@@ -789,7 +793,11 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
     if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
         /* Raw video case. The API will change slightly in the near future for that. */
 #ifdef FFMPEG_AVWRITEFRAME_NEWAPI
+#if LIBAVCODEC_VERSION_MAJOR < 53        
         pkt.flags |= PKT_FLAG_KEY;
+#else
+        pkt.flags |= AV_PKT_FLAG_KEY;  
+#endif        
         pkt.data = (uint8_t *)pic;
         pkt.size = sizeof(AVPicture);
         ret = av_write_frame(ffmpeg->oc, &pkt);
@@ -813,7 +821,11 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
             pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
 
             if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
+#if LIBAVCODEC_VERSION_MAJOR < 53                
                 pkt.flags |= PKT_FLAG_KEY;
+#else
+                pkt.flags |= AV_PKT_FLAG_KEY;
+#endif                
 
 
             pkt.data = ffmpeg->video_outbuf;

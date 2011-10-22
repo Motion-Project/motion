@@ -351,7 +351,7 @@ if test "${FFMPEG_DIR}" = "no"; then
 #
 else if test "${FFMPEG_DIR}" = "yes"; then
 	# AUTODETECT STATIC/SHARED LIB 
-	AC_MSG_CHECKING(for ffmpeg autodetecting)
+	AC_MSG_CHECKING(for ffmpeg autodetecting libraries)
 
 	if test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
 		AC_MSG_RESULT(found in /usr/lib64)
@@ -382,7 +382,7 @@ else if test "${FFMPEG_DIR}" = "yes"; then
 		echo ""		
 	fi 
 else
-	AC_MSG_CHECKING(for ffmpeg in -> [${FFMPEG_DIR}] <-)
+	AC_MSG_CHECKING(for ffmpeg libraries in -> [${FFMPEG_DIR}] <-)
 	if test -f ${FFMPEG_DIR}/lib/libavcodec.a -o -f ${FFMPEG_DIR}/lib/libavcodec.so && test -f ${FFMPEG_DIR}/lib/libavformat.a -o -f ${FFMPEG_DIR}/lib/libavformat.so ; then
 		AC_MSG_RESULT(found)
 		FFMPEG_OK="found"
@@ -427,9 +427,11 @@ if test "${FFMPEG_OK}" = "found"; then
     elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
+        AVFORMAT="-I${FFMPEG_DIR}/include/libavformat" 
     elif test -f ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES" 
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES"
+        AVFORMAT="-I${FFMPEG_DIR}/include/ffmpeg/libavformat" 
     else
         AC_MSG_RESULT(not found)
         FFMPEG_OK="no_found"
@@ -458,9 +460,11 @@ if test "${FFMPEG_OK}" = "found"; then
 		AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
 		saved_CFLAGS=$CFLAGS
 		saved_LIBS=$LIBS
-		CFLAGS="${FFMPEG_CFLAGS}"
+
+
+		CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
 		LIBS="$TEMP_LIBS"
-		
+    	
 		AC_COMPILE_IFELSE(
 			[
 			#include <avformat.h>
@@ -477,7 +481,35 @@ if test "${FFMPEG_OK}" = "found"; then
 			]
 		)
 		CFLAGS=$saved_CFLAGS
-		LIBS=$saved_LIBS	
+		LIBS=$saved_LIBS
+       
+        AC_MSG_CHECKING([av_register_protocol is defined in ffmpeg ?]) 
+        saved_CFLAGS=$CFLAGS
+        saved_LIBS=$LIBS
+        CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
+        LIBS="$TEMP_LIBS"
+       
+        AC_COMPILE_IFELSE(
+            [
+            #include <avformat.h>
+            URLProtocol test_file_protocol;
+            int main(void){
+                av_register_protocol(&test_file_protocol);
+        	    return 0;
+            }
+            ],
+            [
+                AC_MSG_RESULT(yes)
+                TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_AV_REGISTER_PROTOCOL"
+            ],
+            [
+                AC_MSG_RESULT(no)
+            ]
+        )
+
+        CFLAGS=$saved_CFLAGS
+        LIBS=$saved_LIBS
+                                        
 	fi
 fi	
 fi

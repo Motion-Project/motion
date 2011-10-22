@@ -1075,6 +1075,10 @@ Mike Lees
    * Implemented the new brightness, contrast, hue, saturation features
      http://www.lavrsen.dk/twiki/bin/view/Motion/BrightnessContrastPatch
 
+Wim Lewis
+
+   * Added EXIF feature for jpeg images , http://www.lavrsen.dk/foswiki/bin/view/Motion/ExifTaggingPatch
+
 Michal Licko
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch
