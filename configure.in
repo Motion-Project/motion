@@ -1169,6 +1169,10 @@ CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"
 LIBS="${TEMP_LIBS}"
 LDFLAGS="${TEMP_LDFLAGS}"
 
+
+AC_CHECK_FUNC(avformat_alloc_context, AC_DEFINE([have_avformat_alloc_context],1,[Define to 1 if you have avformat_alloc_context support]))
+AC_CHECK_FUNC(av_avformat_alloc_context, AC_DEFINE([have_av_avformat_alloc_context],1,[Define to 1 if you have av_avformat_alloc_context support]))
+
 #
 # Add the right exec path for rc scripts
 #

@@ -40,7 +40,7 @@ Features
    * Added a macro MOTION_LOG , no need to add __FUNCTION__ anymore. (Angel Carpintero)
    * Added EXIF feature for jpeg images , http://www.lavrsen.dk/foswiki/bin/view/Motion/ExifTaggingPatch (Wim Lewis)
    * Improve detection of av_register_protocol() for ffmpeg (Angel Carpintero).
-  
+     
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
@@ -61,6 +61,8 @@ Bugfixes
    * No PQfinish() (Angel Carpintero)
    * Input for webcams has to be set to -1
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x01x21x162309
+   * Added a conditional check for avformat_alloc_context , av_avformat_alloc_context to fix 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x10x05x071936 (Angel Carpintero)
 
 3.2.12 Summary of Changes
 

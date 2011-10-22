@@ -1,5 +1,5 @@
 #!/bin/sh
 
-SNV_VERSION=`git show | grep commit|cut -d' ' -f2`
+SNV_VERSION=`git show -s --format=%H`
 echo -n "Git-$SNV_VERSION"
 

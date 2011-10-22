@@ -434,7 +434,14 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
 
     /* Allocation the output media context. */
+#ifdef have_avformat_alloc_context
+    ffmpeg->oc = avformat_alloc_context();
+#elif defined have_av_avformat_alloc_context
+    ffmpeg->oc = av_alloc_format_context();
+#else
     ffmpeg->oc = av_mallocz(sizeof(AVFormatContext));
+#endif
+
     if (!ffmpeg->oc) {
         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Memory error while allocating"
                    " output media context");
