@@ -111,5 +111,14 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
+/* Define to 1 if you have av_avformat_alloc_context support */
+#undef have_av_avformat_alloc_context
+
+/* Define to 1 if you have av_register_protocol support */
+#undef have_av_register_protocol
+
+/* Define to 1 if you have av_register_protocol2 support */
+#undef have_av_register_protocol2
+
 /* Define to 1 if you have avformat_alloc_context support */
 #undef have_avformat_alloc_context

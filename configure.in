@@ -3,6 +3,7 @@
 AC_INIT(motion, esyscmd(['./version.sh']))
 AC_CONFIG_SRCDIR([motion.c])
 AC_CONFIG_HEADERS(config.h)
+AC_PROG_CC
 
 THREAD_CFLAGS=""
 THREAD_CHECK="/usr/include/pthread.h"
@@ -483,33 +484,6 @@ if test "${FFMPEG_OK}" = "found"; then
 		CFLAGS=$saved_CFLAGS
 		LIBS=$saved_LIBS
        
-        AC_MSG_CHECKING([av_register_protocol is defined in ffmpeg ?]) 
-        saved_CFLAGS=$CFLAGS
-        saved_LIBS=$LIBS
-        CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
-        LIBS="$TEMP_LIBS"
-       
-        AC_COMPILE_IFELSE(
-            [
-            #include <avformat.h>
-            URLProtocol test_file_protocol;
-            int main(void){
-                av_register_protocol(&test_file_protocol);
-        	    return 0;
-            }
-            ],
-            [
-                AC_MSG_RESULT(yes)
-                TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_AV_REGISTER_PROTOCOL"
-            ],
-            [
-                AC_MSG_RESULT(no)
-            ]
-        )
-
-        CFLAGS=$saved_CFLAGS
-        LIBS=$saved_LIBS
-                                        
 	fi
 fi	
 fi
@@ -1172,6 +1146,9 @@ LDFLAGS="${TEMP_LDFLAGS}"
 
 AC_CHECK_FUNC(avformat_alloc_context, AC_DEFINE([have_avformat_alloc_context],1,[Define to 1 if you have avformat_alloc_context support]))
 AC_CHECK_FUNC(av_avformat_alloc_context, AC_DEFINE([have_av_avformat_alloc_context],1,[Define to 1 if you have av_avformat_alloc_context support]))
+AC_CHECK_FUNC(av_register_protocol2, AC_DEFINE([have_av_register_protocol2],1,[Define to 1 if you have av_register_protocol2 support]))
+AC_CHECK_FUNC(av_register_protocol, AC_DEFINE([have_av_register_protocol],1,[Define to 1 if you have av_register_protocol support]))
+
 
 #
 # Add the right exec path for rc scripts

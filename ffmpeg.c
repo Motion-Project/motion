@@ -276,10 +276,12 @@ void ffmpeg_init()
     mpeg1_file_protocol.url_close = file_protocol.url_close;
 
 /* Register the append file protocol. */
-#ifdef HAVE_FFMPEG_AV_REGISTER_PROTOCOL
+#ifdef have_av_register_protocol2
+    av_register_protocol2(&mpeg1_file_protocol, sizeof(mpeg1_file_protocol));
+#elif defined have_av_register_protocol        
     av_register_protocol(&mpeg1_file_protocol);
 #else
-    av_register_protocol2(&mpeg1_file_protocol, sizeof(mpeg1_file_protocol));
+#   warning av_register_protocolXXX missing
 #endif
 }
 
