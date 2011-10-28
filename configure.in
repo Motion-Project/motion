@@ -5,6 +5,7 @@ AC_CONFIG_SRCDIR([motion.c])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CC
 
+
 THREAD_CFLAGS=""
 THREAD_CHECK="/usr/include/pthread.h"
 
@@ -451,39 +452,38 @@ if test "${FFMPEG_OK}" = "found"; then
 #
 
 	if  test "${FFMPEG_OK}" = "found"; then	
-		TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} -lavformat -lavcodec -lavutil -lm -lz"
-		TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
+        TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} -lavformat -lavcodec -lavutil -lm -lz"
+        TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
+        TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
 
-		FFMPEG_OBJ="ffmpeg.o"
-		AC_SUBST(FFMPEG_OBJ)
+        FFMPEG_OBJ="ffmpeg.o"
+        AC_SUBST(FFMPEG_OBJ)
 
-		AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
-		saved_CFLAGS=$CFLAGS
-		saved_LIBS=$LIBS
+        AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
+        saved_CFLAGS=$CFLAGS
+        saved_LIBS=$LIBS
 
 
 		CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
 		LIBS="$TEMP_LIBS"
     	
-		AC_COMPILE_IFELSE(
-			[
-			#include <avformat.h>
-			URLProtocol test_file_protocol;
-			int main(void){
-				test_file_protocol.url_read  = file_protocol.url_read;
-				return 0;
-			}
-			],
-			[AC_MSG_RESULT(yes)],
-			[
-				AC_MSG_RESULT(no)
-				TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
-			]
-		)
+	    AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+		    [
+		     #include <avformat.h>
+		     URLProtocol test_file_protocol;
+		     int main(void){
+		         test_file_protocol.url_read  = file_protocol.url_read;
+		         return 0;
+		     }
+		     ]])],
+		     [AC_MSG_RESULT(yes)],
+		     [
+			     AC_MSG_RESULT(no)
+			     TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
+		     ]
+	    )
 		CFLAGS=$saved_CFLAGS
 		LIBS=$saved_LIBS
-       
 	fi
 fi	
 fi
@@ -1148,7 +1148,6 @@ AC_CHECK_FUNC(avformat_alloc_context, AC_DEFINE([have_avformat_alloc_context],1,
 AC_CHECK_FUNC(av_avformat_alloc_context, AC_DEFINE([have_av_avformat_alloc_context],1,[Define to 1 if you have av_avformat_alloc_context support]))
 AC_CHECK_FUNC(av_register_protocol2, AC_DEFINE([have_av_register_protocol2],1,[Define to 1 if you have av_register_protocol2 support]))
 AC_CHECK_FUNC(av_register_protocol, AC_DEFINE([have_av_register_protocol],1,[Define to 1 if you have av_register_protocol support]))
-
 
 #
 # Add the right exec path for rc scripts
