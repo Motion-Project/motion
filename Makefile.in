@@ -133,6 +133,11 @@ dep depend fastdep: $(DEPEND_FILE)
 ################################################################################
 dev: distclean autotools all
 
+################################################################################
+# DEV-GIT, BUILD with developer flags                                          #
+################################################################################
+dev-git: distclean autotools-git all
+
 
 ################################################################################
 # GIT, BUILD with developer flags                                              #
@@ -151,6 +156,12 @@ autotools:
 	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.in
 	autoconf
 	./configure --with-developer-flags 
+
+autotools-git:
+	@sed -i 's/.\/git-commit-version.sh/.\/version.sh/g' configure.in
+	autoconf
+	./configure --with-developer-flags 
+
 
 build-commit: distclean svn set-version all
 
@@ -172,6 +183,7 @@ help:
 	@echo "make                   Build motion from local copy in your computer"	
 	@echo "make current           Build last version of motion from svn"
 	@echo "make dev               Build motion with dev flags"
+	@echo "make dev-git           Build motion with dev flags for git"
 	@echo "make build-commit      Build last version of motion and prepare to commit to svn"
 	@echo "make build-commit-git  Build last version of motion and prepare to commit to git"
 	@echo "make clean             Clean objects" 
