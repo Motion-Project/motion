@@ -491,8 +491,9 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
      */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
-    // TODO: Set to FALSE for some buggy implementation of JPEG ?
+#if JPEG_LIB_VERSION >= 70    
     dinfo.do_fancy_upsampling = FALSE;
+#endif    
     dinfo.out_color_space = JCS_YCbCr;
     dinfo.dct_method = JDCT_IFAST;
     guarantee_huff_tables(&dinfo);
@@ -583,8 +584,9 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
         if (field > 0) {
             jpeg_read_header (&dinfo, TRUE);
             dinfo.raw_data_out = TRUE;
-            // TODO: Set to FALSE for some buggy implementation of JPEG ?
+#if JPEG_LIB_VERSION >= 70            
             dinfo.do_fancy_upsampling = FALSE;
+#endif            
             dinfo.out_color_space = JCS_YCbCr;
             dinfo.dct_method = JDCT_IFAST;
             jpeg_start_decompress (&dinfo);
@@ -801,8 +803,9 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
      */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
-    // TODO: Set to FALSE for some buggy implementation of JPEG ?
+#if JPEG_LIB_VERSION >= 70
     dinfo.do_fancy_upsampling = FALSE;
+#endif    
     dinfo.out_color_space = JCS_GRAYSCALE;
     dinfo.dct_method = JDCT_IFAST;
 
@@ -869,8 +872,9 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
         if (field > 0) {
             jpeg_read_header (&dinfo, TRUE);
             dinfo.raw_data_out = TRUE;
-            // TODO: Set to FALSE for some buggy implementation of JPEG ?
+#if JPEG_LIB_VERSION >= 70
             dinfo.do_fancy_upsampling = FALSE;
+#endif            
             dinfo.out_color_space = JCS_GRAYSCALE;
             dinfo.dct_method = JDCT_IFAST;
             jpeg_start_decompress (&dinfo);

@@ -436,13 +436,12 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
-    jpeg_set_defaults (&cinfo);
+    jpeg_set_defaults(&cinfo);
 
     jpeg_set_colorspace(&cinfo, JCS_YCbCr);
 
     cinfo.raw_data_in = TRUE; // Supply downsampled data
 #if JPEG_LIB_VERSION >= 70
-#warning using JPEG_LIB_VERSION >= 70
     cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
 #endif
     cinfo.comp_info[0].h_samp_factor = 2;
@@ -457,7 +456,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 
     _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
 
-    jpeg_start_compress (&cinfo, TRUE);
+    jpeg_start_compress(&cinfo, TRUE);
 
     put_jpeg_exif(&cinfo, cnt, tm, box);
 
@@ -577,7 +576,6 @@ static void put_jpeg_yuv420p_file(FILE *fp,
 
     cinfo.raw_data_in = TRUE; // Supply downsampled data
 #if JPEG_LIB_VERSION >= 70
-#warning using JPEG_LIB_VERSION >= 70
     cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
 #endif
     cinfo.comp_info[0].h_samp_factor = 2;
