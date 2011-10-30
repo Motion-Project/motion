@@ -40,7 +40,8 @@ Features
    * Added a macro MOTION_LOG , no need to add __FUNCTION__ anymore. (Angel Carpintero)
    * Added EXIF feature for jpeg images , http://www.lavrsen.dk/foswiki/bin/view/Motion/ExifTaggingPatch (Wim Lewis)
    * Improve detection of av_register_protocol() for ffmpeg (Angel Carpintero).
-     
+   * Added support for libjpeg-turbo 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2010x04x14x082244 (Angel Carpintero)     
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)

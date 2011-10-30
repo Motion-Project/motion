@@ -213,7 +213,8 @@ fi
 #
 SDL_SUPPORT="yes"
 AC_ARG_WITH(sdl,
-[  --without-sdl           Compile without sdl support to get stream in SDL window.],
+[  --without-sdl           Compile without sdl support to get stream in SDL window.
+],
 [],
 [])
 AC_MSG_CHECKING(for sdl)
@@ -249,6 +250,52 @@ else
 fi
 
 #
+# Check for the libjpeg-turbo library
+#
+JPEG_TURBO="no"
+JPEG_TURBO_OK="not_found"
+
+AC_ARG_WITH(jpeg-turbo,
+[  --with-jpeg-turbo[=DIR]   Specify the prefix for the install path for
+                          jpeg-turbo for optimized jpeg handling (optional).
+                          ],
+JPEG_TURBO="$withval"
+)
+
+if test "${JPEG_TURBO}" = "no"; then
+    AC_MSG_CHECKING(for libjpeg-turbo)
+    AC_MSG_RESULT(skipping)
+else
+    AC_MSG_CHECKING(for libjpeg-turbo in -> [${JPEG_TURBO}] <-)
+    if test -f ${JPEG_TURBO}/lib/libjpeg.a ; then
+        AC_MSG_RESULT(found)
+        JPEG_TURBO_OK="found"
+    else
+        AC_MSG_RESULT(not found)
+    fi
+fi
+
+
+if test "${JPEG_TURBO_OK}" = "found"; then
+    saved_CFLAGS="$CFLAGS"
+    saved_LIBS="$LIBS"
+    saved_LDFLAGS="$LDFLAGS"
+    LDFLAGS="-L${JPEG_TURBO}/lib"
+    CFLAGS="$CFLAGS -I${JPEG_TURBO}/include"
+    LIBS="$LIBS -L${JPEG_TURBO}/lib -ljpeg"
+    AC_CHECK_LIB(jpeg, jpeg_start_compress,
+        [ TEMP_LIBS="$LIBS"
+          TEMP_CFLAGS="${CFLAGS}"
+          TEMP_LDFLAGS="$TEMP_LDFLAGS $LDFLAGS"
+          JPEG_SUPPORT="yes"],,)
+    LIBS="$saved_LIBS"
+    CFLAGS="$saved_CFLAGS"
+    LDFLAGS="$saved_LDFLAGS"
+    JPEG_SUPPORT_TURBO="yes"
+fi
+
+
+#
 # Check for the special mmx accelerated jpeg library
 #
 JPEG_MMX="no"
@@ -266,7 +313,7 @@ JPEG_MMX="$withval"
 # --without-jpeg-mmx or with-jpeg-mmx=no
 #
 
-if test "${JPEG_MMX}" = "no"; then
+if test "${JPEG_MMX}" = "no" || test x$JPEG_SUPPORT != xyes; then
         AC_MSG_CHECKING(for libjpeg-mmx)
         AC_MSG_RESULT(skipping)
 elif test "${JPEG_MMX}" = "yes"; then
@@ -1084,7 +1131,7 @@ if test "x${CPU_TYPE}" = "xunknown"; then
 			CPU_OPTIONS="-march=k6-3"
 			;;
 		*)
-			CPU_OPTIONS=""
+			CPU_OPTIONS="-march=native -mtune=native"
 			;;
 		esac
 	fi
@@ -1209,7 +1256,10 @@ else
     echo "**********************************************" 
 fi
 
-if test "${JPEG_SUPPORT_MMX}" = "yes"; then
+
+if test "${JPEG_SUPPORT_TURBO}" = "yes"; then
+    echo "jpeg turbo support:  Yes"
+elif test "${JPEG_SUPPORT_MMX}" = "yes"; then
     echo "jpeg-mmx support:    Yes"
 elif test "${JPEG_SUPPORT}" = "yes"; then
     echo "jpeg support:        Yes"
