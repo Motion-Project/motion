@@ -932,8 +932,8 @@ static int motion_init(struct context *cnt)
                        cnt->conf.stream_port);
             cnt->finish = 1;
         } else {  
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Started motion-stream server in port %d", 
-                       cnt->conf.stream_port);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Started motion-stream server in port %d auth %s", 
+                       cnt->conf.stream_port, cnt->conf.stream_auth_method ? "Enabled":"Disabled");
         }    
     }
 
@@ -1882,8 +1882,10 @@ static void *motion_loop(void *arg)
              * First test for max_movie_time
              */
             if ((cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event) &&
-                (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time))
+                (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time)) {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: max movie time reached , making movie");
                 cnt->makemovie = 1;
+            }    
 
             /* 
              * Now test for quiet longer than 'gap' OR make movie as decided in
@@ -1911,7 +1913,7 @@ static void *motion_loop(void *arg)
                     if (cnt->track.type)
                         cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: End of event %d", 
+                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: End of event %d", 
                                cnt->event_nr);
 
                     cnt->makemovie = 0;
@@ -3076,6 +3078,10 @@ int myfclose(FILE* fh)
 {
     int i = 0;
     int rval = fclose(fh);
+
+    if (rval != 0) 
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error closing file");
+
     for (i = 0; i < MYBUFCOUNT; i++) {
         if (buffers[i].fh == fh) {
             buffers[i].fh = NULL;
