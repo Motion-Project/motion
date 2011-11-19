@@ -1519,7 +1519,7 @@ static void *motion_loop(void *arg)
                      * 5 frames to allow the camera to settle.
                      * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
                      */
-                    if (cnt->conf.lightswitch && !cnt->lost_connection) {
+                    if (cnt->conf.lightswitch > 1 && !cnt->lost_connection) {
                         if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Lightswitch detected"); 
 
@@ -1634,15 +1634,17 @@ static void *motion_loop(void *arg)
 
                 /* 
                  * Update reference frame. 
-                 * micro-lighswitch: e.g. neighbors cat switched on the motion sensitive 
+                 * micro-lighswitch: trying to auto-detect lightswitch events. 
                  * frontdoor illumination. Updates are rate-limited to 3 per second at   
                  * framerates above 5fps to save CPU resources and to keep sensitivity   
                  * at a constant level.                                                  
                  */
 
-                if ((cnt->current_image->diffs > cnt->threshold) && 
-                    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window */
+                if ((cnt->current_image->diffs > cnt->threshold) && (cnt->conf.lightswitch == 1) &&
+                    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
+                    /* number of changed pixels almost the same in two consecutive frames and */
                     ((abs(previous_diffs - cnt->current_image->diffs)) < (previous_diffs / 15)) &&
+                    /* center of motion in about the same place ? */
                     ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 150)) &&
                     ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 150))) {
                     alg_update_reference_frame(cnt, RESET_REF_FRAME);
@@ -1882,10 +1884,8 @@ static void *motion_loop(void *arg)
              * First test for max_movie_time
              */
             if ((cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event) &&
-                (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time)) {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: max movie time reached , making movie");
+                (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time))
                 cnt->makemovie = 1;
-            }    
 
             /* 
              * Now test for quiet longer than 'gap' OR make movie as decided in

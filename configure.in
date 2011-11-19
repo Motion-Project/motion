@@ -77,6 +77,9 @@ fi
 
 AC_SUBST(VIDEO)
 
+# Checks for programs.
+AC_PROG_CC
+
 TEMP_LIBS="-lm ${TEMP_LIBS}"
 TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
 TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
@@ -102,6 +105,7 @@ AC_ARG_WITH(bktr,
                           ,
 BKTR="$withval"
 )
+
 
 	if test "${BKTR}" = "no"; then
         	TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
@@ -136,10 +140,10 @@ AC_MSG_CHECKING(for linuxthreads)
 # Check for thread header
 #
 	if test -f "${THREAD_CHECK}"; then
-       	HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
-       	THREADS="yes"
+        	HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
+        	THREADS="yes"
 	else
-       	THREADS="no"
+        	THREADS="no"
 	fi
 
 #
@@ -149,7 +153,7 @@ AC_MSG_CHECKING(for linuxthreads)
 		THREADS="yes"
 		LIB_THREAD="-llthread -llgcc_r"
 	else
-       	THREADS="no"
+        	THREADS="no"
 	fi
 
 # Checks for Library linuxthreads for FreeBSD
@@ -162,17 +166,17 @@ AC_MSG_CHECKING(for linuxthreads)
 
 	if test "${THREADS}" = "yes"; then
 		TEMP_CFLAGS="${HEADERS_THREAD_CFLAGS} $TEMP_CFLAGS -DWITH_LINUXTREADS"
-        TEMP_LIBS="$TEMP_LIBS ${LIB_THREAD}"
-        THREAD_CFLAGS="-D_THREAD_SAFE"
-        PTHREAD_SUPPORT="yes"
-        AC_MSG_RESULT($THREADS)
-    else
-        PTHREAD_SUPPORT="no"
-        AC_MSG_RESULT($THREADS)
-        echo
-        echo "You do not have linuxthread installed"
-        echo
-    fi
+                TEMP_LIBS="$TEMP_LIBS ${LIB_THREAD}"
+                THREAD_CFLAGS="-D_THREAD_SAFE"
+                PTHREAD_SUPPORT="yes"
+                AC_MSG_RESULT($THREADS)
+        else
+                PTHREAD_SUPPORT="no"
+                AC_MSG_RESULT($THREADS)
+                echo
+                echo "You do not have linuxthread installed"
+                echo
+        fi
 
 elif test -f "${THREAD_CHECK}"; then
 
@@ -646,7 +650,7 @@ else
 		AC_MSG_RESULT(not found)
 		echo "Invalid MySQL directory - unable to find mysql.h."
 	else
-		AC_MSG_RESULT(yes)
+		AC_MSG_RESULT($MYSQL_INCDIR yes)
 		MYSQL_HEADERS="yes"
 	fi
 

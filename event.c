@@ -158,9 +158,9 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
                         MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to Mysql database '%s' Succeed",
                                    cnt->conf.database_dbname);
                         if (mysql_query(cnt->database, sqlquery) != 0) {
-                            int err_code = mysql_errno(cnt->database);
+                            int error_my = mysql_errno(cnt->database);
                             MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: after re-connection Mysql query failed %s error code %d",
-                                       mysql_error(cnt->database), err_code);
+                                       mysql_error(cnt->database), error_my);
                         }
                     }
                 }
@@ -238,7 +238,6 @@ static void on_event_end_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct tm *tm ATTRIBUTE_UNUSED)
 {
-
     if (cnt->conf.on_event_end)
         exec_command(cnt, cnt->conf.on_event_end, NULL, 0);
 }
@@ -406,9 +405,6 @@ static void on_movie_end_command(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
     int filetype = (unsigned long) arg;
 
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Closing File: %s",
-                   filename);
-
     if ((filetype & FTYPE_MPEG_ANY) && cnt->conf.on_movie_end)
         exec_command(cnt, cnt->conf.on_movie_end, filename, filetype);
 }
@@ -420,9 +416,9 @@ static void event_extpipe_end(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (cnt->extpipe_open) {
         cnt->extpipe_open = 0;
         fflush(cnt->extpipe);
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: CLOSING: extpipe file desc %d, error state %d",
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: CLOSING: extpipe file desc %d, error state %d",
                    fileno(cnt->extpipe), ferror(cnt->extpipe));
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: pclose return: %d",
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pclose return: %d",
                    pclose(cnt->extpipe));
         event(cnt, EVENT_FILECLOSE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, NULL);
     }

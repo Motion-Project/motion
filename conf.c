@@ -363,7 +363,7 @@ config_param config_params[] = {
     },
     {
     "netcam_url",
-    "# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// or file:///)\n"
+    "# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// or file:///)\n"
     "# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined",
     0,
     CONF_OFFSET(netcam_url),
@@ -538,7 +538,8 @@ config_param config_params[] = {
     "# Detect motion in predefined areas (1 - 9). Areas are numbered like that:  1 2 3\n"
     "# A script (on_area_detected) is started immediately when motion is         4 5 6\n"
     "# detected in one of the given areas, but only once during an event.        7 8 9\n"
-    "# One or more areas can be specified with this option. (Default: not defined)",
+    "# One or more areas can be specified with this option. Take care: This option\n"
+    "# does NOT restrict detection to these areas! (Default: not defined)",
     0,
     CONF_OFFSET(area_detect),
     copy_string,
@@ -565,7 +566,9 @@ config_param config_params[] = {
     {
     "lightswitch",
     "# Ignore sudden massive light intensity changes given as a percentage of the picture\n"
-    "# area that changed intensity. Valid range: 0 - 100 , default: 0 = disabled",
+    "# area that changed intensity. If set to 1, motion will do some kind of\n"
+    "# auto-lightswitch. Valid range: 0 - 100 , default: 0 = disabled",
+
     0,
     CONF_OFFSET(lightswitch),
     copy_int,
@@ -603,10 +606,12 @@ config_param config_params[] = {
     },
     {
     "event_gap",
-    "# Event Gap is the seconds of no motion detection that triggers the end of an event\n"
+    "# Event Gap is the seconds of no motion detection that triggers the end of an event.\n"
     "# An event is defined as a series of motion images taken within a short timeframe.\n"
-    "# Recommended value is 60 seconds (Default). The value 0 is allowed and disables\n"
-    "# events causing all Motion to be written to one single movie file and no pre_capture.",
+    "# Recommended value is 60 seconds (Default). The value -1 is allowed and disables\n"
+    "# events causing all Motion to be written to one single movie file and no pre_capture.\n"
+    "# If set to 0, motion is running in gapless mode. Movies don't have gaps anymore. An\n"
+    "# event ends right after no more motion is detected and post_capture is over.",
     0,
     CONF_OFFSET(event_gap),
     copy_int,

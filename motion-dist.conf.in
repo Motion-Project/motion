@@ -101,7 +101,7 @@ framerate 2
 # This option is used when you want to capture images at a rate lower than 2 per second.
 minimum_frame_time 0
 
-# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// or file:///)
+# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// or file:///)
 # Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined
 ; netcam_url value
 
@@ -190,7 +190,8 @@ despeckle_filter EedDl
 # Detect motion in predefined areas (1 - 9). Areas are numbered like that:  1 2 3
 # A script (on_area_detected) is started immediately when motion is         4 5 6
 # detected in one of the given areas, but only once during an event.        7 8 9
-# One or more areas can be specified with this option. (Default: not defined)
+# One or more areas can be specified with this option. Take care: This option
+# does NOT restrict detection to these areas! (Default: not defined)
 ; area_detect value
 
 # PGM file to use as a sensitivity mask.
@@ -220,12 +221,12 @@ pre_capture 0
 # Number of frames to capture after motion is no longer detected (default: 0)
 post_capture 0
 
-# Event Gap is the seconds of no motion detection that triggers the end of an event
+# Event Gap is the seconds of no motion detection that triggers the end of an event.
 # An event is defined as a series of motion images taken within a short timeframe.
-# Recommended value is 60 seconds (Default). A value of 0 allows to generate 'gapless'
-# movies - an event ends right after post_capture if any. The value -1 is allowed and
-# disables events causing all Motion to be written to one single movie file and no
-# pre_capture.
+# Recommended value is 60 seconds (Default). The value -1 is allowed and disables
+# events causing all Motion to be written to one single movie file and no pre_capture.
+# If set to 0, motion is running in gapless mode. Movies don't have gaps anymore. An
+# event ends right after no more motion is detected and post_capture is over.
 event_gap 60
 
 # Maximum length in seconds of a movie
