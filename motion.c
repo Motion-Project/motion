@@ -1796,18 +1796,15 @@ static void *motion_loop(void *arg)
                 }
 
                 if (frame_count >= cnt->conf.minimum_motion_frames) {
+
                     cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
                     cnt->detecting_motion = 1;
-#ifdef HAVE_FFMPEG
-                    if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
-#else
-                    if (cnt->conf.useextpipe && cnt->extpipe) {
-#endif
-                        /* Setup the postcap counter */
-                        cnt->postcap = cnt->conf.post_capture;
-                        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Setup post capture %d", 
-                                   cnt->postcap);
-                    }
+
+                    /* Setup the postcap counter */
+                    cnt->postcap = cnt->conf.post_capture;
+                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Setup post capture %d", 
+                               cnt->postcap);
+
                     /* Mark all images in image_ring to be saved */
                     for (i = 0; i < cnt->imgs.image_ring_size; i++) 
                         cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
@@ -1838,6 +1835,8 @@ static void *motion_loop(void *arg)
                 /* No motion, doing postcap */
                 cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                 cnt->postcap--;
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: post capture %d", 
+                           cnt->postcap);
             } else {
                 /* Done with postcap, so just have the image in the precap buffer */
                 cnt->current_image->flags |= IMAGE_PRECAP;
@@ -2462,7 +2461,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         cnt_list[0]->log_level = cnt_list[0]->conf.log_level - 1; // Let's make syslog compatible
     }
 
-    set_log_level(cnt_list[0]->log_level);   
+    //set_log_level(cnt_list[0]->log_level);   
 
 #ifdef HAVE_SDL
      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion "VERSION" Started with SDL support");
@@ -2499,6 +2498,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Using log type (%s) log level (%s)", 
                get_log_type_str(cnt_list[0]->log_type), get_log_level_str(cnt_list[0]->log_level));
 
+    set_log_level(cnt_list[0]->log_level);
     set_log_type(cnt_list[0]->log_type);
 
     initialize_chars();
@@ -2764,7 +2764,7 @@ int main (int argc, char **argv)
 
             if (((motion_threads_running == 0) && finish) || 
                 ((motion_threads_running == 0) && (threads_running == 0))) {
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: DEBUG-1 threads_running %d motion_threads_running %d "
+                MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO, "%s: DEBUG-1 threads_running %d motion_threads_running %d "
                            ", finish %d", threads_running, motion_threads_running, finish);                 
                 break;
             }    
@@ -2800,7 +2800,7 @@ int main (int argc, char **argv)
                 }
             }
 
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
+            MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO, "%s: DEBUG-2 threads_running %d motion_threads_running %d finish %d", 
                        threads_running, motion_threads_running, finish);
         }
         /* Reset end main loop flag */

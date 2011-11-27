@@ -42,6 +42,7 @@ Features
    * Improve detection of av_register_protocol() for ffmpeg (Angel Carpintero).
    * Added support for libjpeg-turbo 
      http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2010x04x14x082244 (Angel Carpintero)     
+   * Added new log type COR , to filter messages from CORE. (Angel Carpintero)
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
@@ -69,6 +70,7 @@ Bugfixes
    * Made micro-lightswitch optional (see lightwitch option in motion.conf)
    * Fixed help text for options event_gap and area_detect
    * Fixed motion.conf-dist , adding text according with config options.
+   * Fixed a bug in post_capture. It was missed under certain conditions.
 
 3.2.12 Summary of Changes
 

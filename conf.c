@@ -228,7 +228,7 @@ config_param config_params[] = {
     },
     {
     "log_type",
-    "# Filter to log messages by type (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",
+    "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",
     1,
     CONF_OFFSET(log_type_str),
     copy_string,

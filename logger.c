@@ -18,7 +18,7 @@ static FILE *logfile;
 static unsigned int log_level = LEVEL_DEFAULT;
 static unsigned int log_type = TYPE_DEFAULT;
 
-static const char *log_type_str[] = {NULL, "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL"};
+static const char *log_type_str[] = {NULL, "COR", "STR", "ENC", "NET", "DBL", "EVT", "TRK", "VID", "ALL"};
 static const char *log_level_str[] = {"EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL", NULL};
 
 
