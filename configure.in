@@ -211,7 +211,7 @@ fi
 #
 # Check for sdl library
 #
-SDL_SUPPORT="yes"
+SDL_SUPPORT="no"
 AC_ARG_WITH(sdl,
 [  --without-sdl           Compile without sdl support to get stream in SDL window.
 ],
@@ -220,7 +220,6 @@ AC_ARG_WITH(sdl,
 AC_MSG_CHECKING(for sdl)
 if test "x$withval" = "xno"; then
 	AC_MSG_RESULT(skipped)
-    SDL_SUPPORT="no"
 else
 	if test "${FreeBSD}" != ""; then
 		CONFIG_SDL='sdl11-config'

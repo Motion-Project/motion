@@ -63,6 +63,7 @@ const char* get_log_type_str(unsigned int type)
 void set_log_type(unsigned int type)
 {
     log_type = type;
+    //printf("set log type %d\n", type);
 }
 
 /**
@@ -85,6 +86,7 @@ const char* get_log_level_str(unsigned int level)
 void set_log_level(unsigned int level)
 {
     log_level = level;
+    //printf("set log level %d\n", level);
 }
 
 /**
@@ -96,6 +98,7 @@ void set_log_level(unsigned int level)
 void set_log_mode(int mode)
 {
     log_mode = mode;
+    //printf("set log mode %d\n", mode);
 }
 
 /**
@@ -172,6 +175,8 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     /* Exit if type is not equal to log_type and not TYPE_ALL */
     if ((log_type != TYPE_ALL) && (type != log_type))
         return;
+
+    //printf("log_type %d, type %d level %d\n", log_type, type, level);
 
     /*
      * If pthread_getspecific fails (e.g., because the thread's TLS doesn't

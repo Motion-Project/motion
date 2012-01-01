@@ -1,9 +1,9 @@
-.TH MOTION 1 2008-05-05 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2011-12-12 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
 .B motion
-[ -hns ] [ -c config file path ] [ -d log level ] [ -k log type ] [ -p process_id_file ] [ -l logfile ]
+[ -hmns ] [ -c config file path ] [ -d log level ] [ -k log type ] [ -p process_id_file ] [ -l logfile ]
 .SH DESCRIPTION
 .I  Motion
 uses a video4linux device to detect motion. If motion is detected both normal
@@ -16,6 +16,9 @@ Full path and filename of config file. E.g. /home/kurt/motion.conf. Default is /
 .TP
 .B \-h
 Show help screen.
+.TP
+.B \-m
+Disable motion detection at startup.
 .TP
 .B \-n
 Run in non-daemon mode.

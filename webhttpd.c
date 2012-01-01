@@ -2389,7 +2389,7 @@ void httpd_run(struct context **cnt)
 {
     int sd = -1, client_socket_fd, val;
     unsigned int client_sent_quit_message = 1, closehttpd = 0;
-    struct addrinfo hints, *res, *ressave;
+    struct addrinfo hints, *res = NULL, *ressave = NULL;
     struct sigaction act;
     char *authentication = NULL;
     char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];

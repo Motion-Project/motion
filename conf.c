@@ -159,6 +159,7 @@ struct config conf_template = {
     log_file:                       NULL,
     log_level:                      LEVEL_DEFAULT+10,
     log_type_str:                   NULL,
+//    motion_detection_pause:         1,
 };
 
 
@@ -1550,7 +1551,7 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "c:d:hns?p:k:l:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "c:d:hmns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1)
@@ -1579,6 +1580,9 @@ static void conf_cmdline(struct context *cnt, int thread)
             if (thread == -1)
                 strcpy(cnt->log_file, optarg);
             break;
+        case 'm':
+            cnt->pause = 1;
+            break;    
         case 'h':
         case '?':
         default:
@@ -2358,9 +2362,10 @@ static void usage()
     printf("-s\t\t\tRun in setup mode.\n");
     printf("-c config\t\tFull path and filename of config file.\n");
     printf("-d level\t\tLog level (1-9) (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). default: 6 / NTC.\n");
-    printf("-k type\t\t\tType of log (STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
+    printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
     printf("-l log file \t\tFull path and filename of log file.\n");
+    printf("-m\t\t\tDisable motion detection at startup.\n");
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");

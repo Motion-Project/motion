@@ -43,6 +43,7 @@ Features
    * Added support for libjpeg-turbo 
      http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2010x04x14x082244 (Angel Carpintero)     
    * Added new log type COR , to filter messages from CORE. (Angel Carpintero)
+   * Added a new starting option -m to disable motion detection. (Angel Carpintero)
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
@@ -71,6 +72,7 @@ Bugfixes
    * Fixed help text for options event_gap and area_detect
    * Fixed motion.conf-dist , adding text according with config options.
    * Fixed a bug in post_capture. It was missed under certain conditions.
+   * Fixed configure for SDL.
 
 3.2.12 Summary of Changes
 

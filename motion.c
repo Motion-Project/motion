@@ -688,8 +688,8 @@ static int motion_init(struct context *cnt)
     cnt->detecting_motion = 0;
     cnt->makemovie = 0;
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d started", 
-               (unsigned long)pthread_getspecific(tls_key_threadnr));
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d started , motion detection %s", 
+               (unsigned long)pthread_getspecific(tls_key_threadnr), cnt->pause ? "Disabled":"Enabled");
 
     if (!cnt->conf.filepath)
         cnt->conf.filepath = mystrdup(".");
@@ -2854,7 +2854,7 @@ int main (int argc, char **argv)
  */
 void * mymalloc(size_t nbytes)
 {
-    void *dummy = malloc(nbytes);
+    void *dummy = calloc(nbytes, 1);
  
     if (!dummy) {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "%s: Could not allocate %llu bytes of memory!", 
