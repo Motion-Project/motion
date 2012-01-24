@@ -644,7 +644,7 @@ void vid_close(struct context *cnt)
  * Returns
  *     device number
  *     -1 if failed to open device.
- *     -3 image dimensions are not modulo 16
+ *     -3 image dimensions are not modulo 8
  */
 static int vid_v4lx_start(struct context *cnt)
 {
@@ -659,17 +659,17 @@ static int vid_v4lx_start(struct context *cnt)
      * We use width and height from conf in this function. They will be assigned
      * to width and height in imgs here, and cap_width and cap_height in
      * rotate_data won't be set until in rotate_init.
-     * Motion requires that width and height is a multiple of 16 so we check
+     * Motion requires that width and height is a multiple of 8 so we check
      * for this first.
      */
-    if (conf->width % 16) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 16",
+    if (conf->width % 8) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 8",
                    conf->width);
         return -3;
     }
 
-    if (conf->height % 16) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 16",
+    if (conf->height % 8) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 8",
                    conf->height);
         return -3;
     }
@@ -837,7 +837,7 @@ static int vid_v4lx_start(struct context *cnt)
  * vid_start setup the capture device. This will be either a V4L device or a netcam.
  * The function does the following:
  * - If the camera is a netcam - netcam_start is called and function returns
- * - Width and height are checked for valid value (multiple of 16)
+ * - Width and height are checked for valid value (multiple of 8)
  * - Copy the config height and width to the imgs struct. Note that height and width are
  *   only copied to the from the conf struct to the imgs struct during program startup
  *   The width and height can no later be changed via http remote control as this would
@@ -851,7 +851,7 @@ static int vid_v4lx_start(struct context *cnt)
  * Returns
  *     device number
  *     -1 if failed to open device.
- *     -3 image dimensions are not modulo 16
+ *     -3 image dimensions are not modulo 8 
  */
 int vid_start(struct context *cnt)
 {

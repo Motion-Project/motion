@@ -133,7 +133,6 @@ struct config {
     int minimum_motion_frames;
     const char *exif_text;
     char *pid_file;
-//    unsigned int motion_detection_pause;
     int argc;
     char **argv;
 };

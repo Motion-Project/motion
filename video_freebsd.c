@@ -1080,18 +1080,18 @@ int vid_start(struct context *cnt)
          * We use width and height from conf in this function. They will be assigned
          * to width and height in imgs here, and cap_width and cap_height in
          * rotate_data won't be set until in rotate_init.
-         * Motion requires that width and height are multiples of 16 so we check for this.
+         * Motion requires that width and height are multiples of 8 so we check for this.
          */
-        if (conf->width % 16) {
+        if (conf->width % 8) {
             MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,
-                       "%s: config image width (%d) is not modulo 16",
+                       "%s: config image width (%d) is not modulo 8",
                         conf->width);
             return -1;
         }
 
-        if (conf->height % 16) {
+        if (conf->height % 8) {
             MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,
-                       "%s: config image height (%d) is not modulo 16",
+                       "%s: config image height (%d) is not modulo 8",
                         conf->height);
             return -1;
         }

@@ -389,8 +389,8 @@ static void motion_remove_pid(void)
     if (ptr_logfile) { 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Closing logfile (%s).",  
                    cnt_list[0]->conf.log_file);
-        set_log_mode(LOGMODE_SYSLOG);
         myfclose(ptr_logfile);
+        set_log_mode(LOGMODE_SYSLOG);
         ptr_logfile = NULL;
     }        
 
@@ -3085,13 +3085,13 @@ int myfclose(FILE* fh)
     for (i = 0; i < MYBUFCOUNT; i++) {
         if (buffers[i].fh == fh) {
             buffers[i].fh = NULL;
-#if 0 /* Don't free the buffers for now, reuse them instead */
-            if (buffers[i].buffer)
-                free(buffers[i].buffer);
+            if ( finish ) {
+                /* Free the buffers */
+                if (buffers[i].buffer)
+                    free(buffers[i].buffer);
                 buffers[i].buffer = NULL;
                 buffers[i].bufsize = 0;
-#endif
-            break;
+            }
         }
     }
     return rval;

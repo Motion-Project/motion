@@ -159,7 +159,6 @@ struct config conf_template = {
     log_file:                       NULL,
     log_level:                      LEVEL_DEFAULT+10,
     log_type_str:                   NULL,
-//    motion_detection_pause:         1,
 };
 
 
