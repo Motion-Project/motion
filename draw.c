@@ -1097,10 +1097,19 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     char_arr_ptr = factor ? big_char_arr_ptr : small_char_arr_ptr;
     
     for (pos = 0; pos < len; pos++) {
-        char_ptr = char_arr_ptr[(int)text[pos]];
+        int pos_check = (int)text[pos];
+
+        char_ptr = char_arr_ptr[pos_check];
 
         for (y = 8 * (factor + 1); y--;) {
             for (x = 7 * (factor + 1); x--;) {
+
+                if (pos_check < 0) {
+                    image_ptr++;
+                    char_ptr++;
+                    continue;
+                }                    
+                            
                 switch(*char_ptr) {
                 case 1:
                     *image_ptr = 0;

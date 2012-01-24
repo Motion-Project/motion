@@ -76,6 +76,7 @@ Bugfixes
    * Fixed configure for SDL.
    * Replace malloc() by calloc(). (Jeroen Massar)
    * Free file descriptor buffers on exit.
+   * Avoid segfault when text_left or text_right uses non supported chars. 
 
 3.2.12 Summary of Changes
 
