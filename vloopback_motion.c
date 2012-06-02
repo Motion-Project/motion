@@ -58,6 +58,7 @@ static int v4l_open_vidpipe(void)
         /* Read vloopback version*/
         if (!fgets(buffer, sizeof(buffer), vloopbacks)) {
             MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to read vloopback version");
+            myfclose(vloopbacks);
             return -1;
         }
 
@@ -68,6 +69,7 @@ static int v4l_open_vidpipe(void)
         if (!fgets(buffer, sizeof(buffer), vloopbacks)) {
             MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to read vloopback"
                        " explanation line");
+            myfclose(vloopbacks);
             return -1;
         }
 

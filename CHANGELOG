@@ -45,6 +45,8 @@ Features
    * Added new log type COR , to filter messages from CORE. (Angel Carpintero)
    * Added a new starting option -m to disable motion detection. (Angel Carpintero)
    * Allow image dimension not 4:3 changing a check of modulo 16 by modulo 8. (Jeroen Massar)
+   * Added codec Ogg/Theora as new output format for regular movies.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse (Michael Luich)
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
@@ -76,7 +78,8 @@ Bugfixes
    * Fixed configure for SDL.
    * Replace malloc() by calloc(). (Jeroen Massar)
    * Free file descriptor buffers on exit.
-   * Avoid segfault when text_left or text_right uses non supported chars. 
+   * Avoid segfault when text_left or text_right uses non supported chars.
+   * Fixed leak in vloopback.
 
 3.2.12 Summary of Changes
 

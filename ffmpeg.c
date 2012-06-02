@@ -63,6 +63,7 @@
 #    define AVSTREAM_CODEC_PTR(avs_ptr) (&avs_ptr->codec)
 #endif /* LIBAVFORMAT_BUILD >= 4629 */
 
+
 /*
  * Name of custom file protocol for appending to existing files instead
  * of truncating.
@@ -383,6 +384,15 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
         of = guess_format("mpeg1video", NULL, NULL);
 #else        
         of = av_guess_format("mov", NULL, NULL);
+#endif
+	    }
+  else if (strcmp (codec, "ogg") == 0)
+    {
+      ext = ".ogg";
+#ifdef GUESS_NO_DEPRECATED
+      of = guess_format ("ogg", NULL, NULL);
+#else
+      of = av_guess_format ("ogg", NULL, NULL);
 #endif
     } else {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg_video_codec option value"

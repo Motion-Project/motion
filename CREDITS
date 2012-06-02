@@ -1086,6 +1086,11 @@ Michal Licko
    * Track pan/tilt support for uvcvideo ( Michal Licko ,Dirk Wesenberg and Angel Carpintero )
      http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch
 
+Michael Luich
+
+   * Added codec Ogg/Theora as new output format for regular movies.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse
+
 Bill Maidment
    * Fixed bug reporting errors when creating symlink to last snap.
 
