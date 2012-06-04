@@ -80,6 +80,7 @@ Bugfixes
    * Free file descriptor buffers on exit.
    * Avoid segfault when text_left or text_right uses non supported chars.
    * Fixed leak in vloopback.
+   * Fixed a build of motion for some kernel version with not good videodev.h 
 
 3.2.12 Summary of Changes
 
