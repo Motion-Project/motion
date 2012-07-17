@@ -106,7 +106,6 @@ AC_ARG_WITH(bktr,
 BKTR="$withval"
 )
 
-
 	if test "${BKTR}" = "no"; then
         	TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
 	fi
@@ -140,10 +139,10 @@ AC_MSG_CHECKING(for linuxthreads)
 # Check for thread header
 #
 	if test -f "${THREAD_CHECK}"; then
-        	HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
-        	THREADS="yes"
+       	HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
+       	THREADS="yes"
 	else
-        	THREADS="no"
+       	THREADS="no"
 	fi
 
 #
@@ -153,7 +152,7 @@ AC_MSG_CHECKING(for linuxthreads)
 		THREADS="yes"
 		LIB_THREAD="-llthread -llgcc_r"
 	else
-        	THREADS="no"
+       	THREADS="no"
 	fi
 
 # Checks for Library linuxthreads for FreeBSD
@@ -166,17 +165,17 @@ AC_MSG_CHECKING(for linuxthreads)
 
 	if test "${THREADS}" = "yes"; then
 		TEMP_CFLAGS="${HEADERS_THREAD_CFLAGS} $TEMP_CFLAGS -DWITH_LINUXTREADS"
-                TEMP_LIBS="$TEMP_LIBS ${LIB_THREAD}"
-                THREAD_CFLAGS="-D_THREAD_SAFE"
-                PTHREAD_SUPPORT="yes"
-                AC_MSG_RESULT($THREADS)
-        else
-                PTHREAD_SUPPORT="no"
-                AC_MSG_RESULT($THREADS)
-                echo
-                echo "You do not have linuxthread installed"
-                echo
-        fi
+        TEMP_LIBS="$TEMP_LIBS ${LIB_THREAD}"
+        THREAD_CFLAGS="-D_THREAD_SAFE"
+        PTHREAD_SUPPORT="yes"
+        AC_MSG_RESULT($THREADS)
+    else
+        PTHREAD_SUPPORT="no"
+        AC_MSG_RESULT($THREADS)
+        echo
+        echo "You do not have linuxthread installed"
+        echo
+    fi
 
 elif test -f "${THREAD_CHECK}"; then
 
@@ -388,6 +387,17 @@ AC_ARG_WITH(ffmpeg,
                           ],
 FFMPEG_DIR="$withval"
 )
+
+# 
+# ffmpeg headers custom location
+#
+FFMPEG_HEADERS_DIR="yes"
+AC_ARG_WITH(ffmpeg_headers,
+[  --with-ffmpeg-headers[=DIR] Specify the prefix for ffmpeg headers.
+                               ],
+FFMPEG_HEADERS_DIR="$withval"
+)
+
 #
 # --without-ffmpeg or with-ffmpeg=no
 #
@@ -461,8 +471,13 @@ fi
 #
 
 if test "${FFMPEG_OK}" = "found"; then
-    AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
-	
+    if test "${FFMPEG_HEADERS_DIR}" = "yes"; then
+        AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
+	else
+        AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_HEADERS_DIR})
+        FFMPEG_DIR="${FFMPEG_HEADERS_DIR}"
+    fi
+
     if test -f ${FFMPEG_DIR}/include/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
@@ -480,6 +495,10 @@ if test "${FFMPEG_OK}" = "found"; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES"
         AVFORMAT="-I${FFMPEG_DIR}/include/ffmpeg/libavformat" 
+    elif test -f ${FFMPEG_DIR}/libavformat/avformat.h; then
+        AC_MSG_RESULT(found ${FFMPEG_DIR}/libavformat/avformat.h)
+        FFMPEG_CFLAGS="-I${FFMPEG_DIR} -DFFMPEG_NEW_INCLUDES"
+        AVFORMAT="-I{FFMPEG_DIR}/libavformat"
     else
         AC_MSG_RESULT(not found)
         FFMPEG_OK="no_found"
@@ -660,7 +679,7 @@ else
 	if test "${MYSQL_LIBS}" = "yes"; then
 		AC_MSG_CHECKING(autodect mysql libs)
         	# Autodetect
-		for w in /usr/lib64 /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql; do
+		for w in /usr/lib64 /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib/x86_64-linux-gnu; do
 			# check for plain setups
 			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
 				MYSQL_LIBDIR=$w
