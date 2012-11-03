@@ -174,7 +174,7 @@ static void image_ring_destroy(struct context *cnt)
 /**
  * image_save_as_preview
  *
- * This routine is called when we detect motion and want to save a image in the preview buffer
+ * This routine is called when we detect motion and want to save an image in the preview buffer
  *
  * Parameters:
  *
@@ -2728,7 +2728,7 @@ int main (int argc, char **argv)
             SLEEP(1, 0);
 
             /*
-             * Calculate how many threads runnig or wants to run
+             * Calculate how many threads are running or wants to run
              * if zero and we want to finish, break out
              */
             int motion_threads_running = 0;
