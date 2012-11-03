@@ -28,7 +28,7 @@
 #        warning Your version of FFmpeg is newer than version 0.4.8
 #        warning Newer versions of ffmpeg do not support MPEG1 with
 #        warning non-standard framerate. MPEG1 will be disabled for
-#        warning normal video output. You can still use mpeg4 and
+#        warning normal video output. You can still use mpeg4
 #        warning and mpeg4ms which are both better in terms of size
 #        warning and quality. MPEG1 is always used for timelapse.
 #        warning Please read the Motion Guide for more information.

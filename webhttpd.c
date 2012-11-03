@@ -16,6 +16,9 @@
 #include <netdb.h>
 #include <stddef.h>
 
+/* Timeout in seconds, used for read and write */
+const int NONBLOCK_TIMEOUT = 1;
+
 pthread_mutex_t httpd_mutex;
 
 // This is a dummy variable use to kill warnings when not checking sscanf and similar functions
@@ -197,7 +200,7 @@ static ssize_t write_nonblock(int fd, const void *buf, size_t size)
     struct timeval tm;
     fd_set fds;
 
-    tm.tv_sec = 1; /* Timeout in seconds */
+    tm.tv_sec = NONBLOCK_TIMEOUT;
     tm.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(fd, &fds);
@@ -223,7 +226,7 @@ static ssize_t read_nonblock(int fd ,void *buf, ssize_t size)
     struct timeval tm;
     fd_set fds;
 
-    tm.tv_sec = 1; /* Timeout in seconds */
+    tm.tv_sec = NONBLOCK_TIMEOUT; /* Timeout in seconds */
     tm.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(fd, &fds);
@@ -2502,7 +2505,7 @@ void httpd_run(struct context **cnt)
 
     while ((client_sent_quit_message) && (!closehttpd)) {
 
-        client_socket_fd = acceptnonblocking(sd, 1);
+        client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
 
         if (client_socket_fd < 0) {
             if ((!cnt[0]) || (cnt[0]->finish)) {

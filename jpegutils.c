@@ -770,7 +770,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                          unsigned int height, unsigned char *raw0,
                          unsigned char *raw1, unsigned char *raw2)
 {
-    int numfields, hsf[3], field, yl, yc, xsl, xsc, xs, xd, hdown;
+    int numfields, field, yl, yc, xsl, xsc, xs, xd, hdown;
     unsigned int x, y, vsf[3];
 
     JSAMPROW row0[16] = { buf0[0], buf0[1], buf0[2], buf0[3],
@@ -818,8 +818,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     guarantee_huff_tables(&dinfo);
     jpeg_start_decompress (&dinfo);
 
-    hsf[0] = 1; hsf[1] = 1; hsf[2] = 1;
-    vsf[0]= 1; vsf[1] = 1; vsf[2] = 1;
+    vsf[0] = 1; vsf[1] = 1; vsf[2] = 1;
 
     /* Height match image height or be exact twice the image height. */
 
