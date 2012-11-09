@@ -3176,6 +3176,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
     char tempstring[PATH_MAX] = "";
     char *format, *tempstr;
     const char *pos_userformat;
+    int width;
 
     format = formatstring;
 
@@ -3195,6 +3196,12 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
              */
             tempstr = tempstring;
             tempstr[0] = '\0';
+            width = 0;
+            while ('0' <= pos_userformat[1] && pos_userformat[1] <= '9') {
+                width *= 10;
+                width += pos_userformat[1] - '0';
+                ++pos_userformat;
+            }
 
             switch (*++pos_userformat) {
             case '\0': // end of string
@@ -3202,73 +3209,78 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                 break;
 
             case 'v': // event
-                sprintf(tempstr, "%02d", cnt->event_nr);
+                sprintf(tempstr, "%0*d", width ? width : 2, cnt->event_nr);
                 break;
 
             case 'q': // shots
-                sprintf(tempstr, "%02d", cnt->current_image->shot);
+                sprintf(tempstr, "%0*d", width ? width : 2,
+                    cnt->current_image->shot);
                 break;
 
             case 'D': // diffs
-                sprintf(tempstr, "%d", cnt->current_image->diffs);
+                sprintf(tempstr, "%*d", width, cnt->current_image->diffs);
                 break;
 
             case 'N': // noise
-                sprintf(tempstr, "%d", cnt->noise);
+                sprintf(tempstr, "%*d", width, cnt->noise);
                 break;
 
             case 'i': // motion width
-                sprintf(tempstr, "%d", cnt->current_image->location.width);
+                sprintf(tempstr, "%*d", width,
+                    cnt->current_image->location.width);
                 break;
 
             case 'J': // motion height
-                sprintf(tempstr, "%d", cnt->current_image->location.height);
+                sprintf(tempstr, "%*d", width,
+                    cnt->current_image->location.height);
                 break;
 
             case 'K': // motion center x
-                sprintf(tempstr, "%d", cnt->current_image->location.x);
+                sprintf(tempstr, "%*d", width, cnt->current_image->location.x);
                 break;
 
             case 'L': // motion center y
-                sprintf(tempstr, "%d", cnt->current_image->location.y);
+                sprintf(tempstr, "%*d", width, cnt->current_image->location.y);
                 break;
 
             case 'o': // threshold
-                sprintf(tempstr, "%d", cnt->threshold);
+                sprintf(tempstr, "%*d", width, cnt->threshold);
                 break;
 
             case 'Q': // number of labels
-                sprintf(tempstr, "%d", cnt->current_image->total_labels);
+                sprintf(tempstr, "%*d", width,
+                    cnt->current_image->total_labels);
                 break;
 
             case 't': // thread number
-                sprintf(tempstr, "%d",(int)(unsigned long)
+                sprintf(tempstr, "%*d", width, (int)(unsigned long)
                         pthread_getspecific(tls_key_threadnr));
                 break;
 
             case 'C': // text_event
                 if (cnt->text_event_string && cnt->text_event_string[0])
-                    snprintf(tempstr, PATH_MAX, "%s", cnt->text_event_string);
+                    snprintf(tempstr, PATH_MAX, "%*s", width,
+                        cnt->text_event_string);
                 else
                     ++pos_userformat;
                 break;
 
             case 'f': // filename -- or %fps
                 if ((*(pos_userformat+1) == 'p') && (*(pos_userformat+2) == 's')) {
-                    sprintf(tempstr, "%d", cnt->movie_fps);
+                    sprintf(tempstr, "%*d", width, cnt->movie_fps);
                     pos_userformat += 2;
                     break;
                 }
 
                 if (filename)
-                    snprintf(tempstr, PATH_MAX, "%s", filename);
+                    snprintf(tempstr, PATH_MAX, "%*s", width, filename);
                 else
                     ++pos_userformat;
                 break;
 
             case 'n': // sqltype
                 if (sqltype)
-                    sprintf(tempstr, "%d", sqltype);
+                    sprintf(tempstr, "%*d", width, sqltype);
                 else
                     ++pos_userformat;
                 break;

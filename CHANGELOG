@@ -49,6 +49,7 @@ Features
      http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse (Michael Luich)
    * Added support for ffmpeg 0.11 new API.
    * Added RSTP support for netcam ( merge https://github.com/hyperbolic2346/motion )
+   * Allow text format specifiers to take a width like printf would.  (David Fries)
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
