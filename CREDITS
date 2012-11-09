@@ -473,6 +473,9 @@ Mark Feenstra
 Miguel Freitas
    * Came up with the round robing idea.
 
+David Fries
+   * Fix webhttpd race condition crash with SIGHUP, add it to running thread counter
+
 Aaron Gage
    * Pointed me to the vid_mmap/int problem when calling SYNC in
      video.c

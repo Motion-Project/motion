@@ -2508,7 +2508,7 @@ void httpd_run(struct context **cnt)
         client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
 
         if (client_socket_fd < 0) {
-            if ((!cnt[0]) || (cnt[0]->finish)) {
+            if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Finishing");
                 closehttpd = 1;
             }
@@ -2539,6 +2539,17 @@ void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
     httpd_run(cnt);
+
+    /* 
+     * Update how many threads we have running. This is done within a
+     * mutex lock to prevent multiple simultaneous updates to
+     * 'threads_running'.
+     */
+    pthread_mutex_lock(&global_lock);
+    threads_running--;
+    cnt[0]->webcontrol_running = 0;
+    pthread_mutex_unlock(&global_lock);
+
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd thread exit");
     pthread_exit(NULL);
 }

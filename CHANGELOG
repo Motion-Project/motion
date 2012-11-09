@@ -84,6 +84,7 @@ Bugfixes
    * Fixed leak in vloopback.
    * Fixed a build of motion for some kernel version with not good videodev.h 
    * Netcam Modulo 8
+   * Fix webhttpd race condition crash with SIGHUP, add it to running thread counter (David Fries)
 
 3.2.12 Summary of Changes
 

@@ -340,6 +340,7 @@ static void sig_handler(int signo)
             while (cnt_list[++i]) {
                 cnt_list[i]->makemovie = 1;
                 cnt_list[i]->finish = 1;
+                cnt_list[i]->webcontrol_finish = 1;
                 /* 
                  * Don't restart thread when it ends, 
                  * all threads restarts if global restart is set 
@@ -2747,8 +2748,21 @@ int main (int argc, char **argv)
          * Create a thread for the control interface if requested. Create it
          * detached and with 'motion_web_control' as the thread function.
          */
-        if (cnt_list[0]->conf.webcontrol_port)
-            pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
+        if (cnt_list[0]->conf.webcontrol_port) {
+            pthread_mutex_lock(&global_lock);
+            threads_running++;
+            /* set outside the loop to avoid thread set vs main thread check */
+            cnt_list[0]->webcontrol_running = 1;
+            pthread_mutex_unlock(&global_lock);
+            if (pthread_create(&thread_id, &thread_attr, &motion_web_control,
+                cnt_list)) {
+                /* thread create failed, undo running state */
+                pthread_mutex_lock(&global_lock);
+                threads_running--;
+                cnt_list[0]->webcontrol_running = 0;
+                pthread_mutex_unlock(&global_lock);
+            }
+        }
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Waiting for threads to finish, pid: %d", 
                    getpid());
@@ -2770,6 +2784,9 @@ int main (int argc, char **argv)
                 if (cnt_list[i]->running || cnt_list[i]->restart)
                     motion_threads_running++;
             }
+            if (cnt_list[0]->conf.webcontrol_port &&
+                cnt_list[0]->webcontrol_running)
+                motion_threads_running++;
 
             if (((motion_threads_running == 0) && finish) || 
                 ((motion_threads_running == 0) && (threads_running == 0))) {
@@ -2829,7 +2846,7 @@ int main (int argc, char **argv)
 
 
     // Be sure that http control exits fine
-    cnt_list[0]->finish = 1;
+    cnt_list[0]->webcontrol_finish = 1;
     SLEEP(1, 0);
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion terminating");
 
