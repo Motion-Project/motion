@@ -1108,8 +1108,6 @@ static void *motion_loop(void *arg)
      * is acted upon.
      */
     unsigned long int time_last_frame = 1, time_current_frame;
-
-    cnt->running = 1;
     
     if (motion_init(cnt) < 0) 
         goto err;
@@ -2623,11 +2621,22 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
     /* Give the thread WATCHDOG_TMO to start */
     cnt->watchdog = WATCHDOG_TMO;
 
+    /* Flag it as running outside of the thread, otherwise if the main loop
+     * checked if it is was running before the thread set it to 1, it would
+     * start another thread for this device. */
+    cnt->running = 1;
+
     /* 
      * Create the actual thread. Use 'motion_loop' as the thread
      * function.
      */
-    pthread_create(&cnt->thread_id, thread_attr, &motion_loop, cnt);
+    if (pthread_create(&cnt->thread_id, thread_attr, &motion_loop, cnt)) {
+        /* thread create failed, undo running state */
+        cnt->running = 0;
+        pthread_mutex_lock(&global_lock);
+        threads_running--;
+        pthread_mutex_unlock(&global_lock);
+    }
 }
 
 /**
