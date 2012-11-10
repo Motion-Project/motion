@@ -86,6 +86,8 @@ Features
    * Removed compiler warning regarding ffmpeg being newer than 0.4 version(Mr-Dave)
    * New configure script and identification of ffmpeg version and additional libs. (Mr-Dave)
    * Allow text format specifiers to take a width like printf would.  (David Fries)
+   * Allow text format specifiers to take a width like printf would.  (David Fries)
+   * Add power_line_frequency configuration item to improve image quality.  (David Fries)
    * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
    * Revised INSTALL with samples(Mr-Dave)
    * Revisions for RTSP and code standard.(Mr-Dave)

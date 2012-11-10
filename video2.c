@@ -144,6 +144,10 @@ static const u32 queried_ctrls[] = {
     V4L2_CID_CONTRAST,
     V4L2_CID_SATURATION,
     V4L2_CID_HUE,
+/* first added in Linux kernel v2.6.26 */
+#ifdef V4L2_CID_POWER_LINE_FREQUENCY
+    V4L2_CID_POWER_LINE_FREQUENCY,
+#endif
 
     V4L2_CID_RED_BALANCE,
     V4L2_CID_BLUE_BALANCE,
@@ -749,6 +753,13 @@ static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
                     ret = xioctl(vid_source, VIDIOC_S_CTRL, &control);
                     break;
 
+                case V4L2_CTRL_TYPE_MENU:
+                    /* set as is, no adjustments */
+                    control.value = value;
+                    ret = xioctl(vid_source, VIDIOC_S_CTRL, &control);
+                    break;
+
+
                 default:
                     MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "%s: control type not supported yet");
                     return -1;
@@ -788,6 +799,14 @@ static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
         viddev->hue = cnt->conf.hue;
         v4l2_set_control(vid_source, V4L2_CID_HUE, viddev->hue);
     }
+
+#ifdef V4L2_CID_POWER_LINE_FREQUENCY
+    /* -1 is don't modify as 0 is an option to disable the power line filter */
+    if (cnt->conf.power_line_frequency != -1 && cnt->conf.power_line_frequency != viddev->power_line_frequency) {
+        viddev->power_line_frequency = cnt->conf.power_line_frequency;
+        v4l2_set_control(vid_source, V4L2_CID_POWER_LINE_FREQUENCY, viddev->power_line_frequency);
+    }
+#endif
 
     if (cnt->conf.autobright) {
         if (vid_do_autobright(cnt, viddev)) {
