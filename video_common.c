@@ -760,6 +760,8 @@ static int vid_v4lx_start(struct context *cnt)
     dev->contrast = 0;
     dev->saturation = 0;
     dev->hue = 0;
+    /* -1 is don't modify, (0 is a valid value) */
+    dev->power_line_frequency = -1;
     dev->owner = -1;
     dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
     dev->fps = 0;

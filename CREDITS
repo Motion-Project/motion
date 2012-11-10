@@ -476,6 +476,7 @@ Miguel Freitas
 David Fries
    * Fix webhttpd race condition crash with SIGHUP, add it to running thread counter
    * Allow text format specifiers to take a width like printf would.
+   * Add power_line_frequency configuration item to improve image quality.
 
 Aaron Gage
    * Pointed me to the vid_mmap/int problem when calling SYNC in

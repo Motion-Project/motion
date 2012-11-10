@@ -71,6 +71,7 @@ struct config conf_template = {
     contrast:                       0,
     saturation:                     0,
     hue:                            0,
+    power_line_frequency:           -1,
     roundrobin_frames:              1,
     roundrobin_skip:                1,
     pre_capture:                    0,
@@ -456,6 +457,22 @@ config_param config_params[] = {
     "# Valid range 0-255, default 0 = disabled",
     0,
     CONF_OFFSET(hue),
+    copy_int,
+    print_int
+    },
+    {
+    "power_line_frequency",
+    "# Set the power line frequency to help cancel flicker by compensating\n"
+    "# for light intensity ripple.  (default: -1).\n"
+    "# This can help reduce power line light flicker.\n"
+    "# Valuse :\n"
+    "# do not modify the device setting       : -1\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_DISABLED : 0\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_50HZ     : 1\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_60HZ     : 2\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_AUTO     : 3",
+    0,
+    CONF_OFFSET(power_line_frequency),
     copy_int,
     print_int
     },

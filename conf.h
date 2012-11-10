@@ -53,6 +53,7 @@ struct config {
     int contrast;
     int saturation;
     int hue;
+    int power_line_frequency;
     int roundrobin_frames;
     int roundrobin_skip;
     int pre_capture;
