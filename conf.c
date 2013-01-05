@@ -668,6 +668,15 @@ config_param config_params[] = {
     print_string
     },
     {
+    "ffmpeg_duplicate_frames",
+    "# True to duplicate frames to achieve \"framerate\" fps, but enough\n"
+    "duplicated frames and the video appears to freeze once a second.",
+    0,
+    CONF_OFFSET(ffmpeg_duplicate_frames),
+    copy_bool,
+    print_bool
+    },
+    {
     "output_debug_pictures",
     "# Output pictures with only the pixels moving object (ghost images) (default: off)",
     0,

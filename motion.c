@@ -570,8 +570,13 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
             /* 
              * Check if we must add any "filler" frames into movie to keep up fps 
              * Only if we are recording videos ( ffmpeg or extenal pipe )         
+             * While the overall elapsed time might be correct, if there are
+             * many duplicated frames, say 10 fps, 5 duplicated, the video will
+             * look like it is frozen every second for half a second.
              */
-            if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
+            if (!cnt->conf.ffmpeg_duplicate_frames) {
+                /* don't duplicate frames */
+            } else if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
 #ifdef HAVE_FFMPEG
                 (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
 #else
