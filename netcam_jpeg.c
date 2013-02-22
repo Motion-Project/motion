@@ -485,6 +485,42 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 }
 
 /**
+  * netcam_fix_jpeg_header
+  *
+  *    Routine to decode an image received from a netcam into a YUV420P buffer
+  *    suitable for processing by motion.
+  *
+  * Parameters:
+  *    netcam    pointer to the netcam_context structure
+  *
+  * Returns:  Nothing
+  *
+  */
+void netcam_fix_jpeg_header(netcam_context_ptr netcam)
+{
+    char *ptr_buffer;
+
+    ptr_buffer = memmem(netcam->receiving->ptr, netcam->receiving->used, "\xff\xd8", 2);
+
+    if (ptr_buffer != NULL) {
+        size_t soi_position = 0;
+
+        soi_position = ptr_buffer - netcam->receiving->ptr;
+
+        if (soi_position > 0) {
+            memmove(netcam->receiving->ptr, netcam->receiving->ptr + soi_position,
+                    netcam->receiving->used - soi_position);
+            netcam->receiving->used -= soi_position;
+        }
+
+        // if (debug_level > CAMERA_INFO)
+        //    motion_log(LOG_INFO, 0, "%s: SOI found , position %d",
+        //               __FUNCTION__, soi_position);
+    }
+}
+
+
+/**
  * netcam_get_dimensions
  *
  *    This function gets the height and width of the JPEG image
