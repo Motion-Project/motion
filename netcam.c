@@ -1305,6 +1305,11 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
         MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
     
     netcam->receiving->image_time = curtime;
+    
+    /* Fix starting of JPEG if needed , some cameras introduce thrash before 
+     * SOI  0xFFD8  Start Of Image
+     */
+    netcam_fix_jpeg_header(netcam);
 
     /*
      * Calculate our "running average" time for this netcam's
