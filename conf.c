@@ -23,6 +23,9 @@
  *   4. add a entry to the config_params array below, if your
  *      option should be configurable by the config file.
  */
+#include <dirent.h>
+#include <string.h>
+
 #include "motion.h"
 
 #if (defined(BSD) && !defined(PWCBSD))
@@ -30,6 +33,8 @@
 #else
 #include "video.h"
 #endif /* BSD */
+
+#define EXTENSION ".conf"
 
 #ifndef HAVE_GET_CURRENT_DIR_NAME
 char *get_current_dir_name(void)
@@ -46,6 +51,7 @@ struct config conf_template = {
     width:                          DEF_WIDTH,
     height:                         DEF_HEIGHT,
     quality:                        DEF_QUALITY,
+    camera_id:                      0,
     rotate_deg:                     0,
     max_changes:                    DEF_CHANGES,
     threshold_tune:                 0,
@@ -161,12 +167,15 @@ struct config conf_template = {
     log_file:                       NULL,
     log_level:                      LEVEL_DEFAULT+10,
     log_type_str:                   NULL,
+    thread_dir:                     sysconfdir "/conf.d"
 };
 
 
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_thread(struct context **cnt, const char *str, int val);
+static struct context **read_thread_dir(struct context **cnt, const char *str,
+                                            int val);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -333,6 +342,16 @@ config_param config_params[] = {
     "# Image width (pixels). Valid range: Camera dependent, default: 352",
     0,
     CONF_OFFSET(width),
+    copy_int,
+    print_int
+    },
+    {
+    "camera_id",
+    "Id used to label the camera when inserting data into SQL or saving the"
+    "camera image to disk.  This is better than using thread ID so that there"
+    "always is a consistent label",
+    0,
+    CONF_OFFSET(camera_id),
     copy_int,
     print_int
     },
@@ -1570,6 +1589,18 @@ config_param config_params[] = {
     config_thread,
     print_thread
     },
+
+    /* using a conf.d style camera addition */
+    {
+    "thread_dir",
+    "\n##############################################################\n"
+    "# Thread config directory - One for each camera.\n"
+    "##############################################################\n",
+    1,
+    CONF_OFFSET(thread_dir),
+    read_thread_dir,
+    print_string
+    },
     { NULL, NULL, 0, 0, NULL, NULL }
 };
 
@@ -1630,7 +1661,7 @@ static void conf_cmdline(struct context *cnt, int thread)
             break;
         case 'm':
             cnt->pause = 1;
-            break;    
+            break;
         case 'h':
         case '?':
         default:
@@ -2322,6 +2353,54 @@ static const char *print_thread(struct context **cnt, char **str,
     *str = retval;
 
     return NULL;
+}
+
+
+/**
+ * config_thread_dir
+ *     Read the directory finding all *.conf files in the path
+ *     when calls config_thread
+ */
+
+static struct context **read_thread_dir(struct context **cnt, const char *str,
+                                            int val ATTRIBUTE_UNUSED)
+{
+    DIR *dp;
+    struct dirent *ep;
+    int name_len;
+
+    char conf_file[PATH_MAX];
+
+    dp = opendir(str);
+    if (dp != NULL)
+    {
+        while( (ep = readdir(dp)) )
+        {
+            name_len = strlen(ep->d_name);
+            if (name_len > strlen(EXTENSION) &&
+                    (strncmp(EXTENSION,
+                                (ep->d_name + name_len - strlen(EXTENSION)),
+                                strlen(EXTENSION)) == 0
+                    )
+                )
+            {
+                memset(conf_file, '\0', sizeof(conf_file));
+                snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
+                            str, ep->d_name);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+                    "%s: Processing config file %s", conf_file );
+                cnt = config_thread(cnt, conf_file, 0);
+            }
+        }
+        closedir(dp);
+    }
+    else
+    {
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Thread directory config "
+                    "%s not found", str);
+    }
+
+    return cnt;
 }
 
 /**

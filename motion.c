@@ -2764,7 +2764,7 @@ int main (int argc, char **argv)
                        cnt_list[i]->conf.stream_port);
 #ifdef HAVE_SQLITE
             /* this is done to share the seralized handle
-             * and supress creation of new handles in the threads */    
+             * and supress creation of new handles in the threads */
             cnt_list[i]->database_sqlite3=cnt_list[0]->database_sqlite3;
 #endif
             start_motion_thread(cnt_list[i], &thread_attr);
@@ -3036,7 +3036,7 @@ int create_path(const char *path)
  *   (which is: path does not exist), the path is created and then things are
  *   tried again. This is faster then trying to create that path over and over
  *   again. If someone removes the path after it was created, myfopen will
- *   recreate the path automatically. 
+ *   recreate the path automatically.
  *
  * Parameters:
  *
@@ -3173,6 +3173,9 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     cnt->current_image->location.width);
                 break;
 
+            case 'I': // camera id
+                sprintf(tempstr, "%*d", width, cnt->conf.camera_id);
+                break;
             case 'J': // motion height
                 sprintf(tempstr, "%*d", width,
                     cnt->current_image->location.height);
