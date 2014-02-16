@@ -3200,6 +3200,14 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     ++pos_userformat;
                 break;
 
+            case 'w': // picture width
+                sprintf(tempstr, "%d", cnt->imgs.width);
+                break;
+
+            case 'h': // picture height
+                sprintf(tempstr, "%d", cnt->imgs.height);
+                break;
+
             case 'f': // filename -- or %fps
                 if ((*(pos_userformat+1) == 'p') && (*(pos_userformat+2) == 's')) {
                     sprintf(tempstr, "%d", cnt->movie_fps);
