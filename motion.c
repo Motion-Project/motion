@@ -2714,8 +2714,12 @@ int main (int argc, char **argv)
             cnt_list[i]->threadnr = i ? i : 1;
 
             if (strcmp(cnt_list[i]->conf_filename, ""))
+            {
+                cnt_list[i]->conf_filename[sizeof(cnt_list[i]->conf_filename) - 1] = '\0';
+
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is from %s", 
                            cnt_list[i]->threadnr, cnt_list[i]->conf_filename);
+            }
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is device: %s input %d", 
                        cnt_list[i]->threadnr, cnt_list[i]->conf.netcam_url ? 
