@@ -212,11 +212,20 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     /* Next add the user's message. */
     va_start(ap, fmt);
     n += vsnprintf(buf + n, sizeof(buf) - n, fmt, ap);
+    buf[1023] = '\0';
 
     /* If errno_flag is set, add on the library error message. */
     if (errno_flag) {
-        strncat(buf, ": ", 1024 - strlen(buf));
-        n += 2;
+      size_t buf_len = strlen(buf);
+      
+      // just knock off 10 characters if we're that close...
+      if (buf_len + 10 > 1024) {
+	buf[1024 - 10] = '\0';
+	buf_len = 1024 - 10;
+      }
+
+      strncat(buf, ": ", 1024 - buf_len);
+      n += 2;
         /*
          * This is bad - apparently gcc/libc wants to use the non-standard GNU
          * version of strerror_r, which doesn't actually put the message into
