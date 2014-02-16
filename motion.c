@@ -1294,7 +1294,7 @@ static void *motion_loop(void *arg)
                 cnt->current_image->timestamp_tm = old_image->timestamp_tm;
                 cnt->current_image->shot = old_image->shot;
                 cnt->current_image->cent_dist = old_image->cent_dist;
-                cnt->current_image->flags = old_image->flags;
+                cnt->current_image->flags = old_image->flags & (~IMAGE_SAVED);
                 cnt->current_image->location = old_image->location;
                 cnt->current_image->total_labels = old_image->total_labels;
             }
