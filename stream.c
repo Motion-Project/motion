@@ -170,7 +170,6 @@ static void* handle_basic_auth(void* param)
     char buffer[1024] = {'\0'};
     ssize_t length = 1023;
     char *auth, *h, *authentication;
-    int ret;
     static const char *request_auth_response_template=
         "HTTP/1.0 401 Authorization Required\r\n"
         "Server: Motion/"VERSION"\r\n"
@@ -243,7 +242,7 @@ static void* handle_basic_auth(void* param)
     pthread_exit(NULL);
 
 Error:
-    ret = write(p->sock, request_auth_response_template, strlen (request_auth_response_template));
+    write(p->sock, request_auth_response_template, strlen (request_auth_response_template));
 
 Invalid_Request:
     close(p->sock);
@@ -396,7 +395,6 @@ static void* handle_md5_digest(void* param)
 #define SERVER_URI_LEN 512
     char server_uri[SERVER_URI_LEN];
     char* server_user = NULL, *server_pass = NULL;
-    int ret;
     unsigned int rand1,rand2;
     HASHHEX HA1;
     HASHHEX HA2 = "";
@@ -571,8 +569,8 @@ Error:
                 "Content-Length: %Zu\r\n\r\n",
                 request_auth_response_template, server_nonce,
                 KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
-        ret = write(p->sock, buffer, strlen(buffer));
-        ret = write(p->sock, auth_failed_html_template, strlen(auth_failed_html_template));
+        write(p->sock, buffer, strlen(buffer));
+        write(p->sock, auth_failed_html_template, strlen(auth_failed_html_template));
     }
 
     // OK - Access
@@ -609,7 +607,7 @@ InternalError:
     if(server_pass)
         free(server_pass);
 
-    ret = write(p->sock, internal_error_template, strlen(internal_error_template));
+    write(p->sock, internal_error_template, strlen(internal_error_template));
 
 Invalid_Request:
     close(p->sock);

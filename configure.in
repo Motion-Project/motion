@@ -426,6 +426,11 @@ else if test "${FFMPEG_DIR}" = "yes"; then
 		FFMPEG_OK="found"
 		FFMPEG_LIB="/usr/local/lib"
 		FFMPEG_DIR="/usr/local"
+    elif test -f /usr/lib/x86_64-linux-gnu/libavcodec.a -o -f /usr/lib/x86_64-linux-gnu/libavcodec.so && test /usr/lib/x86_64-linux-gnu/libavcodec.a -o -f /usr/lib/x86_64-linux-gnu/libavcodec.so ; then
+        AC_MSG_RESULT(found in /usr/lib/x86_64-linux-gnu)
+        FFMPEG_OK="found"
+        FFMPEG_LIB="/usr/lib/x86_64-linux-gnu"
+        FFMPEG_DIR="/usr"
 	else
 		AC_MSG_RESULT(not found)
 		echo ""
