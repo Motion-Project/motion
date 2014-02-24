@@ -663,7 +663,6 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
                      MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Boundary string [%s]",
                                 netcam->boundary);
-                        
                 }
                 break;
             case 3:  /* MJPG-Block style streaming. */
