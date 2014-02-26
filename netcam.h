@@ -105,6 +105,7 @@ typedef struct file_context {
 #define NCS_UNSUPPORTED         0  /* streaming is not supported */
 #define NCS_MULTIPART           1  /* streaming is done via multipart */
 #define NCS_BLOCK               2  /* streaming is done via MJPG-block */
+#define NCS_RTSP                3  /* streaming is done via RTSP */
 
 /*
  * struct netcam_context contains all the structures and other data
@@ -198,6 +199,9 @@ typedef struct netcam_context {
 
     struct file_context *file;  /* this structure contains the
                                    context for FILE connection */
+
+    struct rtsp_context *rtsp;  /* this structure contains the
+                                   context for RTSP connection */                                                                       
 
     int (*get_image)(netcam_context_ptr);
                                 /* Function to fetch the image from
