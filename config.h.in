@@ -114,6 +114,9 @@
 /* Define to 1 if you have av_avformat_alloc_context support */
 #undef have_av_avformat_alloc_context
 
+/* Define to 1 if you have av_get_media_type_string support */
+#undef have_av_get_media_type_string
+
 /* Define to 1 if you have av_register_protocol support */
 #undef have_av_register_protocol
 
