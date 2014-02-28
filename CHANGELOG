@@ -48,6 +48,7 @@ Features
    * Added codec Ogg/Theora as new output format for regular movies.
      http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse (Michael Luich)
    * Added support for ffmpeg 0.11 new API.
+   * Added RSTP support for netcam ( merge https://github.com/hyperbolic2346/motion )
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
@@ -82,6 +83,7 @@ Bugfixes
    * Avoid segfault when text_left or text_right uses non supported chars.
    * Fixed leak in vloopback.
    * Fixed a build of motion for some kernel version with not good videodev.h 
+   * Netcam Modulo 8
 
 3.2.12 Summary of Changes
 
