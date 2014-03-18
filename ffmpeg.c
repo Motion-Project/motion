@@ -1000,7 +1000,7 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
     /* We assume using 'PIX_FMT_YUV420P' always */
     avpicture_deinterlace(&picture, &picture, PIX_FMT_YUV420P, width, height);
 
-#ifndef __SSE_MATH__
+#if !defined(__SSE_MATH__) && (defined(__i386__) || defined(__x86_64__))
     __asm__ __volatile__ ( "emms");
 #endif
 
