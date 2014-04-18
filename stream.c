@@ -955,7 +955,7 @@ static void stream_add_client(struct stream *list, int sc)
                                  "Cache-Control: no-cache, private\r\n"
                                  "Pragma: no-cache\r\n"
                                  "Content-Type: multipart/x-mixed-replace; "
-                                 "boundary=--BoundaryString\r\n\r\n";
+                                 "boundary=BoundaryString\r\n\r\n";
 
     memset(new, 0, sizeof(struct stream));
     new->socket = sc;
