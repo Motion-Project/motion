@@ -917,7 +917,7 @@ static int motion_init(struct context *cnt)
     /* Always initialize smart_mask - someone could turn it on later... */
     memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
     memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
-    memset(cnt->imgs.smartmask_buffer, 0, cnt->imgs.motionsize*sizeof(cnt->imgs.smartmask_buffer));
+    memset(cnt->imgs.smartmask_buffer, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
 
     /* Set noise level */
     cnt->noise = cnt->conf.noise;
