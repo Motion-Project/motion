@@ -478,7 +478,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     if (setjmp (jerr.setjmp_buffer)) {
         /* If we get here, the JPEG code has signaled an error. */
         jpeg_destroy_decompress (&dinfo);
-        return -1;
+        return 1;
     }
 
     jpeg_create_decompress (&dinfo);
