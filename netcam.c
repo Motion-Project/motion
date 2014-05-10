@@ -2418,6 +2418,7 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
 {
   struct context *cnt = netcam->cnt;
   const char *ptr;
+  int ret = -1;
   
   netcam->caps.streaming = NCS_RTSP;
   netcam->rtsp = rtsp_new_context();
@@ -2470,7 +2471,8 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
    * The RTSP context should be all ready to attempt a connection with
    * the server, so we try ....
    */
-  rtsp_connect(netcam);
+  ret = rtsp_connect(netcam);
+  if (ret < 0) return ret;
 
   netcam->get_image = netcam_read_rtsp_image;
 
