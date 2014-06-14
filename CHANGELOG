@@ -55,6 +55,10 @@ Features
        picture.c,webhttpd.c,stream.c,ffmpeg.c
    * Bug fix as part of warnings in webhttpd.c fixed(Mr-Dave)
    * Removed compiler warning regarding ffmpeg being newer than 0.4 version(Mr-Dave)
+   * New configure script and identification of ffmpeg version and additional libs. (Mr-Dave)
+   * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
+   * Revised INSTALL with samples(Mr-Dave)
+   * Revisions for RTSP and code standard.(Mr-Dave)
    
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)

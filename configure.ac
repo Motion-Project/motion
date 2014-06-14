@@ -399,6 +399,16 @@ FFMPEG_HEADERS_DIR="$withval"
 )
 
 #
+# ffmpeg custom extra libraries
+#
+FFMPEG_EXTRALIBS=" -lavformat -lavcodec -lavutil -lm -lz "
+AC_ARG_WITH(ffmpeg-libs,
+[  --with-ffmpeg-libs[=libs]  Specify the extra libs for ffmpeg
+                               ],
+FFMPEG_EXTRALIBS="$withval"
+)
+
+#
 # --without-ffmpeg or with-ffmpeg=no
 #
 if test "${FFMPEG_DIR}" = "no"; then
@@ -471,42 +481,54 @@ else
 	fi
 fi
 
+
 #
 # Now check for ffmpeg headers ( avformat.h ) if ffmpeg libs were found
 #
 
+AVFORMAT_DIR=""
+
 if test "${FFMPEG_OK}" = "found"; then
     if test "${FFMPEG_HEADERS_DIR}" = "yes"; then
         AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
-	else
+        AVFORMAT_DIR="${FFMPEG_DIR}"
+    else
         AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_HEADERS_DIR})
         FFMPEG_DIR="${FFMPEG_HEADERS_DIR}"
+        AVFORMAT_DIR="${FFMPEG_DIR}"
     fi
 
     if test -f ${FFMPEG_DIR}/include/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
+        AVFORMAT_DIR="${FFMPEG_DIR}/include/avformat.h"
     elif test -f ${FFMPEG_DIR}/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}"
+        AVFORMAT_DIR="${FFMPEG_DIR}/avformat.h"
     elif test -f ${FFMPEG_DIR}/include/ffmpeg/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg"
+        AVFORMAT_DIR="${FFMPEG_DIR}/include/ffmpeg/avformat.h"
     elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
         AVFORMAT="-I${FFMPEG_DIR}/include/libavformat" 
+        AVFORMAT_DIR="${FFMPEG_DIR}/include/libavformat/avformat.h"
     elif test -f ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES"
         AVFORMAT="-I${FFMPEG_DIR}/include/ffmpeg/libavformat" 
+        AVFORMAT_DIR="${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h"
     elif test -f ${FFMPEG_DIR}/libavformat/avformat.h; then
         AC_MSG_RESULT(found ${FFMPEG_DIR}/libavformat/avformat.h)
         FFMPEG_CFLAGS="-I${FFMPEG_DIR} -DFFMPEG_NEW_INCLUDES"
         AVFORMAT="-I{FFMPEG_DIR}/libavformat"
+        AVFORMAT_DIR="${FFMPEG_DIR}/libavformat/avformat.h"
     else
         AC_MSG_RESULT(not found)
         FFMPEG_OK="no_found"
+        AVFORMAT_DIR="avformat.h"
         echo "**********************************************"
         echo "*       avformat.h not found:                *"
         echo "*    ALL FFMPEG FEATURES DISABLED            *"
@@ -521,43 +543,57 @@ if test "${FFMPEG_OK}" = "found"; then
 # If ffmpeg libs and headers have been found 
 #
 
-	if  test "${FFMPEG_OK}" = "found"; then	
-        TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} -lavformat -lavcodec -lavutil -lm -lz"
+    if  test "${FFMPEG_OK}" = "found"; then	
+        TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} ${FFMPEG_EXTRALIBS}"
         TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
         TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
 
         FFMPEG_OBJ="ffmpeg.o"
         AC_SUBST(FFMPEG_OBJ)
 
-        RTPS_OBJ="netcam_rtsp.o"
-        AC_SUBST(RTPS_OBJ)
+        AC_MSG_CHECKING(avformat)
+        AC_RUN_IFELSE([AC_LANG_SOURCE([
+            [
+             #include <${AVFORMAT_DIR}>
+             int main(void){
+                 if (LIBAVFORMAT_VERSION_MAJOR >= 55) return -1;
+                 return 0;
+             }
+            ]])],
+            [AC_MSG_RESULT(version previous to 55)],
+            [
+             AC_MSG_RESULT(version 55 or higher)
+             TEMP_CFLAGS="${TEMP_CFLAGS} -DFFMPEG_V55"
+             RTPS_OBJ="netcam_rtsp.o"
+             AC_SUBST(RTPS_OBJ)
+            ]
+        )
 
         AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
         saved_CFLAGS=$CFLAGS
         saved_LIBS=$LIBS
 
-
-		CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
-		LIBS="$TEMP_LIBS"
+        CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
+        LIBS="$TEMP_LIBS"
     	
-	    AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-		    [
-		     #include <avformat.h>
-		     URLProtocol test_file_protocol;
-		     int main(void){
-		         test_file_protocol.url_read  = file_protocol.url_read;
-		         return 0;
-		     }
-		     ]])],
-		     [AC_MSG_RESULT(yes)],
-		     [
-			     AC_MSG_RESULT(no)
-			     TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
-		     ]
-	    )
-		CFLAGS=$saved_CFLAGS
-		LIBS=$saved_LIBS
-	fi
+        AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+            [
+             #include <${AVFORMAT_DIR}>
+             URLProtocol test_file_protocol;
+             int main(void){
+                 test_file_protocol.url_read  = file_protocol.url_read;
+                 return 0;
+             }
+            ]])],
+            [AC_MSG_RESULT(yes)],
+            [
+             AC_MSG_RESULT(no)
+             TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
+            ]
+        )
+        CFLAGS=$saved_CFLAGS
+        LIBS=$saved_LIBS
+    fi
 fi	
 fi
 
@@ -752,7 +788,7 @@ PGSQL_SUPPORT="no"
 PGSQL_HEADERS="yes"
 PGSQL_LIBS="yes"
 
-AC_DEFUN(PGSQL_INC_CHK,[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
+AC_DEFUN([PGSQL_INC_CHK],[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
 
 AC_ARG_WITH(pgsql,
 [  --without-pgsql         Disable PostgreSQL support in motion.
@@ -1215,13 +1251,6 @@ CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"
 
 LIBS="${TEMP_LIBS}"
 LDFLAGS="${TEMP_LDFLAGS}"
-
-
-AC_CHECK_FUNC(avformat_alloc_context, AC_DEFINE([have_avformat_alloc_context],1,[Define to 1 if you have avformat_alloc_context support]))
-AC_CHECK_FUNC(av_avformat_alloc_context, AC_DEFINE([have_av_avformat_alloc_context],1,[Define to 1 if you have av_avformat_alloc_context support]))
-AC_CHECK_FUNC(av_register_protocol2, AC_DEFINE([have_av_register_protocol2],1,[Define to 1 if you have av_register_protocol2 support]))
-AC_CHECK_FUNC(av_register_protocol, AC_DEFINE([have_av_register_protocol],1,[Define to 1 if you have av_register_protocol support]))
-AC_CHECK_FUNC(av_get_media_type_string, AC_DEFINE([have_av_get_media_type_string],1,[Define to 1 if you have av_get_media_type_string support]))
 
 
 #

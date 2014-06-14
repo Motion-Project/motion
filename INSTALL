@@ -1,16 +1,36 @@
-Very simple:
+Required Packages:
+    sudo apt-get install autoconf automake build-essential libjpeg-turbo8-dev libzip-dev
 
-type:
+Obtain source code (via git)
+    sudo apt-get install git
+    cd ~
+    git clone {https://github.com/your favorite fork}
 
+To rebuild the motion configure file use
+    autoreconf
+
+Optional: With FFMPEG support:
+    Build FFMPEG via their instructions
+
+    Change to location of the motion source code
+    cd ~/motion
+
+    Configure with manually built ffmpeg which installs to ~/bin and ~/ffmpeg_build
+        Basic
+            ./configure --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include
+
+        With extra libraries for ffmpeg  IMPORTANT NOTE:  Your libraries will vary depending upon your build of FFMPEG
+            ./configure --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include --with-ffmpeg-libs=" -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec "
+
+        With extra libraries for ffmpeg and install to ~/motion_build
+            ./configure --prefix=$HOME/motion_build --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include --with-ffmpeg-libs=" -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec "
+
+With APT versions of ffmpeg libraries
+    sudo apt-get install libavformat-dev libavcodec-dev
+
+Without any FFMPEG support or just any installed version of FFMPEG
     ./configure
 
-followed by:
-
+Once configured type:
     make
-
-And
-
     make install
-
-    
-Next read the README
