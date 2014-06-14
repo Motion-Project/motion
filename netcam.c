@@ -2446,10 +2446,12 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
   int ret = -1;
 
   netcam->caps.streaming = NCS_RTSP;
+
   netcam->rtsp = rtsp_new_context();
 
   if (netcam->rtsp == NULL) {
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to create rtsp context");
+    netcam_shutdown_rtsp(netcam);
     return -1;
   }
 
@@ -2476,7 +2478,7 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
         if ((cptr = strchr(ptr, ':')) == NULL) {
             netcam->rtsp->user = mystrdup(ptr);
         } else {
-            netcam->rtsp->user = mymalloc((cptr - ptr));
+            netcam->rtsp->user = mymalloc((cptr - ptr)+2);  //+2 for string terminator
             memcpy(netcam->rtsp->user, ptr,(cptr - ptr));
             netcam->rtsp->pass = mystrdup(cptr + 1);
         }
@@ -2495,7 +2497,7 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
     if ((netcam->rtsp->user != NULL) && (netcam->rtsp->pass != NULL)) {
         ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
 	          + 5 + strlen(url->path) + 5
-              + strlen(netcam->rtsp->user) + strlen(netcam->rtsp->pass) + 5 );
+              + strlen(netcam->rtsp->user) + strlen(netcam->rtsp->pass) + 3 );
         sprintf((char *)ptr, "%s://%s:%s@%s:%d%s",
                 url->service,netcam->rtsp->user,netcam->rtsp->pass,
                 netcam->connect_host, netcam->connect_port, url->path);
@@ -2520,7 +2522,10 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
      * the server, so we try ....
      */
     ret = rtsp_connect(netcam);
-    if (ret < 0) return ret;
+    if (ret < 0){
+        netcam_shutdown_rtsp(netcam);
+        return ret;
+    }
 
     netcam->get_image = netcam_read_rtsp_image;
 

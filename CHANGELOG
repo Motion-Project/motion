@@ -59,6 +59,7 @@ Features
    * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
    * Revised INSTALL with samples(Mr-Dave)
    * Revisions for RTSP and code standard.(Mr-Dave)
+   * Plugged most(?) memory leaks in RTSP. (Mr-Dave)
    
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
