@@ -563,7 +563,6 @@ static unsigned int servo_status(struct context *cnt, unsigned int motor)
 
 static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset)
 {
-    unsigned int ret = 0;
     int x_offset_abs;
     int y_offset_abs;
 
@@ -591,7 +590,7 @@ static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset
     if (x_offset_abs <= cnt->track.maxx  && x_offset_abs >= cnt->track.minx) {
         /* Set Speed , TODO : it should be done only when speed changes */
         servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
-        ret = servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_ABSOLUTE, x_offset_abs);
+        servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_ABSOLUTE, x_offset_abs);
     }
 
     /* y-axis */
@@ -603,7 +602,7 @@ static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset
     if (y_offset_abs <= cnt->track.maxy && y_offset_abs >= cnt->track.minx) {
         /* Set Speed , TODO : it should be done only when speed changes */
         servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
-        ret = servo_command(cnt, cnt->track.motory, SERVO_COMMAND_ABSOLUTE, y_offset_abs);
+        servo_command(cnt, cnt->track.motory, SERVO_COMMAND_ABSOLUTE, y_offset_abs);
     }
 
     return cnt->track.move_wait;

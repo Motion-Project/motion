@@ -281,6 +281,8 @@ static void send_template_raw(int client_socket, char *res)
 {
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, res, strlen(res));
+    if (nwrite < 0)
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write_nonblock returned value less than zero.");
 }
 
 /**
@@ -290,6 +292,9 @@ static void send_template_end_client(int client_socket)
 {
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, end_template, strlen(end_template));
+    if (nwrite < 0)
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write_nonblock returned value less than zero.");
+
 }
 
 /**
@@ -303,6 +308,9 @@ static void response_client(int client_socket, const char *template, char *back)
         send_template(client_socket, back);
         send_template_end_client(client_socket);
     }
+    if (nwrite < 0)
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write_nonblock returned value less than zero.");
+
 }
 
 /**
@@ -370,7 +378,7 @@ static void url_decode(char *urlencoded, size_t length)
                 *urldecoded++ = c[1];
             }
 
-	} else if (*data == '<' || *data == '+' || data == '>') {
+	} else if (*data == '<' || *data == '+' || *data == '>') {
 	  *urldecoded++ = ' ';
         } else {
             *urldecoded++ = *data;

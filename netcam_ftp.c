@@ -790,10 +790,10 @@ int ftp_get_socket(ftp_context_pointer ctxt)
 */
 int ftp_send_type(ftp_context_pointer ctxt, char type)
 {
-    char buf[100], utype;
+    char buf[100];
     int len, res;
 
-    utype = toupper(type);
+    toupper(type);
     /* Assure transfer will be in "image" mode. */
     snprintf(buf, sizeof(buf), "TYPE I\r\n");
     len = strlen(buf);

@@ -242,7 +242,8 @@ static void* handle_basic_auth(void* param)
     pthread_exit(NULL);
 
 Error:
-    write(p->sock, request_auth_response_template, strlen (request_auth_response_template));
+    if (write(p->sock, request_auth_response_template, strlen (request_auth_response_template)) < 0)
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write failure 1:handle_basic_auth");
 
 Invalid_Request:
     close(p->sock);
@@ -569,8 +570,10 @@ Error:
                 "Content-Length: %Zu\r\n\r\n",
                 request_auth_response_template, server_nonce,
                 KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
-        write(p->sock, buffer, strlen(buffer));
-        write(p->sock, auth_failed_html_template, strlen(auth_failed_html_template));
+        if (write(p->sock, buffer, strlen(buffer)) < 0)
+            MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write failure 1:handle_md5_digest");
+        if (write(p->sock, auth_failed_html_template, strlen(auth_failed_html_template)) < 0)
+            MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write failure 2:handle_md5_digest");
     }
 
     // OK - Access
@@ -607,7 +610,8 @@ InternalError:
     if(server_pass)
         free(server_pass);
 
-    write(p->sock, internal_error_template, strlen(internal_error_template));
+    if (write(p->sock, internal_error_template, strlen(internal_error_template)) < 0)
+      MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write failure 3:handle_md5_digest");
 
 Invalid_Request:
     close(p->sock);

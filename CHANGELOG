@@ -49,7 +49,13 @@ Features
      http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse (Michael Luich)
    * Added support for ffmpeg 0.11 new API.
    * Added RSTP support for netcam ( merge https://github.com/hyperbolic2346/motion )
-
+   * Merge tosiara/rtsp branch (commit 46cfcf31d, 2014/05/21) (Mr-Dave)
+   * Removed compiler warnings:  (Mr-Dave)
+       logger.c,jpegutils.c,netcam_ftp.c,track.c,
+       picture.c,webhttpd.c,stream.c,ffmpeg.c
+   * Bug fix as part of warnings in webhttpd.c fixed(Mr-Dave)
+   * Removed compiler warning regarding ffmpeg being newer than 0.4 version(Mr-Dave)
+   
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
