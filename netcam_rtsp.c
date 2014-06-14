@@ -189,7 +189,7 @@ int rtsp_connect(netcam_context_ptr netcam)
     MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %d - %s", netcam->rtsp->path, ret, av_err2str(ret));
     rtsp_free_context(netcam->rtsp);
     netcam->rtsp = NULL;
-    return -1;
+    return ret;
   }
 
   // fill out stream information

@@ -534,7 +534,7 @@ static int alg_labeling(struct context *cnt)
     imgs->labels_above = 0;
 
     /* Init: 0 means no label set / not checked. */
-    memset(labels, 0, width * height * sizeof(labels));
+    memset(labels, 0, width * height * sizeof(*labels));
     pixelpos = 0;
 
     for (iy = 0; iy < height - 1; iy++) {
@@ -1363,6 +1363,6 @@ void alg_update_reference_frame(struct context *cnt, int action)
         /* Copy fresh image */
         memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
         /* Reset static objects */
-        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(cnt->imgs.ref_dyn)); 
+        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
     }
 }

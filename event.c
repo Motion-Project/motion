@@ -416,9 +416,9 @@ static void event_extpipe_end(struct context *cnt, int type ATTRIBUTE_UNUSED,
     if (cnt->extpipe_open) {
         cnt->extpipe_open = 0;
         fflush(cnt->extpipe);
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: CLOSING: extpipe file desc %d, error state %d",
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: CLOSING: extpipe file desc %d, error state %d",
                    fileno(cnt->extpipe), ferror(cnt->extpipe));
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pclose return: %d",
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: pclose return: %d",
                    pclose(cnt->extpipe));
         event(cnt, EVENT_FILECLOSE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, NULL);
     }

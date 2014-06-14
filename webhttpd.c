@@ -370,9 +370,8 @@ static void url_decode(char *urlencoded, size_t length)
                 *urldecoded++ = c[1];
             }
 
-        } else if (*data == '+') {
-            *urldecoded++ = ' ';
-
+	} else if (*data == '<' || *data == '+' || data == '>') {
+	  *urldecoded++ = ' ';
         } else {
             *urldecoded++ = *data;
         }
