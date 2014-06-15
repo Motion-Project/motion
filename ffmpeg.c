@@ -24,9 +24,9 @@
 #    define FFMPEG_NO_NONSTD_MPEG1
 #endif /* LIBAVCODEC_BUILD > 4680 */
 
-#if defined LIBAVFORMAT_VERSION_MAJOR && defined LIBAVFORMAT_VERSION_MINOR
+#if defined LIBAVFORMAT_VERSION_MAJOR && defined LIBAVFORMAT_VERSION_MINOR 
 #   if LIBAVFORMAT_VERSION_MAJOR < 53 && LIBAVFORMAT_VERSION_MINOR < 45
-#       define GUESS_NO_DEPRECATED
+#       define GUESS_NO_DEPRECATED 
 #   endif
 #endif
 
@@ -50,7 +50,7 @@
 #    define AVSTREAM_CODEC_PTR(avs_ptr) (&avs_ptr->codec)
 #endif /* LIBAVFORMAT_BUILD >= 4629 */
 
-// AV_VERSION_INT(a, b, c) (a<<16 | b<<8 | c)
+// AV_VERSION_INT(a, b, c) (a<<16 | b<<8 | c) 
 // (54*2^16 | 6*2^8 | 100)
 #if LIBAVFORMAT_BUILD >= 3540580
 #define FF_API_NEW_AVIO
@@ -79,9 +79,9 @@ static unsigned char mpeg1_trailer[] = {0x00, 0x00, 0x01, 0xb7};
 // FFMPEG API changed in 0.8
 #if defined FF_API_NEW_AVIO
 
-// TODO
+// TODO 
 
-
+	
 #else
 
 /**
@@ -268,7 +268,7 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 void ffmpeg_init()
 {
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg LIBAVCODEC_BUILD %d"
-               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD,
+               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, 
                LIBAVFORMAT_BUILD);
     av_register_all();
 
@@ -289,12 +289,10 @@ void ffmpeg_init()
     mpeg1_file_protocol.url_close = file_protocol.url_close;
 
 /* Register the append file protocol. */
-#ifdef have_av_register_protocol2
+#ifdef FFMPEG_V55
     av_register_protocol2(&mpeg1_file_protocol, sizeof(mpeg1_file_protocol));
-#elif defined have_av_register_protocol
-    av_register_protocol(&mpeg1_file_protocol);
 #else
-#   warning av_register_protocolXXX missing
+    av_register_protocol(&mpeg1_file_protocol);
 #endif
 
 #endif // FF_API_NEW_AVIO
@@ -331,10 +329,10 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
          * result in a muxed output file, which isn't appropriate here.
          */
 #ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
+        of = guess_format("mpeg1video", NULL, NULL);        
 #else
         of = av_guess_format("mpeg1video", NULL, NULL);
-#endif
+#endif 
         /* But we want the trailer to be correctly written. */
         if (of)
             of->write_trailer = mpeg1_write_trailer;
@@ -349,14 +347,14 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
         ext = ".avi";
 #ifdef GUESS_NO_DEPRECATED
         of = guess_format("mpeg1video", NULL, NULL);
-#else
+#else        
         of = av_guess_format("avi", NULL, NULL);
-#endif
+#endif        
     } else if (strcmp(codec, "msmpeg4") == 0) {
         ext = ".avi";
 #ifdef GUESS_NO_DEPRECATED
         of = guess_format("mpeg1video", NULL, NULL);
-#else
+#else        
         of = av_guess_format("avi", NULL, NULL);
 #endif
         /* Manually override the codec id. */
@@ -367,16 +365,16 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
         ext = ".swf";
 #ifdef GUESS_NO_DEPRECATED
         of = guess_format("mpeg1video", NULL, NULL);
-#else
+#else        
         of = av_guess_format("swf", NULL, NULL);
-#endif
+#endif        
     } else if (strcmp(codec, "flv") == 0) {
         ext = ".flv";
 #ifdef GUESS_NO_DEPRECATED
         of = guess_format("mpeg1video", NULL, NULL);
-#else
+#else        
         of = av_guess_format("flv", NULL, NULL);
-#endif
+#endif        
         of->video_codec = CODEC_ID_FLV1;
     } else if (strcmp(codec, "ffv1") == 0) {
         ext = ".avi";
@@ -396,7 +394,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
         ext = ".mov";
 #ifdef GUESS_NO_DEPRECATED
         of = guess_format("mpeg1video", NULL, NULL);
-#else
+#else        
         of = av_guess_format("mov", NULL, NULL);
 #endif
 	    }
@@ -460,12 +458,10 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
 
     /* Allocation the output media context. */
-#ifdef have_avformat_alloc_context
+#ifdef FFMPEG_V55
     ffmpeg->oc = avformat_alloc_context();
-#elif defined have_av_avformat_alloc_context
-    ffmpeg->oc = av_alloc_format_context();
 #else
-    ffmpeg->oc = av_mallocz(sizeof(AVFormatContext));
+    ffmpeg->oc = av_alloc_format_context();
 #endif
 
     if (!ffmpeg->oc) {
@@ -487,7 +483,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     /* Create a new video stream and initialize the codecs. */
     ffmpeg->video_st = NULL;
     if (ffmpeg->oc->oformat->video_codec != CODEC_ID_NONE) {
-#if defined FF_API_NEW_AVIO
+#if defined FF_API_NEW_AVIO 
         ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL /* Codec */);
 #else
         ffmpeg->video_st = av_new_stream(ffmpeg->oc, 0);
@@ -508,11 +504,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
     c->codec_id   = ffmpeg->oc->oformat->video_codec;
-#if LIBAVCODEC_VERSION_MAJOR < 53
+#if LIBAVCODEC_VERSION_MAJOR < 53    
     c->codec_type = CODEC_TYPE_VIDEO;
 #else
     c->codec_type = AVMEDIA_TYPE_VIDEO;
-#endif
+#endif    
     is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
@@ -619,7 +615,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     }
 
     /* Allocate the encoded raw picture. */
+#ifdef FFMPEG_V55
+    ffmpeg->picture = av_frame_alloc();
+#else
     ffmpeg->picture = avcodec_alloc_frame();
+#endif
 
     if (!ffmpeg->picture) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: avcodec_alloc_frame -"
@@ -852,11 +852,11 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
     if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
         /* Raw video case. The API will change slightly in the near future for that. */
 #ifdef FFMPEG_AVWRITEFRAME_NEWAPI
-#   if LIBAVCODEC_VERSION_MAJOR < 53
+#   if LIBAVCODEC_VERSION_MAJOR < 53        
         pkt.flags |= PKT_FLAG_KEY;
 #   else
-        pkt.flags |= AV_PKT_FLAG_KEY;
-#   endif
+        pkt.flags |= AV_PKT_FLAG_KEY;  
+#   endif        
         pkt.data = (uint8_t *)pic;
         pkt.size = sizeof(AVPicture);
         ret = av_write_frame(ffmpeg->oc, &pkt);
@@ -870,10 +870,10 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
         pkt.data = ffmpeg->video_outbuf;
         pkt.size = ffmpeg->video_outbuf_size;
 
-        out_size = avcodec_encode_video2(AVSTREAM_CODEC_PTR(ffmpeg->video_st),
+        out_size = avcodec_encode_video2(AVSTREAM_CODEC_PTR(ffmpeg->video_st), 
                                         &pkt, pic, &got_packet_ptr);
         if (out_size < 0)
-            // Error encondig
+            // Error encondig 
             out_size = 0;
         else
             out_size = pkt.size;
@@ -892,11 +892,11 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
             pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
 
             if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
-#   if LIBAVCODEC_VERSION_MAJOR < 53
+#   if LIBAVCODEC_VERSION_MAJOR < 53                
                 pkt.flags |= PKT_FLAG_KEY;
 #   else
                 pkt.flags |= AV_PKT_FLAG_KEY;
-#   endif
+#   endif                
 
             pkt.data = ffmpeg->video_outbuf;
             pkt.size = out_size;
@@ -936,7 +936,11 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
 {
     AVFrame *picture;
 
+#ifdef FFMPEG_V55
+    picture = av_frame_alloc();
+#else
     picture = avcodec_alloc_frame();
+#endif
 
     if (!picture) {
         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Could not alloc frame");
@@ -985,7 +989,12 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
     picture.linesize[2] = width2;
 
     /* We assume using 'PIX_FMT_YUV420P' always */
+#ifdef FFMPEG_V55
+    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Deinterlace depreciated for recent versions of FFMPEG.");
+#else
     avpicture_deinterlace(&picture, &picture, PIX_FMT_YUV420P, width, height);
+#endif
+
 
 #if !defined(__SSE_MATH__) && (defined(__i386__) || defined(__x86_64__))
     __asm__ __volatile__ ( "emms");
