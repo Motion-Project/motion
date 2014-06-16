@@ -2085,11 +2085,6 @@ static void *netcam_handler_loop(void *arg)
     /* The loop continues forever, or until motion shutdown. */
     }
 
-#ifdef FFMPEG_V55
-    if (netcam->caps.streaming == NCS_RTSP)
-        netcam_shutdown_rtsp(netcam);
-#endif
-
     /* Our thread is finished - decrement motion's thread count. */
     pthread_mutex_lock(&global_lock);
     threads_running--;
@@ -2712,6 +2707,11 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
 
     if (netcam->response != NULL) 
         free(netcam->response);
+
+#ifdef FFMPEG_V55
+    if (netcam->caps.streaming == NCS_RTSP)
+        netcam_shutdown_rtsp(netcam);
+#endif
 
     pthread_mutex_destroy(&netcam->mutex);
     pthread_cond_destroy(&netcam->cap_cond);

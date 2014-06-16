@@ -61,6 +61,7 @@ Features
    * Revisions for RTSP and code standard.(Mr-Dave)
    * Plugged most(?) memory leaks in RTSP. (Mr-Dave)
    * Undo changes caused by code editor and other unnecessary changes
+   * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs.
 
    
 Bugfixes
