@@ -62,6 +62,7 @@ Features
    * Plugged most(?) memory leaks in RTSP. (Mr-Dave)
    * Undo changes caused by code editor and other unnecessary changes
    * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs.
+   * Regession fix for memory leaks and reconnection
 
    
 Bugfixes

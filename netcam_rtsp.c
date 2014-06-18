@@ -4,6 +4,10 @@
 
 #ifdef FFMPEG_V55
 
+/*  Only recent versions of FFMPEG are supported since
+ *  no documentation on how to code the old versions exist
+ */
+
 /****************************************************
  * Duplicated static functions - FIXME
  ****************************************************/
@@ -51,18 +55,6 @@ static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
  * End Duplicated static functions - FIXME
  ****************************************************/
 
-void netcam_free_context(netcam_context_ptr netcam)
-{
-    av_frame_free(&netcam->rtsp->frame);
-    avcodec_close(netcam->rtsp->codec_context);
-    avformat_close_input(&netcam->rtsp->format_context);
-
-    free(netcam->rtsp->frame);
-    free(netcam->rtsp->codec_context);
-    free(netcam->rtsp->format_context);
-
-}
-
 static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *frame, AVCodecContext *cc)
 {
     int check = 0;
@@ -71,7 +63,7 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
     if (ret < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding video packet");
         return 0;
-     }
+    }
 
     if (check == 0) {
         // no frame could be decoded...keep trying
@@ -92,38 +84,31 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
     return frame_size;
 }
 
-static int open_codec_context(netcam_context_ptr netcam, enum AVMediaType type)
+static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AVMediaType type)
 {
     int ret;
+    AVStream *st;
+    AVCodecContext *dec_ctx = NULL;
     AVCodec *dec = NULL;
-
-    ret = av_find_best_stream(netcam->rtsp->format_context, type, -1, -1, NULL, 0);
+    ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
     if (ret < 0) {
-	    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream %s in input!", av_get_media_type_string(type));
+		MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream %s in input!", av_get_media_type_string(type));
         return ret;
+    } else {
+        *stream_idx = ret;
+        st = fmt_ctx->streams[*stream_idx];
+        /* find decoder for the stream */
+        dec_ctx = st->codec;
+        dec = avcodec_find_decoder(dec_ctx->codec_id);
+        if (!dec) {
+    		MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to find %s codec!", av_get_media_type_string(type));
+            return ret;
+        }
+        if ((ret = avcodec_open2(dec_ctx, dec, NULL)) < 0) {
+    		MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open %s codec!", av_get_media_type_string(type));
+            return ret;
+        }
     }
-
-    netcam->rtsp->video_stream_index = ret;
-    netcam->rtsp->codec_context = netcam->rtsp->format_context->streams[netcam->rtsp->video_stream_index]->codec;
-
-    dec = avcodec_find_decoder(netcam->rtsp->codec_context->codec_id);
-    if (dec == NULL) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to find %s codec!", av_get_media_type_string(type));
-        return -1;
-    }
-
-    netcam->rtsp->codec_context = avcodec_alloc_context3(dec);
-    if (netcam->rtsp->codec_context == NULL) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec context for %s codec!", av_get_media_type_string(type));
-        return -1;
-    }
-
-    ret = avcodec_open2(netcam->rtsp->codec_context, dec, NULL);
-    if (ret < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open %s codec!", av_get_media_type_string(type));
-        return ret;
-    }
-
     return 0;
 }
 
@@ -160,7 +145,7 @@ static int decode_interrupt_cb(void *ctx)
     } else {
         struct timeval interrupttime;
         if (gettimeofday(&interrupttime, NULL) < 0) {
-            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: Failed to get interrupt time");
+            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
             MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Timeout getting frame %d",interrupttime.tv_sec - rtsp->startreadtime.tv_sec);
@@ -174,8 +159,10 @@ static int decode_interrupt_cb(void *ctx)
     return 0;
 }
 
+
 int rtsp_connect(netcam_context_ptr netcam)
 {
+
     int ret;
 
     if (netcam->rtsp->path == NULL) {
@@ -183,7 +170,6 @@ int rtsp_connect(netcam_context_ptr netcam)
         return -1;
     }
 
-    netcam_free_context(netcam);
 
     // open the network connection
     AVDictionary *opts = 0;
@@ -197,10 +183,12 @@ int rtsp_connect(netcam_context_ptr netcam)
     if (ret < 0) {
         MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %d - %s", netcam->rtsp->path,av_err2str(ret));
         if (ret == -1094995529) MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Authentication?");
+        av_dict_free(&opts);
         avformat_close_input(&netcam->rtsp->format_context);
         return ret;
-    }
-
+    }    
+    av_dict_free(&opts);
+    
     // fill out stream information
     ret = avformat_find_stream_info(netcam->rtsp->format_context, NULL);
     if (ret < 0) {
@@ -209,13 +197,15 @@ int rtsp_connect(netcam_context_ptr netcam)
         return -1;
     }
 
-    ret = open_codec_context(netcam, AVMEDIA_TYPE_VIDEO);
+    ret = open_codec_context(&netcam->rtsp->video_stream_index, netcam->rtsp->format_context, AVMEDIA_TYPE_VIDEO);
     if (ret < 0) {
         MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open codec context: %d", ret);
-        avcodec_close(netcam->rtsp->codec_context);
         avformat_close_input(&netcam->rtsp->format_context);
+        avcodec_close(netcam->rtsp->codec_context);
         return -1;
     }
+
+    netcam->rtsp->codec_context = netcam->rtsp->format_context->streams[netcam->rtsp->video_stream_index]->codec;
 
     netcam->rtsp->frame = av_frame_alloc();
 
@@ -227,6 +217,7 @@ int rtsp_connect(netcam_context_ptr netcam)
 
 int netcam_read_rtsp_image(netcam_context_ptr netcam)
 {
+
     /* This code is called many times so optimize and do
      * little as possible in here.
      */
@@ -241,6 +232,10 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
     buffer = netcam->receiving;
     buffer->used = 0;
 
+    av_init_packet(&packet);
+
+    packet.data = NULL;
+    packet.size = 0;
 
     size_decoded = 0;
     usual_size_decoded = 0;
@@ -253,11 +248,11 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
     netcam->rtsp->readingframe = 1;
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
         if(packet.stream_index != netcam->rtsp->video_stream_index) {
-            // not our packet, Free it/reinitialize and try again.
             av_free_packet(&packet);
             av_init_packet(&packet);
             packet.data = NULL;
             packet.size = 0;
+            // not our packet, skip
            continue;
         }
         size_decoded = decode_packet(&packet, buffer, netcam->rtsp->frame, netcam->rtsp->codec_context);
@@ -275,6 +270,9 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
     if (size_decoded == 0) {
         // something went wrong, end of stream? Interupted?
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: invalid frame! %d", size_decoded);
+        av_free(netcam->rtsp->frame);
+        avcodec_close(netcam->rtsp->codec_context);
+        avformat_close_input(&netcam->rtsp->format_context);
         return -1;
     }
 
@@ -284,8 +282,8 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
         }
         usual_size_decoded = size_decoded;
     }
-    // Time may be slightly off due to it being when we initiated the reading of the frame
-    // rather than when we finally got a good frame.  But we are averaging frame times anyway..
+
+
     netcam->receiving->image_time = curtime;
 
     /*
@@ -295,11 +293,11 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
      */
     if (netcam->last_image.tv_sec) {
         netcam->av_frame_time = ((9.0 * netcam->av_frame_time) + 1000000.0 *
-			     (curtime.tv_sec - netcam->last_image.tv_sec) +
-			     (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
+		    (curtime.tv_sec - netcam->last_image.tv_sec) +
+			(curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
         MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f",
-	       netcam->av_frame_time);
+	        netcam->av_frame_time);
     }
 
     netcam->last_image = curtime;
@@ -330,15 +328,24 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
     return 0;
 }
 
+
 void netcam_shutdown_rtsp(netcam_context_ptr netcam)
 {
-    netcam_free_context(netcam);
 
-    free(netcam->rtsp->path);
-    free(netcam->rtsp->user);
-    free(netcam->rtsp->pass);
+    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO,"%s: shutting down rtsp");
+
+    av_free(netcam->rtsp->frame);
+    avcodec_close(netcam->rtsp->codec_context);
+    avformat_close_input(&netcam->rtsp->format_context);
+
+    if (netcam->rtsp->path != NULL) free(netcam->rtsp->path);
+    if (netcam->rtsp->user != NULL) free(netcam->rtsp->user);
+    if (netcam->rtsp->pass != NULL) free(netcam->rtsp->pass);
 
     free(netcam->rtsp);
+
+    netcam->rtsp = NULL;
+    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO,"%s: rtsp shut down");
 }
 
 #endif
