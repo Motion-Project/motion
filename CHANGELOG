@@ -60,9 +60,15 @@ Features
    * Revised INSTALL with samples(Mr-Dave)
    * Revisions for RTSP and code standard.(Mr-Dave)
    * Plugged most(?) memory leaks in RTSP. (Mr-Dave)
-   * Undo changes caused by code editor and other unnecessary changes
-   * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs.
-   * Regession fix for memory leaks and reconnection
+   * Undo changes caused by code editor and other unnecessary changes (Mr-Dave)
+   * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs. (Mr-Dave)
+   * Regession fix for memory leaks and reconnection (Mr-Dave)
+   * Eliminated requirement to manually build FFMPEG for RTSP support. (Mr-Dave)
+   * Revised RTSP to support version 53 of libavformat (Mr-Dave)
+   * Revised FFMPEG.c to eliminate warnings and functions no longer supported by Libav/FFMPEG(Mr-Dave)
+   * Revised INSTALL to have sample PI configure option.(Mr-Dave)
+   * Revised configure.ac to generate compiler flag AVFMT_V53.(Mr-Dave)
+   * Revised INSTALL to indicate standard APT packages for RTSP (Mr-Dave)
 
    
 Bugfixes

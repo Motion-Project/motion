@@ -441,6 +441,11 @@ else if test "${FFMPEG_DIR}" = "yes"; then
         FFMPEG_OK="found"
         FFMPEG_LIB="/usr/lib/x86_64-linux-gnu"
         FFMPEG_DIR="/usr"
+	elif test -f /usr/lib/i386-linux-gnu/libavcodec.a -o -f /usr/lib/i386-linux-gnu/libavcodec.so && test /usr/lib/i386-linux-gnu/libavformat.a -o -f /usr/lib/i386-linux-gnu/libavformat.so ; then
+        AC_MSG_RESULT(found in /usr/lib/i386-linux-gnu)
+        FFMPEG_OK="found"
+        FFMPEG_LIB="/usr/lib/i386-linux-gnu"
+        FFMPEG_DIR="/usr"	
 	else
 		AC_MSG_RESULT(not found)
 		echo ""
@@ -551,7 +556,7 @@ if test "${FFMPEG_OK}" = "found"; then
         FFMPEG_OBJ="ffmpeg.o"
         AC_SUBST(FFMPEG_OBJ)
 
-        AC_MSG_CHECKING(avformat)
+        AC_MSG_CHECKING(avformat version 55)
         AC_RUN_IFELSE([AC_LANG_SOURCE([
             [
              #include <${AVFORMAT_DIR}>
@@ -560,14 +565,37 @@ if test "${FFMPEG_OK}" = "found"; then
                  return 0;
              }
             ]])],
-            [AC_MSG_RESULT(version previous to 55)],
+            [            
+            AC_MSG_RESULT(no)
+            AC_MSG_CHECKING(avformat version 53)
+            AC_RUN_IFELSE([AC_LANG_SOURCE([
             [
-             AC_MSG_RESULT(version 55 or higher)
+             #include <${AVFORMAT_DIR}>
+             int main(void){
+                 if (LIBAVFORMAT_VERSION_MAJOR = 53) return -1;
+                 return 0;
+             }
+            ]])],
+            [AC_MSG_RESULT(no)],
+            [
+             AC_MSG_RESULT(yes)
+             TEMP_CFLAGS="${TEMP_CFLAGS} -DAVFMT_V53"
+             RTPS_OBJ="netcam_rtsp.o"
+             AC_SUBST(RTPS_OBJ)
+            ]
+            )
+            ],
+            [
+             AC_MSG_RESULT( yes version 55 or higher)
              TEMP_CFLAGS="${TEMP_CFLAGS} -DFFMPEG_V55"
              RTPS_OBJ="netcam_rtsp.o"
              AC_SUBST(RTPS_OBJ)
             ]
         )
+
+        
+
+
 
         AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
         saved_CFLAGS=$CFLAGS

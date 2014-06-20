@@ -45,7 +45,7 @@
 #include <sys/socket.h>
 
 #include "netcam_ftp.h"
-#ifdef FFMPEG_V55
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
 #include "netcam_rtsp.h"
 #endif
 
@@ -149,7 +149,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 {
     char *s;
     int i;
-#ifdef FFMPEG_V55    
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
     const char *re = "(http|ftp|mjpg|rtsp)://(((.*):(.*))@)?"
                      "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^:]*))";
 #else
@@ -211,7 +211,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
             parse_url->port = 80;
         else if (!strcmp(parse_url->service, "ftp"))
             parse_url->port = 21;
-#ifdef FFMPEG_V55            
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
         else if (!strcmp(parse_url->service, "rtsp") && parse_url->port == 0)
             parse_url->port = 554;
 #endif            
@@ -2018,7 +2018,7 @@ static void *netcam_handler_loop(void *arg)
             }
         }
         
-#ifdef FFMPEG_V55
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
         if (netcam->caps.streaming == NCS_RTSP) {
             if (netcam->rtsp->format_context == NULL) {      // We must have disconnected.  Try to reconnect
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Attempting to reconnect");
@@ -2433,7 +2433,7 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
     return 0;
 }
 
-#ifdef FFMPEG_V55
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
 static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
 {
   struct context *cnt = netcam->cnt;
@@ -2518,7 +2518,6 @@ static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
      */
     ret = rtsp_connect(netcam);
     if (ret < 0){
-        netcam_shutdown_rtsp(netcam);
         return ret;
     }
 
@@ -2708,8 +2707,8 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     if (netcam->response != NULL) 
         free(netcam->response);
 
-#ifdef FFMPEG_V55
-    if (netcam->caps.streaming == NCS_RTSP)
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
+    if ((netcam->caps.streaming == NCS_RTSP) && (netcam->rtsp->connected == 1))
         netcam_shutdown_rtsp(netcam);
 #endif
 
@@ -2945,7 +2944,7 @@ int netcam_start(struct context *cnt)
 
         strcpy(url.service, "http"); /* Put back a real URL service. */
         retval = netcam_setup_mjpg(netcam, &url);
-#ifdef FFMPEG_V55        
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
     } else if ((url.service) && (!strcmp(url.service, "rtsp"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
                     " netcam_setup_rtsp()");
@@ -2975,7 +2974,7 @@ int netcam_start(struct context *cnt)
         return -1;
     }
 
-#ifdef FFMPEG_V55
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
     if (netcam->caps.streaming != NCS_RTSP) {
 #endif
         /*
@@ -3008,7 +3007,7 @@ int netcam_start(struct context *cnt)
                        " is not modulo 8", netcam->height);
             return -3;
         }
-#ifdef FFMPEG_V55        
+#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
     } else {
         // not jpeg, get the dimensions
         netcam->width = netcam->rtsp->codec_context->width;
