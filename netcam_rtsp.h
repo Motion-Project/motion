@@ -15,10 +15,10 @@ struct rtsp_context {
     char*                 user;
     char*                 pass;
     int                   readingframe;
+    int                   connected;
     struct timeval        startreadtime;
 };
 
-//int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url);
 struct rtsp_context *rtsp_new_context(void);
 void netcam_shutdown_rtsp(netcam_context_ptr netcam);
 int rtsp_connect(netcam_context_ptr netcam);
