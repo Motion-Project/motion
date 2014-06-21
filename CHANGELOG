@@ -69,6 +69,7 @@ Features
    * Revised INSTALL to have sample PI configure option.(Mr-Dave)
    * Revised configure.ac to generate compiler flag AVFMT_V53.(Mr-Dave)
    * Revised INSTALL to indicate standard APT packages for RTSP (Mr-Dave)
+   * Revised configure.ac to recognize libavformat version 54 RTSP (Mr-Dave)
 
    
 Bugfixes

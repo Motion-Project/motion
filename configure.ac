@@ -567,12 +567,12 @@ if test "${FFMPEG_OK}" = "found"; then
             ]])],
             [            
             AC_MSG_RESULT(no)
-            AC_MSG_CHECKING(avformat version 53)
+            AC_MSG_CHECKING(avformat version 53/54)
             AC_RUN_IFELSE([AC_LANG_SOURCE([
             [
              #include <${AVFORMAT_DIR}>
              int main(void){
-                 if (LIBAVFORMAT_VERSION_MAJOR = 53) return -1;
+                 if ((LIBAVFORMAT_VERSION_MAJOR = 53) || (LIBAVFORMAT_VERSION_MAJOR = 54)) return -1;
                  return 0;
              }
             ]])],
