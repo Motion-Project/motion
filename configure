@@ -4334,6 +4334,12 @@ $as_echo "found in /usr/lib/x86_64-linux-gnu" >&6; }
         FFMPEG_OK="found"
         FFMPEG_LIB="/usr/lib/x86_64-linux-gnu"
         FFMPEG_DIR="/usr"
+	elif test -f /usr/lib/i386-linux-gnu/libavcodec.a -o -f /usr/lib/i386-linux-gnu/libavcodec.so && test /usr/lib/i386-linux-gnu/libavformat.a -o -f /usr/lib/i386-linux-gnu/libavformat.so ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found in /usr/lib/i386-linux-gnu" >&5
+$as_echo "found in /usr/lib/i386-linux-gnu" >&6; }
+        FFMPEG_OK="found"
+        FFMPEG_LIB="/usr/lib/i386-linux-gnu"
+        FFMPEG_DIR="/usr"
 	else
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
@@ -4458,8 +4464,8 @@ $as_echo "not found" >&6; }
         FFMPEG_OBJ="ffmpeg.o"
 
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking avformat" >&5
-$as_echo_n "checking avformat... " >&6; }
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking avformat version 55" >&5
+$as_echo_n "checking avformat version 55... " >&6; }
         if test "$cross_compiling" = yes; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
@@ -4478,12 +4484,50 @@ else
 
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: version previous to 55" >&5
-$as_echo "version previous to 55" >&6; }
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking avformat version 53/54" >&5
+$as_echo_n "checking avformat version 53/54... " >&6; }
+            if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+             #include <${AVFORMAT_DIR}>
+             int main(void){
+                 if ((LIBAVFORMAT_VERSION_MAJOR = 53) || (LIBAVFORMAT_VERSION_MAJOR = 54)) return -1;
+                 return 0;
+             }
+
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 else
 
-             { $as_echo "$as_me:${as_lineno-$LINENO}: result: version 55 or higher" >&5
-$as_echo "version 55 or higher" >&6; }
+             { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+             TEMP_CFLAGS="${TEMP_CFLAGS} -DAVFMT_V53"
+             RTPS_OBJ="netcam_rtsp.o"
+
+
+
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+else
+
+             { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes version 55 or higher" >&5
+$as_echo "yes version 55 or higher" >&6; }
              TEMP_CFLAGS="${TEMP_CFLAGS} -DFFMPEG_V55"
              RTPS_OBJ="netcam_rtsp.o"
 
@@ -4493,6 +4537,10 @@ fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
+
+
+
+
 
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking file_protocol is defined in ffmpeg ?" >&5
