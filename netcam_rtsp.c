@@ -98,7 +98,7 @@ static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AV
         /* find decoder for the stream */
         dec_ctx = st->codec;
         dec = avcodec_find_decoder(dec_ctx->codec_id);
-        if (!dec) {
+        if (dec == NULL) {
     		MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to find %s codec!", type);
             return ret;
         }
@@ -146,7 +146,7 @@ static int interrupt_cb(void *ctx)
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
-            MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Timeout getting frame %d",interrupttime.tv_sec - rtsp->startreadtime.tv_sec);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Reading picture timed out for %s",rtsp->path);
             return 1;
         } else{
             return 0;
@@ -165,7 +165,7 @@ int rtsp_connect(netcam_context_ptr netcam)
     netcam->rtsp->connected = 0;
     
     if (netcam->rtsp->path == NULL) {
-        MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Null path passed to connect (%s)", netcam->rtsp->path);
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Null path passed to connect (%s)", netcam->rtsp->path);
         return -1;
     }
 
@@ -180,8 +180,8 @@ int rtsp_connect(netcam_context_ptr netcam)
     ret = avformat_open_input(&netcam->rtsp->format_context, netcam->rtsp->path, NULL, &opts);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
-        MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->path,errstr);
-        if (ret == -1094995529) MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Authentication?");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->path,errstr);
+        if (ret == -1094995529) MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error opening camera.  Authentication?");
         av_dict_free(&opts);
         //The format context gets freed upon any error from open_input.        
         return ret;
@@ -191,27 +191,45 @@ int rtsp_connect(netcam_context_ptr netcam)
     // fill out stream information
     ret = avformat_find_stream_info(netcam->rtsp->format_context, NULL);
     if (ret < 0) {
-        MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: unable to find stream info: %d", ret);
+        av_strerror(ret, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to find stream info: %s", errstr);
         avformat_close_input(&netcam->rtsp->format_context);
         return -1;
     }
 
     ret = open_codec_context(&netcam->rtsp->video_stream_index, netcam->rtsp->format_context, AVMEDIA_TYPE_VIDEO);
     if (ret < 0) {
-        MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open codec context: %d", ret);
-        avformat_close_input(&netcam->rtsp->format_context);
+        av_strerror(ret, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open codec context: %s", errstr);
         avcodec_close(netcam->rtsp->codec_context);
+        avformat_close_input(&netcam->rtsp->format_context);        
         return -1;
     }
 
     netcam->rtsp->codec_context = netcam->rtsp->format_context->streams[netcam->rtsp->video_stream_index]->codec;
 
     netcam->rtsp->frame = my_frame_alloc();
-    
+    if (netcam->rtsp->frame == NULL) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to allocate frame.  Fatal error.  Check FFmpeg/Libav configuration");
+        avcodec_close(netcam->rtsp->codec_context);
+        avformat_close_input(&netcam->rtsp->format_context);        
+        return -1;
+    }
+
     // start up the feed
-    av_read_play(netcam->rtsp->format_context);
-    
+    ret = av_read_play(netcam->rtsp->format_context);
+    if (ret < 0) {
+        av_strerror(ret, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open the camera: %s", errstr);
+        my_frame_free(netcam->rtsp->frame);
+        avcodec_close(netcam->rtsp->codec_context);
+        avformat_close_input(&netcam->rtsp->format_context);        
+        return -1;
+    }
+
     netcam->rtsp->connected = 1;
+
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Camera connected");
 
     return 0;
 }
@@ -237,7 +255,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
     usual_size_decoded = 0;
 
     if (gettimeofday(&curtime, NULL) < 0) {
-        MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
     }
     netcam->rtsp->startreadtime = curtime;
 
@@ -265,7 +283,6 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
 
     if (size_decoded == 0) {
         // something went wrong, end of stream? Interupted?
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: invalid frame! %d ", size_decoded);
         av_free(netcam->rtsp->frame);
         avcodec_close(netcam->rtsp->codec_context);
         avformat_close_input(&netcam->rtsp->format_context);
@@ -274,7 +291,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
 
     if (size_decoded != usual_size_decoded) {
         if (usual_size_decoded !=0) {
-            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: unusual frame size of %d!", size_decoded);
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: unusual frame size of %d!", size_decoded);
         }
         usual_size_decoded = size_decoded;
     }
@@ -302,7 +319,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam)
 void netcam_shutdown_rtsp(netcam_context_ptr netcam)
 {
 
-    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO,"%s: shutting down rtsp");
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: shutting down rtsp");
 
     my_frame_free(netcam->rtsp->frame);
     avcodec_close(netcam->rtsp->codec_context);
@@ -315,7 +332,7 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam)
     free(netcam->rtsp);
 
     netcam->rtsp = NULL;
-    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO,"%s: rtsp shut down");
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: rtsp shut down");
 }
 
 #endif
