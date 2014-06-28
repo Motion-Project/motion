@@ -1537,6 +1537,43 @@ fi
 
 } # ac_fn_c_try_link
 
+# ac_fn_c_try_cpp LINENO
+# ----------------------
+# Try to preprocess conftest.$ac_ext, and return whether this succeeded.
+ac_fn_c_try_cpp ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { { ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } > conftest.i && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+    ac_retval=1
+fi
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_c_try_cpp
+
 # ac_fn_c_try_run LINENO
 # ----------------------
 # Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
@@ -1578,43 +1615,6 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_run
-
-# ac_fn_c_try_cpp LINENO
-# ----------------------
-# Try to preprocess conftest.$ac_ext, and return whether this succeeded.
-ac_fn_c_try_cpp ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  if { { ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } > conftest.i && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-    ac_retval=1
-fi
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_c_try_cpp
 
 # ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
@@ -4259,6 +4259,7 @@ fi
 #
 # Check for libavcodec and libavformat from ffmpeg
 #
+
 FFMPEG_DIR="yes"
 FFMPEG_OK="no_found"
 FFMPEG_OBJ=""
@@ -4333,6 +4334,12 @@ $as_echo "found in /usr/local/lib" >&6; }
 $as_echo "found in /usr/lib/x86_64-linux-gnu" >&6; }
         FFMPEG_OK="found"
         FFMPEG_LIB="/usr/lib/x86_64-linux-gnu"
+        FFMPEG_DIR="/usr"
+	elif test -f /usr/lib/i386-linux-gnu/libavcodec.a -o -f /usr/lib/i386-linux-gnu/libavcodec.so && test /usr/lib/i386-linux-gnu/libavformat.a -o -f /usr/lib/i386-linux-gnu/libavformat.so ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found in /usr/lib/i386-linux-gnu" >&5
+$as_echo "found in /usr/lib/i386-linux-gnu" >&6; }
+        FFMPEG_OK="found"
+        FFMPEG_LIB="/usr/lib/i386-linux-gnu"
         FFMPEG_DIR="/usr"
 	else
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
@@ -4458,43 +4465,6 @@ $as_echo "not found" >&6; }
         FFMPEG_OBJ="ffmpeg.o"
 
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking avformat" >&5
-$as_echo_n "checking avformat... " >&6; }
-        if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-             #include <${AVFORMAT_DIR}>
-             int main(void){
-                 if (LIBAVFORMAT_VERSION_MAJOR >= 55) return -1;
-                 return 0;
-             }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: version previous to 55" >&5
-$as_echo "version previous to 55" >&6; }
-else
-
-             { $as_echo "$as_me:${as_lineno-$LINENO}: result: version 55 or higher" >&5
-$as_echo "version 55 or higher" >&6; }
-             TEMP_CFLAGS="${TEMP_CFLAGS} -DFFMPEG_V55"
-             RTPS_OBJ="netcam_rtsp.o"
-
-
-
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking file_protocol is defined in ffmpeg ?" >&5
 $as_echo_n "checking file_protocol is defined in ffmpeg ?... " >&6; }
         saved_CFLAGS=$CFLAGS
@@ -4532,6 +4502,11 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     fi
 fi
 fi
+
+# Revised RTSP module so that it can be included
+# whether or not FFMPEG is found.
+
+    RTPS_OBJ="netcam_rtsp.o"
 
 
 #
