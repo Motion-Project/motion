@@ -297,5 +297,6 @@ int netcam_start (struct context *);
 int netcam_next (struct context *, unsigned char *);
 void netcam_cleanup (struct netcam_context *, int);
 ssize_t netcam_recv(netcam_context_ptr, void *, size_t);
+void netcam_url_free(struct url_t *parse_url);
 
 #endif
