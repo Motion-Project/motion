@@ -50,6 +50,10 @@ Features
    * Added support for ffmpeg 0.11 new API.
    * Added RSTP support for netcam ( merge https://github.com/hyperbolic2346/motion )
    * Merge tosiara/rtsp branch (commit 46cfcf31d, 2014/05/21) (Mr-Dave)
+     * 3fps bugfix from SVN rev559 (tosiara, Joerg Weber)
+     * Buffer overflow vulnerabilities (hyperbolic2346)
+     * Redundand -- boundary prefix (torao)
+     * Proper size for memset and allocation size (Alfred Klomp) 
    * Removed compiler warnings:  (Mr-Dave)
        logger.c,jpegutils.c,netcam_ftp.c,track.c,
        picture.c,webhttpd.c,stream.c,ffmpeg.c
@@ -70,6 +74,8 @@ Features
    * Revised configure.ac to generate compiler flag AVFMT_V53.(Mr-Dave)
    * Revised INSTALL to indicate standard APT packages for RTSP (Mr-Dave)
    * Revised configure.ac to recognize libavformat version 54 RTSP (Mr-Dave)
+   * Clean up the messaging for RTSP.
+   * Additional validations for RTSP connection and corrected free sequences
 
    
 Bugfixes

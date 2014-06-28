@@ -2011,14 +2011,18 @@ static void *netcam_handler_loop(void *arg)
         }
         
         if (netcam->caps.streaming == NCS_RTSP) {
-            if (netcam->rtsp->connected == 0) {      // We must have disconnected.  Try to reconnect
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Attempting to reconnect");
+            if (netcam->rtsp->format_context == NULL) {      // We must have disconnected.  Try to reconnect
+                if (netcam->rtsp->connected == 1){                      
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Reconnecting with camera....");
+                }
                 netcam_connect_rtsp(netcam);
                 continue;
             } else {
                 // We think we are connected...
                 if (netcam->get_image(netcam) < 0) {
-                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Bad image attempting to reconnect");
+                    if (netcam->rtsp->connected == 1){ 
+                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Bad image.  Reconnecting with camera....");
+                    }
                     //Nope.  We are not or got bad image.  Reconnect
                     netcam_connect_rtsp(netcam);
                     continue;
