@@ -45,9 +45,7 @@
 #include <sys/socket.h>
 
 #include "netcam_ftp.h"
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
 #include "netcam_rtsp.h"
-#endif
 
 #define CONNECT_TIMEOUT        10     /* Timeout on remote connection attempt */
 #define READ_TIMEOUT            5     /* Default timeout on recv requests */
@@ -149,13 +147,9 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 {
     char *s;
     int i;
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
+
     const char *re = "(http|ftp|mjpg|rtsp)://(((.*):(.*))@)?"
                      "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^:]*))";
-#else
-    const char *re = "(http|ftp|mjpg)://(((.*):(.*))@)?"
-                     "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^:]*))";
-#endif                     
     regex_t pattbuf;
     regmatch_t matches[10];
 
@@ -211,10 +205,8 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
             parse_url->port = 80;
         else if (!strcmp(parse_url->service, "ftp"))
             parse_url->port = 21;
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
         else if (!strcmp(parse_url->service, "rtsp") && parse_url->port == 0)
             parse_url->port = 554;
-#endif            
     }
 
     regfree(&pattbuf);
@@ -232,7 +224,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
  * Returns:             Nothing
  *
  */
-static void netcam_url_free(struct url_t *parse_url)
+void netcam_url_free(struct url_t *parse_url)
 {
     if (parse_url->service) {
         free(parse_url->service);
@@ -2018,23 +2010,26 @@ static void *netcam_handler_loop(void *arg)
             }
         }
         
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
         if (netcam->caps.streaming == NCS_RTSP) {
             if (netcam->rtsp->format_context == NULL) {      // We must have disconnected.  Try to reconnect
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Attempting to reconnect");
-                rtsp_connect(netcam);
+                if (netcam->rtsp->connected == 1){                      
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Reconnecting with camera....");
+                }
+                netcam_connect_rtsp(netcam);
                 continue;
             } else {
                 // We think we are connected...
                 if (netcam->get_image(netcam) < 0) {
-                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Bad image attempting to reconnect");
+                    if (netcam->rtsp->connected == 1){ 
+                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Bad image.  Reconnecting with camera....");
+                    }
                     //Nope.  We are not or got bad image.  Reconnect
-                    rtsp_connect(netcam);
+                    netcam_connect_rtsp(netcam);
                     continue;
                 }
             }
         }
-#endif
+
         if (netcam->caps.streaming != NCS_RTSP) {
             if (netcam->get_image(netcam) < 0) {
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error getting jpeg image");
@@ -2433,100 +2428,6 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
     return 0;
 }
 
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
-static int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url)
-{
-  struct context *cnt = netcam->cnt;
-  const char *ptr;
-  int ret = -1;
-
-  netcam->caps.streaming = NCS_RTSP;
-
-  netcam->rtsp = rtsp_new_context();
-
-  if (netcam->rtsp == NULL) {
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to create rtsp context");
-    netcam_shutdown_rtsp(netcam);
-    return -1;
-  }
-
-  /*
-   * Allocate space for a working string to contain the path.
-   * The extra 5 is for "://", ":" and string terminator.
-   */
-
-  // force port to a sane value
-  if (netcam->connect_port > 65536) {
-    netcam->connect_port = 65536;
-  } else if (netcam->connect_port < 0) {
-    netcam->connect_port = 0;
-  }
-
-    if (cnt->conf.netcam_userpass != NULL) {
-        ptr = cnt->conf.netcam_userpass;
-    } else {
-        ptr = url->userpass;  /* Don't set this one NULL, gets freed. */
-    }
-
-    if (ptr != NULL) {
-        char *cptr;
-        if ((cptr = strchr(ptr, ':')) == NULL) {
-            netcam->rtsp->user = mystrdup(ptr);
-        } else {
-            netcam->rtsp->user = mymalloc((cptr - ptr)+2);  //+2 for string terminator
-            memcpy(netcam->rtsp->user, ptr,(cptr - ptr));
-            netcam->rtsp->pass = mystrdup(cptr + 1);
-        }
-    }
-
-    /*
-    Need a method to query the path and
-    determine the authentication type if needed.
-    avformat_open_input returns file not found when
-    it wants authentication and it is not provided.
-    right now, if user specified a password, we will
-    prepend it onto the path to make it happier so we
-    can at least try basic authentication.
-    */
-
-    if ((netcam->rtsp->user != NULL) && (netcam->rtsp->pass != NULL)) {
-        ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
-	          + 5 + strlen(url->path) + 5
-              + strlen(netcam->rtsp->user) + strlen(netcam->rtsp->pass) + 4 );
-        sprintf((char *)ptr, "%s://%s:%s@%s:%d%s",
-                url->service,netcam->rtsp->user,netcam->rtsp->pass,
-                netcam->connect_host, netcam->connect_port, url->path);
-    }
-    else {
-        ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
-	          + 5 + strlen(url->path) + 5);
-        sprintf((char *)ptr, "%s://%s:%d%s", url->service,
-	        netcam->connect_host, netcam->connect_port, url->path);
-    }
-    netcam->rtsp->path = (char *)ptr;
-
-    netcam_url_free(url);
-
-    /*
-     * Now we need to set some flags for the callback function.
-     */
-    netcam->rtsp->readingframe = 0;
-
-    /*
-     * The RTSP context should be all ready to attempt a connection with
-     * the server, so we try ....
-     */
-    ret = rtsp_connect(netcam);
-    if (ret < 0){
-        return ret;
-    }
-
-    netcam->get_image = netcam_read_rtsp_image;
-
-  return 0;
-}
-#endif
-
 /**
  * netcam_recv
  *
@@ -2707,10 +2608,9 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     if (netcam->response != NULL) 
         free(netcam->response);
 
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
+
     if ((netcam->caps.streaming == NCS_RTSP) && (netcam->rtsp->connected == 1))
         netcam_shutdown_rtsp(netcam);
-#endif
 
     pthread_mutex_destroy(&netcam->mutex);
     pthread_cond_destroy(&netcam->cap_cond);
@@ -2944,13 +2844,11 @@ int netcam_start(struct context *cnt)
 
         strcpy(url.service, "http"); /* Put back a real URL service. */
         retval = netcam_setup_mjpg(netcam, &url);
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
     } else if ((url.service) && (!strcmp(url.service, "rtsp"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
                     " netcam_setup_rtsp()");
 
         retval = netcam_setup_rtsp(netcam, &url);
-#endif        
     } else {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Invalid netcam service '%s' - "
                    "must be http, ftp, mjpg or file.", url.service);
@@ -2974,9 +2872,9 @@ int netcam_start(struct context *cnt)
         return -1;
     }
 
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
+
     if (netcam->caps.streaming != NCS_RTSP) {
-#endif
+
         /*
         * If an error occurs in the JPEG decompression which follows this,
         * jpeglib will return to the code within this 'if'.  If such an error
@@ -3007,13 +2905,7 @@ int netcam_start(struct context *cnt)
                        " is not modulo 8", netcam->height);
             return -3;
         }
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
-    } else {
-        // not jpeg, get the dimensions
-        netcam->width = netcam->rtsp->codec_context->width;
-        netcam->height = netcam->rtsp->codec_context->height;
-    }
-#endif
+    } 
 
     /* Fill in camera details into context structure. */
     cnt->imgs.width = netcam->width;

@@ -375,6 +375,7 @@ fi
 #
 # Check for libavcodec and libavformat from ffmpeg
 #
+
 FFMPEG_DIR="yes"
 FFMPEG_OK="no_found"
 FFMPEG_OBJ=""
@@ -556,47 +557,6 @@ if test "${FFMPEG_OK}" = "found"; then
         FFMPEG_OBJ="ffmpeg.o"
         AC_SUBST(FFMPEG_OBJ)
 
-        AC_MSG_CHECKING(avformat version 55)
-        AC_RUN_IFELSE([AC_LANG_SOURCE([
-            [
-             #include <${AVFORMAT_DIR}>
-             int main(void){
-                 if (LIBAVFORMAT_VERSION_MAJOR >= 55) return -1;
-                 return 0;
-             }
-            ]])],
-            [            
-            AC_MSG_RESULT(no)
-            AC_MSG_CHECKING(avformat version 53/54)
-            AC_RUN_IFELSE([AC_LANG_SOURCE([
-            [
-             #include <${AVFORMAT_DIR}>
-             int main(void){
-                 if ((LIBAVFORMAT_VERSION_MAJOR = 53) || (LIBAVFORMAT_VERSION_MAJOR = 54)) return -1;
-                 return 0;
-             }
-            ]])],
-            [AC_MSG_RESULT(no)],
-            [
-             AC_MSG_RESULT(yes)
-             TEMP_CFLAGS="${TEMP_CFLAGS} -DAVFMT_V53"
-             RTPS_OBJ="netcam_rtsp.o"
-             AC_SUBST(RTPS_OBJ)
-            ]
-            )
-            ],
-            [
-             AC_MSG_RESULT( yes version 55 or higher)
-             TEMP_CFLAGS="${TEMP_CFLAGS} -DFFMPEG_V55"
-             RTPS_OBJ="netcam_rtsp.o"
-             AC_SUBST(RTPS_OBJ)
-            ]
-        )
-
-        
-
-
-
         AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
         saved_CFLAGS=$CFLAGS
         saved_LIBS=$LIBS
@@ -625,6 +585,11 @@ if test "${FFMPEG_OK}" = "found"; then
 fi	
 fi
 
+# Revised RTSP module so that it can be included
+# whether or not FFMPEG is found.
+
+    RTPS_OBJ="netcam_rtsp.o"
+    AC_SUBST(RTPS_OBJ)
 
 #
 # Check SQLITE3

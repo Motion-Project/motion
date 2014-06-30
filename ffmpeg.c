@@ -160,7 +160,7 @@ URLProtocol mpeg1_file_protocol = {
  ****************************************************************************/
 AVFrame *my_frame_alloc(void){
     AVFrame *pic;
-#ifdef FFMPEG_V55
+#if (LIBAVFORMAT_VERSION_MAJOR >= 55)
     pic = av_frame_alloc();
 #else
     pic = avcodec_alloc_frame();
@@ -169,7 +169,7 @@ AVFrame *my_frame_alloc(void){
 }
 
 void my_frame_free(AVFrame *frame){    
-#ifdef FFMPEG_V55
+#if (LIBAVFORMAT_VERSION_MAJOR >= 55)
     av_frame_free(&frame);
 #else
     //avcodec_free_frame(&frame);
@@ -378,7 +378,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
 
     /* Allocation the output media context. */
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
+#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
     ffmpeg->oc = avformat_alloc_context();
 #else
     ffmpeg->oc = av_alloc_format_context();
@@ -420,10 +420,10 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
     c->codec_id   = ffmpeg->oc->oformat->video_codec;
-#if LIBAVCODEC_VERSION_MAJOR < 53    
-    c->codec_type = CODEC_TYPE_VIDEO;
-#else
+#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
     c->codec_type = AVMEDIA_TYPE_VIDEO;
+#else
+    c->codec_type = CODEC_TYPE_VIDEO;    
 #endif    
     is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
 
@@ -864,7 +864,7 @@ void ffmpeg_deinterlace(unsigned char *img, int width, int height)
     picture.linesize[2] = width2;
 
     /* We assume using 'PIX_FMT_YUV420P' always */
-#if ((defined FFMPEG_V55) || (defined AVFMT_V53))
+#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
     MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Deinterlace depreciated for recent versions of FFMPEG.");
 #else
     avpicture_deinterlace(&picture, &picture, PIX_FMT_YUV420P, width, height);
