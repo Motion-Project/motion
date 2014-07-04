@@ -11,13 +11,13 @@
 struct rtsp_context {
     AVFormatContext*      format_context;
     AVCodecContext*       codec_context;
-    AVFrame               *frame;
+    AVFrame*              frame;
     int                   video_stream_index;
     char*                 path;
     char*                 user;
     char*                 pass;
     int                   readingframe;
-    int                   connected;
+    int                   status;
     struct timeval        startreadtime;
 };
 #else
@@ -29,7 +29,7 @@ struct rtsp_context {
 struct rtsp_context {
     int*                  format_context; 
     int                   readingframe;
-    int                   connected;    
+    int                   status;
 };
 #endif
 
