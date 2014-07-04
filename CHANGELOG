@@ -76,6 +76,7 @@ Features
    * Revised configure.ac to recognize libavformat version 54 RTSP (Mr-Dave)
    * Clean up the messaging for RTSP.
    * Additional validations for RTSP connection and corrected free sequences
+   * Removed seg fault on failure to open first image, comments, isolation of RTSP
 
    
 Bugfixes

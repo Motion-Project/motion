@@ -2012,18 +2012,20 @@ static void *netcam_handler_loop(void *arg)
         
         if (netcam->caps.streaming == NCS_RTSP) {
             if (netcam->rtsp->format_context == NULL) {      // We must have disconnected.  Try to reconnect
-                if (netcam->rtsp->connected == 1){                      
+                if (netcam->rtsp->status == RTSP_CONNECTED){
                     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Reconnecting with camera....");
                 }
+                netcam->rtsp->status = RTSP_RECONNECTING;
                 netcam_connect_rtsp(netcam);
                 continue;
             } else {
                 // We think we are connected...
                 if (netcam->get_image(netcam) < 0) {
-                    if (netcam->rtsp->connected == 1){ 
+                    if (netcam->rtsp->status == RTSP_CONNECTED){
                         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Bad image.  Reconnecting with camera....");
                     }
                     //Nope.  We are not or got bad image.  Reconnect
+                    netcam->rtsp->status = RTSP_RECONNECTING;
                     netcam_connect_rtsp(netcam);
                     continue;
                 }
@@ -2609,7 +2611,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
         free(netcam->response);
 
 
-    if ((netcam->caps.streaming == NCS_RTSP) && (netcam->rtsp->connected == 1))
+    if (netcam->caps.streaming == NCS_RTSP) 
         netcam_shutdown_rtsp(netcam);
 
     pthread_mutex_destroy(&netcam->mutex);
@@ -2869,6 +2871,7 @@ int netcam_start(struct context *cnt)
     if ((retval = netcam->get_image(netcam)) != 0) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Failed trying to "
                    "read first image - retval:%d", retval);
+        netcam->rtsp->status = RTSP_NOTCONNECTED;
         return -1;
     }
 
