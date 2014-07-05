@@ -1,3 +1,9 @@
+NOTE:  Versions come, versions go, packages change, etc.  These instructions are intended as a starting point 
+       and may need modification by the time you read this.  
+
+**********************************
+***    DEBIAN BASED SYSTEMS    ***
+
 Required Packages:
     sudo apt-get install autoconf automake build-essential libtool libjpeg8-dev libzip-dev
 
@@ -34,3 +40,22 @@ Sample PI configuration with LIBAV
 Once configured type:
     make
     make install
+
+*****************************
+***    OpenSUSE SYSTEM    ***
+
+sudo zypper install autoconf automake libtool git
+sudo zypper install --type pattern devel_basis
+sudo zypper install libjpeg8-devel 
+sudo zypper install -t pattern devel_C_C++
+
+Optional:  FFmpeg files
+sudo zypper ar -f -n packman-essentials http://packman.inode.at/suse/openSUSE_13.1/Essentials/ packman-essentials
+sudo zypper ar -f -n packman-multimedia http://packman.inode.at/suse/openSUSE_13.1/Multimedia/ packman-multimedia
+sudo zypper install libffmpeg-devel
+
+./configure
+    make
+    make install
+
+*************************

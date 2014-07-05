@@ -95,7 +95,9 @@ void ffmpeg_deinterlace(unsigned char *, int, int);
 /* Setup an avcodec log handler. */
 void ffmpeg_avcodec_log(void *, int, const char *, va_list);
 
+#ifdef HAVE_FFMPEG
 AVFrame *my_frame_alloc(void);
 void my_frame_free(AVFrame *frame);
+#endif
 
 #endif /* _INCLUDE_FFMPEG_H_ */
