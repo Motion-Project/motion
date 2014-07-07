@@ -2665,6 +2665,10 @@ int netcam_next(struct context *cnt, unsigned char *image)
     }
 
     if (netcam->caps.streaming == NCS_RTSP) {
+        
+        if (netcam->rtsp->status == RTSP_RECONNECTING)
+            return NETCAM_NOTHING_NEW_ERROR;
+        
     	memcpy(image, netcam->latest->ptr, netcam->latest->used);
     	return 0;
     }
