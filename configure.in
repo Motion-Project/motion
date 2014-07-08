@@ -426,6 +426,11 @@ else if test "${FFMPEG_DIR}" = "yes"; then
 		FFMPEG_OK="found"
 		FFMPEG_LIB="/usr/local/lib"
 		FFMPEG_DIR="/usr/local"
+    elif test -f /usr/lib/x86_64-linux-gnu/libavcodec.a -o -f /usr/lib/x86_64-linux-gnu/libavcodec.so && test /usr/lib/x86_64-linux-gnu/libavformat.a -o -f /usr/lib/x86_64-linux-gnu/libavformat.so ; then
+        AC_MSG_RESULT(found in /usr/lib/x86_64-linux-gnu)
+        FFMPEG_OK="found"
+        FFMPEG_LIB="/usr/lib/x86_64-linux-gnu"
+        FFMPEG_DIR="/usr"
 	else
 		AC_MSG_RESULT(not found)
 		echo ""
@@ -523,6 +528,9 @@ if test "${FFMPEG_OK}" = "found"; then
 
         FFMPEG_OBJ="ffmpeg.o"
         AC_SUBST(FFMPEG_OBJ)
+
+        RTPS_OBJ="netcam_rtsp.o"
+        AC_SUBST(RTPS_OBJ)
 
         AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
         saved_CFLAGS=$CFLAGS
@@ -1213,6 +1221,8 @@ AC_CHECK_FUNC(avformat_alloc_context, AC_DEFINE([have_avformat_alloc_context],1,
 AC_CHECK_FUNC(av_avformat_alloc_context, AC_DEFINE([have_av_avformat_alloc_context],1,[Define to 1 if you have av_avformat_alloc_context support]))
 AC_CHECK_FUNC(av_register_protocol2, AC_DEFINE([have_av_register_protocol2],1,[Define to 1 if you have av_register_protocol2 support]))
 AC_CHECK_FUNC(av_register_protocol, AC_DEFINE([have_av_register_protocol],1,[Define to 1 if you have av_register_protocol support]))
+AC_CHECK_FUNC(av_get_media_type_string, AC_DEFINE([have_av_get_media_type_string],1,[Define to 1 if you have av_get_media_type_string support]))
+
 
 #
 # Add the right exec path for rc scripts
