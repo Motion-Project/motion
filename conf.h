@@ -123,6 +123,7 @@ struct config {
     const char *netcam_keepalive;
     const char *netcam_proxy;
     unsigned int netcam_tolerant_check;
+    unsigned int rtsp_uses_tcp;
     int text_changes;
     const char *text_left;
     const char *text_right;

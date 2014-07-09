@@ -80,6 +80,8 @@ Features
    * Add AC_GNU_SOURCE macro to check for GNU C Library, fix compile when no FFMpeg.
    * Implement inits of AV functions from bcl fork 
    * Add gray image upon disconnection
+   * Added tcp/udp transport config option from hyperbolic(commit 423ef7bb3)
+   * Revised comments to be in line with application standard.
 
    
 Bugfixes

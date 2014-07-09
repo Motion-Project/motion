@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include "netcam_rtsp.h"
-#include "motion.h"
-
 /***********************************************************
  *  In the top section are the functions that are used 
  *  when processing the RTSP camera feed.  Since these functions
@@ -19,15 +15,16 @@
  *  structures are in the declarations.  Simple error
  *  messages are raised if called when no FFmpeg is found.
  * 
- *  Comments inside the function structure are particular 
- *  to that function.  Comments outside a function (such as
- *  these) are applicable to the entire module.
  ***********************************************************/
+
+#include <stdio.h>
+#include "netcam_rtsp.h"
+#include "motion.h"
+
 #ifdef HAVE_FFMPEG
 
 #include "ffmpeg.h"
 
-static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
 /**
  * netcam_buffsize_rtsp
  *
@@ -41,6 +38,7 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
  *
  * Returns:             Nothing
  */
+static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
     
     int min_size_to_alloc;
     int real_alloc;
@@ -66,7 +64,6 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
     buff->size = new_size;
 }
 
-static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *frame, AVCodecContext *cc){
 /**
  * decode_packet
  *
@@ -84,7 +81,7 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
  *      Failure    0(zero)
  *      Success    The size of the frame decoded
  */
-
+static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *frame, AVCodecContext *cc){
     int check = 0;
     int frame_size = 0;
     int ret = 0; 
@@ -112,7 +109,6 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
     return frame_size;
 }
 
-static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AVMediaType type){
 /**
  * open_codec_context
  *
@@ -128,7 +124,7 @@ static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AV
  *      Failure    Error code from FFmpeg (Negative number)
  *      Success    0(Zero)
  */
-
+static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AVMediaType type){
     int ret;
     char errstr[128];
     AVStream *st;
@@ -164,7 +160,6 @@ static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AV
     return 0;
 }
 
-struct rtsp_context *rtsp_new_context(void){
 /**
 * rtsp_new_context
 *
@@ -177,7 +172,7 @@ struct rtsp_context *rtsp_new_context(void){
 * Returns:     Pointer to the newly-created structure, NULL if error.
 *
 */
-
+struct rtsp_context *rtsp_new_context(void){
     struct rtsp_context *ret;
 
     /* Note that mymalloc will exit on any problem. */
@@ -188,7 +183,6 @@ struct rtsp_context *rtsp_new_context(void){
     return ret;
 }
 
-static int netcam_interrupt_rtsp(void *ctx){
 /**
 * netcam_interrupt_rtsp
 *
@@ -209,7 +203,7 @@ static int netcam_interrupt_rtsp(void *ctx){
 *       Success     0(zero which indicates to let process continue)
 *
 */
-
+static int netcam_interrupt_rtsp(void *ctx){
     struct rtsp_context *rtsp = (struct rtsp_context *)ctx;
 
     if (rtsp->readingframe != 1) {
@@ -231,7 +225,6 @@ static int netcam_interrupt_rtsp(void *ctx){
     return 0;
 }
 
-int netcam_read_rtsp_image(netcam_context_ptr netcam){
 /**
 * netcam_read_rtsp_image
 *
@@ -248,7 +241,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-
+int netcam_read_rtsp_image(netcam_context_ptr netcam){
     struct timeval    curtime;
     netcam_buff_ptr    buffer;
     AVPacket           packet;
@@ -333,8 +326,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
  *  This ends the section of functions that rely upon FFmpeg
  ***********************************************************/
 #endif /* End HAVE_FFMPEG */
- 
-int netcam_connect_rtsp(netcam_context_ptr netcam){
+
 /**
 * netcam_connect_rtsp
 *
@@ -348,7 +340,8 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 *       Failure    -1
 *       Success     0(zero)
 *
-*/
+*/ 
+int netcam_connect_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
     int ret;    
@@ -363,9 +356,16 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 
     // open the network connection
     AVDictionary *opts = 0;
-    av_dict_set(&opts, "rtsp_transport", "tcp", 0);
-    //av_dict_set(&opts, "rtsp_transport", "udp", 0);
-    //av_dict_set(&opts, "max_delay", "500000", 0);  //100000 is the default
+    if (netcam->cnt->conf.rtsp_uses_tcp) {
+        av_dict_set(&opts, "rtsp_transport", "tcp", 0);
+        if (netcam->rtsp->status == RTSP_NOTCONNECTED)
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Using tcp transport");
+    } else {
+        av_dict_set(&opts, "rtsp_transport", "udp", 0);
+        av_dict_set(&opts, "max_delay", "500000", 0);  //100000 is the default
+        if (netcam->rtsp->status == RTSP_NOTCONNECTED)
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Using udp transport");
+    }    
     
     netcam->rtsp->format_context = avformat_alloc_context();
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
@@ -461,7 +461,6 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 #endif /* End #ifdef HAVE_FFMPEG */
 }
 
-void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 /**
 * netcam_shutdown_rtsp
 *
@@ -476,6 +475,7 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 *       Success    nothing
 *
 */
+void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
     if (netcam->rtsp->status == RTSP_CONNECTED) {
@@ -498,7 +498,6 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 #endif /* End #ifdef HAVE_FFMPEG */
 }
 
-int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 /**
 * netcam_setup_rtsp
 *
@@ -515,6 +514,7 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 *       Success    0(zero)
 *
 */
+int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 #ifdef HAVE_FFMPEG
 
   struct context *cnt = netcam->cnt;

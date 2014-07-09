@@ -146,6 +146,7 @@ struct config conf_template = {
     netcam_keepalive:               "off",
     netcam_proxy:                   NULL,
     netcam_tolerant_check:          0,
+    rtsp_uses_tcp:                  1,
     text_changes:                   0,
     text_left:                      NULL,
     text_right:                     DEF_TIMESTAMP,
@@ -407,6 +408,15 @@ config_param config_params[] = {
     "# Default: off",
     0,
     CONF_OFFSET(netcam_tolerant_check),
+    copy_bool,
+    print_bool
+    },
+    {
+    "rtsp_uses_tcp",
+    "# RTSP connection uses TCP to communicate to the camera. Can prevent image corruption.\n"
+    "# Default: on",
+    1,
+    CONF_OFFSET(rtsp_uses_tcp),
     copy_bool,
     print_bool
     },
