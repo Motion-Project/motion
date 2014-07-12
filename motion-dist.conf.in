@@ -101,7 +101,7 @@ framerate 2
 # This option is used when you want to capture images at a rate lower than 2 per second.
 minimum_frame_time 0
 
-# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rstp:// or file:///)
+# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rtsp:// or file:///)
 # Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined
 ; netcam_url value
 
@@ -124,6 +124,10 @@ netcam_keepalive off
 # Set less strict jpeg checks for network cameras with a poor/buggy firmware.
 # Default: off
 netcam_tolerant_check off
+
+# RTSP connection uses TCP to communicate to the camera. Can prevent image corruption.
+# Default: on
+rtsp_uses_tcp on
 
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.
