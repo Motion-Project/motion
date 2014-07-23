@@ -1,20 +1,20 @@
 /***********************************************************
- *  In the top section are the functions that are used 
+ *  In the top section are the functions that are used
  *  when processing the RTSP camera feed.  Since these functions
- *  are internal to the RTSP module, and many require FFmpeg 
- *  structures in their declarations, they are within the 
- *  HAVE_FFMPEG block that eliminates them entirely when 
- *  FFmpeg is not present.  
+ *  are internal to the RTSP module, and many require FFmpeg
+ *  structures in their declarations, they are within the
+ *  HAVE_FFMPEG block that eliminates them entirely when
+ *  FFmpeg is not present.
  *
- *  The functions: 
+ *  The functions:
  *      netcam_setup_rtsp
  *      netcam_connect_rtsp
  *      netcam_shutdown_rtsp
- *  are called from netcam.c therefore must be defined even 
- *  if FFmpeg is not present.  They must also not have FFmpeg 
+ *  are called from netcam.c therefore must be defined even
+ *  if FFmpeg is not present.  They must also not have FFmpeg
  *  structures are in the declarations.  Simple error
  *  messages are raised if called when no FFmpeg is found.
- * 
+ *
  ***********************************************************/
 
 #include <stdio.h>
@@ -39,7 +39,7 @@
  * Returns:             Nothing
  */
 static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
-    
+
     int min_size_to_alloc;
     int real_alloc;
     int new_size;
@@ -84,8 +84,8 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
 static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *frame, AVCodecContext *cc){
     int check = 0;
     int frame_size = 0;
-    int ret = 0; 
-    
+    int ret = 0;
+
     cc->err_recognition = 3;
     ret = avcodec_decode_video2(cc, frame, &check, packet);
     if (ret < 0) {
@@ -98,11 +98,11 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
     }
 
     frame_size = avpicture_get_size(cc->pix_fmt, cc->width, cc->height);
-    
+
     netcam_buffsize_rtsp(buffer, frame_size);
-    
+
     avpicture_layout((const AVPicture*)frame,cc->pix_fmt,cc->width,cc->height
-                    ,(unsigned char *)buffer->ptr,frame_size );    
+                    ,(unsigned char *)buffer->ptr,frame_size );
 
     buffer->used = frame_size;
 
@@ -130,14 +130,14 @@ static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AV
     AVStream *st;
     AVCodecContext *dec_ctx = NULL;
     AVCodec *dec = NULL;
-    
+
     ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
 		MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream in input!: %s",errstr);
         return ret;
-    } 
-    
+    }
+
     *stream_idx = ret;
     st = fmt_ctx->streams[*stream_idx];
 
@@ -188,17 +188,17 @@ struct rtsp_context *rtsp_new_context(void){
 *
 *    This function is called during the FFmpeg blocking functions.
 *    These include the opening of the format context as well as the
-*    reading of the packets from the stream.  Since this is called 
+*    reading of the packets from the stream.  Since this is called
 *    during all blocking functions, the process uses the readingframe
 *    flag to determine whether to timeout the process.
 *
 * Parameters
 *
-*       ctx   We pass in the rtsp context to use it to look for the 
-*             readingframe flag as well as the time that we started 
+*       ctx   We pass in the rtsp context to use it to look for the
+*             readingframe flag as well as the time that we started
 *             the read attempt.
 *
-* Returns:     
+* Returns:
 *       Failure    -1(which triggers an interupt)
 *       Success     0(zero which indicates to let process continue)
 *
@@ -228,7 +228,7 @@ static int netcam_interrupt_rtsp(void *ctx){
 /**
 * netcam_read_rtsp_image
 *
-*    This function reads the packet from the camera.  
+*    This function reads the packet from the camera.
 *    It is called extensively so only absolutely essential
 *    functions and allocations are performed.
 *
@@ -236,7 +236,7 @@ static int netcam_interrupt_rtsp(void *ctx){
 *
 *       netcam  The netcam context to read from
 *
-* Returns:     
+* Returns:
 *       Failure    -1
 *       Success     0(zero)
 *
@@ -334,19 +334,19 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
 *
 * Parameters
 *
-*       netcam  The netcam context to open. 
+*       netcam  The netcam context to open.
 *
-* Returns:     
+* Returns:
 *       Failure    -1
 *       Success     0(zero)
 *
-*/ 
+*/
 int netcam_connect_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
-    int ret;    
+    int ret;
     char errstr[128];
- 
+
     if (netcam->rtsp->path == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Null path passed to connect (%s)", netcam->rtsp->path);
@@ -365,12 +365,12 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
         av_dict_set(&opts, "max_delay", "500000", 0);  //100000 is the default
         if (netcam->rtsp->status == RTSP_NOTCONNECTED)
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Using udp transport");
-    }    
-    
+    }
+
     netcam->rtsp->format_context = avformat_alloc_context();
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
     netcam->rtsp->format_context->interrupt_callback.opaque = netcam->rtsp;
-    
+
     ret = avformat_open_input(&netcam->rtsp->format_context, netcam->rtsp->path, NULL, &opts);
     if (ret < 0) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
@@ -378,9 +378,9 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->path,errstr);
         }
         av_dict_free(&opts);
-        //The format context gets freed upon any error from open_input.        
+        //The format context gets freed upon any error from open_input.
         return ret;
-    }    
+    }
     av_dict_free(&opts);
 
     // fill out stream information
@@ -400,7 +400,7 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
             av_strerror(ret, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open codec context: %s", errstr);
         }
-        avformat_close_input(&netcam->rtsp->format_context);        
+        avformat_close_input(&netcam->rtsp->format_context);
         return -1;
     }
 
@@ -412,7 +412,7 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to allocate frame.  Fatal error.  Check FFmpeg/Libav configuration");
         }
         avcodec_close(netcam->rtsp->codec_context);
-        avformat_close_input(&netcam->rtsp->format_context);        
+        avformat_close_input(&netcam->rtsp->format_context);
         return -1;
     }
 
@@ -425,13 +425,13 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
         }
         my_frame_free(netcam->rtsp->frame);
         avcodec_close(netcam->rtsp->codec_context);
-        avformat_close_input(&netcam->rtsp->format_context);        
+        avformat_close_input(&netcam->rtsp->format_context);
         return -1;
     }
-    
-    /*  
+
+    /*
      *  Get an image from the feed, this serves
-     *  two purposes.  
+     *  two purposes.
      *  1.  Get the dimensions of the pic
      *  2.  Validate that the previous steps opened the camera
      */
@@ -443,7 +443,7 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
         }
         return -1;
     }
-    
+
     netcam->width = netcam->rtsp->codec_context->width;
     netcam->height = netcam->rtsp->codec_context->height;
 
@@ -452,7 +452,7 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Camera connected");
 
     return 0;
-    
+
 #else  /* No FFmpeg/Libav */
     netcam->rtsp->status = RTSP_NOTCONNECTED;
     netcam->rtsp->format_context = NULL;
@@ -468,9 +468,9 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 *
 * Parameters
 *
-*       netcam  The netcam context to free. 
+*       netcam  The netcam context to free.
 *
-* Returns:     
+* Returns:
 *       Failure    nothing
 *       Success    nothing
 *
@@ -482,17 +482,17 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         my_frame_free(netcam->rtsp->frame);
         avcodec_close(netcam->rtsp->codec_context);
         avformat_close_input(&netcam->rtsp->format_context);
-        
+
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: rtsp shut down");
     }
-    
+
     if (netcam->rtsp->path != NULL) free(netcam->rtsp->path);
     if (netcam->rtsp->user != NULL) free(netcam->rtsp->user);
     if (netcam->rtsp->pass != NULL) free(netcam->rtsp->pass);
-    
+
     free(netcam->rtsp);
     netcam->rtsp = NULL;
-    
+
 #else  /* No FFmpeg/Libav */
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
 #endif /* End #ifdef HAVE_FFMPEG */
@@ -501,15 +501,15 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 /**
 * netcam_setup_rtsp
 *
-*    This function sets up all the necessary items for the 
-*    rtsp camera. 
+*    This function sets up all the necessary items for the
+*    rtsp camera.
 *
 * Parameters
 *
-*       netcam  The netcam context to free. 
+*       netcam  The netcam context to free.
 *       url     The URL of the camera
 *
-* Returns:     
+* Returns:
 *       Failure    -1
 *       Success    0(zero)
 *
@@ -562,7 +562,7 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 
     /*
      *  Need a method to query the path and
-     *  determine the authentication type 
+     *  determine the authentication type
      */
     if ((netcam->rtsp->user != NULL) && (netcam->rtsp->pass != NULL)) {
         ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
@@ -587,7 +587,7 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
      */
     netcam->rtsp->readingframe = 0;
     netcam->rtsp->status = RTSP_NOTCONNECTED;
-    
+
     av_register_all();
     avformat_network_init();
 
@@ -603,7 +603,7 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     netcam->get_image = netcam_read_rtsp_image;
 
   return 0;
-  
+
 #else  /* No FFmpeg/Libav */
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
