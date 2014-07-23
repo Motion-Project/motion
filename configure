@@ -5923,7 +5923,7 @@ $as_echo_n "checking autodect pgsql libs... " >&6; }
 $as_echo "$PGSQL_LIBDIR" >&6; }
 
 		elif test "${PGSQL_LIBS}" = "no"; then
-	        	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pgsql libs" >&5
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pgsql libs" >&5
 $as_echo_n "checking for pgsql libs... " >&6; }
 		        { $as_echo "$as_me:${as_lineno-$LINENO}: result: skipped" >&5
 $as_echo "skipped" >&6; }
