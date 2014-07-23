@@ -1,5 +1,5 @@
 NOTE:  Versions come, versions go, packages change, etc.  These instructions are intended as a starting point 
-       and may need modification by the time you read this.  
+       and may need modification by the time you read this.
 
 **********************************
 ***    DEBIAN BASED SYSTEMS    ***
@@ -46,7 +46,7 @@ Once configured type:
 
 sudo zypper install autoconf automake libtool git
 sudo zypper install --type pattern devel_basis
-sudo zypper install libjpeg8-devel 
+sudo zypper install libjpeg8-devel
 sudo zypper install -t pattern devel_C_C++
 
 Optional:  FFmpeg files
@@ -59,3 +59,4 @@ sudo zypper install libffmpeg-devel
     make install
 
 *************************
+
