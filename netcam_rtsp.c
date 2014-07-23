@@ -68,7 +68,7 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
  * decode_packet
  *
  * This routine takes in the packet from the read and decodes it into
- * the frame.  It then takes the frame and copies it into the netcam 
+ * the frame.  It then takes the frame and copies it into the netcam
  * buffer
  *
  * Parameters:
@@ -153,7 +153,7 @@ static int open_codec_context(int *stream_idx, AVFormatContext *fmt_ctx, enum AV
     ret = avcodec_open2(dec_ctx, dec, NULL);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
-    	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
+	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
         return ret;
     }
 
