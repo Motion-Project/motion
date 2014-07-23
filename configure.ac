@@ -1384,4 +1384,3 @@ echo "LDFLAGS: $LDFLAGS"
 echo
 echo  "Install prefix:       $prefix"
 echo
-

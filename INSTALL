@@ -59,4 +59,3 @@ sudo zypper install libffmpeg-devel
     make install
 
 *************************
-
