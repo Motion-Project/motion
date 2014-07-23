@@ -14,7 +14,7 @@
 
 #include "ffmpeg.h"
 #include "motion.h"
- 
+
 #if LIBAVCODEC_BUILD > 4680
 /*
  * FFmpeg after build 4680 doesn't have support for mpeg1 videos with
@@ -154,8 +154,8 @@ URLProtocol mpeg1_file_protocol = {
 
 #endif // FF_API_NEW_AVIO
 /****************************************************************************
- *  The section below is the "my" section of functions.  
- *  These are designed to be extremely simple version specific 
+ *  The section below is the "my" section of functions.
+ *  These are designed to be extremely simple version specific
  *  variants of the libav functions.
  ****************************************************************************/
 AVFrame *my_frame_alloc(void){
@@ -168,7 +168,7 @@ AVFrame *my_frame_alloc(void){
     return pic;
 }
 
-void my_frame_free(AVFrame *frame){    
+void my_frame_free(AVFrame *frame){
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
     av_frame_free(&frame);
 #else
@@ -423,7 +423,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 #if (LIBAVFORMAT_VERSION_MAJOR >= 53)
     c->codec_type = AVMEDIA_TYPE_VIDEO;
 #else
-    c->codec_type = CODEC_TYPE_VIDEO;    
+    c->codec_type = CODEC_TYPE_VIDEO;
 #endif    
     is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
 

@@ -2009,7 +2009,7 @@ static void *netcam_handler_loop(void *arg)
                  */
             }
         }
-        
+
         if (netcam->caps.streaming == NCS_RTSP) {
             if (netcam->rtsp->format_context == NULL) {      // We must have disconnected.  Try to reconnect
                 if (netcam->rtsp->status == RTSP_CONNECTED){
@@ -2611,7 +2611,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
         free(netcam->response);
 
 
-    if (netcam->caps.streaming == NCS_RTSP) 
+    if (netcam->caps.streaming == NCS_RTSP)
         netcam_shutdown_rtsp(netcam);
 
     pthread_mutex_destroy(&netcam->mutex);
@@ -2665,10 +2665,10 @@ int netcam_next(struct context *cnt, unsigned char *image)
     }
 
     if (netcam->caps.streaming == NCS_RTSP) {
-        
+
         if (netcam->rtsp->status == RTSP_RECONNECTING)
             return NETCAM_NOTHING_NEW_ERROR;
-        
+
     	memcpy(image, netcam->latest->ptr, netcam->latest->used);
     	return 0;
     }
@@ -2912,7 +2912,7 @@ int netcam_start(struct context *cnt)
                        " is not modulo 8", netcam->height);
             return -3;
         }
-    } 
+    }
 
     /* Fill in camera details into context structure. */
     cnt->imgs.width = netcam->width;
