@@ -202,7 +202,7 @@ fi
 	AC_MSG_RESULT($PTHREAD_SUPPORT)
 
 else
-	echo 
+	echo
 	echo "You do not have threads support"
 	echo
 fi
