@@ -24,7 +24,7 @@ struct rtsp_context {
     struct timeval        startreadtime;
 
 #else /* Do not have FFmpeg */
-    int*                  format_context; 
+    int*                  format_context;
     int                   readingframe;
     int                   status;
 #endif /* end HAVE_FFMPEG  */
