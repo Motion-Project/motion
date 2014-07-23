@@ -8,7 +8,10 @@
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
 
+#endif /* end HAVE_FFMPEG  */
+
 struct rtsp_context {
+#ifdef HAVE_FFMPEG
     AVFormatContext*      format_context;
     AVCodecContext*       codec_context;
     AVFrame*              frame;
@@ -19,19 +22,13 @@ struct rtsp_context {
     int                   readingframe;
     int                   status;
     struct timeval        startreadtime;
-};
-#else
-/****************************************
- * Dummy context for when no FFMPEG/Libav
- * is on machine.  These need to be primitive
- * data types
- *****************************************/
-struct rtsp_context {
+
+#else /* Do not have FFmpeg */
     int*                  format_context; 
     int                   readingframe;
     int                   status;
+#endif /* end HAVE_FFMPEG  */
 };
-#endif
 
 struct rtsp_context *rtsp_new_context(void);
 void netcam_shutdown_rtsp(netcam_context_ptr netcam);

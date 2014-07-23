@@ -77,6 +77,11 @@ Features
    * Clean up the messaging for RTSP.
    * Additional validations for RTSP connection and corrected free sequences
    * Removed seg fault on failure to open first image, comments, isolation of RTSP
+   * Add AC_GNU_SOURCE macro to check for GNU C Library, fix compile when no FFMpeg.
+   * Implement inits of AV functions from bcl fork 
+   * Add gray image upon disconnection
+   * Added tcp/udp transport config option from hyperbolic(commit 423ef7bb3)
+   * Revised comments to be in line with application standard.
 
    
 Bugfixes
