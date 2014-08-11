@@ -28,7 +28,7 @@ Optional: With FFMPEG support:
             ./configure --prefix=$HOME/motion_build --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include --with-ffmpeg-libs=" -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec "
 
 With LIBAV APT versions of libraries
-    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libav-tools
+    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libav-tools libswscale-dev
 
 Without any LIBAV/FFMPEG support or the installed version of libavcodec/libavformat
     ./configure

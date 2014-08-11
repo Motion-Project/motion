@@ -148,7 +148,7 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     char *s;
     int i;
 
-    const char *re = "(http|ftp|mjpg|rtsp)://(((.*):(.*))@)?"
+    const char *re = "(http|ftp|mjpg|mjpeg|rtsp)://(((.*):(.*))@)?"
                      "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^:]*))";
     regex_t pattbuf;
     regmatch_t matches[10];
@@ -1262,7 +1262,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                      * module netcam_wget.c to do this job!
                      */
 
-                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,
+                    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,
                                "%s: Potential split boundary - "
                                "%d chars flushed, %d "
                                "re-positioned", ix,
@@ -2669,7 +2669,9 @@ int netcam_next(struct context *cnt, unsigned char *image)
         if (netcam->rtsp->status == RTSP_RECONNECTING)
             return NETCAM_NOTHING_NEW_ERROR;
 
-    	memcpy(image, netcam->latest->ptr, netcam->latest->used);
+    	if (netcam_next_rtsp(image , netcam) < 0)
+            return NETCAM_GENERAL_ERROR | NETCAM_JPEG_CONV_ERROR;
+
     	return 0;
     }
 
@@ -2850,6 +2852,12 @@ int netcam_start(struct context *cnt)
 
         strcpy(url.service, "http"); /* Put back a real URL service. */
         retval = netcam_setup_mjpg(netcam, &url);
+    } else if ((url.service) && (!strcmp(url.service, "mjpeg"))) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
+                   " netcam_setup_mjpeg()");
+
+        strcpy(url.service, "http"); /* Put back a real URL service. */
+        retval = netcam_setup_rtsp(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "rtsp"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
                     " netcam_setup_rtsp()");
@@ -2857,7 +2865,7 @@ int netcam_start(struct context *cnt)
         retval = netcam_setup_rtsp(netcam, &url);
     } else {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Invalid netcam service '%s' - "
-                   "must be http, ftp, mjpg or file.", url.service);
+                   "must be http, ftp, mjpg, mjpeg or file.", url.service);
         netcam_url_free(&url);
         return -1;
     }
@@ -2896,23 +2904,23 @@ int netcam_start(struct context *cnt)
         netcam->netcam_tolerant_check = cnt->conf.netcam_tolerant_check;
         netcam->JFIF_marker = 0;
         netcam_get_dimensions(netcam);
-
-        /*
-        * Motion currently requires that image height and width is a
-        * multiple of 16. So we check for this.
-        */
-        if (netcam->width % 8) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image width (%d)"
-                       " is not modulo 8", netcam->width);
-            return -3;
-        }
-
-        if (netcam->height % 8) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image height (%d)"
-                       " is not modulo 8", netcam->height);
-            return -3;
-        }
     }
+    /*
+    * Motion currently requires that image height and width is a
+    * multiple of 16. So we check for this.
+    */
+    if (netcam->width % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image width (%d)"
+                   " is not modulo 8", netcam->width);
+        return -3;
+    }
+
+    if (netcam->height % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image height (%d)"
+                   " is not modulo 8", netcam->height);
+        return -3;
+    }
+    
 
     /* Fill in camera details into context structure. */
     cnt->imgs.width = netcam->width;

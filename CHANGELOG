@@ -82,6 +82,7 @@ Features
    * Add gray image upon disconnection
    * Added tcp/udp transport config option from hyperbolic(commit 423ef7bb3)
    * Revised comments to be in line with application standard.
+   * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
