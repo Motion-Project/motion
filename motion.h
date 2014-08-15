@@ -149,6 +149,7 @@
                                      */
 
 #define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
+#define WATCHDOG_KILL          -60   /* -60 sec grace period before calling thread cancel */
 #define WATCHDOG_OFF          -127   /* Turn off watchdog, used when we wants to quit a thread */
 
 #define CONNECTION_KO           "Lost connection"
