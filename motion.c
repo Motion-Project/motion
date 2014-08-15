@@ -2804,24 +2804,39 @@ int main (int argc, char **argv)
                 }
 
                 if (cnt_list[i]->watchdog > WATCHDOG_OFF) {
-                    cnt_list[i]->watchdog--;
-                    
-                    if (cnt_list[i]->watchdog == 0) {
-                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, trying to do "
-                                   "a graceful restart", cnt_list[i]->threadnr);
-                        cnt_list[i]->finish = 1;
-                    }
+                    if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
+                        /* if 0 then it finally did clean up (and will restart without any further action here)
+                         * kill(, 0) == ESRCH means the thread is no longer running
+                         * if it is no longer running with running set, then cleanup here so it can restart
+                         */
+                        if(cnt_list[i]->running && pthread_kill(cnt_list[i]->thread_id, 0) == ESRCH) {
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: cleaning Thread %d", cnt_list[i]->threadnr);
+                            pthread_mutex_lock(&global_lock);
+                            threads_running--;
+                            pthread_mutex_unlock(&global_lock);
+                            motion_cleanup(cnt_list[i]);
+                            cnt_list[i]->running = 0;
+                            cnt_list[i]->finish = 0;
+                        }
+                    } else {
+                        cnt_list[i]->watchdog--;
 
-                    if (cnt_list[i]->watchdog == -60) {
-                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful," 
-                                   "killing it!", cnt_list[i]->threadnr);
-                        pthread_cancel(cnt_list[i]->thread_id);
-                        pthread_mutex_lock(&global_lock);
-                        threads_running--;
-                        pthread_mutex_unlock(&global_lock);
-                        motion_cleanup(cnt_list[i]);
-                        cnt_list[i]->running = 0;
-                        cnt_list[i]->finish = 0;
+                        
+                        if (cnt_list[i]->watchdog == 0) {
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, trying to do "
+                                       "a graceful restart", cnt_list[i]->threadnr);
+                            cnt_list[i]->finish = 1;
+                        }
+
+                        if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful," 
+                                       "killing it!", cnt_list[i]->threadnr);
+                            /* The problem is pthead_cancel might just wake up the thread so it runs to completition
+                             * or it might not.  In either case don't rip the carpet out under it by
+                             * doing motion_cleanup until it no longer is running.
+                             */
+                            pthread_cancel(cnt_list[i]->thread_id);
+                        }
                     }
                 }
             }
