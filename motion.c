@@ -357,6 +357,9 @@ static void sig_handler(int signo)
         break;
     case SIGSEGV:
         exit(0);
+    case SIGVTALRM:
+        printf("SIGVTALRM went off\n");
+        break;
     }
 }
 
@@ -2525,6 +2528,10 @@ static void setup_signals(struct sigaction *sig_handler_action, struct sigaction
     sigaction(SIGQUIT, sig_handler_action, NULL);
     sigaction(SIGTERM, sig_handler_action, NULL);
     sigaction(SIGUSR1, sig_handler_action, NULL);
+
+    /* use SIGVTALRM as a way to break out of the ioctl, don't restart */
+    sig_handler_action->sa_flags = 0;
+    sigaction(SIGVTALRM, sig_handler_action, NULL);
 }
 
 /**
@@ -2793,6 +2800,9 @@ int main (int argc, char **argv)
                             motion_cleanup(cnt_list[i]);
                             cnt_list[i]->running = 0;
                             cnt_list[i]->finish = 0;
+                        } else {
+                            /* keep sending signals so it doesn't get stuck in a blocking call */
+                            pthread_kill(cnt_list[i]->thread_id, SIGVTALRM);
                         }
                     } else {
                         cnt_list[i]->watchdog--;
