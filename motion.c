@@ -133,6 +133,7 @@ static void image_ring_resize(struct context *cnt, int new_size)
 
             /* Point to the new ring */
             cnt->imgs.image_ring = tmp;
+            cnt->current_image = NULL;
 
             cnt->imgs.image_ring_size = new_size;
         }
@@ -167,6 +168,7 @@ static void image_ring_destroy(struct context *cnt)
     free(cnt->imgs.image_ring);
 
     cnt->imgs.image_ring = NULL;
+    cnt->current_image = NULL;
     cnt->imgs.image_ring_size = 0;
 }
 
