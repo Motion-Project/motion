@@ -14,6 +14,12 @@
 #include "mmx.h"
 #endif
 
+#ifdef __SSE2__
+#define HAVE_SSE2
+#include <emmintrin.h>
+#include "alg/sse2.h"
+#endif
+
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
@@ -352,7 +358,11 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
 #define DIFF(x, y)         (ABS((x)-(y)))
 #define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
 
+#ifdef HAVE_SSE2
+#include "alg/alg_noise_tune.sse2.c"
+#else
 #include "alg/alg_noise_tune.plain.c"
+#endif
 
 /**
  * alg_noise_tune
@@ -360,7 +370,11 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
  */
 void alg_noise_tune(struct context *cnt, unsigned char *new)
 {
+#ifdef HAVE_SSE2
+    alg_noise_tune_sse2(cnt, new);
+#else
     alg_noise_tune_plain(cnt, new);
+#endif
 }
 
 /**

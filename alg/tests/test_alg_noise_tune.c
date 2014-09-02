@@ -1,7 +1,10 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <emmintrin.h>
 
+#include "../sse2.h"
 #include "timer.h"
 
 /* Stub structures for test purposes: */
@@ -113,6 +116,7 @@ testsuite (char *name, struct context *ctx, unsigned char *new, void (*func)(str
 }
 
 #include "../alg_noise_tune.plain.c"
+#include "../alg_noise_tune.sse2.c"
 
 int
 main ()
@@ -123,6 +127,7 @@ main ()
 	init(&ctx, &new);
 
 	testsuite("plain", &ctx, new, alg_noise_tune_plain);
+	testsuite("sse2", &ctx, new, alg_noise_tune_sse2);
 
 	free(new);
 	free(ctx.imgs.ref);
