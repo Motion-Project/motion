@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "timer.h"
 
@@ -20,11 +21,11 @@ struct context
 
 #define WIDTH    600
 #define HEIGHT   400
+#define BLOCKPX   50
 
 static void
 init (struct context *ctx, unsigned char **new)
 {
-	ctx->noise = 0;
 	ctx->imgs.motionsize = WIDTH * HEIGHT;
 	ctx->imgs.ref = malloc(ctx->imgs.motionsize);
 	ctx->imgs.mask = malloc(ctx->imgs.motionsize);
@@ -33,11 +34,66 @@ init (struct context *ctx, unsigned char **new)
 }
 
 static void
+clean (struct context *ctx, unsigned char *new)
+{
+	ctx->noise = 0;
+	memset(ctx->imgs.ref, 0, WIDTH * HEIGHT);
+	memset(ctx->imgs.mask, 0, WIDTH * HEIGHT);
+	memset(ctx->imgs.smartmask_final, 0, WIDTH * HEIGHT);
+	memset(new, 0, WIDTH * HEIGHT);
+}
+
+static void
+apply_pattern (unsigned char *pattern, unsigned char *img)
+{
+	int x = 0, y = 0;
+
+	/* Each pattern represents BLOCKPX * BLOCKPX pixels in the output: */
+	while (y < HEIGHT) {
+		unsigned char *col = pattern;
+		while (x < WIDTH) {
+			*img++ = *col;
+			if (++x % BLOCKPX == 0) {
+				col++;
+			}
+		}
+		/* After BLOCKPX rows, move to next: */
+		if (++y % BLOCKPX == 0) {
+			pattern += WIDTH / BLOCKPX;
+		}
+	}
+}
+
+static void
+random_patterns (int seed, struct context *ctx, unsigned char *new)
+{
+	int i;
+	unsigned char *c;
+	unsigned char pattern[(HEIGHT * WIDTH) / BLOCKPX];
+	unsigned char *ptrs[4];
+
+	ptrs[0] = ctx->imgs.ref;
+	ptrs[1] = ctx->imgs.mask;
+	ptrs[2] = ctx->imgs.smartmask_final;
+	ptrs[3] = new;
+
+	srand(seed);
+
+	for (i = 0; i < 4; i++) {
+		for (c = pattern; c < (pattern + sizeof(pattern)); c++) {
+			*c = rand() / (RAND_MAX / 256);
+		}
+		apply_pattern(pattern, ptrs[i]);
+	}
+}
+
+static void
 testsuite (char *name, struct context *ctx, unsigned char *new, void (*func)(struct context *, unsigned char *))
 {
 	int i;
 
 	printf("---\n%s\n", name);
+	clean(ctx, new);
 
 	timer_start();
 	for (i = 100; i > 0; i--) {
@@ -47,6 +103,13 @@ testsuite (char *name, struct context *ctx, unsigned char *new, void (*func)(str
 
 	printf("Noise level: %d\nTime: %.4f sec\n", ctx->noise, timer_sec());
 
+	for (i = 100; i > 0; i--) {
+		clean(ctx, new);
+		random_patterns(i, ctx, new);
+		func(ctx, new);
+		printf("%d ", ctx->noise);
+	}
+	puts("");
 }
 
 #include "../alg_noise_tune.plain.c"
