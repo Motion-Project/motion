@@ -10,7 +10,7 @@ struct images
 {
 	unsigned char *ref;
 	unsigned char *out;
-	int *ref_dyn;
+	uint16_t *ref_dyn;
 	unsigned char *image_virgin;
 	unsigned char *smartmask_final;
 	int size;
@@ -60,7 +60,7 @@ permutate (int action, void (*func)(struct context *, int))
 	unsigned char out[16];
 	unsigned char image_virgin[16];
 	unsigned char smartmask_final[16];
-	int ref_dyn[16];
+	uint16_t ref_dyn[16];
 	struct context ctx;
 	unsigned int ref_cksum;
 	unsigned int ref_dyn_cksum;

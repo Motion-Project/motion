@@ -289,7 +289,7 @@ struct images {
 
     unsigned char *ref;               /* The reference frame */
     unsigned char *out;               /* Picture buffer for motion images */
-    int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
+    uint16_t *ref_dyn;                /* Dynamic objects to be excluded from reference frame */
     unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
     struct image_data preview_image;  /* Picture buffer for best image when enables */
     unsigned char *mask;              /* Buffer for the mask file */

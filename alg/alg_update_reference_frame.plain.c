@@ -2,7 +2,7 @@ static void alg_update_reference_frame_plain(struct context *cnt, int action)
 {
     int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
-    int *ref_dyn = cnt->imgs.ref_dyn;
+    uint16_t *ref_dyn = cnt->imgs.ref_dyn;
     unsigned char *image_virgin = cnt->imgs.image_virgin;
     unsigned char *ref = cnt->imgs.ref;
     unsigned char *smartmask = cnt->imgs.smartmask_final;
