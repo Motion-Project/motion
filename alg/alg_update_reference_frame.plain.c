@@ -15,8 +15,11 @@ static void alg_update_reference_frame_plain(struct context *cnt, int action)
         threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
 
         for (i = cnt->imgs.motionsize; i > 0; i--) {
+            int thresholdmask = ((int)(abs(*ref - *image_virgin)) > threshold_ref);
+            int includemask = (thresholdmask && (*smartmask != 0));
+
             /* Exclude pixels from ref frame well below noise level. */
-            if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
+            if (includemask) {
                 if (*ref_dyn == 0) { /* Always give new pixels a chance. */
                     *ref_dyn = 1;
                 } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */
