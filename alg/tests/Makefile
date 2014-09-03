@@ -14,7 +14,7 @@ test_alg_noise_tune.o: ../alg_noise_tune.plain.c ../alg_noise_tune.sse2.c test_a
 test_alg_update_reference_frame: test_alg_update_reference_frame.o timer.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
-test_alg_update_reference_frame.o: ../alg_update_reference_frame.plain.c test_alg_update_reference_frame.c
+test_alg_update_reference_frame.o: ../alg_update_reference_frame.plain.c ../alg_update_reference_frame.sse2-algo.c test_alg_update_reference_frame.c
 	$(CC) $(CFLAGS) -o $@ -c test_alg_update_reference_frame.c
 
 timer.o: timer.c

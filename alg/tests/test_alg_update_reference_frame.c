@@ -139,6 +139,7 @@ testsuite (char *name, struct context *ctx, int action, void (*func)(struct cont
 #define EXCLUDE_LEVEL_PERCENT 20
 
 #include "../alg_update_reference_frame.plain.c"
+#include "../alg_update_reference_frame.sse2-algo.c"
 
 int
 main ()
@@ -148,6 +149,7 @@ main ()
 	init(&ctx);
 
 	testsuite("plain", &ctx, UPDATE_REF_FRAME, alg_update_reference_frame_plain);
+	testsuite("plain, SSE2 algorithm demo", &ctx, UPDATE_REF_FRAME, alg_update_reference_frame_sse2_algo);
 
 	free(ctx.imgs.ref);
 	free(ctx.imgs.out);
