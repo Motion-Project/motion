@@ -1,8 +1,39 @@
 static __inline __m128i
+_mm_cmpgt_epu8 (__m128i x, __m128i y)
+{
+    /* Returns 0xFF where x > y: */
+    return _mm_andnot_si128(
+        _mm_cmpeq_epi8(x, y),
+        _mm_cmpeq_epi8(_mm_max_epu8(x, y), x)
+    );
+}
+
+static __inline __m128i
+_mm_cmple_epu16 (__m128i x, __m128i y)
+{
+    /* Returns 0xFFFF where x <= y: */
+    return _mm_cmpeq_epi16(_mm_subs_epu16(x, y), _mm_setzero_si128());
+}
+
+static __inline __m128i
+_mm_cmpgt_epu16 (__m128i x, __m128i y)
+{
+    /* Returns 0xFFFF where x > y: */
+    return _mm_andnot_si128(_mm_cmpeq_epi16(x, y), _mm_cmple_epu16(y, x));
+}
+
+static __inline __m128i
 _mm_absdiff_epu8 (__m128i x, __m128i y)
 {
     /* Calculate absolute difference: abs(x - y): */
     return _mm_or_si128(_mm_subs_epu8(x, y), _mm_subs_epu8(y, x));
+}
+
+static __inline __m128i
+_mm_blendv_si128 (__m128i x, __m128i y, __m128i mask)
+{
+    /* Replace bit in x with bit in y when matching bit in mask is set: */
+    return _mm_or_si128(_mm_andnot_si128(mask, x), _mm_and_si128(mask, y));
 }
 
 static __inline __m128i

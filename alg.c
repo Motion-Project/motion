@@ -1291,7 +1291,11 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 #define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
 #define EXCLUDE_LEVEL_PERCENT 20
 
+#ifdef HAVE_SSE2
+#include "alg/alg_update_reference_frame.sse2.c"
+#else
 #include "alg/alg_update_reference_frame.plain.c"
+#endif
 
 /** 
  * alg_update_reference_frame
@@ -1308,5 +1312,9 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
  */
 void alg_update_reference_frame(struct context *cnt, int action) 
 {
+#ifdef HAVE_SSE2
+    alg_update_reference_frame_sse2(cnt, action);
+#else
     alg_update_reference_frame_plain(cnt, action);
+#endif
 }
