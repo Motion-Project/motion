@@ -53,7 +53,6 @@ Features
      * 3fps bugfix from SVN rev559 (tosiara, Joerg Weber)
      * Buffer overflow vulnerabilities (hyperbolic2346)
      * Redundand -- boundary prefix (torao)
-     * Proper size for memset and allocation size (Alfred Klomp)
    * Removed compiler warnings:  (Mr-Dave)
        logger.c,jpegutils.c,netcam_ftp.c,track.c,
        picture.c,webhttpd.c,stream.c,ffmpeg.c
@@ -63,7 +62,7 @@ Features
    * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
    * Revised INSTALL with samples(Mr-Dave)
    * Revisions for RTSP and code standard.(Mr-Dave)
-   * Plugged most(?) memory leaks in RTSP. (Mr-Dave)
+   * Plugged most memory leaks in RTSP. (Mr-Dave)
    * Undo changes caused by code editor and other unnecessary changes (Mr-Dave)
    * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs. (Mr-Dave)
    * Regession fix for memory leaks and reconnection (Mr-Dave)
@@ -80,9 +79,11 @@ Features
    * Add AC_GNU_SOURCE macro to check for GNU C Library, fix compile when no FFMpeg.
    * Implement inits of AV functions from bcl fork
    * Add gray image upon disconnection
-   * Added tcp/udp transport config option from hyperbolic(commit 423ef7bb3)
+   * Added tcp/udp transport config option from hyperbolic2346(commit 423ef7bb3)
    * Revised comments to be in line with application standard.
    * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
+   * Revise version.sh to put out the git commit.
+   * Rollback revision to allow for a formal pull request.
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
