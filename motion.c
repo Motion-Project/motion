@@ -1294,7 +1294,7 @@ static void *motion_loop(void *arg)
                 cnt->current_image->timestamp_tm = old_image->timestamp_tm;
                 cnt->current_image->shot = old_image->shot;
                 cnt->current_image->cent_dist = old_image->cent_dist;
-                cnt->current_image->flags = old_image->flags;
+                cnt->current_image->flags = old_image->flags & (~IMAGE_SAVED);
                 cnt->current_image->location = old_image->location;
                 cnt->current_image->total_labels = old_image->total_labels;
             }
@@ -2714,8 +2714,12 @@ int main (int argc, char **argv)
             cnt_list[i]->threadnr = i ? i : 1;
 
             if (strcmp(cnt_list[i]->conf_filename, ""))
+            {
+                cnt_list[i]->conf_filename[sizeof(cnt_list[i]->conf_filename) - 1] = '\0';
+
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is from %s", 
                            cnt_list[i]->threadnr, cnt_list[i]->conf_filename);
+            }
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is device: %s input %d", 
                        cnt_list[i]->threadnr, cnt_list[i]->conf.netcam_url ? 
@@ -3198,6 +3202,14 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     snprintf(tempstr, PATH_MAX, "%s", cnt->text_event_string);
                 else
                     ++pos_userformat;
+                break;
+
+            case 'w': // picture width
+                sprintf(tempstr, "%d", cnt->imgs.width);
+                break;
+
+            case 'h': // picture height
+                sprintf(tempstr, "%d", cnt->imgs.height);
                 break;
 
             case 'f': // filename -- or %fps

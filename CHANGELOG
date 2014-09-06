@@ -84,6 +84,7 @@ Features
    * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
    * Revise version.sh to put out the git commit.
    * Rollback revision to allow for a formal pull request.
+   * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
