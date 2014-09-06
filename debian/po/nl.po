@@ -1,0 +1,49 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: motion\n"
+"Report-Msgid-Bugs-To: juan@apuntale.com\n"
+"POT-Creation-Date: 2007-11-02 20:04-0400\n"
+"PO-Revision-Date: 2007-03-07 20:50+0100\n"
+"Last-Translator: Bart Cornelis <cobaco@skolelinux.no>\n"
+"Language-Team: debian-l10n-dutch <debian-l10n-dutch@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Dutch\n"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid "Location of Motion's config files has changed"
+msgstr "De locatie van Motion's configuratiebestanden is veranderd."
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The default location of Motion's configuration files has moved from /etc/ "
+"to /etc/motion/. So if you already have a motion.conf in /etc/ from a "
+"previous installation of Motion, you should move this to /etc/motion/ in "
+"order for it to take effect whenever Motion is used."
+msgstr ""
+"De standaardlocatie van de configuratiebestanden van Motion is verplaatst "
+"van /etc/ naar /etc/motion/. Mocht u al een motion.conf hebben van een "
+"eerdere installatie van Motion in /etc/ dient u dit te verplaatsen naar /etc/"
+"motion/ opdat dit effect heeft bij gebruik van Motion."
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The same thing goes for any thread*.conf files you may have. You should move "
+"these to /etc/motion/ as well (in this case, also remember to update the "
+"path to the thread*.conf files inside motion.conf)."
+msgstr ""
+"Hetzelfde geldt voor alle 'thread*.conf'-bestanden die u heeft. Ook deze "
+"dient u te verplaatsen naar /etc/motion/ (vergeet niet om in dat geval ook "
+"het pad naar de 'thread*.conf'-bestanden aan te passen in motion.conf)."

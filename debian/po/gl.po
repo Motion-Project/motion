@@ -1,0 +1,48 @@
+# Galician translation of motion's debconf templates
+# This file is distributed under the same license as the motion package.
+# Jacobo Tarrio <jtarrio@debian.org>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: motion\n"
+"Report-Msgid-Bugs-To: juan@apuntale.com\n"
+"POT-Creation-Date: 2007-11-02 20:04-0400\n"
+"PO-Revision-Date: 2008-06-02 18:58+0100\n"
+"Last-Translator: Jacobo Tarrio <jtarrio@debian.org>\n"
+"Language-Team: Galician <proxecto@trasno.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid "Location of Motion's config files has changed"
+msgstr "Cambiou a ubicación dos ficheiros de configuración de Motion"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The default location of Motion's configuration files has moved from /etc/ "
+"to /etc/motion/. So if you already have a motion.conf in /etc/ from a "
+"previous installation of Motion, you should move this to /etc/motion/ in "
+"order for it to take effect whenever Motion is used."
+msgstr ""
+"A ubicación por defecto dos ficheiros de configuración de Motion trasladouse "
+"de /etc/ a /etc/motion/. Así que se xa ten un ficheiro motion.conf en /etc/ "
+"dunha instalación anterior de Motion, debería trasladarlo a /etc/motion/ "
+"para que tome efecto cando empregue Motion."
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The same thing goes for any thread*.conf files you may have. You should move "
+"these to /etc/motion/ as well (in this case, also remember to update the "
+"path to the thread*.conf files inside motion.conf)."
+msgstr ""
+"O mesmo serve para os ficheiros thread*.conf que teña. Debería trasladalos "
+"tamén a /etc/motion/ (neste caso, lembre actualizar a ruta aos ficheiros "
+"thread*.conf en motion.conf)."
+

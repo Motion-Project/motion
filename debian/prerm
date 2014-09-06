@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+
+    remove|remove-in-favour|deconfigure|deconfigure-in-favour)
+
+        if [ -x /etc/init.d/motion ]; then
+            if [ -x /usr/sbin/invoke-rc.d ] ; then
+                   invoke-rc.d motion stop
+            else   
+                   /etc/init.d/motion stop
+            fi
+        fi
+
+    ;;
+
+    upgrade|failed-upgrade)
+
+    ;;
+
+    *)
+
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+
+    ;;
+
+esac
+
+#DEBHELPER#
+
+exit 0

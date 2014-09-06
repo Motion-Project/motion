@@ -1,0 +1,95 @@
+Description: Fix FFmpeg guess_format() deprecation warning
+Author: Angel Carpintero <motiondevelop@gmail.com>
+Origin: Upstream, https://github.com/sackmotion/motion/commit/527377#svn517
+Last-Update: 2012-02-12
+
+--- a/ffmpeg.c
++++ b/ffmpeg.c
+@@ -36,6 +36,11 @@
+ #    endif /* __GNUC__ */
+ #endif /* LIBAVCODEC_BUILD > 4680 */
+ 
++#if defined LIBAVFORMAT_VERSION_MAJOR && defined LIBAVFORMAT_VERSION_MINOR 
++#if LIBAVFORMAT_VERSION_MAJOR < 53 && LIBAVFORMAT_VERSION_MINOR < 45
++    #define GUESS_NO_DEPRECATED 
++#endif
++#endif
+ 
+ #if LIBAVFORMAT_BUILD >= 4616
+ /* The API for av_write_frame changed with FFmpeg version 0.4.9pre1.
+@@ -258,7 +263,11 @@
+         /* We use "mpeg1video" for raw mpeg1 format. Using "mpeg" would
+          * result in a muxed output file, which isn't appropriate here.
+          */
+-        of = guess_format("mpeg1video", NULL, NULL);
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);        
++#else
++        of = av_guess_format("mpeg1video", NULL, NULL);
++#endif 
+         if (of) {
+             /* But we want the trailer to be correctly written. */
+             of->write_trailer = mpeg1_write_trailer;
+@@ -270,24 +279,44 @@
+ #endif
+     } else if (strcmp(codec, "mpeg4") == 0) {
+         ext = ".avi";
+-        of = guess_format("avi", NULL, NULL);
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);
++#else        
++        of = av_guess_format("avi", NULL, NULL);
++#endif        
+     } else if (strcmp(codec, "msmpeg4") == 0) {
+         ext = ".avi";
+-        of = guess_format("avi", NULL, NULL);
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);
++#else        
++        of = av_guess_format("avi", NULL, NULL);
++#endif
+         if (of) {
+             /* Manually override the codec id. */
+             of->video_codec = CODEC_ID_MSMPEG4V2;
+         }
+     } else if (strcmp(codec, "swf") == 0) {
+         ext = ".swf";
+-        of = guess_format("swf", NULL, NULL);
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);
++#else        
++        of = av_guess_format("swf", NULL, NULL);
++#endif        
+     } else if (strcmp(codec, "flv") == 0) {
+         ext = ".flv";
+-        of = guess_format("flv", NULL, NULL);
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);
++#else        
++        of = av_guess_format("flv", NULL, NULL);
++#endif        
+         of->video_codec = CODEC_ID_FLV1;
+     } else if (strcmp(codec, "ffv1") == 0) {
+         ext = ".avi";
+-        of = guess_format("avi", NULL, NULL);
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);
++#else
++        of = av_guess_format("avi", NULL, NULL);
++#endif
+         if (of) {
+             /* Use the FFMPEG Lossless Video codec (experimental!).
+                Requires strict_std_compliance to be <= -2 */
+@@ -295,7 +324,11 @@
+         }
+     } else if (strcmp(codec, "mov") == 0) {
+         ext = ".mov";
+-        of = guess_format("mov", NULL, NULL);        
++#ifdef GUESS_NO_DEPRECATED
++        of = guess_format("mpeg1video", NULL, NULL);
++#else        
++        of = av_guess_format("mov", NULL, NULL);
++#endif
+     } else {
+         motion_log(LOG_ERR, 0, "ffmpeg_video_codec option value %s is not supported", codec);
+         return NULL;

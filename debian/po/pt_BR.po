@@ -1,0 +1,48 @@
+# motion Brazilian Portuguese translation.
+# Copyright (C) 2007 motion's PACKAGE COPYRIGHT HOLDER
+# This file is distributed under the same license as the motion package.
+# Beraldo Leal <beraldo@unp.br>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: motion 3.2.3-2.1\n"
+"Report-Msgid-Bugs-To: juan@apuntale.com\n"
+"POT-Creation-Date: 2007-11-02 20:04-0400\n"
+"PO-Revision-Date: 2007-10-03 17:32-0300\n"
+"Last-Translator: Beraldo Leal <beraldo@unp.br>\n"
+"Language-Team: l10n portuguese <debian-l10n-portuguese@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid "Location of Motion's config files has changed"
+msgstr "O local dos arquivos de configuração do Motion mudou"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The default location of Motion's configuration files has moved from /etc/ "
+"to /etc/motion/. So if you already have a motion.conf in /etc/ from a "
+"previous installation of Motion, you should move this to /etc/motion/ in "
+"order for it to take effect whenever Motion is used."
+msgstr ""
+"O local padrão dos arquivos de configuração do Motion foi movido de /etc/ "
+"para /etc/motion/. Portanto, se você já possui um motion.conf em /etc/ de "
+"uma instalação anterior do Motion, você deveria movê-lo para /etc/motion/ "
+"para que tenha efeito sempre que o Motion for usado."
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The same thing goes for any thread*.conf files you may have. You should move "
+"these to /etc/motion/ as well (in this case, also remember to update the "
+"path to the thread*.conf files inside motion.conf)."
+msgstr ""
+"O mesmo deve ser feito para quaisquer arquivos thread*.conf que você tenha. "
+"Você também deveria movê-los para /etc/motion/ (neste caso, lembre-se também "
+"de atualizar o caminho para os arquivos thread*.conf dentro de motion.conf)."

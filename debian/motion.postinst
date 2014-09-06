@@ -1,0 +1,44 @@
+#!/bin/sh
+# postinst script for motion
+# Made by Angel Carpintero
+
+set -e
+
+
+. /usr/share/debconf/confmodule
+
+add_group_if_missing() {
+    if [ -x /usr/sbin/addgroup ]; then
+        if ! getent group motion >/dev/null; then
+                addgroup --system --force-badname motion || true
+        fi
+    fi
+}
+
+add_user_if_missing() {
+    if [ -x /usr/sbin/adduser ]; then
+        if ! id -u motion > /dev/null 2>&1; then
+            adduser --system --no-create-home \
+		--disabled-password \
+		--force-badname motion \
+		--ingroup motion
+	    adduser motion video
+        fi
+    fi
+}
+
+add_group_if_missing
+add_user_if_missing
+
+# Fix motion.conf permission
+chmod 0640 /etc/motion/motion.conf
+chgrp motion /etc/motion/motion.conf
+
+
+db_stop
+
+#DEBHELPER#
+
+exit 0
+
+

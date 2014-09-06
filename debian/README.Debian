@@ -1,0 +1,12 @@
+Motion for Debian
+-----------------
+
+Motion supports Debian's ffmpeg, but currently it encodes in SWF by
+default since the latest versions of ffmpeg stripped support for mpeg1,
+mpeg4, and msmpeg4 due to patents.
+
+You can see more in: http://packages.debian.org/changelogs/pool/main/f/ffmpeg/current/changelog
+
+Enjoy :)
+
+ -- Juan Angulo Moreno <juan@apuntale.com>  Wed, 14 Nov 2007

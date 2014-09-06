@@ -1,0 +1,3 @@
+# set to 'yes' to enable the motion daemon
+start_motion_daemon=no
+

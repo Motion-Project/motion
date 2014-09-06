@@ -1,0 +1,8 @@
+020101107~5273773.patch
+020111022~58627b0.patch
+020111022~734155f.patch
+020111027~5dd9ed4.patch
+01_videodev.h.diff
+02_libav_multiarch.patch
+use-new-api.patch
+copy-old-api.patch

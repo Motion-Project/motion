@@ -1,0 +1,165 @@
+Description: Fix build for newer ffmpeg/libav API
+ Upgrade to the newer ffmpeg/libav API in current unstable Debian/DMO. This is
+ a cut-down version of https://github.com/sackmotion/motion/commit/0fb31d#diff-3
+ which is a more proper fix (it detects versions correctly) but it does not
+ apply to the orig tarball in Debian.
+Author: Ximin Luo <infinity0@pwned.gg>
+Forwarded: not-needed
+
+--- a/ffmpeg.c
++++ b/ffmpeg.c
+@@ -89,9 +89,9 @@
+         filename = colon + 1;
+     
+ 
+-    if (flags & URL_RDWR) {
++    if (flags & AVIO_FLAG_READ_WRITE) {
+         access_flags = O_CREAT | O_APPEND | O_RDWR;
+-    } else if (flags & URL_WRONLY) {
++    } else if (flags & AVIO_FLAG_WRITE) {
+         access_flags = O_CREAT | O_APPEND | O_WRONLY;
+     } else {
+         access_flags = O_RDONLY;
+@@ -106,10 +106,10 @@
+ }
+ 
+ /* URLProtocol entry for the append file protocol, which we use for mpeg1 videos
+- * in order to get append behavior with url_fopen.
++ * in order to get append behavior with avio_open.
+  *
+  * Libavformat uses protocols for achieving flexibility when handling files
+- * and other resources. A call to url_fopen will eventually be redirected to
++ * and other resources. A call to avio_open will eventually be redirected to
+  * a protocol-specific open function.
+  *
+  * The remaining functions (for writing, seeking etc.) are set in ffmpeg_init.
+@@ -139,9 +139,9 @@
+                               
+     av_strstart(filename, "file:", &filename);
+ 
+-    if (flags & URL_RDWR) {
++    if (flags & AVIO_FLAG_READ_WRITE) {
+         access_flags = O_CREAT | O_TRUNC | O_RDWR;
+-    } else if (flags & URL_WRONLY) {
++    } else if (flags & AVIO_FLAG_WRITE) {
+         access_flags = O_CREAT | O_TRUNC | O_WRONLY;
+     } else {
+         access_flags = O_RDONLY;
+@@ -204,11 +204,11 @@
+ static int mpeg1_write_trailer(AVFormatContext *s)
+ {
+ #if LIBAVFORMAT_BUILD >= (52<<16) 
+-    put_buffer(s->pb, mpeg1_trailer, 4);
+-    put_flush_packet(s->pb);    
++    avio_write(s->pb, mpeg1_trailer, 4);
++    avio_flush(s->pb);
+ #else
+-    put_buffer(&s->pb, mpeg1_trailer, 4);
+-    put_flush_packet(&s->pb);
++    avio_write(&s->pb, mpeg1_trailer, 4);
++    avio_flush(&s->pb);
+ #endif /* LIBAVFORMAT_BUILD >= (52<<16) */
+ 
+     return 0; /* success */
+@@ -403,9 +403,9 @@
+     ffmpeg->video_st = NULL;
+ 
+     if (ffmpeg->oc->oformat->video_codec != CODEC_ID_NONE) {
+-        ffmpeg->video_st = av_new_stream(ffmpeg->oc, 0);
++        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, 0);
+         if (!ffmpeg->video_st) {
+-            motion_log(LOG_ERR, 1, "av_new_stream - could not alloc stream");
++            motion_log(LOG_ERR, 1, "avformat_new_stream - could not alloc stream");
+             ffmpeg_cleanups(ffmpeg);
+             return NULL;
+         }
+@@ -461,13 +461,6 @@
+         c->flags |= CODEC_FLAG_GLOBAL_HEADER;
+     }
+ 
+-    /* set the output parameters (must be done even if no parameters). */
+-    if (av_set_parameters(ffmpeg->oc, NULL) < 0) {
+-        motion_log(LOG_ERR, 0, "ffmpeg av_set_parameters error: Invalid output format parameters");
+-        ffmpeg_cleanups(ffmpeg);
+-        return NULL;
+-    }
+-
+     /* Dump the format settings.  This shows how the various streams relate to each other */
+     //dump_format(ffmpeg->oc, 0, filename, 1);
+ 
+@@ -488,7 +481,7 @@
+     pthread_mutex_lock(&global_lock);
+ 
+     /* open the codec */
+-    if (avcodec_open(c, codec) < 0) {
++    if (avcodec_open2(c, codec, NULL) < 0) {
+         /* Release the lock. */
+         pthread_mutex_unlock(&global_lock);
+         motion_log(LOG_ERR, 1, "avcodec_open - could not open codec");
+@@ -535,7 +528,7 @@
+         char file_proto[256];
+ 
+         /* Use append file protocol for mpeg1, to get the append behavior from 
+-         * url_fopen, but no protocol (=> default) for other codecs.
++         * avio_open, but no protocol (=> default) for other codecs.
+          */
+         if (is_mpeg1) 
+             snprintf(file_proto, sizeof(file_proto), APPEND_PROTO ":%s", filename);
+@@ -543,7 +536,7 @@
+             snprintf(file_proto, sizeof(file_proto), "%s", filename);
+         
+ 
+-        if (url_fopen(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
++        if (avio_open(&ffmpeg->oc->pb, file_proto, AVIO_FLAG_WRITE) < 0) {
+             /* path did not exist? */
+             if (errno == ENOENT) {
+                 /* create path for file (don't use file_proto)... */
+@@ -553,15 +546,15 @@
+                 }
+ 
+                 /* and retry opening the file (use file_proto) */
+-                if (url_fopen(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
+-                    motion_log(LOG_ERR, 1, "url_fopen - error opening file %s",filename);
++                if (avio_open(&ffmpeg->oc->pb, file_proto, AVIO_FLAG_WRITE) < 0) {
++                    motion_log(LOG_ERR, 1, "avio_open - error opening file %s",filename);
+                     ffmpeg_cleanups(ffmpeg);
+                     return NULL;
+                 }
+                 /* Permission denied */
+             } else if (errno ==  EACCES) {
+                 motion_log(LOG_ERR, 1,
+-                           "url_fopen - error opening file %s"
++                           "avio_open - error opening file %s"
+                            " ... check access rights to target directory", filename);
+                 ffmpeg_cleanups(ffmpeg);
+                 return NULL;
+@@ -574,7 +567,7 @@
+     }
+ 
+     /* write the stream header, if any */
+-    av_write_header(ffmpeg->oc);
++    avformat_write_header(ffmpeg->oc, NULL);
+     
+     return ffmpeg;
+ }
+@@ -605,7 +598,7 @@
+ /*
+         if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
+             // close the output file 
+-            if (ffmpeg->oc->pb) url_fclose(&ffmpeg->oc->pb);
++            if (ffmpeg->oc->pb) avio_close(&ffmpeg->oc->pb);
+         }
+ */
+     /* free the stream */
+@@ -641,9 +634,9 @@
+     if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
+         /* close the output file */
+ #if LIBAVFORMAT_BUILD >= (52<<16) 
+-        url_fclose(ffmpeg->oc->pb);
++        avio_close(ffmpeg->oc->pb);
+ #else
+-        url_fclose(&ffmpeg->oc->pb);
++        avio_close(&ffmpeg->oc->pb);
+ #endif /* LIBAVFORMAT_BUILD >= (52<<16) */
+     }
+ 

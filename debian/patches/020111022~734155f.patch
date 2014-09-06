@@ -1,0 +1,35 @@
+Description: Fix avoid crash producing MPEG4 with newer FFmpeg.
+Author: Angel Carpintero <motiondevelop@gmail.com>
+Origin: Upstream, https://github.com/sackmotion/motion/commit/734155#svn539
+Bug: http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x10x05x071936
+Last-Update: 2012-02-12
+
+--- a/configure.in
++++ b/configure.in
+@@ -1099,6 +1099,10 @@
+ LIBS="${TEMP_LIBS}"
+ LDFLAGS="${TEMP_LDFLAGS}"
+ 
++
++AC_CHECK_FUNC(avformat_alloc_context, AC_DEFINE([have_avformat_alloc_context],1,[Define to 1 if you have avformat_alloc_context support]))
++AC_CHECK_FUNC(av_avformat_alloc_context, AC_DEFINE([have_av_avformat_alloc_context],1,[Define to 1 if you have av_avformat_alloc_context support]))
++
+ #
+ # Add the right exec path for rc scripts
+ #
+--- a/ffmpeg.c
++++ b/ffmpeg.c
+@@ -373,7 +373,13 @@
+     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
+ 
+     /* allocation the output media context */
++#ifdef have_avformat_alloc_context
++    ffmpeg->oc = avformat_alloc_context();
++#elif defined have_av_avformat_alloc_context
++    ffmpeg->oc = av_alloc_format_context();
++#else
+     ffmpeg->oc = av_mallocz(sizeof(AVFormatContext));
++#endif
+ 
+     if (!ffmpeg->oc) {
+         motion_log(LOG_ERR, 1, "Memory error while allocating output media context");

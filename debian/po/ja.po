@@ -1,0 +1,47 @@
+# Japanese debconf templates translation for motion.
+# Copyright (C) 2007 Noritada Kobayashi
+# This file is distributed under the same license as the motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: motion (debconf) 3.2.3-2\n"
+"Report-Msgid-Bugs-To: juan@apuntale.com\n"
+"POT-Creation-Date: 2007-11-02 20:04-0400\n"
+"PO-Revision-Date: 2007-03-01 17:18+0900\n"
+"Last-Translator: Noritada Kobayashi <nori1@dolphin.c.u-tokyo.ac.jp>\n"
+"Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid "Location of Motion's config files has changed"
+msgstr "Motion の設定ファイルの場所が変わりました"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The default location of Motion's configuration files has moved from /etc/ "
+"to /etc/motion/. So if you already have a motion.conf in /etc/ from a "
+"previous installation of Motion, you should move this to /etc/motion/ in "
+"order for it to take effect whenever Motion is used."
+msgstr ""
+"Motion の設定ファイルのデフォルトの場所が、/etc/ から /etc/motion/ に変更され"
+"ました。したがって、以前インストールした Motion の motion.conf が /etc/ に既"
+"に存在している場合は、Motion を使用するときにいつでもそのファイルが有効になる"
+"よう、ファイルを /etc/motion/ に移動してください。"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The same thing goes for any thread*.conf files you may have. You should move "
+"these to /etc/motion/ as well (in this case, also remember to update the "
+"path to the thread*.conf files inside motion.conf)."
+msgstr ""
+"あらゆる thread*.conf ファイルについても同じことが言えます。これらのファイル"
+"を同様に /etc/motion/ に移動してください (その際、motion.conf 内の thread*."
+"conf ファイルへのパスも忘れずに更新してください)。"

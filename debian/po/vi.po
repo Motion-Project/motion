@@ -1,0 +1,42 @@
+# Vietnamese translation for Motion.
+# Copyright © 2010 Free Software Foundation, Inc.
+# Clytie Siddall <clytie@riverland.net.au>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: motion\n"
+"Report-Msgid-Bugs-To: juan@apuntale.com\n"
+"POT-Creation-Date: 2007-11-02 20:04-0400\n"
+"PO-Revision-Date: 2010-04-01 16:59+1030\n"
+"Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
+"Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: LocFactoryEditor 1.8\n"
+
+#: ../motion.templates:1001
+#. Type: note
+#. Description
+msgid "Location of Motion's config files has changed"
+msgstr "Tập tin cấu hình Motion có vị trí khác"
+
+#: ../motion.templates:1001
+#. Type: note
+#. Description
+msgid ""
+"The default location of Motion's configuration files has moved from /etc/ "
+"to /etc/motion/. So if you already have a motion.conf in /etc/ from a "
+"previous installation of Motion, you should move this to /etc/motion/ in "
+"order for it to take effect whenever Motion is used."
+msgstr "Vị trí mặc định của các tập tin cấu hình Motion đã di chuyển từ « /etc/ » sang « /etc/motion/ ». Vì thế nếu bạn có một tập tin « motion.conf » trong « /etc/ » từ một bản cài đặt Motion trước thì bạn nên di chuyển nó sang « /etc/motion/ » để có tác động khi chạy Motion."
+
+#: ../motion.templates:1001
+#. Type: note
+#. Description
+msgid ""
+"The same thing goes for any thread*.conf files you may have. You should move "
+"these to /etc/motion/ as well (in this case, also remember to update the "
+"path to the thread*.conf files inside motion.conf)."
+msgstr "Tương tự với tập tin « thread*.conf » nào —  di chuyển tập tin như vậy sang « /etc/motion/ ». Trong trường hợp này, cũng cần phải cập nhật đường dẫn đến các tập tin « thread*.conf » bên trong tập tin « motion.conf »."

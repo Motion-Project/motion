@@ -1,0 +1,7 @@
+motion (3.2.9-3) unstable; urgency=low
+
+  The file motion-contro is no longer present in the package motion. If
+  you want more information about "API for HTTP Interface" can visit the
+  following URL: http://www.lavrsen.dk/twiki/bin/view/Motion/MotionHttpAPI
+
+ -- Juan Angulo Moreno <juan@apuntale.com>  Thu, 27 may 2008 20:19:56 -0430

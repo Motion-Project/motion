@@ -1,0 +1,51 @@
+# ITALIAN TRANSLATION OF MOTION'S PO-DEBCONF FILE.
+# COPYRIGHT (C) 2010 THE MOTION'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the motion package.
+# Vincenzo Campanella <vinz65@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: motion\n"
+"Report-Msgid-Bugs-To: juan@apuntale.com\n"
+"POT-Creation-Date: 2007-11-02 20:04-0400\n"
+"PO-Revision-Date: 2010-03-16 10:07+0100\n"
+"Last-Translator: Vincenzo Campanella <vinz65@gmail.com>\n"
+"Language-Team: Italian <tp@lists.linux.it>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid "Location of Motion's config files has changed"
+msgstr "La posizione dei file di configurazione di Motion è stata modificata"
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The default location of Motion's configuration files has moved from /etc/ "
+"to /etc/motion/. So if you already have a motion.conf in /etc/ from a "
+"previous installation of Motion, you should move this to /etc/motion/ in "
+"order for it to take effect whenever Motion is used."
+msgstr ""
+"La posizione predefinita dei file di configurazione di Motion è stata "
+"spostata da «/etc/» a «/etc/motion». Pertanto, se si possiede già una "
+"configurazione di Motion in «/etc/» da una precedente installazione, la si "
+"dovrebbe spostare in «/etc/motion» affinché possa funzionare quando Motion "
+"viene utilizzato."
+
+#. Type: note
+#. Description
+#: ../motion.templates:1001
+msgid ""
+"The same thing goes for any thread*.conf files you may have. You should move "
+"these to /etc/motion/ as well (in this case, also remember to update the "
+"path to the thread*.conf files inside motion.conf)."
+msgstr ""
+"Lo stesso vale per qualsiasi file di configurazione «thread*.conf»: se se ne "
+"hanno, li si dovrebbe spostare a loro volta in «/etc/motion/». In tal caso, "
+"ricordarsi anche di aggiornare il percorso dei file di configurazione "
+"«thread*.conf» all'interno di «motion.conf»."
+

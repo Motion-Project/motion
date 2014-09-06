@@ -86,6 +86,7 @@ Features
    * Rollback revision to allow for a formal pull request.
    * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
    * Implement requirement of modulo 16 to avoid seg fault when opening stream
+   * Add debian build files from trusty(14.04)
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
