@@ -2909,15 +2909,15 @@ int netcam_start(struct context *cnt)
     * Motion currently requires that image height and width is a
     * multiple of 16. So we check for this.
     */
-    if (netcam->width % 8) {
+    if (netcam->width % 16) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image width (%d)"
-                   " is not modulo 8", netcam->width);
+                   " is not modulo 16", netcam->width);
         return -3;
     }
 
-    if (netcam->height % 8) {
+    if (netcam->height % 16) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image height (%d)"
-                   " is not modulo 8", netcam->height);
+                   " is not modulo 16", netcam->height);
         return -3;
     }
     

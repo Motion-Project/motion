@@ -850,6 +850,20 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     netcam->rtsp->readingframe = 0;
     netcam->rtsp->status = RTSP_NOTCONNECTED;
 
+    /*
+     * Warn and fix dimensions as needed.
+     */
+    if (netcam->cnt->conf.width % 16) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Image width (%d) requested is not modulo 16.", netcam->cnt->conf.width);
+        netcam->cnt->conf.width = netcam->cnt->conf.width - (netcam->cnt->conf.width % 16) + 16;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting width to next higher multiple of 16 (%d).", netcam->cnt->conf.width);
+    }
+    if (netcam->cnt->conf.height % 16) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Image height (%d) requested is not modulo 16.", netcam->cnt->conf.height);
+        netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 16) + 16;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 16 (%d).", netcam->cnt->conf.height);
+    }
+    
     av_register_all();
     avformat_network_init();
     avcodec_register_all();
