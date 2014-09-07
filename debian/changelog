@@ -1,3 +1,137 @@
+motion (3.2.12-4ppa01~precise) precise; urgency=low
+
+   * Nonmaintainer upload  
+   * Due to conficts, removed patches (Mr Dave)
+   * Revise motion.postinst to put motion.conf at 0644 instead of 0640(Mr Dave)
+   * Many many changes from github repos of many many developers since 3.2.12 was released.
+   *
+   * Features
+   * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
+   * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6 
+     (Jeroen Massar & Angel Carpintero) 
+   * Experimental approach for MJPEG streams (Motion JPEG) for network cameras 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinksysWVC200SupportPatch ( ... )  
+   * Add draw a RED box around the movement as default (Joerg Weber)
+   * Add write/read nonblock functions in webhttpd( timeout on read/write). (Angel Carpintero) 
+   * More changes in option names from http://www.lavrsen.dk/twiki/bin/view/Motion/IntuitiveOptionNamesDiscussion
+     (Angel Carpintero)
+   * motion_locate new parameter names : red , center , redcross  instead of only on, off. (Angel Carpintero)
+   * External pipe to allow external video encoders 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Bill Payne, Angel Carpintero)
+   * Split locate_motion into separate 'mode' and 'style' option to allow all
+     possible combinations. (Joerg Weber)
+   * Implement 'gapless' event mode to allow for recording of movies without 'holes'. (Joerg Weber)
+   * Limit detection rate to 3fps at framerates above 5fps, to reduce CPU load. (Joerg Weber)
+   * Fix warning for syslog() , Added support for some new bayer palettes introduced in kernel 2.6.27. 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
+     Increased buffer in ffmpeg to allow encoding at 1600x1200 (Angel Carpintero)
+   * Sqlite3 support http://www.lavrsen.dk/twiki/bin/view/Motion/SQLite3Patch (Giacomo Graziosi)
+   * New RPM SPEC file and startup scripts compliant with Fedora 10 guidelines and above (Steven Moix)
+   * Increase write buffer size for writing image files and ffmpegs 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionWriteBuffersPatch (Craig West)
+   * Fixed mask overlay in setup mode is now green instead of white (Joerg Weber)
+   * Add new config option 'ipv6_enabled' to enable/disable IPV6 (Angel Carpintero)
+   * Remove VIDIOC_S_JPEGCOMP support is deprecated. (Angel Carpintero) 
+   * Use static memory allocation in ffmpeg_deinterlace() (Peter Holik)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegDeinterlaceStatic 
+   * Atom optimizacion in configure.in (Peter Holik)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/AtomOptimizations
+   * Allow to change Standard method ( PAL / NECAM / SECAM ) (Angel Carpintero)
+   * Add authentication  methods 'Basic Authentication' and 'Digest Authentication' 
+     to the "Live Stream Server". (Michael Finsterbusch)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
+   * Implemented new logging system 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionLog (Angel Carpintero)
+   * Added a macro MOTION_LOG , no need to add __FUNCTION__ anymore. (Angel Carpintero)
+   * Added EXIF feature for jpeg images , http://www.lavrsen.dk/foswiki/bin/view/Motion/ExifTaggingPatch (Wim Lewis)
+   * Improve detection of av_register_protocol() for ffmpeg (Angel Carpintero).
+   * Added support for libjpeg-turbo 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2010x04x14x082244 (Angel Carpintero)     
+   * Added new log type COR , to filter messages from CORE. (Angel Carpintero)
+   * Added a new starting option -m to disable motion detection. (Angel Carpintero)
+   * Allow image dimension not 4:3 changing a check of modulo 16 by modulo 8. (Jeroen Massar)
+   * Added codec Ogg/Theora as new output format for regular movies.
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse (Michael Luich)
+   * Added support for ffmpeg 0.11 new API.
+   * Added RSTP support for netcam ( merge https://github.com/hyperbolic2346/motion )
+   * Merge tosiara/rtsp branch (commit 46cfcf31d, 2014/05/21) (Mr-Dave)
+     * 3fps bugfix from SVN rev559 (tosiara, Joerg Weber)
+     * Buffer overflow vulnerabilities (hyperbolic2346)
+     * Redundand -- boundary prefix (torao)
+   * Removed compiler warnings:  (Mr-Dave)
+       logger.c,jpegutils.c,netcam_ftp.c,track.c,
+       picture.c,webhttpd.c,stream.c,ffmpeg.c
+   * Bug fix as part of warnings in webhttpd.c fixed(Mr-Dave)
+   * Removed compiler warning regarding ffmpeg being newer than 0.4 version(Mr-Dave)
+   * New configure script and identification of ffmpeg version and additional libs. (Mr-Dave)
+   * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
+   * Revised INSTALL with samples(Mr-Dave)
+   * Revisions for RTSP and code standard.(Mr-Dave)
+   * Plugged most memory leaks in RTSP. (Mr-Dave)
+   * Undo changes caused by code editor and other unnecessary changes (Mr-Dave)
+   * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs. (Mr-Dave)
+   * Regession fix for memory leaks and reconnection (Mr-Dave)
+   * Eliminated requirement to manually build FFMPEG for RTSP support. (Mr-Dave)
+   * Revised RTSP to support version 53 of libavformat (Mr-Dave)
+   * Revised FFMPEG.c to eliminate warnings and functions no longer supported by Libav/FFMPEG(Mr-Dave)
+   * Revised INSTALL to have sample PI configure option.(Mr-Dave)
+   * Revised configure.ac to generate compiler flag AVFMT_V53.(Mr-Dave)
+   * Revised INSTALL to indicate standard APT packages for RTSP (Mr-Dave)
+   * Revised configure.ac to recognize libavformat version 54 RTSP (Mr-Dave)
+   * Clean up the messaging for RTSP.
+   * Additional validations for RTSP connection and corrected free sequences
+   * Removed seg fault on failure to open first image, comments, isolation of RTSP
+   * Add AC_GNU_SOURCE macro to check for GNU C Library, fix compile when no FFMpeg.
+   * Implement inits of AV functions from bcl fork
+   * Add gray image upon disconnection
+   * Added tcp/udp transport config option from hyperbolic2346(commit 423ef7bb3)
+   * Revised comments to be in line with application standard.
+   * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
+   * Revise version.sh to put out the git commit.
+   * Rollback revision to allow for a formal pull request.
+   * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
+   * Implement requirement of modulo 16 to avoid seg fault when opening stream
+   * Add debian build files from trusty(14.04)
+   * Revise default values for motion.conf
+   * Revise CHANGELOG to conform with debian format
+
+   * Bugfixes
+   * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
+   * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
+   * Allow compile with NetBSD and make LP64 compliant video_freebsd.c (Andreas Wrede)
+   * Avoid compile vloopback in BSD (Angel Carpintero)
+   * V4L2 fourcc GRBG not supported, updated default value for v4l2_palette 17. (Isaac Richter)
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x10x29x222753
+   * Exit when image dimension are not modulo 16. (Angel Carpintero)
+   * Avoid logs flooding using some options of netcam_keepalive and try to discard images with 
+     weird header Content-Lenght 0. (Angel Carpintero)
+   * Only use post capture when we setup to record videos with external pipe or ffmpeg. (Angel Carpintero)   
+   * Fix introduced bug for Content-Lenght = 0 in svn r476. (Angel Carpintero)
+   * Avoid segfault when motion cannot create a logfile. (Angel Carpintero)
+   * No mysql_close
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x11x22x033859
+   * No PQfinish() (Angel Carpintero)
+   * Input for webcams has to be set to -1
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x01x21x162309
+   * Added a conditional check for avformat_alloc_context , av_avformat_alloc_context to fix 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x10x05x071936 (Angel Carpintero)
+   * Fix issue with JPEG , adding dinfo.do_fancy_upsampling = FALSE;
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x08x20x194659
+   * Made micro-lightswitch optional (see lightwitch option in motion.conf)
+   * Fixed help text for options event_gap and area_detect
+   * Fixed motion.conf-dist , adding text according with config options.
+   * Fixed a bug in post_capture. It was missed under certain conditions.
+   * Fixed configure for SDL.
+   * Replace malloc() by calloc(). (Jeroen Massar)
+   * Free file descriptor buffers on exit.
+   * Avoid segfault when text_left or text_right uses non supported chars.
+   * Fixed leak in vloopback.
+   * Fixed a build of motion for some kernel version with not good videodev.h 
+   * Netcam Modulo 8
+
+ -- Mr Dave <motionmrdave@gmail.com>  Sat, 06 Sep 2014 14:26:03 -0700
+
 motion (3.2.12-4) unstable; urgency=medium
 
   * New maintainer.

@@ -1,6 +1,8 @@
-SVN trunk Summary of Changes
-
-Features
+   * 
+   * Revised debian packaging files
+   * Implement new sequence for this file (CHANGELOG) newest to oldest.
+   *
+   * Features
    * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
    * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6 
      (Jeroen Massar & Angel Carpintero) 
@@ -88,8 +90,9 @@ Features
    * Implement requirement of modulo 16 to avoid seg fault when opening stream
    * Add debian build files from trusty(14.04)
    * Revise default values for motion.conf
+   * Revise CHANGELOG to conform with debian format
 
-Bugfixes
+   * Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603

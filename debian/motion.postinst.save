@@ -40,7 +40,7 @@ add_user_if_missing
 create_pid_dir
 
 # Fix motion.conf permission
-chmod 0640 /etc/motion/motion.conf
+chmod 0644 /etc/motion/motion.conf
 chgrp motion /etc/motion/motion.conf
 
 

@@ -3,7 +3,7 @@ Section: graphics
 Priority: optional
 Maintainer: Ximin Luo <infinity0@pwned.gg>
 HomePage: http://motion.sf.net
-Build-Depends: debhelper (>= 6), dpkg-dev (>= 1.16), dh-autoreconf, libjpeg-dev, zlib1g-dev, libavcodec-dev, libavformat-dev, libpq-dev, libmysqlclient-dev (>= 5.5.17-4), libv4l-dev
+Build-Depends: debhelper (>= 6), dpkg-dev (>= 1.16), dh-autoreconf, libjpeg-dev, zlib1g-dev, libavcodec-dev, libavformat-dev, libpq-dev, libmysqlclient-dev (>= 5.5.17-4), libv4l-dev, libswscale-dev
 Standards-Version: 3.9.2
 
 Package: motion
