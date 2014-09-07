@@ -1,4 +1,4 @@
-motion (3.2.12-4ppa01~precise) precise; urgency=low
+motion (3.2.12-4ppa01~trusty) trusty; urgency=low
 
    * Nonmaintainer upload  
    * Due to conficts, removed patches (Mr Dave)
