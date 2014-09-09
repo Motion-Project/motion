@@ -1250,6 +1250,16 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
              else
                  response_client(client_socket, not_found_response_valid_command_raw, NULL);
         }
+    }  else if (!strcmp(command, "frmps")) {
+	 pointer = pointer + 5;
+         length_uri = length_uri - 5;
+
+         // used for benchmarking of thread #0
+         send_template_ini_client(client_socket, ini_template);
+         sprintf(res, "FPS=%d\n", cnt[0]->movie_fps);
+         send_template(client_socket, res);
+         send_template_end_client(client_socket);
+
     } else {
         if (cnt[0]->conf.webcontrol_html_output)
             response_client(client_socket, not_found_response_valid_command, NULL);
