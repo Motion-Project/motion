@@ -8,156 +8,54 @@
  * The contents of this file has been derived from output_example.c
  * and apiexample.c from the FFmpeg distribution.
  *
+ * This file has been modified so that only major versions greater than
+ * 53 are supported.
  */
+
 
 #ifdef HAVE_FFMPEG
 
 #include "ffmpeg.h"
 #include "motion.h"
 
-#if LIBAVCODEC_BUILD > 4680
-/*
- * FFmpeg after build 4680 doesn't have support for mpeg1 videos with
- * non-standard framerates. Previous builds contained a broken hack
- * that padded with B frames to obtain the correct framerate.
- */
-#    define FFMPEG_NO_NONSTD_MPEG1
-#endif /* LIBAVCODEC_BUILD > 4680 */
-
-#if defined LIBAVFORMAT_VERSION_MAJOR && defined LIBAVFORMAT_VERSION_MINOR 
-#   if LIBAVFORMAT_VERSION_MAJOR < 53 && LIBAVFORMAT_VERSION_MINOR < 45
-#       define GUESS_NO_DEPRECATED 
-#   endif
-#endif
-
-#if LIBAVFORMAT_BUILD >= 4616
-/*
- * The API for av_write_frame changed with FFmpeg version 0.4.9pre1.
- * It now uses an AVPacket struct instead of direct parameters to the
- * function.
- */
-#    define FFMPEG_AVWRITEFRAME_NEWAPI
-#endif /* LIBAVFORMAT_BUILD >= 4616 */
-
-#if LIBAVFORMAT_BUILD >= 4629
-/*
- * In this build/header version, the codec member of struct AVStream
- * was changed to a pointer so changes to AVCodecContext shouldn't
- * break binary compatibility with AVStream.
- */
-#    define AVSTREAM_CODEC_PTR(avs_ptr) (avs_ptr->codec)
-#else
-#    define AVSTREAM_CODEC_PTR(avs_ptr) (&avs_ptr->codec)
-#endif /* LIBAVFORMAT_BUILD >= 4629 */
-
-// AV_VERSION_INT(a, b, c) (a<<16 | b<<8 | c) 
-// (54*2^16 | 6*2^8 | 100)
-#if LIBAVFORMAT_BUILD >= 3540580
-#define FF_API_NEW_AVIO
-#define URL_RDONLY  AVIO_FLAG_READ       /**< read-only */
-#define URL_WRONLY  AVIO_FLAG_WRITE      /**< write-only */
-#define URL_RDWR    AVIO_FLAG_READ_WRITE /**< read-write pseudo flag */
-#endif
+#define AVSTREAM_CODEC_PTR(avs_ptr) (avs_ptr->codec)
 
 
-/*
- * Name of custom file protocol for appending to existing files instead
- * of truncating.
- */
-#define APPEND_PROTO "appfile"
-
-/* Some forward-declarations. */
-int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
-void ffmpeg_cleanups(struct ffmpeg *);
-AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
-                              unsigned char *, unsigned char *);
-
-/* This is the trailer used to end mpeg1 videos. */
-static unsigned char mpeg1_trailer[] = {0x00, 0x00, 0x01, 0xb7};
-
-
-// FFMPEG API changed in 0.8
-#if defined FF_API_NEW_AVIO
-
-// TODO 
-
-	
-#else
-
-/**
- * file_open_append
- *      Append version of the file open function used in libavformat when opening
- *      an ordinary file. The original file open function truncates an existing
- *      file, but this version appends to it instead.
- *
- *  Returns 0 on success and AVERROR(ENOENT) on error.
- *
- */
-static int file_open_append(URLContext *h, const char *filename, int flags)
-{
-    const char *colon;
-    const char *mode;
-    FILE *fh;
-    size_t bufsize = 0;
-
-    /* Skip past the protocol part of filename. */
-    colon = strchr(filename, ':');
-
-    if (colon)
-        filename = colon + 1;
-
-
-    if (flags & URL_RDWR) {
-        mode = "ab+";
-        bufsize = BUFSIZE_1MEG;
-    } else if (flags & URL_WRONLY) {
-        mode = "ab";
-        bufsize = BUFSIZE_1MEG;
-    } else {
-        mode = "rb";
-    }
-
-    fh = myfopen(filename, mode, bufsize);
-    if (fh == NULL)
-        return AVERROR(ENOENT);
-
-    h->priv_data = (void *)fh;
-    return 0;
-}
-
-/*
- * URLProtocol entry for the append file protocol, which we use for mpeg1 videos
- * in order to get append behavior with url_fopen.
- *
- * Libavformat uses protocols for achieving flexibility when handling files
- * and other resources. A call to url_fopen will eventually be redirected to
- * a protocol-specific open function.
- *
- * The remaining functions (for writing, seeking etc.) are set in ffmpeg_init.
- */
-URLProtocol mpeg1_file_protocol = {
-    .name     = APPEND_PROTO,
-    .url_open = file_open_append
-};
-
-
-#ifdef HAVE_FFMPEG_NEW
-
-/* file_procotol has been removed from avio.h */
-#ifdef FFMPEG_NEW_INCLUDES
-#include <libavutil/avstring.h>
-#else
-#include "avstring.h"
-#endif
-
-#endif // HAVE_FFMPEG_NEW
-
-#endif // FF_API_NEW_AVIO
 /****************************************************************************
  *  The section below is the "my" section of functions.
  *  These are designed to be extremely simple version specific
  *  variants of the libav functions.
  ****************************************************************************/
+#if (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
+
+#define MY_FLAG_READ       AVIO_FLAG_READ
+#define MY_FLAG_WRITE      AVIO_FLAG_WRITE
+#define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
+
+#else  //Older versions
+
+#define MY_FLAG_READ       URL_RDONLY
+#define MY_FLAG_WRITE      URL_WRONLY
+#define MY_FLAG_READ_WRITE URL_RDWR
+
+#endif
+/*********************************************/
+#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+
+#define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
+#define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
+#define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
+#define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
+
+#else
+
+#define MY_CODEC_ID_MSMPEG4V2 CODEC_ID_MSMPEG4V2
+#define MY_CODEC_ID_FLV1      CODEC_ID_FLV1
+#define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
+#define MY_CODEC_ID_NONE      CODEC_ID_NONE
+
+#endif
+/*********************************************/
 AVFrame *my_frame_alloc(void){
     AVFrame *pic;
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
@@ -167,7 +65,7 @@ AVFrame *my_frame_alloc(void){
 #endif
     return pic;
 }
-
+/*********************************************/
 void my_frame_free(AVFrame *frame){
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
     av_frame_free(&frame);
@@ -177,27 +75,9 @@ void my_frame_free(AVFrame *frame){
     av_freep(&frame);
 #endif
 }
-
 /****************************************************************************
  ****************************************************************************
  ****************************************************************************/
-
-/**
- * mpeg1_write_trailer
- *      We set AVOutputFormat->write_trailer to this function for mpeg1. That way,
- *      the mpeg1 video gets a proper trailer when it is closed.
- *
- *  Returns 0
- *
- */
-static int mpeg1_write_trailer(AVFormatContext *s)
-{
-    avio_write(s->pb, mpeg1_trailer, 4);
-    avio_flush(s->pb);
-
-    return 0; /* success */
-}
-
 /**
  * ffmpeg_init
  *      Initializes for libavformat.
@@ -208,17 +88,12 @@ static int mpeg1_write_trailer(AVFormatContext *s)
 void ffmpeg_init()
 {
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg LIBAVCODEC_BUILD %d"
-               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD, 
+               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD,
                LIBAVFORMAT_BUILD);
     av_register_all();
-
-#if LIBAVCODEC_BUILD > 4680
     av_log_set_callback((void *)ffmpeg_avcodec_log);
     av_log_set_level(AV_LOG_ERROR);
-#endif
-
 }
-
 /**
  * get_oformat
  *      Obtains the output format used for the specified codec. For mpeg4 codecs,
@@ -235,104 +110,36 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
     /*
      * Here, we use guess_format to automatically setup the codec information.
      * If we are using msmpeg4, manually set that codec here.
-     * We also dynamically add the file extension to the filename here. This was
-     * done to support both mpeg1 and mpeg4 codecs since they have different extensions.
+     * We also dynamically add the file extension to the filename here.
      */
-    if ((strcmp(codec, TIMELAPSE_CODEC) == 0)
-#ifndef FFMPEG_NO_NONSTD_MPEG1
-        || (strcmp(codec, "mpeg1") == 0)
-#endif
-    ) {
-        ext = ".mpg";
-        /*
-         * We use "mpeg1video" for raw mpeg1 format. Using "mpeg" would
-         * result in a muxed output file, which isn't appropriate here.
-         */
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);        
-#else
-        of = av_guess_format("mpeg1video", NULL, NULL);
-#endif 
-        /* But we want the trailer to be correctly written. */
-        if (of)
-            of->write_trailer = mpeg1_write_trailer;
-
-#ifdef FFMPEG_NO_NONSTD_MPEG1
-    } else if (strcmp(codec, "mpeg1") == 0) {
-        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "%s: *** mpeg1 support for normal"
-                   " videos has been disabled ***");
-        return NULL;
-#endif
+    if (strcmp(codec, TIMELAPSE_CODEC) == 0){
+        ext = ".avi";
+        of = av_guess_format("avi", NULL, NULL);
     } else if (strcmp(codec, "mpeg4") == 0) {
         ext = ".avi";
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
-#else        
         of = av_guess_format("avi", NULL, NULL);
-#endif        
     } else if (strcmp(codec, "msmpeg4") == 0) {
         ext = ".avi";
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
-#else        
         of = av_guess_format("avi", NULL, NULL);
-#endif
         /* Manually override the codec id. */
-        if (of)
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-            of->video_codec = AV_CODEC_ID_MSMPEG4V2;
-#else
-            of->video_codec = CODEC_ID_MSMPEG4V2;
-#endif
+        if (of) of->video_codec = MY_CODEC_ID_MSMPEG4V2;
     } else if (strcmp(codec, "swf") == 0) {
         ext = ".swf";
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
-#else        
         of = av_guess_format("swf", NULL, NULL);
-#endif        
     } else if (strcmp(codec, "flv") == 0) {
         ext = ".flv";
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
-#else        
         of = av_guess_format("flv", NULL, NULL);
-#endif        
-        of->video_codec = CODEC_ID_FLV1;
+        of->video_codec = MY_CODEC_ID_FLV1;
     } else if (strcmp(codec, "ffv1") == 0) {
         ext = ".avi";
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
-#else
         of = av_guess_format("avi", NULL, NULL);
-#endif
-        /*
-         * Use the FFMPEG Lossless Video codec (experimental!).
-         * Requires strict_std_compliance to be <= -2
-         */
-        if (of)
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-            of->video_codec = AV_CODEC_ID_FFV1;
-#else
-            of->video_codec = CODEC_ID_FFV1;
-#endif
-
+        if (of) of->video_codec = MY_CODEC_ID_FFV1;
     } else if (strcmp(codec, "mov") == 0) {
         ext = ".mov";
-#ifdef GUESS_NO_DEPRECATED
-        of = guess_format("mpeg1video", NULL, NULL);
-#else        
         of = av_guess_format("mov", NULL, NULL);
-#endif
-	    }
-  else if (strcmp (codec, "ogg") == 0)
-    {
+	} else if (strcmp (codec, "ogg") == 0){
       ext = ".ogg";
-#ifdef GUESS_NO_DEPRECATED
-      of = guess_format ("ogg", NULL, NULL);
-#else
       of = av_guess_format ("ogg", NULL, NULL);
-#endif
     } else {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg_video_codec option value"
                    " %s is not supported", codec);
@@ -350,7 +157,6 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 
     return of;
 }
-
 /**
  * ffmpeg_open
  *      Opens an mpeg file using the new libavformat method. Both mpeg1
@@ -368,7 +174,6 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     AVCodecContext *c;
     AVCodec *codec;
     struct ffmpeg *ffmpeg;
-    int is_mpeg1;
     int ret;
     /*
      * Allocate space for our ffmpeg structure. This structure contains all the
@@ -385,11 +190,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
 
     /* Allocation the output media context. */
-#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
     ffmpeg->oc = avformat_alloc_context();
-#else
-    ffmpeg->oc = av_alloc_format_context();
-#endif
 
     if (!ffmpeg->oc) {
         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Memory error while allocating"
@@ -408,13 +209,23 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     snprintf(ffmpeg->oc->filename, sizeof(ffmpeg->oc->filename), "%s", filename);
 
     /* Create a new video stream and initialize the codecs. */
+
+    /*
+     * Now that all the parameters are set, we can open the video
+     * codec and allocate the necessary encode buffers.
+     */
+
     ffmpeg->video_st = NULL;
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-    if (ffmpeg->oc->oformat->video_codec != AV_CODEC_ID_NONE) {
-#else
-    if (ffmpeg->oc->oformat->video_codec != CODEC_ID_NONE) {
-#endif
-        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL /* Codec */);
+    if (ffmpeg->oc->oformat->video_codec != MY_CODEC_ID_NONE) {
+
+        codec = avcodec_find_encoder(ffmpeg->oc->oformat->video_codec);
+        if (!codec) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Codec %s not found", ffmpeg_video_codec);
+            ffmpeg_cleanups(ffmpeg);
+            return NULL;
+        }
+
+        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, codec);
         if (!ffmpeg->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: av_new_stream - could"
                        " not alloc stream");
@@ -431,16 +242,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
     c->codec_id   = ffmpeg->oc->oformat->video_codec;
-#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
     c->codec_type = AVMEDIA_TYPE_VIDEO;
-#else
-    c->codec_type = CODEC_TYPE_VIDEO;
-#endif
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-    is_mpeg1      = c->codec_id == AV_CODEC_ID_MPEG1VIDEO;
-#else
-    is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
-#endif
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
         c->strict_std_compliance = -2;
@@ -452,26 +254,16 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->bit_rate = bps;
     c->width    = width;
     c->height   = height;
-#if LIBAVCODEC_BUILD >= 4754
     /* Frame rate = 1/time_base, so we set 1/rate, not rate/1 */
     c->time_base.num = 1;
     c->time_base.den = rate;
-#else
-    c->frame_rate      = rate;
-    c->frame_rate_base = 1;
-#endif /* LIBAVCODEC_BUILD >= 4754 */
 
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s FPS %d",
-               rate);
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s FPS %d", rate);
 
     if (vbr)
         c->flags |= CODEC_FLAG_QSCALE;
 
-    /*
-     * Set codec specific parameters.
-     * Set intra frame distance in frames depending on codec.
-     */
-    c->gop_size = is_mpeg1 ? 10 : 12;
+    c->gop_size = 12;
 
     /* Some formats want stream headers to be separate. */
     if (!strcmp(ffmpeg->oc->oformat->name, "mp4") ||
@@ -482,19 +274,6 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
     /* Dump the format settings.  This shows how the various streams relate to each other. */
     //dump_format(ffmpeg->oc, 0, filename, 1);
-
-    /*
-     * Now that all the parameters are set, we can open the video
-     * codec and allocate the necessary encode buffers.
-     */
-    codec = avcodec_find_encoder(c->codec_id);
-
-    if (!codec) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Codec %s not found",
-                   ffmpeg_video_codec);
-        ffmpeg_cleanups(ffmpeg);
-        return NULL;
-    }
 
     /* Set the picture format - need in ffmpeg starting round April-May 2005 */
     c->pix_fmt = PIX_FMT_YUV420P;
@@ -543,7 +322,6 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (ffmpeg->vbr)
         ffmpeg->picture->quality = ffmpeg->vbr;
 
-
     /* Set the frame data. */
     ffmpeg->picture->data[0] = y;
     ffmpeg->picture->data[1] = u;
@@ -556,21 +334,9 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
         char file_proto[256];
 
-        /*
-         * Use append file protocol for mpeg1, to get the append behavior from
-         * url_fopen, but no protocol (=> default) for other codecs.
-         */
-        if (is_mpeg1)
-#if defined FF_API_NEW_AVIO
-            snprintf(file_proto, sizeof(file_proto), "%s", filename);
-#else
-            snprintf(file_proto, sizeof(file_proto), APPEND_PROTO ":%s", filename);
-#endif
-        else
-            snprintf(file_proto, sizeof(file_proto), "%s", filename);
+        snprintf(file_proto, sizeof(file_proto), "%s", filename);
 
-
-        if (avio_open(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
+        if (avio_open(&ffmpeg->oc->pb, file_proto, MY_FLAG_WRITE) < 0) {
             /* Path did not exist? */
             if (errno == ENOENT) {
                 /* Create path for file (don't use file_proto)... */
@@ -579,7 +345,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
                     return NULL;
                 }
 
-                if (avio_open(&ffmpeg->oc->pb, file_proto, URL_WRONLY) < 0) {
+                if (avio_open(&ffmpeg->oc->pb, file_proto, MY_FLAG_WRITE) < 0) {
                     MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: url_fopen -"
                                " error opening file %s", filename);
                     ffmpeg_cleanups(ffmpeg);
@@ -606,7 +372,6 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     avformat_write_header(ffmpeg->oc, NULL);
     return ffmpeg;
 }
-
 /**
  * ffmpeg_cleanups
  *      Clean up ffmpeg struct if something was wrong.
@@ -616,32 +381,21 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
  */
 void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
 {
-    unsigned int i;
 
     /* Close each codec */
     if (ffmpeg->video_st) {
         pthread_mutex_lock(&global_lock);
-#if LIBAVCODEC_BUILD > 4680
         if (ffmpeg->video_st->codec->priv_data != NULL)
-#endif
             avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
         pthread_mutex_unlock(&global_lock);
         av_freep(&ffmpeg->picture);
         free(ffmpeg->video_outbuf);
     }
 
-    /* Free the streams */
-    for (i = 0; i < ffmpeg->oc->nb_streams; i++)
-        av_freep(&ffmpeg->oc->streams[i]);
-
-    /* Free the stream */
-    av_free(ffmpeg->oc);
-#if LIBAVFORMAT_BUILD >= 4629
-    av_free(ffmpeg->c);
-#endif
+    avcodec_close(ffmpeg->c);
+    avformat_free_context(ffmpeg->oc);
     free(ffmpeg);
 }
-
 /**
  * ffmpeg_close
  *      Closes a video file.
@@ -651,7 +405,9 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
  */
 void ffmpeg_close(struct ffmpeg *ffmpeg)
 {
-    unsigned int i;
+
+    /* Write the trailer, if any. */
+    av_write_trailer(ffmpeg->oc);
 
     /* Close each codec */
     if (ffmpeg->video_st) {
@@ -662,27 +418,16 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
         free(ffmpeg->video_outbuf);
     }
 
-    /* Write the trailer, if any. */
-    av_write_trailer(ffmpeg->oc);
-
-    /* Free the streams. */
-    for (i = 0; i < ffmpeg->oc->nb_streams; i++)
-        av_freep(&ffmpeg->oc->streams[i]);
-
+    avcodec_close(ffmpeg->c);
     if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
         /* Close the output file. */
         avio_close(ffmpeg->oc->pb);
     }
 
-
-    /* Free the stream. */
-    av_free(ffmpeg->oc);
-#if LIBAVFORMAT_BUILD >= 4629
-    av_free(ffmpeg->c);
-#endif
+    avformat_free_context(ffmpeg->oc);
     free(ffmpeg);
-}
 
+}
 /**
  * ffmpeg_put_image
  *      Puts the image pointed to by ffmpeg->picture.
@@ -732,87 +477,96 @@ int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
  */
 int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
 {
-    int out_size, ret;
-
-#ifdef FFMPEG_AVWRITEFRAME_NEWAPI
+/**
+ * Since the logic,return values and conditions changed so
+ * dramatically between versions, the encoding of the frame
+ * is 100% blocked based upon Libav/FFMpeg version
+ */
+#if (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
+    int retcd;
+    int got_packet_ptr;
     AVPacket pkt;
 
-    av_init_packet(&pkt); /* Init static structure. */
-    pkt.stream_index = ffmpeg->video_st->index;
-#endif /* FFMPEG_AVWRITEFRAME_NEWAPI */
-
     if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
-        /* Raw video case. The API will change slightly in the near future for that. */
-#ifdef FFMPEG_AVWRITEFRAME_NEWAPI
-#   if LIBAVCODEC_VERSION_MAJOR < 53        
-        pkt.flags |= PKT_FLAG_KEY;
-#   else
-        pkt.flags |= AV_PKT_FLAG_KEY;  
-#   endif        
-        pkt.data = (uint8_t *)pic;
-        pkt.size = sizeof(AVPicture);
-        ret = av_write_frame(ffmpeg->oc, &pkt);
-#else
-        ret = av_write_frame(ffmpeg->oc, ffmpeg->video_st->index,
-            (uint8_t *)pic, sizeof(AVPicture));
-#endif /* FFMPEG_AVWRITEFRAME_NEWAPI */
+        av_init_packet(&pkt); /* Init static structure. */
+           pkt.stream_index = ffmpeg->video_st->index;
+           pkt.flags |= AV_PKT_FLAG_KEY;
+           pkt.data = (uint8_t *)pic;
+           pkt.size = sizeof(AVPicture);
+           retcd = av_write_frame(ffmpeg->oc, &pkt);
+        av_free_packet(&pkt);
     } else {
-        /* Encodes the image. */
-#if defined FF_API_NEW_AVIO
-
-        int got_packet_ptr;
-        pkt.data = ffmpeg->video_outbuf;
-        pkt.size = ffmpeg->video_outbuf_size;
-
-        out_size = avcodec_encode_video2(AVSTREAM_CODEC_PTR(ffmpeg->video_st), 
+        av_init_packet(&pkt);
+        pkt.data = NULL;
+        retcd = avcodec_encode_video2(AVSTREAM_CODEC_PTR(ffmpeg->video_st),
                                         &pkt, pic, &got_packet_ptr);
-        if (out_size < 0)
-            // Error encondig 
-            out_size = 0;
-        else
-            out_size = pkt.size;
-#else
-        out_size = avcodec_encode_video(AVSTREAM_CODEC_PTR(ffmpeg->video_st),
-                                        ffmpeg->video_outbuf,
-                                        ffmpeg->video_outbuf_size, pic);
-#endif
-        /* If zero size, it means the image was buffered. */
-        if (out_size != 0) {
-            /*
-             * Writes the compressed frame in the media file.
-             * XXX: in case of B frames, the pts is not yet valid.
-             */
-#ifdef FFMPEG_AVWRITEFRAME_NEWAPI
-            pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
-
-            if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
-#   if LIBAVCODEC_VERSION_MAJOR < 53                
-                pkt.flags |= PKT_FLAG_KEY;
-#   else
-                pkt.flags |= AV_PKT_FLAG_KEY;
-#   endif                
-
-            pkt.data = ffmpeg->video_outbuf;
-            pkt.size = out_size;
-            ret = av_write_frame(ffmpeg->oc, &pkt);
-#else
-            ret = av_write_frame(ffmpeg->oc, ffmpeg->video_st->index,
-                                 ffmpeg->video_outbuf, out_size);
-#endif /* FFMPEG_AVWRITEFRAME_NEWAPI */
-
-        } else {
-            ret = 0;
+        if (retcd < 0 ){
+            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
+            //Packet is freed upon failure of encoding
+            return -1;
         }
+        //No error returned, now check packet encoding status.
+        if (got_packet_ptr == 0){
+            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
+            av_free_packet(&pkt);
+            return -1;
+        }
+
+        pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
+        if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
+                pkt.flags |= AV_PKT_FLAG_KEY;
+
+        retcd = av_write_frame(ffmpeg->oc, &pkt);
+        av_free_packet(&pkt);
     }
 
-    if (ret != 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error while writing"
-                   " video frame");
+    if (retcd != 0) {
+        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error while writing video frame");
         ffmpeg_cleanups(ffmpeg);
         return -1;
     }
 
-    return ret;
+    return retcd;
+
+#else  //  Old versions of Libav/FFmpeg
+    int retcd;
+    AVPacket pkt;
+
+    av_init_packet(&pkt); /* Init static structure. */
+    pkt.stream_index = ffmpeg->video_st->index;
+    if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
+        // Raw video case.
+        pkt.size = sizeof(AVPicture);
+        pkt.data = (uint8_t *)pic;
+        pkt.flags |= AV_PKT_FLAG_KEY;
+    } else {
+        retcd = avcodec_encode_video(AVSTREAM_CODEC_PTR(ffmpeg->video_st),
+                                        ffmpeg->video_outbuf,
+                                        ffmpeg->video_outbuf_size, pic);
+        if (retcd <= 0 ){
+            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
+            av_free_packet(&pkt);
+            return -1;
+        }
+        pkt.size = retcd;
+        pkt.data = ffmpeg->video_outbuf;
+        pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
+        if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
+            pkt.flags |= AV_PKT_FLAG_KEY;
+    }
+
+    retcd = av_write_frame(ffmpeg->oc, &pkt);
+    av_free_packet(&pkt);
+
+    if (retcd != 0) {
+        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error while writing video frame");
+        ffmpeg_cleanups(ffmpeg);
+        return -1;
+    }
+
+    return retcd;
+
+#endif
 }
 
 /**
@@ -851,48 +605,6 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
 
     return picture;
 }
-
-
-/**
- * ffmpeg_deinterlace
- *      Make the image suitable for deinterlacing using ffmpeg, then deinterlace the picture.
- *
- * Parameters
- *      img     image in YUV420P format
- *      width   image width in pixels
- *      height  image height in pixels
- *
- * Returns
- *      Function returns nothing.
- *      img     contains deinterlaced image
- */
-void ffmpeg_deinterlace(unsigned char *img, int width, int height)
-{
-    AVPicture picture;
-    int width2 = width / 2;
-
-    picture.data[0] = img;
-    picture.data[1] = img + width * height;
-    picture.data[2] = picture.data[1] + (width * height) / 4;
-    picture.linesize[0] = width;
-    picture.linesize[1] = width2;
-    picture.linesize[2] = width2;
-
-    /* We assume using 'PIX_FMT_YUV420P' always */
-#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
-    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Deinterlace depreciated for recent versions of FFMPEG.");
-#else
-    avpicture_deinterlace(&picture, &picture, PIX_FMT_YUV420P, width, height);
-#endif
-
-
-#if !defined(__SSE_MATH__) && (defined(__i386__) || defined(__x86_64__))
-    __asm__ __volatile__ ( "emms");
-#endif
-
-    return;
-}
-
 /**
  * ffmpeg_avcodec_log
  *      Handle any logging output from the ffmpeg library avcodec.
