@@ -279,8 +279,11 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
 #endif
         /* Manually override the codec id. */
         if (of)
+#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+            of->video_codec = AV_CODEC_ID_MSMPEG4V2;
+#else
             of->video_codec = CODEC_ID_MSMPEG4V2;
-
+#endif
     } else if (strcmp(codec, "swf") == 0) {
         ext = ".swf";
 #ifdef GUESS_NO_DEPRECATED
@@ -308,7 +311,11 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
          * Requires strict_std_compliance to be <= -2
          */
         if (of)
+#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+            of->video_codec = AV_CODEC_ID_FFV1;
+#else
             of->video_codec = CODEC_ID_FFV1;
+#endif
 
     } else if (strcmp(codec, "mov") == 0) {
         ext = ".mov";
@@ -402,7 +409,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
     /* Create a new video stream and initialize the codecs. */
     ffmpeg->video_st = NULL;
+#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+    if (ffmpeg->oc->oformat->video_codec != AV_CODEC_ID_NONE) {
+#else
     if (ffmpeg->oc->oformat->video_codec != CODEC_ID_NONE) {
+#endif
         ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL /* Codec */);
         if (!ffmpeg->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: av_new_stream - could"
@@ -424,8 +435,12 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->codec_type = AVMEDIA_TYPE_VIDEO;
 #else
     c->codec_type = CODEC_TYPE_VIDEO;
-#endif    
+#endif
+#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+    is_mpeg1      = c->codec_id == AV_CODEC_ID_MPEG1VIDEO;
+#else
     is_mpeg1      = c->codec_id == CODEC_ID_MPEG1VIDEO;
+#endif
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
         c->strict_std_compliance = -2;
