@@ -729,8 +729,8 @@ quiet on
 # This motion.conf file AND thread1.conf and thread2.conf.
 # Only put the options that are unique to each camera in the
 # thread config files.
-; thread /usr/local/etc/thread1.conf
-; thread /usr/local/etc/thread2.conf
-; thread /usr/local/etc/thread3.conf
-; thread /usr/local/etc/thread4.conf
+; thread @sysconfdir@/motion/thread1.conf
+; thread @sysconfdir@/motion/thread2.conf
+; thread @sysconfdir@/motion/thread3.conf
+; thread @sysconfdir@/motion/thread4.conf
 
