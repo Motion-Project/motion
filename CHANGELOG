@@ -1,8 +1,18 @@
-   * 
+Summary of Changes
+
+   * Revise version.sh to put out the git commit.
+   * Rollback revision to allow for a formal pull request.
+   * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
+   * Implement requirement of modulo 16 to avoid seg fault when opening stream
+   * Add debian build files from trusty(14.04)
+   * Revise default values for motion.conf
+   * Revise CHANGELOG to conform with debian format
    * Revised debian packaging files
    * Implement new sequence for this file (CHANGELOG) newest to oldest.
-   *
-   * Features
+
+3.4.0 Summary of Changes
+
+Features
    * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
    * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6 
      (Jeroen Massar & Angel Carpintero) 
@@ -84,15 +94,8 @@
    * Added tcp/udp transport config option from hyperbolic2346(commit 423ef7bb3)
    * Revised comments to be in line with application standard.
    * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
-   * Revise version.sh to put out the git commit.
-   * Rollback revision to allow for a formal pull request.
-   * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
-   * Implement requirement of modulo 16 to avoid seg fault when opening stream
-   * Add debian build files from trusty(14.04)
-   * Revise default values for motion.conf
-   * Revise CHANGELOG to conform with debian format
 
-   * Bugfixes
+Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x06x17x090603
@@ -140,7 +143,7 @@ Bugfixes
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
 
 
-3.2.11.1 Sumary of Changes
+3.2.11.1 Summary of Changes
 
 Bugfixes
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)
