@@ -178,8 +178,8 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Connection to PostgreSQL database '%s' failed: %s",
                            cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
-                
-                // This function will close the connection to the server and attempt to reestablish a new connection to the same server, 
+
+                // This function will close the connection to the server and attempt to reestablish a new connection to the same server,
                 // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
                 PQreset(cnt->database_pg);
 
@@ -194,7 +194,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
             } else if (PQresultStatus(res) != PGRES_COMMAND_OK) {
                 MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query [%s] failed", sqlquery);
                 PQclear(res);
-            } 
+            }
         }
 #endif /* HAVE_PGSQL */
 
@@ -585,7 +585,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
         if ((cnt->ffmpeg_output =
             ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                         cnt->conf.ffmpeg_vbr)) == NULL) {
+                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]",
                        cnt->newfilename);
             cnt->finish = 1;
@@ -613,7 +613,7 @@ static void event_ffmpeg_newfile(struct context *cnt, int type ATTRIBUTE_UNUSED,
         if ((cnt->ffmpeg_output_debug =
             ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                         cnt->conf.ffmpeg_vbr)) == NULL) {
+                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]",
                        cnt->motionfilename);
             cnt->finish = 1;
@@ -665,10 +665,23 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             v = u + (width * height) / 4;
         }
 
-        if ((cnt->ffmpeg_timelapse =
-            ffmpeg_open((char *)TIMELAPSE_CODEC, cnt->timelapsefilename, y, u, v,
-                         cnt->imgs.width, cnt->imgs.height, 24, cnt->conf.ffmpeg_bps,
-                         cnt->conf.ffmpeg_vbr)) == NULL) {
+        if (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) {
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using swf codec.");
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
+            cnt->ffmpeg_timelapse =
+                ffmpeg_open("swf",cnt->timelapsefilename, y, u, v
+                        ,cnt->imgs.width, cnt->imgs.height, 24
+                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND);
+        } else {
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpeg4 codec.");
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be trigger new files");
+            cnt->ffmpeg_timelapse =
+                ffmpeg_open("mpeg4",cnt->timelapsefilename, y, u, v
+                        ,cnt->imgs.width, cnt->imgs.height, 1
+                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_NEW);
+        }
+
+        if (cnt->ffmpeg_timelapse == NULL){
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating "
                        "(timelapse) file [%s]", cnt->timelapsefilename);
             cnt->finish = 1;

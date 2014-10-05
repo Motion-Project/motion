@@ -10,7 +10,9 @@
 
 #endif /* HAVE_FFMPEG */
 
-#define TIMELAPSE_CODEC "mpeg1_tl"
+#define TIMELAPSE_NONE   0  /* No timelapse, regular processing */
+#define TIMELAPSE_APPEND 1  /* Use append version of timelapse */
+#define TIMELAPSE_NEW    2  /* Use create new file version of timelapse */
 
 struct ffmpeg {
 #ifdef HAVE_FFMPEG
@@ -25,6 +27,7 @@ struct ffmpeg {
     void *udata;            /* U & V planes for greyscale images */
     int vbr;                /* variable bitrate setting */
     char codec[20];         /* codec name */
+    int tlapse;
 #else
     int dummy;
 #endif
@@ -43,7 +46,8 @@ struct ffmpeg *ffmpeg_open(
     int height,
     int rate,            /* framerate, fps */
     int bps,             /* bitrate; bits per second */
-    int vbr              /* variable bitrate */
+    int vbr,             /* variable bitrate */
+    int tlapse
     );
 
 /* Puts the image pointed to by the picture member of struct ffmpeg. */

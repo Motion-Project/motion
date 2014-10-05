@@ -79,18 +79,48 @@ void my_frame_free(AVFrame *frame){
  ****************************************************************************
  ****************************************************************************/
 /**
+ * timelapse_exists
+ *      Determines whether the timelapse file exists
+ *
+ * Returns
+ *      0:  File doesn't exist
+ *      1:  File exists
+ */
+int timelapse_exists(const char *fname){
+    FILE *file;
+    file = fopen(fname, "r");
+    if (file)
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
+    FILE *file;
+
+    file = fopen(ffmpeg->oc->filename, "a");
+    if (!file) return -1;
+
+    fwrite(pkt.data,1,pkt.size,file);
+
+    fclose(file);
+
+    return 0;
+}
+/**
  * ffmpeg_init
  *      Initializes for libavformat.
  *
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_init()
-{
+void ffmpeg_init(){
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg LIBAVCODEC_BUILD %d"
                " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD,
                LIBAVFORMAT_BUILD);
     av_register_all();
+    avcodec_register_all();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
     av_log_set_level(AV_LOG_ERROR);
 }
@@ -103,8 +133,7 @@ void ffmpeg_init()
  *  Returns
  *      AVOutputFormat pointer or NULL if any error happens.
  */
-static AVOutputFormat *get_oformat(const char *codec, char *filename)
-{
+static AVOutputFormat *get_oformat(const char *codec, char *filename){
     const char *ext;
     AVOutputFormat *of = NULL;
     /*
@@ -112,9 +141,10 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
      * If we are using msmpeg4, manually set that codec here.
      * We also dynamically add the file extension to the filename here.
      */
-    if (strcmp(codec, TIMELAPSE_CODEC) == 0){
-        ext = ".avi";
-        of = av_guess_format("avi", NULL, NULL);
+    if (strcmp(codec, "tlapse") == 0) {
+        ext = ".swf";
+        of = av_guess_format("swf", NULL, NULL);
+        if (of) of->video_codec = AV_CODEC_ID_MPEG2VIDEO;
     } else if (strcmp(codec, "mpeg4") == 0) {
         ext = ".avi";
         of = av_guess_format("avi", NULL, NULL);
@@ -147,8 +177,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
     }
 
     if (!of) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not guess format for %s",
-                   codec);
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not guess format for %s", codec);
         return NULL;
     }
 
@@ -169,22 +198,22 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename)
  */
 struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
                            unsigned char *y, unsigned char *u, unsigned char *v,
-                           int width, int height, int rate, int bps, int vbr)
+                           int width, int height, int rate, int bps, int vbr, int tlapse)
 {
     AVCodecContext *c;
     AVCodec *codec;
     struct ffmpeg *ffmpeg;
     int ret;
+    char errstr[128];
     /*
      * Allocate space for our ffmpeg structure. This structure contains all the
      * codec and image information we need to generate movies.
-     * FIXME when motion exits we should close the movie to ensure that
-     * ffmpeg is freed.
      */
     ffmpeg = mymalloc(sizeof(struct ffmpeg));
     memset(ffmpeg, 0, sizeof(struct ffmpeg));
 
     ffmpeg->vbr = vbr;
+    ffmpeg->tlapse = tlapse;
 
     /* Store codec name in ffmpeg->codec, with buffer overflow check. */
     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
@@ -193,27 +222,23 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     ffmpeg->oc = avformat_alloc_context();
 
     if (!ffmpeg->oc) {
-        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Memory error while allocating"
-                   " output media context");
+        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Could not allocate output context");
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
 
     /* Setup output format */
-    ffmpeg->oc->oformat = get_oformat(ffmpeg_video_codec, filename);
+    if (ffmpeg->tlapse == TIMELAPSE_APPEND){
+        ffmpeg->oc->oformat = get_oformat("tlapse", filename);
+    } else {
+        ffmpeg->oc->oformat = get_oformat(ffmpeg_video_codec, filename);
+    }
     if (!ffmpeg->oc->oformat) {
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
 
     snprintf(ffmpeg->oc->filename, sizeof(ffmpeg->oc->filename), "%s", filename);
-
-    /* Create a new video stream and initialize the codecs. */
-
-    /*
-     * Now that all the parameters are set, we can open the video
-     * codec and allocate the necessary encode buffers.
-     */
 
     ffmpeg->video_st = NULL;
     if (ffmpeg->oc->oformat->video_codec != MY_CODEC_ID_NONE) {
@@ -227,15 +252,13 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
 
         ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, codec);
         if (!ffmpeg->video_st) {
-            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: av_new_stream - could"
-                       " not alloc stream");
+            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Could not alloc stream");
             ffmpeg_cleanups(ffmpeg);
             return NULL;
         }
     } else {
         /* We did not get a proper video codec. */
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Failed to obtain a proper"
-                   " video codec");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not get the codec");
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
@@ -243,77 +266,62 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
     c->codec_id   = ffmpeg->oc->oformat->video_codec;
     c->codec_type = AVMEDIA_TYPE_VIDEO;
-
-    if (strcmp(ffmpeg_video_codec, "ffv1") == 0)
-        c->strict_std_compliance = -2;
-
-    /* Uncomment to allow non-standard framerates. */
-    //c->strict_std_compliance = -1;
-
-    /* Set default parameters */
-    c->bit_rate = bps;
-    c->width    = width;
-    c->height   = height;
-    /* Frame rate = 1/time_base, so we set 1/rate, not rate/1 */
+    c->bit_rate   = bps;
+    c->width      = width;
+    c->height     = height;
     c->time_base.num = 1;
     c->time_base.den = rate;
+    c->gop_size   = 0;
+    c->pix_fmt    = PIX_FMT_YUV420P;
+    c->max_b_frames = 0;
 
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s FPS %d", rate);
-
-    if (vbr)
-        c->flags |= CODEC_FLAG_QSCALE;
-
-    c->gop_size = 12;
-
-    /* Some formats want stream headers to be separate. */
+    if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
+    if (vbr) c->flags |= CODEC_FLAG_QSCALE;
     if (!strcmp(ffmpeg->oc->oformat->name, "mp4") ||
         !strcmp(ffmpeg->oc->oformat->name, "mov") ||
         !strcmp(ffmpeg->oc->oformat->name, "3gp")) {
         c->flags |= CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    /* Dump the format settings.  This shows how the various streams relate to each other. */
-    //dump_format(ffmpeg->oc, 0, filename, 1);
-
-    /* Set the picture format - need in ffmpeg starting round April-May 2005 */
-    c->pix_fmt = PIX_FMT_YUV420P;
-
-    /* Get a mutex lock. */
     pthread_mutex_lock(&global_lock);
-
-    /* Open the codec */
-    ret = avcodec_open2(c, codec, NULL /* options */ );
-
-    if (ret < 0) {
-        /* Release the lock. */
-        pthread_mutex_unlock(&global_lock);
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: avcodec_open - could not open codec %s",
-                   ffmpeg_video_codec);
-        ffmpeg_cleanups(ffmpeg);
-        return NULL;
-    }
-
-    /* Release the lock. */
+        ret = avcodec_open2(c, codec, NULL);
     pthread_mutex_unlock(&global_lock);
+    if (ret < 0) {
+        if (codec->supported_framerates) {
+            const AVRational *fps = codec->supported_framerates;
+            while (fps->num) {
+                MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Reported FPS Supported %d/%d", fps->num, fps->den);
+                fps++;
+            }
+        }
+        int chkrate = 1;
+        pthread_mutex_lock(&global_lock);
+            while ((chkrate < 36) && (ret != 0)) {
+                c->time_base.den = chkrate;
+                ret = avcodec_open2(c, codec, NULL);
+                chkrate++;
+            }
+        pthread_mutex_unlock(&global_lock);
+        if (ret < 0){
+            av_strerror(ret, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not open codec %s",errstr);
+            ffmpeg_cleanups(ffmpeg);
+            return NULL;
+        }
+
+    }
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
 
     ffmpeg->video_outbuf = NULL;
-
     if (!(ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE)) {
-        /*
-         * Allocate output buffer
-         * XXX: API change will be done
-         * ffmpeg->video_outbuf_size = 200000
-         */
         ffmpeg->video_outbuf_size = ffmpeg->c->width * 512;
         ffmpeg->video_outbuf = mymalloc(ffmpeg->video_outbuf_size);
     }
 
-    /* Allocate the encoded raw picture. */
     ffmpeg->picture = my_frame_alloc();
 
     if (!ffmpeg->picture) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: avcodec_alloc_frame -"
-                   " could not alloc frame");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: could not alloc frame");
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
@@ -330,46 +338,43 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     ffmpeg->picture->linesize[1] = ffmpeg->c->width / 2;
     ffmpeg->picture->linesize[2] = ffmpeg->c->width / 2;
 
+
     /* Open the output file, if needed. */
-    if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
-        char file_proto[256];
-
-        snprintf(file_proto, sizeof(file_proto), "%s", filename);
-
-        if (avio_open(&ffmpeg->oc->pb, file_proto, MY_FLAG_WRITE) < 0) {
-            /* Path did not exist? */
-            if (errno == ENOENT) {
-                /* Create path for file (don't use file_proto)... */
-                if (create_path(filename) == -1) {
+    if ((timelapse_exists(filename) == 0) || (ffmpeg->tlapse != TIMELAPSE_APPEND)) {
+        if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
+            if (avio_open(&ffmpeg->oc->pb, filename, MY_FLAG_WRITE) < 0) {
+                if (errno == ENOENT) {
+                    if (create_path(filename) == -1) {
+                        ffmpeg_cleanups(ffmpeg);
+                        return NULL;
+                    }
+                    if (avio_open(&ffmpeg->oc->pb, filename, MY_FLAG_WRITE) < 0) {
+                        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: error opening file %s", filename);
+                        ffmpeg_cleanups(ffmpeg);
+                        return NULL;
+                    }
+                    /* Permission denied */
+                } else if (errno ==  EACCES) {
+                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO,"%s: Permission denied. %s",filename);
+                    ffmpeg_cleanups(ffmpeg);
+                    return NULL;
+                } else {
+                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error opening file %s", filename);
                     ffmpeg_cleanups(ffmpeg);
                     return NULL;
                 }
-
-                if (avio_open(&ffmpeg->oc->pb, file_proto, MY_FLAG_WRITE) < 0) {
-                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: url_fopen -"
-                               " error opening file %s", filename);
-                    ffmpeg_cleanups(ffmpeg);
-                    return NULL;
-                }
-                /* Permission denied */
-            } else if (errno ==  EACCES) {
-                MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO,
-                           "%s: url_fopen - error opening file %s"
-                           " ... check access rights to target directory",
-                           filename);
-                ffmpeg_cleanups(ffmpeg);
-                return NULL;
-            } else {
-                MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error opening file %s",
-                           filename);
-                ffmpeg_cleanups(ffmpeg);
-                return NULL;
             }
         }
+        /* Write the stream header,  For the TIMELAPSE_APPEND
+         * we write the data via standard file I/O so we close the
+         * items here
+         */
+        avformat_write_header(ffmpeg->oc, NULL);
+        if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
+            av_write_trailer(ffmpeg->oc);
+            avio_close(ffmpeg->oc->pb);
+        }
     }
-
-    /* Write the stream header, if any. */
-    avformat_write_header(ffmpeg->oc, NULL);
     return ffmpeg;
 }
 /**
@@ -379,20 +384,16 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
-{
+void ffmpeg_cleanups(struct ffmpeg *ffmpeg){
 
     /* Close each codec */
     if (ffmpeg->video_st) {
         pthread_mutex_lock(&global_lock);
-        if (ffmpeg->video_st->codec->priv_data != NULL)
-            avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
+        avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
         pthread_mutex_unlock(&global_lock);
-        av_freep(&ffmpeg->picture);
-        free(ffmpeg->video_outbuf);
     }
-
-    avcodec_close(ffmpeg->c);
+    free(ffmpeg->video_outbuf);
+    av_freep(&ffmpeg->picture);
     avformat_free_context(ffmpeg->oc);
     free(ffmpeg);
 }
@@ -403,27 +404,25 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg)
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_close(struct ffmpeg *ffmpeg)
-{
+void ffmpeg_close(struct ffmpeg *ffmpeg){
 
-    /* Write the trailer, if any. */
-    av_write_trailer(ffmpeg->oc);
-
+    if (ffmpeg->tlapse != TIMELAPSE_APPEND) {
+        av_write_trailer(ffmpeg->oc);
+    }
     /* Close each codec */
     if (ffmpeg->video_st) {
         pthread_mutex_lock(&global_lock);
         avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
         pthread_mutex_unlock(&global_lock);
-        av_freep(&ffmpeg->picture);
-        free(ffmpeg->video_outbuf);
     }
+    av_freep(&ffmpeg->picture);
+    free(ffmpeg->video_outbuf);
 
-    avcodec_close(ffmpeg->c);
     if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
-        /* Close the output file. */
-        avio_close(ffmpeg->oc->pb);
+        if (ffmpeg->tlapse != TIMELAPSE_APPEND) {
+            avio_close(ffmpeg->oc->pb);
+        }
     }
-
     avformat_free_context(ffmpeg->oc);
     free(ffmpeg);
 
@@ -435,11 +434,33 @@ void ffmpeg_close(struct ffmpeg *ffmpeg)
  * Returns
  *      value returned by ffmpeg_put_frame call.
  */
-int ffmpeg_put_image(struct ffmpeg *ffmpeg)
-{
-    return ffmpeg_put_frame(ffmpeg, ffmpeg->picture);
-}
+int ffmpeg_put_image(struct ffmpeg *ffmpeg){
 
+    /* A return code of -2 is thrown by the put_frame
+     * when a image is buffered.  For timelapse, we absolutely
+     * never want a frame buffered so we keep sending back the
+     * the same pic until it flushes or fails in a different way
+     */
+    int retcd;
+    int cnt = 0;
+
+    retcd = ffmpeg_put_frame(ffmpeg, ffmpeg->picture);
+    while ((retcd == -2) && (ffmpeg->tlapse != TIMELAPSE_NONE)) {
+        retcd = ffmpeg_put_frame(ffmpeg, ffmpeg->picture);
+        cnt++;
+        if (cnt > 50){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Excessive attempts to clear buffered packet");
+            retcd = -1;
+        }
+    }
+    //non timelapse buffered is ok
+    if (retcd == -2){
+        retcd = 0;
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Buffered packet");
+    }
+
+    return retcd;
+}
 /**
  * ffmpeg_put_other_image
  *      Puts an arbitrary picture defined by y, u and v.
@@ -450,23 +471,39 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg)
  *       0 if error allocating picture.
  */
 int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
-                            unsigned char *u, unsigned char *v)
-{
+                            unsigned char *u, unsigned char *v){
     AVFrame *picture;
-    int ret = 0;
+    int retcd = 0;
+    int cnt = 0;
 
     /* Allocate the encoded raw picture. */
     picture = ffmpeg_prepare_frame(ffmpeg, y, u, v);
 
     if (picture) {
-        ret = ffmpeg_put_frame(ffmpeg, picture);
-        if (!ret)
-            av_free(picture);
+        /* A return code of -2 is thrown by the put_frame
+         * when a image is buffered.  For timelapse, we absolutely
+         * never want a frame buffered so we keep sending back the
+         * the same pic until it flushes or fails in a different way
+         */
+        retcd = ffmpeg_put_frame(ffmpeg, picture);
+        while ((retcd == -2) && (ffmpeg->tlapse != TIMELAPSE_NONE)) {
+            retcd = ffmpeg_put_frame(ffmpeg, picture);
+            cnt++;
+            if (cnt > 50){
+                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Excessive attempts to clear buffered packet");
+                retcd = -1;
+            }
+        }
+        //non timelapse buffered is ok
+        if (retcd == -2){
+            retcd = 0;
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Buffered packet");
+        }
+        av_free(picture);
     }
 
-    return ret;
+    return retcd;
 }
-
 /**
  * ffmpeg_put_frame
  *      Encodes and writes a video frame using the av_write_frame API. This is
@@ -475,8 +512,7 @@ int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
  *  Returns
  *      Number of bytes written or -1 if any error happens.
  */
-int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
-{
+int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
 /**
  * Since the logic,return values and conditions changed so
  * dramatically between versions, the encoding of the frame
@@ -486,39 +522,40 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
     int retcd;
     int got_packet_ptr;
     AVPacket pkt;
+    char errstr[128];
 
+    av_init_packet(&pkt); /* Init static structure. */
     if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
-        av_init_packet(&pkt); /* Init static structure. */
-           pkt.stream_index = ffmpeg->video_st->index;
-           pkt.flags |= AV_PKT_FLAG_KEY;
-           pkt.data = (uint8_t *)pic;
-           pkt.size = sizeof(AVPicture);
-           retcd = av_write_frame(ffmpeg->oc, &pkt);
-        av_free_packet(&pkt);
+        pkt.stream_index = ffmpeg->video_st->index;
+        pkt.flags |= AV_PKT_FLAG_KEY;
+        pkt.data = (uint8_t *)pic;
+        pkt.size = sizeof(AVPicture);
     } else {
-        av_init_packet(&pkt);
         pkt.data = NULL;
+        pkt.size = 0;
         retcd = avcodec_encode_video2(AVSTREAM_CODEC_PTR(ffmpeg->video_st),
                                         &pkt, pic, &got_packet_ptr);
         if (retcd < 0 ){
-            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video:%s",errstr);
             //Packet is freed upon failure of encoding
             return -1;
         }
-        //No error returned, now check packet encoding status.
         if (got_packet_ptr == 0){
-            MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
+            //Buffered packet.  Throw special return code
             av_free_packet(&pkt);
-            return -1;
+            return -2;
         }
-
         pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
         if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
                 pkt.flags |= AV_PKT_FLAG_KEY;
-
-        retcd = av_write_frame(ffmpeg->oc, &pkt);
-        av_free_packet(&pkt);
     }
+    if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
+        retcd = timelapse_append(ffmpeg, pkt);
+    } else {
+        retcd = av_write_frame(ffmpeg->oc, &pkt);
+    }
+    av_free_packet(&pkt);
 
     if (retcd != 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error while writing video frame");
@@ -543,19 +580,28 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic)
         retcd = avcodec_encode_video(AVSTREAM_CODEC_PTR(ffmpeg->video_st),
                                         ffmpeg->video_outbuf,
                                         ffmpeg->video_outbuf_size, pic);
-        if (retcd <= 0 ){
+        if (retcd < 0 ){
             MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
             av_free_packet(&pkt);
             return -1;
         }
+        if (retcd == 0 ){
+            // No bytes encoded => buffered=>special handling
+            av_free_packet(&pkt);
+            return -2;
+        }
+
         pkt.size = retcd;
         pkt.data = ffmpeg->video_outbuf;
         pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
         if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
             pkt.flags |= AV_PKT_FLAG_KEY;
     }
-
-    retcd = av_write_frame(ffmpeg->oc, &pkt);
+    if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
+        retcd = timelapse_append(ffmpeg, pkt);
+    } else {
+        retcd = av_write_frame(ffmpeg->oc, &pkt);
+    }
     av_free_packet(&pkt);
 
     if (retcd != 0) {

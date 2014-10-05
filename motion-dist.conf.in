@@ -287,7 +287,7 @@ ffmpeg_timelapse_mode daily
 
 # Bitrate to be used by the ffmpeg encoder (default: 400000)
 # This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)
-ffmpeg_bps 500000
+ffmpeg_bps 400000
 
 # Enables and defines variable bitrate for the ffmpeg encoder.
 # ffmpeg_bps is ignored if variable bitrate is enabled.
@@ -296,9 +296,14 @@ ffmpeg_bps 500000
 ffmpeg_variable_bitrate 0
 
 # Codec to used by ffmpeg for the video compression.
-# Timelapse mpegs are always made in mpeg1 format independent from this option.
-# Supported formats are: mpeg1 (ffmpeg-0.4.8 only), mpeg4 (default), and msmpeg4.
-# mpeg1 - gives you files with extension .mpg
+# Timelapse videos have two options.
+#   swf - Creates swf file with mpeg-2 encoding.
+#     If motion is shutdown and restarted, new pics will be appended
+#     to any previously created file with name indicated for timelapse.
+#   mpeg4 - Creates avi file with the default encoding.
+#     If motion is shutdown and restarted, new pics will create a
+#     new file with the name indicated for timelapse.
+# Supported formats are:
 # mpeg4 or msmpeg4 - gives you files with extension .avi
 # msmpeg4 is recommended for use with Windows Media Player because
 # it requires no installation of codec on the Windows client.
@@ -441,17 +446,12 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
-# Default value is equivalent to legacy oldlayout option
-# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S
-# File extension .mpg or .avi is automatically added so do not include this
-# This option was previously called ffmpeg_filename
+# File extensions(.swf .avi) are automatically added so do not include them
 movie_filename %v-%Y%m%d%H%M%S
 
 # File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
-# Default value is near equivalent to legacy oldlayout option
-# For Motion 3.0 compatible mode choose: %Y/%m/%d-timelapse
-# File extension .mpg is automatically added so do not include this
+# File extensions(.swf .avi) are automatically added so do not include them
 timelapse_filename %Y%m%d-timelapse
 
 ############################################################
@@ -661,7 +661,7 @@ quiet on
 # %f = filename with full path
 # Default value:
 # Create tables :
-## 
+##
 # Mysql
 # CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
 #
