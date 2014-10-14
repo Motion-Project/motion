@@ -387,42 +387,15 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
  */
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
 {
-    uint8_t *yuv[3];
-    unsigned char *y, *u, *v;
-    int loop, ret;
-
-    yuv[0] = mymalloc(width * height * sizeof(yuv[0][0]));
-    yuv[1] = mymalloc(width * height / 4 * sizeof(yuv[1][0]));
-    yuv[2] = mymalloc(width * height / 4 * sizeof(yuv[2][0]));
-
-
-    ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height, yuv[0], yuv[1], yuv[2]);
+    int ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height,
+                map,
+                map + (width * height),
+                map + (width * height) + (width * height) / 4);
 
     if (ret == 1) {
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue");
         ret = 2;
     }
-
-    y = map;
-    u = y + width * height;
-    v = u + (width * height) / 4;
-    memset(y, 0, width * height);
-    memset(u, 0, width * height / 4);
-    memset(v, 0, width * height / 4);
-
-    for(loop = 0; loop < width * height; loop++)
-        *map++ = yuv[0][loop];
-
-    for(loop = 0; loop < width * height / 4; loop++)
-        *map++ = yuv[1][loop];
-
-    for(loop = 0; loop < width * height / 4; loop++)
-        *map++ = yuv[2][loop];
-
-    free(yuv[0]);
-    free(yuv[1]);
-    free(yuv[2]);
-
     return ret;
 }
 
