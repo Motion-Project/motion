@@ -143,7 +143,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
                     // Close connection before start a new connection
                     mysql_close(cnt->database);
 
-                    cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
+                    cnt->database = mymalloc(sizeof(MYSQL));
                     mysql_init(cnt->database);
 
                     if (!mysql_real_connect(cnt->database, cnt->conf.database_host,

@@ -2170,7 +2170,7 @@ char *mystrdup(const char *from)
     } else {
         stringlength = strlen(from);
         stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = (char *)mymalloc(stringlength + 1);
+        tmp = mymalloc(stringlength + 1);
         strncpy(tmp, from, stringlength);
 
         /*

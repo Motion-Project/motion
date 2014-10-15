@@ -2498,7 +2498,7 @@ void httpd_run(struct context **cnt)
         char *userpass = NULL;
         size_t auth_size = strlen(cnt[0]->conf.webcontrol_authentication);
 
-        authentication = (char *) mymalloc(BASE64_LENGTH(auth_size) + 1);
+        authentication = mymalloc(BASE64_LENGTH(auth_size) + 1);
         userpass = mymalloc(auth_size + 4);
         /* base64_encode can read 3 bytes after the end of the string, initialize it */
         memset(userpass, 0, auth_size + 4);

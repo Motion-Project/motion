@@ -121,7 +121,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
     if (m.rm_so != -1) {
         len = m.rm_eo - m.rm_so;
 
-        if ((match = (char *) mymalloc(len + 1)) != NULL) {
+        if ((match = mymalloc(len + 1)) != NULL) {
             strncpy(match, input + m.rm_so, len);
             match[len] = '\0';
         }
@@ -2128,7 +2128,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
     int ix;
 
     /* First the http context structure. */
-    netcam->response = (struct rbuf *) mymalloc(sizeof(struct rbuf));
+    netcam->response = mymalloc(sizeof(struct rbuf));
     memset(netcam->response, 0, sizeof(struct rbuf));
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Netcam has flags:"
@@ -2721,8 +2721,7 @@ int netcam_start(struct context *cnt)
      * Create a new netcam_context for this camera
      * and clear all the entries.
      */
-    cnt->netcam = (struct netcam_context *)
-                   mymalloc(sizeof(struct netcam_context));
+    cnt->netcam = mymalloc(sizeof(struct netcam_context));
     memset(cnt->netcam, 0, sizeof(struct netcam_context));
     netcam = cnt->netcam;           /* Just for clarity in remaining code. */
     netcam->cnt = cnt;              /* Fill in the "parent" info. */

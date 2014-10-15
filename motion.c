@@ -829,7 +829,7 @@ static int motion_init(struct context *cnt)
             // close database to be sure that we are not leaking
             mysql_close(cnt->database);
 
-            cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
+            cnt->database = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
 
             if (!mysql_real_connect(cnt->database, cnt->conf.database_host, cnt->conf.database_user,
