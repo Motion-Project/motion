@@ -971,60 +971,38 @@ static void motion_cleanup(struct context *cnt)
         vid_close(cnt);
     }
 
-    if (cnt->imgs.out) {
-        free(cnt->imgs.out);
-        cnt->imgs.out = NULL;
-    }
+    free(cnt->imgs.out);
+    cnt->imgs.out = NULL;
 
-    if (cnt->imgs.ref) {
-        free(cnt->imgs.ref);
-        cnt->imgs.ref = NULL;
-    }
+    free(cnt->imgs.ref);
+    cnt->imgs.ref = NULL;
 
-    if (cnt->imgs.ref_dyn) {
-        free(cnt->imgs.ref_dyn);
-        cnt->imgs.ref_dyn = NULL;
-    }
+    free(cnt->imgs.ref_dyn);
+    cnt->imgs.ref_dyn = NULL;
 
-    if (cnt->imgs.image_virgin) {
-        free(cnt->imgs.image_virgin);
-        cnt->imgs.image_virgin = NULL;
-    }
+    free(cnt->imgs.image_virgin);
+    cnt->imgs.image_virgin = NULL;
 
-    if (cnt->imgs.labels) {
-        free(cnt->imgs.labels);
-        cnt->imgs.labels = NULL;
-    }
+    free(cnt->imgs.labels);
+    cnt->imgs.labels = NULL;
 
-    if (cnt->imgs.labelsize) {
-        free(cnt->imgs.labelsize);
-        cnt->imgs.labelsize = NULL;
-    }
+    free(cnt->imgs.labelsize);
+    cnt->imgs.labelsize = NULL;
 
-    if (cnt->imgs.smartmask) {
-        free(cnt->imgs.smartmask);
-        cnt->imgs.smartmask = NULL;
-    }
+    free(cnt->imgs.smartmask);
+    cnt->imgs.smartmask = NULL;
 
-    if (cnt->imgs.smartmask_final) {
-        free(cnt->imgs.smartmask_final);
-        cnt->imgs.smartmask_final = NULL;
-    }
+    free(cnt->imgs.smartmask_final);
+    cnt->imgs.smartmask_final = NULL;
 
-    if (cnt->imgs.smartmask_buffer) {
-        free(cnt->imgs.smartmask_buffer);
-        cnt->imgs.smartmask_buffer = NULL;
-    }
+    free(cnt->imgs.smartmask_buffer);
+    cnt->imgs.smartmask_buffer = NULL;
 
-    if (cnt->imgs.common_buffer) {
-        free(cnt->imgs.common_buffer);
-        cnt->imgs.common_buffer = NULL;
-    }
+    free(cnt->imgs.common_buffer);
+    cnt->imgs.common_buffer = NULL;
 
-    if (cnt->imgs.preview_image.image) {
-        free(cnt->imgs.preview_image.image);
-        cnt->imgs.preview_image.image = NULL;
-    }
+    free(cnt->imgs.preview_image.image);
+    cnt->imgs.preview_image.image = NULL;
 
     image_ring_destroy(cnt); /* Cleanup the precapture ring buffer */
 
@@ -1041,16 +1019,12 @@ static void motion_cleanup(struct context *cnt)
     }
 
     /* Cleanup the current time structure */
-    if (cnt->currenttime_tm) {
-        free(cnt->currenttime_tm);
-        cnt->currenttime_tm = NULL;
-    }
+    free(cnt->currenttime_tm);
+    cnt->currenttime_tm = NULL;
 
     /* Cleanup the event time structure */
-    if (cnt->eventtime_tm) {
-        free(cnt->eventtime_tm);
-        cnt->eventtime_tm = NULL;
-    }
+    free(cnt->eventtime_tm);
+    cnt->eventtime_tm = NULL;
 
     if (cnt->conf.database_type) {
 #ifdef HAVE_MYSQL
@@ -2230,8 +2204,7 @@ static void *motion_loop(void *arg)
      * If code continues here it is because the thread is exiting or restarting
      */
 err:
-    if (rolling_average_data)
-        free(rolling_average_data);
+    free(rolling_average_data);
 
     cnt->lost_connection = 1;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread exiting");
@@ -3089,8 +3062,7 @@ int myfclose(FILE* fh)
             buffers[i].fh = NULL;
             if ( finish ) {
                 /* Free the buffers */
-                if (buffers[i].buffer)
-                    free(buffers[i].buffer);
+                free(buffers[i].buffer);
                 buffers[i].buffer = NULL;
                 buffers[i].bufsize = 0;
             }

@@ -2528,8 +2528,7 @@ void httpd_run(struct context **cnt)
 
     }
 
-    if (authentication != NULL)
-        free(authentication);
+    free(authentication);
     close(sd);
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Closing");
     pthread_mutex_destroy(&httpd_mutex);

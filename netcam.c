@@ -226,25 +226,17 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
  */
 void netcam_url_free(struct url_t *parse_url)
 {
-    if (parse_url->service) {
-        free(parse_url->service);
-        parse_url->service = NULL;
-    }
+    free(parse_url->service);
+    parse_url->service = NULL;
 
-    if (parse_url->userpass) {
-        free(parse_url->userpass);
-        parse_url->userpass = NULL;
-    }
+    free(parse_url->userpass);
+    parse_url->userpass = NULL;
 
-    if (parse_url->host) {
-        free(parse_url->host);
-        parse_url->host = NULL;
-    }
+    free(parse_url->host);
+    parse_url->host = NULL;
 
-    if (parse_url->path) {
-        free(parse_url->path);
-        parse_url->path = NULL;
-    }
+    free(parse_url->path);
+    parse_url->path = NULL;
 }
 
 /**
@@ -333,8 +325,7 @@ static int netcam_check_keepalive(char *header)
         return -1;
 
     /* We do not detect the second field or other case mixes at present. */
-    if (content_type) 
-        free(content_type);
+    free(content_type);
 
     return 1;
 }
@@ -364,8 +355,7 @@ static int netcam_check_close(char *header)
     if (!strcmp(type, "close")) /* strcmp returns 0 for match. */
         ret = 1;
     
-    if (type) 
-        free(type);
+    free(type);
 
     return ret;
 }
@@ -409,8 +399,7 @@ static int netcam_check_content_type(char *header)
         ret = 0;
     }
 
-    if (content_type)
-        free(content_type);
+    free(content_type);
 
     return ret;
 }
@@ -652,8 +641,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
                 if ((boundary = strstr(header, "boundary="))) {
                     /* On error recovery this may already be set. */
-                    if (netcam->boundary)
-                        free(netcam->boundary);
+                    free(netcam->boundary);
 
                     netcam->boundary = mystrdup(boundary + 9);
                     /*
@@ -1852,9 +1840,7 @@ void file_free_context(tfile_context* ctxt)
     if (ctxt == NULL)
         return;
 
-    if (ctxt->path != NULL)
-        free(ctxt->path);
-
+    free(ctxt->path);
     free(ctxt);
 }
 
@@ -2561,35 +2547,23 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     pthread_mutex_unlock(&netcam->mutex);
 
     /* and cleanup the rest of the netcam_context structure. */
-    if (netcam->connect_host != NULL) 
-        free(netcam->connect_host);
-
-    if (netcam->connect_request != NULL) 
-        free(netcam->connect_request);
-    
-
-    if (netcam->boundary != NULL) 
-        free(netcam->boundary);
+    free(netcam->connect_host);
+    free(netcam->connect_request);
+    free(netcam->boundary);
     
 
     if (netcam->latest != NULL) {
-        if (netcam->latest->ptr != NULL) 
-            free(netcam->latest->ptr);
-        
+        free(netcam->latest->ptr);
         free(netcam->latest);
     }
 
     if (netcam->receiving != NULL) {
-        if (netcam->receiving->ptr != NULL) 
-            free(netcam->receiving->ptr);
-        
+        free(netcam->receiving->ptr);
         free(netcam->receiving);
     }
 
     if (netcam->jpegbuf != NULL) {
-        if (netcam->jpegbuf->ptr != NULL) 
-            free(netcam->jpegbuf->ptr);
-    
+        free(netcam->jpegbuf->ptr);
         free(netcam->jpegbuf);
     }
 
@@ -2598,10 +2572,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     else 
         netcam_disconnect(netcam);
     
-
-    if (netcam->response != NULL) 
-        free(netcam->response);
-
+    free(netcam->response);
 
     if (netcam->caps.streaming == NCS_RTSP)
         netcam_shutdown_rtsp(netcam);
