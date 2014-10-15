@@ -1843,14 +1843,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
 tfile_context *file_new_context(void) 
 {
-    tfile_context *ret;
-
     /* Note that mymalloc will exit on any problem. */
-    ret = mymalloc(sizeof(tfile_context));
-    if (!ret)
-        return ret;
-
-    return ret;
+    return mymalloc(sizeof(tfile_context));
 }
 
 void file_free_context(tfile_context* ctxt) 
