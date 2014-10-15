@@ -210,7 +210,6 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
      * codec and image information we need to generate movies.
      */
     ffmpeg = mymalloc(sizeof(struct ffmpeg));
-    memset(ffmpeg, 0, sizeof(struct ffmpeg));
 
     ffmpeg->vbr = vbr;
     ffmpeg->tlapse = tlapse;

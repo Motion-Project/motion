@@ -1850,7 +1850,6 @@ tfile_context *file_new_context(void)
     if (!ret)
         return ret;
 
-    memset(ret, 0, sizeof(tfile_context));
     return ret;
 }
 
@@ -2129,7 +2128,6 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
 
     /* First the http context structure. */
     netcam->response = mymalloc(sizeof(struct rbuf));
-    memset(netcam->response, 0, sizeof(struct rbuf));
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Netcam has flags:"
                " HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.",  
@@ -2722,7 +2720,6 @@ int netcam_start(struct context *cnt)
      * and clear all the entries.
      */
     cnt->netcam = mymalloc(sizeof(struct netcam_context));
-    memset(cnt->netcam, 0, sizeof(struct netcam_context));
     netcam = cnt->netcam;           /* Just for clarity in remaining code. */
     netcam->cnt = cnt;              /* Fill in the "parent" info. */
 
@@ -2733,15 +2730,12 @@ int netcam_start(struct context *cnt)
 
     /* Our image buffers */
     netcam->receiving = mymalloc(sizeof(netcam_buff));
-    memset(netcam->receiving, 0, sizeof(netcam_buff));
     netcam->receiving->ptr = mymalloc(NETCAM_BUFFSIZE);
 
     netcam->jpegbuf = mymalloc(sizeof(netcam_buff));
-    memset(netcam->jpegbuf, 0, sizeof(netcam_buff));
     netcam->jpegbuf->ptr = mymalloc(NETCAM_BUFFSIZE);
 
     netcam->latest = mymalloc(sizeof(netcam_buff));
-    memset(netcam->latest, 0, sizeof(netcam_buff));
     netcam->latest->ptr = mymalloc(NETCAM_BUFFSIZE);
     netcam->timeout.tv_sec = READ_TIMEOUT;
 

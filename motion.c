@@ -720,7 +720,6 @@ static int motion_init(struct context *cnt)
 
     cnt->imgs.ref = mymalloc(cnt->imgs.size);
     cnt->imgs.out = mymalloc(cnt->imgs.size);
-    memset(cnt->imgs.out, 0, cnt->imgs.size);
 
     /* contains the moving objects of ref. frame */
     cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
