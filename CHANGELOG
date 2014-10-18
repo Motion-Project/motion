@@ -1,5 +1,13 @@
 Summary of Changes
-
+   * Merge mymalloc, free and casting changes from Alfred Klomp
+   * Merge bug fix for sizeof from Alfred Klomp
+   * Rewrote timelapse so that it works
+   * Merge tosiara changes for version number
+   * Add copyright file for features added since 3.2.12
+   * Cleanup ffmpeg.c and plug memory leak
+   * Add support for latest version of ffmpeg/libav
+   * Tidy up packaging changes
+   * Add packaging fixes (infinity0)
    * Revise version.sh to put out the git commit.
    * Rollback revision to allow for a formal pull request.
    * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
