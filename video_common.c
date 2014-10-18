@@ -726,7 +726,6 @@ static int vid_v4lx_start(struct context *cnt)
                conf->video_device, conf->input);
 
     dev = mymalloc(sizeof(struct video_dev));
-    memset(dev, 0, sizeof(struct video_dev));
 
     dev->video_device = conf->video_device;
 

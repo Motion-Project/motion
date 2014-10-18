@@ -1803,7 +1803,7 @@ void conf_print(struct context **cnt)
                     fprintf(conffile, "%s\n", val);
 
                     if (strlen(val) == 0)
-                        fprintf(conffile, "; thread /usr/local/etc/thread1.conf\n");
+                        fprintf(conffile, "; thread %s/motion/thread1.conf\n", sysconfdir);
 
                     free(val);
                 } else if (thread == 0) {
@@ -1914,7 +1914,7 @@ struct context **conf_load(struct context **cnt)
         fp = fopen(filename, "r");
 
         if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
+            snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
             fp = fopen(filename, "r");
 
             if (!fp) /* There is no config file.... use defaults. */
@@ -2173,7 +2173,7 @@ char *mystrdup(const char *from)
     } else {
         stringlength = strlen(from);
         stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = (char *)mymalloc(stringlength + 1);
+        tmp = mymalloc(stringlength + 1);
         strncpy(tmp, from, stringlength);
 
         /*
@@ -2391,6 +2391,6 @@ static void usage()
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");
-    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
+    printf("it will read motion.conf from current directory, ~/.motion or %s/motion.\n", sysconfdir);
     printf("\n");
 }

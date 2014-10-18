@@ -746,9 +746,9 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
 
-    if (netcam->rtsp->path != NULL) free(netcam->rtsp->path);
-    if (netcam->rtsp->user != NULL) free(netcam->rtsp->user);
-    if (netcam->rtsp->pass != NULL) free(netcam->rtsp->pass);
+    free(netcam->rtsp->path);
+    free(netcam->rtsp->user);
+    free(netcam->rtsp->pass);
 
     free(netcam->rtsp);
     netcam->rtsp = NULL;

@@ -57,15 +57,9 @@ void ftp_free_context(ftp_context_pointer ctxt)
     if (ctxt == NULL)
         return;
 
-    if (ctxt->path != NULL)
-        free(ctxt->path);
-
-    if (ctxt->user)
-        free(ctxt->user);
-
-    if (ctxt->passwd)
-        free(ctxt->passwd);
-
+    free(ctxt->path);
+    free(ctxt->user);
+    free(ctxt->passwd);
     if (ctxt->control_file_desc >= 0)
         close(ctxt->control_file_desc);
 

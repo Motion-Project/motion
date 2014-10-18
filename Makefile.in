@@ -12,6 +12,7 @@
 
 CC      = @CC@
 INSTALL = install
+INSTALL_DATA = ${INSTALL} -m 644
 
 ################################################################################
 # Install locations, controlled by setting configure flags.                    #
@@ -37,10 +38,11 @@ VIDEO_OBJ    = @VIDEO@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(VIDEO_OBJ) \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
-			   stream.o md5.o @FFMPEG_OBJ@ @SDL_OBJ@ @RTPS_OBJ@
+			   stream.o md5.o netcam_rtsp.o @FFMPEG_OBJ@ @SDL_OBJ@
 SRC          = $(OBJ:.o=.c)
-DOC          = CHANGELOG COPYING CREDITS INSTALL README motion_guide.html
-EXAMPLES     = *.conf motion.init-Debian motion.init-Fedora motion.init-FreeBSD.sh
+DOC          = CHANGELOG COPYING CREDITS README motion_guide.html
+EXAMPLES     = *.conf
+EXAMPLES_BIN = motion.init-Debian motion.init-Fedora motion.init-FreeBSD.sh
 PROGS        = motion
 DEPEND_FILE  = .depend
 
@@ -201,20 +203,25 @@ install:
 	@echo "--------------------------------------------------------------------------------"
 	mkdir -p $(DESTDIR)$(bindir)
 	mkdir -p $(DESTDIR)$(mandir)/man1
-	mkdir -p $(DESTDIR)$(sysconfdir)
+	mkdir -p $(DESTDIR)$(sysconfdir)/motion
 	mkdir -p $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(examplesdir)
-	$(INSTALL) motion.1 $(DESTDIR)$(mandir)/man1
-	$(INSTALL) $(DOC) $(DESTDIR)$(docdir)
-	$(INSTALL) $(EXAMPLES) $(DESTDIR)$(examplesdir)
-	$(INSTALL) motion-dist.conf $(DESTDIR)$(sysconfdir)
+	$(INSTALL_DATA) motion.1 $(DESTDIR)$(mandir)/man1
+	$(INSTALL_DATA) $(DOC) $(DESTDIR)$(docdir)
+	$(INSTALL_DATA) $(EXAMPLES) $(DESTDIR)$(examplesdir)
+	$(INSTALL) $(EXAMPLES_BIN) $(DESTDIR)$(examplesdir)
+	$(INSTALL_DATA) motion-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread1.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread2.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread3.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread4.conf $(DESTDIR)$(sysconfdir)/motion
 	for prog in $(PROGS); \
 	do \
 	($(INSTALL) $$prog $(DESTDIR)$(bindir) ); \
 	done
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Install complete! The default configuration file, motion-dist.conf, has been"
-	@echo "installed to $(sysconfdir). You need to rename/copy it to $(sysconfdir)/motion.conf"
+	@echo "installed to $(sysconfdir)/motion. You need to rename/copy it to motion.conf"
 	@echo "for Motion to find it. More configuration examples as well as init scripts"
 	@echo "can be found in $(examplesdir)."
 	@echo
@@ -230,7 +237,11 @@ uninstall remove: pre-build-info
 		($ rm -f $(bindir)/$$prog ); \
 	done
 	rm -f $(mandir)/man1/motion.1
-	rm -f $(sysconfdir)/motion-dist.conf
+	rm -f $(sysconfdir)/motion/motion-dist.conf
+	rm -f $(sysconfdir)/motion/thread1.conf
+	rm -f $(sysconfdir)/motion/thread2.conf
+	rm -f $(sysconfdir)/motion/thread3.conf
+	rm -f $(sysconfdir)/motion/thread4.conf
 	rm -rf $(docdir)
 	rm -rf $(examplesdir)
 	@echo "--------------------------------------------------------------------------------"

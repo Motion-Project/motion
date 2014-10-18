@@ -2498,7 +2498,7 @@ void httpd_run(struct context **cnt)
         char *userpass = NULL;
         size_t auth_size = strlen(cnt[0]->conf.webcontrol_authentication);
 
-        authentication = (char *) mymalloc(BASE64_LENGTH(auth_size) + 1);
+        authentication = mymalloc(BASE64_LENGTH(auth_size) + 1);
         userpass = mymalloc(auth_size + 4);
         /* base64_encode can read 3 bytes after the end of the string, initialize it */
         memset(userpass, 0, auth_size + 4);
@@ -2528,8 +2528,7 @@ void httpd_run(struct context **cnt)
 
     }
 
-    if (authentication != NULL)
-        free(authentication);
+    free(authentication);
     close(sd);
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Closing");
     pthread_mutex_destroy(&httpd_mutex);
