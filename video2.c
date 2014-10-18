@@ -854,8 +854,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
     return (void *) 1;
 
 err:
-    if (vid_source)
-        free(vid_source);
+    free(vid_source);
 
     viddev->v4l2_private = NULL;
     viddev->v4l2 = 0;
@@ -1101,10 +1100,8 @@ void v4l2_cleanup(struct video_dev *viddev)
         vid_source->buffers = NULL;
     }
 
-    if (vid_source->controls) {
-        free(vid_source->controls);
-        vid_source->controls = NULL;
-    }
+    free(vid_source->controls);
+    vid_source->controls = NULL;
 
     free(vid_source);
     viddev->v4l2_private = NULL;

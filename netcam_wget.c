@@ -70,7 +70,7 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
     int i;
     int bufsize = 80;
 
-    *hdr = (char *)mymalloc(bufsize);
+    *hdr = mymalloc(bufsize);
 
     for (i = 0; 1; i++) {
         int res;
@@ -257,7 +257,7 @@ void base64_encode(const char *s, char *store, int length)
  */ 
 char *strdupdelim(const char *beg, const char *end)
 {
-    char *res = (char *)mymalloc(end - beg + 1);
+    char *res = mymalloc(end - beg + 1);
     memcpy (res, beg, end - beg);
 
     res[end - beg] = '\0';

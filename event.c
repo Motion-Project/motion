@@ -143,7 +143,7 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
                     // Close connection before start a new connection
                     mysql_close(cnt->database);
 
-                    cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
+                    cnt->database = mymalloc(sizeof(MYSQL));
                     mysql_init(cnt->database);
 
                     if (!mysql_real_connect(cnt->database, cnt->conf.database_host,
@@ -745,8 +745,7 @@ static void event_ffmpeg_closefile(struct context *cnt,
 {
 
     if (cnt->ffmpeg_output) {
-        if (cnt->ffmpeg_output->udata)
-            free(cnt->ffmpeg_output->udata);
+        free(cnt->ffmpeg_output->udata);
 
         ffmpeg_close(cnt->ffmpeg_output);
         cnt->ffmpeg_output = NULL;
@@ -755,8 +754,7 @@ static void event_ffmpeg_closefile(struct context *cnt,
     }
 
     if (cnt->ffmpeg_output_debug) {
-        if (cnt->ffmpeg_output_debug->udata)
-            free(cnt->ffmpeg_output_debug->udata);
+        free(cnt->ffmpeg_output_debug->udata);
 
         ffmpeg_close(cnt->ffmpeg_output_debug);
         cnt->ffmpeg_output_debug = NULL;
@@ -771,8 +769,7 @@ static void event_ffmpeg_timelapseend(struct context *cnt,
             struct tm *tm ATTRIBUTE_UNUSED)
 {
     if (cnt->ffmpeg_timelapse) {
-        if (cnt->ffmpeg_timelapse->udata)
-            free(cnt->ffmpeg_timelapse->udata);
+        free(cnt->ffmpeg_timelapse->udata);
 
         ffmpeg_close(cnt->ffmpeg_timelapse);
         cnt->ffmpeg_timelapse = NULL;
