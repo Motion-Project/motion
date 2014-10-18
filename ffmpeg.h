@@ -1,12 +1,13 @@
 #ifndef _INCLUDE_FFMPEG_H_
 #define _INCLUDE_FFMPEG_H_
 
+#include <stdio.h>
+#include <stdarg.h>
+
 #ifdef HAVE_FFMPEG
 
 #include <errno.h>
 #include <libavformat/avformat.h>
-#include <stdio.h>
-#include <stdarg.h>
 
 #endif /* HAVE_FFMPEG */
 
