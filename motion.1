@@ -3,7 +3,7 @@
 motion \-   Detect motion using a video4linux device
 .SH SYNOPSIS
 .B motion
-[ -hmns ] [ -c config file path ] [ -d log level ] [ -k log type ] [ -p process_id_file ] [ -l logfile ]
+[ \-bhmns ] [ \-c config file path ] [ \-d log level ] [ \-k log type ] [ \-p process_id_file ] [ \-l logfile ]
 .SH DESCRIPTION
 .I  Motion
 uses a video4linux device to detect motion. If motion is detected both normal
@@ -12,13 +12,16 @@ if needed. Creation of automated snapshots is also possible.
 .SH OPTIONS
 .TP
 .B \-c
-Full path and filename of config file. E.g. /home/kurt/motion.conf. Default is /usr/local/etc unless specified differently when building Motion. Many RPMs and debian packages will most likely use /etc or /etc/motion as default.
+Full path and filename of config file. E.g. /home/kurt/motion.conf. Default is /usr/local/etc/motion unless specified differently when building Motion. Many RPMs and debian packages will most likely use /etc or /etc/motion as default.
 .TP
 .B \-h
 Show help screen.
 .TP
 .B \-m
 Disable motion detection at startup.
+.TP
+.B \-b
+Run in background (daemon) mode.
 .TP
 .B \-n
 Run in non-daemon mode.
@@ -36,7 +39,7 @@ Set type of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)
 Full path and filename for process id file (pid file). E.g /var/run/motion.pid. Default is not defined. Pid file is only created when Motion is started in daemon mode.
 .TP
 .B \-l
-Full path and filename of log file. ( use -l syslog to log to stderr and syslog )
+Full path and filename of log file. ( use \-l syslog to log to stderr and syslog )
 .TP
 .SH "CONFIG FILE OPTIONS"
 These are the options that can be used in the config file.
@@ -132,7 +135,7 @@ pipe raw video to generally - 'STDIN', allowing to use an external video encoder
 .br
 e.g. using memcoder :
 .br
-extpipe mencoder -demuxer rawvideo -rawvideo w=320:h=240:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:     threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
+extpipe mencoder \-demuxer rawvideo \-rawvideo w=320:h=240:i420 \-ovc x264 \-x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:     threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me \-vf denoise3d=16:12:48:4,pp=lb \-of   avi \-o %f.avi \- \-fps %fps
 .TP
 .B ffmpeg_bps integer
 Values: 0 - 9999999 / Default: 400000
@@ -195,9 +198,9 @@ Values: 0 - 255 / Default: 0 (disabled)
 The hue level for the video device.
 .TP
 .B input integer
-Values: -1 - 64, -1 = disabled / Default: -1 (disabled)
+Values: \-1 - 64, \-1 = disabled / Default: \-1 (disabled)
 .br
-Input channel to use expressed as an integer number starting from -1. Should normally be set to 1 for video/TV cards, and -1 for USB cameras.
+Input channel to use expressed as an integer number starting from \-1. Should normally be set to 1 for video/TV cards, and \-1 for USB cameras.
 .TP
 .B ipv6_enabled boolean
 Values: on, off / Default: off
@@ -529,12 +532,12 @@ This option defines the value of the special event conversion specifier %C. You 
 .B text_left string
 Values: Max 4095 characters / Default: Not defined
 .br
-User defined text overlayed on each in the lower left corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > | , . : - + _ \n and conversion specifiers (codes starting by a %).
+User defined text overlayed on each in the lower left corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > | , . : - + _ \\n and conversion specifiers (codes starting by a %).
 .TP
 .B text_right string
-Values: Max 4095 characters / Default: %Y-%m-%d\n%T
+Values: Max 4095 characters / Default: %Y-%m-%d\\n%T
 .br
-User defined text overlayed on each in the lower right corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > | , . : - + _ \n and conversion specifiers (codes starting by a %). Default: %Y-%m-%d\n%T = date in ISO format and time in 24 hour clock
+User defined text overlayed on each in the lower right corner. Use A-Z, a-z, 0-9, " / ( ) @ ~ # < > | , . : - + _ \\n and conversion specifiers (codes starting by a %). Default: %Y-%m-%d\\n%T = date in ISO format and time in 24 hour clock
 .TP
 .B thread string
 Values: Max 4095 characters / Default: Not defined
@@ -695,19 +698,19 @@ A "motion" image/movie shows the pixels that have actually changed during the la
 A "normal" image is the real image taken by the camera with text overlayed.
 .TP
 .B Threads and config files
-If Motion was invoked with command line option -c pathname Motion will expect the config file to be as specified. When you specify the config file on the command line with -c you can call it anything.
+If Motion was invoked with command line option \-c pathname Motion will expect the config file to be as specified. When you specify the config file on the command line with \-c you can call it anything.
 .br
-If you do not specify -c or the filename you give Motion does not exist, Motion will search for the configuration file called 'motion.conf' in the following order:
+If you do not specify \-c or the filename you give Motion does not exist, Motion will search for the configuration file called 'motion.conf' in the following order:
 .br
 1. Current directory from where motion was invoked
 .br
 2. Then in a directory called '.motion' in the current users home directory (shell environment variable $HOME). E.g. /home/goofy/.motion/motion.conf
 .br
-3. The directory defined by the --sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
+3. The directory defined by the \-\-sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
 .br
-If you have write access to /usr/local/etc then the editor recommends having only one motion.conf file in the default /usr/local/etc/ directory.
+If you have write access to /usr/local/etc/motion then the editor recommends having only one motion.conf file in the default /usr/local/etc/motion directory.
 .br
-Motion has a configuration file in the distribution package called motion-dist.conf. When you run 'make install' this files gets copied to the /usr/local/etc directory.
+Motion has a configuration file in the distribution package called motion-dist.conf. When you run 'make install' this files gets copied to the /usr/local/etc/motion directory.
 .br
 The configuration file needs to be renamed from motion-dist.conf to motion.conf. The original file is called motion-dist.conf so that your perfectly working motion.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of Motion.
 .br
@@ -742,7 +745,7 @@ If you run the webcontrol command http://host:port/0/config/writeyes, motion wil
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, picture_filename, movie_filename, timelapse_filename, on_area_detected, on_camera_lost, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
 .br
-In text_left and text_right you can additionally use '\n' for new line.
+In text_left and text_right you can additionally use '\\n' for new line.
 
 .TP
 .B %a

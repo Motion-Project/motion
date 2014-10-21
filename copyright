@@ -1,0 +1,47 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: motion
+Source: http://motion.sourceforge.net/
+License: GPL-2+
+
+Files: *
+Copyright: 1999-2014 motion authors; see CREDITS for details
+License: GPL-2+
+
+Files: md5.*
+Copyright: 1991-1992 RSA Data Security, Inc
+License: custom-RSA
+
+Files: netcam_wget.*
+Copyright: 1995-2002 Free Software Foundation, Inc.
+License: GPL-2+
+
+Files: mmx.h
+Copyright: 1997-2001 H. Dietz and R. Fisher
+License: GPL-2+
+
+Files: debian/*
+Copyright: 2000-2014 motion Debian packagers; see debian/changelog for details
+License: GPL-2+
+
+License: GPL-2+
+ On Debian systems, the complete text of the GNU General Public
+ License can be found in the file /usr/share/common-licenses/GPL-2'.
+
+License: custom-RSA
+ License to copy and use this software is granted provided that it
+ is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+ Algorithm" in all material mentioning or referencing this software
+ or this function.
+ .
+ License is also granted to make and use derivative works provided
+ that such works are identified as "derived from the RSA Data
+ Security, Inc. MD5 Message-Digest Algorithm" in all material
+ mentioning or referencing the derived work.
+ .
+ RSA Data Security, Inc. makes no representations concerning either
+ the merchantability of this software or the suitability of this
+ software for any particular purpose. It is provided "as is"
+ without express or implied warranty of any kind.
+ .
+ These notices must be retained in any copies of any part of this
+ documentation and/or software.

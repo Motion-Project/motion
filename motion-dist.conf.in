@@ -8,7 +8,7 @@
 ############################################################
 
 # Start in daemon (background) mode and release terminal (default: off)
-daemon on
+daemon off
 
 # File to store the process ID, also called pid file. (default: not defined)
 process_id_file /var/run/motion/motion.pid
@@ -101,7 +101,7 @@ framerate 2
 # This option is used when you want to capture images at a rate lower than 2 per second.
 minimum_frame_time 0
 
-# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rstp:// or file:///)
+# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)
 # Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined
 ; netcam_url value
 
@@ -124,6 +124,10 @@ netcam_keepalive off
 # Set less strict jpeg checks for network cameras with a poor/buggy firmware.
 # Default: off
 netcam_tolerant_check off
+
+# RTSP connection uses TCP to communicate to the camera. Can prevent image corruption.
+# Default: on
+rtsp_uses_tcp on
 
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.
@@ -283,7 +287,7 @@ ffmpeg_timelapse_mode daily
 
 # Bitrate to be used by the ffmpeg encoder (default: 400000)
 # This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)
-ffmpeg_bps 500000
+ffmpeg_bps 400000
 
 # Enables and defines variable bitrate for the ffmpeg encoder.
 # ffmpeg_bps is ignored if variable bitrate is enabled.
@@ -292,9 +296,14 @@ ffmpeg_bps 500000
 ffmpeg_variable_bitrate 0
 
 # Codec to used by ffmpeg for the video compression.
-# Timelapse mpegs are always made in mpeg1 format independent from this option.
-# Supported formats are: mpeg1 (ffmpeg-0.4.8 only), mpeg4 (default), and msmpeg4.
-# mpeg1 - gives you files with extension .mpg
+# Timelapse videos have two options.
+#   swf - Creates swf file with mpeg-2 encoding.
+#     If motion is shutdown and restarted, new pics will be appended
+#     to any previously created file with name indicated for timelapse.
+#   mpeg4 - Creates avi file with the default encoding.
+#     If motion is shutdown and restarted, new pics will create a
+#     new file with the name indicated for timelapse.
+# Supported formats are:
 # mpeg4 or msmpeg4 - gives you files with extension .avi
 # msmpeg4 is recommended for use with Windows Media Player because
 # it requires no installation of codec on the Windows client.
@@ -315,7 +324,7 @@ ffmpeg_deinterlace off
 ############################################################
 
 # Number of motion thread to show in SDL Window (default: 0 = disabled)
-sdl_threadnr 0
+#sdl_threadnr 0
 
 ############################################################
 # External pipe to video encoder
@@ -415,7 +424,7 @@ text_double off
 
 # Target base directory for pictures and films
 # Recommended to use absolute path. (Default: current working directory)
-target_dir /usr/local/apache2/htdocs/cam1
+#target_dir /tmp/motion
 
 # File path for snapshots (jpeg or ppm) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S-snapshot
@@ -437,17 +446,12 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
-# Default value is equivalent to legacy oldlayout option
-# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S
-# File extension .mpg or .avi is automatically added so do not include this
-# This option was previously called ffmpeg_filename
+# File extensions(.swf .avi) are automatically added so do not include them
 movie_filename %v-%Y%m%d%H%M%S
 
 # File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
-# Default value is near equivalent to legacy oldlayout option
-# For Motion 3.0 compatible mode choose: %Y/%m/%d-timelapse
-# File extension .mpg is automatically added so do not include this
+# File extensions(.swf .avi) are automatically added so do not include them
 timelapse_filename %Y%m%d-timelapse
 
 ############################################################
@@ -657,7 +661,7 @@ quiet on
 # %f = filename with full path
 # Default value:
 # Create tables :
-## 
+##
 # Mysql
 # CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
 #
@@ -725,8 +729,8 @@ quiet on
 # This motion.conf file AND thread1.conf and thread2.conf.
 # Only put the options that are unique to each camera in the
 # thread config files.
-; thread /usr/local/etc/thread1.conf
-; thread /usr/local/etc/thread2.conf
-; thread /usr/local/etc/thread3.conf
-; thread /usr/local/etc/thread4.conf
+; thread @prefix@/etc/motion/thread1.conf
+; thread @prefix@/etc/motion/thread2.conf
+; thread @prefix@/etc/motion/thread3.conf
+; thread @prefix@/etc/motion/thread4.conf
 

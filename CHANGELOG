@@ -1,4 +1,25 @@
-SVN trunk Summary of Changes
+Summary of Changes
+   * Changes to ffmpeg.h/ffmpeg.c to allow for compiling without ffmpeg/libav or with older versions.
+   * Merge mymalloc, free and casting changes from Alfred Klomp
+   * Merge bug fix for sizeof from Alfred Klomp
+   * Rewrote timelapse so that it works
+   * Merge tosiara changes for version number
+   * Add copyright file for features added since 3.2.12
+   * Cleanup ffmpeg.c and plug memory leak
+   * Add support for latest version of ffmpeg/libav
+   * Tidy up packaging changes
+   * Add packaging fixes (infinity0)
+   * Revise version.sh to put out the git commit.
+   * Rollback revision to allow for a formal pull request.
+   * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
+   * Implement requirement of modulo 16 to avoid seg fault when opening stream
+   * Add debian build files from trusty(14.04)
+   * Revise default values for motion.conf
+   * Revise CHANGELOG to conform with debian format
+   * Revised debian packaging files
+   * Implement new sequence for this file (CHANGELOG) newest to oldest.
+
+3.4.0 Summary of Changes
 
 Features
    * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
@@ -49,6 +70,39 @@ Features
      http://www.lavrsen.dk/foswiki/bin/view/Motion/OggTimelapse (Michael Luich)
    * Added support for ffmpeg 0.11 new API.
    * Added RSTP support for netcam ( merge https://github.com/hyperbolic2346/motion )
+   * Merge tosiara/rtsp branch (commit 46cfcf31d, 2014/05/21) (Mr-Dave)
+     * 3fps bugfix from SVN rev559 (tosiara, Joerg Weber)
+     * Buffer overflow vulnerabilities (hyperbolic2346)
+     * Redundand -- boundary prefix (torao)
+   * Removed compiler warnings:  (Mr-Dave)
+       logger.c,jpegutils.c,netcam_ftp.c,track.c,
+       picture.c,webhttpd.c,stream.c,ffmpeg.c
+   * Bug fix as part of warnings in webhttpd.c fixed(Mr-Dave)
+   * Removed compiler warning regarding ffmpeg being newer than 0.4 version(Mr-Dave)
+   * New configure script and identification of ffmpeg version and additional libs. (Mr-Dave)
+   * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
+   * Revised INSTALL with samples(Mr-Dave)
+   * Revisions for RTSP and code standard.(Mr-Dave)
+   * Plugged most memory leaks in RTSP. (Mr-Dave)
+   * Undo changes caused by code editor and other unnecessary changes (Mr-Dave)
+   * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs. (Mr-Dave)
+   * Regession fix for memory leaks and reconnection (Mr-Dave)
+   * Eliminated requirement to manually build FFMPEG for RTSP support. (Mr-Dave)
+   * Revised RTSP to support version 53 of libavformat (Mr-Dave)
+   * Revised FFMPEG.c to eliminate warnings and functions no longer supported by Libav/FFMPEG(Mr-Dave)
+   * Revised INSTALL to have sample PI configure option.(Mr-Dave)
+   * Revised configure.ac to generate compiler flag AVFMT_V53.(Mr-Dave)
+   * Revised INSTALL to indicate standard APT packages for RTSP (Mr-Dave)
+   * Revised configure.ac to recognize libavformat version 54 RTSP (Mr-Dave)
+   * Clean up the messaging for RTSP.
+   * Additional validations for RTSP connection and corrected free sequences
+   * Removed seg fault on failure to open first image, comments, isolation of RTSP
+   * Add AC_GNU_SOURCE macro to check for GNU C Library, fix compile when no FFMpeg.
+   * Implement inits of AV functions from bcl fork
+   * Add gray image upon disconnection
+   * Added tcp/udp transport config option from hyperbolic2346(commit 423ef7bb3)
+   * Revised comments to be in line with application standard.
+   * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
 
 Bugfixes
    * Avoid segfault detecting strerror_r() version GNU or SUSv3. (Angel Carpintero)
@@ -98,7 +152,7 @@ Bugfixes
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
 
 
-3.2.11.1 Sumary of Changes
+3.2.11.1 Summary of Changes
 
 Bugfixes
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)

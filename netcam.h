@@ -107,6 +107,11 @@ typedef struct file_context {
 #define NCS_BLOCK               2  /* streaming is done via MJPG-block */
 #define NCS_RTSP                3  /* streaming is done via RTSP */
 
+
+#define RTSP_NOTCONNECTED  0  /* The camera has never connected */
+#define RTSP_CONNECTED     1  /* The camera is currently connected */
+#define RTSP_RECONNECTING  2  /* The camera is trying to reconnect*/
+
 /*
  * struct netcam_context contains all the structures and other data
  * for an individual netcam.
@@ -297,5 +302,6 @@ int netcam_start (struct context *);
 int netcam_next (struct context *, unsigned char *);
 void netcam_cleanup (struct netcam_context *, int);
 ssize_t netcam_recv(netcam_context_ptr, void *, size_t);
+void netcam_url_free(struct url_t *parse_url);
 
 #endif

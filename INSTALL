@@ -1,16 +1,61 @@
-Very simple:
+NOTE:  Versions come, versions go, packages change, etc.  These instructions are intended as a starting point
+       and may need modification by the time you read this.
 
-type:
+**********************************
+***    DEBIAN BASED SYSTEMS    ***
 
+Required Packages:
+    sudo apt-get install autoconf automake build-essential libtool libjpeg8-dev libzip-dev
+
+Obtain source code (via git)
+    sudo apt-get install git
+    cd ~
+    git clone {https://github.com/your favorite fork}
+
+To rebuild the motion configure file use
+    autoreconf
+
+Optional: With FFMPEG support:
+    Build FFMPEG via their instructions
+    Configure with manually built ffmpeg which currently installs to ~/bin and ~/ffmpeg_build
+        Basic
+            ./configure --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include
+
+        With extra libraries for ffmpeg  IMPORTANT NOTE:  Your libraries will vary depending upon your build of FFMPEG
+            ./configure --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include --with-ffmpeg-libs=" -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec "
+
+        With extra libraries for ffmpeg and install to ~/motion_build
+            ./configure --prefix=$HOME/motion_build --with-ffmpeg=$HOME/ffmpeg_build --with-ffmpeg-headers=$HOME/ffmpeg_build/include --with-ffmpeg-libs=" -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec "
+
+With LIBAV APT versions of libraries
+    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libav-tools libswscale-dev
+
+Without any LIBAV/FFMPEG support or the installed version of libavcodec/libavformat
     ./configure
 
-followed by:
+Sample PI configuration with LIBAV
+    ./configure --with-ffmpeg=/usr/lib/arm-linux-gnueabihf --with-ffmpeg-headers=/usr/include
 
+
+Once configured type:
     make
-
-And
-
     make install
 
-    
-Next read the README
+*****************************
+***    OpenSUSE SYSTEM    ***
+
+sudo zypper install autoconf automake libtool git
+sudo zypper install --type pattern devel_basis
+sudo zypper install libjpeg8-devel
+sudo zypper install -t pattern devel_C_C++
+
+Optional:  FFmpeg files
+sudo zypper ar -f -n packman-essentials http://packman.inode.at/suse/openSUSE_13.1/Essentials/ packman-essentials
+sudo zypper ar -f -n packman-multimedia http://packman.inode.at/suse/openSUSE_13.1/Multimedia/ packman-multimedia
+sudo zypper install libffmpeg-devel
+
+./configure
+    make
+    make install
+
+*************************

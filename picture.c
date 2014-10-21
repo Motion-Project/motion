@@ -177,7 +177,7 @@ static void put_direntry(struct tiff_writing *into, const char *data, unsigned l
     } else {
 	    /* Longer entries are stored out-of-line */
 	    unsigned offset = into->data_offset;
-	
+
         while ((offset & 0x03) != 0) {  /* Alignment */
 	        into->base[offset] = 0;
 	        offset ++;
@@ -324,7 +324,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 
     JOCTET *marker = malloc(buffer_size);
     memcpy(marker, exif_marker_start, 14); /* EXIF and TIFF headers */
-    
+
     struct tiff_writing writing = (struct tiff_writing) {
 	.base = marker + 6, /* base address for intra-TIFF offsets */
 	.buf = marker + 14, /* current write position */
@@ -338,10 +338,10 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 
     if (description)
 	    put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 0);
-    
+
     if (datetime)
 	    put_stringentry(&writing, TIFF_TAG_DATETIME, datetime, 1);
-    
+
     if (ifd1_tagcount > 0) {
 	    /* Offset of IFD1 - TIFF header + IFD0 size. */
 	    unsigned ifd1_offset = 8 + 6 + ( 12 * ifd0_tagcount );
@@ -369,10 +369,10 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 
 	    if (datetime)
 	        put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME, datetime, 1);
-	    
+
         if (box)
 	        put_subjectarea(&writing, box);
-	    
+
         if (subtime)
 	        put_stringentry(&writing, EXIF_TAG_ORIGINAL_DATETIME_SS, subtime, 0);
 
@@ -392,9 +392,8 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     /* EXIF data lives in a JPEG APP1 marker */
     jpeg_write_marker(cinfo, JPEG_APP0 + 1, marker, marker_len);
 
-    if (description)
-	    free(description);
-    
+    free(description);
+
     free(marker);
 }
 
@@ -679,7 +678,6 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
     unsigned char *u = image + width * height;
     unsigned char *v = u + (width * height) / 4;
     int r, g, b;
-    int warningkiller;
     unsigned char rgb[3];
 
     /*
@@ -722,7 +720,7 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
                 v++;
             }
             /* ppm is rgb not bgr */
-            warningkiller = fwrite(rgb, 1, 3, picture);
+            fwrite(rgb, 1, 3, picture);
         }
         if (y & 1) {
             u -= width / 2;

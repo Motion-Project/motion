@@ -1161,7 +1161,6 @@ int vid_start(struct context *cnt)
 
 
         dev = mymalloc(sizeof(struct video_dev));
-        memset(dev, 0, sizeof(struct video_dev));
 
         fd_bktr = open(conf->video_device, O_RDWR);
 

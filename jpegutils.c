@@ -491,9 +491,9 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
      */
     jpeg_read_header (&dinfo, TRUE);
     dinfo.raw_data_out = TRUE;
-#if JPEG_LIB_VERSION >= 70    
+#if JPEG_LIB_VERSION >= 70
     dinfo.do_fancy_upsampling = FALSE;
-#endif    
+#endif
     dinfo.out_color_space = JCS_YCbCr;
     dinfo.dct_method = JDCT_IFAST;
     guarantee_huff_tables(&dinfo);
@@ -584,9 +584,9 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
         if (field > 0) {
             jpeg_read_header (&dinfo, TRUE);
             dinfo.raw_data_out = TRUE;
-#if JPEG_LIB_VERSION >= 70            
+#if JPEG_LIB_VERSION >= 70
             dinfo.do_fancy_upsampling = FALSE;
-#endif            
+#endif
             dinfo.out_color_space = JCS_YCbCr;
             dinfo.dct_method = JDCT_IFAST;
             jpeg_start_decompress (&dinfo);
@@ -770,7 +770,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                          unsigned int height, unsigned char *raw0,
                          unsigned char *raw1, unsigned char *raw2)
 {
-    int numfields, hsf[3], field, yl, yc, xsl, xsc, xs, xd, hdown;
+    int numfields, field, yl, yc, xsl, xsc, xs, xd, hdown;
     unsigned int x, y, vsf[3];
 
     JSAMPROW row0[16] = { buf0[0], buf0[1], buf0[2], buf0[3],
@@ -805,7 +805,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     dinfo.raw_data_out = TRUE;
 #if JPEG_LIB_VERSION >= 70
     dinfo.do_fancy_upsampling = FALSE;
-#endif    
+#endif
     dinfo.out_color_space = JCS_GRAYSCALE;
     dinfo.dct_method = JDCT_IFAST;
 
@@ -818,7 +818,6 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     guarantee_huff_tables(&dinfo);
     jpeg_start_decompress (&dinfo);
 
-    hsf[0] = 1; hsf[1] = 1; hsf[2] = 1;
     vsf[0]= 1; vsf[1] = 1; vsf[2] = 1;
 
     /* Height match image height or be exact twice the image height. */
@@ -874,7 +873,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
             dinfo.raw_data_out = TRUE;
 #if JPEG_LIB_VERSION >= 70
             dinfo.do_fancy_upsampling = FALSE;
-#endif            
+#endif
             dinfo.out_color_space = JCS_GRAYSCALE;
             dinfo.dct_method = JDCT_IFAST;
             jpeg_start_decompress (&dinfo);

@@ -217,7 +217,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     /* If errno_flag is set, add on the library error message. */
     if (errno_flag) {
       size_t buf_len = strlen(buf);
-      
+
       // just knock off 10 characters if we're that close...
       if (buf_len + 10 > 1024) {
 	buf[1024 - 10] = '\0';
@@ -232,15 +232,9 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
 #if defined(XSI_STRERROR_R)
-#warning "************************************"
-#warning "* Using XSI-COMPLIANT strerror_r() *"
-#warning "************************************"
         /* XSI-compliant strerror_r() */
         strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
 #else
-#warning "************************************"
-#warning "* Using GNU-COMPLIANT strerror_r() *"
-#warning "************************************"
         /* GNU-specific strerror_r() */
         strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
