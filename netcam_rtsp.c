@@ -19,8 +19,8 @@
  ***********************************************************/
 
 #include <stdio.h>
-#include "netcam_rtsp.h"
 #include "rotate.h"    /* already includes motion.h */
+#include "netcam_rtsp.h"
 
 #ifdef HAVE_FFMPEG
 
