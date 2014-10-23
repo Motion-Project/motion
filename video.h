@@ -14,8 +14,12 @@
 #include <sys/mman.h>
 
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#if !defined(WITHOUT_V4L)
+#if defined(HAVE_LINUX_VIDEODEV_H)
 #include <linux/videodev.h>
+#elif defined(HAVE_SYS_VIDEOIO_H)
+#include <sys/videoio.h>
+#endif
 #include "vloopback_motion.h"
 #include "pwc-ioctl.h"
 #endif

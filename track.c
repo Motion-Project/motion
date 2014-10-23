@@ -9,7 +9,7 @@
 #include <math.h>
 #include "motion.h"
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#if (defined(HAVE_LINUX_VIDEODEV_H) || defined(HAVE_SYS_VIDEOIO_H)) && (!defined(WITHOUT_V4L))
 #include "pwc-ioctl.h"
 #endif
 
