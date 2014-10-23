@@ -37,7 +37,7 @@ if test "${Darwin}" = ""; then
 	AC_MSG_RESULT(no)
 	AC_MSG_CHECKING(for *BSD)
 
-	FreeBSD=`uname -a | grep "BSD"`
+	FreeBSD=`uname -a | grep "FreeBSD"`
 	if test "${FreeBSD}" = ""; then
 		AC_MSG_RESULT(no)
 		VIDEO="video.o video2.o video_common.o"
