@@ -25,6 +25,7 @@
 /* Forward declarations */
 static int motion_init(struct context *cnt);
 static void motion_cleanup(struct context *cnt);
+static void setup_signals(struct sigaction *, struct sigaction *);
 
 
 /**

@@ -179,7 +179,11 @@ typedef struct {
 /**
  * xioctl
  */
+#ifdef __OpenBSD__
+static int xioctl(int fd, unsigned long request, void *arg)
+#else
 static int xioctl(int fd, int request, void *arg)
+#endif
 {
     int ret;
 

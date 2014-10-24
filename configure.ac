@@ -37,7 +37,7 @@ if test "${Darwin}" = ""; then
 	AC_MSG_RESULT(no)
 	AC_MSG_CHECKING(for *BSD)
 
-	FreeBSD=`uname -a | grep "BSD"`
+	FreeBSD=`uname -a | grep "FreeBSD"`
 	if test "${FreeBSD}" = ""; then
 		AC_MSG_RESULT(no)
 		VIDEO="video.o video2.o video_common.o"
@@ -915,7 +915,7 @@ fi
 
 #Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h)
+AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h sys/videoio.h)
 
 AC_CHECK_FUNCS(get_current_dir_name)
 
@@ -931,8 +931,11 @@ else
 		[SUPPORTED_V4L2=true],
 		[SUPPORTED_V4L2=false],
 		[#include <sys/time.h>
-			#include <linux/videodev.h>])
-
+			#ifdef HAVE_LINUX_VIDEODEV_H
+			#include <linux/videodev.h>
+			#elif HAVE_SYS_VIDEOIO_H
+			#include <sys/videoio.h>
+			#endif])
 	AC_MSG_CHECKING(for V42L support)
 	if test x$SUPPORTED_V4L2 = xtrue; then
 		AC_MSG_RESULT(yes)
