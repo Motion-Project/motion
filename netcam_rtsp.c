@@ -197,8 +197,10 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
         return -1;
     }
 
-    /* Open the codec  */
-    ret = avcodec_open2(dec_ctx, dec, NULL);
+    /* Open the codec  It is not thread safe so lock it*/
+    pthread_mutex_lock(&global_lock);
+        ret = avcodec_open2(dec_ctx, dec, NULL);
+    pthread_mutex_unlock(&global_lock);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
     	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
@@ -863,11 +865,17 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
         netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 8 (%d).", netcam->cnt->conf.height);
     }
-    
-    av_register_all();
-    avformat_network_init();
-    avcodec_register_all();
 
+    /*
+     * Documentation does not indicate thread safety on these
+     * init functions but we lock them just in case.
+     */
+    pthread_mutex_lock(&global_lock);
+        av_register_all();
+        avformat_network_init();
+        avcodec_register_all();
+    pthread_mutex_unlock(&global_lock);
+    
     /*
      * The RTSP context should be all ready to attempt a connection with
      * the server, so we try ....
