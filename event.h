@@ -11,31 +11,36 @@
 #ifndef _INCLUDE_EVENT_H_
 #define _INCLUDE_EVENT_H_
 
-#define EVENT_FILECREATE        1
-#define EVENT_MOTION            2
-#define EVENT_FIRSTMOTION       3
-#define EVENT_ENDMOTION         4
-#define EVENT_STOP              5
-#define EVENT_TIMELAPSE         6
-#define EVENT_TIMELAPSEEND      7
-#define EVENT_STREAM            8
-#define EVENT_IMAGE_DETECTED    9
-#define EVENT_IMAGEM_DETECTED   10
-#define EVENT_IMAGE_SNAPSHOT    11
-#define EVENT_IMAGE             12
-#define EVENT_IMAGEM            13
-#define EVENT_FILECLOSE         14
-#define EVENT_DEBUG             15
-#define EVENT_CRITICAL          16
-#define EVENT_AREA_DETECTED     17
-#define EVENT_CAMERA_LOST       18
-#define EVENT_FFMPEG_PUT        19
-#define EVENT_SDL_PUT           20
+typedef enum {
+    EVENT_FILECREATE = 1,
+    EVENT_MOTION,
+    EVENT_FIRSTMOTION,
+    EVENT_ENDMOTION,
+    EVENT_STOP,
+    EVENT_TIMELAPSE,
+    EVENT_TIMELAPSEEND,
+    EVENT_STREAM,
+    EVENT_IMAGE_DETECTED,
+    EVENT_IMAGEM_DETECTED,
+    EVENT_IMAGE_SNAPSHOT,
+    EVENT_IMAGE,
+    EVENT_IMAGEM,
+    EVENT_FILECLOSE,
+    EVENT_DEBUG,
+    EVENT_CRITICAL,
+    EVENT_AREA_DETECTED,
+    EVENT_CAMERA_LOST,
+    EVENT_FFMPEG_PUT,
+    EVENT_SDL_PUT,
+    EVENT_LAST,
+} motion_event;
 
 
-typedef void(* event_handler)(struct context *, int, unsigned char *, char *, void *, struct tm *);
+typedef void(* event_handler)(struct context *, motion_event, unsigned char *,
+             char *, void *, struct tm *);
 
-void event(struct context *, int, unsigned char *, char *, void *, struct tm *);
+void event(struct context *, motion_event, unsigned char *, char *, void *,
+           struct tm *);
 const char * imageext(struct context *);
 
 #endif /* _INCLUDE_EVENT_H_ */
