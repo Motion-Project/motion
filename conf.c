@@ -1561,11 +1561,14 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "c:d:hmns?p:k:l:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1)
                 strcpy(cnt->conf_filename, optarg);
+            break;
+        case 'b':
+            cnt->daemon = 1;
             break;
         case 'n':
             cnt->daemon = 0;
@@ -1800,7 +1803,7 @@ void conf_print(struct context **cnt)
                     fprintf(conffile, "%s\n", val);
 
                     if (strlen(val) == 0)
-                        fprintf(conffile, "; thread /usr/local/etc/thread1.conf\n");
+                        fprintf(conffile, "; thread %s/motion/thread1.conf\n", sysconfdir);
 
                     free(val);
                 } else if (thread == 0) {
@@ -1911,7 +1914,7 @@ struct context **conf_load(struct context **cnt)
         fp = fopen(filename, "r");
 
         if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
+            snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
             fp = fopen(filename, "r");
 
             if (!fp) /* There is no config file.... use defaults. */
@@ -2170,7 +2173,7 @@ char *mystrdup(const char *from)
     } else {
         stringlength = strlen(from);
         stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = (char *)mymalloc(stringlength + 1);
+        tmp = mymalloc(stringlength + 1);
         strncpy(tmp, from, stringlength);
 
         /*
@@ -2376,6 +2379,7 @@ static void usage()
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
+    printf("-b\t\t\tRun in background (daemon) mode.\n");
     printf("-n\t\t\tRun in non-daemon mode.\n");
     printf("-s\t\t\tRun in setup mode.\n");
     printf("-c config\t\tFull path and filename of config file.\n");
@@ -2387,6 +2391,6 @@ static void usage()
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");
-    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
+    printf("it will read motion.conf from current directory, ~/.motion or %s/motion.\n", sysconfdir);
     printf("\n");
 }

@@ -392,8 +392,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     /* EXIF data lives in a JPEG APP1 marker */
     jpeg_write_marker(cinfo, JPEG_APP0 + 1, marker, marker_len);
 
-    if (description)
-	    free(description);
+    free(description);
 
     free(marker);
 }

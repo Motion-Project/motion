@@ -20,7 +20,7 @@ rcvar=`set_rcvar`
 
 command="@BIN_PATH@/${name}"
 pidfile="/var/run/${name}.pid"
-required_files="/usr/local/etc/${name}.conf"
+required_files="/usr/local/etc/motion/${name}.conf"
 
 load_rc_config $name
 run_rc_command "$1"
