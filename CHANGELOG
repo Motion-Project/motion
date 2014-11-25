@@ -1,3 +1,25 @@
+3.4.1 Summary of Changes
+
+   * Changes to ffmpeg.h/ffmpeg.c to allow for compiling without ffmpeg/libav or with older versions.
+   * Merge mymalloc, free and casting changes from Alfred Klomp
+   * Merge bug fix for sizeof from Alfred Klomp
+   * Rewrote timelapse so that it works
+   * Merge tosiara changes for version number
+   * Add copyright file for features added since 3.2.12
+   * Cleanup ffmpeg.c and plug memory leak
+   * Add support for latest version of ffmpeg/libav
+   * Tidy up packaging changes
+   * Add packaging fixes (infinity0)
+   * Revise version.sh to put out the git commit.
+   * Rollback revision to allow for a formal pull request.
+   * Reimplement changes not to be included in pull request from tosiara commit 9ebee031
+   * Implement requirement of modulo 16 to avoid seg fault when opening stream
+   * Add debian build files from trusty(14.04)
+   * Revise default values for motion.conf
+   * Revise CHANGELOG to conform with debian format
+   * Revised debian packaging files
+   * Implement new sequence for this file (CHANGELOG) newest to oldest.
+
 3.4.0 Summary of Changes
 
 Features
@@ -53,7 +75,6 @@ Features
      * 3fps bugfix from SVN rev559 (tosiara, Joerg Weber)
      * Buffer overflow vulnerabilities (hyperbolic2346)
      * Redundand -- boundary prefix (torao)
-     * Proper size for memset and allocation size (Alfred Klomp)
    * Removed compiler warnings:  (Mr-Dave)
        logger.c,jpegutils.c,netcam_ftp.c,track.c,
        picture.c,webhttpd.c,stream.c,ffmpeg.c
@@ -63,7 +84,7 @@ Features
    * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
    * Revised INSTALL with samples(Mr-Dave)
    * Revisions for RTSP and code standard.(Mr-Dave)
-   * Plugged most(?) memory leaks in RTSP. (Mr-Dave)
+   * Plugged most memory leaks in RTSP. (Mr-Dave)
    * Undo changes caused by code editor and other unnecessary changes (Mr-Dave)
    * Moved call to netcam_shutdown_rtsp into netcam_cleanup where it belongs. (Mr-Dave)
    * Regession fix for memory leaks and reconnection (Mr-Dave)
@@ -80,7 +101,7 @@ Features
    * Add AC_GNU_SOURCE macro to check for GNU C Library, fix compile when no FFMpeg.
    * Implement inits of AV functions from bcl fork
    * Add gray image upon disconnection
-   * Added tcp/udp transport config option from hyperbolic(commit 423ef7bb3)
+   * Added tcp/udp transport config option from hyperbolic2346(commit 423ef7bb3)
    * Revised comments to be in line with application standard.
    * Restructure rtsp to handle rescaling and non YUV420 format, rotate, MJPEG input format
 
@@ -132,7 +153,7 @@ Bugfixes
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
 
 
-3.2.11.1 Sumary of Changes
+3.2.11.1 Summary of Changes
 
 Bugfixes
    * Fix Segfault on reload or quit for vloopback (maybe other v4l1 devices too) (Peter Holik)

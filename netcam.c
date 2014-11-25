@@ -121,7 +121,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
     if (m.rm_so != -1) {
         len = m.rm_eo - m.rm_so;
 
-        if ((match = (char *) mymalloc(len + 1)) != NULL) {
+        if ((match = mymalloc(len + 1)) != NULL) {
             strncpy(match, input + m.rm_so, len);
             match[len] = '\0';
         }
@@ -226,25 +226,17 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
  */
 void netcam_url_free(struct url_t *parse_url)
 {
-    if (parse_url->service) {
-        free(parse_url->service);
-        parse_url->service = NULL;
-    }
+    free(parse_url->service);
+    parse_url->service = NULL;
 
-    if (parse_url->userpass) {
-        free(parse_url->userpass);
-        parse_url->userpass = NULL;
-    }
+    free(parse_url->userpass);
+    parse_url->userpass = NULL;
 
-    if (parse_url->host) {
-        free(parse_url->host);
-        parse_url->host = NULL;
-    }
+    free(parse_url->host);
+    parse_url->host = NULL;
 
-    if (parse_url->path) {
-        free(parse_url->path);
-        parse_url->path = NULL;
-    }
+    free(parse_url->path);
+    parse_url->path = NULL;
 }
 
 /**
@@ -333,8 +325,7 @@ static int netcam_check_keepalive(char *header)
         return -1;
 
     /* We do not detect the second field or other case mixes at present. */
-    if (content_type) 
-        free(content_type);
+    free(content_type);
 
     return 1;
 }
@@ -364,8 +355,7 @@ static int netcam_check_close(char *header)
     if (!strcmp(type, "close")) /* strcmp returns 0 for match. */
         ret = 1;
     
-    if (type) 
-        free(type);
+    free(type);
 
     return ret;
 }
@@ -409,8 +399,7 @@ static int netcam_check_content_type(char *header)
         ret = 0;
     }
 
-    if (content_type)
-        free(content_type);
+    free(content_type);
 
     return ret;
 }
@@ -652,8 +641,7 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
                 if ((boundary = strstr(header, "boundary="))) {
                     /* On error recovery this may already be set. */
-                    if (netcam->boundary)
-                        free(netcam->boundary);
+                    free(netcam->boundary);
 
                     netcam->boundary = mystrdup(boundary + 9);
                     /*
@@ -1843,15 +1831,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
 tfile_context *file_new_context(void) 
 {
-    tfile_context *ret;
-
     /* Note that mymalloc will exit on any problem. */
-    ret = mymalloc(sizeof(tfile_context));
-    if (!ret)
-        return ret;
-
-    memset(ret, 0, sizeof(tfile_context));
-    return ret;
+    return mymalloc(sizeof(tfile_context));
 }
 
 void file_free_context(tfile_context* ctxt) 
@@ -1859,9 +1840,7 @@ void file_free_context(tfile_context* ctxt)
     if (ctxt == NULL)
         return;
 
-    if (ctxt->path != NULL)
-        free(ctxt->path);
-
+    free(ctxt->path);
     free(ctxt);
 }
 
@@ -2128,8 +2107,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
     int ix;
 
     /* First the http context structure. */
-    netcam->response = (struct rbuf *) mymalloc(sizeof(struct rbuf));
-    memset(netcam->response, 0, sizeof(struct rbuf));
+    netcam->response = mymalloc(sizeof(struct rbuf));
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Netcam has flags:"
                " HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.",  
@@ -2569,35 +2547,23 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     pthread_mutex_unlock(&netcam->mutex);
 
     /* and cleanup the rest of the netcam_context structure. */
-    if (netcam->connect_host != NULL) 
-        free(netcam->connect_host);
-
-    if (netcam->connect_request != NULL) 
-        free(netcam->connect_request);
-    
-
-    if (netcam->boundary != NULL) 
-        free(netcam->boundary);
+    free(netcam->connect_host);
+    free(netcam->connect_request);
+    free(netcam->boundary);
     
 
     if (netcam->latest != NULL) {
-        if (netcam->latest->ptr != NULL) 
-            free(netcam->latest->ptr);
-        
+        free(netcam->latest->ptr);
         free(netcam->latest);
     }
 
     if (netcam->receiving != NULL) {
-        if (netcam->receiving->ptr != NULL) 
-            free(netcam->receiving->ptr);
-        
+        free(netcam->receiving->ptr);
         free(netcam->receiving);
     }
 
     if (netcam->jpegbuf != NULL) {
-        if (netcam->jpegbuf->ptr != NULL) 
-            free(netcam->jpegbuf->ptr);
-    
+        free(netcam->jpegbuf->ptr);
         free(netcam->jpegbuf);
     }
 
@@ -2606,10 +2572,7 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
     else 
         netcam_disconnect(netcam);
     
-
-    if (netcam->response != NULL) 
-        free(netcam->response);
-
+    free(netcam->response);
 
     if (netcam->caps.streaming == NCS_RTSP)
         netcam_shutdown_rtsp(netcam);
@@ -2721,9 +2684,7 @@ int netcam_start(struct context *cnt)
      * Create a new netcam_context for this camera
      * and clear all the entries.
      */
-    cnt->netcam = (struct netcam_context *)
-                   mymalloc(sizeof(struct netcam_context));
-    memset(cnt->netcam, 0, sizeof(struct netcam_context));
+    cnt->netcam = mymalloc(sizeof(struct netcam_context));
     netcam = cnt->netcam;           /* Just for clarity in remaining code. */
     netcam->cnt = cnt;              /* Fill in the "parent" info. */
 
@@ -2734,15 +2695,12 @@ int netcam_start(struct context *cnt)
 
     /* Our image buffers */
     netcam->receiving = mymalloc(sizeof(netcam_buff));
-    memset(netcam->receiving, 0, sizeof(netcam_buff));
     netcam->receiving->ptr = mymalloc(NETCAM_BUFFSIZE);
 
     netcam->jpegbuf = mymalloc(sizeof(netcam_buff));
-    memset(netcam->jpegbuf, 0, sizeof(netcam_buff));
     netcam->jpegbuf->ptr = mymalloc(NETCAM_BUFFSIZE);
 
     netcam->latest = mymalloc(sizeof(netcam_buff));
-    memset(netcam->latest, 0, sizeof(netcam_buff));
     netcam->latest->ptr = mymalloc(NETCAM_BUFFSIZE);
     netcam->timeout.tv_sec = READ_TIMEOUT;
 
@@ -2909,15 +2867,15 @@ int netcam_start(struct context *cnt)
     * Motion currently requires that image height and width is a
     * multiple of 16. So we check for this.
     */
-    if (netcam->width % 8) {
+    if (netcam->width % 16) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image width (%d)"
-                   " is not modulo 8", netcam->width);
+                   " is not modulo 16", netcam->width);
         return -3;
     }
 
-    if (netcam->height % 8) {
+    if (netcam->height % 16) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image height (%d)"
-                   " is not modulo 8", netcam->height);
+                   " is not modulo 16", netcam->height);
         return -3;
     }
     
