@@ -2879,7 +2879,6 @@ int netcam_start(struct context *cnt)
         return -3;
     }
     
-
     /* Fill in camera details into context structure. */
     cnt->imgs.width = netcam->width;
     cnt->imgs.height = netcam->height;
