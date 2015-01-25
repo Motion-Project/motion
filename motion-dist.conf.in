@@ -24,7 +24,7 @@ setup_mode off
 # Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)
 ;logfile /tmp/motion.log
 
-# Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)
+# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)
 log_level 6
 
 # Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)
