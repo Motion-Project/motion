@@ -221,7 +221,7 @@ config_param config_params[] = {
     },
     {
     "log_level",
-    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 6 / NTC)",
+    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)",
     1,
     CONF_OFFSET(log_level),
     copy_int,
@@ -2383,7 +2383,7 @@ static void usage()
     printf("-n\t\t\tRun in non-daemon mode.\n");
     printf("-s\t\t\tRun in setup mode.\n");
     printf("-c config\t\tFull path and filename of config file.\n");
-    printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). default: 6 / NTC.\n");
+    printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). default: 6 / NTC.\n");
     printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
     printf("-l log file \t\tFull path and filename of log file.\n");
