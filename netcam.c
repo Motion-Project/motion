@@ -2366,7 +2366,12 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
      * ownership" of the string away from the URL (i.e. it won't be freed
      * when we cleanup the url structure later).
      */
-    netcam->ftp->path = url->path;
+    if (strcmp(url->path,"/")){ 
+        netcam->ftp->path = mystrdup(url->path + 1);
+    } else { 
+        netcam->ftp->path = mystrdup(url->path);
+    } 
+
     url->path = NULL;
 
     if (cnt->conf.netcam_userpass != NULL) {
@@ -2395,6 +2400,7 @@ static int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
      */
     if (ftp_connect(netcam) < 0) {
         ftp_free_context(netcam->ftp);
+        netcam->ftp = NULL;
         return -1;
     }
 
@@ -2567,10 +2573,12 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag)
         free(netcam->jpegbuf);
     }
 
-    if (netcam->ftp != NULL) 
+    if (netcam->ftp != NULL) {
         ftp_free_context(netcam->ftp);
-    else 
+        netcam->ftp = NULL;
+    } else {
         netcam_disconnect(netcam);
+    }
     
     free(netcam->response);
 
@@ -2841,7 +2849,8 @@ int netcam_start(struct context *cnt)
     if ((retval = netcam->get_image(netcam)) != 0) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Failed trying to "
                    "read first image - retval:%d", retval);
-        netcam->rtsp->status = RTSP_NOTCONNECTED;
+        if (netcam->caps.streaming == NCS_RTSP) 
+            netcam->rtsp->status = RTSP_NOTCONNECTED;
         return -1;
     }
 
@@ -2870,13 +2879,13 @@ int netcam_start(struct context *cnt)
     if (netcam->width % 8) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image width (%d)"
                    " is not modulo 8", netcam->width);
-        return -3;
+        return -2;
     }
 
     if (netcam->height % 8) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: netcam image height (%d)"
                    " is not modulo 8", netcam->height);
-        return -3;
+        return -2;
     }
     
 

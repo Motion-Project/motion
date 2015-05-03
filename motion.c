@@ -662,7 +662,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
  * Returns:     0 OK
  *             -1 Fatal error, open loopback error
  *             -2 Fatal error, open SQL database error
- *             -3 Fatal error, image dimensions are not modulo 16
+ *             -3 Fatal error, image dimensions are not modulo 8
  */
 static int motion_init(struct context *cnt)
 {
@@ -713,7 +713,7 @@ static int motion_init(struct context *cnt)
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     } else if (cnt->video_dev == -2) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera "
-                   "Motion only supports width and height modulo 16");
+                   "Motion only supports width and height modulo 8");
         return -3;
     }
 
@@ -812,7 +812,7 @@ static int motion_init(struct context *cnt)
 
 #ifdef HAVE_SQLITE3
     if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.sqlite3_db) {
-        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: DB %s",
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 Database filename %s",
                    cnt->conf.sqlite3_db);
 
         if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
@@ -821,6 +821,11 @@ static int motion_init(struct context *cnt)
             sqlite3_close(cnt->database_sqlite3);
             exit(1);
         }
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 busy timeout %s msec", 
+               cnt->conf.sqlite3_busy_timeout);
+		if (sqlite3_busy_timeout(cnt->database_sqlite3, cnt->conf.sqlite3_busy_timeout) != SQLITE_OK)
+			MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: sqlite3_busy_timeout failed %s : %s\n",
+                      cnt->conf.sqlite3_db, sqlite3_errmsg(cnt->database_sqlite3));	
     }
 #endif /* HAVE_SQLITE3 */
 
