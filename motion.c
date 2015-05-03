@@ -812,7 +812,7 @@ static int motion_init(struct context *cnt)
 
 #ifdef HAVE_SQLITE3
     if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.sqlite3_db) {
-        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: DB %s",
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 Database filename %s",
                    cnt->conf.sqlite3_db);
 
         if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
@@ -821,6 +821,11 @@ static int motion_init(struct context *cnt)
             sqlite3_close(cnt->database_sqlite3);
             exit(1);
         }
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 busy timeout %s msec", 
+               cnt->conf.sqlite3_busy_timeout);
+		if (sqlite3_busy_timeout(cnt->database_sqlite3, cnt->conf.sqlite3_busy_timeout) != SQLITE_OK)
+			MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: sqlite3_busy_timeout failed %s : %s\n",
+                      cnt->conf.sqlite3_db, sqlite3_errmsg(cnt->database_sqlite3));	
     }
 #endif /* HAVE_SQLITE3 */
 

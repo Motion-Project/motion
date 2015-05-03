@@ -403,7 +403,7 @@ FFMPEG_HEADERS_DIR="$withval"
 #
 # ffmpeg custom extra libraries
 #
-FFMPEG_EXTRALIBS=" -lavformat -lavcodec -lavutil -lm -lz -lswscale "
+FFMPEG_EXTRALIBS=" -lavformat -lavcodec -lavutil -lm -lz -lswscale -lswresample -lva"
 AC_ARG_WITH(ffmpeg-libs,
 [  --with-ffmpeg-libs[=libs]  Specify the extra libs for ffmpeg
                                ],
