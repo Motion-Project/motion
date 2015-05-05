@@ -6,6 +6,7 @@
  *    This program is published under the GNU Public license
  */
 
+#include <linux/videodev2.h>
 #include <math.h>
 #include "motion.h"
 

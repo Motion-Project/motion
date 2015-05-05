@@ -132,6 +132,7 @@ struct config conf_template = {
     database_port:                  0,
 #ifdef HAVE_SQLITE3
     sqlite3_db:                     NULL,
+    sqlite3_busy_timeout:			0,
 #endif
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */
     on_picture_save:                NULL,
@@ -1501,6 +1502,14 @@ config_param config_params[] = {
     "# SQLite3 database to log to (default: not defined)",
     0,
     CONF_OFFSET(sqlite3_db),
+    copy_string,
+    print_string
+    },
+    {
+    "sqlite3_busy_timeout",
+   "# wait time in Msec for locked sqlite3 database (default: 0 no wait)",
+    0,
+    CONF_OFFSET(sqlite3_busy_timeout),
     copy_string,
     print_string
     },
