@@ -201,10 +201,10 @@ static void event_sqlnewfile(struct context *cnt, int type  ATTRIBUTE_UNUSED,
 #ifdef HAVE_SQLITE3
         if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.sqlite3_db)) {
             int res;
-            char *errmsg = 0;
+            char *errmsg = 0;                       
             res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
             if (res != SQLITE_OK ) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: SQLite error was %s",
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: SQLite exec error was %s",
                            errmsg);
                 sqlite3_free(errmsg);
             }
