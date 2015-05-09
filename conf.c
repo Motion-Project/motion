@@ -1899,6 +1899,11 @@ struct context **conf_load(struct context **cnt)
       strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
+      if (!fp) {
+		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line %s, exiting.",
+                       filename);
+		  exit(1);
+	  }
     }
 
     if (!fp) {  /* Command-line didn't work, try current dir. */
