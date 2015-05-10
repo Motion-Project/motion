@@ -1902,7 +1902,7 @@ struct context **conf_load(struct context **cnt)
       if (!fp) {
 		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line %s, exiting.",
                        filename);
-		  exit(1);
+		  exit(-1);
 	  }
     }
 
