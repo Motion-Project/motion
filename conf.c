@@ -132,6 +132,7 @@ struct config conf_template = {
     database_port:                  0,
 #ifdef HAVE_SQLITE3
     sqlite3_db:                     NULL,
+    sqlite3_busy_timeout:			0,
 #endif
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */
     on_picture_save:                NULL,
@@ -1504,6 +1505,14 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
+    {
+    "sqlite3_busy_timeout",
+    "# wait time in milliseconds for locked database to unlock (default: 0 no wait)",
+    0,
+    CONF_OFFSET(sqlite3_busy_timeout),
+    copy_string,
+    print_string
+    },
 #endif /* HAVE_SQLITE3 */
 
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
@@ -1890,6 +1899,11 @@ struct context **conf_load(struct context **cnt)
       strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
+      if (!fp) {
+		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line %s, exiting.",
+                       filename);
+		  exit(-1);
+	  }
     }
 
     if (!fp) {  /* Command-line didn't work, try current dir. */
