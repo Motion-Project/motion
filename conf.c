@@ -1890,24 +1890,27 @@ struct context **conf_load(struct context **cnt)
       strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
-    }
-
-    if (!fp) {  /* Command-line didn't work, try current dir. */
-        char *path = NULL;
-
-        if (cnt[0]->conf_filename[0])
-            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
+      if (!fp) {
+		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line %s, exiting.",
                        filename);
-
-        if ((path = get_current_dir_name()) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
-            exit(-1);
-        }
-
-        snprintf(filename, PATH_MAX, "%s/motion.conf", path);
-        fp = fopen (filename, "r");
-        free(path);
+		  exit(-1);
+	  }
     }
+	/* no file on Command-line try other locations */
+	char *path = NULL;
+
+	if (cnt[0]->conf_filename[0])
+		MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
+				   filename);
+
+	if ((path = get_current_dir_name()) == NULL) {
+		MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
+		exit(-1);
+	}
+
+	snprintf(filename, PATH_MAX, "%s/motion.conf", path);
+	fp = fopen (filename, "r");
+	free(path);
 
     if (!fp) {  /* Specified file does not exist... try default file. */
         snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
