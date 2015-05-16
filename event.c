@@ -351,14 +351,14 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 {
     char fullfilename[PATH_MAX];
     int len = strlen(cnt->conf.snappath);
+	char filename[PATH_MAX];
+	char filepath[PATH_MAX];
     int offset = 0;
     if (len >= 9)
     {
 		offset = len - 8;
 	}
-    if (strcmp(cnt->conf.snappath+offset, "lastsnap")) {
-        char filename[PATH_MAX];
-        char filepath[PATH_MAX];
+    if (strcmp(cnt->conf.snappath+offset, "lastsnap"))
         char linkpath[PATH_MAX];
         const char *snappath;
         /*
@@ -388,8 +388,6 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
             return;
         }
     } else {
-		char filename[PATH_MAX];
-		char filepath[PATH_MAX];
 		mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tm, NULL, 0);
 		snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
 		snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
