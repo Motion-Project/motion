@@ -395,7 +395,7 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
     }
 
-	cnt->snapshot = 0;
+    cnt->snapshot = 0;
 }
 
 static void event_camera_lost(struct context *cnt, int type ATTRIBUTE_UNUSED,
