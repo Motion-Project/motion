@@ -1896,7 +1896,7 @@ struct context **conf_load(struct context **cnt)
 		  exit(-1);
 	  }
     } else {
-		/* no file on Command-line try other locations */
+		/* no file on Command-line try other locations, first current dir */
 		char *path = NULL;
 
 		if (cnt[0]->conf_filename[0])
