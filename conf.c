@@ -1891,7 +1891,7 @@ struct context **conf_load(struct context **cnt)
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
       if (!fp) {
-		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line %s, exiting.",
+		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line, exiting.",
                        filename);
 		  exit(-1);
 	  }
