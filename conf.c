@@ -1895,36 +1895,37 @@ struct context **conf_load(struct context **cnt)
                        filename);
 		  exit(-1);
 	  }
-    }
-	/* no file on Command-line try other locations */
-	char *path = NULL;
+    } else {
+		/* no file on Command-line try other locations */
+		char *path = NULL;
 
-	if (cnt[0]->conf_filename[0])
-		MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
-				   filename);
+		if (cnt[0]->conf_filename[0])
+			MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
+					   filename);
 
-	if ((path = get_current_dir_name()) == NULL) {
-		MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
-		exit(-1);
+		 if ((path = get_current_dir_name()) == NULL) {
+			 MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
+			 exit(-1);
+		 }
+
+		snprintf(filename, PATH_MAX, "%s/motion.conf", path);
+		fp = fopen (filename, "r");
+		free(path);
+
+		if (!fp) {  /* Specified file does not exist... try default file. */
+			snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
+			fp = fopen(filename, "r");
+
+			if (!fp) {
+				snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
+				fp = fopen(filename, "r");
+
+				if (!fp) /* There is no config file.... use defaults. */
+					MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
+							   filename);
+			}
+		}
 	}
-
-	snprintf(filename, PATH_MAX, "%s/motion.conf", path);
-	fp = fopen (filename, "r");
-	free(path);
-
-    if (!fp) {  /* Specified file does not exist... try default file. */
-        snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
-        fp = fopen(filename, "r");
-
-        if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
-            fp = fopen(filename, "r");
-
-            if (!fp) /* There is no config file.... use defaults. */
-                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
-                           filename);
-        }
-    }
 
     /* Now we process the motion.conf config file and close it. */
     if (fp) {
