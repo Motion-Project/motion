@@ -349,7 +349,7 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
 {
-    char fullfilename[PATH_MAX];	
+	char fullfilename[PATH_MAX];	
 	char filename[PATH_MAX];
 	char filepath[PATH_MAX];
 	int offset = 0;
