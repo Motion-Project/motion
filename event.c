@@ -350,16 +350,16 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct tm *currenttime_tm)
 {
     char fullfilename[PATH_MAX];
-    int len = strlen(cnt->conf.snappath);
+	int len = strlen(cnt->conf.snappath);
 	char filename[PATH_MAX];
 	char filepath[PATH_MAX];
-    int offset = 0;
-    if (len >= 9)
-    {
+	int offset = 0;
+	if (len >= 9)
+	{
 		offset = len - 8;
 	}
-    if (strcmp(cnt->conf.snappath+offset, "lastsnap"))
-        char linkpath[PATH_MAX];
+	if (strcmp(cnt->conf.snappath+offset, "lastsnap"))
+		char linkpath[PATH_MAX];
         const char *snappath;
         /*
          *  conf.snappath would normally be defined but if someone deleted it by control interface
