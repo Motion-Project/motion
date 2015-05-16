@@ -391,11 +391,11 @@ static void event_image_snapshot(struct context *cnt, int type ATTRIBUTE_UNUSED,
 		mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tm, NULL, 0);
 		snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
 		snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
-        remove(fullfilename);
-        put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
+		remove(fullfilename);
+		put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
     }
 
-    cnt->snapshot = 0;
+	cnt->snapshot = 0;
 }
 
 static void event_camera_lost(struct context *cnt, int type ATTRIBUTE_UNUSED,
