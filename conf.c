@@ -1903,10 +1903,10 @@ struct context **conf_load(struct context **cnt)
 			MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
 					   filename);
 
-		 if ((path = get_current_dir_name()) == NULL) {
-			 MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
-			 exit(-1);
-		 }
+		if ((path = get_current_dir_name()) == NULL) {
+			MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
+			exit(-1);
+		}
 
 		snprintf(filename, PATH_MAX, "%s/motion.conf", path);
 		fp = fopen (filename, "r");
