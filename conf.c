@@ -1582,26 +1582,26 @@ static void conf_cmdline(struct context *cnt, int thread)
                 cnt->log_level = (unsigned int)atoi(optarg);
             break;
         case 'k':
-	  if (thread == -1) {
-	    strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
-	    cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
-	  }
-	  break;
+      if (thread == -1) {
+        strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
+        cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
+      }
+      break;
         case 'p':
-	  if (thread == -1) {
-	    strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
-	    cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
-	  }
-	  break;
+      if (thread == -1) {
+        strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
+        cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
+      }
+      break;
         case 'l':
-	  if (thread == -1) {
-	    strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
-	    cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
-	  }
-	  break;
+      if (thread == -1) {
+        strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
+        cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
+      }
+      break;
         case 'm':
             cnt->pause = 1;
-            break;    
+            break;
         case 'h':
         case '?':
         default:
@@ -1891,48 +1891,48 @@ struct context **conf_load(struct context **cnt)
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
       if (!fp) {
-		  MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line, exiting.",
+          MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line, exiting.",
                        filename);
-		  exit(-1);
-	  }
+          exit(-1);
+      }
     } else {
-		/* no file on Command-line try other locations, first current dir */
-		char *path = NULL;
+        /* no file on Command-line try other locations, first current dir */
+        char *path = NULL;
 
-		if (cnt[0]->conf_filename[0])
-			MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
-					   filename);
+        if (cnt[0]->conf_filename[0])
+            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
+                       filename);
 
-		if ((path = get_current_dir_name()) == NULL) {
-			MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
-			exit(-1);
-		}
+        if ((path = get_current_dir_name()) == NULL) {
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
+            exit(-1);
+        }
 
-		snprintf(filename, PATH_MAX, "%s/motion.conf", path);
-		fp = fopen (filename, "r");
-		free(path);
+        snprintf(filename, PATH_MAX, "%s/motion.conf", path);
+        fp = fopen (filename, "r");
+        free(path);
 
-		if (!fp) {  /* Specified file does not exist... try default file. */
-			snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
-			fp = fopen(filename, "r");
+        if (!fp) {  /* Specified file does not exist... try default file. */
+            snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
+            fp = fopen(filename, "r");
 
-			if (!fp) {
-				snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
-				fp = fopen(filename, "r");
+            if (!fp) {
+                snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
+                fp = fopen(filename, "r");
 
-				if (!fp) /* There is no config file.... use defaults. */
-					MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
-							   filename);
-			}
-		}
-	}
+                if (!fp) /* There is no config file.... use defaults. */
+                    MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
+                               filename);
+            }
+        }
+    }
 
     /* Now we process the motion.conf config file and close it. */
     if (fp) {
       strncpy(cnt[0]->conf_filename, filename, sizeof(cnt[0]->conf_filename) - 1);
       cnt[0]->conf_filename[sizeof(cnt[0]->conf_filename) - 1] = '\0';
       MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s",
-		 filename);
+         filename);
       cnt = conf_process(cnt, fp);
       myfclose(fp);
     } else {
