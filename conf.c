@@ -1586,19 +1586,19 @@ static void conf_cmdline(struct context *cnt, int thread)
                 strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
                 cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
             }
-      break;
+            break;
         case 'p':
             if (thread == -1) {
                 strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
                 cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
             }
-      break;
+            break;
         case 'l':
             if (thread == -1) {
                 strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
                 cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
             }
-      break;
+            break;
         case 'm':
             cnt->pause = 1;
             break;
