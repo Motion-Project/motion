@@ -1890,9 +1890,13 @@ struct context **conf_load(struct context **cnt)
       strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
-    }
-
-    if (!fp) {  /* Command-line didn't work, try current dir. */
+      if (!fp) {
+          MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open Configfile  %s on command line, exiting.",
+                       filename);
+          exit(-1);
+      }
+    } else {
+        /* no file on Command-line try other locations, first current dir */
         char *path = NULL;
 
         if (cnt[0]->conf_filename[0])
@@ -1907,19 +1911,19 @@ struct context **conf_load(struct context **cnt)
         snprintf(filename, PATH_MAX, "%s/motion.conf", path);
         fp = fopen (filename, "r");
         free(path);
-    }
 
-    if (!fp) {  /* Specified file does not exist... try default file. */
-        snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
-        fp = fopen(filename, "r");
-
-        if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
+        if (!fp) {  /* Specified file does not exist... try default file. */
+            snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
             fp = fopen(filename, "r");
 
-            if (!fp) /* There is no config file.... use defaults. */
-                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
-                           filename);
+            if (!fp) {
+                snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
+                fp = fopen(filename, "r");
+
+                if (!fp) /* There is no config file.... use defaults. */
+                    MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
+                               filename);
+            }
         }
     }
 
