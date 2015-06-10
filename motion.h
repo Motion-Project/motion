@@ -306,7 +306,7 @@ struct images {
     int width;
     int height;
     int type;
-    int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */       
+    int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */        
     int size;
     int motionsize;
     int labelgroup_max;
