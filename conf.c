@@ -1592,26 +1592,26 @@ static void conf_cmdline(struct context *cnt, int thread)
                 cnt->log_level = (unsigned int)atoi(optarg);
             break;
         case 'k':
-            if (thread == -1) {
-                strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
-                cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
-            }
-            break;
+	  if (thread == -1) {
+	    strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
+	    cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
+	  }
+	  break;
         case 'p':
-            if (thread == -1) {
-                strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
-                cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
-            }
-            break;
+	  if (thread == -1) {
+	    strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
+	    cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
+	  }
+	  break;
         case 'l':
-            if (thread == -1) {
-                strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
-                cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
-            }
-            break;
+	  if (thread == -1) {
+	    strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
+	    cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
+	  }
+	  break;
         case 'm':
             cnt->pause = 1;
-            break;
+            break;    
         case 'h':
         case '?':
         default:
@@ -1938,7 +1938,7 @@ struct context **conf_load(struct context **cnt)
       strncpy(cnt[0]->conf_filename, filename, sizeof(cnt[0]->conf_filename) - 1);
       cnt[0]->conf_filename[sizeof(cnt[0]->conf_filename) - 1] = '\0';
       MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s",
-         filename);
+		 filename);
       cnt = conf_process(cnt, fp);
       myfclose(fp);
     } else {
