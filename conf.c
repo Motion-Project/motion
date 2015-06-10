@@ -1929,7 +1929,7 @@ struct context **conf_load(struct context **cnt)
 
             if (!fp) /* There is no config file.... use defaults. */
                 MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
-                        filename);
+                           filename);
         }
     }
 
