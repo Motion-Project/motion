@@ -2737,9 +2737,11 @@ int main (int argc, char **argv)
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Stream port %d",
                        cnt_list[i]->conf.stream_port);
+#ifdef HAVE_SQLITE
             /* this is done to share the seralized handle
-             * and supress creation of new handles in the threads */
+             * and supress creation of new handles in the threads */    
             cnt_list[i]->database_sqlite3=cnt_list[0]->database_sqlite3;
+#endif
             start_motion_thread(cnt_list[i], &thread_attr);
         }
 
