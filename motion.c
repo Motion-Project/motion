@@ -2653,7 +2653,7 @@ int main (int argc, char **argv)
     /* database_sqlite3 == NULL if not changed causes each thread to creat their own
      * sqlite3 connection this will only happens when using a non-threaded sqlite version */
     cnt_list[0]->database_sqlite3=NULL;
-    if ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.sqlite3_db) {
+    if (cnt_list[0]->conf.database_type && ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.sqlite3_db)) {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 Database filename %s",
                    cnt_list[0]->conf.sqlite3_db);
 
