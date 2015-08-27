@@ -272,7 +272,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->height     = height;
     c->time_base.num = 1;
     c->time_base.den = rate;
-    c->gop_size   = 0;
+    c->gop_size   = 12;
     c->pix_fmt    = PIX_FMT_YUV420P;
     c->max_b_frames = 0;
 
