@@ -6,6 +6,7 @@ motion
 config.h
 config.status
 Makefile
+configure
 motion-dist.conf
 motion.init-Debian
 motion.init-Fedora
