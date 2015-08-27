@@ -717,6 +717,10 @@ quiet on
 # SQLite3 database (file path) (default: not defined)
 ; sqlite3_db value
 
+# SQLite3 wait time in milliseconds for locked database to
+# be unlocked before returning database locked error (default 0)
+; sqlite3_busy_timeout 0
+
 
 
 ############################################################
