@@ -134,6 +134,7 @@ static void image_ring_resize(struct context *cnt, int new_size)
 
             /* Point to the new ring */
             cnt->imgs.image_ring = tmp;
+            cnt->current_image = NULL;
 
             cnt->imgs.image_ring_size = new_size;
         }
@@ -168,13 +169,14 @@ static void image_ring_destroy(struct context *cnt)
     free(cnt->imgs.image_ring);
 
     cnt->imgs.image_ring = NULL;
+    cnt->current_image = NULL;
     cnt->imgs.image_ring_size = 0;
 }
 
 /**
  * image_save_as_preview
  *
- * This routine is called when we detect motion and want to save a image in the preview buffer
+ * This routine is called when we detect motion and want to save an image in the preview buffer
  *
  * Parameters:
  *
@@ -341,6 +343,7 @@ static void sig_handler(int signo)
             while (cnt_list[++i]) {
                 cnt_list[i]->makemovie = 1;
                 cnt_list[i]->finish = 1;
+                cnt_list[i]->webcontrol_finish = 1;
                 /*
                  * Don't restart thread when it ends,
                  * all threads restarts if global restart is set
@@ -356,6 +359,9 @@ static void sig_handler(int signo)
         break;
     case SIGSEGV:
         exit(0);
+    case SIGVTALRM:
+        printf("SIGVTALRM went off\n");
+        break;
     }
 }
 
@@ -565,8 +571,13 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
             /*
              * Check if we must add any "filler" frames into movie to keep up fps
              * Only if we are recording videos ( ffmpeg or extenal pipe )
+             * While the overall elapsed time might be correct, if there are
+             * many duplicated frames, say 10 fps, 5 duplicated, the video will
+             * look like it is frozen every second for half a second.
              */
-            if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
+            if (!cnt->conf.ffmpeg_duplicate_frames) {
+                /* don't duplicate frames */
+            } else if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
 #ifdef HAVE_FFMPEG
                 (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
 #else
@@ -1087,8 +1098,6 @@ static void *motion_loop(void *arg)
      * is acted upon.
      */
     unsigned long int time_last_frame = 1, time_current_frame;
-
-    cnt->running = 1;
 
     if (motion_init(cnt) < 0)
         goto err;
@@ -2526,6 +2535,10 @@ static void setup_signals(struct sigaction *sig_handler_action, struct sigaction
     sigaction(SIGQUIT, sig_handler_action, NULL);
     sigaction(SIGTERM, sig_handler_action, NULL);
     sigaction(SIGUSR1, sig_handler_action, NULL);
+
+    /* use SIGVTALRM as a way to break out of the ioctl, don't restart */
+    sig_handler_action->sa_flags = 0;
+    sigaction(SIGVTALRM, sig_handler_action, NULL);
 }
 
 /**
@@ -2595,11 +2608,22 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
     /* Give the thread WATCHDOG_TMO to start */
     cnt->watchdog = WATCHDOG_TMO;
 
+    /* Flag it as running outside of the thread, otherwise if the main loop
+     * checked if it is was running before the thread set it to 1, it would
+     * start another thread for this device. */
+    cnt->running = 1;
+
     /*
      * Create the actual thread. Use 'motion_loop' as the thread
      * function.
      */
-    pthread_create(&cnt->thread_id, thread_attr, &motion_loop, cnt);
+    if (pthread_create(&cnt->thread_id, thread_attr, &motion_loop, cnt)) {
+        /* thread create failed, undo running state */
+        cnt->running = 0;
+        pthread_mutex_lock(&global_lock);
+        threads_running--;
+        pthread_mutex_unlock(&global_lock);
+    }
 }
 
 /**
@@ -2714,8 +2738,21 @@ int main (int argc, char **argv)
          * Create a thread for the control interface if requested. Create it
          * detached and with 'motion_web_control' as the thread function.
          */
-        if (cnt_list[0]->conf.webcontrol_port)
-            pthread_create(&thread_id, &thread_attr, &motion_web_control, cnt_list);
+        if (cnt_list[0]->conf.webcontrol_port) {
+            pthread_mutex_lock(&global_lock);
+            threads_running++;
+            /* set outside the loop to avoid thread set vs main thread check */
+            cnt_list[0]->webcontrol_running = 1;
+            pthread_mutex_unlock(&global_lock);
+            if (pthread_create(&thread_id, &thread_attr, &motion_web_control,
+                cnt_list)) {
+                /* thread create failed, undo running state */
+                pthread_mutex_lock(&global_lock);
+                threads_running--;
+                cnt_list[0]->webcontrol_running = 0;
+                pthread_mutex_unlock(&global_lock);
+            }
+        }
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Waiting for threads to finish, pid: %d",
                    getpid());
@@ -2728,7 +2765,7 @@ int main (int argc, char **argv)
             SLEEP(1, 0);
 
             /*
-             * Calculate how many threads runnig or wants to run
+             * Calculate how many threads are running or wants to run
              * if zero and we want to finish, break out
              */
             int motion_threads_running = 0;
@@ -2737,6 +2774,9 @@ int main (int argc, char **argv)
                 if (cnt_list[i]->running || cnt_list[i]->restart)
                     motion_threads_running++;
             }
+            if (cnt_list[0]->conf.webcontrol_port &&
+                cnt_list[0]->webcontrol_running)
+                motion_threads_running++;
 
             if (((motion_threads_running == 0) && finish) ||
                 ((motion_threads_running == 0) && (threads_running == 0))) {
@@ -2754,24 +2794,42 @@ int main (int argc, char **argv)
                 }
 
                 if (cnt_list[i]->watchdog > WATCHDOG_OFF) {
-                    cnt_list[i]->watchdog--;
+                    if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
+                        /* if 0 then it finally did clean up (and will restart without any further action here)
+                         * kill(, 0) == ESRCH means the thread is no longer running
+                         * if it is no longer running with running set, then cleanup here so it can restart
+                         */
+                        if(cnt_list[i]->running && pthread_kill(cnt_list[i]->thread_id, 0) == ESRCH) {
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: cleaning Thread %d", cnt_list[i]->threadnr);
+                            pthread_mutex_lock(&global_lock);
+                            threads_running--;
+                            pthread_mutex_unlock(&global_lock);
+                            motion_cleanup(cnt_list[i]);
+                            cnt_list[i]->running = 0;
+                            cnt_list[i]->finish = 0;
+                        } else {
+                            /* keep sending signals so it doesn't get stuck in a blocking call */
+                            pthread_kill(cnt_list[i]->thread_id, SIGVTALRM);
+                        }
+                    } else {
+                        cnt_list[i]->watchdog--;
 
-                    if (cnt_list[i]->watchdog == 0) {
-                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, trying to do "
-                                   "a graceful restart", cnt_list[i]->threadnr);
-                        cnt_list[i]->finish = 1;
-                    }
 
-                    if (cnt_list[i]->watchdog == -60) {
-                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful,"
-                                   "killing it!", cnt_list[i]->threadnr);
-                        pthread_cancel(cnt_list[i]->thread_id);
-                        pthread_mutex_lock(&global_lock);
-                        threads_running--;
-                        pthread_mutex_unlock(&global_lock);
-                        motion_cleanup(cnt_list[i]);
-                        cnt_list[i]->running = 0;
-                        cnt_list[i]->finish = 0;
+                        if (cnt_list[i]->watchdog == 0) {
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, trying to do "
+                                       "a graceful restart", cnt_list[i]->threadnr);
+                            cnt_list[i]->finish = 1;
+                        }
+
+                        if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful,"
+                                       "killing it!", cnt_list[i]->threadnr);
+                            /* The problem is pthead_cancel might just wake up the thread so it runs to completition
+                             * or it might not.  In either case don't rip the carpet out under it by
+                             * doing motion_cleanup until it no longer is running.
+                             */
+                            pthread_cancel(cnt_list[i]->thread_id);
+                        }
                     }
                 }
             }
@@ -2796,7 +2854,7 @@ int main (int argc, char **argv)
 
 
     // Be sure that http control exits fine
-    cnt_list[0]->finish = 1;
+    cnt_list[0]->webcontrol_finish = 1;
     SLEEP(1, 0);
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion terminating");
 
@@ -3098,6 +3156,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
     char tempstring[PATH_MAX] = "";
     char *format, *tempstr;
     const char *pos_userformat;
+    int width;
 
     format = formatstring;
 
@@ -3117,6 +3176,12 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
              */
             tempstr = tempstring;
             tempstr[0] = '\0';
+            width = 0;
+            while ('0' <= pos_userformat[1] && pos_userformat[1] <= '9') {
+                width *= 10;
+                width += pos_userformat[1] - '0';
+                ++pos_userformat;
+            }
 
             switch (*++pos_userformat) {
             case '\0': // end of string
@@ -3124,81 +3189,86 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                 break;
 
             case 'v': // event
-                sprintf(tempstr, "%02d", cnt->event_nr);
+                sprintf(tempstr, "%0*d", width ? width : 2, cnt->event_nr);
                 break;
 
             case 'q': // shots
-                sprintf(tempstr, "%02d", cnt->current_image->shot);
+                sprintf(tempstr, "%0*d", width ? width : 2,
+                    cnt->current_image->shot);
                 break;
 
             case 'D': // diffs
-                sprintf(tempstr, "%d", cnt->current_image->diffs);
+                sprintf(tempstr, "%*d", width, cnt->current_image->diffs);
                 break;
 
             case 'N': // noise
-                sprintf(tempstr, "%d", cnt->noise);
+                sprintf(tempstr, "%*d", width, cnt->noise);
                 break;
 
             case 'i': // motion width
-                sprintf(tempstr, "%d", cnt->current_image->location.width);
+                sprintf(tempstr, "%*d", width,
+                    cnt->current_image->location.width);
                 break;
 
             case 'J': // motion height
-                sprintf(tempstr, "%d", cnt->current_image->location.height);
+                sprintf(tempstr, "%*d", width,
+                    cnt->current_image->location.height);
                 break;
 
             case 'K': // motion center x
-                sprintf(tempstr, "%d", cnt->current_image->location.x);
+                sprintf(tempstr, "%*d", width, cnt->current_image->location.x);
                 break;
 
             case 'L': // motion center y
-                sprintf(tempstr, "%d", cnt->current_image->location.y);
+                sprintf(tempstr, "%*d", width, cnt->current_image->location.y);
                 break;
 
             case 'o': // threshold
-                sprintf(tempstr, "%d", cnt->threshold);
+                sprintf(tempstr, "%*d", width, cnt->threshold);
                 break;
 
             case 'Q': // number of labels
-                sprintf(tempstr, "%d", cnt->current_image->total_labels);
+                sprintf(tempstr, "%*d", width,
+                    cnt->current_image->total_labels);
                 break;
 
             case 't': // thread number
-                sprintf(tempstr, "%d",(int)(unsigned long)
+                sprintf(tempstr, "%*d", width, (int)(unsigned long)
                         pthread_getspecific(tls_key_threadnr));
                 break;
 
             case 'C': // text_event
                 if (cnt->text_event_string && cnt->text_event_string[0])
-                    snprintf(tempstr, PATH_MAX, "%s", cnt->text_event_string);
+                    snprintf(tempstr, PATH_MAX, "%*s", width,
+                        cnt->text_event_string);
                 else
                     ++pos_userformat;
                 break;
 
             case 'w': // picture width
-                sprintf(tempstr, "%d", cnt->imgs.width);
+                sprintf(tempstr, "%*d", width, cnt->imgs.width);
                 break;
 
             case 'h': // picture height
-                sprintf(tempstr, "%d", cnt->imgs.height);
+                sprintf(tempstr, "%*d", width, cnt->imgs.height);
                 break;
 
             case 'f': // filename -- or %fps
                 if ((*(pos_userformat+1) == 'p') && (*(pos_userformat+2) == 's')) {
-                    sprintf(tempstr, "%d", cnt->movie_fps);
+                    sprintf(tempstr, "%*d", width, cnt->movie_fps);
                     pos_userformat += 2;
                     break;
                 }
 
                 if (filename)
-                    snprintf(tempstr, PATH_MAX, "%s", filename);
+                    snprintf(tempstr, PATH_MAX, "%*s", width, filename);
                 else
                     ++pos_userformat;
                 break;
 
             case 'n': // sqltype
                 if (sqltype)
-                    sprintf(tempstr, "%d", sqltype);
+                    sprintf(tempstr, "%*d", width, sqltype);
                 else
                     ++pos_userformat;
                 break;

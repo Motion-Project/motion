@@ -30,6 +30,7 @@ struct config {
     int max_changes;
     int threshold_tune;
     const char *output_pictures;
+    int ffmpeg_duplicate_frames;
     int motion_img;
     int emulate_motion;
     int event_gap;
@@ -53,6 +54,7 @@ struct config {
     int contrast;
     int saturation;
     int hue;
+    int power_line_frequency;
     int roundrobin_frames;
     int roundrobin_skip;
     int pre_capture;

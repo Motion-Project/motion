@@ -16,6 +16,9 @@
 #include <netdb.h>
 #include <stddef.h>
 
+/* Timeout in seconds, used for read and write */
+const int NONBLOCK_TIMEOUT = 1;
+
 pthread_mutex_t httpd_mutex;
 
 // This is a dummy variable use to kill warnings when not checking sscanf and similar functions
@@ -197,7 +200,7 @@ static ssize_t write_nonblock(int fd, const void *buf, size_t size)
     struct timeval tm;
     fd_set fds;
 
-    tm.tv_sec = 1; /* Timeout in seconds */
+    tm.tv_sec = NONBLOCK_TIMEOUT;
     tm.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(fd, &fds);
@@ -223,7 +226,7 @@ static ssize_t read_nonblock(int fd ,void *buf, ssize_t size)
     struct timeval tm;
     fd_set fds;
 
-    tm.tv_sec = 1; /* Timeout in seconds */
+    tm.tv_sec = NONBLOCK_TIMEOUT; /* Timeout in seconds */
     tm.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(fd, &fds);
@@ -2509,10 +2512,10 @@ void httpd_run(struct context **cnt)
 
     while ((client_sent_quit_message) && (!closehttpd)) {
 
-        client_socket_fd = acceptnonblocking(sd, 1);
+        client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
 
         if (client_socket_fd < 0) {
-            if ((!cnt[0]) || (cnt[0]->finish)) {
+            if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Finishing");
                 closehttpd = 1;
             }
@@ -2542,6 +2545,17 @@ void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
     httpd_run(cnt);
+
+    /* 
+     * Update how many threads we have running. This is done within a
+     * mutex lock to prevent multiple simultaneous updates to
+     * 'threads_running'.
+     */
+    pthread_mutex_lock(&global_lock);
+    threads_running--;
+    cnt[0]->webcontrol_running = 0;
+    pthread_mutex_unlock(&global_lock);
+
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd thread exit");
     pthread_exit(NULL);
 }
