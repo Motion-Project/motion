@@ -47,10 +47,13 @@ const char *eventList[] = {
  *
  * returns string label of the event
  */
+ /**
+ * Future use debug / notification function
 static const char *eventToString(motion_event e)
 {
     return eventList[(int)e];
 }
+*/
 
 /**
  * exec_command
