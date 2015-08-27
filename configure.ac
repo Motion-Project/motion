@@ -611,12 +611,27 @@ else
     saved_CFLAGS=$CFLAGS
     saved_LIBS=$LIBS
 
-    AC_CHECK_LIB(sqlite3, sqlite3_open,
-    [
-    TEMP_LIBS="$TEMP_LIBS -lsqlite3"
-    SQLITE3_SUPPORT="yes"
-    AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 support])
-    ]
+    # first we check to see if the sqlite3 amalgamation (sqlite3.c), is in with our source
+    # this is the prefered way to use sqlite
+    AC_CHECK_FILE([sqlite3.c],
+        [
+        SQLITE3_SUPPORT="yes"
+        VIDEO="$VIDEO sqlite3.o"
+        TEMP_LIBS="$TEMP_LIBS -ldl"
+        AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3])
+        AC_DEFINE([HAVE_SQLITE3_EMBEDDED],1,[Define to 1 if you have SQLITE3 embedded support])
+        ]
+        ,
+        [
+        # if sqlite3.c is not found then we look for the shared library
+        AC_CHECK_LIB(sqlite3, sqlite3_open,
+            [
+            TEMP_LIBS="$TEMP_LIBS -lsqlite3"
+            SQLITE3_SUPPORT="yes"
+            AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 shared library support])
+            ]
+        )
+        ]
     )
 
     CFLAGS=$saved_CFLAGS

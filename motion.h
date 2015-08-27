@@ -22,7 +22,11 @@
 #endif
 
 #ifdef HAVE_SQLITE3
+#ifdef HAVE_SQLITE3_EMBEDDED
+#include "sqlite3.h"
+#else
 #include <sqlite3.h>
+#endif
 #endif
 
 #ifdef HAVE_PGSQL
