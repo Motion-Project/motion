@@ -818,7 +818,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     guarantee_huff_tables(&dinfo);
     jpeg_start_decompress (&dinfo);
 
-    vsf[0]= 1; vsf[1] = 1; vsf[2] = 1;
+    vsf[0] = 1; vsf[1] = 1; vsf[2] = 1;
 
     /* Height match image height or be exact twice the image height. */
 

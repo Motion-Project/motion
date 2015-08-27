@@ -65,6 +65,7 @@ struct video_dev {
     int contrast;
     int saturation;
     int hue;
+    int power_line_frequency;
     unsigned long freq;
     int tuner_number;
     int fps;
