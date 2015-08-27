@@ -83,6 +83,15 @@ norm 0
 # The frequency to set the tuner to (kHz) (only for TV tuner cards) (default: 0)
 frequency 0
 
+# Override the power line frequency for the webcam. (normally not necessary)
+# Values: 
+# -1 : Do not modify device setting
+# 0  : Power line frequency Disabled
+# 1  : 50hz
+# 2  : 60hz
+# 3  : Auto
+power_line_frequency -1
+
 # Rotate image this number of degrees. The rotation affects all saved images as
 # well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.
 rotate 0
@@ -319,6 +328,11 @@ ffmpeg_video_codec mpeg4
 # and see horizontal combing on moving objects in video or pictures.
 # (default: off)
 ffmpeg_deinterlace off
+
+# When creating videos, should frames be duplicated in order 
+# to keep up with the requested frames per second
+# (default: true)
+ffmpeg_duplicate_frames true
 
 ############################################################
 # SDL Window

@@ -1,4 +1,9 @@
 Summary of Changes   
+   * Add new config options to the motion-dist.conf 
+   * Allow text format specifiers to take a width like printf would.  (David Fries)
+   * Allow text format specifiers to take a width like printf would.  (David Fries)
+   * Add power_line_frequency configuration item to improve image quality.  (David Fries)
+   * Fix webhttpd race condition crash with SIGHUP, add it to running thread counter (David Fries)
    * Fix the GOP size for the created videos
    * Fix netcam ftp functionality
    * Fix Typo on the log level
@@ -89,9 +94,6 @@ Features
    * Bug fix as part of warnings in webhttpd.c fixed(Mr-Dave)
    * Removed compiler warning regarding ffmpeg being newer than 0.4 version(Mr-Dave)
    * New configure script and identification of ffmpeg version and additional libs. (Mr-Dave)
-   * Allow text format specifiers to take a width like printf would.  (David Fries)
-   * Allow text format specifiers to take a width like printf would.  (David Fries)
-   * Add power_line_frequency configuration item to improve image quality.  (David Fries)
    * Resolve additional compiler warnings in ffmpeg (Mr-Dave)
    * Revised INSTALL with samples(Mr-Dave)
    * Revisions for RTSP and code standard.(Mr-Dave)
@@ -150,7 +152,6 @@ Bugfixes
    * Fixed leak in vloopback.
    * Fixed a build of motion for some kernel version with not good videodev.h 
    * Netcam Modulo 8
-   * Fix webhttpd race condition crash with SIGHUP, add it to running thread counter (David Fries)
 
 3.2.12 Summary of Changes
 
