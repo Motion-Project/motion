@@ -1,4 +1,6 @@
 Summary of Changes   
+   * Fix missing header for some builds(Jim Dodgen)
+   * Sqlite3 revisions (Jim Dodgen)
    * Add new config options to the motion-dist.conf 
    * Allow text format specifiers to take a width like printf would.  (David Fries)
    * Allow text format specifiers to take a width like printf would.  (David Fries)
