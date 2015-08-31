@@ -387,10 +387,36 @@ void conv_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, 
  */
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size)
 {
-    int ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height,
+    unsigned char *ptr_buffer;
+    size_t soi_pos = 0;
+    int ret = 0;
+
+    ptr_buffer = memmem(cap_map, size, "\xff\xd8", 2);
+    if (ptr_buffer != NULL) {
+        /**
+         Some cameras are sending multiple SOIs in the buffer.
+         Move the pointer to the last SOI in the buffer and proceed.
+        */
+        while (ptr_buffer != NULL && ((size - soi_pos - 1) > 2) ){
+            soi_pos = ptr_buffer - cap_map;
+            ptr_buffer = memmem(cap_map + soi_pos + 1, size - soi_pos - 1, "\xff\xd8", 2);
+        }
+
+        if (soi_pos != 0){
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: SOI position adjusted by %d bytes.", soi_pos);
+        }
+
+        memmove(cap_map, cap_map + soi_pos, size - soi_pos);
+        size -= soi_pos;
+        ret = decode_jpeg_raw(cap_map, size, 0, 420, width, height,
                 map,
                 map + (width * height),
                 map + (width * height) + (width * height) / 4);
+
+    } else {
+        //Buffer does not have a SOI
+        ret = 1;
+    }
 
     if (ret == 1) {
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue");

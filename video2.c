@@ -997,6 +997,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
     vid_source->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     vid_source->buf.memory = V4L2_MEMORY_MMAP;
+    vid_source->buf.bytesused = 0;
 
     if (xioctl(vid_source, VIDIOC_DQBUF, &vid_source->buf) == -1) {
         int ret;
