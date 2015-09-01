@@ -1,4 +1,5 @@
 Summary of Changes   
+   * Updated handling of lastsnap to permit subdirectory specification.
    * Handle MJPEG streams from some Logitech webcams which send AVI1 instead of JFIF.
    * Fix missing header for some builds(Jim Dodgen)
    * Sqlite3 revisions (Jim Dodgen)
