@@ -326,11 +326,6 @@ ffmpeg_variable_bitrate 0
 # mkv - Matroska H264 encoding
 ffmpeg_video_codec mpeg4
 
-# Use ffmpeg to deinterlace video. Necessary if you use an analog camera
-# and see horizontal combing on moving objects in video or pictures.
-# (default: off)
-ffmpeg_deinterlace off
-
 # When creating videos, should frames be duplicated in order 
 # to keep up with the requested frames per second
 # (default: true)

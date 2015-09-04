@@ -679,15 +679,6 @@ config_param config_params[] = {
     print_string
     },
     {
-    "ffmpeg_duplicate_frames",
-    "# True to duplicate frames to achieve \"framerate\" fps, but enough\n"
-    "duplicated frames and the video appears to freeze once a second.",
-    0,
-    CONF_OFFSET(ffmpeg_duplicate_frames),
-    copy_bool,
-    print_bool
-    },
-    {
     "output_debug_pictures",
     "# Output pictures with only the pixels moving object (ghost images) (default: off)",
     0,
@@ -787,19 +778,20 @@ config_param config_params[] = {
     "# flv - gives you a flash video with extension .flv\n"
     "# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )\n"
     "# mov - QuickTime ( testing )\n"
-    "# ogg - Ogg/Theora ( testing )",
+    "# ogg - Ogg/Theora ( testing )\n"
+    "# mp4 - MPEG-4 Part 14 H264 encoding\n"
+    "# mkv - Matroska H264 encoding",
     0,
     CONF_OFFSET(ffmpeg_video_codec),
     copy_string,
     print_string
     },
     {
-    "ffmpeg_deinterlace",
-    "# Use ffmpeg to deinterlace video. Necessary if you use an analog camera\n"
-    "# and see horizontal combing on moving objects in video or pictures.\n"
-    "# (default: off)",
+    "ffmpeg_duplicate_frames",
+    "# True to duplicate frames to achieve \"framerate\" fps, but enough\n"
+    "duplicated frames and the video appears to freeze once a second.",
     0,
-    CONF_OFFSET(ffmpeg_deinterlace),
+    CONF_OFFSET(ffmpeg_duplicate_frames),
     copy_bool,
     print_bool
     },

@@ -64,7 +64,6 @@ struct config {
     int ffmpeg_output_debug;
     int ffmpeg_bps;
     int ffmpeg_vbr;
-    int ffmpeg_deinterlace;
     const char *ffmpeg_video_codec;
 #ifdef HAVE_SDL
     int sdl_threadnr;
