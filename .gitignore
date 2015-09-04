@@ -5,6 +5,7 @@
 motion
 config.h
 config.status
+config.h.in
 Makefile
 configure
 motion-dist.conf
