@@ -47,6 +47,7 @@
 #define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
 #define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
 #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
+#define MY_CODEC_ID_H264      AV_CODEC_ID_H264
 
 #else
 
@@ -55,7 +56,7 @@
 #define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
 #define MY_CODEC_ID_NONE      CODEC_ID_NONE
 #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
-
+#define MY_CODEC_ID_H264      CODEC_ID_H264
 #endif
 /*********************************************/
 AVFrame *my_frame_alloc(void){
@@ -72,8 +73,6 @@ void my_frame_free(AVFrame *frame){
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
     av_frame_free(&frame);
 #else
-    //avcodec_free_frame(&frame);
-    //av_frame_free(&netcam->rtsp->frame);
     av_freep(&frame);
 #endif
 }
@@ -172,6 +171,14 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
 	} else if (strcmp (codec, "ogg") == 0){
       ext = ".ogg";
       of = av_guess_format ("ogg", NULL, NULL);
+	} else if (strcmp (codec, "mp4") == 0){
+      ext = ".mp4";
+      of = av_guess_format ("mp4", NULL, NULL);
+      of->video_codec = MY_CODEC_ID_H264;
+    } else if (strcmp (codec, "mkv") == 0){
+      ext = ".mkv";
+      of = av_guess_format ("matroska", NULL, NULL);
+      of->video_codec = MY_CODEC_ID_H264;
     } else {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg_video_codec option value"
                    " %s is not supported", codec);
@@ -207,6 +214,8 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     struct ffmpeg *ffmpeg;
     int ret;
     char errstr[128];
+    AVDictionary *opts = 0;
+
     /*
      * Allocate space for our ffmpeg structure. This structure contains all the
      * codec and image information we need to generate movies.
@@ -275,6 +284,11 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->gop_size   = 12;
     c->pix_fmt    = PIX_FMT_YUV420P;
     c->max_b_frames = 0;
+    if (c->codec_id == AV_CODEC_ID_H264){
+        av_dict_set(&opts, "preset", "ultrafast", 0);
+        av_dict_set(&opts, "crf", "18", 0);
+        av_dict_set(&opts, "tune", "zerolatency", 0);
+    }
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
     if (vbr) c->flags |= CODEC_FLAG_QSCALE;
@@ -285,7 +299,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     }
 
     pthread_mutex_lock(&global_lock);
-        ret = avcodec_open2(c, codec, NULL);
+        ret = avcodec_open2(c, codec, &opts);
     pthread_mutex_unlock(&global_lock);
     if (ret < 0) {
         if (codec->supported_framerates) {
@@ -299,18 +313,20 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
         pthread_mutex_lock(&global_lock);
             while ((chkrate < 36) && (ret != 0)) {
                 c->time_base.den = chkrate;
-                ret = avcodec_open2(c, codec, NULL);
+                ret = avcodec_open2(c, codec, &opts);
                 chkrate++;
             }
         pthread_mutex_unlock(&global_lock);
         if (ret < 0){
             av_strerror(ret, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not open codec %s",errstr);
+            av_dict_free(&opts);
             ffmpeg_cleanups(ffmpeg);
             return NULL;
         }
 
     }
+    av_dict_free(&opts);
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
 
     ffmpeg->video_outbuf = NULL;
@@ -457,7 +473,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg){
     //non timelapse buffered is ok
     if (retcd == -2){
         retcd = 0;
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Buffered packet");
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: Buffered packet");
     }
 
     return retcd;
@@ -498,7 +514,7 @@ int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
         //non timelapse buffered is ok
         if (retcd == -2){
             retcd = 0;
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Buffered packet");
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: Buffered packet");
         }
         av_free(picture);
     }

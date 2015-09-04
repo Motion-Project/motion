@@ -1,4 +1,6 @@
-Summary of Changes   
+Summary of Changes
+   * Remove avformat_network_init call.  Call was not needed and was leaking memory
+   * Add extra container options for ffmpeg videos
    * Remove extra bytes before SOI marker on netcam images.
    * Updated handling of lastsnap to permit subdirectory specification.
    * Handle MJPEG streams from some Logitech webcams which send AVI1 instead of JFIF.

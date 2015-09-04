@@ -872,7 +872,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
      */
     pthread_mutex_lock(&global_lock);
         av_register_all();
-        avformat_network_init();
         avcodec_register_all();
     pthread_mutex_unlock(&global_lock);
     

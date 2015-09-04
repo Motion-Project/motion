@@ -322,6 +322,8 @@ ffmpeg_variable_bitrate 0
 # ffv1 - FF video codec 1 for Lossless Encoding ( experimental )
 # mov - QuickTime ( testing )
 # ogg - Ogg/Theora ( testing )
+# mp4 - MPEG-4 Part 14 H264 encoding
+# mkv - Matroska H264 encoding
 ffmpeg_video_codec mpeg4
 
 # Use ffmpeg to deinterlace video. Necessary if you use an analog camera
