@@ -8,6 +8,7 @@
 
 #include <errno.h>
 #include <libavformat/avformat.h>
+#include <libavutil/mathematics.h>
 
 #endif /* HAVE_FFMPEG */
 

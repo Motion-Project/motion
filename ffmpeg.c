@@ -284,12 +284,12 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->gop_size   = 12;
     c->pix_fmt    = PIX_FMT_YUV420P;
     c->max_b_frames = 0;
-    if (c->codec_id == AV_CODEC_ID_H264){
+
+    if (c->codec_id == MY_CODEC_ID_H264){
         av_dict_set(&opts, "preset", "ultrafast", 0);
         av_dict_set(&opts, "crf", "18", 0);
         av_dict_set(&opts, "tune", "zerolatency", 0);
     }
-
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
     if (vbr) c->flags |= CODEC_FLAG_QSCALE;
     if (!strcmp(ffmpeg->oc->oformat->name, "mp4") ||
@@ -563,7 +563,14 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
             av_free_packet(&pkt);
             return -2;
         }
-        pkt.pts = AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->pts;
+        if (pkt.pts != AV_NOPTS_VALUE)
+            pkt.pts = av_rescale_q(pkt.pts,
+                ffmpeg->video_st->codec->time_base,
+                ffmpeg->video_st->time_base);
+        if (pkt.dts != AV_NOPTS_VALUE)
+            pkt.dts = av_rescale_q(pkt.dts,
+                ffmpeg->video_st->codec->time_base,
+                ffmpeg->video_st->time_base);
         if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
                 pkt.flags |= AV_PKT_FLAG_KEY;
     }
