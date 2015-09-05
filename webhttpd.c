@@ -1965,25 +1965,50 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
         /* ROOT_URI -> GET / */
         if (!strcmp(url, "/")) {
             int y;
+            int counter;
+
+            //Send the webcontrol section if applicable
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
                 sprintf(res, "<b>Motion "VERSION" Running [%hu] Threads</b><br>\n"
-                             "<a href='/0/'>All</a><br>\n", i);
+                             "<a href='/0/'>All</a>\n", i);
                 send_template(client_socket, res);
+                
+                counter = 0;
                 for (y = 1; y < i; y++) {
-                    sprintf(res, "<a href='/%hu/'>Thread %hu</a><br>\n", y, y);
+                    counter++;
+                    if (counter == 6){
+                        sprintf(res, "<br>");
+                        send_template(client_socket, res);
+                        counter = 0;
+                    }
+                    sprintf(res, "<a href='/%hu/'>Thread %hu</a>\n", y, y);
                     send_template(client_socket, res);
                 }
-                send_template_end_client(client_socket);
+                sprintf(res, "<br>");
+                send_template(client_socket, res);
             } else {
-                send_template_ini_client_raw(client_socket);
-                sprintf(res, "Motion "VERSION" Running [%hu] Threads\n0\n", i);
-                send_template_raw(client_socket, res);
-                for (y = 1; y < i; y++) {
-                    sprintf(res, "%hu\n", y);
-                    send_template_raw(client_socket, res);
+                send_template_ini_client(client_socket, ini_template);
+                sprintf(res, "<b>Motion "VERSION" Running [%hu] Threads</b><br>\n", i);
+                send_template(client_socket, res);
+            }
+            //Send the preview section
+            for (y = 0; y < i; y++) {
+                if (cnt[y]->conf.stream_port) {
+                    if (cnt[y]->conf.stream_preview_newline) {
+                        sprintf(res, "<br>");
+                        send_template(client_socket, res);
+                    }    
+                    sprintf(res, "<a href=http://localhost:%d> "
+                       "<img src=http://localhost:%d/ border=0 width=%d%%></a/n>"
+                        ,cnt[y]->conf.stream_port
+                        ,cnt[y]->conf.stream_port
+                        ,cnt[y]->conf.stream_preview_scale);
+                    send_template(client_socket, res);
                 }
             }
+            send_template_end_client(client_socket);
+
         } else {
             char command[256] = {'\0'};
             char slash;
@@ -2231,7 +2256,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
         nread = read_nonblock(client_socket, buffer, length);
 
         if (nread <= 0) {
-            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd First Read Error");
+            MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd First Read Error");
             pthread_mutex_unlock(&httpd_mutex);
             return 1;
         } else {

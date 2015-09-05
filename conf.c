@@ -96,6 +96,8 @@ struct config conf_template = {
     stream_limit:                   0,
     stream_auth_method:             0,
     stream_authentication:          NULL,
+    stream_preview_scale:           25,
+    stream_preview_newline:         0,
     webcontrol_port:                0,
     webcontrol_localhost:           1,
     webcontrol_html_output:         1,
@@ -898,7 +900,7 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-     {
+    {
     "text_changes",
     "# Draw the number of changed pixed on the images (default: off)\n"
     "# Will normally be set to off except when you setup and adjust the motion settings\n"
@@ -1100,6 +1102,22 @@ config_param config_params[] = {
     CONF_OFFSET(stream_authentication),
     copy_string,
     print_string
+    },
+    {
+    "stream_preview_scale",
+    "# Percentage to scale the preview stream image (default: 25)\n",
+    0,
+    CONF_OFFSET(stream_preview_scale),
+    copy_int,
+    print_int
+    },
+    {
+    "stream_preview_newline",
+    "# Have stream preview image start on a new line (default: no)\n",
+    0,
+    CONF_OFFSET(stream_preview_newline),
+    copy_bool,
+    print_bool
     },
     {
     "webcontrol_port",

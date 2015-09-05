@@ -507,6 +507,13 @@ stream_auth_method 0
 # Default: not defined (Disabled)
 ; stream_authentication username:password
 
+# Percentage to scale the stream image for preview
+# Default: 25
+; stream_preview_scale 25
+
+# Have stream preview image start on a new line
+# Default: no
+; stream_preview_newline no
 
 ############################################################
 # HTTP Based Control

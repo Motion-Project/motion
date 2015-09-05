@@ -77,6 +77,8 @@ struct config {
     int stream_limit;
     int stream_auth_method;
     const char *stream_authentication;
+    int stream_preview_scale;
+    int stream_preview_newline;
     int webcontrol_port;
     int webcontrol_localhost;
     int webcontrol_html_output;
