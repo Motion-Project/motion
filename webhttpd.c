@@ -1966,6 +1966,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
         if (!strcmp(url, "/")) {
             int y;
             int counter;
+            char hostname[1024];
 
             //Send the webcontrol section if applicable
             if (cnt[0]->conf.webcontrol_html_output) {
@@ -1993,16 +1994,19 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                 send_template(client_socket, res);
             }
             //Send the preview section
+            hostname[1023] = '\0';
+            gethostname(hostname, 1023);
+
             for (y = 0; y < i; y++) {
                 if (cnt[y]->conf.stream_port) {
                     if (cnt[y]->conf.stream_preview_newline) {
                         sprintf(res, "<br>");
                         send_template(client_socket, res);
                     }    
-                    sprintf(res, "<a href=http://localhost:%d> "
-                       "<img src=http://localhost:%d/ border=0 width=%d%%></a/n>"
-                        ,cnt[y]->conf.stream_port
-                        ,cnt[y]->conf.stream_port
+                    sprintf(res, "<a href=http://%s:%d> "
+                        "<img src=http://%s:%d/ border=0 width=%d%%></a/n>"
+                        ,hostname,cnt[y]->conf.stream_port
+                        ,hostname,cnt[y]->conf.stream_port
                         ,cnt[y]->conf.stream_preview_scale);
                     send_template(client_socket, res);
                 }
