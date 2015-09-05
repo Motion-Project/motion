@@ -220,8 +220,8 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 
       // just knock off 10 characters if we're that close...
       if (buf_len + 10 > 1024) {
-	buf[1024 - 10] = '\0';
-	buf_len = 1024 - 10;
+          buf[1024 - 10] = '\0';
+          buf_len = 1024 - 10;
       }
 
       strncat(buf, ": ", 1024 - buf_len);
