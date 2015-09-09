@@ -1988,31 +1988,35 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                 }
                 sprintf(res, "<br>");
                 send_template(client_socket, res);
-            } else {
-                send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<b>Motion "VERSION" Running [%hu] Threads</b><br>\n", i);
-                send_template(client_socket, res);
-            }
-            //Send the preview section
-            hostname[1023] = '\0';
-            gethostname(hostname, 1023);
 
-            for (y = 0; y < i; y++) {
-                if (cnt[y]->conf.stream_port) {
-                    if (cnt[y]->conf.stream_preview_newline) {
-                        sprintf(res, "<br>");
+                //Send the preview section
+                hostname[1023] = '\0';
+                gethostname(hostname, 1023);
+
+                for (y = 0; y < i; y++) {
+                    if (cnt[y]->conf.stream_port) {
+                        if (cnt[y]->conf.stream_preview_newline) {
+                            sprintf(res, "<br>");
+                            send_template(client_socket, res);
+                        }
+                        sprintf(res, "<a href=http://%s:%d> "
+                            "<img src=http://%s:%d/ border=0 width=%d%%></a/n>"
+                            ,hostname,cnt[y]->conf.stream_port
+                            ,hostname,cnt[y]->conf.stream_port
+                            ,cnt[y]->conf.stream_preview_scale);
                         send_template(client_socket, res);
-                    }    
-                    sprintf(res, "<a href=http://%s:%d> "
-                        "<img src=http://%s:%d/ border=0 width=%d%%></a/n>"
-                        ,hostname,cnt[y]->conf.stream_port
-                        ,hostname,cnt[y]->conf.stream_port
-                        ,cnt[y]->conf.stream_preview_scale);
-                    send_template(client_socket, res);
+                    }
+                }
+                send_template_end_client(client_socket);
+            } else {
+                send_template_ini_client_raw(client_socket);
+                sprintf(res, "Motion "VERSION" Running [%hu] Threads\n0\n", i);
+                send_template_raw(client_socket, res);
+                for (y = 1; y < i; y++) {
+                    sprintf(res, "%hu\n", y);
+                    send_template_raw(client_socket, res);
                 }
             }
-            send_template_end_client(client_socket);
-
         } else {
             char command[256] = {'\0'};
             char slash;
