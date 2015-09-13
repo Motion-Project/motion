@@ -1,4 +1,5 @@
 Summary of Changes
+   * Draft revised motion_guide.html with new options.
    * Revise manual to have current options. 
    * Tab/Space cleanup and validation security issue addressed. (closes 071831)
    * Add preview to webcontrol page(closes 172526)
