@@ -241,7 +241,7 @@ static void event_sqlnewfile(struct context *cnt,
 #endif /* HAVE_PGSQL */
 
 #ifdef HAVE_SQLITE3
-        if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.sqlite3_db)) {
+        if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
             int res;
             char *errmsg = 0;
             res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
@@ -703,6 +703,8 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     if (!cnt->ffmpeg_timelapse) {
         char tmp[PATH_MAX];
         const char *timepath;
+        char codec_swf[3] = "swf";
+        char codec_mpeg[5] = "mpeg4";
 
         /*
          *  conf.timepath would normally be defined but if someone deleted it by control interface
@@ -735,14 +737,14 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using swf codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
             cnt->ffmpeg_timelapse =
-                ffmpeg_open("swf",cnt->timelapsefilename, y, u, v
+                ffmpeg_open(codec_swf,cnt->timelapsefilename, y, u, v
                         ,cnt->imgs.width, cnt->imgs.height, 24
                         ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND);
         } else {
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpeg4 codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be trigger new files");
             cnt->ffmpeg_timelapse =
-                ffmpeg_open("mpeg4",cnt->timelapsefilename, y, u, v
+                ffmpeg_open(codec_mpeg ,cnt->timelapsefilename, y, u, v
                         ,cnt->imgs.width, cnt->imgs.height, 1
                         ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_NEW);
         }

@@ -133,10 +133,7 @@ struct config conf_template = {
     database_user:                  NULL,
     database_password:              NULL,
     database_port:                  0,
-#ifdef HAVE_SQLITE3
-    sqlite3_db:                     NULL,
-    sqlite3_busy_timeout:           0,
-#endif
+    database_busy_timeout:           0,
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */
     on_picture_save:                NULL,
     on_motion_detected:             NULL,
@@ -1529,29 +1526,14 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#ifdef HAVE_SQLITE3
     {
-    "sqlite3_db",
-    "\n############################################################\n"
-    "# Database Options For SQLite3\n"
-    "############################################################\n\n"
-    "# SQLite3 database to log to (default: not defined)",
+    "database_busy_timeout",
+    "# Database wait for unlock time (default: 0)",
     0,
-    CONF_OFFSET(sqlite3_db),
-    copy_string,
-    print_string
-    },
-    {
-    "sqlite3_busy_timeout",
-    "# SQLite3 wait for unlock time (default: 0)",
-    0,
-    CONF_OFFSET(sqlite3_busy_timeout),
+    CONF_OFFSET(database_busy_timeout),
     copy_int,
     print_int
     },
-
-#endif /* HAVE_SQLITE3 */
-
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
     {
     "video_pipe",

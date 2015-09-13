@@ -1675,7 +1675,7 @@ Default: Not defined
 Description: 
 .fi
 .RS
-The name of the database being used (dbname)
+The name of the database being used (dbname).  For Sqlite3, the full path to the database.
 .RE
 .RE
 
@@ -1733,20 +1733,7 @@ Default ports: mysql 3306 , postgresql 5432
 .RE
 
 .TP
-.B sqlite3_db
-.RS 
-.nf 
-Values: User defined string
-Default: Not Defined
-Description: 
-.fi
-.RS
-The full path to the sqlite3 database.
-.RE
-.RE
-
-.TP
-.B sqlite3_busy_timeout
+.B database_busy_timeout
 .RS 
 .nf 
 Values: 0 to unlimited
@@ -1754,7 +1741,7 @@ Default: 0
 Description: 
 .fi
 .RS
-SQLite3 wait time in milliseconds for locked database to be unlocked before returning database locked error
+Database wait time in milliseconds for locked database to be unlocked before returning database locked error
 .RE
 .RE
 

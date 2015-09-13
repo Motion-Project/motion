@@ -1,5 +1,8 @@
 The following is a brief overview of the building and installing instructions.
 
+For full instructions on how to build and install Motion, see the 
+motion_guide.html that is distributed with this source code.
+
 The building instructions vary based upon the base system and the desired options.
 For most installs, it will be desired to include either ffmpeg or libav and these will
 have associated dependencies which dictate the configuration options. 

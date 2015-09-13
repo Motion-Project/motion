@@ -826,19 +826,19 @@ static int motion_init(struct context *cnt)
      * sqlite3 and will need a seperate connection for each thread */
     if (cnt->database_sqlite3) {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 using shared handle");
-    } else if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.sqlite3_db) {
+    } else if ((!strcmp(cnt->conf.database_type, "sqlite3")) && cnt->conf.database_dbname) {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 Database filename %s",
-                   cnt->conf.sqlite3_db);
-        if (sqlite3_open(cnt->conf.sqlite3_db, &cnt->database_sqlite3) != SQLITE_OK) {
+                   cnt->conf.database_dbname);
+        if (sqlite3_open(cnt->conf.database_dbname, &cnt->database_sqlite3) != SQLITE_OK) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Can't open database %s : %s",
-                       cnt->conf.sqlite3_db, sqlite3_errmsg(cnt->database_sqlite3));
+                       cnt->conf.database_dbname, sqlite3_errmsg(cnt->database_sqlite3));
             sqlite3_close(cnt->database_sqlite3);
             exit(1);
         }
-        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: sqlite3_busy_timeout %d msec",
-               cnt->conf.sqlite3_busy_timeout);
-        if (sqlite3_busy_timeout(cnt->database_sqlite3, cnt->conf.sqlite3_busy_timeout) != SQLITE_OK)
-            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: sqlite3_busy_timeout failed %s",
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: database_busy_timeout %d msec",
+               cnt->conf.database_busy_timeout);
+        if (sqlite3_busy_timeout(cnt->database_sqlite3, cnt->conf.database_busy_timeout) != SQLITE_OK)
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: database_busy_timeout failed %s",
                        sqlite3_errmsg(cnt->database_sqlite3));
     }
 #endif /* HAVE_SQLITE3 */
@@ -1061,8 +1061,9 @@ static void motion_cleanup(struct context *cnt)
 
 #ifdef HAVE_SQLITE3
         /* Close the SQLite database */
-        if (cnt->conf.sqlite3_db)
+        if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
             sqlite3_close(cnt->database_sqlite3);
+        }
 #endif /* HAVE_SQLITE3 */
     }
 }
@@ -2677,25 +2678,25 @@ int main (int argc, char **argv)
     /* database_sqlite3 == NULL if not changed causes each thread to creat their own
      * sqlite3 connection this will only happens when using a non-threaded sqlite version */
     cnt_list[0]->database_sqlite3=NULL;
-    if (cnt_list[0]->conf.database_type && ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.sqlite3_db)) {
+    if (cnt_list[0]->conf.database_type && ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.database_dbname)) {
         MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 Database filename %s",
-                   cnt_list[0]->conf.sqlite3_db);
+                   cnt_list[0]->conf.database_dbname);
 
         int thread_safe = sqlite3_threadsafe();
         if (thread_safe > 0) {
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 is threadsafe");
             MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: SQLite3 serialized %s",
                        (sqlite3_config(SQLITE_CONFIG_SERIALIZED)?"FAILED":"SUCCESS"));
-            if (sqlite3_open( cnt_list[0]->conf.sqlite3_db, &cnt_list[0]->database_sqlite3) != SQLITE_OK) {
+            if (sqlite3_open( cnt_list[0]->conf.database_dbname, &cnt_list[0]->database_sqlite3) != SQLITE_OK) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Can't open database %s : %s",
-                            cnt_list[0]->conf.sqlite3_db, sqlite3_errmsg( cnt_list[0]->database_sqlite3));
+                            cnt_list[0]->conf.database_dbname, sqlite3_errmsg( cnt_list[0]->database_sqlite3));
                 sqlite3_close( cnt_list[0]->database_sqlite3);
                 exit(1);
             }
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: sqlite3_busy_timeout %d msec",
-                    cnt_list[0]->conf.sqlite3_busy_timeout);
-            if (sqlite3_busy_timeout( cnt_list[0]->database_sqlite3,  cnt_list[0]->conf.sqlite3_busy_timeout) != SQLITE_OK)
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: sqlite3_busy_timeout failed %s",
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, "%s: database_busy_timeout %d msec",
+                    cnt_list[0]->conf.database_busy_timeout);
+            if (sqlite3_busy_timeout( cnt_list[0]->database_sqlite3,  cnt_list[0]->conf.database_busy_timeout) != SQLITE_OK)
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: database_busy_timeout failed %s",
                             sqlite3_errmsg( cnt_list[0]->database_sqlite3));
         }
 

@@ -112,8 +112,7 @@ struct config {
     const char *database_host;
     const char *database_user;
     const char *database_password;
-    const char *sqlite3_db;
-    int sqlite3_busy_timeout;
+    int database_busy_timeout;
     int database_port;
     char *on_picture_save;
     char *on_area_detected;
