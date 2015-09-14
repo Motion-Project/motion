@@ -1371,12 +1371,14 @@ Some configuration options are only used if Motion is built on a system that has
        <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>       
      </tr>
      <tr>
-       <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>       
+       <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
        <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
      </tr>
      <tr>
+       <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
        <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
      </tr>
    </tbody>  
@@ -3805,6 +3807,46 @@ document regarding how it completely opens up your system.
 <p></p>
 This parameter establishes the username and password to use for the stream.  
 The syntax is username:password
+<p></p>
+
+<h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
+<p></p> 
+<ul>
+  <li> Type: Integer</li>
+  <li> Range / Valid values:</li>
+  <li> Default: 25</li>
+</ul> 
+<p></p>
+If the webcontrol page has HTML enabled, Motion displays all of the streams on the home webcontrol page in HTML 
+format so that all the images can be viewed by standard browsers.
+<p></p>
+This parameter indicates the percentage to scale the stream image when it is placed on the page.  
+Numbers greater than 100 are permitted. 
+<p></p>
+<p></p>
+
+<h3><a name="stream_preview_newline"></a> stream_preview_newline </h3>
+<p></p> 
+<ul>
+  <li> Type: string</li>
+  <li> Range / Valid values:on / off</li>
+  <li> Default: on</li>
+</ul> 
+<p></p>
+If the webcontrol page has HTML enabled, Motion displays all of the streams on the home webcontrol page 
+in HTML format so that all the images can be viewed by standard browsers.
+<p></p>
+This parameter determines whether the image is placed on a new line in the webcontrol web page.
+<p></p>  
+Preview images are placed on to the webcontrol home page in thread number order.  This   
+This parameter allows the user some flexibility in organizing the images on the page.  
+<p></p>
+Setting this parameter to off will set the image to the right of any image from a lower numbered thread. 
+Setting it to 'on' will place the image on the start of the next line(below). 
+<p></p>
+Full customization of the webcontrol page is NOT planned in the Motion development.  Users that require
+a more polished and customized preview page are encouraged to create their own local HTML page that references
+the streams.    
 <p></p>
 
 <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
