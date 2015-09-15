@@ -67,24 +67,15 @@ static boolean netcam_fill_input_buffer(j_decompress_ptr cinfo)
      * path when a new image is to be processed.  It is assumed that
      * this routine will only be called once for the entire image.
      * If an unexpected call (with start_of_file FALSE) occurs, the
-     * routine will insert a "fake" "end of image" marker and return
-     * to the library to process whatever data remains from the original
-     * image (the one with errors).
-     *
-     * I'm not yet clear on what the result (from the application's
-     * point of view) will be from this logic.  If the application
-     * expects that a completely new image will be started, this will
-     * give trouble.
+     * routine calls ERREXIT().
      */
     if (src->start_of_file) {
         nbytes = src->length;
         src->buffer = (JOCTET *) src->data;
     } else {
-        /* Insert a fake EOI marker - as per jpeglib recommendation */
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: **fake EOI inserted**");
-        src->buffer[0] = (JOCTET) 0xFF;
-        src->buffer[1] = (JOCTET) JPEG_EOI;    /* 0xD9 */
         nbytes = 2;
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Not enough data from netcam.");
+        ERREXIT(cinfo, JERR_INPUT_EOF);
     }
 
     src->pub.next_input_byte = src->buffer;
