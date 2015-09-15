@@ -2186,10 +2186,14 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
          * Allocate space for a working string to contain the path.
          * The extra 4 is for "://" and string terminator.
          */
-        ptr = mymalloc(strlen(url->service) + strlen(url->host)
-                       + strlen(url->path) + 4);
-        sprintf((char *)ptr, "http://%s%s", url->host, url->path);
-        
+        if (url->port != 0) {
+            ptr = mymalloc(strlen(url->service) + strlen(url->host) + 7 + strlen(url->path) + 4);
+            sprintf((char *)ptr, "http://%s:%d%s", url->host, url->port , url->path);
+        }else {
+            ptr = mymalloc(strlen(url->service) + strlen(url->host) + strlen(url->path) + 4);
+            sprintf((char *)ptr, "http://%s%s", url->host, url->path);
+        }
+
         netcam->connect_keepalive = FALSE; /* Disable Keepalive if proxy */
         free((void *)netcam->cnt->conf.netcam_keepalive);
         netcam->cnt->conf.netcam_keepalive = strdup("off");
