@@ -31,9 +31,9 @@ examplesdir = $(datadir)/@PACKAGE_NAME@-@PACKAGE_VERSION@/examples
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
-CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" 
+CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@
 LDFLAGS      = @LDFLAGS@
-LIBS         = @LIBS@ 
+LIBS         = @LIBS@  @FFMPEG_LIBS@
 VIDEO_OBJ    = @VIDEO@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(VIDEO_OBJ) \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
