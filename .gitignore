@@ -1,6 +1,7 @@
 *.log
 .svn/
 *.o
+autom4te.cache
 .depend
 motion
 config.h

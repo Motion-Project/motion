@@ -36,8 +36,8 @@ int netcam_check_pixfmt(netcam_context_ptr netcam){
 
     retcd = -1;
 
-    if ((netcam->rtsp->codec_context->pix_fmt == PIX_FMT_YUV420P) ||
-        (netcam->rtsp->codec_context->pix_fmt == PIX_FMT_YUVJ420P)) retcd = 0;
+    if ((netcam->rtsp->codec_context->pix_fmt == AV_PIX_FMT_YUV420P) ||
+        (netcam->rtsp->codec_context->pix_fmt == AV_PIX_FMT_YUVJ420P)) retcd = 0;
 
     return retcd;
 
@@ -565,7 +565,7 @@ int netcam_rtsp_open_sws(netcam_context_ptr netcam){
         ,netcam->rtsp->codec_context->pix_fmt
         ,netcam->width
         ,netcam->height
-        ,PIX_FMT_YUV420P
+        ,AV_PIX_FMT_YUV420P
         ,SWS_BICUBIC,NULL,NULL,NULL);
     if (netcam->rtsp->swsctx == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
@@ -576,7 +576,7 @@ int netcam_rtsp_open_sws(netcam_context_ptr netcam){
     }
 
     netcam->rtsp->swsframe_size = avpicture_get_size(
-            PIX_FMT_YUV420P
+            AV_PIX_FMT_YUV420P
             ,netcam->width
             ,netcam->height);
         if (netcam->rtsp->swsframe_size <= 0) {
@@ -632,7 +632,7 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
     retcd = avpicture_fill(
         (AVPicture*)netcam->rtsp->swsframe_out
         ,buffer_out
-        ,PIX_FMT_YUV420P
+        ,AV_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height);
     if (retcd < 0) {
@@ -663,7 +663,7 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     retcd = avpicture_layout(
         (const AVPicture*)netcam->rtsp->swsframe_out
-        ,PIX_FMT_YUV420P
+        ,AV_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height
         ,(unsigned char *)image

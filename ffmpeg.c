@@ -12,6 +12,7 @@
  * 53 are supported.
  */
 
+#include "config.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -273,7 +274,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->time_base.num = 1;
     c->time_base.den = rate;
     c->gop_size   = 12;
-    c->pix_fmt    = PIX_FMT_YUV420P;
+    c->pix_fmt    = AV_PIX_FMT_YUV420P;
     c->max_b_frames = 0;
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
