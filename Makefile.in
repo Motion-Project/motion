@@ -195,6 +195,7 @@ help:
 	@echo "--------------------------------------------------------------------------------"
 	@echo
 
+	
 ################################################################################
 # INSTALL installs all relevant files.                                         #
 ################################################################################
@@ -206,15 +207,20 @@ install:
 	mkdir -p $(DESTDIR)$(sysconfdir)/motion
 	mkdir -p $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(examplesdir)
+	@sed -i 's|$${prefix}|$(prefix)|' motion-dist.conf
+	@sed -i 's|$${prefix}|$(prefix)|' thread1-dist.conf
+	@sed -i 's|$${prefix}|$(prefix)|' thread2-dist.conf
+	@sed -i 's|$${prefix}|$(prefix)|' thread3-dist.conf
+	@sed -i 's|$${prefix}|$(prefix)|' thread4-dist.conf				
 	$(INSTALL_DATA) motion.1 $(DESTDIR)$(mandir)/man1
 	$(INSTALL_DATA) $(DOC) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $(EXAMPLES) $(DESTDIR)$(examplesdir)
 	$(INSTALL) $(EXAMPLES_BIN) $(DESTDIR)$(examplesdir)
 	$(INSTALL_DATA) motion-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread1.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread2.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread3.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread4.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread1-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread2-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread3-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) thread4-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	for prog in $(PROGS); \
 	do \
 	($(INSTALL) $$prog $(DESTDIR)$(bindir) ); \

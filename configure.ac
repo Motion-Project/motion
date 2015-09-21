@@ -396,12 +396,6 @@ AS_IF([test "${HAVE_FFMPEG}" = "yes" ], [
 ])
 AC_SUBST(FFMPEG_OBJ)
 
-# Revised RTSP module so that it can be included
-# whether or not FFMPEG is found.
-
-    RTPS_OBJ="netcam_rtsp.o"
-    AC_SUBST(RTPS_OBJ)
-
 #
 # Check SQLITE3
 #
@@ -1097,10 +1091,10 @@ fi
 AC_SUBST(BIN_PATH)
 
 AC_CONFIG_FILES([
-thread1.conf
-thread2.conf
-thread3.conf
-thread4.conf
+thread1-dist.conf
+thread2-dist.conf
+thread3-dist.conf
+thread4-dist.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
