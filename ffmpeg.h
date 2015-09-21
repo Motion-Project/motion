@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "config.h"
+
 #ifdef HAVE_FFMPEG
 
 #include <errno.h>
