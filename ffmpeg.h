@@ -12,6 +12,19 @@
 #include <libavformat/avformat.h>
 #include <libavutil/mathematics.h>
 
+#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
+
+#define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
+#define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
+
+#else
+
+#define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
+#define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
+
+#endif
+
+
 #endif /* HAVE_FFMPEG */
 
 #define TIMELAPSE_NONE   0  /* No timelapse, regular processing */
