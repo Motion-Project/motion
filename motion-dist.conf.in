@@ -112,7 +112,8 @@ framerate 2
 minimum_frame_time 0
 
 # URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)
-# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined
+# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. A trailing slash may be required for some cameras.
+# Default: Not defined
 ; netcam_url value
 
 # Username and password for network camera (only if required). Default: not defined
