@@ -380,7 +380,7 @@ FFMPEG_OBJ=""
 AC_ARG_WITH([ffmpeg],
 	    AS_HELP_STRING([--with-ffmpeg[=DIR]], [Build with FFMPEG support]),
 	    [with_ffmpeg=$withval],
-	    [with_ffmpeg=no])
+	    [with_ffmpeg=yes])
 
 AS_IF([test "x$with_ffmpeg" != "xno"], [
        AS_IF([test "x$with_ffmpeg" != "xyes"], [

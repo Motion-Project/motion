@@ -100,12 +100,13 @@ on the mailing list.
 <p></p>
 Versions 3.2.12 is the current official version released in June 2010.  The trunk of the SVN represents the official 
 development branch of Motion.  Additional independent development forks exist on Github that contain additional bug 
-fixes, enhanced features and updated 
-documentation.  This guide is based upon the features and options included in the Mr-Dave Github repository as of 
-September 2015.
-Note that the majority of the new options and changed names represent differences between the official 3.2.12 version
-and the SVN trunk rather than differences between the trunk and the Mr-Dave repository.  Users are encouraged to evaluate 
-the pros and cons for themselves of using any particular source.
+fixes, enhanced features and updated documentation.  
+This guide is based upon the features and options included in the source code with which it is distributed.  
+It was re-written in September 2015 to reflect the changes and options in the code at that time.
+The majority of the new options and changed names represent differences between the official 3.2.12 version
+and the SVN trunk and as a result this guide will generally apply to the code in the trunk as well.  There may 
+however be some options and features included in this guide that are not incorporated into the trunk source code.  
+Users are encouraged to evaluate the pros and cons for themselves of using any particular source.
 <p></p>
 Since 3.2.12 many options have been renamed in the development branches to make setting up Motion easier. 
 <p></p>
@@ -298,7 +299,8 @@ Ubuntu / Debian Packages
   packages and whether they are Libav or ffmpeg is a user selection and possibly dependent upon which is  
   available in the Ubuntu/Debian repositories.  The source code with the latest fixes will work with either Libav or
   ffmpeg.  Older source code may compile better using one or the other.  It is important to note that many repositories
-  do NOT include both Libav and ffmpeg.  They will only have one or the other.   
+  do NOT include both Libav and ffmpeg.  They will only have one or the other.  The default for the configure is to
+  require that ffmpeg or Libav are installed.  Use the configure option to compile without the ffmpeg / libav functionality.    
 </ul>
 <p></p>
 <p></p>
@@ -350,6 +352,8 @@ openSUSE Packages
   </ul>
   Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
   change in the future.  Validate that the repository is still valid when doing the install on openSUSE systems.
+  The default for the configure is to require that ffmpeg or Libav are installed.  Use the configure option to 
+  compile without the ffmpeg / libav functionality.
 </ul> 
 <p></p>
 <p></p>
@@ -379,8 +383,7 @@ not found because it was either not installed or that it was installed into a lo
 With the Motion configure script, once it has ended it also lists out all of the optional components that were located.  
 Note that if you KNOW that a particular component is installed yet the configure script reports it as not installed, then
 it may be necessary to use one or more of the configure options described below to tell the script where to find
-the particular component.  (This happens frequently with the Libav/ffmpeg libraries since the install location has changed
-numerous times).
+the particular component.  
 
 <p></p>
 To run the configure your current directory must be the motion directory. You type
@@ -566,32 +569,24 @@ The following table lists the current configure options.
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the path for the directory prefix in which the library and headers are installed  .<br /> If not specified configure will search in /usr/ and /usr/local/ </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the path for the directory prefix in which the 
+			library and headers are installed  .<br /> If not specified configure will search in /usr/ and /usr/local/ </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > DIR is the directory PREFIX in which the ffmpeg shared libraries 
 			and their headers are installed. <br /> If you install ffmpeg from sources and use the	default directories or 
 			if ffmpeg is installed as a binary package (RPM or deb) you may not need to specify the directory prefix. 
 			Configure should find the libraries automatically. If you installed ffmpeg from sources and specified a 
-			different --prefix when building ffmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR). 
+			different --prefix when building ffmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR) 
+			or export that location to be included in the PKG_CONFIG_PATH
+			The option of --with-ffmpeg is the default for Motion.  If the required libraries are not located, the 
+			configure script will stop at the ffmpeg section and report which libraries need to be installed.  
+			Once the required libraries are installed, run the script again.  As noted previously, make sure
+			to install the -dev versions.   
 			For more information on FFmpeg see the documentation for the FFmpeg project. <br /> </td>
-		</tr>
-		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg-headers=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the prefix for ffmpeg headers.</td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > DIR is the directory PREFIX in which the ffmpeg headers are installed. <br /> If you install ffmpeg from sources and use the	default directories or 
-			if ffmpeg is installed as a binary package (RPM or deb) you may not need to specify the directory prefix. 
-			Configure should find the libraries automatically. If you installed ffmpeg from sources and specified a 
-			different --prefix when building ffmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR). 
-			For more information on FFmpeg see the documentation for the FFmpeg project. <br /> </td>
-		</tr>
-		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg-libs=libs </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the extra libs ffmpeg.</td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > libs is a list of libraries associated with ffmpeg necessary for linking. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-ffmpeg </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with ffmpeg </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to compile with ffmpeg. If ffmpeg is not installed you do not need to specify that Motion must build without ffmpeg. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to compile with ffmpeg. If ffmpeg is not installed you must specify this option for Motion to build without ffmpeg. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-mysql-lib=DIR </td>
@@ -666,13 +661,11 @@ warnings or possibly none.
 <p></p>
 If the notifications indicate many many undefined references, then it is most likely that
 an additional library needs to be added in via the configure switches.  Many of these additional libraries are related
-to the version of ffmpeg and how it was built or installed.  The following is a sample of the configuration
-line that needs to be run to add references to the ffmpeg libraries.  Note that it is unlikely that ALL of these 
-libraries would be needed and this sample is only intended to provide some guidance.  As indicated, the libraries are 
-associated with ffmpeg and how that component was created.
+to the version of ffmpeg and how it was built or installed.  The following is a sample of some of the extra libraries 
+that may need to be added.
 <p></p>
 <code>
-./configure --with-ffmpeg-libs=" -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec "
+-lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec 
 </code>
 <p></p>  
     
