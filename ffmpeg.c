@@ -49,6 +49,7 @@
 #define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
 #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
 #define MY_CODEC_ID_H264      AV_CODEC_ID_H264
+#define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
 
 #else
 
@@ -58,6 +59,7 @@
 #define MY_CODEC_ID_NONE      CODEC_ID_NONE
 #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
 #define MY_CODEC_ID_H264      CODEC_ID_H264
+#define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
 #endif
 /*********************************************/
 AVFrame *my_frame_alloc(void){
@@ -180,6 +182,10 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
       ext = ".mkv";
       of = av_guess_format ("matroska", NULL, NULL);
       of->video_codec = MY_CODEC_ID_H264;
+    } else if (strcmp (codec, "hevc") == 0){
+      ext = ".mp4";
+      of = av_guess_format ("mp4", NULL, NULL);
+      of->video_codec = MY_CODEC_ID_HEVC;
     } else {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg_video_codec option value"
                    " %s is not supported", codec);
@@ -286,7 +292,8 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
     c->pix_fmt    = MY_PIX_FMT_YUV420P;
     c->max_b_frames = 0;
 
-    if (c->codec_id == MY_CODEC_ID_H264){
+    if (c->codec_id == MY_CODEC_ID_H264 ||
+        c->codec_id == MY_CODEC_ID_HEVC){
         av_dict_set(&opts, "preset", "ultrafast", 0);
         av_dict_set(&opts, "crf", "18", 0);
         av_dict_set(&opts, "tune", "zerolatency", 0);
