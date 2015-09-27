@@ -221,11 +221,7 @@ AC_MSG_CHECKING(for sdl)
 if test "x$withval" = "xno"; then
 	AC_MSG_RESULT(skipped)
 else
-	if test "${FreeBSD}" != ""; then
-		CONFIG_SDL='sdl11-config'
-	else
-		CONFIG_SDL='sdl-config'
-	fi
+    CONFIG_SDL='sdl-config'
 	if test -z "`($CONFIG_SDL --version) 2>/dev/null`" ;then
 		AC_MSG_RESULT(no)
 		if test "$withval" = "yes"; then

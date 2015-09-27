@@ -391,10 +391,22 @@ To run the configure your current directory must be the motion directory. You ty
 <code>./configure</code>
 <p></p>
 You can add the parameter <code>./configure --help</code> to get help on the different switches.  
-
-The following table lists the current configure options.
 <p></p>
-
+When the configure script finishes you should validate that the options desired  
+were correctly identified by the configure.  In particular, the ffmpeg option is occasionally not 
+found even if it is actually installed.  Various users have indicated this to be a particular
+problem with the PI.  If using a PI and have this issue, you can use the following option
+<p></p>
+<code>./configure --with-ffmpeg=/usr/lib/arm-linux-gnueabihf</code>
+<p></p>
+For a long term option, you can edit the file 
+<code>$HOME/.bashrc</code>
+and within it place the following two lines at the end
+<code>PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf:$PKG_CONFIG_PATH</code>
+<code>export PKG_CONFIG_PATH</code>
+<p></p>
+The long term option will however only become effective the next time you get into the terminal shell.
+<p></p>
 
 <table border="1" class="fixed" >
     <colgroup>    
@@ -651,8 +663,8 @@ The following table lists the current configure options.
 <h3><a name="Make"></a>  Make </h3>
 <ul>
 
-Once the configure script finishes successfully, a 'makefile' is created.  The makefile builds the Motion program
-and links in all of the required libraries.  To run the makefile, type
+Once the configure script has successfully finished and indicates all options desired, a 'makefile' is created.  
+The makefile builds the Motion program and links in all of the required libraries.  To run the makefile, type
 <p></p>
 <code>make</code>
 <p></p>

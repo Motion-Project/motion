@@ -1,4 +1,5 @@
 Summary of Changes
+   * Makefile changes to align with Debian package and fixes from previous changes
    * Revise description for netcam_url in configuration file.
    * Change default for ffmpeg in configure.ac (Issue 795002,82)
      To compile without ffmpeg now requires --without-ffmpeg option
