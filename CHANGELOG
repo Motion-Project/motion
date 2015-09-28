@@ -1,12 +1,20 @@
 Summary of Changes
+   * Makefile changes to align with Debian package and fixes from previous changes
+   * Revise description for netcam_url in configuration file.
+   * Change default for ffmpeg in configure.ac (Issue 795002,82)
+     To compile without ffmpeg now requires --without-ffmpeg option
+   * Change prefix to use sysconfdir instead.  Install threadX.conf files to threadx-dist.conf
+   * Revise configure.ac to use pkg-config for ffmpeg(Rex Feany)
+   * Revise PIX_FMT to be able to use older ffmpeg versions.
+   * Revise PIX_FMT for newer ffmpeg(Rex Feany)
    * Add patch for ports on proxy netcams from GVautier (issue 144906)
    * Add patch from JonGuess(issue 151452) for treatment of partial netcam images. 
    * Consolidate the Sqlite3 options into the code standard.
    * Draft revised motion_guide.html with new options.
    * Revise manual to have current options. 
-   * Tab/Space cleanup and validation security issue addressed. (closes 071831)
-   * Add preview to webcontrol page(closes 172526)
-   * Additional container fixes(closes requests/bugs 201900,110304,001656,050731)
+   * Tab/Space cleanup and validation security issue addressed. (issue 071831)
+   * Add preview to webcontrol page(issue 172526)
+   * Additional container fixes(requests/bugs 201900,110304,001656,050731)
    * Remove depreciated deinterlace option
    * Remove avformat_network_init call.  Call was not needed and was leaking memory
    * Add extra container options for ffmpeg videos

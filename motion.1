@@ -1,8 +1,8 @@
-.TH MOTION 1 2007-11-06 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2015-09-26 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detct motion using a video4linux device or network camera
 .SH SYNOPSIS
-.B motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process_id_file ][ -l log_file ]
+.B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p process_id_file ][ \-l log_file ]
 .SH DESCRIPTION
 .I  Motion
 uses a video4linux device or network camera to detect motion. If motion is detected both normal
@@ -196,11 +196,11 @@ This is ONLY used for FreeBSD.
 .nf 
 Values: 
 .RS
--1 : USB Cameras
+\-1 : USB Cameras
 0 : video/TV cards or uvideo(4) on OpenBSD
 1 : video/TV cards
 .RE
-Default: -1
+Default: \-1
 Description: 
 .fi
 .RS
@@ -644,8 +644,14 @@ Note that this option is only used to trigger the indicated script.
 It does not limit all motion detection events to only the area indicated.
 .RS
 Image Areas
+.RE
+.RS
 123
+.RE
+.RS
 456
+.RE
+.RS
 789
 .RE
 .RE
