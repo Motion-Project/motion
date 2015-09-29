@@ -2,7 +2,7 @@
 %define dist .el7
 %endif
 
-%define gitver .git21994e4
+%define gitver .git2bd79c7
 
 %{!?_unitdir: %global _unitdir /lib/systemd/system}
 %{!?_tmpfilesdir:%global _tmpfilesdir %{_prefix}/lib/tmpfiles.d}
@@ -11,9 +11,9 @@
 Packager:       momo-i <webmaster@momo-i.org>
 Vendor:         momo-i, http://www.momo-i.org/
 
-Name:           motion
-Version:        3.2.13
-Release:        13%{?gitver}%{?dist}
+Name:           @PACKAGE_NAME@
+Version:        @PACKAGE_VERSION@
+Release:        16%{?gitver}%{?dist}
 Summary:        A program that monitors the video signal from cameras.
 
 Group:          Applications/Internet
@@ -96,8 +96,8 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 
 # Remove doc and example
-rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}-%{version}
-rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
+rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}
 
 %if 0%{?fedora} >= 21 || 0%{?rhel} >= 7
 install -d -m755 $RPM_BUILD_ROOT%{_unitdir}
@@ -113,10 +113,17 @@ install -D -m755 motion.init-Fedora $RPM_BUILD_ROOT%{_initrddir}/motion
 install -D -m644 %{SOURCE3} $RPM_BUILD_ROOT%{_httpd_confdir}/%{name}.conf
 
 mv -f $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}-dist.conf $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.conf
-#install -D -m644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.conf
+
 install -D -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/htpasswd
 
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/run/%{name}
+
+pushd $RPM_BUILD_ROOT%{_sysconfdir}/%{name}
+mv -f thread1-dist.conf thread1.conf
+mv -f thread2-dist.conf thread2.conf
+mv -f thread3-dist.conf thread3.conf
+mv -f thread4-dist.conf thread4.conf
+popd
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -160,9 +167,9 @@ fi
 %endif
 
 %files
-%doc CHANGELOG CODE_STANDARD CREDITS FAQ INSTALL README motion_guide.html %{name}-dist.conf
+%doc CHANGELOG CODE_STANDARD CREDITS FAQ INSTALL README motion_guide.html *-dist.conf
 %{!?_licensedir:%global license %%doc}
-%license COPYING
+%license COPYING copyright
 %{_bindir}/%{name}
 %dir %{_sysconfdir}/%{name}
 %dir %{_localstatedir}/run/%{name}
@@ -181,6 +188,16 @@ fi
 %config(noreplace) %{_httpd_confdir}/%{name}.conf
 
 %changelog
+* Tue Sep 29 2015 momo-i <webmaster@momo-i.org> - 3.2.13-16.git2bd79c7
+- change name thread*.conf
+
+* Tue Sep 29 2015 momo-i <webmaster@momo-i.org> - 3.2.13-15.git2bd79c7
+- Update to 2bd79c7
+- Delete webm
+
+* Tue Sep 29 2015 momo-i <webmaster@momo-i.org> - 3.2.13-14.git21994e4
+- Test webm
+
 * Sun Sep 27 2015 momo-i <webmaster@momo-i.org> - 3.2.13-13.git21994e4
 - Change auth digest to basic
 
