@@ -1,0 +1,14 @@
+[Unit]
+Description=Motion detection system. It is used to detect movement based on compare images.
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/motion/motion.pid
+# Edit @libdir@ to your library path. /usr/lib, /usr/lib64, etc...
+Environment=LD_PRELOAD=@libdir@/libv4l/v4l2convert.so
+ExecStart=/usr/bin/motion -c /etc/motion/motion.conf
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

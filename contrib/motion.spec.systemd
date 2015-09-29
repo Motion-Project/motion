@@ -1,0 +1,221 @@
+%if 0%{?el7}
+%define dist .el7
+%endif
+
+%define gitver .git21994e4
+
+%{!?_unitdir: %global _unitdir /lib/systemd/system}
+%{!?_tmpfilesdir:%global _tmpfilesdir %{_prefix}/lib/tmpfiles.d}
+%{!?_httpd_confdir: %{expand: %%global _httpd_confdir %%{_sysconfdir}/httpd/conf.d}}
+
+Packager:       momo-i <webmaster@momo-i.org>
+Vendor:         momo-i, http://www.momo-i.org/
+
+Name:           motion
+Version:        3.2.13
+Release:        13%{?gitver}%{?dist}
+Summary:        A program that monitors the video signal from cameras.
+
+Group:          Applications/Internet
+License:        GPLv2
+# Original URL
+#URL:            http://www.lavrsen.dk/foswiki/bin/view/Motion/WebHome
+### svn co http://www.lavrsen.dk/svn/motion/trunk/ motion-3.2.13
+### tar acvf motion-3.2.13.tar.xz motion-3.2.13 --exclude=.svn
+
+URL:            https://github.com/Mr-Dave/motion
+# git clone https://github.com/Mr-Dave/motion.git motion-3.2.13
+# tar acvf motion-3.2.13%{?gitver}.tar.xz motion-3.2.13 --exclude=.git
+# cd motion-3.2.13 ; git log -1 --pretty=format:".git%h"
+Source0:        %{name}-%{version}%{?gitver}.tar.xz
+
+Source1:        %{name}.service
+Source2:        %{name}-tmpfiles.conf
+Source3:        %{name}-httpd.conf
+Source4:        %{name}.conf
+Source5:        %{name}.htpasswd
+
+Patch0:         %{name}-%{version}-hevc.patch
+Patch1:         %{name}-%{version}-db.patch
+
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  autoconf automake libtool
+BuildRequires:  libv4l-devel libjpeg-turbo-devel
+BuildRequires:  ffmpeg-devel sqlite-devel
+BuildRequires:  postgresql-devel
+%if 0%{?fedora} >= 21 || 0%{?rhel} >= 7
+BuildRequires:  mariadb-devel
+BuildRequires:  SDL-devel >= 1.2.15
+%else
+BuildRequires:  mysql-devel
+%endif
+
+%if 0%{?fedora} >= 21 || 0%{?rhel} >= 7
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
+%else
+Requires(preun): initscripts, chkconfig
+Requires(post): initscripts, chkconfig
+Requires(postun): initscripts
+%endif
+
+Requires:       httpd
+
+%description
+Motion is a program that monitors the video signal from cameras.
+It is able to detect if a significant part of the picture has changed;
+in other words, it can detect motion.
+
+%prep
+%setup -q
+%patch0 -p1
+%patch1 -p1
+
+cat << EOF > version.sh
+#!/bin/sh
+echo -n "%{version}"
+EOF
+
+autoreconf -ivf
+
+%build
+CXXFLAGS="$RPM_OPT_FLAGS -fPIC"
+CFLAGS="$RPM_OPT_FLAGS -fPIC"
+%configure \
+%if 0%{?el6}
+	--without-sdl \
+%endif
+	--without-optimizecpu
+
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+# Remove doc and example
+rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}-%{version}
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
+
+%if 0%{?fedora} >= 21 || 0%{?rhel} >= 7
+install -d -m755 $RPM_BUILD_ROOT%{_unitdir}
+install -d -m755 $RPM_BUILD_ROOT%{_tmpfilesdir}
+
+sed -i 's,@libdir@,%{_libdir},g' %{SOURCE1}
+install -D -m644 %{SOURCE1} $RPM_BUILD_ROOT%{_unitdir}/%{name}.service
+install -D -m644 %{SOURCE2} $RPM_BUILD_ROOT%{_tmpfilesdir}/%{name}.conf
+%else
+install -d -m755 $RPM_BUILD_ROOT%{_initrddir}
+install -D -m755 motion.init-Fedora $RPM_BUILD_ROOT%{_initrddir}/motion
+%endif
+install -D -m644 %{SOURCE3} $RPM_BUILD_ROOT%{_httpd_confdir}/%{name}.conf
+
+mv -f $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}-dist.conf $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.conf
+#install -D -m644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/%{name}.conf
+install -D -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/htpasswd
+
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/run/%{name}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%preun
+%if 0%{?fedora} >= 20 || 0%{?rhel} >= 7
+if [ $1 -eq 0 ] ; then
+	# Package removal, not upgrade
+	systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
+	systemctl stop %{name}.service > /dev/null 2>&1 || :
+fi
+%else
+if [ $1 = 0 ]; then
+	/sbin/service %{name} stop > /dev/null 2>&1 || :
+	/sbin/chkconfig --del %{name} || :
+fi
+%endif
+
+%post
+%if 0%{?fedora} >= 20 || 0%{?rhel} >= 7
+if [ $1 -eq 1 ] ; then
+	# Initial installation
+	systemctl preset %{name}.service >/dev/null 2>&1 || :
+fi
+%else
+	/sbin/chkconfig --add %{name} > /dev/null 2>&1 || :
+%endif
+
+%postun
+%if 0%{?fedora} >= 20 || 0%{?rhel} >= 7
+systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+	# Package upgrade, not uninstall
+	systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+fi
+%else
+if [ $1 -ge 1 ] ; then
+	# Package upgrade, not uninstall
+	/sbin/service %{name} condrestart > /dev/null 2>&1 || :
+fi
+%endif
+
+%files
+%doc CHANGELOG CODE_STANDARD CREDITS FAQ INSTALL README motion_guide.html %{name}-dist.conf
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%{_bindir}/%{name}
+%dir %{_sysconfdir}/%{name}
+%dir %{_localstatedir}/run/%{name}
+%config(noreplace) %{_sysconfdir}/%{name}/thread*.conf
+%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
+#{_sysconfdir}/%{name}/%{name}-dist.conf
+%{_mandir}/man1/%{name}.1*
+%if 0%{?fedora} >= 21 || 0%{?rhel} >= 7
+%{_unitdir}/%{name}.service
+%{_tmpfilesdir}/%{name}.conf
+%else
+%{_initrddir}/motion
+%endif
+%ghost %attr(0644,root,root) %{_localstatedir}/log/%{name}.log
+%config(noreplace) %{_sysconfdir}/%{name}/htpasswd
+%config(noreplace) %{_httpd_confdir}/%{name}.conf
+
+%changelog
+* Sun Sep 27 2015 momo-i <webmaster@momo-i.org> - 3.2.13-13.git21994e4
+- Change auth digest to basic
+
+* Fri Sep 25 2015 momo-i <webmaster@momo-i.org> - 3.2.13-12.git21994e4
+- HEVC patched
+
+* Fri Sep 25 2015 momo-i <webmaster@momo-i.org> - 3.2.13-11.git21994e4
+- Update to 21994e4
+
+* Sat Sep 19 2015 momo-i <webmaster@momo-i.org> - 3.2.13-10.git4750579c
+- Add Requires: httpd
+
+* Fri Sep 18 2015 momo-i <webmaster@momo-i.org> - 3.2.13-9.git4750579c
+- Disable SDL for el6
+
+* Fri Sep 18 2015 momo-i <webmaster@momo-i.org> - 3.2.13-8.git4750579c
+- Change default ffmpeg codec mpeg4 to h264
+
+* Fri Sep 18 2015 momo-i <webmaster@momo-i.org> - 3.2.13-7.git4750579c
+- x264/x265 test
+
+* Fri Sep 18 2015 momo-i <webmaster@momo-i.org> - 3.2.13-6.git4750579c
+- Fixed htdigest
+
+* Thu Sep 17 2015 momo-i <webmaster@momo-i.org> - 3.2.13-5.git4750579c
+- Add httpd settings, conf, and passwdfile
+
+* Thu Sep 17 2015 momo-i <webmaster@momo-i.org> - 3.2.13-4.git4750579c
+- Testing h264/265 codec
+
+* Thu Sep 17 2015 momo-i <webmaster@momo-i.org> - 3.2.13-3.git4750579c
+- Fixed configure
+
+* Thu Sep 17 2015 momo-i <webmaster@momo-i.org> - 3.2.13-2.git4750579c
+- Fix systemd file
+
+* Thu Sep 17 2015 momo-i <webmaster@momo-i.org> - 3.2.13-1
+- Initial rpm release.
