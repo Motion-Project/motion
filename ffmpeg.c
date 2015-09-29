@@ -59,7 +59,7 @@
 #define MY_CODEC_ID_NONE      CODEC_ID_NONE
 #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
 #define MY_CODEC_ID_H264      CODEC_ID_H264
-#define MY_CODEC_ID_HEVC      CODEC_ID_H264
+#define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
 #endif
 /*********************************************/
 AVFrame *my_frame_alloc(void){
