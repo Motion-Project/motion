@@ -325,6 +325,7 @@ ffmpeg_variable_bitrate 0
 # ogg - Ogg/Theora ( testing )
 # mp4 - MPEG-4 Part 14 H264 encoding
 # mkv - Matroska H264 encoding
+# hevc - H.265 / HEVC (High Efficiency Video Coding)
 ffmpeg_video_codec mpeg4
 
 # When creating videos, should frames be duplicated in order 
