@@ -569,7 +569,7 @@ else
 		#LDFLAGS="-L$MYSQL_LIBDIR"
 		saved_CFLAGS=$CFLAGS
 		saved_LIBS=$LIBS
-		CFLAGS="-I$MYSQL_INCDIR"
+		CFLAGS="-I$MYSQL_INCDIR -fPIC"
 		LIBS="-L$MYSQL_LIBDIR"
 		AC_CHECK_LIB(mysqlclient,mysql_init,[
 					TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient -lz"
@@ -708,7 +708,7 @@ else
 			#LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
 			saved_CFLAGS=$CFLAGS
 			saved_LIBS=$LIBS
-			CFLAGS="-I$PGSQL_INCDIR"
+			CFLAGS="-I$PGSQL_INCDIR -fPIC"
 			LIBS="-L$PGSQL_LIBDIR"
 			AC_CHECK_LIB(pq, PQconnectStart, [
 						PGSQL_SUPPORT="yes"
