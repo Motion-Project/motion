@@ -579,8 +579,6 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
             pkt.dts = av_rescale_q(pkt.dts,
                 ffmpeg->video_st->codec->time_base,
                 ffmpeg->video_st->time_base);
-        if (AVSTREAM_CODEC_PTR(ffmpeg->video_st)->coded_frame->key_frame)
-                pkt.flags |= AV_PKT_FLAG_KEY;
     }
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
         retcd = timelapse_append(ffmpeg, pkt);
