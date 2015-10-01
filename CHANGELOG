@@ -1,4 +1,6 @@
 Summary of Changes
+   * Revise HEVC to use H264 for older ffmpeg
+   * Add HEVC codec option for newer ffmpeg (momo-i)
    * Makefile changes to align with Debian package and fixes from previous changes
    * Revise description for netcam_url in configuration file.
    * Change default for ffmpeg in configure.ac (Issue 795002,82)
