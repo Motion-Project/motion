@@ -380,7 +380,7 @@ AC_ARG_WITH([ffmpeg],
 
 AS_IF([test "x$with_ffmpeg" != "xno"], [
        AS_IF([test "x$with_ffmpeg" != "xyes"], [
-	      PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${with_ffmpeg}/lib/pkgconfig
+	      PKG_CONFIG_PATH=${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH
 	      export PKG_CONFIG_PATH
 	])
 	PKG_CHECK_MODULES([FFMPEG], libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes)
