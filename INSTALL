@@ -7,21 +7,14 @@ The building instructions vary based upon the base system and the desired option
 For most installs, it will be desired to include either ffmpeg or libav and these will
 have associated dependencies which dictate the configuration options. 
 
-Build Packages(apt):
+Build Packages:
     autoconf 
-    automake     
+    automake
+    pkgconf
     libtool 
     libjpeg8-dev 
     build-essential 
     libzip-dev
-
-Build Packages(zypper)
-    autoconf 
-    automake 
-    libtool 
-    libjpeg8-devel
-    -t pattern devel_basis
-    -t pattern devel_C_C++
 
 The option to include FFMPEG or Libav functionality in motion is a choice of one OR the other not both.
 The packages and library names change frequently and vary across base operating systems.  If ffmpeg or
@@ -42,20 +35,12 @@ Libav Packages
     libswscale-dev
 
 Once required packages are installed, execute:
-    autoreconf -f
+    autoreconf -fiv
     ./configure
     make
     make install
 
 Sample custom configuration options:
     --prefix               :  Specify the install location for the motion package
-    --with-ffmpeg          :  Specify the location in which ffmpeg/libav is installed.
-    --with-ffmpeg-headers  :  Specify the location for the ffmpeg/libav headers
-    --with-ffmpeg-libs     :  Specify the additional libraries for ffmpeg/libav
-
-Sample additional libs that MAY be needed for ffmpeg/libav
-    -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm 
-    -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc 
-    -lvorbis -ltheoraenc -ltheoradec 
-
+    --with-ffmpeg=[dir]    :  Specify the location in which ffmpeg/libav is installed.
 
