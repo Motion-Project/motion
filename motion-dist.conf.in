@@ -8,7 +8,7 @@
 ############################################################
 
 # Start in daemon (background) mode and release terminal (default: off)
-daemon on
+daemon off
 
 # File to store the process ID, also called pid file. (default: not defined)
 process_id_file /var/run/motion/motion.pid
@@ -24,7 +24,7 @@ setup_mode off
 # Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)
 ;logfile /tmp/motion.log
 
-# Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)
+# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)
 log_level 6
 
 # Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)
@@ -73,6 +73,7 @@ v4l2_palette 17
 
 # The video input to be used (default: -1)
 # Should normally be set to 0 or 1 for video/TV cards, and -1 for USB cameras
+# Set to 0 for uvideo(4) on OpenBSD
 input -1
 
 # The video norm to use (only for video capture and TV tuner cards)
@@ -81,6 +82,15 @@ norm 0
 
 # The frequency to set the tuner to (kHz) (only for TV tuner cards) (default: 0)
 frequency 0
+
+# Override the power line frequency for the webcam. (normally not necessary)
+# Values: 
+# -1 : Do not modify device setting
+# 0  : Power line frequency Disabled
+# 1  : 50hz
+# 2  : 60hz
+# 3  : Auto
+power_line_frequency -1
 
 # Rotate image this number of degrees. The rotation affects all saved images as
 # well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.
@@ -102,7 +112,8 @@ framerate 2
 minimum_frame_time 0
 
 # URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)
-# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined
+# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. A trailing slash may be required for some cameras.
+# Default: Not defined
 ; netcam_url value
 
 # Username and password for network camera (only if required). Default: not defined
@@ -287,7 +298,7 @@ ffmpeg_timelapse_mode daily
 
 # Bitrate to be used by the ffmpeg encoder (default: 400000)
 # This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)
-ffmpeg_bps 500000
+ffmpeg_bps 400000
 
 # Enables and defines variable bitrate for the ffmpeg encoder.
 # ffmpeg_bps is ignored if variable bitrate is enabled.
@@ -296,9 +307,14 @@ ffmpeg_bps 500000
 ffmpeg_variable_bitrate 0
 
 # Codec to used by ffmpeg for the video compression.
-# Timelapse mpegs are always made in mpeg1 format independent from this option.
-# Supported formats are: mpeg1 (ffmpeg-0.4.8 only), mpeg4 (default), and msmpeg4.
-# mpeg1 - gives you files with extension .mpg
+# Timelapse videos have two options.
+#   swf - Creates swf file with mpeg-2 encoding.
+#     If motion is shutdown and restarted, new pics will be appended
+#     to any previously created file with name indicated for timelapse.
+#   mpeg4 - Creates avi file with the default encoding.
+#     If motion is shutdown and restarted, new pics will create a
+#     new file with the name indicated for timelapse.
+# Supported formats are:
 # mpeg4 or msmpeg4 - gives you files with extension .avi
 # msmpeg4 is recommended for use with Windows Media Player because
 # it requires no installation of codec on the Windows client.
@@ -307,19 +323,22 @@ ffmpeg_variable_bitrate 0
 # ffv1 - FF video codec 1 for Lossless Encoding ( experimental )
 # mov - QuickTime ( testing )
 # ogg - Ogg/Theora ( testing )
+# mp4 - MPEG-4 Part 14 H264 encoding
+# mkv - Matroska H264 encoding
+# hevc - H.265 / HEVC (High Efficiency Video Coding)
 ffmpeg_video_codec mpeg4
 
-# Use ffmpeg to deinterlace video. Necessary if you use an analog camera
-# and see horizontal combing on moving objects in video or pictures.
-# (default: off)
-ffmpeg_deinterlace off
+# When creating videos, should frames be duplicated in order 
+# to keep up with the requested frames per second
+# (default: true)
+ffmpeg_duplicate_frames true
 
 ############################################################
 # SDL Window
 ############################################################
 
 # Number of motion thread to show in SDL Window (default: 0 = disabled)
-sdl_threadnr 0
+#sdl_threadnr 0
 
 ############################################################
 # External pipe to video encoder
@@ -419,7 +438,7 @@ text_double off
 
 # Target base directory for pictures and films
 # Recommended to use absolute path. (Default: current working directory)
-target_dir /usr/local/apache2/htdocs/cam1
+#target_dir /tmp/motion
 
 # File path for snapshots (jpeg or ppm) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S-snapshot
@@ -441,17 +460,12 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
-# Default value is equivalent to legacy oldlayout option
-# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S
-# File extension .mpg or .avi is automatically added so do not include this
-# This option was previously called ffmpeg_filename
+# File extensions(.swf .avi) are automatically added so do not include them
 movie_filename %v-%Y%m%d%H%M%S
 
 # File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
-# Default value is near equivalent to legacy oldlayout option
-# For Motion 3.0 compatible mode choose: %Y/%m/%d-timelapse
-# File extension .mpg is automatically added so do not include this
+# File extensions(.swf .avi) are automatically added so do not include them
 timelapse_filename %Y%m%d-timelapse
 
 ############################################################
@@ -495,6 +509,13 @@ stream_auth_method 0
 # Default: not defined (Disabled)
 ; stream_authentication username:password
 
+# Percentage to scale the stream image for preview
+# Default: 25
+; stream_preview_scale 25
+
+# Have stream preview image start on a new line
+# Default: no
+; stream_preview_newline no
 
 ############################################################
 # HTTP Based Control
@@ -661,7 +682,7 @@ quiet on
 # %f = filename with full path
 # Default value:
 # Create tables :
-## 
+##
 # Mysql
 # CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
 #
@@ -680,6 +701,7 @@ quiet on
 ; database_type value
 
 # database to log to (default: not defined)
+# for sqlite3, the full path and name for the database.
 ; database_dbname value
 
 # The host on which the database is located (default: localhost)
@@ -695,12 +717,9 @@ quiet on
 #  mysql 3306 , postgresql 5432 (default: not defined)
 ; database_port value
 
-############################################################
-# Database Options For SQLite3
-############################################################
-
-# SQLite3 database (file path) (default: not defined)
-; sqlite3_db value
+# Database wait time in milliseconds for locked database to
+# be unlocked before returning database locked error (default 0)
+; database_busy_timeout 0
 
 
 
@@ -729,8 +748,8 @@ quiet on
 # This motion.conf file AND thread1.conf and thread2.conf.
 # Only put the options that are unique to each camera in the
 # thread config files.
-; thread /usr/local/etc/thread1.conf
-; thread /usr/local/etc/thread2.conf
-; thread /usr/local/etc/thread3.conf
-; thread /usr/local/etc/thread4.conf
+; thread @sysconfdir@/motion/thread1.conf
+; thread @sysconfdir@/motion/thread2.conf
+; thread @sysconfdir@/motion/thread3.conf
+; thread @sysconfdir@/motion/thread4.conf
 

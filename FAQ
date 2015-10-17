@@ -13,8 +13,8 @@ Q: Were does motion look for the config file?
 A: First it will look for 'motion.conf' in the current directory, next it will
    try to find '.motion/motion.conf' in your home directory (pointed to by
    the HOME environment variable). If these don't exist it will try to open
-   '/usr/local/etc/motion.conf' if you specified /usr/local as the prefix to
-   configure (this is the default).
+   '/usr/local/etc/motion/motion.conf' if you specified /usr/local as the prefix
+   to configure (this is the default).
 
 Q: What codingstyle is used for motion?
 

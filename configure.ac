@@ -37,7 +37,7 @@ if test "${Darwin}" = ""; then
 	AC_MSG_RESULT(no)
 	AC_MSG_CHECKING(for *BSD)
 
-	FreeBSD=`uname -a | grep "BSD"`
+	FreeBSD=`uname -a | grep "FreeBSD"`
 	if test "${FreeBSD}" = ""; then
 		AC_MSG_RESULT(no)
 		VIDEO="video.o video2.o video_common.o"
@@ -221,11 +221,7 @@ AC_MSG_CHECKING(for sdl)
 if test "x$withval" = "xno"; then
 	AC_MSG_RESULT(skipped)
 else
-	if test "${FreeBSD}" != ""; then
-		CONFIG_SDL='sdl11-config'
-	else
-		CONFIG_SDL='sdl-config'
-	fi
+    CONFIG_SDL='sdl-config'
 	if test -z "`($CONFIG_SDL --version) 2>/dev/null`" ;then
 		AC_MSG_RESULT(no)
 		if test "$withval" = "yes"; then
@@ -376,221 +372,25 @@ fi
 #
 # Check for libavcodec and libavformat from ffmpeg
 #
-
-FFMPEG_DIR="yes"
-FFMPEG_OK="no_found"
 FFMPEG_OBJ=""
-AC_ARG_WITH(ffmpeg,
-[  --with-ffmpeg[=DIR]       Specify the prefix for the install path for
-                          libavcodec/libavformat (part of ffmpeg) be able to
-                          encode mpeg movies realtime.
-                          If this is not specified motion will try to find
-                          the libraries in /usr and /usr/local.
-                          ],
-FFMPEG_DIR="$withval"
-)
+AC_ARG_WITH([ffmpeg],
+	    AS_HELP_STRING([--with-ffmpeg[=DIR]], [Build with FFMPEG support]),
+	    [with_ffmpeg=$withval],
+	    [with_ffmpeg=yes])
 
-#
-# ffmpeg headers custom location
-#
-FFMPEG_HEADERS_DIR="yes"
-AC_ARG_WITH(ffmpeg_headers,
-[  --with-ffmpeg-headers[=DIR] Specify the prefix for ffmpeg headers.
-                               ],
-FFMPEG_HEADERS_DIR="$withval"
-)
+AS_IF([test "x$with_ffmpeg" != "xno"], [
+       AS_IF([test "x$with_ffmpeg" != "xyes"], [
+	      PKG_CONFIG_PATH=${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH
+	      export PKG_CONFIG_PATH
+	])
+	PKG_CHECK_MODULES([FFMPEG], libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes)
+])
 
-#
-# ffmpeg custom extra libraries
-#
-FFMPEG_EXTRALIBS=" -lavformat -lavcodec -lavutil -lm -lz -lswscale "
-AC_ARG_WITH(ffmpeg-libs,
-[  --with-ffmpeg-libs[=libs]  Specify the extra libs for ffmpeg
-                               ],
-FFMPEG_EXTRALIBS="$withval"
-)
-
-#
-# --without-ffmpeg or with-ffmpeg=no
-#
-if test "${FFMPEG_DIR}" = "no"; then
-	AC_MSG_CHECKING(for ffmpeg)
-	AC_MSG_RESULT(skipping)
-#
-# with-ffmpeg=<dir> or nothing
-#
-else if test "${FFMPEG_DIR}" = "yes"; then
-	# AUTODETECT STATIC/SHARED LIB
-	AC_MSG_CHECKING(for ffmpeg autodetecting libraries)
-
-	if test -f /usr/lib64/libavcodec.a -o -f /usr/lib64/libavcodec.so && test -f /usr/lib64/libavformat.a -o -f /usr/lib64/libavformat.so ; then
-		AC_MSG_RESULT(found in /usr/lib64)
-		FFMPEG_OK="found"
-		FFMPEG_LIB="/usr/lib64"
-		FFMPEG_DIR="/usr"
-	elif test -f /usr/lib/libavcodec.a -o -f /usr/lib/libavcodec.so && test -f /usr/lib/libavformat.a -o -f /usr/lib/libavformat.so ; then
-		AC_MSG_RESULT(found in /usr/lib)
-		FFMPEG_OK="found"
-		FFMPEG_LIB="/usr/lib"
-		FFMPEG_DIR="/usr"
-	elif test -f /usr/local/lib/libavcodec.a -o -f /usr/local/lib/libavcodec.so && test -f /usr/local/lib/libavformat.a -o -f /usr/local/lib/libavformat.so ; then
-		AC_MSG_RESULT(found in /usr/local/lib)
-		FFMPEG_OK="found"
-		FFMPEG_LIB="/usr/local/lib"
-		FFMPEG_DIR="/usr/local"
-    elif test -f /usr/lib/x86_64-linux-gnu/libavcodec.a -o -f /usr/lib/x86_64-linux-gnu/libavcodec.so && test /usr/lib/x86_64-linux-gnu/libavformat.a -o -f /usr/lib/x86_64-linux-gnu/libavformat.so ; then
-        AC_MSG_RESULT(found in /usr/lib/x86_64-linux-gnu)
-        FFMPEG_OK="found"
-        FFMPEG_LIB="/usr/lib/x86_64-linux-gnu"
-        FFMPEG_DIR="/usr"
-	elif test -f /usr/lib/i386-linux-gnu/libavcodec.a -o -f /usr/lib/i386-linux-gnu/libavcodec.so && test /usr/lib/i386-linux-gnu/libavformat.a -o -f /usr/lib/i386-linux-gnu/libavformat.so ; then
-        AC_MSG_RESULT(found in /usr/lib/i386-linux-gnu)
-        FFMPEG_OK="found"
-        FFMPEG_LIB="/usr/lib/i386-linux-gnu"
-        FFMPEG_DIR="/usr"
-	else
-		AC_MSG_RESULT(not found)
-		echo ""
-		echo "**********************************************"
-		echo "* libavcodec.a or libavcodec.so or           *"
-		echo "* libavformat.a or libavformat.so not found: *"
-		echo "*    ALL FFMPEG FEATURES DISABLED            *"
-		echo "*                                            *"
-		echo "* Please read the Motion Guide for help:     *"
-		echo "* http://motion.sourceforge.net              *"
-		echo "**********************************************"
-		echo ""
-	fi
-else
-	AC_MSG_CHECKING(for ffmpeg libraries in -> [${FFMPEG_DIR}] <-)
-	if test -f ${FFMPEG_DIR}/lib/libavcodec.a -o -f ${FFMPEG_DIR}/lib/libavcodec.so && test -f ${FFMPEG_DIR}/lib/libavformat.a -o -f ${FFMPEG_DIR}/lib/libavformat.so ; then
-		AC_MSG_RESULT(found)
-		FFMPEG_OK="found"
-		FFMPEG_LIB="${FFMPEG_DIR}/lib"
-	elif test -f ${FFMPEG_DIR}/libavcodec.a -o -f ${FFMPEG_DIR}/libavcodec.so && test -f ${FFMPEG_DIR}/libavformat.a -o -f ${FFMPEG_DIR}/libavformat.so ; then
-		AC_MSG_RESULT(found)
-		FFMPEG_LIB="${FFMPEG_DIR}"
-		FFMPEG_OK="found"
-	else
-		AC_MSG_RESULT(not found)
-		if test "${FFMPEG_OK}" != "found"; then
-			echo ""
-			echo "**********************************************"
-			echo "* libavcodec.a or libavcodec.so or           *"
-			echo "* libavformat.a or libavformat.so not found: *"
-			echo "*    ALL FFMPEG FEATURES DISABLED            *"
-			echo "*                                            *"
-			echo "* Please read the Motion Guide for help:     *"
-			echo "* http://motion.sourceforge.net              *"
-			echo "**********************************************"
-			echo ""
-		fi
-	fi
-fi
-
-
-#
-# Now check for ffmpeg headers ( avformat.h ) if ffmpeg libs were found
-#
-
-AVFORMAT_DIR=""
-
-if test "${FFMPEG_OK}" = "found"; then
-    if test "${FFMPEG_HEADERS_DIR}" = "yes"; then
-        AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_DIR})
-        AVFORMAT_DIR="${FFMPEG_DIR}"
-    else
-        AC_MSG_CHECKING(for ffmpeg headers in ${FFMPEG_HEADERS_DIR})
-        FFMPEG_DIR="${FFMPEG_HEADERS_DIR}"
-        AVFORMAT_DIR="${FFMPEG_DIR}"
-    fi
-
-    if test -f ${FFMPEG_DIR}/include/avformat.h; then
-        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include"
-        AVFORMAT_DIR="${FFMPEG_DIR}/include/avformat.h"
-    elif test -f ${FFMPEG_DIR}/avformat.h; then
-        AC_MSG_RESULT(found ${FFMPEG_DIR}/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR}"
-        AVFORMAT_DIR="${FFMPEG_DIR}/avformat.h"
-    elif test -f ${FFMPEG_DIR}/include/ffmpeg/avformat.h; then
-        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg"
-        AVFORMAT_DIR="${FFMPEG_DIR}/include/ffmpeg/avformat.h"
-    elif test -f ${FFMPEG_DIR}/include/libavformat/avformat.h; then
-        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/libavformat/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include -DFFMPEG_NEW_INCLUDES"
-        AVFORMAT="-I${FFMPEG_DIR}/include/libavformat"
-        AVFORMAT_DIR="${FFMPEG_DIR}/include/libavformat/avformat.h"
-    elif test -f ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h; then
-        AC_MSG_RESULT(found ${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR}/include/ffmpeg -DFFMPEG_NEW_INCLUDES"
-        AVFORMAT="-I${FFMPEG_DIR}/include/ffmpeg/libavformat"
-        AVFORMAT_DIR="${FFMPEG_DIR}/include/ffmpeg/libavformat/avformat.h"
-    elif test -f ${FFMPEG_DIR}/libavformat/avformat.h; then
-        AC_MSG_RESULT(found ${FFMPEG_DIR}/libavformat/avformat.h)
-        FFMPEG_CFLAGS="-I${FFMPEG_DIR} -DFFMPEG_NEW_INCLUDES"
-        AVFORMAT="-I{FFMPEG_DIR}/libavformat"
-        AVFORMAT_DIR="${FFMPEG_DIR}/libavformat/avformat.h"
-    else
-        AC_MSG_RESULT(not found)
-        FFMPEG_OK="no_found"
-        AVFORMAT_DIR="avformat.h"
-        echo "**********************************************"
-        echo "*       avformat.h not found:                *"
-        echo "*    ALL FFMPEG FEATURES DISABLED            *"
-        echo "*                                            *"
-        echo "* Please read the Motion Guide for help:     *"
-        echo "* http://motion.sourceforge.net              *"
-        echo "**********************************************"
-        echo ""
-    fi
-
-#
-# If ffmpeg libs and headers have been found
-#
-
-    if  test "${FFMPEG_OK}" = "found"; then
-        TEMP_LIBS="$TEMP_LIBS -L${FFMPEG_LIB} ${FFMPEG_EXTRALIBS}"
-        TEMP_LDFLAGS="${TEMP_LDFLAGS} -L${FFMPEG_LIB}"
-        TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG ${FFMPEG_CFLAGS}"
-
-        FFMPEG_OBJ="ffmpeg.o"
-        AC_SUBST(FFMPEG_OBJ)
-
-        AC_MSG_CHECKING([file_protocol is defined in ffmpeg ?])
-        saved_CFLAGS=$CFLAGS
-        saved_LIBS=$LIBS
-
-        CFLAGS="${FFMPEG_CFLAGS} ${AVFORMAT}"
-        LIBS="$TEMP_LIBS"
-
-        AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-            [
-             #include <${AVFORMAT_DIR}>
-             URLProtocol test_file_protocol;
-             int main(void){
-                 test_file_protocol.url_read  = file_protocol.url_read;
-                 return 0;
-             }
-            ]])],
-            [AC_MSG_RESULT(yes)],
-            [
-             AC_MSG_RESULT(no)
-             TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_FFMPEG_NEW"
-            ]
-        )
-        CFLAGS=$saved_CFLAGS
-        LIBS=$saved_LIBS
-    fi
-fi
-fi
-
-# Revised RTSP module so that it can be included
-# whether or not FFMPEG is found.
-
-    RTPS_OBJ="netcam_rtsp.o"
-    AC_SUBST(RTPS_OBJ)
+AS_IF([test "${HAVE_FFMPEG}" = "yes" ], [
+       FFMPEG_OBJ="ffmpeg.o"
+       AC_DEFINE([HAVE_FFMPEG], 1, [Define to 1 if FFMPEG is around])
+])
+AC_SUBST(FFMPEG_OBJ)
 
 #
 # Check SQLITE3
@@ -611,12 +411,27 @@ else
     saved_CFLAGS=$CFLAGS
     saved_LIBS=$LIBS
 
-    AC_CHECK_LIB(sqlite3, sqlite3_open,
-    [
-    TEMP_LIBS="$TEMP_LIBS -lsqlite3"
-    SQLITE3_SUPPORT="yes"
-    AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 support])
-    ]
+    # first we check to see if the sqlite3 amalgamation (sqlite3.c), is in with our source
+    # this is the prefered way to use sqlite
+    AC_CHECK_FILE([sqlite3.c],
+        [
+        SQLITE3_SUPPORT="yes"
+        VIDEO="$VIDEO sqlite3.o"
+        TEMP_LIBS="$TEMP_LIBS -ldl"
+        AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3])
+        AC_DEFINE([HAVE_SQLITE3_EMBEDDED],1,[Define to 1 if you have SQLITE3 embedded support])
+        ]
+        ,
+        [
+        # if sqlite3.c is not found then we look for the shared library
+        AC_CHECK_LIB(sqlite3, sqlite3_open,
+            [
+            TEMP_LIBS="$TEMP_LIBS -lsqlite3"
+            SQLITE3_SUPPORT="yes"
+            AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 shared library support])
+            ]
+        )
+        ]
     )
 
     CFLAGS=$saved_CFLAGS
@@ -915,7 +730,7 @@ fi
 
 #Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h)
+AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h sys/videoio.h)
 
 AC_CHECK_FUNCS(get_current_dir_name)
 
@@ -931,8 +746,11 @@ else
 		[SUPPORTED_V4L2=true],
 		[SUPPORTED_V4L2=false],
 		[#include <sys/time.h>
-			#include <linux/videodev.h>])
-
+			#ifdef HAVE_LINUX_VIDEODEV_H
+			#include <linux/videodev.h>
+			#elif HAVE_SYS_VIDEOIO_H
+			#include <sys/videoio.h>
+			#endif])
 	AC_MSG_CHECKING(for V42L support)
 	if test x$SUPPORTED_V4L2 = xtrue; then
 		AC_MSG_RESULT(yes)
@@ -1269,10 +1087,10 @@ fi
 AC_SUBST(BIN_PATH)
 
 AC_CONFIG_FILES([
-thread1.conf
-thread2.conf
-thread3.conf
-thread4.conf
+thread1-dist.conf
+thread2-dist.conf
+thread3-dist.conf
+thread4-dist.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
@@ -1354,8 +1172,10 @@ else
 	echo "SDL support:         No"
 fi
 
-if test "${FFMPEG_OK}" = "found"; then
+if test "${HAVE_FFMPEG}" = "yes"; then
     echo "FFmpeg support:      Yes"
+    echo " ... FFMPEG_CFLAGS: $FFMPEG_CFLAGS"
+    echo " ... FFMPEG_LIBS: $FFMPEG_LIBS"
 else
     echo "FFmpeg support:      No"
 fi

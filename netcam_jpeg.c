@@ -67,24 +67,15 @@ static boolean netcam_fill_input_buffer(j_decompress_ptr cinfo)
      * path when a new image is to be processed.  It is assumed that
      * this routine will only be called once for the entire image.
      * If an unexpected call (with start_of_file FALSE) occurs, the
-     * routine will insert a "fake" "end of image" marker and return
-     * to the library to process whatever data remains from the original
-     * image (the one with errors).
-     *
-     * I'm not yet clear on what the result (from the application's
-     * point of view) will be from this logic.  If the application
-     * expects that a completely new image will be started, this will
-     * give trouble.
+     * routine calls ERREXIT().
      */
     if (src->start_of_file) {
         nbytes = src->length;
         src->buffer = (JOCTET *) src->data;
     } else {
-        /* Insert a fake EOI marker - as per jpeglib recommendation */
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: **fake EOI inserted**");
-        src->buffer[0] = (JOCTET) 0xFF;
-        src->buffer[1] = (JOCTET) JPEG_EOI;    /* 0xD9 */
         nbytes = 2;
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Not enough data from netcam.");
+        ERREXIT(cinfo, JERR_INPUT_EOF);
     }
 
     src->pub.next_input_byte = src->buffer;
@@ -483,6 +474,42 @@ int netcam_proc_jpeg(netcam_context_ptr netcam, unsigned char *image)
 
     return retval;
 }
+
+/**
+  * netcam_fix_jpeg_header
+  *
+  *    Routine to decode an image received from a netcam into a YUV420P buffer
+  *    suitable for processing by motion.
+  *
+  * Parameters:
+  *    netcam    pointer to the netcam_context structure
+  *
+  * Returns:  Nothing
+  *
+  */
+void netcam_fix_jpeg_header(netcam_context_ptr netcam)
+{
+    char *ptr_buffer;
+
+    ptr_buffer = memmem(netcam->receiving->ptr, netcam->receiving->used, "\xff\xd8", 2);
+
+    if (ptr_buffer != NULL) {
+        size_t soi_position = 0;
+
+        soi_position = ptr_buffer - netcam->receiving->ptr;
+
+        if (soi_position > 0) {
+            memmove(netcam->receiving->ptr, netcam->receiving->ptr + soi_position,
+                    netcam->receiving->used - soi_position);
+            netcam->receiving->used -= soi_position;
+        }
+
+        // if (debug_level > CAMERA_INFO)
+        //    motion_log(LOG_INFO, 0, "%s: SOI found , position %d",
+        //               __FUNCTION__, soi_position);
+    }
+}
+
 
 /**
  * netcam_get_dimensions

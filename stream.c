@@ -205,7 +205,7 @@ static void* handle_basic_auth(void* param)
         char *userpass = NULL;
         size_t auth_size = strlen(p->conf->stream_authentication);
 
-        authentication = (char *) mymalloc(BASE64_LENGTH(auth_size) + 1);
+        authentication = mymalloc(BASE64_LENGTH(auth_size) + 1);
         userpass = mymalloc(auth_size + 4);
         /* base64_encode can read 3 bytes after the end of the string, initialize it. */
         memset(userpass, 0, auth_size + 4);
@@ -584,11 +584,8 @@ Error:
         goto Error;
     }
 
-    if(server_user)
-        free(server_user);
-
-    if(server_pass)
-        free(server_pass);
+    free(server_user);
+    free(server_pass);
 
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
@@ -604,11 +601,8 @@ Error:
     pthread_exit(NULL);
 
 InternalError:
-    if(server_user)
-        free(server_user);
-
-    if(server_pass)
-        free(server_pass);
+    free(server_user);
+    free(server_pass);
 
     if (write(p->sock, internal_error_template, strlen(internal_error_template)) < 0)
       MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write failure 3:handle_md5_digest");
@@ -698,8 +692,7 @@ static void do_client_auth(struct context *cnt, int sc)
 
 Error:
     close(sc);
-    if(handle_param)
-        free(handle_param);
+    free(handle_param);
 }
 
 /**

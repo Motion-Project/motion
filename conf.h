@@ -30,6 +30,7 @@ struct config {
     int max_changes;
     int threshold_tune;
     const char *output_pictures;
+    int ffmpeg_duplicate_frames;
     int motion_img;
     int emulate_motion;
     int event_gap;
@@ -53,6 +54,7 @@ struct config {
     int contrast;
     int saturation;
     int hue;
+    int power_line_frequency;
     int roundrobin_frames;
     int roundrobin_skip;
     int pre_capture;
@@ -62,7 +64,6 @@ struct config {
     int ffmpeg_output_debug;
     int ffmpeg_bps;
     int ffmpeg_vbr;
-    int ffmpeg_deinterlace;
     const char *ffmpeg_video_codec;
 #ifdef HAVE_SDL
     int sdl_threadnr;
@@ -76,6 +77,8 @@ struct config {
     int stream_limit;
     int stream_auth_method;
     const char *stream_authentication;
+    int stream_preview_scale;
+    int stream_preview_newline;
     int webcontrol_port;
     int webcontrol_localhost;
     int webcontrol_html_output;
@@ -84,7 +87,7 @@ struct config {
     int tuner_number;
     int timelapse;
     const char *timelapse_mode; 
-#if (defined(BSD))
+#if (defined(BSD) || defined(__FreeBSD_kernel__))
     const char *tuner_device;
 #endif
     const char *video_device;
@@ -109,7 +112,7 @@ struct config {
     const char *database_host;
     const char *database_user;
     const char *database_password;
-    const char *sqlite3_db;
+    int database_busy_timeout;
     int database_port;
     char *on_picture_save;
     char *on_area_detected;

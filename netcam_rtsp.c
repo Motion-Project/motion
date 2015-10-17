@@ -19,8 +19,8 @@
  ***********************************************************/
 
 #include <stdio.h>
-#include "netcam_rtsp.h"
 #include "rotate.h"    /* already includes motion.h */
+#include "netcam_rtsp.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -36,8 +36,8 @@ int netcam_check_pixfmt(netcam_context_ptr netcam){
 
     retcd = -1;
 
-    if ((netcam->rtsp->codec_context->pix_fmt == PIX_FMT_YUV420P) ||
-        (netcam->rtsp->codec_context->pix_fmt == PIX_FMT_YUVJ420P)) retcd = 0;
+    if ((netcam->rtsp->codec_context->pix_fmt == MY_PIX_FMT_YUV420P) ||
+        (netcam->rtsp->codec_context->pix_fmt == MY_PIX_FMT_YUVJ420P)) retcd = 0;
 
     return retcd;
 
@@ -197,8 +197,10 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
         return -1;
     }
 
-    /* Open the codec  */
-    ret = avcodec_open2(dec_ctx, dec, NULL);
+    /* Open the codec  It is not thread safe so lock it*/
+    pthread_mutex_lock(&global_lock);
+        ret = avcodec_open2(dec_ctx, dec, NULL);
+    pthread_mutex_unlock(&global_lock);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
     	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
@@ -563,7 +565,7 @@ int netcam_rtsp_open_sws(netcam_context_ptr netcam){
         ,netcam->rtsp->codec_context->pix_fmt
         ,netcam->width
         ,netcam->height
-        ,PIX_FMT_YUV420P
+        ,MY_PIX_FMT_YUV420P
         ,SWS_BICUBIC,NULL,NULL,NULL);
     if (netcam->rtsp->swsctx == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
@@ -574,7 +576,7 @@ int netcam_rtsp_open_sws(netcam_context_ptr netcam){
     }
 
     netcam->rtsp->swsframe_size = avpicture_get_size(
-            PIX_FMT_YUV420P
+            MY_PIX_FMT_YUV420P
             ,netcam->width
             ,netcam->height);
         if (netcam->rtsp->swsframe_size <= 0) {
@@ -630,7 +632,7 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
     retcd = avpicture_fill(
         (AVPicture*)netcam->rtsp->swsframe_out
         ,buffer_out
-        ,PIX_FMT_YUV420P
+        ,MY_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height);
     if (retcd < 0) {
@@ -661,7 +663,7 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     retcd = avpicture_layout(
         (const AVPicture*)netcam->rtsp->swsframe_out
-        ,PIX_FMT_YUV420P
+        ,MY_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height
         ,(unsigned char *)image
@@ -746,9 +748,9 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
 
-    if (netcam->rtsp->path != NULL) free(netcam->rtsp->path);
-    if (netcam->rtsp->user != NULL) free(netcam->rtsp->user);
-    if (netcam->rtsp->pass != NULL) free(netcam->rtsp->pass);
+    free(netcam->rtsp->path);
+    free(netcam->rtsp->user);
+    free(netcam->rtsp->pass);
 
     free(netcam->rtsp);
     netcam->rtsp = NULL;
@@ -850,10 +852,29 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     netcam->rtsp->readingframe = 0;
     netcam->rtsp->status = RTSP_NOTCONNECTED;
 
-    av_register_all();
-    avformat_network_init();
-    avcodec_register_all();
+    /*
+     * Warn and fix dimensions as needed.
+     */
+    if (netcam->cnt->conf.width % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Image width (%d) requested is not modulo 8.", netcam->cnt->conf.width);
+        netcam->cnt->conf.width = netcam->cnt->conf.width - (netcam->cnt->conf.width % 8) + 8;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting width to next higher multiple of 8 (%d).", netcam->cnt->conf.width);
+    }
+    if (netcam->cnt->conf.height % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Image height (%d) requested is not modulo 8.", netcam->cnt->conf.height);
+        netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 8) + 8;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 8 (%d).", netcam->cnt->conf.height);
+    }
 
+    /*
+     * Documentation does not indicate thread safety on these
+     * init functions but we lock them just in case.
+     */
+    pthread_mutex_lock(&global_lock);
+        av_register_all();
+        avcodec_register_all();
+    pthread_mutex_unlock(&global_lock);
+    
     /*
      * The RTSP context should be all ready to attempt a connection with
      * the server, so we try ....

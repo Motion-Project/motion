@@ -71,6 +71,7 @@ struct config conf_template = {
     contrast:                       0,
     saturation:                     0,
     hue:                            0,
+    power_line_frequency:           -1,
     roundrobin_frames:              1,
     roundrobin_skip:                1,
     pre_capture:                    0,
@@ -95,6 +96,8 @@ struct config conf_template = {
     stream_limit:                   0,
     stream_auth_method:             0,
     stream_authentication:          NULL,
+    stream_preview_scale:           25,
+    stream_preview_newline:         0,
     webcontrol_port:                0,
     webcontrol_localhost:           1,
     webcontrol_html_output:         1,
@@ -130,9 +133,7 @@ struct config conf_template = {
     database_user:                  NULL,
     database_password:              NULL,
     database_port:                  0,
-#ifdef HAVE_SQLITE3
-    sqlite3_db:                     NULL,
-#endif
+    database_busy_timeout:           0,
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */
     on_picture_save:                NULL,
     on_motion_detected:             NULL,
@@ -221,7 +222,7 @@ config_param config_params[] = {
     },
     {
     "log_level",
-    "# Level of log messages [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). (default: 6 / NTC)",
+    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)",
     1,
     CONF_OFFSET(log_level),
     copy_int,
@@ -466,6 +467,22 @@ config_param config_params[] = {
     "# Valid range 0-255, default 0 = disabled",
     0,
     CONF_OFFSET(hue),
+    copy_int,
+    print_int
+    },
+    {
+    "power_line_frequency",
+    "# Set the power line frequency to help cancel flicker by compensating\n"
+    "# for light intensity ripple.  (default: -1).\n"
+    "# This can help reduce power line light flicker.\n"
+    "# Valuse :\n"
+    "# do not modify the device setting       : -1\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_DISABLED : 0\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_50HZ     : 1\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_60HZ     : 2\n"
+    "# V4L2_CID_POWER_LINE_FREQUENCY_AUTO     : 3",
+    0,
+    CONF_OFFSET(power_line_frequency),
     copy_int,
     print_int
     },
@@ -760,19 +777,21 @@ config_param config_params[] = {
     "# flv - gives you a flash video with extension .flv\n"
     "# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )\n"
     "# mov - QuickTime ( testing )\n"
-    "# ogg - Ogg/Theora ( testing )",
+    "# ogg - Ogg/Theora ( testing )\n"
+    "# mp4 - MPEG-4 Part 14 H264 encoding\n"
+    "# mkv - Matroska H264 encoding\n"
+    "# hevc - H.265 / HEVC (High Efficiency Video Coding)",
     0,
     CONF_OFFSET(ffmpeg_video_codec),
     copy_string,
     print_string
     },
     {
-    "ffmpeg_deinterlace",
-    "# Use ffmpeg to deinterlace video. Necessary if you use an analog camera\n"
-    "# and see horizontal combing on moving objects in video or pictures.\n"
-    "# (default: off)",
+    "ffmpeg_duplicate_frames",
+    "# True to duplicate frames to achieve \"framerate\" fps, but enough\n"
+    "duplicated frames and the video appears to freeze once a second.",
     0,
-    CONF_OFFSET(ffmpeg_deinterlace),
+    CONF_OFFSET(ffmpeg_duplicate_frames),
     copy_bool,
     print_bool
     },
@@ -879,7 +898,7 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-     {
+    {
     "text_changes",
     "# Draw the number of changed pixed on the images (default: off)\n"
     "# Will normally be set to off except when you setup and adjust the motion settings\n"
@@ -1081,6 +1100,22 @@ config_param config_params[] = {
     CONF_OFFSET(stream_authentication),
     copy_string,
     print_string
+    },
+    {
+    "stream_preview_scale",
+    "# Percentage to scale the preview stream image (default: 25)\n",
+    0,
+    CONF_OFFSET(stream_preview_scale),
+    copy_int,
+    print_int
+    },
+    {
+    "stream_preview_newline",
+    "# Have stream preview image start on a new line (default: no)\n",
+    0,
+    CONF_OFFSET(stream_preview_newline),
+    copy_bool,
+    print_bool
     },
     {
     "webcontrol_port",
@@ -1492,20 +1527,14 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#ifdef HAVE_SQLITE3
     {
-    "sqlite3_db",
-    "\n############################################################\n"
-    "# Database Options For SQLite3\n"
-    "############################################################\n\n"
-    "# SQLite3 database to log to (default: not defined)",
+    "database_busy_timeout",
+    "# Database wait for unlock time (default: 0)",
     0,
-    CONF_OFFSET(sqlite3_db),
-    copy_string,
-    print_string
+    CONF_OFFSET(database_busy_timeout),
+    copy_int,
+    print_int
     },
-#endif /* HAVE_SQLITE3 */
-
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
     {
     "video_pipe",
@@ -1561,11 +1590,14 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "c:d:hmns?p:k:l:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1)
                 strcpy(cnt->conf_filename, optarg);
+            break;
+        case 'b':
+            cnt->daemon = 1;
             break;
         case 'n':
             cnt->daemon = 0;
@@ -1579,23 +1611,23 @@ static void conf_cmdline(struct context *cnt, int thread)
                 cnt->log_level = (unsigned int)atoi(optarg);
             break;
         case 'k':
-	  if (thread == -1) {
-	    strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
-	    cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
-	  }
-	  break;
+            if (thread == -1) {
+                strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
+                cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
+            }
+            break;
         case 'p':
-	  if (thread == -1) {
-	    strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
-	    cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
-	  }
-	  break;
+            if (thread == -1) {
+                strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
+                cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
+            }
+            break;
         case 'l':
-	  if (thread == -1) {
-	    strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
-	    cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
-	  }
-	  break;
+            if (thread == -1) {
+                strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
+                cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
+            }
+            break;
         case 'm':
             cnt->pause = 1;
             break;    
@@ -1800,7 +1832,7 @@ void conf_print(struct context **cnt)
                     fprintf(conffile, "%s\n", val);
 
                     if (strlen(val) == 0)
-                        fprintf(conffile, "; thread /usr/local/etc/thread1.conf\n");
+                        fprintf(conffile, "; thread %s/motion/thread1.conf\n", sysconfdir);
 
                     free(val);
                 } else if (thread == 0) {
@@ -1911,7 +1943,7 @@ struct context **conf_load(struct context **cnt)
         fp = fopen(filename, "r");
 
         if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
+            snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
             fp = fopen(filename, "r");
 
             if (!fp) /* There is no config file.... use defaults. */
@@ -2170,7 +2202,7 @@ char *mystrdup(const char *from)
     } else {
         stringlength = strlen(from);
         stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = (char *)mymalloc(stringlength + 1);
+        tmp = mymalloc(stringlength + 1);
         strncpy(tmp, from, stringlength);
 
         /*
@@ -2376,10 +2408,11 @@ static void usage()
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
+    printf("-b\t\t\tRun in background (daemon) mode.\n");
     printf("-n\t\t\tRun in non-daemon mode.\n");
     printf("-s\t\t\tRun in setup mode.\n");
     printf("-c config\t\tFull path and filename of config file.\n");
-    printf("-d level\t\tLog level (1-9) (EMR, ALR, CRT, ERR, WRN, NTC, ERR, DBG, ALL). default: 6 / NTC.\n");
+    printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). default: 6 / NTC.\n");
     printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
     printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
     printf("-l log file \t\tFull path and filename of log file.\n");
@@ -2387,6 +2420,6 @@ static void usage()
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");
-    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
+    printf("it will read motion.conf from current directory, ~/.motion or %s/motion.\n", sysconfdir);
     printf("\n");
 }

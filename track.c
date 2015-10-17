@@ -5,11 +5,13 @@
  *    Copyright 2000, Jeroen Vreeken
  *    This program is published under the GNU Public license
  */
-
+#ifdef MOTION_V4L2
+#include <linux/videodev2.h>
+#endif /* MOTION_V4L2 */
 #include <math.h>
 #include "motion.h"
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#if (defined(HAVE_LINUX_VIDEODEV_H) || defined(HAVE_SYS_VIDEOIO_H)) && (!defined(WITHOUT_V4L))
 #include "pwc-ioctl.h"
 #endif
 

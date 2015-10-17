@@ -296,6 +296,7 @@ typedef struct {
  */
 /*     Within netcam_jpeg.c    */
 int netcam_proc_jpeg (struct netcam_context *, unsigned char *);
+void netcam_fix_jpeg_header(struct netcam_context *);
 void netcam_get_dimensions (struct netcam_context *);
 /*     Within netcam.c        */
 int netcam_start (struct context *);

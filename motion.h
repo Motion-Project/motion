@@ -22,7 +22,11 @@
 #endif
 
 #ifdef HAVE_SQLITE3
+#ifdef HAVE_SQLITE3_EMBEDDED
+#include "sqlite3.h"
+#else
 #include <sqlite3.h>
+#endif
 #endif
 
 #ifdef HAVE_PGSQL
@@ -149,6 +153,7 @@
                                      */
 
 #define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
+#define WATCHDOG_KILL          -60   /* -60 sec grace period before calling thread cancel */
 #define WATCHDOG_OFF          -127   /* Turn off watchdog, used when we wants to quit a thread */
 
 #define CONNECTION_KO           "Lost connection"
@@ -370,6 +375,9 @@ struct context {
     volatile unsigned int restart;     /* Restart the thread when it ends */
     /* Is the motion thread running */
     volatile unsigned int running;
+    /* Is the web control thread running */
+    volatile unsigned int webcontrol_running;
+    volatile unsigned int webcontrol_finish;      /* End the thread */
     volatile int watchdog;
 
     pthread_t thread_id;
