@@ -1083,11 +1083,10 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     int pos, x, y, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr, **char_arr_ptr;
 
-    if (startx > width / 2)
-        startx -= len * (6 * (factor + 1));
-
     if (startx + len * 6 * (factor + 1) >= width)
         len = (width-startx-1)/(6*(factor+1));
+
+    printf("\t%d,%d (%d): %d\n", startx, starty, width, len);
     
     line_offset = width - 7 * (factor + 1);
     next_char_offs = width * 8 * (factor + 1) - 6 * (factor + 1);
@@ -1140,16 +1139,6 @@ int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, un
     int num_nl = 0;
     const char *end, *begin;
     const int line_space = (factor + 1) * 9;
-    
-    /* Count the number of newlines in "text" so we scroll it up the image. */
-    end = text;
-
-    while ((end = strstr(end, NEWLINE))) {
-        num_nl++;
-        end += sizeof(NEWLINE)-1;
-    }
-
-    starty -= line_space * num_nl;
     
     begin = end = text;
 
@@ -1235,4 +1224,8 @@ void get_text_dimensions(const char *const str, const int big_chars, int *const 
         *width = cols * 7;
         *height = rows * 8;
     }
+}
+
+void get_space_dimension(const int big_chars, int *const width, int *const height) {
+	get_text_dimensions(" ", big_chars, width, height);
 }

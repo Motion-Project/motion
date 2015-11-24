@@ -397,7 +397,7 @@ timestamp %Y-%m-%d\n%T-%q
 
 # Select where to place the "timestamp".
 # Default: Not defined = bottom-right
-# Can be bottom-left, bottom-right, upper-left, upper-right
+# Can be bottom-left, bottom-right, center, upper-left, upper-right
 ; timestamp bottom-right
 
 # Draw a user defined text on the images using same options as C function strftime(3)
@@ -407,7 +407,7 @@ timestamp %Y-%m-%d\n%T-%q
 
 # Select where to place the "generic_text".
 # Default: Not defined = bottom-left
-# Can be bottom-left, bottom-right, upper-left, upper-right
+# Can be bottom-left, bottom-right, center, upper-left, upper-right
 ; generic_text_location bottom-left
 
 # Select a UDP port to listen on for text-messages. These then will be shown in the
@@ -421,7 +421,7 @@ timestamp %Y-%m-%d\n%T-%q
 # Can be any value >= 1 seconds
 ; ext_event_show_time 5
 
-# Where to put the text. Can be bottom-left, bottom-right, upper-left, upper-right
+# Where to put the text. Can be bottom-left, bottom-right, center, upper-left, upper-right
 # Default: Not defined = upper-left
 ; ext_event_location upper-left
 

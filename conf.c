@@ -896,7 +896,7 @@ config_param config_params[] = {
     {
     "timestamp_location",
     "# Where to place the timestamp-text. Can be upper-left, upper-right,\n"
-    "# bottom-left or bottom-right.\n"
+    "# center, bottom-left or bottom-right.\n"
     "# Default: Not defined = bottom-right\n",
     0,
     CONF_OFFSET(timestamp_location),
@@ -916,7 +916,7 @@ config_param config_params[] = {
     {
     "generic_text_location",
     "# Where to place the generic text. Can be upper-left, upper-right,\n"
-    "# ceter, bottom-left or bottom-right.\n"
+    "# center, bottom-left or bottom-right.\n"
     "# Default: Not defined = bottom-left\n",
     0,
     CONF_OFFSET(generic_text_location),
@@ -975,7 +975,7 @@ config_param config_params[] = {
     {
     "ext_event_location",
     "# Where to place the external event text. Can be upper-left, upper-right,\n"
-    "# bottom-left or bottom-right.\n"
+    "# center, bottom-left or bottom-right.\n"
     "# Default: Not defined = center\n",
     0,
     CONF_OFFSET(ext_event_location),

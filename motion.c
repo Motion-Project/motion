@@ -1131,19 +1131,45 @@ void format_and_draw_text_at_location(struct context *const cnt, const char *con
     const char *const use_location = location ? location : default_location;
     int size_mul = cnt->conf.text_double ? 2 : 1;
     char tmp[PATH_MAX];
+    int text_width = 0, text_height = 0;
+    int bottom = 0, right = 0;
+    int space_width = 0, space_height = 0;
+
+    get_space_dimension(cnt->conf.text_double, &space_width, &space_height);
+    get_text_dimensions(text, cnt->conf.text_double, &text_width, &text_height);
+
+    bottom = cnt->imgs.height - space_height - text_height;
+    right = cnt->imgs.width - space_width - text_width;
+
+    printf("%dx%d %s %s\n", text_width, text_height, use_location, text);
+
     mystrftime(cnt, tmp, sizeof(tmp), text, &cnt->current_image->timestamp_tm, NULL, 0);
 
     if (strcasecmp(use_location, "bottom-left") == 0)
-        draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * size_mul, cnt->imgs.width, tmp, cnt->conf.text_double);
+        draw_text(cnt->current_image->image, space_width, bottom, cnt->imgs.width, tmp, cnt->conf.text_double);
 
     else if (strcasecmp(use_location, "bottom-right") == 0)
-        draw_text(cnt->current_image->image, cnt->imgs.width - 10, cnt->imgs.height - 10 * size_mul, cnt->imgs.width, tmp, cnt->conf.text_double);
+        draw_text(cnt->current_image->image, right, bottom, cnt->imgs.width, tmp, cnt->conf.text_double);
 
     else if (strcasecmp(use_location, "upper-left") == 0)
-        draw_text(cnt->current_image->image, 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
+        draw_text(cnt->current_image->image, space_width, space_height, cnt->imgs.width, tmp, cnt->conf.text_double);
 
     else if (strcasecmp(use_location, "upper-right") == 0)
-        draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
+        draw_text(cnt->current_image->image, right, space_height, cnt->imgs.width, tmp, cnt->conf.text_double);
+
+    else if (strcasecmp(use_location, "center") == 0) {
+        int x = 0, y = 0;
+
+        x = cnt->imgs.width / 2 - text_width / 2;
+	if (x < 0)
+            x = 0;
+
+        y = cnt->imgs.height / 2 - text_height / 2;
+        if (y < 0)
+            y = 0;
+
+        draw_text(cnt->current_image->image, x, y, cnt->imgs.width, tmp, cnt->conf.text_double);
+    }
 }
 
 /**
@@ -1771,8 +1797,7 @@ static void *motion_loop(void *arg)
                 else
                     sprintf(tmp, "-");
 
-                draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
+		format_and_draw_text_at_location(cnt, tmp, "upper-right", NULL);
             }
 
             /*
@@ -1783,8 +1808,10 @@ static void *motion_loop(void *arg)
                 char tmp[PATH_MAX];
                 sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                         cnt->current_image->total_labels, cnt->noise);
+
                 draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * text_size_factor,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
+
                 sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
                 draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * text_size_factor,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
