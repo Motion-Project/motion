@@ -27,6 +27,10 @@ static int motion_init(struct context *cnt);
 static void motion_cleanup(struct context *cnt);
 static void setup_signals(struct sigaction *, struct sigaction *);
 
+pthread_t ext_event_th;
+pthread_mutex_t ext_event_lock = PTHREAD_MUTEX_INITIALIZER;
+const char *ext_event_text = NULL;
+time_t ext_event_shown_since = 0;
 
 /**
  * tls_key_threadnr
@@ -73,6 +77,59 @@ FILE *ptr_logfile = NULL;
  *   up again (instead of just quitting).
  */
 unsigned int restart = 0;
+
+static void * ext_event_thread(void *p)
+{
+    struct context *cnt = (struct context *)p;
+    struct sockaddr_in name;
+    int set = 1, fd = -1;
+
+    if (cnt->conf.ext_event_udp_listener_port <= 0)
+        return NULL;
+
+    fd = socket(PF_INET, SOCK_DGRAM, 0);
+    if (fd == -1)
+    {
+        fprintf(stderr, "ext event UDP listener: failed creating socket: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    (void)setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof set);
+
+    name.sin_family = AF_INET;
+    name.sin_port = htons(cnt->conf.ext_event_udp_listener_port);
+    name.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (bind(fd, (struct sockaddr *)&name, sizeof(name)) == -1)
+    {
+        fprintf(stderr, "ext event UDP listener: failed binding socket: %s\n", strerror(errno));
+        close(fd);
+        return NULL;
+    }
+
+    while (!cnt->finish || cnt->makemovie)
+    {
+        char buffer[1024];
+        int rc = recv(fd, buffer, sizeof buffer - 1, 0);
+
+        if (rc == -1)
+            break;
+
+        if (rc == 0)
+            continue;
+
+        buffer[rc] = 0x00;
+
+        pthread_mutex_lock(&ext_event_lock);
+        free((void *)ext_event_text);
+        ext_event_text = strdup(buffer);
+        ext_event_shown_since = time(NULL);
+        pthread_mutex_unlock(&ext_event_lock);
+    }
+
+    close(fd);
+
+    return NULL;
+}
 
 /**
  * image_ring_resize
@@ -961,6 +1018,8 @@ static int motion_init(struct context *cnt)
     /* 2 sec startup delay so FPS is calculated correct */
     cnt->startup_frames = cnt->conf.frame_limit * 2;
 
+    pthread_create(&ext_event_th, NULL, ext_event_thread, cnt);
+
     return 0;
 }
 
@@ -1066,6 +1125,25 @@ static void motion_cleanup(struct context *cnt)
         }
 #endif /* HAVE_SQLITE3 */
     }
+}
+
+void format_and_draw_text_at_location(struct context *const cnt, const char *const text, const char *const location, const char *const default_location) {
+    const char *const use_location = location ? location : default_location;
+    int size_mul = cnt->conf.text_double ? 2 : 1;
+    char tmp[PATH_MAX];
+    mystrftime(cnt, tmp, sizeof(tmp), text, &cnt->current_image->timestamp_tm, NULL, 0);
+
+    if (strcasecmp(use_location, "bottom-left") == 0)
+        draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * size_mul, cnt->imgs.width, tmp, cnt->conf.text_double);
+
+    else if (strcasecmp(use_location, "bottom-right") == 0)
+        draw_text(cnt->current_image->image, cnt->imgs.width - 10, cnt->imgs.height - 10 * size_mul, cnt->imgs.width, tmp, cnt->conf.text_double);
+
+    else if (strcasecmp(use_location, "upper-left") == 0)
+        draw_text(cnt->current_image->image, 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
+
+    else if (strcasecmp(use_location, "upper-right") == 0)
+        draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10, cnt->imgs.width, tmp, cnt->conf.text_double);
 }
 
 /**
@@ -1712,25 +1790,28 @@ static void *motion_loop(void *arg)
                           cnt->imgs.width, tmp, cnt->conf.text_double);
             }
 
-            /* Add text in lower left corner of the pictures */
-            if (cnt->conf.text_left) {
-                char tmp[PATH_MAX];
-                mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
-                           &cnt->current_image->timestamp_tm, NULL, 0);
-                draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * text_size_factor,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-            }
+            /* Add generic text */
+            if (cnt->conf.generic_text)
+		format_and_draw_text_at_location(cnt, cnt->conf.generic_text, cnt->conf.generic_text_location, "bottom-left");
 
-            /* Add text in lower right corner of the pictures */
-            if (cnt->conf.text_right) {
-                char tmp[PATH_MAX];
-                mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
-                           &cnt->current_image->timestamp_tm, NULL, 0);
-                draw_text(cnt->current_image->image, cnt->imgs.width - 10,
-                          cnt->imgs.height - 10 * text_size_factor,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-            }
+            /* Add timestamp */
+            if (cnt->conf.timestamp)
+		format_and_draw_text_at_location(cnt, cnt->conf.timestamp, cnt->conf.timestamp_location, "bottom-right");
 
+            if (cnt->conf.ext_event_udp_listener_port > 0) {
+                time_t now = time(NULL);
+
+                pthread_mutex_lock(&ext_event_lock);
+
+                if (now - ext_event_shown_since <= cnt->conf.ext_event_show_time && ext_event_text != NULL)
+			format_and_draw_text_at_location(cnt, ext_event_text, cnt->conf.ext_event_location, "upper-left");
+                else {
+                    free((void *)ext_event_text);
+                    ext_event_text = NULL;
+                }
+
+                pthread_mutex_unlock(&ext_event_lock);
+            }
 
         /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
