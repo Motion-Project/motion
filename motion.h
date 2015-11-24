@@ -284,9 +284,7 @@ struct image_data {
  *               These values are set in rotate_init.
  */
 
-/* date/time drawing, draw.c */
-int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor);
-int initialize_chars(void);
+#include "draw.h"
 
 struct images {
     struct image_data *image_ring;    /* The base address of the image ring buffer */
