@@ -1203,3 +1203,15 @@ int initialize_chars(void)
     return 0;
 }
 
+void get_text_dimensions(const char *const str, const int big_chars, int *const width, int *const height) {
+    int len = strlen(str);
+
+    if (big_chars) {
+        *width = len * 14;
+        *height = 16;
+    }
+    else {
+        *width = len * 7;
+        *height = 8;
+    }
+}
