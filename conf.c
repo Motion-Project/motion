@@ -149,9 +149,11 @@ struct config conf_template = {
     netcam_tolerant_check:          0,
     rtsp_uses_tcp:                  1,
     text_changes:                   0,
-    text_left:                      NULL,
-    text_right:                     DEF_TIMESTAMP,
     text_event:                     DEF_EVENTSTAMP,
+    timestamp:                      DEF_TIMESTAMP,
+    timestamp_location:             NULL,
+    generic_text:                   NULL,
+    generic_text_location:          NULL,
     text_double:                    0,
     despeckle_filter:               NULL,
     area_detect:                    NULL,
@@ -161,6 +163,9 @@ struct config conf_template = {
     log_file:                       NULL,
     log_level:                      LEVEL_DEFAULT+10,
     log_type_str:                   NULL,
+    ext_event_udp_listener_port:    0,
+    ext_event_show_time:            5,
+    ext_event_location:             "upper-left",
 };
 
 
@@ -879,22 +884,42 @@ config_param config_params[] = {
     print_string
     },
     {
-    "text_right",
+    "timestamp",
     "# Draws the timestamp using same options as C function strftime(3)\n"
     "# Default: %Y-%m-%d\\n%T = date in ISO format and time in 24 hour clock\n"
-    "# Text is placed in lower right corner",
+    "# Text is placed in lower right corner (default, override with timestamp_location)",
     0,
-    CONF_OFFSET(text_right),
+    CONF_OFFSET(timestamp),
     copy_string,
     print_string
     },
     {
-    "text_left",
+    "timestamp_location",
+    "# Where to place the timestamp-text. Can be upper-left, upper-right,\n"
+    "# bottom-left or bottom-right.\n"
+    "# Default: Not defined = bottom-right\n",
+    0,
+    CONF_OFFSET(timestamp_location),
+    copy_string,
+    print_string
+    },
+    {
+    "generic_text",
     "# Draw a user defined text on the images using same options as C function strftime(3)\n"
     "# Default: Not defined = no text\n"
-    "# Text is placed in lower left corner",
+    "# Text is placed in lower left corner (default, override with generic_text_location)",
     0,
-    CONF_OFFSET(text_left),
+    CONF_OFFSET(generic_text),
+    copy_string,
+    print_string
+    },
+    {
+    "generic_text_location",
+    "# Where to place the generic text. Can be upper-left, upper-right,\n"
+    "# ceter, bottom-left or bottom-right.\n"
+    "# Default: Not defined = bottom-left\n",
+    0,
+    CONF_OFFSET(generic_text_location),
     copy_string,
     print_string
     },
@@ -928,6 +953,34 @@ config_param config_params[] = {
     CONF_OFFSET(text_double),
     copy_bool,
     print_bool
+    },
+    {
+    "ext_event_udp_listener_port",
+    "# On what UDP port to listen for external (text-)events. They will\n"
+    "# be show on the screen for ext_event_show_time seconds at position\n"
+    "# ext_event_location. You can send any text to it.\n",
+    0,
+    CONF_OFFSET(ext_event_udp_listener_port),
+    copy_int,
+    print_int
+    },
+    {
+    "ext_event_show_time",
+    "# How long to show an external event text.\n",
+    0,
+    CONF_OFFSET(ext_event_show_time),
+    copy_int,
+    print_int
+    },
+    {
+    "ext_event_location",
+    "# Where to place the external event text. Can be upper-left, upper-right,\n"
+    "# bottom-left or bottom-right.\n"
+    "# Default: Not defined = center\n",
+    0,
+    CONF_OFFSET(ext_event_location),
+    copy_string,
+    print_string
     },
     {
     "exif_text",
@@ -1758,7 +1811,7 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
                 /*
                  * If argument is in "" we will strip them off
                  * It is important that we can use "" so that we can use
-                 * leading spaces in text_left and text_right.
+                 * leading spaces in timestamp and generic_text.
                  */
                 if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
                     (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
