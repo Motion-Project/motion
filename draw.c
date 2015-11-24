@@ -1204,14 +1204,35 @@ int initialize_chars(void)
 }
 
 void get_text_dimensions(const char *const str, const int big_chars, int *const width, int *const height) {
-    int len = strlen(str);
+    int cols = 0, rows = 0;
+    char *dummy = strdup(str), *curp = dummy;
+
+    for(;;) {
+        int clen;
+        char *lf = strstr(curp, "\\n");
+        if (lf)
+            *lf = 0x00;
+
+        rows++;
+
+        clen = strlen(curp);
+        if (clen > cols)
+            cols = clen;
+
+        if (!lf)
+            break;
+
+        curp = lf + 2;
+    }
+
+    free(dummy);
 
     if (big_chars) {
-        *width = len * 14;
-        *height = 16;
+        *width = cols * 14;
+        *height = rows * 16;
     }
     else {
-        *width = len * 7;
-        *height = 8;
+        *width = cols * 7;
+        *height = rows * 8;
     }
 }
