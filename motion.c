@@ -1141,8 +1141,6 @@ void format_and_draw_text_at_location(struct context *const cnt, const char *con
     bottom = cnt->imgs.height - space_height - text_height;
     right = cnt->imgs.width - space_width - text_width;
 
-    printf("%dx%d %s %s\n", text_width, text_height, use_location, text);
-
     mystrftime(cnt, tmp, sizeof(tmp), text, &cnt->current_image->timestamp_tm, NULL, 0);
 
     if (strcasecmp(use_location, "bottom-left") == 0)

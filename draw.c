@@ -1086,8 +1086,6 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     if (startx + len * 6 * (factor + 1) >= width)
         len = (width-startx-1)/(6*(factor+1));
 
-    printf("\t%d,%d (%d): %d\n", startx, starty, width, len);
-    
     line_offset = width - 7 * (factor + 1);
     next_char_offs = width * 8 * (factor + 1) - 6 * (factor + 1);
     
@@ -1136,22 +1134,22 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
  */
 int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor)
 {
-    int num_nl = 0;
-    const char *end, *begin;
+    const char *p = text;
     const int line_space = (factor + 1) * 9;
-    
-    begin = end = text;
 
-    while ((end = strstr(end, NEWLINE))) {
-        int len = end-begin;
+    for(;;) {
+        const char *end = strstr(p, NEWLINE);
+        int len = end ? end - p : strlen(p);
 
-        draw_textn(image, startx, starty, width, begin, len, factor);
-        end += sizeof(NEWLINE)-1;
-        begin = end;
+        draw_textn(image, startx, starty, width, p, len, factor);
+
+        if (!end)
+            break;
+
+        p = end + sizeof(NEWLINE) - 1;
+
         starty += line_space;
     }
-
-    draw_textn(image, startx, starty, width, begin, strlen(begin), factor);
 
     return 0;
 }
