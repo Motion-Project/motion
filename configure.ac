@@ -383,7 +383,19 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
 	      PKG_CONFIG_PATH=${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH
 	      export PKG_CONFIG_PATH
 	])
-	PKG_CHECK_MODULES([FFMPEG], libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes)
+
+       AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
+       AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
+       AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([required program 'pkg-config' not found.])])
+
+       AC_SUBST(FFMPEG_LIBS)
+       AC_SUBST(FFMPEG_CFLAGS)
+       FFMPEG_DEPS="libavutil libavformat libavcodec libswscale"
+       if pkg-config $FFMPEG_DEPS; then
+               FFMPEG_CFLAGS=`pkg-config --cflags $FFMPEG_DEPS`
+               FFMPEG_LIBS=`pkg-config --libs $FFMPEG_DEPS`
+               HAVE_FFMPEG="yes"
+       fi
 ])
 
 AS_IF([test "${HAVE_FFMPEG}" = "yes" ], [
