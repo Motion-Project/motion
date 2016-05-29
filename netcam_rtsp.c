@@ -31,7 +31,7 @@
  *
  * Determine whether pix_format is YUV420P
  */
-int netcam_check_pixfmt(netcam_context_ptr netcam){
+static int netcam_check_pixfmt(netcam_context_ptr netcam){
     int retcd;
 
     retcd = -1;
@@ -47,7 +47,7 @@ int netcam_check_pixfmt(netcam_context_ptr netcam){
  *
  * Null all the context
  */
-void netcam_rtsp_null_context(netcam_context_ptr netcam){
+static void netcam_rtsp_null_context(netcam_context_ptr netcam){
 
     netcam->rtsp->swsctx         = NULL;
     netcam->rtsp->swsframe_in    = NULL;
@@ -62,7 +62,7 @@ void netcam_rtsp_null_context(netcam_context_ptr netcam){
  *
  * Close all the context that could be open
  */
-void netcam_rtsp_close_context(netcam_context_ptr netcam){
+static void netcam_rtsp_close_context(netcam_context_ptr netcam){
 
     if (netcam->rtsp->swsctx       != NULL) sws_freeContext(netcam->rtsp->swsctx);
     if (netcam->rtsp->swsframe_in  != NULL) my_frame_free(netcam->rtsp->swsframe_in);
@@ -372,7 +372,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-int netcam_rtsp_resize_ntc(netcam_context_ptr netcam){
+static int netcam_rtsp_resize_ntc(netcam_context_ptr netcam){
 
     if ((netcam->width  != netcam->rtsp->codec_context->width) ||
         (netcam->height != netcam->rtsp->codec_context->height) ||
@@ -425,7 +425,7 @@ int netcam_rtsp_resize_ntc(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-int netcam_rtsp_open_context(netcam_context_ptr netcam){
+static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     int  retcd;
     char errstr[128];
@@ -531,7 +531,7 @@ int netcam_rtsp_open_context(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-int netcam_rtsp_open_sws(netcam_context_ptr netcam){
+static int netcam_rtsp_open_sws(netcam_context_ptr netcam){
 
     netcam->width  = ((netcam->cnt->conf.width / 8) * 8);
     netcam->height = ((netcam->cnt->conf.height / 8) * 8);
@@ -605,7 +605,7 @@ int netcam_rtsp_open_sws(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
+static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     int      retcd;
     char     errstr[128];

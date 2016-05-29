@@ -90,7 +90,7 @@ void my_frame_free(AVFrame *frame){
  *      0:  File doesn't exist
  *      1:  File exists
  */
-int timelapse_exists(const char *fname){
+static int timelapse_exists(const char *fname){
     FILE *file;
     file = fopen(fname, "r");
     if (file)
@@ -100,7 +100,7 @@ int timelapse_exists(const char *fname){
     }
     return 0;
 }
-int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
+static int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
     FILE *file;
 
     file = fopen(ffmpeg->oc->filename, "a");
