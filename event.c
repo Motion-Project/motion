@@ -649,7 +649,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
 
         if ((cnt->ffmpeg_output =
-            ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
+            ffmpeg_open(cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]",
@@ -677,9 +677,9 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
 
         if ((cnt->ffmpeg_output_debug =
-            ffmpeg_open((char *)cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
-                         cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
+            ffmpeg_open(cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
+                        cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
+                        cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]",
                        cnt->motionfilename);
             cnt->finish = 1;
@@ -703,8 +703,8 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     if (!cnt->ffmpeg_timelapse) {
         char tmp[PATH_MAX];
         const char *timepath;
-        char codec_swf[3] = "swf";
-        char codec_mpeg[5] = "mpeg4";
+        const char *codec_swf = "swf";
+        const char *codec_mpeg = "mpeg4";
 
         /*
          *  conf.timepath would normally be defined but if someone deleted it by control interface
