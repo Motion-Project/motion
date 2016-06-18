@@ -212,7 +212,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
  *  Returns
  *      A new allocated ffmpeg struct or NULL if any error happens.
  */
-struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
+struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
                            unsigned char *y, unsigned char *u, unsigned char *v,
                            int width, int height, int rate, int bps, int vbr, int tlapse)
 {
