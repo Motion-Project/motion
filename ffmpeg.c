@@ -296,9 +296,9 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
         c->codec_id == MY_CODEC_ID_HEVC){
         av_dict_set(&opts, "preset", "ultrafast", 0);
 
-        /* transforrm vbr (2 - 31) into crf (0 - 51) by scaling */
+        /* transform vbr (1 - 32767) into crf (0 - 51) by scaling */
         char crf[4];
-        snprintf(crf, 4, "%d", (int) ((vbr - 2) * 1.758));
+        snprintf(crf, 4, "%d", (int) ((vbr - 1) * 51.0 / 32766));
 
         av_dict_set(&opts, "tune", "zerolatency", 0);
     }
