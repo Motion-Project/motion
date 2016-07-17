@@ -300,6 +300,7 @@ struct ffmpeg *ffmpeg_open(char *ffmpeg_video_codec, char *filename,
         char crf[4];
         snprintf(crf, 4, "%d", (int) ((vbr - 1) * 51.0 / 32766));
 
+        av_dict_set(&opts, "crf", crf, 0);
         av_dict_set(&opts, "tune", "zerolatency", 0);
     }
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
