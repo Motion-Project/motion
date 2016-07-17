@@ -2000,7 +2000,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                             send_template(client_socket, res);
                         }
                         sprintf(res, "<a href=http://%s:%d> "
-                            "<img src=http://%s:%d/ border=0 width=%d%%></a/n>"
+                            "<img src=http://%s:%d/ border=0 width=%d%%></a>\n"
                             ,hostname,cnt[y]->conf.stream_port
                             ,hostname,cnt[y]->conf.stream_port
                             ,cnt[y]->conf.stream_preview_scale);
