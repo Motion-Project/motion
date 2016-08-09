@@ -254,7 +254,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 	    description = malloc(PATH_MAX);
 	    mystrftime(cnt, description, PATH_MAX-1,
 		        cnt->conf.exif_text,
-		        timestamp, NULL, 0);
+		       timestamp, NULL, 0, 0);
     } else {
 	    description = NULL;
     }
@@ -1127,7 +1127,7 @@ void preview_save(struct context *cnt)
             else
                 imagepath = (char *)DEF_IMAGEPATH;
 
-            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0);
+            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0, 0);
             snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
             put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);
