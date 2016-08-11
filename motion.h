@@ -426,7 +426,7 @@ struct context {
 
 #ifdef HAVE_MYSQL
     MYSQL *database;
-    my_ulonglong current_event_id;OB
+    my_ulonglong current_event_id;
 #endif
 
 #ifdef HAVE_PGSQL

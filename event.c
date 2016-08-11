@@ -239,7 +239,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 #endif /* HAVE_SQLITE3 */
 }
 
-static void event_sqlfirstmotion(struct context *cnt, int type  ATTRIBUTE_UNUSED,
+static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
                                  unsigned char *dummy1 ATTRIBUTE_UNUSED,
                                  char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
                                  struct tm *tm ATTRIBUTE_UNUSED)
