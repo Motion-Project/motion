@@ -263,8 +263,7 @@ static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBU
     }
 }
 
-static void event_sqlnewfile(struct context *cnt,
-            motion_event type  ATTRIBUTE_UNUSED,
+static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
             unsigned char *dummy ATTRIBUTE_UNUSED,
             char *filename, void *arg, struct tm *tm ATTRIBUTE_UNUSED)
 {
@@ -281,10 +280,14 @@ static void event_sqlnewfile(struct context *cnt,
     {
         char sqlquery[PATH_MAX];
 
-        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_event_start_query,
-                   cnt->eventtime_tm, NULL, 0, 0);
+        unsigned long long event_id = 0;
+#ifdef HAVE_MYSQL
+        event_id = cnt->current_event_id;
+#endif
+        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_file_query,
+                   &cnt->current_image->timestamp_tm, filename, sqltype, event_id);
 
-        do_sql_query(sqlquery, cnt, 1);
+        do_sql_query(sqlquery, cnt, 0);
     }
 }
 
