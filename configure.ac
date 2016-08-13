@@ -1045,11 +1045,11 @@ rm -f $TMPO
 rm -f $TMPC
 
 
-if test "x${TMP}" = "x1" ; then
+if test "x${TMP}" = "x0" ; then
+	echo "CPU optimization: $CPU_OPTIONS"
+else
 	CPU_OPTIONS=""
 	echo "No CPU optimizations will be added"
-else
-	echo "CPU optimization: $CPU_OPTIONS"
 fi
 
 else
