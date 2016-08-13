@@ -845,7 +845,18 @@ if test "${OPTIMIZECPU}" = "yes"; then
 # Try to autodetect cpu type
 CPU_NAME="unknown"
 CPU_TYPE="unknown"
-if test -e "/proc/cpuinfo" ; then
+if test -e "/proc/device-tree/model"; then
+    # explicit test for RPI3 as /proc/cpuinfo reports armv7 even though
+    # it is armv8
+    RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
+    if test "x${RPI3}" != "x"; then
+        CPU_NAME="Raspberry Pi 3"
+        CPU_TYPE="Raspberry Pi 3"
+	CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+    fi
+fi
+
+if test "x${CPU_TYPE}" = "xunknown" && test -e "/proc/cpuinfo" ; then
 	intel[[30]]="-march=i386"
 	intel[[32]]="-march=i386"
 	intel[[34]]="-march=i386"
