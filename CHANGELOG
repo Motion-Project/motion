@@ -1,4 +1,6 @@
 Summary of Changes
+   * Fix timelapse crash when selecting mpeg4
+Version 3.4.1 Changes Below
    * Added suggestion for including pkgconf as part of build requirements
    * Swap sequence of user ffmpeg path and PKG_CONFIG_PATH
    * Allow : in non standard locations of netcam_url path.
