@@ -1,4 +1,5 @@
 Summary of Changes
+   * Better messages for pkg-config
    * Fix timelapse crash when selecting mpeg4
 Version 3.4.1 Changes Below
    * Added suggestion for including pkgconf as part of build requirements

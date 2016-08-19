@@ -368,6 +368,14 @@ if test x$JPEG_SUPPORT != xyes ; then
   )
 fi
 
+#
+# Check for the pkg-config.  
+#
+
+AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
+AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
+AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
+
 
 #
 # Check for libavcodec and libavformat from ffmpeg
@@ -384,10 +392,6 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
 	      export PKG_CONFIG_PATH
 	])
 
-       AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
-       AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
-       AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
-
        AC_SUBST(FFMPEG_LIBS)
        AC_SUBST(FFMPEG_CFLAGS)
        FFMPEG_DEPS="libavutil libavformat libavcodec libswscale"
@@ -395,6 +399,8 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
                FFMPEG_CFLAGS=`pkg-config --cflags $FFMPEG_DEPS`
                FFMPEG_LIBS=`pkg-config --libs $FFMPEG_DEPS`
                HAVE_FFMPEG="yes"
+       else
+              AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev' were not found.  Please check motion_guide.html and install necessary dependencies or use the '--without-ffmpeg' configuration option.])
        fi
 ])
 
