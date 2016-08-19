@@ -1,0 +1,9 @@
+/var/log/motion/motion.log {
+	rotate 12
+	monthly
+	compress
+	delaycompress
+	missingok
+	notifempty
+	copytruncate
+}

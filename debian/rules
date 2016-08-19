@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+LIBDIR_MULTIARCH = /usr/lib/$(DEB_HOST_MULTIARCH)
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	  --with-ffmpeg=$(LIBDIR_MULTIARCH) \
+	  --with-ffmpeg-headers=/usr/include/$(DEB_HOST_MULTIARCH) \
+	  --with-mysql-lib=$(LIBDIR_MULTIARCH) \
+	  --with-pgsql-lib=$(LIBDIR_MULTIARCH) \
+	  --without-optimizecpu
