@@ -295,7 +295,12 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     if (c->codec_id == MY_CODEC_ID_H264 ||
         c->codec_id == MY_CODEC_ID_HEVC){
         av_dict_set(&opts, "preset", "ultrafast", 0);
-        av_dict_set(&opts, "crf", "18", 0);
+
+        /* transform vbr (1 - 32767) into crf (0 - 51) by scaling */
+        char crf[4];
+        snprintf(crf, 4, "%d", (int) ((vbr - 1) * 51.0 / 32766));
+
+        av_dict_set(&opts, "crf", crf, 0);
         av_dict_set(&opts, "tune", "zerolatency", 0);
     }
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
