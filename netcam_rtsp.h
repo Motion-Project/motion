@@ -9,10 +9,7 @@
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 
-#endif /* end HAVE_FFMPEG  */
-
 struct rtsp_context {
-#ifdef HAVE_FFMPEG
     AVFormatContext*      format_context;
     AVCodecContext*       codec_context;
     AVFrame*              frame;
@@ -27,12 +24,6 @@ struct rtsp_context {
     int                   status;
     struct timeval        startreadtime;
     struct SwsContext*   swsctx;
-
-#else /* Do not have FFmpeg */
-    int*                  format_context;
-    int                   readingframe;
-    int                   status;
-#endif /* end HAVE_FFMPEG  */
 };
 
 struct rtsp_context *rtsp_new_context(void);
@@ -41,3 +32,29 @@ int netcam_connect_rtsp(netcam_context_ptr netcam);
 int netcam_read_rtsp_image(netcam_context_ptr netcam);
 int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url);
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam);
+int netcam_check_pixfmt(netcam_context_ptr netcam);
+void netcam_rtsp_null_context(netcam_context_ptr netcam);
+void netcam_rtsp_close_context(netcam_context_ptr netcam);
+int netcam_rtsp_resize_ntc(netcam_context_ptr netcam);
+int netcam_rtsp_open_context(netcam_context_ptr netcam);
+int netcam_rtsp_open_sws(netcam_context_ptr netcam);
+int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam);
+
+#else /* Do not have FFmpeg */
+
+struct rtsp_context {
+    int*                  format_context;
+    int                   readingframe;
+    int                   status;
+};
+
+struct rtsp_context *rtsp_new_context(void);
+void netcam_shutdown_rtsp(netcam_context_ptr netcam);
+int netcam_connect_rtsp(netcam_context_ptr netcam);
+int netcam_read_rtsp_image(netcam_context_ptr netcam);
+int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url);
+int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam);
+
+#endif /* end HAVE_FFMPEG  */
+
+

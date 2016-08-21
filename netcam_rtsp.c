@@ -377,14 +377,14 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
 */
 int netcam_rtsp_resize_ntc(netcam_context_ptr netcam){
 
-    if ((netcam->width  != netcam->rtsp->codec_context->width) ||
-        (netcam->height != netcam->rtsp->codec_context->height) ||
+    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
         (netcam_check_pixfmt(netcam) != 0) ){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: ");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: ****************************************************************");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: The network camera is sending pictures in a different");
-        if ((netcam->width  != netcam->rtsp->codec_context->width) ||
-            (netcam->height != netcam->rtsp->codec_context->height)) {
+        if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+            (netcam->height != (unsigned)netcam->rtsp->codec_context->height)) {
             if (netcam_check_pixfmt(netcam) != 0) {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: size than specified in the config and also a ");
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: different picture format.  The picture is being");
@@ -759,7 +759,9 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
     netcam->rtsp = NULL;
 
 #else  /* No FFmpeg/Libav */
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
+    /* Stop compiler warnings */
+    netcam->rtsp->status = RTSP_NOTCONNECTED;
+    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
 #endif /* End #ifdef HAVE_FFMPEG */
 }
 
@@ -892,6 +894,8 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
   return 0;
 
 #else  /* No FFmpeg/Libav */
+    /* Stop compiler warnings */
+    if (url->port == url->port) netcam->rtsp->status = RTSP_NOTCONNECTED;
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
@@ -917,8 +921,8 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
-    if ((netcam->width  != netcam->rtsp->codec_context->width) ||
-        (netcam->height != netcam->rtsp->codec_context->height) ||
+    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
         (netcam_check_pixfmt(netcam) != 0) ){
         netcam_rtsp_resize(image ,netcam);
     } else {
@@ -930,6 +934,8 @@ int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
 
     return 0;
 #else  /* No FFmpeg/Libav */
+    /* Stop compiler warnings */
+    if (image == image) netcam->rtsp->status = RTSP_NOTCONNECTED;
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
