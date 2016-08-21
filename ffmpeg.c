@@ -79,6 +79,64 @@ void my_frame_free(AVFrame *frame){
     av_freep(&frame);
 #endif
 }
+/*********************************************/
+int my_image_get_buffer_size(enum AVPixelFormat pix_fmt, int width, int height){
+    int retcd = 0;
+#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    int align = 1;
+    retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
+#else
+    retcd = avpicture_get_size(pix_fmt, width, height);
+#endif
+    return retcd;
+}
+/*********************************************/
+int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum AVPixelFormat pix_fmt,int width, int height,int dest_size){
+    int retcd = 0;
+#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    int align = 1;
+    retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
+        ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
+#else
+    retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
+        ,(unsigned char *)buffer_ptr,dest_size);
+#endif
+	return retcd;
+}
+/*********************************************/
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height){
+    int retcd = 0;
+#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    int align = 1;
+    retcd = av_image_fill_arrays(
+        frame->data
+        ,frame->linesize
+        ,buffer_ptr
+        ,pix_fmt
+        ,width
+        ,height
+        ,align
+	);
+#else
+    retcd = avpicture_fill(
+        (AVPicture *)frame
+        ,buffer_ptr
+        ,pix_fmt
+        ,width
+        ,height);
+#endif
+	return retcd;
+}
+/*********************************************/
+void my_packet_unref(AVPacket pkt){
+#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+    av_packet_unref(&pkt);
+#else
+    av_free_packet(&pkt);
+#endif
+}
+/*********************************************/
+
 /****************************************************************************
  ****************************************************************************
  ****************************************************************************/
@@ -219,7 +277,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     AVCodecContext *c;
     AVCodec *codec;
     struct ffmpeg *ffmpeg;
-    int ret;
+    int retcd;
     char errstr[128];
     AVDictionary *opts = 0;
 
@@ -312,9 +370,9 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     }
 
     pthread_mutex_lock(&global_lock);
-        ret = avcodec_open2(c, codec, &opts);
+        retcd = avcodec_open2(c, codec, &opts);
     pthread_mutex_unlock(&global_lock);
-    if (ret < 0) {
+    if (retcd < 0) {
         if (codec->supported_framerates) {
             const AVRational *fps = codec->supported_framerates;
             while (fps->num) {
@@ -324,14 +382,14 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         }
         int chkrate = 1;
         pthread_mutex_lock(&global_lock);
-            while ((chkrate < 36) && (ret != 0)) {
+            while ((chkrate < 36) && (retcd != 0)) {
                 c->time_base.den = chkrate;
-                ret = avcodec_open2(c, codec, &opts);
+                retcd = avcodec_open2(c, codec, &opts);
                 chkrate++;
             }
         pthread_mutex_unlock(&global_lock);
-        if (ret < 0){
-            av_strerror(ret, errstr, sizeof(errstr));
+        if (retcd < 0){
+            av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not open codec %s",errstr);
             av_dict_free(&opts);
             ffmpeg_cleanups(ffmpeg);
@@ -399,7 +457,13 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
          * we write the data via standard file I/O so we close the
          * items here
          */
-        avformat_write_header(ffmpeg->oc, NULL);
+        retcd = avformat_write_header(ffmpeg->oc, NULL);
+        if (retcd < 0){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not write ffmpeg header %s",errstr);
+            ffmpeg_cleanups(ffmpeg);
+            return NULL;
+        }
         if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
             av_write_trailer(ffmpeg->oc);
             avio_close(ffmpeg->oc->pb);
@@ -573,7 +637,7 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
         }
         if (got_packet_ptr == 0){
             //Buffered packet.  Throw special return code
-            av_free_packet(&pkt);
+            my_packet_unref(pkt);
             return -2;
         }
         if (pkt.pts != AV_NOPTS_VALUE)
@@ -590,7 +654,7 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     } else {
         retcd = av_write_frame(ffmpeg->oc, &pkt);
     }
-    av_free_packet(&pkt);
+    my_packet_unref(pkt);
 
     if (retcd != 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error while writing video frame");
@@ -617,12 +681,12 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
                                         ffmpeg->video_outbuf_size, pic);
         if (retcd < 0 ){
             MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error encoding video");
-            av_free_packet(&pkt);
+            my_packet_unref(pkt);
             return -1;
         }
         if (retcd == 0 ){
             // No bytes encoded => buffered=>special handling
-            av_free_packet(&pkt);
+            my_packet_unref(pkt);
             return -2;
         }
 
@@ -637,7 +701,7 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     } else {
         retcd = av_write_frame(ffmpeg->oc, &pkt);
     }
-    av_free_packet(&pkt);
+    my_packet_unref(pkt);
 
     if (retcd != 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Error while writing video frame");

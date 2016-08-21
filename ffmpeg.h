@@ -10,6 +10,7 @@
 
 #include <errno.h>
 #include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/mathematics.h>
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 56)
@@ -91,6 +92,11 @@ int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
 void ffmpeg_cleanups(struct ffmpeg *);
 AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
                               unsigned char *, unsigned char *);
+int my_image_get_buffer_size(enum AVPixelFormat pix_fmt, int width, int height);
+int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height,int dest_size);
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height);
+void my_packet_unref(AVPacket pkt);
+
 #endif
 
 #endif /* _INCLUDE_FFMPEG_H_ */
