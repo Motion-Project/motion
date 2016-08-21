@@ -587,10 +587,7 @@ static void event_new_video(struct context *cnt,
     MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s FPS %d",
                cnt->movie_fps);
 
-    if (cnt->movie_fps > 30)
-        cnt->movie_fps = 30;
-    else if (cnt->movie_fps < 2)
-        cnt->movie_fps = 2;
+    if (cnt->movie_fps < 2) cnt->movie_fps = 2;
 }
 
 #ifdef HAVE_FFMPEG
