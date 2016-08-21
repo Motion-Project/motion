@@ -1130,7 +1130,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
     if (buffer->content_length != 0)
         remaining = buffer->content_length;
     else
-        remaining = 999999;
+        remaining = 9999999;
 
     /* Now read in the data. */
     while (remaining) {
