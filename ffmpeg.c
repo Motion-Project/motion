@@ -178,9 +178,11 @@ int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
  *      Function returns nothing.
  */
 void ffmpeg_init(){
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: ffmpeg LIBAVCODEC_BUILD %d"
-               " LIBAVFORMAT_BUILD %d", LIBAVCODEC_BUILD,
-               LIBAVFORMAT_BUILD);
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, 
+        "%s: ffmpeg libavcodec version %d.%d.%d"
+        " libavformat version %d.%d.%d"
+        , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
+        , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
     av_register_all();
     avcodec_register_all();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
@@ -361,7 +363,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     } else {
         ffmpeg->vbr = 0;
     }
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s vbr/crf for codec: %d", ffmpeg->vbr);
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s vbr/crf for codec: %d", ffmpeg->vbr);
 
     if (c->codec_id == MY_CODEC_ID_H264 ||
         c->codec_id == MY_CODEC_ID_HEVC){
@@ -390,7 +392,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         if (codec->supported_framerates) {
             const AVRational *fps = codec->supported_framerates;
             while (fps->num) {
-                MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Reported FPS Supported %d/%d", fps->num, fps->den);
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s Reported FPS Supported %d/%d", fps->num, fps->den);
                 fps++;
             }
         }
@@ -412,7 +414,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
 
     }
     av_dict_free(&opts);
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
 
     ffmpeg->video_outbuf = NULL;
     if (!(ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE)) {
@@ -781,7 +783,7 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const c
     vsnprintf(buf, sizeof(buf), fmt, vl);
 
     /* If the debug_level is correct then send the message to the motion logging routine. */
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: %s - flag %d",
+    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: %s - flag %d",
                buf, errno_flag);
 }
 
