@@ -931,7 +931,7 @@ This option is ignored if ffmpeg_variable_bitrate is not 0.
 .B ffmpeg_variable_bitrate
 .RS 
 .nf 
-Values: 0, 2 to 31
+Values: 0 to 100
 Default: 0
 Description: 
 .fi
@@ -939,8 +939,8 @@ Description:
 Enable and define the variable bitrate for the ffmpeg encoder.
 ffmpeg_bps is ignored if variable bitrate is enabled.
 When specified as 0, use the fixed bitrate defined by ffmpeg_bps.
-When defined as 2 - 31 vary the quality of the movie.  
-A value of 2 is best quality versus a value of 31 is worst quality.
+When defined as 1 - 100 varies the quality of the movie.
+A value of 1 is worst quality versus a value of 100 is best quality.
 .RE
 .RE
 

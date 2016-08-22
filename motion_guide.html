@@ -3298,14 +3298,14 @@ This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled).
 <p></p> 
 <ul>
   <li> Type: Integer</li>
-  <li> Range / Valid values: 0, 2 - 31</li>
+  <li> Range / Valid values: 0 - 100</li>
   <li> Default: 0 (disabled)</li>
 </ul> 
 <p></p>
 Enables and defines variable bitrate for the ffmpeg encoder. 
 The option of ffmpeg_bps is ignored if variable bitrate is enabled. 
-A value of 0 disables this option while values 2 - 31 are applicable when a 
-variable bit rate is desired.  The value of 2 means best quality and 31 is worst.
+A value of 0 disables this option while values 1 - 100 varies the quality
+of the movie.  The value of 1 means worst quality and 100 is the best quality.
 <p></p>
 Experiment for the value that gives you the desired compromise between size and quality.
 <p></p>

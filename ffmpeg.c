@@ -287,7 +287,6 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
      */
     ffmpeg = mymalloc(sizeof(struct ffmpeg));
 
-    ffmpeg->vbr = vbr;
     ffmpeg->tlapse = tlapse;
 
     /* Store codec name in ffmpeg->codec, with buffer overflow check. */
@@ -350,19 +349,34 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     c->pix_fmt    = MY_PIX_FMT_YUV420P;
     c->max_b_frames = 0;
 
+    /* The selection of 8000 in the else is a subjective number based upon viewing output files */
+    if (vbr > 0){
+        if (vbr > 100) vbr = 100;
+        if (c->codec_id == MY_CODEC_ID_H264 ||
+            c->codec_id == MY_CODEC_ID_HEVC){
+            ffmpeg->vbr = (int)(( (100-vbr) * 51)/100);
+        } else {
+            ffmpeg->vbr =(int)(((100-vbr)*(100-vbr)*(100-vbr) * 8000) / 1000000) + 1;
+        }
+    } else {
+        ffmpeg->vbr = 0;
+    }
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s vbr/crf for codec: %d", ffmpeg->vbr);
+
     if (c->codec_id == MY_CODEC_ID_H264 ||
         c->codec_id == MY_CODEC_ID_HEVC){
         av_dict_set(&opts, "preset", "ultrafast", 0);
 
-        /* transform vbr (1 - 32767) into crf (0 - 51) by scaling */
         char crf[4];
-        snprintf(crf, 4, "%d", (int) ((vbr - 1) * 51.0 / 32766));
-
+        snprintf(crf, 4, "%d",ffmpeg->vbr);
         av_dict_set(&opts, "crf", crf, 0);
         av_dict_set(&opts, "tune", "zerolatency", 0);
+    } else {
+        if (ffmpeg->vbr) c->flags |= CODEC_FLAG_QSCALE;
+        c->global_quality=ffmpeg->vbr;
     }
+
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
-    if (vbr) c->flags |= CODEC_FLAG_QSCALE;
     if (!strcmp(ffmpeg->oc->oformat->name, "mp4") ||
         !strcmp(ffmpeg->oc->oformat->name, "mov") ||
         !strcmp(ffmpeg->oc->oformat->name, "3gp")) {
@@ -413,10 +427,6 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         ffmpeg_cleanups(ffmpeg);
         return NULL;
     }
-
-    /* Set variable bitrate if requested. */
-    if (ffmpeg->vbr)
-        ffmpeg->picture->quality = ffmpeg->vbr;
 
     /* Set the frame data. */
     ffmpeg->picture->data[0] = y;
