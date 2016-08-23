@@ -183,10 +183,10 @@ void ffmpeg_init(){
         " libavformat version %d.%d.%d"
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+
     av_register_all();
     avcodec_register_all();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
-    av_log_set_level(AV_LOG_ERROR);
 }
 /**
  * get_oformat
@@ -783,8 +783,13 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const c
     vsnprintf(buf, sizeof(buf), fmt, vl);
 
     /* If the debug_level is correct then send the message to the motion logging routine. */
-    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: %s - flag %d",
-               buf, errno_flag);
+    if (errno_flag <= AV_LOG_ERROR) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+    } else if (errno_flag <= AV_LOG_WARNING) {
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+    } else if (errno_flag < AV_LOG_DEBUG){
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+    }
 }
 
 #endif /* HAVE_FFMPEG */

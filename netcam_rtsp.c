@@ -750,7 +750,9 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
-
+    
+    avformat_network_deinit();
+    
     free(netcam->rtsp->path);
     free(netcam->rtsp->user);
     free(netcam->rtsp->pass);
@@ -878,6 +880,7 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     pthread_mutex_lock(&global_lock);
         av_register_all();
         avcodec_register_all();
+        avformat_network_init();
     pthread_mutex_unlock(&global_lock);
 
     /*
