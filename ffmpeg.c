@@ -60,6 +60,7 @@
 #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
 #define MY_CODEC_ID_H264      CODEC_ID_H264
 #define MY_CODEC_ID_HEVC      CODEC_ID_H264
+
 #endif
 /*********************************************/
 AVFrame *my_frame_alloc(void){
@@ -207,7 +208,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
      */
     if (strcmp(codec, "tlapse") == 0) {
         ext = ".swf";
-        of = av_guess_format("swf", NULL, NULL);
+        of = av_guess_format ("mpeg2video", NULL, NULL);
         if (of) of->video_codec = MY_CODEC_ID_MPEG2VIDEO;
     } else if (strcmp(codec, "mpeg4") == 0) {
         ext = ".avi";
@@ -752,6 +753,7 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
     if (ffmpeg->vbr)
         picture->quality = ffmpeg->vbr;
 
+
     /* Setup pointers and line widths. */
     picture->data[0] = y;
     picture->data[1] = u;
@@ -759,6 +761,10 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
     picture->linesize[0] = ffmpeg->c->width;
     picture->linesize[1] = ffmpeg->c->width / 2;
     picture->linesize[2] = ffmpeg->c->width / 2;
+
+    picture->format = ffmpeg->c->pix_fmt;
+    picture->width  = ffmpeg->c->width;
+    picture->height = ffmpeg->c->height;
 
     return picture;
 }
