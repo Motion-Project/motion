@@ -207,7 +207,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
      * We also dynamically add the file extension to the filename here.
      */
     if (strcmp(codec, "tlapse") == 0) {
-        ext = ".swf";
+        ext = ".mpg";
         of = av_guess_format ("mpeg2video", NULL, NULL);
         if (of) of->video_codec = MY_CODEC_ID_MPEG2VIDEO;
     } else if (strcmp(codec, "mpeg4") == 0) {

@@ -700,7 +700,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     if (!cnt->ffmpeg_timelapse) {
         char tmp[PATH_MAX];
         const char *timepath;
-        const char *codec_swf = "swf";
+        const char *codec_mpg = "mpg";
         const char *codec_mpeg = "mpeg4";
 
         /*
@@ -730,11 +730,11 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             v = u + (width * height) / 4;
         }
 
-        if (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) {
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using swf codec.");
+        if (strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) {
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpg codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
             cnt->ffmpeg_timelapse =
-                ffmpeg_open(codec_swf,cnt->timelapsefilename, y, u, v
+                ffmpeg_open(codec_mpg,cnt->timelapsefilename, y, u, v
                         ,cnt->imgs.width, cnt->imgs.height, 24
                         ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND);
         } else {

@@ -308,7 +308,7 @@ ffmpeg_variable_bitrate 0
 
 # Codec to used by ffmpeg for the video compression.
 # Timelapse videos have two options.
-#   swf - Creates swf file with mpeg-2 encoding.
+#   mpg - Creates mpg file with mpeg-2 encoding.
 #     If motion is shutdown and restarted, new pics will be appended
 #     to any previously created file with name indicated for timelapse.
 #   mpeg4 - Creates avi file with the default encoding.
@@ -460,12 +460,12 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
-# File extensions(.swf .avi) are automatically added so do not include them
+# File extensions(.mpg .avi) are automatically added so do not include them
 movie_filename %v-%Y%m%d%H%M%S
 
 # File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
-# File extensions(.swf .avi) are automatically added so do not include them
+# File extensions(.mpg .avi) are automatically added so do not include them
 timelapse_filename %Y%m%d-timelapse
 
 ############################################################
