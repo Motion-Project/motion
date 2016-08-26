@@ -77,44 +77,39 @@ under the <a href="http://www.gnu.org/licenses/gpl.html" rel="nofollow" target="
 <p></p>
 <h3><a name="Maintenance_and_Support"></a>  Maintenance and Support </h3>
 <p></p>
-Both Motion and the Motion Guide are written by people that do all this as a hobby and without asking for any payments or donations. We have a life other than developing Motion and its documentation. This means that bugfixes and updates to this guide are done as our time and families allow it. You are however encouraged to participate and contribute in a very active <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/MailingList">mailing list</a>. It is a list with a very "positive attitude" and with many contributors that propose features, post patches, discuss problems and patiently answer newbie questions with a very positive spirit. Expect 1-10 emails per day.
+Both Motion and the Motion Guide are written by people that do all this as a hobby and without asking for any payments or donations. We have a life other than developing Motion and its documentation. This means that bugfixes and updates to this guide are done as our time and families allow it. You are however encouraged to participate and contribute in a very active <a href="https://lists.sourceforge.net/lists/listinfo/motion-user">mailing list</a>. It is a list with a very "positive attitude" and with many contributors that propose features, post patches, discuss problems and patiently answer newbie questions with a very positive spirit. Expect 1-10 emails per day.
 <p></p>
-To get motion direct your browser to the <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome" class="foswikiCurrentWebHomeLink">Motion Homepage</a>.
+To get motion direct your browser to the <a href="https://motion-project.github.io/">Motion Homepage</a>.
 <p></p>
-On the <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/DownloadFiles">Download Files</a> page you will find  
+On the <a href="https://github.com/Motion-Project/motion/releases/">Releases</a> page you will find  
 links to the latest stable version both as sources and binaries for some of the most popular Linux distributions. 
-You will also find links to development versions. Snapshot releases are special test releases that are normally 
-stable. Every day a <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/MotionDailySourceSnap">Motion Daily Source Snap</a> is created from the <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/MotionSubversion">Motion Subversion</a>
-<p></p>
+p></p>
 Motion was originally written by Jeroen Vreeken and later Folkert van Heusden continued as a 
 lead programmer with Kenneth Lavrsen responsible for Motion Guide, website and releases on Sourceforge.
 <p></p>
-From version 3.1.12 Motion is now project managed entirely by Kenneth Lavrsen, and the project now shift 
-towards being developed by many contributers.
+From version 3.4.1 Motion is now managed on github via a many maintainers and contributors.
 <p></p>
-For support we encourage you to join the mailing list instead of writing to Jeroen, Folkert or Kenneth directly. 
-Newbies and stupid questions are welcome on the list. Contributions in the form of patches are also very welcome 
-on the mailing list.
+For support we encourage you to join the mailing list instead of writing to the maintainers directly.  
+Newbies and stupid questions are welcome on the list. Contributions in the form of pull requests to the github
+repository are also very welcome.
 <p></p>
 <h3><a name="Which_version_to_download_and_use"></a>  Which version to download and use? </h3>
 <p></p>
-Versions 3.2.12 is the current official version released in June 2010.  The trunk of the SVN represents the official 
-development branch of Motion.  Additional independent development forks exist on Github that contain additional bug 
-fixes, enhanced features and updated documentation.  
+Versions 3.4.1~rc01 is the current version released in August 2016.  The master branch of the github 
+repository represents the official development branch of Motion.  Additional independent development forks exist 
+in other Github repos that contain additional bug fixes, enhanced features and updated documentation.  
 This guide is based upon the features and options included in the source code with which it is distributed.  
 It was re-written in September 2015 to reflect the changes and options in the code at that time.
-The majority of the new options and changed names represent differences between the official 3.2.12 version
-and the SVN trunk and as a result this guide will generally apply to the code in the trunk as well.  There may 
-however be some options and features included in this guide that are not incorporated into the trunk source code.  
-Users are encouraged to evaluate the pros and cons for themselves of using any particular source.
+The majority of the new options and changed names represent differences between the 3.2.12 version
+and the legacy SVN trunk.  
 <p></p>
-Since 3.2.12 many options have been renamed in the development branches to make setting up Motion easier. 
+Since 3.2.12 many options have been renamed to make setting up Motion easier. 
 <p></p>
-Motion is included in Debian and Ubuntu while RPM users can find the binary package for 3.2.12 on the Motion Sourceforge file download page.
+Motion is included in Debian and Ubuntu while RPM users currently must build from source.  
 <p></p>
 <h3><a name="What_features_does_Motion_have"></a>  What features does Motion have? </h3>
 <p></p>
-See more description at the <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome" class="foswikiCurrentWebHomeLink">Motion Homepage</a>. 
+See more description at the <a href="https://motion-project.github.io/">Motion Homepage</a>. 
 <ul>
   <li> Taking snapshots of movement</li>
   <li> Watch multiple video devices at the same time</li>
@@ -148,8 +143,8 @@ You have the following sources of information:
 <p></p>
 <ul>
   <li> This Motion Guide</li> 
-  <li> The <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/FrequentlyAskedQuestions">Frequently Asked Questions</a></li>
-  <li> The author of the program has written a description of the <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTechnology">technology behind motion</a>.</li>
+  <li> The <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a></li>
+  <li> The author of the program has written a description of the <a href="https://github.com/Motion-Project/motion/wiki/Technology">technology behind motion</a>.</li>
   <li> The man page. After installation simply type 'man motion' into a terminal screen.</li>
   <li> The default motion.conf file (motion-dist.conf) that comes with the package.</li>
 </ul> 
@@ -170,11 +165,7 @@ often convenient to first get the device working with other software and then us
 <ul>
 
 <p></p>
-See also the <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/FrequentlyAskedQuestions">Frequently Asked Questions</a> and <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/BugReports">Bug Reports</a> for known open bugs.
-<p></p>
-<strong>Kernel 2.6 and pwc.</strong> Note that for kernel 2.6 there is a new release of the Philips WebCam (pwc) drivers 10.0.X. It is recommended to install this. At the time of this being written the 2.6.12+ kernels have a version of pwc built-in but it is a crippled version which can only support very small picture size. You can however download the latest source code of the pwc driver (at this time 10.0.11) and build it without having to rebuild your kernel. But you will need to have either the kernel sources or a special kernel-header package installed to compile it. See <a href="http://www.lavrsen.dk/twiki/bin/viewPWC/InstallationOfPWC">Installation of PWC</a> page which is also hosted in this wiki.
-<p></p>
-If you use use a <strong>Logitech Quickcam Orbit or Sphere</strong> using the driver pwc/pwcx and kernel 2.6.X you should replace the file in the Motion sources called pwc-ioctl.h with the one that comes with the your pwc version. Motion is shipped with 3 versions of pwc-ioctl.h-VERSION. Rename the one that fits your major pwc version number best to pwc-ioctl.h (after renaming the current to something else). There has been some small adjustments in the API that requires that you have the right header file.
+See also the <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a> and <a href="https://github.com/Motion-Project/motion/issues">Issues</a> for known open issues.
 <p></p>
 <p></p>
 
@@ -215,13 +206,8 @@ Then start motion in the terminal simply by typing:
 <ul>
 
 <p></p>
-While Motion is included in the apt packages for Ubuntu and Debian, it can also be built from the source code.  
+While Motion is included in the apt packages for Ubuntu and Debian, it can also be built from the See also the <a href="https://github.com/Motion-Project/motion">source code</a> 
 Source code is located in multiple locations depending upon the needs of the user
-<ul>
-  <li>SourceForge (official release)</li>
-  <li>SVN(official release and maintainer development trunk) </li>
-  <li>Github(Latest fixes, enhancements and documents from community) </li>
-</ul>
 
 <p></p>
 <h3><a name="Preparation_For_Building"></a>  <a Preparation For Building</a> </h3>
@@ -2048,10 +2034,8 @@ When the netcam_url is defined the video4linux options are ignored.
 </ul> 
 <p></p>
 The Username and password for the network camera.  For http protocols, this 
-option is for HTTP 1.1 Basic authentication. The string is specified as username:password. 
-Do not specify this option for no authentication.  To use no authentication simply 
-remove this option.  Note that only basic authentication is 
-supported for connection to netwwork cameras.  Digest authentication is not currently available
+option is for HTTP 1.1 Basic authentication only. The string is specified as username:password. 
+To use no authentication simply remove this option.  Digest authentication is only available for rtsp cameras.
 
 <p></p>
 
@@ -2614,14 +2598,14 @@ Below are an example of a webcam picture and a mask file to prevent the detectio
 <p></p>
 Normal picture. Notice the street is visible through the hedge.
 <p></p>
-<img alt="normal.jpg" src="http://www.lavrsen.dk/twiki/pub/Motion/ConfigOptionMaskFile/normal.jpg" />
+<img alt="normal.jpg" src="normal.jpg" />
 <p></p>
 Mask file (converted to png format so it can be shown by your web browser)
 <p></p>
 <table style="border-width:1px;" cellspacing="0" cellpadding="0" border="1">
  <tr >
    <td bgcolor="#ffffff" valign="top" style="vertical-align:top;" >
-     <img alt="mask1.png" src="http://www.lavrsen.dk/twiki/pub/Motion/ConfigOptionMaskFile/mask1.png" />      
+     <img alt="mask1.png" src="mask1.png" />      
    </td>
  </tr>
 </table>
@@ -3046,7 +3030,7 @@ NOT recommended.  It is recommended that this directory be specified as deep as 
 <p></p>
 Motion can output different types of pictures.  The normal picture is indicated below.
 <p></p>
-<img alt="outputnormal1.jpg" src="http://www.lavrsen.dk/twiki/pub/Motion/TuningMotion/outputnormal1.jpg" />
+<img alt="outputnormal1.jpg" src="outputnormal1.jpg" />
 <p></p>
 The motion type picture or also referred to as a debug picture is shown 
 below.  Note that the largest area is blue and only this is counted as Motion.
@@ -3055,7 +3039,7 @@ The Motion image shows how Motion maintains a "reference frame" which is not jus
 but a mathematical calculation of the past images. This enlarges real Motion and ensures that it is not easy to 
 sneak in slowly.
 <p></p>
-<img alt="outputmotion1.jpg" src="http://www.lavrsen.dk/twiki/pub/Motion/TuningMotion/outputmotion1.jpg" />
+<img alt="outputmotion1.jpg" src="outputmotion1.jpg" />
 <p></p>
 <p></p>
 
@@ -3395,8 +3379,7 @@ You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this o
 
 <p></p>
 The video4linux driver is written by the same author that first created Motion. You can 
-find the source and a brief description at the 
-<a href="http://www.lavrsen.dk/twiki/bin/view/Motion/VideoFourLinuxLoopbackDevice" class="twikiLink">video4linux loopback device web page</a>. 
+find the source within apt packages.  
 <p></p>
 The video4linux device is a Kernel module which installs itself as a video pipe. 
 It has an input and an output. The module simply takes anything that comes on its input 
@@ -3444,9 +3427,7 @@ that were already there.
 <p></p>
 Now you need to install the video loopback device.
 <p></p>
-Download the latest 
-<a href="http://www.lavrsen.dk/twiki/bin/view/Motion/VideoFourLinuxLoopbackDevice" target="_top">video4linux loopback device</a> . 
-Place the file in a place of your own choice. 
+Download the latest via the apt packages and place the file in a place of your own choice. 
 <p></p>
 Untar and uncompress the file to the place you want the program installed. Editor recommends /usr/local/vloopback.
 <p></p>
@@ -3538,7 +3519,6 @@ a free pipe.
 <li> Type: String
 </li> <li> Range / Valid values: Max 4095 characters
 </li> <li> Default: Not defined
-</li> <li> <a href="http://www.lavrsen.dk/twiki/bin/view/Motion/ConfigOptionMotionVideoPipe" class="twikiLink">Option Topic</a>
 </li></ul> 
 <p></p>
 The video4linux video loopback input device for motion images. 
