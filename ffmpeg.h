@@ -46,6 +46,7 @@ struct ffmpeg {
     int vbr;                /* variable bitrate setting */
     char codec[20];         /* codec name */
     int tlapse;
+    struct timeval start_time;
 #else
     int dummy;
 #endif

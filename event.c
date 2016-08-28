@@ -584,8 +584,7 @@ static void event_new_video(struct context *cnt,
 
     cnt->movie_fps = cnt->lastrate;
 
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s FPS %d",
-               cnt->movie_fps);
+    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s Source FPS %d", cnt->movie_fps);
 
     if (cnt->movie_fps < 2) cnt->movie_fps = 2;
 }
@@ -785,11 +784,12 @@ static void event_ffmpeg_put(struct context *cnt,
         unsigned char *u, *v;
 
         if (cnt->imgs.type == VIDEO_PALETTE_GREY)
-            u = cnt->ffmpeg_timelapse->udata;
+            u = cnt->ffmpeg_output->udata;
         else
             u = y + (width * height);
 
         v = u + (width * height) / 4;
+
         if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v) == -1) {
             cnt->finish = 1;
             cnt->restart = 0;

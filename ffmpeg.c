@@ -290,7 +290,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
      */
     ffmpeg = mymalloc(sizeof(struct ffmpeg));
 
-    ffmpeg->tlapse = tlapse;
+    ffmpeg->tlapse  = tlapse;
 
     /* Store codec name in ffmpeg->codec, with buffer overflow check. */
     snprintf(ffmpeg->codec, sizeof(ffmpeg->codec), "%s", ffmpeg_video_codec);
@@ -358,6 +358,8 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         if (c->codec_id == MY_CODEC_ID_H264 ||
             c->codec_id == MY_CODEC_ID_HEVC){
             ffmpeg->vbr = (int)(( (100-vbr) * 51)/100);
+        } else if (strcmp(ffmpeg_video_codec, "ogg") == 0){
+            ffmpeg->vbr = (int)(( (100-vbr) * 10)/100);
         } else {
             ffmpeg->vbr =(int)(((100-vbr)*(100-vbr)*(100-vbr) * 8000) / 1000000) + 1;
         }
@@ -380,11 +382,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     }
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
-    if (!strcmp(ffmpeg->oc->oformat->name, "mp4") ||
-        !strcmp(ffmpeg->oc->oformat->name, "mov") ||
-        !strcmp(ffmpeg->oc->oformat->name, "3gp")) {
-        c->flags |= CODEC_FLAG_GLOBAL_HEADER;
-    }
+    c->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
     pthread_mutex_lock(&global_lock);
         retcd = avcodec_open2(c, codec, &opts);
@@ -415,7 +413,16 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
 
     }
     av_dict_free(&opts);
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
+
+    if ((strcmp(ffmpeg_video_codec, "ffv1") == 0)  ||
+        (strcmp(ffmpeg_video_codec, "ogg") == 0) ){
+        ffmpeg->video_st->time_base.num = 1;
+        ffmpeg->video_st->time_base.den = 1000;
+    } else {
+        ffmpeg->video_st->time_base.num = 1;
+        ffmpeg->video_st->time_base.den = rate;
+    }
 
     ffmpeg->video_outbuf = NULL;
     if (!(ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE)) {
@@ -438,7 +445,6 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     ffmpeg->picture->linesize[0] = ffmpeg->c->width;
     ffmpeg->picture->linesize[1] = ffmpeg->c->width / 2;
     ffmpeg->picture->linesize[2] = ffmpeg->c->width / 2;
-
 
     /* Open the output file, if needed. */
     if ((timelapse_exists(filename) == 0) || (ffmpeg->tlapse != TIMELAPSE_APPEND)) {
@@ -466,6 +472,8 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
                 }
             }
         }
+        gettimeofday(&ffmpeg->start_time, NULL);
+
         /* Write the stream header,  For the TIMELAPSE_APPEND
          * we write the data via standard file I/O so we close the
          * items here
@@ -481,6 +489,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
             av_write_trailer(ffmpeg->oc);
             avio_close(ffmpeg->oc->pb);
         }
+
     }
     return ffmpeg;
 }
@@ -630,6 +639,9 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     int got_packet_ptr;
     AVPacket pkt;
     char errstr[128];
+    struct timeval tv1;
+
+    gettimeofday(&tv1, NULL);
 
     av_init_packet(&pkt); /* Init static structure. */
     if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
@@ -653,14 +665,12 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
             my_packet_unref(pkt);
             return -2;
         }
-        if (pkt.pts != AV_NOPTS_VALUE)
-            pkt.pts = av_rescale_q(pkt.pts,
-                ffmpeg->video_st->codec->time_base,
-                ffmpeg->video_st->time_base);
-        if (pkt.dts != AV_NOPTS_VALUE)
-            pkt.dts = av_rescale_q(pkt.dts,
-                ffmpeg->video_st->codec->time_base,
-                ffmpeg->video_st->time_base);
+        pkt.pts = ((1000000L * (tv1.tv_sec - ffmpeg->start_time.tv_sec)) + tv1.tv_usec - ffmpeg->start_time.tv_usec)/10;
+        pkt.pts = av_rescale_q(pkt.pts,(AVRational){1, 100000},ffmpeg->video_st->time_base);
+        if (pkt.pts < 1) pkt.pts = 1;
+        if (pkt.pts < pkt.dts) pkt.pts=pkt.dts;
+
+ //       MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d ",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den);
     }
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
         retcd = timelapse_append(ffmpeg, pkt);
