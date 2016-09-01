@@ -320,9 +320,8 @@ ffmpeg_variable_bitrate 0
 # it requires no installation of codec on the Windows client.
 # swf - gives you a flash film with extension .swf
 # flv - gives you a flash video with extension .flv
-# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )
-# mov - QuickTime ( testing )
-# ogg - Ogg/Theora ( testing )
+# ffv1 - FF video codec 1 for Lossless Encoding
+# mov - QuickTime
 # mp4 - MPEG-4 Part 14 H264 encoding
 # mkv - Matroska H264 encoding
 # hevc - H.265 / HEVC (High Efficiency Video Coding)

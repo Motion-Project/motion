@@ -232,9 +232,6 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
     } else if (strcmp(codec, "mov") == 0) {
         ext = ".mov";
         of = av_guess_format("mov", NULL, NULL);
-	} else if (strcmp (codec, "ogg") == 0){
-      ext = ".ogg";
-      of = av_guess_format ("ogg", NULL, NULL);
 	} else if (strcmp (codec, "mp4") == 0){
       ext = ".mp4";
       of = av_guess_format ("mp4", NULL, NULL);
@@ -340,6 +337,15 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         return NULL;
     }
 
+    /* Only the newer codec and containers can handle the really fast FPS */
+    if (((strcmp(ffmpeg_video_codec, "msmpeg4") == 0) ||
+        (strcmp(ffmpeg_video_codec, "mpeg4") == 0) ||
+        (strcmp(ffmpeg_video_codec, "swf") == 0) ) && (rate >100)){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s The frame rate specified is too high for the ffmpeg movie type specified. Choose a different ffmpeg container or lower framerate. ");
+        ffmpeg_cleanups(ffmpeg);
+        return NULL;
+    }
+
     ffmpeg->c     = c = AVSTREAM_CODEC_PTR(ffmpeg->video_st);
     c->codec_id   = ffmpeg->oc->oformat->video_codec;
     c->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -358,8 +364,6 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         if (c->codec_id == MY_CODEC_ID_H264 ||
             c->codec_id == MY_CODEC_ID_HEVC){
             ffmpeg->vbr = (int)(( (100-vbr) * 51)/100);
-        } else if (strcmp(ffmpeg_video_codec, "ogg") == 0){
-            ffmpeg->vbr = (int)(( (100-vbr) * 10)/100);
         } else {
             ffmpeg->vbr =(int)(((100-vbr)*(100-vbr)*(100-vbr) * 8000) / 1000000) + 1;
         }
@@ -415,13 +419,14 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     av_dict_free(&opts);
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
 
-    if ((strcmp(ffmpeg_video_codec, "ffv1") == 0)  ||
-        (strcmp(ffmpeg_video_codec, "ogg") == 0) ){
-        ffmpeg->video_st->time_base.num = 1;
-        ffmpeg->video_st->time_base.den = 1000;
-    } else {
+    ffmpeg->video_st->time_base.num = 1;
+    ffmpeg->video_st->time_base.den = 1000;
+    if (strcmp(ffmpeg_video_codec, "swf") == 0) {
         ffmpeg->video_st->time_base.num = 1;
         ffmpeg->video_st->time_base.den = rate;
+        if (rate > 50){
+            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s The FPS could be too high for the SWF container.  Consider other choices.");
+        }
     }
 
     ffmpeg->video_outbuf = NULL;
@@ -640,6 +645,7 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     AVPacket pkt;
     char errstr[128];
     struct timeval tv1;
+    int64_t pts_interval;
 
     gettimeofday(&tv1, NULL);
 
@@ -665,12 +671,12 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
             my_packet_unref(pkt);
             return -2;
         }
-        pkt.pts = ((1000000L * (tv1.tv_sec - ffmpeg->start_time.tv_sec)) + tv1.tv_usec - ffmpeg->start_time.tv_usec)/10;
-        pkt.pts = av_rescale_q(pkt.pts,(AVRational){1, 100000},ffmpeg->video_st->time_base);
+        pts_interval = ((1000000L * (tv1.tv_sec - ffmpeg->start_time.tv_sec)) + tv1.tv_usec - ffmpeg->start_time.tv_usec) + 10000;
+        pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base);
         if (pkt.pts < 1) pkt.pts = 1;
-        if (pkt.pts < pkt.dts) pkt.pts=pkt.dts;
+        pkt.dts = pkt.pts;
 
- //       MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d ",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den);
+//        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d interval %d",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den,pts_interval);
     }
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
         retcd = timelapse_append(ffmpeg, pkt);

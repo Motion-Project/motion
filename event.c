@@ -608,6 +608,8 @@ static void event_ffmpeg_newfile(struct context *cnt,
     unsigned char *convbuf, *y, *u, *v;
     char stamp[PATH_MAX];
     const char *moviepath;
+    char codec[8];
+    long codenbr;
 
     if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug)
         return;
@@ -627,9 +629,54 @@ static void event_ffmpeg_newfile(struct context *cnt,
      *  motion movies get the same name as normal movies plus an appended 'm'
      *  PATH_MAX - 4 to allow for .mpg to be appended without overflow
      */
-    snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
-    snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
-
+     /* Set up a testing / evaluation codec which will use a different
+      * codec for the events.
+     */
+    snprintf(codec, sizeof(codec), "%s", cnt->conf.ffmpeg_video_codec);
+    if (strcmp(codec, "test") == 0) {
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Running test of the various output formats.");
+        codenbr = cnt->event_nr;
+        while (codenbr > 10){
+          codenbr -= 10;
+        }
+        switch (codenbr) {
+        case 1:
+            snprintf(codec, sizeof(codec), "%s", "mpeg4");
+            break;
+        case 2:
+            snprintf(codec, sizeof(codec), "%s", "msmpeg4");
+            break;
+        case 3:
+            snprintf(codec, sizeof(codec), "%s", "swf");
+            break;
+        case 4:
+            snprintf(codec, sizeof(codec), "%s", "flv");
+            break;
+        case 5:
+            snprintf(codec, sizeof(codec), "%s", "ffv1");
+            break;
+        case 6:
+            snprintf(codec, sizeof(codec), "%s", "mov");
+            break;
+        case 7:
+            snprintf(codec, sizeof(codec), "%s", "mp4");
+            break;
+        case 8:
+            snprintf(codec, sizeof(codec), "%s", "mkv");
+            break;
+        case 9:
+            snprintf(codec, sizeof(codec), "%s", "hevc");
+            break;
+        default:
+            snprintf(codec, sizeof(codec), "%s", "msmpeg4");
+            break;
+        }
+        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%s_%sm", cnt->conf.filepath, codec, stamp);
+        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s_%s", cnt->conf.filepath, codec, stamp);
+    } else {
+        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
+        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
+    }
     if (cnt->conf.ffmpeg_output) {
         if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
             convbuf = mymalloc((width * height) / 2);
@@ -645,7 +692,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
 
         if ((cnt->ffmpeg_output =
-            ffmpeg_open(cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
+            ffmpeg_open(codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]",
@@ -673,7 +720,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
 
         if ((cnt->ffmpeg_output_debug =
-            ffmpeg_open(cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
+            ffmpeg_open(codec, cnt->motionfilename, y, u, v,
                         cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]",
