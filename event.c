@@ -640,6 +640,10 @@ static void event_ffmpeg_newfile(struct context *cnt,
       * different types of movies checking for crashes, warnings, etc.
      */
     codec = cnt->conf.ffmpeg_video_codec;
+    if (strcmp(codec, "ogg") == 0) {
+        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "%s The ogg container is no longer supported.  Changing to mpeg4");
+        codec = "mpeg4";
+    }
     if (strcmp(codec, "test") == 0) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Running test of the various output formats.");
         codenbr = cnt->event_nr % 10;
@@ -780,7 +784,14 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             v = u + (width * height) / 4;
         }
 
-        if (strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) {
+
+        if ((strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) ||
+            (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) ){
+
+            if (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) {
+                MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO, "%s: The swf container for timelapse no longer supported.  Using mpg container.");
+            }
+
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpg codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
             cnt->ffmpeg_timelapse =
