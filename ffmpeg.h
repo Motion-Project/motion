@@ -10,6 +10,7 @@
 
 #include <errno.h>
 #include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/mathematics.h>
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 56)
@@ -45,6 +46,7 @@ struct ffmpeg {
     int vbr;                /* variable bitrate setting */
     char codec[20];         /* codec name */
     int tlapse;
+    struct timeval start_time;
 #else
     int dummy;
 #endif
@@ -85,12 +87,19 @@ void ffmpeg_close(struct ffmpeg *);
 void ffmpeg_avcodec_log(void *, int, const char *, va_list);
 
 #ifdef HAVE_FFMPEG
+int timelapse_exists(const char *fname);
+int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt);
 AVFrame *my_frame_alloc(void);
 void my_frame_free(AVFrame *frame);
 int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
 void ffmpeg_cleanups(struct ffmpeg *);
 AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
                               unsigned char *, unsigned char *);
+int my_image_get_buffer_size(enum AVPixelFormat pix_fmt, int width, int height);
+int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height,int dest_size);
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height);
+void my_packet_unref(AVPacket pkt);
+
 #endif
 
 #endif /* _INCLUDE_FFMPEG_H_ */

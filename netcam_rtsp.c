@@ -133,10 +133,10 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
 static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *frame, AVCodecContext *cc){
     int check = 0;
     int frame_size = 0;
-    int ret = 0;
+    int retcd = 0;
 
-    ret = avcodec_decode_video2(cc, frame, &check, packet);
-    if (ret < 0) {
+    retcd = avcodec_decode_video2(cc, frame, &check, packet);
+    if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding video packet");
         return 0;
     }
@@ -145,12 +145,15 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
         return 0;
     }
 
-    frame_size = avpicture_get_size(cc->pix_fmt, cc->width, cc->height);
+    frame_size = my_image_get_buffer_size(cc->pix_fmt, cc->width, cc->height);
 
     netcam_buffsize_rtsp(buffer, frame_size);
 
-    avpicture_layout((const AVPicture*)frame,cc->pix_fmt,cc->width,cc->height
-                    ,(unsigned char *)buffer->ptr,frame_size );
+    retcd = my_image_copy_to_buffer(frame, (uint8_t *)buffer->ptr,cc->pix_fmt,cc->width,cc->height, frame_size);
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding video packet: Copying to buffer");
+        return 0;
+    }
 
     buffer->used = frame_size;
 
@@ -313,7 +316,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     netcam->rtsp->readingframe = 1;
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
         if(packet.stream_index != netcam->rtsp->video_stream_index) {
-            av_free_packet(&packet);
+            my_packet_unref(packet);
             av_init_packet(&packet);
             packet.data = NULL;
             packet.size = 0;
@@ -322,7 +325,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         }
         size_decoded = decode_packet(&packet, buffer, netcam->rtsp->frame, netcam->rtsp->codec_context);
 
-        av_free_packet(&packet);
+        my_packet_unref(packet);
         av_init_packet(&packet);
         packet.data = NULL;
         packet.size = 0;
@@ -330,7 +333,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     netcam->rtsp->readingframe = 0;
 
     // at this point, we are finished with the packet
-    av_free_packet(&packet);
+    my_packet_unref(packet);
 
     if (size_decoded == 0) {
         // something went wrong, end of stream? Interupted?
@@ -374,14 +377,14 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
 */
 int netcam_rtsp_resize_ntc(netcam_context_ptr netcam){
 
-    if ((netcam->width  != netcam->rtsp->codec_context->width) ||
-        (netcam->height != netcam->rtsp->codec_context->height) ||
+    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
         (netcam_check_pixfmt(netcam) != 0) ){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: ");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: ****************************************************************");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: The network camera is sending pictures in a different");
-        if ((netcam->width  != netcam->rtsp->codec_context->width) ||
-            (netcam->height != netcam->rtsp->codec_context->height)) {
+        if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+            (netcam->height != (unsigned)netcam->rtsp->codec_context->height)) {
             if (netcam_check_pixfmt(netcam) != 0) {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: size than specified in the config and also a ");
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: different picture format.  The picture is being");
@@ -575,17 +578,17 @@ int netcam_rtsp_open_sws(netcam_context_ptr netcam){
         return -1;
     }
 
-    netcam->rtsp->swsframe_size = avpicture_get_size(
+    netcam->rtsp->swsframe_size = my_image_get_buffer_size(
             MY_PIX_FMT_YUV420P
             ,netcam->width
             ,netcam->height);
-        if (netcam->rtsp->swsframe_size <= 0) {
-            if (netcam->rtsp->status == RTSP_NOTCONNECTED){
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error determining size of frame out");
-            }
-            netcam_rtsp_close_context(netcam);
-            return -1;
+    if (netcam->rtsp->swsframe_size <= 0) {
+        if (netcam->rtsp->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error determining size of frame out");
         }
+        netcam_rtsp_close_context(netcam);
+        return -1;
+    }
 
     return 0;
 
@@ -611,8 +614,8 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
     char     errstr[128];
     uint8_t *buffer_out;
 
-    retcd = avpicture_fill(
-        (AVPicture*)netcam->rtsp->swsframe_in
+    retcd=my_image_fill_arrays(
+        netcam->rtsp->swsframe_in
         ,(uint8_t*)netcam->latest->ptr
         ,netcam->rtsp->codec_context->pix_fmt
         ,netcam->rtsp->codec_context->width
@@ -629,8 +632,8 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     buffer_out=(uint8_t *)av_malloc(netcam->rtsp->swsframe_size*sizeof(uint8_t));
 
-    retcd = avpicture_fill(
-        (AVPicture*)netcam->rtsp->swsframe_out
+    retcd=my_image_fill_arrays(
+        netcam->rtsp->swsframe_out
         ,buffer_out
         ,MY_PIX_FMT_YUV420P
         ,netcam->width
@@ -661,13 +664,13 @@ int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
         return -1;
     }
 
-    retcd = avpicture_layout(
-        (const AVPicture*)netcam->rtsp->swsframe_out
+    retcd=my_image_copy_to_buffer(
+         netcam->rtsp->swsframe_out
+        ,(uint8_t *)image
         ,MY_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height
-        ,(unsigned char *)image
-        ,netcam->rtsp->swsframe_size );
+        ,netcam->rtsp->swsframe_size);
     if (retcd < 0) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -747,7 +750,9 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
-
+    
+    avformat_network_deinit();
+    
     free(netcam->rtsp->path);
     free(netcam->rtsp->user);
     free(netcam->rtsp->pass);
@@ -756,7 +761,9 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
     netcam->rtsp = NULL;
 
 #else  /* No FFmpeg/Libav */
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
+    /* Stop compiler warnings */
+    netcam->rtsp->status = RTSP_NOTCONNECTED;
+    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
 #endif /* End #ifdef HAVE_FFMPEG */
 }
 
@@ -873,8 +880,9 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     pthread_mutex_lock(&global_lock);
         av_register_all();
         avcodec_register_all();
+        avformat_network_init();
     pthread_mutex_unlock(&global_lock);
-    
+
     /*
      * The RTSP context should be all ready to attempt a connection with
      * the server, so we try ....
@@ -889,6 +897,8 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
   return 0;
 
 #else  /* No FFmpeg/Libav */
+    /* Stop compiler warnings */
+    if (url->port == url->port) netcam->rtsp->status = RTSP_NOTCONNECTED;
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
@@ -914,8 +924,8 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
-    if ((netcam->width  != netcam->rtsp->codec_context->width) ||
-        (netcam->height != netcam->rtsp->codec_context->height) ||
+    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
         (netcam_check_pixfmt(netcam) != 0) ){
         netcam_rtsp_resize(image ,netcam);
     } else {
@@ -927,6 +937,8 @@ int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
 
     return 0;
 #else  /* No FFmpeg/Libav */
+    /* Stop compiler warnings */
+    if (image == image) netcam->rtsp->status = RTSP_NOTCONNECTED;
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */

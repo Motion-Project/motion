@@ -584,13 +584,9 @@ static void event_new_video(struct context *cnt,
 
     cnt->movie_fps = cnt->lastrate;
 
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s FPS %d",
-               cnt->movie_fps);
+    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s Source FPS %d", cnt->movie_fps);
 
-    if (cnt->movie_fps > 30)
-        cnt->movie_fps = 30;
-    else if (cnt->movie_fps < 2)
-        cnt->movie_fps = 2;
+    if (cnt->movie_fps < 2) cnt->movie_fps = 2;
 }
 
 #ifdef HAVE_FFMPEG
@@ -612,6 +608,8 @@ static void event_ffmpeg_newfile(struct context *cnt,
     unsigned char *convbuf, *y, *u, *v;
     char stamp[PATH_MAX];
     const char *moviepath;
+    const char *codec;
+    long codenbr;
 
     if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug)
         return;
@@ -631,9 +629,62 @@ static void event_ffmpeg_newfile(struct context *cnt,
      *  motion movies get the same name as normal movies plus an appended 'm'
      *  PATH_MAX - 4 to allow for .mpg to be appended without overflow
      */
-    snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
-    snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
+     /* The following section allows for testing of all the various containers
+      * that Motion permits. The container type is pre-pended to the name of the
+      * file so that we can determine which container type created what movie.
+      * The intent for this is be used for developer testing when the ffmpeg libs
+      * change or the code inside our ffmpeg module changes.  For each event, the
+      * container type will change.  This way, you can turn on emulate motion, then
+      * specify a maximum movie time and let Motion run for days creating all the
+      * different types of movies checking for crashes, warnings, etc.
+     */
+    codec = cnt->conf.ffmpeg_video_codec;
+    if (strcmp(codec, "ogg") == 0) {
+        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "%s The ogg container is no longer supported.  Changing to mpeg4");
+        codec = "mpeg4";
+    }
+    if (strcmp(codec, "test") == 0) {
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Running test of the various output formats.");
+        codenbr = cnt->event_nr % 10;
+        switch (codenbr) {
+        case 1:
+            codec = "mpeg4";
+            break;
+        case 2:
+            codec = "msmpeg4";
+            break;
+        case 3:
+            codec = "swf";
+            break;
+        case 4:
+            codec = "flv";
+            break;
+        case 5:
+            codec = "ffv1";
+            break;
+        case 6:
+            codec = "mov";
+            break;
+        case 7:
+            codec = "mp4";
+            break;
+        case 8:
+            codec = "mkv";
+            break;
+        case 9:
+            codec = "hevc";
+            break;
+        default:
+            codec = "msmpeg4";
+            break;
+        }
+        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%s_%sm", cnt->conf.filepath, codec, stamp);
+        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s_%s", cnt->conf.filepath, codec, stamp);
+    } else {
+        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
+        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
+    }
     if (cnt->conf.ffmpeg_output) {
         if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
             convbuf = mymalloc((width * height) / 2);
@@ -649,7 +700,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
 
         if ((cnt->ffmpeg_output =
-            ffmpeg_open(cnt->conf.ffmpeg_video_codec, cnt->newfilename, y, u, v,
+            ffmpeg_open(codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                          cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]",
@@ -677,7 +728,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
 
         if ((cnt->ffmpeg_output_debug =
-            ffmpeg_open(cnt->conf.ffmpeg_video_codec, cnt->motionfilename, y, u, v,
+            ffmpeg_open(codec, cnt->motionfilename, y, u, v,
                         cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]",
@@ -703,7 +754,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     if (!cnt->ffmpeg_timelapse) {
         char tmp[PATH_MAX];
         const char *timepath;
-        const char *codec_swf = "swf";
+        const char *codec_mpg = "mpg";
         const char *codec_mpeg = "mpeg4";
 
         /*
@@ -733,11 +784,18 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             v = u + (width * height) / 4;
         }
 
-        if (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) {
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using swf codec.");
+
+        if ((strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) ||
+            (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) ){
+
+            if (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) {
+                MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO, "%s: The swf container for timelapse no longer supported.  Using mpg container.");
+            }
+
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpg codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
             cnt->ffmpeg_timelapse =
-                ffmpeg_open(codec_swf,cnt->timelapsefilename, y, u, v
+                ffmpeg_open(codec_mpg,cnt->timelapsefilename, y, u, v
                         ,cnt->imgs.width, cnt->imgs.height, 24
                         ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND);
         } else {
@@ -788,11 +846,12 @@ static void event_ffmpeg_put(struct context *cnt,
         unsigned char *u, *v;
 
         if (cnt->imgs.type == VIDEO_PALETTE_GREY)
-            u = cnt->ffmpeg_timelapse->udata;
+            u = cnt->ffmpeg_output->udata;
         else
             u = y + (width * height);
 
         v = u + (width * height) / 4;
+
         if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v) == -1) {
             cnt->finish = 1;
             cnt->restart = 0;

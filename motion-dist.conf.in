@@ -303,12 +303,12 @@ ffmpeg_bps 400000
 # Enables and defines variable bitrate for the ffmpeg encoder.
 # ffmpeg_bps is ignored if variable bitrate is enabled.
 # Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps,
-# or the range 2 - 31 where 2 means best quality and 31 is worst.
+# or the range 1 - 100 where 1 means worst quality and 100 is best.
 ffmpeg_variable_bitrate 0
 
 # Codec to used by ffmpeg for the video compression.
 # Timelapse videos have two options.
-#   swf - Creates swf file with mpeg-2 encoding.
+#   mpg - Creates mpg file with mpeg-2 encoding.
 #     If motion is shutdown and restarted, new pics will be appended
 #     to any previously created file with name indicated for timelapse.
 #   mpeg4 - Creates avi file with the default encoding.
@@ -320,9 +320,8 @@ ffmpeg_variable_bitrate 0
 # it requires no installation of codec on the Windows client.
 # swf - gives you a flash film with extension .swf
 # flv - gives you a flash video with extension .flv
-# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )
-# mov - QuickTime ( testing )
-# ogg - Ogg/Theora ( testing )
+# ffv1 - FF video codec 1 for Lossless Encoding
+# mov - QuickTime
 # mp4 - MPEG-4 Part 14 H264 encoding
 # mkv - Matroska H264 encoding
 # hevc - H.265 / HEVC (High Efficiency Video Coding)
@@ -460,12 +459,12 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
-# File extensions(.swf .avi) are automatically added so do not include them
+# File extensions(.mpg .avi) are automatically added so do not include them
 movie_filename %v-%Y%m%d%H%M%S
 
 # File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
-# File extensions(.swf .avi) are automatically added so do not include them
+# File extensions(.mpg .avi) are automatically added so do not include them
 timelapse_filename %Y%m%d-timelapse
 
 ############################################################
