@@ -905,7 +905,7 @@ static int motion_init(struct context *cnt)
 
     /* Load the mask file if any */
     if (cnt->conf.mask_file) {
-        if ((picture = myfopen(cnt->conf.mask_file, "r", 0))) {
+        if ((picture = myfopen(cnt->conf.mask_file, "r"))) {
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
@@ -2286,7 +2286,7 @@ static void become_daemon(void)
      * for an enter.
      */
     if (cnt_list[0]->conf.pid_file) {
-        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+", 0);
+        pidf = myfopen(cnt_list[0]->conf.pid_file, "w+");
 
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
@@ -3029,13 +3029,6 @@ int create_path(const char *path)
     return 0;
 }
 
-#define MYBUFCOUNT 32
-struct MyBuffer {
-    FILE* fh;
-    char* buffer;
-    size_t bufsize;
-} buffers[MYBUFCOUNT];
-
 /**
  * myfopen
  *
@@ -3043,25 +3036,17 @@ struct MyBuffer {
  *   (which is: path does not exist), the path is created and then things are
  *   tried again. This is faster then trying to create that path over and over
  *   again. If someone removes the path after it was created, myfopen will
- *   recreate the path automatically. If the bufsize is set to > 0, we will
- *   allocate (or re-use) write buffers to use instead of the default ones.
- *   This gives us much higher throughput in many cases.
+ *   recreate the path automatically. 
  *
  * Parameters:
  *
  *   path - path to the file to open
  *   mode - open mode
- *   bufsize - size of write buffers, 0 == OS default
  *
  * Returns: the file stream object
  */
-FILE * myfopen(const char *path, const char *mode, size_t bufsize)
+FILE * myfopen(const char *path, const char *mode)
 {
-    static int bufferInit = 0;
-    if (!bufferInit) {
-        bufferInit = 1;
-        memset(buffers, 0x00, sizeof(buffers));
-    }
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
 
@@ -3077,59 +3062,6 @@ FILE * myfopen(const char *path, const char *mode, size_t bufsize)
             /* and retry opening the file */
             dummy = fopen(path, mode);
         }
-    }
-
-    if (dummy) {
-        if (bufsize > 0) {
-            int i = 0;
-            for (i = 0; i < MYBUFCOUNT; i++) {
-                int first = -1;
-                if (!buffers[i].fh) {
-                    if (first == -1)
-                        first = i;
-                    if (buffers[i].buffer == NULL ||
-                        buffers[i].bufsize >= bufsize ||
-                        (i == (MYBUFCOUNT - 1) && first >= 0)) {
-                        if (buffers[i].buffer == NULL) {
-                            /* We are allocating a new buffer */
-                            buffers[i].fh = dummy;
-                            buffers[i].buffer = mymalloc(bufsize);
-                            buffers[i].bufsize = bufsize;
-                        }
-                        else if (buffers[i].bufsize >= bufsize) {
-                            /* We are using an old buffer */
-                            buffers[i].fh = dummy;
-                        }
-                        else {
-                            /*
-                             * We are reusing an old buffer, but it is too
-                             * small, realloc it
-                             */
-                            i = first;
-                            buffers[i].fh = dummy;
-                            buffers[i].buffer = myrealloc(buffers[i].buffer,
-                                                          bufsize, "myfopen");
-                            buffers[i].bufsize = bufsize;
-                        }
-
-                        if (buffers[i].buffer == NULL) {
-                            /*
-                             * Our allocation failed, so just use the default
-                             * OS buffers
-                             */
-                            buffers[i].fh = NULL;
-                            buffers[i].bufsize = 0;
-                        }
-                        else {
-                            setvbuf(buffers[i].fh, buffers[i].buffer,
-                                    _IOFBF, buffers[i].bufsize);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    } else {
         /*
          * Two possibilities
          * 1: there was an other error while trying to open the file for the
@@ -3138,6 +3070,7 @@ FILE * myfopen(const char *path, const char *mode, size_t bufsize)
          */
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error opening file %s with mode %s",
                    path, mode);
+        return NULL;
     }
 
     return dummy;
@@ -3152,23 +3085,11 @@ FILE * myfopen(const char *path, const char *mode, size_t bufsize)
  */
 int myfclose(FILE* fh)
 {
-    int i = 0;
     int rval = fclose(fh);
 
     if (rval != 0)
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error closing file");
 
-    for (i = 0; i < MYBUFCOUNT; i++) {
-        if (buffers[i].fh == fh) {
-            buffers[i].fh = NULL;
-            if ( finish ) {
-                /* Free the buffers */
-                free(buffers[i].buffer);
-                buffers[i].buffer = NULL;
-                buffers[i].bufsize = 0;
-            }
-        }
-    }
     return rval;
 }
 

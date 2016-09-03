@@ -512,7 +512,7 @@ static void event_create_extpipe(struct context *cnt,
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
         /* Open a dummy file to check if path is correct */
-        fd_dummy = myfopen(cnt->extpipefilename, "w", 0);
+        fd_dummy = myfopen(cnt->extpipefilename, "w");
 
         /* TODO: trigger some warning instead of only log an error message */
         if (fd_dummy == NULL) {
