@@ -796,14 +796,14 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
             cnt->ffmpeg_timelapse =
                 ffmpeg_open(codec_mpg,cnt->timelapsefilename, y, u, v
-                        ,cnt->imgs.width, cnt->imgs.height, 24
+                        ,cnt->imgs.width, cnt->imgs.height, cnt->conf.frame_limit
                         ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND);
         } else {
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpeg4 codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be trigger new files");
             cnt->ffmpeg_timelapse =
                 ffmpeg_open(codec_mpeg ,cnt->timelapsefilename, y, u, v
-                        ,cnt->imgs.width, cnt->imgs.height, 1
+                        ,cnt->imgs.width, cnt->imgs.height, cnt->conf.frame_limit
                         ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_NEW);
         }
 
