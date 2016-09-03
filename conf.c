@@ -1796,7 +1796,7 @@ void conf_print(struct context **cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Writing config file to %s",
                    cnt[thread]->conf_filename);
 
-        conffile = myfopen(cnt[thread]->conf_filename, "w", 0);
+        conffile = myfopen(cnt[thread]->conf_filename, "w");
 
         if (!conffile)
             continue;
