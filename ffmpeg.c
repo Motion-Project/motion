@@ -421,10 +421,11 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
 
     ffmpeg->video_st->time_base.num = 1;
     ffmpeg->video_st->time_base.den = 1000;
-    if (strcmp(ffmpeg_video_codec, "swf") == 0) {
+    if ((strcmp(ffmpeg_video_codec, "swf") == 0) ||
+        (ffmpeg->tlapse != TIMELAPSE_NONE) ) {
         ffmpeg->video_st->time_base.num = 1;
         ffmpeg->video_st->time_base.den = rate;
-        if (rate > 50){
+        if ((rate > 50) && (strcmp(ffmpeg_video_codec, "swf") == 0)){
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s The FPS could be too high for the SWF container.  Consider other choices.");
         }
     }
@@ -671,18 +672,19 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
             my_packet_unref(pkt);
             return -2;
         }
+    }
+    if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
+        retcd = timelapse_append(ffmpeg, pkt);
+    } else if (ffmpeg->tlapse == TIMELAPSE_NEW) {
+        retcd = av_write_frame(ffmpeg->oc, &pkt);
+    } else {
         pts_interval = ((1000000L * (tv1.tv_sec - ffmpeg->start_time.tv_sec)) + tv1.tv_usec - ffmpeg->start_time.tv_usec) + 10000;
         pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base);
         if (pkt.pts < 1) pkt.pts = 1;
         pkt.dts = pkt.pts;
-
-//        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d interval %d",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den,pts_interval);
-    }
-    if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
-        retcd = timelapse_append(ffmpeg, pkt);
-    } else {
         retcd = av_write_frame(ffmpeg->oc, &pkt);
     }
+//        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d interval %d",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den,pts_interval);
     my_packet_unref(pkt);
 
     if (retcd != 0) {
