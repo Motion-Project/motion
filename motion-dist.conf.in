@@ -140,6 +140,14 @@ netcam_tolerant_check off
 # Default: on
 rtsp_uses_tcp on
 
+# Name of camera to use if you are using a camera accessed through OpenMax/MMAL
+# Default: Not defined
+; mmalcam_name vc.ril.camera
+
+# Camera control parameters (see raspivid/raspistill tool documentation)
+# Default: Not defined
+; mmalcam_control_params -hf
+
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.
 # If brightness is zero auto_brightness will adjust to average brightness value 128.
