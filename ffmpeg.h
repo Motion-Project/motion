@@ -25,6 +25,12 @@
 
 #endif
 
+/*
+ * AVPixelFormat is a newer release of avutil PixelFormat is the old name
+ */
+#ifndef AVPixelFormat
+#define AVPixelFormat PixelFormat
+#endif
 
 #endif /* HAVE_FFMPEG */
 

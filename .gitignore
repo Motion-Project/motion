@@ -1,6 +1,7 @@
 *.log
 .svn/
 *.o
+*.sw*
 autom4te.cache
 aclocal.m4
 .depend

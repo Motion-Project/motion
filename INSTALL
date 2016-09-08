@@ -10,6 +10,7 @@ have associated dependencies which dictate the configuration options.
 Build Packages:
     autoconf 
     automake
+    git
     pkgconf
     libtool 
     libjpeg8-dev 

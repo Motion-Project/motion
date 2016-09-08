@@ -1,0 +1,16 @@
+language: c
+compiler: gcc
+before_script: autoreconf -fiv
+addons:
+  apt:
+    packages:
+      - libavformat-dev
+      - libavcodec-dev
+      - libav-tools
+      - libavutil-dev
+      - libswscale-dev 
+      - ffmpeg
+      - libjpeg8-dev
+      - libv4l-dev 
+      - libzip-dev
+script: ./configure && make
