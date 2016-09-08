@@ -41,20 +41,17 @@ Read the motion.1 manpage for more info
 
 And most of all read the Motion Guide for very detailed description of both
 installation and use.
-The Motion Guide is part of the distribution (motion_guide.htm).
-You are encouraged to look up an up to date version by visiting the Motion
-homepage at
-http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome
-and specifically the Motion Guide at
-http://www.lavrsen.dk/twiki/bin/view/Motion/MotionGuide
+The Motion Guide is part of the distribution (/usr/share/doc/motion/motion_guide.html).
+You are encouraged to visit the Motion homepage at
+https://motion-project.github.io/
 
 
 Support:
 
-Lots of resources at http://www.lavrsen.dk/twiki/bin/view/Motion/WebHome
+Lots of resources at https://motion-project.github.io/
 
 Please join the mailing list
-http://www.lavrsen.dk/twiki/bin/view/Motion/MailingList
+https://lists.sourceforge.net/lists/listinfo/motion-user
 Newbies and silly questions are welcome. We prefer support through the mailing
 list because more will have benefit from the answers.
 

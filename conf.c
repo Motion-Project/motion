@@ -2404,7 +2404,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
  */
 static void usage()
 {
-    printf("motion Version "VERSION", Copyright 2000-2005 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen\n");
+    printf("motion Version "VERSION", Copyright 2000-2016 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");

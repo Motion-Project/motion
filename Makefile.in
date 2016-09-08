@@ -7,7 +7,7 @@
 # Please read the file COPYING for more info.                                  #
 ################################################################################
 # Please visit the Motion home page:                                           #
-# http://www.lavrsen.dk/twiki/bin/view/Motion                                  #
+# https://motion-project.github.io/                                            #
 ################################################################################
 
 CC      = @CC@
@@ -40,7 +40,7 @@ OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(
 			   alg.o event.o picture.o rotate.o webhttpd.o \
 			   stream.o md5.o netcam_rtsp.o @FFMPEG_OBJ@ @SDL_OBJ@
 SRC          = $(OBJ:.o=.c)
-DOC          = CHANGELOG COPYING CREDITS README motion_guide.html
+DOC          = CHANGELOG COPYING CREDITS README motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
 EXAMPLES     = *.conf
 EXAMPLES_BIN = motion.init-Debian motion.init-Fedora motion.init-FreeBSD.sh
 PROGS        = motion
@@ -281,15 +281,4 @@ distclean: clean
 	@echo "You will need to re-run configure if you want to build Motion."
 	@echo
 
-################################################################################
-# UPDATEGUIDE downloads the Motion Guide from TWiki.                           #
-################################################################################
-updateguide: pre-build-info
-	@echo "Downloading Motion Guide. If it fails, please check your Internet connection."
-	@echo
-	wget www.lavrsen.dk/twiki/bin/view/Motion/MotionGuideOneLargeDocument?skin=text -O motion_guide.tmp
-	@echo "Cleaning up and fixing links..."
-	@cat motion_guide.tmp | sed -e 's/\?skin=text//g;s,"/twiki/,"http://www.lavrsen.dk/twiki/,g' > motion_guide.html
-	@rm -f motion_guide.tmp
-	@echo "All done, you should now have a local copy of the Motion guide from the home page."
-	@echo
+
