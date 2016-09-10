@@ -96,8 +96,6 @@ void ffmpeg_close(struct ffmpeg *);
 void ffmpeg_avcodec_log(void *, int, const char *, va_list);
 
 #ifdef HAVE_FFMPEG
-int timelapse_exists(const char *fname);
-int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt);
 AVFrame *my_frame_alloc(void);
 void my_frame_free(AVFrame *frame);
 int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
