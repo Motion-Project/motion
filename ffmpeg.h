@@ -25,6 +25,15 @@
 
 #endif
 
+/**
+ * libavutil changed the name from PixelFormat to AVPixelFormat in 51.42.0
+ * Add compatibility with older versions.
+ */
+#ifdef FF_API_PIX_FMT
+#define MyPixelFormat AVPixelFormat 
+#else
+#define MyPixelFormat PixelFormat
+#endif
 
 #endif /* HAVE_FFMPEG */
 
@@ -95,9 +104,9 @@ int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
 void ffmpeg_cleanups(struct ffmpeg *);
 AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
                               unsigned char *, unsigned char *);
-int my_image_get_buffer_size(enum AVPixelFormat pix_fmt, int width, int height);
-int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height,int dest_size);
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height);
+int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
+int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
 void my_packet_unref(AVPacket pkt);
 
 #endif

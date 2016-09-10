@@ -81,7 +81,7 @@ void my_frame_free(AVFrame *frame){
 #endif
 }
 /*********************************************/
-int my_image_get_buffer_size(enum AVPixelFormat pix_fmt, int width, int height){
+int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
     int retcd = 0;
 #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
     int align = 1;
@@ -92,7 +92,7 @@ int my_image_get_buffer_size(enum AVPixelFormat pix_fmt, int width, int height){
     return retcd;
 }
 /*********************************************/
-int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum AVPixelFormat pix_fmt,int width, int height,int dest_size){
+int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size){
     int retcd = 0;
 #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
     int align = 1;
@@ -105,7 +105,7 @@ int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum AVPixelFor
 	return retcd;
 }
 /*********************************************/
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum AVPixelFormat pix_fmt,int width,int height){
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
     int retcd = 0;
 #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
     int align = 1;
