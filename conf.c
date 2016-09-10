@@ -43,6 +43,7 @@ char *get_current_dir_name(void)
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
+    camera_name:                    NULL,
     width:                          DEF_WIDTH,
     height:                         DEF_HEIGHT,
     quality:                        DEF_QUALITY,
@@ -211,6 +212,15 @@ config_param config_params[] = {
     CONF_OFFSET(setup_mode),
     copy_bool,
     print_bool
+    },
+    {
+    "camera_name",
+    "# Name given to a camera/thread. Shown in web interface and may be used with the specifier %$ for filenames and such.\n"
+    "# Default: not defined",
+    0,
+    CONF_OFFSET(camera_name),
+    copy_string,
+    print_string
     },
     {
     "logfile",

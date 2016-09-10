@@ -484,7 +484,28 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         return -1;
     }
 
+#ifdef HAVE_PTHREAD_SETNAME_NP
+    /* there is no way to set the avcodec thread names, but they inherit
+     * our thread name - so temporarily change our thread name to the
+     * desired name */
+    {
+        char curtname[16];
+        char newtname[16];
+        pthread_getname_np(pthread_self(), curtname, sizeof(curtname));
+        snprintf(newtname, sizeof(newtname), "av%d%s%s",
+                 netcam->cnt->threadnr,
+                 netcam->cnt->conf.camera_name ? ":" : "",
+                 netcam->cnt->conf.camera_name ? netcam->cnt->conf.camera_name : "");
+        pthread_setname_np(pthread_self(), newtname);
+#endif
+
     retcd = netcam_open_codec(&netcam->rtsp->video_stream_index, netcam->rtsp->format_context, AVMEDIA_TYPE_VIDEO);
+
+#ifdef HAVE_PTHREAD_SETNAME_NP
+        pthread_setname_np(pthread_self(), curtname);
+    }
+#endif
+
     if (retcd < 0) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
