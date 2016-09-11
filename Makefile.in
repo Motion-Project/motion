@@ -259,7 +259,7 @@ uninstall remove: pre-build-info
 ################################################################################
 clean: pre-build-info
 	@echo "Removing compiled files and binaries..."
-	@rm -f *~ *.jpg *.o $(PROGS) combine $(DEPEND_FILE)
+	@rm -f *~ *.o $(PROGS) combine $(DEPEND_FILE)
 
 ################################################################################
 # DIST restores the directory to distribution state.                           #
