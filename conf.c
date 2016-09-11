@@ -1750,7 +1750,7 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
             /* Trim white space and any CR or LF at the end of the line. */
             end = line + strlen(line) - 1; /* Point to the last non-null character in the string. */
-            while (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')
+            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r'))
                 end--;
 
             *(end+1) = '\0';
