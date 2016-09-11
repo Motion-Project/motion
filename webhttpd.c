@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stddef.h>
+#include <ctype.h>
 
 /* Timeout in seconds, used for read and write */
 const int NONBLOCK_TIMEOUT = 1;
@@ -1951,7 +1952,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
  *      0 on action restart or quit
  *      1 on success
  */
-static unsigned int handle_get(int client_socket, const char *url, void *userdata)
+static unsigned int handle_get(int client_socket, const char *url, void *userdata, const char *httphostname)
 {
     struct context **cnt = userdata;
 
@@ -1989,10 +1990,14 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                 sprintf(res, "<br>");
                 send_template(client_socket, res);
 
-                //Send the preview section
-                hostname[1023] = '\0';
-                gethostname(hostname, 1023);
+                if (!httphostname)
+                {
+                    hostname[1023] = '\0';
+                    gethostname(hostname, 1023);
+                    httphostname = hostname;
+                }
 
+                //Send the preview section
                 for (y = 0; y < i; y++) {
                     if (cnt[y]->conf.stream_port) {
                         if (cnt[y]->conf.stream_preview_newline) {
@@ -2001,8 +2006,8 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         }
                         sprintf(res, "<a href=http://%s:%d> "
                             "<img src=http://%s:%d/ border=0 width=%d%%></a>\n"
-                            ,hostname,cnt[y]->conf.stream_port
-                            ,hostname,cnt[y]->conf.stream_port
+                            ,httphostname,cnt[y]->conf.stream_port
+                            ,httphostname,cnt[y]->conf.stream_port
                             ,cnt[y]->conf.stream_preview_scale);
                         send_template(client_socket, res);
                     }
@@ -2272,6 +2277,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
             char url[512]={'\0'};
             char protocol[10]={'\0'};
             char *authentication=NULL;
+            char *hostname=NULL;
 
             buffer[nread] = '\0';
 
@@ -2346,6 +2352,33 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                 return 1;
             }
 
+            if ((hostname = strstr(buffer,"Host:"))) {
+                /* use the hostname the browser used to connect to us when
+                 * constructing links to the stream ports. If available
+                 * (which it is in all modern browsers) it is more likely to
+                 * work that the result of gethostname(), which is reliant on
+                 * the machine we're running on having it's hostname setup
+                 * correctly and corresponding DNS in place. */
+                char *end_host = NULL;
+                hostname += strlen("Host:");
+                while (isspace(*hostname))
+                    hostname++;
+
+                if ((end_host = strstr(hostname,"\r\n"))) {
+                    /* we have a string that is the hostname followed by
+                     * optionally a colon and a port number - strip off any
+                     * port number & colon */
+                    char *colon = memchr(hostname, ':', hostname-end_host);
+                    if (colon)
+                      end_host = colon;
+                    while (isspace(end_host[-1]))
+                        end_host--;
+                    hostname = strndup(hostname, end_host - hostname);
+                } else {
+                    hostname = NULL;
+                }
+            }
+
             if (auth != NULL) {
                 if ((authentication = strstr(buffer,"Basic"))) {
                     char *end_auth = NULL;
@@ -2357,6 +2390,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                         char response[1024];
                         snprintf(response, sizeof (response), request_auth_response_template, method);
                         warningkill = write_nonblock(client_socket, response, strlen(response));
+                        free(hostname);
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
                     }
@@ -2365,10 +2399,11 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                         char response[1024] = {'\0'};
                         snprintf(response, sizeof (response), request_auth_response_template, method);
                         warningkill = write_nonblock(client_socket, response, strlen(response));
+                        free(hostname);
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
                     } else {
-                        ret = handle_get(client_socket, url, cnt);
+                        ret = handle_get(client_socket, url, cnt, hostname);
                         /* A valid auth request.  Process it.  */
                     }
                 } else {
@@ -2376,13 +2411,15 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     char response[1024] = {'\0'};
                     snprintf(response, sizeof (response), request_auth_response_template, method);
                     warningkill = write_nonblock(client_socket, response, strlen(response));
+                    free(hostname);
                     pthread_mutex_unlock(&httpd_mutex);
                     return 1;
                 }
             } else {
-                ret = handle_get(client_socket, url, cnt);
+                ret = handle_get(client_socket, url, cnt, hostname);
                 /* A valid request.  Process it.  */
             }
+            free(hostname);
         }
     }
     pthread_mutex_unlock(&httpd_mutex);
