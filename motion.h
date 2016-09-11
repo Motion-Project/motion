@@ -218,6 +218,10 @@ struct images;
 #include "track.h"
 #include "netcam.h"
 
+#ifdef HAVE_MMAL
+#include "mmalcam.h"
+#endif
+
 /* 
  * Structure to hold images information
  * The idea is that this should have all information about a picture e.g. diffs, timestamp etc.
@@ -353,6 +357,9 @@ struct context {
     struct images imgs;
     struct trackoptions track;
     struct netcam_context *netcam;
+#ifdef HAVE_MMAL
+    struct mmalcam_context *mmalcam;
+#endif
     struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
 
