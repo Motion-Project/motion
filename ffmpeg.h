@@ -17,22 +17,14 @@
 
 #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
 #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
+#define MyPixelFormat AVPixelFormat 
 
 #else
 
 #define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
 #define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
-
-#endif
-
-/**
- * libavutil changed the name from PixelFormat to AVPixelFormat in 51.42.0
- * Add compatibility with older versions.
- */
-#ifdef FF_API_PIX_FMT
-#define MyPixelFormat AVPixelFormat 
-#else
 #define MyPixelFormat PixelFormat
+
 #endif
 
 #endif /* HAVE_FFMPEG */
