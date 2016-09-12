@@ -41,11 +41,9 @@ static int v4l_open_vidpipe(void)
 
     if (strcmp(minor, "5") < 0) {
         FILE *vloopbacks;
-        char *loop;
         char *input;
         char *istatus;
         char *output;
-        char *ostatus;
 
         vloopbacks = fopen("/proc/video/vloopback/vloopbacks", "r");
 
@@ -76,11 +74,9 @@ static int v4l_open_vidpipe(void)
         while (fgets(buffer, sizeof(buffer), vloopbacks)) {
             if (strlen(buffer) > 1) {
                 buffer[strlen(buffer)-1] = 0;
-                loop = strtok(buffer, "\t");
                 input = strtok(NULL, "\t");
                 istatus = strtok(NULL, "\t");
                 output = strtok(NULL, "\t");
-                ostatus = strtok(NULL, "\t");
 
                 if (istatus[0] == '-') {
                     snprintf(pipepath, sizeof(pipepath), "/dev/%s", input);
