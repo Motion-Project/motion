@@ -10,7 +10,17 @@
  *
  * This file has been modified so that only major versions greater than
  * 53 are supported.
- */
+ * Note that while the conditions are based upon LIBAVFORMAT, not all of the changes are 
+ * specific to libavformat.h.  Some changes could be related to other components of ffmpeg.
+ * This is for simplicity.  The avformat version has historically changed at the same time
+ * as the other components so it is easier to have a single version number to track rather 
+ * than the particular version numbers which are associated with each component.
+ * The libav variant also has different apis with the same major/minor version numbers.  
+ * As such, it is occasionally necessary to look at the microversion number.  Numbers
+ * greater than 100 for micro version indicate ffmpeg whereas numbers less than 100
+ * indicate libav
+*/
+
 
 #include "config.h"
 
