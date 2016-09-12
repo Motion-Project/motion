@@ -19,6 +19,7 @@
  * More parameters may be added later.
  */
 struct config {
+    const char *camera_name;
     unsigned int log_level;
     char *log_type_str;
     char *log_file;

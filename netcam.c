@@ -1893,6 +1893,17 @@ static void *netcam_handler_loop(void *arg)
     netcam_context_ptr netcam = arg;
     struct context *cnt = netcam->cnt; /* Needed for the SETUP macro :-( */
 
+#ifdef HAVE_PTHREAD_SETNAME_NP
+    {
+        char tname[16];
+        snprintf(tname, sizeof(tname), "nc%d%s%s",
+                 cnt->threadnr,
+                 cnt->conf.camera_name ? ":" : "",
+                 cnt->conf.camera_name ? cnt->conf.camera_name : "");
+        pthread_setname_np(pthread_self(), tname);
+    }
+#endif
+
     /* Store the corresponding motion thread number in TLS also for this
      * thread (necessary for 'MOTION_LOG' to function properly).
      */

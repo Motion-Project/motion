@@ -208,6 +208,17 @@ else
 fi
 
 
+if test "x$PTHREAD_SUPPORT" = "xyes"; then
+    AC_MSG_CHECKING([[for pthread_setname_np]])
+    CFLAGS="$TEMP_CFLAGS"
+    LIBS="$TEMP_LIBS"
+    AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([[#include <pthread.h>]], [[  pthread_setname_np(pthread_self(), "name")]])],
+    [AC_DEFINE([[HAVE_PTHREAD_SETNAME_NP]], [[1]], [Define if you have pthread_setname_np function.])
+     AC_MSG_RESULT([[yes]])],
+    [AC_MSG_RESULT([[no]])] )
+fi
+
 #
 # Check for sdl library
 #
