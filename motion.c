@@ -2685,6 +2685,12 @@ int main (int argc, char **argv)
      */
     ffmpeg_init();
 #endif /* HAVE_FFMPEG */
+#ifdef HAVE_MYSQL
+    if (mysql_library_init(0, NULL, NULL)) {
+        fprintf(stderr, "could not initialize MySQL library\n");
+        exit(1);
+    }
+#endif /* HAVE_MYSQL */
 #ifdef HAVE_SQLITE3
     /* database_sqlite3 == NULL if not changed causes each thread to creat their own
      * sqlite3 connection this will only happens when using a non-threaded sqlite version */
