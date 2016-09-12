@@ -806,13 +806,22 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const c
     /* Flatten the message coming in from avcodec. */
     vsnprintf(buf, sizeof(buf), fmt, vl);
 
-    /* If the debug_level is correct then send the message to the motion logging routine. */
-    if (errno_flag <= AV_LOG_ERROR) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
-    } else if (errno_flag <= AV_LOG_WARNING) {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
-    } else if (errno_flag < AV_LOG_DEBUG){
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+    /* If the debug_level is correct then send the message to the motion logging routine.
+     * While it is not really desired to look for specific text in the message, there does
+     * not seem another option.  The specific messages indicated are lost camera which we
+     * have our own message and UE golomb is not something that is possible for us to fix.
+     * It is caused by the stream sent from the source camera
+     */
+    if(strstr(buf, "No route to host")  == NULL){
+        if (strstr(buf, "Invalid UE golomb") != NULL) {
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+        } else if (errno_flag <= AV_LOG_ERROR) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+        } else if (errno_flag <= AV_LOG_WARNING) {
+            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+        } else if (errno_flag < AV_LOG_DEBUG){
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+        }
     }
 }
 
