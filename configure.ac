@@ -273,7 +273,7 @@ if test "${JPEG_TURBO}" = "no"; then
     AC_MSG_RESULT(skipping)
 else
     AC_MSG_CHECKING(for libjpeg-turbo in -> [${JPEG_TURBO}] <-)
-    if test -f ${JPEG_TURBO}/lib/libjpeg.a ; then
+    if test -f ${JPEG_TURBO}/lib/libjpeg.a -o ${JPEG_TURBO}/lib/libjpeg.so; then
         AC_MSG_RESULT(found)
         JPEG_TURBO_OK="found"
     else
