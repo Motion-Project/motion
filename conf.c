@@ -47,6 +47,7 @@ struct config conf_template = {
     width:                          DEF_WIDTH,
     height:                         DEF_HEIGHT,
     quality:                        DEF_QUALITY,
+    camera_id:                      0,
     rotate_deg:                     0,
     max_changes:                    DEF_CHANGES,
     threshold_tune:                 0,
@@ -171,11 +172,16 @@ struct config conf_template = {
 
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
-static struct context **config_thread(struct context **cnt, const char *str, int val);
+static struct context **config_camera(struct context **cnt, const char *str, int val);
+
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
 static const char *print_string(struct context **, char **, int, unsigned int);
+static const char *print_camera(struct context **, char **, int, unsigned int);
+
+/* Deprcated thread config functions */
+static struct context **config_thread(struct context **cnt, const char *str, int val);
 static const char *print_thread(struct context **, char **, int, unsigned int);
 
 static void usage(void);
@@ -219,7 +225,7 @@ config_param config_params[] = {
     },
     {
     "camera_name",
-    "# Name given to a camera/thread. Shown in web interface and may be used with the specifier %$ for filenames and such.\n"
+    "# Name given to a camera. Shown in web interface and may be used with the specifier %$ for filenames and such.\n"
     "# Default: not defined",
     0,
     CONF_OFFSET(camera_name),
@@ -729,6 +735,16 @@ config_param config_params[] = {
     print_int
     },
     {
+    "camera_id",
+    "Id used to label the camera when inserting data into SQL or saving the\n"
+    "camera image to disk.  This is better than using thread ID so that there\n"
+    "always is a consistent label\n",
+    0,
+    CONF_OFFSET(camera_id),
+    copy_int,
+    print_int
+    },
+    {
     "picture_type",
     "# Type of output images\n"
     "# Valid values: jpeg, ppm (default: jpeg)",
@@ -884,7 +900,7 @@ config_param config_params[] = {
     "# Text Display\n"
     "# %Y = year, %m = month, %d = date,\n"
     "# %H = hour, %M = minute, %S = second, %T = HH:MM:SS,\n"
-    "# %v = event, %q = frame number, %t = thread (camera) number,\n"
+    "# %v = event, %q = frame number, %t = camera id,\n"
     "# %D = changed pixels, %N = noise level, \\n = new line,\n"
     "# %i and %J = width and height of motion area,\n"
     "# %K and %L = X and Y coordinates of motion center\n"
@@ -982,7 +998,7 @@ config_param config_params[] = {
     "# you can use conversion specifiers\n"
     "# %Y = year, %m = month, %d = date,\n"
     "# %H = hour, %M = minute, %S = second,\n"
-    "# %v = event, %q = frame number, %t = thread (camera) number,\n"
+    "# %v = event, %q = frame number, %t = camera id,\n"
     "# %D = changed pixels, %N = noise level,\n"
     "# %i and %J = width and height of motion area,\n"
     "# %K and %L = X and Y coordinates of motion center\n"
@@ -1593,11 +1609,25 @@ config_param config_params[] = {
     print_string
     },
     {
+    "camera",
+    "\n##############################################################\n"
+    "# Camera config files - One for each camera.\n"
+    "# Except if only one camera - You only need this config file.\n"
+    "# If you have more than one camera you MUST define one camera\n"
+    "# config file for each camera in addition to this config file.\n"
+    "##############################################################\n",
+    1,
+    0,
+    config_camera,
+    print_camera
+    },
+    {
     "thread",
     "\n##############################################################\n"
-    "# Thread config files - One for each camera.\n"
+    "# Deprecated use camera instead of thread.\n"
+    "# Camera config files - One for each camera.\n"
     "# Except if only one camera - You only need this config file.\n"
-    "# If you have more than one camera you MUST define one thread\n"
+    "# If you have more than one camera you MUST define one camera\n"
     "# config file for each camera in addition to this config file.\n"
     "##############################################################\n",
     1,
@@ -1665,7 +1695,7 @@ static void conf_cmdline(struct context *cnt, int thread)
             break;
         case 'm':
             cnt->pause = 1;
-            break;    
+            break;
         case 'h':
         case '?':
         default:
@@ -1713,6 +1743,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
              * If the option is an int, copy_int is called.
              * If the option is a string, copy_string is called.
              * If the option is a thread, config_thread is called.
+             * If the option is a camera, config_camera is called.
              * The arguments to the function are:
              *  cnt  - a pointer to the context structure.
              *  arg1 - a pointer to the new option value (represented as string).
@@ -1867,7 +1898,7 @@ void conf_print(struct context **cnt)
                     fprintf(conffile, "%s\n", val);
 
                     if (strlen(val) == 0)
-                        fprintf(conffile, "; thread %s/motion/thread1.conf\n", sysconfdir);
+                        fprintf(conffile, "; camera %s/motion/camera1.conf\n", sysconfdir);
 
                     free(val);
                 } else if (thread == 0) {
@@ -2335,8 +2366,14 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
     return retval;
 }
 
-
 static const char *print_thread(struct context **cnt, char **str,
+                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
+{
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "thread config option deprecated use camera");
+    return print_camera(cnt, str, parm, threadnr);
+}
+
+static const char *print_camera(struct context **cnt, char **str,
                                 int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
 {
     char *retval;
@@ -2350,8 +2387,8 @@ static const char *print_thread(struct context **cnt, char **str,
 
     while (cnt[++i]) {
         retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10,
-                           "print_thread");
-        sprintf(retval + strlen(retval), "thread %s\n", cnt[i]->conf_filename);
+                           "print_camera");
+        sprintf(retval + strlen(retval), "camera %s\n", cnt[i]->conf_filename);
     }
 
     *str = retval;
@@ -2359,10 +2396,17 @@ static const char *print_thread(struct context **cnt, char **str,
     return NULL;
 }
 
+static struct context **config_thread(struct context **cnt, const char *str,
+                                      int val ATTRIBUTE_UNUSED)
+{
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "thread config option deprecated use camera");
+    return config_camera(cnt, str, val);
+}
+
 /**
- * config_thread
+ * config_camera
  *      Is called during initial config file loading each time Motion
- *      finds a thread option in motion.conf
+ *      finds a camera option in motion.conf
  *      The size of the context array is increased and the main context's values are
  *      copied to the new thread.
  *
@@ -2371,7 +2415,7 @@ static const char *print_thread(struct context **cnt, char **str,
  *      val  - is not used. It is defined to be function header compatible with
  *            copy_int, copy_bool and copy_string.
  */
-static struct context **config_thread(struct context **cnt, const char *str,
+static struct context **config_camera(struct context **cnt, const char *str,
                                       int val ATTRIBUTE_UNUSED)
 {
     int i;
@@ -2383,7 +2427,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
     fp = fopen(str, "r");
 
     if (!fp) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Thread config file %s not found",
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Camera config file %s not found",
                    str);
         return cnt;
     }
@@ -2399,7 +2443,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
      * First thread is 0 so the number of threads is i + 1
      * plus an extra for the NULL pointer. This gives i + 2
      */
-    cnt = myrealloc(cnt, sizeof(struct context *) * (i + 2), "config_thread");
+    cnt = myrealloc(cnt, sizeof(struct context *) * (i + 2), "config_camera");
 
     /* Now malloc space for an additional context structure for thread nr. i */
     cnt[i] = mymalloc(sizeof(struct context));
@@ -2421,7 +2465,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
 
     /* Process the thread's config file and notify user on console. */
     strcpy(cnt[i]->conf_filename, str);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing config file %s",
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing camera config file %s",
                str);
     conf_process(cnt + i, fp);
 
