@@ -3066,19 +3066,20 @@ FILE * myfopen(const char *path, const char *mode)
 {
     /* first, just try to open the file */
     FILE *dummy = fopen(path, mode);
+    if (dummy) return dummy;
 
     /* could not open file... */
+    /* path did not exist? */
+    if (errno == ENOENT) {
+
+        /* create path for file... */
+        if (create_path(path) == -1)
+            return NULL;
+
+        /* and retry opening the file */
+        dummy = fopen(path, mode);
+    }
     if (!dummy) {
-        /* path did not exist? */
-        if (errno == ENOENT) {
-
-            /* create path for file... */
-            if (create_path(path) == -1)
-                return NULL;
-
-            /* and retry opening the file */
-            dummy = fopen(path, mode);
-        }
         /*
          * Two possibilities
          * 1: there was an other error while trying to open the file for the
