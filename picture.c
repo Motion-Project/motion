@@ -963,9 +963,9 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
  */
 unsigned char *get_pgm(FILE *picture, int width, int height)
 {
-    int x = 0 , y = 0, maxval;
+    int x, y, mask_width, mask_height, maxval;
     char line[256];
-    unsigned char *image;
+    unsigned char *image, *resized_image;
 
     line[255] = 0;
 
@@ -986,15 +986,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
         if (!fgets(line, 255, picture))
             return NULL;
 
-    /* Check size */
-    if (sscanf(line, "%d %d", &x, &y) != 2) {
+    /* Read image size */
+    if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading size in pgm file");
-        return NULL;
-    }
-
-    if (x != width || y != height) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Wrong image size %dx%d should be %dx%d",
-                   x, y, width, height);
         return NULL;
     }
 
@@ -1011,15 +1005,34 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Read data */
 
-    image = mymalloc(width * height);
+    image = mymalloc(mask_width * mask_height);
 
-    for (y = 0; y < height; y++) {
-        if ((int)fread(&image[y * width], 1, width, picture) != width)
+    for (y = 0; y < mask_height; y++) {
+        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading image data from pgm file");
 
-        for (x = 0; x < width; x++)
-            image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
+        for (x = 0; x < mask_width; x++)
+            image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
 
+    }
+
+    /* Resize mask if required */
+    if (mask_width != width || mask_height != height) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Mask needs resizing from %dx%d to %dx%d",
+                   mask_width, mask_height, width, height);
+
+        resized_image = mymalloc(width * height);
+
+        for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+                resized_image[y * width + x] = image[
+                        (mask_height - 1) * y / (height - 1) * mask_width + 
+                        (mask_width  - 1) * x / (width  - 1)];
+            }
+        }
+
+        free(image);
+        image = resized_image;
     }
 
     return image;
