@@ -224,28 +224,25 @@ fi
 #
 SDL_SUPPORT="no"
 AC_ARG_WITH(sdl,
-[  --without-sdl           Compile without sdl support to get stream in SDL window.
+[  --with-sdl[=DIR]          Specify the prefix for the install path for
+                          sdl-config to get stream in SDL window (optional).
 ],
 [],
-[])
-AC_MSG_CHECKING(for sdl)
+[withval="no"])
 if test "x$withval" = "xno"; then
+	AC_MSG_CHECKING(for sdl)
 	AC_MSG_RESULT(skipped)
 else
-    CONFIG_SDL='sdl-config'
+	AC_PATH_PROG([CONFIG_SDL], [sdl-config], [], [${PATH}:${withval}:${withval}/bin])
 	if test -z "`($CONFIG_SDL --version) 2>/dev/null`" ;then
-		AC_MSG_RESULT(no)
-		if test "$withval" = "yes"; then
-			echo ""
-			echo "****************************************************"
-			echo "* sdl-config could not be found. Please install it *"
-			echo "* and remove the --with-sdl configure argument.    *"
-			echo "* libSDL can be found at http://www.libsdl.org     *"
-			echo "****************************************************"
-			echo ""
-		fi
+		echo ""
+		echo "****************************************************"
+		echo "* sdl-config could not be found. Please install it *"
+		echo "* and remove the --with-sdl configure argument.    *"
+		echo "* libSDL can be found at http://www.libsdl.org     *"
+		echo "****************************************************"
+		echo ""
 	else
-		AC_MSG_RESULT(yes)
 		SDL_SUPPORT="yes"
 		TEMP_LIBS="$TEMP_LIBS `${CONFIG_SDL} --libs`"
 		TEMP_CFLAGS="${TEMP_CFLAGS} `${CONFIG_SDL} --cflags`"
