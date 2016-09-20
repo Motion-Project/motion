@@ -290,8 +290,8 @@ if test "${JPEG_TURBO_OK}" = "found"; then
     CFLAGS="$CFLAGS -I${JPEG_TURBO}/include"
     LIBS="$LIBS -L${JPEG_TURBO}/lib -ljpeg"
     AC_CHECK_LIB(jpeg, jpeg_start_compress,
-        [ TEMP_LIBS="$LIBS"
-          TEMP_CFLAGS="${CFLAGS}"
+        [ TEMP_LIBS="$TEMP_LIBS -L${JPEG_TURBO}/lib -ljpeg"
+          TEMP_CFLAGS="${TEMP_CFLAGS} -I${JPEG_TURBO}/include"
           TEMP_LDFLAGS="$TEMP_LDFLAGS $LDFLAGS"
           JPEG_SUPPORT="yes"],,)
     LIBS="$saved_LIBS"
