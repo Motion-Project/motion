@@ -26,16 +26,23 @@ pthread_mutex_t httpd_mutex;
 int warningkill;
 
 static const char *ini_template =
-    "<html><head><title>Motion "VERSION"</title></head>\n"
+    "<!DOCTYPE html>\n"
+    "<html>\n"
+    "<head><title>Motion "VERSION"</title></head>\n"
     "<body>\n";
 
 static const char *set_template =
-    "<html><head><script language='javascript'>"
+    "<!DOCTYPE html>\n"
+    "<html>\n"
+    "<head>\n"
+    "<title>Motion "VERSION"</title>\n"
+    "<script language='javascript'>"
     "function show() {top.location.href="
     "'set?'+document.n.onames.options[document.n.onames.selectedIndex].value"
     "+'='+document.s.valor.value;"
-    "}</script>\n<title>Motion "VERSION"</title>\n"
-    "</head><body>\n";
+    "}</script>\n"
+    "</head>\n"
+    "<body>\n";
 
 static const char *end_template =
     "</body>\n"
@@ -66,6 +73,7 @@ static const char *ok_response_raw =
 static const char *bad_request_response =
     "HTTP/1.0 400 Bad Request\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Bad Request</h1>\n"
@@ -81,6 +89,7 @@ static const char *bad_request_response_raw =
 static const char *not_found_response_template =
     "HTTP/1.0 404 Not Found\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Found</h1>\n"
@@ -96,6 +105,7 @@ static const char *not_found_response_template_raw =
 static const char *not_found_response_valid =
     "HTTP/1.0 404 Not Valid\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Valid</h1>\n"
@@ -111,6 +121,7 @@ static const char *not_found_response_valid_raw =
 static const char *not_valid_syntax =
     "HTTP/1.0 404 Not Valid Syntax\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Valid Syntax</h1>\n"
@@ -125,6 +136,7 @@ static const char *not_valid_syntax_raw =
 static const char *not_track =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Tracking Not Enabled</h1>\n";
@@ -137,6 +149,7 @@ static const char *not_track_raw =
 static const char *track_error =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Track Error</h1>\n";
@@ -149,6 +162,7 @@ static const char *track_error_raw =
 static const char *error_value =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Value Error</h1>\n";
@@ -161,6 +175,7 @@ static const char *error_value_raw =
 static const char *not_found_response_valid_command =
     "HTTP/1.0 404 Not Valid Command\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Valid Command</h1>\n"
@@ -176,6 +191,7 @@ static const char *not_found_response_valid_command_raw =
 static const char *bad_method_response_template =
     "HTTP/1.0 501 Method Not Implemented\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Method Not Implemented</h1>\n"
