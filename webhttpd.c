@@ -2464,7 +2464,15 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     /* we have a string that is the hostname followed by
                      * optionally a colon and a port number - strip off any
                      * port number & colon */
-                    char *colon = memchr(hostname, ':', hostname-end_host);
+                    char *colon = NULL;
+                    if (hostname[0] == '[') {
+                        // hostname is a IPv6 address like "[::1]"
+                        char *endbracket = memchr(hostname, ']', hostname-end_host);
+                        // look for the colon after the "]"
+                        colon = memchr(endbracket, ':', hostname-end_host);
+                    } else {
+                        colon = memchr(hostname, ':', hostname-end_host);
+                    }
                     if (colon)
                       end_host = colon;
                     while (isspace(end_host[-1]))
