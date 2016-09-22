@@ -2467,17 +2467,17 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     char *colon = NULL;
                     if (hostname[0] == '[') {
                         // hostname is a IPv6 address like "[::1]"
-                        char *endbracket = memchr(hostname, ']', hostname-end_host);
+                        char *end_bracket = memchr(hostname, ']', end_host-hostname);
                         // look for the colon after the "]"
-                        colon = memchr(endbracket, ':', hostname-end_host);
+                        colon = memchr(end_bracket, ':', end_host-end_bracket);
                     } else {
-                        colon = memchr(hostname, ':', hostname-end_host);
+                        colon = memchr(hostname, ':', end_host-hostname);
                     }
                     if (colon)
                       end_host = colon;
                     while (isspace(end_host[-1]))
                         end_host--;
-                    hostname = strndup(hostname, end_host - hostname);
+                    hostname = strndup(hostname, end_host-hostname);
                 } else {
                     hostname = NULL;
                 }
