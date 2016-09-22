@@ -399,13 +399,38 @@ locate_motion_style box
 
 # Draws the timestamp using same options as C function strftime(3)
 # Default: %Y-%m-%d\n%T = date in ISO format and time in 24 hour clock
-# Text is placed in lower right corner
-text_right %Y-%m-%d\n%T-%q
+# Text is placed default in lower right corner. Change this with timestamp_location
+timestamp %Y-%m-%d\n%T-%q
+
+# Select where to place the "timestamp".
+# Default: Not defined = bottom-right
+# Can be bottom-left, bottom-right, center, upper-left, upper-right
+; timestamp bottom-right
 
 # Draw a user defined text on the images using same options as C function strftime(3)
 # Default: Not defined = no text
-# Text is placed in lower left corner
-; text_left CAMERA %t
+# Text is placed default in lower left corner. Change this with generic_text_location
+; generic_text CAMERA %t
+
+# Select where to place the "generic_text".
+# Default: Not defined = bottom-left
+# Can be bottom-left, bottom-right, center, upper-left, upper-right
+; generic_text_location bottom-left
+
+# Select a UDP port to listen on for text-messages. These then will be shown in the
+# image. Seen "send.py" for an example.
+# Default: Not defined = disabled
+# Can be any valid port-number.
+; ext_event_udp_listener_port 1888
+
+# How long to show a text.
+# Default: Not defined = 5 seconds
+# Can be any value >= 1 seconds
+; ext_event_show_time 5
+
+# Where to put the text. Can be bottom-left, bottom-right, center, upper-left, upper-right
+# Default: Not defined = upper-left
+; ext_event_location upper-left
 
 # Draw the number of changed pixed on the images (default: off)
 # Will normally be set to off except when you setup and adjust the motion settings

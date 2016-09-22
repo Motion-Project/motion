@@ -133,9 +133,11 @@ struct config {
     const char *mmalcam_control_params;
 #endif
     int text_changes;
-    const char *text_left;
-    const char *text_right;
+    const char *timestamp, *timestamp_location;
+    const char *generic_text, *generic_text_location;
     const char *text_event;
+    int ext_event_udp_listener_port, ext_event_show_time;
+    const char *ext_event_location;
     int text_double;
     const char *despeckle_filter;
     const char *area_detect;

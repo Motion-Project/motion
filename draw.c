@@ -1083,12 +1083,9 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     int pos, x, y, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr, **char_arr_ptr;
 
-    if (startx > width / 2)
-        startx -= len * (6 * (factor + 1));
-
     if (startx + len * 6 * (factor + 1) >= width)
         len = (width-startx-1)/(6*(factor+1));
-    
+
     line_offset = width - 7 * (factor + 1);
     next_char_offs = width * 8 * (factor + 1) - 6 * (factor + 1);
     
@@ -1137,32 +1134,22 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
  */
 int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor)
 {
-    int num_nl = 0;
-    const char *end, *begin;
+    const char *p = text;
     const int line_space = (factor + 1) * 9;
-    
-    /* Count the number of newlines in "text" so we scroll it up the image. */
-    end = text;
 
-    while ((end = strstr(end, NEWLINE))) {
-        num_nl++;
-        end += sizeof(NEWLINE)-1;
-    }
+    for(;;) {
+        const char *end = strstr(p, NEWLINE);
+        int len = end ? end - p : strlen(p);
 
-    starty -= line_space * num_nl;
-    
-    begin = end = text;
+        draw_textn(image, startx, starty, width, p, len, factor);
 
-    while ((end = strstr(end, NEWLINE))) {
-        int len = end-begin;
+        if (!end)
+            break;
 
-        draw_textn(image, startx, starty, width, begin, len, factor);
-        end += sizeof(NEWLINE)-1;
-        begin = end;
+        p = end + sizeof(NEWLINE) - 1;
+
         starty += line_space;
     }
-
-    draw_textn(image, startx, starty, width, begin, strlen(begin), factor);
 
     return 0;
 }
@@ -1203,3 +1190,40 @@ int initialize_chars(void)
     return 0;
 }
 
+void get_text_dimensions(const char *const str, const int big_chars, int *const width, int *const height) {
+    int cols = 0, rows = 0;
+    char *dummy = strdup(str), *curp = dummy;
+
+    for(;;) {
+        int clen;
+        char *lf = strstr(curp, "\\n");
+        if (lf)
+            *lf = 0x00;
+
+        rows++;
+
+        clen = strlen(curp);
+        if (clen > cols)
+            cols = clen;
+
+        if (!lf)
+            break;
+
+        curp = lf + 2;
+    }
+
+    free(dummy);
+
+    if (big_chars) {
+        *width = cols * 14;
+        *height = rows * 16;
+    }
+    else {
+        *width = cols * 7;
+        *height = rows * 8;
+    }
+}
+
+void get_space_dimension(const int big_chars, int *const width, int *const height) {
+	get_text_dimensions(" ", big_chars, width, height);
+}
