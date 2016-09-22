@@ -1140,10 +1140,10 @@ fi
 AC_SUBST(BIN_PATH)
 
 AC_CONFIG_FILES([
-thread1-dist.conf
-thread2-dist.conf
-thread3-dist.conf
-thread4-dist.conf
+camera1-dist.conf
+camera2-dist.conf
+camera3-dist.conf
+camera4-dist.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
