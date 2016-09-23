@@ -2455,12 +2455,13 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                  * work that the result of gethostname(), which is reliant on
                  * the machine we're running on having it's hostname setup
                  * correctly and corresponding DNS in place. */
-                char *end_host = NULL;
                 hostname += strlen("Host:");
-                while (isspace(*hostname))
-                    hostname++;
-
-                if ((end_host = strstr(hostname,"\r\n"))) {
+                char *end_host = strstr(hostname,"\r\n");
+                if (end_host) {
+                    while (hostname < end_host && isspace(hostname[0]))
+                        hostname++;
+                    while (hostname < end_host && isspace(end_host[-1]))
+                        end_host--;
                     /* we have a string that is the hostname followed by
                      * optionally a colon and a port number - strip off any
                      * port number & colon */
@@ -2475,8 +2476,6 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     }
                     if (colon)
                       end_host = colon;
-                    while (isspace(end_host[-1]))
-                        end_host--;
                     hostname = strndup(hostname, end_host-hostname);
                 } else {
                     hostname = NULL;
