@@ -6,12 +6,10 @@
 # Capture device options
 ############################################################
 
-#
 # Camera Id
-# Id used to label the camera when inserting data into SQL or saving the
-# camera image to disk.  This is better than using thread number so that there
-# always is a consistent labe
-# Default: order when the camera file was read
+# Consistent identification number to assign to each camera across multiple
+# invocations of Motion.
+# Default: The order when the camera file was read
 # camera_id = 1
 
 # Videodevice to be used for capturing  (default /dev/video0)
@@ -34,7 +32,7 @@ text_left CAMERA 1
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center

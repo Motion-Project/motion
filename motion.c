@@ -2761,7 +2761,9 @@ int main (int argc, char **argv)
          * option is used, so start at 1 then and 0 otherwise.
          */
         for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
-            /* camera_id is not defined in the config, then the camera id needs to be gnerated.
+            /* If i is 0 it means no thread files and we then set the thread number to 1 */
+            cnt_list[i]->threadnr = i ? i : 1;
+            /* camera_id is not defined in the config, then the camera id needs to be generated.
              * the load order will generate a # that will become the camera_id
              */
             cnt_list[i]->conf.camera_id = cnt_list[i]->conf.camera_id ? cnt_list[i]->conf.camera_id: i;
