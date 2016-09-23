@@ -389,14 +389,22 @@ AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not f
 
 # Check for raspberry pi mmal interface
 #
-HAVE_MMAL=""
-LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+WITHOUT_MMAL="no"
+AC_ARG_WITH([mmal],
+AS_HELP_STRING([--without-mmal],
+               [Compile without RaspberyPi mmal camera support]),
+WITHOUT_MMAL="yes",
+WITHOUT_MMAL="no")
 
-if test -d ${LIBRASPBERRYPIDEVPATH}; then
+if test "${WITHOUT_MMAL}" = "no"; then
+  HAVE_MMAL=""
+  LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+
+  if test -d ${LIBRASPBERRYPIDEVPATH}; then
        HAVE_MMAL="yes"
-fi
+  fi
 
-AS_IF([test "${HAVE_MMAL}" = "yes" ], [
+  AS_IF([test "${HAVE_MMAL}" = "yes" ], [
            AC_SUBST(MMAL_CFLAGS)
            AC_SUBST(MMAL_OBJ)
            AC_SUBST(MMAL_LIBS)
@@ -404,7 +412,8 @@ AS_IF([test "${HAVE_MMAL}" = "yes" ], [
            MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
            MMAL_LIBS="-L/opt/vc/lib  -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
            AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
-])
+  ])
+fi
 
 #
 # Check for libavcodec and libavformat from ffmpeg
@@ -1230,6 +1239,8 @@ if test "${HAVE_MMAL}" = "yes"; then
     echo " ... MMAL_CFLAGS: $MMAL_CFLAGS"
     echo " ... MMAL_OBJ: $MMAL_OBJ"
     echo " ... MMAL_LIBS: $MMAL_LIBS"
+elif test "${WITHOUT_MMAL}" = "yes"; then
+    echo "MMAL support:        disabled"
 else
     echo "MMAL support:        No"
     echo " ... libraspberrypi-dev package not installed"
