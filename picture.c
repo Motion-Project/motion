@@ -1018,7 +1018,8 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Resize mask if required */
     if (mask_width != width || mask_height != height) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Mask needs resizing from %dx%d to %dx%d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: The mask file specified is not the same size as image from camera.");
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Attempting to resize mask image from %dx%d to %dx%d",
                    mask_width, mask_height, width, height);
 
         resized_image = mymalloc(width * height);
