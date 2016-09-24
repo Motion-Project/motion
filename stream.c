@@ -413,26 +413,28 @@ static void* handle_md5_digest(void* param)
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Digest";
     static const char *auth_failed_html_template=
-        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
-        "<HTML><HEAD>\r\n"
-        "<TITLE>401 Authorization Required</TITLE>\r\n"
-        "</HEAD><BODY>\r\n"
-        "<H1>Authorization Required</H1>\r\n"
-        "This server could not verify that you are authorized to access the document "
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head><title>401 Authorization Required</title></head>\n"
+        "<body>\n"
+        "<h1>Authorization Required</h1>\n"
+        "<p>This server could not verify that you are authorized to access the document "
         "requested.  Either you supplied the wrong credentials (e.g., bad password), "
-        "or your browser doesn't understand how to supply the credentials required.\r\n"
-        "</BODY></HTML>\r\n";
+        "or your browser doesn't understand how to supply the credentials required.</p>\n"
+        "</body>\n"
+        "</html>\n";
     static const char *internal_error_template=
         "HTTP/1.0 500 Internal Server Error\r\n"
         "Server: Motion/"VERSION"\r\n"
         "Content-Type: text/html\r\n"
         "Connection: Close\r\n\r\n"
-        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
-        "<HTML><HEAD>\r\n"
-        "<TITLE>500 Internal Server Error</TITLE>\r\n"
-        "</HEAD><BODY>\r\n"
-        "<H1>500 Internal Server Error</H1>\r\n"
-        "</BODY></HTML>\r\n";
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head><title>500 Internal Server Error</title></head>\n"
+        "<body>\n"
+        "<h1>500 Internal Server Error</h1>\n"
+        "</body>\n"
+        "</html>\n";
 
 #ifdef HAVE_PTHREAD_SETNAME_NP
     pthread_setname_np(pthread_self(), "handle_md5_digest");
