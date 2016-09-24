@@ -258,15 +258,31 @@ struct rtsp_context *rtsp_new_context(void){
 static int netcam_interrupt_rtsp(void *ctx){
     struct rtsp_context *rtsp = (struct rtsp_context *)ctx;
 
-    if (rtsp->readingframe != 1) {
+    if (rtsp->status == RTSP_CONNECTED) {
         return 0;
-    } else {
+    } else if (rtsp->status == RTSP_READINGIMAGE) {
         struct timeval interrupttime;
         if (gettimeofday(&interrupttime, NULL) < 0) {
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Reading picture timed out for %s",rtsp->path);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            return 1;
+        } else{
+            return 0;
+        }
+    } else {
+        /* This is for NOTCONNECTED and RECONNECTING status.  We give these
+         * options more time because all the ffmpeg calls that are inside the
+         * rtsp_connect function will use the same start time.  Otherwise we
+         * would need to reset the time before each call to a ffmpeg function.
+        */
+        struct timeval interrupttime;
+        if (gettimeofday(&interrupttime, NULL) < 0) {
+            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
+        }
+        if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 30){
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
             return 1;
         } else{
             return 0;
@@ -313,7 +329,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     }
     netcam->rtsp->startreadtime = curtime;
 
-    netcam->rtsp->readingframe = 1;
+    netcam->rtsp->status = RTSP_READINGIMAGE;
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
         if(packet.stream_index != netcam->rtsp->video_stream_index) {
             my_packet_unref(packet);
@@ -330,7 +346,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         packet.data = NULL;
         packet.size = 0;
     }
-    netcam->rtsp->readingframe = 0;
+    netcam->rtsp->status = RTSP_CONNECTED;
 
     // at this point, we are finished with the packet
     my_packet_unref(packet);
@@ -445,6 +461,10 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
     netcam->rtsp->format_context = avformat_alloc_context();
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
     netcam->rtsp->format_context->interrupt_callback.opaque = netcam->rtsp;
+
+    if (gettimeofday(&netcam->rtsp->startreadtime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
+    }
 
     if (strncmp(netcam->rtsp->path, "http", 4) == 0 ){
         netcam->rtsp->format_context->iformat = av_find_input_format("mjpeg");
@@ -767,7 +787,8 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
-    if (netcam->rtsp->status == RTSP_CONNECTED) {
+    if (netcam->rtsp->status == RTSP_CONNECTED ||
+        netcam->rtsp->status == RTSP_READINGIMAGE) {
         netcam_rtsp_close_context(netcam);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
@@ -877,7 +898,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     /*
      * Now we need to set some flags
      */
-    netcam->rtsp->readingframe = 0;
     netcam->rtsp->status = RTSP_NOTCONNECTED;
 
     /*
