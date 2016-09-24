@@ -1153,7 +1153,7 @@ camera4-dist.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
-motion.init-Fedora
+motion.service
 motion.spec
 Makefile
 ])
