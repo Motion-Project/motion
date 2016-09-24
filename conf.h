@@ -140,6 +140,7 @@ struct config {
     int text_double;
     const char *despeckle_filter;
     const char *area_detect;
+    char *camera_dir;
     int minimum_motion_frames;
     const char *exif_text;
     char *pid_file;

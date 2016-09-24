@@ -23,6 +23,10 @@
  *   4. add a entry to the config_params array below, if your
  *      option should be configurable by the config file.
  */
+
+#include <dirent.h>
+#include <string.h>
+
 #include "motion.h"
 
 #if (defined(BSD) && !defined(PWCBSD))
@@ -30,6 +34,8 @@
 #else
 #include "video.h"
 #endif /* BSD */
+
+#define EXTENSION ".conf"
 
 #ifndef HAVE_GET_CURRENT_DIR_NAME
 char *get_current_dir_name(void)
@@ -167,13 +173,15 @@ struct config conf_template = {
     log_file:                       NULL,
     log_level:                      LEVEL_DEFAULT+10,
     log_type_str:                   NULL,
+    camera_dir:                     sysconfdir"/conf.d"
 };
 
 
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
-
+static struct context **read_camera_dir(struct context **cnt, const char *str,
+                                            int val);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -1635,6 +1643,17 @@ config_param config_params[] = {
     config_thread,
     print_thread
     },
+    /* using a conf.d style camera addition */
+    {
+    "camera_dir",
+    "\n##############################################################\n"
+    "# Camera config directory - One for each camera.\n"
+    "##############################################################\n",
+    1,
+    CONF_OFFSET(camera_dir),
+    read_camera_dir,
+    print_string
+    },
     { NULL, NULL, 0, 0, NULL, NULL }
 };
 
@@ -2394,6 +2413,53 @@ static const char *print_camera(struct context **cnt, char **str,
     *str = retval;
 
     return NULL;
+}
+
+/**
+ * config_camera_dir
+ *     Read the directory finding all *.conf files in the path
+ *     when calls config_camera
+ */
+
+static struct context **read_camera_dir(struct context **cnt, const char *str,
+                                            int val ATTRIBUTE_UNUSED)
+{
+    DIR *dp;
+    struct dirent *ep;
+    int name_len;
+
+    char conf_file[PATH_MAX];
+
+    dp = opendir(str);
+    if (dp != NULL)
+    {
+        while( (ep = readdir(dp)) )
+        {
+            name_len = strlen(ep->d_name);
+            if (name_len > strlen(EXTENSION) &&
+                    (strncmp(EXTENSION,
+                                (ep->d_name + name_len - strlen(EXTENSION)),
+                                strlen(EXTENSION)) == 0
+                    )
+                )
+            {
+                memset(conf_file, '\0', sizeof(conf_file));
+                snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
+                            str, ep->d_name);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+                    "%s: Processing config file %s", conf_file );
+                cnt = config_camera(cnt, conf_file, 0);
+            }
+        }
+        closedir(dp);
+    }
+    else
+    {
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Camera directory config "
+                    "%s not found", str);
+    }
+
+    return cnt;
 }
 
 static struct context **config_thread(struct context **cnt, const char *str,

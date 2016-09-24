@@ -762,3 +762,9 @@ quiet on
 ; camera @sysconfdir@/motion/camera3.conf
 ; camera @sysconfdir@/motion/camera4.conf
 
+
+##############################################################
+# Camera config directory - One for each camera.
+##############################################################
+#
+; camera_dir @sysconfdir@/motion/conf.d
