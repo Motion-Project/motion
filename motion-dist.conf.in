@@ -375,7 +375,7 @@ snapshot_interval 0
 # Text Display
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second, %T = HH:MM:SS,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level, \n = new line,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
@@ -435,7 +435,7 @@ text_double off
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
@@ -616,7 +616,7 @@ track_stepsize 40
 # You can use conversion specifiers for the on_xxxx commands
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
@@ -744,19 +744,19 @@ quiet on
 
 
 ##############################################################
-# Thread config files - One for each camera.
+# camera config files - One for each camera.
 # Except if only one camera - You only need this config file.
-# If you have more than one camera you MUST define one thread
+# If you have more than one camera you MUST define one camera
 # config file for each camera in addition to this config file.
 ##############################################################
 
 # Remember: If you have more than one camera you must have one
-# thread file for each camera. E.g. 2 cameras requires 3 files:
-# This motion.conf file AND thread1.conf and thread2.conf.
+# camera file for each camera. E.g. 2 cameras requires 3 files:
+# This motion.conf file AND camera1.conf and camera2.conf.
 # Only put the options that are unique to each camera in the
-# thread config files.
-; thread @sysconfdir@/motion/thread1.conf
-; thread @sysconfdir@/motion/thread2.conf
-; thread @sysconfdir@/motion/thread3.conf
-; thread @sysconfdir@/motion/thread4.conf
+# camera config files.
+; camera @sysconfdir@/motion/camera1.conf
+; camera @sysconfdir@/motion/camera2.conf
+; camera @sysconfdir@/motion/camera3.conf
+; camera @sysconfdir@/motion/camera4.conf
 

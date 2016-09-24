@@ -700,8 +700,8 @@ static int motion_init(struct context *cnt)
     cnt->detecting_motion = 0;
     cnt->makemovie = 0;
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d started , motion detection %s",
-               (unsigned long)pthread_getspecific(tls_key_threadnr), cnt->pause ? "Disabled":"Enabled");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Camera %d started: motion detection %s",
+               cnt->conf.camera_id, cnt->pause ? "Disabled":"Enabled");
 
     if (!cnt->conf.filepath)
         cnt->conf.filepath = mystrdup(".");
@@ -2763,17 +2763,21 @@ int main (int argc, char **argv)
         for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
             /* If i is 0 it means no thread files and we then set the thread number to 1 */
             cnt_list[i]->threadnr = i ? i : 1;
+            /* camera_id is not defined in the config, then the camera id needs to be generated.
+             * the load order will generate a # that will become the camera_id
+             */
+            cnt_list[i]->conf.camera_id = cnt_list[i]->conf.camera_id ? cnt_list[i]->conf.camera_id: i;
 
             if (strcmp(cnt_list[i]->conf_filename, ""))
             {
                 cnt_list[i]->conf_filename[sizeof(cnt_list[i]->conf_filename) - 1] = '\0';
 
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is from %s",
-                           cnt_list[i]->threadnr, cnt_list[i]->conf_filename);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Camera %d is from %s",
+                           cnt_list[i]->conf.camera_id, cnt_list[i]->conf_filename);
             }
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread %d is device: %s input %d",
-                       cnt_list[i]->threadnr, cnt_list[i]->conf.netcam_url ?
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Camera %d is device: %s input %d",
+                       cnt_list[i]->conf.camera_id, cnt_list[i]->conf.netcam_url ?
                        cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
                        cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input);
 
@@ -2781,7 +2785,7 @@ int main (int argc, char **argv)
                        cnt_list[i]->conf.stream_port);
 #ifdef HAVE_SQLITE
             /* this is done to share the seralized handle
-             * and supress creation of new handles in the threads */    
+             * and supress creation of new handles in the threads */
             cnt_list[i]->database_sqlite3=cnt_list[0]->database_sqlite3;
 #endif
             start_motion_thread(cnt_list[i], &thread_attr);
@@ -3053,7 +3057,7 @@ int create_path(const char *path)
  *   (which is: path does not exist), the path is created and then things are
  *   tried again. This is faster then trying to create that path over and over
  *   again. If someone removes the path after it was created, myfopen will
- *   recreate the path automatically. 
+ *   recreate the path automatically.
  *
  * Parameters:
  *
@@ -3213,9 +3217,8 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     cnt->current_image->total_labels);
                 break;
 
-            case 't': // thread number
-                sprintf(tempstr, "%*d", width, (int)(unsigned long)
-                        pthread_getspecific(tls_key_threadnr));
+            case 't': // camera id
+                sprintf(tempstr, "%*d", width, cnt->conf.camera_id);
                 break;
 
             case 'C': // text_event
