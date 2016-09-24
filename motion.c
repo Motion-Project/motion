@@ -1018,6 +1018,9 @@ static void motion_cleanup(struct context *cnt)
     free(cnt->imgs.smartmask_buffer);
     cnt->imgs.smartmask_buffer = NULL;
 
+    if (cnt->imgs.mask) free(cnt->imgs.mask);
+    cnt->imgs.mask = NULL;
+
     free(cnt->imgs.common_buffer);
     cnt->imgs.common_buffer = NULL;
 
