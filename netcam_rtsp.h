@@ -20,7 +20,6 @@ struct rtsp_context {
     char*                 path;
     char*                 user;
     char*                 pass;
-    int                   readingframe;
     int                   status;
     struct timeval        startreadtime;
     struct SwsContext*   swsctx;
@@ -37,7 +36,6 @@ int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam);
 
 struct rtsp_context {
     int*                  format_context;
-    int                   readingframe;
     int                   status;
 };
 
