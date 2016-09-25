@@ -812,9 +812,15 @@ AVFrame *ffmpeg_prepare_frame(struct ffmpeg *ffmpeg, unsigned char *y,
 void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const char *fmt, va_list vl)
 {
     char buf[1024];
+    char *end;
 
     /* Flatten the message coming in from avcodec. */
     vsnprintf(buf, sizeof(buf), fmt, vl);
+    end = buf + strlen(buf);
+    if (end > buf && end[-1] == '\n')
+    {
+        *--end = 0;
+    }
 
     /* If the debug_level is correct then send the message to the motion logging routine.
      * While it is not really desired to look for specific text in the message, there does
