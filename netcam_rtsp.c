@@ -73,7 +73,6 @@ static void netcam_rtsp_close_context(netcam_context_ptr netcam){
 
     netcam_rtsp_null_context(netcam);
 }
-
 /**
  * netcam_buffsize_rtsp
  *
@@ -112,7 +111,6 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
                           "netcam_check_buf_size");
     buff->size = new_size;
 }
-
 /**
  * decode_packet
  *
@@ -159,7 +157,6 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
 
     return frame_size;
 }
-
 /**
  * netcam_open_codec
  *
@@ -212,7 +209,6 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
 
     return 0;
 }
-
 /**
 * rtsp_new_context
 *
@@ -454,6 +450,23 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Null path passed to connect (%s)", netcam->rtsp->path);
         }
         return -1;
+    }
+
+    /*
+     * Documentation does not indicate thread safety on these
+     * init functions so we lock them just in case.
+     */
+    if (netcam->rtsp->status == RTSP_RECONNECTING){
+        pthread_mutex_lock(&global_lock);
+            avformat_network_deinit();
+            avformat_network_init();
+        pthread_mutex_unlock(&global_lock);
+    } else {
+        pthread_mutex_lock(&global_lock);
+            av_register_all();
+            avcodec_register_all();
+            avformat_network_init();
+        pthread_mutex_unlock(&global_lock);
     }
 
     // open the network connection
@@ -769,7 +782,6 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
 }
-
 /**
 * netcam_shutdown_rtsp
 *
@@ -807,7 +819,6 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
 #endif /* End #ifdef HAVE_FFMPEG */
 }
-
 /**
 * netcam_setup_rtsp
 *
@@ -912,16 +923,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
         netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 8 (%d).", netcam->cnt->conf.height);
     }
-
-    /*
-     * Documentation does not indicate thread safety on these
-     * init functions but we lock them just in case.
-     */
-    pthread_mutex_lock(&global_lock);
-        av_register_all();
-        avcodec_register_all();
-        avformat_network_init();
-    pthread_mutex_unlock(&global_lock);
 
     /*
      * The RTSP context should be all ready to attempt a connection with
