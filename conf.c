@@ -2426,7 +2426,7 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
 {
     DIR *dp;
     struct dirent *ep;
-    int name_len;
+    size_t name_len;
 
     char conf_file[PATH_MAX];
 
