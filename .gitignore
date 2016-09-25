@@ -12,8 +12,8 @@ Makefile
 configure
 motion-dist.conf
 motion.init-Debian
-motion.init-Fedora
 motion.init-FreeBSD.sh
+motion.service
 motion.spec
 thread1-dist.conf
 thread2-dist.conf
