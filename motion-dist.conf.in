@@ -480,8 +480,8 @@ timelapse_filename %Y%m%d-timelapse
 ############################################################
 # Global Network Options
 ############################################################
-# Enable or disable IPV6 for http control and stream (default: off )
-ipv6_enabled off
+# Listen to IPv4 localhost instead of IPv6 (default: on)
+localhost_ipv4 on
 
 ############################################################
 # Live Stream Server

@@ -95,7 +95,7 @@ struct config conf_template = {
 #ifdef HAVE_SDL
     sdl_threadnr:                   0,
 #endif
-    ipv6_enabled:                   0,
+    localhost_ipv4:                 1,
     stream_port:                    0,
     stream_quality:                 50,
     stream_motion:                  0,
@@ -1076,13 +1076,13 @@ config_param config_params[] = {
     },
 #endif /* HAVE_FFMPEG */
     {
-    "ipv6_enabled",
+    "localhost_ipv4",
     "\n############################################################\n"
     "# Global Network Options\n"
     "############################################################\n\n"
-    "# Enable or disable IPV6 for http control and stream (default: off)",
+    "# Listen to IPv4 localhost instead of IPv6 (default: on)",
     0,
-    CONF_OFFSET(ipv6_enabled),
+    CONF_OFFSET(localhost_ipv4),
     copy_bool,
     print_bool
     },
