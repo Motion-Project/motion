@@ -15,7 +15,7 @@ motion.init-Debian
 motion.init-FreeBSD.sh
 motion.service
 motion.spec
-thread1-dist.conf
-thread2-dist.conf
-thread3-dist.conf
-thread4-dist.conf
+camera1-dist.conf
+camera2-dist.conf
+camera3-dist.conf
+camera4-dist.conf
