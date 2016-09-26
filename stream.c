@@ -724,23 +724,28 @@ int http_bindsock(int port, int local, int local_ipv4)
 {
     int sd = socket(AF_INET6, SOCK_STREAM, 0);
 
+    char *addr_str;
     struct sockaddr_in6 sin6;
     bzero(&sin6, sizeof(struct sockaddr_in6));
     sin6.sin6_family = AF_INET6;
     sin6.sin6_port = htons(port);
     if(local) {
-        if(local_ipv4) //listen only on 127.0.0.1
+        if(local_ipv4) {
+            addr_str = "127.0.0.1";
             sin6.sin6_addr = in6addr_loopback4;
-        else //listen only on ::1
+        } else {
+            addr_str = "::1";
             sin6.sin6_addr = in6addr_loopback;
+        }
     } else {
+        addr_str = "any address";
         sin6.sin6_addr = in6addr_any;
     }
     int no = 0;
     setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 
     if (bind(sd, &sin6, sizeof(sin6)) != 0) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: error binding on port: %d", port);
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: error binding on %s port %d", addr_str, port);
         return -1;
     }
 
@@ -749,7 +754,7 @@ int http_bindsock(int port, int local, int local_ipv4)
         return -1;
     }
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: listening on port: %d", port);
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: listening on %s port %d", addr_str, port);
 
     return sd;
 }

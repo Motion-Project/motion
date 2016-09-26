@@ -2607,8 +2607,8 @@ void httpd_run(struct context **cnt)
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-        "%s: motion-httpd/"VERSION" running, accepting connections");
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"%s: Started motion-httpd server on port %d (auth %s)",
+        cnt[0]->conf.webcontrol_port, cnt[0]->conf.webcontrol_authentication ? "Enabled":"Disabled");
 
     if (cnt[0]->conf.webcontrol_authentication != NULL) {
         char *userpass = NULL;
