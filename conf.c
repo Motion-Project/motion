@@ -744,9 +744,9 @@ config_param config_params[] = {
     },
     {
     "camera_id",
-    "Id used to label the camera when inserting data into SQL or saving the\n"
-    "camera image to disk.  This is better than using thread ID so that there\n"
-    "always is a consistent label\n",
+    "# Id used to label the camera when inserting data into SQL or saving the\n"
+    "# camera image to disk.  This is better than using thread ID so that there\n"
+    "# always is a consistent label",
     0,
     CONF_OFFSET(camera_id),
     copy_int,
