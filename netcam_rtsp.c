@@ -73,7 +73,6 @@ static void netcam_rtsp_close_context(netcam_context_ptr netcam){
 
     netcam_rtsp_null_context(netcam);
 }
-
 /**
  * netcam_buffsize_rtsp
  *
@@ -112,7 +111,6 @@ static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
                           "netcam_check_buf_size");
     buff->size = new_size;
 }
-
 /**
  * decode_packet
  *
@@ -159,7 +157,6 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
 
     return frame_size;
 }
-
 /**
  * netcam_open_codec
  *
@@ -212,7 +209,6 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
 
     return 0;
 }
-
 /**
 * rtsp_new_context
 *
@@ -258,15 +254,31 @@ struct rtsp_context *rtsp_new_context(void){
 static int netcam_interrupt_rtsp(void *ctx){
     struct rtsp_context *rtsp = (struct rtsp_context *)ctx;
 
-    if (rtsp->readingframe != 1) {
+    if (rtsp->status == RTSP_CONNECTED) {
         return 0;
-    } else {
+    } else if (rtsp->status == RTSP_READINGIMAGE) {
         struct timeval interrupttime;
         if (gettimeofday(&interrupttime, NULL) < 0) {
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Reading picture timed out for %s",rtsp->path);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            return 1;
+        } else{
+            return 0;
+        }
+    } else {
+        /* This is for NOTCONNECTED and RECONNECTING status.  We give these
+         * options more time because all the ffmpeg calls that are inside the
+         * rtsp_connect function will use the same start time.  Otherwise we
+         * would need to reset the time before each call to a ffmpeg function.
+        */
+        struct timeval interrupttime;
+        if (gettimeofday(&interrupttime, NULL) < 0) {
+            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
+        }
+        if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 30){
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
             return 1;
         } else{
             return 0;
@@ -313,7 +325,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     }
     netcam->rtsp->startreadtime = curtime;
 
-    netcam->rtsp->readingframe = 1;
+    netcam->rtsp->status = RTSP_READINGIMAGE;
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
         if(packet.stream_index != netcam->rtsp->video_stream_index) {
             my_packet_unref(packet);
@@ -330,7 +342,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         packet.data = NULL;
         packet.size = 0;
     }
-    netcam->rtsp->readingframe = 0;
+    netcam->rtsp->status = RTSP_CONNECTED;
 
     // at this point, we are finished with the packet
     my_packet_unref(packet);
@@ -440,11 +452,32 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         return -1;
     }
 
+    /*
+     * Documentation does not indicate thread safety on these
+     * init functions so we lock them just in case.
+     */
+    if (netcam->rtsp->status == RTSP_RECONNECTING){
+        pthread_mutex_lock(&global_lock);
+            avformat_network_deinit();
+            avformat_network_init();
+        pthread_mutex_unlock(&global_lock);
+    } else {
+        pthread_mutex_lock(&global_lock);
+            av_register_all();
+            avcodec_register_all();
+            avformat_network_init();
+        pthread_mutex_unlock(&global_lock);
+    }
+
     // open the network connection
     AVDictionary *opts = 0;
     netcam->rtsp->format_context = avformat_alloc_context();
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
     netcam->rtsp->format_context->interrupt_callback.opaque = netcam->rtsp;
+
+    if (gettimeofday(&netcam->rtsp->startreadtime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
+    }
 
     if (strncmp(netcam->rtsp->path, "http", 4) == 0 ){
         netcam->rtsp->format_context->iformat = av_find_input_format("mjpeg");
@@ -749,7 +782,6 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
 }
-
 /**
 * netcam_shutdown_rtsp
 *
@@ -787,7 +819,6 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
     MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
 #endif /* End #ifdef HAVE_FFMPEG */
 }
-
 /**
 * netcam_setup_rtsp
 *
@@ -877,7 +908,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     /*
      * Now we need to set some flags
      */
-    netcam->rtsp->readingframe = 0;
     netcam->rtsp->status = RTSP_NOTCONNECTED;
 
     /*
@@ -893,16 +923,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
         netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 8 (%d).", netcam->cnt->conf.height);
     }
-
-    /*
-     * Documentation does not indicate thread safety on these
-     * init functions but we lock them just in case.
-     */
-    pthread_mutex_lock(&global_lock);
-        av_register_all();
-        avcodec_register_all();
-        avformat_network_init();
-    pthread_mutex_unlock(&global_lock);
 
     /*
      * The RTSP context should be all ready to attempt a connection with
