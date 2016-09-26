@@ -720,7 +720,7 @@ Error:
  *
  * Returns: socket descriptor or -1 if any error happens
  */
-int http_bindsock(int port, int local, int local_ipv4)
+int http_bindsock(int port, int local, int ipv6_localhost)
 {
     int sd = socket(AF_INET6, SOCK_STREAM, 0);
 
@@ -730,12 +730,12 @@ int http_bindsock(int port, int local, int local_ipv4)
     sin6.sin6_family = AF_INET6;
     sin6.sin6_port = htons(port);
     if(local) {
-        if(local_ipv4) {
-            addr_str = "127.0.0.1";
-            sin6.sin6_addr = in6addr_loopback4;
-        } else {
+        if(ipv6_localhost) {
             addr_str = "::1";
             sin6.sin6_addr = in6addr_loopback;
+        } else {
+            addr_str = "127.0.0.1";
+            sin6.sin6_addr = in6addr_loopback4;
         }
     } else {
         addr_str = "any address";
@@ -1010,7 +1010,7 @@ static int stream_check_write(struct stream *list)
 int stream_init(struct context *cnt)
 {
     cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost,
-                                       cnt->conf.localhost_ipv4);
+                                       cnt->conf.ipv6_enabled);
     cnt->stream.next = NULL;
     cnt->stream.prev = NULL;
     return cnt->stream.socket;

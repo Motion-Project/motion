@@ -70,7 +70,7 @@ struct config {
 #ifdef HAVE_SDL
     int sdl_threadnr;
 #endif
-    int localhost_ipv4;
+    int ipv6_enabled;
     int stream_port;
     int stream_quality;
     int stream_motion;

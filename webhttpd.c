@@ -2601,7 +2601,7 @@ void httpd_run(struct context **cnt)
     sigaction(SIGCHLD, &act, NULL);
 
     int sd = http_bindsock(cnt[0]->conf.webcontrol_port,
-        cnt[0]->conf.webcontrol_localhost, cnt[0]->conf.localhost_ipv4);
+        cnt[0]->conf.webcontrol_localhost, cnt[0]->conf.ipv6_enabled);
     if (sd < 0) {
         pthread_mutex_destroy(&httpd_mutex);
         return;
