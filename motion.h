@@ -54,6 +54,8 @@
 #include <sys/param.h>
 #include <stdint.h>
 
+#include <netinet/in.h>
+
 #define _LINUX_TIME_H 1
 #if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L)) && (!defined(BSD))
 #include <linux/videodev.h>

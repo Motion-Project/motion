@@ -12,6 +12,7 @@
  */
 #include "webhttpd.h"    /* already includes motion.h */
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stddef.h>
@@ -2592,6 +2593,7 @@ void httpd_run(struct context **cnt)
     struct sigaction act;
     char *authentication = NULL;
     char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+    int qlen = DEF_MAXWEBQUEUE; // or SOMAXCONN
 
     /* Initialize the mutex */
     pthread_mutex_init(&httpd_mutex, NULL);
@@ -2653,6 +2655,12 @@ void httpd_run(struct context **cnt)
                            hbuf, sbuf);
                 break;
             }
+
+            /* it is totally harmless if this fails. if it succeeds, it may slightly improve the
+             * latency of the web-server */
+#ifdef TCP_FASTOPEN
+            (void)setsockopt(sd, SOL_TCP, TCP_FASTOPEN, &qlen, sizeof(qlen));
+#endif
 
             MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd failed bind() interface %s"
                        " / port %s, retrying", hbuf, sbuf);
