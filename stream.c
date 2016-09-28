@@ -725,26 +725,26 @@ int http_bindsock(int port, int local, int ipv6_localhost)
     int sd = socket(AF_INET6, SOCK_STREAM, 0);
 
     char *addr_str;
-    struct sockaddr_in6 sin6;
-    bzero(&sin6, sizeof(struct sockaddr_in6));
-    sin6.sin6_family = AF_INET6;
-    sin6.sin6_port = htons(port);
+    struct sockaddr_in6 sin;
+    bzero(&sin, sizeof(struct sockaddr_in6));
+    sin.sin6_family = AF_INET6;
+    sin.sin6_port = htons(port);
     if(local) {
         if(ipv6_localhost) {
             addr_str = "::1";
-            sin6.sin6_addr = in6addr_loopback;
+            sin.sin6_addr = in6addr_loopback;
         } else {
             addr_str = "127.0.0.1";
-            sin6.sin6_addr = in6addr_loopback4;
+            sin.sin6_addr = in6addr_loopback4;
         }
     } else {
         addr_str = "any address";
-        sin6.sin6_addr = in6addr_any;
+        sin.sin6_addr = in6addr_any;
     }
     int no = 0;
     setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 
-    if (bind(sd, &sin6, sizeof(sin6)) != 0) {
+    if (bind(sd, &sin, sizeof(sin)) != 0) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: error binding on %s port %d", addr_str, port);
         return -1;
     }
@@ -769,10 +769,10 @@ static int http_acceptsock(int sl)
 {
     int sc;
     unsigned long i;
-    struct sockaddr_storage sin;
-    socklen_t addrlen = sizeof(sin);
+    struct sockaddr_in6 sin;
+    socklen_t sin_len = sizeof(sin);
 
-    if ((sc = accept(sl, (struct sockaddr *)&sin, &addrlen)) >= 0) {
+    if ((sc = accept(sl, &sin, &sin_len)) >= 0) {
         i = 1;
         ioctl(sc, FIONBIO, &i);
         return sc;

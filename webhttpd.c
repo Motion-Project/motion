@@ -2558,8 +2558,8 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
 static int acceptnonblocking(int serverfd, int timeout)
 {
     int curfd;
-    struct sockaddr_storage client;
-    socklen_t namelen = sizeof(client);
+    struct sockaddr_in6 client;
+    socklen_t client_len = sizeof(client);
 
     struct timeval tm;
     fd_set fds;
@@ -2571,7 +2571,7 @@ static int acceptnonblocking(int serverfd, int timeout)
 
     if (select(serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
         if (FD_ISSET(serverfd, &fds)) {
-            if ((curfd = accept(serverfd, (struct sockaddr*)&client, &namelen)) > 0)
+            if ((curfd = accept(serverfd, &client, &client_len)) > 0)
                 return curfd;
         }
     }
