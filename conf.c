@@ -278,7 +278,7 @@ config_param config_params[] = {
     },
     {
     "v4l2_palette",
-    "# v4l2_palette allows to choose preferable palette to be use by motion\n"
+    "# v4l2_palette allows one to choose preferable palette to be use by motion\n"
     "# to capture from those supported by your videodevice. (default: 17)\n"
     "# E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and\n"
     "# V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.\n"

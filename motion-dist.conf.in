@@ -38,7 +38,7 @@ log_type all
 # for FreeBSD default is /dev/bktr0
 videodevice /dev/video0
 
-# v4l2_palette allows to choose preferable palette to be use by motion
+# v4l2_palette allows one to choose preferable palette to be use by motion
 # to capture from those supported by your videodevice. (default: 17)
 # E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and
 # V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.

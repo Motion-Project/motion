@@ -903,7 +903,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
     default:
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknown image type %d",
                    cnt->imgs.type);
     }
 
@@ -923,7 +923,7 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
             break;
         default:
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d",
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknown image type %d",
                        cnt->imgs.type);
         }
     }

@@ -465,7 +465,7 @@ else
     saved_LIBS=$LIBS
 
     # first we check to see if the sqlite3 amalgamation (sqlite3.c), is in with our source
-    # this is the prefered way to use sqlite
+    # this is the preferred way to use sqlite
     if test -f sqlite3.c; then
         SQLITE3_SUPPORT="yes"
         VIDEO="$VIDEO sqlite3.o"
