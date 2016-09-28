@@ -1829,15 +1829,15 @@ A "motion" image/mpeg shows the pixels that have actually changed during the las
 A "normal" image is the real image taken by the camera with text overlayed.
 .TP
 .B Threads and config files
-If Motion was invoked with command line option -c pathname Motion will expect the config file to be as specified. When you specify the config file on the command line with -c you can call it anything.
+If Motion was invoked with command line option \-c pathname Motion will expect the config file to be as specified. When you specify the config file on the command line with \-c you can call it anything.
 .br
-If you do not specify -c or the filename you give Motion does not exist, Motion will search for the configuration file called 'motion.conf' in the following order:
+If you do not specify \-c or the filename you give Motion does not exist, Motion will search for the configuration file called 'motion.conf' in the following order:
 .br
 1. Current directory from where motion was invoked
 .br
 2. Then in a directory called '.motion' in the current users home directory (shell environment variable $HOME). E.g. /home/goofy/.motion/motion.conf
 .br
-3. The motion/ subdirectory inside the directory defined by the --sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
+3. The motion/ subdirectory inside the directory defined by the \-\-sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
 .br
 If you have write access to /usr/local/etc/motion then the editor recommends having only one motion.conf file in the default /usr/local/etc/motion directory.
 .br
@@ -1876,7 +1876,7 @@ If you run the http control command http://host:port/0/config/writeyes, motion w
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
 .br
-In text_left and text_right you can additionally use '\n' for new line.
+In text_left and text_right you can additionally use '\\n' for new line.
 
 .TP
 .B %a
