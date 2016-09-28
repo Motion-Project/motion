@@ -1837,11 +1837,11 @@ If you do not specify -c or the filename you give Motion does not exist, Motion 
 .br
 2. Then in a directory called '.motion' in the current users home directory (shell environment variable $HOME). E.g. /home/goofy/.motion/motion.conf
 .br
-3. The directory defined by the --sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
+3. The motion/ subdirectory inside the directory defined by the --sysconfdir=DIR when running .configure during installation of Motion (If this option was not defined the default is /usr/local/etc/)
 .br
-If you have write access to /usr/local/etc then the editor recommends having only one motion.conf file in the default /usr/local/etc/ directory.
+If you have write access to /usr/local/etc/motion then the editor recommends having only one motion.conf file in the default /usr/local/etc/motion directory.
 .br
-Motion has a configuration file in the distribution package called motion-dist.conf. When you run 'make install' this files gets copied to the /usr/local/etc directory.
+Motion has a configuration file in the distribution package called motion-dist.conf. When you run 'make install' this files gets copied to the /usr/local/etc/motion directory.
 .br
 The configuration file needs to be renamed from motion-dist.conf to motion.conf. The original file is called motion-dist.conf so that your perfectly working motion.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of Motion.
 .br

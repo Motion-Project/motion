@@ -459,7 +459,7 @@ The long term option will however only become effective the next time you get in
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --prefix=PREFIX </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > install architecture-independent files in PREFIX <br /> [/usr/local]</td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > The default /usr/local means that <br><br> The executable binary "motion" is installed in /usr/local/bin <br> The manual page in /usr/local/man/man1 <br>The document files in /usr/local/docs/motion-version<br>The configuration file in /usr/local/etc <br>The example config files in /usr/local/examples/motion-version <br><br> The editor recommends keeping this default setting. <br /> If you are experimenting with many parallel versions it may be interesting to set the PREFIX to e.g. /usr/local/motion and then add /usr/local/motion/bin to your search path (or simply cd /usr/local/motion/bin before execution). <br /> This way you can change version just by changing the symbolic link in /usr/local/motion as suggested earlier in this guide. <br /> If you are installing the software on a machine where you have no access to the /usr/local but have write access to a home directory, then you should change this to point to a directory within your home tree. <br /> Example: --prefix=$HOME </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > The default /usr/local means that <br><br> The executable binary "motion" is installed in /usr/local/bin <br> The manual page in /usr/local/man/man1 <br>The document files in /usr/local/docs/motion-version<br>The configuration file in /usr/local/etc/motion <br>The example config files in /usr/local/examples/motion-version <br><br> The editor recommends keeping this default setting. <br /> If you are experimenting with many parallel versions it may be interesting to set the PREFIX to e.g. /usr/local/motion and then add /usr/local/motion/bin to your search path (or simply cd /usr/local/motion/bin before execution). <br /> This way you can change version just by changing the symbolic link in /usr/local/motion as suggested earlier in this guide. <br /> If you are installing the software on a machine where you have no access to the /usr/local but have write access to a home directory, then you should change this to point to a directory within your home tree. <br /> Example: --prefix=$HOME </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --exec-prefix=EPREFIX </td>
@@ -495,7 +495,7 @@ The long term option will however only become effective the next time you get in
          <br /> 
          <UL>  <br /> 1. Current directory from where motion was invoked 
                <br /> 2. $HOME/.motion 
-               <br /> 3. The sysconfig directory set by this switch. If not defined the default is /usr/local/etc/ <br />
+               <br /> 3. The motion/ subdirectory inside the sysconfig directory set by this switch. If not defined the default is /usr/local/etc/ <br />
          </UL> <br /> Editor recommends leaving this at default. Be careful if you run "make install" again. 
          This will overwrite the motion-dist.conf file that you may have edited. 
        </td>
@@ -691,7 +691,7 @@ Creates the directories (if they do not already exist)(path shown are the defaul
 <ul>
 <li>/usr/local/bin</li>
 <li>usr/local/man/man1</li>
-<li>/usr/local/etc</li>
+<li>/usr/local/etc/motion</li>
 <li>/usr/local/share/doc/motion-<code>version</code></li>
 <li>/usr/local/share/doc/examples/motion-<code>version</code></li>
 </ul>
@@ -704,7 +704,7 @@ Copies the following files from the base motion directory
   <li> Manual page "motion.1" to /usr/local/man/man1</li>
   <li> Document files "CHANGELOG, COPYING, CREDITS, INSTALL, and README to /usr/local/share/doc/motion-<code>version</code></li>
   <li> Example configuration files "*.conf" to /usr/local/share/doc/examples/motion-<code>version</code></li>
-  <li> Configuration file "motion-dist.conf" to /usr/local/etc</li>
+  <li> Configuration file "motion-dist.conf" to /usr/local/etc/motion</li>
 </ul> 
 
 Note that the any existing files are overwritten. The default config file motion-dist.conf is named like 
