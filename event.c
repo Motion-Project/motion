@@ -565,7 +565,7 @@ static void event_extpipe_put(struct context *cnt,
         /* Check that is open */
         if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
             if (!fwrite(img, cnt->imgs.size, 1, cnt->extpipe))
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Error writting in pipe , state error %d",
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Error writing in pipe , state error %d",
                            ferror(cnt->extpipe));
         } else {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pipe %s not created or closed already ",
