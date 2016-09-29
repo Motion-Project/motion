@@ -741,16 +741,19 @@ int http_bindsock(int port, int local, int ipv6_localhost)
         addr_str = "any address";
         sin.sin6_addr = in6addr_any;
     }
-    int no = 0;
-    setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
+    int no = 0, yes = 1;
+    setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no));
+    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
     if (bind(sd, &sin, sizeof(sin)) != 0) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: error binding on %s port %d", addr_str, port);
+        close(sd);
         return -1;
     }
 
     if (listen(sd, DEF_MAXWEBQUEUE) != 0) {
         MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error listening");
+        close(sd);
         return -1;
     }
 
