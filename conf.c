@@ -1080,7 +1080,7 @@ config_param config_params[] = {
     "\n############################################################\n"
     "# Global Network Options\n"
     "############################################################\n\n"
-    "# Enable or disable IPV6 for http control and stream (default: off)",
+    "# Listen to IPv6 localhost instead of IPv4 (default: off)",
     0,
     CONF_OFFSET(ipv6_enabled),
     copy_bool,

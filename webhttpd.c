@@ -2558,8 +2558,8 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
 static int acceptnonblocking(int serverfd, int timeout)
 {
     int curfd;
-    struct sockaddr_storage client;
-    socklen_t namelen = sizeof(client);
+    struct sockaddr_in6 client;
+    socklen_t client_len = sizeof(client);
 
     struct timeval tm;
     fd_set fds;
@@ -2571,7 +2571,7 @@ static int acceptnonblocking(int serverfd, int timeout)
 
     if (select(serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
         if (FD_ISSET(serverfd, &fds)) {
-            if ((curfd = accept(serverfd, (struct sockaddr*)&client, &namelen)) > 0)
+            if ((curfd = accept(serverfd, &client, &client_len)) > 0)
                 return curfd;
         }
     }
@@ -2586,12 +2586,9 @@ static int acceptnonblocking(int serverfd, int timeout)
  */
 void httpd_run(struct context **cnt)
 {
-    int sd = -1, client_socket_fd, val;
     unsigned int client_sent_quit_message = 1, closehttpd = 0;
-    struct addrinfo hints, *res = NULL, *ressave = NULL;
     struct sigaction act;
     char *authentication = NULL;
-    char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
     /* Initialize the mutex */
     pthread_mutex_init(&httpd_mutex, NULL);
@@ -2603,88 +2600,15 @@ void httpd_run(struct context **cnt)
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    /* AI_PASSIVE as we are going to listen */
-    hints.ai_flags = AI_PASSIVE;
-#if defined(BSD)
-    hints.ai_family = AF_INET;
-#else
-    if (!cnt[0]->conf.ipv6_enabled)
-        hints.ai_family = AF_INET;
-    else
-        hints.ai_family = AF_UNSPEC;
-#endif
-    hints.ai_socktype = SOCK_STREAM;
-
-    snprintf(portnumber, sizeof(portnumber), "%u", cnt[0]->conf.webcontrol_port);
-
-    val = getaddrinfo(cnt[0]->conf.webcontrol_localhost ? "localhost" : NULL, portnumber, &hints, &res);
-
-    /* check != 0 to allow FreeBSD compatibility */
-    if (val != 0) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for httpd socket failed: %s",
-                   gai_strerror(val));
-        if (res)
-            freeaddrinfo(res);
-        pthread_mutex_destroy(&httpd_mutex);
-        return;
-    }
-
-    ressave = res;
-
-    while (res) {
-        /* create socket */
-        sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-
-        getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
-                    sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
-
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd testing : %s addr: %s port: %s",
-                   res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
-
-        if (sd >= 0) {
-            val = 1;
-            /* Reuse Address */
-            setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
-
-            if (bind(sd, res->ai_addr, res->ai_addrlen) == 0) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Bound : %s addr: %s"
-                           " port: %s", res->ai_family == AF_INET ? "IPV4":"IPV6",
-                           hbuf, sbuf);
-                break;
-            }
-
-            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd failed bind() interface %s"
-                       " / port %s, retrying", hbuf, sbuf);
-            close(sd);
-            sd = -1;
-        }
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd socket failed interface %s"
-                   " / port %s, retrying", hbuf, sbuf);
-        res = res->ai_next;
-    }
-
-    freeaddrinfo(ressave);
-
+    int sd = http_bindsock(cnt[0]->conf.webcontrol_port,
+        cnt[0]->conf.webcontrol_localhost, cnt[0]->conf.ipv6_enabled);
     if (sd < 0) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR bind()"
-                   " [interface %s port %s]", hbuf, sbuf);
         pthread_mutex_destroy(&httpd_mutex);
         return;
     }
 
-    if (listen(sd, DEF_MAXWEBQUEUE) == -1) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR listen()"
-                   " [interface %s port %s]", hbuf, sbuf);
-        close(sd);
-        pthread_mutex_destroy(&httpd_mutex);
-        return;
-    }
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd/"VERSION" running,"
-               " accepting connections");
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd: waiting for data"
-               " on %s port TCP %s", hbuf, sbuf);
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"%s: Started motion-httpd server on port %d (auth %s)",
+        cnt[0]->conf.webcontrol_port, cnt[0]->conf.webcontrol_authentication ? "Enabled":"Disabled");
 
     if (cnt[0]->conf.webcontrol_authentication != NULL) {
         char *userpass = NULL;
@@ -2701,7 +2625,7 @@ void httpd_run(struct context **cnt)
 
     while ((client_sent_quit_message) && (!closehttpd)) {
 
-        client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
+        int client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
 
         if (client_socket_fd < 0) {
             if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
