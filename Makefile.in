@@ -155,12 +155,12 @@ svn:
 	svn update
 
 autotools:
-	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.ac
+	@sed -i.bak 's/.\/commit-version.sh/.\/version.sh/g' configure.ac
 	autoconf
 	./configure --with-developer-flags 
 
 autotools-git:
-	@sed -i 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac
+	@sed -i.bak 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac
 	autoconf
 	./configure --with-developer-flags 
 
@@ -168,15 +168,15 @@ autotools-git:
 build-commit: distclean svn set-version all
 
 set-version:
-	@sed -i 's/.\/version.sh/.\/commit-version.sh/g' configure.ac
+	@sed -i.bak 's/.\/version.sh/.\/commit-version.sh/g' configure.ac
 	autoconf
-	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.ac
+	@sed -i.bak 's/.\/commit-version.sh/.\/version.sh/g' configure.ac
 	./configure --with-developer-flags
 
 set-version-git:
-	@sed -i 's/.\/version.sh/.\/git-commit-version.sh/g' configure.ac
+	@sed -i.bak 's/.\/version.sh/.\/git-commit-version.sh/g' configure.ac
 	autoconf
-	@sed -i 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac
+	@sed -i.bak 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac
 	./configure --with-developer-flags
 
 
@@ -207,11 +207,11 @@ install:
 	mkdir -p $(DESTDIR)$(sysconfdir)/motion
 	mkdir -p $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(examplesdir)
-	@sed -i 's|$${prefix}|$(prefix)|' motion-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' camera1-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' camera2-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' camera3-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' camera4-dist.conf				
+	@sed -i.bak 's|$${prefix}|$(prefix)|' motion-dist.conf
+	@sed -i.bak 's|$${prefix}|$(prefix)|' camera1-dist.conf
+	@sed -i.bak 's|$${prefix}|$(prefix)|' camera2-dist.conf
+	@sed -i.bak 's|$${prefix}|$(prefix)|' camera3-dist.conf
+	@sed -i.bak 's|$${prefix}|$(prefix)|' camera4-dist.conf
 	$(INSTALL_DATA) motion.1 $(DESTDIR)$(mandir)/man1
 	$(INSTALL_DATA) $(DOC) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $(EXAMPLES) $(DESTDIR)$(examplesdir)
