@@ -188,7 +188,7 @@ static int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_init(){
+void ffmpeg_init(void){
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,
         "%s: ffmpeg libavcodec version %d.%d.%d"
         " libavformat version %d.%d.%d"
@@ -197,8 +197,14 @@ void ffmpeg_init(){
 
     av_register_all();
     avcodec_register_all();
+    avformat_network_init();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
 }
+
+void ffmpeg_finalise(void) {
+    avformat_network_deinit();
+}
+
 /**
  * get_oformat
  *      Obtains the output format used for the specified codec. For mpeg4 codecs,

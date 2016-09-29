@@ -793,8 +793,6 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
     
-    avformat_network_deinit();
-    
     free(netcam->rtsp->path);
     free(netcam->rtsp->user);
     free(netcam->rtsp->pass);
@@ -913,16 +911,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
         netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 8 (%d).", netcam->cnt->conf.height);
     }
-
-    /*
-     * Documentation does not indicate thread safety on these
-     * init functions but we lock them just in case.
-     */
-    pthread_mutex_lock(&global_lock);
-        av_register_all();
-        avcodec_register_all();
-        avformat_network_init();
-    pthread_mutex_unlock(&global_lock);
 
     /*
      * The RTSP context should be all ready to attempt a connection with

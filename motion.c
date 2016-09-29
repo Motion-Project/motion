@@ -2917,7 +2917,9 @@ int main (int argc, char **argv)
 #ifdef HAVE_SDL
     sdl_stop();
 #endif
-
+#ifdef HAVE_FFMPEG
+    ffmpeg_finalise();
+#endif /* HAVE_FFMPEG */
 
     // Be sure that http control exits fine
     cnt_list[0]->webcontrol_finish = 1;
