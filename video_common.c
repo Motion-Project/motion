@@ -425,6 +425,40 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
     return ret;
 }
 
+/**
+ * y10torgb24
+ *
+ *
+ */
+void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift)
+{
+    /* Source code: raw2rgbpnm project
+    /* url: http://salottisipuli.retiisi.org.uk/cgi-bin/gitweb.cgi?p=~sailus/raw2rgbpnm.git;a=summary */
+
+    /* bpp - bits per pixel */
+    /* bpp: 'Pixels are stored in 16-bit words with unused high bits padded with 0' */
+    /* url: https://linuxtv.org/downloads/v4l-dvb-apis/V4L2-PIX-FMT-Y12.html */
+    /* url: https://linuxtv.org/downloads/v4l-dvb-apis/V4L2-PIX-FMT-Y10.html */
+
+    int src_size[2] = {width,height};
+    int bpp = 16;
+    unsigned int src_stride = (src_size[0] * bpp) / 8;
+    unsigned int rgb_stride = src_size[0] * 3;
+    int a = 0;
+    int src_x = 0, src_y = 0;
+    int dst_x = 0, dst_y = 0;
+
+    for (src_y = 0, dst_y = 0; dst_y < src_size[1]; src_y++, dst_y++) {
+        for (src_x = 0, dst_x = 0; dst_x < src_size[0]; src_x++, dst_x++) {
+            a = (cap_map[src_y*src_stride + src_x*2+0] |
+                (cap_map[src_y*src_stride + src_x*2+1] << 8)) >> shift;
+            map[dst_y*rgb_stride+3*dst_x+0] = a;
+            map[dst_y*rgb_stride+3*dst_x+1] = a;
+            map[dst_y*rgb_stride+3*dst_x+2] = a;
+        }
+    }
+}
+
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
 

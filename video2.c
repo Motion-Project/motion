@@ -136,6 +136,14 @@
 #define V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8') /* YUVY per line  */
 #endif
 
+#ifndef V4L2_PIX_FMT_Y10
+#define V4L2_PIX_FMT_Y10     v4l2_fourcc('Y', '1', '0', ' ') /* 10  Greyscale     */
+#endif
+
+#ifndef V4L2_PIX_FMT_Y12
+#define V4L2_PIX_FMT_Y12     v4l2_fourcc('Y', '1', '2', ' ') /* 12  Greyscale     */
+#endif
+
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
@@ -481,7 +489,9 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
         V4L2_PIX_FMT_UYVY,
         V4L2_PIX_FMT_YUYV,
         V4L2_PIX_FMT_YUV422P,
-        V4L2_PIX_FMT_YUV420 /* most efficient for motion */
+        V4L2_PIX_FMT_YUV420, /* most efficient for motion */
+        V4L2_PIX_FMT_Y10,
+        V4L2_PIX_FMT_Y12
     };
 
     int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
@@ -969,6 +979,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 {
     sigset_t set, old;
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
+    int shift = 0;
 
     if (viddev->v4l_fmt != VIDEO_PALETTE_YUV420P)
         return V4L_FATAL_ERROR;
@@ -1087,6 +1098,13 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_SN9C10X:
             sonix_decompress(map, the_buffer->ptr, width, height);
             bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
+            conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            return 0;
+        case V4L2_PIX_FMT_Y12:
+            shift += 2;
+        case V4L2_PIX_FMT_Y10:
+            shift += 2;
+            y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
         }
