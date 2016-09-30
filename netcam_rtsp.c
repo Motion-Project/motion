@@ -200,10 +200,8 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
         return -1;
     }
 
-    /* Open the codec  It is not thread safe so lock it*/
-    pthread_mutex_lock(&global_lock);
-        ret = avcodec_open2(dec_ctx, dec, NULL);
-    pthread_mutex_unlock(&global_lock);
+    /* Open the codec */
+    ret = avcodec_open2(dec_ctx, dec, NULL);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
     	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
