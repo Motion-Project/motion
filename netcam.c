@@ -840,8 +840,8 @@ static void netcam_disconnect(netcam_context_ptr netcam)
  */
 static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 {
-    struct sockaddr_in server;      /* For connect */
-    struct addrinfo *res;           /* For getaddrinfo */
+    struct sockaddr_in6 server;      /* For connect */
+    struct addrinfo *ai;           /* For getaddrinfo */
     int ret;
     int saveflags;
     int back_err;
@@ -851,6 +851,18 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     fd_set fd_w;
     struct timeval selecttime;
 
+    /* Lookup the hostname given in the netcam URL. */
+    if ((ret = getaddrinfo(netcam->connect_host, NULL, NULL, &ai)) != 0) {
+        if (!err_flag)
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: getaddrinfo() failed (%s): %s",
+                       netcam->connect_host, gai_strerror(ret));
+
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam (1)");
+
+        netcam_disconnect(netcam);
+        return -1;
+    }
+
     /* Assure any previous connection has been closed - IF we are not in keepalive. */
     if (!netcam->connect_keepalive) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam " 
@@ -859,7 +871,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
         netcam_disconnect(netcam);
 
         /* Create a new socket. */
-        if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        if ((netcam->sock = socket(ai->ai_family, SOCK_STREAM, 0)) < 0) {
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s:  with no keepalive, attempt "
                        "to create socket failed.");
             return -1;
@@ -870,7 +882,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
 
     } else if (netcam->sock == -1) {   /* We are in keepalive mode, check for invalid socket. */
         /* Must be first time, or closed, create a new socket. */
-        if ((netcam->sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        if ((netcam->sock = socket(ai->ai_family, SOCK_STREAM, 0)) < 0) {
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: with keepalive set, invalid socket." 
                        "This could be the first time. Creating a new one failed.");
             return -1;
@@ -907,28 +919,15 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: re-using socket %d since keepalive is set.", 
                netcam->sock);
 
-    /* Lookup the hostname given in the netcam URL. */
-    if ((ret = getaddrinfo(netcam->connect_host, NULL, NULL, &res)) != 0) {
-        if (!err_flag)
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: getaddrinfo() failed (%s): %s",
-                       netcam->connect_host, gai_strerror(ret));
-
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: disconnecting netcam (1)");
-
-        netcam_disconnect(netcam);
-        return -1;
-    }
-
     /*
      * Fill the hostname details into the 'server' structure and
      * attempt to connect to the remote server.
      */
     memset(&server, 0, sizeof(server));
-    memcpy(&server, res->ai_addr, sizeof(server));
-    freeaddrinfo(res);
-
-    server.sin_family = AF_INET;
-    server.sin_port = htons(netcam->connect_port);
+    memcpy(&server, ai->ai_addr, sizeof(server));
+    server.sin6_family = ai->ai_family;
+    server.sin6_port = htons(netcam->connect_port);
+    freeaddrinfo(ai);
 
     /*
      * We set the socket non-blocking and then use a 'select'
@@ -949,8 +948,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     }
 
     /* Now the connect call will return immediately. */
-    ret = connect(netcam->sock, (struct sockaddr *) &server,
-                  sizeof(server));
+    ret = connect(netcam->sock, &server, sizeof(server));
     back_err = errno;           /* Save the errno from connect */
 
     /* If the connect failed with anything except EINPROGRESS, error. */
