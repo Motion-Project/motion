@@ -1,6 +1,6 @@
-.TH MOTION 1 2016-08-25 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2016-09-28 "Motion" "Motion Options and Config Files"
 .SH NAME
-motion \-   Detct motion using a video4linux device or network camera
+motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
 .B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p process_id_file ][ \-l log_file ]
 .SH DESCRIPTION
@@ -128,6 +128,34 @@ Filter to log messages by type
 .RE
 
 .TP
+.B camera_id
+.RS
+.nf
+Values: Numeric identification number for the camera
+Default: The order in which the camera is opened by Motion
+Description:
+.fi
+.RS
+Use this option to assign a number to each camera that is consistent every time that Motion is started.
+By default Motion will assign a number based upon the sequence in which it reads the configuration and this
+sequence may not be the same every time that Motion starts.
+.RE
+.RE
+
+.TP
+.B camera_name
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+User specified string to describe the camera.
+.RE
+.RE
+
+.TP
 .B videodevice
 .RS
 .nf
@@ -176,7 +204,7 @@ If the preferred palette is not available from the video device, Motion will att
 .RE
 .RE
 
-.TP
+.TPq
 .B tunerdevice
 .RS
 .nf
@@ -370,8 +398,8 @@ Description:
 .fi
 .RS
 The user id and password required to access the network camera string.
-only basic authentication is supported at this time.
-Format is in user:password format when both a user name and password is required.
+Only basic authentication is supported at this time.
+Format is in user:password format when both a user name and password are required.
 .RE
 .RE
 
@@ -444,6 +472,36 @@ Description:
 .RS
 When using a RTSP connection for a network camera, use a TCP transport instead of UDP.
 The UDP transport frequently results in "smeared" corrupt images.
+.RE
+.RE
+
+.TP
+.B mmalcam_name
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Name of camera to use if you are using a camera accessed through OpenMax/MMAL.
+This value is used to specify the use of the PI camera.
+The typical value for the PI camera is vc.ril.camera
+.RE
+.RE
+
+.TP
+.B mmalcam_control_params
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Camera configuration options to use for the OpenMax/MMAL camera.
+See the raspivid/raspistill tool documentation for full list of options.
+Typical value for the PI camera is -hf
 .RE
 .RE
 
@@ -963,7 +1021,6 @@ swf - Flash film with extension .swf
 flv - Flash video with extension .flv
 ffv1 - FF video codec 1 for Lossless Encoding
 mov - QuickTime
-ogg - Ogg/Theora
 mp4 - MPEG-4 Part 14 H264 encoding
 mkv - Matroska H264 encoding
 hevc - H.265 / HEVC (High Efficiency Video Coding)
@@ -1779,7 +1836,7 @@ Output motion images to a video4linux loopback device.  The value '-' means next
 .RE
 
 .TP
-.B thread
+.B camera_dir
 .RS
 .nf
 Values: User specified string
@@ -1787,17 +1844,30 @@ Default: Not Defined
 Description:
 .fi
 .RS
-This option specifies the full path and file name to individual thread files.
+This option specifies the optional subdirectory that contains the camera config files.
+.RE
+.RE
+
+.TP
+.B camera
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+This option specifies the full path and file name to individual camera files.
 This option can be listed multiple times.
-Each thread file should contain the options that are unique to that camera/video device.
+Each camera file should contain the options that are unique to that camera/video device.
 Common options are obtained from the motion.conf file and values are overwritten from each
-thread file.  While the motion.conf includes four sample thread options, the actual
-limit of threads is only dependent upon the machine capabilities.
+camera file.  While the motion.conf includes four sample camera files, the actual
+limit of cameras is only dependent upon the machine capabilities.
 Remember: If you have more than one camera you must have one
-thread file for each camera. For example, 2 cameras would require 3 files:
-The motion.conf file AND thread1.conf and thread2.conf.
+camera file for each one. For example, 2 cameras would require 3 files:
+The motion.conf file AND camera1.conf and camera2.conf.
 only put the options that are unique to each camera in the
-thread config files.
+camera config files.
 .RE
 .RE
 
@@ -1813,22 +1883,22 @@ Motion responds to the following signals:
 The config file will be reread.
 .TP
 .B SIGTERM
-If needed motion will create an mpeg file of the last event and exit
+If needed motion will create an movie file of the last event and exit
 .TP
 .B SIGUSR1
-Motion will create an mpeg file of the current event.
+Motion will create an movie file of the current event.
 .SH NOTES
 .TP
 .B Snapshot
 A snapshot is a picture taken at regular intervals independently of any movement in the picture.
 .TP
 .B Motion image
-A "motion" image/mpeg shows the pixels that have actually changed during the last frames. These pictures are not very useful for normal presentation to the public but they are quite useful for testing and tuning and making mask files as you can see exactly where motion sees something moving. Motion is shown in greytones. If labelling is enabled the largest area is marked as blue. Smart mask is shown in read.
+A "motion" image/movie shows the pixels that have actually changed during the last frames. These pictures are not very useful for normal presentation to the public but they are quite useful for testing and tuning and making mask files as you can see exactly where motion sees something moving. Motion is shown in greytones. If labelling is enabled the largest area is marked as blue. Smart mask is shown in read.
 .TP
 .B Normal image
 A "normal" image is the real image taken by the camera with text overlayed.
 .TP
-.B Threads and config files
+.B Cameras and config files
 If Motion was invoked with command line option \-c pathname Motion will expect the config file to be as specified. When you specify the config file on the command line with \-c you can call it anything.
 .br
 If you do not specify \-c or the filename you give Motion does not exist, Motion will search for the configuration file called 'motion.conf' in the following order:
@@ -1845,33 +1915,33 @@ Motion has a configuration file in the distribution package called motion-dist.c
 .br
 The configuration file needs to be renamed from motion-dist.conf to motion.conf. The original file is called motion-dist.conf so that your perfectly working motion.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of Motion.
 .br
-If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with more than one camera in a very elegant way and the way to do it is to create a number of thread config files. Motion will then create an extra tread of itself for each camera. If you only have one camera you only need the motion.conf file. The minute you have two or more cameras you must have one thread config file per camera besides the motion.conf file.
+If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. Motion will then create an extra tread of itself for each camera. If you only have one camera you only need the motion.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motion.conf file.
 .br
-So if you have for example two cameras you need motion.conf and two thread config files. Total of 3 config files.
+So if you have for example two cameras you need motion.conf and two camera config files. Total of 3 config files.
 .br
-An option that is common to all cameras can be placed in motion.conf. (You can also put all parameters in the thread files but that makes a lot of editing when you change a common thing).
+An option that is common to all cameras can be placed in motion.conf. (You can also put all parameters in the camera files but that makes a lot of editing when you change a common thing).
 .br
-An option that is unique to a camera must be defined in each thread file.
+An option that is unique to a camera must be defined in each camera file.
 .br
-The first camera is defined in the first thread file called from motion.conf. The 2nd camera is defined in the 2nd thread file called from motion.conf etc.
+The first camera is defined in the first camera file called from motion.conf. The 2nd camera is defined in the 2nd camera file called from motion.conf etc.
 .br
-Any option defined in motion.conf will be used for all cameras except for the cameras in which the same option is defined in a thread config file.
+Any option defined in motion.conf will be used for all cameras except for the cameras in which the same option is defined in a camera config file.
 .br
 Motion reads its configuration parameters in the following sequence. If the same parameter exists more than one place the last one read wins.
 .br
 1. Motion reads the configuration file motion.conf from the beginning of the file going down line by line.
 .br
-2. If the option "thread" is defined in motion.conf, the thread configuration file(s) is/(are) read.
+2. If the option "camera" is defined in motion.conf, the camera configuration file(s) is/(are) read.
 .br
-3. Motion continues reading the rest of the motion.conf file. Any options from here will overrule the same option previously defines in a thread config file.
+3. Motion continues reading the rest of the motion.conf file. Any options from here will overrule the same option previously defines in a camera config file.
 .br
 4. Motion reads the command line option again overruling any previously defined options.
 .br
-So always call the thread config files in the end of the motion.conf file. If you define options in motion.conf AFTER the thread file calls, the same options in the thread files will never be used. So always put the thread file call at the end of motion.conf.
+So always call the camera config files in the end of the motion.conf file. If you define options in motion.conf AFTER the camera file calls, the same options in the camera files will never be used. So always put the camera file call at the end of motion.conf.
 .br
 If motion is built without specific features such as ffmpeg, mysql etc it will ignore the options that belongs to these features. You do not have to remove them or comment them out.
 .br
-If you run the http control command http://host:port/0/config/writeyes, motion will overwrite motion.conf and all the thread.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
+If you run the http control command http://host:port/0/config/writeyes, motion will overwrite motion.conf and all the camera.conf files by autogenerated config files neatly formatted and only with the features included that Motion was built with. If you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have new config files with the new options included all set to their default values. This makes upgrading very easy to do.
 .TP
 .B Conversion Specifiers for Advanced Filename and Text Features
 The table below shows all the supported Conversion Specifiers you can use in the options text_left, text_right, snapshot_filename, jpeg_filename, ffmpeg_filename, timelapse_filename, on_event_start, on_event_end, on_picture_save, on_movie_start, on_movie_end, and on_motion_detected.
@@ -1979,7 +2049,7 @@ The number of seconds since the Epoch, i.e., since 1970-01-01 00:00:00 UTC.
 The second as a decimal number (range 00 to 61).
 .TP
 .B %t
-Thread number (camera number)
+Camera ID number
 .TP
 .B %T
 The time in 24-hour notation (%H:%M:%S).
