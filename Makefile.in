@@ -41,7 +41,7 @@ OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(
 			   stream.o md5.o netcam_rtsp.o \
 			   @FFMPEG_OBJ@ @MMAL_OBJ@ @SDL_OBJ@
 SRC          = $(OBJ:.o=.c)
-DOC          = CHANGELOG COPYING CREDITS README motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
+DOC          = CHANGELOG COPYING CREDITS README.md motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
 EXAMPLES     = *.conf motion.service
 EXAMPLES_BIN = motion.init-Debian motion.init-FreeBSD.sh
 PROGS        = motion
