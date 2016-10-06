@@ -1,3 +1,6 @@
+#ifndef _INCLUDE_NETCAM_RTSP_H
+#define _INCLUDE_NETCAM_RTSP_H
+
 #include "netcam.h"
 
 #ifdef HAVE_FFMPEG
@@ -26,13 +29,6 @@ struct rtsp_context {
     struct SwsContext*   swsctx;
 };
 
-struct rtsp_context *rtsp_new_context(void);
-void netcam_shutdown_rtsp(netcam_context_ptr netcam);
-int netcam_connect_rtsp(netcam_context_ptr netcam);
-int netcam_read_rtsp_image(netcam_context_ptr netcam);
-int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url);
-int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam);
-
 #else /* Do not have FFmpeg */
 
 struct rtsp_context {
@@ -41,6 +37,8 @@ struct rtsp_context {
     int                   status;
 };
 
+#endif /* end HAVE_FFMPEG  */
+
 struct rtsp_context *rtsp_new_context(void);
 void netcam_shutdown_rtsp(netcam_context_ptr netcam);
 int netcam_connect_rtsp(netcam_context_ptr netcam);
@@ -48,6 +46,4 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam);
 int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url);
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam);
 
-#endif /* end HAVE_FFMPEG  */
-
-
+#endif /* _INCLUDE_NETCAM_RTSP_H */
