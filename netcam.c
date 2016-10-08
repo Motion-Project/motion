@@ -1051,6 +1051,57 @@ static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 }
 
 /**
+ * Publish new image
+ *
+ * Moves the image in 'receiving' into 'latest' and updates last frame time
+ */
+void netcam_image_read_complete(netcam_context_ptr netcam)
+{
+    struct timeval curtime;
+    netcam_buff *xchg;
+
+    if (gettimeofday(&curtime, NULL) < 0)
+        MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
+
+    netcam->receiving->image_time = curtime;
+    /*
+     * Calculate our "running average" time for this netcam's
+     * frame transmissions (except for the first time).
+     * Note that the average frame time is held in microseconds.
+     */
+    if (netcam->last_image.tv_sec) {
+        netcam->av_frame_time = ((9.0 * netcam->av_frame_time) + 1000000.0 *
+                                 (curtime.tv_sec - netcam->last_image.tv_sec) +
+                                 (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
+
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f",
+                   netcam->av_frame_time);
+    }
+
+    netcam->last_image = curtime;
+
+    /*
+     * read is complete - set the current 'receiving' buffer atomically
+     * as 'latest', and make the buffer previously in 'latest' become
+     * the new 'receiving'.
+     */
+    pthread_mutex_lock(&netcam->mutex);
+
+    xchg = netcam->latest;
+    netcam->latest = netcam->receiving;
+    netcam->receiving = xchg;
+    netcam->imgcnt++;
+
+    /*
+     * We have a new frame ready.  We send a signal so that
+     * any thread (e.g. the motion main loop) waiting for the
+     * next frame to become available may proceed.
+     */
+    pthread_cond_signal(&netcam->pic_ready);
+    pthread_mutex_unlock(&netcam->mutex);
+}
+
+/**
  * netcam_read_html_jpeg
  *
  * This routine reads a jpeg image from the netcam.  When it is called,
@@ -1115,8 +1166,6 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
     size_t rem, rlen, ix;   /* Working vars */
     int retval;
     char *ptr, *bptr, *rptr;
-    netcam_buff *xchg;
-    struct timeval curtime;
     /*
      * Initialisation - set our local pointers to the context
      * information.
@@ -1293,51 +1342,13 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
             remaining -= retval;
         }
     }
-
-    /*
-     * Read is complete - set the current 'receiving' buffer atomically
-     * as 'latest', and make the buffer previously in 'latest' become
-     * the new 'receiving'.
-     */
-    if (gettimeofday(&curtime, NULL) < 0) 
-        MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
-    
-    netcam->receiving->image_time = curtime;
     
     /* Fix starting of JPEG if needed , some cameras introduce thrash before 
      * SOI  0xFFD8  Start Of Image
      */
     netcam_fix_jpeg_header(netcam);
 
-    /*
-     * Calculate our "running average" time for this netcam's
-     * frame transmissions (except for the first time).
-     * Note that the average frame time is held in microseconds.
-     */
-    if (netcam->last_image.tv_sec) {
-        netcam->av_frame_time = (9.0 * netcam->av_frame_time +
-                                 1000000.0 * (curtime.tv_sec - netcam->last_image.tv_sec) +
-                                 (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
-
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
-                   netcam->av_frame_time);
-    }
-    netcam->last_image = curtime;
-
-    pthread_mutex_lock(&netcam->mutex);
-
-    xchg = netcam->latest;
-    netcam->latest = netcam->receiving;
-    netcam->receiving = xchg;
-    netcam->imgcnt++;
-    /*
-     * We have a new frame ready.  We send a signal so that
-     * any thread (e.g. the motion main loop) waiting for the
-     * next frame to become available may proceed.
-     */
-    pthread_cond_signal(&netcam->pic_ready);
-
-    pthread_mutex_unlock(&netcam->mutex);
+    netcam_image_read_complete(netcam);
 
     if (netcam->caps.streaming == NCS_UNSUPPORTED) {
         if (!netcam->connect_keepalive) {
@@ -1494,8 +1505,6 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
 static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
 {
     netcam_buff_ptr buffer;
-    netcam_buff *xchg;
-    struct timeval curtime;
     mjpg_header mh;
     size_t read_bytes;
     int retval;
@@ -1579,46 +1588,8 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
         /* MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Rlen now at [%d] bytes", rlen); */
     }
 
-    /*
-     * read is complete - set the current 'receiving' buffer atomically
-     * as 'latest', and make the buffer previously in 'latest' become
-     * the new 'receiving'.
-     */
-    if (gettimeofday(&curtime, NULL) < 0) 
-        MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
+    netcam_image_read_complete(netcam);
     
-    netcam->receiving->image_time = curtime;
-
-    /*
-     * Calculate our "running average" time for this netcam's
-     * frame transmissions (except for the first time).
-     * Note that the average frame time is held in microseconds.
-     */
-    if (netcam->last_image.tv_sec) {
-        netcam->av_frame_time = (9.0 * netcam->av_frame_time +
-                                 1000000.0 * (curtime.tv_sec - netcam->last_image.tv_sec) +
-                                 (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
-
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
-                   netcam->av_frame_time);
-    }
-    netcam->last_image = curtime;
-
-    pthread_mutex_lock(&netcam->mutex);
-
-    xchg = netcam->latest;
-    netcam->latest = netcam->receiving;
-    netcam->receiving = xchg;
-    netcam->imgcnt++;
-    /*
-     * We have a new frame ready.  We send a signal so that
-     * any thread (e.g. the motion main loop) waiting for the
-     * next frame to become available may proceed.
-     */
-    pthread_cond_signal(&netcam->pic_ready);
-
-    pthread_mutex_unlock(&netcam->mutex);
-
     return 0;
 }
 
@@ -1634,8 +1605,6 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
 {
     netcam_buff_ptr buffer;
     int len;
-    netcam_buff *xchg;
-    struct timeval curtime;
 
     /* Point to our working buffer. */
     buffer = netcam->receiving;
@@ -1659,46 +1628,7 @@ static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
         buffer->used += len;
     } while (len > 0);
 
-    if (gettimeofday(&curtime, NULL) < 0) 
-        MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
-    
-    netcam->receiving->image_time = curtime;
-    /*
-     * Calculate our "running average" time for this netcam's
-     * frame transmissions (except for the first time).
-     * Note that the average frame time is held in microseconds.
-     */
-    if (netcam->last_image.tv_sec) {
-        netcam->av_frame_time = ((9.0 * netcam->av_frame_time) + 1000000.0 *
-                                 (curtime.tv_sec - netcam->last_image.tv_sec) +
-                                 (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
-
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
-                   netcam->av_frame_time);
-    }
-
-    netcam->last_image = curtime;
-
-    /*
-     * read is complete - set the current 'receiving' buffer atomically
-     * as 'latest', and make the buffer previously in 'latest' become
-     * the new 'receiving'.
-     */
-    pthread_mutex_lock(&netcam->mutex);
-
-    xchg = netcam->latest;
-    netcam->latest = netcam->receiving;
-    netcam->receiving = xchg;
-    netcam->imgcnt++;
-
-    /*
-     * We have a new frame ready.  We send a signal so that
-     * any thread (e.g. the motion main loop) waiting for the
-     * next frame to become available may proceed.
-     */
-    pthread_cond_signal(&netcam->pic_ready);
-
-    pthread_mutex_unlock(&netcam->mutex);
+    netcam_image_read_complete(netcam);
 
     return 0;
 }
@@ -1720,8 +1650,6 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
     netcam_buff_ptr buffer;
     int len;
-    netcam_buff *xchg;
-    struct timeval curtime;
     struct stat statbuf;
 
     /* Point to our working buffer. */
@@ -1786,45 +1714,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
     buffer->used += len;
     close(netcam->file->control_file_desc);
 
-    if (gettimeofday(&curtime, NULL) < 0)
-        MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
-    
-    netcam->receiving->image_time = curtime;
-    /*
-     * Calculate our "running average" time for this netcam's
-     * frame transmissions (except for the first time).
-     * Note that the average frame time is held in microseconds.
-     */
-    if (netcam->last_image.tv_sec) {
-        netcam->av_frame_time = ((9.0 * netcam->av_frame_time) + 1000000.0 *
-                                 (curtime.tv_sec - netcam->last_image.tv_sec) +
-                                 (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
-    
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Calculated frame time %f", 
-                   netcam->av_frame_time);
-    }
-
-    netcam->last_image = curtime;
-
-    /*
-     * read is complete - set the current 'receiving' buffer atomically
-     * as 'latest', and make the buffer previously in 'latest' become
-     * the new 'receiving'.
-     */
-    pthread_mutex_lock(&netcam->mutex);
-
-    xchg = netcam->latest;
-    netcam->latest = netcam->receiving;
-    netcam->receiving = xchg;
-    netcam->imgcnt++;
-
-    /*
-     * We have a new frame ready.  We send a signal so that
-     * any thread (e.g. the motion main loop) waiting for the
-     * next frame to become available may proceed.
-     */
-    pthread_cond_signal(&netcam->pic_ready);
-    pthread_mutex_unlock(&netcam->mutex);
+    netcam_image_read_complete(netcam);
 
     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: End");
     
