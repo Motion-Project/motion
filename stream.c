@@ -724,7 +724,7 @@ int http_bindsock(int port, int local, int ipv6_enabled)
     if (ipv6_enabled)
         setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no));
 
-    char *addr_str;
+    const char *addr_str;
     struct sockaddr_storage sin;
     bzero(&sin, sizeof(struct sockaddr_storage));
     sin.ss_family = ipv6_enabled?AF_INET6:AF_INET;
