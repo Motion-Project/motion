@@ -355,22 +355,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         return -1;
     }
 
-    /*
-     * read is complete - set the current 'receiving' buffer atomically
-     * as 'latest', and make the buffer previously in 'latest' become
-     * the new 'receiving' and signal pic_ready.
-     */
-    netcam->receiving->image_time = curtime;
-    netcam->last_image = curtime;
-    netcam_buff *xchg;
-
-    pthread_mutex_lock(&netcam->mutex);
-        xchg = netcam->latest;
-        netcam->latest = netcam->receiving;
-        netcam->receiving = xchg;
-        netcam->imgcnt++;
-        pthread_cond_signal(&netcam->pic_ready);
-    pthread_mutex_unlock(&netcam->mutex);
+    netcam_image_read_complete(netcam);
 
     return 0;
 }
