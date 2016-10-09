@@ -26,6 +26,9 @@
 
 #include "ffmpeg.h"
 
+static int netcam_rtsp_resize(netcam_context_ptr netcam);
+static int netcam_rtsp_open_sws(netcam_context_ptr netcam);
+
 /**
  * netcam_check_pixfmt
  *
@@ -355,6 +358,13 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         return -1;
     }
 
+    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
+        (netcam_check_pixfmt(netcam) != 0) ){
+        if (netcam_rtsp_resize(netcam) < 0)
+          return -1;
+    }
+
     netcam_image_read_complete(netcam);
 
     return 0;
@@ -529,6 +539,8 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         return -1;
     }
 
+    if (netcam_rtsp_open_sws(netcam) < 0) return -1;
+
     /*
      *  Validate that the previous steps opened the camera
      */
@@ -632,7 +644,7 @@ static int netcam_rtsp_open_sws(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
+static int netcam_rtsp_resize(netcam_context_ptr netcam){
 
     int      retcd;
     char     errstr[128];
@@ -640,7 +652,7 @@ static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     retcd=my_image_fill_arrays(
         netcam->rtsp->swsframe_in
-        ,(uint8_t*)netcam->latest->ptr
+        ,(uint8_t*)netcam->receiving->ptr
         ,netcam->rtsp->codec_context->pix_fmt
         ,netcam->rtsp->codec_context->width
         ,netcam->rtsp->codec_context->height);
@@ -690,7 +702,7 @@ static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     retcd=my_image_copy_to_buffer(
          netcam->rtsp->swsframe_out
-        ,(uint8_t *)image
+        ,(uint8_t *)netcam->receiving->ptr
         ,MY_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height
@@ -732,8 +744,6 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
     if (netcam_rtsp_open_context(netcam) < 0) return -1;
-
-    if (netcam_rtsp_open_sws(netcam) < 0) return -1;
 
     if (netcam_rtsp_resize_ntc(netcam) < 0 ) return -1;
 
@@ -935,14 +945,17 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 */
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
+    /* This function is running from the motion_loop thread - generally the
+     * rest of the functions in this file are running from the
+     * netcam_handler_loop thread - this means you generally cannot access
+     * or call anything else without taking care of thread safety.
+     * The netcam mutex *only* protects netcam->latest, it cannot be
+     * used to safely call other netcam functions. */
+    
+    pthread_mutex_lock(&netcam->mutex);
+    memcpy(image, netcam->latest->ptr, netcam->latest->used);
+    pthread_mutex_unlock(&netcam->mutex);
 
-    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
-        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
-        (netcam_check_pixfmt(netcam) != 0) ){
-        netcam_rtsp_resize(image ,netcam);
-    } else {
-        memcpy(image, netcam->latest->ptr, netcam->latest->used);
-    }
     if (netcam->cnt->rotate_data.degrees > 0)
         /* Rotate as specified */
         rotate_map(netcam->cnt, image);
