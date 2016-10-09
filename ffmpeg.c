@@ -368,32 +368,31 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     c->pix_fmt    = MY_PIX_FMT_YUV420P;
     c->max_b_frames = 0;
 
-    /* The selection of 8000 in the else is a subjective number based upon viewing output files */
-    if (vbr > 0){
-        if (vbr > 100) vbr = 100;
-        if (c->codec_id == MY_CODEC_ID_H264 ||
-            c->codec_id == MY_CODEC_ID_HEVC){
-            ffmpeg->vbr = (int)(( (100-vbr) * 51)/100);
-        } else {
-            ffmpeg->vbr =(int)(((100-vbr)*(100-vbr)*(100-vbr) * 8000) / 1000000) + 1;
-        }
-    } else {
-        ffmpeg->vbr = 0;
-    }
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s vbr/crf for codec: %d", ffmpeg->vbr);
+    if (vbr > 100) vbr = 100;
 
     if (c->codec_id == MY_CODEC_ID_H264 ||
         c->codec_id == MY_CODEC_ID_HEVC){
+        if (vbr > 0) {
+            ffmpeg->vbr = (int)(( (100-vbr) * 51)/100);
+        } else {
+            ffmpeg->vbr = 28;
+        }
         av_dict_set(&opts, "preset", "ultrafast", 0);
-
         char crf[4];
         snprintf(crf, 4, "%d",ffmpeg->vbr);
         av_dict_set(&opts, "crf", crf, 0);
         av_dict_set(&opts, "tune", "zerolatency", 0);
     } else {
-        if (ffmpeg->vbr) c->flags |= CODEC_FLAG_QSCALE;
-        c->global_quality=ffmpeg->vbr;
+        /* The selection of 8000 in the else is a subjective number based upon viewing output files */
+        /* Default to 75% */
+        if (vbr > 0){
+            ffmpeg->vbr =(int)(((100-vbr)*(100-vbr)*(100-vbr) * 8000) / 1000000) + 1;
+            c->flags |= CODEC_FLAG_QSCALE;
+            c->global_quality=ffmpeg->vbr;
+        }
     }
+
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s vbr/crf for codec: %d", ffmpeg->vbr);
 
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
     c->flags |= CODEC_FLAG_GLOBAL_HEADER;
