@@ -715,6 +715,7 @@ static int netcam_rtsp_resize(netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         return -1;
     }
+    netcam->receiving->used = netcam->rtsp->swsframe_size;
 
     av_free(buffer_out);
 
