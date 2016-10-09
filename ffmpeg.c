@@ -10,12 +10,12 @@
  *
  * This file has been modified so that only major versions greater than
  * 53 are supported.
- * Note that while the conditions are based upon LIBAVFORMAT, not all of the changes are 
+ * Note that while the conditions are based upon LIBAVFORMAT, not all of the changes are
  * specific to libavformat.h.  Some changes could be related to other components of ffmpeg.
  * This is for simplicity.  The avformat version has historically changed at the same time
- * as the other components so it is easier to have a single version number to track rather 
+ * as the other components so it is easier to have a single version number to track rather
  * than the particular version numbers which are associated with each component.
- * The libav variant also has different apis with the same major/minor version numbers.  
+ * The libav variant also has different apis with the same major/minor version numbers.
  * As such, it is occasionally necessary to look at the microversion number.  Numbers
  * greater than 100 for micro version indicate ffmpeg whereas numbers less than 100
  * indicate libav
@@ -189,7 +189,7 @@ static int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
  *      Function returns nothing.
  */
 void ffmpeg_init(){
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, 
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,
         "%s: ffmpeg libavcodec version %d.%d.%d"
         " libavformat version %d.%d.%d"
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
@@ -429,6 +429,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     av_dict_free(&opts);
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s Selected Output FPS %d", c->time_base.den);
 
+    ffmpeg->last_pts = 0;
     ffmpeg->video_st->time_base.num = 1;
     ffmpeg->video_st->time_base.den = 1000;
     if ((strcmp(ffmpeg_video_codec, "swf") == 0) ||
@@ -690,9 +691,10 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     } else {
         pts_interval = ((1000000L * (tv1.tv_sec - ffmpeg->start_time.tv_sec)) + tv1.tv_usec - ffmpeg->start_time.tv_usec) + 10000;
         pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base);
-        if (pkt.pts < 1) pkt.pts = 1;
+        if (pkt.pts <= ffmpeg->last_pts) pkt.pts = ffmpeg->last_pts + 1;
         pkt.dts = pkt.pts;
         retcd = av_write_frame(ffmpeg->oc, &pkt);
+        ffmpeg->last_pts = pkt.pts;
     }
 //        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d interval %d",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den,pts_interval);
     my_packet_unref(pkt);

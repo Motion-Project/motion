@@ -18,7 +18,7 @@
 
 #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
 #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-#define MyPixelFormat AVPixelFormat 
+#define MyPixelFormat AVPixelFormat
 
 #else
 
@@ -48,6 +48,7 @@ struct ffmpeg {
     int vbr;                /* variable bitrate setting */
     char codec[20];         /* codec name */
     int tlapse;
+    int64_t last_pts;
     struct timeval start_time;
 #else
     int dummy;
