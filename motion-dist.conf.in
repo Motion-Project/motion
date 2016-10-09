@@ -480,7 +480,7 @@ timelapse_filename %Y%m%d-timelapse
 ############################################################
 # Global Network Options
 ############################################################
-# Listen to IPv6 localhost instead of IPv4 (default: off)
+# Enable IPv6 (default: off)
 ipv6_enabled off
 
 ############################################################
