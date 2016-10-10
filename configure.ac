@@ -824,27 +824,6 @@ else
 fi
 
 
-# Check sizes of integer types
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long int)
-AC_CHECK_SIZEOF(long long)
-AC_CHECK_SIZEOF(int *)
-AC_CHECK_SIZEOF(void *)
-
-if test "$ac_cv_sizeof_short" = "4"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short\""
-else
-	if test "$ac_cv_sizeof_int" = "4"; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"int\""
-	else
-		if test "$ac_cv_sizeof_long_int" = "4"; then
-			TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"long int\""
-		fi
-	fi
-fi
-
-
 OPTIMIZECPU="yes"
 
 AC_ARG_WITH(optimizecpu,
@@ -1097,22 +1076,6 @@ fi
 else
 	CPU_OPTIONS=""
 fi
-
-
-AC_MSG_CHECKING(for bswap instruction)
-AC_LINK_IFELSE([
-	AC_LANG_PROGRAM([ ],
-		[unsigned int __x=0;
-		register unsigned int __v;
-		__asm("bswap %0" : "=r" (__v) : "0" (__x));])
-	],
-	[
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_BSWAP"
-		AC_MSG_RESULT(yes)
-	],
-	[
-		AC_MSG_RESULT(no)
-	])
 
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
