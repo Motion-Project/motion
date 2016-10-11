@@ -31,7 +31,10 @@
  */
 #include "rotate.h"
 #include <stdint.h>
-#ifdef BSD
+#if defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define bswap_32(x) OSSwapInt32(x)
+#elif defined(BSD)
 #include <sys/endian.h>
 #define bswap_32(x) bswap32(x)
 #else
