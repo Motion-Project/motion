@@ -384,7 +384,6 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
         av_dict_set(&opts, "tune", "zerolatency", 0);
     } else {
         /* The selection of 8000 in the else is a subjective number based upon viewing output files */
-        /* Default to 75% */
         if (vbr > 0){
             ffmpeg->vbr =(int)(((100-vbr)*(100-vbr)*(100-vbr) * 8000) / 1000000) + 1;
             c->flags |= CODEC_FLAG_QSCALE;
