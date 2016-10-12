@@ -530,6 +530,14 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     netcam->rtsp->codec_context = netcam->rtsp->format_context->streams[netcam->rtsp->video_stream_index]->codec;
 
+    if (netcam->rtsp->codec_context->width <= 0 ||
+        netcam->rtsp->codec_context->height <= 0)
+    {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Camera image size is invalid");
+        netcam_rtsp_close_context(netcam);
+        return -1;
+    }
+
     netcam->rtsp->frame = my_frame_alloc();
     if (netcam->rtsp->frame == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
