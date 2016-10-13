@@ -918,7 +918,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 *
 */
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
-#ifdef HAVE_FFMPEG
     /* This function is running from the motion_loop thread - generally the
      * rest of the functions in this file are running from the
      * netcam_handler_loop thread - this means you generally cannot access
@@ -935,10 +934,4 @@ int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
         rotate_map(netcam->cnt, image);
 
     return 0;
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (image == image) netcam->rtsp->status = RTSP_NOTCONNECTED;
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
-    return -1;
-#endif /* End #ifdef HAVE_FFMPEG */
 }
