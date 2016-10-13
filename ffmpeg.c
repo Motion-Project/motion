@@ -244,7 +244,7 @@ void ffmpeg_init(void){
     if (ret < 0)
     {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "%s: av_lockmgr_register failed (%d)", ret);
-        abort();
+        exit(1);
     }
 }
 
