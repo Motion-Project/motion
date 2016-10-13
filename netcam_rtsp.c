@@ -595,6 +595,10 @@ static int netcam_rtsp_open_sws(netcam_context_ptr netcam){
         return -1;
     }
 
+    /* the image buffers must be big enough to hold the final frame after resizing */
+    netcam_check_buffsize(netcam->receiving, netcam->rtsp->swsframe_size);
+    netcam_check_buffsize(netcam->latest, netcam->rtsp->swsframe_size);
+
     return 0;
 
 }
