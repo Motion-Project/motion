@@ -1010,21 +1010,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     return 0;   /* Success */
 }
 
-
-/**
- * netcam_check_buffsize
- *
- * This routine checks whether there is enough room in a buffer to copy
- * some additional data.  If there is not enough room, it will re-allocate
- * the buffer and adjust it's size.
- *
- * Parameters:
- *      buff            Pointer to a netcam_image_buffer structure.
- *      numbytes        The number of bytes to be copied.
- *
- * Returns:             Nothing
- */
-static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
+void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 {
     int min_size_to_alloc;
     int real_alloc;

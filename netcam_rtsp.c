@@ -78,45 +78,6 @@ static void netcam_rtsp_close_context(netcam_context_ptr netcam){
 }
 
 /**
- * netcam_buffsize_rtsp
- *
- * This routine checks whether there is enough room in a buffer to copy
- * some additional data.  If there is not enough room, it will re-allocate
- * the buffer and adjust it's size.
- *
- * Parameters:
- *      buff            Pointer to a netcam_image_buffer structure.
- *      numbytes        The number of bytes to be copied.
- *
- * Returns:             Nothing
- */
-static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
-
-    int min_size_to_alloc;
-    int real_alloc;
-    int new_size;
-
-    if ((buff->size - buff->used) >= numbytes)
-        return;
-
-    min_size_to_alloc = numbytes - (buff->size - buff->used);
-    real_alloc = ((min_size_to_alloc / NETCAM_BUFFSIZE) * NETCAM_BUFFSIZE);
-
-    if ((min_size_to_alloc - real_alloc) > 0)
-        real_alloc += NETCAM_BUFFSIZE;
-
-    new_size = buff->size + real_alloc;
-
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: expanding buffer from [%d/%d] to [%d/%d] bytes.",
-               (int) buff->used, (int) buff->size,
-               (int) buff->used, new_size);
-
-    buff->ptr = myrealloc(buff->ptr, new_size,
-                          "netcam_check_buf_size");
-    buff->size = new_size;
-}
-
-/**
  * decode_packet
  *
  * This routine takes in the packet from the read and decodes it into
@@ -150,7 +111,7 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
 
     frame_size = my_image_get_buffer_size(cc->pix_fmt, cc->width, cc->height);
 
-    netcam_buffsize_rtsp(buffer, frame_size);
+    netcam_check_buffsize(buffer, frame_size);
 
     retcd = my_image_copy_to_buffer(frame, (uint8_t *)buffer->ptr,cc->pix_fmt,cc->width,cc->height, frame_size);
     if (retcd < 0) {

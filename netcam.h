@@ -314,4 +314,17 @@ void netcam_url_free(struct url_t *parse_url);
  */
 void netcam_image_read_complete(netcam_context_ptr netcam);
 
+/**
+ * This routine checks whether there is enough room in a buffer to copy
+ * some additional data.  If there is not enough room, it will re-allocate
+ * the buffer and adjust it's size.
+ *
+ * Parameters:
+ *      buff            Pointer to a netcam_image_buffer structure.
+ *      numbytes        The number of bytes to be copied.
+ *
+ * Returns:             Nothing
+ */
+void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes);
+
 #endif
