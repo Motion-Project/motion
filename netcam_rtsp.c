@@ -26,6 +26,9 @@
 
 #include "ffmpeg.h"
 
+static int netcam_rtsp_resize(netcam_context_ptr netcam);
+static int netcam_rtsp_open_sws(netcam_context_ptr netcam);
+
 /**
  * netcam_check_pixfmt
  *
@@ -75,45 +78,6 @@ static void netcam_rtsp_close_context(netcam_context_ptr netcam){
 }
 
 /**
- * netcam_buffsize_rtsp
- *
- * This routine checks whether there is enough room in a buffer to copy
- * some additional data.  If there is not enough room, it will re-allocate
- * the buffer and adjust it's size.
- *
- * Parameters:
- *      buff            Pointer to a netcam_image_buffer structure.
- *      numbytes        The number of bytes to be copied.
- *
- * Returns:             Nothing
- */
-static void netcam_buffsize_rtsp(netcam_buff_ptr buff, size_t numbytes){
-
-    int min_size_to_alloc;
-    int real_alloc;
-    int new_size;
-
-    if ((buff->size - buff->used) >= numbytes)
-        return;
-
-    min_size_to_alloc = numbytes - (buff->size - buff->used);
-    real_alloc = ((min_size_to_alloc / NETCAM_BUFFSIZE) * NETCAM_BUFFSIZE);
-
-    if ((min_size_to_alloc - real_alloc) > 0)
-        real_alloc += NETCAM_BUFFSIZE;
-
-    new_size = buff->size + real_alloc;
-
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: expanding buffer from [%d/%d] to [%d/%d] bytes.",
-               (int) buff->used, (int) buff->size,
-               (int) buff->used, new_size);
-
-    buff->ptr = myrealloc(buff->ptr, new_size,
-                          "netcam_check_buf_size");
-    buff->size = new_size;
-}
-
-/**
  * decode_packet
  *
  * This routine takes in the packet from the read and decodes it into
@@ -147,7 +111,7 @@ static int decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *fram
 
     frame_size = my_image_get_buffer_size(cc->pix_fmt, cc->width, cc->height);
 
-    netcam_buffsize_rtsp(buffer, frame_size);
+    netcam_check_buffsize(buffer, frame_size);
 
     retcd = my_image_copy_to_buffer(frame, (uint8_t *)buffer->ptr,cc->pix_fmt,cc->width,cc->height, frame_size);
     if (retcd < 0) {
@@ -200,10 +164,8 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
         return -1;
     }
 
-    /* Open the codec  It is not thread safe so lock it*/
-    pthread_mutex_lock(&global_lock);
-        ret = avcodec_open2(dec_ctx, dec, NULL);
-    pthread_mutex_unlock(&global_lock);
+    /* Open the codec */
+    ret = avcodec_open2(dec_ctx, dec, NULL);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
     	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
@@ -258,15 +220,31 @@ struct rtsp_context *rtsp_new_context(void){
 static int netcam_interrupt_rtsp(void *ctx){
     struct rtsp_context *rtsp = (struct rtsp_context *)ctx;
 
-    if (rtsp->readingframe != 1) {
+    if (rtsp->status == RTSP_CONNECTED) {
         return 0;
-    } else {
+    } else if (rtsp->status == RTSP_READINGIMAGE) {
         struct timeval interrupttime;
         if (gettimeofday(&interrupttime, NULL) < 0) {
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Reading picture timed out for %s",rtsp->path);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            return 1;
+        } else{
+            return 0;
+        }
+    } else {
+        /* This is for NOTCONNECTED and RECONNECTING status.  We give these
+         * options more time because all the ffmpeg calls that are inside the
+         * rtsp_connect function will use the same start time.  Otherwise we
+         * would need to reset the time before each call to a ffmpeg function.
+        */
+        struct timeval interrupttime;
+        if (gettimeofday(&interrupttime, NULL) < 0) {
+            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
+        }
+        if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 30){
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
             return 1;
         } else{
             return 0;
@@ -313,7 +291,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     }
     netcam->rtsp->startreadtime = curtime;
 
-    netcam->rtsp->readingframe = 1;
+    netcam->rtsp->status = RTSP_READINGIMAGE;
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
         if(packet.stream_index != netcam->rtsp->video_stream_index) {
             my_packet_unref(packet);
@@ -330,7 +308,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         packet.data = NULL;
         packet.size = 0;
     }
-    netcam->rtsp->readingframe = 0;
+    netcam->rtsp->status = RTSP_CONNECTED;
 
     // at this point, we are finished with the packet
     my_packet_unref(packet);
@@ -341,22 +319,14 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         return -1;
     }
 
-    /*
-     * read is complete - set the current 'receiving' buffer atomically
-     * as 'latest', and make the buffer previously in 'latest' become
-     * the new 'receiving' and signal pic_ready.
-     */
-    netcam->receiving->image_time = curtime;
-    netcam->last_image = curtime;
-    netcam_buff *xchg;
+    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
+        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
+        (netcam_check_pixfmt(netcam) != 0) ){
+        if (netcam_rtsp_resize(netcam) < 0)
+          return -1;
+    }
 
-    pthread_mutex_lock(&netcam->mutex);
-        xchg = netcam->latest;
-        netcam->latest = netcam->receiving;
-        netcam->receiving = xchg;
-        netcam->imgcnt++;
-        pthread_cond_signal(&netcam->pic_ready);
-    pthread_mutex_unlock(&netcam->mutex);
+    netcam_image_read_complete(netcam);
 
     return 0;
 }
@@ -446,6 +416,10 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
     netcam->rtsp->format_context->interrupt_callback.opaque = netcam->rtsp;
 
+    if (gettimeofday(&netcam->rtsp->startreadtime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
+    }
+
     if (strncmp(netcam->rtsp->path, "http", 4) == 0 ){
         netcam->rtsp->format_context->iformat = av_find_input_format("mjpeg");
     } else {
@@ -517,6 +491,14 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     netcam->rtsp->codec_context = netcam->rtsp->format_context->streams[netcam->rtsp->video_stream_index]->codec;
 
+    if (netcam->rtsp->codec_context->width <= 0 ||
+        netcam->rtsp->codec_context->height <= 0)
+    {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Camera image size is invalid");
+        netcam_rtsp_close_context(netcam);
+        return -1;
+    }
+
     netcam->rtsp->frame = my_frame_alloc();
     if (netcam->rtsp->frame == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
@@ -525,6 +507,8 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         return -1;
     }
+
+    if (netcam_rtsp_open_sws(netcam) < 0) return -1;
 
     /*
      *  Validate that the previous steps opened the camera
@@ -611,6 +595,10 @@ static int netcam_rtsp_open_sws(netcam_context_ptr netcam){
         return -1;
     }
 
+    /* the image buffers must be big enough to hold the final frame after resizing */
+    netcam_check_buffsize(netcam->receiving, netcam->rtsp->swsframe_size);
+    netcam_check_buffsize(netcam->latest, netcam->rtsp->swsframe_size);
+
     return 0;
 
 }
@@ -629,7 +617,7 @@ static int netcam_rtsp_open_sws(netcam_context_ptr netcam){
 *       Success     0(zero)
 *
 */
-static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
+static int netcam_rtsp_resize(netcam_context_ptr netcam){
 
     int      retcd;
     char     errstr[128];
@@ -637,7 +625,7 @@ static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     retcd=my_image_fill_arrays(
         netcam->rtsp->swsframe_in
-        ,(uint8_t*)netcam->latest->ptr
+        ,(uint8_t*)netcam->receiving->ptr
         ,netcam->rtsp->codec_context->pix_fmt
         ,netcam->rtsp->codec_context->width
         ,netcam->rtsp->codec_context->height);
@@ -687,7 +675,7 @@ static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
 
     retcd=my_image_copy_to_buffer(
          netcam->rtsp->swsframe_out
-        ,(uint8_t *)image
+        ,(uint8_t *)netcam->receiving->ptr
         ,MY_PIX_FMT_YUV420P
         ,netcam->width
         ,netcam->height
@@ -700,6 +688,7 @@ static int netcam_rtsp_resize(unsigned char *image , netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         return -1;
     }
+    netcam->receiving->used = netcam->rtsp->swsframe_size;
 
     av_free(buffer_out);
 
@@ -729,8 +718,6 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
     if (netcam_rtsp_open_context(netcam) < 0) return -1;
-
-    if (netcam_rtsp_open_sws(netcam) < 0) return -1;
 
     if (netcam_rtsp_resize_ntc(netcam) < 0 ) return -1;
 
@@ -767,12 +754,11 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
 void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 #ifdef HAVE_FFMPEG
 
-    if (netcam->rtsp->status == RTSP_CONNECTED) {
+    if (netcam->rtsp->status == RTSP_CONNECTED ||
+        netcam->rtsp->status == RTSP_READINGIMAGE) {
         netcam_rtsp_close_context(netcam);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
-    
-    avformat_network_deinit();
     
     free(netcam->rtsp->path);
     free(netcam->rtsp->user);
@@ -877,7 +863,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     /*
      * Now we need to set some flags
      */
-    netcam->rtsp->readingframe = 0;
     netcam->rtsp->status = RTSP_NOTCONNECTED;
 
     /*
@@ -893,16 +878,6 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
         netcam->cnt->conf.height = netcam->cnt->conf.height - (netcam->cnt->conf.height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Adjusting height to next higher multiple of 8 (%d).", netcam->cnt->conf.height);
     }
-
-    /*
-     * Documentation does not indicate thread safety on these
-     * init functions but we lock them just in case.
-     */
-    pthread_mutex_lock(&global_lock);
-        av_register_all();
-        avcodec_register_all();
-        avformat_network_init();
-    pthread_mutex_unlock(&global_lock);
 
     /*
      * The RTSP context should be all ready to attempt a connection with
@@ -943,24 +918,20 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 *
 */
 int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
-#ifdef HAVE_FFMPEG
+    /* This function is running from the motion_loop thread - generally the
+     * rest of the functions in this file are running from the
+     * netcam_handler_loop thread - this means you generally cannot access
+     * or call anything else without taking care of thread safety.
+     * The netcam mutex *only* protects netcam->latest, it cannot be
+     * used to safely call other netcam functions. */
+    
+    pthread_mutex_lock(&netcam->mutex);
+    memcpy(image, netcam->latest->ptr, netcam->latest->used);
+    pthread_mutex_unlock(&netcam->mutex);
 
-    if ((netcam->width  != (unsigned)netcam->rtsp->codec_context->width) ||
-        (netcam->height != (unsigned)netcam->rtsp->codec_context->height) ||
-        (netcam_check_pixfmt(netcam) != 0) ){
-        netcam_rtsp_resize(image ,netcam);
-    } else {
-        memcpy(image, netcam->latest->ptr, netcam->latest->used);
-    }
     if (netcam->cnt->rotate_data.degrees > 0)
         /* Rotate as specified */
         rotate_map(netcam->cnt, image);
 
     return 0;
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (image == image) netcam->rtsp->status = RTSP_NOTCONNECTED;
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
-    return -1;
-#endif /* End #ifdef HAVE_FFMPEG */
 }

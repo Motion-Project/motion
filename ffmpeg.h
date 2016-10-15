@@ -57,6 +57,8 @@ struct ffmpeg {
 
 /* Initialize FFmpeg stuff. Needs to be called before ffmpeg_open. */
 void ffmpeg_init(void);
+/** Finalise ffmpeg; call only after all threads have finished */
+void ffmpeg_finalise(void);
 
 struct ffmpeg *ffmpeg_open(
     const char *ffmpeg_video_codec,

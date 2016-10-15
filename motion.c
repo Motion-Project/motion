@@ -2890,7 +2890,7 @@ int main (int argc, char **argv)
                         if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
                             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful,"
                                        "killing it!", cnt_list[i]->threadnr);
-                            /* The problem is pthead_cancel might just wake up the thread so it runs to completition
+                            /* The problem is pthread_cancel might just wake up the thread so it runs to completion
                              * or it might not.  In either case don't rip the carpet out under it by
                              * doing motion_cleanup until it no longer is running.
                              */
@@ -2917,7 +2917,9 @@ int main (int argc, char **argv)
 #ifdef HAVE_SDL
     sdl_stop();
 #endif
-
+#ifdef HAVE_FFMPEG
+    ffmpeg_finalise();
+#endif /* HAVE_FFMPEG */
 
     // Be sure that http control exits fine
     cnt_list[0]->webcontrol_finish = 1;

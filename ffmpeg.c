@@ -181,6 +181,44 @@ static int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
 
     return 0;
 }
+
+/** locking callback for use with ffmpeg's av_lockmgr_register */
+static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op)
+{
+    pthread_mutex_t *mutex = *arg;
+    int err;
+
+    switch (op) {
+    case AV_LOCK_CREATE:
+        mutex = malloc(sizeof(*mutex));
+        if (!mutex)
+            return AVERROR(ENOMEM);
+        if ((err = pthread_mutex_init(mutex, NULL))) {
+            free(mutex);
+            return AVERROR(err);
+        }
+        *arg = mutex;
+        return 0;
+    case AV_LOCK_OBTAIN:
+        if ((err = pthread_mutex_lock(mutex)))
+            return AVERROR(err);
+
+        return 0;
+    case AV_LOCK_RELEASE:
+        if ((err = pthread_mutex_unlock(mutex)))
+            return AVERROR(err);
+
+        return 0;
+    case AV_LOCK_DESTROY:
+        if (mutex)
+            pthread_mutex_destroy(mutex);
+        free(mutex);
+        *arg = NULL;
+        return 0;
+    }
+    return 1;
+}
+
 /**
  * ffmpeg_init
  *      Initializes for libavformat.
@@ -188,8 +226,10 @@ static int timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
  * Returns
  *      Function returns nothing.
  */
-void ffmpeg_init(){
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,
+void ffmpeg_init(void){
+    int ret;
+
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, 
         "%s: ffmpeg libavcodec version %d.%d.%d"
         " libavformat version %d.%d.%d"
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
@@ -197,8 +237,21 @@ void ffmpeg_init(){
 
     av_register_all();
     avcodec_register_all();
+    avformat_network_init();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
+
+    ret = av_lockmgr_register(ffmpeg_lockmgr_cb);
+    if (ret < 0)
+    {
+        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "%s: av_lockmgr_register failed (%d)", ret);
+        exit(1);
+    }
 }
+
+void ffmpeg_finalise(void) {
+    avformat_network_deinit();
+}
+
 /**
  * get_oformat
  *      Obtains the output format used for the specified codec. For mpeg4 codecs,
@@ -396,9 +449,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     if (strcmp(ffmpeg_video_codec, "ffv1") == 0) c->strict_std_compliance = -2;
     c->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
-    pthread_mutex_lock(&global_lock);
-        retcd = avcodec_open2(c, codec, &opts);
-    pthread_mutex_unlock(&global_lock);
+    retcd = avcodec_open2(c, codec, &opts);
     if (retcd < 0) {
         if (codec->supported_framerates) {
             const AVRational *fps = codec->supported_framerates;
@@ -408,13 +459,11 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
             }
         }
         int chkrate = 1;
-        pthread_mutex_lock(&global_lock);
-            while ((chkrate < 36) && (retcd != 0)) {
-                c->time_base.den = chkrate;
-                retcd = avcodec_open2(c, codec, &opts);
-                chkrate++;
-            }
-        pthread_mutex_unlock(&global_lock);
+        while ((chkrate < 36) && (retcd != 0)) {
+            c->time_base.den = chkrate;
+            retcd = avcodec_open2(c, codec, &opts);
+            chkrate++;
+        }
         if (retcd < 0){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not open codec %s",errstr);
@@ -519,9 +568,7 @@ void ffmpeg_cleanups(struct ffmpeg *ffmpeg){
 
     /* Close each codec */
     if (ffmpeg->video_st) {
-        pthread_mutex_lock(&global_lock);
         avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
-        pthread_mutex_unlock(&global_lock);
     }
     free(ffmpeg->video_outbuf);
     av_freep(&ffmpeg->picture);
@@ -542,9 +589,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
     }
     /* Close each codec */
     if (ffmpeg->video_st) {
-        pthread_mutex_lock(&global_lock);
         avcodec_close(AVSTREAM_CODEC_PTR(ffmpeg->video_st));
-        pthread_mutex_unlock(&global_lock);
     }
     av_freep(&ffmpeg->picture);
     free(ffmpeg->video_outbuf);
