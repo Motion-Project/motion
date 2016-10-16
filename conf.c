@@ -214,7 +214,7 @@ config_param config_params[] = {
     },
     {
     "process_id_file",
-    "#File to store the process ID, also called pid file. (default: not defined)",
+    "# File to store the process ID, also called pid file. (default: not defined)",
     1,
     CONF_OFFSET(pid_file),
     copy_string,
@@ -393,8 +393,9 @@ config_param config_params[] = {
     },
     {
     "netcam_url",
-    "# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// or file:///)\n"
-    "# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. Default: Not defined",
+    "# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)\n"
+    "# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. A trailing slash may be required for some cameras.\n"
+    "# Default: Not defined",
     0,
     CONF_OFFSET(netcam_url),
     copy_string,
@@ -827,8 +828,8 @@ config_param config_params[] = {
     "ffmpeg_video_codec",
     "# Codec to used by ffmpeg for the video compression.\n"
     "# Timelapse movies are always made in mpeg1 format independent from this option.\n"
-    "# Supported formats are: mpeg1 (ffmpeg-0.4.8 only), mpeg4 (default), and msmpeg4.\n"
-    "# mpeg1 - gives you files with extension .mpg\n"
+    "# Supported formats are (default:mpeg4):\n"
+    "# mpeg1 - gives you files with extension .mpg (ffmpeg-0.4.8 or later)\n"
     "# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
     "# msmpeg4 is recommended for use with Windows Media Player because\n"
     "# it requires no installation of codec on the Windows client.\n"
@@ -848,7 +849,7 @@ config_param config_params[] = {
     {
     "ffmpeg_duplicate_frames",
     "# True to duplicate frames to achieve \"framerate\" fps, but enough\n"
-    "duplicated frames and the video appears to freeze once a second.",
+    "# duplicated frames and the video appears to freeze once a second.",
     0,
     CONF_OFFSET(ffmpeg_duplicate_frames),
     copy_bool,
@@ -1143,9 +1144,9 @@ config_param config_params[] = {
     {
     "stream_auth_method",
     "# Set the authentication method (default: 0)\n"
-    "# 0 = disabled \n"
+    "# 0 = disabled\n"
     "# 1 = Basic authentication\n"
-    "# 2 = MD5 digest (the safer authentication)\n",
+    "# 2 = MD5 digest (the safer authentication)",
     0,
     CONF_OFFSET(stream_auth_method),
     copy_int,
@@ -1162,7 +1163,7 @@ config_param config_params[] = {
     },
     {
     "stream_preview_scale",
-    "# Percentage to scale the preview stream image (default: 25)\n",
+    "# Percentage to scale the preview stream image (default: 25)",
     0,
     CONF_OFFSET(stream_preview_scale),
     copy_int,
@@ -1170,7 +1171,7 @@ config_param config_params[] = {
     },
     {
     "stream_preview_newline",
-    "# Have stream preview image start on a new line (default: no)\n",
+    "# Have stream preview image start on a new line (default: no)",
     0,
     CONF_OFFSET(stream_preview_newline),
     copy_bool,
@@ -1381,7 +1382,7 @@ config_param config_params[] = {
     "# You can use conversion specifiers for the on_xxxx commands\n"
     "# %Y = year, %m = month, %d = date,\n"
     "# %H = hour, %M = minute, %S = second,\n"
-    "# %v = event, %q = frame number, %t = thread (camera) number,\n"
+    "# %v = event, %q = frame number, %t = camera id,\n"
     "# %D = changed pixels, %N = noise level,\n"
     "# %i and %J = width and height of motion area,\n"
     "# %K and %L = X and Y coordinates of motion center\n"
@@ -1402,7 +1403,7 @@ config_param config_params[] = {
     {
     "on_event_start",
     "# Command to be executed when an event starts. (default: none)\n"
-    "# An event starts at first motion detected after a period of no motion defined by event_gap ",
+    "# An event starts at first motion detected after a period of no motion defined by event_gap",
     0,
     CONF_OFFSET(on_event_start),
     copy_string,
@@ -1537,7 +1538,7 @@ config_param config_params[] = {
     {
     "database_type",
     "\n############################################################\n"
-    "# Database Options \n"
+    "# Database Options\n"
     "############################################################\n\n"
     "# database type : mysql, postgresql, sqlite3 (default : not defined)",
     0,
@@ -1547,7 +1548,8 @@ config_param config_params[] = {
     },
     {
     "database_dbname",
-    "# database to log to (default: not defined)",
+    "# database to log to (default: not defined)\n"
+    "# for sqlite3, the full path and name for the database",
     0,
     CONF_OFFSET(database_dbname),
     copy_string,
@@ -1555,7 +1557,7 @@ config_param config_params[] = {
     },
     {
     "database_host",
-    "# The host on which the database is located (default: not defined)",
+    "# The host on which the database is located (default: localhost)",
     0,
     CONF_OFFSET(database_host),
     copy_string,
@@ -1579,7 +1581,7 @@ config_param config_params[] = {
     },
     {
     "database_port",
-    "# Port on which the database is located (default: not defined)\n"
+    "# Port on which the database is located\n"
     "# mysql 3306 , postgresql 5432 (default: not defined)",
     0,
     CONF_OFFSET(database_port),
