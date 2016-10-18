@@ -37,15 +37,6 @@
 
 #define EXTENSION ".conf"
 
-#ifndef HAVE_GET_CURRENT_DIR_NAME
-char *get_current_dir_name(void)
-{
-    char *buf = mymalloc(MAXPATHLEN);
-    getwd(buf);
-    return buf;
-}
-#endif
-
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
@@ -2007,20 +1998,19 @@ struct context **conf_load(struct context **cnt)
     }
 
     if (!fp) {  /* Command-line didn't work, try current dir. */
-        char *path = NULL;
+        char path[PATH_MAX];
 
         if (cnt[0]->conf_filename[0])
             MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
                        filename);
 
-        if ((path = get_current_dir_name()) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
+        if (getcwd(path, sizeof(path)) == NULL) {
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error getcwd");
             exit(-1);
         }
 
         snprintf(filename, PATH_MAX, "%s/motion.conf", path);
         fp = fopen (filename, "r");
-        free(path);
     }
 
     if (!fp) {  /* Specified file does not exist... try default file. */
