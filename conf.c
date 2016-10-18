@@ -29,11 +29,11 @@
 
 #include "motion.h"
 
-#if (defined(BSD) && !defined(PWCBSD))
+#if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
 #include "video.h"
-#endif /* BSD */
+#endif
 
 #define EXTENSION ".conf"
 
@@ -114,7 +114,7 @@ struct config conf_template = {
     tuner_number:                   0,
     timelapse:                      0,
     timelapse_mode:                 DEF_TIMELAPSE_MODE,
-#if (defined(BSD))
+#if (defined(__FreeBSD__))
     tuner_device:                   NULL,
 #endif
     video_device:                   VIDEO_DEVICE,
@@ -310,7 +310,7 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#if (defined(BSD))
+#if (defined(__FreeBSD__))
     {
     "tunerdevice",
     "# Tuner device to be used for capturing using tuner as source (default /dev/tuner0)\n"

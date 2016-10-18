@@ -9,7 +9,7 @@
 #include "ffmpeg.h"
 #include "motion.h"
 
-#if (defined(BSD) && !defined(PWCBSD))
+#if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
 #include "video.h"
@@ -789,7 +789,7 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(BSD)
+#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
@@ -814,7 +814,7 @@ static int motion_init(struct context *cnt)
             return -1;
         }
     }
-#endif /* !WITHOUT_V4L && !BSD */
+#endif /* !WITHOUT_V4L && !__FreeBSD__ */
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
@@ -2322,11 +2322,11 @@ static void become_daemon(void)
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not change directory");
 
 
-#if (defined(BSD))
+#if (defined(__FreeBSD__))
     setpgrp(0, getpid());
 #else
     setpgrp();
-#endif /* BSD */
+#endif /* __FreeBSD__ */
 
 
     if ((i = open("/dev/tty", O_RDWR)) >= 0) {
