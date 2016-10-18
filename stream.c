@@ -179,9 +179,7 @@ static void* handle_basic_auth(void* param)
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), "handle_basic_auth");
-#endif
+    MOTION_PTHREAD_SETNAME("handle_basic_auth");
 
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
@@ -436,9 +434,7 @@ static void* handle_md5_digest(void* param)
         "</body>\n"
         "</html>\n";
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), "handle_md5_digest");
-#endif
+    MOTION_PTHREAD_SETNAME("handle_md5_digest");
 
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;

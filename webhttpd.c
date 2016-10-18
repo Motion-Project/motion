@@ -2658,9 +2658,7 @@ void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), "web_control");
-#endif
+    MOTION_PTHREAD_SETNAME("web_control");
 
     httpd_run(cnt);
 

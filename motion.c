@@ -1104,16 +1104,14 @@ static void *motion_loop(void *arg)
     unsigned int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
     struct image_data *old_image;
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
     {
         char tname[16];
         snprintf(tname, sizeof(tname), "ml%d%s%s",
                  cnt->threadnr,
                  cnt->conf.camera_name ? ":" : "",
                  cnt->conf.camera_name ? cnt->conf.camera_name : "");
-        pthread_setname_np(pthread_self(), tname);
+        MOTION_PTHREAD_SETNAME(tname);
     }
-#endif
 
     /*
      * Next two variables are used for snapshot and timelapse feature
