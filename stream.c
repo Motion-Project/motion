@@ -722,6 +722,7 @@ int http_bindsock(int port, int local, int ipv6_enabled)
 
     const char *addr_str;
     struct sockaddr_storage sin;
+    socklen_t sinsize;
     bzero(&sin, sizeof(struct sockaddr_storage));
     sin.ss_family = ipv6_enabled?AF_INET6:AF_INET;
     if (ipv6_enabled) {
@@ -735,6 +736,7 @@ int http_bindsock(int port, int local, int ipv6_enabled)
             addr_str = "any IPv4/IPv6 address";
             sin6->sin6_addr = in6addr_any;
         }
+        sinsize = sizeof(*sin6);
     } else {
         struct sockaddr_in *sin4 = (struct sockaddr_in*)&sin;
         sin4->sin_family = AF_INET;
@@ -746,10 +748,11 @@ int http_bindsock(int port, int local, int ipv6_enabled)
             addr_str = "any IPv4 address";
             sin4->sin_addr.s_addr = htonl(INADDR_ANY);
         }
+        sinsize = sizeof(*sin4);
     }
 
-    if (bind(sd, (struct sockaddr*)&sin, sizeof(sin)) != 0) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: error binding on %s port %d", addr_str, port);
+    if (bind(sd, (struct sockaddr*)&sin, sinsize) != 0) {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error binding on %s port %d", addr_str, port);
         close(sd);
         return -1;
     }
