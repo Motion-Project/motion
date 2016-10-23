@@ -2571,7 +2571,7 @@ static int acceptnonblocking(int serverfd, int timeout)
 
     if (select(serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
         if (FD_ISSET(serverfd, &fds)) {
-            if ((curfd = accept(serverfd, &client, &client_len)) > 0)
+            if ((curfd = accept(serverfd, (struct sockaddr *)&client, &client_len)) > 0)
                 return curfd;
         }
     }
