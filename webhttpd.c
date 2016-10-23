@@ -1936,7 +1936,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer = pointer + 6;
                 length_uri = length_uri - 6;
                 warningkill = sscanf(pointer, "%255[-0-9a-z]" , command);
-                if ((command != NULL) && (strlen(command) > 0)) {
+                if (strlen(command) > 0) {
                     struct context *autocnt;
 
                     /* auto value=0|1|status */

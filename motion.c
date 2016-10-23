@@ -3225,7 +3225,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                 break;
 
             case 'C': // text_event
-                if (cnt->text_event_string && cnt->text_event_string[0])
+                if (cnt->text_event_string[0])
                     snprintf(tempstr, PATH_MAX, "%*s", width,
                         cnt->text_event_string);
                 else
