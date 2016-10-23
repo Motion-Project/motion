@@ -713,12 +713,29 @@ Error:
  */
 int http_bindsock(int port, int local, int ipv6_enabled)
 {
-    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, 0);
+    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (sd == -1)
+    {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error creating socket");
+        return -1;
+    }
 
     int yes = 1, no = 0;
-    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != 0)
+    {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: setting SO_REUSEADDR to yes failed");
+        /* we can carry on even if this failed */
+    }
+
     if (ipv6_enabled)
-        setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no));
+    {
+        if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no)) != 0)
+        {
+            MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: setting IPV6_V6ONLY to no failed");
+            /* we can carry on even if this failed */
+        }
+    }
 
     const char *addr_str;
     struct sockaddr_storage sin;
