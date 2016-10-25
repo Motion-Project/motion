@@ -135,50 +135,16 @@ dep depend fastdep: $(DEPEND_FILE)
 ################################################################################
 dev: distclean autotools all
 
-################################################################################
-# DEV-GIT, BUILD with developer flags                                          #
-################################################################################
-dev-git: distclean autotools-git all
-
-
-################################################################################
-# GIT, BUILD with developer flags                                              #
-################################################################################
-build-commit-git: distclean set-version-git all
-
-################################################################################
-# CURRENT, BUILD current svn trunk.                                            #
-################################################################################
-current: distclean svn autotools all
-
-svn:
-	svn update
-
 autotools:
-	@sed -e 's/.\/commit-version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
+	@sed -e 's/.\/version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
 	autoconf
 	./configure --with-developer-flags 
-
-autotools-git:
-	@sed -e 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
-	autoconf
-	./configure --with-developer-flags 
-
-
-build-commit: distclean svn set-version all
 
 set-version:
-	@sed -e 's/.\/version.sh/.\/commit-version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
+	@sed -e 's/.\/version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
 	autoconf
-	@sed -e 's/.\/commit-version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
+	@sed -e 's/.\/version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
 	./configure --with-developer-flags
-
-set-version-git:
-	@sed -e 's/.\/version.sh/.\/git-commit-version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
-	autoconf
-	@sed -e 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
-	./configure --with-developer-flags
-
 
 help:
 	@echo "--------------------------------------------------------------------------------"
@@ -265,7 +231,7 @@ clean: pre-build-info
 ################################################################################
 # DIST restores the directory to distribution state.                           #
 ################################################################################
-dist: distclean updateguide
+dist: distclean 
 	@chmod -R 644 *
 	@chmod 755 configure
 	@chmod 755 version.sh
