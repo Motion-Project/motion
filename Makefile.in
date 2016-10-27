@@ -136,14 +136,11 @@ dep depend fastdep: $(DEPEND_FILE)
 dev: distclean autotools all
 
 autotools:
-	@sed -e 's/.\/version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
 	autoconf
 	./configure --with-developer-flags 
 
 set-version:
-	@sed -e 's/.\/version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
 	autoconf
-	@sed -e 's/.\/version.sh/.\/version.sh/g' configure.ac > configure.ac.tmp && mv -f configure.ac.tmp configure.ac
 	./configure --with-developer-flags
 
 help:
