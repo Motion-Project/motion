@@ -72,7 +72,7 @@ int rbuf_read_bufferful(netcam_context_ptr);
 /* How many bytes it will take to store LEN bytes in base64.  */
 #define BASE64_LENGTH(len) (4 * (((len) + 2) / 3))
 
-void base64_encode(const char *, char *, int);
+void motion_base64_encode(const char *, char *, int);
 char *strdupdelim(const char *, const char *);
 int http_process_type(const char *, void *);
 

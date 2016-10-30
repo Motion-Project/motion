@@ -2616,10 +2616,10 @@ void httpd_run(struct context **cnt)
 
         authentication = mymalloc(BASE64_LENGTH(auth_size) + 1);
         userpass = mymalloc(auth_size + 4);
-        /* base64_encode can read 3 bytes after the end of the string, initialize it */
+        /* motion_base64_encode can read 3 bytes after the end of the string, initialize it */
         memset(userpass, 0, auth_size + 4);
         strcpy(userpass, cnt[0]->conf.webcontrol_authentication);
-        base64_encode(userpass, authentication, auth_size);
+        motion_base64_encode(userpass, authentication, auth_size);
         free(userpass);
     }
 
