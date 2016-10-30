@@ -2019,7 +2019,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
     else
         ptr = url->userpass;
 
-    /* base64_encode needs up to 3 additional chars. */
+    /* motion_base64_encode needs up to 3 additional chars. */
     if (ptr) {
         userpass = mymalloc(strlen(ptr) + 3);
         strcpy(userpass, ptr);
@@ -2045,7 +2045,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
         /* Allocate space for the base64-encoded string. */
         encuserpass = mymalloc(BASE64_LENGTH(strlen(userpass)) + 1);
         /* Fill in the value. */
-        base64_encode(userpass, encuserpass, strlen(userpass));
+        motion_base64_encode(userpass, encuserpass, strlen(userpass));
         /* Now create the last part (authorization) of the request. */
         request_pass = mymalloc(strlen(connect_auth_req) +
                                 strlen(encuserpass) + 1);
