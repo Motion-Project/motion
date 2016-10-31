@@ -103,6 +103,7 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size);
+void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift);
 
 #ifndef WITHOUT_V4L
 /* video functions, video.c */
