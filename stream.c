@@ -179,9 +179,7 @@ static void* handle_basic_auth(void* param)
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), "handle_basic_auth");
-#endif
+    MOTION_PTHREAD_SETNAME("handle_basic_auth");
 
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
@@ -436,9 +434,7 @@ static void* handle_md5_digest(void* param)
         "</body>\n"
         "</html>\n";
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), "handle_md5_digest");
-#endif
+    MOTION_PTHREAD_SETNAME("handle_md5_digest");
 
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
@@ -577,7 +573,7 @@ Error:
                 "Content-Type: text/html\r\n"
                 "Keep-Alive: timeout=%i\r\n"
                 "Connection: keep-alive\r\n"
-                "Content-Length: %Zu\r\n\r\n",
+                "Content-Length: %zu\r\n\r\n",
                 request_auth_response_template, server_nonce,
                 KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
         if (write(p->sock, buffer, strlen(buffer)) < 0)
@@ -717,15 +713,33 @@ Error:
  */
 int http_bindsock(int port, int local, int ipv6_enabled)
 {
-    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, 0);
+    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (sd == -1)
+    {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error creating socket");
+        return -1;
+    }
 
     int yes = 1, no = 0;
-    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != 0)
+    {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: setting SO_REUSEADDR to yes failed");
+        /* we can carry on even if this failed */
+    }
+
     if (ipv6_enabled)
-        setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no));
+    {
+        if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no)) != 0)
+        {
+            MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: setting IPV6_V6ONLY to no failed");
+            /* we can carry on even if this failed */
+        }
+    }
 
     const char *addr_str;
     struct sockaddr_storage sin;
+    socklen_t sinsize;
     bzero(&sin, sizeof(struct sockaddr_storage));
     sin.ss_family = ipv6_enabled?AF_INET6:AF_INET;
     if (ipv6_enabled) {
@@ -739,6 +753,7 @@ int http_bindsock(int port, int local, int ipv6_enabled)
             addr_str = "any IPv4/IPv6 address";
             sin6->sin6_addr = in6addr_any;
         }
+        sinsize = sizeof(*sin6);
     } else {
         struct sockaddr_in *sin4 = (struct sockaddr_in*)&sin;
         sin4->sin_family = AF_INET;
@@ -750,10 +765,11 @@ int http_bindsock(int port, int local, int ipv6_enabled)
             addr_str = "any IPv4 address";
             sin4->sin_addr.s_addr = htonl(INADDR_ANY);
         }
+        sinsize = sizeof(*sin4);
     }
 
-    if (bind(sd, (struct sockaddr*)&sin, sizeof(sin)) != 0) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: error binding on %s port %d", addr_str, port);
+    if (bind(sd, (struct sockaddr*)&sin, sinsize) != 0) {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error binding on %s port %d", addr_str, port);
         close(sd);
         return -1;
     }

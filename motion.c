@@ -9,7 +9,7 @@
 #include "ffmpeg.h"
 #include "motion.h"
 
-#if (defined(BSD) && !defined(PWCBSD))
+#if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
 #include "video.h"
@@ -789,7 +789,7 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(BSD)
+#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
@@ -814,7 +814,7 @@ static int motion_init(struct context *cnt)
             return -1;
         }
     }
-#endif /* !WITHOUT_V4L && !BSD */
+#endif /* !WITHOUT_V4L && !__FreeBSD__ */
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
@@ -1104,16 +1104,14 @@ static void *motion_loop(void *arg)
     unsigned int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
     struct image_data *old_image;
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
     {
         char tname[16];
         snprintf(tname, sizeof(tname), "ml%d%s%s",
                  cnt->threadnr,
                  cnt->conf.camera_name ? ":" : "",
                  cnt->conf.camera_name ? cnt->conf.camera_name : "");
-        pthread_setname_np(pthread_self(), tname);
+        MOTION_PTHREAD_SETNAME(tname);
     }
-#endif
 
     /*
      * Next two variables are used for snapshot and timelapse feature
@@ -2322,11 +2320,11 @@ static void become_daemon(void)
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not change directory");
 
 
-#if (defined(BSD))
+#if (defined(__FreeBSD__))
     setpgrp(0, getpid());
 #else
     setpgrp();
-#endif /* BSD */
+#endif /* __FreeBSD__ */
 
 
     if ((i = open("/dev/tty", O_RDWR)) >= 0) {
@@ -3227,7 +3225,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                 break;
 
             case 'C': // text_event
-                if (cnt->text_event_string && cnt->text_event_string[0])
+                if (cnt->text_event_string[0])
                     snprintf(tempstr, PATH_MAX, "%*s", width,
                         cnt->text_event_string);
                 else

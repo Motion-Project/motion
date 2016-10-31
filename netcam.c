@@ -948,7 +948,7 @@ static int netcam_connect(netcam_context_ptr netcam, int err_flag)
     }
 
     /* Now the connect call will return immediately. */
-    ret = connect(netcam->sock, &server, sizeof(server));
+    ret = connect(netcam->sock, (struct sockaddr *)&server, sizeof(server));
     back_err = errno;           /* Save the errno from connect */
 
     /* If the connect failed with anything except EINPROGRESS, error. */
@@ -1767,16 +1767,14 @@ static void *netcam_handler_loop(void *arg)
     netcam_context_ptr netcam = arg;
     struct context *cnt = netcam->cnt; /* Needed for the SETUP macro :-( */
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
     {
         char tname[16];
         snprintf(tname, sizeof(tname), "nc%d%s%s",
                  cnt->threadnr,
                  cnt->conf.camera_name ? ":" : "",
                  cnt->conf.camera_name ? cnt->conf.camera_name : "");
-        pthread_setname_np(pthread_self(), tname);
+        MOTION_PTHREAD_SETNAME(tname);
     }
-#endif
 
     /* Store the corresponding motion thread number in TLS also for this
      * thread (necessary for 'MOTION_LOG' to function properly).

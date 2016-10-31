@@ -191,12 +191,8 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
      */
     errno_save = errno;
 
-#ifdef HAVE_PTHREAD_SETNAME_NP
     char threadname[32] = "unknown";
     pthread_getname_np(pthread_self(), threadname, sizeof(threadname));
-#else /* HAVE_PTHREAD_SETNAME_NP */
-    const char *threadname = "";
-#endif /* HAVE_PTHREAD_SETNAME_NP */
 
     /*
      * Prefix the message with the log level string, log type string,

@@ -29,151 +29,142 @@
 
 #include "motion.h"
 
-#if (defined(BSD) && !defined(PWCBSD))
+#if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
 #include "video.h"
-#endif /* BSD */
+#endif
 
 #define EXTENSION ".conf"
-
-#ifndef HAVE_GET_CURRENT_DIR_NAME
-char *get_current_dir_name(void)
-{
-    char *buf = mymalloc(MAXPATHLEN);
-    getwd(buf);
-    return buf;
-}
-#endif
 
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
-    camera_name:                    NULL,
-    width:                          DEF_WIDTH,
-    height:                         DEF_HEIGHT,
-    quality:                        DEF_QUALITY,
-    camera_id:                      0,
-    rotate_deg:                     0,
-    max_changes:                    DEF_CHANGES,
-    threshold_tune:                 0,
-    output_pictures:                "on",
-    motion_img:                     0,
-    emulate_motion:                 0,
-    event_gap:                      DEF_EVENT_GAP,
-    max_movie_time:                 DEF_MAXMOVIETIME,
-    snapshot_interval:              0,
-    locate_motion_mode:             "off",
-    locate_motion_style:            "box",
-    input:                          IN_DEFAULT,
-    norm:                           0,
-    frame_limit:                    DEF_MAXFRAMERATE,
-    quiet:                          1,
-    picture_type:                   "jpeg",
-    noise:                          DEF_NOISELEVEL,
-    noise_tune:                     1,
-    minimum_frame_time:             0,
-    lightswitch:                    0,
-    autobright:                     0,
-    brightness:                     0,
-    contrast:                       0,
-    saturation:                     0,
-    hue:                            0,
-    power_line_frequency:           -1,
-    roundrobin_frames:              1,
-    roundrobin_skip:                1,
-    pre_capture:                    0,
-    post_capture:                   0,
-    switchfilter:                   0,
-    ffmpeg_output:                  0,
-    extpipe:                        NULL,
-    useextpipe:                     0,
-    ffmpeg_output_debug:            0,
-    ffmpeg_bps:                     DEF_FFMPEG_BPS,
-    ffmpeg_vbr:                     DEF_FFMPEG_VBR,
-    ffmpeg_video_codec:             DEF_FFMPEG_CODEC,
+    .camera_name =                     NULL,
+    .width =                           DEF_WIDTH,
+    .height =                          DEF_HEIGHT,
+    .quality =                         DEF_QUALITY,
+    .camera_id =                       0,
+    .rotate_deg =                      0,
+    .max_changes =                     DEF_CHANGES,
+    .threshold_tune =                  0,
+    .output_pictures =                 "on",
+    .motion_img =                      0,
+    .emulate_motion =                  0,
+    .event_gap =                       DEF_EVENT_GAP,
+    .max_movie_time =                  DEF_MAXMOVIETIME,
+    .snapshot_interval =               0,
+    .locate_motion_mode =              "off",
+    .locate_motion_style =             "box",
+    .input =                           IN_DEFAULT,
+    .norm =                            0,
+    .frame_limit =                     DEF_MAXFRAMERATE,
+    .quiet =                           1,
+    .picture_type =                    "jpeg",
+    .noise =                           DEF_NOISELEVEL,
+    .noise_tune =                      1,
+    .minimum_frame_time =              0,
+    .lightswitch =                     0,
+    .autobright =                      0,
+    .brightness =                      0,
+    .contrast =                        0,
+    .saturation =                      0,
+    .hue =                             0,
+    .power_line_frequency =            -1,
+    .roundrobin_frames =               1,
+    .roundrobin_skip =                 1,
+    .pre_capture =                     0,
+    .post_capture =                    0,
+    .switchfilter =                    0,
+    .ffmpeg_output =                   0,
+    .extpipe =                         NULL,
+    .useextpipe =                      0,
+    .ffmpeg_output_debug =             0,
+    .ffmpeg_bps =                      DEF_FFMPEG_BPS,
+    .ffmpeg_vbr =                      DEF_FFMPEG_VBR,
+    .ffmpeg_video_codec =              DEF_FFMPEG_CODEC,
 #ifdef HAVE_SDL
     sdl_threadnr:                   0,
 #endif
-    ipv6_enabled:                   0,
-    stream_port:                    0,
-    stream_quality:                 50,
-    stream_motion:                  0,
-    stream_maxrate:                 1,
-    stream_localhost:               1,
-    stream_limit:                   0,
-    stream_auth_method:             0,
-    stream_authentication:          NULL,
-    stream_preview_scale:           25,
-    stream_preview_newline:         0,
-    webcontrol_port:                0,
-    webcontrol_localhost:           1,
-    webcontrol_html_output:         1,
-    webcontrol_authentication:      NULL,
-    frequency:                      0,
-    tuner_number:                   0,
-    timelapse:                      0,
-    timelapse_mode:                 DEF_TIMELAPSE_MODE,
-#if (defined(BSD))
+    .ipv6_enabled =                    0,
+    .stream_port =                     0,
+    .stream_quality =                  50,
+    .stream_motion =                   0,
+    .stream_maxrate =                  1,
+    .stream_localhost =                1,
+    .stream_limit =                    0,
+    .stream_auth_method =              0,
+    .stream_authentication =           NULL,
+    .stream_preview_scale =            25,
+    .stream_preview_newline =          0,
+    .webcontrol_port =                 0,
+    .webcontrol_localhost =            1,
+    .webcontrol_html_output =          1,
+    .webcontrol_authentication =       NULL,
+    .frequency =                       0,
+    .tuner_number =                    0,
+    .timelapse =                       0,
+    .timelapse_mode =                  DEF_TIMELAPSE_MODE,
+#if (defined(__FreeBSD__))
     tuner_device:                   NULL,
 #endif
-    video_device:                   VIDEO_DEVICE,
-    v4l2_palette:                   DEF_PALETTE,
-    vidpipe:                        NULL,
-    filepath:                       NULL,
-    imagepath:                      DEF_IMAGEPATH,
-    moviepath:                      DEF_MOVIEPATH,
-    snappath:                       DEF_SNAPPATH,
-    timepath:                       DEF_TIMEPATH,
-    on_event_start:                 NULL,
-    on_event_end:                   NULL,
-    mask_file:                      NULL,
-    smart_mask_speed:               0,
+    .video_device =                    VIDEO_DEVICE,
+    .v4l2_palette =                    DEF_PALETTE,
+    .vidpipe =                         NULL,
+    .filepath =                        NULL,
+    .imagepath =                       DEF_IMAGEPATH,
+    .moviepath =                       DEF_MOVIEPATH,
+    .snappath =                        DEF_SNAPPATH,
+    .timepath =                        DEF_TIMEPATH,
+    .on_event_start =                  NULL,
+    .on_event_end =                    NULL,
+    .mask_file =                       NULL,
+    .smart_mask_speed =                0,
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
-    sql_log_image:                  1,
-    sql_log_snapshot:               1,
-    sql_log_movie:                  0,
-    sql_log_timelapse:              0,
-    sql_query:                      DEF_SQL_QUERY,
-    database_type:                  NULL,
-    database_dbname:                NULL,
-    database_host:                  "localhost",
-    database_user:                  NULL,
-    database_password:              NULL,
-    database_port:                  0,
-    database_busy_timeout:           0,
+    .sql_log_image =                   1,
+    .sql_log_snapshot =                1,
+    .sql_log_movie =                   0,
+    .sql_log_timelapse =               0,
+    .sql_query =                       DEF_SQL_QUERY,
+    .database_type =                   NULL,
+    .database_dbname =                 NULL,
+    .database_host =                   "localhost",
+    .database_user =                   NULL,
+    .database_password =               NULL,
+    .database_port =                   0,
+    .database_busy_timeout =            0,
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */
-    on_picture_save:                NULL,
-    on_motion_detected:             NULL,
-    on_area_detected:               NULL,
-    on_movie_start:                 NULL,
-    on_movie_end:                   NULL,
-    on_camera_lost:                 NULL,
-    motionvidpipe:                  NULL,
-    netcam_url:                     NULL,
-    netcam_userpass:                NULL,
-    netcam_keepalive:               "off",
-    netcam_proxy:                   NULL,
-    netcam_tolerant_check:          0,
-    rtsp_uses_tcp:                  1,
+    .on_picture_save =                 NULL,
+    .on_motion_detected =              NULL,
+    .on_area_detected =                NULL,
+    .on_movie_start =                  NULL,
+    .on_movie_end =                    NULL,
+    .on_camera_lost =                  NULL,
+    .motionvidpipe =                   NULL,
+    .netcam_url =                      NULL,
+    .netcam_userpass =                 NULL,
+    .netcam_keepalive =                "off",
+    .netcam_proxy =                    NULL,
+    .netcam_tolerant_check =           0,
+    .rtsp_uses_tcp =                   1,
 #ifdef HAVE_MMAL
     mmalcam_name:                   NULL,
     mmalcam_control_params:         NULL,
 #endif
-    text_changes:                   0,
-    text_left:                      NULL,
-    text_right:                     DEF_TIMESTAMP,
-    text_event:                     DEF_EVENTSTAMP,
-    text_double:                    0,
-    despeckle_filter:               NULL,
-    area_detect:                    NULL,
-    minimum_motion_frames:          1,
-    exif_text:                      NULL,
-    pid_file:                       NULL,
-    log_file:                       NULL,
-    log_level:                      LEVEL_DEFAULT+10,
-    log_type_str:                   NULL,
-    camera_dir:                     sysconfdir"/conf.d"
+    .text_changes =                    0,
+    .text_left =                       NULL,
+    .text_right =                      DEF_TIMESTAMP,
+    .text_event =                      DEF_EVENTSTAMP,
+    .text_double =                     0,
+    .despeckle_filter =                NULL,
+    .area_detect =                     NULL,
+    .minimum_motion_frames =           1,
+    .exif_text =                       NULL,
+    .pid_file =                        NULL,
+    .log_file =                        NULL,
+    .log_level =                       LEVEL_DEFAULT+10,
+    .log_type_str =                    NULL,
+    .camera_dir =                      sysconfdir"/conf.d"
 };
 
 
@@ -310,7 +301,7 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#if (defined(BSD))
+#if (defined(__FreeBSD__))
     {
     "tunerdevice",
     "# Tuner device to be used for capturing using tuner as source (default /dev/tuner0)\n"
@@ -2009,20 +2000,19 @@ struct context **conf_load(struct context **cnt)
     }
 
     if (!fp) {  /* Command-line didn't work, try current dir. */
-        char *path = NULL;
+        char path[PATH_MAX];
 
         if (cnt[0]->conf_filename[0])
             MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
                        filename);
 
-        if ((path = get_current_dir_name()) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error get_current_dir_name");
+        if (getcwd(path, sizeof(path)) == NULL) {
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error getcwd");
             exit(-1);
         }
 
         snprintf(filename, PATH_MAX, "%s/motion.conf", path);
         fp = fopen (filename, "r");
-        free(path);
     }
 
     if (!fp) {  /* Specified file does not exist... try default file. */

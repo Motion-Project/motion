@@ -207,18 +207,6 @@ else
 	echo
 fi
 
-
-if test "x$PTHREAD_SUPPORT" = "xyes"; then
-    AC_MSG_CHECKING([[for pthread_setname_np]])
-    CFLAGS="$TEMP_CFLAGS"
-    LIBS="$TEMP_LIBS"
-    AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM([[#include <pthread.h>]], [[  pthread_setname_np(pthread_self(), "name")]])],
-    [AC_DEFINE([[HAVE_PTHREAD_SETNAME_NP]], [[1]], [Define if you have pthread_setname_np function.])
-     AC_MSG_RESULT([[yes]])],
-    [AC_MSG_RESULT([[no]])] )
-fi
-
 #
 # Check for sdl library
 #
@@ -780,8 +768,6 @@ fi
 #Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h sys/videoio.h)
-
-AC_CHECK_FUNCS(get_current_dir_name)
 
 # Check if v4l2 is available
 SUPPORTED_V4L2=false
