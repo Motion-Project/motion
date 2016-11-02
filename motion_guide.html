@@ -819,7 +819,7 @@ A few important definitions.
   for testing and tuning and making mask files as you can see exactly where motion sees something moving.
   Motion is shown in greytones. If labelling is enabled the largest area is marked as blue. Smart mask is
   shown in red.</li>
-  <li> A "normal" image is the real image taken by the camera with text overlayed.</li>
+  <li> A "normal" image is the real image taken by the camera with text overlaid.</li>
 </ul>
 
 <p></p>
@@ -1051,7 +1051,7 @@ can also view that format.  See the option <code><strong>netcam_url</strong></co
 
 <strong>Raspberry Pi cameras</strong> are set up via the <code><strong>mmalcam_name</strong></code> parameter.
 Note that name for this parameter derives from the MMAL/OpenMax software.  The most common use of this
-option is to use the Rasberry PI camera.
+option is to use the Raspberry PI camera.
 <p></p>
 
 <strong>Composite video cards</strong> are normally made with a chip called BT878 (older cards have a BT848). They
@@ -1957,7 +1957,7 @@ Some configuration options are only used if Motion is built on a system that has
      </tr>
   	  <tr>
   	    <td bgcolor="#edf4f9" ><a href="#minimum_frame_time" >minimum_frame_time</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#despeckle" >despeckle</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
        <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
        <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
      </tr>
@@ -2348,9 +2348,9 @@ The following section provides detailed descriptions of each of the configuratio
        <td bgcolor="#edf4f9" >%i </a> </td>
        <td bgcolor="#edf4f9" >width of motion area,</a> </td>
        <td bgcolor="#edf4f9" >%J  </a> </td>
-       <td bgcolor="#edf4f9" >height of motion area,</a> </td>
+       <td bgcolor="#edf4f9" >height of motion area</a> </td>
        <td bgcolor="#edf4f9" >%J  </a> </td>
-       <td bgcolor="#edf4f9" >height of motion area,</a> </td>
+       <td bgcolor="#edf4f9" >height of motion area</a> </td>
 
      </tr>
      <tr>
@@ -2647,7 +2647,7 @@ See the <a href="#Basic_Setup">Basic Setup</a> section of this guide for a addit
 <ul>
   <li> Type: Integer</li>
   <li> Range / Valid values: -1, 0 - 7</li>
-  <li> Default: 1 (Disabled) /li>
+  <li> Default: 1 (Disabled) </li>
 </ul>
 <p></p>
 Input channel to use expressed as an integer number starting from 0.
@@ -2791,8 +2791,8 @@ to share the device with the other cameras.
 <p></p>
 Round Robin is not relevant for Network cameras or standard USB web cameras.  It is used with video capture
 cards which have multiple inputs per video chip.  This is not the ideal way to run multiple cameras.
-When the capture card changes input it takes some time before the decoder chip has syncronized to the new camera.
-You can improve this if you have expensive cameras with a syncronize input. Only one camera can be decoded
+When the capture card changes input it takes some time before the decoder chip has synchronized to the new camera.
+You can improve this if you have expensive cameras with a synchronized input. Only one camera can be decoded
 at a time so if you have 4 cameras connected 3 of the cameras will need to wait for their
 turn. The fact that cameras have to take turns and the fact that you have to skip a few frames after
 each turn dramatically lowers the possible framerate. You can get a high framerate by viewing each
@@ -2930,7 +2930,7 @@ URL to use for a netcam proxy server, if required. The syntax is
 <a href="http://myproxy:portnumber" rel="nofollow" target="_top">http://myproxy:portnumber</a>
 Use this if you need to connect to a network camera through a proxy server.
 Example of syntax: "http://myproxy.mydomain.com:1024
-If the proxy port number is 80 you can ommit the port number. Then the syntax is use "http://myproxy.mydomain.com" .
+If the proxy port number is 80 you can omit the port number. Then the syntax is use "http://myproxy.mydomain.com" .
 Leave this option undefined if you do not use a proxy server.
 <p></p>
 
@@ -3045,7 +3045,7 @@ smaller size and create a gray band around the image to fit the size given by
 motion. Note that it is the driver and not motion that generates the gray band.
 Motion will try to detect motion in the entire image including the gray band.
 Older versions of Motion required that dimensions of image must have both height and width that are a multiple of 16.
-The latest versions have eliminated this requirement.
+The latest versions have relaxed this condition, requiring both dimensions to be a multiple of 8.
 <p></p>
 
 <h3><a name="height"></a> height </h3>
@@ -3071,7 +3071,7 @@ makes the driver create an image of the nearest smaller size and create a gray b
 the size given by motion. Note that it is the driver and not motion that generates the gray band. Motion will
 try to detect motion in the entire image including the gray band.
 Older versions of Motion required that dimensions of image must have both height and width that are a multiple of 16.
-The latest versions have eliminated this requirement.
+The latest versions have relaxed this condition, requiring both dimensions to be a multiple of 8.
 <p></p>
 
 <h3><a name="framerate"></a> framerate </h3>
@@ -3107,7 +3107,7 @@ webcam port etc.
 
 <p></p>
 
-<h3><a name="despeckle"></a> despeckle </h3>
+<h3><a name="despeckle_filter"></a> despeckle_filter </h3>
 <p></p>
 <ul>
   <li> Type: String</li>
@@ -3171,7 +3171,7 @@ saved preview jpeg image and not on the saved movie.
   <li> Range / Valid values: Max 4095 characters</li>
   <li> Default: </li>
 </ul>
-User defined text overlayed on each in the lower left corner.
+User defined text overlaid on each in the lower left corner.
 Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and conversion specifiers
 <p></p>
 If the option is not defined no text is displayed at this position.
@@ -3186,7 +3186,7 @@ must be URL encoded. The browser does this for you. If you need
 to set it with a command line tool, use a browser first and let it make the encoded URL for you. Then
 you can copy paste it to your script file or cron line or whatever you want to use.
 <p></p>
-This is how the overlayed text is located.
+This is how the overlaid text is located.
 <p></p>
 <table border="1" width="354">
     <tr>
@@ -3223,7 +3223,7 @@ This is how the overlayed text is located.
   <li> Default: %Y-%m-%d\n%T</li>
 </ul>
 <p></p>
-User defined text overlayed on each in the lower right corner.
+User defined text overlaid on each in the lower right corner.
 Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and conversion specifiers
 <p></p>
 If the option is not defined no text is displayed at this position.
@@ -3242,7 +3242,7 @@ A major difference from text_left is that if this option is undefined the
 default is %Y-%m-%d\n%T which displays the date in ISO format YYYY-MM-DD and below the
 time in 24 hour clock HH:MM:SS.
 <p></p>
-This is how the overlayed text is located.
+This is how the overlaid text is located.
 <p></p>
 <table border="1" width="354">
     <tr>
@@ -3282,7 +3282,7 @@ This is how the overlayed text is located.
 Turns the text showing changed pixels on/off.
 By setting this option to 'on' the number of pixels that changed compared to the
 reference frame is displayed in the upper right corner of the pictures. This is good for calibration and testing.
-This is how the overlayed text is located.
+This is how the overlaid text is located.
 <p></p>
 <table border="1" width="354">
     <tr>
