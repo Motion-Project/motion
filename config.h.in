@@ -1,0 +1,23 @@
+/* Settings */
+#define VERSION "@VERSION@"
+#define sysconfdir "@sysconfdir@"
+
+/* Optional components */
+#cmakedefine HAVE_FFMPEG
+#cmakedefine HAVE_MMAL
+#cmakedefine HAVE_MYSQL
+#cmakedefine HAVE_PGSQL
+#cmakedefine HAVE_SDL
+#cmakedefine HAVE_SQLITE3
+
+/* Optional headers */
+#cmakedefine HAVE_LINUX_VIDEODEV_H
+#cmakedefine HAVE_LINUX_VIDEODEV2_H
+#cmakedefine HAVE_SYS_VIDEOIO_H
+
+/* TODO: look at these */
+#undef PWCBSD
+#undef OLD_BKTR
+#undef MOTION_V4L2
+#undef MOTION_V4L2_OLD
+#undef WITHOUT_V4L
