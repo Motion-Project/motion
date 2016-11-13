@@ -196,6 +196,19 @@ Motion is part of the Ubuntu and Debian repositories and can be installed with t
 <p></p>
 Open up a terminal window and type: <code><strong>sudo apt-get install motion</strong></code>
 <p></p>
+Motion can also be installed from the release deb files.  First, get the link to the deb file
+for the distribution and platform from the <a href="https://github.com/Motion-Project/motion/releases">Releases</a>
+page.
+<p></p>
+Open up a terminal window and type:
+<code><strong>wget https://github.com/Motion-Project/motion/releases/{deb package name} </strong></code>
+Next, there are multiple options to install a deb package, the below is one option
+and uses the gdebi tool.
+<p></p>
+<code><strong>sudo apt-get install gdebi-core</strong></code>
+<p></p>
+<code><strong>sudo gdebi {deb package name}</strong></code>
+<p></p>
 Before we start configuring Motion, we will copy the config file to our Home folder so that the master copy
 won't be affected. Open a terminal and copy the configuration file to your Home folder with following commands:
 <p></p>

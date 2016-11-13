@@ -591,7 +591,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                     if (cnt_list[0]->log_level >= DBG) {
                         int frames = cnt->movie_fps - (cnt->movie_last_shot + 1);
                         if (frames > 0) {
-                            char tmp[15];
+                            char tmp[25];
                             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Added %d fillerframes into movie",
                                        frames);
                             sprintf(tmp, "Fillerframes %d", frames);
@@ -1698,7 +1698,7 @@ static void *motion_loop(void *arg)
 
             /* Add changed pixels in upper right corner of the pictures */
             if (cnt->conf.text_changes) {
-                char tmp[15];
+                char tmp[25];
 
                 if (!cnt->pause)
                     sprintf(tmp, "%d", cnt->current_image->diffs);
