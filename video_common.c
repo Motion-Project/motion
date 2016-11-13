@@ -432,7 +432,7 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
  */
 void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift)
 {
-    /* Source code: raw2rgbpnm project
+    /* Source code: raw2rgbpnm project */
     /* url: http://salottisipuli.retiisi.org.uk/cgi-bin/gitweb.cgi?p=~sailus/raw2rgbpnm.git;a=summary */
 
     /* bpp - bits per pixel */
@@ -820,7 +820,7 @@ static int vid_v4lx_start(struct context *cnt)
         dev->height = height;
 #endif
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))      
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
         if (!v4l_start(dev, width, height, input, norm, frequency, tuner_number)) {
             close(dev->fd);
             pthread_mutexattr_destroy(&dev->attr);
@@ -894,7 +894,7 @@ static int vid_v4lx_start(struct context *cnt)
  * Returns
  *     device number
  *     -1 if failed to open device.
- *     -3 image dimensions are not modulo 8 
+ *     -3 image dimensions are not modulo 8
  */
 int vid_start(struct context *cnt)
 {
@@ -1005,10 +1005,10 @@ int vid_next(struct context *cnt, unsigned char *map)
             ret = v4l2_next(cnt, dev, map, width, height);
         } else {
 #endif
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))           
+#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
             v4l_set_input(cnt, dev, map, width, height, conf);
             ret = v4l_next(dev, map, width, height);
-#endif            
+#endif
 #ifdef MOTION_V4L2
         }
 #endif
