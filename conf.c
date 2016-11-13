@@ -83,9 +83,6 @@ struct config conf_template = {
     .ffmpeg_bps =                      DEF_FFMPEG_BPS,
     .ffmpeg_vbr =                      DEF_FFMPEG_VBR,
     .ffmpeg_video_codec =              DEF_FFMPEG_CODEC,
-#ifdef HAVE_SDL
-    sdl_threadnr:                   0,
-#endif
     .ipv6_enabled =                    0,
     .stream_port =                     0,
     .stream_quality =                  50,
@@ -847,19 +844,6 @@ config_param config_params[] = {
     print_bool
     },
 #endif /* HAVE_FFMPEG */
-#ifdef HAVE_SDL
-     {
-    "sdl_threadnr",
-    "\n############################################################\n"
-    "# SDL Window\n"
-    "############################################################\n\n"
-    "# Number of motion thread to show in SDL Window (default: 0 = disabled)",
-    1,
-    CONF_OFFSET(sdl_threadnr),
-    copy_int,
-    print_int
-    },
-#endif /* HAVE_SDL */
     {
     "use_extpipe",
     "\n############################################################\n"

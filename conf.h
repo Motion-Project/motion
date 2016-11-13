@@ -67,9 +67,6 @@ struct config {
     int ffmpeg_bps;
     int ffmpeg_vbr;
     const char *ffmpeg_video_codec;
-#ifdef HAVE_SDL
-    int sdl_threadnr;
-#endif
     int ipv6_enabled;
     int stream_port;
     int stream_quality;

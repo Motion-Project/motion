@@ -62,10 +62,6 @@
 #include "stream.h"
 #include "webhttpd.h"
 
-#ifdef HAVE_SDL
-#include "sdl.h"
-#endif
-
 #ifdef __APPLE__
 #define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(name)
 #elif defined(__FreeBSD__)
