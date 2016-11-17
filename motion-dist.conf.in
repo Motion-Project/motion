@@ -343,13 +343,6 @@ ffmpeg_video_codec mpeg4
 ffmpeg_duplicate_frames true
 
 ############################################################
-# SDL Window
-############################################################
-
-# Number of motion thread to show in SDL Window (default: 0 = disabled)
-#sdl_threadnr 0
-
-############################################################
 # External pipe to video encoder
 # Replacement for FFMPEG builtin encoder for ffmpeg_output_movies only.
 # The options movie_filename and timelapse_filename are also used

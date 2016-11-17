@@ -38,7 +38,6 @@ const char *eventList[] = {
     "EVENT_AREA_DETECTED",
     "EVENT_CAMERA_LOST",
     "EVENT_FFMPEG_PUT",
-    "EVENT_SDL_PUT",
     "EVENT_LAST"
 };
 
@@ -305,16 +304,6 @@ static void event_stream_put(struct context *cnt,
     if (cnt->conf.stream_port)
         stream_put(cnt, img);
 }
-
-#ifdef HAVE_SDL
-static void event_sdl_put(struct context *cnt,
-            motion_event type ATTRIBUTE_UNUSED,
-            unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
-            void *dummy2 ATTRIBUTE_UNUSED, struct tm *tm ATTRIBUTE_UNUSED)
-{
-    sdl_put(img, cnt->imgs.width, cnt->imgs.height);
-}
-#endif
 
 
 #if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
@@ -967,12 +956,6 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
-#ifdef HAVE_SDL
-    {
-    EVENT_SDL_PUT,
-    event_sdl_put
-    },
-#endif
 #if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
     {
     EVENT_IMAGE,

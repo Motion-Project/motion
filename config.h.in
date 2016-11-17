@@ -7,7 +7,6 @@
 #cmakedefine HAVE_MMAL
 #cmakedefine HAVE_MYSQL
 #cmakedefine HAVE_PGSQL
-#cmakedefine HAVE_SDL
 #cmakedefine HAVE_SQLITE3
 
 /* Optional headers */

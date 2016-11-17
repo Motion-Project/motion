@@ -208,39 +208,6 @@ else
 fi
 
 #
-# Check for sdl library
-#
-SDL_SUPPORT="no"
-AC_ARG_WITH(sdl,
-[  --with-sdl[=DIR]          Specify the prefix for the install path for
-                          sdl-config to get stream in SDL window (optional).
-],
-[],
-[withval="no"])
-if test "x$withval" = "xno"; then
-	AC_MSG_CHECKING(for sdl)
-	AC_MSG_RESULT(skipped)
-else
-	AC_PATH_PROG([CONFIG_SDL], [sdl-config], [], [${PATH}:${withval}:${withval}/bin])
-	if test -z "`($CONFIG_SDL --version) 2>/dev/null`" ;then
-		echo ""
-		echo "****************************************************"
-		echo "* sdl-config could not be found. Please install it *"
-		echo "* and remove the --with-sdl configure argument.    *"
-		echo "* libSDL can be found at http://www.libsdl.org     *"
-		echo "****************************************************"
-		echo ""
-	else
-		SDL_SUPPORT="yes"
-		TEMP_LIBS="$TEMP_LIBS `${CONFIG_SDL} --libs`"
-		TEMP_CFLAGS="${TEMP_CFLAGS} `${CONFIG_SDL} --cflags`"
-		AC_DEFINE([HAVE_SDL],1,[Define to 1 if you have SDL support])
-		SDL_OBJ="sdl.o"
-		AC_SUBST(SDL_OBJ)
-	fi
-fi
-
-#
 # Check for the libjpeg-turbo library
 #
 JPEG_TURBO="no"
@@ -1172,12 +1139,6 @@ else
 	else
         echo "V4L2 support:        No"
 	fi
-fi
-
-if test "${SDL_SUPPORT}" = "yes"; then
-	echo "SDL support:         Yes"
-else
-	echo "SDL support:         No"
 fi
 
 if test "${HAVE_MMAL}" = "yes"; then
