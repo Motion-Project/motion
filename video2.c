@@ -68,10 +68,10 @@
  let's go :)
 */
 
-#if !defined(WITHOUT_V4L) && defined(MOTION_V4L2)
-
 #include "motion.h"
 #include "video.h"
+
+#if !defined(WITHOUT_V4L) && defined(MOTION_V4L2)
 
 #ifdef MOTION_V4L2_OLD
 // Seems that is needed for some system
