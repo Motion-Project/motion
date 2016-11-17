@@ -24,6 +24,7 @@ option(WITH_MMAL "enable MMAL (Multi-Media Abstraction Layer API) support for Ra
 option(WITH_MYSQL "enable MySQL database support" ${MYSQL_FOUND})
 option(WITH_PGSQL "enable PostgreSQL database support" ${PostgreSQL_FOUND})
 option(WITH_SQLITE3 "enable SQLite database support" ${SQLITE3_FOUND})
+option(WITH_V4L "enable Video 4 Linux (2) webcam support" ON)
 
 set(HAVE_FFMPEG ${WITH_FFMPEG})
 set(HAVE_MMAL ${WITH_MMAL})
@@ -33,6 +34,9 @@ set(HAVE_SQLITE3 ${WITH_SQLITE3})
 check_include_files("linux/videodev.h" HAVE_LINUX_VIDEODEV_H)
 check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
 check_include_files("sys/videoio.h" HAVE_SYS_VIDEOIO_H)
+set(WITHOUT_V4L NOT ${WITH_V4L})
+set(MOTION_V4L2 ${HAVE_LINUX_VIDEODEV2_H})
+set(MOTION_V4L2_OLD ${HAVE_LINUX_VIDEODEV2_H})
 
 configure_file(config.h.in "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
 configure_file(motion-dist.conf.in motion-dist.conf)

@@ -7,9 +7,10 @@
  *    See also the file 'COPYING'.
  *
  */
-/* Common stuff: */
-#include "rotate.h"     /* already includes motion.h */
+
+#include "motion.h"
 #include "video.h"
+#include "rotate.h"
 
 #if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L)
 
