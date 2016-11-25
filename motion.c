@@ -578,11 +578,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
             if (!cnt->conf.ffmpeg_duplicate_frames) {
                 /* don't duplicate frames */
             } else if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
-#ifdef HAVE_FFMPEG
                 (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
-#else
-                (cnt->conf.useextpipe && cnt->extpipe)) {
-#endif
                 /*
                  * movie_last_shoot is -1 when file is created,
                  * we don't know how many frames there is in first sec
@@ -981,10 +977,8 @@ static void motion_cleanup(struct context *cnt)
     /* Stop stream */
     event(cnt, EVENT_STOP, NULL, NULL, NULL, NULL);
 
-#ifdef HAVE_FFMPEG
     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
-#endif // HAVE_FFMPEG
 
     if (cnt->video_dev >= 0) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Calling vid_close() from motion_cleanup");
@@ -1764,11 +1758,7 @@ static void *motion_loop(void *arg)
             if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
                 cnt->detecting_motion = 1;
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
-#ifdef HAVE_FFMPEG
                 if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
-#else
-                if (cnt->conf.useextpipe && cnt->extpipe) {
-#endif
                     /* Setup the postcap counter */
                     cnt->postcap = cnt->conf.post_capture;
                     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: (Em) Init post capture %d",
@@ -1813,11 +1803,7 @@ static void *motion_loop(void *arg)
                         cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
 
                 } else if ((cnt->postcap) &&
-#ifdef HAVE_FFMPEG
                            (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
-#else
-                           (cnt->conf.useextpipe && cnt->extpipe)) {
-#endif
                    /* we have motion in this frame, but not enought frames for trigger. Check postcap */
                     cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                     cnt->postcap--;
@@ -1830,11 +1816,7 @@ static void *motion_loop(void *arg)
                 /* Always call motion_detected when we have a motion image */
                 motion_detected(cnt, cnt->video_dev, cnt->current_image);
             } else if ((cnt->postcap) &&
-#ifdef HAVE_FFMPEG
                       (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
-#else
-                      (cnt->conf.useextpipe && cnt->extpipe)) {
-#endif
                 /* No motion, doing postcap */
                 cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
                 cnt->postcap--;
@@ -1996,7 +1978,6 @@ static void *motion_loop(void *arg)
 
     /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
 
-#ifdef HAVE_FFMPEG
 
         if (cnt->conf.timelapse) {
 
@@ -2064,8 +2045,6 @@ static void *motion_loop(void *arg)
          */
             event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
         }
-
-#endif /* HAVE_FFMPEG */
 
         time_last_frame = time_current_frame;
 
@@ -2666,13 +2645,8 @@ int main (int argc, char **argv)
 
     motion_startup(1, argc, argv);
 
-#ifdef HAVE_FFMPEG
-    /*
-     * FFMpeg initialization is only performed if FFMpeg support was found
-     * and not disabled during the configure phase.
-     */
     ffmpeg_init();
-#endif /* HAVE_FFMPEG */
+
 #ifdef HAVE_MYSQL
     if (mysql_library_init(0, NULL, NULL)) {
         fprintf(stderr, "could not initialize MySQL library\n");
@@ -2893,9 +2867,7 @@ int main (int argc, char **argv)
 
     } while (restart); /* loop if we're supposed to restart */
 
-#ifdef HAVE_FFMPEG
     ffmpeg_finalise();
-#endif /* HAVE_FFMPEG */
 
     // Be sure that http control exits fine
     cnt_list[0]->webcontrol_finish = 1;

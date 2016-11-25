@@ -92,7 +92,7 @@
 #endif
 
 
-/* 
+/*
  *  The macro below defines a version of sleep using nanosleep
  * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping
  */
@@ -101,7 +101,7 @@
                 tv.tv_sec = (seconds);             \
                 tv.tv_nsec = (nanoseconds);        \
                 while (nanosleep(&tv, &tv) == -1); \
-        } 
+        }
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -221,7 +221,7 @@ struct images;
 #include "mmalcam.h"
 #endif
 
-/* 
+/*
  * Structure to hold images information
  * The idea is that this should have all information about a picture e.g. diffs, timestamp etc.
  * The exception is the label information, it uses a lot of memory
@@ -244,9 +244,9 @@ struct image_data {
     struct tm timestamp_tm;
     int shot;                   /* Sub second timestamp count */
 
-    /* 
-     * Movement center to img center distance 
-     * Note: Dist is calculated distX*distX + distY*distY 
+    /*
+     * Movement center to img center distance
+     * Note: Dist is calculated distX*distX + distY*distY
      */
     unsigned long cent_dist;
 
@@ -257,24 +257,24 @@ struct image_data {
     int total_labels;
 };
 
-/* 
+/*
  * DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
  * (and the corresponding height values, of course)
  * ===========================================================================
  * Location      Purpose
- * 
+ *
  * conf          The values in conf reflect width and height set in the
- *               configuration file. These can be set via http remote control, 
+ *               configuration file. These can be set via http remote control,
  *               but they are not used internally by Motion, so it won't break
  *               anything. These values are transferred to imgs in vid_start.
  *
  * imgs          The values in imgs are the actual output dimensions. Normally
  *               the output dimensions are the same as the capture dimensions,
- *               but for 90 or 270 degrees rotation, they are not. E.g., if 
+ *               but for 90 or 270 degrees rotation, they are not. E.g., if
  *               you capture at 320x240, and rotate 90 degrees, the output
  *               dimensions are 240x320.
- *               These values are set from the conf values in vid_start, or 
- *               from the first JPEG image in netcam_start. For 90 or 270 
+ *               These values are set from the conf values in vid_start, or
+ *               from the first JPEG image in netcam_start. For 90 or 270
  *               degrees rotation, they are swapped in rotate_init.
  *
  * rotate_data   The values in rotate_data are named cap_width and cap_height,
@@ -308,7 +308,7 @@ struct images {
     int width;
     int height;
     int type;
-    int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */        
+    int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */
     int size;
     int motionsize;
     int labelgroup_max;
@@ -321,7 +321,7 @@ struct images {
 struct rotdata {
     /* Temporary buffer for 90 and 270 degrees rotation. */
     unsigned char *temp_buf;
-    /* 
+    /*
      * Degrees to rotate; copied from conf.rotate_deg. This is the value
      * that is actually used. The value of conf.rotate_deg cannot be used
      * because it can be changed by motion-control, and changing rotation
@@ -329,8 +329,8 @@ struct rotdata {
      */
     int degrees;
     /*
-     * Capture width and height - different from output width and height if 
-     * rotating 90 or 270 degrees. 
+     * Capture width and height - different from output width and height if
+     * rotating 90 or 270 degrees.
      */
     int cap_width;
     int cap_height;
@@ -408,7 +408,7 @@ struct context {
     unsigned int moved;
     unsigned int pause;
     int missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
-    unsigned int lost_connection;    
+    unsigned int lost_connection;
 
 #if (defined(BSD))
     int tuner_dev;
@@ -419,7 +419,7 @@ struct context {
 
     struct stream stream;
     int stream_count;
-    
+
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     int sql_mask;
 #endif
@@ -441,14 +441,13 @@ struct context {
     char extpipefilename[PATH_MAX];
     int movie_last_shot;
 
-#ifdef HAVE_FFMPEG
     struct ffmpeg *ffmpeg_output;
     struct ffmpeg *ffmpeg_output_debug;
     struct ffmpeg *ffmpeg_timelapse;
     struct ffmpeg *ffmpeg_smartmask;
     char timelapsefilename[PATH_MAX];
     char motionfilename[PATH_MAX];
-#endif
+
 };
 
 extern pthread_mutex_t global_lock;

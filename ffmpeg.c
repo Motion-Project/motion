@@ -23,14 +23,12 @@
 
 
 #include "config.h"
-
-#ifdef HAVE_FFMPEG
-
 #include "ffmpeg.h"
 #include "motion.h"
 
-#define AVSTREAM_CODEC_PTR(avs_ptr) (avs_ptr->codec)
+#ifdef HAVE_FFMPEG
 
+#define AVSTREAM_CODEC_PTR(avs_ptr) (avs_ptr->codec)
 
 /****************************************************************************
  *  The section below is the "my" section of functions.
@@ -229,7 +227,7 @@ static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op)
 void ffmpeg_init(void){
     int ret;
 
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, 
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,
         "%s: ffmpeg libavcodec version %d.%d.%d"
         " libavformat version %d.%d.%d"
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
@@ -884,6 +882,53 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag, const c
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
         }
     }
+}
+
+
+#else /* No FFMPEG */
+/****************************************************************************
+ ****************************************************************************
+ ****************************************************************************/
+void ffmpeg_init(void){
+    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,"%s: No ffmpeg functionality included");
+}
+void ffmpeg_finalise(void) {}
+struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
+                           unsigned char *y, unsigned char *u, unsigned char *v,
+                           int width, int height, int rate, int bps, int vbr, int tlapse)
+{
+    struct ffmpeg *ffmpeg;
+    ffmpeg = mymalloc(sizeof(struct ffmpeg));
+
+    ffmpeg_video_codec = ffmpeg_video_codec;
+    filename = filename;
+    y = y;
+    u = u;
+    v = v;
+    width = width;
+    height = height;
+    rate = rate;
+    bps = bps;
+    vbr = vbr;
+    tlapse = tlapse;
+    ffmpeg->dummy = 0;
+    return ffmpeg;
+
+}
+void ffmpeg_close(struct ffmpeg *ffmpeg){
+    free(ffmpeg);
+}
+int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
+                           unsigned char *u, unsigned char *v){
+    ffmpeg = ffmpeg;
+    y = y;
+    u = u;
+    v = v;
+    return 0;
+}
+int ffmpeg_put_image(struct ffmpeg *ffmpeg){
+    ffmpeg = ffmpeg;
+    return 0;
 }
 
 #endif /* HAVE_FFMPEG */

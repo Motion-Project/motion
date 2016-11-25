@@ -578,7 +578,6 @@ static void event_new_video(struct context *cnt,
     if (cnt->movie_fps < 2) cnt->movie_fps = 2;
 }
 
-#ifdef HAVE_FFMPEG
 
 static void grey2yuv420p(unsigned char *u, unsigned char *v, int width, int height)
 {
@@ -897,7 +896,6 @@ static void event_ffmpeg_timelapseend(struct context *cnt,
     }
 }
 
-#endif /* HAVE_FFMPEG */
 
 
 /*
@@ -974,7 +972,6 @@ struct event_handlers event_handlers[] = {
     EVENT_FIRSTMOTION,
     event_new_video
     },
-#ifdef HAVE_FFMPEG
     {
     EVENT_FIRSTMOTION,
     event_ffmpeg_newfile
@@ -999,7 +996,6 @@ struct event_handlers event_handlers[] = {
     EVENT_TIMELAPSEEND,
     event_ffmpeg_timelapseend
     },
-#endif /* HAVE_FFMPEG */
     {
     EVENT_FILECLOSE,
     on_movie_end_command

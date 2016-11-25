@@ -451,14 +451,14 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 
     jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
-    
+
     _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
-    
+
 
     jpeg_start_compress(&cinfo, TRUE);
 
     put_jpeg_exif(&cinfo, cnt, tm, box);
-    
+
     /* If the image is not a multiple of 16, this overruns the buffers
      * we'll just pad those last bytes with zeros
      */
@@ -468,13 +468,13 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
                 y[i] = input_image + width * (i + j);
                 if (i % 2 == 0) {
                     cb[i / 2] = input_image + width * height + width / 2 * ((i + j) /2);
-                    cr[i / 2] = input_image + width * height + width * height / 4 + width / 2 * ((i + j) / 2);                
+                    cr[i / 2] = input_image + width * height + width * height / 4 + width / 2 * ((i + j) / 2);
                 }
             } else {
                 y[i] = 0x00;
                 cb[i] = 0x00;
                 cr[i] = 0x00;
-            }    
+            }
         }
         jpeg_write_raw_data(&cinfo, data, 16);
     }
@@ -612,8 +612,8 @@ static void put_jpeg_yuv420p_file(FILE *fp,
                 y[i] = 0x00;
                 cb[i] = 0x00;
                 cr[i] = 0x00;
-            }        
-        }    
+            }
+        }
         jpeg_write_raw_data(&cinfo, data, 16);
     }
 
@@ -1026,7 +1026,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
                 resized_image[y * width + x] = image[
-                        (mask_height - 1) * y / (height - 1) * mask_width + 
+                        (mask_height - 1) * y / (height - 1) * mask_width +
                         (mask_width  - 1) * x / (width  - 1)];
             }
         }
@@ -1106,12 +1106,7 @@ void preview_save(struct context *cnt)
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 
-#ifdef HAVE_FFMPEG
-        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))
-            && !use_imagepath) {
-#else
-        if ((cnt->conf.useextpipe && cnt->extpipe) && !use_imagepath) {
-#endif
+        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) && !use_imagepath) {
             if (cnt->conf.useextpipe && cnt->extpipe) {
                 basename_len = strlen(cnt->extpipefilename) + 1;
                 strncpy(previewname, cnt->extpipefilename, basename_len);

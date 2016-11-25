@@ -750,7 +750,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-#ifdef HAVE_FFMPEG
     {
     "ffmpeg_output_movies",
     "\n############################################################\n"
@@ -843,7 +842,6 @@ config_param config_params[] = {
     copy_bool,
     print_bool
     },
-#endif /* HAVE_FFMPEG */
     {
     "use_extpipe",
     "\n############################################################\n"
