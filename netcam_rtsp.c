@@ -726,9 +726,8 @@ int netcam_connect_rtsp(netcam_context_ptr netcam){
     return 0;
 
 #else  /* No FFmpeg/Libav */
-    netcam->rtsp->status = RTSP_NOTCONNECTED;
-    netcam->rtsp->format_context = NULL;
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
+    if (netcam)
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
 }
@@ -755,7 +754,7 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,"%s: netcam shut down");
     }
-    
+
     free(netcam->rtsp->path);
     free(netcam->rtsp->user);
     free(netcam->rtsp->pass);
@@ -765,8 +764,8 @@ void netcam_shutdown_rtsp(netcam_context_ptr netcam){
 
 #else  /* No FFmpeg/Libav */
     /* Stop compiler warnings */
-    netcam->rtsp->status = RTSP_NOTCONNECTED;
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
+    if (netcam)
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
 #endif /* End #ifdef HAVE_FFMPEG */
 }
 
@@ -890,8 +889,8 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
 
 #else  /* No FFmpeg/Libav */
     /* Stop compiler warnings */
-    if (url->port == url->port) netcam->rtsp->status = RTSP_NOTCONNECTED;
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
+    if ((url) || (netcam))
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: FFmpeg/Libav not found on computer.  No RTSP support");
     return -1;
 #endif /* End #ifdef HAVE_FFMPEG */
 }
@@ -920,7 +919,7 @@ int netcam_next_rtsp(unsigned char *image , netcam_context_ptr netcam){
      * or call anything else without taking care of thread safety.
      * The netcam mutex *only* protects netcam->latest, it cannot be
      * used to safely call other netcam functions. */
-    
+
     pthread_mutex_lock(&netcam->mutex);
     memcpy(image, netcam->latest->ptr, netcam->latest->used);
     pthread_mutex_unlock(&netcam->mutex);
