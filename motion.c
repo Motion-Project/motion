@@ -1392,6 +1392,154 @@ static int motionloop_retry(struct context *cnt){
     return 0;
 }
 
+static int motionloop_capture(struct context *cnt){
+
+    const char *tmpin;
+    char tmpout[80];
+    struct tm tmptime;
+    int vid_return_code = 0;        /* Return code used when calling vid_next */
+    struct timeval tv1;
+
+    /***** MOTION LOOP - IMAGE CAPTURE SECTION *****/
+    /*
+     * Fetch next frame from camera
+     * If vid_next returns 0 all is well and we got a new picture
+     * Any non zero value is an error.
+     * 0 = OK, valid picture
+     * <0 = fatal error - leave the thread by breaking out of the main loop
+     * >0 = non fatal error - copy last image or show grey image with message
+     */
+    if (cnt->video_dev >= 0)
+        vid_return_code = vid_next(cnt, cnt->current_image->image);
+    else
+        vid_return_code = 1; /* Non fatal error */
+
+    // VALID PICTURE
+    if (vid_return_code == 0) {
+        cnt->lost_connection = 0;
+        cnt->connectionlosttime = 0;
+
+        /* If all is well reset missing_frame_counter */
+        if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
+            /* If we previously logged starting a grey image, now log video re-start */
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal re-acquired");
+            // event for re-acquired video signal can be called here
+        }
+        cnt->missing_frame_counter = 0;
+
+        /*
+         * Save the newly captured still virgin image to a buffer
+         * which we will not alter with text and location graphics
+         */
+        memcpy(cnt->imgs.image_virgin, cnt->current_image->image, cnt->imgs.size);
+
+        /*
+         * If the camera is a netcam we let the camera decide the pace.
+         * Otherwise we will keep on adding duplicate frames.
+         * By resetting the timer the framerate becomes maximum the rate
+         * of the Netcam.
+         */
+        if (cnt->conf.netcam_url) {
+            gettimeofday(&tv1, NULL);
+            cnt->timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
+        }
+    // FATAL ERROR - leave the thread by breaking out of the main loop
+    } else if (vid_return_code < 0) {
+        /* Fatal error - Close video device */
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Video device fatal error - Closing video device");
+        vid_close(cnt);
+        /*
+         * Use virgin image, if we are not able to open it again next loop
+         * a gray image with message is applied
+         * flag lost_connection
+         */
+        memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
+        cnt->lost_connection = 1;
+    /* NO FATAL ERROR -
+    *        copy last image or show grey image with message
+    *        flag on lost_connection if :
+    *               vid_return_code == NETCAM_RESTART_ERROR
+    *        cnt->video_dev < 0
+    *        cnt->missing_frame_counter > (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)
+    */
+    } else {
+
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: vid_return_code %d",vid_return_code);
+        /*
+         * Netcams that change dimensions while Motion is running will
+         * require that Motion restarts to reinitialize all the many
+         * buffers inside Motion. It will be a mess to try and recover any
+         * other way
+         */
+        if (vid_return_code == NETCAM_RESTART_ERROR) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Restarting Motion thread to reinitialize all "
+                       "image buffers");
+            /*
+             * Break out of main loop terminating thread
+             * watchdog will start us again
+             * Set lost_connection flag on
+             */
+            cnt->lost_connection = 1;
+            return 1;
+        }
+
+        /*
+         * First missed frame - store timestamp
+         * Don't reset time when thread restarts
+         */
+        if (cnt->connectionlosttime == 0)
+            cnt->connectionlosttime = cnt->currenttime;
+
+        /*
+         * Increase missing_frame_counter
+         * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
+         * After MISSING_FRAMES_TIMEOUT seconds we put a grey error image in the buffer
+         * If we still have not yet received the initial image from a camera
+         * we go straight for the grey error image.
+         */
+        ++cnt->missing_frame_counter;
+
+        if (cnt->video_dev >= 0 &&
+            cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
+            memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
+        } else {
+            cnt->lost_connection = 1;
+
+            if (cnt->video_dev >= 0)
+                tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
+            else
+                tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
+
+            localtime_r(&cnt->connectionlosttime, &tmptime);
+            memset(cnt->current_image->image, 0x80, cnt->imgs.size);
+            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
+            draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
+                      tmpout, cnt->conf.text_double);
+
+            /* Write error message only once */
+            if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal lost - Adding grey image");
+                // Event for lost video signal can be called from here
+                event(cnt, EVENT_CAMERA_LOST, NULL, NULL,
+                      NULL, cnt->currenttime_tm);
+            }
+
+            /*
+             * If we don't get a valid frame for a long time, try to close/reopen device
+             * Only try this when a device is open
+             */
+            if ((cnt->video_dev > 0) &&
+                (cnt->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cnt->conf.frame_limit)) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Video signal still lost - "
+                           "Trying to close video device");
+                vid_close(cnt);
+            }
+        }
+    }
+    return 0;
+
+}
+
 /**
  * motion_loop
  *
@@ -1410,10 +1558,9 @@ static void *motion_loop(void *arg)
     unsigned int passflag = 0;
     long int delay_time_nsec;
     int rolling_frame = 0;
-    struct timeval tv1, tv2;
+    struct timeval tv2;
     unsigned long int elapsedtime;
     unsigned long long int timenow = 0, timebefore = 0;
-    int vid_return_code = 0;        /* Return code used when calling vid_next */
 
 
     /*
@@ -1430,149 +1577,7 @@ static void *motion_loop(void *arg)
         if (cnt->get_image) {
             motionloop_resetimages(cnt);
             if (motionloop_retry(cnt) == 1)  break;
-        /***** MOTION LOOP - IMAGE CAPTURE SECTION *****/
-
-            /*
-             * Fetch next frame from camera
-             * If vid_next returns 0 all is well and we got a new picture
-             * Any non zero value is an error.
-             * 0 = OK, valid picture
-             * <0 = fatal error - leave the thread by breaking out of the main loop
-             * >0 = non fatal error - copy last image or show grey image with message
-             */
-            if (cnt->video_dev >= 0)
-                vid_return_code = vid_next(cnt, cnt->current_image->image);
-            else
-                vid_return_code = 1; /* Non fatal error */
-
-            // VALID PICTURE
-            if (vid_return_code == 0) {
-                cnt->lost_connection = 0;
-                cnt->connectionlosttime = 0;
-
-                /* If all is well reset missing_frame_counter */
-                if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
-                    /* If we previously logged starting a grey image, now log video re-start */
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal re-acquired");
-                    // event for re-acquired video signal can be called here
-                }
-                cnt->missing_frame_counter = 0;
-
-                /*
-                 * Save the newly captured still virgin image to a buffer
-                 * which we will not alter with text and location graphics
-                 */
-                memcpy(cnt->imgs.image_virgin, cnt->current_image->image, cnt->imgs.size);
-
-                /*
-                 * If the camera is a netcam we let the camera decide the pace.
-                 * Otherwise we will keep on adding duplicate frames.
-                 * By resetting the timer the framerate becomes maximum the rate
-                 * of the Netcam.
-                 */
-                if (cnt->conf.netcam_url) {
-                    gettimeofday(&tv1, NULL);
-                    timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
-                }
-            // FATAL ERROR - leave the thread by breaking out of the main loop
-            } else if (vid_return_code < 0) {
-                /* Fatal error - Close video device */
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Video device fatal error - Closing video device");
-                vid_close(cnt);
-                /*
-                 * Use virgin image, if we are not able to open it again next loop
-                 * a gray image with message is applied
-                 * flag lost_connection
-                 */
-                memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
-                cnt->lost_connection = 1;
-            /* NO FATAL ERROR -
-            *        copy last image or show grey image with message
-            *        flag on lost_connection if :
-            *               vid_return_code == NETCAM_RESTART_ERROR
-            *        cnt->video_dev < 0
-            *        cnt->missing_frame_counter > (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)
-            */
-            } else {
-
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: vid_return_code %d",
-                           vid_return_code);
-
-                /*
-                 * Netcams that change dimensions while Motion is running will
-                 * require that Motion restarts to reinitialize all the many
-                 * buffers inside Motion. It will be a mess to try and recover any
-                 * other way
-                 */
-                if (vid_return_code == NETCAM_RESTART_ERROR) {
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Restarting Motion thread to reinitialize all "
-                               "image buffers");
-                    /*
-                     * Break out of main loop terminating thread
-                     * watchdog will start us again
-                     * Set lost_connection flag on
-                     */
-
-                    cnt->lost_connection = 1;
-                    break;
-                }
-
-                /*
-                 * First missed frame - store timestamp
-                 * Don't reset time when thread restarts
-                 */
-                if (cnt->connectionlosttime == 0)
-                    cnt->connectionlosttime = cnt->currenttime;
-
-                /*
-                 * Increase missing_frame_counter
-                 * The first MISSING_FRAMES_TIMEOUT seconds we copy previous virgin image
-                 * After MISSING_FRAMES_TIMEOUT seconds we put a grey error image in the buffer
-                 * If we still have not yet received the initial image from a camera
-                 * we go straight for the grey error image.
-                 */
-                ++cnt->missing_frame_counter;
-
-                if (cnt->video_dev >= 0 &&
-                    cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
-                    memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
-                } else {
-                    const char *tmpin;
-                    char tmpout[80];
-                    struct tm tmptime;
-                    cnt->lost_connection = 1;
-
-                    if (cnt->video_dev >= 0)
-                        tmpin = "CONNECTION TO CAMERA LOST\\nSINCE %Y-%m-%d %T";
-                    else
-                        tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
-
-                    localtime_r(&cnt->connectionlosttime, &tmptime);
-                    memset(cnt->current_image->image, 0x80, cnt->imgs.size);
-                    mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
-                    draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
-                              tmpout, cnt->conf.text_double);
-
-                    /* Write error message only once */
-                    if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
-                        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal lost - Adding grey image");
-                        // Event for lost video signal can be called from here
-                        event(cnt, EVENT_CAMERA_LOST, NULL, NULL,
-                              NULL, cnt->currenttime_tm);
-                    }
-
-                    /*
-                     * If we don't get a valid frame for a long time, try to close/reopen device
-                     * Only try this when a device is open
-                     */
-                    if ((cnt->video_dev > 0) &&
-                        (cnt->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cnt->conf.frame_limit)) {
-                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Video signal still lost - "
-                                   "Trying to close video device");
-                        vid_close(cnt);
-                    }
-                }
-            }
+            if (motionloop_capture(cnt) == 1)  break;
 
         /***** MOTION LOOP - MOTION DETECTION SECTION *****/
 
