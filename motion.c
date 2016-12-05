@@ -2107,7 +2107,32 @@ static void motionloop_timelapse(struct context *cnt){
 
 }
 
+static void motionloop_loopback(struct context *cnt){
+    /*
+     * Feed last image and motion image to video device pipes and the stream clients
+     * In setup mode we send the special setup mode image to both stream and vloopback pipe
+     * In normal mode we feed the latest image to vloopback device and we send
+     * the image to the stream. We always send the first image in a second to the stream.
+     * Other image are sent only when the config option stream_motion is off
+     * The result is that with stream_motion on the stream stream is normally at the minimal
+     * 1 frame per second but the minute motion is detected the motion_detected() function
+     * sends all detected pictures to the stream except the 1st per second which is already sent.
+     */
+    if (cnt->conf.setup_mode) {
+        event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
+        event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
+    } else {
+        event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL,
+              &cnt->pipe, &cnt->current_image->timestamp_tm);
 
+        if (!cnt->conf.stream_motion || cnt->shots == 1)
+            event(cnt, EVENT_STREAM, cnt->current_image->image, NULL, NULL,
+                  &cnt->current_image->timestamp_tm);
+    }
+
+    event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
+
+}
 
 
 
@@ -2148,33 +2173,7 @@ static void *motion_loop(void *arg)
         }
         motionloop_snapshot(cnt);
         motionloop_timelapse(cnt);
-
-    /***** MOTION LOOP - VIDEO LOOPBACK SECTION *****/
-
-        /*
-         * Feed last image and motion image to video device pipes and the stream clients
-         * In setup mode we send the special setup mode image to both stream and vloopback pipe
-         * In normal mode we feed the latest image to vloopback device and we send
-         * the image to the stream. We always send the first image in a second to the stream.
-         * Other image are sent only when the config option stream_motion is off
-         * The result is that with stream_motion on the stream stream is normally at the minimal
-         * 1 frame per second but the minute motion is detected the motion_detected() function
-         * sends all detected pictures to the stream except the 1st per second which is already sent.
-         */
-        if (cnt->conf.setup_mode) {
-            event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
-            event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
-        } else {
-            event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL,
-                  &cnt->pipe, &cnt->current_image->timestamp_tm);
-
-            if (!cnt->conf.stream_motion || cnt->shots == 1)
-                event(cnt, EVENT_STREAM, cnt->current_image->image, NULL, NULL,
-                      &cnt->current_image->timestamp_tm);
-        }
-
-        event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
-
+        motionloop_loopback(cnt);
 
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
