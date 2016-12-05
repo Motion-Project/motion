@@ -465,6 +465,11 @@ struct context {
     long int *rolling_average_data;
     unsigned long int rolling_average;
 
+    int olddiffs;   //only need this in here for a printf later...do we need that printf?
+    int smartmask_ratio;
+    int smartmask_count;
+
+
 };
 
 extern pthread_mutex_t global_lock;

@@ -1078,6 +1078,9 @@ static int motion_init(struct context *cnt)
     cnt->minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
     cnt->get_image = 1;
 
+    cnt->olddiffs = 0;
+    cnt->smartmask_ratio = 0;
+    cnt->smartmask_count = 20;
 
     return 0;
 }
@@ -1540,6 +1543,119 @@ static int motionloop_capture(struct context *cnt){
 
 }
 
+static void motionloop_detection(struct context *cnt){
+
+
+    /***** MOTION LOOP - MOTION DETECTION SECTION *****/
+    /*
+     * The actual motion detection takes place in the following
+     * diffs is the number of pixels detected as changed
+     * Make a differences picture in image_out
+     *
+     * alg_diff_standard is the slower full feature motion detection algorithm
+     * alg_diff first calls a fast detection algorithm which only looks at a
+     * fraction of the pixels. If this detects possible motion alg_diff_standard
+     * is called.
+     */
+    if (cnt->process_thisframe) {
+        if (cnt->threshold && !cnt->pause) {
+            /*
+             * If we've already detected motion and we want to see if there's
+             * still motion, don't bother trying the fast one first. IF there's
+             * motion, the alg_diff will trigger alg_diff_standard
+             * anyway
+             */
+            if (cnt->detecting_motion || cnt->conf.setup_mode)
+                cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin);
+            else
+                cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin);
+
+            /* Lightswitch feature - has light intensity changed?
+             * This can happen due to change of light conditions or due to a sudden change of the camera
+             * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
+             * 5 frames to allow the camera to settle.
+             * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
+             */
+            if (cnt->conf.lightswitch > 1 && !cnt->lost_connection) {
+                if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Lightswitch detected");
+
+                    if (cnt->moved < 5)
+                        cnt->moved = 5;
+
+                    cnt->current_image->diffs = 0;
+                    alg_update_reference_frame(cnt, RESET_REF_FRAME);
+                }
+            }
+
+            /*
+             * Switchfilter feature tries to detect a change in the video signal
+             * from one camera to the next. This is normally used in the Round
+             * Robin feature. The algorithm is not very safe.
+             * The algorithm takes a little time so we only call it when needed
+             * ie. when feature is enabled and diffs>threshold.
+             * We do not suspend motion detection like we did for lightswitch
+             * because with Round Robin this is controlled by roundrobin_skip.
+             */
+            if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
+                cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs,
+                                                             cnt->current_image->image);
+
+                if (cnt->current_image->diffs <= cnt->threshold) {
+                    cnt->current_image->diffs = 0;
+
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Switchfilter detected");
+                }
+            }
+
+            /*
+             * Despeckle feature
+             * First we run (as given by the despeckle_filter option iterations
+             * of erode and dilate algorithms.
+             * Finally we run the labelling feature.
+             * All this is done in the alg_despeckle code.
+             */
+            cnt->current_image->total_labels = 0;
+            cnt->imgs.largest_label = 0;
+            cnt->olddiffs = 0;
+
+            if (cnt->conf.despeckle_filter && cnt->current_image->diffs > 0) {
+                cnt->olddiffs = cnt->current_image->diffs;
+                cnt->current_image->diffs = alg_despeckle(cnt, cnt->olddiffs);
+            } else if (cnt->imgs.labelsize_max) {
+                cnt->imgs.labelsize_max = 0; /* Disable labeling if enabled */
+            }
+
+        } else if (!cnt->conf.setup_mode) {
+            cnt->current_image->diffs = 0;
+        }
+    }
+
+    //TODO:  This section needs investigation for purpose, cause and effect
+    /* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
+    if ((cnt->smartmask_speed && (cnt->event_nr != cnt->prev_event)) &&
+        (!--cnt->smartmask_count)) {
+        alg_tune_smartmask(cnt);
+        cnt->smartmask_count = cnt->smartmask_ratio;
+    }
+
+    /*
+     * cnt->moved is set by the tracking code when camera has been asked to move.
+     * When camera is moving we do not want motion to detect motion or we will
+     * get our camera chasing itself like crazy and we will get motion detected
+     * which is not really motion. So we pretend there is no motion by setting
+     * cnt->diffs = 0.
+     * We also pretend to have a moving camera when we start Motion and when light
+     * switch has been detected to allow camera to settle.
+     */
+    if (cnt->moved) {
+        cnt->moved--;
+        cnt->current_image->diffs = 0;
+    }
+
+}
+
+
 /**
  * motion_loop
  *
@@ -1550,10 +1666,7 @@ static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
     int i, j = 0;
-    int smartmask_ratio = 0;
-    int smartmask_count = 20;
     unsigned int smartmask_lastrate = 0;
-    int olddiffs = 0;
     int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
     unsigned int passflag = 0;
     long int delay_time_nsec;
@@ -1578,113 +1691,7 @@ static void *motion_loop(void *arg)
             motionloop_resetimages(cnt);
             if (motionloop_retry(cnt) == 1)  break;
             if (motionloop_capture(cnt) == 1)  break;
-
-        /***** MOTION LOOP - MOTION DETECTION SECTION *****/
-
-            /*
-             * The actual motion detection takes place in the following
-             * diffs is the number of pixels detected as changed
-             * Make a differences picture in image_out
-             *
-             * alg_diff_standard is the slower full feature motion detection algorithm
-             * alg_diff first calls a fast detection algorithm which only looks at a
-             * fraction of the pixels. If this detects possible motion alg_diff_standard
-             * is called.
-             */
-            if (cnt->process_thisframe) {
-                if (cnt->threshold && !cnt->pause) {
-                    /*
-                     * If we've already detected motion and we want to see if there's
-                     * still motion, don't bother trying the fast one first. IF there's
-                     * motion, the alg_diff will trigger alg_diff_standard
-                     * anyway
-                     */
-                    if (cnt->detecting_motion || cnt->conf.setup_mode)
-                        cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin);
-                    else
-                        cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin);
-
-                    /* Lightswitch feature - has light intensity changed?
-                     * This can happen due to change of light conditions or due to a sudden change of the camera
-                     * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
-                     * 5 frames to allow the camera to settle.
-                     * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
-                     */
-                    if (cnt->conf.lightswitch > 1 && !cnt->lost_connection) {
-                        if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
-                            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Lightswitch detected");
-
-                            if (cnt->moved < 5)
-                                cnt->moved = 5;
-
-                            cnt->current_image->diffs = 0;
-                            alg_update_reference_frame(cnt, RESET_REF_FRAME);
-                        }
-                    }
-
-                    /*
-                     * Switchfilter feature tries to detect a change in the video signal
-                     * from one camera to the next. This is normally used in the Round
-                     * Robin feature. The algorithm is not very safe.
-                     * The algorithm takes a little time so we only call it when needed
-                     * ie. when feature is enabled and diffs>threshold.
-                     * We do not suspend motion detection like we did for lightswitch
-                     * because with Round Robin this is controlled by roundrobin_skip.
-                     */
-                    if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
-                        cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs,
-                                                                     cnt->current_image->image);
-
-                        if (cnt->current_image->diffs <= cnt->threshold) {
-                            cnt->current_image->diffs = 0;
-
-                            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Switchfilter detected");
-                        }
-                    }
-
-                    /*
-                     * Despeckle feature
-                     * First we run (as given by the despeckle_filter option iterations
-                     * of erode and dilate algorithms.
-                     * Finally we run the labelling feature.
-                     * All this is done in the alg_despeckle code.
-                     */
-                    cnt->current_image->total_labels = 0;
-                    cnt->imgs.largest_label = 0;
-                    olddiffs = 0;
-
-                    if (cnt->conf.despeckle_filter && cnt->current_image->diffs > 0) {
-                        olddiffs = cnt->current_image->diffs;
-                        cnt->current_image->diffs = alg_despeckle(cnt, olddiffs);
-                    } else if (cnt->imgs.labelsize_max) {
-                        cnt->imgs.labelsize_max = 0; /* Disable labeling if enabled */
-                    }
-
-                } else if (!cnt->conf.setup_mode) {
-                    cnt->current_image->diffs = 0;
-                }
-            }
-
-            /* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
-            if ((cnt->smartmask_speed && (cnt->event_nr != cnt->prev_event)) &&
-                (!--smartmask_count)) {
-                alg_tune_smartmask(cnt);
-                smartmask_count = smartmask_ratio;
-            }
-
-            /*
-             * cnt->moved is set by the tracking code when camera has been asked to move.
-             * When camera is moving we do not want motion to detect motion or we will
-             * get our camera chasing itself like crazy and we will get motion detected
-             * which is not really motion. So we pretend there is no motion by setting
-             * cnt->diffs = 0.
-             * We also pretend to have a moving camera when we start Motion and when light
-             * switch has been detected to allow camera to settle.
-             */
-            if (cnt->moved) {
-                cnt->moved--;
-                cnt->current_image->diffs = 0;
-            }
+            motionloop_detection(cnt);
 
         /***** MOTION LOOP - TUNING SECTION *****/
 
@@ -1997,7 +2004,7 @@ static void *motion_loop(void *arg)
 
                 if (cnt->conf.despeckle_filter) {
                     snprintf(part, 99, "Raw changes: %5d - changes after '%s': %5d",
-                             olddiffs, cnt->conf.despeckle_filter, cnt->current_image->diffs);
+                             cnt->olddiffs, cnt->conf.despeckle_filter, cnt->current_image->diffs);
                     strcat(msg, part);
                     if (strchr(cnt->conf.despeckle_filter, 'l')) {
                         sprintf(part, " - labels: %3d", cnt->current_image->total_labels);
@@ -2196,7 +2203,7 @@ static void *motion_loop(void *arg)
                  * Decay delay - based on smart_mask_speed (framerate independent)
                  * This is always 5*smartmask_speed seconds
                  */
-                smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
+                cnt->smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
             }
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
