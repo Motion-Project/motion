@@ -22,6 +22,8 @@
 #include "picture.h"
 #include "rotate.h"
 
+#define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
+
 /**
  * tls_key_threadnr
  *
@@ -555,7 +557,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
  *   max_images - Max number of images to process
  *                Set to IMAGE_BUFFER_FLUSH to send/save all images in buffer
  */
-#define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
+
 static void process_image_ring(struct context *cnt, unsigned int max_images)
 {
     /*
@@ -709,6 +711,13 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 static int motion_init(struct context *cnt)
 {
     FILE *picture;
+
+    char tname[16];
+    snprintf(tname, sizeof(tname), "ml%d%s%s",
+             cnt->threadnr,
+             cnt->conf.camera_name ? ":" : "",
+             cnt->conf.camera_name ? cnt->conf.camera_name : "");
+    MOTION_PTHREAD_SETNAME(tname);
 
     /* Store thread number in TLS. */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
@@ -992,6 +1001,28 @@ static int motion_init(struct context *cnt)
     /* 2 sec startup delay so FPS is calculated correct */
     cnt->startup_frames = cnt->conf.frame_limit * 2;
 
+    /* Initialize area detection */
+    cnt->area_minx[0] = cnt->area_minx[3] = cnt->area_minx[6] = 0;
+    cnt->area_miny[0] = cnt->area_miny[1] = cnt->area_miny[2] = 0;
+
+    cnt->area_minx[1] = cnt->area_minx[4] = cnt->area_minx[7] = cnt->imgs.width / 3;
+    cnt->area_maxx[0] = cnt->area_maxx[3] = cnt->area_maxx[6] = cnt->imgs.width / 3;
+
+    cnt->area_minx[2] = cnt->area_minx[5] = cnt->area_minx[8] = cnt->imgs.width / 3 * 2;
+    cnt->area_maxx[1] = cnt->area_maxx[4] = cnt->area_maxx[7] = cnt->imgs.width / 3 * 2;
+
+    cnt->area_miny[3] = cnt->area_miny[4] = cnt->area_miny[5] = cnt->imgs.height / 3;
+    cnt->area_maxy[0] = cnt->area_maxy[1] = cnt->area_maxy[2] = cnt->imgs.height / 3;
+
+    cnt->area_miny[6] = cnt->area_miny[7] = cnt->area_miny[8] = cnt->imgs.height / 3 * 2;
+    cnt->area_maxy[3] = cnt->area_maxy[4] = cnt->area_maxy[5] = cnt->imgs.height / 3 * 2;
+
+    cnt->area_maxx[2] = cnt->area_maxx[5] = cnt->area_maxx[8] = cnt->imgs.width;
+    cnt->area_maxy[6] = cnt->area_maxy[7] = cnt->area_maxy[8] = cnt->imgs.height;
+
+    cnt->areadetect_eventnbr = 0;
+
+
     return 0;
 }
 
@@ -1100,6 +1131,34 @@ static void motion_cleanup(struct context *cnt)
     }
 }
 
+static void motionloop_areadetect(struct context *cnt){
+    int i, j, z = 0;
+    /*
+     * Simple hack to recognize motion in a specific area
+     * Do we need a new coversion specifier as well??
+     */
+    if ((cnt->conf.area_detect) &&
+        (cnt->event_nr != cnt->areadetect_eventnbr) &&
+        (cnt->current_image->flags & IMAGE_TRIGGER)) {
+        j = strlen(cnt->conf.area_detect);
+        for (i = 0; i < j; i++) {
+            z = cnt->conf.area_detect[i] - 49; /* characters are stored as ascii 48-57 (0-9) */
+            if ((z >= 0) && (z < 9)) {
+                if (cnt->current_image->location.x > cnt->area_minx[z] &&
+                    cnt->current_image->location.x < cnt->area_maxx[z] &&
+                    cnt->current_image->location.y > cnt->area_miny[z] &&
+                    cnt->current_image->location.y < cnt->area_maxy[z]) {
+                    event(cnt, EVENT_AREA_DETECTED, NULL, NULL, NULL, cnt->currenttime_tm);
+                    cnt->areadetect_eventnbr = cnt->event_nr; /* Fire script only once per event */
+                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Motion in area %d detected.", z + 1);
+                    break;
+                }
+            }
+        }
+    }
+
+}
+
 /**
  * motion_loop
  *
@@ -1109,12 +1168,10 @@ static void motion_cleanup(struct context *cnt)
 static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
-    int i, j, z = 0;
+    int i, j = 0;
     time_t lastframetime = 0;
     int frame_buffer_size;
     unsigned int rate_limit = 0;
-    int area_once = 0;
-    int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int smartmask_ratio = 0;
     int smartmask_count = 20;
     unsigned int smartmask_lastrate = 0;
@@ -1133,15 +1190,6 @@ static void *motion_loop(void *arg)
     unsigned int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
     struct image_data *old_image;
 
-    {
-        char tname[16];
-        snprintf(tname, sizeof(tname), "ml%d%s%s",
-                 cnt->threadnr,
-                 cnt->conf.camera_name ? ":" : "",
-                 cnt->conf.camera_name ? cnt->conf.camera_name : "");
-        MOTION_PTHREAD_SETNAME(tname);
-    }
-
     /*
      * Next two variables are used for snapshot and timelapse feature
      * time_last_frame is set to 1 so that first coming timelapse or second = 0
@@ -1158,25 +1206,6 @@ static void *motion_loop(void *arg)
         text_size_factor = 2;
     else
         text_size_factor = 1;
-
-    /* Initialize area detection */
-    area_minx[0] = area_minx[3] = area_minx[6] = 0;
-    area_miny[0] = area_miny[1] = area_miny[2] = 0;
-
-    area_minx[1] = area_minx[4] = area_minx[7] = cnt->imgs.width / 3;
-    area_maxx[0] = area_maxx[3] = area_maxx[6] = cnt->imgs.width / 3;
-
-    area_minx[2] = area_minx[5] = area_minx[8] = cnt->imgs.width / 3 * 2;
-    area_maxx[1] = area_maxx[4] = area_maxx[7] = cnt->imgs.width / 3 * 2;
-
-    area_miny[3] = area_miny[4] = area_miny[5] = cnt->imgs.height / 3;
-    area_maxy[0] = area_maxy[1] = area_maxy[2] = cnt->imgs.height / 3;
-
-    area_miny[6] = area_miny[7] = area_miny[8] = cnt->imgs.height / 3 * 2;
-    area_maxy[3] = area_maxy[4] = area_maxy[5] = cnt->imgs.height / 3 * 2;
-
-    area_maxx[2] = area_maxx[5] = area_maxx[8] = cnt->imgs.width;
-    area_maxy[6] = area_maxy[7] = area_maxy[8] = cnt->imgs.height;
 
     /* Work out expected frame rate based on config setting */
     if (cnt->conf.frame_limit < 2)
@@ -1870,33 +1899,8 @@ static void *motion_loop(void *arg)
             if (cnt->current_image->flags & IMAGE_SAVE)
                 cnt->lasttime = cnt->current_image->timestamp;
 
+            motionloop_areadetect(cnt);
 
-            /*
-             * Simple hack to recognize motion in a specific area
-             * Do we need a new coversion specifier as well??
-             */
-            if ((cnt->conf.area_detect) && (cnt->event_nr != area_once) &&
-                (cnt->current_image->flags & IMAGE_TRIGGER)) {
-                j = strlen(cnt->conf.area_detect);
-
-                for (i = 0; i < j; i++) {
-                    z = cnt->conf.area_detect[i] - 49; /* 1 becomes 0 */
-                    if ((z >= 0) && (z < 9)) {
-                        if (cnt->current_image->location.x > area_minx[z] &&
-                            cnt->current_image->location.x < area_maxx[z] &&
-                            cnt->current_image->location.y > area_miny[z] &&
-                            cnt->current_image->location.y < area_maxy[z]) {
-                            event(cnt, EVENT_AREA_DETECTED, NULL, NULL,
-                                  NULL, cnt->currenttime_tm);
-                            area_once = cnt->event_nr; /* Fire script only once per event */
-
-                            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Motion in area %d detected.",
-                                       z + 1);
-                            break;
-                        }
-                    }
-                }
-            }
 
             /*
              * Is the movie too long? Then make movies

@@ -448,6 +448,9 @@ struct context {
     char timelapsefilename[PATH_MAX];
     char motionfilename[PATH_MAX];
 
+    int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
+    int areadetect_eventnbr;
+
 };
 
 extern pthread_mutex_t global_lock;
