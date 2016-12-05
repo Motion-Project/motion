@@ -1808,6 +1808,169 @@ static void motionloop_overlay(struct context *cnt){
 
 }
 
+static void motionloop_actions(struct context *cnt){
+
+    int indx;
+
+    /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
+
+    if (cnt->current_image->diffs > cnt->threshold) {
+        /* flag this image, it have motion */
+        cnt->current_image->flags |= IMAGE_MOTION;
+        cnt->lightswitch_framecounter++; /* micro lightswitch */
+    } else {
+        cnt->lightswitch_framecounter = 0;
+    }
+
+    /*
+     * If motion has been detected we take action and start saving
+     * pictures and movies etc by calling motion_detected().
+     * Is emulate_motion enabled we always call motion_detected()
+     * If post_capture is enabled we also take care of this in the this
+     * code section.
+     */
+    if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
+        cnt->detecting_motion = 1;
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
+        if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
+            /* Setup the postcap counter */
+            cnt->postcap = cnt->conf.post_capture;
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: (Em) Init post capture %d",
+                       cnt->postcap);
+        }
+
+        cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+        motion_detected(cnt, cnt->video_dev, cnt->current_image);
+    } else if ((cnt->current_image->flags & IMAGE_MOTION) && (cnt->startup_frames == 0)) {
+        /*
+         * Did we detect motion (like the cat just walked in :) )?
+         * If so, ensure the motion is sustained if minimum_motion_frames
+         */
+
+        /* Count how many frames with motion there is in the last minimum_motion_frames in precap buffer */
+        int frame_count = 0;
+        int pos = cnt->imgs.image_ring_in;
+
+        for (indx = 0; indx < cnt->conf.minimum_motion_frames; indx++) {
+            if (cnt->imgs.image_ring[pos].flags & IMAGE_MOTION)
+                frame_count++;
+
+            if (pos == 0)
+                pos = cnt->imgs.image_ring_size-1;
+            else
+                pos--;
+        }
+
+        if (frame_count >= cnt->conf.minimum_motion_frames) {
+
+            cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+            cnt->detecting_motion = 1;
+
+            /* Setup the postcap counter */
+            cnt->postcap = cnt->conf.post_capture;
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Setup post capture %d",
+                       cnt->postcap);
+
+            /* Mark all images in image_ring to be saved */
+            for (indx = 0; indx < cnt->imgs.image_ring_size; indx++)
+                cnt->imgs.image_ring[indx].flags |= IMAGE_SAVE;
+
+        } else if ((cnt->postcap) &&
+                   (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+           /* we have motion in this frame, but not enought frames for trigger. Check postcap */
+            cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+            cnt->postcap--;
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: post capture %d",
+                       cnt->postcap);
+        } else {
+            cnt->current_image->flags |= IMAGE_PRECAP;
+        }
+
+        /* Always call motion_detected when we have a motion image */
+        motion_detected(cnt, cnt->video_dev, cnt->current_image);
+    } else if ((cnt->postcap) &&
+              (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+        /* No motion, doing postcap */
+        cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        cnt->postcap--;
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: post capture %d",
+                   cnt->postcap);
+    } else {
+        /* Done with postcap, so just have the image in the precap buffer */
+        cnt->current_image->flags |= IMAGE_PRECAP;
+        /* gapless movie feature */
+        if ((cnt->conf.event_gap == 0) && (cnt->detecting_motion == 1))
+            cnt->makemovie = 1;
+        cnt->detecting_motion = 0;
+    }
+
+    /* Update last frame saved time, so we can end event after gap time */
+    if (cnt->current_image->flags & IMAGE_SAVE)
+        cnt->lasttime = cnt->current_image->timestamp;
+
+
+    motionloop_areadetect(cnt);
+
+    /*
+     * Is the movie too long? Then make movies
+     * First test for max_movie_time
+     */
+    if ((cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event) &&
+        (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time))
+        cnt->makemovie = 1;
+
+    /*
+     * Now test for quiet longer than 'gap' OR make movie as decided in
+     * previous statement.
+     */
+    if (((cnt->currenttime - cnt->lasttime >= cnt->conf.event_gap) && cnt->conf.event_gap > 0) ||
+          cnt->makemovie) {
+        if (cnt->event_nr == cnt->prev_event || cnt->makemovie) {
+
+            /* Flush image buffer */
+            process_image_ring(cnt, IMAGE_BUFFER_FLUSH);
+
+            /* Save preview_shot here at the end of event */
+            if (cnt->imgs.preview_image.diffs) {
+                preview_save(cnt);
+                cnt->imgs.preview_image.diffs = 0;
+            }
+
+            event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, cnt->currenttime_tm);
+
+            /*
+             * If tracking is enabled we center our camera so it does not
+             * point to a place where it will miss the next action
+             */
+            if (cnt->track.type)
+                cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
+
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: End of event %d",
+                       cnt->event_nr);
+
+            cnt->makemovie = 0;
+            /* Reset post capture */
+            cnt->postcap = 0;
+
+            /* Finally we increase the event number */
+            cnt->event_nr++;
+            cnt->lightswitch_framecounter = 0;
+
+            /*
+             * And we unset the text_event_string to avoid that buffered
+             * images get a timestamp from previous event.
+             */
+            cnt->text_event_string[0] = '\0';
+        }
+    }
+
+    /* Save/send to movie some images */
+    process_image_ring(cnt, 2);
+
+
+}
+
+
 
 
 /**
@@ -1819,7 +1982,7 @@ static void motionloop_overlay(struct context *cnt){
 static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
-    int i, j = 0;
+    int j = 0;
     unsigned int smartmask_lastrate = 0;
     unsigned int passflag = 0;
     long int delay_time_nsec;
@@ -1847,162 +2010,7 @@ static void *motion_loop(void *arg)
             motionloop_detection(cnt);
             motionloop_tuning(cnt);
             motionloop_overlay(cnt);
-
-        /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
-
-            if (cnt->current_image->diffs > cnt->threshold) {
-                /* flag this image, it have motion */
-                cnt->current_image->flags |= IMAGE_MOTION;
-                cnt->lightswitch_framecounter++; /* micro lightswitch */
-            } else {
-                cnt->lightswitch_framecounter = 0;
-            }
-
-            /*
-             * If motion has been detected we take action and start saving
-             * pictures and movies etc by calling motion_detected().
-             * Is emulate_motion enabled we always call motion_detected()
-             * If post_capture is enabled we also take care of this in the this
-             * code section.
-             */
-            if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
-                cnt->detecting_motion = 1;
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
-                if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
-                    /* Setup the postcap counter */
-                    cnt->postcap = cnt->conf.post_capture;
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: (Em) Init post capture %d",
-                               cnt->postcap);
-                }
-
-                cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
-                motion_detected(cnt, cnt->video_dev, cnt->current_image);
-            } else if ((cnt->current_image->flags & IMAGE_MOTION) && (cnt->startup_frames == 0)) {
-                /*
-                 * Did we detect motion (like the cat just walked in :) )?
-                 * If so, ensure the motion is sustained if minimum_motion_frames
-                 */
-
-                /* Count how many frames with motion there is in the last minimum_motion_frames in precap buffer */
-                int frame_count = 0;
-                int pos = cnt->imgs.image_ring_in;
-
-                for (i = 0; i < cnt->conf.minimum_motion_frames; i++) {
-
-                    if (cnt->imgs.image_ring[pos].flags & IMAGE_MOTION)
-                        frame_count++;
-
-                    if (pos == 0)
-                        pos = cnt->imgs.image_ring_size-1;
-                    else
-                        pos--;
-                }
-
-                if (frame_count >= cnt->conf.minimum_motion_frames) {
-
-                    cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
-                    cnt->detecting_motion = 1;
-
-                    /* Setup the postcap counter */
-                    cnt->postcap = cnt->conf.post_capture;
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Setup post capture %d",
-                               cnt->postcap);
-
-                    /* Mark all images in image_ring to be saved */
-                    for (i = 0; i < cnt->imgs.image_ring_size; i++)
-                        cnt->imgs.image_ring[i].flags |= IMAGE_SAVE;
-
-                } else if ((cnt->postcap) &&
-                           (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
-                   /* we have motion in this frame, but not enought frames for trigger. Check postcap */
-                    cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
-                    cnt->postcap--;
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: post capture %d",
-                               cnt->postcap);
-                } else {
-                    cnt->current_image->flags |= IMAGE_PRECAP;
-                }
-
-                /* Always call motion_detected when we have a motion image */
-                motion_detected(cnt, cnt->video_dev, cnt->current_image);
-            } else if ((cnt->postcap) &&
-                      (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
-                /* No motion, doing postcap */
-                cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
-                cnt->postcap--;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: post capture %d",
-                           cnt->postcap);
-            } else {
-                /* Done with postcap, so just have the image in the precap buffer */
-                cnt->current_image->flags |= IMAGE_PRECAP;
-                /* gapless movie feature */
-                if ((cnt->conf.event_gap == 0) && (cnt->detecting_motion == 1))
-                    cnt->makemovie = 1;
-                cnt->detecting_motion = 0;
-            }
-
-            /* Update last frame saved time, so we can end event after gap time */
-            if (cnt->current_image->flags & IMAGE_SAVE)
-                cnt->lasttime = cnt->current_image->timestamp;
-
-            motionloop_areadetect(cnt);
-
-
-            /*
-             * Is the movie too long? Then make movies
-             * First test for max_movie_time
-             */
-            if ((cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event) &&
-                (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time))
-                cnt->makemovie = 1;
-
-            /*
-             * Now test for quiet longer than 'gap' OR make movie as decided in
-             * previous statement.
-             */
-            if (((cnt->currenttime - cnt->lasttime >= cnt->conf.event_gap) && cnt->conf.event_gap > 0) ||
-                  cnt->makemovie) {
-                if (cnt->event_nr == cnt->prev_event || cnt->makemovie) {
-
-                    /* Flush image buffer */
-                    process_image_ring(cnt, IMAGE_BUFFER_FLUSH);
-
-                    /* Save preview_shot here at the end of event */
-                    if (cnt->imgs.preview_image.diffs) {
-                        preview_save(cnt);
-                        cnt->imgs.preview_image.diffs = 0;
-                    }
-
-                    event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, cnt->currenttime_tm);
-
-                    /*
-                     * If tracking is enabled we center our camera so it does not
-                     * point to a place where it will miss the next action
-                     */
-                    if (cnt->track.type)
-                        cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
-
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: End of event %d",
-                               cnt->event_nr);
-
-                    cnt->makemovie = 0;
-                    /* Reset post capture */
-                    cnt->postcap = 0;
-
-                    /* Finally we increase the event number */
-                    cnt->event_nr++;
-                    cnt->lightswitch_framecounter = 0;
-
-                    /*
-                     * And we unset the text_event_string to avoid that buffered
-                     * images get a timestamp from previous event.
-                     */
-                    cnt->text_event_string[0] = '\0';
-                }
-            }
-
-            /* Save/send to movie some images */
-            process_image_ring(cnt, 2);
+            motionloop_actions(cnt);
 
         /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
