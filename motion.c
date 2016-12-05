@@ -416,6 +416,21 @@ static void setup_signals(struct sigaction *sig_handler_action, struct sigaction
     sigaction(SIGVTALRM, sig_handler_action, NULL);
 }
 
+static void setup_signals_BSD(struct context *cnt){
+#ifdef __OpenBSD__
+    /*
+     * FIXMARK
+     * Fixes zombie issue on OpenBSD 4.6
+     */
+    struct sigaction sig_handler_action;
+    struct sigaction sigchild_action;
+    setup_signals(&sig_handler_action, &sigchild_action);
+#else
+    /* Kill compiler warnings */
+    cnt->log_level = cnt->log_level;
+#endif
+}
+
 /**
  * motion_remove_pid
  *
@@ -711,6 +726,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 static int motion_init(struct context *cnt)
 {
     FILE *picture;
+    int indx;
 
     char tname[16];
     snprintf(tname, sizeof(tname), "ml%d%s%s",
@@ -1001,6 +1017,39 @@ static int motion_init(struct context *cnt)
     /* 2 sec startup delay so FPS is calculated correct */
     cnt->startup_frames = cnt->conf.frame_limit * 2;
 
+    /* Initialize the double sized characters if needed. */
+    if (cnt->conf.text_double)
+        cnt->text_size_factor = 2;
+    else
+        cnt->text_size_factor = 1;
+
+
+    /* Work out expected frame rate based on config setting */
+    if (cnt->conf.frame_limit < 2)
+        cnt->conf.frame_limit = 2;
+
+    cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
+
+    cnt->frame_delay = cnt->required_frame_time;
+
+    /*
+     * Reserve enough space for a 10 second timing history buffer. Note that,
+     * if there is any problem on the allocation, mymalloc does not return.
+     */
+    cnt->rolling_average_data = NULL;
+    cnt->rolling_average_limit = 10 * cnt->conf.frame_limit;
+    cnt->rolling_average_data = mymalloc(sizeof(cnt->rolling_average_data) * cnt->rolling_average_limit);
+
+    /* Preset history buffer with expected frame rate */
+    for (indx = 0; indx < cnt->rolling_average_limit; indx++)
+        cnt->rolling_average_data[indx] = cnt->required_frame_time;
+
+
+    if (cnt->track.type)
+        cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
+
+    setup_signals_BSD(cnt);
+
     /* Initialize area detection */
     cnt->area_minx[0] = cnt->area_minx[3] = cnt->area_minx[6] = 0;
     cnt->area_miny[0] = cnt->area_miny[1] = cnt->area_miny[2] = 0;
@@ -1269,13 +1318,11 @@ static void *motion_loop(void *arg)
     unsigned int smartmask_lastrate = 0;
     int olddiffs = 0;
     int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
-    unsigned int text_size_factor;
     unsigned int passflag = 0;
-    long int *rolling_average_data = NULL;
-    long int rolling_average_limit, required_frame_time, frame_delay, delay_time_nsec;
+    long int delay_time_nsec;
     int rolling_frame = 0;
     struct timeval tv1, tv2;
-    unsigned long int rolling_average, elapsedtime;
+    unsigned long int elapsedtime;
     unsigned long long int timenow = 0, timebefore = 0;
     int vid_return_code = 0;        /* Return code used when calling vid_next */
     struct image_data *old_image;
@@ -1287,53 +1334,7 @@ static void *motion_loop(void *arg)
      */
     unsigned long int time_last_frame = 1, time_current_frame;
 
-    if (motion_init(cnt) < 0)
-        goto err;
-
-
-    /* Initialize the double sized characters if needed. */
-    if (cnt->conf.text_double)
-        text_size_factor = 2;
-    else
-        text_size_factor = 1;
-
-    /* Work out expected frame rate based on config setting */
-    if (cnt->conf.frame_limit < 2)
-        cnt->conf.frame_limit = 2;
-
-    required_frame_time = 1000000L / cnt->conf.frame_limit;
-
-    frame_delay = required_frame_time;
-
-    /*
-     * Reserve enough space for a 10 second timing history buffer. Note that,
-     * if there is any problem on the allocation, mymalloc does not return.
-     */
-    rolling_average_limit = 10 * cnt->conf.frame_limit;
-    rolling_average_data = mymalloc(sizeof(rolling_average_data) * rolling_average_limit);
-
-    /* Preset history buffer with expected frame rate */
-    for (j = 0; j < rolling_average_limit; j++)
-        rolling_average_data[j] = required_frame_time;
-
-
-    if (cnt->track.type)
-        cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
-
-#ifdef __OpenBSD__
-    /*
-     * FIXMARK
-     * Fixes zombie issue on OpenBSD 4.6
-     */
-    struct sigaction sig_handler_action;
-    struct sigaction sigchild_action;
-    setup_signals(&sig_handler_action, &sigchild_action);
-#endif
-
-    /*
-     * MAIN MOTION LOOP BEGINS HERE
-     * Should go on forever... unless you bought vaporware :)
-     */
+    if (motion_init(cnt) < 0)  goto err;
 
     while (!cnt->finish || cnt->makemovie) {
         motionloop_prepare(cnt);
@@ -1541,7 +1542,7 @@ static void *motion_loop(void *arg)
                     localtime_r(&cnt->connectionlosttime, &tmptime);
                     memset(cnt->current_image->image, 0x80, cnt->imgs.size);
                     mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
-                    draw_text(cnt->current_image->image, 10, 20 * text_size_factor, cnt->imgs.width,
+                    draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
                               tmpout, cnt->conf.text_double);
 
                     /* Write error message only once */
@@ -1763,11 +1764,11 @@ static void *motion_loop(void *arg)
                 overlay_fixed_mask(cnt, cnt->imgs.out);
 
             /* Initialize the double sized characters if needed. */
-            if (cnt->conf.text_double && text_size_factor == 1) {
-                text_size_factor = 2;
+            if (cnt->conf.text_double && cnt->text_size_factor == 1) {
+                cnt->text_size_factor = 2;
             /* If text_double is set to off, then reset the scaling text_size_factor. */
-            } else if (!cnt->conf.text_double && text_size_factor == 2) {
-                text_size_factor = 1;
+            } else if (!cnt->conf.text_double && cnt->text_size_factor == 2) {
+                cnt->text_size_factor = 1;
             }
 
             /* Add changed pixels in upper right corner of the pictures */
@@ -1791,10 +1792,10 @@ static void *motion_loop(void *arg)
                 char tmp[PATH_MAX];
                 sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                         cnt->current_image->total_labels, cnt->noise);
-                draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * text_size_factor,
+                draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->text_size_factor,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
                 sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
-                draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * text_size_factor,
+                draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->text_size_factor,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
             }
 
@@ -1803,7 +1804,7 @@ static void *motion_loop(void *arg)
                 char tmp[PATH_MAX];
                 mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
                            &cnt->current_image->timestamp_tm, NULL, 0);
-                draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * text_size_factor,
+                draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
             }
 
@@ -1813,7 +1814,7 @@ static void *motion_loop(void *arg)
                 mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
                            &cnt->current_image->timestamp_tm, NULL, 0);
                 draw_text(cnt->current_image->image, cnt->imgs.width - 10,
-                          cnt->imgs.height - 10 * text_size_factor,
+                          cnt->imgs.height - 10 * cnt->text_size_factor,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
             }
 
@@ -2209,9 +2210,9 @@ static void *motion_loop(void *arg)
          * have changed from http-control
          */
         if (cnt->conf.frame_limit)
-            required_frame_time = 1000000L / cnt->conf.frame_limit;
+            cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
         else
-            required_frame_time = 0;
+            cnt->required_frame_time = 0;
 
         /* Get latest time to calculate time taken to process video data */
         gettimeofday(&tv2, NULL);
@@ -2222,30 +2223,30 @@ static void *motion_loop(void *arg)
          * variable will be inaccurate
          */
         if (passflag)
-            rolling_average_data[rolling_frame] = timenow-timebefore;
+            cnt->rolling_average_data[rolling_frame] = timenow-timebefore;
         else
             passflag = 1;
 
         rolling_frame++;
-        if (rolling_frame >= rolling_average_limit)
+        if (rolling_frame >= cnt->rolling_average_limit)
             rolling_frame = 0;
 
         /* Calculate 10 second average and use deviation in delay calculation */
-        rolling_average = 0L;
+        cnt->rolling_average = 0L;
 
-        for (j = 0; j < rolling_average_limit; j++)
-            rolling_average += rolling_average_data[j];
+        for (j = 0; j < cnt->rolling_average_limit; j++)
+            cnt->rolling_average += cnt->rolling_average_data[j];
 
-        rolling_average /= rolling_average_limit;
-        frame_delay = required_frame_time-elapsedtime - (rolling_average - required_frame_time);
+        cnt->rolling_average /= cnt->rolling_average_limit;
+        cnt->frame_delay = cnt->required_frame_time-elapsedtime - (cnt->rolling_average - cnt->required_frame_time);
 
-        if (frame_delay > 0) {
+        if (cnt->frame_delay > 0) {
             /* Apply delay to meet frame time */
-            if (frame_delay > required_frame_time)
-                frame_delay = required_frame_time;
+            if (cnt->frame_delay > cnt->required_frame_time)
+                cnt->frame_delay = cnt->required_frame_time;
 
             /* Delay time in nanoseconds for SLEEP */
-            delay_time_nsec = frame_delay * 1000;
+            delay_time_nsec = cnt->frame_delay * 1000;
 
             if (delay_time_nsec > 999999999)
                 delay_time_nsec = 999999999;
@@ -2260,7 +2261,7 @@ static void *motion_loop(void *arg)
      * If code continues here it is because the thread is exiting or restarting
      */
 err:
-    free(rolling_average_data);
+    free(cnt->rolling_average_data);
 
     cnt->lost_connection = 1;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Thread exiting");
