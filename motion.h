@@ -469,6 +469,7 @@ struct context {
     int smartmask_ratio;
     int smartmask_count;
 
+    int previous_diffs, previous_location_x, previous_location_y;
 
 };
 

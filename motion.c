@@ -1082,6 +1082,11 @@ static int motion_init(struct context *cnt)
     cnt->smartmask_ratio = 0;
     cnt->smartmask_count = 20;
 
+    cnt->previous_diffs = 0;
+    cnt->previous_location_x = 0;
+    cnt->previous_location_y = 0;
+
+
     return 0;
 }
 
@@ -1655,6 +1660,77 @@ static void motionloop_detection(struct context *cnt){
 
 }
 
+static void motionloop_tuning(struct context *cnt){
+
+    /***** MOTION LOOP - TUNING SECTION *****/
+
+    /*
+     * If noise tuning was selected, do it now. but only when
+     * no frames have been recorded and only once per second
+     */
+    if ((cnt->conf.noise_tune && cnt->shots == 0) &&
+         (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold)))
+        alg_noise_tune(cnt, cnt->imgs.image_virgin);
+
+
+    /*
+     * If we are not noise tuning lets make sure that remote controlled
+     * changes of noise_level are used.
+     */
+    if (cnt->process_thisframe) {
+        if (!cnt->conf.noise_tune)
+            cnt->noise = cnt->conf.noise;
+
+        /*
+         * threshold tuning if enabled
+         * if we are not threshold tuning lets make sure that remote controlled
+         * changes of threshold are used.
+         */
+        if (cnt->conf.threshold_tune)
+            alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
+        else
+            cnt->threshold = cnt->conf.max_changes;
+
+        /*
+         * If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
+         * we find the center and size coordinates of the motion to be used for text overlays and later
+         * for adding the locate rectangle
+         */
+        if (cnt->current_image->diffs > cnt->threshold)
+            alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
+
+        /*
+         * Update reference frame.
+         * micro-lighswitch: trying to auto-detect lightswitch events.
+         * frontdoor illumination. Updates are rate-limited to 3 per second at
+         * framerates above 5fps to save CPU resources and to keep sensitivity
+         * at a constant level.
+         */
+
+        if ((cnt->current_image->diffs > cnt->threshold) && (cnt->conf.lightswitch == 1) &&
+            (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
+            /* number of changed pixels almost the same in two consecutive frames and */
+            ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
+            /* center of motion in about the same place ? */
+            ((abs(cnt->current_image->location.x - cnt->previous_location_x)) <= (cnt->imgs.width / 150)) &&
+            ((abs(cnt->current_image->location.y - cnt->previous_location_y)) <= (cnt->imgs.height / 150))) {
+            alg_update_reference_frame(cnt, RESET_REF_FRAME);
+            cnt->current_image->diffs = 0;
+            cnt->lightswitch_framecounter = 0;
+
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: micro-lightswitch!");
+        } else {
+            alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
+        }
+        cnt->previous_diffs = cnt->current_image->diffs;
+        cnt->previous_location_x = cnt->current_image->location.x;
+        cnt->previous_location_y = cnt->current_image->location.y;
+    }
+
+
+}
+
+
 
 /**
  * motion_loop
@@ -1667,7 +1743,6 @@ static void *motion_loop(void *arg)
     struct context *cnt = arg;
     int i, j = 0;
     unsigned int smartmask_lastrate = 0;
-    int previous_diffs = 0, previous_location_x = 0, previous_location_y = 0;
     unsigned int passflag = 0;
     long int delay_time_nsec;
     int rolling_frame = 0;
@@ -1692,72 +1767,8 @@ static void *motion_loop(void *arg)
             if (motionloop_retry(cnt) == 1)  break;
             if (motionloop_capture(cnt) == 1)  break;
             motionloop_detection(cnt);
+            motionloop_tuning(cnt);
 
-        /***** MOTION LOOP - TUNING SECTION *****/
-
-            /*
-             * If noise tuning was selected, do it now. but only when
-             * no frames have been recorded and only once per second
-             */
-            if ((cnt->conf.noise_tune && cnt->shots == 0) &&
-                 (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold)))
-                alg_noise_tune(cnt, cnt->imgs.image_virgin);
-
-
-            /*
-             * If we are not noise tuning lets make sure that remote controlled
-             * changes of noise_level are used.
-             */
-            if (cnt->process_thisframe) {
-                if (!cnt->conf.noise_tune)
-                    cnt->noise = cnt->conf.noise;
-
-                /*
-                 * threshold tuning if enabled
-                 * if we are not threshold tuning lets make sure that remote controlled
-                 * changes of threshold are used.
-                 */
-                if (cnt->conf.threshold_tune)
-                    alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
-                else
-                    cnt->threshold = cnt->conf.max_changes;
-
-                /*
-                 * If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
-                 * we find the center and size coordinates of the motion to be used for text overlays and later
-                 * for adding the locate rectangle
-                 */
-                if (cnt->current_image->diffs > cnt->threshold)
-                    alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
-
-                /*
-                 * Update reference frame.
-                 * micro-lighswitch: trying to auto-detect lightswitch events.
-                 * frontdoor illumination. Updates are rate-limited to 3 per second at
-                 * framerates above 5fps to save CPU resources and to keep sensitivity
-                 * at a constant level.
-                 */
-
-                if ((cnt->current_image->diffs > cnt->threshold) && (cnt->conf.lightswitch == 1) &&
-                    (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
-                    /* number of changed pixels almost the same in two consecutive frames and */
-                    ((abs(previous_diffs - cnt->current_image->diffs)) < (previous_diffs / 15)) &&
-                    /* center of motion in about the same place ? */
-                    ((abs(cnt->current_image->location.x - previous_location_x)) <= (cnt->imgs.width / 150)) &&
-                    ((abs(cnt->current_image->location.y - previous_location_y)) <= (cnt->imgs.height / 150))) {
-                    alg_update_reference_frame(cnt, RESET_REF_FRAME);
-                    cnt->current_image->diffs = 0;
-                    cnt->lightswitch_framecounter = 0;
-
-                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: micro-lightswitch!");
-                } else {
-                    alg_update_reference_frame(cnt, UPDATE_REF_FRAME);
-                }
-
-                previous_diffs = cnt->current_image->diffs;
-                previous_location_x = cnt->current_image->location.x;
-                previous_location_y = cnt->current_image->location.y;
-            }
 
         /***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
 
