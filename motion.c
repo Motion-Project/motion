@@ -1970,6 +1970,43 @@ static void motionloop_actions(struct context *cnt){
 
 }
 
+static void motionloop_setupmode(struct context *cnt){
+/***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
+
+    /* If CAMERA_VERBOSE enabled output some numbers to console */
+    if (cnt->conf.setup_mode) {
+        char msg[1024] = "\0";
+        char part[100];
+
+        if (cnt->conf.despeckle_filter) {
+            snprintf(part, 99, "Raw changes: %5d - changes after '%s': %5d",
+                     cnt->olddiffs, cnt->conf.despeckle_filter, cnt->current_image->diffs);
+            strcat(msg, part);
+            if (strchr(cnt->conf.despeckle_filter, 'l')) {
+                sprintf(part, " - labels: %3d", cnt->current_image->total_labels);
+                strcat(msg, part);
+            }
+        } else {
+            sprintf(part, "Changes: %5d", cnt->current_image->diffs);
+            strcat(msg, part);
+        }
+
+        if (cnt->conf.noise_tune) {
+            sprintf(part, " - noise level: %2d", cnt->noise);
+            strcat(msg, part);
+        }
+
+        if (cnt->conf.threshold_tune) {
+            sprintf(part, " - threshold: %d", cnt->threshold);
+            strcat(msg, part);
+        }
+
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: %s", msg);
+    }
+
+}
+
+
 
 
 
@@ -2011,41 +2048,8 @@ static void *motion_loop(void *arg)
             motionloop_tuning(cnt);
             motionloop_overlay(cnt);
             motionloop_actions(cnt);
-
-        /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
-
-            /* If CAMERA_VERBOSE enabled output some numbers to console */
-            if (cnt->conf.setup_mode) {
-                char msg[1024] = "\0";
-                char part[100];
-
-                if (cnt->conf.despeckle_filter) {
-                    snprintf(part, 99, "Raw changes: %5d - changes after '%s': %5d",
-                             cnt->olddiffs, cnt->conf.despeckle_filter, cnt->current_image->diffs);
-                    strcat(msg, part);
-                    if (strchr(cnt->conf.despeckle_filter, 'l')) {
-                        sprintf(part, " - labels: %3d", cnt->current_image->total_labels);
-                        strcat(msg, part);
-                    }
-                } else {
-                    sprintf(part, "Changes: %5d", cnt->current_image->diffs);
-                    strcat(msg, part);
-                }
-
-                if (cnt->conf.noise_tune) {
-                    sprintf(part, " - noise level: %2d", cnt->noise);
-                    strcat(msg, part);
-                }
-
-                if (cnt->conf.threshold_tune) {
-                    sprintf(part, " - threshold: %d", cnt->threshold);
-                    strcat(msg, part);
-                }
-
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: %s", msg);
-            }
-
-        } /* get_image end */
+            motionloop_setupmode(cnt);
+        }
 
     /***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
 
