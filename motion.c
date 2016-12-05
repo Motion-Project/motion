@@ -2006,6 +2006,30 @@ static void motionloop_setupmode(struct context *cnt){
 
 }
 
+static void motionloop_snapshot(struct context *cnt){
+    /***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
+    /*
+     * Did we get triggered to make a snapshot from control http? Then shoot a snap
+     * If snapshot_interval is not zero and time since epoch MOD snapshot_interval = 0 then snap
+     * We actually allow the time to run over the interval in case we have a delay
+     * from slow camera.
+     * Note: Negative value means SIGALRM snaps are enabled
+     * httpd-control snaps are always enabled.
+     */
+
+    /* time_current_frame is used both for snapshot and timelapse features */
+    cnt->time_current_frame = cnt->currenttime;
+
+    if ((cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
+         cnt->time_current_frame % cnt->conf.snapshot_interval <= cnt->time_last_frame % cnt->conf.snapshot_interval) ||
+         cnt->snapshot) {
+        event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+        cnt->snapshot = 0;
+    }
+
+}
+
+
 
 
 
@@ -2050,28 +2074,7 @@ static void *motion_loop(void *arg)
             motionloop_actions(cnt);
             motionloop_setupmode(cnt);
         }
-
-    /***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
-
-        /*
-         * Did we get triggered to make a snapshot from control http? Then shoot a snap
-         * If snapshot_interval is not zero and time since epoch MOD snapshot_interval = 0 then snap
-         * We actually allow the time to run over the interval in case we have a delay
-         * from slow camera.
-         * Note: Negative value means SIGALRM snaps are enabled
-         * httpd-control snaps are always enabled.
-         */
-
-        /* time_current_frame is used both for snapshot and timelapse features */
-        time_current_frame = cnt->currenttime;
-
-        if ((cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
-             time_current_frame % cnt->conf.snapshot_interval <= time_last_frame % cnt->conf.snapshot_interval) ||
-             cnt->snapshot) {
-            event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
-            cnt->snapshot = 0;
-        }
-
+        motionloop_snapshot(cnt);
 
     /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
 
