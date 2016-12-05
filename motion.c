@@ -1358,6 +1358,40 @@ static void motionloop_resetimages(struct context *cnt){
 
 }
 
+static int motionloop_retry(struct context *cnt){
+
+    /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
+    /*
+     * If a camera is not available we keep on retrying every 10 seconds
+     * until it shows up.
+     */
+    if (cnt->video_dev < 0 &&
+        cnt->currenttime % 10 == 0 && cnt->shots == 0) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,
+            "%s: Retrying until successful connection with camera");
+            cnt->video_dev = vid_start(cnt);
+        /*
+         * If the netcam has different dimensions than in the config file
+         * we need to restart Motion to re-allocate all the buffers
+         */
+        if (cnt->imgs.width != cnt->conf.width || cnt->imgs.height != cnt->conf.height) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Camera has finally become available\n"
+                       "Camera image has different width and height"
+                       "from what is in the config file. You should fix that\n"
+                       "Restarting Motion thread to reinitialize all "
+                       "image buffers to new picture dimensions");
+            cnt->conf.width = cnt->imgs.width;
+            cnt->conf.height = cnt->imgs.height;
+            /*
+             * Break out of main loop terminating thread
+             * watchdog will start us again
+             */
+            return 1;
+        }
+    }
+    return 0;
+}
+
 /**
  * motion_loop
  *
@@ -1395,39 +1429,7 @@ static void *motion_loop(void *arg)
         motionloop_prepare(cnt);
         if (cnt->get_image) {
             motionloop_resetimages(cnt);
-
-        /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
-            /*
-             * If a camera is not available we keep on retrying every 10 seconds
-             * until it shows up.
-             */
-            if (cnt->video_dev < 0 &&
-                cnt->currenttime % 10 == 0 && cnt->shots == 0) {
-                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,
-                           "%s: Retrying until successful connection with camera");
-                cnt->video_dev = vid_start(cnt);
-
-                /*
-                 * If the netcam has different dimensions than in the config file
-                 * we need to restart Motion to re-allocate all the buffers
-                 */
-                if (cnt->imgs.width != cnt->conf.width || cnt->imgs.height != cnt->conf.height) {
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Camera has finally become available\n"
-                               "Camera image has different width and height"
-                               "from what is in the config file. You should fix that\n"
-                               "Restarting Motion thread to reinitialize all "
-                               "image buffers to new picture dimensions");
-                    cnt->conf.width = cnt->imgs.width;
-                    cnt->conf.height = cnt->imgs.height;
-                    /*
-                     * Break out of main loop terminating thread
-                     * watchdog will start us again
-                     */
-                    break;
-                }
-            }
-
-
+            if (motionloop_retry(cnt) == 1)  break;
         /***** MOTION LOOP - IMAGE CAPTURE SECTION *****/
 
             /*
