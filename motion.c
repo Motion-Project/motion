@@ -1302,6 +1302,61 @@ static void motionloop_prepare(struct context *cnt){
 
 }
 
+static void motionloop_resetimages(struct context *cnt){
+
+    struct image_data *old_image;
+
+    if (cnt->conf.minimum_frame_time) {
+        cnt->minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
+        cnt->get_image = 0;
+    }
+
+    /* ring_buffer_in is pointing to current pos, update before put in a new image */
+    if (++cnt->imgs.image_ring_in >= cnt->imgs.image_ring_size)
+        cnt->imgs.image_ring_in = 0;
+
+    /* Check if we have filled the ring buffer, throw away last image */
+    if (cnt->imgs.image_ring_in == cnt->imgs.image_ring_out) {
+        if (++cnt->imgs.image_ring_out >= cnt->imgs.image_ring_size)
+            cnt->imgs.image_ring_out = 0;
+    }
+
+    /* cnt->current_image points to position in ring where to store image, diffs etc. */
+    old_image = cnt->current_image;
+    cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_in];
+
+    /* Init/clear current_image */
+    if (cnt->process_thisframe) {
+        /* set diffs to 0 now, will be written after we calculated diffs in new image */
+        cnt->current_image->diffs = 0;
+
+        /* Set flags to 0 */
+        cnt->current_image->flags = 0;
+        cnt->current_image->cent_dist = 0;
+
+        /* Clear location data */
+        memset(&cnt->current_image->location, 0, sizeof(cnt->current_image->location));
+        cnt->current_image->total_labels = 0;
+    } else if (cnt->current_image && old_image) {
+        /* not processing this frame: save some important values for next image */
+        cnt->current_image->diffs = old_image->diffs;
+        cnt->current_image->timestamp = old_image->timestamp;
+        cnt->current_image->timestamp_tm = old_image->timestamp_tm;
+        cnt->current_image->shot = old_image->shot;
+        cnt->current_image->cent_dist = old_image->cent_dist;
+        cnt->current_image->flags = old_image->flags & (~IMAGE_SAVED);
+        cnt->current_image->location = old_image->location;
+        cnt->current_image->total_labels = old_image->total_labels;
+    }
+
+    /* Store time with pre_captured image */
+    cnt->current_image->timestamp = cnt->currenttime;
+    localtime_r(&cnt->current_image->timestamp, &cnt->current_image->timestamp_tm);
+
+    /* Store shot number with pre_captured image */
+    cnt->current_image->shot = cnt->shots;
+
+}
 
 /**
  * motion_loop
@@ -1325,7 +1380,7 @@ static void *motion_loop(void *arg)
     unsigned long int elapsedtime;
     unsigned long long int timenow = 0, timebefore = 0;
     int vid_return_code = 0;        /* Return code used when calling vid_next */
-    struct image_data *old_image;
+
 
     /*
      * Next two variables are used for snapshot and timelapse feature
@@ -1338,57 +1393,8 @@ static void *motion_loop(void *arg)
 
     while (!cnt->finish || cnt->makemovie) {
         motionloop_prepare(cnt);
-
         if (cnt->get_image) {
-            if (cnt->conf.minimum_frame_time) {
-                cnt->minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
-                cnt->get_image = 0;
-            }
-
-            /* ring_buffer_in is pointing to current pos, update before put in a new image */
-            if (++cnt->imgs.image_ring_in >= cnt->imgs.image_ring_size)
-                cnt->imgs.image_ring_in = 0;
-
-            /* Check if we have filled the ring buffer, throw away last image */
-            if (cnt->imgs.image_ring_in == cnt->imgs.image_ring_out) {
-                if (++cnt->imgs.image_ring_out >= cnt->imgs.image_ring_size)
-                    cnt->imgs.image_ring_out = 0;
-            }
-
-            /* cnt->current_image points to position in ring where to store image, diffs etc. */
-            old_image = cnt->current_image;
-            cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_in];
-
-            /* Init/clear current_image */
-            if (cnt->process_thisframe) {
-                /* set diffs to 0 now, will be written after we calculated diffs in new image */
-                cnt->current_image->diffs = 0;
-
-                /* Set flags to 0 */
-                cnt->current_image->flags = 0;
-                cnt->current_image->cent_dist = 0;
-
-                /* Clear location data */
-                memset(&cnt->current_image->location, 0, sizeof(cnt->current_image->location));
-                cnt->current_image->total_labels = 0;
-            } else if (cnt->current_image && old_image) {
-                /* not processing this frame: save some important values for next image */
-                cnt->current_image->diffs = old_image->diffs;
-                cnt->current_image->timestamp = old_image->timestamp;
-                cnt->current_image->timestamp_tm = old_image->timestamp_tm;
-                cnt->current_image->shot = old_image->shot;
-                cnt->current_image->cent_dist = old_image->cent_dist;
-                cnt->current_image->flags = old_image->flags & (~IMAGE_SAVED);
-                cnt->current_image->location = old_image->location;
-                cnt->current_image->total_labels = old_image->total_labels;
-            }
-
-            /* Store time with pre_captured image */
-            cnt->current_image->timestamp = cnt->currenttime;
-            localtime_r(&cnt->current_image->timestamp, &cnt->current_image->timestamp_tm);
-
-            /* Store shot number with pre_captured image */
-            cnt->current_image->shot = cnt->shots;
+            motionloop_resetimages(cnt);
 
         /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
             /*
