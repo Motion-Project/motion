@@ -470,6 +470,7 @@ struct context {
     int smartmask_count;
 
     int previous_diffs, previous_location_x, previous_location_y;
+    unsigned long int time_last_frame, time_current_frame;
 
 };
 

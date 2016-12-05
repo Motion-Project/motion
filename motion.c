@@ -1086,6 +1086,9 @@ static int motion_init(struct context *cnt)
     cnt->previous_location_x = 0;
     cnt->previous_location_y = 0;
 
+    cnt->time_last_frame = 1;
+    cnt->time_current_frame = 0;
+
 
     return 0;
 }
@@ -2029,6 +2032,82 @@ static void motionloop_snapshot(struct context *cnt){
 
 }
 
+static void motionloop_timelapse(struct context *cnt){
+    /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
+
+    if (cnt->conf.timelapse) {
+
+        /*
+         * Check to see if we should start a new timelapse file. We start one when
+         * we are on the first shot, and and the seconds are zero. We must use the seconds
+         * to prevent the timelapse file from getting reset multiple times during the minute.
+         */
+        if (cnt->current_image->timestamp_tm.tm_min == 0 &&
+            (cnt->time_current_frame % 60 < cnt->time_last_frame % 60) &&
+            cnt->shots == 0) {
+
+            if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0) {
+                ;/* No action */
+
+            /* If we are daily, raise timelapseend event at midnight */
+            } else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
+                if (cnt->current_image->timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
+
+            /* handle the hourly case */
+            } else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
+                event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
+
+            /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
+            } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
+                if (cnt->current_image->timestamp_tm.tm_wday == 0 &&
+                    cnt->current_image->timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
+                          &cnt->current_image->timestamp_tm);
+            /* If we are weekly-monday, raise timelapseend event at midnight on monday */
+            } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
+                if (cnt->current_image->timestamp_tm.tm_wday == 1 &&
+                    cnt->current_image->timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
+                          &cnt->current_image->timestamp_tm);
+            /* If we are monthly, raise timelapseend event at midnight on first day of month */
+            } else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
+                if (cnt->current_image->timestamp_tm.tm_mday == 1 &&
+                    cnt->current_image->timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
+                          &cnt->current_image->timestamp_tm);
+            /* If invalid we report in syslog once and continue in manual mode */
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Invalid timelapse_mode argument '%s'",
+                           cnt->conf.timelapse_mode);
+                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%:s Defaulting to manual timelapse mode");
+                conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
+            }
+        }
+
+        /*
+         * If ffmpeg timelapse is enabled and time since epoch MOD ffmpeg_timelaps = 0
+         * add a timelapse frame to the timelapse movie.
+         */
+        if (cnt->shots == 0 && cnt->time_current_frame % cnt->conf.timelapse <=
+            cnt->time_last_frame % cnt->conf.timelapse)
+            event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL,
+                  &cnt->current_image->timestamp_tm);
+    } else if (cnt->ffmpeg_timelapse) {
+    /*
+     * If timelapse movie is in progress but conf.timelapse is zero then close timelapse file
+     * This is an important feature that allows manual roll-over of timelapse file using the http
+     * remote control via a cron job.
+     */
+        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
+    }
+
+    cnt->time_last_frame = cnt->time_current_frame;
+
+
+}
+
+
 
 
 
@@ -2053,13 +2132,6 @@ static void *motion_loop(void *arg)
     unsigned long long int timenow = 0, timebefore = 0;
 
 
-    /*
-     * Next two variables are used for snapshot and timelapse feature
-     * time_last_frame is set to 1 so that first coming timelapse or second = 0
-     * is acted upon.
-     */
-    unsigned long int time_last_frame = 1, time_current_frame;
-
     if (motion_init(cnt) < 0)  goto err;
 
     while (!cnt->finish || cnt->makemovie) {
@@ -2075,79 +2147,7 @@ static void *motion_loop(void *arg)
             motionloop_setupmode(cnt);
         }
         motionloop_snapshot(cnt);
-
-    /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
-
-
-        if (cnt->conf.timelapse) {
-
-            /*
-             * Check to see if we should start a new timelapse file. We start one when
-             * we are on the first shot, and and the seconds are zero. We must use the seconds
-             * to prevent the timelapse file from getting reset multiple times during the minute.
-             */
-            if (cnt->current_image->timestamp_tm.tm_min == 0 &&
-                (time_current_frame % 60 < time_last_frame % 60) &&
-                cnt->shots == 0) {
-
-                if (strcasecmp(cnt->conf.timelapse_mode, "manual") == 0) {
-                    ;/* No action */
-
-                /* If we are daily, raise timelapseend event at midnight */
-                } else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
-                    if (cnt->current_image->timestamp_tm.tm_hour == 0)
-                        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-
-                /* handle the hourly case */
-                } else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
-                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
-
-                /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
-                } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
-                    if (cnt->current_image->timestamp_tm.tm_wday == 0 &&
-                        cnt->current_image->timestamp_tm.tm_hour == 0)
-                        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
-                              &cnt->current_image->timestamp_tm);
-                /* If we are weekly-monday, raise timelapseend event at midnight on monday */
-                } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
-                    if (cnt->current_image->timestamp_tm.tm_wday == 1 &&
-                        cnt->current_image->timestamp_tm.tm_hour == 0)
-                        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
-                              &cnt->current_image->timestamp_tm);
-                /* If we are monthly, raise timelapseend event at midnight on first day of month */
-                } else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
-                    if (cnt->current_image->timestamp_tm.tm_mday == 1 &&
-                        cnt->current_image->timestamp_tm.tm_hour == 0)
-                        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
-                              &cnt->current_image->timestamp_tm);
-                /* If invalid we report in syslog once and continue in manual mode */
-                } else {
-                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Invalid timelapse_mode argument '%s'",
-                               cnt->conf.timelapse_mode);
-                    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%:s Defaulting to manual timelapse mode");
-                    conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
-                }
-            }
-
-            /*
-             * If ffmpeg timelapse is enabled and time since epoch MOD ffmpeg_timelaps = 0
-             * add a timelapse frame to the timelapse movie.
-             */
-            if (cnt->shots == 0 && time_current_frame % cnt->conf.timelapse <=
-                time_last_frame % cnt->conf.timelapse)
-                event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL,
-                      &cnt->current_image->timestamp_tm);
-        } else if (cnt->ffmpeg_timelapse) {
-        /*
-         * If timelapse movie is in progress but conf.timelapse is zero then close timelapse file
-         * This is an important feature that allows manual roll-over of timelapse file using the http
-         * remote control via a cron job.
-         */
-            event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
-        }
-
-        time_last_frame = time_current_frame;
-
+        motionloop_timelapse(cnt);
 
     /***** MOTION LOOP - VIDEO LOOPBACK SECTION *****/
 
