@@ -22,12 +22,6 @@
 #include "picture.h"
 #include "rotate.h"
 
-/* Forward declarations */
-static int motion_init(struct context *cnt);
-static void motion_cleanup(struct context *cnt);
-static void setup_signals(struct sigaction *, struct sigaction *);
-
-
 /**
  * tls_key_threadnr
  *
@@ -377,6 +371,47 @@ static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
     while (waitpid(-1, NULL, WNOHANG) > 0) {};
 #endif /* WNOHANG */
     return;
+}
+
+/**
+ * setup_signals
+ *
+ *   Attaches handlers to a number of signals that Motion need to catch.
+ *
+ * Parameters: sigaction structs for signals in general and SIGCHLD.
+ *
+ * Returns:    nothing
+ */
+static void setup_signals(struct sigaction *sig_handler_action, struct sigaction *sigchild_action)
+{
+#ifdef SA_NOCLDWAIT
+    sigchild_action->sa_flags = SA_NOCLDWAIT;
+#else
+    sigchild_action->sa_flags = 0;
+#endif
+    sigchild_action->sa_handler = sigchild_handler;
+    sigemptyset(&sigchild_action->sa_mask);
+#ifdef SA_RESTART
+    sig_handler_action->sa_flags = SA_RESTART;
+#else
+    sig_handler_action->sa_flags = 0;
+#endif
+    sig_handler_action->sa_handler = sig_handler;
+    sigemptyset(&sig_handler_action->sa_mask);
+
+    /* Enable automatic zombie reaping */
+    sigaction(SIGCHLD, sigchild_action, NULL);
+    sigaction(SIGPIPE, sigchild_action, NULL);
+    sigaction(SIGALRM, sig_handler_action, NULL);
+    sigaction(SIGHUP, sig_handler_action, NULL);
+    sigaction(SIGINT, sig_handler_action, NULL);
+    sigaction(SIGQUIT, sig_handler_action, NULL);
+    sigaction(SIGTERM, sig_handler_action, NULL);
+    sigaction(SIGUSR1, sig_handler_action, NULL);
+
+    /* use SIGVTALRM as a way to break out of the ioctl, don't restart */
+    sig_handler_action->sa_flags = 0;
+    sigaction(SIGVTALRM, sig_handler_action, NULL);
 }
 
 /**
@@ -2486,47 +2521,6 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 #ifndef WITHOUT_V4L
     vid_init();
 #endif
-}
-
-/**
- * setup_signals
- *
- *   Attaches handlers to a number of signals that Motion need to catch.
- *
- * Parameters: sigaction structs for signals in general and SIGCHLD.
- *
- * Returns:    nothing
- */
-static void setup_signals(struct sigaction *sig_handler_action, struct sigaction *sigchild_action)
-{
-#ifdef SA_NOCLDWAIT
-    sigchild_action->sa_flags = SA_NOCLDWAIT;
-#else
-    sigchild_action->sa_flags = 0;
-#endif
-    sigchild_action->sa_handler = sigchild_handler;
-    sigemptyset(&sigchild_action->sa_mask);
-#ifdef SA_RESTART
-    sig_handler_action->sa_flags = SA_RESTART;
-#else
-    sig_handler_action->sa_flags = 0;
-#endif
-    sig_handler_action->sa_handler = sig_handler;
-    sigemptyset(&sig_handler_action->sa_mask);
-
-    /* Enable automatic zombie reaping */
-    sigaction(SIGCHLD, sigchild_action, NULL);
-    sigaction(SIGPIPE, sigchild_action, NULL);
-    sigaction(SIGALRM, sig_handler_action, NULL);
-    sigaction(SIGHUP, sig_handler_action, NULL);
-    sigaction(SIGINT, sig_handler_action, NULL);
-    sigaction(SIGQUIT, sig_handler_action, NULL);
-    sigaction(SIGTERM, sig_handler_action, NULL);
-    sigaction(SIGUSR1, sig_handler_action, NULL);
-
-    /* use SIGVTALRM as a way to break out of the ioctl, don't restart */
-    sig_handler_action->sa_flags = 0;
-    sigaction(SIGVTALRM, sig_handler_action, NULL);
 }
 
 /**
