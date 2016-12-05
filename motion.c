@@ -1022,6 +1022,13 @@ static int motion_init(struct context *cnt)
 
     cnt->areadetect_eventnbr = 0;
 
+    cnt->timenow = 0;
+    cnt->timebefore = 0;
+    cnt->rate_limit = 0;
+    cnt->lastframetime = 0;
+    cnt->minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
+    cnt->get_image = 1;
+
 
     return 0;
 }
@@ -1159,6 +1166,94 @@ static void motionloop_areadetect(struct context *cnt){
 
 }
 
+static void motionloop_prepare(struct context *cnt){
+
+    int frame_buffer_size;
+    struct timeval tv1;
+
+    /***** MOTION LOOP - PREPARE FOR NEW FRAME SECTION *****/
+    cnt->watchdog = WATCHDOG_TMO;
+
+    /* Get current time and preserver last time for frame interval calc. */
+
+    /* This may be better at the end of the loop or moving the part in
+     * the end doing elapsed time calc in here
+     */
+    cnt->timebefore = cnt->timenow;
+    gettimeofday(&tv1, NULL);
+    cnt->timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
+
+    /*
+     * Calculate detection rate limit. Above 5fps we limit the detection
+     * rate to 3fps to reduce load at higher framerates.
+     */
+    cnt->process_thisframe = 0;
+    cnt->rate_limit++;
+    if (cnt->rate_limit >= (cnt->lastrate / 3)) {
+        cnt->rate_limit = 0;
+        cnt->process_thisframe = 1;
+    }
+
+    /*
+     * Since we don't have sanity checks done when options are set,
+     * this sanity check must go in the main loop :(, before pre_captures
+     * are attempted.
+     */
+    if (cnt->conf.minimum_motion_frames < 1)
+        cnt->conf.minimum_motion_frames = 1;
+
+    if (cnt->conf.pre_capture < 0)
+        cnt->conf.pre_capture = 0;
+
+    /*
+     * Check if our buffer is still the right size
+     * If pre_capture or minimum_motion_frames has been changed
+     * via the http remote control we need to re-size the ring buffer
+     */
+    frame_buffer_size = cnt->conf.pre_capture + cnt->conf.minimum_motion_frames;
+
+    if (cnt->imgs.image_ring_size != frame_buffer_size)
+        image_ring_resize(cnt, frame_buffer_size);
+
+    /* Get time for current frame */
+    cnt->currenttime = time(NULL);
+
+    /*
+     * localtime returns static data and is not threadsafe
+     * so we use localtime_r which is reentrant and threadsafe
+     */
+    localtime_r(&cnt->currenttime, cnt->currenttime_tm);
+
+    /*
+     * If we have started on a new second we reset the shots variable
+     * lastrate is updated to be the number of the last frame. last rate
+     * is used as the ffmpeg framerate when motion is detected.
+     */
+    if (cnt->lastframetime != cnt->currenttime) {
+        cnt->lastrate = cnt->shots + 1;
+        cnt->shots = -1;
+        cnt->lastframetime = cnt->currenttime;
+
+        if (cnt->conf.minimum_frame_time) {
+            cnt->minimum_frame_time_downcounter--;
+            if (cnt->minimum_frame_time_downcounter == 0)
+                cnt->get_image = 1;
+        } else {
+            cnt->get_image = 1;
+        }
+    }
+
+
+    /* Increase the shots variable for each frame captured within this second */
+    cnt->shots++;
+
+    if (cnt->startup_frames > 0)
+        cnt->startup_frames--;
+
+
+}
+
+
 /**
  * motion_loop
  *
@@ -1169,9 +1264,6 @@ static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
     int i, j = 0;
-    time_t lastframetime = 0;
-    int frame_buffer_size;
-    unsigned int rate_limit = 0;
     int smartmask_ratio = 0;
     int smartmask_count = 20;
     unsigned int smartmask_lastrate = 0;
@@ -1186,8 +1278,6 @@ static void *motion_loop(void *arg)
     unsigned long int rolling_average, elapsedtime;
     unsigned long long int timenow = 0, timebefore = 0;
     int vid_return_code = 0;        /* Return code used when calling vid_next */
-    int minimum_frame_time_downcounter = cnt->conf.minimum_frame_time; /* time in seconds to skip between capturing images */
-    unsigned int get_image = 1;    /* Flag used to signal that we capture new image when we run the loop */
     struct image_data *old_image;
 
     /*
@@ -1246,86 +1336,12 @@ static void *motion_loop(void *arg)
      */
 
     while (!cnt->finish || cnt->makemovie) {
+        motionloop_prepare(cnt);
 
-    /***** MOTION LOOP - PREPARE FOR NEW FRAME SECTION *****/
-        cnt->watchdog = WATCHDOG_TMO;
-
-        /* Get current time and preserver last time for frame interval calc. */
-        timebefore = timenow;
-        gettimeofday(&tv1, NULL);
-        timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
-
-        /*
-         * Calculate detection rate limit. Above 5fps we limit the detection
-         * rate to 3fps to reduce load at higher framerates.
-         */
-        cnt->process_thisframe = 0;
-        rate_limit++;
-        if (rate_limit >= (cnt->lastrate / 3)) {
-            rate_limit = 0;
-            cnt->process_thisframe = 1;
-        }
-
-        /*
-         * Since we don't have sanity checks done when options are set,
-         * this sanity check must go in the main loop :(, before pre_captures
-         * are attempted.
-         */
-        if (cnt->conf.minimum_motion_frames < 1)
-            cnt->conf.minimum_motion_frames = 1;
-
-        if (cnt->conf.pre_capture < 0)
-            cnt->conf.pre_capture = 0;
-
-        /*
-         * Check if our buffer is still the right size
-         * If pre_capture or minimum_motion_frames has been changed
-         * via the http remote control we need to re-size the ring buffer
-         */
-        frame_buffer_size = cnt->conf.pre_capture + cnt->conf.minimum_motion_frames;
-
-        if (cnt->imgs.image_ring_size != frame_buffer_size)
-            image_ring_resize(cnt, frame_buffer_size);
-
-        /* Get time for current frame */
-        cnt->currenttime = time(NULL);
-
-        /*
-         * localtime returns static data and is not threadsafe
-         * so we use localtime_r which is reentrant and threadsafe
-         */
-        localtime_r(&cnt->currenttime, cnt->currenttime_tm);
-
-        /*
-         * If we have started on a new second we reset the shots variable
-         * lastrate is updated to be the number of the last frame. last rate
-         * is used as the ffmpeg framerate when motion is detected.
-         */
-        if (lastframetime != cnt->currenttime) {
-            cnt->lastrate = cnt->shots + 1;
-            cnt->shots = -1;
-            lastframetime = cnt->currenttime;
-
+        if (cnt->get_image) {
             if (cnt->conf.minimum_frame_time) {
-                minimum_frame_time_downcounter--;
-                if (minimum_frame_time_downcounter == 0)
-                    get_image = 1;
-            } else {
-                get_image = 1;
-            }
-        }
-
-
-        /* Increase the shots variable for each frame captured within this second */
-        cnt->shots++;
-
-        if (cnt->startup_frames > 0)
-            cnt->startup_frames--;
-
-        if (get_image) {
-            if (cnt->conf.minimum_frame_time) {
-                minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
-                get_image = 0;
+                cnt->minimum_frame_time_downcounter = cnt->conf.minimum_frame_time;
+                cnt->get_image = 0;
             }
 
             /* ring_buffer_in is pointing to current pos, update before put in a new image */
