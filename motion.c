@@ -1730,6 +1730,84 @@ static void motionloop_tuning(struct context *cnt){
 
 }
 
+static void motionloop_overlay(struct context *cnt){
+
+    char tmp[PATH_MAX];
+    /***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
+    /*
+     * Some overlays on top of the motion image
+     * Note that these now modifies the cnt->imgs.out so this buffer
+     * can no longer be used for motion detection features until next
+     * picture frame is captured.
+     */
+
+    /* Smartmask overlay */
+    if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
+        cnt->conf.setup_mode))
+        overlay_smartmask(cnt, cnt->imgs.out);
+
+    /* Largest labels overlay */
+    if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
+        cnt->conf.setup_mode))
+        overlay_largest_label(cnt, cnt->imgs.out);
+
+    /* Fixed mask overlay */
+    if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
+        cnt->conf.setup_mode))
+        overlay_fixed_mask(cnt, cnt->imgs.out);
+
+    /* Initialize the double sized characters if needed. */
+    if (cnt->conf.text_double && cnt->text_size_factor == 1) {
+        cnt->text_size_factor = 2;
+    /* If text_double is set to off, then reset the scaling text_size_factor. */
+    } else if (!cnt->conf.text_double && cnt->text_size_factor == 2) {
+        cnt->text_size_factor = 1;
+    }
+
+    /* Add changed pixels in upper right corner of the pictures */
+    if (cnt->conf.text_changes) {
+        if (!cnt->pause)
+            sprintf(tmp, "%d", cnt->current_image->diffs);
+        else
+            sprintf(tmp, "-");
+
+        draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10,
+                  cnt->imgs.width, tmp, cnt->conf.text_double);
+    }
+
+    /*
+     * Add changed pixels to motion-images (for stream) in setup_mode
+     * and always overlay smartmask (not only when motion is detected)
+     */
+    if (cnt->conf.setup_mode) {
+        sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
+                cnt->current_image->total_labels, cnt->noise);
+        draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->text_size_factor,
+                  cnt->imgs.width, tmp, cnt->conf.text_double);
+        sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
+        draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->text_size_factor,
+                  cnt->imgs.width, tmp, cnt->conf.text_double);
+    }
+
+    /* Add text in lower left corner of the pictures */
+    if (cnt->conf.text_left) {
+        mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
+                   &cnt->current_image->timestamp_tm, NULL, 0);
+        draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
+                  cnt->imgs.width, tmp, cnt->conf.text_double);
+    }
+
+    /* Add text in lower right corner of the pictures */
+    if (cnt->conf.text_right) {
+        mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
+                   &cnt->current_image->timestamp_tm, NULL, 0);
+        draw_text(cnt->current_image->image, cnt->imgs.width - 10,
+                  cnt->imgs.height - 10 * cnt->text_size_factor,
+                  cnt->imgs.width, tmp, cnt->conf.text_double);
+    }
+
+}
+
 
 
 /**
@@ -1768,87 +1846,7 @@ static void *motion_loop(void *arg)
             if (motionloop_capture(cnt) == 1)  break;
             motionloop_detection(cnt);
             motionloop_tuning(cnt);
-
-
-        /***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
-
-            /*
-             * Some overlays on top of the motion image
-             * Note that these now modifies the cnt->imgs.out so this buffer
-             * can no longer be used for motion detection features until next
-             * picture frame is captured.
-             */
-
-            /* Smartmask overlay */
-            if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
-                cnt->conf.setup_mode))
-                overlay_smartmask(cnt, cnt->imgs.out);
-
-            /* Largest labels overlay */
-            if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
-                cnt->conf.setup_mode))
-                overlay_largest_label(cnt, cnt->imgs.out);
-
-            /* Fixed mask overlay */
-            if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
-                cnt->conf.setup_mode))
-                overlay_fixed_mask(cnt, cnt->imgs.out);
-
-            /* Initialize the double sized characters if needed. */
-            if (cnt->conf.text_double && cnt->text_size_factor == 1) {
-                cnt->text_size_factor = 2;
-            /* If text_double is set to off, then reset the scaling text_size_factor. */
-            } else if (!cnt->conf.text_double && cnt->text_size_factor == 2) {
-                cnt->text_size_factor = 1;
-            }
-
-            /* Add changed pixels in upper right corner of the pictures */
-            if (cnt->conf.text_changes) {
-                char tmp[25];
-
-                if (!cnt->pause)
-                    sprintf(tmp, "%d", cnt->current_image->diffs);
-                else
-                    sprintf(tmp, "-");
-
-                draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-            }
-
-            /*
-             * Add changed pixels to motion-images (for stream) in setup_mode
-             * and always overlay smartmask (not only when motion is detected)
-             */
-            if (cnt->conf.setup_mode) {
-                char tmp[PATH_MAX];
-                sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
-                        cnt->current_image->total_labels, cnt->noise);
-                draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->text_size_factor,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-                sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
-                draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->text_size_factor,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-            }
-
-            /* Add text in lower left corner of the pictures */
-            if (cnt->conf.text_left) {
-                char tmp[PATH_MAX];
-                mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
-                           &cnt->current_image->timestamp_tm, NULL, 0);
-                draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-            }
-
-            /* Add text in lower right corner of the pictures */
-            if (cnt->conf.text_right) {
-                char tmp[PATH_MAX];
-                mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
-                           &cnt->current_image->timestamp_tm, NULL, 0);
-                draw_text(cnt->current_image->image, cnt->imgs.width - 10,
-                          cnt->imgs.height - 10 * cnt->text_size_factor,
-                          cnt->imgs.width, tmp, cnt->conf.text_double);
-            }
-
+            motionloop_overlay(cnt);
 
         /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
