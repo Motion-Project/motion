@@ -472,6 +472,7 @@ struct context {
     int previous_diffs, previous_location_x, previous_location_y;
     unsigned long int time_last_frame, time_current_frame;
 
+    unsigned int smartmask_lastrate;
 };
 
 extern pthread_mutex_t global_lock;

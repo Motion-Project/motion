@@ -1089,6 +1089,7 @@ static int motion_init(struct context *cnt)
     cnt->time_last_frame = 1;
     cnt->time_current_frame = 0;
 
+    cnt->smartmask_lastrate = 0;
 
     return 0;
 }
@@ -2134,6 +2135,78 @@ static void motionloop_loopback(struct context *cnt){
 
 }
 
+static void motionloop_parmsupdate(struct context *cnt){
+    /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
+
+    /* Check for some config parameter changes but only every second */
+    if (cnt->shots == 0) {
+        if (strcasecmp(cnt->conf.output_pictures, "on") == 0)
+            cnt->new_img = NEWIMG_ON;
+        else if (strcasecmp(cnt->conf.output_pictures, "first") == 0)
+            cnt->new_img = NEWIMG_FIRST;
+        else if (strcasecmp(cnt->conf.output_pictures, "best") == 0)
+            cnt->new_img = NEWIMG_BEST;
+        else if (strcasecmp(cnt->conf.output_pictures, "center") == 0)
+            cnt->new_img = NEWIMG_CENTER;
+        else
+            cnt->new_img = NEWIMG_OFF;
+
+        if (strcasecmp(cnt->conf.locate_motion_mode, "on") == 0)
+            cnt->locate_motion_mode = LOCATE_ON;
+        else if (strcasecmp(cnt->conf.locate_motion_mode, "preview") == 0)
+            cnt->locate_motion_mode = LOCATE_PREVIEW;
+        else
+            cnt->locate_motion_mode = LOCATE_OFF;
+
+        if (strcasecmp(cnt->conf.locate_motion_style, "box") == 0)
+            cnt->locate_motion_style = LOCATE_BOX;
+        else if (strcasecmp(cnt->conf.locate_motion_style, "redbox") == 0)
+            cnt->locate_motion_style = LOCATE_REDBOX;
+        else if (strcasecmp(cnt->conf.locate_motion_style, "cross") == 0)
+            cnt->locate_motion_style = LOCATE_CROSS;
+        else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0)
+            cnt->locate_motion_style = LOCATE_REDCROSS;
+        else
+            cnt->locate_motion_style = LOCATE_BOX;
+
+        /* Sanity check for smart_mask_speed, silly value disables smart mask */
+        if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
+            cnt->conf.smart_mask_speed = 0;
+
+        /* Has someone changed smart_mask_speed or framerate? */
+        if (cnt->conf.smart_mask_speed != cnt->smartmask_speed ||
+            cnt->smartmask_lastrate != cnt->lastrate) {
+            if (cnt->conf.smart_mask_speed == 0) {
+                memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
+                memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
+            }
+
+            cnt->smartmask_lastrate = cnt->lastrate;
+            cnt->smartmask_speed = cnt->conf.smart_mask_speed;
+            /*
+             * Decay delay - based on smart_mask_speed (framerate independent)
+             * This is always 5*smartmask_speed seconds
+             */
+            cnt->smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
+        }
+
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+
+        /*
+         * Set the sql mask file according to the SQL config options
+         * We update it for every frame in case the config was updated
+         * via remote control.
+         */
+        cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
+                        cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
+                        cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
+                        cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
+#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
+
+    }
+
+}
+
 
 
 
@@ -2148,7 +2221,6 @@ static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
     int j = 0;
-    unsigned int smartmask_lastrate = 0;
     unsigned int passflag = 0;
     long int delay_time_nsec;
     int rolling_frame = 0;
@@ -2174,75 +2246,7 @@ static void *motion_loop(void *arg)
         motionloop_snapshot(cnt);
         motionloop_timelapse(cnt);
         motionloop_loopback(cnt);
-
-    /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
-
-        /* Check for some config parameter changes but only every second */
-        if (cnt->shots == 0) {
-            if (strcasecmp(cnt->conf.output_pictures, "on") == 0)
-                cnt->new_img = NEWIMG_ON;
-            else if (strcasecmp(cnt->conf.output_pictures, "first") == 0)
-                cnt->new_img = NEWIMG_FIRST;
-            else if (strcasecmp(cnt->conf.output_pictures, "best") == 0)
-                cnt->new_img = NEWIMG_BEST;
-            else if (strcasecmp(cnt->conf.output_pictures, "center") == 0)
-                cnt->new_img = NEWIMG_CENTER;
-            else
-                cnt->new_img = NEWIMG_OFF;
-
-            if (strcasecmp(cnt->conf.locate_motion_mode, "on") == 0)
-                cnt->locate_motion_mode = LOCATE_ON;
-            else if (strcasecmp(cnt->conf.locate_motion_mode, "preview") == 0)
-                cnt->locate_motion_mode = LOCATE_PREVIEW;
-            else
-                cnt->locate_motion_mode = LOCATE_OFF;
-
-            if (strcasecmp(cnt->conf.locate_motion_style, "box") == 0)
-                cnt->locate_motion_style = LOCATE_BOX;
-            else if (strcasecmp(cnt->conf.locate_motion_style, "redbox") == 0)
-                cnt->locate_motion_style = LOCATE_REDBOX;
-            else if (strcasecmp(cnt->conf.locate_motion_style, "cross") == 0)
-                cnt->locate_motion_style = LOCATE_CROSS;
-            else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0)
-                cnt->locate_motion_style = LOCATE_REDCROSS;
-            else
-                cnt->locate_motion_style = LOCATE_BOX;
-
-            /* Sanity check for smart_mask_speed, silly value disables smart mask */
-            if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
-                cnt->conf.smart_mask_speed = 0;
-
-            /* Has someone changed smart_mask_speed or framerate? */
-            if (cnt->conf.smart_mask_speed != cnt->smartmask_speed ||
-                smartmask_lastrate != cnt->lastrate) {
-                if (cnt->conf.smart_mask_speed == 0) {
-                    memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
-                    memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
-                }
-
-                smartmask_lastrate = cnt->lastrate;
-                cnt->smartmask_speed = cnt->conf.smart_mask_speed;
-                /*
-                 * Decay delay - based on smart_mask_speed (framerate independent)
-                 * This is always 5*smartmask_speed seconds
-                 */
-                cnt->smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
-            }
-
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
-
-            /*
-             * Set the sql mask file according to the SQL config options
-             * We update it for every frame in case the config was updated
-             * via remote control.
-             */
-            cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-                            cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-                            cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-                            cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
-
-        }
+        motionloop_parmsupdate(cnt);
 
 
     /***** MOTION LOOP - FRAMERATE TIMING AND SLEEPING SECTION *****/
