@@ -473,6 +473,10 @@ struct context {
     unsigned long int time_last_frame, time_current_frame;
 
     unsigned int smartmask_lastrate;
+
+    unsigned int passflag;  //only purpose is to flag first frame vs all others.....
+    int rolling_frame;
+
 };
 
 extern pthread_mutex_t global_lock;

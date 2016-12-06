@@ -1091,6 +1091,9 @@ static int motion_init(struct context *cnt)
 
     cnt->smartmask_lastrate = 0;
 
+    cnt->passflag = 0;  //only purpose to flag first frame
+    cnt->rolling_frame = 0;
+
     return 0;
 }
 
@@ -2207,9 +2210,65 @@ static void motionloop_parmsupdate(struct context *cnt){
 
 }
 
+static void motionloop_frametiming(struct context *cnt){
 
+    int indx;
+    struct timeval tv2;
+    unsigned long int elapsedtime;  //TODO: Need to evaluate logic for needing this.
+    long int delay_time_nsec;
 
+    /***** MOTION LOOP - FRAMERATE TIMING AND SLEEPING SECTION *****/
+    /*
+     * Work out expected frame rate based on config setting which may
+     * have changed from http-control
+     */
+    if (cnt->conf.frame_limit)
+        cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
+    else
+        cnt->required_frame_time = 0;
 
+    /* Get latest time to calculate time taken to process video data */
+    gettimeofday(&tv2, NULL);
+    elapsedtime = (tv2.tv_usec + 1000000L * tv2.tv_sec) - cnt->timenow;
+
+    /*
+     * Update history buffer but ignore first pass as timebefore
+     * variable will be inaccurate
+     */
+    if (cnt->passflag)
+        cnt->rolling_average_data[cnt->rolling_frame] = cnt->timenow - cnt->timebefore;
+    else
+        cnt->passflag = 1;
+
+    cnt->rolling_frame++;
+    if (cnt->rolling_frame >= cnt->rolling_average_limit)
+        cnt->rolling_frame = 0;
+
+    /* Calculate 10 second average and use deviation in delay calculation */
+    cnt->rolling_average = 0L;
+
+    for (indx = 0; indx < cnt->rolling_average_limit; indx++)
+        cnt->rolling_average += cnt->rolling_average_data[indx];
+
+    cnt->rolling_average /= cnt->rolling_average_limit;
+    cnt->frame_delay = cnt->required_frame_time - elapsedtime - (cnt->rolling_average - cnt->required_frame_time);
+
+    if (cnt->frame_delay > 0) {
+        /* Apply delay to meet frame time */
+        if (cnt->frame_delay > cnt->required_frame_time)
+            cnt->frame_delay = cnt->required_frame_time;
+
+        /* Delay time in nanoseconds for SLEEP */
+        delay_time_nsec = cnt->frame_delay * 1000;
+
+        if (delay_time_nsec > 999999999)
+            delay_time_nsec = 999999999;
+
+        /* SLEEP as defined in motion.h  A safe sleep using nanosleep */
+        SLEEP(0, delay_time_nsec);
+    }
+
+}
 
 /**
  * motion_loop
@@ -2220,14 +2279,6 @@ static void motionloop_parmsupdate(struct context *cnt){
 static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
-    int j = 0;
-    unsigned int passflag = 0;
-    long int delay_time_nsec;
-    int rolling_frame = 0;
-    struct timeval tv2;
-    unsigned long int elapsedtime;
-    unsigned long long int timenow = 0, timebefore = 0;
-
 
     if (motion_init(cnt) < 0)  goto err;
 
@@ -2247,66 +2298,9 @@ static void *motion_loop(void *arg)
         motionloop_timelapse(cnt);
         motionloop_loopback(cnt);
         motionloop_parmsupdate(cnt);
-
-
-    /***** MOTION LOOP - FRAMERATE TIMING AND SLEEPING SECTION *****/
-
-
-        /*
-         * Work out expected frame rate based on config setting which may
-         * have changed from http-control
-         */
-        if (cnt->conf.frame_limit)
-            cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
-        else
-            cnt->required_frame_time = 0;
-
-        /* Get latest time to calculate time taken to process video data */
-        gettimeofday(&tv2, NULL);
-        elapsedtime = (tv2.tv_usec + 1000000L * tv2.tv_sec) - timenow;
-
-        /*
-         * Update history buffer but ignore first pass as timebefore
-         * variable will be inaccurate
-         */
-        if (passflag)
-            cnt->rolling_average_data[rolling_frame] = timenow-timebefore;
-        else
-            passflag = 1;
-
-        rolling_frame++;
-        if (rolling_frame >= cnt->rolling_average_limit)
-            rolling_frame = 0;
-
-        /* Calculate 10 second average and use deviation in delay calculation */
-        cnt->rolling_average = 0L;
-
-        for (j = 0; j < cnt->rolling_average_limit; j++)
-            cnt->rolling_average += cnt->rolling_average_data[j];
-
-        cnt->rolling_average /= cnt->rolling_average_limit;
-        cnt->frame_delay = cnt->required_frame_time-elapsedtime - (cnt->rolling_average - cnt->required_frame_time);
-
-        if (cnt->frame_delay > 0) {
-            /* Apply delay to meet frame time */
-            if (cnt->frame_delay > cnt->required_frame_time)
-                cnt->frame_delay = cnt->required_frame_time;
-
-            /* Delay time in nanoseconds for SLEEP */
-            delay_time_nsec = cnt->frame_delay * 1000;
-
-            if (delay_time_nsec > 999999999)
-                delay_time_nsec = 999999999;
-
-            /* SLEEP as defined in motion.h  A safe sleep using nanosleep */
-            SLEEP(0, delay_time_nsec);
-        }
+        motionloop_frametiming(cnt);
     }
 
-    /*
-     * END OF MOTION MAIN LOOP
-     * If code continues here it is because the thread is exiting or restarting
-     */
 err:
     free(cnt->rolling_average_data);
 
