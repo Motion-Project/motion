@@ -462,9 +462,13 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
      * our thread name - so temporarily change our thread name to the
      * desired name */
     {
-        char curtname[16];
         char newtname[16];
+#if defined(__FreeBSD__)
+        char curtname[16] = "unknown";
+#else
+        char curtname[16];
         pthread_getname_np(pthread_self(), curtname, sizeof(curtname));
+#endif
         snprintf(newtname, sizeof(newtname), "av%d%s%s",
                  netcam->cnt->threadnr,
                  netcam->cnt->conf.camera_name ? ":" : "",
