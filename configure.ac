@@ -350,7 +350,11 @@ WITHOUT_MMAL="no")
 
 if test "${WITHOUT_MMAL}" = "no"; then
   HAVE_MMAL=""
-  LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+  if test "${FreeBSD}" != "" ; then
+	LIBRASPBERRYPIDEVPATH="/usr/local/include/interface/mmal"
+  else
+        LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+  fi
 
   if test -d ${LIBRASPBERRYPIDEVPATH}; then
        HAVE_MMAL="yes"
@@ -362,7 +366,10 @@ if test "${WITHOUT_MMAL}" = "no"; then
            AC_SUBST(MMAL_LIBS)
            MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
            MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
-           MMAL_LIBS="-L/opt/vc/lib  -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+           AS_IF([test "${FreeBSD}" != "" ], [
+                MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
+               ])
+           MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
            AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
   ])
 fi
