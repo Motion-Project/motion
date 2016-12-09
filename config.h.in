@@ -16,6 +16,5 @@
 
 /* TODO: look at these */
 #undef PWCBSD
-#undef OLD_BKTR
 #cmakedefine MOTION_V4L2
 #cmakedefine WITHOUT_V4L

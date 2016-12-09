@@ -93,7 +93,6 @@ if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
 		AC_MSG_RESULT(yes)
 	else
 		AC_MSG_RESULT(no)
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
 	fi
 #
 # Check to Exclude BKTR
