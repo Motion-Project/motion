@@ -745,7 +745,6 @@ AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h s
 
 # Check if v4l2 is available
 SUPPORTED_V4L2=false
-SUPPORTED_V4L2_old=false
 
 if test "${V4L}" = "no"; then
 	AC_MSG_CHECKING(for V42L support)
@@ -755,7 +754,9 @@ else
 		[SUPPORTED_V4L2=true],
 		[SUPPORTED_V4L2=false],
 		[#include <sys/time.h>
-			#ifdef HAVE_LINUX_VIDEODEV_H
+			#ifdef HAVE_LINUX_VIDEODEV2_H
+			#include <linux/videodev2.h>
+			#elif HAVE_LINUX_VIDEODEV_H
 			#include <linux/videodev.h>
 			#elif HAVE_SYS_VIDEOIO_H
 			#include <sys/videoio.h>
@@ -767,20 +768,6 @@ else
 	else
 		AC_MSG_RESULT(no)
 	fi
-
-	# linux/videodev.h doesn't include videodev2.h
-	if test x$SUPPORTED_V4L2 = xfalse; then
-		AC_MSG_CHECKING(for V42L *old* support)
-		AC_MSG_RESULT(testing)
-		AC_CHECK_HEADERS(linux/videodev2.h,[SUPPORTED_V4L2_old=true],[], [#include <asm/types.h>])
-	fi
-
-
-	if test x$SUPPORTED_V4L2_old = xtrue; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2 -DMOTION_V4L2_OLD"
-		SUPPORTED_V4L2=true
-	fi
-
 fi
 
 

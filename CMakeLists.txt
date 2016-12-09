@@ -40,7 +40,6 @@ else(${WITH_V4L})
 	set(WITHOUT_V4L ON)
 endif(${WITH_V4L})
 set(MOTION_V4L2 ${HAVE_LINUX_VIDEODEV2_H})
-set(MOTION_V4L2_OLD ${HAVE_LINUX_VIDEODEV2_H})
 
 configure_file(config.h.in "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
 configure_file(motion-dist.conf.in motion-dist.conf)

@@ -18,5 +18,4 @@
 #undef PWCBSD
 #undef OLD_BKTR
 #cmakedefine MOTION_V4L2
-#cmakedefine MOTION_V4L2_OLD
 #cmakedefine WITHOUT_V4L
