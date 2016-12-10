@@ -509,7 +509,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
              * in both time_t and struct tm format.
              */
             cnt->prev_event = cnt->event_nr;
-            cnt->eventtime = img->timestamp;
+            cnt->eventtime = img->timestamp_tv.tv_sec;
             localtime_r(&cnt->eventtime, cnt->eventtime_tm);
 
             /*
@@ -518,10 +518,10 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
              * on_motion_detected_commend so it must be done now.
              */
             mystrftime(cnt, cnt->text_event_string, sizeof(cnt->text_event_string),
-                       cnt->conf.text_event, cnt->eventtime_tm, NULL, 0);
+                       cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
-            event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tm);
+            event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tv);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion detected - starting event %d",
                        cnt->event_nr);
@@ -533,7 +533,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
         }
 
         /* EVENT_MOTION triggers event_beep and on_motion_detected_command */
-        event(cnt, EVENT_MOTION, NULL, NULL, NULL, &img->timestamp_tm);
+        event(cnt, EVENT_MOTION, NULL, NULL, NULL, &img->timestamp_tv);
     }
 
     /* Limit framerate */
@@ -545,14 +545,14 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
          * We also disable this in setup_mode.
          */
         if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
-            event(cnt, EVENT_STREAM, img->image, NULL, NULL, &img->timestamp_tm);
+            event(cnt, EVENT_STREAM, img->image, NULL, NULL, &img->timestamp_tv);
 
         /*
          * Save motion jpeg, if configured
          * Output the image_out (motion) picture.
          */
         if (conf->motion_img)
-            event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tm);
+            event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tv);
     }
 
     /* if track enabled and auto track on */
@@ -608,7 +608,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                     t = "Other";
 
                 mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q",
-                           &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm, NULL, 0);
+                           &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv, NULL, 0);
                 draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 20,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
                 draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30,
@@ -618,7 +618,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
             /* Output the picture to jpegs and ffmpeg */
             event(cnt, EVENT_IMAGE_DETECTED,
                   cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL,
-                  &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
+                  &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
             /*
              * Check if we must add any "filler" frames into movie to keep up fps
@@ -652,7 +652,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                         /* Add a filler frame into encoder */
                         event(cnt, EVENT_FFMPEG_PUT,
                               cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL,
-                              &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tm);
+                              &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
                         cnt->movie_last_shot++;
                     }
@@ -1219,7 +1219,7 @@ static void mlp_areadetect(struct context *cnt){
                     cnt->current_image->location.x < cnt->area_maxx[z] &&
                     cnt->current_image->location.y > cnt->area_miny[z] &&
                     cnt->current_image->location.y < cnt->area_maxy[z]) {
-                    event(cnt, EVENT_AREA_DETECTED, NULL, NULL, NULL, cnt->currenttime_tm);
+                    event(cnt, EVENT_AREA_DETECTED, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                     cnt->areadetect_eventnbr = cnt->event_nr; /* Fire script only once per event */
                     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Motion in area %d detected.", z + 1);
                     break;
@@ -1355,8 +1355,7 @@ static void mlp_resetimages(struct context *cnt){
     } else if (cnt->current_image && old_image) {
         /* not processing this frame: save some important values for next image */
         cnt->current_image->diffs = old_image->diffs;
-        cnt->current_image->timestamp = old_image->timestamp;
-        cnt->current_image->timestamp_tm = old_image->timestamp_tm;
+        cnt->current_image->timestamp_tv = old_image->timestamp_tv;
         cnt->current_image->shot = old_image->shot;
         cnt->current_image->cent_dist = old_image->cent_dist;
         cnt->current_image->flags = old_image->flags & (~IMAGE_SAVED);
@@ -1365,8 +1364,7 @@ static void mlp_resetimages(struct context *cnt){
     }
 
     /* Store time with pre_captured image */
-    cnt->current_image->timestamp = cnt->currenttime;
-    localtime_r(&cnt->current_image->timestamp, &cnt->current_image->timestamp_tm);
+    gettimeofday(&cnt->current_image->timestamp_tv, NULL);
 
     /* Store shot number with pre_captured image */
     cnt->current_image->shot = cnt->shots;
@@ -1411,7 +1409,6 @@ static int mlp_capture(struct context *cnt){
 
     const char *tmpin;
     char tmpout[80];
-    struct tm tmptime;
     int vid_return_code = 0;        /* Return code used when calling vid_next */
     struct timeval tv1;
 
@@ -1525,9 +1522,10 @@ static int mlp_capture(struct context *cnt){
             else
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
 
-            localtime_r(&cnt->connectionlosttime, &tmptime);
+            tv1.tv_sec=cnt->connectionlosttime;
+            tv1.tv_usec = 0;
             memset(cnt->current_image->image, 0x80, cnt->imgs.size);
-            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tmptime, NULL, 0);
+            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
             draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
                       tmpout, cnt->conf.text_double);
 
@@ -1535,8 +1533,7 @@ static int mlp_capture(struct context *cnt){
             if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal lost - Adding grey image");
                 // Event for lost video signal can be called from here
-                event(cnt, EVENT_CAMERA_LOST, NULL, NULL,
-                      NULL, cnt->currenttime_tm);
+                event(cnt, EVENT_CAMERA_LOST, NULL, NULL, NULL, &tv1);
             }
 
             /*
@@ -1799,7 +1796,7 @@ static void mlp_overlay(struct context *cnt){
     /* Add text in lower left corner of the pictures */
     if (cnt->conf.text_left) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
-                   &cnt->current_image->timestamp_tm, NULL, 0);
+                   &cnt->current_image->timestamp_tv, NULL, 0);
         draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
@@ -1807,7 +1804,7 @@ static void mlp_overlay(struct context *cnt){
     /* Add text in lower right corner of the pictures */
     if (cnt->conf.text_right) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
-                   &cnt->current_image->timestamp_tm, NULL, 0);
+                   &cnt->current_image->timestamp_tv, NULL, 0);
         draw_text(cnt->current_image->image, cnt->imgs.width - 10,
                   cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
@@ -1913,7 +1910,7 @@ static void mlp_actions(struct context *cnt){
 
     /* Update last frame saved time, so we can end event after gap time */
     if (cnt->current_image->flags & IMAGE_SAVE)
-        cnt->lasttime = cnt->current_image->timestamp;
+        cnt->lasttime = cnt->current_image->timestamp_tv.tv_sec;
 
 
     mlp_areadetect(cnt);
@@ -1943,7 +1940,7 @@ static void mlp_actions(struct context *cnt){
                 cnt->imgs.preview_image.diffs = 0;
             }
 
-            event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, cnt->currenttime_tm);
+            event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
             /*
              * If tracking is enabled we center our camera so it does not
@@ -2030,23 +2027,26 @@ static void mlp_snapshot(struct context *cnt){
     if ((cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
          cnt->time_current_frame % cnt->conf.snapshot_interval <= cnt->time_last_frame % cnt->conf.snapshot_interval) ||
          cnt->snapshot) {
-        event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tm);
+        event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tv);
         cnt->snapshot = 0;
     }
 
 }
 
 static void mlp_timelapse(struct context *cnt){
+    struct tm timestamp_tm;
+
     /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
 
     if (cnt->conf.timelapse) {
+        localtime_r(&cnt->current_image->timestamp_tv.tv_sec, &timestamp_tm);
 
         /*
          * Check to see if we should start a new timelapse file. We start one when
          * we are on the first shot, and and the seconds are zero. We must use the seconds
          * to prevent the timelapse file from getting reset multiple times during the minute.
          */
-        if (cnt->current_image->timestamp_tm.tm_min == 0 &&
+        if (timestamp_tm.tm_min == 0 &&
             (cnt->time_current_frame % 60 < cnt->time_last_frame % 60) &&
             cnt->shots == 0) {
 
@@ -2055,31 +2055,28 @@ static void mlp_timelapse(struct context *cnt){
 
             /* If we are daily, raise timelapseend event at midnight */
             } else if (strcasecmp(cnt->conf.timelapse_mode, "daily") == 0) {
-                if (cnt->current_image->timestamp_tm.tm_hour == 0)
-                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
+                if (timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
             /* handle the hourly case */
             } else if (strcasecmp(cnt->conf.timelapse_mode, "hourly") == 0) {
-                event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tm);
+                event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
 
             /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
             } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-sunday") == 0) {
-                if (cnt->current_image->timestamp_tm.tm_wday == 0 &&
-                    cnt->current_image->timestamp_tm.tm_hour == 0)
-                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
-                          &cnt->current_image->timestamp_tm);
+                if (timestamp_tm.tm_wday == 0 &&
+                    timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
             /* If we are weekly-monday, raise timelapseend event at midnight on monday */
             } else if (strcasecmp(cnt->conf.timelapse_mode, "weekly-monday") == 0) {
-                if (cnt->current_image->timestamp_tm.tm_wday == 1 &&
-                    cnt->current_image->timestamp_tm.tm_hour == 0)
-                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
-                          &cnt->current_image->timestamp_tm);
+                if (timestamp_tm.tm_wday == 1 &&
+                    timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
             /* If we are monthly, raise timelapseend event at midnight on first day of month */
             } else if (strcasecmp(cnt->conf.timelapse_mode, "monthly") == 0) {
-                if (cnt->current_image->timestamp_tm.tm_mday == 1 &&
-                    cnt->current_image->timestamp_tm.tm_hour == 0)
-                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL,
-                          &cnt->current_image->timestamp_tm);
+                if (timestamp_tm.tm_mday == 1 &&
+                    timestamp_tm.tm_hour == 0)
+                    event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
             /* If invalid we report in syslog once and continue in manual mode */
             } else {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Invalid timelapse_mode argument '%s'",
@@ -2096,14 +2093,14 @@ static void mlp_timelapse(struct context *cnt){
         if (cnt->shots == 0 && cnt->time_current_frame % cnt->conf.timelapse <=
             cnt->time_last_frame % cnt->conf.timelapse)
             event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL,
-                  &cnt->current_image->timestamp_tm);
+                  &cnt->current_image->timestamp_tv);
     } else if (cnt->ffmpeg_timelapse) {
     /*
      * If timelapse movie is in progress but conf.timelapse is zero then close timelapse file
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, cnt->currenttime_tm);
+        event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
     }
 
     cnt->time_last_frame = cnt->time_current_frame;
@@ -2123,18 +2120,18 @@ static void mlp_loopback(struct context *cnt){
      * sends all detected pictures to the stream except the 1st per second which is already sent.
      */
     if (cnt->conf.setup_mode) {
-        event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, cnt->currenttime_tm);
-        event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, cnt->currenttime_tm);
+        event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, &cnt->current_image->timestamp_tv);
+        event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, &cnt->current_image->timestamp_tv);
     } else {
         event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL,
-              &cnt->pipe, &cnt->current_image->timestamp_tm);
+              &cnt->pipe, &cnt->current_image->timestamp_tv);
 
         if (!cnt->conf.stream_motion || cnt->shots == 1)
             event(cnt, EVENT_STREAM, cnt->current_image->image, NULL, NULL,
-                  &cnt->current_image->timestamp_tm);
+                  &cnt->current_image->timestamp_tv);
     }
 
-    event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, cnt->currenttime_tm);
+    event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, &cnt->current_image->timestamp_tv);
 
 }
 
@@ -3144,13 +3141,16 @@ int myfclose(FILE* fh)
  * Returns: number of bytes written to the string s
  */
 size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *userformat,
-                  const struct tm *tm, const char *filename, int sqltype)
+                  const struct timeval *tv1, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";
     char tempstring[PATH_MAX] = "";
     char *format, *tempstr;
     const char *pos_userformat;
     int width;
+    struct tm timestamp_tm;
+
+    localtime_r(&tv1->tv_sec, &timestamp_tm);
 
     format = formatstring;
 
@@ -3297,6 +3297,6 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
     *format = '\0';
     format = formatstring;
 
-    return strftime(s, max, format, tm);
+    return strftime(s, max, format, &timestamp_tm);
 }
 

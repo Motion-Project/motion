@@ -222,7 +222,7 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
  */
 static void put_jpeg_exif(j_compress_ptr cinfo,
 			  const struct context *cnt,
-			  const struct tm *timestamp,
+			  const struct timeval *tv1,
 			  const struct coord *box)
 {
     /* description, datetime, and subtime are the values that are actually
@@ -230,16 +230,18 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     */
     char *description, *datetime, *subtime;
     char datetime_buf[22];
+    struct tm timestamp_tm;
 
-    if (timestamp) {
+    if (tv1->tv_sec) {
+        localtime_r(&tv1->tv_sec, &timestamp_tm);
 	/* Exif requires this exact format */
 	    snprintf(datetime_buf, 21, "%04d:%02d:%02d %02d:%02d:%02d",
-		        timestamp->tm_year + 1900,
-		        timestamp->tm_mon + 1,
-		        timestamp->tm_mday,
-		        timestamp->tm_hour,
-		        timestamp->tm_min,
-		        timestamp->tm_sec);
+		        timestamp_tm.tm_year + 1900,
+		        timestamp_tm.tm_mon + 1,
+		        timestamp_tm.tm_mday,
+		        timestamp_tm.tm_hour,
+		        timestamp_tm.tm_min,
+		        timestamp_tm.tm_sec);
 	    datetime = datetime_buf;
     } else {
 	    datetime = NULL;
@@ -253,7 +255,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 	    description = malloc(PATH_MAX);
 	    mystrftime(cnt, description, PATH_MAX-1,
 		        cnt->conf.exif_text,
-		        timestamp, NULL, 0);
+		        tv1, NULL, 0);
     } else {
 	    description = NULL;
     }
@@ -351,7 +353,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 
     if (datetime) {
         memcpy(writing.buf, exif_tzoffset_tag, 12);
-        put_sint16(writing.buf+8, timestamp->tm_gmtoff / 3600);
+        put_sint16(writing.buf+8, timestamp_tm.tm_gmtoff / 3600);
         writing.buf += 12;
     }
 
@@ -413,7 +415,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
  */
 static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 				   unsigned char *input_image, int width, int height, int quality,
-				   struct context *cnt, struct tm *tm, struct coord *box)
+				   struct context *cnt, struct timeval *tv1, struct coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -457,7 +459,7 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 
     jpeg_start_compress(&cinfo, TRUE);
 
-    put_jpeg_exif(&cinfo, cnt, tm, box);
+    put_jpeg_exif(&cinfo, cnt, tv1, box);
 
     /* If the image is not a multiple of 16, this overruns the buffers
      * we'll just pad those last bytes with zeros
@@ -557,7 +559,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
 static void put_jpeg_yuv420p_file(FILE *fp,
 				  unsigned char *image, int width, int height,
 				  int quality,
-				  struct context *cnt, struct tm *tm, struct coord *box)
+				  struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int i, j;
 
@@ -598,7 +600,7 @@ static void put_jpeg_yuv420p_file(FILE *fp,
     jpeg_stdio_dest(&cinfo, fp);        // Data written to file
     jpeg_start_compress(&cinfo, TRUE);
 
-    put_jpeg_exif(&cinfo, cnt, tm, box);
+    put_jpeg_exif(&cinfo, cnt, tv1, box);
 
     for (j = 0; j < height; j += 16) {
         for (i = 0; i < 16; i++) {
@@ -897,7 +899,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tm), &(cnt->current_image->location));
+                                       cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
     case VIDEO_PALETTE_GREY:
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
@@ -916,7 +918,7 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
     } else {
         switch (cnt->imgs.type) {
         case VIDEO_PALETTE_YUV420P:
-            put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tm), &(cnt->current_image->location));
+            put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
             break;
         case VIDEO_PALETTE_GREY:
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
@@ -1135,7 +1137,7 @@ void preview_save(struct context *cnt)
             else
                 imagepath = (char *)DEF_IMAGEPATH;
 
-            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0);
+            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0);
             snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
             put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);
