@@ -1202,7 +1202,7 @@ static void motion_cleanup(struct context *cnt)
     }
 }
 
-static void motionloop_areadetect(struct context *cnt){
+static void mlp_areadetect(struct context *cnt){
     int i, j, z = 0;
     /*
      * Simple hack to recognize motion in a specific area
@@ -1230,7 +1230,7 @@ static void motionloop_areadetect(struct context *cnt){
 
 }
 
-static void motionloop_prepare(struct context *cnt){
+static void mlp_prepare(struct context *cnt){
 
     int frame_buffer_size;
     struct timeval tv1;
@@ -1317,7 +1317,7 @@ static void motionloop_prepare(struct context *cnt){
 
 }
 
-static void motionloop_resetimages(struct context *cnt){
+static void mlp_resetimages(struct context *cnt){
 
     struct image_data *old_image;
 
@@ -1373,7 +1373,7 @@ static void motionloop_resetimages(struct context *cnt){
 
 }
 
-static int motionloop_retry(struct context *cnt){
+static int mlp_retry(struct context *cnt){
 
     /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
     /*
@@ -1407,7 +1407,7 @@ static int motionloop_retry(struct context *cnt){
     return 0;
 }
 
-static int motionloop_capture(struct context *cnt){
+static int mlp_capture(struct context *cnt){
 
     const char *tmpin;
     char tmpout[80];
@@ -1555,7 +1555,7 @@ static int motionloop_capture(struct context *cnt){
 
 }
 
-static void motionloop_detection(struct context *cnt){
+static void mlp_detection(struct context *cnt){
 
 
     /***** MOTION LOOP - MOTION DETECTION SECTION *****/
@@ -1667,7 +1667,7 @@ static void motionloop_detection(struct context *cnt){
 
 }
 
-static void motionloop_tuning(struct context *cnt){
+static void mlp_tuning(struct context *cnt){
 
     /***** MOTION LOOP - TUNING SECTION *****/
 
@@ -1737,7 +1737,7 @@ static void motionloop_tuning(struct context *cnt){
 
 }
 
-static void motionloop_overlay(struct context *cnt){
+static void mlp_overlay(struct context *cnt){
 
     char tmp[PATH_MAX];
     /***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
@@ -1815,7 +1815,7 @@ static void motionloop_overlay(struct context *cnt){
 
 }
 
-static void motionloop_actions(struct context *cnt){
+static void mlp_actions(struct context *cnt){
 
     int indx;
 
@@ -1916,7 +1916,7 @@ static void motionloop_actions(struct context *cnt){
         cnt->lasttime = cnt->current_image->timestamp;
 
 
-    motionloop_areadetect(cnt);
+    mlp_areadetect(cnt);
 
     /*
      * Is the movie too long? Then make movies
@@ -1977,7 +1977,7 @@ static void motionloop_actions(struct context *cnt){
 
 }
 
-static void motionloop_setupmode(struct context *cnt){
+static void mlp_setupmode(struct context *cnt){
 /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
     /* If CAMERA_VERBOSE enabled output some numbers to console */
@@ -2013,7 +2013,7 @@ static void motionloop_setupmode(struct context *cnt){
 
 }
 
-static void motionloop_snapshot(struct context *cnt){
+static void mlp_snapshot(struct context *cnt){
     /***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
     /*
      * Did we get triggered to make a snapshot from control http? Then shoot a snap
@@ -2036,7 +2036,7 @@ static void motionloop_snapshot(struct context *cnt){
 
 }
 
-static void motionloop_timelapse(struct context *cnt){
+static void mlp_timelapse(struct context *cnt){
     /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
 
     if (cnt->conf.timelapse) {
@@ -2111,7 +2111,7 @@ static void motionloop_timelapse(struct context *cnt){
 
 }
 
-static void motionloop_loopback(struct context *cnt){
+static void mlp_loopback(struct context *cnt){
     /*
      * Feed last image and motion image to video device pipes and the stream clients
      * In setup mode we send the special setup mode image to both stream and vloopback pipe
@@ -2138,7 +2138,7 @@ static void motionloop_loopback(struct context *cnt){
 
 }
 
-static void motionloop_parmsupdate(struct context *cnt){
+static void mlp_parmsupdate(struct context *cnt){
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
     /* Check for some config parameter changes but only every second */
@@ -2210,7 +2210,7 @@ static void motionloop_parmsupdate(struct context *cnt){
 
 }
 
-static void motionloop_frametiming(struct context *cnt){
+static void mlp_frametiming(struct context *cnt){
 
     int indx;
     struct timeval tv2;
@@ -2283,22 +2283,22 @@ static void *motion_loop(void *arg)
     if (motion_init(cnt) < 0)  goto err;
 
     while (!cnt->finish || cnt->makemovie) {
-        motionloop_prepare(cnt);
+        mlp_prepare(cnt);
         if (cnt->get_image) {
-            motionloop_resetimages(cnt);
-            if (motionloop_retry(cnt) == 1)  break;
-            if (motionloop_capture(cnt) == 1)  break;
-            motionloop_detection(cnt);
-            motionloop_tuning(cnt);
-            motionloop_overlay(cnt);
-            motionloop_actions(cnt);
-            motionloop_setupmode(cnt);
+            mlp_resetimages(cnt);
+            if (mlp_retry(cnt) == 1)  break;
+            if (mlp_capture(cnt) == 1)  break;
+            mlp_detection(cnt);
+            mlp_tuning(cnt);
+            mlp_overlay(cnt);
+            mlp_actions(cnt);
+            mlp_setupmode(cnt);
         }
-        motionloop_snapshot(cnt);
-        motionloop_timelapse(cnt);
-        motionloop_loopback(cnt);
-        motionloop_parmsupdate(cnt);
-        motionloop_frametiming(cnt);
+        mlp_snapshot(cnt);
+        mlp_timelapse(cnt);
+        mlp_loopback(cnt);
+        mlp_parmsupdate(cnt);
+        mlp_frametiming(cnt);
     }
 
 err:
