@@ -709,6 +709,54 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
     cnt->current_image = saved_current_image;
 }
 
+static void init_mask_privacy(struct context *cnt){
+
+    int indxrow;
+    int indxcol;
+    FILE *picture;
+
+    /* Load the privacy file if any */
+    if (cnt->conf.mask_privacy) {
+        if ((picture = myfopen(cnt->conf.mask_privacy, "r"))) {
+            /*
+             * NOTE: The mask is expected to have the output dimensions. I.e., the mask
+             * applies to the already rotated image, not the capture image. Thus, use
+             * width and height from imgs.
+             */
+            cnt->imgs.mask_privacy = get_pgm(picture, cnt->imgs.width, cnt->imgs.height);
+            myfclose(picture);
+        } else {
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error opening mask file %s",
+                       cnt->conf.mask_privacy);
+            /*
+             * Try to write an empty mask file to make it easier
+             * for the user to edit it
+             */
+            put_fixed_mask(cnt, cnt->conf.mask_privacy);
+        }
+
+        if (!cnt->imgs.mask_privacy) {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to read mask privacy image. Mask privacy feature disabled.");
+        } else {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Mask privacy file \"%s\" loaded.", cnt->conf.mask_privacy);
+            //swap black vs white for efficient processing
+            for (indxrow = 0; indxrow < cnt->imgs.height; indxrow++) {
+                for (indxcol = 0; indxcol < cnt->imgs.width; indxcol++) {
+                    if ( cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] == 0xff) {
+                        cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] = 0x00;
+                    } else{
+                        cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] = 0xff;
+                    }
+                }
+            }
+        }
+
+    } else {
+        cnt->imgs.mask_privacy = NULL;
+    }
+
+}
+
 /**
  * motion_init
  *
@@ -990,6 +1038,8 @@ static int motion_init(struct context *cnt)
         cnt->imgs.mask = NULL;
     }
 
+    init_mask_privacy(cnt);
+
     /* Always initialize smart_mask - someone could turn it on later... */
     memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
     memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
@@ -1153,6 +1203,9 @@ static void motion_cleanup(struct context *cnt)
     if (cnt->imgs.mask) free(cnt->imgs.mask);
     cnt->imgs.mask = NULL;
 
+    if (cnt->imgs.mask_privacy) free(cnt->imgs.mask_privacy);
+    cnt->imgs.mask_privacy = NULL;
+
     free(cnt->imgs.common_buffer);
     cnt->imgs.common_buffer = NULL;
 
@@ -1201,6 +1254,34 @@ static void motion_cleanup(struct context *cnt)
         }
 #endif /* HAVE_SQLITE3 */
     }
+}
+
+static void mlp_mask_privacy(struct context *cnt){
+
+  /*  We do a bitwise OR of the image with the mask file.
+   *  The value for black in the mask file is 0x00 so when
+   *  it is bitwised OR with image, it will leave the original
+   *  value.  For this reason, we inverted the mask in the init
+   *  function.  The file is read in as black=blockout, white=keep
+   *  this function works as black=keep, white=blockout.  This also
+   *  results with the blockout section being white on the result.
+   *  This is done strictly for processing efficiency to lower cpu
+   *  since this function is called for every single image.
+   *  If user wants blockout in black instead of white, that means more cpu......
+  */
+
+  int indxrow;
+  int indxcol;
+
+  if (cnt->imgs.mask_privacy != NULL){
+      for (indxrow = 0; indxrow < cnt->imgs.height; indxrow++) {
+          for (indxcol = 0; indxcol < cnt->imgs.width; indxcol++) {
+              cnt->current_image->image[indxcol + (indxrow*cnt->imgs.width)] |= cnt->imgs.mask_privacy[indxcol + (indxrow*cnt->imgs.width)];
+          }
+      }
+  }
+
+
 }
 
 static void mlp_areadetect(struct context *cnt){
@@ -1445,6 +1526,8 @@ static int mlp_capture(struct context *cnt){
          * which we will not alter with text and location graphics
          */
         memcpy(cnt->imgs.image_virgin, cnt->current_image->image, cnt->imgs.size);
+
+        mlp_mask_privacy(cnt);
 
         /*
          * If the camera is a netcam we let the camera decide the pace.

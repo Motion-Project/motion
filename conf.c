@@ -116,6 +116,7 @@ struct config conf_template = {
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
     .mask_file =                       NULL,
+    .mask_privacy =                    NULL,
     .smart_mask_speed =                0,
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     .sql_log_image =                   1,
@@ -616,6 +617,15 @@ config_param config_params[] = {
     "# Full path name to. (Default: not defined)",
     0,
     CONF_OFFSET(mask_file),
+    copy_string,
+    print_string
+    },
+    {
+    "mask_privacy",
+    "# PGM file to completely mask out an area of the image.\n"
+    "# Full path name to. (Default: not defined)",
+    0,
+    CONF_OFFSET(mask_privacy),
     copy_string,
     print_string
     },

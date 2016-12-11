@@ -1336,6 +1336,12 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#mask_file" >mask_file</a></td>
 	</tr>
 	<tr>
+		<td height="17" align="left"></td>
+		<td align="left"></td>
+		<td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
+	</tr>
+
+	<tr>
 		<td height="17" align="left">max_mpeg_time</td>
 		<td align="left">max_movie_time</td>
 		<td align="left"><a href="#max_movie_time" >max_movie_time</a></td>
@@ -1994,9 +2000,10 @@ Some configuration options are only used if Motion is built on a system that has
    	 <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
        <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
        <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
      </tr>
   	  <tr>
+       <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
   	    <td bgcolor="#edf4f9" ><a href="#lightswitch" >lightswitch</a> </td>
        <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
        <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
@@ -3490,6 +3497,26 @@ Mask file (converted to png format so it can be shown by your web browser)
 <p></p>
 
 
+<p></p>
+
+<h3><a name="mask_privacy"></a> mask_privacy </h3>
+<p></p>
+<ul>
+  <li> Type: String</li>
+  <li> Range / Valid values: Max 4095 characters</li>
+  <li> Default: Not defined</li>
+</ul>
+<p></p>
+The full path and filename for the privacy masking pgm file.  This file works like the mask_file as
+described above.  The difference with this parameter is that while the mask_file excludes the section from
+detecting motion, this file excludes the section of the image completely.  Excluded areas will appear as
+white on all images and movies.
+<p></p>
+mask_privacy is applied before detection so no motion will ever be detected in the excluded area.
+This parameter could however still be used with the mask_file.  e.g.  This file could exclude the
+neighbors yard and the mask_file would exclude the blowing tree from motion detection.  The resulting
+pictures/movies would show solid white in place of the neighbors yard but the tree would still be in
+the pictures/movies.
 <p></p>
 
 <h3><a name="smart_mask_speed"></a> smart_mask_speed </h3>

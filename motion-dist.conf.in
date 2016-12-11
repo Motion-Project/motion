@@ -223,6 +223,10 @@ despeckle_filter EedDl
 # Full path name to. (Default: not defined)
 ; mask_file value
 
+# PGM file to completely mask out a area of image. 
+# Full path name to. (Default: not defined)
+# mask_privacy value
+
 # Dynamically create a mask file during operation (default: 0)
 # Adjust speed of mask changes from 0 (off) to 10 (fast)
 smart_mask_speed 0
