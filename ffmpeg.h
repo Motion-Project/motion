@@ -51,7 +51,7 @@ struct ffmpeg {
 
 AVFrame *my_frame_alloc(void);
 void my_frame_free(AVFrame *frame);
-int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
+int ffmpeg_put_frame(struct ffmpeg *, AVFrame *, const struct timeval *tv1);
 void ffmpeg_cleanups(struct ffmpeg *);
 AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
                               unsigned char *, unsigned char *);
@@ -84,14 +84,16 @@ struct ffmpeg *ffmpeg_open(
     int rate,            /* framerate, fps */
     int bps,             /* bitrate; bits per second */
     int vbr,             /* variable bitrate */
-    int tlapse
+    int tlapse,
+    const struct timeval *tv1
     );
-int ffmpeg_put_image(struct ffmpeg *);
+int ffmpeg_put_image(struct ffmpeg *, const struct timeval *tv1);
 int ffmpeg_put_other_image(
     struct ffmpeg *ffmpeg,
     unsigned char *y,
     unsigned char *u,
-    unsigned char *v
+    unsigned char *v,
+    const struct timeval *tv1
     );
 void ffmpeg_close(struct ffmpeg *);
 void ffmpeg_avcodec_log(void *, int, const char *, va_list);

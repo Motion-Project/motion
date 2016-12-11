@@ -333,7 +333,8 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
  */
 struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
                            unsigned char *y, unsigned char *u, unsigned char *v,
-                           int width, int height, int rate, int bps, int vbr, int tlapse)
+                           int width, int height, int rate, int bps, int vbr, int tlapse,
+                           const struct timeval *tv1)
 {
     AVCodecContext *c;
     AVCodec *codec;
@@ -534,7 +535,10 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
                 }
             }
         }
-        gettimeofday(&ffmpeg->start_time, NULL);
+
+        ffmpeg->start_time.tv_sec = tv1->tv_sec;
+        ffmpeg->start_time.tv_usec= tv1->tv_usec;
+
 
         /* Write the stream header,  For the TIMELAPSE_APPEND
          * we write the data via standard file I/O so we close the
@@ -608,7 +612,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
  * Returns
  *      value returned by ffmpeg_put_frame call.
  */
-int ffmpeg_put_image(struct ffmpeg *ffmpeg){
+int ffmpeg_put_image(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     /* A return code of -2 is thrown by the put_frame
      * when a image is buffered.  For timelapse, we absolutely
@@ -618,9 +622,9 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg){
     int retcd;
     int cnt = 0;
 
-    retcd = ffmpeg_put_frame(ffmpeg, ffmpeg->picture);
+    retcd = ffmpeg_put_frame(ffmpeg, ffmpeg->picture, tv1);
     while ((retcd == -2) && (ffmpeg->tlapse != TIMELAPSE_NONE)) {
-        retcd = ffmpeg_put_frame(ffmpeg, ffmpeg->picture);
+        retcd = ffmpeg_put_frame(ffmpeg, ffmpeg->picture, tv1);
         cnt++;
         if (cnt > 50){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Excessive attempts to clear buffered packet");
@@ -645,7 +649,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg){
  *       0 if error allocating picture.
  */
 int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
-                            unsigned char *u, unsigned char *v){
+                            unsigned char *u, unsigned char *v, const struct timeval *tv1){
     AVFrame *picture;
     int retcd = 0;
     int cnt = 0;
@@ -659,9 +663,9 @@ int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
          * never want a frame buffered so we keep sending back the
          * the same pic until it flushes or fails in a different way
          */
-        retcd = ffmpeg_put_frame(ffmpeg, picture);
+        retcd = ffmpeg_put_frame(ffmpeg, picture, tv1);
         while ((retcd == -2) && (ffmpeg->tlapse != TIMELAPSE_NONE)) {
-            retcd = ffmpeg_put_frame(ffmpeg, picture);
+            retcd = ffmpeg_put_frame(ffmpeg, picture, tv1);
             cnt++;
             if (cnt > 50){
                 MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Excessive attempts to clear buffered packet");
@@ -686,7 +690,7 @@ int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
  *  Returns
  *      Number of bytes written or -1 if any error happens.
  */
-int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
+int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic, const struct timeval *tv1){
 /**
  * Since the logic,return values and conditions changed so
  * dramatically between versions, the encoding of the frame
@@ -697,10 +701,8 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     int got_packet_ptr;
     AVPacket pkt;
     char errstr[128];
-    struct timeval tv1;
     int64_t pts_interval;
 
-    gettimeofday(&tv1, NULL);
 
     av_init_packet(&pkt); /* Init static structure. */
     if (ffmpeg->oc->oformat->flags & AVFMT_RAWPICTURE) {
@@ -730,14 +732,24 @@ int ffmpeg_put_frame(struct ffmpeg *ffmpeg, AVFrame *pic){
     } else if (ffmpeg->tlapse == TIMELAPSE_NEW) {
         retcd = av_write_frame(ffmpeg->oc, &pkt);
     } else {
-        pts_interval = ((1000000L * (tv1.tv_sec - ffmpeg->start_time.tv_sec)) + tv1.tv_usec - ffmpeg->start_time.tv_usec) + 10000;
+        pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec) + 10000;
+
+//        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: interval:%d img_sec:%d img_usec:%d strt_sec:%d strt_usec:%d "
+//                   ,pts_interval,tv1->tv_sec,tv1->tv_usec,ffmpeg->start_time.tv_sec,ffmpeg->start_time.tv_usec);
+
+        if (pts_interval < 0){
+            /* This can occur when we have pre-capture frames.  Reset start time of video. */
+            ffmpeg->start_time.tv_sec = tv1->tv_sec ;
+            ffmpeg->start_time.tv_usec = tv1->tv_usec ;
+            pts_interval = 1;
+        }
         pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base);
         if (pkt.pts <= ffmpeg->last_pts) pkt.pts = ffmpeg->last_pts + 1;
         pkt.dts = pkt.pts;
         retcd = av_write_frame(ffmpeg->oc, &pkt);
         ffmpeg->last_pts = pkt.pts;
     }
-//        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d interval %d",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den,pts_interval);
+    //        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: pts:%d dts:%d stream:%d interval %d",pkt.pts,pkt.dts,ffmpeg->video_st->time_base.den,pts_interval);
     my_packet_unref(pkt);
 
     if (retcd != 0) {

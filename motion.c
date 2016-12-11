@@ -521,7 +521,8 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
-            event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL, &img->timestamp_tv);
+            event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL,
+                  &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Motion detected - starting event %d",
                        cnt->event_nr);

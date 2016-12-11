@@ -689,7 +689,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         if ((cnt->ffmpeg_output =
             ffmpeg_open(codec, cnt->newfilename, y, u, v,
                          cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
+                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE, currenttime_tv)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]",
                        cnt->newfilename);
             cnt->finish = 1;
@@ -717,7 +717,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         if ((cnt->ffmpeg_output_debug =
             ffmpeg_open(codec, cnt->motionfilename, y, u, v,
                         cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                        cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE)) == NULL) {
+                        cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE,currenttime_tv)) == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]",
                        cnt->motionfilename);
             cnt->finish = 1;
@@ -784,14 +784,14 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             cnt->ffmpeg_timelapse =
                 ffmpeg_open(codec_mpg,cnt->timelapsefilename, y, u, v
                         ,cnt->imgs.width, cnt->imgs.height, cnt->conf.frame_limit
-                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND);
+                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND,currenttime_tv);
         } else {
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpeg4 codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be trigger new files");
             cnt->ffmpeg_timelapse =
                 ffmpeg_open(codec_mpeg ,cnt->timelapsefilename, y, u, v
                         ,cnt->imgs.width, cnt->imgs.height, cnt->conf.frame_limit
-                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_NEW);
+                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_NEW,currenttime_tv);
         }
 
         if (cnt->ffmpeg_timelapse == NULL){
@@ -814,7 +814,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 
     v = u + (width * height) / 4;
 
-    if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v) == -1) {
+    if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v,currenttime_tv) == -1) {
         cnt->finish = 1;
         cnt->restart = 0;
     }
@@ -824,7 +824,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 static void event_ffmpeg_put(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
-            void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
+            void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
     if (cnt->ffmpeg_output) {
         int width = cnt->imgs.width;
@@ -839,14 +839,14 @@ static void event_ffmpeg_put(struct context *cnt,
 
         v = u + (width * height) / 4;
 
-        if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v) == -1) {
+        if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v, currenttime_tv) == -1) {
             cnt->finish = 1;
             cnt->restart = 0;
         }
     }
 
     if (cnt->ffmpeg_output_debug) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output_debug) == -1) {
+        if (ffmpeg_put_image(cnt->ffmpeg_output_debug, currenttime_tv) == -1) {
             cnt->finish = 1;
             cnt->restart = 0;
         }
