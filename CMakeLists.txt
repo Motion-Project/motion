@@ -25,6 +25,7 @@ option(WITH_MYSQL "enable MySQL database support" ${MYSQL_FOUND})
 option(WITH_PGSQL "enable PostgreSQL database support" ${PostgreSQL_FOUND})
 option(WITH_SQLITE3 "enable SQLite database support" ${SQLITE3_FOUND})
 option(WITH_V4L "enable Video 4 Linux (2) webcam support" ON)
+option(WITH_PWCBSD "enable PWC webcam support (BSD only)" OFF)
 
 set(HAVE_FFMPEG ${WITH_FFMPEG})
 set(HAVE_MMAL ${WITH_MMAL})
@@ -40,7 +41,7 @@ else(${WITH_V4L})
 	set(WITHOUT_V4L ON)
 endif(${WITH_V4L})
 set(MOTION_V4L2 ${HAVE_LINUX_VIDEODEV2_H})
-set(MOTION_V4L2_OLD ${HAVE_LINUX_VIDEODEV2_H})
+set(PWCBSD WITH_PWCBSD)
 
 configure_file(config.h.in "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
 configure_file(motion-dist.conf.in motion-dist.conf)
@@ -57,11 +58,12 @@ configure_file(motion.init-FreeBSD.sh.in motion.init-FreeBSD.sh)
 list(APPEND SRC_FILES
      conf.c motion.c alg.c draw.c event.c ffmpeg.c jpegutils.c logger.c md5.c
      netcam.c netcam_ftp.c netcam_jpeg.c netcam_rtsp.c netcam_wget.c
-     picture.c rotate.c stream.c track.c video2.c video.c video_common.c
-     vloopback_motion.c webhttpd.c)
-if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+     picture.c rotate.c stream.c track.c vloopback_motion.c webhttpd.c)
+if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD" AND NOT(WITH_PWCBSD))
 	list(APPEND SRC_FILES video_freebsd.c)
-endif(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+else()
+	list(APPEND SRC_FILES video2.c video.c video_common.c)
+endif()
 
 include_directories(${JPEG_INCLUDE_DIR})
 list(APPEND LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ${JPEG_LIBRARIES})
