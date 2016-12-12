@@ -1042,15 +1042,18 @@ Motion permits the use of video cards that have discreet input channels.  Since 
 the option <code>input</code> must be set to the value -1 for USB cameras.
 <p></p>
 
-<strong>Network cameras</strong> are set up via the <code><strong>netcam_url</strong></code> parameter.
+<strong>Network cameras</strong> are set up via the
+<code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong> parameter.
 The latest versions of Motion support rtsp format which many cameras now stream.
 The URL connection string to enter is specific to the camera and is
 usually provided by the manufacturer.  The connection string is the same as what would be used by other
 video playing software such as VLC.  If the camera does not stream via RTSP and instead uses a MJPEG, then Motion
-can also view that format.  See the option <code><strong>netcam_url</strong></code> for additional options.
+can also view that format.  See the option <code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong>
+for additional options.
 <p></p>
 
-<strong>Raspberry Pi cameras</strong> are set up via the <code><strong>mmalcam_name</strong></code> parameter.
+<strong>Raspberry Pi cameras</strong> are set up via the <code><strong>
+<a href="#mmalcam_name" >mmalcam_name</a> </code></strong> parameter.
 Note that name for this parameter derives from the MMAL/OpenMax software.  The most common use of this
 option is to use the Raspberry PI camera.
 <p></p>
@@ -1082,6 +1085,16 @@ option <code>frequency</code>. Otherwise set <code>frequency</code> to 0.
 Finally you need to set the TV norm. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default is 0 (PAL).
 If your camera is a PAL black and white you may get a better result with norm=3 (PAL no colour).
 <p></p>
+
+<strong>Static files</strong> can also be processed with a bit of additional setup via a v4l2loopback.
+Install the loopback software to create a /dev/videoX device and then use software such as ffmpeg to stream
+the static file into the v4l2 device.  e.g. <code><strong> ffmpeg -re -i <mymovie.mp4> -f v4l2 -pix_fmt gray /dev/video0 </strong></code>
+As illustrated in the example, this method can also be used to reformat the content to a different pixel.  This
+can be helpful as a interim process where ffmpeg supports a particular format but that format is not yet supported
+by Motion.
+<p></p>
+
+
 <p></p>
 </ul>
 
@@ -2605,6 +2618,9 @@ format that Motion uses internally.
 <li> V4L2_PIX_FMT_YUYV    : 15 'YUYV'</li>
 <li> V4L2_PIX_FMT_YUV422P : 16 '422P'</li>
 <li> V4L2_PIX_FMT_YUV420  : 17 'YU12'</li>
+<li> V4L2_PIX_FMT_Y10     : 18 'YU10'</li>
+<li> V4L2_PIX_FMT_Y12     : 19 'YU12'</li>
+<li> V4L2_PIX_FMT_GREY    : 20 'GREY'</li>
 
 </ul>
 

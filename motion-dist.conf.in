@@ -66,6 +66,7 @@ videodevice /dev/video0
 # V4L2_PIX_FMT_YUV420  : 17 'YU12'
 # V4L2_PIX_FMT_Y10     : 18 'Y10'
 # V4L2_PIX_FMT_Y12     : 19 'Y12'
+# V4L2_PIX_FMT_GREY    : 20 'GREY'
 #
 v4l2_palette 17
 

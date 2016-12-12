@@ -459,6 +459,55 @@ void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int heigh
     }
 }
 
+/**
+ * conv_greytoyuv420p
+ *
+ *
+ */
+void conv_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+    /* This is a adaptation of the rgb to yuv.
+     * For grey, we use just a single color
+    */
+
+    unsigned char *y, *u, *v;
+    unsigned char *r;
+    int i, loop;
+
+    r = cap_map;
+
+    y = map;
+    u = y + width * height;
+    v = u + (width * height) / 4;
+    memset(u, 0, width * height / 4);
+    memset(v, 0, width * height / 4);
+
+    for (loop = 0; loop < height; loop++) {
+        for (i = 0; i < width; i += 2) {
+            *y++ = (9796 **  r + 19235 ** r + 3736 **  r) >> 15;
+            *u += ((-4784 ** r - 9437 **  r + 14221 ** r) >> 17) + 32;
+            *v += ((20218 ** r - 16941 ** r - 3277 **  r) >> 17) + 32;
+            r++;
+
+            *y++ = (9796 **  r + 19235 ** r + 3736 **  r) >> 15;
+            *u += ((-4784 ** r - 9437 **  r + 14221 ** r) >> 17) + 32;
+            *v += ((20218 ** r - 16941 ** r - 3277 **  r) >> 17) + 32;
+            r ++;
+
+            u++;
+            v++;
+        }
+
+        if ((loop & 1) == 0) {
+            u -= width / 2;
+            v -= width / 2;
+        }
+    }
+
+
+}
+
+
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MIN2(x, y) ((x) < (y) ? (x) : (y))
 

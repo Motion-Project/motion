@@ -144,6 +144,10 @@
 #define V4L2_PIX_FMT_Y12     v4l2_fourcc('Y', '1', '2', ' ') /* 12  Greyscale     */
 #endif
 
+#ifndef V4L2_PIX_FMT_GREY
+#define V4L2_PIX_FMT_GREY     v4l2_fourcc('G', 'R', 'E', 'Y') /* 8 Greyscale     */
+#endif
+
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
@@ -277,7 +281,7 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
 
     if (xioctl(vid_source, VIDIOC_ENUMINPUT, &input) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to query input %d."
-                   " VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1", 
+                   " VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1",
                    input.index);
         return -1;
     }
@@ -491,7 +495,8 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
         V4L2_PIX_FMT_YUV422P,
         V4L2_PIX_FMT_YUV420, /* most efficient for motion */
         V4L2_PIX_FMT_Y10,
-        V4L2_PIX_FMT_Y12
+        V4L2_PIX_FMT_Y12,
+        V4L2_PIX_FMT_GREY
     };
 
     int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
@@ -1107,6 +1112,10 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
             y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
+        case V4L2_PIX_FMT_GREY:
+            conv_greytoyuv420p(map, the_buffer->ptr, width, height);
+            return 0;
+
         }
     }
 
