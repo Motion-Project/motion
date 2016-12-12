@@ -13,7 +13,7 @@
 #include "video_freebsd.h"
 #else
 #include "video.h"
-#endif /* BSD */
+#endif
 
 #include "conf.h"
 #include "alg.h"
@@ -2311,11 +2311,11 @@ static void become_daemon(void)
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not change directory");
 
 
-#if (defined(__FreeBSD__))
+#if (defined(BSD) && !defined(__APPLE__))
     setpgrp(0, getpid());
 #else
     setpgrp();
-#endif /* __FreeBSD__ */
+#endif
 
 
     if ((i = open("/dev/tty", O_RDWR)) >= 0) {

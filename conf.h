@@ -86,7 +86,7 @@ struct config {
     int tuner_number;
     int timelapse;
     const char *timelapse_mode;
-#if (defined(BSD) || defined(__FreeBSD_kernel__))
+#ifdef __FreeBSD__
     const char *tuner_device;
 #endif
     const char *video_device;

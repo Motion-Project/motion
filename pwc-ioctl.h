@@ -323,6 +323,6 @@ struct pwc_raw_frame {
    __u8   rawframe[0];    /* frame_size = H/4*vbandlength */
 } __attribute__ ((packed));
 
-#endif    /*  MOTION_V4L2 && (! BSD ) */
+#endif /*  MOTION_V4L2 && __linux__ */
 
 #endif
