@@ -93,7 +93,6 @@ if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
 		AC_MSG_RESULT(yes)
 	else
 		AC_MSG_RESULT(no)
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
 	fi
 #
 # Check to Exclude BKTR
@@ -350,7 +349,11 @@ WITHOUT_MMAL="no")
 
 if test "${WITHOUT_MMAL}" = "no"; then
   HAVE_MMAL=""
-  LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+  if test "${FreeBSD}" != "" ; then
+	LIBRASPBERRYPIDEVPATH="/usr/local/include/interface/mmal"
+  else
+        LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+  fi
 
   if test -d ${LIBRASPBERRYPIDEVPATH}; then
        HAVE_MMAL="yes"
@@ -362,7 +365,10 @@ if test "${WITHOUT_MMAL}" = "no"; then
            AC_SUBST(MMAL_LIBS)
            MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
            MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
-           MMAL_LIBS="-L/opt/vc/lib  -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+           AS_IF([test "${FreeBSD}" != "" ], [
+                MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
+               ])
+           MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
            AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
   ])
 fi
@@ -738,7 +744,6 @@ AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h s
 
 # Check if v4l2 is available
 SUPPORTED_V4L2=false
-SUPPORTED_V4L2_old=false
 
 if test "${V4L}" = "no"; then
 	AC_MSG_CHECKING(for V42L support)
@@ -748,7 +753,9 @@ else
 		[SUPPORTED_V4L2=true],
 		[SUPPORTED_V4L2=false],
 		[#include <sys/time.h>
-			#ifdef HAVE_LINUX_VIDEODEV_H
+			#ifdef HAVE_LINUX_VIDEODEV2_H
+			#include <linux/videodev2.h>
+			#elif HAVE_LINUX_VIDEODEV_H
 			#include <linux/videodev.h>
 			#elif HAVE_SYS_VIDEOIO_H
 			#include <sys/videoio.h>
@@ -760,20 +767,6 @@ else
 	else
 		AC_MSG_RESULT(no)
 	fi
-
-	# linux/videodev.h doesn't include videodev2.h
-	if test x$SUPPORTED_V4L2 = xfalse; then
-		AC_MSG_CHECKING(for V42L *old* support)
-		AC_MSG_RESULT(testing)
-		AC_CHECK_HEADERS(linux/videodev2.h,[SUPPORTED_V4L2_old=true],[], [#include <asm/types.h>])
-	fi
-
-
-	if test x$SUPPORTED_V4L2_old = xtrue; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2 -DMOTION_V4L2_OLD"
-		SUPPORTED_V4L2=true
-	fi
-
 fi
 
 

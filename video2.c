@@ -73,12 +73,6 @@
 
 #if !defined(WITHOUT_V4L) && defined(MOTION_V4L2)
 
-#ifdef MOTION_V4L2_OLD
-// Seems that is needed for some system
-#include <linux/time.h>
-#include <linux/videodev2.h>
-#endif
-
 #define u8 unsigned char
 #define u16 unsigned short
 #define u32 unsigned int

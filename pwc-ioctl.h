@@ -55,13 +55,7 @@
 #if defined(__linux__)
 #include <linux/types.h>
 #include <linux/version.h>
-
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 10)
-/* Compatibility for older kernel */
-typedef __u16 __le16;
 #endif
-
-#endif /* ( !BSD ) */
 
  /* Enumeration of image sizes */
 #define PSZ_SQCIF   0x00

@@ -10,12 +10,12 @@
 #ifndef _INCLUDE_VIDEO_H
 #define _INCLUDE_VIDEO_H
 
-#define _LINUX_TIME_H 1
 #include <sys/mman.h>
 
-
 #if !defined(WITHOUT_V4L)
-#if defined(HAVE_LINUX_VIDEODEV_H)
+#if defined(HAVE_LINUX_VIDEODEV2_H)
+#include <linux/videodev2.h>
+#elif defined(HAVE_LINUX_VIDEODEV_H)
 #include <linux/videodev.h>
 #elif defined(HAVE_SYS_VIDEOIO_H)
 #include <sys/videoio.h>
