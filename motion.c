@@ -1952,6 +1952,15 @@ static void mlp_actions(struct context *cnt){
         if (frame_count >= cnt->conf.minimum_motion_frames) {
 
             cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+            /*  If we were previously detecting motion, started a movie, then got
+             *  no motion then we reset the start movie time so that we do not
+             *  get a pause in the movie.
+            */
+            if ( (cnt->detecting_motion == 0) && (cnt->ffmpeg_output != NULL) ) {
+                cnt->ffmpeg_output->start_time.tv_sec=cnt->current_image->timestamp_tv.tv_sec;
+                cnt->ffmpeg_output->start_time.tv_usec=cnt->current_image->timestamp_tv.tv_usec;
+            }
+
             cnt->detecting_motion = 1;
 
             /* Setup the postcap counter */
