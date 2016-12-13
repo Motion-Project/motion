@@ -80,7 +80,7 @@ struct video_dev {
     /* v4l */
     int v4l2;
     void *v4l2_private;
-    
+
     int size_map;
     int v4l_fmt;
     unsigned char *v4l_buffers[2];
@@ -104,6 +104,7 @@ void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long in
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size);
 void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift);
+void conv_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 
 #ifndef WITHOUT_V4L
 /* video functions, video.c */
