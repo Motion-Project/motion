@@ -5,13 +5,11 @@
  *    Copyright 2000, Jeroen Vreeken
  *    This program is published under the GNU Public license
  */
-#ifdef MOTION_V4L2
-#include <linux/videodev2.h>
-#endif /* MOTION_V4L2 */
 #include <math.h>
 #include "motion.h"
 
-#if (defined(HAVE_LINUX_VIDEODEV_H) || defined(HAVE_SYS_VIDEOIO_H)) && (!defined(WITHOUT_V4L))
+#ifdef MOTION_V4L2
+#include <linux/videodev2.h>
 #include "pwc-ioctl.h"
 #endif
 
@@ -54,16 +52,14 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
                                      struct images *imgs, unsigned int manual);
 static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#ifdef MOTION_V4L2
 static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
 static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
                                     struct images *imgs, unsigned int manual);
-#ifdef MOTION_V4L2
 static unsigned int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
 static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
                                    struct images *imgs, unsigned int manual);
 #endif /* MOTION_V4L2 */
-#endif /* WITHOUT_V4L */
 
 /* Add a call to your functions here: */
 unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
@@ -83,14 +79,12 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
     } else if (cnt->track.type == TRACK_TYPE_SERVO) {
         return servo_center(cnt, xoff, yoff);
     }
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#ifdef MOTION_V4L2
     else if (cnt->track.type == TRACK_TYPE_PWC)
         return lqos_center(cnt, dev, xoff, yoff);
-#ifdef MOTION_V4L2
     else if (cnt->track.type == TRACK_TYPE_UVC)
         return uvc_center(cnt, dev, xoff, yoff);
-#endif /* MOTION_V4L2 */
-#endif /* WITHOUT_V4L */
+#endif
     else if (cnt->track.type == TRACK_TYPE_IOMOJO)
         return iomojo_center(cnt, xoff, yoff);
     else if (cnt->track.type == TRACK_TYPE_GENERIC)
@@ -114,14 +108,12 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
         return stepper_move(cnt, cent, imgs);
     else if (cnt->track.type == TRACK_TYPE_SERVO)
         return servo_move(cnt, cent, imgs, manual);
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#ifdef MOTION_V4L2
     else if (cnt->track.type == TRACK_TYPE_PWC)
         return lqos_move(cnt, dev, cent, imgs, manual);
-#ifdef MOTION_V4L2
     else if (cnt->track.type == TRACK_TYPE_UVC)
         return uvc_move(cnt, dev, cent, imgs, manual);
-#endif /* MOTION_V4L2 */
-#endif /* WITHOUT_V4L */
+#endif
     else if (cnt->track.type == TRACK_TYPE_IOMOJO)
         return iomojo_move(cnt, dev, cent, imgs);
     else if (cnt->track.type == TRACK_TYPE_GENERIC)
@@ -788,7 +780,7 @@ static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent
     Logitech QuickCam Orbit camera tracking code by folkert@vanheusden.com
 
 ******************************************************************************/
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
+#ifdef MOTION_V4L2
 static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
     int reset = 3;
@@ -907,6 +899,7 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
 
     return cnt->track.move_wait;
 }
+
 /******************************************************************************
 
     Logitech QuickCam Sphere camera tracking code by oBi
@@ -915,8 +908,6 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
     - for new API in uvcvideo
     - add Trace-steps for investigation
 ******************************************************************************/
-#ifdef MOTION_V4L2
-
 static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_angle)
 {
     /* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
@@ -1229,4 +1220,3 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
     return cnt->track.move_wait;
 }
 #endif /* MOTION_V4L2 */
-#endif /* WITHOUT_V4L */
