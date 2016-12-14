@@ -463,10 +463,8 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
      * desired name */
     {
         char newtname[16];
-#if defined(__FreeBSD__)
         char curtname[16] = "unknown";
-#else
-        char curtname[16];
+#if (!defined(BSD) || defined(__APPLE__))
         pthread_getname_np(pthread_self(), curtname, sizeof(curtname));
 #endif
         snprintf(newtname, sizeof(newtname), "av%d%s%s",

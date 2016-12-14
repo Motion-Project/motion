@@ -34,8 +34,14 @@
 #if defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
 #define bswap_32(x) OSSwapInt32(x)
-#elif defined(BSD)
+#elif defined(__FreeBSD__)
 #include <sys/endian.h>
+#define bswap_32(x) bswap32(x)
+#elif defined(__OpenBSD__)
+#include <sys/types.h>
+#define bswap_32(x) swap32(x)
+#elif defined(__NetBSD__)
+#include <sys/bswap.h>
 #define bswap_32(x) bswap32(x)
 #else
 #include <byteswap.h>

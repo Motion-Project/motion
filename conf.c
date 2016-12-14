@@ -102,7 +102,7 @@ struct config conf_template = {
     .tuner_number =                    0,
     .timelapse =                       0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
-#if (defined(__FreeBSD__))
+#ifdef __FreeBSD__
     tuner_device:                   NULL,
 #endif
     .video_device =                    VIDEO_DEVICE,
@@ -298,7 +298,7 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#if (defined(__FreeBSD__))
+#ifdef __FreeBSD__
     {
     "tunerdevice",
     "# Tuner device to be used for capturing using tuner as source (default /dev/tuner0)\n"
