@@ -35,7 +35,8 @@ CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(s
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
 VIDEO_OBJ    = @VIDEO@
-OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(VIDEO_OBJ) \
+OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
+		 vloopback_motion.o vloopback_motion2.o $(VIDEO_OBJ) \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
 			   stream.o md5.o netcam_rtsp.o ffmpeg.o \
