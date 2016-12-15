@@ -12,10 +12,6 @@
 
 #include "config.h"
 
-#if defined(__FreeBSD__) || defined(__NetBSD__)
-#define BSD
-#endif
-
 /* Includes */
 #ifdef HAVE_MYSQL
 #include <mysql.h>
@@ -58,7 +54,7 @@
 
 #ifdef __APPLE__
 #define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(name)
-#elif defined(__FreeBSD__)
+#elif defined(BSD)
 #define MOTION_PTHREAD_SETNAME(name)  pthread_set_name_np(pthread_self(), name)
 #else
 #define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(pthread_self(), name)
@@ -406,9 +402,6 @@ struct context {
     int missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
     unsigned int lost_connection;
 
-#if (defined(BSD))
-    int tuner_dev;
-#endif
     int video_dev;
     int pipe;
     int mpipe;

@@ -192,7 +192,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     errno_save = errno;
 
     char threadname[32] = "unknown";
-#if (!defined(__FreeBSD__))
+#if (!defined(BSD) || defined(__APPLE__))
     pthread_getname_np(pthread_self(), threadname, sizeof(threadname));
 #endif
 
