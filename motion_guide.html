@@ -608,7 +608,7 @@ how Motion is built.
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-pwcbsd </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Use pwcbsd based webcams ( only BSD ) </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > This option allow to build motion to support V4L/V4L2 in BSD. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > This option allow to build motion to support V4L2 in BSD. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
@@ -616,8 +616,8 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
 		</tr>
 		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l (video4linux) subsystem. Makes Motion so it only supports network cameras. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support and maybe lack some of the libraries for it. </td>
 		</tr>
 		<tr>
@@ -3026,7 +3026,7 @@ Motion automatically swaps width and height if you rotate 90 or 270 degrees, so 
 </ul>
 <p></p>
 The width in pixels of each frame. Valid range is camera dependent.
-Motion does not scale so should be set to the actual size of the v4l device.
+Motion does not scale so should be set to the actual size of the v4l2 device.
 In case of a net camera motion sets the height to the height of the first image read
 except for rtsp streams which does rescale the network camera image to the
 requested dimensions.  Note that this rescaling comes at a very high CPU cost so it

@@ -11,7 +11,7 @@
 
 /* For rotation */
 #include "rotate.h"    /* Already includes motion.h */
-#include "video.h"
+#include "video2.h"
 #include "jpegutils.h"
 
 typedef unsigned char uint8_t;
@@ -584,7 +584,7 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
     Wrappers calling the actual capture routines
  *****************************************************************************/
 
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
 /*
  * Big lock for vid_start to ensure exclusive access to viddevs while adding
  * devices during initialization of each thread.
@@ -618,7 +618,7 @@ void vid_cleanup(void)
     pthread_mutex_destroy(&vid_mutex);
 }
 
-#endif    /* WITHOUT_V4L */
+#endif    /* WITHOUT_V4L2 */
 
 /**
  * vid_close
@@ -627,10 +627,10 @@ void vid_cleanup(void)
  */
 void vid_close(struct context *cnt)
 {
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
     struct video_dev *dev = viddevs;
     struct video_dev *prev = NULL;
-#endif /* WITHOUT_V4L */
+#endif /* WITHOUT_V4L2 */
 
     /* Cleanup the netcam part */
 #ifdef HAVE_MMAL
@@ -649,9 +649,9 @@ void vid_close(struct context *cnt)
         return;
     }
 
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
 
-    /* Cleanup the v4l part */
+    /* Cleanup the v4l2 part */
     pthread_mutex_lock(&vid_mutex);
     while (dev) {
         if (dev->fd == cnt->video_dev)
@@ -672,17 +672,14 @@ void vid_close(struct context *cnt)
     if (--dev->usage_count == 0) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s",
                    dev->video_device);
-#ifdef MOTION_V4L2
         if (dev->v4l2) {
             v4l2_close(dev);
             v4l2_cleanup(dev);
         } else {
-#endif
             close(dev->fd);
             munmap(viddevs->v4l_buffers[0], dev->size_map);
-#ifdef MOTION_V4L2
         }
-#endif
+
         dev->fd = -1;
         pthread_mutex_lock(&vid_mutex);
         /* Remove from list */
@@ -708,10 +705,10 @@ void vid_close(struct context *cnt)
             pthread_mutex_unlock(&dev->mutex);
         }
     }
-#endif /* !WITHOUT_V4L */
+#endif /* !WITHOUT_V4L2 */
 }
 
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
 
 /**
  * vid_v4lx_start
@@ -855,11 +852,8 @@ static int vid_v4lx_start(struct context *cnt)
     dev->owner = -1;
     dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
     dev->fps = 0;
-#ifdef MOTION_V4L2
-    /* First lets try V4L2 and if it's not supported V4L1. */
 
     dev->v4l2 = 1;
-
     if (!v4l2_start(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
         /*
          * Restore width & height before test with v4l
@@ -867,24 +861,9 @@ static int vid_v4lx_start(struct context *cnt)
          */
         dev->width = width;
         dev->height = height;
-#endif
-
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
-        if (!v4l_start(dev, width, height, input, norm, frequency, tuner_number)) {
-            close(dev->fd);
-            pthread_mutexattr_destroy(&dev->attr);
-            pthread_mutex_destroy(&dev->mutex);
-            free(dev);
-
-            pthread_mutex_unlock(&vid_mutex);
-            return -1;
-        }
-#endif
-
-#ifdef MOTION_V4L2
         dev->v4l2 = 0;
     }
-#endif
+
     if (dev->v4l2 == 0) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using V4L1");
     } else {
@@ -921,7 +900,7 @@ static int vid_v4lx_start(struct context *cnt)
 
     return fd;
 }
-#endif /* !WITHOUT_V4L */
+#endif /* !WITHOUT_V4L2 */
 
 /**
  * vid_start
@@ -967,13 +946,13 @@ int vid_start(struct context *cnt)
             cnt->netcam = NULL;
         }
     }
-#ifdef WITHOUT_V4L
+#ifdef WITHOUT_V4L2
     else
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url");
 #else
     else
         dev = vid_v4lx_start(cnt);
-#endif    /*WITHOUT_V4L */
+#endif    /*WITHOUT_V4L2 */
 
     return dev;
 }
@@ -1018,7 +997,7 @@ int vid_next(struct context *cnt, unsigned char *map)
 
         return netcam_next(cnt, map);
     }
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
     /*
      * We start a new block so we can make declarations without breaking
      * gcc 2.95 or older.
@@ -1048,19 +1027,12 @@ int vid_next(struct context *cnt, unsigned char *map)
             dev->owner = cnt->threadnr;
             dev->frames = conf->roundrobin_frames;
         }
-#ifdef MOTION_V4L2
+
         if (dev->v4l2) {
             v4l2_set_input(cnt, dev, map, width, height, conf);
             ret = v4l2_next(cnt, dev, map, width, height);
-        } else {
-#endif
-#if defined(HAVE_LINUX_VIDEODEV_H) && (!defined(WITHOUT_V4L))
-            v4l_set_input(cnt, dev, map, width, height, conf);
-            ret = v4l_next(dev, map, width, height);
-#endif
-#ifdef MOTION_V4L2
         }
-#endif
+
         if (--dev->frames <= 0) {
             dev->owner = -1;
             dev->frames = 0;
@@ -1072,6 +1044,6 @@ int vid_next(struct context *cnt, unsigned char *map)
             rotate_map(cnt, map);
 
     }
-#endif  /*WITHOUT_V4L */
+#endif  /*WITHOUT_V4L2 */
     return ret;
 }

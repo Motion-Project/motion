@@ -8,8 +8,8 @@
  *    See also the file 'COPYING'.
  *
  */
-#include "vloopback_motion.h"
-#if defined(HAVE_LINUX_VIDEODEV2_H) && (!defined(WITHOUT_V4L)) && (!defined(BSD))
+#include "vloopback_motion2.h"
+#if (!defined(WITHOUT_V4L2)) && (!defined(BSD))
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
@@ -67,10 +67,10 @@ static int v4l2_open_vidpipe(void)
 
 	  if ((tfd = open(buffer, O_RDWR)) >= 0) {
 	    strncpy(pipepath, buffer, sizeof(pipepath));
-	    
+
 	    if (pipe_fd >= 0)
 	      close(pipe_fd);
-	    
+
 	    pipe_fd = tfd;
 	    break;
 	  }
@@ -176,7 +176,7 @@ static int v4l2_startpipe(const char *dev_name, int width, int height, int type)
     show_vcap(&vc);
 
     memset(&v, 0, sizeof(v));
-    
+
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 
     if (ioctl(dev, VIDIOC_G_FMT, &v) == -1) {
@@ -184,7 +184,7 @@ static int v4l2_startpipe(const char *dev_name, int width, int height, int type)
         return -1;
     }
     printf("Original Format******************\n");
-    show_vfmt(&v);    
+    show_vfmt(&v);
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     v.fmt.pix.width = width;
     v.fmt.pix.height = height;
@@ -195,14 +195,14 @@ static int v4l2_startpipe(const char *dev_name, int width, int height, int type)
     v.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
 
     printf("Proposed new Format**************\n");
-    show_vfmt(&v);    
+    show_vfmt(&v);
 
     if (ioctl(dev,VIDIOC_S_FMT, &v) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOC_S_FMT)");
         return -1;
     }
     printf("Final Format*********************\n");
-    show_vfmt(&v);    
+    show_vfmt(&v);
     return dev;
 }
 
@@ -232,4 +232,4 @@ int vid_putpipe (int dev, unsigned char *image, int size)
 {
     return v4l2_putpipe(dev, image, size);
 }
-#endif /* !WITHOUT_V4L && !BSD */
+#endif /* !WITHOUT_V4L2 && !BSD */

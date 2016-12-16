@@ -32,7 +32,7 @@
 #if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
-#include "video.h"
+#include "video2.h"
 #endif
 
 #define EXTENSION ".conf"

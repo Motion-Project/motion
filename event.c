@@ -12,7 +12,7 @@
 #include "picture.h"   /* already includes motion.h */
 #include "event.h"
 #if (!defined(__FreeBSD__))
-#include "video.h"
+#include "video2.h"
 #endif
 
 /* Various functions (most doing the actual action) */
@@ -306,7 +306,7 @@ static void event_stream_put(struct context *cnt,
 }
 
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
+#if !defined(WITHOUT_V4L2) && !defined(__FreeBSD__)
 static void event_vid_putpipe(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
@@ -317,7 +317,7 @@ static void event_vid_putpipe(struct context *cnt,
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Failed to put image into video pipe");
     }
 }
-#endif /* !WITHOUT_V4L && !__FreeBSD__  */
+#endif /* !WITHOUT_V4L2 && !__FreeBSD__  */
 
 const char *imageext(struct context *cnt)
 {
@@ -953,7 +953,7 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
-#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
+#if !defined(WITHOUT_V4L2) && !defined(__FreeBSD__)
     {
     EVENT_IMAGE,
     event_vid_putpipe
@@ -962,7 +962,7 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGEM,
     event_vid_putpipe
     },
-#endif /* !WITHOUT_V4L && !__FreeBSD__  */
+#endif /* !WITHOUT_V4L2 && !__FreeBSD__  */
     {
     EVENT_STREAM,
     event_stream_put

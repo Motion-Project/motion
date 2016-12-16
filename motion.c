@@ -12,7 +12,7 @@
 #if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
-#include "video.h"
+#include "video2.h"
 #endif
 
 #include "conf.h"
@@ -894,13 +894,13 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#if defined(HAVE_LINUX_VIDEODEV_H) && !defined(WITHOUT_V4L) && !defined(__FreeBSD__)
+#if !defined(WITHOUT_V4L2) && !defined(__FreeBSD__)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
+        cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, V4L2_PIX_FMT_YUV420);
 
         if (cnt->pipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for normal pictures");
@@ -912,14 +912,14 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for motion pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, cnt->imgs.type);
+        cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, V4L2_PIX_FMT_YUV420);
 
         if (cnt->mpipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for motion pictures");
             return -1;
         }
     }
-#endif /* !WITHOUT_V4L && !__FreeBSD__ */
+#endif /* !WITHOUT_V4L2 && !__FreeBSD__ */
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
@@ -2579,7 +2579,7 @@ static void motion_shutdown(void)
 
     free(cnt_list);
     cnt_list = NULL;
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
     vid_cleanup();
 #endif
 }
@@ -2670,7 +2670,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         }
     }
 
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
     vid_init();
 #endif
 }
@@ -2857,7 +2857,7 @@ int main (int argc, char **argv)
             MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Restarting motion.");
             motion_shutdown();
             restart = 0; /* only one reset for now */
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
             SLEEP(5, 0); // maybe some cameras needs less time
 #endif
             motion_startup(0, argc, argv); /* 0 = skip daemon init */

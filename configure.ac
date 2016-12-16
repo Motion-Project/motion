@@ -40,7 +40,7 @@ if test "${Darwin}" = ""; then
 	FreeBSD=`uname -a | grep "FreeBSD"`
 	if test "${FreeBSD}" = ""; then
 		AC_MSG_RESULT(no)
-		VIDEO="video.o video2.o video_common.o"
+		VIDEO="video2.o video_common.o"
 	else
 		AC_MSG_RESULT(yes)
 		if test "${LINUXTHREADS}" = "no"; then
@@ -52,7 +52,7 @@ if test "${Darwin}" = ""; then
 		fi
 
 		if test "${PWCBSD}" != "no"; then
-			VIDEO="video.o video2.o video_common.o"
+			VIDEO="video2.o video_common.o"
 			TEMP_CFLAGS="${CFLAGS} -I/usr/local/include -DPWCBSD"
 		else
 			VIDEO="video_freebsd.o"
@@ -71,7 +71,7 @@ else
 	VIDEO="video_freebsd.o"
 	FINK_LIB="-L/sw/lib"
 	Darwin="yes"
-	V4L="no"
+	V4L2="no"
 	AC_MSG_RESULT($Darwin)
 fi
 
@@ -94,42 +94,42 @@ if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
 	else
 		AC_MSG_RESULT(no)
 	fi
-#
-# Check to Exclude BKTR
-#
-BKTR="yes"
-AC_ARG_WITH(bktr,
-[  --without-bktr          Exclude to use bktr subsystem , that usually useful
-                          for devices as network cameras ( ONLY used in *BSD).
-                          ]
-                          ,
-BKTR="$withval"
-)
-
-	if test "${BKTR}" = "no"; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
-	fi
-
+    #
+    # Check to Exclude BKTR
+    #
+    BKTR="yes"
+    AC_ARG_WITH(bktr,
+      [  --without-bktr          Exclude to use bktr subsystem , that usually useful
+                              for devices as network cameras ( ONLY used in *BSD).
+                          ]  ,
+      BKTR="$withval")
+    if test "${BKTR}" = "no"; then
+        TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+    fi
 else
+    #
+    # Check to Exclude V4L2
+    #
+    V4L2="yes"
+    AC_ARG_WITH(v4l2,
+    [  --without-v4l2         Exclude using v4l2 (video4linux2) subsystem.
+                              Makes Motion so it only supports network cameras.
+                              ],
+    V4L2="$withval" )
 
-#
-# Check to Exclude V4L
-#
-V4L="yes"
-AC_ARG_WITH(v4l,
-[  --without-v4l           Exclude using v4l (video4linux) subsystem.
-                          Makes Motion so it only supports network cameras.
-                          ],
-V4L="$withval"
-)
-
+    if test "${V4L2}" = "no"; then
+        TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+    else
+        AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
+        AC_MSG_CHECKING(for V4L2 support)
+        if test "${V4L2}" = "no"; then
+                AC_MSG_RESULT(no)
+                TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+        else
+                AC_MSG_RESULT(yes)
+        fi
+    fi
 fi
-
-
-if test "${V4L}" = "no"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
-fi
-
 
 if test "${FreeBSD}" != "" && test "${LINUXTHREADS}" != "no" ; then
 
@@ -740,34 +740,7 @@ fi
 
 #Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h sys/videoio.h)
-
-# Check if v4l2 is available
-SUPPORTED_V4L2=false
-
-if test "${V4L}" = "no"; then
-	AC_MSG_CHECKING(for V42L support)
-	AC_MSG_RESULT(skipping)
-else
-	AC_CHECK_TYPE([struct v4l2_buffer],
-		[SUPPORTED_V4L2=true],
-		[SUPPORTED_V4L2=false],
-		[#include <sys/time.h>
-			#ifdef HAVE_LINUX_VIDEODEV2_H
-			#include <linux/videodev2.h>
-			#elif HAVE_LINUX_VIDEODEV_H
-			#include <linux/videodev.h>
-			#elif HAVE_SYS_VIDEOIO_H
-			#include <sys/videoio.h>
-			#endif])
-	AC_MSG_CHECKING(for V42L support)
-	if test x$SUPPORTED_V4L2 = xtrue; then
-		AC_MSG_RESULT(yes)
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2"
-	else
-		AC_MSG_RESULT(no)
-	fi
-fi
+AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev2.h sys/param.h sys/types.h)
 
 
 OPTIMIZECPU="yes"
@@ -1121,13 +1094,7 @@ if test "${FreeBSD}" != ""; then
 	fi
 
 else
-	if test "${V4L}" = "yes"; then
-        echo "V4L support:         Yes"
-	else
-        echo "V4L support:         No"
-	fi
-
-	if test x$SUPPORTED_V4L2 = xtrue; then
+	if test "$V4L2" = "yes"; then
         echo "V4L2 support:        Yes"
 	else
         echo "V4L2 support:        No"
