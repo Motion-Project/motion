@@ -1,5 +1,9 @@
 project(motion C)
 cmake_minimum_required(VERSION 2.8)
+
+unset(SQLITE3_FOUND CACHE )
+unset(FFMPEG_FOUND CACHE )
+
 include(CheckIncludeFiles)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall")
@@ -32,12 +36,30 @@ set(HAVE_MMAL ${WITH_MMAL})
 set(HAVE_MYSQL ${WITH_MYSQL})
 set(HAVE_PGSQL ${WITH_PGSQL})
 set(HAVE_SQLITE3 ${WITH_SQLITE3})
-check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
-if(${WITH_V4L2})
-	set(WITHOUT_V4L2 HAVE_LINUX_VIDEODEV2_H)
-else(${WITH_V4L2})
-	set(WITHOUT_V4L2 OFF)
-endif(${WITH_V4L2})
+
+set(WITHOUT_V4L2 ON)
+  if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD" AND NOT(WITH_PWCBSD))
+    check_include_files("dev/bktr/ioctl_bt848.h" HAVE_FREEBSD_BT848)
+    check_include_files("dev/bktr/ioctl_meteor.h" HAVE_FREEBSD_METEOR)
+    if(HAVE_FREEBSD_BT848 AND HAVE_FREEBSD_METEOR AND WITH_V4L2 )
+      set(WITHOUT_V4L2 OFF )
+    endif(HAVE_FREEBSD_BT848 AND HAVE_FREEBSD_METEOR AND WITH_V4L2 )
+  endif(CMAKE_SYSTEM_NAME MATCHES "FreeBSD" AND NOT(WITH_PWCBSD))
+
+  if(CMAKE_SYSTEM_NAME MATCHES "NetBSD" OR CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
+    check_include_files("dev/ic/bt8xx.h" HAVE_NETOPEN_BT8XX)
+    if(HAVE_NETOPEN_BT8XX AND WITH_V4L2)
+      set(WITHOUT_V4L2 OFF )
+    endif(HAVE_NETOPEN_BT8XX AND WITH_V4L2)
+  endif(CMAKE_SYSTEM_NAME MATCHES "NetBSD" OR CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
+
+  if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
+    if(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2)
+      set(WITHOUT_V4L2 OFF )
+    endif(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2)
+  endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+
 set(PWCBSD WITH_PWCBSD)
 
 configure_file(config.h.in "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
@@ -92,6 +114,23 @@ if(WITH_MMAL)
 	list(APPEND SRC_FILES mmalcam.c)
 endif(WITH_MMAL)
 
+message("-- Configuration: " )
+message("--   Package Name:           " ${PACKAGE_NAME})
+message("--   Package Version:        " ${PACKAGE_VERSION})
+message("--   Build System:           " ${CMAKE_SYSTEM_NAME})
+message("--   Config Dir:             " ${sysconfdir})
+message("--   Bin Dir:                " ${BIN_PATH})
+message("--   JPEG Include Dir:       " ${JPEG_INCLUDE_DIR})
+message("--   WITH_V4L2:              " ${WITH_V4L2})
+message("--   Without V4L2:           " ${WITHOUT_V4L2})
+message("--   With PWC BSD:           " ${WITH_PWCBSD})
+message("--   MYSQL:   " ${WITH_MYSQL} " Include Dir: " ${MYSQL_INCLUDE_DIRS} )
+message("--   SQLITE3: " ${WITH_SQLITE3} " Include Dir: " ${SQLITE3_INCLUDE_DIRS} )
+message("--   PGSQL:   " ${WITH_PGSQL} " Include Dir: " ${PostgreSQL_INCLUDE_DIRS} )
+message("--   FFMPEG:  " ${WITH_FFMPEG} " Include Dir: " ${FFMPEG_INCLUDE_DIRS} )
+message("--   MMAL:    " ${WITH_MMAL} )
+message("--   CFLAGS:  " ${CMAKE_C_FLAGS} )
+
 add_executable(motion ${SRC_FILES})
 target_link_libraries(motion ${LINK_LIBRARIES})
 
@@ -102,3 +141,4 @@ install(FILES motion.service motion.spec motion.init-Debian motion.init-FreeBSD.
         DESTINATION "lib/${PROJECT_NAME}/examples" COMPONENT examples)
 install(FILES CHANGELOG COPYING CREDITS README.md motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
         DESTINATION "lib/${PROJECT_NAME}/doc" COMPONENT doc)
+
