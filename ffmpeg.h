@@ -66,6 +66,7 @@ void my_packet_unref(AVPacket pkt);
 struct ffmpeg {
     void *udata;
     int dummy;
+    struct timeval start_time;
 };
 
 #endif /* HAVE_FFMPEG */

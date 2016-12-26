@@ -1036,7 +1036,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-#ifdef HAVE_FFMPEG
     {
     "movie_filename",
     "# File path for motion triggered ffmpeg films (movies) relative to target_dir\n"
@@ -1062,7 +1061,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-#endif /* HAVE_FFMPEG */
     {
     "ipv6_enabled",
     "\n############################################################\n"
