@@ -74,7 +74,7 @@ static int v4l2_open_vidpipe(void)
     return pipe_fd;
 }
 
-typedef struct capent {char *cap; int code;} capentT;
+typedef struct capent {const char *cap; int code;} capentT;
     capentT cap_list[] ={
         {"V4L2_CAP_VIDEO_CAPTURE"        ,0x00000001 },
         {"V4L2_CAP_VIDEO_CAPTURE_MPLANE" ,0x00001000 },
@@ -105,7 +105,7 @@ typedef struct capent {char *cap; int code;} capentT;
         {"Last",0}
 };
 
-void show_vcap(struct v4l2_capability *cap) {
+static void show_vcap(struct v4l2_capability *cap) {
     unsigned int vers = cap->version;
     unsigned int c    = cap->capabilities;
     int i;
@@ -122,7 +122,7 @@ void show_vcap(struct v4l2_capability *cap) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: ------------------------");
 }
 
-void show_vfmt(struct v4l2_format *v) {
+static void show_vfmt(struct v4l2_format *v) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: type: type:           %d",v->type);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.width:        %d",v->fmt.pix.width);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.height:       %d",v->fmt.pix.height);

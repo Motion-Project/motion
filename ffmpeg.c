@@ -836,6 +836,7 @@ struct ffmpeg *ffmpeg_open(const char *ffmpeg_video_codec, char *filename,
     vbr = vbr;
     tlapse = tlapse;
     ffmpeg->dummy = 0;
+    tv1 = tv1;
     return ffmpeg;
 
 #endif /* HAVE_FFMPEG */
@@ -923,6 +924,7 @@ int ffmpeg_put_other_image(struct ffmpeg *ffmpeg, unsigned char *y,
     y = y;
     u = u;
     v = v;
+    tv1 = tv1;
     return 0;
 
 #endif // HAVE_FFMPEG
@@ -964,6 +966,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     return retcd;
 #else
     ffmpeg = ffmpeg;
+    tv1 = tv1;
     return 0;
 #endif // HAVE_FFMPEG
 }
