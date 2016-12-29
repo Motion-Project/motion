@@ -608,7 +608,7 @@ how Motion is built.
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-pwcbsd </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Use pwcbsd based webcams ( only BSD ) </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > This option allow to build motion to support V4L/V4L2 in BSD. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > This option allow to build motion to support V4L2 in BSD. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
@@ -616,8 +616,8 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
 		</tr>
 		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l (video4linux) subsystem. Makes Motion so it only supports network cameras. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support and maybe lack some of the libraries for it. </td>
 		</tr>
 		<tr>
@@ -1042,15 +1042,18 @@ Motion permits the use of video cards that have discreet input channels.  Since 
 the option <code>input</code> must be set to the value -1 for USB cameras.
 <p></p>
 
-<strong>Network cameras</strong> are set up via the <code><strong>netcam_url</strong></code> parameter.
+<strong>Network cameras</strong> are set up via the
+<code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong> parameter.
 The latest versions of Motion support rtsp format which many cameras now stream.
 The URL connection string to enter is specific to the camera and is
 usually provided by the manufacturer.  The connection string is the same as what would be used by other
 video playing software such as VLC.  If the camera does not stream via RTSP and instead uses a MJPEG, then Motion
-can also view that format.  See the option <code><strong>netcam_url</strong></code> for additional options.
+can also view that format.  See the option <code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong>
+for additional options.
 <p></p>
 
-<strong>Raspberry Pi cameras</strong> are set up via the <code><strong>mmalcam_name</strong></code> parameter.
+<strong>Raspberry Pi cameras</strong> are set up via the <code><strong>
+<a href="#mmalcam_name" >mmalcam_name</a> </code></strong> parameter.
 Note that name for this parameter derives from the MMAL/OpenMax software.  The most common use of this
 option is to use the Raspberry PI camera.
 <p></p>
@@ -1082,6 +1085,16 @@ option <code>frequency</code>. Otherwise set <code>frequency</code> to 0.
 Finally you need to set the TV norm. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default is 0 (PAL).
 If your camera is a PAL black and white you may get a better result with norm=3 (PAL no colour).
 <p></p>
+
+<strong>Static files</strong> can also be processed with a bit of additional setup via a v4l2loopback.
+Install the loopback software to create a /dev/videoX device and then use software such as ffmpeg to stream
+the static file into the v4l2 device.  e.g. <code><strong> ffmpeg -re -i <mymovie.mp4> -f v4l2 -pix_fmt gray /dev/video0 </strong></code>
+As illustrated in the example, this method can also be used to reformat the content to a different pixel.  This
+can be helpful as a interim process where ffmpeg supports a particular format but that format is not yet supported
+by Motion.
+<p></p>
+
+
 <p></p>
 </ul>
 
@@ -1335,6 +1348,12 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left">mask_file</td>
 		<td align="left"><a href="#mask_file" >mask_file</a></td>
 	</tr>
+	<tr>
+		<td height="17" align="left"></td>
+		<td align="left"></td>
+		<td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
+	</tr>
+
 	<tr>
 		<td height="17" align="left">max_mpeg_time</td>
 		<td align="left">max_movie_time</td>
@@ -1994,9 +2013,10 @@ Some configuration options are only used if Motion is built on a system that has
    	 <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
        <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
        <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
      </tr>
   	  <tr>
+       <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
   	    <td bgcolor="#edf4f9" ><a href="#lightswitch" >lightswitch</a> </td>
        <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
        <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
@@ -2598,6 +2618,9 @@ format that Motion uses internally.
 <li> V4L2_PIX_FMT_YUYV    : 15 'YUYV'</li>
 <li> V4L2_PIX_FMT_YUV422P : 16 '422P'</li>
 <li> V4L2_PIX_FMT_YUV420  : 17 'YU12'</li>
+<li> V4L2_PIX_FMT_Y10     : 18 'YU10'</li>
+<li> V4L2_PIX_FMT_Y12     : 19 'YU12'</li>
+<li> V4L2_PIX_FMT_GREY    : 20 'GREY'</li>
 
 </ul>
 
@@ -3003,7 +3026,7 @@ Motion automatically swaps width and height if you rotate 90 or 270 degrees, so 
 </ul>
 <p></p>
 The width in pixels of each frame. Valid range is camera dependent.
-Motion does not scale so should be set to the actual size of the v4l device.
+Motion does not scale so should be set to the actual size of the v4l2 device.
 In case of a net camera motion sets the height to the height of the first image read
 except for rtsp streams which does rescale the network camera image to the
 requested dimensions.  Note that this rescaling comes at a very high CPU cost so it
@@ -3490,6 +3513,26 @@ Mask file (converted to png format so it can be shown by your web browser)
 <p></p>
 
 
+<p></p>
+
+<h3><a name="mask_privacy"></a> mask_privacy </h3>
+<p></p>
+<ul>
+  <li> Type: String</li>
+  <li> Range / Valid values: Max 4095 characters</li>
+  <li> Default: Not defined</li>
+</ul>
+<p></p>
+The full path and filename for the privacy masking pgm file.  This file works like the mask_file as
+described above.  The difference with this parameter is that while the mask_file excludes the section from
+detecting motion, this file excludes the section of the image completely.  Excluded areas will appear as
+white on all images and movies.
+<p></p>
+mask_privacy is applied before detection so no motion will ever be detected in the excluded area.
+This parameter could however still be used with the mask_file.  e.g.  This file could exclude the
+neighbors yard and the mask_file would exclude the blowing tree from motion detection.  The resulting
+pictures/movies would show solid white in place of the neighbors yard but the tree would still be in
+the pictures/movies.
 <p></p>
 
 <h3><a name="smart_mask_speed"></a> smart_mask_speed </h3>
@@ -4278,109 +4321,21 @@ Camstream is "fooled" to think it is looking at a real camera.
 <p></p>
 <strong>Installing</strong>
 <p></p>
-Installing the video loopback device is not difficult. At least not when you have this document available.
-<p></p>
-First you must prepare your system for more video devices. You will need two extra devices for each video
-pipe that you want.
-<p></p>
-For example if you have 4 cameras they will probably run at
-/dev/video0, /dev/video1, /dev/video2, and /dev/video3. So you will need additional 8 video devices.
-This is easy to do.
-<p></p>
-<pre>
-mknod /dev/video4 c 81 4
-mknod /dev/video5 c 81 5
-mknod /dev/video6 c 81 6
-mknod /dev/video7 c 81 7
-mknod /dev/video8 c 81 8
-mknod /dev/video9 c 81 9
-mknod /dev/video10 c 81 10
-mknod /dev/video11 c 81 11
-</pre>
-<p></p>
-Note that the video device number is the same as the last parameter given on each line.
-<p></p>
-You may need to set the ownership and permissions (chown and chmod) to be the same as the video devices
-that were already there.
-<p></p>
-Now you need to install the video loopback device.
-<p></p>
-Download the latest via the apt packages and place the file in a place of your own choice.
-<p></p>
-Untar and uncompress the file to the place you want the program installed. Editor recommends /usr/local/vloopback.
-<p></p>
-<code>cd /usr/local</code>
-<p></p>
-<code>tar -xvzf /path/to/vloopback-1.1-rc1.tar.gz</code>
-<p></p>
-You now have a directory called vloopback-1.1-rc1. You can rename it to vloopback (mv vloopback-1.1-rc1 vloopback).
-I recommend creating a symbolic link to the current version. This way you can more easily experiment with different
-versions simply by changing the link.
-<p></p>
-<code>ln -s vloopback-1.1-rc1 vloopback</code>
-<p></p>
-Now change to the new directory
-<p></p>
-<code>cd vloopback</code>
-<p></p>
-Build the code
-<p></p>
-<code>make</code>
-<p></p>
-There is a good chance that the make will not work and give you a long list of errors.
-To run make the following must be available on you machine. <ul>
-<li> The kernel source files must be installed.
-</li> <li> The source files must be available at /usr/src/linux.<br />E.g.
-the new Red Hat 7.3 does not have a link to the sources called linux. Instead there is a link
-called linux-2.4. This is easy to fix. Just create a link to the real source tree. Do not rename!
-Add a link using this command (replacing the kernel version number with the one you have on your
-machine)<br /> <code>ln -s /usr/src/linux-2.4.18-4 /usr/src/linux</code>
-</li> <li> Alternatively you can change the vloopback makefile so that the "LINUXSRC=/usr/src/linux" line is
-changed to the actual path. I recommend the link solution since this may solve other similar problems that you
-can get when installing other software.
-</li></ul>
-<p></p>
-When compiling on a newer Linux distribution you may get a warning about a header file malloc.h.
-To remove this warning simply change the header reference as suggested by the warning.
-<p></p>
-In vloopback.c you replace the line
-<p></p>
-<code>#include &lt;linux/malloc.h&gt;</code>
-<p></p>
-with the line
-<p></p>
-<code>#include &lt;linux/slab.h&gt;</code>
-<p></p>
-Install the code you built as a Kernel module. There are two options:
-pipes should be set to the number of video loopbacks that you want. Probably one for each camera.
-The dev_offset defines which video device number will be the first. If dev_offset is not defined the
-vloopback module will install itself from the first available video device. If you want the cameras to be
-assigned to the lower video device numbers you must either load vloopback after loading the video device
-modules OR use the dev_offset option when loading vloopback. Vloopback then installs itself in the sequence
-input 0, output 0, input 1, output 1, input 2, output 2 etc. Here is shown the command for our example of 4
-cameras and 4 loopback devices and the first loopback device offset to /dev/video4.
-<p></p>
-<code>/sbin/insmod /usr/local/vloopback/vloopback.o pipes=4 dev_offset=4</code>
-<p></p>
-When you run the command you may get a warning about tainting the Kernel. Just ignore this.
-You can choose to copy the vloopback.o file into a directory in the /lib/modules tree where the insmod/modprobe programs are already looking for modules. Then the command gets simpler (/sbin/insmod vloopback pipes=.....).
-<p></p>
-If you want the loopback device to load during boot, you can place the call in one of the bootup scripts such as /etc/rc.d/rc.local. Vloopback should be loaded before you start motion.
+The video loopback device can be added installed via apt in many distributions.  The package tested
+with Motion is v4l2loopback-dkms.  Once the package is installed, you just need to run
+<code><strong>sudo modprobe v4l2loopback</strong></code>.  This will add a new video device that you 
+can use for the loopback.  It is believed that there are additional options associated with the 
+v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
+project for additional details.  
 <p></p>
 To activate the vloopback device in motion set the 'video_pipe' option in the motion.conf file.
 You can also view the special motion pictures where you see the changed pixels by setting the option
 'motion_video_pipe' in motion.conf. When setting the video_pipe and/or motion_video_pipe options either
-specify the input device as e.g. /dev/video4. You can also set the parameter to '-' which means that motion
-will find the first vacant video loopback device input. If you have more than one camera you may want to
-control which loopback device each camera uses. Then you need to define the specific device name in motion.conf
-for the first camera and in each camera config file for the other cameras. If you set the video_pipe parameter
-to '-' in the motion.conf file and not setting it in the camera config files, motion automatically assign video
-devices in the same sequence as the camera config files are loaded. You can combine both video_pipe and motion_video_pipe
-but then naturally you will need twice as many pipes.
+specify the input device as e.g. /dev/video4. 
 <p></p>
 De-activating should be done with this command
 <p></p>
-<code>/sbin/modprobe -r vloopback</code>
+<code>sudo modprobe -r v4l2loopback</code>
 <p></p>
 <p></p>
 
@@ -4394,10 +4349,9 @@ De-activating should be done with this command
   <li> Default: </li>
 </ul>
 <p></p>
-if a dash '-' is given motion will use /proc/video/vloopback/vloopbacks to locate a free pipe. Default: not set
-The video4linux video loopback input device for normal images. If a particular pipe is to be used then use the
-device filename of this pipe. If a dash '-' is given motion will use /proc/video/vloopback/vloopbacks to locate
-a free pipe.
+Default: not set
+The video4linux video loopback input device for normal images. The device would be specified 
+in the format like /dev/video1
 <p></p>
 <p></p>
 
@@ -4408,9 +4362,8 @@ a free pipe.
 </li> <li> Default: Not defined
 </li></ul>
 <p></p>
-The video4linux video loopback input device for motion images.
-If a particular pipe is to be used then use the device filename of this pipe,
-if a dash '-' is given motion will use /proc/video/vloopback/vloopbacks to locate a free pipe. Default: not set
+The video4linux video loopback input device for motion images. The device would be specified 
+in the format like /dev/video1
 <p></p>
 <p></p>
 

@@ -100,6 +100,7 @@ struct config {
     char *on_event_start;
     char *on_event_end;
     const char *mask_file;
+    const char *mask_privacy;
     int smart_mask_speed;
     int sql_log_image;
     int sql_log_snapshot;

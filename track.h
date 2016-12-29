@@ -117,7 +117,7 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 
 #define SERVO_BAUDRATE        B9600
 
-#define SERVO_COMMAND_STATUS   0 
+#define SERVO_COMMAND_STATUS   0
 #define SERVO_COMMAND_LEFT_N   1
 #define SERVO_COMMAND_RIGHT_N  2
 #define SERVO_COMMAND_LEFT     3
@@ -155,7 +155,7 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 #define IOMOJO_DIRECTION_DOWN   0x04
 #define IOMOJO_DIRECTION_UP     0x08
 
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
 
 /*
  * Defines for the Logitech QuickCam Orbit/Sphere USB webcam
@@ -165,10 +165,8 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 #define LQOS_HORIZONAL_DEGREES  120
 
 /*
- * UVC 
+ * UVC
  */
-
-#ifdef MOTION_V4L2
 
 #ifndef V4L2_CID_PAN_RELATIVE
 #define V4L2_CID_PAN_RELATIVE   (V4L2_CID_PRIVATE_BASE+7)
@@ -183,9 +181,8 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 #endif
 
 #define INCPANTILT 64 // 1 degree
-#endif /* MOTION_V4L2 */
 
 
-#endif /* WITHOUT_V4L */
+#endif /* WITHOUT_V4L2 */
 
 #endif /* _INCLUDE_TRACK_H */

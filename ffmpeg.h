@@ -7,6 +7,10 @@
 
 #include "config.h"
 
+#define TIMELAPSE_NONE   0  /* No timelapse, regular processing */
+#define TIMELAPSE_APPEND 1  /* Use append version of timelapse */
+#define TIMELAPSE_NEW    2  /* Use create new file version of timelapse */
+
 #ifdef HAVE_FFMPEG
 
 #include <errno.h>
@@ -28,14 +32,7 @@
 
 #endif
 
-#endif /* HAVE_FFMPEG */
-
-#define TIMELAPSE_NONE   0  /* No timelapse, regular processing */
-#define TIMELAPSE_APPEND 1  /* Use append version of timelapse */
-#define TIMELAPSE_NEW    2  /* Use create new file version of timelapse */
-
 struct ffmpeg {
-#ifdef HAVE_FFMPEG
     AVFormatContext *oc;
     AVStream *video_st;
     AVCodecContext *c;
@@ -50,16 +47,33 @@ struct ffmpeg {
     int tlapse;
     int64_t last_pts;
     struct timeval start_time;
-#else
-    int dummy;
-#endif
 };
 
-/* Initialize FFmpeg stuff. Needs to be called before ffmpeg_open. */
-void ffmpeg_init(void);
-/** Finalise ffmpeg; call only after all threads have finished */
-void ffmpeg_finalise(void);
+AVFrame *my_frame_alloc(void);
+void my_frame_free(AVFrame *frame);
+int ffmpeg_put_frame(struct ffmpeg *, AVFrame *, const struct timeval *tv1);
+void ffmpeg_cleanups(struct ffmpeg *);
+AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
+                              unsigned char *, unsigned char *);
+int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
+int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
+int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
+void my_packet_unref(AVPacket pkt);
 
+
+#else /* No FFMPEG */
+
+struct ffmpeg {
+    void *udata;
+    int dummy;
+    struct timeval start_time;
+};
+
+#endif /* HAVE_FFMPEG */
+
+/* Now the functions that are ok for both situations */
+void ffmpeg_init(void);
+void ffmpeg_finalise(void);
 struct ffmpeg *ffmpeg_open(
     const char *ffmpeg_video_codec,
     char *filename,
@@ -71,38 +85,19 @@ struct ffmpeg *ffmpeg_open(
     int rate,            /* framerate, fps */
     int bps,             /* bitrate; bits per second */
     int vbr,             /* variable bitrate */
-    int tlapse
+    int tlapse,
+    const struct timeval *tv1
     );
-
-/* Puts the image pointed to by the picture member of struct ffmpeg. */
-int ffmpeg_put_image(struct ffmpeg *);
-
-/* Puts the image defined by u, y and v (YUV420 format). */
+int ffmpeg_put_image(struct ffmpeg *, const struct timeval *tv1);
 int ffmpeg_put_other_image(
     struct ffmpeg *ffmpeg,
     unsigned char *y,
     unsigned char *u,
-    unsigned char *v
+    unsigned char *v,
+    const struct timeval *tv1
     );
-
-/* Closes the mpeg file. */
 void ffmpeg_close(struct ffmpeg *);
-
-/* Setup an avcodec log handler. */
 void ffmpeg_avcodec_log(void *, int, const char *, va_list);
 
-#ifdef HAVE_FFMPEG
-AVFrame *my_frame_alloc(void);
-void my_frame_free(AVFrame *frame);
-int ffmpeg_put_frame(struct ffmpeg *, AVFrame *);
-void ffmpeg_cleanups(struct ffmpeg *);
-AVFrame *ffmpeg_prepare_frame(struct ffmpeg *, unsigned char *,
-                              unsigned char *, unsigned char *);
-int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
-int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
-void my_packet_unref(AVPacket pkt);
-
-#endif
 
 #endif /* _INCLUDE_FFMPEG_H_ */

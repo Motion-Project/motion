@@ -32,7 +32,7 @@
 #if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
-#include "video.h"
+#include "video2.h"
 #endif
 
 #define EXTENSION ".conf"
@@ -116,6 +116,7 @@ struct config conf_template = {
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
     .mask_file =                       NULL,
+    .mask_privacy =                    NULL,
     .smart_mask_speed =                0,
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     .sql_log_image =                   1,
@@ -292,6 +293,9 @@ config_param config_params[] = {
     "# V4L2_PIX_FMT_YUYV    : 15 'YUYV'\n"
     "# V4L2_PIX_FMT_YUV422P : 16 '422P'\n"
     "# V4L2_PIX_FMT_YUV420  : 17 'YU12'\n"
+    "# V4L2_PIX_FMT_Y10     : 18 'Y10'\n"
+    "# V4L2_PIX_FMT_Y12     : 19 'Y12'\n"
+    "# V4L2_PIX_FMT_GREY    : 20 'GREY'\n"
     "#",
     0,
     CONF_OFFSET(v4l2_palette),
@@ -620,6 +624,15 @@ config_param config_params[] = {
     print_string
     },
     {
+    "mask_privacy",
+    "# PGM file to completely mask out an area of the image.\n"
+    "# Full path name to. (Default: not defined)",
+    0,
+    CONF_OFFSET(mask_privacy),
+    copy_string,
+    print_string
+    },
+    {
     "smart_mask_speed",
     "# Dynamically create a mask file during operation (default: 0)\n"
     "# Adjust speed of mask changes from 0 (off) to 10 (fast)",
@@ -750,7 +763,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-#ifdef HAVE_FFMPEG
     {
     "ffmpeg_output_movies",
     "\n############################################################\n"
@@ -843,7 +855,6 @@ config_param config_params[] = {
     copy_bool,
     print_bool
     },
-#endif /* HAVE_FFMPEG */
     {
     "use_extpipe",
     "\n############################################################\n"
@@ -1024,7 +1035,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-#ifdef HAVE_FFMPEG
     {
     "movie_filename",
     "# File path for motion triggered ffmpeg films (movies) relative to target_dir\n"
@@ -1050,7 +1060,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-#endif /* HAVE_FFMPEG */
     {
     "ipv6_enabled",
     "\n############################################################\n"

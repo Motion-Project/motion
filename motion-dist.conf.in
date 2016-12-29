@@ -66,6 +66,7 @@ videodevice /dev/video0
 # V4L2_PIX_FMT_YUV420  : 17 'YU12'
 # V4L2_PIX_FMT_Y10     : 18 'Y10'
 # V4L2_PIX_FMT_Y12     : 19 'Y12'
+# V4L2_PIX_FMT_GREY    : 20 'GREY'
 #
 v4l2_palette 17
 
@@ -86,7 +87,7 @@ norm 0
 frequency 0
 
 # Override the power line frequency for the webcam. (normally not necessary)
-# Values: 
+# Values:
 # -1 : Do not modify device setting
 # 0  : Power line frequency Disabled
 # 1  : 50hz
@@ -223,6 +224,10 @@ despeckle_filter EedDl
 # Full path name to. (Default: not defined)
 ; mask_file value
 
+# PGM file to completely mask out a area of image.
+# Full path name to. (Default: not defined)
+# mask_privacy value
+
 # Dynamically create a mask file during operation (default: 0)
 # Adjust speed of mask changes from 0 (off) to 10 (fast)
 smart_mask_speed 0
@@ -337,7 +342,7 @@ ffmpeg_variable_bitrate 0
 # hevc - H.265 / HEVC (High Efficiency Video Coding)
 ffmpeg_video_codec mpeg4
 
-# When creating videos, should frames be duplicated in order 
+# When creating videos, should frames be duplicated in order
 # to keep up with the requested frames per second
 # (default: true)
 ffmpeg_duplicate_frames true
@@ -732,11 +737,13 @@ quiet on
 ############################################################
 
 # Output images to a video4linux loopback device
-# The value '-' means next available (default: not defined)
+# Specify the device associated with the loopback device
+# For example /dev/video1 (default: not defined)
 ; video_pipe value
 
 # Output motion images to a video4linux loopback device
-# The value '-' means next available (default: not defined)
+# Specify the device associated with the loopback device
+# For example /dev/video1 (default: not defined)
 ; motion_video_pipe value
 
 
