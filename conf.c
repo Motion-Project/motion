@@ -293,7 +293,6 @@ config_param config_params[] = {
     "# V4L2_PIX_FMT_YUYV    : 15 'YUYV'\n"
     "# V4L2_PIX_FMT_YUV422P : 16 '422P'\n"
     "# V4L2_PIX_FMT_YUV420  : 17 'YU12'\n"
-    "# V4L2_PIX_FMT_YUV420  : 17 'YU12'\n"
     "# V4L2_PIX_FMT_Y10     : 18 'Y10'\n"
     "# V4L2_PIX_FMT_Y12     : 19 'Y12'\n"
     "# V4L2_PIX_FMT_GREY    : 20 'GREY'\n"
