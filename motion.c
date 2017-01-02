@@ -1920,7 +1920,7 @@ static void mlp_actions(struct context *cnt){
     if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
         cnt->detecting_motion = 1;
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
-        if (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) {
+        if (cnt->conf.post_capture > 0) {
             /* Setup the postcap counter */
             cnt->postcap = cnt->conf.post_capture;
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: (Em) Init post capture %d",
@@ -1972,8 +1972,7 @@ static void mlp_actions(struct context *cnt){
             for (indx = 0; indx < cnt->imgs.image_ring_size; indx++)
                 cnt->imgs.image_ring[indx].flags |= IMAGE_SAVE;
 
-        } else if ((cnt->postcap) &&
-                   (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+        } else if (cnt->postcap > 0) {
            /* we have motion in this frame, but not enought frames for trigger. Check postcap */
             cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
             cnt->postcap--;
@@ -1985,8 +1984,7 @@ static void mlp_actions(struct context *cnt){
 
         /* Always call motion_detected when we have a motion image */
         motion_detected(cnt, cnt->video_dev, cnt->current_image);
-    } else if ((cnt->postcap) &&
-              (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+    } else if (cnt->postcap > 0) {
         /* No motion, doing postcap */
         cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
         cnt->postcap--;
