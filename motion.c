@@ -1518,6 +1518,7 @@ static int mlp_capture(struct context *cnt){
             /* If we previously logged starting a grey image, now log video re-start */
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Video signal re-acquired");
             // event for re-acquired video signal can be called here
+            event(cnt, EVENT_CAMERA_FOUND, NULL, NULL, NULL, NULL);
         }
         cnt->missing_frame_counter = 0;
 

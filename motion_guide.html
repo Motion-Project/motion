@@ -1440,6 +1440,11 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
 	</tr>
 	<tr>
+		<td height="17" align="left">on_camera_found</td>
+		<td align="left">on_camera_found</td>
+		<td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
+	</tr>
+	<tr>
 		<td height="17" align="left">on_event_end</td>
 		<td align="left">on_event_end</td>
 		<td align="left"><a href="#on_event_end" >on_event_end</a></td>
@@ -2051,6 +2056,7 @@ Some configuration options are only used if Motion is built on a system that has
        <td bgcolor="#edf4f9" ><a href="#on_movie_start" >on_movie_start</a> </td>
        <td bgcolor="#edf4f9" ><a href="#on_movie_end" >on_movie_end</a> </td>
        <td bgcolor="#edf4f9" ><a href="#on_camera_lost" >on_camera_lost</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
      </tr>
    </tbody>
 </table>
@@ -3838,6 +3844,24 @@ dependent upon the camera and driver and it is advised that this option be teste
 for each configuration.  It has also been observed that there are also
 situations in which the disconnection of the camera even hangs the PC in which
 case this script will not be executed.
+<p></p>
+You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
+and spaces as part of the command.  This can be any type of program or script.
+Remember to set the execution bit in the ACL and if it is a script type program such as perl or bash
+also remember the shebang line (e.g. #!/user/bin/perl) as the first line of the script.
+<p></p>
+<p></p>
+
+<h3><a name="on_camera_found"></a> on_camera_found </h3>
+<p></p>
+<ul>
+  <li> Type: String</li>
+  <li> Range / Valid values: Max 4095 characters</li>
+  <li> Default: </li>
+</ul>
+<p></p>
+The full path and file name of the command to be executed when a lost camera is found
+If motion fails to detect a lost camera, it will also fail to know it found one.
 <p></p>
 You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
 and spaces as part of the command.  This can be any type of program or script.
