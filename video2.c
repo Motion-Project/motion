@@ -71,7 +71,7 @@
 #include "motion.h"
 #include "video2.h"
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
 
 #define u8 unsigned char
 #define u16 unsigned short
@@ -1153,4 +1153,4 @@ void v4l2_cleanup(struct video_dev *viddev)
     free(vid_source);
     viddev->v4l2_private = NULL;
 }
-#endif /* !WITHOUT_V4L2 */
+#endif /* HAVE_V4L2 */

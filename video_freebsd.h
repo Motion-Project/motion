@@ -11,7 +11,7 @@
 #ifndef _INCLUDE_VIDEO_FREEBSD_H
 #define _INCLUDE_VIDEO_FREEBSD_H
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_BKTR
 
 #if defined(__NetBSD__) || defined(__OpenBSD__)
 #include <dev/ic/bt8xx.h>
@@ -20,7 +20,7 @@
 #include <dev/bktr/ioctl_bt848.h>
 #endif
 
-#endif /* !WITHOUT_V4L2 */
+#endif /* HAVE_BKTR */
 
 /* bktr (video4linux) stuff FIXME more modes not only these */
 
@@ -109,8 +109,8 @@ struct video_dev {
     int frames;
 
     /* Device type specific stuff: */
-#ifndef WITHOUT_V4L2
-     int capture_method;
+#ifdef HAVE_BKTR
+    int capture_method;
     int v4l_fmt;
     unsigned char *v4l_buffers[2];
     int v4l_curbuffer;
@@ -124,7 +124,7 @@ int vid_start(struct context *);
 int vid_next(struct context *, unsigned char *);
 void vid_close(struct context *);
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_BKTR
 void vid_init(void);
 void vid_cleanup(void);
 #endif

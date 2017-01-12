@@ -11,7 +11,7 @@
 #include "rotate.h"     /* Already includes motion.h */
 #include "video_freebsd.h"
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_BKTR
 
 /* For the v4l stuff: */
 #include <sys/mman.h>
@@ -40,7 +40,8 @@
 #define VIDEO_FMT_COUNT     20
 
 #define array_elem(x) (sizeof(x) / sizeof((x)[0]))
-
+/****  This function is reported as unused by compiler and also reports a boat load of conversion errors.
+*****  As such, it is being commented out for now and is being targeted for termination.
 static const struct camparam_st {
   int min, max, range, drv_min, drv_range, def;
 } CamParams[] = {
@@ -58,6 +59,8 @@ static const struct camparam_st {
     BT848_CHROMAREGMIN, (BT848_CHROMAREGMAX - BT848_CHROMAREGMIN + 1),
     BT848_CHROMACENTER, },
 };
+
+*/
 
 #define BRIGHT 0
 #define CONTR  1
@@ -950,7 +953,7 @@ void vid_cleanup(void)
     pthread_mutex_destroy(&vid_mutex);
 }
 
-#endif /*WITHOUT_V4L2*/
+#endif /* HAVE_BKTR */
 
 /**
  * vid_close
@@ -959,7 +962,7 @@ void vid_cleanup(void)
  */
 void vid_close(struct context *cnt)
 {
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_BKTR
     struct video_dev *dev = viddevs;
     struct video_dev *prev = NULL;
 #endif
@@ -971,7 +974,7 @@ void vid_close(struct context *cnt)
         return;
     }
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_BKTR
 
     /* Cleanup the v4l part */
     pthread_mutex_lock(&vid_mutex);
@@ -1041,7 +1044,7 @@ void vid_close(struct context *cnt)
                 pthread_mutex_unlock(&dev->mutex);
         }
     }
-#endif /* !WITHOUT_V4L2 */
+#endif /* HAVE_BKTR */
 }
 
 
@@ -1061,7 +1064,7 @@ int vid_start(struct context *cnt)
             cnt->netcam = NULL;
         }
     }
-#ifdef WITHOUT_V4L2
+#ifndef HAVE_BKTR
     else
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url");
 #else
@@ -1249,7 +1252,7 @@ int vid_start(struct context *cnt)
 
         pthread_mutex_unlock(&vid_mutex);
     }
-#endif /* !WITHOUT_V4L2 */
+#endif /* HAVE_BKTR */
 
     /* FIXME needed tuner device ?! */
     return fd_bktr;
@@ -1282,7 +1285,7 @@ int vid_next(struct context *cnt, unsigned char *map)
         return ret;
     }
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_BKTR
 
     struct video_dev *dev;
     int width, height;
@@ -1329,6 +1332,6 @@ int vid_next(struct context *cnt, unsigned char *map)
         rotate_map(cnt, map);
 
 
-#endif /* !WITHOUT_V4L2 */
+#endif /* HAVE_BKTR */
     return ret;
 }

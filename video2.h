@@ -12,7 +12,7 @@
 
 #include <sys/mman.h>
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
 
 #include <linux/videodev2.h>
 #include "vloopback_motion2.h"
@@ -72,7 +72,7 @@ struct video_dev {
     int frames;
 
     /* Device type specific stuff: */
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
     /* v4l */
     int v4l2;
     void *v4l2_private;
@@ -102,7 +102,7 @@ int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int he
 void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift);
 void conv_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
 
 /* video2.c */
 unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int width, int height,
@@ -112,6 +112,6 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height);
 void v4l2_close(struct video_dev *viddev);
 void v4l2_cleanup(struct video_dev *viddev);
-#endif /* WITHOUT_V4L2 */
+#endif /* HAVE_V4L2 */
 
 #endif /* _INCLUDE_VIDEO_H */

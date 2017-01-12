@@ -47,6 +47,10 @@
 #include <stdint.h>
 #include <pthread.h>
 
+#if defined(BSD)
+#include <pthread_np.h>
+#endif
+
 #include "logger.h"
 #include "conf.h"
 #include "stream.h"

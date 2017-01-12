@@ -155,7 +155,7 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 #define IOMOJO_DIRECTION_DOWN   0x04
 #define IOMOJO_DIRECTION_UP     0x08
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
 
 /*
  * Defines for the Logitech QuickCam Orbit/Sphere USB webcam
@@ -183,6 +183,6 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 #define INCPANTILT 64 // 1 degree
 
 
-#endif /* WITHOUT_V4L2 */
+#endif /* HAVE_V4L2 */
 
 #endif /* _INCLUDE_TRACK_H */

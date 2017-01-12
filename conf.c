@@ -103,7 +103,7 @@ struct config conf_template = {
     .timelapse =                       0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
 #ifdef __FreeBSD__
-    tuner_device:                   NULL,
+    .tuner_device =                    NULL,
 #endif
     .video_device =                    VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
