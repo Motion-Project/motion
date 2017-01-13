@@ -80,14 +80,18 @@ if test "x${BKTR}" = "xyes"; then
 fi
 
 if test "${V4L2}" = "yes"; then
-    AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
+    if test "${DISTRO}" = "FreeBSD"; then
+        AC_CHECK_HEADERS(/usr/local/include/libv4l2.h,[V4L2="yes"],[V4L2="no"])
+    else
+        AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
+    fi
 fi
 
 ###
 ### Determine video module and set flags for each combination
 ###
 ### Darwin = Netcam only.  No BKTR or V4L2
-### *BSD = V4L2 and/or BKTR
+### *BSD = V4L2 or BKTR
 ### Linux = V4L2 Only
 
 if test "${DISTRO}" = "Darwin"; then

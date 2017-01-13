@@ -38,8 +38,12 @@ set(HAVE_PGSQL ${WITH_PGSQL})
 set(HAVE_SQLITE3 ${WITH_SQLITE3})
 
 set(HAVE_V4L2 OFF)
-  check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
-  if(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2)
+  if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+    check_include_files("/usr/local/include/libv4l2.h" HAVE_LIBV4L2_H)
+  else()
+    check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
+  endif()
+  if(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2) || (HAVE_LIBV4L2_H AND WITH_V4L2)
     set(HAVE_V4L2 ON )
   endif(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2)
 
@@ -58,8 +62,6 @@ set(HAVE_BKTR OFF)
       set(HAVE_BKTR ON )
     endif(HAVE_NETOPEN_BT8XX AND WITH_BKTR)
   endif(CMAKE_SYSTEM_NAME MATCHES "NetBSD" OR CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
-
-
 
 
 configure_file(config.h.in "${CMAKE_CURRENT_SOURCE_DIR}/config.h")

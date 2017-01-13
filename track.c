@@ -927,7 +927,15 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
         struct v4l2_control control_s;
 
-        control_s.id = V4L2_CID_PANTILT_RESET;
+        control_s.id = V4L2_CID_PAN_RESET;
+        control_s.value = (unsigned char) reset;
+
+        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset UVC camera to starting position! Reason");
+            return 0;
+        }
+
+        control_s.id = V4L2_CID_TILT_RESET;
         control_s.value = (unsigned char) reset;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
@@ -1071,7 +1079,15 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
         unsigned int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
         struct v4l2_control control_s;
 
-        control_s.id = V4L2_CID_PANTILT_RESET;
+        control_s.id = V4L2_CID_PAN_RESET;
+        control_s.value = (unsigned char) reset;
+
+        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset UVC camera to starting position! Reason");
+            return 0;
+        }
+
+        control_s.id = V4L2_CID_TILT_RESET;
         control_s.value = (unsigned char) reset;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
