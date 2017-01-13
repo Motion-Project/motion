@@ -37,6 +37,7 @@ const char *eventList[] = {
     "EVENT_CRITICAL",
     "EVENT_AREA_DETECTED",
     "EVENT_CAMERA_LOST",
+    "EVENT_CAMERA_FOUND",
     "EVENT_FFMPEG_PUT",
     "EVENT_LAST"
 };
@@ -446,6 +447,15 @@ static void event_camera_lost(struct context *cnt,
 {
     if (cnt->conf.on_camera_lost)
         exec_command(cnt, cnt->conf.on_camera_lost, NULL, 0);
+}
+
+static void event_camera_found(struct context *cnt,
+            motion_event type ATTRIBUTE_UNUSED,
+            unsigned char *img ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
+{
+    if (cnt->conf.on_camera_found)
+        exec_command(cnt, cnt->conf.on_camera_found, NULL, 0);
 }
 
 static void on_movie_end_command(struct context *cnt,
@@ -1018,6 +1028,10 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_CAMERA_LOST,
     event_camera_lost
+    },
+    {
+    EVENT_CAMERA_FOUND,
+    event_camera_found
     },
     {
     EVENT_STOP,
