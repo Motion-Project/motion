@@ -138,6 +138,7 @@ struct config conf_template = {
     .on_movie_start =                  NULL,
     .on_movie_end =                    NULL,
     .on_camera_lost =                  NULL,
+    .on_camera_found =                 NULL,
     .motionvidpipe =                   NULL,
     .netcam_url =                      NULL,
     .netcam_userpass =                 NULL,
@@ -1456,6 +1457,15 @@ config_param config_params[] = {
     "# Some hangs the motion thread. Some even hangs the PC! (default: none)",
     0,
     CONF_OFFSET(on_camera_lost),
+    copy_string,
+    print_string
+    },
+    {
+    "on_camera_found",
+    "# Command to be executed when a camera that was lost has been found (default: none)\n"
+    "# NOTE: If motion doesn't properly detect a lost camera, it also won't know it found one.\n",
+    0,
+    CONF_OFFSET(on_camera_found),
     copy_string,
     print_string
     },

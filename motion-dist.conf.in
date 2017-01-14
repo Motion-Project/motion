@@ -667,6 +667,10 @@ quiet on
 # Some hangs the motion thread. Some even hangs the PC! (default: none)
 ; on_camera_lost value
 
+# Command to be executed when a camera that was lost has been found (default: none)
+# NOTE: If motion doesn't properly detect a lost camera, it also won't know it found one.
+; on_camera_found value
+
 #####################################################################
 # Common Options for database features.
 # Options require database options to be active also.
