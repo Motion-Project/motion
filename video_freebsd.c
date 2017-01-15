@@ -649,41 +649,9 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
     }
 }
 
-/*
- * Big lock for vid_start to ensure exclusive access to viddevs while adding
- * devices during initialization of each thread.
- */
 static pthread_mutex_t bktr_mutex;
 
-/*
- * Here we setup the viddevs structure which is used globally in the vid_*
- * functions.
- */
 static struct video_dev *viddevs = NULL;
-
-/**
- * vid_init
- *
- * Called from motion.c at the very beginning before setting up the threads.
- * Function prepares the bktr_mutex.
- */
-void vid_init(void)
-{
-    //rename this function to bktr_mutex_init
-    pthread_mutex_init(&bktr_mutex, NULL);
-}
-
-/**
- * vid_cleanup
- *
- * vid_cleanup is called from motion.c when Motion is stopped or restarted.
- */
-void vid_cleanup(void)
-{
-//rename this function to bktr_mutex_destroy
-    pthread_mutex_destroy(&bktr_mutex);
-}
-
 
 void bktr_cleanup(struct context *cnt)
 {
@@ -782,17 +750,13 @@ int bktr_start(struct context *cnt)
          * Motion requires that width and height are multiples of 8 so we check for this.
          */
         if (conf->width % 8) {
-            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,
-                       "%s: config image width (%d) is not modulo 8",
-                        conf->width);
-            return -1;
+            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 8", conf->width);
+            return -2;
         }
 
         if (conf->height % 8) {
-            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,
-                       "%s: config image height (%d) is not modulo 8",
-                        conf->height);
-            return -1;
+            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 8", conf->height);
+            return -2;
         }
 
         width = conf->width;
@@ -1007,11 +971,43 @@ int bktr_next(struct context *cnt, unsigned char *map)
 
 #endif /* HAVE_BKTR */
 
-/**
- * vid_close
- *
- * vid_close is called from motion.c when a Motion thread is stopped or restarted.
- */
+
+void vid_mutex_init(void)
+{
+    int chk_bktr;
+#if HAVE_BKTR
+    //rename this function to bktr_mutex_init
+    pthread_mutex_init(&bktr_mutex, NULL);
+    chk_bktr = 0;
+#else
+    chk_bktr = 1;
+#endif
+    if (chk_bktr == 0){
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Initializing bktr mutex");
+    } else {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No initialize mutex.");
+    }
+
+}
+
+void vid_mutex_destroy(void)
+{
+    int chk_bktr;
+#if HAVE_BKTR
+    pthread_mutex_destroy(&bktr_mutex);
+    chk_bktr = 0;
+#else
+    chk_bktr = 1;
+#endif
+    if (chk_bktr == 0){
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Destroy bktr mutex");
+    } else {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No destroy mutex.");
+    }
+
+}
+
+
 void vid_close(struct context *cnt)
 {
     /* Cleanup the netcam part */

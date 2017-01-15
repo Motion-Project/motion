@@ -12,6 +12,6 @@
 
 #include "motion.h"
 
-int vid_startpipe(const char *dev_name, int width, int height, int);
-int vid_putpipe(int dev, unsigned char *image, int);
+int vid_startpipe(const char *dev_name, int width, int height);
+int vid_putpipe(int dev, unsigned char *image, int imgsize);
 #endif

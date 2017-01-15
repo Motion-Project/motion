@@ -89,9 +89,7 @@ int vid_start(struct context *);
 int vid_next(struct context *, unsigned char *);
 void vid_close(struct context *);
 
-#ifdef HAVE_BKTR
-void vid_init(void);
-void vid_cleanup(void);
-#endif
+void vid_mutex_init(void);
+void vid_mutex_destroy(void);
 
 #endif /* _INCLUDE_VIDEO_FREEBSD_H */

@@ -56,7 +56,7 @@ struct config conf_template = {
     .snapshot_interval =               0,
     .locate_motion_mode =              "off",
     .locate_motion_style =             "box",
-    .input =                           IN_DEFAULT,
+    .input =                           DEF_INPUT,
     .norm =                            0,
     .frame_limit =                     DEF_MAXFRAMERATE,
     .quiet =                           1,
@@ -105,7 +105,7 @@ struct config conf_template = {
 #ifdef __FreeBSD__
     .tuner_device =                    NULL,
 #endif
-    .video_device =                    VIDEO_DEVICE,
+    .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
     .vidpipe =                         NULL,
     .filepath =                        NULL,

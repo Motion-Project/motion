@@ -137,6 +137,9 @@
 #define DEF_FFMPEG_VBR           0
 #define DEF_FFMPEG_CODEC   "mpeg4"
 
+#define DEF_INPUT               -1
+#define DEF_VIDEO_DEVICE         "/dev/video0"
+
 #define THRESHOLD_TUNE_LENGTH  256
 
 #define MISSING_FRAMES_TIMEOUT  30  /* When failing to get picture frame from camera

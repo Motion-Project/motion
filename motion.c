@@ -12,8 +12,10 @@
 #if (defined(__FreeBSD__) && !defined(PWCBSD))
 #include "video_freebsd.h"
 #else
-#include "video2.h"
+#include "video_common.h"
+#include "vloopback_motion2.h"
 #endif
+
 
 #include "conf.h"
 #include "alg.h"
@@ -828,8 +830,8 @@ static int motion_init(struct context *cnt)
         cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     } else if (cnt->video_dev == -2) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera "
-                   "Motion only supports width and height modulo 8");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera ");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Motion only supports width and height modulo 8");
         return -3;
     }
 
@@ -900,7 +902,7 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, V4L2_PIX_FMT_YUV420);
+        cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->pipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for normal pictures");
@@ -912,7 +914,7 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for motion pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, V4L2_PIX_FMT_YUV420);
+        cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->mpipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for motion pictures");
@@ -2578,9 +2580,9 @@ static void motion_shutdown(void)
 
     free(cnt_list);
     cnt_list = NULL;
-#ifdef HAVE_V4L2
-    vid_cleanup();
-#endif
+
+    vid_mutex_destroy();
+
 }
 
 /**
@@ -2669,9 +2671,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         }
     }
 
-#ifdef HAVE_V4L2
-    vid_init();
-#endif
+    vid_mutex_init();
 }
 
 /**
@@ -2856,9 +2856,9 @@ int main (int argc, char **argv)
             MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Restarting motion.");
             motion_shutdown();
             restart = 0; /* only one reset for now */
-#ifdef HAVE_V4L2
+
             SLEEP(5, 0); // maybe some cameras needs less time
-#endif
+
             motion_startup(0, argc, argv); /* 0 = skip daemon init */
             MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Motion restarted");
         }

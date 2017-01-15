@@ -9,15 +9,12 @@
  *
  */
 #include "vloopback_motion2.h"
+
 #if (defined(HAVE_V4L2)) && (!defined(BSD))
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 
-/**
- * v4l2_open_vidpipe
- *
- */
 static int v4l2_open_vidpipe(void)
 {
     int pipe_fd = -1;
@@ -134,11 +131,7 @@ static void show_vfmt(struct v4l2_format *v) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: ------------------------");
 }
 
-/**
- * v4l2_startpipe
- *
- */
-static int v4l2_startpipe(const char *dev_name, int width, int height, int type)
+static int v4l2_startpipe(const char *dev_name, int width, int height)
 {
     int dev;
     struct v4l2_format v;
@@ -177,7 +170,7 @@ static int v4l2_startpipe(const char *dev_name, int width, int height, int type)
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     v.fmt.pix.width = width;
     v.fmt.pix.height = height;
-    v.fmt.pix.pixelformat = type;
+    v.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
     v.fmt.pix.sizeimage = 3 * width * height / 2;
     v.fmt.pix.bytesperline = width;
     v.fmt.pix.field = V4L2_FIELD_NONE;
@@ -196,30 +189,19 @@ static int v4l2_startpipe(const char *dev_name, int width, int height, int type)
     return dev;
 }
 
-/**
- * v4l2_putpipe
- *
- */
-static int v4l2_putpipe(int dev, unsigned char *image, int size)
+static int v4l2_putpipe(int dev, unsigned char *image, int imgsize)
 {
-    return write(dev, image, size);
+    return write(dev, image, imgsize);
 }
 
-/**
- * vid_startpipe
- *
- */
-int vid_startpipe(const char *dev_name, int width, int height, int type)
+int vid_startpipe(const char *dev_name, int width, int height)
 {
-    return v4l2_startpipe(dev_name, width, height, type);
+    return v4l2_startpipe(dev_name, width, height);
 }
 
-/**
- * vid_putpipe
- *
- */
-int vid_putpipe (int dev, unsigned char *image, int size)
+int vid_putpipe (int dev, unsigned char *image, int imgsize)
 {
-    return v4l2_putpipe(dev, image, size);
+    return v4l2_putpipe(dev, image, imgsize);
 }
+
 #endif /* HAVE_V4L2 && !BSD */
