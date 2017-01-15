@@ -587,7 +587,7 @@ static struct video_dev *viddevs = NULL;
 void bktr_mutex_init(void)
 {
     int chk_bktr;
-#if HAVE_BKTR
+#ifdef HAVE_BKTR
     //rename this function to bktr_mutex_init
     pthread_mutex_init(&bktr_mutex, NULL);
     chk_bktr = 0;
@@ -605,7 +605,7 @@ void bktr_mutex_init(void)
 void bktr_mutex_destroy(void)
 {
     int chk_bktr;
-#if HAVE_BKTR
+#ifdef HAVE_BKTR
     pthread_mutex_destroy(&bktr_mutex);
     chk_bktr = 0;
 #else
@@ -622,7 +622,7 @@ void bktr_mutex_destroy(void)
 void bktr_cleanup(struct context *cnt)
 {
     int chk_bktr;
-#if HAVE_BKTR
+#ifdef HAVE_BKTR
 
     struct video_dev *dev = viddevs;
     struct video_dev *prev = NULL;
@@ -715,7 +715,7 @@ int bktr_start(struct context *cnt)
     int chk_bktr;
     int fd_device = -1;
 
-#if HAVE_BKTR
+#ifdef HAVE_BKTR
     struct config *conf = &cnt->conf;
     struct video_dev *dev;
     int fd_tuner = -1;
@@ -916,7 +916,7 @@ int bktr_next(struct context *cnt, unsigned char *map)
     int chk_bktr;
     int ret = -1;
 
-#if HAVE_BKTR
+#ifdef HAVE_BKTR
 
     struct config *conf = &cnt->conf;
     struct video_dev *dev;

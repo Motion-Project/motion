@@ -1061,7 +1061,7 @@ static void v4l2_device_cleanup(struct video_dev *viddev)
 void v4l2_mutex_init(void)
 {
     int chk_v4l2;
-#if HAVE_V4L2
+#ifdef HAVE_V4L2
     pthread_mutex_init(&v4l2_mutex, NULL);
     chk_v4l2 = 0;
 #else
@@ -1078,7 +1078,7 @@ void v4l2_mutex_init(void)
 void v4l2_mutex_destroy(void)
 {
     int chk_v4l2;
-#if HAVE_V4L2
+#ifdef HAVE_V4L2
     pthread_mutex_destroy(&v4l2_mutex);
     chk_v4l2 = 0;
 #else
@@ -1094,7 +1094,7 @@ void v4l2_mutex_destroy(void)
 
 int v4l2_start(struct context *cnt)
 {
-#if HAVE_V4L2
+#ifdef HAVE_V4L2
 
     struct config *conf = &cnt->conf;
     int fd_device = -1;
@@ -1263,7 +1263,7 @@ int v4l2_start(struct context *cnt)
 
 void v4l2_cleanup(struct context *cnt)
 {
-#if HAVE_V4L2
+#ifdef HAVE_V4L2
 
     struct video_dev *dev = viddevs;
     struct video_dev *prev = NULL;
@@ -1331,7 +1331,7 @@ void v4l2_cleanup(struct context *cnt)
 
 int v4l2_next(struct context *cnt, unsigned char *map)
 {
-#if HAVE_V4L2
+#ifdef HAVE_V4L2
     int ret = -2;
     struct config *conf = &cnt->conf;
     struct video_dev *dev;
