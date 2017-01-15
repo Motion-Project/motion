@@ -11,6 +11,8 @@
 #include "vloopback_motion2.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))
+
+#include "motion.h"
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>

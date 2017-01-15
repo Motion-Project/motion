@@ -36,22 +36,29 @@ AC_SUBST(DISTRO)
 ###############################################################################
 TEMP_LIBS=""
 TEMP_CFLAGS=""
+TEMP_CPPFLAGS=""
 TEMP_LDFLAGS=""
 if test "${DISTRO}" = "Darwin"; then
     TEMP_CFLAGS="${CFLAGS} -I/sw/include"
+    TEMP_CPPFLAGS="${CPPFLAGS} -I/sw/include"
     TEMP_LDFLAGS="${LDFLAGS} -L/sw/lib"
     TEMP_LIBS="-L/sw/lib"
 else
     if test "x${DISTRO}" != "Linux"; then
         TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
+        TEMP_CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
         TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
         TEMP_LIBS="-L/usr/local/lib"
     fi
 fi
 TEMP_LIBS="-lm ${TEMP_LIBS}"
 TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
+TEMP_CPPFLAGS="${TEMP_CPPFLAGS} ${CPPFLAGS}"
 TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
 
+AC_SUBST(CFLAGS, "${TEMP_CFLAGS}")
+AC_SUBST(CPPFLAGS, "${TEMP_CPPFLAGS}")
+AC_SUBST(LDFLAGS, "${TEMP_LDFLAGS}")
 
 ###############################################################################
 ###  Video System
@@ -80,39 +87,8 @@ if test "x${BKTR}" = "xyes"; then
 fi
 
 if test "${V4L2}" = "yes"; then
-    if test "${DISTRO}" = "FreeBSD"; then
-        AC_CHECK_HEADERS(/usr/local/include/libv4l2.h,[V4L2="yes"],[V4L2="no"])
-    else
-        AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
-    fi
+    AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
 fi
-
-###
-### Determine video module and set flags for each combination
-###
-### Darwin = Netcam only.  No BKTR or V4L2
-### *BSD = V4L2 or BKTR
-### Linux = V4L2 Only
-
-if test "${DISTRO}" = "Darwin"; then
-    VIDEO="video_freebsd.o"
-	V4L2="no"
-    BKTR="no"
-else
-    if test "${DISTRO}" != "Linux"; then
-        #BSD Variants
-        if test "${V4L2}" = "yes"; then
-            VIDEO="video2.o video_common.o"
-        else
-            VIDEO="video_freebsd.o"
-        fi
-    else
-        #Linux Variants
-        VIDEO="video2.o video_common.o"
-    fi
-fi
-
-AC_SUBST(VIDEO)
 if test "x${V4L2}" = "xyes"; then
     AC_DEFINE([HAVE_V4L2], 1, [Define to 1 if V4L2 is around])
 fi
@@ -420,13 +396,11 @@ AC_SUBST(FFMPEG_OBJ)
 # Check SQLITE3
 #
 
+SQLITE_OBJ=""
 SQLITE3_SUPPORT="no"
 AC_ARG_WITH(sqlite3,
-    [  --without-sqlite3       Disable sqlite3 support in motion.
-    ],
-    SQLITE3="$withval"
-    # if not given argument, assume standard
-)
+    AS_HELP_STRING([--without-sqlite3],[Disable sqlite3 support in motion.]),
+    [SQLITE3="$withval"])
 
 if test "${SQLITE3}" = "no"; then
     AC_MSG_CHECKING(for sqlite3)
@@ -439,7 +413,7 @@ else
     # this is the preferred way to use sqlite
     if test -f sqlite3.c; then
         SQLITE3_SUPPORT="yes"
-        VIDEO="$VIDEO sqlite3.o"
+        SQLITE_OBJ="sqlite3.o"
         TEMP_LIBS="$TEMP_LIBS -ldl"
         AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3])
         AC_DEFINE([HAVE_SQLITE3_EMBEDDED],1,[Define to 1 if you have SQLITE3 embedded support])
@@ -457,7 +431,7 @@ else
     CFLAGS=$saved_CFLAGS
     LIBS=$saved_LIBS
 fi
-
+AC_SUBST(SQLITE_OBJ)
 
 #
 # Check Mysql

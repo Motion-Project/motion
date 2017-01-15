@@ -234,6 +234,14 @@ struct images;
 #define IMAGE_PRECAP    16
 #define IMAGE_POSTCAP   32
 
+enum CAMERA_TYPE {
+    CAMERA_TYPE_UNKNOWN,
+    CAMERA_TYPE_V4L2,
+    CAMERA_TYPE_BKTR,
+    CAMERA_TYPE_MMAL,
+    CAMERA_TYPE_NETCAM
+};
+
 struct image_data {
     unsigned char *image;
     int diffs;
@@ -354,10 +362,13 @@ struct context {
     struct config conf;
     struct images imgs;
     struct trackoptions track;
+
+    enum CAMERA_TYPE      camera_type;
     struct netcam_context *netcam;
 #ifdef HAVE_MMAL
     struct mmalcam_context *mmalcam;
 #endif
+
     struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
 

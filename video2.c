@@ -131,7 +131,7 @@ static const u32 queried_ctrls[] = {
 };
 
 typedef struct {
-    int fd;
+    int fd_device;
     u32 fps;
 
     struct v4l2_capability cap;
@@ -162,7 +162,7 @@ static int xioctl(src_v4l2_t *vid_source, int request, void *arg)
     int ret;
 
     do
-        ret = ioctl(vid_source->fd, request, arg);
+        ret = ioctl(vid_source->fd_device, request, arg);
     while (-1 == ret && EINTR == errno && !vid_source->finish);
 
     return ret;
@@ -566,7 +566,7 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
 
         vid_source->buffers[buffer_index].size = buf.length;
         vid_source->buffers[buffer_index].ptr = mmap(NULL, buf.length, PROT_READ | PROT_WRITE,
-                                                     MAP_SHARED, vid_source->fd, buf.m.offset);
+                                                     MAP_SHARED, vid_source->fd_device, buf.m.offset);
 
         if (vid_source->buffers[buffer_index].ptr == MAP_FAILED) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error mapping buffer %i mmap",
@@ -765,7 +765,7 @@ static unsigned char *v4l2_device_init(struct context *cnt, struct video_dev *vi
     }
 
     viddev->v4l2_private = vid_source;
-    vid_source->fd = viddev->fd;
+    vid_source->fd_device = viddev->fd_device;
     vid_source->fps = cnt->conf.frame_limit;
     vid_source->pframe = -1;
     vid_source->finish = &cnt->finish;
@@ -1031,8 +1031,8 @@ static void v4l2_device_close(struct video_dev *viddev)
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     xioctl(vid_source, VIDIOC_STREAMOFF, &type);
-    close(vid_source->fd);
-    vid_source->fd = -1;
+    close(vid_source->fd_device);
+    vid_source->fd_device = -1;
 }
 
 static void v4l2_device_cleanup(struct video_dev *viddev)
@@ -1097,7 +1097,7 @@ int v4l2_start(struct context *cnt)
 #if HAVE_V4L2
 
     struct config *conf = &cnt->conf;
-    int fd = -1;
+    int fd_device = -1;
     struct video_dev *dev;
 
     int width, height, input, norm, tuner_number;
@@ -1163,7 +1163,7 @@ int v4l2_start(struct context *cnt)
                 break;
             }
             pthread_mutex_unlock(&v4l2_mutex);
-            return dev->fd;
+            return dev->fd_device;
         }
         dev = dev->next;
     }
@@ -1175,9 +1175,9 @@ int v4l2_start(struct context *cnt)
 
     dev->video_device = conf->video_device;
 
-    fd = open(dev->video_device, O_RDWR);
+    fd_device = open(dev->video_device, O_RDWR);
 
-    if (fd < 0) {
+    if (fd_device < 0) {
         MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s",
                    conf->video_device);
         free(dev);
@@ -1189,7 +1189,7 @@ int v4l2_start(struct context *cnt)
     pthread_mutex_init(&dev->mutex, &dev->attr);
 
     dev->usage_count = 1;
-    dev->fd = fd;
+    dev->fd_device = fd_device;
     dev->input = input;
     dev->norm = norm;
     dev->height = height;
@@ -1253,7 +1253,7 @@ int v4l2_start(struct context *cnt)
 
     pthread_mutex_unlock(&v4l2_mutex);
 
-    return fd;
+    return fd_device;
 #else
     cnt = cnt;
     viddevs = NULL;
@@ -1271,7 +1271,7 @@ void v4l2_cleanup(struct context *cnt)
         /* Cleanup the v4l2 part */
     pthread_mutex_lock(&v4l2_mutex);
     while (dev) {
-        if (dev->fd == cnt->video_dev)
+        if (dev->fd_device == cnt->video_dev)
             break;
         prev = dev;
         dev = dev->next;
@@ -1293,11 +1293,11 @@ void v4l2_cleanup(struct context *cnt)
             v4l2_device_close(dev);
             v4l2_device_cleanup(dev);
         } else {
-            close(dev->fd);
+            close(dev->fd_device);
             munmap(viddevs->v4l_buffers[0], dev->size_map);
         }
 
-        dev->fd = -1;
+        dev->fd_device = -1;
         pthread_mutex_lock(&v4l2_mutex);
         /* Remove from list */
         if (prev == NULL)
@@ -1344,7 +1344,7 @@ int v4l2_next(struct context *cnt, unsigned char *map)
     pthread_mutex_lock(&v4l2_mutex);
     dev = viddevs;
     while (dev) {
-        if (dev->fd == cnt->video_dev)
+        if (dev->fd_device == cnt->video_dev)
             break;
         dev = dev->next;
     }

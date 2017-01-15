@@ -10,9 +10,10 @@
  */
 
 #include "motion.h"
-#include "video2.h"
-#include "jpegutils.h"
 #include "video_common.h"
+#include "video2.h"
+#include "video_freebsd.h"
+#include "jpegutils.h"
 
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
@@ -555,43 +556,50 @@ int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
 void vid_mutex_init(void)
 {
     v4l2_mutex_init();
+    bktr_mutex_init();
 }
 
-/**
- * vid_cleanup
- *
- * vid_cleanup is called from motion.c when Motion is stopped or restarted.
- */
 void vid_mutex_destroy(void)
 {
     v4l2_mutex_destroy();
+    bktr_mutex_destroy();
 }
 
 void vid_close(struct context *cnt)
 {
 
-    /* Cleanup the netcam part */
 #ifdef HAVE_MMAL
-    if (cnt->mmalcam) {
+    if (cnt->camera_type == CAMERA_TYPE_MMAL) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling mmalcam_cleanup");
         mmalcam_cleanup(cnt->mmalcam);
         cnt->mmalcam = NULL;
         return;
     }
-    else
 #endif
-    if (cnt->netcam) {
+
+    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling netcam_cleanup");
         netcam_cleanup(cnt->netcam, 0);
         cnt->netcam = NULL;
         return;
     }
 
-#ifdef HAVE_V4L2
+    if (cnt->camera_type == CAMERA_TYPE_V4L2) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Cleaning up V4L2 device");
+        v4l2_cleanup(cnt);
+        return;
+    }
 
-    v4l2_cleanup(cnt);
+    if (cnt->camera_type == CAMERA_TYPE_BKTR) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Cleaning up BKTR device");
+        bktr_cleanup(cnt);
+        return;
+    }
 
-#endif /* HAVE_V4L2 */
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)");
+    return;
+
+
 }
 
 /**
@@ -618,35 +626,53 @@ void vid_close(struct context *cnt)
  */
 int vid_start(struct context *cnt)
 {
-    struct config *conf = &cnt->conf;
     int dev = -1;
 
 #ifdef HAVE_MMAL
-    if (conf->mmalcam_name) {
+    if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening MMAL cam");
         dev = mmalcam_start(cnt);
         if (dev < 0) {
             mmalcam_cleanup(cnt->mmalcam);
             cnt->mmalcam = NULL;
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: MMAL cam failed to open");
         }
+        return dev;
     }
-    else
 #endif
-    if (conf->netcam_url) {
+
+    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening Netcam");
         dev = netcam_start(cnt);
         if (dev < 0) {
             netcam_cleanup(cnt->netcam, 1);
             cnt->netcam = NULL;
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Netcam failed to open");
         }
+        return dev;
     }
-#ifndef HAVE_V4L2
-    else
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: You must setup netcam_url");
-#else
-    else
-        dev = v4l2_start(cnt);
-#endif    /* HAVE_V4L2 */
 
+    if (cnt->camera_type == CAMERA_TYPE_V4L2) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening V4L2 device");
+        dev = v4l2_start(cnt);
+        if (dev < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 device failed to open");
+        }
+        return dev;
+    }
+
+    if (cnt->camera_type == CAMERA_TYPE_BKTR) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening BKTR device");
+        dev = v4l2_start(cnt);
+        if (dev < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: BKTR device failed to open");
+        }
+        return dev;
+    }
+
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: No Camera device specified (MMAL, Netcam, V4L2, BKTR)");
     return dev;
+
 }
 
 /**
@@ -671,27 +697,30 @@ int vid_start(struct context *cnt)
  */
 int vid_next(struct context *cnt, unsigned char *map)
 {
-    int ret = -2;
-    struct config *conf = &cnt->conf;
 
 #ifdef HAVE_MMAL
-    if (conf->mmalcam_name) {
+     if (cnt->camera_type == CAMERA_TYPE_MMAL) {
         if (cnt->mmalcam == NULL) {
             return NETCAM_GENERAL_ERROR;
         }
         return mmalcam_next(cnt, map);
     }
-    else
 #endif
-    if (conf->netcam_url) {
+
+    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
         if (cnt->video_dev == -1)
             return NETCAM_GENERAL_ERROR;
 
         return netcam_next(cnt, map);
     }
-#ifdef HAVE_V4L2
-    ret = v4l2_next(cnt, map);
 
-#endif  /* HAVE_V4L2 */
-    return ret;
+    if (cnt->camera_type == CAMERA_TYPE_V4L2) {
+        return v4l2_next(cnt, map);
+   }
+
+    if (cnt->camera_type == CAMERA_TYPE_BKTR) {
+        return bktr_next(cnt, map);
+    }
+
+    return -2;
 }

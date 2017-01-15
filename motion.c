@@ -6,17 +6,10 @@
  *    See also the file 'COPYING'.
  *
  */
-#include "ffmpeg.h"
 #include "motion.h"
-
-#if (defined(__FreeBSD__) && !defined(PWCBSD))
-#include "video_freebsd.h"
-#else
+#include "ffmpeg.h"
 #include "video_common.h"
 #include "vloopback_motion2.h"
-#endif
-
-
 #include "conf.h"
 #include "alg.h"
 #include "track.h"
@@ -711,6 +704,41 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
     cnt->current_image = saved_current_image;
 }
 
+static int init_camera_type(struct context *cnt){
+
+    cnt->camera_type = CAMERA_TYPE_UNKNOWN;
+
+#ifdef HAVE_MMAL
+    if (cnt->conf.mmalcam_name) {
+        cnt->camera_type = CAMERA_TYPE_MMAL;
+        return 0;
+    }
+#endif // HAVE_MMAL
+
+    if (cnt->conf.netcam_url) {
+        cnt->camera_type = CAMERA_TYPE_NETCAM;
+        return 0;
+    }
+
+#ifdef HAVE_V4l2
+    if (strncmp(cnt->conf.video_device,"/dev/video",10) != 0) {
+        cnt->camera_type = CAMERA_TYPE_V4L2;
+        return 0;
+    }
+#endif // HAVE_V4l2
+
+#ifdef HAVE_BKTR
+    if (strncmp(cnt->conf.video_device,"/dev/bktr",9) != 0) {
+        cnt->camera_type = CAMERA_TYPE_BKTR;
+        return 0;
+    }
+#endif // HAVE_BKTR
+
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)");
+    return -1;
+
+}
+
 static void init_mask_privacy(struct context *cnt){
 
     int indxrow;
@@ -812,6 +840,8 @@ static int motion_init(struct context *cnt)
 
     if (!cnt->conf.filepath)
         cnt->conf.filepath = mystrdup(".");
+
+    if (init_camera_type(cnt) != 0 ) return -3;
 
     /* set the device settings */
     cnt->video_dev = vid_start(cnt);

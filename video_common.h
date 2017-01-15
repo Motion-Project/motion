@@ -11,8 +11,10 @@
 struct video_dev {
     struct video_dev *next;
     int usage_count;
-    int fd;
+    int fd_device;
+    int fd_tuner;
     const char *video_device;
+    const char *tuner_device;
     int input;
     int norm;
     int width;
@@ -26,16 +28,19 @@ struct video_dev {
     int tuner_number;
     int fps;
 
+    int channel;
+    int channelset;
+
     pthread_mutex_t mutex;
     pthread_mutexattr_t attr;
     int owner;
     int frames;
 
-    /* Device type specific stuff: */
     int v4l2;
     void *v4l2_private;
 
     int size_map;
+    int capture_method;
     int v4l_fmt;
     unsigned char *v4l_buffers[2];
     int v4l_curbuffer;
@@ -43,7 +48,6 @@ struct video_dev {
     int v4l_bufsize;
 
 };
-
 
 int vid_start(struct context *cnt);
 int vid_next(struct context *cnt, unsigned char *map);
