@@ -7,8 +7,8 @@
  *      See also the file 'COPYING'.
  *
  */
-#ifndef _INCLUDE_VLOOPBACK_MOTION_H
-#define _INCLUDE_VLOOPBACK_MOTION_H
+#ifndef _INCLUDE_VLOOPBACK_MOTION2_H
+#define _INCLUDE_VLOOPBACK_MOTION2_H
 
 int vid_startpipe(const char *dev_name, int width, int height);
 int vid_putpipe(int dev, unsigned char *image, int imgsize);
