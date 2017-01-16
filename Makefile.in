@@ -34,9 +34,8 @@ examplesdir = $(datadir)/@PACKAGE_NAME@/examples
 CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
-VIDEO_OBJ    = @VIDEO@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
-			   vloopback_motion2.o video2.o video_common.o video_freebsd.o \
+			   video_loopback.o video_v4l2.o video_common.o video_bktr.o \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
 			   stream.o md5.o netcam_rtsp.o ffmpeg.o \

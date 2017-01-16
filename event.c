@@ -11,7 +11,7 @@
 #include "ffmpeg.h"    /* must be first to avoid 'shadow' warning */
 #include "picture.h"   /* already includes motion.h */
 #include "event.h"
-#include "vloopback_motion2.h"
+#include "video_loopback.h"
 #include "video_common.h"
 
 /* Various functions (most doing the actual action) */

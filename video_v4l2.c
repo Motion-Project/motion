@@ -17,7 +17,7 @@
 */
 #include "rotate.h"    /* Already includes motion.h */
 #include "video_common.h"
-#include "video2.h"
+#include "video_v4l2.h"
 #include <sys/mman.h>
 
 

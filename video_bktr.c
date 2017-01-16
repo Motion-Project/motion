@@ -10,7 +10,7 @@
 /* For rotation */
 #include "rotate.h"     /* Already includes motion.h */
 #include "video_common.h"
-#include "video_freebsd.h"
+#include "video_bktr.h"
 
 #ifdef HAVE_BKTR
 

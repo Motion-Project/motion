@@ -29,12 +29,6 @@
 
 #include "motion.h"
 
-#if (defined(__FreeBSD__) && !defined(PWCBSD))
-#include "video_freebsd.h"
-#else
-#include "video2.h"
-#endif
-
 #define EXTENSION ".conf"
 
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }

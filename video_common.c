@@ -11,8 +11,8 @@
 
 #include "motion.h"
 #include "video_common.h"
-#include "video2.h"
-#include "video_freebsd.h"
+#include "video_v4l2.h"
+#include "video_bktr.h"
 #include "jpegutils.h"
 
 typedef unsigned char uint8_t;

@@ -1,5 +1,5 @@
 /*
- *    vloopback_motion.c
+ *    video_loopback.c
  *
  *    Video loopback functions for motion.
  *    Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
