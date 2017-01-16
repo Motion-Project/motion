@@ -569,7 +569,7 @@ void vid_close(struct context *cnt)
 {
 
 #ifdef HAVE_MMAL
-    if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+    if (cnt->mmalcam) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling mmalcam_cleanup");
         mmalcam_cleanup(cnt->mmalcam);
         cnt->mmalcam = NULL;
@@ -577,7 +577,7 @@ void vid_close(struct context *cnt)
     }
 #endif
 
-    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
+    if (cnt->netcam) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling netcam_cleanup");
         netcam_cleanup(cnt->netcam, 0);
         cnt->netcam = NULL;

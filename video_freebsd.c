@@ -597,7 +597,7 @@ void bktr_mutex_init(void)
     if (chk_bktr == 0){
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Initializing bktr mutex");
     } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No initialize mutex.");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
     }
 
 }
@@ -614,7 +614,7 @@ void bktr_mutex_destroy(void)
     if (chk_bktr == 0){
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Destroy bktr mutex");
     } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No destroy mutex.");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
     }
 
 }
@@ -704,7 +704,7 @@ void bktr_cleanup(struct context *cnt)
     if (chk_bktr == 0){
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Cleanup bktr");
     } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No cleanup bktr.");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
     }
 
 }
@@ -905,7 +905,7 @@ int bktr_start(struct context *cnt)
     if (chk_bktr == 0){
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Cleanup bktr");
     } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No cleanup bktr.");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
     }
     return fd_device;
 }
@@ -974,7 +974,7 @@ int bktr_next(struct context *cnt, unsigned char *map)
     if (chk_bktr == 0){
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Cleanup bktr");
     } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.  No cleanup bktr.");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
     }
     return ret;
 }
