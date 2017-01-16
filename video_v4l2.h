@@ -10,14 +10,6 @@
 #ifndef _INCLUDE_VIDEO_V4L2_H
 #define _INCLUDE_VIDEO_V4L2_H
 
-typedef struct video_image_buff {
-    unsigned char *ptr;
-    int content_length;
-    size_t size;                    /* total allocated size */
-    size_t used;                    /* bytes already used */
-    struct timeval image_time;      /* time this image was received */
-} video_buff;
-
 void v4l2_mutex_init(void);
 void v4l2_mutex_destroy(void);
 

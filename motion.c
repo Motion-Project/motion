@@ -932,7 +932,7 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height);
+        cnt->pipe = vlp_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->pipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for normal pictures");
@@ -944,7 +944,7 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for motion pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height);
+        cnt->mpipe = vlp_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->mpipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for motion pictures");

@@ -17,7 +17,6 @@
 */
 #include "rotate.h"    /* Already includes motion.h */
 #include "video_common.h"
-#include "video_v4l2.h"
 #include <sys/mman.h>
 
 
@@ -111,6 +110,14 @@ static struct video_dev *viddevs = NULL;
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
 static pthread_mutex_t v4l2_mutex;
+
+typedef struct video_image_buff {
+    unsigned char *ptr;
+    int content_length;
+    size_t size;                    /* total allocated size */
+    size_t used;                    /* bytes already used */
+    struct timeval image_time;      /* time this image was received */
+} video_buff;
 
 static const u32 queried_ctrls[] = {
     V4L2_CID_BRIGHTNESS,

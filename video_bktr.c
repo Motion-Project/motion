@@ -1,4 +1,4 @@
-/*    video_freebsd.c
+/*    video_bktr.c
  *
  *    BSD Video stream functions for motion.
  *    Copyright 2004 by Angel Carpintero (motiondevelop@gmail.com)
@@ -10,13 +10,45 @@
 /* For rotation */
 #include "rotate.h"     /* Already includes motion.h */
 #include "video_common.h"
-#include "video_bktr.h"
 
 #ifdef HAVE_BKTR
 
 #include <sys/mman.h>
 
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+#include <dev/ic/bt8xx.h>
+#else
+#include <dev/bktr/ioctl_meteor.h>
+#include <dev/bktr/ioctl_bt848.h>
+#endif
+
+#define array_elem(x) (sizeof(x) / sizeof((x)[0]))
+
+#define BKTR_PAL                   0
+#define BKTR_NTSC                  1
+#define BKTR_SECAM                 2
+#define BKTR_PAL_NC                3
+
+#define BKTR_PAL_HEIGHT          576
+#define BKTR_SECAM_HEIGHT        576
+#define BKTR_NTSC_HEIGHT         480
+
+#define BKTR_IN_COMPOSITE          0
+#define BKTR_IN_TV                 1
+#define BKTR_IN_COMPOSITE2         2
+#define BKTR_IN_SVIDEO             3
+
+#define BKTR_NORM_DEFAULT      BT848_IFORM_F_AUTO
+#define BKTR_NORM_PAL          BT848_IFORM_F_PALBDGHI
+#define BKTR_NORM_NTSC         BT848_IFORM_F_NTSCM
+#define BKTR_NORM_SECAM        BT848_IFORM_F_SECAM
+
+
 volatile sig_atomic_t bktr_frame_waiting;
+
+static pthread_mutex_t bktr_mutex;
+
+static struct video_dev *viddevs = NULL;
 
 static void catchsignal(int sig)
 {
@@ -575,13 +607,8 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
     }
 }
 
-static pthread_mutex_t bktr_mutex;
-
-static struct video_dev *viddevs = NULL;
 
 #endif /* HAVE_BKTR */
-
-
 
 
 void bktr_mutex_init(void)
@@ -909,7 +936,6 @@ int bktr_start(struct context *cnt)
     }
     return fd_device;
 }
-
 
 int bktr_next(struct context *cnt, unsigned char *map)
 {

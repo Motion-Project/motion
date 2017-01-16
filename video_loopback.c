@@ -16,7 +16,7 @@
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 
-static int v4l2_open_vidpipe(void)
+static int vlp_open_vidpipe(void)
 {
     int pipe_fd = -1;
     char pipepath[255];
@@ -103,7 +103,7 @@ typedef struct capent {const char *cap; int code;} capentT;
         {"Last",0}
 };
 
-static void show_vcap(struct v4l2_capability *cap) {
+static void vlp_show_vcap(struct v4l2_capability *cap) {
     unsigned int vers = cap->version;
     unsigned int c    = cap->capabilities;
     int i;
@@ -120,7 +120,7 @@ static void show_vcap(struct v4l2_capability *cap) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: ------------------------");
 }
 
-static void show_vfmt(struct v4l2_format *v) {
+static void vlp_show_vfmt(struct v4l2_format *v) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: type: type:           %d",v->type);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.width:        %d",v->fmt.pix.width);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.height:       %d",v->fmt.pix.height);
@@ -132,14 +132,14 @@ static void show_vfmt(struct v4l2_format *v) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: ------------------------");
 }
 
-static int v4l2_startpipe(const char *dev_name, int width, int height)
+int vlp_startpipe(const char *dev_name, int width, int height)
 {
     int dev;
     struct v4l2_format v;
     struct v4l2_capability vc;
 
     if (!strcmp(dev_name, "-")) {
-        dev = v4l2_open_vidpipe();
+        dev = vlp_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as pipe output", dev_name);
@@ -155,7 +155,7 @@ static int v4l2_startpipe(const char *dev_name, int width, int height)
         return -1;
     }
 
-    show_vcap(&vc);
+    vlp_show_vcap(&vc);
 
     memset(&v, 0, sizeof(v));
 
@@ -166,7 +166,7 @@ static int v4l2_startpipe(const char *dev_name, int width, int height)
         return -1;
     }
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Original pipe specifications");
-    show_vfmt(&v);
+    vlp_show_vfmt(&v);
 
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     v.fmt.pix.width = width;
@@ -177,7 +177,7 @@ static int v4l2_startpipe(const char *dev_name, int width, int height)
     v.fmt.pix.field = V4L2_FIELD_NONE;
     v.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Proposed pipe specifications");
-    show_vfmt(&v);
+    vlp_show_vfmt(&v);
 
     if (ioctl(dev,VIDIOC_S_FMT, &v) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOC_S_FMT)");
@@ -185,24 +185,15 @@ static int v4l2_startpipe(const char *dev_name, int width, int height)
     }
 
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Final pipe specifications");
-    show_vfmt(&v);
+    vlp_show_vfmt(&v);
 
     return dev;
 }
 
-static int v4l2_putpipe(int dev, unsigned char *image, int imgsize)
+int vlp_putpipe(int dev, unsigned char *image, int imgsize)
 {
     return write(dev, image, imgsize);
 }
 
-int vid_startpipe(const char *dev_name, int width, int height)
-{
-    return v4l2_startpipe(dev_name, width, height);
-}
-
-int vid_putpipe (int dev, unsigned char *image, int imgsize)
-{
-    return v4l2_putpipe(dev, image, imgsize);
-}
 
 #endif /* HAVE_V4L2 && !BSD */

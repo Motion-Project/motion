@@ -307,13 +307,13 @@ static void event_stream_put(struct context *cnt,
 
 
 #if defined(HAVE_V4L2) && !defined(__FreeBSD__)
-static void event_vid_putpipe(struct context *cnt,
+static void event_vlp_putpipe(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if (*(int *)devpipe >= 0) {
-        if (vid_putpipe(*(int *)devpipe, img, cnt->imgs.size) == -1)
+        if (vlp_putpipe(*(int *)devpipe, img, cnt->imgs.size) == -1)
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Failed to put image into video pipe");
     }
 }
@@ -926,11 +926,11 @@ struct event_handlers event_handlers[] = {
 #if defined(HAVE_V4L2) && !defined(__FreeBSD__)
     {
     EVENT_IMAGE,
-    event_vid_putpipe
+    event_vlp_putpipe
     },
     {
     EVENT_IMAGEM,
-    event_vid_putpipe
+    event_vlp_putpipe
     },
 #endif /* defined(HAVE_V4L2) && !__FreeBSD__  */
     {
