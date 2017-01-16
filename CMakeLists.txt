@@ -38,12 +38,8 @@ set(HAVE_PGSQL ${WITH_PGSQL})
 set(HAVE_SQLITE3 ${WITH_SQLITE3})
 
 set(HAVE_V4L2 OFF)
-  if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-    check_include_files("/usr/local/include/libv4l2.h" HAVE_LIBV4L2_H)
-  else()
-    check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
-  endif()
-  if(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2) || (HAVE_LIBV4L2_H AND WITH_V4L2)
+  check_include_files("linux/videodev2.h" HAVE_LINUX_VIDEODEV2_H)
+  if(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2)
     set(HAVE_V4L2 ON )
   endif(HAVE_LINUX_VIDEODEV2_H AND WITH_V4L2)
 
@@ -79,13 +75,8 @@ configure_file(motion.init-FreeBSD.sh.in motion.init-FreeBSD.sh)
 list(APPEND SRC_FILES
      conf.c motion.c alg.c draw.c event.c ffmpeg.c jpegutils.c logger.c md5.c
      netcam.c netcam_ftp.c netcam_jpeg.c netcam_rtsp.c netcam_wget.c
-     picture.c rotate.c stream.c track.c vloopback_motion2.c webhttpd.c)
-if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD" AND NOT(WITH_V4L2))
-	list(APPEND SRC_FILES video_freebsd.c)
-else()
-	list(APPEND SRC_FILES video2.c video_common.c)
-endif()
-
+     picture.c rotate.c stream.c track.c video_loopback.c webhttpd.c
+     video_v4l2.c video_common.c video_bktr.c)
 include_directories(${JPEG_INCLUDE_DIR})
 list(APPEND LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ${JPEG_LIBRARIES})
 

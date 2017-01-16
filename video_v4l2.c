@@ -20,8 +20,6 @@
 #include <sys/mman.h>
 
 
-static struct video_dev *viddevs = NULL;
-
 #ifdef HAVE_V4L2
 
 #include <linux/videodev2.h>
@@ -110,6 +108,8 @@ static struct video_dev *viddevs = NULL;
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
 static pthread_mutex_t v4l2_mutex;
+
+static struct video_dev *viddevs = NULL;
 
 typedef struct video_image_buff {
     unsigned char *ptr;
@@ -1074,12 +1074,7 @@ void v4l2_mutex_init(void)
 #else
     chk_v4l2 = 1;
 #endif // HAVE_V4L2
-
-    if (chk_v4l2 == 1) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Initializing V4L2 mutex");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled");
-    }
+    if (chk_v4l2 == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled");
 }
 
 void v4l2_mutex_destroy(void)
@@ -1091,12 +1086,7 @@ void v4l2_mutex_destroy(void)
 #else
     chk_v4l2 = 1;
 #endif // HAVE_V4L2
-
-    if (chk_v4l2 == 1) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Destroying V4L2 mutex");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled");
-    }
+    if (chk_v4l2 == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled");
 }
 
 int v4l2_start(struct context *cnt)
@@ -1262,8 +1252,7 @@ int v4l2_start(struct context *cnt)
 
     return fd_device;
 #else
-    cnt = cnt;
-    viddevs = NULL;
+    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled.");
     return -1;
 #endif // HAVE_V4l2
 }
@@ -1330,9 +1319,7 @@ void v4l2_cleanup(struct context *cnt)
         }
     }
 #else
-    cnt = cnt;
-    viddevs = NULL;
-
+    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled.");
 #endif // HAVE_V4L2
 }
 
@@ -1383,8 +1370,7 @@ int v4l2_next(struct context *cnt, unsigned char *map)
 
     return ret;
 #else
-    cnt = cnt;
-    map = map;
+    if (!cnt || !map) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled.");
     return -1;
 #endif // HAVE_V4L2
 

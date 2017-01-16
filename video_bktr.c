@@ -607,7 +607,6 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
     }
 }
 
-
 #endif /* HAVE_BKTR */
 
 
@@ -615,18 +614,12 @@ void bktr_mutex_init(void)
 {
     int chk_bktr;
 #ifdef HAVE_BKTR
-    //rename this function to bktr_mutex_init
     pthread_mutex_init(&bktr_mutex, NULL);
     chk_bktr = 0;
 #else
     chk_bktr = 1;
 #endif
-    if (chk_bktr == 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Initializing bktr mutex");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
-    }
-
+    if (chk_bktr == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
 }
 
 void bktr_mutex_destroy(void)
@@ -638,17 +631,12 @@ void bktr_mutex_destroy(void)
 #else
     chk_bktr = 1;
 #endif
-    if (chk_bktr == 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Destroy bktr mutex");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
-    }
+    if (chk_bktr == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
 
 }
 
 void bktr_cleanup(struct context *cnt)
 {
-    int chk_bktr;
 #ifdef HAVE_BKTR
 
     struct video_dev *dev = viddevs;
@@ -723,33 +711,23 @@ void bktr_cleanup(struct context *cnt)
         }
     }
 
-   chk_bktr = 0;
 #else
-    chk_bktr = 1;
-    cnt = cnt;
+    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
 #endif
-    if (chk_bktr == 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Cleanup bktr");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
-    }
 
 }
 
 int bktr_start(struct context *cnt)
 {
-
-    int chk_bktr;
-    int fd_device = -1;
-
 #ifdef HAVE_BKTR
+
     struct config *conf = &cnt->conf;
     struct video_dev *dev;
     int fd_tuner = -1;
     int width, height, capture_method;
     unsigned input, norm;
     unsigned long frequency;
-
+    int fd_device = -1;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: [%s]",
                conf->video_device);
@@ -923,31 +901,23 @@ int bktr_start(struct context *cnt)
 
     pthread_mutex_unlock(&bktr_mutex);
 
-   chk_bktr = 0;
-#else
-    chk_bktr = 1;
-    cnt = cnt;
-    fd_device = -1;
-#endif
-    if (chk_bktr == 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Cleanup bktr");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
-    }
     return fd_device;
+#else
+    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
+    return -1;
+#endif
+
 }
 
 int bktr_next(struct context *cnt, unsigned char *map)
 {
-    int chk_bktr;
-    int ret = -1;
-
 #ifdef HAVE_BKTR
 
     struct config *conf = &cnt->conf;
     struct video_dev *dev;
     int width, height;
     int dev_bktr = cnt->video_dev;
+    int ret = -1;
 
     /* NOTE: Since this is a capture, we need to use capture dimensions. */
     width = cnt->rotate_data.cap_width;
@@ -988,21 +958,12 @@ int bktr_next(struct context *cnt, unsigned char *map)
     if (cnt->rotate_data.degrees > 0)
         rotate_map(cnt, map);
 
-    chk_bktr = 0;
-#else
-
-    chk_bktr = 1;
-    cnt = cnt;
-    map = map;
-    ret = -1;
-
-#endif
-    if (chk_bktr == 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: Cleanup bktr");
-    } else {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
-    }
     return ret;
+#else
+    if (!cnt || !map) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: BKTR is not enabled.");
+    return -1;
+#endif
+
 }
 
 

@@ -13,4 +13,4 @@
 
 /* Optional headers */
 #cmakedefine HAVE_LINUX_VIDEODEV2_H
-#cmakedefine HAVE_SYS_VIDEOIO_H
+
