@@ -3214,6 +3214,62 @@ int myfclose(FILE* fh)
 }
 
 /**
+ * mystrftime_long
+ *
+ *   Motion-specific long form of format specifiers.
+ *
+ * Parameters:
+ *
+ *   cnt        - current thread's context structure.
+ *   width      - width associated with the format specifier.
+ *   word       - beginning of the format specifier's word.
+ *   l          - length of the format specifier's word.
+ *   out        - output buffer where to store the result. Size: PATH_MAX.
+ *
+ * This is called if a format specifier with the format below was found:
+ *
+ *   % { word }
+ *
+ * As a special edge case, an incomplete format at the end of the string
+ * is processed as well:
+ *
+ *   % { word \0
+ *
+ * Any valid format specified width is supported, e.g. "%12{host}".
+ *
+ * The following specifier keywords are currently supported:
+ *
+ * host    Replaced with the name of the local machine (see gethostname(2)).
+ * fps     Equivalent to %fps.
+ */
+static void mystrftime_long (const struct context *cnt,
+                             int width, const char *word, int l, char *out)
+{
+#define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
+
+    if (SPECIFIERWORD("host")) {
+        char host[PATH_MAX];
+        gethostname (host, PATH_MAX);
+        host[PATH_MAX-1] = 0; // see man page for gethostname.
+        snprintf (out, PATH_MAX, "%*s", width, host);
+        return;
+    }
+    if (SPECIFIERWORD("fps")) {
+        sprintf(out, "%*d", width, cnt->movie_fps);
+        return;
+    }
+    // Not a valid modifier keyword. Log the error and ignore.
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+        "%s: invalid format specifier keyword %*.*s", l, l, word);
+
+    // Do not let the output buffer empty, or else where to restart the
+    // interpretation of the user string will become dependent to far too
+    // many conditions. Maybe change loop to "if (*pos_userformat == '%') {
+    // ...} __else__ ..."?
+    out[0] = '~'; out[1] = 0;
+}
+
+/**
  * mystrftime
  *
  *   Motion-specific variant of strftime(3) that supports additional format
@@ -3356,6 +3412,16 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                     sprintf(tempstr, "%*d", width, sqltype);
                 else
                     ++pos_userformat;
+                break;
+
+            case '{': // long format specifier word.
+                {
+                    const char *word = ++pos_userformat;
+                    while ((*pos_userformat != '}') && (*pos_userformat != 0))
+                        ++pos_userformat;
+                    mystrftime_long (cnt, width, word, (int)(pos_userformat-word), tempstr);
+                    if (*pos_userformat == '\0') --pos_userformat;
+                }
                 break;
 
             case '$': // thread name
