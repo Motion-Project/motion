@@ -713,6 +713,8 @@ static void init_mask_privacy(struct context *cnt){
 
     int indxrow;
     int indxcol;
+    int start_cr, start_cb;
+
     FILE *picture;
 
     /* Load the privacy file if any */
@@ -739,18 +741,27 @@ static void init_mask_privacy(struct context *cnt){
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to read mask privacy image. Mask privacy feature disabled.");
         } else {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Mask privacy file \"%s\" loaded.", cnt->conf.mask_privacy);
-            //swap black vs white for efficient processing
+            start_cr = (cnt->imgs.height * cnt->imgs.width);
+            start_cb = start_cr + ((cnt->imgs.height * cnt->imgs.width)/4);
+
             for (indxrow = 0; indxrow < cnt->imgs.height; indxrow++) {
                 for (indxcol = 0; indxcol < cnt->imgs.width; indxcol++) {
                     if ( cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] == 0xff) {
-                        cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] = 0x00;
+                        if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                            cnt->imgs.mask_privacy[ start_cr + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0xff;
+                            cnt->imgs.mask_privacy[ start_cb + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0xff;
+                        }
                     } else{
-                        cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] = 0xff;
+                        cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] = 0x00;
+                        if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                            cnt->imgs.mask_privacy[ start_cr + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0x00;
+                            cnt->imgs.mask_privacy[ start_cb + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0x00;
+                        }
+
                     }
                 }
             }
         }
-
     } else {
         cnt->imgs.mask_privacy = NULL;
     }
@@ -1258,30 +1269,19 @@ static void motion_cleanup(struct context *cnt)
 
 static void mlp_mask_privacy(struct context *cnt){
 
-  /*  We do a bitwise OR of the image with the mask file.
-   *  The value for black in the mask file is 0x00 so when
-   *  it is bitwised OR with image, it will leave the original
-   *  value.  For this reason, we inverted the mask in the init
-   *  function.  The file is read in as black=blockout, white=keep
-   *  this function works as black=keep, white=blockout.  This also
-   *  results with the blockout section being white on the result.
-   *  This is done strictly for processing efficiency to lower cpu
-   *  since this function is called for every single image.
-   *  If user wants blockout in black instead of white, that means more cpu......
-  */
-
-  int indxrow;
-  int indxcol;
+  int indxloc;
 
   if (cnt->imgs.mask_privacy != NULL){
-      for (indxrow = 0; indxrow < cnt->imgs.height; indxrow++) {
-          for (indxcol = 0; indxcol < cnt->imgs.width; indxcol++) {
-              cnt->current_image->image[indxcol + (indxrow*cnt->imgs.width)] |= cnt->imgs.mask_privacy[indxcol + (indxrow*cnt->imgs.width)];
-          }
+      for (indxloc = 0; indxloc < (cnt->imgs.height * cnt->imgs.width); indxloc++) {
+          if (cnt->imgs.mask_privacy[indxloc] == 0x00)
+              cnt->current_image->image[indxloc] = 0x00;
       }
+      for (indxloc = (cnt->imgs.height * cnt->imgs.width); indxloc < cnt->imgs.size; indxloc++) {
+          if (cnt->imgs.mask_privacy[indxloc] == 0x00)
+              cnt->current_image->image[indxloc] = 0x80;
+      }
+
   }
-
-
 }
 
 static void mlp_areadetect(struct context *cnt){
