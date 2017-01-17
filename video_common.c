@@ -663,7 +663,7 @@ int vid_start(struct context *cnt)
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening BKTR device");
-        dev = v4l2_start(cnt);
+        dev = bktr_start(cnt);
         if (dev < 0) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: BKTR device failed to open");
         }
