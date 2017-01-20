@@ -1214,7 +1214,9 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "Camera %d Detection resumed\nDone\n", cnt[thread]->conf.camera_id);
+                sprintf(res, "Camera %d%s%s Detection resumed\nDone\n", cnt[thread]->conf.camera_id,
+                        cnt[thread]->conf.camera_name ? " -- " : "",
+                        cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template_raw(client_socket, res);
             }
         } else {
@@ -1248,7 +1250,7 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "<b>Camera %d%s%s</b> Detection paused\nDone\n", cnt[thread]->conf.camera_id,
+                sprintf(res, "Camera %d%s%s Detection paused\nDone\n", cnt[thread]->conf.camera_id,
                         cnt[thread]->conf.camera_name ? " -- " : "",
                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template_raw(client_socket, res);
