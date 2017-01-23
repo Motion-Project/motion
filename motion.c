@@ -1612,7 +1612,7 @@ static int mlp_capture(struct context *cnt){
             tv1.tv_sec=cnt->connectionlosttime;
             tv1.tv_usec = 0;
             memset(cnt->current_image->image, 0x80, cnt->imgs.size);
-            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
+            mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0, 0);
             draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
                       tmpout, cnt->conf.text_double);
 
@@ -1883,7 +1883,7 @@ static void mlp_overlay(struct context *cnt){
     /* Add text in lower left corner of the pictures */
     if (cnt->conf.text_left) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
-                   &cnt->current_image->timestamp_tv, NULL, 0);
+                   &cnt->current_image->timestamp_tv, NULL, 0, 0);
         draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
@@ -1891,7 +1891,7 @@ static void mlp_overlay(struct context *cnt){
     /* Add text in lower right corner of the pictures */
     if (cnt->conf.text_right) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
-                   &cnt->current_image->timestamp_tv, NULL, 0);
+                   &cnt->current_image->timestamp_tv, NULL, 0, 0);
         draw_text(cnt->current_image->image, cnt->imgs.width - 10,
                   cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
