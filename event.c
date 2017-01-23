@@ -226,7 +226,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 #endif /* HAVE_PGSQL */
 
 #ifdef HAVE_SQLITE3
-    if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.sqlite3_db)) {
+    if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
         int res;
         char *errmsg = 0;
         res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
