@@ -7,7 +7,7 @@
 # Please read the file COPYING for more info.                                  #
 ################################################################################
 # Please visit the Motion home page:                                           #
-# http://www.lavrsen.dk/twiki/bin/view/Motion                                  #
+# https://motion-project.github.io/                                            #
 ################################################################################
 
 CC      = @CC@
@@ -31,18 +31,20 @@ examplesdir = $(datadir)/@PACKAGE_NAME@/examples
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
-CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@
+CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
-LIBS         = @LIBS@  @FFMPEG_LIBS@
+LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
 VIDEO_OBJ    = @VIDEO@
-OBJ          = motion.o logger.o conf.o draw.o jpegutils.o vloopback_motion.o $(VIDEO_OBJ) \
+OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
+		 vloopback_motion2.o $(VIDEO_OBJ) \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
-			   stream.o md5.o netcam_rtsp.o @FFMPEG_OBJ@ @SDL_OBJ@
+			   stream.o md5.o netcam_rtsp.o ffmpeg.o \
+			   @MMAL_OBJ@
 SRC          = $(OBJ:.o=.c)
-DOC          = CHANGELOG COPYING CREDITS README motion_guide.html
-EXAMPLES     = *.conf
-EXAMPLES_BIN = motion.init-Debian motion.init-Fedora motion.init-FreeBSD.sh
+DOC          = CHANGELOG COPYING CREDITS README.md motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
+EXAMPLES     = *.conf motion.service
+EXAMPLES_BIN = motion.init-Debian motion.init-FreeBSD.sh
 PROGS        = motion
 DEPEND_FILE  = .depend
 
@@ -134,50 +136,13 @@ dep depend fastdep: $(DEPEND_FILE)
 ################################################################################
 dev: distclean autotools all
 
-################################################################################
-# DEV-GIT, BUILD with developer flags                                          #
-################################################################################
-dev-git: distclean autotools-git all
-
-
-################################################################################
-# GIT, BUILD with developer flags                                              #
-################################################################################
-build-commit-git: distclean set-version-git all
-
-################################################################################
-# CURRENT, BUILD current svn trunk.                                            #
-################################################################################
-current: distclean svn autotools all
-
-svn:
-	svn update
-
 autotools:
-	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.ac
 	autoconf
 	./configure --with-developer-flags 
-
-autotools-git:
-	@sed -i 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac
-	autoconf
-	./configure --with-developer-flags 
-
-
-build-commit: distclean svn set-version all
 
 set-version:
-	@sed -i 's/.\/version.sh/.\/commit-version.sh/g' configure.ac
 	autoconf
-	@sed -i 's/.\/commit-version.sh/.\/version.sh/g' configure.ac
 	./configure --with-developer-flags
-
-set-version-git:
-	@sed -i 's/.\/version.sh/.\/git-commit-version.sh/g' configure.ac
-	autoconf
-	@sed -i 's/.\/git-commit-version.sh/.\/version.sh/g' configure.ac
-	./configure --with-developer-flags
-
 
 help:
 	@echo "--------------------------------------------------------------------------------"
@@ -206,20 +171,20 @@ install:
 	mkdir -p $(DESTDIR)$(sysconfdir)/motion
 	mkdir -p $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(examplesdir)
-	@sed -i 's|$${prefix}|$(prefix)|' motion-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' thread1-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' thread2-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' thread3-dist.conf
-	@sed -i 's|$${prefix}|$(prefix)|' thread4-dist.conf				
+	@sed -e 's|$${prefix}|$(prefix)|' motion-dist.conf > motion-dist.conf.tmp && mv -f motion-dist.conf.tmp motion-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' camera1-dist.conf > camera1-dist.conf.tmp && mv -f camera1-dist.conf.tmp camera1-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' camera2-dist.conf > camera2-dist.conf.tmp && mv -f camera2-dist.conf.tmp camera2-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' camera3-dist.conf > camera3-dist.conf.tmp && mv -f camera3-dist.conf.tmp camera3-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' camera4-dist.conf > camera4-dist.conf.tmp && mv -f camera4-dist.conf.tmp camera4-dist.conf
 	$(INSTALL_DATA) motion.1 $(DESTDIR)$(mandir)/man1
 	$(INSTALL_DATA) $(DOC) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $(EXAMPLES) $(DESTDIR)$(examplesdir)
 	$(INSTALL) $(EXAMPLES_BIN) $(DESTDIR)$(examplesdir)
 	$(INSTALL_DATA) motion-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread1-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread2-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread3-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) thread4-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) camera1-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) camera2-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) camera3-dist.conf $(DESTDIR)$(sysconfdir)/motion
+	$(INSTALL_DATA) camera4-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	for prog in $(PROGS); \
 	do \
 	($(INSTALL) $$prog $(DESTDIR)$(bindir) ); \
@@ -243,10 +208,10 @@ uninstall remove: pre-build-info
 	done
 	rm -f $(mandir)/man1/motion.1
 	rm -f $(sysconfdir)/motion/motion-dist.conf
-	rm -f $(sysconfdir)/motion/thread1-dist.conf
-	rm -f $(sysconfdir)/motion/thread2-dist.conf
-	rm -f $(sysconfdir)/motion/thread3-dist.conf
-	rm -f $(sysconfdir)/motion/thread4-dist.conf
+	rm -f $(sysconfdir)/motion/camera1-dist.conf
+	rm -f $(sysconfdir)/motion/camera2-dist.conf
+	rm -f $(sysconfdir)/motion/camera3-dist.conf
+	rm -f $(sysconfdir)/motion/camera4-dist.conf
 	rm -rf $(docdir)
 	rm -rf $(examplesdir)
 	@echo "--------------------------------------------------------------------------------"
@@ -259,12 +224,12 @@ uninstall remove: pre-build-info
 ################################################################################
 clean: pre-build-info
 	@echo "Removing compiled files and binaries..."
-	@rm -f *~ *.jpg *.o $(PROGS) combine $(DEPEND_FILE)
+	@rm -f *~ *.o $(PROGS) combine $(DEPEND_FILE)
 
 ################################################################################
 # DIST restores the directory to distribution state.                           #
 ################################################################################
-dist: distclean updateguide
+dist: distclean 
 	@chmod -R 644 *
 	@chmod 755 configure
 	@chmod 755 version.sh
@@ -275,21 +240,10 @@ dist: distclean updateguide
 ################################################################################
 distclean: clean
 	@echo "Removing files generated by configure..."
-	@rm -f config.status config.log config.cache Makefile motion.init-Fedora motion.init-Debian motion.init-FreeBSD.sh
-	@rm -f thread1-dist.conf thread2-dist.conf thread3-dist.conf thread4-dist.conf motion-dist.conf motion-help.conf motion.spec
+	@rm -f config.status config.log config.cache Makefile motion.service motion.init-Debian motion.init-FreeBSD.sh
+	@rm -f camera1-dist.conf camera2-dist.conf camera3-dist.conf camera4-dist.conf motion-dist.conf motion-help.conf motion.spec
 	@rm -rf autom4te.cache config.h
 	@echo "You will need to re-run configure if you want to build Motion."
 	@echo
 
-################################################################################
-# UPDATEGUIDE downloads the Motion Guide from TWiki.                           #
-################################################################################
-updateguide: pre-build-info
-	@echo "Downloading Motion Guide. If it fails, please check your Internet connection."
-	@echo
-	wget www.lavrsen.dk/twiki/bin/view/Motion/MotionGuideOneLargeDocument?skin=text -O motion_guide.tmp
-	@echo "Cleaning up and fixing links..."
-	@cat motion_guide.tmp | sed -e 's/\?skin=text//g;s,"/twiki/,"http://www.lavrsen.dk/twiki/,g' > motion_guide.html
-	@rm -f motion_guide.tmp
-	@echo "All done, you should now have a local copy of the Motion guide from the home page."
-	@echo
+

@@ -14,7 +14,6 @@
 
 #include <assert.h>
 
-#undef HAVE_STDLIB_H
 #include <jpeglib.h>
 #include <jerror.h>
 
@@ -223,7 +222,7 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
  */
 static void put_jpeg_exif(j_compress_ptr cinfo,
 			  const struct context *cnt,
-			  const struct tm *timestamp,
+			  const struct timeval *tv1,
 			  const struct coord *box)
 {
     /* description, datetime, and subtime are the values that are actually
@@ -231,16 +230,18 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     */
     char *description, *datetime, *subtime;
     char datetime_buf[22];
+    struct tm timestamp_tm;
 
-    if (timestamp) {
+    if (tv1->tv_sec) {
+        localtime_r(&tv1->tv_sec, &timestamp_tm);
 	/* Exif requires this exact format */
 	    snprintf(datetime_buf, 21, "%04d:%02d:%02d %02d:%02d:%02d",
-		        timestamp->tm_year + 1900,
-		        timestamp->tm_mon + 1,
-		        timestamp->tm_mday,
-		        timestamp->tm_hour,
-		        timestamp->tm_min,
-		        timestamp->tm_sec);
+		        timestamp_tm.tm_year + 1900,
+		        timestamp_tm.tm_mon + 1,
+		        timestamp_tm.tm_mday,
+		        timestamp_tm.tm_hour,
+		        timestamp_tm.tm_min,
+		        timestamp_tm.tm_sec);
 	    datetime = datetime_buf;
     } else {
 	    datetime = NULL;
@@ -254,7 +255,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 	    description = malloc(PATH_MAX);
 	    mystrftime(cnt, description, PATH_MAX-1,
 		        cnt->conf.exif_text,
-		       timestamp, NULL, 0, 0);
+		       tv1, NULL, 0, 0);
     } else {
 	    description = NULL;
     }
@@ -352,7 +353,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 
     if (datetime) {
         memcpy(writing.buf, exif_tzoffset_tag, 12);
-        put_sint16(writing.buf+8, timestamp->tm_gmtoff / 3600);
+        put_sint16(writing.buf+8, timestamp_tm.tm_gmtoff / 3600);
         writing.buf += 12;
     }
 
@@ -414,7 +415,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
  */
 static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 				   unsigned char *input_image, int width, int height, int quality,
-				   struct context *cnt, struct tm *tm, struct coord *box)
+				   struct context *cnt, struct timeval *tv1, struct coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -452,14 +453,14 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 
     jpeg_set_quality(&cinfo, quality, TRUE);
     cinfo.dct_method = JDCT_FASTEST;
-    
+
     _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
-    
+
 
     jpeg_start_compress(&cinfo, TRUE);
 
-    put_jpeg_exif(&cinfo, cnt, tm, box);
-    
+    put_jpeg_exif(&cinfo, cnt, tv1, box);
+
     /* If the image is not a multiple of 16, this overruns the buffers
      * we'll just pad those last bytes with zeros
      */
@@ -469,13 +470,13 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
                 y[i] = input_image + width * (i + j);
                 if (i % 2 == 0) {
                     cb[i / 2] = input_image + width * height + width / 2 * ((i + j) /2);
-                    cr[i / 2] = input_image + width * height + width * height / 4 + width / 2 * ((i + j) / 2);                
+                    cr[i / 2] = input_image + width * height + width * height / 4 + width / 2 * ((i + j) / 2);
                 }
             } else {
                 y[i] = 0x00;
                 cb[i] = 0x00;
                 cr[i] = 0x00;
-            }    
+            }
         }
         jpeg_write_raw_data(&cinfo, data, 16);
     }
@@ -558,7 +559,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
 static void put_jpeg_yuv420p_file(FILE *fp,
 				  unsigned char *image, int width, int height,
 				  int quality,
-				  struct context *cnt, struct tm *tm, struct coord *box)
+				  struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int i, j;
 
@@ -599,7 +600,7 @@ static void put_jpeg_yuv420p_file(FILE *fp,
     jpeg_stdio_dest(&cinfo, fp);        // Data written to file
     jpeg_start_compress(&cinfo, TRUE);
 
-    put_jpeg_exif(&cinfo, cnt, tm, box);
+    put_jpeg_exif(&cinfo, cnt, tv1, box);
 
     for (j = 0; j < height; j += 16) {
         for (i = 0; i < 16; i++) {
@@ -613,8 +614,8 @@ static void put_jpeg_yuv420p_file(FILE *fp,
                 y[i] = 0x00;
                 cb[i] = 0x00;
                 cr[i] = 0x00;
-            }        
-        }    
+            }
+        }
         jpeg_write_raw_data(&cinfo, data, 16);
     }
 
@@ -898,12 +899,12 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tm), &(cnt->current_image->location));
+                                       cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
     case VIDEO_PALETTE_GREY:
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
     default:
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknown image type %d",
                    cnt->imgs.type);
     }
 
@@ -917,13 +918,13 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
     } else {
         switch (cnt->imgs.type) {
         case VIDEO_PALETTE_YUV420P:
-            put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tm), &(cnt->current_image->location));
+            put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
             break;
         case VIDEO_PALETTE_GREY:
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
             break;
         default:
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknow image type %d",
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknown image type %d",
                        cnt->imgs.type);
         }
     }
@@ -934,7 +935,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
 {
     FILE *picture;
 
-    picture = myfopen(file, "w", BUFSIZE_1MEG);
+    picture = myfopen(file, "w");
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
@@ -963,9 +964,9 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
  */
 unsigned char *get_pgm(FILE *picture, int width, int height)
 {
-    int x = 0 , y = 0, maxval;
+    int x, y, mask_width, mask_height, maxval;
     char line[256];
-    unsigned char *image;
+    unsigned char *image, *resized_image;
 
     line[255] = 0;
 
@@ -986,15 +987,9 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
         if (!fgets(line, 255, picture))
             return NULL;
 
-    /* Check size */
-    if (sscanf(line, "%d %d", &x, &y) != 2) {
+    /* Read image size */
+    if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading size in pgm file");
-        return NULL;
-    }
-
-    if (x != width || y != height) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Wrong image size %dx%d should be %dx%d",
-                   x, y, width, height);
         return NULL;
     }
 
@@ -1011,15 +1006,35 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Read data */
 
-    image = mymalloc(width * height);
+    image = mymalloc(mask_width * mask_height);
 
-    for (y = 0; y < height; y++) {
-        if ((int)fread(&image[y * width], 1, width, picture) != width)
+    for (y = 0; y < mask_height; y++) {
+        if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading image data from pgm file");
 
-        for (x = 0; x < width; x++)
-            image[y * width + x] = (int)image[y * width + x] * 255 / maxval;
+        for (x = 0; x < mask_width; x++)
+            image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
 
+    }
+
+    /* Resize mask if required */
+    if (mask_width != width || mask_height != height) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: The mask file specified is not the same size as image from camera.");
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Attempting to resize mask image from %dx%d to %dx%d",
+                   mask_width, mask_height, width, height);
+
+        resized_image = mymalloc(width * height);
+
+        for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+                resized_image[y * width + x] = image[
+                        (mask_height - 1) * y / (height - 1) * mask_width +
+                        (mask_width  - 1) * x / (width  - 1)];
+            }
+        }
+
+        free(image);
+        image = resized_image;
     }
 
     return image;
@@ -1037,7 +1052,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
 {
     FILE *picture;
 
-    picture = myfopen(file, "w", BUFSIZE_1MEG);
+    picture = myfopen(file, "w");
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
@@ -1093,12 +1108,7 @@ void preview_save(struct context *cnt)
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 
-#ifdef HAVE_FFMPEG
-        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))
-            && !use_imagepath) {
-#else
-        if ((cnt->conf.useextpipe && cnt->extpipe) && !use_imagepath) {
-#endif
+        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) && !use_imagepath) {
             if (cnt->conf.useextpipe && cnt->extpipe) {
                 basename_len = strlen(cnt->extpipefilename) + 1;
                 strncpy(previewname, cnt->extpipefilename, basename_len);
@@ -1127,7 +1137,7 @@ void preview_save(struct context *cnt)
             else
                 imagepath = (char *)DEF_IMAGEPATH;
 
-            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tm, NULL, 0, 0);
+            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0, 0);
             snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
             put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);

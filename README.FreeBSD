@@ -1,88 +1,51 @@
-The motion port to *BSD is still in very beta state, but
-has been tested with network cameras support successfully.
-This version has been tested with TV Card ( Miro PCTV pro ),
-but should work by any framegrabber supported by bktr driver. 
+The following file explains how to build and run
+Motion on FreeBSD. It was tested on FreeBSD 10.3.
 
-* How configure your capture card *
+To build Motion on FreeBSD, you need the following packages:
+* autoconf
+* automake
+* ffmpeg
+* gcc
+* gmake
+* libjpeg-turbo
+* pkgconf
 
-1-. Load the bktr modules
-type as root :
+For database backend support, also install one of the following:
+* mysql57-client
+* postgresql95-contrib
+* sqlite3
 
-kldload bktr_mem.ko
-kldload bktr.ko 
+For PWC based webcams, also install:
+* pwcbsd
+* v4l_compat
 
-You can setup this in your /boot/loader.conf adding :
-
-bktr_mem_load="YES"
-bktr_load="YES"
-
-2-. Configure your card settings ( tuner type , format and card ).
-
-Type as root :
-
-sysctl hw.bt848.card=1 ( Miro pctv )
-sysctl hw.bt848.tuner=10 ( PHILIPS_FR1216_PAL )
-sysctl hw.bt848.format=0 ( PAL )
-
-or add to /etc/sysctl.conf adding :
-
-hw.bt848.card=1
-hw.bt848.tuner=10
-hw.bt848.format=0
-
-* To compile motion in FreeBSD ( should work in OpenBSD and NetBSD ) :
-
-   autoconf
-   ./configure
-   of
-   CC=gcc34 ./configure ( to override the default gcc version) 
-   gmake
-   gmake install
-
-( ./configure --without-bktr , to work only with network cameras ).
-
-Tested in FreeBSD 4.9/4.1x/5.x/6.x .
-
-Packages needed (dependencies for 6.x):
-
- - autoconf-2.59_2 
- - gcc-3.4.6_20051206 
- - m4-1.4.4 
- - linuxthreads-2.2.3_19 only if you don't want native freebsd pthread 
- - jpeg-6b_4 or above  
- - gmake-3.80_2 ( GNU Make )
- - ffmpeg-0.4.9.p1_6 ( mpeg1/4 video encoders ).
- - mysql-server , mysql-client ( database backend support ).
- - postgresql-devel , postgresql ( database backend support ).
-
- - kernel with bktr support ( GENERIC kernel has by default support ).
+Then, run the following commands:
+ autoreconf
+ ./configure
+ gmake
+ gmake install
 
 
- *  webcams pwc based
+To set up your capture device:
 
- - pwcbsd-1.4.1_1 ( with mmap support )
- - v4l_compat-1.0.20060801
+  1. Load the bktr modules
 
- run : ./configure --with-pwcbsd ; gmake ; gmake install 
+    Type as root:
+      kldload bktr_mem.ko
+      kldload bktr.ko
 
+    You can setup this in your /boot/loader.conf adding:
+      bktr_mem_load="YES"
+      bktr_load="YES"
 
-* TODO *
---------
+  2. Configure your card settings (tuner type, format, and card)
 
-- Improve the capture method ( double buffer , async capture ). 
-- Detect pixelformat , palettes format , etc ...
-- Implement tuner capture ( now only video / svideo capture implemented ).
-- Code clean up.
-- And many others ... 
+    Type as root:
+      sysctl hw.bt848.card=1 ( Miro pctv )
+      sysctl hw.bt848.tuner=10 ( PHILIPS_FR1216_PAL )
+      sysctl hw.bt848.format=0 ( PAL )
 
- Any question / fix / suggestion  please send it to motion mailing list.
-
-
- http://www.lavrsen.dk/twiki/bin/view/Motion/FreeBSD
-
- * WEBCAMS
- ----------
- http://www.lavrsen.dk/twiki/bin/view/Motion/HowtoMotionPwcFreeBSD
-
- Angel Carpintero
- ack@telefonica.net
+    or add to /etc/sysctl.conf adding:
+      hw.bt848.card=1
+      hw.bt848.tuner=10
+      hw.bt848.format=0

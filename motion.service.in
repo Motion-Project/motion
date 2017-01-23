@@ -1,0 +1,12 @@
+[Unit]
+Description=Motion daemon
+After=local-fs.target network.target
+
+[Service]
+PIDFile=/var/run/motion.pid
+ExecStart=@BIN_PATH@/motion -n
+Type=simple
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

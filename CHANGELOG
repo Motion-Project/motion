@@ -1,4 +1,20 @@
 Summary of Changes
+
+Version 4.0 Changes Below
+   * PI Cam Support
+   * Web Interface fixes for preview, IPV6, HTML 
+   * Allow for resize of mask file to match image
+   * FFMPEG Revisions (3.0, reporting of messages, FPS, timelapse)
+   * Fix image corruptions across threads
+   * Documentation updates to guide, manual, reference images.
+   * Add camera_name, camera_id, camera_dir options
+   * Configuration fixes (Pi3, JPeg Turbo, SDL, Fedora, BSD, systemd)
+   * travis build testing
+   * remove unused files(pwc-ioctl****.h, README.Axis)
+   * ffmpeg_variable_bitrate to values of 0-100 and ffmpeg fixes
+   * Better messages for pkg-config
+   * Fix timelapse crash when selecting mpeg4
+Version 3.4.1 Changes Below
    * Added suggestion for including pkgconf as part of build requirements
    * Swap sequence of user ffmpeg path and PKG_CONFIG_PATH
    * Allow : in non standard locations of netcam_url path.

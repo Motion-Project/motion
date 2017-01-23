@@ -1,21 +1,31 @@
-*.log
-.svn/
+Makefile
+config.h
+motion
+motion.init-Debian
+motion.init-FreeBSD.sh
+motion.service
+motion.spec
+motion-dist.conf
+camera1-dist.conf
+camera2-dist.conf
+camera3-dist.conf
+camera4-dist.conf
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# CMake -G Xcode
+CMakeScripts/
+motion.build/
+motion.xcodeproj/
+
+# automake
 *.o
+*.log
+.depend
 autom4te.cache
 aclocal.m4
-.depend
-motion
-config.h
 config.status
-config.h.in
-Makefile
 configure
-motion-dist.conf
-motion.init-Debian
-motion.init-Fedora
-motion.init-FreeBSD.sh
-motion.spec
-thread1-dist.conf
-thread2-dist.conf
-thread3-dist.conf
-thread4-dist.conf

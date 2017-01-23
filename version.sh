@@ -1,11 +1,8 @@
 #!/bin/sh
-
-SNV_VERSION=`cd "$1" && LC_ALL=C svn info 2> /dev/null | grep Revision | cut -d' ' -f2`
-test $SNV_VERSION || SNV_VERSION=`cd "$1" && grep revision .svn/entries 2>/dev/null | cut -d '"' -f2`
-test $SNV_VERSION || SNV_VERSION=UNKNOWN
-GITDIR=".git"
-if [ -d "$GITDIR" ]; then 
-  SNV_VERSION=`git show -s --format=%h`
+BASE_VERSION="4.0.1"
+if [ -d .git ]; then
+	GIT_COMMIT=`git show -s --format=%h`
+	printf "$BASE_VERSION+git$GIT_COMMIT"
+else
+	printf "$BASE_VERSION+gitUNKNOWN"
 fi
-echo -n "Unofficial-Git-$SNV_VERSION"
-

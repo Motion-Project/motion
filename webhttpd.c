@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stddef.h>
+#include <ctype.h>
 
 /* Timeout in seconds, used for read and write */
 const int NONBLOCK_TIMEOUT = 1;
@@ -25,16 +26,23 @@ pthread_mutex_t httpd_mutex;
 int warningkill;
 
 static const char *ini_template =
-    "<html><head><title>Motion "VERSION"</title></head>\n"
+    "<!DOCTYPE html>\n"
+    "<html>\n"
+    "<head><title>Motion "VERSION"</title></head>\n"
     "<body>\n";
 
 static const char *set_template =
-    "<html><head><script language='javascript'>"
+    "<!DOCTYPE html>\n"
+    "<html>\n"
+    "<head>\n"
+    "<title>Motion "VERSION"</title>\n"
+    "<script language='javascript'>"
     "function show() {top.location.href="
     "'set?'+document.n.onames.options[document.n.onames.selectedIndex].value"
     "+'='+document.s.valor.value;"
-    "}</script>\n<title>Motion "VERSION"</title>\n"
-    "</head><body>\n";
+    "}</script>\n"
+    "</head>\n"
+    "<body>\n";
 
 static const char *end_template =
     "</body>\n"
@@ -65,6 +73,7 @@ static const char *ok_response_raw =
 static const char *bad_request_response =
     "HTTP/1.0 400 Bad Request\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Bad Request</h1>\n"
@@ -80,6 +89,7 @@ static const char *bad_request_response_raw =
 static const char *not_found_response_template =
     "HTTP/1.0 404 Not Found\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Found</h1>\n"
@@ -95,6 +105,7 @@ static const char *not_found_response_template_raw =
 static const char *not_found_response_valid =
     "HTTP/1.0 404 Not Valid\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Valid</h1>\n"
@@ -110,6 +121,7 @@ static const char *not_found_response_valid_raw =
 static const char *not_valid_syntax =
     "HTTP/1.0 404 Not Valid Syntax\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Valid Syntax</h1>\n"
@@ -124,6 +136,7 @@ static const char *not_valid_syntax_raw =
 static const char *not_track =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Tracking Not Enabled</h1>\n";
@@ -136,6 +149,7 @@ static const char *not_track_raw =
 static const char *track_error =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Track Error</h1>\n";
@@ -148,6 +162,7 @@ static const char *track_error_raw =
 static const char *error_value =
     "HTTP/1.0 200 OK\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Value Error</h1>\n";
@@ -160,6 +175,7 @@ static const char *error_value_raw =
 static const char *not_found_response_valid_command =
     "HTTP/1.0 404 Not Valid Command\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Not Valid Command</h1>\n"
@@ -175,6 +191,7 @@ static const char *not_found_response_valid_command_raw =
 static const char *bad_method_response_template =
     "HTTP/1.0 501 Method Not Implemented\r\n"
     "Content-type: text/html\r\n\r\n"
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<body>\n"
     "<h1>Method Not Implemented</h1>\n"
@@ -418,8 +435,11 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
             /*call list*/
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n<ul>",
-                        thread, thread);
+                sprintf(res, "<a href=/%u/config>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>\n<ul>",
+                        thread, cnt[thread]->conf.camera_id,
+                        cnt[thread]->conf.camera_name ? " -- " : "",
+                        cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
+
                 send_template(client_socket, res);
 
                 for (i=0; config_params[i].param_name != NULL; i++) {
@@ -468,30 +488,30 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                 retval = mystrdup(thread_strings);
                             }
 
-                            sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
+                            sprintf(res, "<li><a href=/%u/config/set?%s>%s</a> = %s</li>\n", thread,
                                     config_params[i].param_name, config_params[i].param_name, retval);
                             free(retval);
                         } else if (thread != 0) {
                             /* get the value from main thread for the rest of threads */
                             value = config_params[i].print(cnt, NULL, i, 0);
 
-                            sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
+                            sprintf(res, "<li><a href=/%u/config/set?%s>%s</a> = %s</li>\n", thread,
                                     config_params[i].param_name, config_params[i].param_name,
                                     value ? value : "(not defined)");
                         } else {
-                            sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
+                            sprintf(res, "<li><a href=/%u/config/set?%s>%s</a> = %s</li>\n", thread,
                                     config_params[i].param_name, config_params[i].param_name,
                                     "(not defined)");
                         }
 
                     } else {
-                        sprintf(res, "<li><a href=/%hu/config/set?%s>%s</a> = %s</li>\n", thread,
+                        sprintf(res, "<li><a href=/%u/config/set?%s>%s</a> = %s</li>\n", thread,
                                 config_params[i].param_name, config_params[i].param_name, value);
                     }
                     send_template(client_socket, res);
                 }
 
-                sprintf(res, "</ul><a href=/%hu/config>&lt;&ndash; back</a>", thread);
+                sprintf(res, "</ul><a href=/%u/config>&lt;&ndash; back</a>", thread);
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
@@ -547,11 +567,14 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                             conf_cmdparse(cnt + thread, config_params[i].param_name, Value);
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 sprintf(res,
-                                    "<a href=/%hu/config/list>&lt;&ndash; back</a>"
-                                    "<br><br>\n<b>Thread %hu</b>\n"
-                                    "<ul><li><a href=/%hu/config/set?%s>%s</a> = %s"
+                                    "<a href=/%u/config/list>&lt;&ndash; back</a>"
+                                    "<br><br>\n<b>Camera %d%s%s</b>\n"
+                                    "<ul><li><a href=/%u/config/set?%s>%s</a> = %s"
                                     "</li></ul><b>Done</b>",
-                                        thread, thread, thread, config_params[i].param_name,
+                                        thread, cnt[thread]->conf.camera_id,
+                                        cnt[thread]->conf.camera_name ? " -- " : "",
+                                        cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                        thread, config_params[i].param_name,
                                         config_params[i].param_name, Value);
 
                                 send_template_ini_client(client_socket, ini_template);
@@ -593,9 +616,12 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
 
                         if (cnt[0]->conf.webcontrol_html_output) {
                             sprintf(res,
-                                "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
-                                    "<b>Thread %hu</b>\n<ul><li><a href=/%hu/config/set?%s>%s</a>"
-                                    "= %s</li></ul><br><b>Done</b>", thread, thread, thread,
+                                "<a href=/%u/config/list>&lt;&ndash; back</a><br><br>\n"
+                                    "<b>Camera %d%s%s</b>\n<ul><li><a href=/%u/config/set?%s>%s</a>"
+                                    "= %s</li></ul><br><b>Done</b>", thread, cnt[thread]->conf.camera_id,
+                                    cnt[thread]->conf.camera_name ? " -- " : "",
+                                    cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                    thread,
                                     config_params[i].param_name, config_params[i].param_name, type);
 
                             send_template_ini_client(client_socket, ini_template);
@@ -660,15 +686,17 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                 sprintf(option, "<option value='on'>on</option>\n"
                                                 "<option value='off' selected>off</option>\n");
 
-                            sprintf(res, "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
-                                         "<b>Thread %hu</b>\n"
+                            sprintf(res, "<a href=/%u/config/list>&lt;&ndash; back</a><br><br>\n"
+                                         "<b>Camera %d%s%s</b>\n"
                                          "<form action=set?>\n"
                                          "<b>%s</b>&nbsp;<select name='%s'>\n"
                                          "%s"
                                          "</select><input type='submit' value='set'>\n"
                                          "&nbsp;&nbsp;&nbsp;&nbsp;"
                                          "<a href='%s#%s' target=_blank>[help]</a>"
-                                         "</form>\n<hr><i>%s</i>", thread, thread,
+                                         "</form>\n<hr><i>%s</i>", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                                          config_params[i].param_name, config_params[i].param_name,
                                          option, TWIKI_URL, config_params[i].param_name, text_help);
                         } else {
@@ -679,13 +707,15 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                                                 value = config_params[i].print(cnt, NULL, i, 0);
                                 if (value == NULL) value = "";
                             }
-                            sprintf(res, "<a href=/%hu/config/list>&lt;&ndash; back</a><br><br>\n"
-                                         "<b>Thread %hu</b>\n<form action=set?>\n"
+                            sprintf(res, "<a href=/%u/config/list>&lt;&ndash; back</a><br><br>\n"
+                                         "<b>Camera %d%s%s</b>\n<form action=set?>\n"
                                          "<b>%s</b>&nbsp;<input type=text name='%s' value='%s' size=80>\n"
                                          "<input type='submit' value='set'>\n"
                                          "&nbsp;&nbsp;&nbsp;&nbsp;"
                                          "<a href='%s#%s' target=_blank>[help]</a>"
-                                         "</form>\n<hr><i>%s</i>", thread, thread,
+                                         "</form>\n<hr><i>%s</i>", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                                          config_params[i].param_name, config_params[i].param_name,
                                          value, TWIKI_URL, config_params[i].param_name, text_help);
                         }
@@ -709,8 +739,10 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
         } else if (length_uri == 0) {
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, set_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n"
-                             "<form name='n'>\n<select name='onames'>\n", thread, thread);
+                sprintf(res, "<a href=/%u/config>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>\n"
+                             "<form name='n'>\n<select name='onames'>\n", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
 
                 send_template(client_socket, res);
                 for (i=0; config_params[i].param_name != NULL; i++) {
@@ -802,11 +834,14 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                                 value = config_params[i].print(cnt, NULL, i, 0);
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 send_template_ini_client(client_socket, ini_template);
-                                sprintf(res, "<a href=/%hu/config/get>&lt;&ndash; back</a><br><br>\n"
-                                             "<b>Thread %hu</b><br>\n<ul><li>%s = %s &nbsp;&nbsp;"
+                                sprintf(res, "<a href=/%u/config/get>&lt;&ndash; back</a><br><br>\n"
+                                             "<b>Camera %d%s%s</b><br>\n<ul><li>%s = %s &nbsp;&nbsp;"
                                              "&nbsp;&nbsp;<a href='%s#%s' target=_blank>"
                                              "[help]</a></li></ul><hr><i>%s</i>",
-                                             thread, thread, config_params[i].param_name, value,
+                                             thread, cnt[thread]->conf.camera_id,
+                                             cnt[thread]->conf.camera_name ? " -- " : "",
+                                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                             config_params[i].param_name, value,
                                              TWIKI_URL, config_params[i].param_name, text_help);
 
                                 send_template(client_socket, res);
@@ -837,9 +872,11 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
         } else if (length_uri == 0) {
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b><br>\n"
+                sprintf(res, "<a href=/%u/config>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b><br>\n"
                              "<form action=get>\n"
-                             "<select name='query'>\n", thread, thread);
+                             "<select name='query'>\n", thread, cnt[thread]->conf.camera_id,
+                        cnt[thread]->conf.camera_name ? " -- " : "",
+                        cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 for (i=0; config_params[i].param_name != NULL; i++) {
                     if ((thread != 0) && (config_params[i].main_thread))
@@ -871,14 +908,14 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
             if (length_uri == 0) {
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
-                    sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>"
-                                 "Are you sure? <a href=/%hu/config/writeyes>Yes</a>\n", thread, thread);
+                    sprintf(res, "<a href=/%u/config>&lt;&ndash; back</a><br><br>"
+                                 "Are you sure? <a href=/%u/config/writeyes>Yes</a>\n", thread, thread);
                     send_template(client_socket, res);
                     send_template_end_client(client_socket);
                 } else {
                     conf_print(cnt);
                     send_template_ini_client_raw(client_socket);
-                    sprintf(res, "Thread %hu write\nDone\n", thread);
+                    sprintf(res, "Camera %d write\nDone\n", cnt[thread]->conf.camera_id);
                     send_template_raw(client_socket, res);
                 }
             } else {
@@ -896,13 +933,15 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
             conf_print(cnt);
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/config>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>  write done !\n",
-                             thread, thread);
+                sprintf(res, "<a href=/%u/config>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>  write done !\n",
+                             thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "Thread %hu write\nDone\n", thread);
+                sprintf(res, "Camera %d write\nDone\n", cnt[thread]->conf.camera_id);
                 send_template_raw(client_socket, res);
             }
         } else {
@@ -957,13 +996,13 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
-                             "makemovie for thread %hu done<br>\n", thread, thread);
+                sprintf(res, "<a href=/%u/action>&lt;&ndash; back</a><br><br>\n"
+                             "makemovie for thread %u done<br>\n", thread, thread);
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "makemovie for thread %hu\nDone\n", thread);
+                sprintf(res, "makemovie for thread %u\nDone\n", thread);
                 send_template_raw(client_socket, res);
             }
         } else {
@@ -989,13 +1028,13 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             cnt[thread]->snapshot = 1;
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
-                             "snapshot for thread %hu done<br>\n", thread, thread);
+                sprintf(res, "<a href=/%u/action>&lt;&ndash; back</a><br><br>\n"
+                             "snapshot for thread %u done<br>\n", thread, thread);
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "snapshot for thread %hu\nDone\n", thread);
+                sprintf(res, "snapshot for thread %u\nDone\n", thread);
                 send_template_raw(client_socket, res);
             }
         } else {
@@ -1035,13 +1074,13 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 cnt[thread]->restart = 1;
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
-                    sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
-                                 "restart for thread %hu done<br>\n", thread, thread);
+                    sprintf(res, "<a href=/%u/action>&lt;&ndash; back</a><br><br>\n"
+                                 "restart for thread %u done<br>\n", thread, thread);
                     send_template(client_socket, res);
                     send_template_end_client(client_socket);
                 } else {
                     send_template_ini_client_raw(client_socket);
-                    sprintf(res, "restart for thread %hu\nDone\n", thread);
+                    sprintf(res, "restart for thread %u\nDone\n", thread);
                     send_template_raw(client_socket, res);
                 }
             }
@@ -1080,13 +1119,13 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 cnt[thread]->watchdog = WATCHDOG_OFF;
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
-                    sprintf(res, "<a href=/%hu/action>&lt;&ndash; back</a><br><br>\n"
-                                 "quit for thread %hu done<br>\n", thread, thread);
+                    sprintf(res, "<a href=/%u/action>&lt;&ndash; back</a><br><br>\n"
+                                 "quit for thread %u done<br>\n", thread, thread);
                     send_template(client_socket, res);
                     send_template_end_client(client_socket);
                 } else {
                     send_template_ini_client_raw(client_socket);
-                    sprintf(res, "quit for thread %hu\nDone\n", thread);
+                    sprintf(res, "quit for thread %u\nDone\n", thread);
                     send_template_raw(client_socket, res);
                 }
             }
@@ -1131,13 +1170,15 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br><b>Thread %hu</b>"
-                             " Detection status %s\n", thread, thread,
+                sprintf(res, "<a href=/%u/detection>&lt;&ndash; back</a><br><br><b>Camera %d%s%s</b>"
+                             " Detection status %s\n", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                              (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
-                sprintf(res, "Thread %hu Detection status %s\n", thread,
+                sprintf(res, "Camera %d Detection status %s\n", cnt[thread]->conf.camera_id,
                              (!cnt[thread]->running)? "NOT RUNNING": (cnt[thread]->pause)? "PAUSE":"ACTIVE");
                 send_template_ini_client_raw(client_socket);
                 send_template_raw(client_socket, res);
@@ -1165,13 +1206,15 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
-                             " Detection resumed\n", thread, thread);
+                sprintf(res, "<a href=/%u/detection>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>"
+                             " Detection resumed\n", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "Thread %hu Detection resumed\nDone\n", thread);
+                sprintf(res, "Camera %d Detection resumed\nDone\n", cnt[thread]->conf.camera_id);
                 send_template_raw(client_socket, res);
             }
         } else {
@@ -1197,13 +1240,17 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
-                             " Detection paused\n", thread, thread);
+                sprintf(res, "<a href=/%u/detection>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>"
+                             " Detection paused\n", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "<b>Thread %hu</b> Detection paused\nDone\n", thread);
+                sprintf(res, "<b>Camera %d%s%s</b> Detection paused\nDone\n", cnt[thread]->conf.camera_id,
+                        cnt[thread]->conf.camera_name ? " -- " : "",
+                        cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template_raw(client_socket, res);
             }
         } else {
@@ -1221,17 +1268,21 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
             /* call connection */
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/detection>&lt;&ndash; back</a><br><br>\n", thread);
+                sprintf(res, "<a href=/%u/detection>&lt;&ndash; back</a><br><br>\n", thread);
                 send_template(client_socket, res);
                 if (thread == 0) {
                     do{
-                        sprintf(res, "<b>Thread %hu</b> %s<br>\n", i,
+                        sprintf(res, "<b>Camera %d%s%s</b> %s<br>\n", cnt[i]->conf.camera_id,
+                                     cnt[i]->conf.camera_name ? " -- " : "",
+                                     cnt[i]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                                      (!cnt[i]->running)? "NOT RUNNING" :
                                      (cnt[i]->lost_connection)?CONNECTION_KO:CONNECTION_OK);
                         send_template(client_socket, res);
                     } while (cnt[++i]);
                 } else {
-                    sprintf(res, "<b>Thread %hu</b> %s\n", thread,
+                    sprintf(res, "<b>Camera %d%s%s</b> %s\n", cnt[thread]->conf.camera_id,
+                                 cnt[thread]->conf.camera_name ? " -- " : "",
+                                 cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                                  (!cnt[thread]->running)? "NOT RUNNING" :
                                  (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
                     send_template(client_socket, res);
@@ -1241,13 +1292,13 @@ static unsigned int detection(char *pointer, char *res, unsigned int length_uri,
                 send_template_ini_client_raw(client_socket);
                 if (thread == 0) {
                     do {
-                        sprintf(res, "Thread %hu %s\n", i,
+                        sprintf(res, "Camera %d %s\n", cnt[i]->conf.camera_id,
                                      (!cnt[i]->running)? "NOT RUNNING" :
                                                              (cnt[i]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
                         send_template_raw(client_socket, res);
                     } while (cnt[++i]);
                 } else {
-                    sprintf(res, "Thread %hu %s\n", thread,
+                    sprintf(res, "Camera %d %s\n", cnt[thread]->conf.camera_id,
                                  (!cnt[thread]->running)? "NOT RUNNING" :
                                  (cnt[thread]->lost_connection)? CONNECTION_KO: CONNECTION_OK);
                     send_template_raw(client_socket, res);
@@ -1402,10 +1453,13 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b><br>\n"
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b><br>\n"
                                          "track set relative pan=%s<br>\n",
-                                         thread, thread, panvalue);
+                                         thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                         panvalue);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
@@ -1416,8 +1470,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     } else {
                     /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b>\n", thread, thread);
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b>\n", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
@@ -1439,10 +1495,13 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b><br>\n"
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b><br>\n"
                                          "track set relative tilt=%s\n",
-                                         thread, thread, tiltvalue);
+                                         thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                         tiltvalue);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
@@ -1453,8 +1512,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     } else {
                         /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b>\n", thread, thread);
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b>\n", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
@@ -1468,10 +1529,13 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b><br>\n"
-                                     "track set absolute x=%s\n",
-                                         thread, thread, x_value);
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b><br>\n"
+                                         "track set absolute x=%s\n",
+                                         thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                         x_value);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
@@ -1482,8 +1546,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     } else {
                         /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b>\n", thread, thread);
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b>\n", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
@@ -1498,10 +1564,13 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b><br>\n"
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b><br>\n"
                                          "track set absolute y=%s<br>\n",
-                                         thread, thread, y_value);
+                                         thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                         y_value);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
@@ -1512,8 +1581,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     } else {
                         /* error in track action */
                         if (cnt[0]->conf.webcontrol_html_output) {
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b>\n", thread, thread);
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b>\n", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
@@ -1670,10 +1741,13 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 if (cnt[thread]->moved) {
                     if (cnt[0]->conf.webcontrol_html_output) {
                         send_template_ini_client(client_socket, ini_template);
-                        sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                     "<b>Thread %hu</b><br>\n"
+                        sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                     "<b>Camera %d%s%s</b><br>\n"
                                      "track absolute set x=%s y=%s<br>\n",
-                                     thread, thread, x_value, y_value);
+                                     thread, cnt[thread]->conf.camera_id,
+                                     cnt[thread]->conf.camera_name ? " -- " : "",
+                                     cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                     x_value, y_value);
                         send_template(client_socket, res);
                         send_template_end_client(client_socket);
                     } else {
@@ -1684,8 +1758,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 } else {
                     /* error in track action */
                     if (cnt[0]->conf.webcontrol_html_output) {
-                        sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                     "<b>Thread %hu</b>\n", thread, thread);
+                        sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                     "<b>Camera %d%s%s</b>\n", thread, cnt[thread]->conf.camera_id,
+                                     cnt[thread]->conf.camera_name ? " -- " : "",
+                                     cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                         response_client(client_socket, track_error, res);
                     } else {
                         response_client(client_socket, track_error_raw, NULL);
@@ -1720,10 +1796,13 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     if (cnt[thread]->moved) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b><br>\n"
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b><br>\n"
                                          "track relative pan=%s tilt=%s\n",
-                                         thread, thread, panvalue, tiltvalue);
+                                         thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                         panvalue, tiltvalue);
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
@@ -1736,8 +1815,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     } else {
                         /* error in track tilt */
                         if (cnt[0]->conf.webcontrol_html_output) {
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b>\n", thread, thread);
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b>\n", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                             response_client(client_socket, track_error, res);
                         } else {
                             response_client(client_socket, track_error_raw, NULL);
@@ -1747,8 +1828,10 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
                 /* error in track pan */
                 if (cnt[0]->conf.webcontrol_html_output) {
-                    sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br><b>Thread %hu</b>\n",
-                                 thread, thread);
+                    sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br><b>Camera %d%s%s</b>\n",
+                                 thread, cnt[thread]->conf.camera_id,
+                                 cnt[thread]->conf.camera_name ? " -- " : "",
+                                 cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                     response_client(client_socket, track_error, res);
                 } else {
                     response_client(client_socket, track_error_raw, NULL);
@@ -1757,7 +1840,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
         } else if (length_uri == 0) {
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b><br>\n"
+                sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b><br>\n"
                              "<form action='set'>\n"
                              "Pan<input type=text name='pan' value=''>\n"
                              "Tilt<input type=text name='tilt' value=''>\n"
@@ -1767,7 +1850,9 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                              "X<input type=text name='x' value=''>\n"
                              "Y<input type=text name='y' value=''>\n"
                              "<input type=submit value='set absolute'>\n"
-                             "</form>\n", thread, thread);
+                             "</form>\n", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
@@ -1793,12 +1878,14 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
-                              "<br>track set center", thread, thread);
+                sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>"
+                             "<br>track set center", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
-                sprintf(res, "Thread %hu\n track set center\nDone\n", thread);
+                sprintf(res, "Camera %d\n track set center\nDone\n", cnt[thread]->conf.camera_id);
                 send_template_ini_client_raw(client_socket);
                 send_template_raw(client_socket, res);
             }
@@ -1815,13 +1902,15 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
         if (length_uri==0) {
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>"
-                             "<br>track auto %s", thread, thread,
+                sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>"
+                             "<br>track auto %s", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                              (cnt[thread]->track.active)? "enabled":"disabled");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
             } else {
-                sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread,
+                sprintf(res, "Camera %d\n track auto %s\nDone\n", cnt[thread]->conf.camera_id,
                              (cnt[thread]->track.active)? "enabled":"disabled");
                 send_template_ini_client_raw(client_socket);
                 send_template_raw(client_socket, res);
@@ -1847,7 +1936,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer = pointer + 6;
                 length_uri = length_uri - 6;
                 warningkill = sscanf(pointer, "%255[-0-9a-z]" , command);
-                if ((command != NULL) && (strlen(command) > 0)) {
+                if (strlen(command) > 0) {
                     struct context *autocnt;
 
                     /* auto value=0|1|status */
@@ -1855,14 +1944,16 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     if (!strcmp(command, "status")) {
                         if (cnt[0]->conf.webcontrol_html_output) {
                             send_template_ini_client(client_socket, ini_template);
-                            sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                         "<b>Thread %hu</b><br>"
-                                     "track auto %s", thread, thread,
-                                    (cnt[thread]->track.active)? "enabled":"disabled");
+                            sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                         "<b>Camera %d%s%s</b><br>"
+                                         "track auto %s", thread, cnt[thread]->conf.camera_id,
+                                         cnt[thread]->conf.camera_name ? " -- " : "",
+                                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                         (cnt[thread]->track.active)? "enabled":"disabled");
                             send_template(client_socket, res);
                             send_template_end_client(client_socket);
                         } else {
-                            sprintf(res, "Thread %hu\n track auto %s\nDone\n", thread,
+                            sprintf(res, "Camera %d\n track auto %s\nDone\n", cnt[thread]->conf.camera_id,
                                      (cnt[thread]->track.active)? "enabled":"disabled");
                             send_template_ini_client_raw(client_socket);
                             send_template_raw(client_socket, res);
@@ -1876,9 +1967,11 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                             autocnt->track.active = active;
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 send_template_ini_client(client_socket, ini_template);
-                                sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>"
-                                             "<b>Thread %hu</b>"
-                                             "<br>track auto %s<br>", thread, thread,
+                                sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>"
+                                             "<b>Camera %d%s%s</b>"
+                                             "<br>track auto %s<br>", thread, cnt[thread]->conf.camera_id,
+                                             cnt[thread]->conf.camera_name ? " -- " : "",
+                                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
                                              active ? "enabled":"disabled");
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
@@ -1910,12 +2003,15 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<a href=/%hu/track>&lt;&ndash; back</a><br><br>\n<b>Thread %hu</b>\n"
+                sprintf(res, "<a href=/%u/track>&lt;&ndash; back</a><br><br>\n<b>Camera %d%s%s</b>\n"
                              "<form action='auto'><select name='value'>\n"
                              "<option value='0' %s>Disable</option><option value='1' %s>Enable</option>\n"
                              "<option value='status'>status</option>\n"
                              "</select><input type=submit value='set'>\n"
-                             "</form>\n", thread, thread, (cnt[thread]->track.active) ? "selected":"",
+                             "</form>\n", thread, cnt[thread]->conf.camera_id,
+                             cnt[thread]->conf.camera_name ? " -- " : "",
+                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                        (cnt[thread]->track.active) ? "selected":"",
                              (cnt[thread]->track.active) ? "selected":"");
                 send_template(client_socket, res);
                 send_template_end_client(client_socket);
@@ -1951,7 +2047,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
  *      0 on action restart or quit
  *      1 on success
  */
-static unsigned int handle_get(int client_socket, const char *url, void *userdata)
+static unsigned int handle_get(int client_socket, const char *url, void *userdata, const char *httphostname)
 {
     struct context **cnt = userdata;
 
@@ -1971,10 +2067,10 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
             //Send the webcontrol section if applicable
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<b>Motion "VERSION" Running [%hu] Threads</b><br>\n"
+                sprintf(res, "<b>Motion "VERSION" Running [%d] Cameras</b><br>\n"
                              "<a href='/0/'>All</a>\n", i);
                 send_template(client_socket, res);
-                
+
                 counter = 0;
                 for (y = 1; y < i; y++) {
                     counter++;
@@ -1983,16 +2079,22 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         send_template(client_socket, res);
                         counter = 0;
                     }
-                    sprintf(res, "<a href='/%hu/'>Thread %hu</a>\n", y, y);
+                    sprintf(res, "<a href='/%d/'>Camera %d%s%s</a>\n", y, cnt[y]->conf.camera_id,
+                                 cnt[y]->conf.camera_name ? " -- " : "",
+                                 cnt[y]->conf.camera_name ? cnt[y]->conf.camera_name : "");
                     send_template(client_socket, res);
                 }
                 sprintf(res, "<br>");
                 send_template(client_socket, res);
 
-                //Send the preview section
-                hostname[1023] = '\0';
-                gethostname(hostname, 1023);
+                if (!httphostname)
+                {
+                    hostname[1023] = '\0';
+                    gethostname(hostname, 1023);
+                    httphostname = hostname;
+                }
 
+                //Send the preview section
                 for (y = 0; y < i; y++) {
                     if (cnt[y]->conf.stream_port) {
                         if (cnt[y]->conf.stream_preview_newline) {
@@ -2000,9 +2102,9 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                             send_template(client_socket, res);
                         }
                         sprintf(res, "<a href=http://%s:%d> "
-                            "<img src=http://%s:%d/ border=0 width=%d%%></a/n>"
-                            ,hostname,cnt[y]->conf.stream_port
-                            ,hostname,cnt[y]->conf.stream_port
+                            "<img src=http://%s:%d/ border=0 width=%d%%></a>\n"
+                            ,httphostname,cnt[y]->conf.stream_port
+                            ,httphostname,cnt[y]->conf.stream_port
                             ,cnt[y]->conf.stream_preview_scale);
                         send_template(client_socket, res);
                     }
@@ -2010,10 +2112,10 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "Motion "VERSION" Running [%hu] Threads\n0\n", i);
+                sprintf(res, "Motion "VERSION" Running [%d] Cameras\n0\n", i);
                 send_template_raw(client_socket, res);
                 for (y = 1; y < i; y++) {
-                    sprintf(res, "%hu\n", y);
+                    sprintf(res, "%d\n", y);
                     send_template_raw(client_socket, res);
                 }
             }
@@ -2055,18 +2157,21 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         if (length_uri == 0) {
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 send_template_ini_client(client_socket, ini_template);
-                                sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
-                                             "<b>Thread %hd</b><br>\n"
-                                             "<a href=/%hd/config/list>list</a><br>\n"
-                                             "<a href=/%hd/config/write>write</a><br>\n"
-                                             "<a href=/%hd/config/set>set</a><br>\n"
-                                             "<a href=/%hd/config/get>get</a><br>\n",
-                                             thread, thread, thread, thread, thread, thread);
+                                sprintf(res, "<a href=/%d/>&lt;&ndash; back</a><br><br>\n"
+                                             "<b>Camera %d%s%s</b><br>\n"
+                                             "<a href=/%d/config/list>list</a><br>\n"
+                                             "<a href=/%d/config/write>write</a><br>\n"
+                                             "<a href=/%d/config/set>set</a><br>\n"
+                                             "<a href=/%d/config/get>get</a><br>\n",
+                                             thread, cnt[thread]->conf.camera_id,
+                                             cnt[thread]->conf.camera_name ? " -- " : "",
+                                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                        thread, thread, thread, thread);
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
                             } else {
                                 send_template_ini_client_raw(client_socket);
-                                sprintf(res, "Thread %hd\nlist\nwrite\nset\nget\n", thread);
+                                sprintf(res, "Camera %d\nlist\nwrite\nset\nget\n", cnt[thread]->conf.camera_id);
                                 send_template_raw(client_socket, res);
                             }
                         } else if ((slash == '/') && (length_uri >= 4)) {
@@ -2088,18 +2193,21 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         if (length_uri == 0) {
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 send_template_ini_client(client_socket, ini_template);
-                                sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
-                                             "<b>Thread %hd</b><br>\n"
-                                             "<a href=/%hd/action/makemovie>makemovie</a><br>\n"
-                                             "<a href=/%hd/action/snapshot>snapshot</a><br>\n"
-                                             "<a href=/%hd/action/restart>restart</a><br>\n"
-                                             "<a href=/%hd/action/quit>quit</a><br>\n",
-                                             thread, thread, thread, thread, thread, thread);
+                                sprintf(res, "<a href=/%d/>&lt;&ndash; back</a><br><br>\n"
+                                             "<b>Camera %d%s%s</b><br>\n"
+                                             "<a href=/%d/action/makemovie>makemovie</a><br>\n"
+                                             "<a href=/%d/action/snapshot>snapshot</a><br>\n"
+                                             "<a href=/%d/action/restart>restart</a><br>\n"
+                                             "<a href=/%d/action/quit>quit</a><br>\n",
+                                             thread, cnt[thread]->conf.camera_id,
+                                             cnt[thread]->conf.camera_name ? " -- " : "",
+                                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                        thread, thread, thread, thread);
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
                             } else {
                                 send_template_ini_client_raw(client_socket);
-                                sprintf(res, "Thread %hd\nmakemovie\nsnapshot\nrestart\nquit\n", thread);
+                                sprintf(res, "Camera %d\nmakemovie\nsnapshot\nrestart\nquit\n", cnt[thread]->conf.camera_id);
                                 send_template_raw(client_socket, res);
                             }
                         } else if ((slash == '/') && (length_uri > 4)) {
@@ -2122,18 +2230,21 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         if (length_uri == 0) {
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 send_template_ini_client(client_socket, ini_template);
-                                sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
-                                             "<b>Thread %hd</b><br>\n"
-                                             "<a href=/%hd/detection/status>status</a><br>\n"
-                                             "<a href=/%hd/detection/start>start</a><br>\n"
-                                             "<a href=/%hd/detection/pause>pause</a><br>\n"
-                                             "<a href=/%hd/detection/connection>connection</a><br>\n",
-                                             thread, thread, thread, thread, thread, thread);
+                                sprintf(res, "<a href=/%d/>&lt;&ndash; back</a><br><br>\n"
+                                             "<b>Camera %d%s%s</b><br>\n"
+                                             "<a href=/%d/detection/status>status</a><br>\n"
+                                             "<a href=/%d/detection/start>start</a><br>\n"
+                                             "<a href=/%d/detection/pause>pause</a><br>\n"
+                                             "<a href=/%d/detection/connection>connection</a><br>\n",
+                                             thread, cnt[thread]->conf.camera_id,
+                                             cnt[thread]->conf.camera_name ? " -- " : "",
+                                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                             thread, thread, thread, thread);
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
                             } else {
                                 send_template_ini_client_raw(client_socket);
-                                sprintf(res, "Thread %hd\nstatus\nstart\npause\nconnection\n", thread);
+                                sprintf(res, "Camera %d\nstatus\nstart\npause\nconnection\n", cnt[thread]->conf.camera_id);
                                 send_template_raw(client_socket, res);
                             }
                         } else if ((slash == '/') && (length_uri > 5)) {
@@ -2153,18 +2264,21 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         if (length_uri == 0) {
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 send_template_ini_client(client_socket, ini_template);
-                                sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a><br><br>\n"
-                                             "<b>Thread %hd</b><br>\n"
-                                             "<a href=/%hd/track/set>track set pan/tilt</a><br>\n"
-                                             "<a href=/%hd/track/center>track center</a><br>\n"
-                                             "<a href=/%hd/track/auto>track auto</a><br>\n"
-                                             "<a href=/%hd/track/status>track status</a><br>\n",
-                                             thread, thread, thread, thread, thread, thread);
+                                sprintf(res, "<a href=/%d/>&lt;&ndash; back</a><br><br>\n"
+                                             "<b>Camera %d%s%s</b><br>\n"
+                                             "<a href=/%d/track/set>track set pan/tilt</a><br>\n"
+                                             "<a href=/%d/track/center>track center</a><br>\n"
+                                             "<a href=/%d/track/auto>track auto</a><br>\n"
+                                             "<a href=/%d/track/status>track status</a><br>\n",
+                                             thread, cnt[thread]->conf.camera_id,
+                                             cnt[thread]->conf.camera_name ? " -- " : "",
+                                             cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                             thread, thread, thread, thread);
                                 send_template(client_socket, res);
                                 send_template_end_client(client_socket);
                             } else {
                                 send_template_ini_client_raw(client_socket);
-                                sprintf(res, "Thread %hd\nset pan/tilt\ncenter\nauto\nstatus\n", thread);
+                                sprintf(res, "Camera %d\nset pan/tilt\ncenter\nauto\nstatus\n", cnt[thread]->conf.camera_id);
                                 send_template_raw(client_socket, res);
                             }
 
@@ -2177,7 +2291,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                             } else {
                                 /* error track not enable */
                                 if (cnt[0]->conf.webcontrol_html_output) {
-                                    sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
+                                    sprintf(res, "<a href=/%d/>&lt;&ndash; back</a>\n", thread);
                                     response_client(client_socket, not_track, res);
                                 } else {
                                     response_client(client_socket, not_track_raw, NULL);
@@ -2185,7 +2299,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                             }
                         } else {
                             if (cnt[0]->conf.webcontrol_html_output) {
-                                sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
+                                sprintf(res, "<a href=/%d/>&lt;&ndash; back</a>\n", thread);
                                 response_client(client_socket, not_found_response_valid_command, res);
                             } else {
                                 response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -2193,7 +2307,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                         }
                     } else {
                         if (cnt[0]->conf.webcontrol_html_output) {
-                            sprintf(res, "<a href=/%hd/>&lt;&ndash; back</a>\n", thread);
+                            sprintf(res, "<a href=/%d/>&lt;&ndash; back</a>\n", thread);
                             response_client(client_socket, not_found_response_valid_command, res);
                         } else {
                             response_client(client_socket, not_found_response_valid_command_raw, NULL);
@@ -2203,17 +2317,20 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                     /* /thread_number/ requested */
                     if (cnt[0]->conf.webcontrol_html_output) {
                         send_template_ini_client(client_socket, ini_template);
-                        sprintf(res, "<a href=/>&lt;&ndash; back</a><br><br>\n<b>Thread %hd</b><br>\n"
-                                     "<a href='/%hd/config'>config</a><br>\n"
-                                     "<a href='/%hd/action'>action</a><br>\n"
-                                     "<a href='/%hd/detection'>detection</a><br>\n"
-                                     "<a href='/%hd/track'>track</a><br>\n",
-                                     thread, thread, thread, thread, thread);
+                        sprintf(res, "<a href=/>&lt;&ndash; back</a><br><br>\n<b>Camera %d -- Thread %d%s%s</b><br>\n"
+                                     "<a href='/%d/config'>config</a><br>\n"
+                                     "<a href='/%d/action'>action</a><br>\n"
+                                     "<a href='/%d/detection'>detection</a><br>\n"
+                                     "<a href='/%d/track'>track</a><br>\n",
+                                     cnt[thread]->conf.camera_id, thread,
+                                     cnt[thread]->conf.camera_name ? " -- " : "",
+                                     cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
+                                     thread, thread, thread, thread);
                         send_template(client_socket, res);
                         send_template_end_client(client_socket);
                     } else {
                         send_template_ini_client_raw(client_socket);
-                        sprintf(res, "Thread %hd\nconfig\naction\ndetection\ntrack\n", thread);
+                        sprintf(res, "Camera %d\nconfig\naction\ndetection\ntrack\n", cnt[thread]->conf.camera_id);
                         send_template_raw(client_socket, res);
                     }
                 }
@@ -2272,6 +2389,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
             char url[512]={'\0'};
             char protocol[10]={'\0'};
             char *authentication=NULL;
+            char *hostname=NULL;
 
             buffer[nread] = '\0';
 
@@ -2346,6 +2464,40 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                 return 1;
             }
 
+            if ((hostname = strstr(buffer,"Host:"))) {
+                /* use the hostname the browser used to connect to us when
+                 * constructing links to the stream ports. If available
+                 * (which it is in all modern browsers) it is more likely to
+                 * work that the result of gethostname(), which is reliant on
+                 * the machine we're running on having it's hostname setup
+                 * correctly and corresponding DNS in place. */
+                hostname += strlen("Host:");
+                char *end_host = strstr(hostname,"\r\n");
+                if (end_host) {
+                    while (hostname < end_host && isspace(hostname[0]))
+                        hostname++;
+                    while (hostname < end_host && isspace(end_host[-1]))
+                        end_host--;
+                    /* we have a string that is the hostname followed by
+                     * optionally a colon and a port number - strip off any
+                     * port number & colon */
+                    char *colon = NULL;
+                    if (hostname[0] == '[') {
+                        // hostname is a IPv6 address like "[::1]"
+                        char *end_bracket = memchr(hostname, ']', end_host-hostname);
+                        // look for the colon after the "]"
+                        colon = memchr(end_bracket, ':', end_host-end_bracket);
+                    } else {
+                        colon = memchr(hostname, ':', end_host-hostname);
+                    }
+                    if (colon)
+                      end_host = colon;
+                    hostname = strndup(hostname, end_host-hostname);
+                } else {
+                    hostname = NULL;
+                }
+            }
+
             if (auth != NULL) {
                 if ((authentication = strstr(buffer,"Basic"))) {
                     char *end_auth = NULL;
@@ -2357,6 +2509,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                         char response[1024];
                         snprintf(response, sizeof (response), request_auth_response_template, method);
                         warningkill = write_nonblock(client_socket, response, strlen(response));
+                        free(hostname);
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
                     }
@@ -2365,10 +2518,11 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                         char response[1024] = {'\0'};
                         snprintf(response, sizeof (response), request_auth_response_template, method);
                         warningkill = write_nonblock(client_socket, response, strlen(response));
+                        free(hostname);
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
                     } else {
-                        ret = handle_get(client_socket, url, cnt);
+                        ret = handle_get(client_socket, url, cnt, hostname);
                         /* A valid auth request.  Process it.  */
                     }
                 } else {
@@ -2376,13 +2530,15 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                     char response[1024] = {'\0'};
                     snprintf(response, sizeof (response), request_auth_response_template, method);
                     warningkill = write_nonblock(client_socket, response, strlen(response));
+                    free(hostname);
                     pthread_mutex_unlock(&httpd_mutex);
                     return 1;
                 }
             } else {
-                ret = handle_get(client_socket, url, cnt);
+                ret = handle_get(client_socket, url, cnt, hostname);
                 /* A valid request.  Process it.  */
             }
+            free(hostname);
         }
     }
     pthread_mutex_unlock(&httpd_mutex);
@@ -2402,8 +2558,8 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
 static int acceptnonblocking(int serverfd, int timeout)
 {
     int curfd;
-    struct sockaddr_storage client;
-    socklen_t namelen = sizeof(client);
+    struct sockaddr_in6 client;
+    socklen_t client_len = sizeof(client);
 
     struct timeval tm;
     fd_set fds;
@@ -2415,7 +2571,7 @@ static int acceptnonblocking(int serverfd, int timeout)
 
     if (select(serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
         if (FD_ISSET(serverfd, &fds)) {
-            if ((curfd = accept(serverfd, (struct sockaddr*)&client, &namelen)) > 0)
+            if ((curfd = accept(serverfd, (struct sockaddr *)&client, &client_len)) > 0)
                 return curfd;
         }
     }
@@ -2430,12 +2586,9 @@ static int acceptnonblocking(int serverfd, int timeout)
  */
 void httpd_run(struct context **cnt)
 {
-    int sd = -1, client_socket_fd, val;
     unsigned int client_sent_quit_message = 1, closehttpd = 0;
-    struct addrinfo hints, *res = NULL, *ressave = NULL;
     struct sigaction act;
     char *authentication = NULL;
-    char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
     /* Initialize the mutex */
     pthread_mutex_init(&httpd_mutex, NULL);
@@ -2447,88 +2600,15 @@ void httpd_run(struct context **cnt)
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    /* AI_PASSIVE as we are going to listen */
-    hints.ai_flags = AI_PASSIVE;
-#if defined(BSD)
-    hints.ai_family = AF_INET;
-#else
-    if (!cnt[0]->conf.ipv6_enabled)
-        hints.ai_family = AF_INET;
-    else
-        hints.ai_family = AF_UNSPEC;
-#endif
-    hints.ai_socktype = SOCK_STREAM;
-
-    snprintf(portnumber, sizeof(portnumber), "%u", cnt[0]->conf.webcontrol_port);
-
-    val = getaddrinfo(cnt[0]->conf.webcontrol_localhost ? "localhost" : NULL, portnumber, &hints, &res);
-
-    /* check != 0 to allow FreeBSD compatibility */
-    if (val != 0) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for httpd socket failed: %s",
-                   gai_strerror(val));
-        if (res)
-            freeaddrinfo(res);
-        pthread_mutex_destroy(&httpd_mutex);
-        return;
-    }
-
-    ressave = res;
-
-    while (res) {
-        /* create socket */
-        sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-
-        getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
-                    sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
-
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd testing : %s addr: %s port: %s",
-                   res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
-
-        if (sd >= 0) {
-            val = 1;
-            /* Reuse Address */
-            setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
-
-            if (bind(sd, res->ai_addr, res->ai_addrlen) == 0) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Bound : %s addr: %s"
-                           " port: %s", res->ai_family == AF_INET ? "IPV4":"IPV6",
-                           hbuf, sbuf);
-                break;
-            }
-
-            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd failed bind() interface %s"
-                       " / port %s, retrying", hbuf, sbuf);
-            close(sd);
-            sd = -1;
-        }
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd socket failed interface %s"
-                   " / port %s, retrying", hbuf, sbuf);
-        res = res->ai_next;
-    }
-
-    freeaddrinfo(ressave);
-
+    int sd = http_bindsock(cnt[0]->conf.webcontrol_port,
+        cnt[0]->conf.webcontrol_localhost, cnt[0]->conf.ipv6_enabled);
     if (sd < 0) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR bind()"
-                   " [interface %s port %s]", hbuf, sbuf);
         pthread_mutex_destroy(&httpd_mutex);
         return;
     }
 
-    if (listen(sd, DEF_MAXWEBQUEUE) == -1) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd ERROR listen()"
-                   " [interface %s port %s]", hbuf, sbuf);
-        close(sd);
-        pthread_mutex_destroy(&httpd_mutex);
-        return;
-    }
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd/"VERSION" running,"
-               " accepting connections");
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd: waiting for data"
-               " on %s port TCP %s", hbuf, sbuf);
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"%s: Started motion-httpd server on port %d (auth %s)",
+        cnt[0]->conf.webcontrol_port, cnt[0]->conf.webcontrol_authentication ? "Enabled":"Disabled");
 
     if (cnt[0]->conf.webcontrol_authentication != NULL) {
         char *userpass = NULL;
@@ -2536,16 +2616,16 @@ void httpd_run(struct context **cnt)
 
         authentication = mymalloc(BASE64_LENGTH(auth_size) + 1);
         userpass = mymalloc(auth_size + 4);
-        /* base64_encode can read 3 bytes after the end of the string, initialize it */
+        /* motion_base64_encode can read 3 bytes after the end of the string, initialize it */
         memset(userpass, 0, auth_size + 4);
         strcpy(userpass, cnt[0]->conf.webcontrol_authentication);
-        base64_encode(userpass, authentication, auth_size);
+        motion_base64_encode(userpass, authentication, auth_size);
         free(userpass);
     }
 
     while ((client_sent_quit_message) && (!closehttpd)) {
 
-        client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
+        int client_socket_fd = acceptnonblocking(sd, NONBLOCK_TIMEOUT);
 
         if (client_socket_fd < 0) {
             if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
@@ -2577,6 +2657,9 @@ void httpd_run(struct context **cnt)
 void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
+
+    MOTION_PTHREAD_SETNAME("web_control");
+
     httpd_run(cnt);
 
     /* 

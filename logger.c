@@ -110,7 +110,7 @@ void set_log_mode(int mode)
 FILE * set_logfile(const char *logfile_name)
 {
     log_mode = LOGMODE_SYSLOG;  /* Setup temporary to let log if myfopen fails */
-    logfile = myfopen(logfile_name, "a", 0);
+    logfile = myfopen(logfile_name, "a");
 
     /* If logfile was opened correctly */
     if (logfile)
@@ -191,22 +191,27 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
      */
     errno_save = errno;
 
+    char threadname[32] = "unknown";
+#if (!defined(BSD) || defined(__APPLE__))
+    pthread_getname_np(pthread_self(), threadname, sizeof(threadname));
+#endif
+
     /*
      * Prefix the message with the log level string, log type string,
      * time and thread number. e.g. [1] [ERR] [ENC] [Apr 03 00:08:44] blah
      *
      */
     if (!log_mode) {
-        n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] [%s] ",
-                     threadnr, get_log_level_str(level), get_log_type_str(type),
+        n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
+                     threadnr, threadname, get_log_level_str(level), get_log_type_str(type),
                      str_time());
     } else {
     /*
      * Prefix the message with the log level string, log type string
      * and thread number. e.g. [1] [DBG] [TRK] blah
      */
-        n = snprintf(buf, sizeof(buf), "[%d] [%s] [%s] ",
-                     threadnr, get_log_level_str(level), get_log_type_str(type));
+        n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
+                     threadnr, threadname, get_log_level_str(level), get_log_type_str(type));
     }
 
     /* Next add the user's message. */

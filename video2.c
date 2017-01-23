@@ -68,16 +68,10 @@
  let's go :)
 */
 
-#if !defined(WITHOUT_V4L) && defined(MOTION_V4L2)
-
 #include "motion.h"
-#include "video.h"
+#include "video2.h"
 
-#ifdef MOTION_V4L2_OLD
-// Seems that is needed for some system
-#include <linux/time.h>
-#include <linux/videodev2.h>
-#endif
+#ifndef WITHOUT_V4L2
 
 #define u8 unsigned char
 #define u16 unsigned short
@@ -134,6 +128,18 @@
 
 #ifndef V4L2_PIX_FMT_SPCA508
 #define V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8') /* YUVY per line  */
+#endif
+
+#ifndef V4L2_PIX_FMT_Y10
+#define V4L2_PIX_FMT_Y10     v4l2_fourcc('Y', '1', '0', ' ') /* 10  Greyscale     */
+#endif
+
+#ifndef V4L2_PIX_FMT_Y12
+#define V4L2_PIX_FMT_Y12     v4l2_fourcc('Y', '1', '2', ' ') /* 12  Greyscale     */
+#endif
+
+#ifndef V4L2_PIX_FMT_GREY
+#define V4L2_PIX_FMT_GREY     v4l2_fourcc('G', 'R', 'E', 'Y') /* 8 Greyscale     */
 #endif
 
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
@@ -269,7 +275,7 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
 
     if (xioctl(vid_source, VIDIOC_ENUMINPUT, &input) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Unable to query input %d."
-                   " VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1", 
+                   " VIDIOC_ENUMINPUT, if you use a WEBCAM change input value in conf by -1",
                    input.index);
         return -1;
     }
@@ -481,7 +487,10 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
         V4L2_PIX_FMT_UYVY,
         V4L2_PIX_FMT_YUYV,
         V4L2_PIX_FMT_YUV422P,
-        V4L2_PIX_FMT_YUV420 /* most efficient for motion */
+        V4L2_PIX_FMT_YUV420, /* most efficient for motion */
+        V4L2_PIX_FMT_Y10,
+        V4L2_PIX_FMT_Y12,
+        V4L2_PIX_FMT_GREY
     };
 
     int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
@@ -969,6 +978,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 {
     sigset_t set, old;
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
+    int shift = 0;
 
     if (viddev->v4l_fmt != VIDEO_PALETTE_YUV420P)
         return V4L_FATAL_ERROR;
@@ -1089,6 +1099,17 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
             bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
             conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
+        case V4L2_PIX_FMT_Y12:
+            shift += 2;
+        case V4L2_PIX_FMT_Y10:
+            shift += 2;
+            y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
+            conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            return 0;
+        case V4L2_PIX_FMT_GREY:
+            conv_greytoyuv420p(map, the_buffer->ptr, width, height);
+            return 0;
+
         }
     }
 
@@ -1132,4 +1153,4 @@ void v4l2_cleanup(struct video_dev *viddev)
     free(vid_source);
     viddev->v4l2_private = NULL;
 }
-#endif /* !WITHOUT_V4L && MOTION_V4L2 */
+#endif /* !WITHOUT_V4L2 */

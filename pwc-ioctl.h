@@ -55,13 +55,7 @@
 #if defined(__linux__)
 #include <linux/types.h>
 #include <linux/version.h>
-
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 10)
-/* Compatibility for older kernel */
-typedef __u16 __le16;
 #endif
-
-#endif /* ( !BSD ) */
 
  /* Enumeration of image sizes */
 #define PSZ_SQCIF   0x00
@@ -109,7 +103,7 @@ struct pwc_serial
 {
     char serial[30];    /* String with serial number. Contains terminating 0 */
 };
-    
+
 /* pwc_whitebalance.mode values */
 #define PWC_WB_INDOOR        0
 #define PWC_WB_OUTDOOR       1
@@ -117,14 +111,14 @@ struct pwc_serial
 #define PWC_WB_MANUAL        3
 #define PWC_WB_AUTO          4
 
-/* Used with VIDIOCPWC[SG]AWB (Auto White Balance). 
+/* Used with VIDIOCPWC[SG]AWB (Auto White Balance).
    Set mode to one of the PWC_WB_* values above.
-   *red and *blue are the respective gains of these colour components inside 
+   *red and *blue are the respective gains of these colour components inside
    the camera; range 0..65535
-   When 'mode' == PWC_WB_MANUAL, 'manual_red' and 'manual_blue' are set or read; 
+   When 'mode' == PWC_WB_MANUAL, 'manual_red' and 'manual_blue' are set or read;
    otherwise undefined.
    'read_red' and 'read_blue' are read-only.
-*/   
+*/
 struct pwc_whitebalance
 {
     int mode;
@@ -132,9 +126,9 @@ struct pwc_whitebalance
     int read_red, read_blue;      /* R/O */
 };
 
-/* 
+/*
    'control_speed' and 'control_delay' are used in automatic whitebalance mode,
-   and tell the camera how fast it should react to changes in lighting, and 
+   and tell the camera how fast it should react to changes in lighting, and
    with how much delay. Valid values are 0..65535.
 */
 struct pwc_wb_speed
@@ -163,11 +157,11 @@ struct pwc_imagesize
 #define PWC_MPT_TILT       0x02
 #define PWC_MPT_TIMEOUT    0x04 /* for status */
 
-/* Set angles; when absolute != 0, the angle is absolute and the 
+/* Set angles; when absolute != 0, the angle is absolute and the
    driver calculates the relative offset for you. This can only
    be used with VIDIOCPWCSANGLE; VIDIOCPWCGANGLE always returns
    absolute angles.
- */   
+ */
 struct pwc_mpt_angles
 {
     int absolute;   /* write-only */
@@ -194,7 +188,7 @@ struct pwc_mpt_status
 /* This is used for out-of-kernel decompression. With it, you can get
    all the necessary information to initialize and use the decompressor
    routines in standalone applications.
- */   
+ */
 struct pwc_video_command
 {
     int type;                       /* camera type (645, 675, 730, etc.) */
@@ -279,7 +273,7 @@ struct pwc_video_command
 
   /* Flickerless mode; = 0 off, otherwise on */
 #define VIDIOCPWCSFLICKER     _IOW('v', 208, int)
-#define VIDIOCPWCGFLICKER     _IOR('v', 208, int)  
+#define VIDIOCPWCGFLICKER     _IOR('v', 208, int)
 
   /* Dynamic noise reduction; 0 off, 3 = high noise reduction */
 #define VIDIOCPWCSDYNNOISE    _IOW('v', 209, int)
@@ -288,7 +282,7 @@ struct pwc_video_command
  /* Real image size as used by the camera; tells you whether or not there's a gray border around the image */
 #define VIDIOCPWCGREALSIZE    _IOR('v', 210, struct pwc_imagesize)
 
- /* Motorized pan & tilt functions */ 
+ /* Motorized pan & tilt functions */
 #define VIDIOCPWCMPTRESET     _IOW('v', 211, int)
 #define VIDIOCPWCMPTGRANGE    _IOR('v', 211, struct pwc_mpt_range)
 #define VIDIOCPWCMPTSANGLE    _IOW('v', 212, struct pwc_mpt_angles)
@@ -305,11 +299,11 @@ struct pwc_table_init_buffer {
 
 /*
  * This is private command used when communicating with v4l2.
- * In the future all private ioctl will be remove/replace to 
+ * In the future all private ioctl will be remove/replace to
  * use interface offer by v4l2.
  */
 
-#if (defined(MOTION_V4L2)) && defined(__linux__)
+#if (!defined(WITHOUT_V4L2)) && defined(__linux__)
 
 #define V4L2_CID_PRIVATE_SAVE_USER       (V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_PRIVATE_RESTORE_USER    (V4L2_CID_PRIVATE_BASE + 1)
@@ -329,6 +323,6 @@ struct pwc_raw_frame {
    __u8   rawframe[0];    /* frame_size = H/4*vbandlength */
 } __attribute__ ((packed));
 
-#endif    /*  MOTION_V4L2 && (! BSD ) */
+#endif /*  !WITHOUT_V4L2 && __linux__ */
 
 #endif

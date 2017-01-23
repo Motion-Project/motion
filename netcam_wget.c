@@ -210,13 +210,13 @@ int skip_lws(const char *string)
 
 
 /**
- * base64_encode
+ * motion_base64_encode
  *
  *   Encode the string S of length LENGTH to base64 format and place it
  *   to STORE.  STORE will be 0-terminated, and must point to a writable
  *   buffer of at least 1+BASE64_LENGTH(length) bytes.  
  */
-void base64_encode(const char *s, char *store, int length)
+void motion_base64_encode(const char *s, char *store, int length)
 {
     /* Conversion table.  */
     static const char tbl[64] = {

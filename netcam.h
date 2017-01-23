@@ -15,7 +15,6 @@
 #ifndef _INCLUDE_NETCAM_H
 #define _INCLUDE_NETCAM_H
 
-#undef HAVE_STDLIB_H
 #include <jpeglib.h>
 #include <setjmp.h>
 #include <sys/socket.h>
@@ -107,10 +106,12 @@ typedef struct file_context {
 #define NCS_BLOCK               2  /* streaming is done via MJPG-block */
 #define NCS_RTSP                3  /* streaming is done via RTSP */
 
-
-#define RTSP_NOTCONNECTED  0  /* The camera has never connected */
-#define RTSP_CONNECTED     1  /* The camera is currently connected */
-#define RTSP_RECONNECTING  2  /* The camera is trying to reconnect*/
+enum RTSP_STATUS {
+    RTSP_NOTCONNECTED,   /* The camera has never connected */
+    RTSP_CONNECTED,      /* The camera is currently connected */
+    RTSP_RECONNECTING,   /* Motion is trying to reconnect to camera */
+    RTSP_READINGIMAGE    /* Motion is reading a image from camera */
+};
 
 /*
  * struct netcam_context contains all the structures and other data
@@ -304,5 +305,25 @@ int netcam_next (struct context *, unsigned char *);
 void netcam_cleanup (struct netcam_context *, int);
 ssize_t netcam_recv(netcam_context_ptr, void *, size_t);
 void netcam_url_free(struct url_t *parse_url);
+
+/**
+ * Publish new image
+ *
+ * Moves the image in 'receiving' into 'latest' and updates last frame time
+ */
+void netcam_image_read_complete(netcam_context_ptr netcam);
+
+/**
+ * This routine checks whether there is enough room in a buffer to copy
+ * some additional data.  If there is not enough room, it will re-allocate
+ * the buffer and adjust it's size.
+ *
+ * Parameters:
+ *      buff            Pointer to a netcam_image_buffer structure.
+ *      numbytes        The number of bytes to be copied.
+ *
+ * Returns:             Nothing
+ */
+void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes);
 
 #endif

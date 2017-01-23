@@ -179,6 +179,8 @@ static void* handle_basic_auth(void* param)
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
 
+    MOTION_PTHREAD_SETNAME("handle_basic_auth");
+
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
     pthread_mutex_unlock(&stream_auth_mutex);
@@ -207,10 +209,10 @@ static void* handle_basic_auth(void* param)
 
         authentication = mymalloc(BASE64_LENGTH(auth_size) + 1);
         userpass = mymalloc(auth_size + 4);
-        /* base64_encode can read 3 bytes after the end of the string, initialize it. */
+        /* motion_base64_encode can read 3 bytes after the end of the string, initialize it. */
         memset(userpass, 0, auth_size + 4);
         strcpy(userpass, p->conf->stream_authentication);
-        base64_encode(userpass, authentication, auth_size);
+        motion_base64_encode(userpass, authentication, auth_size);
         free(userpass);
 
         if (strcmp(auth, authentication)) {
@@ -409,26 +411,30 @@ static void* handle_md5_digest(void* param)
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Digest";
     static const char *auth_failed_html_template=
-        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
-        "<HTML><HEAD>\r\n"
-        "<TITLE>401 Authorization Required</TITLE>\r\n"
-        "</HEAD><BODY>\r\n"
-        "<H1>Authorization Required</H1>\r\n"
-        "This server could not verify that you are authorized to access the document "
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head><title>401 Authorization Required</title></head>\n"
+        "<body>\n"
+        "<h1>Authorization Required</h1>\n"
+        "<p>This server could not verify that you are authorized to access the document "
         "requested.  Either you supplied the wrong credentials (e.g., bad password), "
-        "or your browser doesn't understand how to supply the credentials required.\r\n"
-        "</BODY></HTML>\r\n";
+        "or your browser doesn't understand how to supply the credentials required.</p>\n"
+        "</body>\n"
+        "</html>\n";
     static const char *internal_error_template=
         "HTTP/1.0 500 Internal Server Error\r\n"
         "Server: Motion/"VERSION"\r\n"
         "Content-Type: text/html\r\n"
         "Connection: Close\r\n\r\n"
-        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
-        "<HTML><HEAD>\r\n"
-        "<TITLE>500 Internal Server Error</TITLE>\r\n"
-        "</HEAD><BODY>\r\n"
-        "<H1>500 Internal Server Error</H1>\r\n"
-        "</BODY></HTML>\r\n";
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head><title>500 Internal Server Error</title></head>\n"
+        "<body>\n"
+        "<h1>500 Internal Server Error</h1>\n"
+        "</body>\n"
+        "</html>\n";
+
+    MOTION_PTHREAD_SETNAME("handle_md5_digest");
 
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
@@ -567,7 +573,7 @@ Error:
                 "Content-Type: text/html\r\n"
                 "Keep-Alive: timeout=%i\r\n"
                 "Connection: keep-alive\r\n"
-                "Content-Length: %Zu\r\n\r\n",
+                "Content-Length: %zu\r\n\r\n",
                 request_auth_response_template, server_nonce,
                 KEEP_ALIVE_TIMEOUT, strlen(auth_failed_html_template));
         if (write(p->sock, buffer, strlen(buffer)) < 0)
@@ -707,82 +713,76 @@ Error:
  */
 int http_bindsock(int port, int local, int ipv6_enabled)
 {
-    int sl = -1, optval;
-    struct addrinfo hints, *res = NULL, *ressave = NULL;
-    char portnumber[10], hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    snprintf(portnumber, sizeof(portnumber), "%u", port);
-    memset(&hints, 0, sizeof(struct addrinfo));
-
-    /* Use the AI_PASSIVE flag, which indicates we are using this address for a listen() */
-    hints.ai_flags = AI_PASSIVE;
-#if defined(BSD)
-    hints.ai_family = AF_INET;
-#else
-    if (!ipv6_enabled)
-        hints.ai_family = AF_INET;
-    else
-        hints.ai_family = AF_UNSPEC;
-#endif
-    hints.ai_socktype = SOCK_STREAM;
-
-    optval = getaddrinfo(local ? "localhost" : NULL, portnumber, &hints, &res);
-
-    if (optval != 0) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: getaddrinfo() for motion-stream socket failed: %s",
-                   gai_strerror(optval));
-
-        if (res != NULL)
-            freeaddrinfo(res);
+    if (sd == -1)
+    {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error creating socket");
         return -1;
     }
 
-    ressave = res;
+    int yes = 1, no = 0;
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != 0)
+    {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: setting SO_REUSEADDR to yes failed");
+        /* we can carry on even if this failed */
+    }
 
-    while (res) {
-        /* Create socket */
-        sl = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-
-        getnameinfo(res->ai_addr, res->ai_addrlen, hbuf,
-                    sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
-
-        if (sl >= 0) {
-            optval = 1;
-            /* Reuse Address */
-            setsockopt(sl, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
-
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-stream testing : %s addr: %s port: %s",
-                       res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
-
-            if (bind(sl, res->ai_addr, res->ai_addrlen) == 0) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-stream Bound : %s addr: %s port: %s",
-                           res->ai_family == AF_INET ? "IPV4":"IPV6", hbuf, sbuf);
-                break;
-            }
-
-            MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream bind() failed, retrying");
-            close(sl);
-            sl = -1;
+    if (ipv6_enabled)
+    {
+        if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no)) != 0)
+        {
+            MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: setting IPV6_V6ONLY to no failed");
+            /* we can carry on even if this failed */
         }
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream socket failed, retrying");
-        res = res->ai_next;
     }
 
-    freeaddrinfo(ressave);
+    const char *addr_str;
+    struct sockaddr_storage sin;
+    socklen_t sinsize;
+    bzero(&sin, sizeof(struct sockaddr_storage));
+    sin.ss_family = ipv6_enabled?AF_INET6:AF_INET;
+    if (ipv6_enabled) {
+        struct sockaddr_in6 *sin6 = (struct sockaddr_in6*)&sin;
+        sin6->sin6_family = AF_INET6;
+        sin6->sin6_port = htons(port);
+        if(local) {
+            addr_str = "::1";
+            sin6->sin6_addr = in6addr_loopback;
+        } else {
+            addr_str = "any IPv4/IPv6 address";
+            sin6->sin6_addr = in6addr_any;
+        }
+        sinsize = sizeof(*sin6);
+    } else {
+        struct sockaddr_in *sin4 = (struct sockaddr_in*)&sin;
+        sin4->sin_family = AF_INET;
+        sin4->sin_port = htons(port);
+        if(local) {
+            addr_str = "127.0.0.1";
+            sin4->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        } else {
+            addr_str = "any IPv4 address";
+            sin4->sin_addr.s_addr = htonl(INADDR_ANY);
+        }
+        sinsize = sizeof(*sin4);
+    }
 
-    if (sl < 0) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream creating socket/bind ERROR");
+    if (bind(sd, (struct sockaddr*)&sin, sinsize) != 0) {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error binding on %s port %d", addr_str, port);
+        close(sd);
         return -1;
     }
 
-
-    if (listen(sl, DEF_MAXWEBQUEUE) == -1) {
-        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream listen() ERROR");
-        close(sl);
-        sl = -1;
+    if (listen(sd, DEF_MAXWEBQUEUE) != 0) {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: error listening");
+        close(sd);
+        return -1;
     }
 
-    return sl;
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: listening on %s port %d", addr_str, port);
+
+    return sd;
 }
 
 /**
@@ -794,19 +794,18 @@ int http_bindsock(int port, int local, int ipv6_enabled)
 static int http_acceptsock(int sl)
 {
     int sc;
-    unsigned long i;
-    struct sockaddr_storage sin;
-    socklen_t addrlen = sizeof(sin);
+    struct sockaddr_storage addr;
+    socklen_t addr_len = sizeof(addr);
+    sc = accept(sl, (struct sockaddr*)&addr, &addr_len);
 
-    if ((sc = accept(sl, (struct sockaddr *)&sin, &addrlen)) >= 0) {
-        i = 1;
-        ioctl(sc, FIONBIO, &i);
-        return sc;
+    if (sc < 0) {
+        MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream accept()");
+        return -1;
     }
 
-    MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO, "%s: motion-stream accept()");
-
-    return -1;
+    unsigned long i = 1;
+    ioctl(sc, FIONBIO, &i);
+    return sc;
 }
 
 

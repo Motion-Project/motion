@@ -1,4 +1,4 @@
-/*	video.h
+/*	video2.h
  *
  *	Include file for video.c
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
@@ -10,18 +10,14 @@
 #ifndef _INCLUDE_VIDEO_H
 #define _INCLUDE_VIDEO_H
 
-#define _LINUX_TIME_H 1
 #include <sys/mman.h>
 
+#ifndef WITHOUT_V4L2
 
-#if !defined(WITHOUT_V4L)
-#if defined(HAVE_LINUX_VIDEODEV_H)
-#include <linux/videodev.h>
-#elif defined(HAVE_SYS_VIDEOIO_H)
-#include <sys/videoio.h>
-#endif
-#include "vloopback_motion.h"
+#include <linux/videodev2.h>
+#include "vloopback_motion2.h"
 #include "pwc-ioctl.h"
+
 #endif
 
 /* video4linux stuff */
@@ -76,11 +72,11 @@ struct video_dev {
     int frames;
 
     /* Device type specific stuff: */
-#ifndef WITHOUT_V4L
+#ifndef WITHOUT_V4L2
     /* v4l */
     int v4l2;
     void *v4l2_private;
-    
+
     int size_map;
     int v4l_fmt;
     unsigned char *v4l_buffers[2];
@@ -103,14 +99,10 @@ int sonix_decompress(unsigned char *outp, unsigned char *inp, int width, int hei
 void bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);
 int vid_do_autobright(struct context *cnt, struct video_dev *viddev);
 int mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height, unsigned int size);
+void y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int height, int shift);
+void conv_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 
-#ifndef WITHOUT_V4L
-/* video functions, video.c */
-unsigned char *v4l_start(struct video_dev *viddev, int width, int height,
-                         int input, int norm, unsigned long freq, int tuner_number);
-void v4l_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height,
-                   struct config *conf);
-int v4l_next(struct video_dev *viddev, unsigned char *map, int width, int height);
+#ifndef WITHOUT_V4L2
 
 /* video2.c */
 unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int width, int height,
@@ -120,6 +112,6 @@ void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char
 int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width, int height);
 void v4l2_close(struct video_dev *viddev);
 void v4l2_cleanup(struct video_dev *viddev);
-#endif /* WITHOUT_V4L */
+#endif /* WITHOUT_V4L2 */
 
 #endif /* _INCLUDE_VIDEO_H */

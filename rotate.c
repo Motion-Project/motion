@@ -30,102 +30,28 @@
  *      v1 (28-Aug-2004) - initial version
  */
 #include "rotate.h"
-
-#ifndef __uint32
-/**
- * We don't have a 32-bit unsigned integer type, so define it, given
- * a 32-bit type was found by configure.
- */
-#    ifdef TYPE_32BIT
-typedef unsigned TYPE_32BIT __uint32;
-#    else
-#        error "Failed to find a 32-bit integer type."
-#    endif
-#endif
-
-/*=============================================================================
-                    Start of code from bits/byteswap.h
- =============================================================================*/
-
-/**
- * The code below is copied (with modification) from bits/byteswap.h. It provides
- * a macro/function named rot__bswap_32 that swaps the bytes in a 32-bit integer,
- * preferably using the bswap assembler instruction if configure found support
- * for it.
- *
- * It would be neater to simply include byteswap.h and use the bswap_32 macro
- * defined there, but the problem is that the bswap asm instruction would then
- * only be used for certain processor architectures, excluding athlon (and
- * probably athlon64 as well). Moreover, byteswap.h doesn't seem to exist on
- * FreeBSD. So, we rely on the HAVE_BSWAP macro defined by configure instead.
- *
- * Note that the macro names have been prefixed with "rot" in order to avoid
- * collision since we have the include chain rotate.h -> motion.h -> netcam.h ->
- * netinet/in.h -> ... -> byteswap.h -> bits/byteswap.h.
- */
-
-/* Swap bytes in 32 bit value. This is used as a fallback and for constants. */
-#define rot__bswap_constant_32(x)                               \
-    ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) |  \
-     (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24))
-
-#ifdef __GNUC__
-#    if (__GNUC__ >= 2) && (i386 || __i386 || __i386__)
-/* We're on an Intel-compatible platform, so we can use inline Intel assembler
- * for the swapping.
- */
-#        ifndef HAVE_BSWAP
-/* Bswap is not available, we have to use three instructions instead. */
-#            define rot__bswap_32(x)                                \
-                (__extension__                                      \
-                ({ register __uint32 __v, __x = (x);                \
-                if (__builtin_constant_p (__x))                     \
-                    __v = rot__bswap_constant_32 (__x);             \
-                else                                                \
-                    __asm__ ("rorw $8, %w0;"                        \
-                            "rorl $16, %0;"                         \
-                            "rorw $8, %w0"                          \
-                            : "=r" (__v)                            \
-                            : "0" (__x)                             \
-                            : "cc");                                \
-                __v; }))
-#        else
-#            define rot__bswap_32(x)                                \
-                (__extension__                                      \
-                ({ register __uint32 __v, __x = (x);                \
-                if (__builtin_constant_p (__x))                     \
-                    __v = rot__bswap_constant_32 (__x);             \
-                else                                                \
-                    __asm__ ("bswap %0" : "=r" (__v) : "0" (__x));  \
-                __v; }))
-#        endif
-#    else
-/* Non-Intel platform or too old version of gcc. */
-#        define rot__bswap_32(x)                                    \
-            (__extension__                                          \
-            ({ register __uint32 __x = (x);                         \
-            rot__bswap_constant_32 (__x); }))
-#    endif
+#include <stdint.h>
+#if defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define bswap_32(x) OSSwapInt32(x)
+#elif defined(__FreeBSD__)
+#include <sys/endian.h>
+#define bswap_32(x) bswap32(x)
+#elif defined(__OpenBSD__)
+#include <sys/types.h>
+#define bswap_32(x) swap32(x)
+#elif defined(__NetBSD__)
+#include <sys/bswap.h>
+#define bswap_32(x) bswap32(x)
 #else
-/* Not a GNU compiler. */
-static inline __uint32 rot__bswap_32(__uint32 __bsx)
-{
-    return __bswap_constant_32 (__bsx);
-}
+#include <byteswap.h>
 #endif
-
-/*=============================================================================
-                     End of code from bits/byteswap.h
- =============================================================================*/
-
-/* Finally define a macro with a more appropriate name, to be used below. */
-#define swap_bytes(x) rot__bswap_32(x)
 
 /**
  * reverse_inplace_quad
  *
  *  Reverses a block of memory in-place, 4 bytes at a time. This function
- *  requires the __uint32 type, which is 32 bits wide.
+ *  requires the uint32_t type, which is 32 bits wide.
  *
  * Parameters:
  *
@@ -136,13 +62,13 @@ static inline __uint32 rot__bswap_32(__uint32 __bsx)
  */
 static void reverse_inplace_quad(unsigned char *src, int size)
 {
-    __uint32 *nsrc = (__uint32 *)src;              /* first quad */
-    __uint32 *ndst = (__uint32 *)(src + size - 4); /* last quad */
-    register __uint32 tmp;
+    uint32_t *nsrc = (uint32_t *)src;              /* first quad */
+    uint32_t *ndst = (uint32_t *)(src + size - 4); /* last quad */
+    register uint32_t tmp;
 
     while (nsrc < ndst) {
-        tmp = swap_bytes(*ndst);
-        *ndst-- = swap_bytes(*nsrc);
+        tmp = bswap_32(*ndst);
+        *ndst-- = bswap_32(*nsrc);
         *nsrc++ = tmp;
     }
 }

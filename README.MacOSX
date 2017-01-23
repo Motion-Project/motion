@@ -1,33 +1,30 @@
- The motion port to MacOSX is only working with network cameras. 
+The motion port to macOS only supports network cameras.
 
- Tested in latest MacOSX 
+It has been tested with macOS 10.12.0 (Sierra) with Xcode 8.0 but should
+work with other versions.
 
- Packages needed :
+First install homebrew:
 
-  * autoconf-2.57 or above.
-  * make-3.79 or above.
-  * This port has been made using some packages from Fink and DarwinPorts :
-      o ffmpeg-0.4.8 from DarwinPorts ( but it needs to be patched with ffmpeg-0.4.8-macosx.patch ).
-      o libjpeg-6b-16, libjpeg-shlibs-6b-16 from Fink
+http://brew.sh
 
-  How to Install
+Then:
 
-   * Get/Patch/Install ffmpeg
-       o Download the ffmpeg from sourceforge ( the same version used in Darwinports ).
-       o Get the patch-ffmpeg
+brew install ffmpeg cmake pkg-config libjpeg
+cmake .
+make
 
-       tar xfvz ffmpeg-0.4.8.tar.gz
-       cd ffmpeg-0.4.8/
-       patch -p1 < ../ffmpeg-0.4.8-macosx.patch
-       ./configure --prefix=/path_to_install_ffmpeg ; make ; make install ; make installlib
-       ldconfig
+For more about using cmake with motion please see:
 
-   To install motion follow the standard procedure :
+https://github.com/Motion-Project/motion/wiki/cmake
 
-   ./configure --with-ffmpeg=/path_where_you_installed_ffmpeg ; make ; make install
+Any questions please send it to motion mailing list:
 
- Any question / fix / suggestion  please send it to motion mailing list.
+https://lists.sourceforge.net/lists/listinfo/motion-user
 
+If you find a bug please open an issue on github:
 
- Angel Carpintero
- ack@telefonica.net
+https://github.com/Motion-Project/motion/issues
+
+If you have an improvement please submit a pull request:
+
+https://github.com/Motion-Project/motion/pulls

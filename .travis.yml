@@ -1,0 +1,42 @@
+before_script:
+  - autoreconf -fiv
+  - avplay -version
+script: ./configure && make
+
+matrix:
+  include:
+  - os: linux
+    language: c
+    compiler: gcc
+    addons:
+      apt:
+        packages:
+        - libavformat-dev
+        - libavcodec-dev
+        - libav-tools
+        - libavutil-dev
+        - libswscale-dev
+        - ffmpeg
+        - libjpeg8-dev
+        - libv4l-dev
+        - libzip-dev
+  - os: linux
+    language: c
+    compiler: gcc
+    sudo: rquired
+    dist: trusty
+    addons:
+      apt:
+        sources:
+        - sourceline: 'ppa:mc3man/trusty-media'
+        packages:
+        - libavformat-dev
+        - libavcodec-dev
+        - libav-tools
+        - libavutil-dev
+        - libswscale-dev
+        - ffmpeg
+        - libjpeg8-dev
+        - libv4l-dev
+        - libzip-dev
+

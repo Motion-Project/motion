@@ -38,7 +38,7 @@ log_type all
 # for FreeBSD default is /dev/bktr0
 videodevice /dev/video0
 
-# v4l2_palette allows to choose preferable palette to be use by motion
+# v4l2_palette allows one to choose preferable palette to be use by motion
 # to capture from those supported by your videodevice. (default: 17)
 # E.g. if your videodevice supports both V4L2_PIX_FMT_SBGGR8 and
 # V4L2_PIX_FMT_MJPEG then motion will by default use V4L2_PIX_FMT_MJPEG.
@@ -64,6 +64,9 @@ videodevice /dev/video0
 # V4L2_PIX_FMT_YUYV    : 15 'YUYV'
 # V4L2_PIX_FMT_YUV422P : 16 '422P'
 # V4L2_PIX_FMT_YUV420  : 17 'YU12'
+# V4L2_PIX_FMT_Y10     : 18 'Y10'
+# V4L2_PIX_FMT_Y12     : 19 'Y12'
+# V4L2_PIX_FMT_GREY    : 20 'GREY'
 #
 v4l2_palette 17
 
@@ -84,7 +87,7 @@ norm 0
 frequency 0
 
 # Override the power line frequency for the webcam. (normally not necessary)
-# Values: 
+# Values:
 # -1 : Do not modify device setting
 # 0  : Power line frequency Disabled
 # 1  : 50hz
@@ -139,6 +142,14 @@ netcam_tolerant_check off
 # RTSP connection uses TCP to communicate to the camera. Can prevent image corruption.
 # Default: on
 rtsp_uses_tcp on
+
+# Name of camera to use if you are using a camera accessed through OpenMax/MMAL
+# Default: Not defined
+; mmalcam_name vc.ril.camera
+
+# Camera control parameters (see raspivid/raspistill tool documentation)
+# Default: Not defined
+; mmalcam_control_params -hf
 
 # Let motion regulate the brightness of a video device (default: off).
 # The auto_brightness feature uses the brightness option as its target value.
@@ -212,6 +223,10 @@ despeckle_filter EedDl
 # PGM file to use as a sensitivity mask.
 # Full path name to. (Default: not defined)
 ; mask_file value
+
+# PGM file to completely mask out a area of image.
+# Full path name to. (Default: not defined)
+# mask_privacy value
 
 # Dynamically create a mask file during operation (default: 0)
 # Adjust speed of mask changes from 0 (off) to 10 (fast)
@@ -303,12 +318,12 @@ ffmpeg_bps 400000
 # Enables and defines variable bitrate for the ffmpeg encoder.
 # ffmpeg_bps is ignored if variable bitrate is enabled.
 # Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps,
-# or the range 2 - 31 where 2 means best quality and 31 is worst.
+# or the range 1 - 100 where 1 means worst quality and 100 is best.
 ffmpeg_variable_bitrate 0
 
 # Codec to used by ffmpeg for the video compression.
 # Timelapse videos have two options.
-#   swf - Creates swf file with mpeg-2 encoding.
+#   mpg - Creates mpg file with mpeg-2 encoding.
 #     If motion is shutdown and restarted, new pics will be appended
 #     to any previously created file with name indicated for timelapse.
 #   mpeg4 - Creates avi file with the default encoding.
@@ -320,25 +335,17 @@ ffmpeg_variable_bitrate 0
 # it requires no installation of codec on the Windows client.
 # swf - gives you a flash film with extension .swf
 # flv - gives you a flash video with extension .flv
-# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )
-# mov - QuickTime ( testing )
-# ogg - Ogg/Theora ( testing )
+# ffv1 - FF video codec 1 for Lossless Encoding
+# mov - QuickTime
 # mp4 - MPEG-4 Part 14 H264 encoding
 # mkv - Matroska H264 encoding
 # hevc - H.265 / HEVC (High Efficiency Video Coding)
 ffmpeg_video_codec mpeg4
 
-# When creating videos, should frames be duplicated in order 
+# When creating videos, should frames be duplicated in order
 # to keep up with the requested frames per second
 # (default: true)
 ffmpeg_duplicate_frames true
-
-############################################################
-# SDL Window
-############################################################
-
-# Number of motion thread to show in SDL Window (default: 0 = disabled)
-#sdl_threadnr 0
 
 ############################################################
 # External pipe to video encoder
@@ -352,8 +359,10 @@ use_extpipe off
 
 # External program (full path and opts) to pipe raw video to
 # Generally, use '-' for STDIN...
-;extpipe mencoder -demuxer rawvideo -rawvideo w=320:h=240:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
-
+;extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
+;extpipe x264 - --input-res %wx%h --fps %fps --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
+;extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%fps -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %fps
+;extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
 
 
 ############################################################
@@ -368,7 +377,7 @@ snapshot_interval 0
 # Text Display
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second, %T = HH:MM:SS,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level, \n = new line,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
@@ -428,7 +437,7 @@ text_double off
 # you can use conversion specifiers
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
@@ -460,18 +469,18 @@ picture_filename %v-%Y%m%d%H%M%S-%q
 
 # File path for motion triggered ffmpeg films (movies) relative to target_dir
 # Default: %v-%Y%m%d%H%M%S
-# File extensions(.swf .avi) are automatically added so do not include them
+# File extensions(.mpg .avi) are automatically added so do not include them
 movie_filename %v-%Y%m%d%H%M%S
 
 # File path for timelapse movies relative to target_dir
 # Default: %Y%m%d-timelapse
-# File extensions(.swf .avi) are automatically added so do not include them
+# File extensions(.mpg .avi) are automatically added so do not include them
 timelapse_filename %Y%m%d-timelapse
 
 ############################################################
 # Global Network Options
 ############################################################
-# Enable or disable IPV6 for http control and stream (default: off )
+# Enable IPv6 (default: off)
 ipv6_enabled off
 
 ############################################################
@@ -609,7 +618,7 @@ track_stepsize 40
 # You can use conversion specifiers for the on_xxxx commands
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
-# %v = event, %q = frame number, %t = thread (camera) number,
+# %v = event, %q = frame number, %t = camera id number,
 # %D = changed pixels, %N = noise level,
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
@@ -657,6 +666,10 @@ quiet on
 # It depends on the driver, some drivers dosn't detect a lost camera at all
 # Some hangs the motion thread. Some even hangs the PC! (default: none)
 ; on_camera_lost value
+
+# Command to be executed when a camera that was lost has been found (default: none)
+# NOTE: If motion doesn't properly detect a lost camera, it also won't know it found one.
+; on_camera_found value
 
 #####################################################################
 # Common Options for database features.
@@ -728,28 +741,36 @@ quiet on
 ############################################################
 
 # Output images to a video4linux loopback device
-# The value '-' means next available (default: not defined)
+# Specify the device associated with the loopback device
+# For example /dev/video1 (default: not defined)
 ; video_pipe value
 
 # Output motion images to a video4linux loopback device
-# The value '-' means next available (default: not defined)
+# Specify the device associated with the loopback device
+# For example /dev/video1 (default: not defined)
 ; motion_video_pipe value
 
 
 ##############################################################
-# Thread config files - One for each camera.
+# camera config files - One for each camera.
 # Except if only one camera - You only need this config file.
-# If you have more than one camera you MUST define one thread
+# If you have more than one camera you MUST define one camera
 # config file for each camera in addition to this config file.
 ##############################################################
 
 # Remember: If you have more than one camera you must have one
-# thread file for each camera. E.g. 2 cameras requires 3 files:
-# This motion.conf file AND thread1.conf and thread2.conf.
+# camera file for each camera. E.g. 2 cameras requires 3 files:
+# This motion.conf file AND camera1.conf and camera2.conf.
 # Only put the options that are unique to each camera in the
-# thread config files.
-; thread @sysconfdir@/motion/thread1.conf
-; thread @sysconfdir@/motion/thread2.conf
-; thread @sysconfdir@/motion/thread3.conf
-; thread @sysconfdir@/motion/thread4.conf
+# camera config files.
+; camera @sysconfdir@/motion/camera1.conf
+; camera @sysconfdir@/motion/camera2.conf
+; camera @sysconfdir@/motion/camera3.conf
+; camera @sysconfdir@/motion/camera4.conf
 
+
+##############################################################
+# Camera config directory - One for each camera.
+##############################################################
+#
+; camera_dir @sysconfdir@/motion/conf.d

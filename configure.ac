@@ -40,7 +40,7 @@ if test "${Darwin}" = ""; then
 	FreeBSD=`uname -a | grep "FreeBSD"`
 	if test "${FreeBSD}" = ""; then
 		AC_MSG_RESULT(no)
-		VIDEO="video.o video2.o video_common.o"
+		VIDEO="video2.o video_common.o"
 	else
 		AC_MSG_RESULT(yes)
 		if test "${LINUXTHREADS}" = "no"; then
@@ -52,7 +52,7 @@ if test "${Darwin}" = ""; then
 		fi
 
 		if test "${PWCBSD}" != "no"; then
-			VIDEO="video.o video2.o video_common.o"
+			VIDEO="video2.o video_common.o"
 			TEMP_CFLAGS="${CFLAGS} -I/usr/local/include -DPWCBSD"
 		else
 			VIDEO="video_freebsd.o"
@@ -71,7 +71,7 @@ else
 	VIDEO="video_freebsd.o"
 	FINK_LIB="-L/sw/lib"
 	Darwin="yes"
-	V4L="no"
+	V4L2="no"
 	AC_MSG_RESULT($Darwin)
 fi
 
@@ -93,44 +93,43 @@ if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
 		AC_MSG_RESULT(yes)
 	else
 		AC_MSG_RESULT(no)
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DOLD_BKTR"
 	fi
-#
-# Check to Exclude BKTR
-#
-BKTR="yes"
-AC_ARG_WITH(bktr,
-[  --without-bktr          Exclude to use bktr subsystem , that usually useful
-                          for devices as network cameras ( ONLY used in *BSD).
-                          ]
-                          ,
-BKTR="$withval"
-)
-
-	if test "${BKTR}" = "no"; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
-	fi
-
+    #
+    # Check to Exclude BKTR
+    #
+    BKTR="yes"
+    AC_ARG_WITH(bktr,
+      [  --without-bktr          Exclude to use bktr subsystem , that usually useful
+                              for devices as network cameras ( ONLY used in *BSD).
+                          ]  ,
+      BKTR="$withval")
+    if test "${BKTR}" = "no"; then
+        TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+    fi
 else
+    #
+    # Check to Exclude V4L2
+    #
+    V4L2="yes"
+    AC_ARG_WITH(v4l2,
+    [  --without-v4l2         Exclude using v4l2 (video4linux2) subsystem.
+                              Makes Motion so it only supports network cameras.
+                              ],
+    V4L2="$withval" )
 
-#
-# Check to Exclude V4L
-#
-V4L="yes"
-AC_ARG_WITH(v4l,
-[  --without-v4l           Exclude using v4l (video4linux) subsystem.
-                          Makes Motion so it only supports network cameras.
-                          ],
-V4L="$withval"
-)
-
+    if test "${V4L2}" = "no"; then
+        TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+    else
+        AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
+        AC_MSG_CHECKING(for V4L2 support)
+        if test "${V4L2}" = "no"; then
+                AC_MSG_RESULT(no)
+                TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+        else
+                AC_MSG_RESULT(yes)
+        fi
+    fi
 fi
-
-
-if test "${V4L}" = "no"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L"
-fi
-
 
 if test "${FreeBSD}" != "" && test "${LINUXTHREADS}" != "no" ; then
 
@@ -207,43 +206,6 @@ else
 	echo
 fi
 
-
-#
-# Check for sdl library
-#
-SDL_SUPPORT="no"
-AC_ARG_WITH(sdl,
-[  --without-sdl           Compile without sdl support to get stream in SDL window.
-],
-[],
-[])
-AC_MSG_CHECKING(for sdl)
-if test "x$withval" = "xno"; then
-	AC_MSG_RESULT(skipped)
-else
-    CONFIG_SDL='sdl-config'
-	if test -z "`($CONFIG_SDL --version) 2>/dev/null`" ;then
-		AC_MSG_RESULT(no)
-		if test "$withval" = "yes"; then
-			echo ""
-			echo "****************************************************"
-			echo "* sdl-config could not be found. Please install it *"
-			echo "* and remove the --with-sdl configure argument.    *"
-			echo "* libSDL can be found at http://www.libsdl.org     *"
-			echo "****************************************************"
-			echo ""
-		fi
-	else
-		AC_MSG_RESULT(yes)
-		SDL_SUPPORT="yes"
-		TEMP_LIBS="$TEMP_LIBS `${CONFIG_SDL} --libs`"
-		TEMP_CFLAGS="${TEMP_CFLAGS} `${CONFIG_SDL} --cflags`"
-		AC_DEFINE([HAVE_SDL],1,[Define to 1 if you have SDL support])
-		SDL_OBJ="sdl.o"
-		AC_SUBST(SDL_OBJ)
-	fi
-fi
-
 #
 # Check for the libjpeg-turbo library
 #
@@ -262,7 +224,7 @@ if test "${JPEG_TURBO}" = "no"; then
     AC_MSG_RESULT(skipping)
 else
     AC_MSG_CHECKING(for libjpeg-turbo in -> [${JPEG_TURBO}] <-)
-    if test -f ${JPEG_TURBO}/lib/libjpeg.a ; then
+    if test -f ${JPEG_TURBO}/lib/libjpeg.a -o -f ${JPEG_TURBO}/lib/libjpeg.so; then
         AC_MSG_RESULT(found)
         JPEG_TURBO_OK="found"
     else
@@ -279,8 +241,8 @@ if test "${JPEG_TURBO_OK}" = "found"; then
     CFLAGS="$CFLAGS -I${JPEG_TURBO}/include"
     LIBS="$LIBS -L${JPEG_TURBO}/lib -ljpeg"
     AC_CHECK_LIB(jpeg, jpeg_start_compress,
-        [ TEMP_LIBS="$LIBS"
-          TEMP_CFLAGS="${CFLAGS}"
+        [ TEMP_LIBS="$TEMP_LIBS -L${JPEG_TURBO}/lib -ljpeg"
+          TEMP_CFLAGS="${TEMP_CFLAGS} -I${JPEG_TURBO}/include"
           TEMP_LDFLAGS="$TEMP_LDFLAGS $LDFLAGS"
           JPEG_SUPPORT="yes"],,)
     LIBS="$saved_LIBS"
@@ -368,6 +330,48 @@ if test x$JPEG_SUPPORT != xyes ; then
   )
 fi
 
+#
+# Check for the pkg-config.  
+#
+
+AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
+AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
+AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
+
+# Check for raspberry pi mmal interface
+#
+WITHOUT_MMAL="no"
+AC_ARG_WITH([mmal],
+AS_HELP_STRING([--without-mmal],
+               [Compile without RaspberyPi mmal camera support]),
+WITHOUT_MMAL="yes",
+WITHOUT_MMAL="no")
+
+if test "${WITHOUT_MMAL}" = "no"; then
+  HAVE_MMAL=""
+  if test "${FreeBSD}" != "" ; then
+	LIBRASPBERRYPIDEVPATH="/usr/local/include/interface/mmal"
+  else
+        LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+  fi
+
+  if test -d ${LIBRASPBERRYPIDEVPATH}; then
+       HAVE_MMAL="yes"
+  fi
+
+  AS_IF([test "${HAVE_MMAL}" = "yes" ], [
+           AC_SUBST(MMAL_CFLAGS)
+           AC_SUBST(MMAL_OBJ)
+           AC_SUBST(MMAL_LIBS)
+           MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
+           MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
+           AS_IF([test "${FreeBSD}" != "" ], [
+                MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
+               ])
+           MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+           AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
+  ])
+fi
 
 #
 # Check for libavcodec and libavformat from ffmpeg
@@ -383,7 +387,17 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
 	      PKG_CONFIG_PATH=${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH
 	      export PKG_CONFIG_PATH
 	])
-	PKG_CHECK_MODULES([FFMPEG], libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes)
+
+       AC_SUBST(FFMPEG_LIBS)
+       AC_SUBST(FFMPEG_CFLAGS)
+       FFMPEG_DEPS="libavutil libavformat libavcodec libswscale"
+       if pkg-config $FFMPEG_DEPS; then
+               FFMPEG_CFLAGS=`pkg-config --cflags $FFMPEG_DEPS`
+               FFMPEG_LIBS=`pkg-config --libs $FFMPEG_DEPS`
+               HAVE_FFMPEG="yes"
+       else
+              AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev' were not found.  Please check motion_guide.html and install necessary dependencies or use the '--without-ffmpeg' configuration option.])
+       fi
 ])
 
 AS_IF([test "${HAVE_FFMPEG}" = "yes" ], [
@@ -412,17 +426,14 @@ else
     saved_LIBS=$LIBS
 
     # first we check to see if the sqlite3 amalgamation (sqlite3.c), is in with our source
-    # this is the prefered way to use sqlite
-    AC_CHECK_FILE([sqlite3.c],
-        [
+    # this is the preferred way to use sqlite
+    if test -f sqlite3.c; then
         SQLITE3_SUPPORT="yes"
         VIDEO="$VIDEO sqlite3.o"
         TEMP_LIBS="$TEMP_LIBS -ldl"
         AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3])
         AC_DEFINE([HAVE_SQLITE3_EMBEDDED],1,[Define to 1 if you have SQLITE3 embedded support])
-        ]
-        ,
-        [
+    else
         # if sqlite3.c is not found then we look for the shared library
         AC_CHECK_LIB(sqlite3, sqlite3_open,
             [
@@ -431,8 +442,7 @@ else
             AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 shared library support])
             ]
         )
-        ]
-    )
+    fi
 
     CFLAGS=$saved_CFLAGS
     LIBS=$saved_LIBS
@@ -730,70 +740,7 @@ fi
 
 #Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev.h linux/videodev2.h sys/param.h sys/types.h sys/videoio.h)
-
-AC_CHECK_FUNCS(get_current_dir_name)
-
-# Check if v4l2 is available
-SUPPORTED_V4L2=false
-SUPPORTED_V4L2_old=false
-
-if test "${V4L}" = "no"; then
-	AC_MSG_CHECKING(for V42L support)
-	AC_MSG_RESULT(skipping)
-else
-	AC_CHECK_TYPE([struct v4l2_buffer],
-		[SUPPORTED_V4L2=true],
-		[SUPPORTED_V4L2=false],
-		[#include <sys/time.h>
-			#ifdef HAVE_LINUX_VIDEODEV_H
-			#include <linux/videodev.h>
-			#elif HAVE_SYS_VIDEOIO_H
-			#include <sys/videoio.h>
-			#endif])
-	AC_MSG_CHECKING(for V42L support)
-	if test x$SUPPORTED_V4L2 = xtrue; then
-		AC_MSG_RESULT(yes)
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2"
-	else
-		AC_MSG_RESULT(no)
-	fi
-
-	# linux/videodev.h doesn't include videodev2.h
-	if test x$SUPPORTED_V4L2 = xfalse; then
-		AC_MSG_CHECKING(for V42L *old* support)
-		AC_MSG_RESULT(testing)
-		AC_CHECK_HEADERS(linux/videodev2.h,[SUPPORTED_V4L2_old=true],[], [#include <asm/types.h>])
-	fi
-
-
-	if test x$SUPPORTED_V4L2_old = xtrue; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DMOTION_V4L2 -DMOTION_V4L2_OLD"
-		SUPPORTED_V4L2=true
-	fi
-
-fi
-
-
-# Check sizes of integer types
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long int)
-AC_CHECK_SIZEOF(long long)
-AC_CHECK_SIZEOF(int *)
-AC_CHECK_SIZEOF(void *)
-
-if test "$ac_cv_sizeof_short" = "4"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"short\""
-else
-	if test "$ac_cv_sizeof_int" = "4"; then
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"int\""
-	else
-		if test "$ac_cv_sizeof_long_int" = "4"; then
-			TEMP_CFLAGS="${TEMP_CFLAGS} -DTYPE_32BIT=\"long int\""
-		fi
-	fi
-fi
+AC_CHECK_HEADERS(stdio.h unistd.h stdint.h fcntl.h time.h signal.h sys/ioctl.h sys/mman.h linux/videodev2.h sys/param.h sys/types.h)
 
 
 OPTIMIZECPU="yes"
@@ -827,7 +774,18 @@ if test "${OPTIMIZECPU}" = "yes"; then
 # Try to autodetect cpu type
 CPU_NAME="unknown"
 CPU_TYPE="unknown"
-if test -e "/proc/cpuinfo" ; then
+if test -e "/proc/device-tree/model"; then
+    # explicit test for RPI3 as /proc/cpuinfo reports armv7 even though
+    # it is armv8
+    RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
+    if test "x${RPI3}" != "x"; then
+        CPU_NAME="Raspberry Pi 3"
+        CPU_TYPE="Raspberry Pi 3"
+	CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+    fi
+fi
+
+if test "x${CPU_TYPE}" = "xunknown" && test -e "/proc/cpuinfo" ; then
 	intel[[30]]="-march=i386"
 	intel[[32]]="-march=i386"
 	intel[[34]]="-march=i386"
@@ -1027,32 +985,16 @@ rm -f $TMPO
 rm -f $TMPC
 
 
-if test "x${TMP}" = "x1" ; then
+if test "x${TMP}" = "x0" ; then
+	echo "CPU optimization: $CPU_OPTIONS"
+else
 	CPU_OPTIONS=""
 	echo "No CPU optimizations will be added"
-else
-	echo "CPU optimization: $CPU_OPTIONS"
 fi
 
 else
 	CPU_OPTIONS=""
 fi
-
-
-AC_MSG_CHECKING(for bswap instruction)
-AC_LINK_IFELSE([
-	AC_LANG_PROGRAM([ ],
-		[unsigned int __x=0;
-		register unsigned int __v;
-		__asm("bswap %0" : "=r" (__v) : "0" (__x));])
-	],
-	[
-		TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_BSWAP"
-		AC_MSG_RESULT(yes)
-	],
-	[
-		AC_MSG_RESULT(no)
-	])
 
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
@@ -1083,18 +1025,17 @@ else
 	fi
 fi
 
-
 AC_SUBST(BIN_PATH)
 
 AC_CONFIG_FILES([
-thread1-dist.conf
-thread2-dist.conf
-thread3-dist.conf
-thread4-dist.conf
+camera1-dist.conf
+camera2-dist.conf
+camera3-dist.conf
+camera4-dist.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
-motion.init-Fedora
+motion.service
 motion.spec
 Makefile
 ])
@@ -1153,23 +1094,23 @@ if test "${FreeBSD}" != ""; then
 	fi
 
 else
-	if test "${V4L}" = "yes"; then
-        echo "V4L support:         Yes"
-	else
-        echo "V4L support:         No"
-	fi
-
-	if test x$SUPPORTED_V4L2 = xtrue; then
+	if test "$V4L2" = "yes"; then
         echo "V4L2 support:        Yes"
 	else
         echo "V4L2 support:        No"
 	fi
 fi
 
-if test "${SDL_SUPPORT}" = "yes"; then
-	echo "SDL support:         Yes"
+if test "${HAVE_MMAL}" = "yes"; then
+    echo "MMAL support:        Yes"
+    echo " ... MMAL_CFLAGS: $MMAL_CFLAGS"
+    echo " ... MMAL_OBJ: $MMAL_OBJ"
+    echo " ... MMAL_LIBS: $MMAL_LIBS"
+elif test "${WITHOUT_MMAL}" = "yes"; then
+    echo "MMAL support:        disabled"
 else
-	echo "SDL support:         No"
+    echo "MMAL support:        No"
+    echo " ... libraspberrypi-dev package not installed"
 fi
 
 if test "${HAVE_FFMPEG}" = "yes"; then
