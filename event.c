@@ -242,7 +242,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
                                  unsigned char *dummy1 ATTRIBUTE_UNUSED,
                                  char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
-                                 struct tm *tm ATTRIBUTE_UNUSED)
+                                 struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     /* Only log the file types we want */
     if (!(cnt->conf.database_type)) {
@@ -257,7 +257,7 @@ static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBU
         char sqlquery[PATH_MAX];
 
         mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_event_start_query,
-                   cnt->current_image->timestamp_tm, NULL, 0, 0);
+                   &cnt->current_image->timestamp_tv, NULL, 0, 0);
 
         do_sql_query(sqlquery, cnt, 1);
     }
@@ -265,7 +265,7 @@ static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBU
 
 static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
             unsigned char *dummy ATTRIBUTE_UNUSED,
-            char *filename, void *arg, struct tm *tm ATTRIBUTE_UNUSED)
+            char *filename, void *arg, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     int sqltype = (unsigned long)arg;
 
@@ -285,7 +285,7 @@ static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_U
         event_id = cnt->current_event_id;
 #endif
         mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_file_query,
-                   &cnt->current_image->timestamp_tm, filename, sqltype, event_id);
+                   &cnt->current_image->timestamp_tv, filename, sqltype, event_id);
 
         do_sql_query(sqlquery, cnt, 0);
     }
