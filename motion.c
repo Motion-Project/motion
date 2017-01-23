@@ -1456,7 +1456,6 @@ static void mlp_resetimages(struct context *cnt){
 }
 
 static int mlp_retry(struct context *cnt){
->>>>>>> master
 
     /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
     /*
@@ -3420,9 +3419,9 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
             case 'e': // event_id
                 if (event_id)
                     sprintf(tempstr, "%llu", event_id);
-		else
-		    ++pos_userformat;
-		break;
+                else
+                    ++pos_userformat;
+                break;
 
             case '{': // long format specifier word.
                 {
