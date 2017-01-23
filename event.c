@@ -257,7 +257,7 @@ static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBU
         char sqlquery[PATH_MAX];
 
         mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_event_start_query,
-                   cnt->eventtime_tm, NULL, 0, 0);
+                   cnt->eventtime_tv, NULL, 0, 0);
 
         do_sql_query(sqlquery, cnt, 1);
     }
