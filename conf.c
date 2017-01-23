@@ -1548,7 +1548,7 @@ config_param config_params[] = {
     "# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);\n"
     "#\n"
     "# Default value:\n"
-    "# insert into security(camera, event_id, filename, frame, file_type, time_stamp, text_event) values('%t', '%n', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')",
+    "# insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')",
     0,
     CONF_OFFSET(sql_file_query),
     copy_string,

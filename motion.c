@@ -1398,7 +1398,7 @@ static void mlp_prepare(struct context *cnt){
     if (cnt->startup_frames > 0)
         cnt->startup_frames--;
 
-    
+
 }
 
 static void mlp_resetimages(struct context *cnt){

@@ -163,7 +163,11 @@
 
 /* Do not break this line into two or more. Must be ONE line */
 #define DEF_SQL_START_QUERY "sql_event_start_query insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
+#ifdef HAVE_MYSQL
 #define DEF_SQL_FILE_QUERY "sql_file_query insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%e', '%f', '%q', '%n', '%Y-%m-%d %T')"
+#else
+#define DEF_SQL_FILE_QUERY "sql_file_query insert into security_file(camera, filename, frame, file_type, time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T')"
+#endif
 
 /* OUTPUT Image types */
 #define IMAGE_TYPE_JPEG        0
