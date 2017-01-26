@@ -14,6 +14,11 @@
 
 #include <assert.h>
 
+#ifdef HAVE_WEBP
+#include <webp/encode.h>
+#include <webp/mux.h>
+#endif /* HAVE_WEBP */
+
 #include <jpeglib.h>
 #include <jerror.h>
 
@@ -541,6 +546,80 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
     return dest_image_size;
 }
 
+#ifdef HAVE_WEBP
+/**
+ * put_webp_yuv420p_file
+ *      Converts an YUV420P coded image to a webp image and writes
+ *      it to an already open file.
+ *
+ * Inputs:
+ * - image is the image in YUV420P format.
+ * - width and height are the dimensions of the image
+ * - quality is the webp encoding quality 0-100%
+ *
+ * Output:
+ * - The webp is written directly to the file given by the file pointer fp
+ *
+ * Returns nothing
+ */
+static void put_webp_yuv420p_file(FILE *fp,
+				  unsigned char *image, int width, int height,
+				  int quality)
+{
+    /* Create a config present and check for compatible library version */
+    WebPConfig webp_config;
+    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "libwebp version error");
+        return;
+    }
+
+    /* Create the input data structure and check for compatible library version */
+    WebPPicture webp_image;
+    if (!WebPPictureInit(&webp_image)){
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "libwebp version error");
+        return;
+    }
+
+    /* Allocate the image buffer based on image width and height */
+    webp_image.width = width;
+    webp_image.height = height;
+    if (!WebPPictureAlloc(&webp_image)){
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "libwebp image buffer allocation error");
+        return;
+    }
+
+    /* Map the input YUV420P buffer as individual Y, U and V pointers */
+    webp_image.y = image;
+    webp_image.u = image + width * height;
+    webp_image.v = webp_image.u + (width * height) / 4;
+
+    /* Setup the memory writting method */
+    WebPMemoryWriter webp_writer;
+    WebPMemoryWriterInit(&webp_writer);
+    webp_image.writer = WebPMemoryWrite;
+    webp_image.custom_ptr = (void*) &webp_writer;
+
+    /* Encode the YUV image as webp */
+    if (!WebPEncode(&webp_config, &webp_image))
+        MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO, "libwebp image compression error");
+
+    /* Write the webp bytestream to file */
+    if (fwrite(webp_writer.mem, sizeof(uint8_t), webp_writer.size, fp) != webp_writer.size)
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to save webp image to file");
+
+#if WEBP_ENCODER_ABI_VERSION > 0x0202
+    /* writer.mem must be freed by calling WebPMemoryWriterClear */
+    WebPMemoryWriterClear(&webp_writer);
+#else
+    /* writer.mem must be freed by calling 'free(writer.mem)' */
+    free(webp_writer.mem);
+#endif /* WEBP_ENCODER_ABI_VERSION */
+
+    /* free the memory used by webp for image object */
+    WebPPictureFree(&webp_image);
+}
+#endif /* HAVE_WEBP */
+
 /**
  * put_jpeg_yuv420p_file
  *      Converts an YUV420P coded image to a jpeg image and writes
@@ -918,7 +997,12 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
     } else {
         switch (cnt->imgs.type) {
         case VIDEO_PALETTE_YUV420P:
-            put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+            #ifdef HAVE_WEBP
+            if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
+                put_webp_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
+            #endif /* HAVE_WEBP */
+            if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
+                put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
             break;
         case VIDEO_PALETTE_GREY:
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);

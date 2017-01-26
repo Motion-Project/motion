@@ -338,6 +338,31 @@ AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
 AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
 AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
 
+
+# Check for the libwebp library
+#
+AC_ARG_WITH(libwebp,
+[  --without-libwebp       Compile without webp image support],
+LIBWEBP="no",
+LIBWEBP="yes"
+)
+
+HAVE_LIBWEBP=""
+if test "${LIBWEBP}" = "yes"; then
+  AC_MSG_CHECKING(for libwebp)
+  LIBWEBP_DEPS="libwebp"
+  if pkg-config $LIBWEBP_DEPS; then
+    AC_MSG_RESULT(found)
+    HAVE_LIBWEBP="yes"
+    TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
+    TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_WEBP"
+  else
+    AC_MSG_RESULT(not found)
+    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-libwebp' configuration option.]) 
+  fi
+fi
+
+
 # Check for raspberry pi mmal interface
 #
 WITHOUT_MMAL="no"
@@ -1078,6 +1103,12 @@ else
     echo "**********************************************"
     echo "** Fatal Error YOU MUST HAVE jpeg Support  ***"
     echo "**********************************************"
+fi
+
+if test "${HAVE_LIBWEBP}" = "yes"; then
+   echo "webp support:        yes"
+else
+   echo "webp support:        no"
 fi
 
 if test "${FreeBSD}" != ""; then

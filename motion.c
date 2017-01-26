@@ -850,6 +850,8 @@ static int motion_init(struct context *cnt)
     /* Set output picture type */
     if (!strcmp(cnt->conf.picture_type, "ppm"))
         cnt->imgs.picture_type = IMAGE_TYPE_PPM;
+    else if (!strcmp(cnt->conf.picture_type, "webp"))
+        cnt->imgs.picture_type = IMAGE_TYPE_WEBP;
     else
         cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
 
