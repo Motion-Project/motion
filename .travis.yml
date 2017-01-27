@@ -20,6 +20,7 @@ matrix:
         - libjpeg8-dev
         - libv4l-dev
         - libzip-dev
+        - libwebp-dev
   - os: linux
     language: c
     compiler: gcc
@@ -39,4 +40,5 @@ matrix:
         - libjpeg8-dev
         - libv4l-dev
         - libzip-dev
+        - libwebp-dev
 

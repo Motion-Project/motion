@@ -9,7 +9,7 @@ URL:            https://motion-project.github.io/
 Source0:        https://github.com/Motion-Project/motion
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  libjpeg-devel ffmpeg-devel zlib-devel
+BuildRequires:  libjpeg-devel ffmpeg-devel zlib-devel libwebp-devel
 #This requires comes from the startup script, it will be there until motion supports libv4l calls in the code
 Requires: libv4l
 Requires(post): chkconfig

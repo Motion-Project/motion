@@ -241,7 +241,7 @@ script for Ubuntu.  If errors occur during the process or you wish to customize 
 review the extended building instructions further below.
 <p></p>
 <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
-libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev</strong></code>
+libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libwebp-dev</strong></code>
 <p></p>
 <code><strong>cd ~</strong></code>
 <br><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -277,7 +277,7 @@ Ubuntu / Debian Packages
   <li>Required</li>
   <ul>
     <p></p>
-    <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg62 libjpeg62-dev</strong></code>
+    <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg62 libjpeg62-dev libwebp5 libwebpmux1</strong></code>
     <p></p>
   </ul>
   <p></p>
@@ -336,6 +336,8 @@ openSUSE Packages
     <p></p>
     <code><strong>sudo zypper install -t pattern devel_C_C++ </strong></code>
     <p></p>
+    <code><strong>sudo zypper install libwebp-devel </strong></code>
+    <p></p>
   </ul>
   <p></p>
   <li>Optional Packages</li>
@@ -386,6 +388,7 @@ FreeBSD
       <li>gcc</li>
       <li>gmake</li>
       <li>libjpeg-turbo</li>
+      <li>libwebp</li>
       <li>pkgconf</li>
       <li>ffmpeg</li>
     </ul>
@@ -623,6 +626,11 @@ how Motion is built.
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-jpeg-mmx=DIR </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the prefix for the install path for jpeg-mmx for optimized jpeg handling</td>
+			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
+		</tr>
+		<tr>
+			<td bgcolor="#edf4f9" word-wrap:break-word > --without-libwebp </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Compile without libwebp image support</td>
 			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
 		</tr>
 		<tr>
@@ -4053,7 +4061,7 @@ the .jpg or .ppm. E.g. the name can be 01-20020424232936-00m.jpg.
   <li> Default: 75</li>
 </ul>
 <p></p>
-The quality for the jpeg images in percent.
+The quality for the jpeg or webp images in percent.
 100 means hardly compressed. A small number means a much smaller file size but also a less nice
 quality image to look at.
 <p></p>
