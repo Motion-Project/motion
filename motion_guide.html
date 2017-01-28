@@ -604,7 +604,7 @@ how Motion is built.
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude to use bktr subsystem , that usually useful for devices as network cameras </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude bktr video subsystem devices </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
 		</tr>
 		<tr>
@@ -1015,9 +1015,9 @@ For video4linux devices, the camera must be installed per the requirements of th
 out of the scope of this document to tell you how to do this and it depends on which type of camera.  Once
 the camera is installed it will have the device name(s) of /dev/video0, /dev/video1, /dev/video2...
 <p></p>
-FreeBSD has a different naming of for the bktr devices.  The bktr system currently will be enabled on BSD
-systems when the V4L2 webcam functionality is disabled.  Under FreeBSD a TV card also has a special device
-for controlling the tuner (e.g. /dev/tuner0) which needs to be specified with the option tunerdevice.
+FreeBSD has a different naming scheme for pci devices that use the bktr subsystem.  The bktr subsystem will report
+devices using a naming scheme of /dev/bktr0, /dev/bktr1, etc.  These device may also need to use the other
+special device for the tuner.  The tuner will need to be specified with the tunerdevice option as /dev/tuner0.
 <p></p>
 <strong>USB cameras</strong> take a lot of bandwidth. A USB camera connected to a USB2 port or hub consumes virtually
 all the bandwidth that the port can handle. Even with a small framesize and low framerate you should not expect to have
