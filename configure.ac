@@ -78,7 +78,7 @@ AC_ARG_WITH(v4l2,
 ###
 if test "x${BKTR}" = "xyes"; then
     if test "${DISTRO}" = "FreeBSD"; then
-        AC_CHECK_HEADERS(dev/bktr/ioctl_meteor.h,dev/bktr/ioctl_bt848.h,[BKTR="yes"],[BKTR="no"])
+        AC_CHECK_HEADERS(dev/bktr/ioctl_meteor.h dev/bktr/ioctl_bt848.h,[BKTR="yes"],[BKTR="no"])
     elif test "${DISTRO}" = "OpenBSD" || test "${DISTRO}" = "NetBSD"; then
         AC_CHECK_HEADERS(dev/ic/bt8xx.h,[BKTR="yes"],[BKTR="no"])
     else
