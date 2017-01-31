@@ -382,6 +382,7 @@ snapshot_interval 0
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
 # %C = value defined by text_event - do not use with text_event!
+# {host} = host name
 # You can put quotation marks around the text to allow
 # leading spaces
 ############################################################
@@ -442,6 +443,7 @@ text_double off
 # %i and %J = width and height of motion area,
 # %K and %L = X and Y coordinates of motion center
 # %C = value defined by text_event
+# {host} = host name
 # Quotation marks round string are allowed.
 ############################################################
 
@@ -625,6 +627,7 @@ track_stepsize 40
 # %C = value defined by text_event
 # %f = filename with full path
 # %n = number indicating filetype
+# {host} = host name
 # Both %f and %n are only defined for on_picture_save,
 # on_movie_start and on_movie_end
 # Quotation marks round string are allowed.
