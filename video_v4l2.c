@@ -4,56 +4,6 @@
  *    V4L2 interface with basically JPEG decompression support and even more ...
  *    Copyright 2006 Krzysztof Blaszkowski (kb@sysmikro.com.pl)
  *              2007 Angel Carpintero (motiondevelop@gmail.com)
-
- * Supported features and TODO
-   - preferred palette is JPEG which seems to be very popular for many 640x480 usb cams
-   - other supported palettes (NOT TESTED)
-       V4L2_PIX_FMT_SN9C10X   (sonix)
-       V4L2_PIX_FMT_SBGGR16,
-       V4L2_PIX_FMT_SBGGR8,   (sonix)
-       V4L2_PIX_FMT_SPCA561,
-       V4L2_PIX_FMT_SGBRG8,
-       V4L2_PIX_FMT_SGRBG8,
-       V4L2_PIX_FMT_PAC207,
-       V4L2_PIX_FMT_PJPG,
-       V4L2_PIX_FMT_MJPEG,    (tested)
-       V4L2_PIX_FMT_JPEG,     (tested)
-       V4L2_PIX_FMT_RGB24,
-       V4L2_PIX_FMT_SPCA501,
-       V4L2_PIX_FMT_SPCA505,
-       V4L2_PIX_FMT_SPCA508,
-       V4L2_PIX_FMT_UYVY,     (tested)
-       V4L2_PIX_FMT_YUV422P,
-       V4L2_PIX_FMT_YUV420,   (tested)
-       V4L2_PIX_FMT_YUYV      (tested)
-
- *  - setting tuner - NOT TESTED
- *  - access to V4L2 device controls is missing. Partially added but requires some improvements likely.
- *  - changing resolution at run-time may not work.
- *  - ucvideo svn r75 or above to work with MJPEG ( e.g. Logitech 5000 pro )
-
- * This work is inspired by fswebcam and current design of motion.
- * This interface has been tested with ZC0301 driver from kernel 2.6.17.3 and Labtec's usb camera (PAS202 sensor)
-
- * I'm very pleased by achieved image quality and cpu usage comparing to junky v4l1 spca5xx driver with
- * it nonsensical kernel messy jpeg decompressor.
- * Default sensor settings used by ZC0301 driver are very reasonable choosen.
- * apparently brigthness should be controlled automatically by motion still for light compensation.
- * it can be done by adjusting ADC gain and also exposure time.
-
- * Kernel 2.6.27
-
- V4L2_PIX_FMT_SPCA501 v4l2_fourcc('S', '5', '0', '1')  YUYV per line
- V4L2_PIX_FMT_SPCA505 v4l2_fourcc('S', '5', '0', '5')  YYUV per line
- V4L2_PIX_FMT_SPCA508 v4l2_fourcc('S', '5', '0', '8')  YUVY per line
- V4L2_PIX_FMT_SGBRG8  v4l2_fourcc('G', 'B', 'R', 'G')   8  GBGB.. RGRG..
- V4L2_PIX_FMT_SGRBG8  v4l2_fourcc('G', 'R', 'B', 'G')   8  GRGR.. BGBG..
- V4L2_PIX_FMT_SBGGR16 v4l2_fourcc('B', 'Y', 'R', '2')  16  BGBG.. GRGR..
- V4L2_PIX_FMT_SPCA561 v4l2_fourcc('S', '5', '6', '1')  compressed GBRG bayer
- V4L2_PIX_FMT_PJPG    v4l2_fourcc('P', 'J', 'P', 'G')  Pixart 73xx JPEG
- V4L2_PIX_FMT_PAC207  v4l2_fourcc('P', '2', '0', '7')  compressed BGGR bayer
-
-
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -64,14 +14,28 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
  * for more details.
-
- let's go :)
 */
+#include "rotate.h"    /* Already includes motion.h */
+#include "video_common.h"
+#include "video_v4l2.h"
+#include <sys/mman.h>
 
-#include "motion.h"
-#include "video2.h"
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
+
+#include <linux/videodev2.h>
+
+/* video4linux stuff */
+#define NORM_DEFAULT    0
+#define NORM_PAL        0
+#define NORM_NTSC       1
+#define NORM_SECAM      2
+#define NORM_PAL_NC     3
+
+#define IN_TV           0
+#define IN_COMPOSITE    1
+#define IN_COMPOSITE2   2
+#define IN_SVIDEO       3
 
 #define u8 unsigned char
 #define u16 unsigned short
@@ -82,7 +46,6 @@
 #define MIN_MMAP_BUFFERS 2
 
 #ifndef V4L2_PIX_FMT_SBGGR8
-/* see http://www.siliconimaging.com/RGB%20Bayer.htm */
 #define V4L2_PIX_FMT_SBGGR8  v4l2_fourcc('B','A','8','1')  /*  8  BGBG.. GRGR.. */
 #endif
 
@@ -145,16 +108,24 @@
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
+static pthread_mutex_t v4l2_mutex;
+
+static struct video_dev *viddevs = NULL;
+
+typedef struct video_image_buff {
+    unsigned char *ptr;
+    int content_length;
+    size_t size;                    /* total allocated size */
+    size_t used;                    /* bytes already used */
+    struct timeval image_time;      /* time this image was received */
+} video_buff;
+
 static const u32 queried_ctrls[] = {
     V4L2_CID_BRIGHTNESS,
     V4L2_CID_CONTRAST,
     V4L2_CID_SATURATION,
     V4L2_CID_HUE,
-/* first added in Linux kernel v2.6.26 */
-#ifdef V4L2_CID_POWER_LINE_FREQUENCY
     V4L2_CID_POWER_LINE_FREQUENCY,
-#endif
-
     V4L2_CID_RED_BALANCE,
     V4L2_CID_BLUE_BALANCE,
     V4L2_CID_GAMMA,
@@ -168,7 +139,7 @@ static const u32 queried_ctrls[] = {
 };
 
 typedef struct {
-    int fd;
+    int fd_device;
     u32 fps;
 
     struct v4l2_capability cap;
@@ -199,15 +170,12 @@ static int xioctl(src_v4l2_t *vid_source, int request, void *arg)
     int ret;
 
     do
-        ret = ioctl(vid_source->fd, request, arg);
+        ret = ioctl(vid_source->fd_device, request, arg);
     while (-1 == ret && EINTR == errno && !vid_source->finish);
 
     return ret;
 }
 
-/**
- * v4l2_get_capability
- */
 static int v4l2_get_capability(src_v4l2_t * vid_source)
 {
     if (xioctl(vid_source, VIDIOC_QUERYCAP, &vid_source->cap) < 0) {
@@ -256,9 +224,6 @@ static int v4l2_get_capability(src_v4l2_t * vid_source)
     return 0;
 }
 
-/**
- * v4l2_select_input
- */
 static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
                              src_v4l2_t * vid_source, int in, int norm,
                              unsigned long freq_, int tuner_number ATTRIBUTE_UNUSED)
@@ -269,7 +234,7 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
 
     /* Set the input. */
     memset(&input, 0, sizeof (input));
-    if (in == IN_DEFAULT)
+    if (in == DEF_INPUT)
         input.index = IN_TV;
     else input.index = in;
 
@@ -302,7 +267,7 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
      * return V4L2_STD_UNKNOWN
      */
     if (xioctl(vid_source, VIDIOC_G_STD, &std_id) == -1) {
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "%s: Device doesn't support VIDIOC_G_STD");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Device doesn't support specifying PAL/NTSC norm");
         norm = std_id = 0;    // V4L2_STD_UNKNOWN = 0
     }
 
@@ -381,7 +346,6 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
     return 0;
 }
 
-
 /* *
  * v4l2_do_set_pix_format
  *
@@ -453,12 +417,6 @@ static int v4l2_do_set_pix_format(u32 pixformat, src_v4l2_t * vid_source,
     return -1;
 }
 
-/**
- * v4l2_set_pix_format
- *
- * Returns:  0  Ok
- *          -1  Problems setting palette or not supported
- */
 static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
                                int *width, int *height)
 {
@@ -560,26 +518,6 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
     return -1;
 }
 
-#if 0
-static void v4l2_set_fps(src_v4l2_t * vid_source) {
-    struct v4l2_streamparm* setfps;
-
-    setfps = (struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
-    memset(setfps, 0, sizeof(struct v4l2_streamparm));
-    setfpvid_source->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    setfpvid_source->parm.capture.timeperframe.numerator = 1;
-    setfpvid_source->parm.capture.timeperframe.denominator = vid_source->fps;
-
-    if (xioctl(vid_source, VIDIOC_S_PARM, setfps) == -1)
-        MOTION_LOG(ERR, 1, "%s: v4l2_set_fps VIDIOC_S_PARM");
-
-
-}
-#endif
-
-/**
- * v4l2_set_mmap
- */
 static int v4l2_set_mmap(src_v4l2_t * vid_source)
 {
     enum v4l2_buf_type type;
@@ -636,7 +574,7 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
 
         vid_source->buffers[buffer_index].size = buf.length;
         vid_source->buffers[buffer_index].ptr = mmap(NULL, buf.length, PROT_READ | PROT_WRITE,
-                                                     MAP_SHARED, vid_source->fd, buf.m.offset);
+                                                     MAP_SHARED, vid_source->fd_device, buf.m.offset);
 
         if (vid_source->buffers[buffer_index].ptr == MAP_FAILED) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Error mapping buffer %i mmap",
@@ -673,9 +611,6 @@ static int v4l2_set_mmap(src_v4l2_t * vid_source)
     return 0;
 }
 
-/**
- * v4l2_scan_controls
- */
 static int v4l2_scan_controls(src_v4l2_t * vid_source)
 {
     int count, i;
@@ -730,9 +665,6 @@ static int v4l2_scan_controls(src_v4l2_t * vid_source)
     return 0;
 }
 
-/**
- * v4l2_set_control
- */
 static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
 {
     int i, count;
@@ -787,9 +719,6 @@ static int v4l2_set_control(src_v4l2_t * vid_source, u32 cid, int value)
     return -1;
 }
 
-/**
- * v4l2_picture_controls
- */
 static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
 {
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
@@ -809,13 +738,11 @@ static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
         v4l2_set_control(vid_source, V4L2_CID_HUE, viddev->hue);
     }
 
-#ifdef V4L2_CID_POWER_LINE_FREQUENCY
     /* -1 is don't modify as 0 is an option to disable the power line filter */
     if (cnt->conf.power_line_frequency != -1 && cnt->conf.power_line_frequency != viddev->power_line_frequency) {
         viddev->power_line_frequency = cnt->conf.power_line_frequency;
         v4l2_set_control(vid_source, V4L2_CID_POWER_LINE_FREQUENCY, viddev->power_line_frequency);
     }
-#endif
 
     if (cnt->conf.autobright) {
         if (vid_do_autobright(cnt, viddev)) {
@@ -832,11 +759,7 @@ static void v4l2_picture_controls(struct context *cnt, struct video_dev *viddev)
 
 }
 
-/* public functions */
-/**
- * v4l2_start
- */
-unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int width, int height,
+static unsigned char *v4l2_device_init(struct context *cnt, struct video_dev *viddev, int width, int height,
               int input, int norm, unsigned long freq, int tuner_number)
 {
     src_v4l2_t *vid_source;
@@ -848,7 +771,7 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
     }
 
     viddev->v4l2_private = vid_source;
-    vid_source->fd = viddev->fd;
+    vid_source->fd_device = viddev->fd_device;
     vid_source->fps = cnt->conf.frame_limit;
     vid_source->pframe = -1;
     vid_source->finish = &cnt->finish;
@@ -866,9 +789,6 @@ unsigned char *v4l2_start(struct context *cnt, struct video_dev *viddev, int wid
     if (v4l2_scan_controls(vid_source))
         goto err;
 
-#if 0
-    v4l2_set_fps(vid_source);
-#endif
     if (v4l2_set_mmap(vid_source))
         goto err;
 
@@ -895,85 +815,7 @@ err:
     return NULL;
 }
 
-/**
- * v4l2_set_input
- */
-void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map,
-                    int width, int height, struct config *conf)
-{
-    int input = conf->input;
-    int norm = conf->norm;
-    unsigned long freq = conf->frequency;
-    int tuner_number = conf->tuner_number;
-
-    if (input != viddev->input || width != viddev->width || height != viddev->height ||
-        freq != viddev->freq || tuner_number != viddev->tuner_number || norm != viddev->norm) {
-
-        unsigned int i;
-        struct timeval switchTime;
-        unsigned int skip = conf->roundrobin_skip;
-
-        if (conf->roundrobin_skip < 0)
-            skip = 1;
-
-        v4l2_select_input(conf, viddev, (src_v4l2_t *) viddev->v4l2_private,
-                          input, norm, freq, tuner_number);
-
-        gettimeofday(&switchTime, NULL);
-
-        v4l2_picture_controls(cnt, viddev);
-
-        viddev->width = width;
-        viddev->height = height;
-
-        /*
-        viddev->input = input;
-        viddev->norm = norm;
-        viddev->width = width;
-        viddev->height = height;
-        viddev->freq = freq;
-        viddev->tuner_number = tuner_number;
-        */
-
-        /* Skip all frames captured before switchtime, capture 1 after switchtime */
-        {
-            src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
-            unsigned int counter = 0;
-
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: set_input_skip_frame "
-                       "switch_time=%ld:%ld", switchTime.tv_sec, switchTime.tv_usec);
-
-            /* Avoid hang using the number of mmap buffers */
-            while(counter < vid_source->req.count) {
-                counter++;
-                if (v4l2_next(cnt, viddev, map, width, height))
-                    break;
-
-                if (vid_source->buf.timestamp.tv_sec > switchTime.tv_sec ||
-                   (vid_source->buf.timestamp.tv_sec == switchTime.tv_sec &&
-                    vid_source->buf.timestamp.tv_usec > switchTime.tv_usec))
-                    break;
-
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: got frame before "
-                           " switch timestamp=%ld:%ld",
-                           vid_source->buf.timestamp.tv_sec,
-                           vid_source->buf.timestamp.tv_usec);
-            }
-        }
-
-        /* skip a few frames if needed */
-        for (i = 1; i < skip; i++)
-            v4l2_next(cnt, viddev, map, width, height);
-    } else {
-        /* No round robin - we only adjust picture controls */
-        v4l2_picture_controls(cnt, viddev);
-    }
-}
-
-/**
- * v4l2_next
- */
-int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
+static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned char *map,
               int width, int height)
 {
     sigset_t set, old;
@@ -981,7 +823,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     int shift = 0;
 
     if (viddev->v4l_fmt != VIDEO_PALETTE_YUV420P)
-        return V4L_FATAL_ERROR;
+        return V4L2_FATAL_ERROR;
 
     /* Block signals during IOCTL */
     sigemptyset(&set);
@@ -1061,16 +903,16 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
 
         switch (vid_source->dst_fmt.fmt.pix.pixelformat) {
         case V4L2_PIX_FMT_RGB24:
-            conv_rgb24toyuv420p(map, the_buffer->ptr, width, height);
+            vid_rgb24toyuv420p(map, the_buffer->ptr, width, height);
             return 0;
 
         case V4L2_PIX_FMT_UYVY:
-            conv_uyvyto420p(map, the_buffer->ptr, (unsigned)width, (unsigned)height);
+            vid_uyvyto420p(map, the_buffer->ptr, (unsigned)width, (unsigned)height);
             return 0;
 
         case V4L2_PIX_FMT_YUYV:
         case V4L2_PIX_FMT_YUV422P:
-            conv_yuv422to420p(map, the_buffer->ptr, width, height);
+            vid_yuv422to420p(map, the_buffer->ptr, width, height);
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
@@ -1080,7 +922,7 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_PJPG:
         case V4L2_PIX_FMT_JPEG:
         case V4L2_PIX_FMT_MJPEG:
-            return mjpegtoyuv420p(map, the_buffer->ptr, width, height,
+            return vid_mjpegtoyuv420p(map, the_buffer->ptr, width, height,
                                   vid_source->buffers[vid_source->buf.index].content_length);
 
         /* FIXME: quick hack to allow work all bayer formats */
@@ -1089,25 +931,25 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
         case V4L2_PIX_FMT_SGRBG8:
         /* case V4L2_PIX_FMT_SPCA561: */
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
-            bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
-            conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            vid_bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
+            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
 
         case V4L2_PIX_FMT_SPCA561:
         case V4L2_PIX_FMT_SN9C10X:
-            sonix_decompress(map, the_buffer->ptr, width, height);
-            bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
-            conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            vid_sonix_decompress(map, the_buffer->ptr, width, height);
+            vid_bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
+            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
         case V4L2_PIX_FMT_Y12:
             shift += 2;
         case V4L2_PIX_FMT_Y10:
             shift += 2;
-            y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
-            conv_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            vid_y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
+            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
         case V4L2_PIX_FMT_GREY:
-            conv_greytoyuv420p(map, the_buffer->ptr, width, height);
+            vid_greytoyuv420p(map, the_buffer->ptr, width, height);
             return 0;
 
         }
@@ -1116,24 +958,90 @@ int v4l2_next(struct context *cnt, struct video_dev *viddev, unsigned char *map,
     return 1;
 }
 
-/**
- * v4l2_close
- */
-void v4l2_close(struct video_dev *viddev)
+static void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map,
+                    int width, int height, struct config *conf)
+{
+    int input = conf->input;
+    int norm = conf->norm;
+    unsigned long freq = conf->frequency;
+    int tuner_number = conf->tuner_number;
+
+    if (input != viddev->input || width != viddev->width || height != viddev->height ||
+        freq != viddev->freq || tuner_number != viddev->tuner_number || norm != viddev->norm) {
+
+        unsigned int i;
+        struct timeval switchTime;
+        unsigned int skip = conf->roundrobin_skip;
+
+        if (conf->roundrobin_skip < 0)
+            skip = 1;
+
+        v4l2_select_input(conf, viddev, (src_v4l2_t *) viddev->v4l2_private,
+                          input, norm, freq, tuner_number);
+
+        gettimeofday(&switchTime, NULL);
+
+        v4l2_picture_controls(cnt, viddev);
+
+        viddev->width = width;
+        viddev->height = height;
+
+        /*
+        viddev->input = input;
+        viddev->norm = norm;
+        viddev->width = width;
+        viddev->height = height;
+        viddev->freq = freq;
+        viddev->tuner_number = tuner_number;
+        */
+
+        /* Skip all frames captured before switchtime, capture 1 after switchtime */
+        {
+            src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
+            unsigned int counter = 0;
+
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: set_input_skip_frame "
+                       "switch_time=%ld:%ld", switchTime.tv_sec, switchTime.tv_usec);
+
+            /* Avoid hang using the number of mmap buffers */
+            while(counter < vid_source->req.count) {
+                counter++;
+                if (v4l2_capture(cnt, viddev, map, width, height))
+                    break;
+
+                if (vid_source->buf.timestamp.tv_sec > switchTime.tv_sec ||
+                   (vid_source->buf.timestamp.tv_sec == switchTime.tv_sec &&
+                    vid_source->buf.timestamp.tv_usec > switchTime.tv_usec))
+                    break;
+
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: got frame before "
+                           " switch timestamp=%ld:%ld",
+                           vid_source->buf.timestamp.tv_sec,
+                           vid_source->buf.timestamp.tv_usec);
+            }
+        }
+
+        /* skip a few frames if needed */
+        for (i = 1; i < skip; i++)
+            v4l2_capture(cnt, viddev, map, width, height);
+    } else {
+        /* No round robin - we only adjust picture controls */
+        v4l2_picture_controls(cnt, viddev);
+    }
+}
+
+static void v4l2_device_close(struct video_dev *viddev)
 {
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
     enum v4l2_buf_type type;
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     xioctl(vid_source, VIDIOC_STREAMOFF, &type);
-    close(vid_source->fd);
-    vid_source->fd = -1;
+    close(vid_source->fd_device);
+    vid_source->fd_device = -1;
 }
 
-/**
- * v4l2_cleanup
- */
-void v4l2_cleanup(struct video_dev *viddev)
+static void v4l2_device_cleanup(struct video_dev *viddev)
 {
     src_v4l2_t *vid_source = (src_v4l2_t *) viddev->v4l2_private;
 
@@ -1153,4 +1061,317 @@ void v4l2_cleanup(struct video_dev *viddev)
     free(vid_source);
     viddev->v4l2_private = NULL;
 }
-#endif /* !WITHOUT_V4L2 */
+
+#endif /* HAVE_V4L2 */
+
+void v4l2_mutex_init(void)
+{
+    int chk_v4l2;
+#ifdef HAVE_V4L2
+    pthread_mutex_init(&v4l2_mutex, NULL);
+    chk_v4l2 = 0;
+#else
+    chk_v4l2 = 1;
+#endif // HAVE_V4L2
+    if (chk_v4l2 == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled");
+}
+
+void v4l2_mutex_destroy(void)
+{
+    int chk_v4l2;
+#ifdef HAVE_V4L2
+    pthread_mutex_destroy(&v4l2_mutex);
+    chk_v4l2 = 0;
+#else
+    chk_v4l2 = 1;
+#endif // HAVE_V4L2
+    if (chk_v4l2 == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled");
+}
+
+int v4l2_start(struct context *cnt)
+{
+#ifdef HAVE_V4L2
+
+    struct config *conf = &cnt->conf;
+    int fd_device = -1;
+    struct video_dev *dev;
+
+    int width, height, input, norm, tuner_number;
+    unsigned long frequency;
+
+    /*
+     * We use width and height from conf in this function. They will be assigned
+     * to width and height in imgs here, and cap_width and cap_height in
+     * rotate_data won't be set until in rotate_init.
+     * Motion requires that width and height is a multiple of 8 so we check
+     * for this first.
+     */
+    if (conf->width % 8) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image width (%d) is not modulo 8", conf->width);
+        return -2;
+    }
+
+    if (conf->height % 8) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 8", conf->height);
+        return -2;
+    }
+
+    width = conf->width;
+    height = conf->height;
+    input = conf->input;
+    norm = conf->norm;
+    frequency = conf->frequency;
+    tuner_number = conf->tuner_number;
+
+    pthread_mutex_lock(&v4l2_mutex);
+
+    /*
+     * Transfer width and height from conf to imgs. The imgs values are the ones
+     * that is used internally in Motion. That way, setting width and height via
+     * http remote control won't screw things up.
+     */
+    cnt->imgs.width = width;
+    cnt->imgs.height = height;
+
+    /*
+     * First we walk through the already discovered video devices to see
+     * if we have already setup the same device before. If this is the case
+     * the device is a Round Robin device and we set the basic settings
+     * and return the file descriptor.
+     */
+    dev = viddevs;
+    while (dev) {
+        if (!strcmp(conf->video_device, dev->video_device)) {
+            dev->usage_count++;
+            cnt->imgs.type = dev->v4l_fmt;
+            switch (cnt->imgs.type) {
+            case VIDEO_PALETTE_GREY:
+                cnt->imgs.motionsize = width * height;
+                cnt->imgs.size = width * height;
+                break;
+            case VIDEO_PALETTE_YUYV:
+            case VIDEO_PALETTE_RGB24:
+            case VIDEO_PALETTE_YUV422:
+                cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+            case VIDEO_PALETTE_YUV420P:
+                cnt->imgs.motionsize = width * height;
+                cnt->imgs.size = (width * height * 3) / 2;
+                break;
+            }
+            pthread_mutex_unlock(&v4l2_mutex);
+            return dev->fd_device;
+        }
+        dev = dev->next;
+    }
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Using videodevice %s and input %d",
+               conf->video_device, conf->input);
+
+    dev = mymalloc(sizeof(struct video_dev));
+
+    dev->video_device = conf->video_device;
+
+    fd_device = open(dev->video_device, O_RDWR);
+
+    if (fd_device < 0) {
+        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open video device %s",
+                   conf->video_device);
+        free(dev);
+        pthread_mutex_unlock(&v4l2_mutex);
+        return -1;
+    }
+
+    pthread_mutexattr_init(&dev->attr);
+    pthread_mutex_init(&dev->mutex, &dev->attr);
+
+    dev->usage_count = 1;
+    dev->fd_device = fd_device;
+    dev->input = input;
+    dev->norm = norm;
+    dev->height = height;
+    dev->width = width;
+    dev->freq = frequency;
+    dev->tuner_number = tuner_number;
+
+    /*
+     * We set brightness, contrast, saturation and hue = 0 so that they only get
+     * set if the config is not zero.
+     */
+    dev->brightness = 0;
+    dev->contrast = 0;
+    dev->saturation = 0;
+    dev->hue = 0;
+    /* -1 is don't modify, (0 is a valid value) */
+    dev->power_line_frequency = -1;
+    dev->owner = -1;
+    dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
+    dev->fps = 0;
+
+    dev->v4l2 = 1;
+    if (!v4l2_device_init(cnt, dev, width, height, input, norm, frequency, tuner_number)) {
+        /*
+         * Restore width & height before test with v4l
+         * because could be changed in v4l2_device_init().
+         */
+        dev->width = width;
+        dev->height = height;
+        dev->v4l2 = 0;
+    }
+
+    if (dev->v4l2 != 0) {
+        /* Update width & height because could be changed in v4l2_device_init(). */
+        width = dev->width;
+        height = dev->height;
+        cnt->imgs.width = width;
+        cnt->imgs.height = height;
+    }
+
+    cnt->imgs.type = dev->v4l_fmt;
+
+    switch (cnt->imgs.type) {
+    case VIDEO_PALETTE_GREY:
+        cnt->imgs.size = width * height;
+        cnt->imgs.motionsize = width * height;
+        break;
+    case VIDEO_PALETTE_YUYV:
+    case VIDEO_PALETTE_RGB24:
+    case VIDEO_PALETTE_YUV422:
+        cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+    case VIDEO_PALETTE_YUV420P:
+        cnt->imgs.size = (width * height * 3) / 2;
+        cnt->imgs.motionsize = width * height;
+        break;
+    }
+
+    /* Insert into linked list. */
+    dev->next = viddevs;
+    viddevs = dev;
+
+    pthread_mutex_unlock(&v4l2_mutex);
+
+    return fd_device;
+#else
+    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled.");
+    return -1;
+#endif // HAVE_V4l2
+}
+
+void v4l2_cleanup(struct context *cnt)
+{
+#ifdef HAVE_V4L2
+
+    struct video_dev *dev = viddevs;
+    struct video_dev *prev = NULL;
+
+        /* Cleanup the v4l2 part */
+    pthread_mutex_lock(&v4l2_mutex);
+    while (dev) {
+        if (dev->fd_device == cnt->video_dev)
+            break;
+        prev = dev;
+        dev = dev->next;
+    }
+    pthread_mutex_unlock(&v4l2_mutex);
+
+    /* Set it as closed in thread context. */
+    cnt->video_dev = -1;
+
+    if (dev == NULL) {
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Unable to find video device");
+        return;
+    }
+
+    if (--dev->usage_count == 0) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Closing video device %s",
+                   dev->video_device);
+        if (dev->v4l2) {
+            v4l2_device_close(dev);
+            v4l2_device_cleanup(dev);
+        } else {
+            close(dev->fd_device);
+            munmap(viddevs->v4l_buffers[0], dev->size_map);
+        }
+
+        dev->fd_device = -1;
+        pthread_mutex_lock(&v4l2_mutex);
+        /* Remove from list */
+        if (prev == NULL)
+            viddevs = dev->next;
+        else
+            prev->next = dev->next;
+        pthread_mutex_unlock(&v4l2_mutex);
+
+        pthread_mutexattr_destroy(&dev->attr);
+        pthread_mutex_destroy(&dev->mutex);
+        free(dev);
+    } else {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Still %d users of video device %s, so we don't close it now",
+                   dev->usage_count, dev->video_device);
+        /*
+         * There is still at least one thread using this device
+         * If we own it, release it.
+         */
+        if (dev->owner == cnt->threadnr) {
+            dev->frames = 0;
+            dev->owner = -1;
+            pthread_mutex_unlock(&dev->mutex);
+        }
+    }
+#else
+    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled.");
+#endif // HAVE_V4L2
+}
+
+int v4l2_next(struct context *cnt, unsigned char *map)
+{
+#ifdef HAVE_V4L2
+    int ret = -2;
+    struct config *conf = &cnt->conf;
+    struct video_dev *dev;
+    int width, height;
+
+    /* NOTE: Since this is a capture, we need to use capture dimensions. */
+    width = cnt->rotate_data.cap_width;
+    height = cnt->rotate_data.cap_height;
+
+    pthread_mutex_lock(&v4l2_mutex);
+    dev = viddevs;
+    while (dev) {
+        if (dev->fd_device == cnt->video_dev)
+            break;
+        dev = dev->next;
+    }
+    pthread_mutex_unlock(&v4l2_mutex);
+
+    if (dev == NULL)
+        return V4L2_FATAL_ERROR;
+
+    if (dev->owner != cnt->threadnr) {
+        pthread_mutex_lock(&dev->mutex);
+        dev->owner = cnt->threadnr;
+        dev->frames = conf->roundrobin_frames;
+    }
+
+    if (dev->v4l2) {
+        v4l2_set_input(cnt, dev, map, width, height, conf);
+        ret = v4l2_capture(cnt, dev, map, width, height);
+    }
+
+    if (--dev->frames <= 0) {
+        dev->owner = -1;
+        dev->frames = 0;
+        pthread_mutex_unlock(&dev->mutex);
+    }
+
+    /* Rotate the image as specified. */
+    if (cnt->rotate_data.degrees > 0)
+        rotate_map(cnt, map);
+
+    return ret;
+#else
+    if (!cnt || !map) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 is not enabled.");
+    return -1;
+#endif // HAVE_V4L2
+
+}
+

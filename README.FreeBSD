@@ -1,23 +1,19 @@
 The following file explains how to build and run
-Motion on FreeBSD. It was tested on FreeBSD 10.3.
+Motion on FreeBSD. It was tested on FreeBSD 11.0
 
 To build Motion on FreeBSD, you need the following packages:
-* autoconf
-* automake
-* ffmpeg
-* gcc
-* gmake
-* libjpeg-turbo
-* pkgconf
+* pkg install autoconf pkgconf automake gmake
 
 For database backend support, also install one of the following:
 * mysql57-client
 * postgresql95-contrib
 * sqlite3
 
-For PWC based webcams, also install:
-* pwcbsd
-* v4l_compat
+For webcams:
+* pkg install v4l_compat webcamd
+* Add cuse_load="YES" in /boot/loader.conf
+* Add webcamd_enable="YES" in the /etc/rc.conf
+* chmod 666 /dev/video0
 
 Then, run the following commands:
  autoreconf

@@ -6,15 +6,10 @@
  *    See also the file 'COPYING'.
  *
  */
-#include "ffmpeg.h"
 #include "motion.h"
-
-#if (defined(__FreeBSD__) && !defined(PWCBSD))
-#include "video_freebsd.h"
-#else
-#include "video2.h"
-#endif
-
+#include "ffmpeg.h"
+#include "video_common.h"
+#include "video_loopback.h"
 #include "conf.h"
 #include "alg.h"
 #include "track.h"
@@ -709,6 +704,41 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
     cnt->current_image = saved_current_image;
 }
 
+static int init_camera_type(struct context *cnt){
+
+    cnt->camera_type = CAMERA_TYPE_UNKNOWN;
+
+#ifdef HAVE_MMAL
+    if (cnt->conf.mmalcam_name) {
+        cnt->camera_type = CAMERA_TYPE_MMAL;
+        return 0;
+    }
+#endif // HAVE_MMAL
+
+    if (cnt->conf.netcam_url) {
+        cnt->camera_type = CAMERA_TYPE_NETCAM;
+        return 0;
+    }
+
+#ifdef HAVE_V4L2
+    if (strncmp(cnt->conf.video_device,"/dev/video",10) == 0) {
+        cnt->camera_type = CAMERA_TYPE_V4L2;
+        return 0;
+    }
+#endif // HAVE_V4L2
+
+#ifdef HAVE_BKTR
+    if (strncmp(cnt->conf.video_device,"/dev/bktr",9) == 0) {
+        cnt->camera_type = CAMERA_TYPE_BKTR;
+        return 0;
+    }
+#endif // HAVE_BKTR
+
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)");
+    return -1;
+
+}
+
 static void init_mask_privacy(struct context *cnt){
 
     int indxrow;
@@ -822,6 +852,8 @@ static int motion_init(struct context *cnt)
     if (!cnt->conf.filepath)
         cnt->conf.filepath = mystrdup(".");
 
+    if (init_camera_type(cnt) != 0 ) return -3;
+
     /* set the device settings */
     cnt->video_dev = vid_start(cnt);
 
@@ -839,8 +871,8 @@ static int motion_init(struct context *cnt)
         cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     } else if (cnt->video_dev == -2) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera "
-                   "Motion only supports width and height modulo 8");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Could not fetch initial image from camera ");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Motion only supports width and height modulo 8");
         return -3;
     }
 
@@ -914,13 +946,13 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#if !defined(WITHOUT_V4L2) && !defined(__FreeBSD__)
+#if defined(HAVE_V4L2) && !defined(__FreeBSD__)
     /* open video loopback devices if enabled */
     if (cnt->conf.vidpipe) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for normal pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->pipe = vid_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height, V4L2_PIX_FMT_YUV420);
+        cnt->pipe = vlp_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->pipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for normal pictures");
@@ -932,14 +964,14 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Opening video loopback device for motion pictures");
 
         /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vid_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height, V4L2_PIX_FMT_YUV420);
+        cnt->mpipe = vlp_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->mpipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Failed to open video loopback for motion pictures");
             return -1;
         }
     }
-#endif /* !WITHOUT_V4L2 && !__FreeBSD__ */
+#endif /* HAVE_V4L2 && !__FreeBSD__ */
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     if (cnt->conf.database_type) {
@@ -2587,9 +2619,9 @@ static void motion_shutdown(void)
 
     free(cnt_list);
     cnt_list = NULL;
-#ifndef WITHOUT_V4L2
-    vid_cleanup();
-#endif
+
+    vid_mutex_destroy();
+
 }
 
 /**
@@ -2678,9 +2710,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         }
     }
 
-#ifndef WITHOUT_V4L2
-    vid_init();
-#endif
+    vid_mutex_init();
 }
 
 /**
@@ -2865,9 +2895,9 @@ int main (int argc, char **argv)
             MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Restarting motion.");
             motion_shutdown();
             restart = 0; /* only one reset for now */
-#ifndef WITHOUT_V4L2
+
             SLEEP(5, 0); // maybe some cameras needs less time
-#endif
+
             motion_startup(0, argc, argv); /* 0 = skip daemon init */
             MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Motion restarted");
         }
