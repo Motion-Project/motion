@@ -7,12 +7,100 @@ AC_CONFIG_HEADERS(config.h)
 AC_PROG_CC
 
 
+###############################################################################
+###  Host system
+###  ToDo:  Evaluate for replacing with case statement on autotools $host_os
+###############################################################################
+AC_MSG_CHECKING(for Darwin/BSD)
+DISTRO=""
+DISTRO=`uname -a | grep -i "Darwin"`
+if test "x${DISTRO}" = "x"; then
+    DISTRO=`uname -s | grep -i "FreeBSD"`
+fi
+if test "x${DISTRO}" = "x"; then
+    DISTRO=`uname -s | grep -i "NetBSD"`
+fi
+if test "x${DISTRO}" = "x"; then
+    DISTRO=`uname -s | grep -i "OpenBSD"`
+fi
+if test "x${DISTRO}" = "x"; then
+    DISTRO="Linux"
+    AC_MSG_RESULT(no)
+else
+    AC_MSG_RESULT($DISTRO)
+fi
+AC_SUBST(DISTRO)
+
+###############################################################################
+###  Host specific paths
+###############################################################################
+TEMP_LIBS=""
+TEMP_CFLAGS=""
+TEMP_CPPFLAGS=""
+TEMP_LDFLAGS=""
+if test "${DISTRO}" = "Darwin"; then
+    TEMP_CFLAGS="${CFLAGS} -I/sw/include"
+    TEMP_CPPFLAGS="${CPPFLAGS} -I/sw/include"
+    TEMP_LDFLAGS="${LDFLAGS} -L/sw/lib"
+    TEMP_LIBS="-L/sw/lib"
+else
+    if test "x${DISTRO}" != "Linux"; then
+        TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
+        TEMP_CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
+        TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+        TEMP_LIBS="-L/usr/local/lib"
+    fi
+fi
+TEMP_LIBS="-lm ${TEMP_LIBS}"
+TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
+TEMP_CPPFLAGS="${TEMP_CPPFLAGS} ${CPPFLAGS}"
+TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
+
+AC_SUBST(CFLAGS, "${TEMP_CFLAGS}")
+AC_SUBST(CPPFLAGS, "${TEMP_CPPFLAGS}")
+AC_SUBST(LDFLAGS, "${TEMP_LDFLAGS}")
+
+###############################################################################
+###  Video System
+###############################################################################
+BKTR="yes"
+AC_ARG_WITH(bktr,
+  AS_HELP_STRING([--without-bktr],[Exclude to use bktr subsystem for BSD]),
+  BKTR="$withval")
+
+V4L2="yes"
+AC_ARG_WITH(v4l2,
+  AS_HELP_STRING([--without-v4l2],[Disable V4L2 devices]),
+  V4L2="$withval")
+
+###
+### Check for headers.  If needed headers are not found, flip switch to off.
+###
+if test "x${BKTR}" = "xyes"; then
+    if test "${DISTRO}" = "FreeBSD"; then
+        AC_CHECK_HEADERS(dev/bktr/ioctl_meteor.h dev/bktr/ioctl_bt848.h,[BKTR="yes"],[BKTR="no"])
+    elif test "${DISTRO}" = "OpenBSD" || test "${DISTRO}" = "NetBSD"; then
+        AC_CHECK_HEADERS(dev/ic/bt8xx.h,[BKTR="yes"],[BKTR="no"])
+    else
+        BKTR="no"
+    fi
+fi
+
+if test "${V4L2}" = "yes"; then
+    AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
+fi
+if test "x${V4L2}" = "xyes"; then
+    AC_DEFINE([HAVE_V4L2], 1, [Define to 1 if V4L2 is around])
+fi
+if test "x${BKTR}" = "xyes"; then
+    AC_DEFINE([HAVE_BKTR], 1, [Define to 1 if BKTR is around])
+fi
+
+##############################################################################
+###  Check for threading
+##############################################################################
 THREAD_CFLAGS=""
 THREAD_CHECK="/usr/include/pthread.h"
-
-Darwin=""
-FreeBSD=""
-
 LINUXTHREADS="no"
 AC_ARG_WITH(linuxthreads,
 [  --with-linuxthreads     Use linuxthreads in BSD instead of native pthreads
@@ -20,118 +108,17 @@ AC_ARG_WITH(linuxthreads,
 				,
 LINUXTHREADS="$withval"
 )
-
-PWCBSD="no"
-AC_ARG_WITH(pwcbsd,
-[  --with-pwcbsd           Use pwcbsd based webcams ( only BSD )
-]
-,
-PWCBSD="$withval"
-)
-
-
-AC_MSG_CHECKING(for Darwin)
-Darwin=`uname -a | grep "Darwin"`
-
-if test "${Darwin}" = ""; then
-	AC_MSG_RESULT(no)
-	AC_MSG_CHECKING(for *BSD)
-
-	FreeBSD=`uname -a | grep "FreeBSD"`
-	if test "${FreeBSD}" = ""; then
-		AC_MSG_RESULT(no)
-		VIDEO="video2.o video_common.o"
-	else
-		AC_MSG_RESULT(yes)
-		if test "${LINUXTHREADS}" = "no"; then
-			AC_MSG_CHECKING(Linuxthreads)
-			AC_MSG_RESULT(skipping)
-		else
-			THREAD_CHECK="/usr/local/include/pthread/linuxthreads/pthread.h"
-			THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
-		fi
-
-		if test "${PWCBSD}" != "no"; then
-			VIDEO="video2.o video_common.o"
-			TEMP_CFLAGS="${CFLAGS} -I/usr/local/include -DPWCBSD"
-		else
-			VIDEO="video_freebsd.o"
-			TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
-		fi
-
-		TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
-		TEMP_LIBS="-L/usr/local/lib"
-		AC_MSG_RESULT(Build with PWCBSD support $PWCBSD)
-
-	fi
-else
-	TEMP_CFLAGS="${CFLAGS} -I/sw/include"
-	TEMP_LDFLAGS="${LDFLAGS} -L/sw/lib"
-	TEMP_LIBS="-L/sw/lib"
-	VIDEO="video_freebsd.o"
-	FINK_LIB="-L/sw/lib"
-	Darwin="yes"
-	V4L2="no"
-	AC_MSG_RESULT($Darwin)
-fi
-
-
-AC_SUBST(VIDEO)
-
-# Checks for programs.
-AC_PROG_CC
-
-TEMP_LIBS="-lm ${TEMP_LIBS}"
-TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
-TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
-
-if test "${FreeBSD}" != "" && test "${PWCBSD}" = "no"; then
-
-	AC_MSG_CHECKING(bktr headers in /usr/include/dev/bktr)
-
-	if test -f /usr/include/dev/bktr/ioctl_meteor.h && test -f /usr/include/dev/bktr/ioctl_bt848.h; then
-		AC_MSG_RESULT(yes)
-	else
-		AC_MSG_RESULT(no)
-	fi
-    #
-    # Check to Exclude BKTR
-    #
-    BKTR="yes"
-    AC_ARG_WITH(bktr,
-      [  --without-bktr          Exclude to use bktr subsystem , that usually useful
-                              for devices as network cameras ( ONLY used in *BSD).
-                          ]  ,
-      BKTR="$withval")
-    if test "${BKTR}" = "no"; then
-        TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
-    fi
-else
-    #
-    # Check to Exclude V4L2
-    #
-    V4L2="yes"
-    AC_ARG_WITH(v4l2,
-    [  --without-v4l2         Exclude using v4l2 (video4linux2) subsystem.
-                              Makes Motion so it only supports network cameras.
-                              ],
-    V4L2="$withval" )
-
-    if test "${V4L2}" = "no"; then
-        TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
+if test "${DISTRO}" != "Linux" && test "${DISTRO}" != "Darwin" ; then
+    if test "${LINUXTHREADS}" = "no"; then
+        AC_MSG_CHECKING(Linuxthreads)
+        AC_MSG_RESULT(skipping)
     else
-        AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
-        AC_MSG_CHECKING(for V4L2 support)
-        if test "${V4L2}" = "no"; then
-                AC_MSG_RESULT(no)
-                TEMP_CFLAGS="${TEMP_CFLAGS} -DWITHOUT_V4L2"
-        else
-                AC_MSG_RESULT(yes)
-        fi
+        THREAD_CHECK="/usr/local/include/pthread/linuxthreads/pthread.h"
+        THREAD_LIB_CHECK="/usr/local/lib/liblthread.so"
     fi
 fi
 
-if test "${FreeBSD}" != "" && test "${LINUXTHREADS}" != "no" ; then
+if test "${DISTRO}" != "Linux" && test "${DISTRO}" != "Darwin" && test "${LINUXTHREADS}" != "no" ; then
 
 AC_MSG_CHECKING(for linuxthreads)
 
@@ -155,9 +142,9 @@ AC_MSG_CHECKING(for linuxthreads)
 		THREADS="no"
 	fi
 
-# Checks for Library linuxthreads for FreeBSD
+# Checks for Library linuxthreads for BSD
 #
-# linuxthreads on freeBSD, ports collection
+# linuxthreads on BSD, ports collection
 # /usr/local/include/pthreads/linuxthreads/pthread.h
 # #include <linuxthreads/pthread.h>
 # /usr/local/lib/libpthread.so
@@ -188,8 +175,7 @@ AC_TRY_LINK([#include <pthread.h>],
  [PTHREAD_LIB=yes])
 
 if test x$PTHREAD_LIB != xyes; then
-
-	if test "${FreeBSD}" != ""; then
+    if test "${DISTRO}" != "Linux" && test "${DISTRO}" != "Darwin" ; then
 		TEMP_LIBS="$TEMP_LIBS -pthread"
 		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT -D_THREAD_SAFE"
 	else
@@ -331,7 +317,7 @@ if test x$JPEG_SUPPORT != xyes ; then
 fi
 
 #
-# Check for the pkg-config.  
+# Check for the pkg-config.
 #
 
 AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
@@ -349,10 +335,10 @@ WITHOUT_MMAL="no")
 
 if test "${WITHOUT_MMAL}" = "no"; then
   HAVE_MMAL=""
-  if test "${FreeBSD}" != "" ; then
-	LIBRASPBERRYPIDEVPATH="/usr/local/include/interface/mmal"
+  if test "${DISTRO}" = "FreeBSD" ; then
+    LIBRASPBERRYPIDEVPATH="/usr/local/include/interface/mmal"
   else
-        LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
+    LIBRASPBERRYPIDEVPATH="/opt/vc/include/interface/mmal"
   fi
 
   if test -d ${LIBRASPBERRYPIDEVPATH}; then
@@ -365,7 +351,7 @@ if test "${WITHOUT_MMAL}" = "no"; then
            AC_SUBST(MMAL_LIBS)
            MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
            MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
-           AS_IF([test "${FreeBSD}" != "" ], [
+           AS_IF([test "${DISTRO}" = "FreeBSD" ], [
                 MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
                ])
            MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
@@ -410,13 +396,11 @@ AC_SUBST(FFMPEG_OBJ)
 # Check SQLITE3
 #
 
+SQLITE_OBJ=""
 SQLITE3_SUPPORT="no"
 AC_ARG_WITH(sqlite3,
-    [  --without-sqlite3       Disable sqlite3 support in motion.
-    ],
-    SQLITE3="$withval"
-    # if not given argument, assume standard
-)
+    AS_HELP_STRING([--without-sqlite3],[Disable sqlite3 support in motion.]),
+    [SQLITE3="$withval"])
 
 if test "${SQLITE3}" = "no"; then
     AC_MSG_CHECKING(for sqlite3)
@@ -429,7 +413,7 @@ else
     # this is the preferred way to use sqlite
     if test -f sqlite3.c; then
         SQLITE3_SUPPORT="yes"
-        VIDEO="$VIDEO sqlite3.o"
+        SQLITE_OBJ="sqlite3.o"
         TEMP_LIBS="$TEMP_LIBS -ldl"
         AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3])
         AC_DEFINE([HAVE_SQLITE3_EMBEDDED],1,[Define to 1 if you have SQLITE3 embedded support])
@@ -447,7 +431,7 @@ else
     CFLAGS=$saved_CFLAGS
     LIBS=$saved_LIBS
 fi
-
+AC_SUBST(SQLITE_OBJ)
 
 #
 # Check Mysql
@@ -765,7 +749,7 @@ DEVELOPER_FLAGS="$withval"
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 
-if test "${FreeBSD}" != ""; then
+if test "${DISTRO}" != "Linux"; then
 	OPTIMIZECPU=""
 fi
 
@@ -1049,9 +1033,9 @@ echo "   **************************"
 echo
 
 
-if test "${Darwin}" != ""; then
+if test "${DISTRO}" = "Darwin"; then
     echo "OS             :     Darwin"
-elif test "${FreeBSD}" != ""; then
+elif test "${DISTRO}" != "Linux"; then
     echo "OS             :     *BSD"
 else
     echo "OS             :     Linux"
@@ -1066,7 +1050,6 @@ else
     echo "**********************************************"
 fi
 
-
 if test "${JPEG_SUPPORT_TURBO}" = "yes"; then
     echo "jpeg turbo support:  Yes"
 elif test "${JPEG_SUPPORT_MMX}" = "yes"; then
@@ -1080,25 +1063,16 @@ else
     echo "**********************************************"
 fi
 
-if test "${FreeBSD}" != ""; then
-	if test "${BKTR}" = "yes"; then
-        echo "BKTR included:       Yes"
-	else
-        echo "BKTR included:       No"
-	fi
-
-	if test "${PWCBSD}" = "yes"; then
-        echo "PWCBSD include:      Yes"
-	else
-        echo "PWCBSD include:      No"
-	fi
-
+if test "$V4L2" = "yes"; then
+    echo "V4L2 support:        Yes"
 else
-	if test "$V4L2" = "yes"; then
-        echo "V4L2 support:        Yes"
-	else
-        echo "V4L2 support:        No"
-	fi
+    echo "V4L2 support:        No"
+fi
+
+if test "${BKTR}" = "yes"; then
+    echo "BKTR support:        Yes"
+else
+    echo "BKTR support:        No"
 fi
 
 if test "${HAVE_MMAL}" = "yes"; then

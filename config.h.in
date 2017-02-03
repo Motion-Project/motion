@@ -8,9 +8,9 @@
 #cmakedefine HAVE_MYSQL
 #cmakedefine HAVE_PGSQL
 #cmakedefine HAVE_SQLITE3
-#cmakedefine PWCBSD
-#cmakedefine WITHOUT_V4L2
+#cmakedefine HAVE_BKTR
+#cmakedefine HAVE_V4L2
 
 /* Optional headers */
 #cmakedefine HAVE_LINUX_VIDEODEV2_H
-#cmakedefine HAVE_SYS_VIDEOIO_H
+

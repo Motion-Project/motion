@@ -29,12 +29,6 @@
 
 #include "motion.h"
 
-#if (defined(__FreeBSD__) && !defined(PWCBSD))
-#include "video_freebsd.h"
-#else
-#include "video2.h"
-#endif
-
 #define EXTENSION ".conf"
 
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
@@ -56,7 +50,7 @@ struct config conf_template = {
     .snapshot_interval =               0,
     .locate_motion_mode =              "off",
     .locate_motion_style =             "box",
-    .input =                           IN_DEFAULT,
+    .input =                           DEF_INPUT,
     .norm =                            0,
     .frame_limit =                     DEF_MAXFRAMERATE,
     .quiet =                           1,
@@ -102,10 +96,8 @@ struct config conf_template = {
     .tuner_number =                    0,
     .timelapse =                       0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
-#ifdef __FreeBSD__
-    tuner_device:                   NULL,
-#endif
-    .video_device =                    VIDEO_DEVICE,
+    .tuner_device =                    NULL,
+    .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
     .vidpipe =                         NULL,
     .filepath =                        NULL,
