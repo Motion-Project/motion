@@ -1005,8 +1005,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     }
 
     /* Read data */
-
-    image = mymalloc(mask_width * mask_height);
+    /* We allocate the size for a 420P since we will use
+    ** this image for masking privacy which needs the space for
+    ** the cr / cb components
+    */
+    image = mymalloc((mask_width * mask_height * 3) / 2);
 
     for (y = 0; y < mask_height; y++) {
         if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
@@ -1023,7 +1026,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Attempting to resize mask image from %dx%d to %dx%d",
                    mask_width, mask_height, width, height);
 
-        resized_image = mymalloc(width * height);
+        resized_image = mymalloc((width * height * 3) / 2);
 
         for (y = 0; y < height; y++) {
             for (x = 0; x < width; x++) {
