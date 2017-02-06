@@ -11,9 +11,8 @@
 #include "ffmpeg.h"    /* must be first to avoid 'shadow' warning */
 #include "picture.h"   /* already includes motion.h */
 #include "event.h"
-#if (!defined(__FreeBSD__))
-#include "video2.h"
-#endif
+#include "video_loopback.h"
+#include "video_common.h"
 
 /* Various functions (most doing the actual action) */
 
@@ -307,18 +306,18 @@ static void event_stream_put(struct context *cnt,
 }
 
 
-#if !defined(WITHOUT_V4L2) && !defined(__FreeBSD__)
-static void event_vid_putpipe(struct context *cnt,
+#if defined(HAVE_V4L2) && !defined(__FreeBSD__)
+static void event_vlp_putpipe(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if (*(int *)devpipe >= 0) {
-        if (vid_putpipe(*(int *)devpipe, img, cnt->imgs.size) == -1)
+        if (vlp_putpipe(*(int *)devpipe, img, cnt->imgs.size) == -1)
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: Failed to put image into video pipe");
     }
 }
-#endif /* !WITHOUT_V4L2 && !__FreeBSD__  */
+#endif /* defined(HAVE_V4L2) && !__FreeBSD__  */
 
 const char *imageext(struct context *cnt)
 {
@@ -588,13 +587,6 @@ static void event_new_video(struct context *cnt,
 }
 
 
-static void grey2yuv420p(unsigned char *u, unsigned char *v, int width, int height)
-{
-    memset(u, 128, width * height / 4);
-    memset(v, 128, width * height / 4);
-}
-
-
 static void event_ffmpeg_newfile(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
@@ -683,18 +675,11 @@ static void event_ffmpeg_newfile(struct context *cnt,
         snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
     }
     if (cnt->conf.ffmpeg_output) {
-        if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
-            convbuf = mymalloc((width * height) / 2);
-            y = img;
-            u = convbuf;
-            v = convbuf + (width * height) / 4;
-            grey2yuv420p(u, v, width, height);
-        } else {
-            convbuf = NULL;
-            y = img;
-            u = img + width * height;
-            v = u + (width * height) / 4;
-        }
+
+        convbuf = NULL;
+        y = img;
+        u = img + width * height;
+        v = u + (width * height) / 4;
 
         if ((cnt->ffmpeg_output =
             ffmpeg_open(codec, cnt->newfilename, y, u, v,
@@ -711,18 +696,10 @@ static void event_ffmpeg_newfile(struct context *cnt,
     }
 
     if (cnt->conf.ffmpeg_output_debug) {
-        if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
-            convbuf = mymalloc((width * height) / 2);
-            y = cnt->imgs.out;
-            u = convbuf;
-            v = convbuf + (width * height) / 4;
-            grey2yuv420p(u, v, width, height);
-        } else {
-            y = cnt->imgs.out;
-            u = cnt->imgs.out + width *height;
-            v = u + (width * height) / 4;
-            convbuf = NULL;
-        }
+        y = cnt->imgs.out;
+        u = cnt->imgs.out + width *height;
+        v = u + (width * height) / 4;
+        convbuf = NULL;
 
         if ((cnt->ffmpeg_output_debug =
             ffmpeg_open(codec, cnt->motionfilename, y, u, v,
@@ -768,18 +745,10 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
         snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
 
-        if (cnt->imgs.type == VIDEO_PALETTE_GREY) {
-            convbuf = mymalloc((width * height) / 2);
-            y = img;
-            u = convbuf;
-            v = convbuf + (width * height) / 4;
-            grey2yuv420p(u, v, width, height);
-        } else {
-            convbuf = NULL;
-            y = img;
-            u = img + width * height;
-            v = u + (width * height) / 4;
-        }
+        convbuf = NULL;
+        y = img;
+        u = img + width * height;
+        v = u + (width * height) / 4;
 
 
         if ((strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) ||
@@ -816,12 +785,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     }
 
     y = img;
-
-    if (cnt->imgs.type == VIDEO_PALETTE_GREY)
-        u = cnt->ffmpeg_timelapse->udata;
-    else
-        u = img + width * height;
-
+    u = img + width * height;
     v = u + (width * height) / 4;
 
     if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v,currenttime_tv) == -1) {
@@ -839,14 +803,10 @@ static void event_ffmpeg_put(struct context *cnt,
     if (cnt->ffmpeg_output) {
         int width = cnt->imgs.width;
         int height = cnt->imgs.height;
-        unsigned char *y = img;
-        unsigned char *u, *v;
+        unsigned char *y, *u, *v;
 
-        if (cnt->imgs.type == VIDEO_PALETTE_GREY)
-            u = cnt->ffmpeg_output->udata;
-        else
-            u = y + (width * height);
-
+        y = img;
+        u = y + (width * height);
         v = u + (width * height) / 4;
 
         if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v, currenttime_tv) == -1) {
@@ -963,16 +923,16 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
-#if !defined(WITHOUT_V4L2) && !defined(__FreeBSD__)
+#if defined(HAVE_V4L2) && !defined(__FreeBSD__)
     {
     EVENT_IMAGE,
-    event_vid_putpipe
+    event_vlp_putpipe
     },
     {
     EVENT_IMAGEM,
-    event_vid_putpipe
+    event_vlp_putpipe
     },
-#endif /* !WITHOUT_V4L2 && !__FreeBSD__  */
+#endif /* defined(HAVE_V4L2) && !__FreeBSD__  */
     {
     EVENT_STREAM,
     event_stream_put

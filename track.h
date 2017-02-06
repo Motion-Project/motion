@@ -155,7 +155,7 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
 #define IOMOJO_DIRECTION_DOWN   0x04
 #define IOMOJO_DIRECTION_UP     0x08
 
-#ifndef WITHOUT_V4L2
+#ifdef HAVE_V4L2
 
 /*
  * Defines for the Logitech QuickCam Orbit/Sphere USB webcam
@@ -169,20 +169,24 @@ unsigned int track_move(struct context *, int, struct coord *, struct images *, 
  */
 
 #ifndef V4L2_CID_PAN_RELATIVE
-#define V4L2_CID_PAN_RELATIVE   (V4L2_CID_PRIVATE_BASE+7)
+#define V4L2_CID_PAN_RELATIVE                   (V4L2_CID_CAMERA_CLASS_BASE+4)
 #endif
 
 #ifndef V4L2_CID_TILT_RELATIVE
-#define V4L2_CID_TILT_RELATIVE  (V4L2_CID_PRIVATE_BASE+8)
+#define V4L2_CID_TILT_RELATIVE                  (V4L2_CID_CAMERA_CLASS_BASE+5)
 #endif
 
-#ifndef V4L2_CID_PANTILT_RESET
-#define V4L2_CID_PANTILT_RESET  (V4L2_CID_PRIVATE_BASE+9)
+#ifndef V4L2_CID_PAN_RESET
+#define V4L2_CID_PAN_RESET                      (V4L2_CID_CAMERA_CLASS_BASE+6)
+#endif
+
+#ifndef V4L2_CID_TILT_RESET
+#define V4L2_CID_TILT_RESET                     (V4L2_CID_CAMERA_CLASS_BASE+7)
 #endif
 
 #define INCPANTILT 64 // 1 degree
 
 
-#endif /* WITHOUT_V4L2 */
+#endif /* HAVE_V4L2 */
 
 #endif /* _INCLUDE_TRACK_H */
