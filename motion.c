@@ -855,7 +855,7 @@ static int motion_init(struct context *cnt)
         cnt->imgs.picture_type = IMAGE_TYPE_WEBP;
 #else
         /* Fallback to jpeg if webp was selected in the config file, but the support for it was not compiled in */
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: webp image format is not available, failing back to jpeg");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: webp image format is not available, failing back to jpeg");
         cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
 #endif /* HAVE_WEBP */
     }
