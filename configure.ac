@@ -343,20 +343,20 @@ AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not f
 #
 AC_ARG_WITH(webp,
 [  --without-webp          Compile without webp image support],
-LIBWEBP="no",
-LIBWEBP="yes"
+WEBP="no",
+WEBP="yes"
 )
 
-HAVE_LIBWEBP=""
-if test "${LIBWEBP}" = "yes"; then
+HAVE_WEBP=""
+if test "${WEBP}" = "yes"; then
   AC_MSG_CHECKING(for libwebp)
-  LIBWEBP_DEPS="libwebp"
-  if pkg-config $LIBWEBP_DEPS; then
+  WEBP_DEPS="libwebp"
+  if pkg-config $WEBP_DEPS; then
     AC_MSG_RESULT(found)
-    HAVE_LIBWEBP="yes"
+    AC_DEFINE([HAVE_WEBP], 1, [Define to 1 if WEBP is around])
+	HAVE_WEBP="yes"
     TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
-    TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_WEBP"
-  else
+else
     AC_MSG_RESULT(not found)
     AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.]) 
   fi
@@ -1105,7 +1105,7 @@ else
     echo "**********************************************"
 fi
 
-if test "${HAVE_LIBWEBP}" = "yes"; then
+if test "${HAVE_WEBP}" = "yes"; then
    echo "webp support:        yes"
 else
    echo "webp support:        no"
