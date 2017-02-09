@@ -341,8 +341,8 @@ AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not f
 
 # Check for the libwebp library
 #
-AC_ARG_WITH(libwebp,
-[  --without-libwebp       Compile without webp image support],
+AC_ARG_WITH(webp,
+[  --without-webp          Compile without webp image support],
 LIBWEBP="no",
 LIBWEBP="yes"
 )
@@ -358,7 +358,7 @@ if test "${LIBWEBP}" = "yes"; then
     TEMP_CFLAGS="${TEMP_CFLAGS} -DHAVE_WEBP"
   else
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-libwebp' configuration option.]) 
+    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.]) 
   fi
 fi
 
