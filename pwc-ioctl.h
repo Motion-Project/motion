@@ -303,7 +303,7 @@ struct pwc_table_init_buffer {
  * use interface offer by v4l2.
  */
 
-#if (!defined(WITHOUT_V4L2)) && defined(__linux__)
+#if (defined(HAVE_V4L2)) && defined(__linux__)
 
 #define V4L2_CID_PRIVATE_SAVE_USER       (V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_PRIVATE_RESTORE_USER    (V4L2_CID_PRIVATE_BASE + 1)
@@ -323,6 +323,6 @@ struct pwc_raw_frame {
    __u8   rawframe[0];    /* frame_size = H/4*vbandlength */
 } __attribute__ ((packed));
 
-#endif /*  !WITHOUT_V4L2 && __linux__ */
+#endif /*  HAVE_V4L2 && __linux__ */
 
 #endif

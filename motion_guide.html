@@ -385,12 +385,10 @@ FreeBSD
     <ul>
       <li>autoconf</li>
       <li>automake</li>
-      <li>gcc</li>
       <li>gmake</li>
       <li>libjpeg-turbo</li>
       <li>libwebp</li>
       <li>pkgconf</li>
-      <li>ffmpeg</li>
     </ul>
   <li>Optional database packages</li>
     <ul>
@@ -398,9 +396,9 @@ FreeBSD
       <li>postgresql95-contrib</li>
       <li>sqlite3</li>
     </ul>
-   <li>PWC based webcams packages</li>
+   <li>Webcams packages</li>
     <ul>
-      <li>pwcbsd</li>
+      <li>webcamd</li>
       <li>v4l_compat</li>
     </ul>
 </ul>
@@ -609,13 +607,8 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word > Only relevant for BSD. In Linux we always use this per default. </td>
 		</tr>
 		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-pwcbsd </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Use pwcbsd based webcams ( only BSD ) </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > This option allow to build motion to support V4L2 in BSD. </td>
-		</tr>
-		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude to use bktr subsystem , that usually useful for devices as network cameras </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude bktr video subsystem devices </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
 		</tr>
 		<tr>
@@ -1031,10 +1024,9 @@ For video4linux devices, the camera must be installed per the requirements of th
 out of the scope of this document to tell you how to do this and it depends on which type of camera.  Once
 the camera is installed it will have the device name(s) of /dev/video0, /dev/video1, /dev/video2...
 <p></p>
-FreeBSD has a different naming of devices. When you build Motion for FreeBSD the default device name is /dev/bktr0.
-Under FreeBSD a TV card has a special device for controlling the tuner (e.g. /dev/tuner0). The option tunerdevice
-is only valid when Motion is built and running under FreeBSD. For Linux do not include this option in the config
-file (remove or comment out).
+FreeBSD has a different naming scheme for pci devices that use the bktr subsystem.  The bktr subsystem will report
+devices using a naming scheme of /dev/bktr0, /dev/bktr1, etc.  These device may also need to use the other
+special device for the tuner.  The tuner will need to be specified with the tunerdevice option as /dev/tuner0.
 <p></p>
 <strong>USB cameras</strong> take a lot of bandwidth. A USB camera connected to a USB2 port or hub consumes virtually
 all the bandwidth that the port can handle. Even with a small framesize and low framerate you should not expect to have
@@ -2598,14 +2590,15 @@ This option specifies a alternative directory to contain the individual camera c
 <ul>
   <li> Type: String</li>
   <li> Range / Valid values: Max 4095 characters</li>
-  <li> Default: /dev/video0 (FreeBSD: /dev/bktr0)</li>
+  <li> Default: /dev/video0 </li>
 </ul>
 <p></p>
-The video device to be used for capturing. Default for Linux is /dev/video0. for FreeBSD the default is /dev/bktr0.
+The video device to be used for capturing. Default is /dev/video0.
 See the <a href="#Basic_Setup">Basic Setup</a>
 section of this guide for a additional discussion of this option.
 <p></p>
-This is the video4linux device name. Ignore this for net cameras.
+This is the video4linux device name. Ignore this for net cameras.  If a netcam_url is specified, this option will
+be ignored.
 <p></p>
 
 <h3><a name="v4l2_palette"></a> v4l2_palette </h3>
@@ -2658,7 +2651,7 @@ format that Motion uses internally.
 </ul>
 <p></p>
 The tuner device used for controlling the tuner in a tuner card. This option is only used when Motion is compiled
-for FreeBSD.  Make sure to remove or comment out this option when running Motion under Linux.
+for FreeBSD with the bktr option.
 See the <a href="#Basic_Setup">Basic Setup</a> section of this guide for a additional discussion of this option.
 <p></p>
 
@@ -4363,15 +4356,15 @@ Camstream is "fooled" to think it is looking at a real camera.
 <p></p>
 The video loopback device can be added installed via apt in many distributions.  The package tested
 with Motion is v4l2loopback-dkms.  Once the package is installed, you just need to run
-<code><strong>sudo modprobe v4l2loopback</strong></code>.  This will add a new video device that you 
-can use for the loopback.  It is believed that there are additional options associated with the 
+<code><strong>sudo modprobe v4l2loopback</strong></code>.  This will add a new video device that you
+can use for the loopback.  It is believed that there are additional options associated with the
 v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
-project for additional details.  
+project for additional details.
 <p></p>
 To activate the vloopback device in motion set the 'video_pipe' option in the motion.conf file.
 You can also view the special motion pictures where you see the changed pixels by setting the option
 'motion_video_pipe' in motion.conf. When setting the video_pipe and/or motion_video_pipe options either
-specify the input device as e.g. /dev/video4. 
+specify the input device as e.g. /dev/video4.
 <p></p>
 De-activating should be done with this command
 <p></p>
@@ -4390,7 +4383,7 @@ De-activating should be done with this command
 </ul>
 <p></p>
 Default: not set
-The video4linux video loopback input device for normal images. The device would be specified 
+The video4linux video loopback input device for normal images. The device would be specified
 in the format like /dev/video1
 <p></p>
 <p></p>
@@ -4402,7 +4395,7 @@ in the format like /dev/video1
 </li> <li> Default: Not defined
 </li></ul>
 <p></p>
-The video4linux video loopback input device for motion images. The device would be specified 
+The video4linux video loopback input device for motion images. The device would be specified
 in the format like /dev/video1
 <p></p>
 <p></p>
