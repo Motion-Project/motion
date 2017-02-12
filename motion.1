@@ -903,7 +903,7 @@ Default: 75
 Description:
 .fi
 .RS
-The quality (in percent) to be used by the jpeg compression
+The quality (in percent) to be used by the jpeg and webp compression
 .RE
 .RE
 
@@ -911,7 +911,7 @@ The quality (in percent) to be used by the jpeg compression
 .B picture_type
 .RS
 .nf
-Values: jpeg/ppm
+Values: jpeg/ppm/webp
 Default: jpeg
 Description:
 .fi
@@ -1265,7 +1265,7 @@ Description:
 .fi
 .RS
 The file path for snapshots relative to target_dir.
-The file extension .jpg or .ppm is automatically added so do not include this.
+The file extension .jpg, .ppm or .webp is automatically added so do not include this.
 A symbolic link called lastsnap.jpg created in the target_dir will always
 point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
 This option accepts the conversion specifiers included at the end of this manual.
@@ -1281,8 +1281,8 @@ Default: %v-%Y%m%d%H%M%S-%q
 Description:
 .fi
 .RS
-The file path for motion triggered images (jpeg or ppm) relative to target_dir.
-The file extension of .jpg or .ppm is automatically added so do not include this.
+The file path for motion triggered images (jpeg, ppm or webp) relative to target_dir.
+The file extension .jpg, .ppm or .webp is automatically added so do not include this.
 Set to 'preview' together with best-preview feature enables special naming
 convention for preview shots.
 This option accepts the conversion specifiers included at the end of this manual.

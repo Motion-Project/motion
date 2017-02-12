@@ -731,7 +731,7 @@ config_param config_params[] = {
     },
     {
     "quality",
-    "# The quality (in percent) to be used by the jpeg compression (default: 75)",
+    "# The quality (in percent) to be used by the jpeg and webp compression (default: 75)",
     0,
     CONF_OFFSET(quality),
     copy_int,
@@ -750,7 +750,7 @@ config_param config_params[] = {
     {
     "picture_type",
     "# Type of output images\n"
-    "# Valid values: jpeg, ppm (default: jpeg)",
+    "# Valid values: jpeg, ppm or webp (default: jpeg)",
     0,
     CONF_OFFSET(picture_type),
     copy_string,
@@ -1002,11 +1002,11 @@ config_param config_params[] = {
     },
     {
     "snapshot_filename",
-    "# File path for snapshots (jpeg or ppm) relative to target_dir\n"
+    "# File path for snapshots (jpeg, ppm or webp) relative to target_dir\n"
     "# Default: "DEF_SNAPPATH"\n"
     "# Default value is equivalent to legacy oldlayout option\n"
     "# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H/%M/%S-snapshot\n"
-    "# File extension .jpg or .ppm is automatically added so do not include this.\n"
+    "# File extension .jpg, .ppm or .webp is automatically added so do not include this.\n"
     "# Note: A symbolic link called lastsnap.jpg created in the target_dir will always\n"
     "# point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'",
     0,
@@ -1016,11 +1016,11 @@ config_param config_params[] = {
     },
     {
     "picture_filename",
-    "# File path for motion triggered images (jpeg or ppm) relative to target_dir\n"
+    "# File path for motion triggered images (jpeg, ppm or webp) relative to target_dir\n"
     "# Default: "DEF_IMAGEPATH"\n"
     "# Default value is equivalent to legacy oldlayout option\n"
     "# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H/%M/%S-%q\n"
-    "# File extension .jpg or .ppm is automatically added so do not include this\n"
+    "# File extension .jpg, .ppm or .webp is automatically added so do not include this\n"
     "# Set to 'preview' together with best-preview feature enables special naming\n"
     "# convention for preview shots. See motion guide for details",
     0,
@@ -1397,7 +1397,7 @@ config_param config_params[] = {
     },
     {
     "on_picture_save",
-    "# Command to be executed when a picture (.ppm|.jpg) is saved (default: none)\n"
+    "# Command to be executed when a picture (.ppm|.jpg|.webp) is saved (default: none)\n"
     "# To give the filename as an argument to a command append it with %f",
     0,
     CONF_OFFSET(on_picture_save),

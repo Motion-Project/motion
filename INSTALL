@@ -15,6 +15,7 @@ Build Packages:
     libjpeg8-dev 
     build-essential 
     libzip-dev
+    libwebp-dev
 
 The option to include FFMPEG or Libav functionality in motion is a choice of one OR the other not both.
 The packages and library names change frequently and vary across base operating systems.  If ffmpeg or
@@ -43,4 +44,4 @@ Once required packages are installed, execute:
 Sample custom configuration options:
     --prefix               :  Specify the install location for the motion package
     --with-ffmpeg=[dir]    :  Specify the location in which ffmpeg/libav is installed.
-
+    --without-webp         :  Compile without webp image support

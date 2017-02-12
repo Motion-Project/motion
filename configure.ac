@@ -324,6 +324,31 @@ AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
 AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
 AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
 
+
+# Check for the libwebp library
+#
+AC_ARG_WITH(webp,
+[  --without-webp          Compile without webp image support],
+WEBP="no",
+WEBP="yes"
+)
+
+HAVE_WEBP=""
+if test "${WEBP}" = "yes"; then
+  AC_MSG_CHECKING(for libwebp)
+  WEBP_DEPS="libwebp"
+  if pkg-config $WEBP_DEPS; then
+    AC_MSG_RESULT(found)
+    AC_DEFINE([HAVE_WEBP], 1, [Define to 1 if WEBP is around])
+	HAVE_WEBP="yes"
+    TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
+else
+    AC_MSG_RESULT(not found)
+    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.])
+  fi
+fi
+
+
 # Check for raspberry pi mmal interface
 #
 WITHOUT_MMAL="no"
@@ -1067,6 +1092,12 @@ if test "$V4L2" = "yes"; then
     echo "V4L2 support:        Yes"
 else
     echo "V4L2 support:        No"
+fi
+
+if test "${HAVE_WEBP}" = "yes"; then
+   echo "webp support:        yes"
+else
+   echo "webp support:        no"
 fi
 
 if test "${BKTR}" = "yes"; then

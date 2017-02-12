@@ -324,6 +324,9 @@ const char *imageext(struct context *cnt)
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM)
         return "ppm";
 
+    if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
+        return "webp";
+
     return "jpg";
 }
 

@@ -175,6 +175,7 @@
 /* OUTPUT Image types */
 #define IMAGE_TYPE_JPEG        0
 #define IMAGE_TYPE_PPM         1
+#define IMAGE_TYPE_WEBP        2
 
 /* Filetype defines */
 #define FTYPE_IMAGE            1

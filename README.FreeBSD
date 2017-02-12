@@ -2,7 +2,7 @@ The following file explains how to build and run
 Motion on FreeBSD. It was tested on FreeBSD 11.0
 
 To build Motion on FreeBSD, you need the following packages:
-* pkg install autoconf pkgconf automake gmake
+* pkg install autoconf pkgconf automake gmake libwebp
 
 For database backend support, also install one of the following:
 * mysql57-client
