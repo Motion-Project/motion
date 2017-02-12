@@ -331,7 +331,7 @@ if test x$JPEG_SUPPORT != xyes ; then
 fi
 
 #
-# Check for the pkg-config.  
+# Check for the pkg-config.
 #
 
 AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
@@ -341,11 +341,11 @@ AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not f
 
 # Check for the libwebp library
 #
-AC_ARG_WITH(webp,
-[  --without-webp          Compile without webp image support],
-WEBP="no",
-WEBP="yes"
-)
+AC_ARG_WITH([webp],
+AS_HELP_STRING([--with-webp],
+               [Compile with Webp image support]),
+WEBP="yes",
+WEBP="no")
 
 HAVE_WEBP=""
 if test "${WEBP}" = "yes"; then
@@ -354,11 +354,11 @@ if test "${WEBP}" = "yes"; then
   if pkg-config $WEBP_DEPS; then
     AC_MSG_RESULT(found)
     AC_DEFINE([HAVE_WEBP], 1, [Define to 1 if WEBP is around])
-	HAVE_WEBP="yes"
+    HAVE_WEBP="yes"
     TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
-else
+  else
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.]) 
+    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.])
   fi
 fi
 
