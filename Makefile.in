@@ -24,7 +24,7 @@ mandir      = @mandir@
 sysconfdir  = @sysconfdir@
 datadir     = @datadir@
 datarootdir = @datarootdir@
-docdir      = $(datadir)/doc/@PACKAGE_NAME@ 
+docdir      = $(datadir)/doc/@PACKAGE_NAME@
 examplesdir = $(datadir)/@PACKAGE_NAME@/examples
 
 ################################################################################
@@ -34,13 +34,12 @@ examplesdir = $(datadir)/@PACKAGE_NAME@/examples
 CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
-VIDEO_OBJ    = @VIDEO@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
-		 vloopback_motion2.o $(VIDEO_OBJ) \
+			   video_loopback.o video_v4l2.o video_common.o video_bktr.o \
 			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
 			   alg.o event.o picture.o rotate.o webhttpd.o \
 			   stream.o md5.o netcam_rtsp.o ffmpeg.o \
-			   @MMAL_OBJ@
+			   @MMAL_OBJ@ @SQLITE_OBJ@
 SRC          = $(OBJ:.o=.c)
 DOC          = CHANGELOG COPYING CREDITS README.md motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
 EXAMPLES     = *.conf motion.service
@@ -52,10 +51,10 @@ DEPEND_FILE  = .depend
 # ALL and PROGS build Motion and, possibly, Motion-control.                    #
 ################################################################################
 all: progs
-ifneq (,$(findstring freebsd,$(VIDEO_OBJ)))
-	@echo "Build complete, run \"gmake install\" to install Motion!"
-else
+ifeq ("@DISTRO@","Linux")
 	@echo "Build complete, run \"make install\" to install Motion!"
+else
+	@echo "Build complete, run \"gmake install\" to install Motion!"
 endif
 	@echo
 
@@ -64,16 +63,16 @@ progs: pre-build-info $(PROGS)
 ################################################################################
 # PRE-BUILD-INFO outputs some general info before the build process starts.    #
 ################################################################################
-pre-build-info: 
+pre-build-info:
 	@echo "Welcome to the setup procedure for Motion, the motion detection daemon! If you get"
 	@echo "error messages during this procedure, please report them to the mailing list. The"
 	@echo "Motion Guide contains all information you should need to get Motion up and running."
 	@echo
 	@echo "Version: @PACKAGE_VERSION@"
-ifneq (,$(findstring freebsd,$(VIDEO_OBJ)))
-	@echo "Platform: FreeBSD"
-else
+ifeq ("@DISTRO@","Linux")
 	@echo "Platform: Linux (if this is incorrect, please read README.FreeBSD)"
+else
+	@echo "Platform: *BSD/Darwin"
 endif
 	@echo
 
@@ -92,7 +91,7 @@ motion-objects: dep pre-mobject-info $(OBJ)
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Motion object files compiled."
 	@echo
-	
+
 pre-mobject-info:
 	@echo "Compiling Motion object files..."
 	@echo "--------------------------------------------------------------------------------"
@@ -138,7 +137,7 @@ dev: distclean autotools all
 
 autotools:
 	autoconf
-	./configure --with-developer-flags 
+	./configure --with-developer-flags
 
 set-version:
 	autoconf
@@ -146,20 +145,20 @@ set-version:
 
 help:
 	@echo "--------------------------------------------------------------------------------"
-	@echo "make                   Build motion from local copy in your computer"	
+	@echo "make                   Build motion from local copy in your computer"
 	@echo "make current           Build last version of motion from svn"
 	@echo "make dev               Build motion with dev flags"
 	@echo "make dev-git           Build motion with dev flags for git"
 	@echo "make build-commit      Build last version of motion and prepare to commit to svn"
 	@echo "make build-commit-git  Build last version of motion and prepare to commit to git"
-	@echo "make clean             Clean objects" 
-	@echo "make distclean         Clean everything"	
+	@echo "make clean             Clean objects"
+	@echo "make distclean         Clean everything"
 	@echo "make install           Install binary , examples , docs and config files"
 	@echo "make uninstall         Uninstall all installed files"
 	@echo "--------------------------------------------------------------------------------"
 	@echo
 
-	
+
 ################################################################################
 # INSTALL installs all relevant files.                                         #
 ################################################################################
@@ -229,7 +228,7 @@ clean: pre-build-info
 ################################################################################
 # DIST restores the directory to distribution state.                           #
 ################################################################################
-dist: distclean 
+dist: distclean
 	@chmod -R 644 *
 	@chmod 755 configure
 	@chmod 755 version.sh
