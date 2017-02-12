@@ -9,7 +9,7 @@ http://brew.sh
 
 Then:
 
-brew install ffmpeg cmake pkg-config libjpeg libwebp
+brew install ffmpeg cmake pkg-config libjpeg
 cmake .
 make
 
