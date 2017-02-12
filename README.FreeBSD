@@ -9,7 +9,6 @@ To build Motion on FreeBSD, you need the following packages:
 * gmake
 * libjpeg-turbo
 * pkgconf
-* libwebp
 
 For database backend support, also install one of the following:
 * mysql57-client

@@ -241,7 +241,7 @@ script for Ubuntu.  If errors occur during the process or you wish to customize 
 review the extended building instructions further below.
 <p></p>
 <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
-libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libwebp-dev</strong></code>
+libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev </strong></code>
 <p></p>
 <code><strong>cd ~</strong></code>
 <br><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -277,7 +277,7 @@ Ubuntu / Debian Packages
   <li>Required</li>
   <ul>
     <p></p>
-    <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg62 libjpeg62-dev libwebp-dev</strong></code>
+    <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg62 libjpeg62-dev </strong></code>
     <p></p>
   </ul>
   <p></p>
@@ -313,6 +313,13 @@ Ubuntu / Debian Packages
       <code><strong>sudo apt-get install libjpeg-turbo8 libjpeg-turbo8-dev</strong></code>
       <p></p>
     </ul>
+    <li>Webp Image Support</li>
+    <ul>
+      <p></p>
+      <code><strong>sudo apt-get install libwebp-dev</strong></code>
+      <p></p>
+    </ul>
+
   </ul>
   Important ffmpeg/libav note:  Motion has been built to use either the libav or the ffmpeg set of libraries.
   Which set of libraries to use is a user selection and possibly dependent upon which is available in the
@@ -335,8 +342,6 @@ openSUSE Packages
     <code><strong>sudo zypper install libjpeg8-devel </strong></code>
     <p></p>
     <code><strong>sudo zypper install -t pattern devel_C_C++ </strong></code>
-    <p></p>
-    <code><strong>sudo zypper install libwebp-devel </strong></code>
     <p></p>
   </ul>
   <p></p>
@@ -370,6 +375,12 @@ openSUSE Packages
       <code><strong>Not known by author</strong></code>
       <p></p>
     </ul>
+    <li>Webp Image Support</li>
+    <ul>
+      <p></p>
+      <code><strong>sudo zypper install libwebp-devel </strong></code>
+      <p></p>
+    </ul>
   </ul>
   Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
   change in the future.  Validate that the repository is still valid when doing the install on openSUSE systems.
@@ -388,7 +399,6 @@ FreeBSD
       <li>gcc</li>
       <li>gmake</li>
       <li>libjpeg-turbo</li>
-      <li>libwebp</li>
       <li>pkgconf</li>
       <li>ffmpeg</li>
     </ul>
@@ -402,6 +412,10 @@ FreeBSD
     <ul>
       <li>pwcbsd</li>
       <li>v4l_compat</li>
+    </ul>
+   <li>Webp Image Support</li>
+    <ul>
+      <li>libwebp</li>
     </ul>
 </ul>
 
@@ -629,8 +643,8 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
 		</tr>
 		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --without-webp </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Compile without webp image support</td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > --with-webp </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Compile with webp image support</td>
 			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
 		</tr>
 		<tr>
@@ -3548,7 +3562,7 @@ Mask file (converted to png format so it can be shown by your web browser)
 <p></p>
 The full path and filename for the privacy masking pgm file.  This file works like the mask_file as
 described above.  The difference with this parameter is that while the mask_file excludes the section from
-detecting motion, this file excludes the section of the image completely.  
+detecting motion, this file excludes the section of the image completely.
 <p></p>
 mask_privacy is applied before detection so no motion will ever be detected in the excluded area.
 This parameter could however still be used with the mask_file.  e.g.  This file could exclude the
@@ -4363,15 +4377,15 @@ Camstream is "fooled" to think it is looking at a real camera.
 <p></p>
 The video loopback device can be added installed via apt in many distributions.  The package tested
 with Motion is v4l2loopback-dkms.  Once the package is installed, you just need to run
-<code><strong>sudo modprobe v4l2loopback</strong></code>.  This will add a new video device that you 
-can use for the loopback.  It is believed that there are additional options associated with the 
+<code><strong>sudo modprobe v4l2loopback</strong></code>.  This will add a new video device that you
+can use for the loopback.  It is believed that there are additional options associated with the
 v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
-project for additional details.  
+project for additional details.
 <p></p>
 To activate the vloopback device in motion set the 'video_pipe' option in the motion.conf file.
 You can also view the special motion pictures where you see the changed pixels by setting the option
 'motion_video_pipe' in motion.conf. When setting the video_pipe and/or motion_video_pipe options either
-specify the input device as e.g. /dev/video4. 
+specify the input device as e.g. /dev/video4.
 <p></p>
 De-activating should be done with this command
 <p></p>
@@ -4390,7 +4404,7 @@ De-activating should be done with this command
 </ul>
 <p></p>
 Default: not set
-The video4linux video loopback input device for normal images. The device would be specified 
+The video4linux video loopback input device for normal images. The device would be specified
 in the format like /dev/video1
 <p></p>
 <p></p>
@@ -4402,7 +4416,7 @@ in the format like /dev/video1
 </li> <li> Default: Not defined
 </li></ul>
 <p></p>
-The video4linux video loopback input device for motion images. The device would be specified 
+The video4linux video loopback input device for motion images. The device would be specified
 in the format like /dev/video1
 <p></p>
 <p></p>
