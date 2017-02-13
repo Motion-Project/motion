@@ -251,7 +251,7 @@ static int ftp_get_response(ftp_context_pointer ctxt)
 
     ctxt->control_buffer_index = ptr - ctxt->control_buffer;
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Server Response: %s",ctxt->control_buffer);    
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Server Response: %s",ctxt->control_buffer);
 
     return (res / 100);
 }

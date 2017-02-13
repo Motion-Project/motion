@@ -1,6 +1,6 @@
-/*	video_v4l2.h
+/*    video_v4l2.h
  *
- *	Include file for video_v4l2.c
+ *    Include file for video_v4l2.c
  *      Copyright 2000 by Jeroen Vreeken (pe1rxq@amsat.org)
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.

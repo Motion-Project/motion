@@ -24,8 +24,8 @@
 #include "motion.h"
 #include "rotate.h"
 
-#define MMALCAM_OK		0
-#define MMALCAM_ERROR	-1
+#define MMALCAM_OK        0
+#define MMALCAM_ERROR    -1
 
 #define MMAL_CAMERA_PREVIEW_PORT 0
 #define MMAL_CAMERA_VIDEO_PORT 1

@@ -3,8 +3,8 @@
 #define _INCLUDE_VIDEO_COMMON_H
 
 /* video4linux error codes */
-#define V4L2_GENERAL_ERROR    0x01	/* binary 000001 */
-#define V4L2_BTTVLOST_ERROR   0x05	/* binary 000101 */
+#define V4L2_GENERAL_ERROR    0x01    /* binary 000001 */
+#define V4L2_BTTVLOST_ERROR   0x05    /* binary 000101 */
 #define V4L2_FATAL_ERROR      -1
 
 

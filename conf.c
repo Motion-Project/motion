@@ -2029,7 +2029,7 @@ struct context **conf_load(struct context **cnt)
       strncpy(cnt[0]->conf_filename, filename, sizeof(cnt[0]->conf_filename) - 1);
       cnt[0]->conf_filename[sizeof(cnt[0]->conf_filename) - 1] = '\0';
       MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s",
-		 filename);
+         filename);
       cnt = conf_process(cnt, fp);
       myfclose(fp);
     } else {

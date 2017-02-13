@@ -21,7 +21,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with Wget; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */ 
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #ifndef NETCAM_WGET_H
 #define NETCAM_WGET_H
@@ -77,8 +77,8 @@ char *strdupdelim(const char *, const char *);
 int http_process_type(const char *, void *);
 
 enum {
-    HG_OK, 
-    HG_ERROR, 
+    HG_OK,
+    HG_ERROR,
     HG_EOF
 };
 

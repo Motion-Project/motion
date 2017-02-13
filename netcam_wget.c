@@ -63,7 +63,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
    `:', thus you can use it to retrieve, say, HTTP status line.
 
    All trailing whitespace is stripped from the header, and it is
-   zero-terminated.  
+   zero-terminated.
  */
 int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flags)
 {
@@ -85,10 +85,10 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                 if (!((flags & HG_NO_CONTINUATIONS) || i == 0
                     || (i == 1 && (*hdr)[0] == '\r'))) {
                     char next;
-                    /* 
+                    /*
                      * If the header is non-empty, we need to check if
                      * it continues on to the other line.  We do that by
-                     * peeking at the next character.  
+                     * peeking at the next character.
                      */
                     res = rbuf_peek(netcam, &next);
 
@@ -107,11 +107,11 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
                 /*
                  * Strip trailing whitespace.  (*hdr)[i] is the newline;
                  * decrement I until it points to the last available
-                 * whitespace.  
+                 * whitespace.
                  */
                 while (i > 0 && isspace((*hdr)[i - 1]))
                     --i;
-                    
+
                 (*hdr)[i] = '\0';
                 break;
             }
@@ -129,10 +129,10 @@ int header_get(netcam_context_ptr netcam, char **hdr, enum header_get_flags flag
 
 /**
  * header_process
- * 
+ *
  *  Check whether HEADER begins with NAME and, if yes, skip the `:' and
  *  the whitespace, and call PROCFUN with the arguments of HEADER's
- *  contents (after the `:' and space) and ARG.  Otherwise, return 0. 
+ *  contents (after the `:' and space) and ARG.  Otherwise, return 0.
  */
 int header_process(const char *header, const char *name,
                     int (*procfun)(const char *, void *), void *arg)
@@ -143,7 +143,7 @@ int header_process(const char *header, const char *name,
 
     if (*name || *header++ != ':')
         return 0;
-    
+
     header += skip_lws (header);
     return ((*procfun) (header, arg));
 }
@@ -152,9 +152,9 @@ int header_process(const char *header, const char *name,
 
 /**
  * header_extract_number
- * 
+ *
  *  Extract a long integer from HEADER and store it to CLOSURE.  If an
- *  error is encountered, return 0, else 1.  
+ *  error is encountered, return 0, else 1.
  */
 int header_extract_number(const char *header, void *closure)
 {
@@ -183,8 +183,8 @@ int header_extract_number(const char *header, void *closure)
 
 /**
  * header_strdup
- * 
- *  Strdup HEADER, and place the pointer to CLOSURE.  
+ *
+ *  Strdup HEADER, and place the pointer to CLOSURE.
  */
 int header_strdup(const char *header, void *closure)
 {
@@ -196,7 +196,7 @@ int header_strdup(const char *header, void *closure)
 /**
  * skip_lws
  *  Skip LWS (linear white space), if present.  Returns number of
- *  characters to skip.  
+ *  characters to skip.
  */
 int skip_lws(const char *string)
 {
@@ -214,7 +214,7 @@ int skip_lws(const char *string)
  *
  *   Encode the string S of length LENGTH to base64 format and place it
  *   to STORE.  STORE will be 0-terminated, and must point to a writable
- *   buffer of at least 1+BASE64_LENGTH(length) bytes.  
+ *   buffer of at least 1+BASE64_LENGTH(length) bytes.
  */
 void motion_base64_encode(const char *s, char *store, int length)
 {
@@ -229,7 +229,7 @@ void motion_base64_encode(const char *s, char *store, int length)
     'w', 'x', 'y', 'z', '0', '1', '2', '3',
     '4', '5', '6', '7', '8', '9', '+', '/'
     };
-    
+
     int i;
     unsigned char *p = (unsigned char *)store;
 
@@ -241,7 +241,7 @@ void motion_base64_encode(const char *s, char *store, int length)
         *p++ = tbl[s[2] & 0x3f];
         s += 3;
     }
-    
+
     /* Pad the result if necessary... */
     if (i == length + 1)
         *(p - 1) = '=';
@@ -254,7 +254,7 @@ void motion_base64_encode(const char *s, char *store, int length)
 
 /**
  * strdupdelim
- */ 
+ */
 char *strdupdelim(const char *beg, const char *end)
 {
     char *res = mymalloc(end - beg + 1);
@@ -266,7 +266,7 @@ char *strdupdelim(const char *beg, const char *end)
 
 /**
  * http_process_type
- */ 
+ */
 int http_process_type(const char *hdr, void *arg)
 {
     char **result = (char **)arg;
@@ -285,8 +285,8 @@ int http_process_type(const char *hdr, void *arg)
 
 /**
  * rbuf_initialize
- * 
- *  This is a simple implementation of buffering IO-read functions.  
+ *
+ *  This is a simple implementation of buffering IO-read functions.
  */
 void rbuf_initialize(netcam_context_ptr netcam)
 {
@@ -302,8 +302,8 @@ int rbuf_read_bufferful(netcam_context_ptr netcam)
 
 /**
  * rbuf_peek
- * 
- *  Like rbuf_readchar(), only don't move the buffer position.  
+ *
+ *  Like rbuf_readchar(), only don't move the buffer position.
  */
 int rbuf_peek(netcam_context_ptr netcam, char *store)
 {
@@ -320,17 +320,17 @@ int rbuf_peek(netcam_context_ptr netcam, char *store)
 
         netcam->response->buffer_left = res;
     }
-    
+
     *store = *netcam->response->buffer_pos;
     return 1;
 }
 
 /**
  * rbuf_flush
- * 
+ *
  *   Flush RBUF's buffer to WHERE.  Flush MAXSIZE bytes at most.
  *   Returns the number of bytes actually copied.  If the buffer is
- *   empty, 0 is returned.  
+ *   empty, 0 is returned.
  */
 int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
 {
@@ -351,7 +351,7 @@ int rbuf_flush(netcam_context_ptr netcam, char *where, int maxsize)
 /**
  * http_result_code
  *
- *  Get the HTTP result code 
+ *  Get the HTTP result code
  */
 int http_result_code(const char *header)
 {
