@@ -615,11 +615,6 @@ how Motion is built.
 			<th bgcolor="#edf4f9" word-wrap:break-word >  </th>
 		</tr>
 		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-linuxthreads </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Use linuxthreads in BSD instead of native phtreads </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Only relevant for BSD. In Linux we always use this per default. </td>
-		</tr>
-		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude bktr video subsystem devices </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
@@ -628,11 +623,6 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support and maybe lack some of the libraries for it. </td>
-		</tr>
-		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-jpeg-mmx=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the prefix for the install path for jpeg-mmx for optimized jpeg handling</td>
-			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-webp </td>
@@ -664,29 +654,9 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to compile with ffmpeg. If ffmpeg is not installed you must specify this option for Motion to build without ffmpeg. </td>
 		</tr>
 		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-mysql-lib=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Lib directory of MySQL </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Normally, configure will scan all possible default installation paths for MySQL libs. When its fail, use this command to tell configure where MySQL libs installation root directory is. </td>
-		</tr>
-		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-mysql-include=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Include directory with headers for MySQL </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Normally, configure will scan all possible default                          installation paths for MySQL include. When its fail, use this command to tell configure where MySQL include installation directory is. This is the directory with the MySQL header files. </td>
-		</tr>
-		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-mysql </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MySQL support </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MySQL support in the package. <br /> This can also be useful if you get compilation errors related to MySQL and you actually do not need the feature anyway. </td>
-		</tr>
-		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-pgsql-lib=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Normally, configure will scan all possible default installation paths for pgsql libs. When it fails, use <br /> this command to tell configure where pgsql libs installation root directory is. </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
-		</tr>
-      <tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-pgsql-include=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Normally, configure will scan all possible default installation paths for pgsql include. When it fails, use this command to tell configure where pgsql include installation root directory is. </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-pgsql </td>
@@ -702,11 +672,6 @@ how Motion is built.
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-optimizecpu </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude autodetecting platform and cpu type. This will disable the compilation of gcc optimizing code by platform and cpu. </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if the optimization causes problems. Typically if you build on some non X386 compatible CPU. </td>
-		</tr>
-		<tr>
-			<td bgcolor="#edf4f9" word-wrap:break-word > --with-jpeg-turbo=DIR </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word >  Specify the prefix for the install path for jpeg-turbo for optimized jpeg handling (optional).</td>
-			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
@@ -2065,12 +2030,15 @@ Some configuration options are only used if Motion is built on a system that has
        <td bgcolor="#edf4f9" ><a href="#on_motion_detected" >on_motion_detected</a> </td>
      </tr>
      <tr>
-   	 <td bgcolor="#edf4f9" ><a href="#on_area_detected" >on_area_detected</a> </td>
+   	   <td bgcolor="#edf4f9" ><a href="#on_area_detected" >on_area_detected</a> </td>
        <td bgcolor="#edf4f9" ><a href="#on_movie_start" >on_movie_start</a> </td>
        <td bgcolor="#edf4f9" ><a href="#on_movie_end" >on_movie_end</a> </td>
        <td bgcolor="#edf4f9" ><a href="#on_camera_lost" >on_camera_lost</a> </td>
+     </tr>
+     <tr>
        <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
      </tr>
+
    </tbody>
 </table>
 
@@ -2350,7 +2318,7 @@ The following section provides detailed descriptions of each of the configuratio
        <td bgcolor="#edf4f9" >%m  </a> </td>
        <td bgcolor="#edf4f9" >month</a> </td>
        <td bgcolor="#edf4f9" >%d   </a> </td>
-       <td bgcolor="#edf4f9" >date</a> </td>
+       <td bgcolor="#edf4f9" >day</a> </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" >%H   </a> </td>
