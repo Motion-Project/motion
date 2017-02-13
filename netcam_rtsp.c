@@ -149,7 +149,7 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
     ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
-		MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream in input!: %s",errstr);
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream in input!: %s",errstr);
         return ret;
     }
 
@@ -168,7 +168,7 @@ static int netcam_open_codec(int *stream_idx, AVFormatContext *fmt_ctx, enum AVM
     ret = avcodec_open2(dec_ctx, dec, NULL);
     if (ret < 0) {
         av_strerror(ret, errstr, sizeof(errstr));
-    	MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
         return ret;
     }
 
@@ -841,7 +841,7 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
      */
     if ((netcam->rtsp->user != NULL) && (netcam->rtsp->pass != NULL)) {
         ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
-	          + 5 + strlen(url->path) + 5
+              + 5 + strlen(url->path) + 5
               + strlen(netcam->rtsp->user) + strlen(netcam->rtsp->pass) + 4 );
         sprintf((char *)ptr, "%s://%s:%s@%s:%d%s",
                 url->service,netcam->rtsp->user,netcam->rtsp->pass,
@@ -849,9 +849,9 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     }
     else {
         ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
-	          + 5 + strlen(url->path) + 5);
+              + 5 + strlen(url->path) + 5);
         sprintf((char *)ptr, "%s://%s:%d%s", url->service,
-	        netcam->connect_host, netcam->connect_port, url->path);
+            netcam->connect_host, netcam->connect_port, url->path);
     }
     netcam->rtsp->path = (char *)ptr;
 

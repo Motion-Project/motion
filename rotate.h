@@ -15,8 +15,8 @@
 
 /**
  * rotate_init
- * 
- *  Sets up rotation data by allocating a temporary buffer for 90/270 degrees 
+ *
+ *  Sets up rotation data by allocating a temporary buffer for 90/270 degrees
  *  rotation, and by determining the right rotate-180-degrees function.
  *
  * Parameters:
@@ -30,7 +30,7 @@ void rotate_init(struct context *cnt);
 /**
  * rotate_deinit
  *
- *  Frees memory allocated by rotate_init. 
+ *  Frees memory allocated by rotate_init.
  *
  * Parameters:
  *
@@ -40,7 +40,7 @@ void rotate_deinit(struct context *cnt);
 
 /**
  * rotate_map
- * 
+ *
  *  Rotates the image stored in map according to the rotation data
  *  available in cnt. Rotation is performed clockwise. Supports 90,
  *  180 and 270 degrees rotation. 180 degrees rotation is performed
@@ -53,13 +53,13 @@ void rotate_deinit(struct context *cnt);
  *  performed in-place.
  *
  * Parameters:
- * 
+ *
  *   map - the image map/data to rotate
  *   cnt - current thread's context structure
- *   
- * Returns: 
  *
- *   0  - success 
+ * Returns:
+ *
+ *   0  - success
  *   -1 - failure (rare, shouldn't happen)
  */
 int rotate_map(struct context *cnt, unsigned char *map);

@@ -1,6 +1,6 @@
 /*
  *      stream.h
- *      
+ *
  *      Include file for stream.c
  *      Copyright (C) 2002 Jeroen Vreeken (pe1rxq@amsat.org)
  *

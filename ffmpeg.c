@@ -110,7 +110,7 @@ int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFor
     retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
         ,(unsigned char *)buffer_ptr,dest_size);
 #endif
-	return retcd;
+    return retcd;
 }
 /*********************************************/
 int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
@@ -125,7 +125,7 @@ int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat p
         ,width
         ,height
         ,align
-	);
+    );
 #else
     retcd = avpicture_fill(
         (AVPicture *)frame
@@ -134,7 +134,7 @@ int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat p
         ,width
         ,height);
 #endif
-	return retcd;
+    return retcd;
 }
 /*********************************************/
 void my_packet_unref(AVPacket pkt){
@@ -261,7 +261,7 @@ static AVOutputFormat *get_oformat(const char *codec, char *filename){
     } else if (strcmp(codec, "mov") == 0) {
         ext = ".mov";
         of = av_guess_format("mov", NULL, NULL);
-	} else if (strcmp (codec, "mp4") == 0){
+    } else if (strcmp (codec, "mp4") == 0){
       ext = ".mp4";
       of = av_guess_format ("mp4", NULL, NULL);
       of->video_codec = MY_CODEC_ID_H264;

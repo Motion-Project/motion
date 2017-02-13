@@ -104,8 +104,8 @@ THREAD_CHECK="/usr/include/pthread.h"
 LINUXTHREADS="no"
 AC_ARG_WITH(linuxthreads,
 [  --with-linuxthreads     Use linuxthreads in BSD instead of native pthreads
-				]
-				,
+                ]
+                ,
 LINUXTHREADS="$withval"
 )
 if test "${DISTRO}" != "Linux" && test "${DISTRO}" != "Darwin" ; then
@@ -125,22 +125,22 @@ AC_MSG_CHECKING(for linuxthreads)
 #
 # Check for thread header
 #
-	if test -f "${THREAD_CHECK}"; then
-		HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
-		THREADS="yes"
-	else
-		THREADS="no"
-	fi
+    if test -f "${THREAD_CHECK}"; then
+        HEADERS_THREAD_CFLAGS="-I/usr/local/include/pthread/linuxthreads"
+        THREADS="yes"
+    else
+        THREADS="no"
+    fi
 
 #
 # Check for thread lib
 #
-	if test -f "${THREAD_LIB_CHECK}" ; then
-		THREADS="yes"
-		LIB_THREAD="-llthread -llgcc_r"
-	else
-		THREADS="no"
-	fi
+    if test -f "${THREAD_LIB_CHECK}" ; then
+        THREADS="yes"
+        LIB_THREAD="-llthread -llgcc_r"
+    else
+        THREADS="no"
+    fi
 
 # Checks for Library linuxthreads for BSD
 #
@@ -150,8 +150,8 @@ AC_MSG_CHECKING(for linuxthreads)
 # /usr/local/lib/libpthread.so
 #
 
-	if test "${THREADS}" = "yes"; then
-		TEMP_CFLAGS="${HEADERS_THREAD_CFLAGS} $TEMP_CFLAGS -DWITH_LINUXTREADS"
+    if test "${THREADS}" = "yes"; then
+        TEMP_CFLAGS="${HEADERS_THREAD_CFLAGS} $TEMP_CFLAGS -DWITH_LINUXTREADS"
         TEMP_LIBS="$TEMP_LIBS ${LIB_THREAD}"
         THREAD_CFLAGS="-D_THREAD_SAFE"
         PTHREAD_SUPPORT="yes"
@@ -176,20 +176,20 @@ AC_TRY_LINK([#include <pthread.h>],
 
 if test x$PTHREAD_LIB != xyes; then
     if test "${DISTRO}" != "Linux" && test "${DISTRO}" != "Darwin" ; then
-		TEMP_LIBS="$TEMP_LIBS -pthread"
-		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT -D_THREAD_SAFE"
-	else
-		TEMP_LIBS="$TEMP_LIBS -lpthread"
-		TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT"
-	fi
-	PTHREAD_SUPPORT="yes"
+        TEMP_LIBS="$TEMP_LIBS -pthread"
+        TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT -D_THREAD_SAFE"
+    else
+        TEMP_LIBS="$TEMP_LIBS -lpthread"
+        TEMP_CFLAGS="${TEMP_CFLAGS} -D_REENTRANT"
+    fi
+    PTHREAD_SUPPORT="yes"
 fi
-	AC_MSG_RESULT($PTHREAD_SUPPORT)
+    AC_MSG_RESULT($PTHREAD_SUPPORT)
 
 else
-	echo
-	echo "You do not have threads support"
-	echo
+    echo
+    echo "You do not have threads support"
+    echo
 fi
 
 #
@@ -260,42 +260,42 @@ if test "${JPEG_MMX}" = "no" || test x$JPEG_SUPPORT != xyes; then
         AC_MSG_CHECKING(for libjpeg-mmx)
         AC_MSG_RESULT(skipping)
 elif test "${JPEG_MMX}" = "yes"; then
-	# AUTODETECT STATIC LIB
-	AC_MSG_CHECKING(for libjpeg-mmx autodetecting)
+    # AUTODETECT STATIC LIB
+    AC_MSG_CHECKING(for libjpeg-mmx autodetecting)
 
-	if test -f /usr/lib/libjpeg-mmx.a ; then
-		AC_MSG_RESULT(found)
-		JPEG_MMX_OK="found"
-		JPEG_MMX="/usr/lib"
-	elif test -f /usr/local/lib/libjpeg-mmx.a ; then
-		AC_MSG_RESULT(found)
-		JPEG_MMX_OK="found"
-		JPEG_MMX="/usr/local/lib"
-	else
-		AC_MSG_RESULT(not found)
-	fi
+    if test -f /usr/lib/libjpeg-mmx.a ; then
+        AC_MSG_RESULT(found)
+        JPEG_MMX_OK="found"
+        JPEG_MMX="/usr/lib"
+    elif test -f /usr/local/lib/libjpeg-mmx.a ; then
+        AC_MSG_RESULT(found)
+        JPEG_MMX_OK="found"
+        JPEG_MMX="/usr/local/lib"
+    else
+        AC_MSG_RESULT(not found)
+    fi
 else
-	AC_MSG_CHECKING(for libjpeg-mmx in -> [${JPEG_MMX}] <-)
-	if test -f ${JPEG_MMX}/libjpeg-mmx.a ; then
-		AC_MSG_RESULT(found)
-		JPEG_MMX_OK="found"
-	else
-		AC_MSG_RESULT(not found)
-	fi
+    AC_MSG_CHECKING(for libjpeg-mmx in -> [${JPEG_MMX}] <-)
+    if test -f ${JPEG_MMX}/libjpeg-mmx.a ; then
+        AC_MSG_RESULT(found)
+        JPEG_MMX_OK="found"
+    else
+        AC_MSG_RESULT(not found)
+    fi
 fi
 
 if test "${JPEG_MMX_OK}" = "found"; then
-	saved_CFLAGS="$CFLAGS"
-	saved_LIBS="$LIBS"
-	CFLAGS="$CFLAGS -I${JPEG_MMX}"
-	LIBS="$LIBS -L${JPEG_MMX}"
-	AC_CHECK_LIB(jpeg-mmx, jpeg_start_compress,
-		[ TEMP_LIBS="$TEMP_LIBS -ljpeg-mmx"
-		TEMP_CFLAGS="${TEMP_CFLAGS} -I${JPEG_MMX}"
-		JPEG_SUPPORT="yes"],,)
-	LIBS="$saved_LIBS"
-	CFLAGS="$saved_CFLAGS"
-	JPEG_SUPPORT_MMX="yes"
+    saved_CFLAGS="$CFLAGS"
+    saved_LIBS="$LIBS"
+    CFLAGS="$CFLAGS -I${JPEG_MMX}"
+    LIBS="$LIBS -L${JPEG_MMX}"
+    AC_CHECK_LIB(jpeg-mmx, jpeg_start_compress,
+        [ TEMP_LIBS="$TEMP_LIBS -ljpeg-mmx"
+        TEMP_CFLAGS="${TEMP_CFLAGS} -I${JPEG_MMX}"
+        JPEG_SUPPORT="yes"],,)
+    LIBS="$saved_LIBS"
+    CFLAGS="$saved_CFLAGS"
+    JPEG_SUPPORT_MMX="yes"
 fi
 
 #
@@ -306,13 +306,13 @@ if test x$JPEG_SUPPORT != xyes ; then
   LDFLAGS=$TEMP_LDFLAGS
 
   AC_CHECK_LIB(jpeg, jpeg_set_defaults, [
-		TEMP_LIBS="$TEMP_LIBS -ljpeg"
-		JPEG_SUPPORT="yes"
-	], [
-		echo
-		echo "You do not have libjpeg installed"
-		echo
-	]
+        TEMP_LIBS="$TEMP_LIBS -ljpeg"
+        JPEG_SUPPORT="yes"
+    ], [
+        echo
+        echo "You do not have libjpeg installed"
+        echo
+    ]
   )
 fi
 
@@ -389,15 +389,15 @@ fi
 #
 FFMPEG_OBJ=""
 AC_ARG_WITH([ffmpeg],
-	    AS_HELP_STRING([--with-ffmpeg[=DIR]], [Build with FFMPEG support]),
-	    [with_ffmpeg=$withval],
-	    [with_ffmpeg=yes])
+        AS_HELP_STRING([--with-ffmpeg[=DIR]], [Build with FFMPEG support]),
+        [with_ffmpeg=$withval],
+        [with_ffmpeg=yes])
 
 AS_IF([test "x$with_ffmpeg" != "xno"], [
        AS_IF([test "x$with_ffmpeg" != "xyes"], [
-	      PKG_CONFIG_PATH=${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH
-	      export PKG_CONFIG_PATH
-	])
+          PKG_CONFIG_PATH=${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH
+          export PKG_CONFIG_PATH
+    ])
 
        AC_SUBST(FFMPEG_LIBS)
        AC_SUBST(FFMPEG_CFLAGS)
@@ -499,110 +499,110 @@ MYSQL_HEADERS="$withval"
 
 
 if test "${MYSQL}" = "no"; then
-	AC_MSG_RESULT(skipped)
+    AC_MSG_RESULT(skipped)
 else
-	AC_MSG_RESULT(testing)
-	# ******* Search mysql headers *******
+    AC_MSG_RESULT(testing)
+    # ******* Search mysql headers *******
 
-	if test "${MYSQL_HEADERS}" = "yes"; then
-		AC_MSG_CHECKING(autodect mysql headers)
-		# Autodetect
-		for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
-			# check for plain setups
-			if test -f $w/mysql.h; then
-				MYSQL_INCDIR=$w
-				break
-			fi
-			# check for "/usr/include/<packagename>" type setups
-			if test -f $w/mysql/mysql.h; then
-				MYSQL_INCDIR=$w/mysql
-				break
-			fi
-			# check for "/usr/<packagename>/include" type setups
-			if test -f $w/mysql/include/mysql.h; then
-				MYSQL_INCDIR=$w/mysql/include
-				break
-			fi
-		done
-	elif test "${MYSQL_HEADERS}" = "no"; then
-		AC_MSG_CHECKING(for mysql headers)
-		AC_MSG_RESULT(skipped)
-	else
-		AC_MSG_CHECKING(for mysql headers in $MYSQL_HEADERS)
-		# Manual detection for <withval>
-		if test -f $MYSQL_HEADERS/mysql.h; then
-			MYSQL_INCDIR=$MYSQL_HEADERS
-	        fi
-	fi
+    if test "${MYSQL_HEADERS}" = "yes"; then
+        AC_MSG_CHECKING(autodect mysql headers)
+        # Autodetect
+        for w in /usr/include /usr/local/include /usr/mysql /usr/local/mysql /usr/local/mysql/include /opt /opt/mysql; do
+            # check for plain setups
+            if test -f $w/mysql.h; then
+                MYSQL_INCDIR=$w
+                break
+            fi
+            # check for "/usr/include/<packagename>" type setups
+            if test -f $w/mysql/mysql.h; then
+                MYSQL_INCDIR=$w/mysql
+                break
+            fi
+            # check for "/usr/<packagename>/include" type setups
+            if test -f $w/mysql/include/mysql.h; then
+                MYSQL_INCDIR=$w/mysql/include
+                break
+            fi
+        done
+    elif test "${MYSQL_HEADERS}" = "no"; then
+        AC_MSG_CHECKING(for mysql headers)
+        AC_MSG_RESULT(skipped)
+    else
+        AC_MSG_CHECKING(for mysql headers in $MYSQL_HEADERS)
+        # Manual detection for <withval>
+        if test -f $MYSQL_HEADERS/mysql.h; then
+            MYSQL_INCDIR=$MYSQL_HEADERS
+            fi
+    fi
 
-	if test -z "$MYSQL_INCDIR" ; then
-		MYSQL_HEADERS="no"
-		AC_MSG_RESULT(not found)
-		echo "Invalid MySQL directory - unable to find mysql.h."
-	else
-		AC_MSG_RESULT($MYSQL_INCDIR yes)
-		MYSQL_HEADERS="yes"
-	fi
-
-
-	if test "${MYSQL_HEADERS}" = "yes"; then
-
-	# ******* Search mysql libs *********
-	if test "${MYSQL_LIBS}" = "yes"; then
-		AC_MSG_CHECKING(autodect mysql libs)
-		# Autodetect
-		for w in /usr/lib64 /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib/x86_64-linux-gnu; do
-			# check for plain setups
-			if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
-				MYSQL_LIBDIR=$w
-				break
-			fi
-			# check for "/usr/lib/<packagename>" type setups
-			if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
-				MYSQL_LIBDIR=$w/mysql
-				break
-			fi
-			# check for "/usr/<packagename>/lib" type setups
-			if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
-				MYSQL_LIBDIR=$w/mysql/lib
-				break
-			fi
-		done
-	elif test "${MYSQL_LIBS}" = "no"; then
-		AC_MSG_CHECKING(for mysql libs)
-	        AC_MSG_RESULT(skipped)
-	else
-		AC_MSG_CHECKING(for mysql libs in $MYSQL_LIBS)
-		# Manual detection for <withval>
-		if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
-			MYSQL_LIBDIR=$MYSQL_LIBS
-		fi
-	fi
+    if test -z "$MYSQL_INCDIR" ; then
+        MYSQL_HEADERS="no"
+        AC_MSG_RESULT(not found)
+        echo "Invalid MySQL directory - unable to find mysql.h."
+    else
+        AC_MSG_RESULT($MYSQL_INCDIR yes)
+        MYSQL_HEADERS="yes"
+    fi
 
 
-	if test -z "$MYSQL_LIBDIR" ; then
-		AC_MSG_RESULT(not found)
-		echo "Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so."
-	else
-		AC_MSG_RESULT($MYSQL_LIBDIR)
-		#LDFLAGS="-L$MYSQL_LIBDIR"
-		saved_CFLAGS=$CFLAGS
-		saved_LIBS=$LIBS
-		CFLAGS="-I$MYSQL_INCDIR"
-		LIBS="-L$MYSQL_LIBDIR"
-		AC_CHECK_LIB(mysqlclient,mysql_init,[
-					TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient -lz"
-					TEMP_CFLAGS="$TEMP_CFLAGS -I$MYSQL_INCDIR"
-					MYSQL_SUPPORT="yes"
-					AC_DEFINE([HAVE_MYSQL],1,[Define to 1 if you have MySQL support])
-					],
-					AC_MSG_ERROR(MySQL support can't build without MySQL libraries))
-		CFLAGS=$saved_CFLAGS
-		LIBS=$saved_LIBS
-	fi
+    if test "${MYSQL_HEADERS}" = "yes"; then
 
-	# end mysql-include , mysql-libs
-	fi
+    # ******* Search mysql libs *********
+    if test "${MYSQL_LIBS}" = "yes"; then
+        AC_MSG_CHECKING(autodect mysql libs)
+        # Autodetect
+        for w in /usr/lib64 /usr/lib /usr/local/lib /usr/mysql /usr/local/mysql /usr/local/mysql/lib /opt /opt/mysql /usr/lib/x86_64-linux-gnu; do
+            # check for plain setups
+            if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
+                MYSQL_LIBDIR=$w
+                break
+            fi
+            # check for "/usr/lib/<packagename>" type setups
+            if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
+                MYSQL_LIBDIR=$w/mysql
+                break
+            fi
+            # check for "/usr/<packagename>/lib" type setups
+            if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
+                MYSQL_LIBDIR=$w/mysql/lib
+                break
+            fi
+        done
+    elif test "${MYSQL_LIBS}" = "no"; then
+        AC_MSG_CHECKING(for mysql libs)
+            AC_MSG_RESULT(skipped)
+    else
+        AC_MSG_CHECKING(for mysql libs in $MYSQL_LIBS)
+        # Manual detection for <withval>
+        if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
+            MYSQL_LIBDIR=$MYSQL_LIBS
+        fi
+    fi
+
+
+    if test -z "$MYSQL_LIBDIR" ; then
+        AC_MSG_RESULT(not found)
+        echo "Invalid MySQL directory - unable to find libmysqlclient.a or libmysqlclient.so."
+    else
+        AC_MSG_RESULT($MYSQL_LIBDIR)
+        #LDFLAGS="-L$MYSQL_LIBDIR"
+        saved_CFLAGS=$CFLAGS
+        saved_LIBS=$LIBS
+        CFLAGS="-I$MYSQL_INCDIR"
+        LIBS="-L$MYSQL_LIBDIR"
+        AC_CHECK_LIB(mysqlclient,mysql_init,[
+                    TEMP_LIBS="$TEMP_LIBS -L$MYSQL_LIBDIR -lmysqlclient -lz"
+                    TEMP_CFLAGS="$TEMP_CFLAGS -I$MYSQL_INCDIR"
+                    MYSQL_SUPPORT="yes"
+                    AC_DEFINE([HAVE_MYSQL],1,[Define to 1 if you have MySQL support])
+                    ],
+                    AC_MSG_ERROR(MySQL support can't build without MySQL libraries))
+        CFLAGS=$saved_CFLAGS
+        LIBS=$saved_LIBS
+    fi
+
+    # end mysql-include , mysql-libs
+    fi
 
 # end Mysql detection
 fi
@@ -648,100 +648,100 @@ PGSQL_HEADERS="$withval"
 AC_MSG_CHECKING(for PostgreSQL)
 
 if test "${PGSQL}" = "no"; then
-	AC_MSG_RESULT(skipped)
+    AC_MSG_RESULT(skipped)
 else
-	AC_MSG_RESULT(testing)
+    AC_MSG_RESULT(testing)
 
-	# ******* Search pgsql headers *******
-	if test "${PGSQL_HEADERS}" = "yes"; then
+    # ******* Search pgsql headers *******
+    if test "${PGSQL_HEADERS}" = "yes"; then
 
-		AC_MSG_CHECKING(autodect pgsql headers)
-		# Autodetect
-		for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
-			PGSQL_INC_CHK(/include)
-			el[]PGSQL_INC_CHK(/include/pgsql)
-			el[]PGSQL_INC_CHK(/include/postgresql)
-			fi
-		done
+        AC_MSG_CHECKING(autodect pgsql headers)
+        # Autodetect
+        for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
+            PGSQL_INC_CHK(/include)
+            el[]PGSQL_INC_CHK(/include/pgsql)
+            el[]PGSQL_INC_CHK(/include/postgresql)
+            fi
+        done
 
-	elif test "${PGSQL_HEADERS}" = "no"; then
-		AC_MSG_CHECKING(for pgsql headers)
-		AC_MSG_RESULT(skipped)
-	else
-		AC_MSG_CHECKING(for pgsql headers in $PGSQL_HEADERS)
-		# Manual detection for <withval>
-		if test -f $PGSQL_HEADERS/libpq-fe.h; then
-			PGSQL_INCDIR=$PGSQL_HEADERS
-	        fi
-	fi
+    elif test "${PGSQL_HEADERS}" = "no"; then
+        AC_MSG_CHECKING(for pgsql headers)
+        AC_MSG_RESULT(skipped)
+    else
+        AC_MSG_CHECKING(for pgsql headers in $PGSQL_HEADERS)
+        # Manual detection for <withval>
+        if test -f $PGSQL_HEADERS/libpq-fe.h; then
+            PGSQL_INCDIR=$PGSQL_HEADERS
+            fi
+    fi
 
-	if test -z "$PGSQL_INCDIR" ; then
-		PGSQL_HEADERS="no"
-		AC_MSG_RESULT(not found)
-		echo "Invalid PostgreSQL directory - unable to find libpq-fe.h."
-	else
-		AC_MSG_RESULT(yes [$PGSQL_INCDIR])
-		PGSQL_HEADERS="yes"
-	fi
-
-
-	if test "${PGSQL_HEADERS}" = "yes"; then
-
-		# ******* Search pgsql libs *********
-		if test "${PGSQL_LIBS}" = "yes"; then
-			AC_MSG_CHECKING(autodect pgsql libs)
-			# Autodetect
-			PGSQL_INCLUDE="-I$PGSQL_INCDIR"
-			PGSQL_LIBDIR=$PGSQL_DIR/lib
-
-			if test -f /usr/lib64/libpq.so ; then
-				PGSQL_LIBDIR=/usr/lib64
-			elif test -f $PGSQL_DIR/lib/pgsql/libpq.so ; then
-				PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql
-			elif test -f $PGSQL_DIR/lib/postgresql/libpq.so ; then
-				PGSQL_LIBDIR=$PGSQL_DIR/lib/postgresql
-			elif test -f $PGSQL_DIR/lib/libpq.so ; then
-				PGSQL_LIBDIR=$PGSQL_DIR/lib
-			else
-				PGSQL_LIBDIR=""
-			fi
-
-			AC_MSG_RESULT($PGSQL_LIBDIR)
-
-		elif test "${PGSQL_LIBS}" = "no"; then
-			AC_MSG_CHECKING(for pgsql libs)
-		        AC_MSG_RESULT(skipped)
-		else
-			AC_MSG_CHECKING(for pgsql libs in $PGSQL_LIBS)
-			# Manual detection for <withval>
-			if test -f $PGSQL_LIBS/libpq.a -o -f $PGSQL_LIBS/libpq.so; then
-				PGSQL_LIBDIR=$PGSQL_LIBS
-			fi
-		fi
+    if test -z "$PGSQL_INCDIR" ; then
+        PGSQL_HEADERS="no"
+        AC_MSG_RESULT(not found)
+        echo "Invalid PostgreSQL directory - unable to find libpq-fe.h."
+    else
+        AC_MSG_RESULT(yes [$PGSQL_INCDIR])
+        PGSQL_HEADERS="yes"
+    fi
 
 
-		if test -z "$PGSQL_LIBDIR" ; then
-			AC_MSG_RESULT(not found)
-			echo "Invalid PostgreSQL directory [$PGSQL_LIBDIR] - unable to find libpq.a or libpq.so."
-		else
-			#LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
-			saved_CFLAGS=$CFLAGS
-			saved_LIBS=$LIBS
-			CFLAGS="-I$PGSQL_INCDIR"
-			LIBS="-L$PGSQL_LIBDIR"
-			AC_CHECK_LIB(pq, PQconnectStart, [
-						PGSQL_SUPPORT="yes"
-						TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
-						TEMP_CFLAGS="$TEMP_CFLAGS -I$PGSQL_INCDIR"
-						AC_DEFINE([HAVE_PGSQL],1,[Define to 1 if you have PostgreSQL support])
-					],
-			AC_MSG_ERROR(PostgreSQL support can't build without PostgreSQL libraries))
-			LDFLAGS=""
-			CFLAGS=$saved_CFLAGS
-			LIBS=$saved_LIBS
-		fi
+    if test "${PGSQL_HEADERS}" = "yes"; then
 
-	fi # end pgsql-include , pgsql-libs
+        # ******* Search pgsql libs *********
+        if test "${PGSQL_LIBS}" = "yes"; then
+            AC_MSG_CHECKING(autodect pgsql libs)
+            # Autodetect
+            PGSQL_INCLUDE="-I$PGSQL_INCDIR"
+            PGSQL_LIBDIR=$PGSQL_DIR/lib
+
+            if test -f /usr/lib64/libpq.so ; then
+                PGSQL_LIBDIR=/usr/lib64
+            elif test -f $PGSQL_DIR/lib/pgsql/libpq.so ; then
+                PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql
+            elif test -f $PGSQL_DIR/lib/postgresql/libpq.so ; then
+                PGSQL_LIBDIR=$PGSQL_DIR/lib/postgresql
+            elif test -f $PGSQL_DIR/lib/libpq.so ; then
+                PGSQL_LIBDIR=$PGSQL_DIR/lib
+            else
+                PGSQL_LIBDIR=""
+            fi
+
+            AC_MSG_RESULT($PGSQL_LIBDIR)
+
+        elif test "${PGSQL_LIBS}" = "no"; then
+            AC_MSG_CHECKING(for pgsql libs)
+                AC_MSG_RESULT(skipped)
+        else
+            AC_MSG_CHECKING(for pgsql libs in $PGSQL_LIBS)
+            # Manual detection for <withval>
+            if test -f $PGSQL_LIBS/libpq.a -o -f $PGSQL_LIBS/libpq.so; then
+                PGSQL_LIBDIR=$PGSQL_LIBS
+            fi
+        fi
+
+
+        if test -z "$PGSQL_LIBDIR" ; then
+            AC_MSG_RESULT(not found)
+            echo "Invalid PostgreSQL directory [$PGSQL_LIBDIR] - unable to find libpq.a or libpq.so."
+        else
+            #LDFLAGS="$TEMP_LDFLAGS -L$PGSQL_LIBDIR"
+            saved_CFLAGS=$CFLAGS
+            saved_LIBS=$LIBS
+            CFLAGS="-I$PGSQL_INCDIR"
+            LIBS="-L$PGSQL_LIBDIR"
+            AC_CHECK_LIB(pq, PQconnectStart, [
+                        PGSQL_SUPPORT="yes"
+                        TEMP_LIBS="$TEMP_LIBS -L$PGSQL_LIBDIR -lpq"
+                        TEMP_CFLAGS="$TEMP_CFLAGS -I$PGSQL_INCDIR"
+                        AC_DEFINE([HAVE_PGSQL],1,[Define to 1 if you have PostgreSQL support])
+                    ],
+            AC_MSG_ERROR(PostgreSQL support can't build without PostgreSQL libraries))
+            LDFLAGS=""
+            CFLAGS=$saved_CFLAGS
+            LIBS=$saved_LIBS
+        fi
+
+    fi # end pgsql-include , pgsql-libs
 
 # end PostgreSQL detection
 fi
@@ -758,7 +758,7 @@ AC_ARG_WITH(optimizecpu,
 [  --without-optimizecpu   Exclude autodetecting platform and cpu type.
                           This will disable the compilation of gcc
                           optimizing code by platform and cpu.
-			  ],
+              ],
 OPTIMIZECPU="$withval"
 )
 
@@ -775,7 +775,7 @@ DEVELOPER_FLAGS="$withval"
 AC_C_CONST
 
 if test "${DISTRO}" != "Linux"; then
-	OPTIMIZECPU=""
+    OPTIMIZECPU=""
 fi
 
 if test "${OPTIMIZECPU}" = "yes"; then
@@ -790,198 +790,198 @@ if test -e "/proc/device-tree/model"; then
     if test "x${RPI3}" != "x"; then
         CPU_NAME="Raspberry Pi 3"
         CPU_TYPE="Raspberry Pi 3"
-	CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+    CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
     fi
 fi
 
 if test "x${CPU_TYPE}" = "xunknown" && test -e "/proc/cpuinfo" ; then
-	intel[[30]]="-march=i386"
-	intel[[32]]="-march=i386"
-	intel[[34]]="-march=i386"
-	intel[[40]]="-march=i486"
-	intel[[41]]="-march=i486"
-	intel[[42]]="-march=i486"
-	intel[[43]]="-march=i486"
-	intel[[44]]="-march=i486"
-	intel[[45]]="-march=i486"
-	intel[[47]]="-march=i486"
-	intel[[48]]="-march=i486"
-	intel[[51]]="-march=pentium"
-	intel[[52]]="-march=pentium"
-	intel[[54]]="-march=pentium-mmx"
-	intel[[56]]="-march=pentium-mmx"
-	intel[[61]]="-march=pentiumpro"
-	intel[[63]]="-march=pentium2"
-	intel[[65]]="-march=pentium2"
-	intel[[66]]="-march=pentium2"
-	intel[[67]]="-march=pentium3"
-	intel[[68]]="-march=pentium3"
-	intel[[610]]="-march=pentium3"
-	intel[[611]]="-march=pentium3"
-	intel[[150]]="-march=pentium4"
-	intel[[151]]="-march=pentium4"
-	intel[[152]]="-march=pentium4"
-	intel[[154]]="-march=pentium4"
-	intel[[614]]="-march=prescott"
-	intel[[628]]="-march=core2"
-	amd[[50]]="-march=i586"
-	amd[[51]]="-march=i586"
-	amd[[52]]="-march=i586"
-	amd[[53]]="-march=i586"
-	amd[[56]]="-march=k6"
-	amd[[57]]="-march=k6"
-	amd[[58]]="-march=k6-2"
-	amd[[510]]="-march=k6-2"
-	amd[[59]]="-march=k6-3"
-	amd[[513]]="-march=k6-3"
-	amd[[61]]="-march=athlon"
-	amd[[62]]="-march=athlon"
-	amd[[63]]="-march=athlon"
-	amd[[64]]="-march=athlon"
-	amd[[66]]="-march=athlon"
-	amd[[67]]="-march=athlon"
-	amd[[68]]="-march=athlon"
-	amd[[610]]="-march=athlon"
-	amd[[158]]="-march=athlon-xp"
-	amd[[154]]="-march=k8"
-	amd[[155]]="-march=athlon64"
-	amd[[1543]]="-march=athlon64"
-	amd[[1544]]="-march=athlon64"
-	amd[[1565]]="-march=opteron"
-	amd[[1572]]="-march=k8"
-	via[[67]]="-march=c3"
-	via[[68]]="-march=c3"
-	via[[69]]="-march=i686"
-	via[[610]]="-march=i686"
+    intel[[30]]="-march=i386"
+    intel[[32]]="-march=i386"
+    intel[[34]]="-march=i386"
+    intel[[40]]="-march=i486"
+    intel[[41]]="-march=i486"
+    intel[[42]]="-march=i486"
+    intel[[43]]="-march=i486"
+    intel[[44]]="-march=i486"
+    intel[[45]]="-march=i486"
+    intel[[47]]="-march=i486"
+    intel[[48]]="-march=i486"
+    intel[[51]]="-march=pentium"
+    intel[[52]]="-march=pentium"
+    intel[[54]]="-march=pentium-mmx"
+    intel[[56]]="-march=pentium-mmx"
+    intel[[61]]="-march=pentiumpro"
+    intel[[63]]="-march=pentium2"
+    intel[[65]]="-march=pentium2"
+    intel[[66]]="-march=pentium2"
+    intel[[67]]="-march=pentium3"
+    intel[[68]]="-march=pentium3"
+    intel[[610]]="-march=pentium3"
+    intel[[611]]="-march=pentium3"
+    intel[[150]]="-march=pentium4"
+    intel[[151]]="-march=pentium4"
+    intel[[152]]="-march=pentium4"
+    intel[[154]]="-march=pentium4"
+    intel[[614]]="-march=prescott"
+    intel[[628]]="-march=core2"
+    amd[[50]]="-march=i586"
+    amd[[51]]="-march=i586"
+    amd[[52]]="-march=i586"
+    amd[[53]]="-march=i586"
+    amd[[56]]="-march=k6"
+    amd[[57]]="-march=k6"
+    amd[[58]]="-march=k6-2"
+    amd[[510]]="-march=k6-2"
+    amd[[59]]="-march=k6-3"
+    amd[[513]]="-march=k6-3"
+    amd[[61]]="-march=athlon"
+    amd[[62]]="-march=athlon"
+    amd[[63]]="-march=athlon"
+    amd[[64]]="-march=athlon"
+    amd[[66]]="-march=athlon"
+    amd[[67]]="-march=athlon"
+    amd[[68]]="-march=athlon"
+    amd[[610]]="-march=athlon"
+    amd[[158]]="-march=athlon-xp"
+    amd[[154]]="-march=k8"
+    amd[[155]]="-march=athlon64"
+    amd[[1543]]="-march=athlon64"
+    amd[[1544]]="-march=athlon64"
+    amd[[1565]]="-march=opteron"
+    amd[[1572]]="-march=k8"
+    via[[67]]="-march=c3"
+    via[[68]]="-march=c3"
+    via[[69]]="-march=i686"
+    via[[610]]="-march=i686"
 
-	CPU_TYPE="known"
-	CPU_FAMILY=`cat /proc/cpuinfo | grep "cpu family" | head -n1`
-	CPU_MODEL=`cat /proc/cpuinfo | grep model[[^\ ]] | head -n1`
-	CPU_NAME=`cat /proc/cpuinfo | grep "model name" | head -n1`
-	CPU_FLAGS=`cat /proc/cpuinfo | grep "flags" | head -n1`
-	CPU_VENDOR=`cat /proc/cpuinfo | grep "vendor_id" | head -n1`
-	CPU_FAMILY=${CPU_FAMILY#*: }
-	CPU_MODEL=${CPU_MODEL#*: }
-	CPU_NAME=${CPU_NAME#*: }
-	CPU_FLAGS=${CPU_FLAGS#*: }
-	CPU_VENDOR=${CPU_VENDOR#*: }
-	if test "x${CPU_VENDOR}" = "xGenuineIntel" ; then
-		CPU_OPTIONS=${intel[[$CPU_FAMILY$CPU_MODEL]]}
-	fi
-	if test "x${CPU_VENDOR}" = "xAuthenticAMD" ; then
-		CPU_OPTIONS=${amd[[$CPU_FAMILY$CPU_MODEL]]}
-	fi
-	if test "x${CPU_VENDOR}" = "xCentaurHauls"; then
-		CPU_OPTIONS=${via[[$CPU_FAMILY$CPU_MODEL]]}
-	fi
-	if test "x${CPU_OPTIONS}" = "x" ; then
-		CPU_TYPE="unknown"
-	fi
-	CPU_EXT=""
-	for i in $CPU_FLAGS ; do
-		case $i in
-		fpu)
-			CPU_FPU="-mfpmath=387"
-			;;
-		mmx)
-			CPU_EXT="$CPU_EXT -mmmx"
-			;;
-		sse)
-			CPU_FPU="-mfpmath=sse -msse"
-			;;
-		sse2)
-			CPU_FPU="-mfpmath=sse -msse2"
-			;;
-		sse3)
-			CPU_FPU="-msse3"
-			;;
-		ssse3)
-			CPU_FPU="-mfpmath=sse -msse2 -mssse3"
-			;;
-		3dnow)
-			CPU_EXT="$CPU_EXT -m3dnow"
-			;;
-		esac
-	done
-	CPU_OPTIONS="$CPU_OPTIONS $CPU_FPU $CPU_EXT"
+    CPU_TYPE="known"
+    CPU_FAMILY=`cat /proc/cpuinfo | grep "cpu family" | head -n1`
+    CPU_MODEL=`cat /proc/cpuinfo | grep model[[^\ ]] | head -n1`
+    CPU_NAME=`cat /proc/cpuinfo | grep "model name" | head -n1`
+    CPU_FLAGS=`cat /proc/cpuinfo | grep "flags" | head -n1`
+    CPU_VENDOR=`cat /proc/cpuinfo | grep "vendor_id" | head -n1`
+    CPU_FAMILY=${CPU_FAMILY#*: }
+    CPU_MODEL=${CPU_MODEL#*: }
+    CPU_NAME=${CPU_NAME#*: }
+    CPU_FLAGS=${CPU_FLAGS#*: }
+    CPU_VENDOR=${CPU_VENDOR#*: }
+    if test "x${CPU_VENDOR}" = "xGenuineIntel" ; then
+        CPU_OPTIONS=${intel[[$CPU_FAMILY$CPU_MODEL]]}
+    fi
+    if test "x${CPU_VENDOR}" = "xAuthenticAMD" ; then
+        CPU_OPTIONS=${amd[[$CPU_FAMILY$CPU_MODEL]]}
+    fi
+    if test "x${CPU_VENDOR}" = "xCentaurHauls"; then
+        CPU_OPTIONS=${via[[$CPU_FAMILY$CPU_MODEL]]}
+    fi
+    if test "x${CPU_OPTIONS}" = "x" ; then
+        CPU_TYPE="unknown"
+    fi
+    CPU_EXT=""
+    for i in $CPU_FLAGS ; do
+        case $i in
+        fpu)
+            CPU_FPU="-mfpmath=387"
+            ;;
+        mmx)
+            CPU_EXT="$CPU_EXT -mmmx"
+            ;;
+        sse)
+            CPU_FPU="-mfpmath=sse -msse"
+            ;;
+        sse2)
+            CPU_FPU="-mfpmath=sse -msse2"
+            ;;
+        sse3)
+            CPU_FPU="-msse3"
+            ;;
+        ssse3)
+            CPU_FPU="-mfpmath=sse -msse2 -mssse3"
+            ;;
+        3dnow)
+            CPU_EXT="$CPU_EXT -m3dnow"
+            ;;
+        esac
+    done
+    CPU_OPTIONS="$CPU_OPTIONS $CPU_FPU $CPU_EXT"
 fi
 if test "x${CPU_TYPE}" = "xunknown"; then
-	CPU_TYPE=`( uname -p ) 2>&1`
-	case $CPU_TYPE in
-	i386)
-		CPU_OPTIONS="-march=i386"
-		;;
-	i486)
-		CPU_OPTIONS="-march=i486"
-		;;
-	Pentium2)
-		CPU_OPTIONS="-march=pentium2"
-		;;
-	Pentiumpro)
-		CPU_OPTIONS="-march=pentiumpro"
-		;;
-	Pentium*)
-		CPU_OPTIONS="-march=pentium"
-		;;
-	k6)
-		CPU_OPTIONS="-march=k6"
-		;;
-	k6-2)
-		CPU_OPTIONS="-march=k6-2"
-		;;
-	k6-3)
-		CPU_OPTIONS="-march=k6-3"
-		;;
-	"VIA C3 Ezra")
-		CPU_OPTIONS="-march=c3"
-		CPU_TYPE="known"
+    CPU_TYPE=`( uname -p ) 2>&1`
+    case $CPU_TYPE in
+    i386)
+        CPU_OPTIONS="-march=i386"
+        ;;
+    i486)
+        CPU_OPTIONS="-march=i486"
+        ;;
+    Pentium2)
+        CPU_OPTIONS="-march=pentium2"
+        ;;
+    Pentiumpro)
+        CPU_OPTIONS="-march=pentiumpro"
+        ;;
+    Pentium*)
+        CPU_OPTIONS="-march=pentium"
+        ;;
+    k6)
+        CPU_OPTIONS="-march=k6"
+        ;;
+    k6-2)
+        CPU_OPTIONS="-march=k6-2"
+        ;;
+    k6-3)
+        CPU_OPTIONS="-march=k6-3"
+        ;;
+    "VIA C3 Ezra")
+        CPU_OPTIONS="-march=c3"
+        CPU_TYPE="known"
                ;;
-	*)
-		CPU_OPTIONS=""
-		CPU_TYPE="unknown"
-		;;
-	esac
-	if test "x${CPU_TYPE}" = "xunknown"; then
-		CPU_TYPE=`( uname -m ) 2>&1`
-		case $CPU_TYPE in
-		i386)
-			CPU_OPTIONS="-march=i386"
-			;;
-		i486)
-			CPU_OPTIONS="-march=i486"
-			;;
-		i586)
-			CPU_OPTIONS="-march=i586"
-			;;
-		i686)
-			CPU_OPTIONS="-march=i686"
-			;;
-		Pentium2)
-			CPU_OPTIONS="-march=pentium2"
-			;;
-		Pentiumpro)
-			CPU_OPTIONS="-march=pentiumpro"
-			;;
-		k6)
-			CPU_OPTIONS="-march=k6"
-			;;
-		k6-2)
-			CPU_OPTIONS="-march=k6-2"
-			;;
-		k6-3)
-			CPU_OPTIONS="-march=k6-3"
-			;;
-		*)
-			CPU_OPTIONS="-march=native -mtune=native"
-			;;
-		esac
-	fi
+    *)
+        CPU_OPTIONS=""
+        CPU_TYPE="unknown"
+        ;;
+    esac
+    if test "x${CPU_TYPE}" = "xunknown"; then
+        CPU_TYPE=`( uname -m ) 2>&1`
+        case $CPU_TYPE in
+        i386)
+            CPU_OPTIONS="-march=i386"
+            ;;
+        i486)
+            CPU_OPTIONS="-march=i486"
+            ;;
+        i586)
+            CPU_OPTIONS="-march=i586"
+            ;;
+        i686)
+            CPU_OPTIONS="-march=i686"
+            ;;
+        Pentium2)
+            CPU_OPTIONS="-march=pentium2"
+            ;;
+        Pentiumpro)
+            CPU_OPTIONS="-march=pentiumpro"
+            ;;
+        k6)
+            CPU_OPTIONS="-march=k6"
+            ;;
+        k6-2)
+            CPU_OPTIONS="-march=k6-2"
+            ;;
+        k6-3)
+            CPU_OPTIONS="-march=k6-3"
+            ;;
+        *)
+            CPU_OPTIONS="-march=native -mtune=native"
+            ;;
+        esac
+    fi
 fi
 echo "Detected CPU: $CPU_NAME"
 # Now we check if the compiler supports the detected cpu
 COMPILER=$CC
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
-	test "$I" && break
+    test "$I" && break
 done
 TMPC="$I/cpu_test-$RANDOM-$$.c"
 TMPO="$I/cpu_test-$RANDOM-$$.o"
@@ -995,19 +995,19 @@ rm -f $TMPC
 
 
 if test "x${TMP}" = "x0" ; then
-	echo "CPU optimization: $CPU_OPTIONS"
+    echo "CPU optimization: $CPU_OPTIONS"
 else
-	CPU_OPTIONS=""
-	echo "No CPU optimizations will be added"
+    CPU_OPTIONS=""
+    echo "No CPU optimizations will be added"
 fi
 
 else
-	CPU_OPTIONS=""
+    CPU_OPTIONS=""
 fi
 
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
-	TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
 fi
 
 CFLAGS="${TEMP_CFLAGS} $UNAME_DEFS  $CPU_OPTIONS"
@@ -1020,18 +1020,18 @@ LDFLAGS="${TEMP_LDFLAGS}"
 # Add the right exec path for rc scripts
 #
 if test $prefix = "NONE";then
-	BIN_PATH="$ac_default_prefix"
-	if test $exec_prefix = "NONE"; then
-		BIN_PATH="$BIN_PATH/bin"
-	else
-		BIN_PATH="$BIN_PATH/$bindir"
-	fi
+    BIN_PATH="$ac_default_prefix"
+    if test $exec_prefix = "NONE"; then
+        BIN_PATH="$BIN_PATH/bin"
+    else
+        BIN_PATH="$BIN_PATH/$bindir"
+    fi
 else
-	if test $exec_prefix = "NONE";then
-		BIN_PATH="$prefix/bin"
-	else
-		BIN_PATH="$prefix/$bindir"
-	fi
+    if test $exec_prefix = "NONE";then
+        BIN_PATH="$prefix/bin"
+    else
+        BIN_PATH="$prefix/$bindir"
+    fi
 fi
 
 AC_SUBST(BIN_PATH)

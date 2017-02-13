@@ -5,7 +5,7 @@
  *      Portions of this file are Copyright by Lionnel Maugis
  *      This software is distributed under the GNU public license version 2
  *      See also the file 'COPYING'.
- *      
+ *
  */
 #ifndef _INCLUDE_PICTURE_H_
 #define _INCLUDE_PICTURE_H_
