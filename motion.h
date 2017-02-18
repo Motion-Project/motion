@@ -14,7 +14,7 @@
 
 /* Includes */
 #ifdef HAVE_MYSQL
-#include <mysql.h>
+#include <mysql/mysql.h>
 #endif
 
 #ifdef HAVE_SQLITE3
@@ -22,7 +22,7 @@
 #endif
 
 #ifdef HAVE_PGSQL
-#include <libpq-fe.h>
+#include <postgresql/libpq-fe.h>
 #endif
 
 
