@@ -1117,19 +1117,18 @@ static int motion_init(struct context *cnt)
 
     /* Prevent first few frames from triggering motion... */
     cnt->moved = 8;
-    /* 2 sec startup delay so FPS is calculated correct */
-    cnt->startup_frames = cnt->conf.frame_limit * 2;
-
     /* Initialize the double sized characters if needed. */
     if (cnt->conf.text_double)
         cnt->text_size_factor = 2;
     else
         cnt->text_size_factor = 1;
 
-
     /* Work out expected frame rate based on config setting */
     if (cnt->conf.frame_limit < 2)
         cnt->conf.frame_limit = 2;
+
+    /* 2 sec startup delay so FPS is calculated correct */
+    cnt->startup_frames = (cnt->conf.frame_limit * 2) + cnt->conf.pre_capture + cnt->conf.minimum_motion_frames;
 
     cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
 
@@ -2829,7 +2828,7 @@ int main (int argc, char **argv)
 
     motion_startup(1, argc, argv);
 
-    ffmpeg_init();
+    ffmpeg_global_init();
 
 #ifdef HAVE_MYSQL
     if (mysql_library_init(0, NULL, NULL)) {
@@ -3051,7 +3050,7 @@ int main (int argc, char **argv)
 
     } while (restart); /* loop if we're supposed to restart */
 
-    ffmpeg_finalise();
+    ffmpeg_global_deinit();
 
     // Be sure that http control exits fine
     cnt_list[0]->webcontrol_finish = 1;
