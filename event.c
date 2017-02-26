@@ -569,7 +569,7 @@ static void event_extpipe_put(struct context *cnt,
                            ferror(cnt->extpipe));
         } else {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: pipe %s not created or closed already ",
-                       cnt->extpipe);
+                       cnt->conf.extpipe);
         }
     }
 }
