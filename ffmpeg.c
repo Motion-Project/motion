@@ -892,7 +892,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct t
             ffmpeg->picture->key_frame = 1;
             ffmpeg->gop_cnt = 0;
         } else {
-            ffmpeg->picture->pict_type = AV_PICTURE_TYPE_NONE;
+            ffmpeg->picture->pict_type = AV_PICTURE_TYPE_P;
             ffmpeg->picture->key_frame = 0;
         }
 
