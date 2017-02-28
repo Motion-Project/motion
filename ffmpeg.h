@@ -51,6 +51,8 @@ struct ffmpeg {
     int vbr;
     const char *codec_name;
     int64_t last_pts;
+    int test_mode;
+    int gop_cnt;
     struct timeval start_time;
 };
 

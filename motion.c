@@ -1196,6 +1196,10 @@ static int motion_init(struct context *cnt)
     cnt->passflag = 0;  //only purpose to flag first frame
     cnt->rolling_frame = 0;
 
+    if (cnt->conf.emulate_motion) {
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
+    }
+
     return 0;
 }
 
@@ -1960,7 +1964,6 @@ static void mlp_actions(struct context *cnt){
      */
     if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
         cnt->detecting_motion = 1;
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Emulating motion");
         if (cnt->conf.post_capture > 0) {
             /* Setup the postcap counter */
             cnt->postcap = cnt->conf.post_capture;

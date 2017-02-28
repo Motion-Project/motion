@@ -334,13 +334,13 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     retcd = avcodec_send_frame(ffmpeg->ctx_codec, ffmpeg->picture);
     if (retcd < 0 ){
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error encoding video:%s",errstr);
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error sending frame for encoding:%s",errstr);
         return -1;
     }
     retcd = avcodec_receive_packet(ffmpeg->ctx_codec, &ffmpeg->pkt);
     if (retcd < 0 ){
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error encoding video:%s",errstr);
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error receiving encoded packet video:%s",errstr);
         //Packet is freed upon failure of encoding
         return -1;
     }
@@ -349,6 +349,10 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         my_packet_unref(ffmpeg->pkt);
         return -2;
     }
+
+    if (ffmpeg->picture->key_frame == 1)
+      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
+
     return 0;
 
 #elif (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
@@ -369,6 +373,10 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         my_packet_unref(ffmpeg->pkt);
         return -2;
     }
+
+    if (ffmpeg->picture->key_frame == 1)
+      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
+
     return 0;
 
 #else
@@ -395,6 +403,9 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     ffmpeg->pkt.size = retcd;
     ffmpeg->pkt.data = video_outbuf;
 
+    if (ffmpeg->picture->key_frame == 1)
+      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
+
     free(video_outbuf);
 
     return 0;
@@ -407,23 +418,34 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     int64_t pts_interval;
 
-    pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
-    if (pts_interval < 0){
-        /* This can occur when we have pre-capture frames.  Reset start time of video. */
-        ffmpeg->start_time.tv_sec = tv1->tv_sec ;
-        ffmpeg->start_time.tv_usec = tv1->tv_usec ;
-        pts_interval = 1;
+    if (ffmpeg->tlapse != TIMELAPSE_NONE) {
+        ffmpeg->last_pts++;
+        ffmpeg->pkt.pts = ffmpeg->last_pts;
+        ffmpeg->pkt.dts = ffmpeg->last_pts;
+    } else {
+        pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
+        if (pts_interval < 0){
+            /* This can occur when we have pre-capture frames.  Reset start time of video. */
+            ffmpeg->start_time.tv_sec = tv1->tv_sec ;
+            ffmpeg->start_time.tv_usec = tv1->tv_usec ;
+            pts_interval = 1;
+        }
+        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base)  + 1;
+
+        if (ffmpeg->test_mode == 1){
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: ms interval %d PTS %d timebase %d-%d",pts_interval,ffmpeg->pkt.pts,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
+        }
+
+        if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
+            //We have a problem with our motion loop timing and sending frames.  Increment by just 1 to at least keep frame in movie.
+            ffmpeg->pkt.pts = ffmpeg->last_pts + 1;
+            if (ffmpeg->test_mode == 1){
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: BAD TIMING!! PTS reset to incremental counter new PTS %d ",ffmpeg->pkt.pts);
+            }
+        }
+        ffmpeg->pkt.dts = ffmpeg->pkt.pts;
+        ffmpeg->last_pts = ffmpeg->pkt.pts;
     }
-    ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base);
-
-    //MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Interval %d PTS %d timebase %d-%d",pts_interval,ffmpeg->pkt.pts,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
-
-    if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
-        //We have a problem with our motion loop timing and sending frames.  Increment by just 1 to at least keep frame in movie.
-        ffmpeg->pkt.pts = ffmpeg->last_pts + 1;
-    }
-    ffmpeg->pkt.dts = ffmpeg->pkt.pts;
-
     return 0;
 }
 
@@ -474,7 +496,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
     ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL);
     if (!ffmpeg->video_st) {
-        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Could not alloc stream");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not alloc stream");
         ffmpeg_free_context(ffmpeg);
         return -1;
     }
@@ -487,12 +509,41 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
 #else
     ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, ffmpeg->codec);
     if (!ffmpeg->video_st) {
-        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Could not alloc stream");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not alloc stream");
         ffmpeg_free_context(ffmpeg);
         return -1;
     }
     ffmpeg->ctx_codec = ffmpeg->video_st->codec;
 #endif
+
+
+    if (ffmpeg->tlapse != TIMELAPSE_NONE) {
+        ffmpeg->ctx_codec->gop_size = 1;
+    } else {
+        if (ffmpeg->fps <= 5){
+            ffmpeg->ctx_codec->gop_size = 1;
+        } else if (ffmpeg->fps > 30){
+            ffmpeg->ctx_codec->gop_size = 15;
+        } else {
+            ffmpeg->ctx_codec->gop_size = (ffmpeg->fps / 2);
+        }
+    }
+
+    /*  For certain containers, setting the fps to very low numbers results in
+    **  a very poor quality playback.  We can set the FPS to a higher number and
+    **  then let the PTS display the frames correctly.
+    */
+    if ((ffmpeg->tlapse == TIMELAPSE_NONE) && (ffmpeg->fps <= 5)){
+        if ((strcmp(ffmpeg->codec_name, "msmpeg4") == 0) ||
+            (strcmp(ffmpeg->codec_name, "flv")     == 0) ||
+            (strcmp(ffmpeg->codec_name, "mov") == 0) ||
+            (strcmp(ffmpeg->codec_name, "mp4") == 0) ||
+            (strcmp(ffmpeg->codec_name, "hevc") == 0) ||
+            (strcmp(ffmpeg->codec_name, "mpeg4")   == 0)) {
+            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: Low fps. Encoding %d frames into a %d frames container.", ffmpeg->fps, 10);
+            ffmpeg->fps = 10;
+        }
+    }
 
     ffmpeg->ctx_codec->codec_id      = ffmpeg->oc->oformat->video_codec;
     ffmpeg->ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
@@ -501,7 +552,6 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     ffmpeg->ctx_codec->height        = ffmpeg->height;
     ffmpeg->ctx_codec->time_base.num = 1;
     ffmpeg->ctx_codec->time_base.den = ffmpeg->fps;
-    ffmpeg->ctx_codec->gop_size      = 12;
     ffmpeg->ctx_codec->pix_fmt       = MY_PIX_FMT_YUV420P;
     ffmpeg->ctx_codec->max_b_frames  = 0;
     if (strcmp(ffmpeg->codec_name, "ffv1") == 0){
@@ -512,7 +562,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
 
     retcd = ffmpeg_set_quality(ffmpeg);
     if (retcd < 0){
-        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Unable to set quality");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Unable to set quality");
         return -1;
     }
 
@@ -560,31 +610,7 @@ static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
     }
 #endif
 
-    /*  We try to set the time base for the stream to a number different than the fps/rate.
-    **  A higher fps is better for setting the PTS to avoid dropping frames
-    **  For any of the timelapse options, we don't use the PTS.
-    */
-
-    if (ffmpeg->tlapse != TIMELAPSE_NONE){
-        ffmpeg->video_st->time_base = (AVRational){1, ffmpeg->fps};
-    } else {
-        ffmpeg->video_st->time_base = (AVRational){1, (ffmpeg->fps)};
-        if ((strcmp(ffmpeg->codec_name, "msmpeg4") == 0) ||
-            (strcmp(ffmpeg->codec_name, "mpeg4") == 0)) {
-            ffmpeg->video_st->time_base = (AVRational){1, (ffmpeg->fps*10)};
-        }
-        if ((strcmp(ffmpeg->codec_name, "swf") == 0) ||
-            (strcmp(ffmpeg->codec_name, "ffv1") == 0)) {
-            ffmpeg->video_st->time_base = (AVRational){1, (ffmpeg->fps)};
-        }
-        if ((strcmp(ffmpeg->codec_name, "mkv") == 0) ||
-            (strcmp(ffmpeg->codec_name, "mp4") == 0) ||
-            (strcmp(ffmpeg->codec_name, "flv") == 0) ||
-            (strcmp(ffmpeg->codec_name, "hevc") == 0) ||
-            (strcmp(ffmpeg->codec_name, "mov") == 0)) {
-            ffmpeg->video_st->time_base = (AVRational){1, 1000};
-        }
-    }
+    ffmpeg->video_st->time_base = (AVRational){1, ffmpeg->fps};
 
     return 0;
 
@@ -680,18 +706,16 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     retcd = ffmpeg_encode_video(ffmpeg);
     if (retcd != 0) return retcd;
 
+    retcd = ffmpeg_set_pts(ffmpeg, tv1);
+    if (retcd < 0) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error while setting PTS");
+        return -1;
+    }
+
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
         retcd = ffmpeg_timelapse_append(ffmpeg, ffmpeg->pkt);
-    } else if (ffmpeg->tlapse == TIMELAPSE_NEW) {
-        retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
     } else {
-        retcd = ffmpeg_set_pts(ffmpeg, tv1);
-        if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error while setting PTS");
-            return -1;
-        }
         retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
-        ffmpeg->last_pts = ffmpeg->pkt.pts;
     }
     my_packet_unref(ffmpeg->pkt);
 
@@ -779,7 +803,7 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 
     ffmpeg->oc = avformat_alloc_context();
     if (!ffmpeg->oc) {
-        MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO, "%s: Could not allocate output context");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Could not allocate output context");
         ffmpeg_free_context(ffmpeg);
         return -1;
     }
@@ -861,6 +885,16 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct t
         ffmpeg->picture->data[0] = image;
         ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
         ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
+
+        ffmpeg->gop_cnt ++;
+        if (ffmpeg->gop_cnt == ffmpeg->ctx_codec->gop_size ){
+            ffmpeg->picture->pict_type = AV_PICTURE_TYPE_I;
+            ffmpeg->picture->key_frame = 1;
+            ffmpeg->gop_cnt = 0;
+        } else {
+            ffmpeg->picture->pict_type = AV_PICTURE_TYPE_NONE;
+            ffmpeg->picture->key_frame = 0;
+        }
 
         /* A return code of -2 is thrown by the put_frame
          * when a image is buffered.  For timelapse, we absolutely

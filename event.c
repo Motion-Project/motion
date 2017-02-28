@@ -691,7 +691,13 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_output->last_pts = 0;
+        cnt->ffmpeg_output->gop_cnt = 0;
         cnt->ffmpeg_output->codec_name = codec;
+        if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
+            cnt->ffmpeg_output->test_mode = 1;
+        } else {
+            cnt->ffmpeg_output->test_mode = 0;
+        }
 
         retcd = ffmpeg_open(cnt->ffmpeg_output);
         if (retcd < 0){
@@ -715,7 +721,13 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_output_debug->last_pts = 0;
+        cnt->ffmpeg_output_debug->gop_cnt = 0;
         cnt->ffmpeg_output_debug->codec_name = codec;
+        if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
+            cnt->ffmpeg_output_debug->test_mode = 1;
+        } else {
+            cnt->ffmpeg_output_debug->test_mode = 0;
+        }
 
         retcd = ffmpeg_open(cnt->ffmpeg_output_debug);
         if (retcd < 0){
@@ -764,7 +776,8 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         cnt->ffmpeg_timelapse->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_timelapse->last_pts = 0;
-
+        cnt->ffmpeg_timelapse->test_mode = 0;
+        cnt->ffmpeg_timelapse->gop_cnt = 0;
 
         if ((strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) ||
             (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) ){
@@ -798,8 +811,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     }
 
     if (ffmpeg_put_image(cnt->ffmpeg_timelapse, img, currenttime_tv) == -1) {
-        cnt->finish = 1;
-        cnt->restart = 0;
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: Error encoding image");
     }
 
 }
@@ -811,15 +823,13 @@ static void event_ffmpeg_put(struct context *cnt,
 {
     if (cnt->ffmpeg_output) {
         if (ffmpeg_put_image(cnt->ffmpeg_output, img, currenttime_tv) == -1) {
-            cnt->finish = 1;
-            cnt->restart = 0;
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: Error encoding image");
         }
     }
 
     if (cnt->ffmpeg_output_debug) {
         if (ffmpeg_put_image(cnt->ffmpeg_output_debug, cnt->imgs.out, currenttime_tv) == -1) {
-            cnt->finish = 1;
-            cnt->restart = 0;
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: Error encoding image");
         }
     }
 }
