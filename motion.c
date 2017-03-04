@@ -720,19 +720,20 @@ static int init_camera_type(struct context *cnt){
         return 0;
     }
 
-#ifdef HAVE_V4L2
-    if (strncmp(cnt->conf.video_device,"/dev/video",10) == 0) {
-        cnt->camera_type = CAMERA_TYPE_V4L2;
-        return 0;
-    }
-#endif // HAVE_V4L2
-
 #ifdef HAVE_BKTR
     if (strncmp(cnt->conf.video_device,"/dev/bktr",9) == 0) {
         cnt->camera_type = CAMERA_TYPE_BKTR;
         return 0;
     }
 #endif // HAVE_BKTR
+
+#ifdef HAVE_V4L2
+    if (cnt->conf.video_device) {
+        cnt->camera_type = CAMERA_TYPE_V4L2;
+        return 0;
+    }
+#endif // HAVE_V4L2
+
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)");
     return -1;
