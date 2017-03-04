@@ -587,21 +587,22 @@ static void event_new_video(struct context *cnt,
     MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s Source FPS %d", cnt->movie_fps);
 
     if (cnt->movie_fps < 2) cnt->movie_fps = 2;
+
 }
 
 
 static void event_ffmpeg_newfile(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
-            unsigned char *img, char *dummy1 ATTRIBUTE_UNUSED,
-            void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
+            unsigned char *dummy0 ATTRIBUTE_UNUSED,
+            char *dummy1 ATTRIBUTE_UNUSED,
+            void *dummy2 ATTRIBUTE_UNUSED,
+            struct timeval *currenttime_tv)
 {
-    int width = cnt->imgs.width;
-    int height = cnt->imgs.height;
-    unsigned char *convbuf, *y, *u, *v;
     char stamp[PATH_MAX];
     const char *moviepath;
     const char *codec;
     long codenbr;
+    int retcd;
 
     if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug)
         return;
@@ -679,43 +680,62 @@ static void event_ffmpeg_newfile(struct context *cnt,
     }
     if (cnt->conf.ffmpeg_output) {
 
-        convbuf = NULL;
-        y = img;
-        u = img + width * height;
-        v = u + (width * height) / 4;
-
-        if ((cnt->ffmpeg_output =
-            ffmpeg_open(codec, cnt->newfilename, y, u, v,
-                         cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                         cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE, currenttime_tv)) == NULL) {
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (new) file [%s]",
-                       cnt->newfilename);
-            cnt->finish = 1;
-            return;
+        cnt->ffmpeg_output = mymalloc(sizeof(struct ffmpeg));
+        cnt->ffmpeg_output->width  = cnt->imgs.width;
+        cnt->ffmpeg_output->height = cnt->imgs.height;
+        cnt->ffmpeg_output->tlapse = TIMELAPSE_NONE;
+        cnt->ffmpeg_output->fps = cnt->movie_fps;
+        cnt->ffmpeg_output->bps = cnt->conf.ffmpeg_bps;
+        cnt->ffmpeg_output->filename = cnt->newfilename;
+        cnt->ffmpeg_output->vbr = cnt->conf.ffmpeg_vbr;
+        cnt->ffmpeg_output->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->ffmpeg_output->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->ffmpeg_output->last_pts = 0;
+        cnt->ffmpeg_output->gop_cnt = 0;
+        cnt->ffmpeg_output->codec_name = codec;
+        if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
+            cnt->ffmpeg_output->test_mode = 1;
+        } else {
+            cnt->ffmpeg_output->test_mode = 0;
         }
 
-        ((struct ffmpeg *)cnt->ffmpeg_output)->udata = convbuf;
+        retcd = ffmpeg_open(cnt->ffmpeg_output);
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: ffopen_open error creating (new) file [%s]",cnt->newfilename);
+            free(cnt->ffmpeg_output);
+            cnt->ffmpeg_output=NULL;
+            return;
+        }
         event(cnt, EVENT_FILECREATE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
     }
 
     if (cnt->conf.ffmpeg_output_debug) {
-        y = cnt->imgs.out;
-        u = cnt->imgs.out + width *height;
-        v = u + (width * height) / 4;
-        convbuf = NULL;
-
-        if ((cnt->ffmpeg_output_debug =
-            ffmpeg_open(codec, cnt->motionfilename, y, u, v,
-                        cnt->imgs.width, cnt->imgs.height, cnt->movie_fps, cnt->conf.ffmpeg_bps,
-                        cnt->conf.ffmpeg_vbr,TIMELAPSE_NONE,currenttime_tv)) == NULL) {
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating (motion) file [%s]",
-                       cnt->motionfilename);
-            cnt->finish = 1;
-            return;
+        cnt->ffmpeg_output_debug = mymalloc(sizeof(struct ffmpeg));
+        cnt->ffmpeg_output_debug->width  = cnt->imgs.width;
+        cnt->ffmpeg_output_debug->height = cnt->imgs.height;
+        cnt->ffmpeg_output_debug->tlapse = TIMELAPSE_NONE;
+        cnt->ffmpeg_output_debug->fps = cnt->movie_fps;
+        cnt->ffmpeg_output_debug->bps = cnt->conf.ffmpeg_bps;
+        cnt->ffmpeg_output_debug->filename = cnt->newfilename;
+        cnt->ffmpeg_output_debug->vbr = cnt->conf.ffmpeg_vbr;
+        cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->ffmpeg_output_debug->last_pts = 0;
+        cnt->ffmpeg_output_debug->gop_cnt = 0;
+        cnt->ffmpeg_output_debug->codec_name = codec;
+        if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
+            cnt->ffmpeg_output_debug->test_mode = 1;
+        } else {
+            cnt->ffmpeg_output_debug->test_mode = 0;
         }
 
-        cnt->ffmpeg_output_debug->udata = convbuf;
-        event(cnt, EVENT_FILECREATE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, NULL);
+        retcd = ffmpeg_open(cnt->ffmpeg_output_debug);
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: ffopen_open error creating (motion) file [%s]", cnt->motionfilename);
+            free(cnt->ffmpeg_output_debug);
+            cnt->ffmpeg_output_debug = NULL;
+            return;
+        }
     }
 }
 
@@ -724,9 +744,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             char *dummy1 ATTRIBUTE_UNUSED, void *dummy2 ATTRIBUTE_UNUSED,
             struct timeval *currenttime_tv)
 {
-    int width = cnt->imgs.width;
-    int height = cnt->imgs.height;
-    unsigned char *convbuf, *y, *u, *v;
+    int retcd;
 
     if (!cnt->ffmpeg_timelapse) {
         char tmp[PATH_MAX];
@@ -748,11 +766,18 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
         snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
 
-        convbuf = NULL;
-        y = img;
-        u = img + width * height;
-        v = u + (width * height) / 4;
-
+        cnt->ffmpeg_timelapse = mymalloc(sizeof(struct ffmpeg));
+        cnt->ffmpeg_timelapse->width  = cnt->imgs.width;
+        cnt->ffmpeg_timelapse->height = cnt->imgs.height;
+        cnt->ffmpeg_timelapse->fps = cnt->conf.frame_limit;
+        cnt->ffmpeg_timelapse->bps = cnt->conf.ffmpeg_bps;
+        cnt->ffmpeg_timelapse->filename = cnt->timelapsefilename;
+        cnt->ffmpeg_timelapse->vbr = cnt->conf.ffmpeg_vbr;
+        cnt->ffmpeg_timelapse->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->ffmpeg_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->ffmpeg_timelapse->last_pts = 0;
+        cnt->ffmpeg_timelapse->test_mode = 0;
+        cnt->ffmpeg_timelapse->gop_cnt = 0;
 
         if ((strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) ||
             (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) ){
@@ -763,37 +788,30 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpg codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be appended to file");
-            cnt->ffmpeg_timelapse =
-                ffmpeg_open(codec_mpg,cnt->timelapsefilename, y, u, v
-                        ,cnt->imgs.width, cnt->imgs.height, cnt->conf.frame_limit
-                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_APPEND,currenttime_tv);
+
+            cnt->ffmpeg_timelapse->tlapse = TIMELAPSE_APPEND;
+            cnt->ffmpeg_timelapse->codec_name = codec_mpg;
+            retcd = ffmpeg_open(cnt->ffmpeg_timelapse);
         } else {
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Timelapse using mpeg4 codec.");
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: Events will be trigger new files");
-            cnt->ffmpeg_timelapse =
-                ffmpeg_open(codec_mpeg ,cnt->timelapsefilename, y, u, v
-                        ,cnt->imgs.width, cnt->imgs.height, cnt->conf.frame_limit
-                        ,cnt->conf.ffmpeg_bps,cnt->conf.ffmpeg_vbr,TIMELAPSE_NEW,currenttime_tv);
+
+            cnt->ffmpeg_timelapse->tlapse = TIMELAPSE_NEW;
+            cnt->ffmpeg_timelapse->codec_name = codec_mpeg;
+            retcd = ffmpeg_open(cnt->ffmpeg_timelapse);
         }
 
-        if (cnt->ffmpeg_timelapse == NULL){
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: ffopen_open error creating "
-                       "(timelapse) file [%s]", cnt->timelapsefilename);
-            cnt->finish = 1;
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: ffopen_open error creating (timelapse) file [%s]", cnt->timelapsefilename);
+            free(cnt->ffmpeg_timelapse);
+            cnt->ffmpeg_timelapse = NULL;
             return;
         }
-
-        cnt->ffmpeg_timelapse->udata = convbuf;
         event(cnt, EVENT_FILECREATE, NULL, cnt->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, NULL);
     }
 
-    y = img;
-    u = img + width * height;
-    v = u + (width * height) / 4;
-
-    if (ffmpeg_put_other_image(cnt->ffmpeg_timelapse, y, u, v,currenttime_tv) == -1) {
-        cnt->finish = 1;
-        cnt->restart = 0;
+    if (ffmpeg_put_image(cnt->ffmpeg_timelapse, img, currenttime_tv) == -1) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: Error encoding image");
     }
 
 }
@@ -804,24 +822,14 @@ static void event_ffmpeg_put(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
     if (cnt->ffmpeg_output) {
-        int width = cnt->imgs.width;
-        int height = cnt->imgs.height;
-        unsigned char *y, *u, *v;
-
-        y = img;
-        u = y + (width * height);
-        v = u + (width * height) / 4;
-
-        if (ffmpeg_put_other_image(cnt->ffmpeg_output, y, u, v, currenttime_tv) == -1) {
-            cnt->finish = 1;
-            cnt->restart = 0;
+        if (ffmpeg_put_image(cnt->ffmpeg_output, img, currenttime_tv) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: Error encoding image");
         }
     }
 
     if (cnt->ffmpeg_output_debug) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output_debug, currenttime_tv) == -1) {
-            cnt->finish = 1;
-            cnt->restart = 0;
+        if (ffmpeg_put_image(cnt->ffmpeg_output_debug, cnt->imgs.out, currenttime_tv) == -1) {
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "%s: Error encoding image");
         }
     }
 }
@@ -834,22 +842,19 @@ static void event_ffmpeg_closefile(struct context *cnt,
 {
 
     if (cnt->ffmpeg_output) {
-        free(cnt->ffmpeg_output->udata);
-
         ffmpeg_close(cnt->ffmpeg_output);
+        free(cnt->ffmpeg_output);
         cnt->ffmpeg_output = NULL;
-
         event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, NULL);
     }
 
     if (cnt->ffmpeg_output_debug) {
-        free(cnt->ffmpeg_output_debug->udata);
-
         ffmpeg_close(cnt->ffmpeg_output_debug);
+        free(cnt->ffmpeg_output_debug);
         cnt->ffmpeg_output_debug = NULL;
-
         event(cnt, EVENT_FILECLOSE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, NULL);
     }
+
 }
 
 static void event_ffmpeg_timelapseend(struct context *cnt,
@@ -859,11 +864,9 @@ static void event_ffmpeg_timelapseend(struct context *cnt,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if (cnt->ffmpeg_timelapse) {
-        free(cnt->ffmpeg_timelapse->udata);
-
         ffmpeg_close(cnt->ffmpeg_timelapse);
+        free(cnt->ffmpeg_timelapse);
         cnt->ffmpeg_timelapse = NULL;
-
         event(cnt, EVENT_FILECLOSE, NULL, cnt->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, NULL);
     }
 }
