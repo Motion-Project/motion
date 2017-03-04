@@ -47,7 +47,8 @@
 #include <stdint.h>
 #include <pthread.h>
 
-#if defined(BSD)
+#ifdef __FreeBSD__
+//It is unknown whether it is safe to put this into the if/else below on Apple and BSD
 #include <pthread_np.h>
 #endif
 
