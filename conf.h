@@ -104,7 +104,8 @@ struct config {
     int sql_log_snapshot;
     int sql_log_movie;
     int sql_log_timelapse;
-    const char *sql_query;
+    const char *sql_event_start_query;
+    const char *sql_file_query;
     const char *database_type;
     const char *database_dbname;
     const char *database_host;

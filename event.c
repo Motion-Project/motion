@@ -65,7 +65,7 @@ static const char *eventToString(motion_event e)
 static void exec_command(struct context *cnt, char *command, char *filename, int filetype)
 {
     char stamp[PATH_MAX];
-    mystrftime(cnt, stamp, sizeof(stamp), command, &cnt->current_image->timestamp_tv, filename, filetype);
+    mystrftime(cnt, stamp, sizeof(stamp), command, &cnt->current_image->timestamp_tv, filename, filetype, 0);
 
     if (!fork()) {
         int i;
@@ -151,8 +151,118 @@ static void on_motion_detected_command(struct context *cnt,
 
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
 
-static void event_sqlnewfile(struct context *cnt,
-            motion_event type  ATTRIBUTE_UNUSED,
+static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
+{
+#ifdef HAVE_MYSQL
+    if (!strcmp(cnt->conf.database_type, "mysql")) {
+        if (mysql_query(cnt->database, sqlquery) != 0) {
+            int error_code = mysql_errno(cnt->database);
+
+            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: Mysql query failed %s error code %d",
+                       mysql_error(cnt->database), error_code);
+            /* Try to reconnect ONCE if fails continue and discard this sql query */
+            if (error_code >= 2000) {
+                // Close connection before start a new connection
+                mysql_close(cnt->database);
+
+                cnt->database = (MYSQL *) mymalloc(sizeof(MYSQL));
+                mysql_init(cnt->database);
+
+                if (!mysql_real_connect(cnt->database, cnt->conf.database_host,
+                                        cnt->conf.database_user, cnt->conf.database_password,
+                                        cnt->conf.database_dbname, 0, NULL, 0)) {
+                    MOTION_LOG(ALR, TYPE_DB, NO_ERRNO, "%s: Cannot reconnect to MySQL"
+                               " database %s on host %s with user %s MySQL error was %s",
+                               cnt->conf.database_dbname,
+                               cnt->conf.database_host, cnt->conf.database_user,
+                               mysql_error(cnt->database));
+                } else {
+                    MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to Mysql database '%s' Succeed",
+                               cnt->conf.database_dbname);
+                    if (mysql_query(cnt->database, sqlquery) != 0) {
+                        int error_my = mysql_errno(cnt->database);
+                        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: after re-connection Mysql query failed %s error code %d",
+                                   mysql_error(cnt->database), error_my);
+                    }
+                }
+            }
+        }
+        if (save_id) {
+            cnt->current_event_id = mysql_insert_id(cnt->database);
+        }
+    }
+#endif /* HAVE_MYSQL */
+
+
+#ifdef HAVE_PGSQL
+    if (!strcmp(cnt->conf.database_type, "postgresql")) {
+        PGresult *res;
+
+        res = PQexec(cnt->database_pg, sqlquery);
+
+        if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
+
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Connection to PostgreSQL database '%s' failed: %s",
+                       cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
+
+	    // This function will close the connection to the server and attempt to reestablish a new connection to the same server,
+	    // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
+            PQreset(cnt->database_pg);
+
+            if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Re-Connection to PostgreSQL database '%s' failed: %s",
+                           cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
+            } else {
+                MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to PostgreSQL database '%s' Succeed",
+                           cnt->conf.database_dbname);
+            }
+
+        } else if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query [%s] failed", sqlquery);
+            PQclear(res);
+        }
+    }
+#endif /* HAVE_PGSQL */
+
+#ifdef HAVE_SQLITE3
+    if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
+        int res;
+        char *errmsg = 0;
+        res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
+        if (res != SQLITE_OK ) {
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: SQLite error was %s",
+                       errmsg);
+            sqlite3_free(errmsg);
+        }
+    }
+#endif /* HAVE_SQLITE3 */
+}
+
+static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
+                                 unsigned char *dummy1 ATTRIBUTE_UNUSED,
+                                 char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
+                                 struct timeval *tv1 ATTRIBUTE_UNUSED)
+{
+    /* Only log the file types we want */
+    if (!(cnt->conf.database_type)) {
+        return;
+    }
+
+    /*
+     * We place the code in a block so we only spend time making space in memory
+     * for the sqlquery and timestr when we actually need it.
+     */
+    {
+        char sqlquery[PATH_MAX];
+
+        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_event_start_query,
+                   &cnt->current_image->timestamp_tv, NULL, 0, 0);
+
+        do_sql_query(sqlquery, cnt, 1);
+    }
+}
+
+static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
             unsigned char *dummy ATTRIBUTE_UNUSED,
             char *filename, void *arg, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
@@ -169,88 +279,14 @@ static void event_sqlnewfile(struct context *cnt,
     {
         char sqlquery[PATH_MAX];
 
-        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query,
-                   &cnt->current_image->timestamp_tv, filename, sqltype);
-
+        unsigned long long event_id = 0;
 #ifdef HAVE_MYSQL
-        if (!strcmp(cnt->conf.database_type, "mysql")) {
-            if (mysql_query(cnt->database, sqlquery) != 0) {
-                int error_code = mysql_errno(cnt->database);
+        event_id = cnt->current_event_id;
+#endif
+        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_file_query,
+                   &cnt->current_image->timestamp_tv, filename, sqltype, event_id);
 
-                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: Mysql query failed %s error code %d",
-                           mysql_error(cnt->database), error_code);
-                /* Try to reconnect ONCE if fails continue and discard this sql query */
-                if (error_code >= 2000) {
-                    // Close connection before start a new connection
-                    mysql_close(cnt->database);
-
-                    cnt->database = mymalloc(sizeof(MYSQL));
-                    mysql_init(cnt->database);
-
-                    if (!mysql_real_connect(cnt->database, cnt->conf.database_host,
-                                            cnt->conf.database_user, cnt->conf.database_password,
-                                            cnt->conf.database_dbname, 0, NULL, 0)) {
-                        MOTION_LOG(ALR, TYPE_DB, NO_ERRNO, "%s: Cannot reconnect to MySQL"
-                                   " database %s on host %s with user %s MySQL error was %s",
-                                   cnt->conf.database_dbname,
-                                   cnt->conf.database_host, cnt->conf.database_user,
-                                   mysql_error(cnt->database));
-                    } else {
-                        MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to Mysql database '%s' Succeed",
-                                   cnt->conf.database_dbname);
-                        if (mysql_query(cnt->database, sqlquery) != 0) {
-                            int error_my = mysql_errno(cnt->database);
-                            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: after re-connection Mysql query failed %s error code %d",
-                                       mysql_error(cnt->database), error_my);
-                        }
-                    }
-                }
-            }
-        }
-#endif /* HAVE_MYSQL */
-
-#ifdef HAVE_PGSQL
-        if (!strcmp(cnt->conf.database_type, "postgresql")) {
-            PGresult *res;
-
-            res = PQexec(cnt->database_pg, sqlquery);
-
-            if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
-
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Connection to PostgreSQL database '%s' failed: %s",
-                           cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
-
-                // This function will close the connection to the server and attempt to reestablish a new connection to the same server,
-                // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
-                PQreset(cnt->database_pg);
-
-                if (PQstatus(cnt->database_pg) == CONNECTION_BAD) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: Re-Connection to PostgreSQL database '%s' failed: %s",
-                               cnt->conf.database_dbname, PQerrorMessage(cnt->database_pg));
-                } else {
-                    MOTION_LOG(INF, TYPE_DB, NO_ERRNO, "%s: Re-Connection to PostgreSQL database '%s' Succeed",
-                               cnt->conf.database_dbname);
-                }
-
-            } else if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query [%s] failed", sqlquery);
-                PQclear(res);
-            }
-        }
-#endif /* HAVE_PGSQL */
-
-#ifdef HAVE_SQLITE3
-        if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
-            int res;
-            char *errmsg = 0;
-            res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
-            if (res != SQLITE_OK ) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, "%s: SQLite error was %s",
-                           errmsg);
-                sqlite3_free(errmsg);
-            }
-        }
-#endif /* HAVE_SQLITE3 */
+        do_sql_query(sqlquery, cnt, 0);
     }
 }
 
@@ -350,7 +386,7 @@ static void event_image_detect(struct context *cnt,
         else
             imagepath = DEF_IMAGEPATH;
 
-        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0, 0);
         snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
         put_picture(cnt, fullfilename, newimg, FTYPE_IMAGE);
@@ -379,7 +415,8 @@ static void event_imagem_detect(struct context *cnt,
         else
             imagepath = DEF_IMAGEPATH;
 
-        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0, 0);
+
         /* motion images gets same name as normal images plus an appended 'm' */
         snprintf(filenamem, PATH_MAX, "%sm", filename);
         snprintf(fullfilenamem, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filenamem, imageext(cnt));
@@ -414,7 +451,7 @@ static void event_image_snapshot(struct context *cnt,
         else
             snappath = DEF_SNAPPATH;
 
-        mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tv, NULL, 0, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
         snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
         put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
@@ -432,7 +469,7 @@ static void event_image_snapshot(struct context *cnt,
             return;
         }
     } else {
-        mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tv, NULL, 0, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
         snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
         remove(fullfilename);
@@ -509,7 +546,7 @@ static void event_create_extpipe(struct context *cnt,
                        moviepath);
         }
 
-        mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0, 0);
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
         /* Open a dummy file to check if path is correct */
@@ -534,7 +571,7 @@ static void event_create_extpipe(struct context *cnt,
         myfclose(fd_dummy);
         unlink(cnt->extpipefilename);
 
-        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
+        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0, 0);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: pipe: %s", stamp);
 
@@ -616,7 +653,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
     else
         moviepath = DEF_MOVIEPATH;
 
-    mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
+    mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0, 0);
 
     /*
      *  motion movies get the same name as normal movies plus an appended 'm'
@@ -761,7 +798,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         else
             timepath = DEF_TIMEPATH;
 
-        mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tv, NULL, 0, 0);
 
         /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
         snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
@@ -909,6 +946,12 @@ struct event_handlers event_handlers[] = {
     EVENT_AREA_DETECTED,
     on_area_command
     },
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+    {
+    EVENT_FIRSTMOTION,
+    event_sqlfirstmotion
+    },
+#endif
     {
     EVENT_FIRSTMOTION,
     on_event_start_command
