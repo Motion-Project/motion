@@ -157,6 +157,10 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
         re = "(file)://(((.*):(.*))@)?"
              "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
 
+    if (!strncmp(text_url, "v4l2", 4))
+        re = "(v4l2)://(((.*):(.*))@)?"
+             "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
+
     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "%s: Entry netcam_url_parse data %s",
                text_url);
 
@@ -2712,14 +2716,15 @@ int netcam_start(struct context *cnt)
 
         strcpy(url.service, "http"); /* Put back a real URL service. */
         retval = netcam_setup_rtsp(netcam, &url);
+    } else if ((url.service) && (!strcmp(url.service, "v4l2"))) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling netcam_setup_v4l2()");
+        retval = netcam_setup_rtsp(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "rtsp"))) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling"
-                    " netcam_setup_rtsp()");
-
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: now calling netcam_setup_rtsp()");
         retval = netcam_setup_rtsp(netcam, &url);
     } else {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "%s: Invalid netcam service '%s' - "
-                   "must be http, ftp, mjpg, mjpeg or file.", url.service);
+                   "must be http, ftp, mjpg, mjpeg, v4l2 or file.", url.service);
         netcam_url_free(&url);
         return -1;
     }

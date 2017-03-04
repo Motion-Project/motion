@@ -767,6 +767,7 @@ void ffmpeg_global_init(void){
     av_register_all();
     avcodec_register_all();
     avformat_network_init();
+    avdevice_register_all();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
 
     ret = av_lockmgr_register(ffmpeg_lockmgr_cb);
