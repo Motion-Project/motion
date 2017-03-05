@@ -65,7 +65,7 @@ static const char *eventToString(motion_event e)
 static void exec_command(struct context *cnt, char *command, char *filename, int filetype)
 {
     char stamp[PATH_MAX];
-    mystrftime(cnt, stamp, sizeof(stamp), command, &cnt->current_image->timestamp_tv, filename, filetype, 0);
+    mystrftime(cnt, stamp, sizeof(stamp), command, &cnt->current_image->timestamp_tv, filename, filetype);
 
     if (!fork()) {
         int i;
@@ -188,7 +188,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
             }
         }
         if (save_id) {
-            cnt->current_event_id = mysql_insert_id(cnt->database);
+            cnt->database_event_id = (unsigned long long) mysql_insert_id(cnt->database);
         }
     }
 #endif /* HAVE_MYSQL */
@@ -221,6 +221,10 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
             MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "%s: PGSQL query [%s] failed", sqlquery);
             PQclear(res);
         }
+        if (save_id) {
+            //ToDO:  Find the equivalent option for pgsql
+            cnt->database_event_id = 0;
+        }
     }
 #endif /* HAVE_PGSQL */
 
@@ -234,6 +238,11 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
                        errmsg);
             sqlite3_free(errmsg);
         }
+        if (save_id) {
+            //ToDO:  Find the equivalent option for sqlite3
+            cnt->database_event_id = 0;
+        }
+
     }
 #endif /* HAVE_SQLITE3 */
 }
@@ -255,8 +264,8 @@ static void event_sqlfirstmotion(struct context *cnt, motion_event type  ATTRIBU
     {
         char sqlquery[PATH_MAX];
 
-        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_event_start_query,
-                   &cnt->current_image->timestamp_tv, NULL, 0, 0);
+        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query_start,
+                   &cnt->current_image->timestamp_tv, NULL, 0);
 
         do_sql_query(sqlquery, cnt, 1);
     }
@@ -279,12 +288,8 @@ static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_U
     {
         char sqlquery[PATH_MAX];
 
-        unsigned long long event_id = 0;
-#ifdef HAVE_MYSQL
-        event_id = cnt->current_event_id;
-#endif
-        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_file_query,
-                   &cnt->current_image->timestamp_tv, filename, sqltype, event_id);
+        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query,
+                   &cnt->current_image->timestamp_tv, filename, sqltype);
 
         do_sql_query(sqlquery, cnt, 0);
     }
@@ -386,7 +391,7 @@ static void event_image_detect(struct context *cnt,
         else
             imagepath = DEF_IMAGEPATH;
 
-        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0, 0);
+        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
         snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
         put_picture(cnt, fullfilename, newimg, FTYPE_IMAGE);
@@ -415,7 +420,7 @@ static void event_imagem_detect(struct context *cnt,
         else
             imagepath = DEF_IMAGEPATH;
 
-        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0, 0);
+        mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
 
         /* motion images gets same name as normal images plus an appended 'm' */
         snprintf(filenamem, PATH_MAX, "%sm", filename);
@@ -451,7 +456,7 @@ static void event_image_snapshot(struct context *cnt,
         else
             snappath = DEF_SNAPPATH;
 
-        mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tv, NULL, 0, 0);
+        mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tv, NULL, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
         snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
         put_picture(cnt, fullfilename, img, FTYPE_IMAGE_SNAPSHOT);
@@ -469,7 +474,7 @@ static void event_image_snapshot(struct context *cnt,
             return;
         }
     } else {
-        mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tv, NULL, 0, 0);
+        mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tv, NULL, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
         snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
         remove(fullfilename);
@@ -546,7 +551,7 @@ static void event_create_extpipe(struct context *cnt,
                        moviepath);
         }
 
-        mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0, 0);
+        mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
         /* Open a dummy file to check if path is correct */
@@ -571,7 +576,7 @@ static void event_create_extpipe(struct context *cnt,
         myfclose(fd_dummy);
         unlink(cnt->extpipefilename);
 
-        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0, 0);
+        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "%s: pipe: %s", stamp);
 
@@ -653,7 +658,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
     else
         moviepath = DEF_MOVIEPATH;
 
-    mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0, 0);
+    mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
 
     /*
      *  motion movies get the same name as normal movies plus an appended 'm'
@@ -798,7 +803,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         else
             timepath = DEF_TIMEPATH;
 
-        mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tv, NULL, 0, 0);
+        mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tv, NULL, 0);
 
         /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
         snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);

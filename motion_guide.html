@@ -1568,14 +1568,19 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#sql_log_timelapse" >sql_log_timelapse</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">sql_query</td>
-		<td align="left">sql_query</td>
-		<td align="left"><a href="#sql_query" >sql_query</a></td>
+        <td height="17" align="left">sql_query</td>
+        <td align="left">sql_query</td>
+        <td align="left"><a href="#sql_query" >sql_query</a></td>
 	</tr>
-	<tr>
-		<td height="17" align="left"><br></td>
-		<td align="left">stream_auth_method</td>
-		<td align="left"><a href="#stream_auth_method" >stream_auth_method</a></td>
+    <tr>
+        <td height="17" align="left">sql_query_start</td>
+        <td align="left">sql_query_start</td>
+        <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
+    </tr>
+    <tr>
+        <td height="17" align="left"><br></td>
+        <td align="left">stream_auth_method</td>
+        <td align="left"><a href="#stream_auth_method" >stream_auth_method</a></td>
 	</tr>
 	<tr>
 		<td height="17" align="left"><br></td>
@@ -2221,18 +2226,21 @@ Some configuration options are only used if Motion is built on a system that has
        <td bgcolor="#edf4f9" ><a href="#sql_log_movie" >sql_log_movie</a> </td>
        <td bgcolor="#edf4f9" ><a href="#sql_log_timelapse" >sql_log_timelapse</a> </td>
      </tr>
-  	  <tr>
-  	    <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
-     </tr>
-  	  <tr>
-  	    <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
-     </tr>
+    <tr>
+        <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
+        <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
+        <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
+        <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
+    </tr>
+    <tr>
+        <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
+        <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
+        <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
+        <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
+    </tr>
+    <tr>
+        <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
+    </tr>
    </tbody>
 </table>
 
@@ -2378,8 +2386,8 @@ The following section provides detailed descriptions of each of the configuratio
        <td bgcolor="#edf4f9" >name of computer running Motion</a> </td>
        <td bgcolor="#edf4f9" >%{fps}</a> </td>
        <td bgcolor="#edf4f9" >current frames per second</a> </td>
-       <td bgcolor="#edf4f9" ></a> </td>
-       <td bgcolor="#edf4f9" ></a> </td>
+       <td bgcolor="#edf4f9" >%{dbeventid}</a> </td>
+       <td bgcolor="#edf4f9" >See <a href="#sql_query_start">sql_query_start</a> </a> </td>
      </tr>
     </tbody>
 </table>
@@ -4823,6 +4831,10 @@ Mysql : CREATE TABLE security (camera int, filename char(80) not null, frame int
 <p></p>
 Postgresql : CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
 <p></p>
+MySQL to use the dbeventid, sql_query_start
+<p></p>
+CREATE TABLE security_file (file_id int primary key auto_increment, event_id int foreign key, filename text not null, frame int, file_type int, time_stamp timestamp(14));\n"
+<p></p>
 
 
 <p></p>
@@ -4885,10 +4897,41 @@ You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
 within the query.
 <p></p>
 <p></p>
-Sample Query
+Sample Queries (depend upon the table created)
 <p></p>
 insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
+insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
+<p></p>
+<p></p>
+
+<h3><a name="sql_query_start"></a> sql_query_start </h3>
+<p></p>
+<ul>
+  <li> Type: String</li>
+  <li> Range / Valid values: Max 4095 characters</li>
+  <li> Default: Not Defined</li>
+</ul>
+<p></p>
+SQL query string that executes against the event table which tracks the unique events of motion.
+<p></p>
+Once the new record is added to this table, the mysql function <code><b>mysql_insert_id</b></code> is then
+executed to provide the key back into the <code><b>dbeventid</b></code> specifier.
+<p></p>
+The <code><b>dbeventid</b></code> specifier can then be used in the <code><b>sql_query</b></code> as a parameter
+to that query for inserting into the table.
+<p></p>
+Although this query is run for all the different database options, the <code><b>dbeventid</b></code> is
+only set for mysql databases.  For the other databases, the <code><b>dbeventid</b></code> is always set
+to zero.
+<p></p>
+<p></p>
+You can use <a href="#conversion_specifiers">Conversion Specifiers</a>within the query.
+<p></p>
+<p></p>
+Sample Query
+<p></p>
+insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
 <p></p>
 <p></p>
 

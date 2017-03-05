@@ -110,13 +110,12 @@ struct config conf_template = {
     .mask_file =                       NULL,
     .mask_privacy =                    NULL,
     .smart_mask_speed =                0,
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     .sql_log_image =                   1,
     .sql_log_snapshot =                1,
     .sql_log_movie =                   0,
     .sql_log_timelapse =               0,
-    .sql_event_start_query =           DEF_SQL_START_QUERY,
-    .sql_file_query =                  DEF_SQL_FILE_QUERY,
+    .sql_query_start =                 DEF_SQL_QUERY_START,
+    .sql_query =                       DEF_SQL_QUERY,
     .database_type =                   NULL,
     .database_dbname =                 NULL,
     .database_host =                   "localhost",
@@ -124,7 +123,6 @@ struct config conf_template = {
     .database_password =               NULL,
     .database_port =                   0,
     .database_busy_timeout =           0,
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || define(HAVE_SQLITE3) */
     .on_picture_save =                 NULL,
     .on_motion_detected =              NULL,
     .on_area_detected =                NULL,
@@ -1462,8 +1460,6 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     {
     "sql_log_picture",
     "\n############################################################\n"
@@ -1501,48 +1497,18 @@ config_param config_params[] = {
     print_bool
     },
     {
-    "sql_event_start_query",
-    "# SQL query string that is sent to the database at the start of an event\n"
-    "# This allows for creating a global event id for an event that files will\n"
-    "# use when they are created\n"
-    "# Use same conversion specifiers has for text features\n"
-    "# Additional special conversion specifiers are\n"
-    "# %n = the number representing the file_type\n"
-    "# %f = filename with full path\n"
-    "# Create tables :\n"
-    "##\n"
-    "# Mysql\n"
-    "# CREATE TABLE security_events (event_id int primary key auto_increment, camera int, event_time_stamp timestamp(14));\n"
-    "#\n"
-    "# Postgresql\n"
-    "# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);\n"
-    "#\n"
-    "# Default value:\n"
-    "# insert into security_events (camera, event_time_stamp) values('%t', '%Y-%m-%d %T')",
+    "sql_query_start",
+    "# SQL query at event start.  See motion_guide.html\n",
     0,
-    CONF_OFFSET(sql_event_start_query),
+    CONF_OFFSET(sql_query_start),
     copy_string,
     print_string
     },
     {
-    "sql_file_query",
-    "# SQL query string that is sent to the database\n"
-    "# Use same conversion specifiers has for text features\n"
-    "# Additional special conversion specifiers are\n"
-    "# %n = the number representing the file_type\n"
-    "# %f = filename with full path\n"
-    "# Create tables :\n"
-    "##\n"
-    "# Mysql\n"
-    "# CREATE TABLE security_file (file_id int primary key auto_increment, event_id int foreign key, filename text not null, frame int, file_type int, time_stamp timestamp(14));\n"
-    "#\n"
-    "# Postgresql\n"
-    "# CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);\n"
-    "#\n"
-    "# Default value:\n"
-    "# insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')",
+    "sql_query",
+    "# SQL query string that is sent to the database.  See motion_guide.html\n",
     0,
-    CONF_OFFSET(sql_file_query),
+    CONF_OFFSET(sql_query),
     copy_string,
     print_string
     },
@@ -1607,7 +1573,6 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-#endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
     {
     "video_pipe",
     "\n############################################################\n"
