@@ -19,6 +19,7 @@ enum TIMELAPSE_TYPE {
 #include <libavformat/avformat.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/mathematics.h>
+#include <libavdevice/avdevice.h>
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 56)
 #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P

@@ -456,6 +456,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     int  retcd;
     char errstr[128];
+    char optvalue[9];
 
     if (netcam->rtsp->path == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
@@ -476,7 +477,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     if (strncmp(netcam->rtsp->path, "http", 4) == 0 ){
         netcam->rtsp->format_context->iformat = av_find_input_format("mjpeg");
-    } else {
+    } else if (strncmp(netcam->rtsp->path, "rtsp", 4) == 0 ){
         if (netcam->cnt->conf.rtsp_uses_tcp) {
             av_dict_set(&opts, "rtsp_transport", "tcp", 0);
             if (netcam->rtsp->status == RTSP_NOTCONNECTED)
@@ -487,7 +488,13 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
             if (netcam->rtsp->status == RTSP_NOTCONNECTED)
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Using udp transport");
         }
-    }
+    } else {
+        netcam->rtsp->format_context->iformat = av_find_input_format("v4l2");
+        snprintf(optvalue, 4, "%d",netcam->cnt->conf.frame_limit);
+        av_dict_set(&opts, "framerate", optvalue, 0);
+        snprintf(optvalue, 9, "%dx%d",netcam->cnt->conf.height,netcam->cnt->conf.width);
+        av_dict_set(&opts, "video_size", optvalue, 0);
+     }
 
     retcd = avformat_open_input(&netcam->rtsp->format_context, netcam->rtsp->path, NULL, &opts);
     if (retcd < 0) {
@@ -891,15 +898,17 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
      *  Need a method to query the path and
      *  determine the authentication type
      */
-    if ((netcam->rtsp->user != NULL) && (netcam->rtsp->pass != NULL)) {
+    if (strcmp(url->service, "v4l2") == 0) {
+        ptr = mymalloc(strlen(url->path));
+        sprintf((char *)ptr, "%s",url->path);
+    } else if ((netcam->rtsp->user != NULL) && (netcam->rtsp->pass != NULL)) {
         ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
               + 5 + strlen(url->path) + 5
               + strlen(netcam->rtsp->user) + strlen(netcam->rtsp->pass) + 4 );
         sprintf((char *)ptr, "%s://%s:%s@%s:%d%s",
                 url->service,netcam->rtsp->user,netcam->rtsp->pass,
                 netcam->connect_host, netcam->connect_port, url->path);
-    }
-    else {
+    } else {
         ptr = mymalloc(strlen(url->service) + strlen(netcam->connect_host)
               + 5 + strlen(url->path) + 5);
         sprintf((char *)ptr, "%s://%s:%d%s", url->service,

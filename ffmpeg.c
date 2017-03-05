@@ -338,18 +338,17 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         return -1;
     }
     retcd = avcodec_receive_packet(ffmpeg->ctx_codec, &ffmpeg->pkt);
+    if (retcd == AVERROR(EAGAIN)){
+        //Buffered packet.  Throw special return code
+        my_packet_unref(ffmpeg->pkt);
+        return -2;
+    }
     if (retcd < 0 ){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error receiving encoded packet video:%s",errstr);
         //Packet is freed upon failure of encoding
         return -1;
     }
-    if (retcd == AVERROR(EAGAIN)){
-        //Buffered packet.  Throw special return code
-        my_packet_unref(ffmpeg->pkt);
-        return -2;
-    }
-
     if (ffmpeg->picture->key_frame == 1)
       ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
 
@@ -767,6 +766,7 @@ void ffmpeg_global_init(void){
     av_register_all();
     avcodec_register_all();
     avformat_network_init();
+    avdevice_register_all();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
 
     ret = av_lockmgr_register(ffmpeg_lockmgr_cb);

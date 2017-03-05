@@ -2578,8 +2578,12 @@ The video device to be used for capturing. Default is /dev/video0.
 See the <a href="#Basic_Setup">Basic Setup</a>
 section of this guide for a additional discussion of this option.
 <p></p>
-This is the video4linux device name. Ignore this for net cameras.  If a netcam_url is specified, this option will
-be ignored.
+This option is the preferred way to specify the video4linux device name. If the camera does
+not work when specifying the device with this option, it is also possible to specify the device
+in the <a href="#netcam_url" >netcam_url</a>  with the v4l2 prefix option.  The
+<a href="#netcam_url" >netcam_url</a> option uses an alternative method to open and operate the
+device but has fewer options available. If the <a href="#netcam_url" >netcam_url</a> is used for
+either this alternative method or for a normal network camera, the videodevice option is ignored.
 <p></p>
 
 <h3><a name="v4l2_palette"></a> v4l2_palette </h3>
@@ -2596,6 +2600,12 @@ loop through the available palettes to try to find one that is supported by both
 Motion will report the supported palettes of the device when Motion starts when the log_level
 is specified as NTC or higher.  The default of 17 is highly preferred since this the native
 format that Motion uses internally.
+
+It is possible that after looping through all of the palette options for the camera, Motion will not
+find a palette that is acceptable for processing.  In this situation, it is possible to use the
+<a href="#netcam_url" >netcam_url</a> option with the v4l2 prefix.  In the situation that the
+<a href="#netcam_url" >netcam_url</a> is used, the v4l2_palette option is ignored.
+
 <ul>
 <li> V4L2_PIX_FMT_SN9C10X : 0  'S910'</li>
 <li> V4L2_PIX_FMT_SBGGR16 : 1  'BYR2'</li>
@@ -2864,19 +2874,53 @@ telling that the signal is lost and when the connection was lost.
 URL to use if you are using a network camera, size will be autodetected
 Available prefixes to the URL:
  <ul>
-<li> http://</li>
+<li>http://</li>
 <li>ftp:// </li>
 <li>mjpg:// </li>
 <li>rtsp:// </li>
 <li>mjpeg:// </li>
-<li>file:/// </li>
+<li>file:// </li>
+<li>v4l2:// </li>
  </ul>
+<p></p>
+<b>http://</b>  This prefix uses the traditional http format and opens the netcam looking for a motion jpg image.
+<p></p>
+<b>ftp://</b>  This prefix opens the ftp site and grabs a static image.  The camera will be expected to periodically
+replace that static image as it processes images.
+<p></p>
+<b>mjpg://</b>  This prefix is experimental and when Motion sees this prefix it will replace the mjpg with http and
+then process the network camera using the extremely experimental method of grabbing motion jpg images.  The
+author has not observed that this experimental option is in any way functional.
+<p></p>
+<b>rtsp://</b>  This prefix is the standard for all modern network cameras.  It is recommended that users search the
+web or the camera manual for the exact connection string to use for their camera.  Once a potential connection
+string is found, it should be validated as being functional using a application such as ffplay or vlc.  The
+connection string that works for these applications is what should be specified for this option.  When using
+the rtsp format, Motion will ignore the netcam_keepalive and netcam_tolerant_check options.
 
-The prefixes of mjpg and mjpeg are not actual protocols and allow the user to specify
-different formats and methods to access the network stream.  They are internally translated
-into http.  For options such as rtsp, it is recommended that the connection string be
-validated with other applications such as ffplay or VLC.
+<p></p>
+<b>mjpeg://</b>  This is another experimental prefix.  The mjpeg is replaced with http by Motion internally.  The mjpeg
+option uses the ffmpeg libraries to retrieve images from the camera and forces the mjpeg format.  This option
+should be equivalent to using <code>ffplay -f mjpeg http://{yourip}</code>.  In certain situations, this option
+may result in better results than using the http protocol.  Motion will ignore the netcam_keepalive and
+netcam_tolerant_check options when this format is specified.
 
+<p></p>
+<b>file://</b>  This option allows for the processing of a static image.  A process outside of Motion would be needed to
+replace the image.  A scenario for this would be processing a large number of previously saved images.  The file
+option would point to a single location such as <code>/home/user/test/currentimage.jpg</code>  Then a bash script
+running external to Motion would loop through all the images and copy them into <code>currentimage.jpg</code>.
+Another situation would be when the ftp server is the same machine as what Motion is running on.  In this situation,
+rather than logging into the ftp server, this option can be used to point to the actual directory.
+
+The author believes that while the static image processing option is possible, a preferred approach would be to
+encode all the static images to a movie and then use ffmpeg to pipe the movie into a video loopback device.
+<p></p>
+<b>v4l2://</b>  This option allows for an alternative method of using a v4l2 device that is not natively supported
+by Motion.  A sample format for the netcam_url would be <code>v4l2:///dev/video0</code>  Internally, this
+is equivalent to running the following from the command line <code>ffplay -f v4l2 /dev/video0</code>
+Since this is not the preferred method of specifying a v4l2 device, many of the usual v4l2 controls such as
+hue, brightness, palette, etc as well as most of the netcam options are ignored.
 <p></p>
 When the netcam_url is defined the video4linux options are ignored.
 <p></p>
