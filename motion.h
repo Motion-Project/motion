@@ -310,6 +310,7 @@ struct images {
     unsigned char *common_buffer;
 
     unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
+    unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
 
     int *smartmask_buffer;
     int *labels;
