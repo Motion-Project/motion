@@ -1330,6 +1330,8 @@ static void motion_cleanup(struct context *cnt)
 
 static void mlp_mask_privacy(struct context *cnt){
 
+  if (cnt->imgs.mask_privacy == NULL) return;
+
   /*
    * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
    * bytes at a time, providing a significant boost in performance.
