@@ -492,8 +492,10 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         netcam->rtsp->format_context->iformat = av_find_input_format("v4l2");
         snprintf(optvalue, 4, "%d",netcam->cnt->conf.frame_limit);
         av_dict_set(&opts, "framerate", optvalue, 0);
-        snprintf(optvalue, 9, "%dx%d",netcam->cnt->conf.height,netcam->cnt->conf.width);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: set v4l2 framerate %s", optvalue);
+        snprintf(optvalue, 9, "%dx%d",netcam->cnt->conf.width,netcam->cnt->conf.height);
         av_dict_set(&opts, "video_size", optvalue, 0);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: set v4l2 video_size %s", optvalue);
      }
 
     retcd = avformat_open_input(&netcam->rtsp->format_context, netcam->rtsp->path, NULL, &opts);
