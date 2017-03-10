@@ -88,15 +88,15 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
         if (retcd < 0 && retcd != AVERROR_EOF){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
-            return 0;
+            return -1;
         }
     }
 
     retcd = avcodec_receive_frame(ctx_codec, frame);
-   if (retcd < 0 ){
+    if (retcd < 0 ){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
-        return 0;
+        return -1;
     }
     return 0;
 
@@ -110,7 +110,7 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
-        return 0;
+        return -1;
     }
     if (check == 0) return -1;
     return 0;
@@ -456,7 +456,8 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     int  retcd;
     char errstr[128];
-    char optvalue[9];
+    char optsize[10], optfmt[8], optfps[5];
+
 
     if (netcam->rtsp->path == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
@@ -489,17 +490,35 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Using udp transport");
         }
     } else {
-        netcam->rtsp->format_context->iformat = av_find_input_format("v4l2");
-        snprintf(optvalue, 4, "%d",netcam->cnt->conf.frame_limit);
-        av_dict_set(&opts, "framerate", optvalue, 0);
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: set v4l2 framerate %s", optvalue);
-        snprintf(optvalue, 9, "%dx%d",netcam->cnt->conf.width,netcam->cnt->conf.height);
-        av_dict_set(&opts, "video_size", optvalue, 0);
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: set v4l2 video_size %s", optvalue);
+        netcam->rtsp->format_context->iformat = av_find_input_format("video4linux2");
+
+        if (netcam->cnt->conf.v4l2_palette == 8) {
+            sprintf(optfmt, "%s","mjpeg");
+            av_dict_set(&opts, "input_format", optfmt, 0);
+        } else if (netcam->cnt->conf.v4l2_palette == 21){
+            sprintf(optfmt, "%s","H264");
+            av_dict_set(&opts, "input_format", optfmt, 0);
+        } else{
+            sprintf(optfmt, "%s","default");
+        }
+
+        sprintf(optfps, "%d",netcam->cnt->conf.frame_limit);
+        av_dict_set(&opts, "framerate", optfps, 0);
+
+        sprintf(optsize, "%dx%d",netcam->cnt->conf.width,netcam->cnt->conf.height);
+        av_dict_set(&opts, "video_size", optsize, 0);
+
+        av_dict_set(&opts, "max_analyze_duration", "100000", 0);
+
+        if (netcam->rtsp->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: v4l2 input_format %s",optfmt);
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: v4l2 framerate %s", optfps);
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: v4l2 video_size %s", optsize);
+        }
      }
 
     retcd = avformat_open_input(&netcam->rtsp->format_context, netcam->rtsp->path, NULL, &opts);
-    if (retcd < 0) {
+    if ((retcd < 0) || (netcam->rtsp->format_context == NULL)) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->path,errstr);

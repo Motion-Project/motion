@@ -855,6 +855,13 @@ static int motion_init(struct context *cnt)
 
     if (init_camera_type(cnt) != 0 ) return -3;
 
+    if ((cnt->conf.height == 0) || (cnt->conf.width == 0)) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Invalid configuration dimensions %dx%d",cnt->conf.height,cnt->conf.width);
+        cnt->conf.height = DEF_HEIGHT;
+        cnt->conf.width = DEF_WIDTH;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Using default dimensions %dx%d",cnt->conf.height,cnt->conf.width);
+    }
+
     /* set the device settings */
     cnt->video_dev = vid_start(cnt);
 

@@ -105,6 +105,10 @@
 #define V4L2_PIX_FMT_GREY     v4l2_fourcc('G', 'R', 'E', 'Y') /* 8 Greyscale     */
 #endif
 
+#ifndef V4L2_PIX_FMT_H264
+#define V4L2_PIX_FMT_H264     v4l2_fourcc('H', '2', '6', '4') /* H264     */
+#endif
+
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
@@ -448,7 +452,8 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
         V4L2_PIX_FMT_YUV420, /* most efficient for motion */
         V4L2_PIX_FMT_Y10,
         V4L2_PIX_FMT_Y12,
-        V4L2_PIX_FMT_GREY
+        V4L2_PIX_FMT_GREY,
+        V4L2_PIX_FMT_H264
     };
 
     int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
@@ -916,6 +921,7 @@ static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned 
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
+        case V4L2_PIX_FMT_H264:
             memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);
             return 0;
 

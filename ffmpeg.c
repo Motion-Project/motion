@@ -742,7 +742,7 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
 
     //We put the avcodec messages to INF level since their error are not necessarily our errors.
     if (errno_flag <= AV_LOG_WARNING){
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: %s", buf);
     }
 }
 
