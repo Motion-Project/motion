@@ -87,15 +87,15 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
         retcd = avcodec_send_packet(ctx_codec, packet);
         if (retcd < 0 && retcd != AVERROR_EOF){
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error sending packet: %s",errstr);
             return -1;
         }
     }
 
     retcd = avcodec_receive_frame(ctx_codec, frame);
-    if (retcd < 0 ){
+    if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error receiving packet: %s",errstr);
         return -1;
     }
     return 0;
@@ -181,7 +181,7 @@ static int netcam_open_codec(netcam_context_ptr netcam){
     AVCodec *decoder = NULL;
 
     retcd = av_find_best_stream(netcam->rtsp->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-    if (retcd < 0) {
+    if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream in input!: %s",errstr);
         return retcd;
@@ -220,7 +220,7 @@ static int netcam_open_codec(netcam_context_ptr netcam){
 #endif
 
     retcd = avcodec_open2(netcam->rtsp->codec_context, decoder, NULL);
-    if (retcd < 0) {
+    if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
         return retcd;
@@ -267,7 +267,7 @@ struct rtsp_context *rtsp_new_context(void){
 *             the read attempt.
 *
 * Returns:
-*       Failure    -1(which triggers an interupt)
+*       Failure    -1(which triggers an interrupt)
 *       Success     0(zero which indicates to let process continue)
 *
 */
@@ -283,6 +283,7 @@ static int netcam_interrupt_rtsp(void *ctx){
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            rtsp->interrupted = 1;
             return 1;
         } else{
             return 0;
@@ -299,6 +300,7 @@ static int netcam_interrupt_rtsp(void *ctx){
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 30){
             MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            rtsp->interrupted = 1;
             return 1;
         } else{
             return 0;
@@ -344,6 +346,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
     }
     netcam->rtsp->startreadtime = curtime;
+    netcam->rtsp->interrupted = 0;
 
     netcam->rtsp->status = RTSP_READINGIMAGE;
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
@@ -367,8 +370,8 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     // at this point, we are finished with the packet
     my_packet_unref(packet);
 
-    if (size_decoded == 0) {
-        // something went wrong, end of stream? Interupted?
+    if ((size_decoded == 0) || (netcam->rtsp->interrupted == 1)) {
+        // something went wrong, end of stream? interrupted?
         netcam_rtsp_close_context(netcam);
         return -1;
     }
@@ -472,6 +475,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
     netcam->rtsp->format_context->interrupt_callback.opaque = netcam->rtsp;
 
+    netcam->rtsp->interrupted = 0;
     if (gettimeofday(&netcam->rtsp->startreadtime, NULL) < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
     }
@@ -496,7 +500,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
             sprintf(optfmt, "%s","mjpeg");
             av_dict_set(&opts, "input_format", optfmt, 0);
         } else if (netcam->cnt->conf.v4l2_palette == 21){
-            sprintf(optfmt, "%s","H264");
+            sprintf(optfmt, "%s","h264");
             av_dict_set(&opts, "input_format", optfmt, 0);
         } else{
             sprintf(optfmt, "%s","default");
@@ -508,8 +512,6 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         sprintf(optsize, "%dx%d",netcam->cnt->conf.width,netcam->cnt->conf.height);
         av_dict_set(&opts, "video_size", optsize, 0);
 
-        av_dict_set(&opts, "max_analyze_duration", "100000", 0);
-
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: v4l2 input_format %s",optfmt);
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: v4l2 framerate %s", optfps);
@@ -518,7 +520,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
      }
 
     retcd = avformat_open_input(&netcam->rtsp->format_context, netcam->rtsp->path, NULL, &opts);
-    if ((retcd < 0) || (netcam->rtsp->format_context == NULL)) {
+    if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->path,errstr);
@@ -531,7 +533,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     // fill out stream information
     retcd = avformat_find_stream_info(netcam->rtsp->format_context, NULL);
-    if (retcd < 0) {
+    if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to find stream info: %s", errstr);
@@ -560,7 +562,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         MOTION_PTHREAD_SETNAME(curtname);
     }
 
-    if (retcd < 0) {
+    if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open codec context: %s", errstr);
@@ -592,7 +594,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
      *  Validate that the previous steps opened the camera
      */
     retcd = netcam_read_rtsp_image(netcam);
-    if (retcd < 0) {
+    if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to read first image");
         }

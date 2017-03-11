@@ -4,7 +4,7 @@
 
 <ul>
 <li> <a href="#Motion_Overview"> Overview </a> </li>
-<li> <a href="#Install_Build"> Installing with apt / Building from source </a></li>
+<li> <a href="#Install_Build"> Installing with apt / debs / building from source </a></li>
 <li> <a href="#Important_Definitions"> Important Definitions </a></li>
 <li> <a href="#The_Config_Files"> The Configuration Files </a></li>
 <li> <a href="#Command_Line_Options"> Command Line Options </a></li>
@@ -171,11 +171,12 @@ and <a href="https://github.com/Motion-Project/motion/issues">Issues</a> for kno
 
 </ul>
 
-<h2><a name="Install_Build"></a> Installing with apt / Building from source </h2>
+<h2><a name="Install_Build"></a> Installing with apt / debs / building from source </h2>
 <ul>
 <p></p>
 <ul>
   <li> <a href="#Install_Apt"> Installing with apt</a></li>
+  <li> <a href="#Install_Deb"> Installing with a release deb package</a></li>
   <li> <a href="#Abbreviated_Building"> Abbreviated Building Guide</a></li>
   <li> <a href="#Preparation_For_Building"> Preparation For Building </a></li>
   <li> <a href="#Configure_Script"> Configure Script </a></li>
@@ -196,41 +197,31 @@ Motion is part of the Ubuntu and Debian repositories and can be installed with t
 <p></p>
 Open up a terminal window and type: <code><strong>sudo apt-get install motion</strong></code>
 <p></p>
-Motion can also be installed from the release deb files.  First, get the link to the deb file
-for the distribution and platform from the <a href="https://github.com/Motion-Project/motion/releases">Releases</a>
-page.
+</ul>
+
+<h3><a name="Install_Deb"></a> Installing with a release deb package </h3>
+<ul>
+Motion can also be installed from the release deb files.
 <p></p>
-Open up a terminal window and type:
+Determine the deb file name that is appropriate for the distribution and platform from
+the <a href="https://github.com/Motion-Project/motion/releases">Releases</a> page
+and open up a terminal window and type:
+<p></p>
+<ul>
 <code><strong>wget https://github.com/Motion-Project/motion/releases/{deb package name} </strong></code>
-Next, there are multiple options to install a deb package, the below is one option
-and uses the gdebi tool.
+</ul>
 <p></p>
+Next, install the retrieved deb package.  Below is a sample method to install that
+uses the gdebi tool.
+<p></p>
+<ul>
 <code><strong>sudo apt-get install gdebi-core</strong></code>
 <p></p>
 <code><strong>sudo gdebi {deb package name}</strong></code>
-<p></p>
-Before we start configuring Motion, we will copy the config file to our Home folder so that the master copy
-won't be affected. Open a terminal and copy the configuration file to your Home folder with following commands:
-<p></p>
-<code><strong>mkdir .motion</strong></code>
-<p></p>
-(Note: This will create a hidden folder <em>.motion</em> in your Home directory.)
-<p></p>
-<code><strong>cp /etc/motion/motion-dist.conf ~/.motion/motion.conf</strong></code>
-<p></p>
-(Note: This command will copy the original motion configuration file to its location.)
-<p></p>
-Now can open the configuration file for editing:
-<p></p>
-<code><strong>sudo nano ~/.motion/motion.conf</strong></code>
-<p></p>
-After you you have made all the appropriate adjustments to the configuration file, close it.
-Then start motion in the terminal simply by typing:
-<p></p>
-<code><strong>motion</strong></code>
-<p></p>
+</ul>
 <p></p>
 </ul>
+
 <h3><a name="Abbreviated_Building"></a> Abbreviated Building Guide  </a> </h3>
 <ul>
 
@@ -241,7 +232,7 @@ script for Ubuntu.  If errors occur during the process or you wish to customize 
 review the extended building instructions further below.
 <p></p>
 <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
-libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev </strong></code>
+libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev </strong></code>
 <p></p>
 <code><strong>cd ~</strong></code>
 <br><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -286,7 +277,7 @@ Ubuntu / Debian Packages
     <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  See note below!)</li>
     <ul>
       <p></p>
-      <code><strong>sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev</strong></code>
+      <code><strong>sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev</strong></code>
       <p></p>
     </ul>
     <li>MySQL database functionality</li>
@@ -807,8 +798,6 @@ A few important definitions.
 </ul>
 
 <h2><a name="The_Config_Files"></a>  The Configuration Files </h2>
-<ul>
-
 <p></p>
 If Motion was invoked with command line option <code>-c pathname</code> Motion will expect the config file to be as specified. When you specify the config file on the command line with -c you can call it anything.
 <p></p>
@@ -2590,45 +2579,161 @@ either this alternative method or for a normal network camera, the videodevice o
 <p></p>
 <ul>
   <li> Type: String</li>
-  <li> Range / Valid values: Max 4095 characters</li>
+  <li> Range / Valid values: 0 - 21</li>
   <li> Default: </li>
 </ul>
 <p></p>
-The v4l2_palette allows the user to choose preferable palette to be use by Motion.  Note that this
-is only the preferred option.  If the video device does not support the requested format, Motion will
-loop through the available palettes to try to find one that is supported by both Motion and the device.
+The v4l2_palette allows the user to choose preferable palette to be use by Motion.  This
+is only the <u>preferred</u> option.  If the video device does not support this preferred format,
+Motion will loop through the available palettes to try to find one that is supported by both Motion
+and the device.
 Motion will report the supported palettes of the device when Motion starts when the log_level
-is specified as NTC or higher.  The default of 17 is highly preferred since this the native
+is specified as NTC or higher.
+<p></p>
+The default of 17 is highly preferred over <u>all</u> other formats since this the native
 format that Motion uses internally.
-
+<p></p>
+The following are each of the palette options.  For the Motion configuration,
+specify the numeric value as the Motion option.
+<p></p>
+<table border="1" class="fixed" >
+    <colgroup>
+        <col width="250px">
+        <col width="200px">
+        <col width="200px">
+    </colgroup>
+    <tbody>
+        <tr>
+            <td bgcolor="#edf4f9" align="center" > V4l2 Option</td>
+            <td bgcolor="#edf4f9" align="center" > FOURCC</td>
+            <td bgcolor="#edf4f9" align="center" > v4l2_palette option </td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SN9C10X</td>
+            <td bgcolor="#edf4f9" align="center" >S910</td>
+            <td bgcolor="#edf4f9" align="center" >0</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR16</td>
+            <td bgcolor="#edf4f9" align="center" >BYR2</td>
+            <td bgcolor="#edf4f9" align="center" >1</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR8</td>
+            <td bgcolor="#edf4f9" align="center" >BA81</td>
+            <td bgcolor="#edf4f9" align="center" >2</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SPCA561</td>
+            <td bgcolor="#edf4f9" align="center" >S561</td>
+            <td bgcolor="#edf4f9" align="center" >3</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGBRG8</td>
+            <td bgcolor="#edf4f9" align="center" >GBRG</td>
+            <td bgcolor="#edf4f9" align="center" >4</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGRBG8</td>
+            <td bgcolor="#edf4f9" align="center" >GRBG</td>
+            <td bgcolor="#edf4f9" align="center" >5</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_PAC207</td>
+            <td bgcolor="#edf4f9" align="center" >P207</td>
+            <td bgcolor="#edf4f9" align="center" >6</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_PJPG</td>
+            <td bgcolor="#edf4f9" align="center" >PJPG</li>
+            <td bgcolor="#edf4f9" align="center" >7</td>
+	    </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_MJPEG</td>
+            <td bgcolor="#edf4f9" align="center" >MJPG</li>
+            <td bgcolor="#edf4f9" align="center" >8</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_JPEG</td>
+            <td bgcolor="#edf4f9" align="center" >JPEG</li>
+            <td bgcolor="#edf4f9" align="center" >9</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_RGB24</td>
+            <td bgcolor="#edf4f9" align="center" >RGB3</li>
+            <td bgcolor="#edf4f9" align="center" >10</td>
+        </tr>
+	    <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA501</td>
+            <td bgcolor="#edf4f9" align="center" >S501</li>
+            <td bgcolor="#edf4f9" align="center" >11</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA505</td>
+            <td bgcolor="#edf4f9" align="center" >S505</li>
+            <td bgcolor="#edf4f9" align="center" >12</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA508</td>
+            <td bgcolor="#edf4f9" align="center" >S508</li>
+            <td bgcolor="#edf4f9" align="center" >13</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_UYVY</td>
+            <td bgcolor="#edf4f9" align="center" >UYVY</li>
+            <td bgcolor="#edf4f9" align="center" >14</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUYV</td>
+            <td bgcolor="#edf4f9" align="center" >YUYV</li>
+            <td bgcolor="#edf4f9" align="center" >15</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV422P</td>
+            <td bgcolor="#edf4f9" align="center" >422P</li>
+            <td bgcolor="#edf4f9" align="center" >16</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV420</td>
+            <td bgcolor="#edf4f9" align="center" >YU12</li>
+            <td bgcolor="#edf4f9" align="center" >17</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
+            <td bgcolor="#edf4f9" align="center" >YU10</li>
+            <td bgcolor="#edf4f9" align="center" >18</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
+            <td bgcolor="#edf4f9" align="center" >YU12</li>
+            <td bgcolor="#edf4f9" align="center" >19</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_GREY</td>
+            <td bgcolor="#edf4f9" align="center" >GREY</li>
+            <td bgcolor="#edf4f9" align="center" >20</td>
+        </tr>
+        <tr>
+            <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_H264</td>
+            <td bgcolor="#edf4f9" align="center" >H264</li>
+            <td bgcolor="#edf4f9" align="center" >21</td>
+        </tr>
+    </tbody>
+</table>
+<p></p>
 It is possible that after looping through all of the palette options for the camera, Motion will not
 find a palette that is acceptable for processing.  In this situation, it is possible to use the
-<a href="#netcam_url" >netcam_url</a> option with the v4l2 prefix.  In the situation that the
-<a href="#netcam_url" >netcam_url</a> is used, the v4l2_palette option is ignored.
+<a href="#netcam_url" >netcam_url</a> option with the v4l2 prefix.  When using the
+<a href="#netcam_url" >netcam_url</a> option, the v4l2_palette option can be used to specify the
+V4L2_PIX_FMT_MJPEG and V4L2_PIX_FMT_H264 options ONLY.  If any of the other palette options
+are specified when using the <a href="#netcam_url" >netcam_url</a> the v4l2_palette option
+is ignored and the camera default is used.
 
-<ul>
-<li> V4L2_PIX_FMT_SN9C10X : 0  'S910'</li>
-<li> V4L2_PIX_FMT_SBGGR16 : 1  'BYR2'</li>
-<li> V4L2_PIX_FMT_SBGGR8  : 2  'BA81'</li>
-<li> V4L2_PIX_FMT_SPCA561 : 3  'S561'</li>
-<li> V4L2_PIX_FMT_SGBRG8  : 4  'GBRG'</li>
-<li> V4L2_PIX_FMT_SGRBG8  : 5  'GRBG'</li>
-<li> V4L2_PIX_FMT_PAC207  : 6  'P207'</li>
-<li> V4L2_PIX_FMT_PJPG    : 7  'PJPG'</li>
-<li> V4L2_PIX_FMT_MJPEG   : 8  'MJPEG'</li>
-<li> V4L2_PIX_FMT_JPEG    : 9  'JPEG'</li>
-<li> V4L2_PIX_FMT_RGB24   : 10 'RGB3'</li>
-<li> V4L2_PIX_FMT_SPCA501 : 11 'S501'</li>
-<li> V4L2_PIX_FMT_SPCA505 : 12 'S505'</li>
-<li> V4L2_PIX_FMT_SPCA508 : 13 'S508'</li>
-<li> V4L2_PIX_FMT_UYVY    : 14 'UYVY'</li>
-<li> V4L2_PIX_FMT_YUYV    : 15 'YUYV'</li>
-<li> V4L2_PIX_FMT_YUV422P : 16 '422P'</li>
-<li> V4L2_PIX_FMT_YUV420  : 17 'YU12'</li>
-<li> V4L2_PIX_FMT_Y10     : 18 'YU10'</li>
-<li> V4L2_PIX_FMT_Y12     : 19 'YU12'</li>
-<li> V4L2_PIX_FMT_GREY    : 20 'GREY'</li>
+<p></p>
 
+The V4L2_PIX_FMT_H264(21) option is valid ONLY when using the <a href="#netcam_url" >netcam_url</a> option.
+When V4L2_PIX_FMT_H264(21) is specified using the videodevice, Motion will change the v4l2_palette option to the
+default of V4L2_PIX_FMT_YUV420 (17)
 </ul>
 
 <p></p>
@@ -2856,7 +2961,7 @@ cannot connect to a video stream such a mpeg, mpeg4, divx. The URL must return o
 a rtsp stream, file or ftp.  When getting a still image, make sure to validate that the camera is serving up
 a actual raw JPG file and not a HTML page with an embedded JPG which is the current
 standard.
-When the netcam_url is defined the video4linux options above are ignored.
+When the netcam_url is defined the videodevice options above are mostly ignored. The options <a href="#width" >netcam_url</a>
 If the connection to a network camera is lost, Motion will reuse the last good image for
 approx 30 seconds. After 30 seconds the image is replaced by a grey image with a text
 telling that the signal is lost and when the connection was lost.
@@ -2870,60 +2975,87 @@ telling that the signal is lost and when the connection was lost.
   <li> Range / Valid values: Max 4095 characters</li>
   <li> Default: Not defined</li>
 </ul>
+<ul>
 <p></p>
 URL to use if you are using a network camera, size will be autodetected
 Available prefixes to the URL:
- <ul>
-<li>http://</li>
-<li>ftp:// </li>
-<li>mjpg:// </li>
-<li>rtsp:// </li>
-<li>mjpeg:// </li>
-<li>file:// </li>
-<li>v4l2:// </li>
- </ul>
 <p></p>
-<b>http://</b>  This prefix uses the traditional http format and opens the netcam looking for a motion jpg image.
+<b>http://</b>
+<ul>
+    This prefix uses the traditional http format and opens the netcam looking for a motion jpg image.
+</ul>
 <p></p>
-<b>ftp://</b>  This prefix opens the ftp site and grabs a static image.  The camera will be expected to periodically
-replace that static image as it processes images.
-<p></p>
-<b>mjpg://</b>  This prefix is experimental and when Motion sees this prefix it will replace the mjpg with http and
-then process the network camera using the extremely experimental method of grabbing motion jpg images.  The
-author has not observed that this experimental option is in any way functional.
-<p></p>
-<b>rtsp://</b>  This prefix is the standard for all modern network cameras.  It is recommended that users search the
-web or the camera manual for the exact connection string to use for their camera.  Once a potential connection
-string is found, it should be validated as being functional using a application such as ffplay or vlc.  The
-connection string that works for these applications is what should be specified for this option.  When using
-the rtsp format, Motion will ignore the netcam_keepalive and netcam_tolerant_check options.
 
+<b>ftp://</b>
+<ul>
+    This prefix opens the ftp site and grabs a static image.  The camera will be expected to periodically
+    replace that static image as it processes images.
+</ul>
 <p></p>
-<b>mjpeg://</b>  This is another experimental prefix.  The mjpeg is replaced with http by Motion internally.  The mjpeg
-option uses the ffmpeg libraries to retrieve images from the camera and forces the mjpeg format.  This option
-should be equivalent to using <code>ffplay -f mjpeg http://{yourip}</code>.  In certain situations, this option
-may result in better results than using the http protocol.  Motion will ignore the netcam_keepalive and
-netcam_tolerant_check options when this format is specified.
 
+<b>mjpg://</b>
+<ul>
+    This prefix is experimental and when Motion sees this prefix it will replace the mjpg with http and
+    then process the network camera using the extremely experimental method of grabbing motion jpg images.
+    <p></p>
+    The functionality of this option is unknown.
+</ul>
 <p></p>
-<b>file://</b>  This option allows for the processing of a static image.  A process outside of Motion would be needed to
-replace the image.  A scenario for this would be processing a large number of previously saved images.  The file
-option would point to a single location such as <code>/home/user/test/currentimage.jpg</code>  Then a bash script
-running external to Motion would loop through all the images and copy them into <code>currentimage.jpg</code>.
-Another situation would be when the ftp server is the same machine as what Motion is running on.  In this situation,
-rather than logging into the ftp server, this option can be used to point to the actual directory.
 
-The author believes that while the static image processing option is possible, a preferred approach would be to
-encode all the static images to a movie and then use ffmpeg to pipe the movie into a video loopback device.
+<b>rtsp://</b>
+<ul>
+    This prefix is the standard for all modern network cameras.  It is recommended that users search the
+    web or the camera manual for the exact connection string to use for their camera.
+    <p></p>
+    Once a potential connection string is found, it should be validated as being functional using a
+    external application such as ffplay or vlc.
+    <p></p>
+    The connection string that works for these applications is what needs to be specified for this option.
+    <p></p>
+    When using the rtsp format, Motion will ignore the netcam_keepalive and netcam_tolerant_check options.
+</ul>
 <p></p>
-<b>v4l2://</b>  This option allows for an alternative method of using a v4l2 device that is not natively supported
-by Motion.  A sample format for the netcam_url would be <code>v4l2:///dev/video0</code>  Internally, this
-is equivalent to running the following from the command line <code>ffplay -f v4l2 /dev/video0</code>
-Since this is not the preferred method of specifying a v4l2 device, many of the usual v4l2 controls such as
-hue, brightness, palette, etc as well as most of the netcam options are ignored.
+
+<b>mjpeg://</b>
+<ul>
+    This is a experimental prefix.  The mjpeg is replaced with http by Motion internally and forces the
+    use of the ffmpeg libraries and the mjpeg format.
+    <p></p>
+    This option is equivalent to using <code>ffplay -f mjpeg http://{yourip}</code>.
+    <p></p>
+    In certain situations, this option may result in better results than using the http protocol.
+    <p></p>
+    Motion will ignore the netcam_keepalive and netcam_tolerant_check options when this format is specified.
+</ul>
 <p></p>
-When the netcam_url is defined the video4linux options are ignored.
+
+<b>file://</b>
+<ul>
+    This option allows for the processing of a static image.  A process outside of Motion is required to replace the image.
+    <p></p>
+    A scenario for this would be processing a large number of previously saved images.  The file
+    option would point to a single location such as <code>/home/user/test/currentimage.jpg</code>  and a script
+    running external to Motion would loop through all the images and copy them into <code>currentimage.jpg</code>.
+</ul>
 <p></p>
+
+<b>v4l2://</b>
+<ul>
+    This option allows for an alternative method of using a v4l2 device that is not natively supported by Motion.
+    <p></p>
+    A sample format for the netcam_url would be <code>v4l2:///dev/video0</code>  Internally, this
+    is equivalent to running the following from the command line <code>ffplay -f v4l2 /dev/video0</code>
+    <p></p>
+    Since this is not the preferred method of specifying a v4l2 device, many of the usual v4l2 controls such as
+    hue, brightness, etc as well as other netcam options are ignored.
+    The options <a href="#width">width</a>, <a href="#height">height</a> as well as two of
+    the <a href="#v4l2_palette">v4l2_palette</a> can be used.  The two options
+    for <a href="#v4l2_palette">v4l2_palette</a> which can be used are option 8 (V4L2_PIX_FMT_MJPEG) and
+    option 21 (V4L2_PIX_FMT_H264).  If any other option is selected for the <a href="#v4l2_palette">v4l2_palette</a>
+    Motion will revert to the camera default.
+</ul>
+<p></p>
+</ul>
 
 <h3><a name="netcam_userpass"></a> netcam_userpass </h3>
 <p></p>

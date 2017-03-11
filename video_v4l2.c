@@ -430,6 +430,11 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
     /*
      * Note that this array MUST exactly match the config file list.
      * A higher index means better chance to be used
+     * Special note on the H264:  It must be kept within this
+     * list to keep the numbering correct even though it is not a
+     * valid format for the v4l2 components.  We edit conf option in
+     * the v4l2_start function so that it is impossible that this
+     * routine will ever get sent the H264.
      */
     static const u32 supported_formats[] = {
         V4L2_PIX_FMT_SN9C10X,
@@ -921,7 +926,6 @@ static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned 
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
-        case V4L2_PIX_FMT_H264:
             memcpy(map, the_buffer->ptr, viddev->v4l_bufsize);
             return 0;
 
@@ -1120,6 +1124,11 @@ int v4l2_start(struct context *cnt)
     if (conf->height % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 8", conf->height);
         return -2;
+    }
+    // The H264(21) is not supported via this module so change it to yuv420(17)
+    if (conf->v4l2_palette == 21 ) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "%s: H264(21) format not supported via videodevice.  Changing to default palette");
+        conf->v4l2_palette = 17;
     }
 
     width = conf->width;
