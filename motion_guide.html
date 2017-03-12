@@ -2975,25 +2975,26 @@ telling that the signal is lost and when the connection was lost.
   <li> Range / Valid values: Max 4095 characters</li>
   <li> Default: Not defined</li>
 </ul>
-<ul>
+
 <p></p>
-URL to use if you are using a network camera, size will be autodetected
+URL to use if you are using a network camera, size will be autodetected.
 Available prefixes to the URL:
 <p></p>
-<b>http://</b>
+<ul>
+<i>http://</i>
 <ul>
     This prefix uses the traditional http format and opens the netcam looking for a motion jpg image.
 </ul>
 <p></p>
 
-<b>ftp://</b>
+<i>ftp://</i>
 <ul>
     This prefix opens the ftp site and grabs a static image.  The camera will be expected to periodically
     replace that static image as it processes images.
 </ul>
 <p></p>
 
-<b>mjpg://</b>
+<i>mjpg://</i>
 <ul>
     This prefix is experimental and when Motion sees this prefix it will replace the mjpg with http and
     then process the network camera using the extremely experimental method of grabbing motion jpg images.
@@ -3002,7 +3003,7 @@ Available prefixes to the URL:
 </ul>
 <p></p>
 
-<b>rtsp://</b>
+<i>rtsp://</i>
 <ul>
     This prefix is the standard for all modern network cameras.  It is recommended that users search the
     web or the camera manual for the exact connection string to use for their camera.
@@ -3016,7 +3017,7 @@ Available prefixes to the URL:
 </ul>
 <p></p>
 
-<b>mjpeg://</b>
+<i>mjpeg://</i>
 <ul>
     This is a experimental prefix.  The mjpeg is replaced with http by Motion internally and forces the
     use of the ffmpeg libraries and the mjpeg format.
@@ -3029,7 +3030,7 @@ Available prefixes to the URL:
 </ul>
 <p></p>
 
-<b>file://</b>
+<i>file://</i>
 <ul>
     This option allows for the processing of a static image.  A process outside of Motion is required to replace the image.
     <p></p>
@@ -3039,7 +3040,7 @@ Available prefixes to the URL:
 </ul>
 <p></p>
 
-<b>v4l2://</b>
+<i>v4l2://</i>
 <ul>
     This option allows for an alternative method of using a v4l2 device that is not natively supported by Motion.
     <p></p>
