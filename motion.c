@@ -744,7 +744,7 @@ static void init_mask_privacy(struct context *cnt){
 
     int indxrow;
     int indxcol;
-    int start_cr, start_cb;
+    int start_cr, offset_cb, start_cb;
 
     FILE *picture;
 
@@ -757,6 +757,10 @@ static void init_mask_privacy(struct context *cnt){
              * width and height from imgs.
              */
             cnt->imgs.mask_privacy = get_pgm(picture, cnt->imgs.width, cnt->imgs.height);
+            /*
+             * We only need the "or" mask for the U & V chrominance area.
+             */
+            cnt->imgs.mask_privacy_uv = mymalloc((cnt->imgs.height * cnt->imgs.width) / 2);
             myfclose(picture);
         } else {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error opening mask file %s",
@@ -773,20 +777,28 @@ static void init_mask_privacy(struct context *cnt){
         } else {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "%s: Mask privacy file \"%s\" loaded.", cnt->conf.mask_privacy);
             start_cr = (cnt->imgs.height * cnt->imgs.width);
-            start_cb = start_cr + ((cnt->imgs.height * cnt->imgs.width)/4);
+            offset_cb = ((cnt->imgs.height * cnt->imgs.width)/4);
+            start_cb = start_cr + offset_cb;
 
             for (indxrow = 0; indxrow < cnt->imgs.height; indxrow++) {
                 for (indxcol = 0; indxcol < cnt->imgs.width; indxcol++) {
-                    if ( cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] == 0xff) {
+                    int y_index = indxcol + (indxrow * cnt->imgs.width);
+                    if ( cnt->imgs.mask_privacy[y_index] == 0xff) {
                         if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
-                            cnt->imgs.mask_privacy[ start_cr + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0xff;
-                            cnt->imgs.mask_privacy[ start_cb + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0xff;
+                            int uv_index = (indxcol/2) + ((indxrow * cnt->imgs.width)/4);
+                            cnt->imgs.mask_privacy[start_cr + uv_index] = 0xff;
+                            cnt->imgs.mask_privacy[start_cb + uv_index] = 0xff;
+                            cnt->imgs.mask_privacy_uv[uv_index] = 0x00;
+                            cnt->imgs.mask_privacy_uv[offset_cb + uv_index] = 0x00;
                         }
                     } else{
-                        cnt->imgs.mask_privacy[indxcol + (indxrow * cnt->imgs.width)] = 0x00;
+                        cnt->imgs.mask_privacy[y_index] = 0x00;
                         if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
-                            cnt->imgs.mask_privacy[ start_cr + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0x00;
-                            cnt->imgs.mask_privacy[ start_cb + (indxcol/2) + ((indxrow * cnt->imgs.width)/4)] = 0x00;
+                            int uv_index = (indxcol/2) + ((indxrow * cnt->imgs.width)/4);
+                            cnt->imgs.mask_privacy[start_cr + uv_index] = 0x00;
+                            cnt->imgs.mask_privacy[start_cb + uv_index] = 0x00;
+                            cnt->imgs.mask_privacy_uv[uv_index] = 0x80;
+                            cnt->imgs.mask_privacy_uv[offset_cb + uv_index] = 0x80;
                         }
 
                     }
@@ -795,6 +807,7 @@ static void init_mask_privacy(struct context *cnt){
         }
     } else {
         cnt->imgs.mask_privacy = NULL;
+        cnt->imgs.mask_privacy_uv = NULL;
     }
 
 }
@@ -1269,6 +1282,9 @@ static void motion_cleanup(struct context *cnt)
     if (cnt->imgs.mask_privacy) free(cnt->imgs.mask_privacy);
     cnt->imgs.mask_privacy = NULL;
 
+    if (cnt->imgs.mask_privacy_uv) free(cnt->imgs.mask_privacy_uv);
+    cnt->imgs.mask_privacy_uv = NULL;
+
     free(cnt->imgs.common_buffer);
     cnt->imgs.common_buffer = NULL;
 
@@ -1321,18 +1337,53 @@ static void motion_cleanup(struct context *cnt)
 
 static void mlp_mask_privacy(struct context *cnt){
 
-  int indxloc;
+  if (cnt->imgs.mask_privacy == NULL) return;
 
-  if (cnt->imgs.mask_privacy != NULL){
-      for (indxloc = 0; indxloc < (cnt->imgs.height * cnt->imgs.width); indxloc++) {
-          if (cnt->imgs.mask_privacy[indxloc] == 0x00)
-              cnt->current_image->image[indxloc] = 0x00;
-      }
-      for (indxloc = (cnt->imgs.height * cnt->imgs.width); indxloc < cnt->imgs.size; indxloc++) {
-          if (cnt->imgs.mask_privacy[indxloc] == 0x00)
-              cnt->current_image->image[indxloc] = 0x80;
-      }
+  /*
+   * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
+   * bytes at a time, providing a significant boost in performance.
+   * Then a trailer loop takes care of any remaining bytes.
+   */
+  int pixels = cnt->imgs.height * cnt->imgs.width;
+  unsigned char *image = cnt->current_image->image;
+  const unsigned char *mask = cnt->imgs.mask_privacy;
 
+  // Mask brightness.
+  //
+  int index = pixels;
+
+  while (index >= sizeof(unsigned long)) {
+     *((unsigned long *)image) &= *((unsigned long *)mask);
+     image += sizeof(unsigned long);
+     mask += sizeof(unsigned long);
+     index -= sizeof(unsigned long);
+  }
+  while (--index >= 0) {
+     *(image++) &= *(mask++);
+  }
+
+  // Mask chrominance.
+  //
+  index = cnt->imgs.size - pixels;
+  const unsigned char *maskuv = cnt->imgs.mask_privacy_uv;
+
+  while (index >= sizeof(unsigned long)) {
+     index -= sizeof(unsigned long);
+     /*
+      * Replace the masked bytes with 0x080. This is done using two masks:
+      * the normal privacy mask is used to clear the masked bits, the
+      * "or" privacy mask is used to write 0x80. The benefit of that method
+      * is that we process 4 or 8 bytes in just two operations.
+      */
+     *((unsigned long *)image) &= *((unsigned long *)mask);
+     mask += sizeof(unsigned long);
+     *((unsigned long *)image) |= *((unsigned long *)maskuv);
+     maskuv += sizeof(unsigned long);
+     image += sizeof(unsigned long);
+  }
+  while (--index >= 0) {
+     if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
+     image += 1;
   }
 }
 
