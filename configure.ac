@@ -98,12 +98,9 @@ fi
 ##############################################################################
 ###  Check for threading
 ##############################################################################
-if test "${DISTRO}" != "Linux" && test "${DISTRO}" != "Darwin" ; then
-  AC_CHECK_HEADERS(pthread.h pthread_np.h,[THREADS="yes"],[THREADS="no"])
-  AC_MSG_CHECKING(for threads)
-  AC_MSG_RESULT($THREADS)
-else
-  AC_CHECK_HEADERS(pthread.h,[THREADS="yes"],[THREADS="no"])
+THREADS="yes"
+if test "${DISTRO}" = "FreeBSD"; then
+  AC_CHECK_HEADERS(pthread_np.h,[THREADS="yes"],[THREADS="no"])
   AC_MSG_CHECKING(for threads)
   AC_MSG_RESULT($THREADS)
 fi

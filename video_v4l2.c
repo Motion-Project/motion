@@ -105,6 +105,10 @@
 #define V4L2_PIX_FMT_GREY     v4l2_fourcc('G', 'R', 'E', 'Y') /* 8 Greyscale     */
 #endif
 
+#ifndef V4L2_PIX_FMT_H264
+#define V4L2_PIX_FMT_H264     v4l2_fourcc('H', '2', '6', '4') /* H264     */
+#endif
+
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
@@ -426,6 +430,11 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
     /*
      * Note that this array MUST exactly match the config file list.
      * A higher index means better chance to be used
+     * Special note on the H264:  It must be kept within this
+     * list to keep the numbering correct even though it is not a
+     * valid format for the v4l2 components.  We edit conf option in
+     * the v4l2_start function so that it is impossible that this
+     * routine will ever get sent the H264.
      */
     static const u32 supported_formats[] = {
         V4L2_PIX_FMT_SN9C10X,
@@ -448,7 +457,8 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
         V4L2_PIX_FMT_YUV420, /* most efficient for motion */
         V4L2_PIX_FMT_Y10,
         V4L2_PIX_FMT_Y12,
-        V4L2_PIX_FMT_GREY
+        V4L2_PIX_FMT_GREY,
+        V4L2_PIX_FMT_H264
     };
 
     int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
@@ -1114,6 +1124,11 @@ int v4l2_start(struct context *cnt)
     if (conf->height % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: config image height (%d) is not modulo 8", conf->height);
         return -2;
+    }
+    // The H264(21) is not supported via this module so change it to yuv420(17)
+    if (conf->v4l2_palette == 21 ) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "%s: H264(21) format not supported via videodevice.  Changing to default palette");
+        conf->v4l2_palette = 17;
     }
 
     width = conf->width;
