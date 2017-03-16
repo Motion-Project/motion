@@ -265,6 +265,40 @@ if test "x${MYSQL}" = "xno"; then
     AC_MSG_CHECKING(for mysql support)
     AC_MSG_RESULT(skipped)
 else
+    AC_MSG_CHECKING([for MySQL library directory])
+    MYSQL_C_LIB_DIR=
+    MYSQL_lib_check="/usr/lib64 /usr/lib /usr/lib64/mysql /usr/lib/mysql /usr/local/lib64"
+    for m in $MYSQL_lib_check; do        if test -d "$m" && \
+           (test -f "$m/libmysqlclient.so" || \
+            test -f "$m/libmysqlclient.a"); then
+            MYSQL_C_LIB_DIR=$m
+            break
+        fi
+    done
+    if test -z "$MYSQL_C_LIB_DIR"; then
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([Didn't find mysqlclient library in '$MYSQL_lib_check'])
+    fi
+
+    case "$MYSQL_C_LIB_DIR" in
+        /* )
+            ;;
+        * )
+            AC_MSG_RESULT([])
+            AC_MSG_ERROR([The MySQL library directory ($MYSQL_C_LIB_DIR) must be an absolute path.]) ;;
+    esac
+
+    AC_MSG_RESULT([$MYSQL_C_LIB_DIR])
+
+    case "$MYSQL_C_LIB_DIR" in
+        /usr/lib)
+            MYSQL_C_LIB_DIR=
+            ;;
+        *)
+            TEMP_LDFLAGS="$TEMP_LDFLAGS -L${MYSQL_C_LIB_DIR}"
+            ;;
+    esac
+
     AC_CHECK_HEADERS(mysql/mysql.h,[MYSQL="yes"],[MYSQL="no"])
     AC_MSG_CHECKING(for mysql support)
     AC_MSG_RESULT($MYSQL)
