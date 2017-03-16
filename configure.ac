@@ -267,7 +267,7 @@ if test "x${MYSQL}" = "xno"; then
 else
     AC_MSG_CHECKING([for MySQL library directory])
     MYSQL_C_LIB_DIR=
-    MYSQL_lib_check="/usr/lib64 /usr/lib /usr/lib64/mysql /usr/lib/mysql /usr/lib/i386-linux-gnu /usr/local/lib64"
+    MYSQL_lib_check="/usr/lib64 /usr/lib /usr/lib64/mysql /usr/lib/mysql /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu /usr/local/lib64"
     for m in $MYSQL_lib_check; do        if test -d "$m" && \
            (test -f "$m/libmysqlclient.so" || \
             test -f "$m/libmysqlclient.a"); then
@@ -291,7 +291,7 @@ else
     AC_MSG_RESULT([$MYSQL_C_LIB_DIR])
 
     case "$MYSQL_C_LIB_DIR" in
-        /usr/lib |  /usr/lib/i386-linux-gnu)
+        /usr/lib |  /usr/lib/*-linux-gnu)
             MYSQL_C_LIB_DIR=
             ;;
         *)
