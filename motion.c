@@ -584,7 +584,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
         if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE)
             break;
 
-        /* Set inte global cotext that we are working with this image */
+        /* Set inte global context that we are working with this image */
         cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_out];
 
         if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot < cnt->conf.frame_limit) {
@@ -670,7 +670,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
         /* Mark the image as saved */
         cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags |= IMAGE_SAVED;
 
-        /* Store it as a preview image, only if it have motion */
+        /* Store it as a preview image, only if it has motion */
         if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_MOTION) {
             /* Check for most significant preview-shot when output_pictures=best */
             if (cnt->new_img & NEWIMG_BEST) {
@@ -1025,6 +1025,7 @@ static int motion_init(struct context *cnt)
         if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
             // close database to be sure that we are not leaking
             mysql_close(cnt->database);
+            cnt->database_event_id = 0;
 
             cnt->database = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
@@ -1317,6 +1318,7 @@ static void motion_cleanup(struct context *cnt)
 #ifdef HAVE_MYSQL
         if ( (!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
             mysql_close(cnt->database);
+            cnt->database_event_id = 0;
         }
 #endif /* HAVE_MYSQL */
 
@@ -3358,6 +3360,11 @@ static void mystrftime_long (const struct context *cnt,
         sprintf(out, "%*d", width, cnt->movie_fps);
         return;
     }
+    if (SPECIFIERWORD("dbeventid")) {
+        sprintf(out, "%*llu", width, cnt->database_event_id);
+        return;
+    }
+
     // Not a valid modifier keyword. Log the error and ignore.
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
         "%s: invalid format specifier keyword %*.*s", l, l, word);

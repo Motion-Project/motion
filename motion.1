@@ -1721,6 +1721,22 @@ insert into security(camera, filename, frame, file_type, time_stamp, text_event)
 .RE
 
 .TP
+.B sql_query_start
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+SQL statement to execute at the start of a event.
+For mysql databases a unique id is returned in the dbeventid conversion specifier but for
+other databases, the dbeventid conversion specifier is assigned to zero.
+.RE
+.RE
+.RE
+
+.TP
 .B database_type
 .RS
 .nf
@@ -2095,6 +2111,17 @@ The time zone or name or abbreviation.
 .TP
 .B %$
 The camera name.
+.TP
+.B %{host}
+The computer host name
+.TP
+.B %{fps}
+The frame per seconds.
+.TP
+.B %{dbeventid}
+The id number returned from mysql_insert_id.
+
+
 
 .TP
 .B More information
