@@ -16,8 +16,9 @@
 #include <syslog.h>
 
 /* Logging mode */
-#define LOGMODE_FILE            0   /* Log messages to file   */
-#define LOGMODE_SYSLOG          1   /* Log messages to syslog */
+#define LOGMODE_NONE            0   /* No logging             */
+#define LOGMODE_FILE            1   /* Log messages to file   */
+#define LOGMODE_SYSLOG          2   /* Log messages to syslog */
 
 #define NO_ERRNO                0   /* Flag to avoid how message associated to errno */
 #define SHOW_ERRNO              1   /* Flag to show message associated to errno */

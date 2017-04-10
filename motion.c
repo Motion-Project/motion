@@ -444,7 +444,7 @@ static void motion_remove_pid(void)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Closing logfile (%s).",
                    cnt_list[0]->conf.log_file);
         myfclose(ptr_logfile);
-        set_log_mode(LOGMODE_SYSLOG);
+        set_log_mode(LOGMODE_NONE);
         ptr_logfile = NULL;
     }
 
