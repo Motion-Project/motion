@@ -24,6 +24,7 @@ struct rtsp_context {
     char*                 user;
     char*                 pass;
     int                   interrupted;
+    int                   active;
     enum RTSP_STATUS      status;
     struct timeval        startreadtime;
     struct SwsContext*   swsctx;

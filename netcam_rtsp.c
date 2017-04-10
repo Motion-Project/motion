@@ -59,6 +59,7 @@ static void netcam_rtsp_null_context(netcam_context_ptr netcam){
     netcam->rtsp->codec_context  = NULL;
     netcam->rtsp->format_context = NULL;
 
+    netcam->rtsp->active = 0;
 }
 /**
  * netcam_rtsp_close_context
@@ -184,7 +185,7 @@ static int netcam_open_codec(netcam_context_ptr netcam){
     if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Could not find stream in input!: %s",errstr);
-        return retcd;
+        return (retcd < 0) ? retcd : -1;
     }
     netcam->rtsp->video_stream_index = retcd;
     st = netcam->rtsp->format_context->streams[netcam->rtsp->video_stream_index];
@@ -223,7 +224,7 @@ static int netcam_open_codec(netcam_context_ptr netcam){
     if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to open codec!: %s", errstr);
-        return retcd;
+        return (retcd < 0) ? retcd : -1;
     }
 
     return 0;
@@ -262,7 +263,7 @@ struct rtsp_context *rtsp_new_context(void){
 *
 * Parameters
 *
-*       ctx   We pass in the rtsp context to use it to look for the
+*       ctx   We pass in the netcam context to use it to look for the
 *             readingframe flag as well as the time that we started
 *             the read attempt.
 *
@@ -272,7 +273,14 @@ struct rtsp_context *rtsp_new_context(void){
 *
 */
 static int netcam_interrupt_rtsp(void *ctx){
-    struct rtsp_context *rtsp = (struct rtsp_context *)ctx;
+    netcam_context_ptr netcam = (netcam_context_ptr)ctx;
+    struct rtsp_context *rtsp = netcam->rtsp;
+
+    if (netcam->finish) {
+        /* netcam_cleanup() wants us to stop */
+        rtsp->interrupted = 1;
+        return 1;
+    }
 
     if (rtsp->status == RTSP_CONNECTED) {
         return 0;
@@ -473,7 +481,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
     AVDictionary *opts = 0;
     netcam->rtsp->format_context = avformat_alloc_context();
     netcam->rtsp->format_context->interrupt_callback.callback = netcam_interrupt_rtsp;
-    netcam->rtsp->format_context->interrupt_callback.opaque = netcam->rtsp;
+    netcam->rtsp->format_context->interrupt_callback.opaque = netcam;
 
     netcam->rtsp->interrupted = 0;
     if (gettimeofday(&netcam->rtsp->startreadtime, NULL) < 0) {
@@ -527,7 +535,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         }
         av_dict_free(&opts);
         //The format context gets freed upon any error from open_input.
-        return retcd;
+        return (retcd < 0) ? retcd : -1;
     }
     av_dict_free(&opts);
 
@@ -601,6 +609,8 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
         netcam_rtsp_close_context(netcam);
         return -1;
     }
+
+    netcam->rtsp->active = 1;
 
     return 0;
 
