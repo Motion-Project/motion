@@ -3088,7 +3088,7 @@ int main (int argc, char **argv)
                         }
 
                         if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
-                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful,"
+                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Thread %d - Watchdog timeout, did NOT restart graceful, "
                                        "killing it!", cnt_list[i]->threadnr);
                             /* The problem is pthread_cancel might just wake up the thread so it runs to completion
                              * or it might not.  In either case don't rip the carpet out under it by
