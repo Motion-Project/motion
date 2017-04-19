@@ -81,7 +81,7 @@ include_directories(${JPEG_INCLUDE_DIR})
 list(APPEND LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ${JPEG_LIBRARIES})
 
 if(WITH_FFMPEG)
-	pkg_check_modules(FFMPEG REQUIRED libavutil libavformat libavcodec libswscale)
+	pkg_check_modules(FFMPEG REQUIRED libavutil libavformat libavcodec libswscale libavdevice)
 	include_directories(${FFMPEG_INCLUDE_DIRS})
 	link_directories(${FFMPEG_LIBRARY_DIRS})
 	list(APPEND LINK_LIBRARIES ${FFMPEG_LIBRARIES})
