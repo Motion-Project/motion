@@ -91,14 +91,22 @@ void set_log_level(unsigned int level)
 
 /**
  * set_log_mode
- *      Sets mode of logging , could be using syslog or files.
+ *      Sets mode of logging, could be using syslog or files.
  *
  * Returns: nothing.
  */
 void set_log_mode(int mode)
 {
+    int prev_mode = log_mode;
+
     log_mode = mode;
     //printf("set log mode %d\n", mode);
+
+    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG)
+        openlog("motion", LOG_PID, LOG_USER);
+
+    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG)
+        closelog();
 }
 
 /**
@@ -109,12 +117,14 @@ void set_log_mode(int mode)
  */
 FILE * set_logfile(const char *logfile_name)
 {
-    log_mode = LOGMODE_SYSLOG;  /* Setup temporary to let log if myfopen fails */
+    /* Setup temporary to let log if myfopen fails */
+    set_log_mode(LOGMODE_SYSLOG);
+
     logfile = myfopen(logfile_name, "a");
 
     /* If logfile was opened correctly */
     if (logfile)
-        log_mode = LOGMODE_FILE;
+        set_log_mode(LOGMODE_FILE);
 
     return logfile;
 }
@@ -197,18 +207,19 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 #endif
 
     /*
-     * Prefix the message with the log level string, log type string,
-     * time and thread number. e.g. [1] [ERR] [ENC] [Apr 03 00:08:44] blah
-     *
+     * Prefix the message with the thread number and name,
+     * log level string, log type string, and time.
+     * e.g. [1:enc] [ERR] [ALL] [Apr 03 00:08:44] blah
      */
-    if (!log_mode) {
+    if (log_mode == LOGMODE_FILE) {
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
                      threadnr, threadname, get_log_level_str(level), get_log_type_str(type),
                      str_time());
     } else {
     /*
-     * Prefix the message with the log level string, log type string
-     * and thread number. e.g. [1] [DBG] [TRK] blah
+     * Prefix the message with the thread number and name,
+     * log level string and log type string.
+     * e.g. [1:trk] [DBG] [ALL] blah
      */
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
                      threadnr, threadname, get_log_level_str(level), get_log_type_str(type));
@@ -217,6 +228,7 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     /* Next add the user's message. */
     va_start(ap, fmt);
     n += vsnprintf(buf + n, sizeof(buf) - n, fmt, ap);
+    va_end(ap);
     buf[1023] = '\0';
 
     /* If errno_flag is set, add on the library error message. */
@@ -245,20 +257,19 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 #endif
     }
 
-    if (!log_mode) {
+    switch (log_mode) {
+    case LOGMODE_FILE:
         strncat(buf, "\n", 1024 - strlen(buf));
         fputs(buf, logfile);
         fflush(logfile);
+        break;
 
-    /* If log_mode, send the message to the syslog. */
-    } else {
+    case LOGMODE_SYSLOG:
         syslog(level, "%s", buf);
         strncat(buf, "\n", 1024 - strlen(buf));
         fputs(buf, stderr);
         fflush(stderr);
+        break;
     }
-
-    /* Clean up the argument list routine. */
-    va_end(ap);
 }
 

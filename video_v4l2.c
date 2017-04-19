@@ -1011,7 +1011,7 @@ static void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsign
             unsigned int counter = 0;
 
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: set_input_skip_frame "
-                       "switch_time=%ld:%ld", switchTime.tv_sec, switchTime.tv_usec);
+                       "switch_time=%ld.%06ld", switchTime.tv_sec, switchTime.tv_usec);
 
             /* Avoid hang using the number of mmap buffers */
             while(counter < vid_source->req.count) {
@@ -1025,7 +1025,7 @@ static void v4l2_set_input(struct context *cnt, struct video_dev *viddev, unsign
                     break;
 
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: got frame before "
-                           " switch timestamp=%ld:%ld",
+                           "switch timestamp=%ld.%06ld",
                            vid_source->buf.timestamp.tv_sec,
                            vid_source->buf.timestamp.tv_usec);
             }

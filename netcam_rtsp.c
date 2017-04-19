@@ -282,7 +282,7 @@ static int netcam_interrupt_rtsp(void *ctx){
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 10){
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s", rtsp->netcam_url);
             rtsp->interrupted = 1;
             return 1;
         } else{
@@ -299,7 +299,7 @@ static int netcam_interrupt_rtsp(void *ctx){
             MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "%s: get interrupt time failed");
         }
         if ((interrupttime.tv_sec - rtsp->startreadtime.tv_sec ) > 30){
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s",rtsp->path);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "%s: Camera timed out for %s", rtsp->netcam_url);
             rtsp->interrupted = 1;
             return 1;
         } else{
@@ -464,7 +464,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
 
     if (netcam->rtsp->path == NULL) {
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Null path passed to connect (%s)", netcam->rtsp->path);
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Null path passed to connect");
         }
         return -1;
     }
@@ -523,7 +523,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
     if ((retcd < 0) || (netcam->rtsp->interrupted == 1)){
         if (netcam->rtsp->status == RTSP_NOTCONNECTED){
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->path,errstr);
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: unable to open input(%s): %s", netcam->rtsp->netcam_url, errstr);
         }
         av_dict_free(&opts);
         //The format context gets freed upon any error from open_input.
@@ -940,6 +940,12 @@ int netcam_setup_rtsp(netcam_context_ptr netcam, struct url_t *url){
     netcam->rtsp->path = (char *)ptr;
 
     netcam_url_free(url);
+
+    /*
+     * Keep a pointer to the original URL for logging purposes
+     * (we don't want to put passwords into the log)
+     */
+    netcam->rtsp->netcam_url = cnt->conf.netcam_url;
 
     /*
      * Now we need to set some flags
