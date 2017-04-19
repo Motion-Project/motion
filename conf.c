@@ -783,7 +783,7 @@ config_param config_params[] = {
     "# Enables and defines variable bitrate for the ffmpeg encoder.\n"
     "# ffmpeg_bps is ignored if variable bitrate is enabled.\n"
     "# Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps,\n"
-    "# or the range 2 - 31 where 2 means best quality and 31 is worst.",
+    "# or the range 1 - 100 where 1 means worst quality and 100 is best.",
     0,
     CONF_OFFSET(ffmpeg_vbr),
     copy_int,
