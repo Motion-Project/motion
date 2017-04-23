@@ -25,6 +25,7 @@ struct rtsp_context {
     char*                 pass;
     const char*           netcam_url;
     int                   interrupted;
+    int                   active;
     enum RTSP_STATUS      status;
     struct timeval        startreadtime;
     struct SwsContext*   swsctx;
