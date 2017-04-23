@@ -104,7 +104,11 @@ if(WITH_SQLITE3)
 endif(WITH_SQLITE3)
 if(WITH_MMAL)
 	find_package(MMAL REQUIRED)
-	list(APPEND SRC_FILES mmalcam.c)
+	include_directories(${MMAL_INCLUDE_DIRS})
+	list(APPEND SRC_FILES mmalcam.c raspicam/RaspiCamControl.c raspicam/RaspiCLI.c)
+	list(APPEND LINK_LIBRARIES ${MMAL_LIBRARIES})
+	list(APPEND LINK_LIBRARIES vcos vchostif vcilcs)
+
 endif(WITH_MMAL)
 
 message("-- Configuration: " )
