@@ -81,29 +81,31 @@ static void netcam_rtsp_close_context(netcam_context_ptr netcam){
 static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *ctx_codec){
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    int retcd = 0;
+    int retcd;
     char errstr[128];
 
     if (packet) {
         retcd = avcodec_send_packet(ctx_codec, packet);
+        assert(retcd != AVERROR(EAGAIN));
         if (retcd < 0 && retcd != AVERROR_EOF){
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error sending packet: %s",errstr);
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error sending packet to codec: %s", errstr);
             return -1;
         }
     }
 
     retcd = avcodec_receive_frame(ctx_codec, frame);
+    if (retcd == AVERROR(EAGAIN)) return 0;
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error receiving packet: %s",errstr);
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error receiving frame from codec: %s", errstr);
         return -1;
     }
-    return 0;
+    return 1;
 
 #else
 
-    int retcd = 0;
+    int retcd;
     int check = 0;
     char errstr[128];
 
@@ -113,8 +115,8 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
         return -1;
     }
-    if (check == 0) return -1;
-    return 0;
+    if (check == 0 || retcd == 0) return 0;
+    return 1;
 
 #endif
 
@@ -127,22 +129,23 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
  * buffer
  *
  * Parameters:
- *      packet    The packet that was read from av_read
+ *      packet    The packet that was read from av_read, or NULL
  *      buffer    The buffer that is the final destination
  *      frame     The frame into which we decode the packet
  *
  *
  * Returns:
- *      Failure    0(zero)
+ *      Error      Negative value
+ *      No result  0(zero)
  *      Success    The size of the frame decoded
  */
 static int rtsp_decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame *frame, AVCodecContext *ctx_codec){
 
-    int frame_size = 0;
-    int retcd = 0;
+    int frame_size;
+    int retcd;
 
     retcd = rtsp_decode_video(packet, frame, ctx_codec);
-    if (retcd < 0) return 0;
+    if (retcd <= 0) return retcd;
 
     frame_size = my_image_get_buffer_size(ctx_codec->pix_fmt, ctx_codec->width, ctx_codec->height);
 
@@ -151,7 +154,7 @@ static int rtsp_decode_packet(AVPacket *packet, netcam_buff_ptr buffer, AVFrame 
     retcd = my_image_copy_to_buffer(frame, (uint8_t *)buffer->ptr,ctx_codec->pix_fmt,ctx_codec->width,ctx_codec->height, frame_size);
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding video packet: Copying to buffer");
-        return 0;
+        return -1;
     }
 
     buffer->used = frame_size;
@@ -348,25 +351,21 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     packet.data = NULL;
     packet.size = 0;
 
-    size_decoded = 0;
-
     if (gettimeofday(&curtime, NULL) < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "%s: gettimeofday");
     }
     netcam->rtsp->startreadtime = curtime;
     netcam->rtsp->interrupted = 0;
-
     netcam->rtsp->status = RTSP_READINGIMAGE;
+
+    /* First, check whether the codec has any frames ready to go
+     * before we feed it new packets
+     */
+    size_decoded = rtsp_decode_packet(NULL, buffer, netcam->rtsp->frame, netcam->rtsp->codec_context);
+
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
-        if(packet.stream_index != netcam->rtsp->video_stream_index) {
-            my_packet_unref(packet);
-            av_init_packet(&packet);
-            packet.data = NULL;
-            packet.size = 0;
-            // not our packet, skip
-           continue;
-        }
-        size_decoded = rtsp_decode_packet(&packet, buffer, netcam->rtsp->frame, netcam->rtsp->codec_context);
+        if (packet.stream_index == netcam->rtsp->video_stream_index)
+            size_decoded = rtsp_decode_packet(&packet, buffer, netcam->rtsp->frame, netcam->rtsp->codec_context);
 
         my_packet_unref(packet);
         av_init_packet(&packet);
@@ -375,10 +374,7 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     }
     netcam->rtsp->status = RTSP_CONNECTED;
 
-    // at this point, we are finished with the packet
-    my_packet_unref(packet);
-
-    if ((size_decoded == 0) || (netcam->rtsp->interrupted == 1)) {
+    if ((size_decoded <= 0) || (netcam->rtsp->interrupted == 1)) {
         // something went wrong, end of stream? interrupted?
         netcam_rtsp_close_context(netcam);
         return -1;

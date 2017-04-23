@@ -38,6 +38,7 @@
 #include <signal.h>
 #include <limits.h>
 #include <errno.h>
+#include <assert.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
