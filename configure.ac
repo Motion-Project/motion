@@ -45,7 +45,7 @@ if test "${DISTRO}" = "Darwin"; then
   TEMP_LDFLAGS="${LDFLAGS} -L/sw/lib"
   TEMP_LIBS="-L/sw/lib"
 else
-  if test "x${DISTRO}" != "Linux"; then
+  if test "${DISTRO}" != "Linux"; then
     TEMP_CFLAGS="${CFLAGS} -I/usr/local/include"
     TEMP_CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
     TEMP_LDFLAGS="${LDFLAGS} -L/usr/local/lib"
