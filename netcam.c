@@ -1875,6 +1875,7 @@ static void *netcam_handler_loop(void *arg)
             }
         }
 
+#ifdef HAVE_FFMPEG
         if (netcam->caps.streaming == NCS_RTSP) {
             if (!netcam->rtsp->active) {      // We must have disconnected.  Try to reconnect
                 if ((netcam->rtsp->status == RTSP_CONNECTED) ||
@@ -1898,6 +1899,7 @@ static void *netcam_handler_loop(void *arg)
                 }
             }
         }
+#endif /* HAVE_FFMPEG */
 
         if (netcam->caps.streaming != NCS_RTSP) {
             if (netcam->get_image(netcam) < 0) {
