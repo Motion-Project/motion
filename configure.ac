@@ -132,7 +132,7 @@ AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not f
 AC_ARG_WITH([webp],
     AS_HELP_STRING([--with-webp],
       [Compile with Webp image support]),
-    WEBP="yes",
+    WEBP="$withval",
     WEBP="no")
 
 HAVE_WEBP=""
