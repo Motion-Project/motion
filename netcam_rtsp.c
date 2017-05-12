@@ -105,9 +105,17 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
 
 #else
 
+    AVPacket empty_packet;
     int retcd;
     int check = 0;
     char errstr[128];
+
+    if (!packet) {
+        av_init_packet(&empty_packet);
+        empty_packet.data = NULL;
+        empty_packet.size = 0;
+        packet = &empty_packet;
+    }
 
     retcd = avcodec_decode_video2(ctx_codec, frame, &check, packet);
     if (retcd < 0) {
