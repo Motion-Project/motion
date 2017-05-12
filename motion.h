@@ -62,8 +62,10 @@
 #define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(name)
 #elif defined(BSD)
 #define MOTION_PTHREAD_SETNAME(name)  pthread_set_name_np(pthread_self(), name)
-#else
+#elif HAVE_PTHREAD_SETNAME_NP
 #define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(pthread_self(), name)
+#else
+#define MOTION_PTHREAD_SETNAME(name)
 #endif
 
 /**
