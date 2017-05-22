@@ -396,7 +396,7 @@ int mmalcam_next(struct context *cnt, unsigned char *map)
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to return a buffer to the camera video port");
     }
 
-    if (cnt->rotate_data.degrees > 0)
+    if (cnt->rotate_data.degrees > 0 || cnt->rotate_data.axis != FLIP_TYPE_NONE)
         rotate_map(cnt, map);
 
     return 0;

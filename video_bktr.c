@@ -956,7 +956,7 @@ int bktr_next(struct context *cnt, unsigned char *map)
     }
 
     /* Rotate the image as specified */
-    if (cnt->rotate_data.degrees > 0)
+    if (cnt->rotate_data.degrees > 0 || cnt->rotate_data.axis != FLIP_TYPE_NONE)
         rotate_map(cnt, map);
 
     return ret;
