@@ -1251,6 +1251,11 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a></td>
 	</tr>
 	<tr>
+		<td height="17" align="left">flip_axis</td>
+		<td align="left">flip_axis</td>
+		<td align="left"><a href="#flip_axis" >flip_axis</a></td>
+	</tr>
+	<tr>
 		<td height="17" align="left">framerate</td>
 		<td align="left">framerate</td>
 		<td align="left"><a href="#framerate" >framerate</a></td>
@@ -1494,7 +1499,7 @@ Some configuration options are only used if Motion is built on a system that has
 	<tr>
 		<td height="17" align="left">rotate</td>
 		<td align="left">rotate</td>
-		<td align="left"><a href="#auto_brightness" >rotate</a></td>
+		<td align="left"><a href="#rotate" >rotate</a></td>
 	</tr>
 	<tr>
 		<td height="17" align="left">roundrobin_frames</td>
@@ -1942,6 +1947,7 @@ Some configuration options are only used if Motion is built on a system that has
  	<tbody>
   	  <tr>
        <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
        <td bgcolor="#edf4f9" ><a href="#width" >width</a> </td>
        <td bgcolor="#edf4f9" ><a href="#height" >height</a> </td>
        <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
@@ -3199,6 +3205,19 @@ Note that the CPU load increases when using this feature with a value other than
 Motion automatically swaps width and height if you rotate 90 or 270 degrees, so you don't have to touch these options.
 <p></p>
 
+<h3><a name="flip_axis"></a> flip_axis </h3>
+<p></p>
+<ul>
+  <li> Type: Discrete Strings</li>
+  <li> Range / Valid values: none, v, h</li>
+  <li> Default: none (no change)</li>
+</ul>
+<p></p>
+Flip the image according to specified axis. The flip affects all saved images as well as movies.
+The flip feature is used when the camera is pointed towards a mirror or provides itself a mirrored image (as found in some cars)
+Note that the CPU load increases when using this feature with a value other than none. Also note that
+<p></p>
+
 <h3><a name="width"></a> width </h3>
 <p></p>
 <ul>
@@ -3652,7 +3671,7 @@ and wide) as the pictures that are taken by the camera.
 You can adjust sensitivity by using gray tones.
 If you do not have a mask file disable this option by not having it in the config file or comment
 it out.
-If you are using the <code>rotate</code> option, note that the mask is applied <em>after</em> the rotation.
+If you are using the <code>rotate</code> or <code>flip_axis</code> options, note that the mask is applied <em>after</em> the rotation.
 <strong>Detailed Description</strong>
 <p></p>
 The mask file must be a pgm format image file (portable gray map). Note that you must choose the BINARY format.
