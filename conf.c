@@ -305,10 +305,10 @@ config_param config_params[] = {
     copy_int,
     print_int
     },
-	{
+    {
     "flip_axis",
-    "# Flip the image horizontaly (h) or verticaly (v). The filp affects all saved images as\n"
-    "# well as movies. Valid values: none (default = no flip), h and v.",
+    "#Flip image over a given axis (vertical or horizontal), vertical means from left to right,\n"
+    "# horizontal means top to bottom. Valid values: none, v and h.",
     0,
     CONF_OFFSET(flip_axis),
     copy_string,
