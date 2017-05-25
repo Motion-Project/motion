@@ -206,9 +206,9 @@ void rotate_init(struct context *cnt)
         cnt->rotate_data.degrees = cnt->conf.rotate_deg % 360; /* Range: 0..359 */
     }
 
-    if ( strncmp(cnt->conf.flip_axis, "h", 1) == 0 ) {
+    if (cnt->conf.flip_axis[0]=='h') {
         cnt->rotate_data.axis = FLIP_TYPE_HORIZONTAL;
-    } else if ( strncmp(cnt->conf.flip_axis, "v", 1) == 0 ) {
+    } else if (cnt->conf.flip_axis[0]=='v') {
         cnt->rotate_data.axis = FLIP_TYPE_VERTICAL;
     } else {
         cnt->rotate_data.axis = FLIP_TYPE_NONE;
@@ -347,18 +347,18 @@ int rotate_map(struct context *cnt, unsigned char *map)
     switch (axis) {
     case FLIP_TYPE_HORIZONTAL:
         flip_inplace_horizontal(map,width, height);
-           if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-               flip_inplace_horizontal(map + wh, w2, h2);
-               flip_inplace_horizontal(map + wh + wh4, w2, h2);
+        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
+            flip_inplace_horizontal(map + wh, w2, h2);
+            flip_inplace_horizontal(map + wh + wh4, w2, h2);
         }
         break;
     case FLIP_TYPE_VERTICAL:
         flip_inplace_vertical(map,width, height);
-           if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-               flip_inplace_vertical(map + wh, w2, h2);
-               flip_inplace_vertical(map + wh + wh4, w2, h2);
+        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
+            flip_inplace_vertical(map + wh, w2, h2);
+            flip_inplace_vertical(map + wh + wh4, w2, h2);
         }
-    	break;
+        break;
     default:
         break;
     }    
