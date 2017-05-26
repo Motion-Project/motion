@@ -39,6 +39,7 @@ struct config conf_template = {
     .height =                          DEF_HEIGHT,
     .quality =                         DEF_QUALITY,
     .camera_id =                       0,
+    .flip_axis =                       "none",
     .rotate_deg =                      0,
     .max_changes =                     DEF_CHANGES,
     .threshold_tune =                  0,
@@ -303,6 +304,15 @@ config_param config_params[] = {
     CONF_OFFSET(frequency),
     copy_int,
     print_int
+    },
+    {
+    "flip_axis",
+    "#Flip image over a given axis (vertical or horizontal), vertical means from left to right,\n"
+    "# horizontal means top to bottom. Valid values: none, v and h.",
+    0,
+    CONF_OFFSET(flip_axis),
+    copy_string,
+    print_string
     },
     {
     "rotate",

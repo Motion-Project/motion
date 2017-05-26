@@ -328,6 +328,12 @@ struct images {
     int largest_label;
 };
 
+enum FLIP_TYPE {
+    FLIP_TYPE_NONE,
+    FLIP_TYPE_HORIZONTAL,
+    FLIP_TYPE_VERTICAL
+};
+
 /* Contains data for image rotation, see rotate.c. */
 struct rotdata {
     /* Temporary buffer for 90 and 270 degrees rotation. */
@@ -339,6 +345,13 @@ struct rotdata {
      * while Motion is running just causes problems.
      */
     int degrees;
+
+    /*
+     * Rotate image over the Horizontal or Vertical axis.
+     * As with degrees, this is the value actually used, and value of conf.flip_axis
+     * cannot be used.
+     */
+    enum FLIP_TYPE axis;
     /*
      * Capture width and height - different from output width and height if
      * rotating 90 or 270 degrees.

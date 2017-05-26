@@ -396,7 +396,7 @@ static int netcam_image_conv(netcam_context_ptr netcam,
     jpeg_finish_decompress(cinfo);
     jpeg_destroy_decompress(cinfo);
 
-    if (netcam->cnt->rotate_data.degrees > 0)
+    if (netcam->cnt->rotate_data.degrees > 0 || netcam->cnt->rotate_data.axis != FLIP_TYPE_NONE)
         /* Rotate as specified */
         rotate_map(netcam->cnt, image);
 

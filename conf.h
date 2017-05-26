@@ -28,6 +28,7 @@ struct config {
     int height;
     int camera_id;
     int quality;
+    const char *flip_axis;
     int rotate_deg;
     int max_changes;
     int threshold_tune;

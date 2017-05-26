@@ -71,6 +71,10 @@ power_line_frequency -1
 # well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.
 rotate 0
 
+# Flip image over a given axis (vertical or horizontal), vertical means from left to right
+# horizontal means top to bottom. Valid values: none, v and h.
+flip_axis none 
+
 # Image width (pixels). Valid range: Camera dependent, default: 352
 width 320
 

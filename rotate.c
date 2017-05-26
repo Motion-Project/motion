@@ -73,6 +73,40 @@ static void reverse_inplace_quad(unsigned char *src, int size)
     }
 }
 
+static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
+    uint8_t *nsrc, *ndst;
+    register uint8_t tmp;
+    unsigned int l,w;
+
+    for(l=0; l < height/2; l++) {
+        nsrc = (uint8_t *)(src + l*width); 
+        ndst = (uint8_t *)(src + (width*(height-l-1))); 
+        for(w=0; w < width; w++) {
+            tmp =*ndst;
+            *ndst++ = *nsrc;
+            *nsrc++ = tmp;
+        }
+    }
+
+}
+
+static void flip_inplace_vertical(unsigned char *src, int width, int height)
+{
+    uint8_t *nsrc, *ndst;
+    register uint8_t tmp;
+    unsigned int l;
+
+    for(l=0; l < height; l++) {
+        nsrc = (uint8_t *)src + l*width; 
+        ndst = nsrc + width - 1; 
+        while (nsrc < ndst) {
+            tmp = *ndst;
+            *ndst-- = *nsrc;
+            *nsrc++ = tmp;
+        }
+    }
+}
+
 /**
  * rot90cw
  *
@@ -170,6 +204,14 @@ void rotate_init(struct context *cnt)
         cnt->rotate_data.degrees = 0; /* Force return below. */
     } else {
         cnt->rotate_data.degrees = cnt->conf.rotate_deg % 360; /* Range: 0..359 */
+    }
+
+    if (cnt->conf.flip_axis[0]=='h') {
+        cnt->rotate_data.axis = FLIP_TYPE_HORIZONTAL;
+    } else if (cnt->conf.flip_axis[0]=='v') {
+        cnt->rotate_data.axis = FLIP_TYPE_VERTICAL;
+    } else {
+        cnt->rotate_data.axis = FLIP_TYPE_NONE;
     }
 
     /*
@@ -276,9 +318,11 @@ int rotate_map(struct context *cnt, unsigned char *map)
      */
     int wh, wh4 = 0, w2 = 0, h2 = 0;  /* width * height, width * height / 4 etc. */
     int size, deg;
+    enum FLIP_TYPE axis;
     int width, height;
 
     deg = cnt->rotate_data.degrees;
+    axis = cnt->rotate_data.axis;
     width = cnt->rotate_data.cap_width;
     height = cnt->rotate_data.cap_height;
 
@@ -299,6 +343,25 @@ int rotate_map(struct context *cnt, unsigned char *map)
     } else { /* VIDEO_PALETTE_GREY */
         size = wh;
     }
+
+    switch (axis) {
+    case FLIP_TYPE_HORIZONTAL:
+        flip_inplace_horizontal(map,width, height);
+        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
+            flip_inplace_horizontal(map + wh, w2, h2);
+            flip_inplace_horizontal(map + wh + wh4, w2, h2);
+        }
+        break;
+    case FLIP_TYPE_VERTICAL:
+        flip_inplace_vertical(map,width, height);
+        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
+            flip_inplace_vertical(map + wh, w2, h2);
+            flip_inplace_vertical(map + wh + wh4, w2, h2);
+        }
+        break;
+    default:
+        break;
+    }    
 
     switch (deg) {
     case 90:
