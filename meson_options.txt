@@ -1,0 +1,28 @@
+option (
+    'WITH_BKTR', type : 'boolean', value : false,
+    description : 'enable BKTR support (BSD only)' )
+option (
+    'WITH_MMAL', type : 'boolean', value : false,
+    description : 'enable MMAL (Multi-Media Abstraction Layer API) support for Raspberry Pi' )
+option (
+    'WITH_V4L2', type : 'boolean', value : true,
+    description : 'enable Video4Linux(2) webcam support' )
+
+
+option (
+    'WITH_FFMPEG', type : 'boolean', value : true,
+    description : 'enable FFmpeg support for encoding/decoding video' )
+option (
+    'WITH_WEBP', type : 'boolean', value : false,
+    description : 'Compile with Webp image support' )
+
+
+option (
+    'WITH_MYSQL', type : 'boolean', value : false,
+    description : 'enable MySQL database support' )
+option (
+    'WITH_PGSQL', type : 'boolean', value : false,
+    description : 'enable PostgreSQL database support' )
+option (
+    'WITH_SQLITE3', type : 'boolean', value : false,
+    description : 'enable SQLite database support' )
