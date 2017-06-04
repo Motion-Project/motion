@@ -605,9 +605,9 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
                 mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q",
                            &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv, NULL, 0);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 20,
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, (CHAR_HEIGHT + 1)/2, (CHAR_HEIGHT + 1)/2,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30,
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, (CHAR_HEIGHT + 1)/2, (CHAR_HEIGHT * 3 + 1)/2 + LARGE_TEXT_SCALING,
                           cnt->imgs.width, t, cnt->conf.text_double);
             }
 
@@ -639,7 +639,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Added %d fillerframes into movie",
                                        frames);
                             sprintf(tmp, "Fillerframes %d", frames);
-                            draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 40,
+                            draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, (CHAR_HEIGHT + 1)/2, (CHAR_HEIGHT * 5 + 1)/2 + 2 * LARGE_TEXT_SCALING,
                                       cnt->imgs.width, tmp, cnt->conf.text_double);
                         }
                     }
@@ -958,7 +958,7 @@ static int motion_init(struct context *cnt)
 
         if (i >= 5) {
             memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
-            draw_text(cnt->imgs.image_virgin, 10, 20, cnt->imgs.width,
+            draw_text(cnt->imgs.image_virgin, (CHAR_HEIGHT + 1)/2, (CHAR_HEIGHT + 1)/2, cnt->imgs.width,
                       "Error capturing first image", cnt->conf.text_double);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Error capturing first image");
         }
@@ -1716,7 +1716,7 @@ static int mlp_capture(struct context *cnt){
             tv1.tv_usec = 0;
             memset(cnt->current_image->image, 0x80, cnt->imgs.size);
             mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
-            draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
+            draw_text(cnt->current_image->image, (CHAR_HEIGHT + 1)/2, (CHAR_HEIGHT * 3 + 1)/2 + LARGE_TEXT_SCALING, cnt->imgs.width,
                       tmpout, cnt->conf.text_double);
 
             /* Write error message only once */
@@ -1965,7 +1965,7 @@ static void mlp_overlay(struct context *cnt){
         else
             sprintf(tmp, "-");
 
-        draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10,
+        draw_text(cnt->current_image->image, cnt->imgs.width - LARGE_TEXT_SCALING - (CHAR_HEIGHT + 1)/2, (CHAR_HEIGHT + 1)/2,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
@@ -1976,10 +1976,12 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.setup_mode) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                 cnt->current_image->total_labels, cnt->noise);
-        draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->text_size_factor,
+        draw_text(cnt->imgs.out, cnt->imgs.width - LARGE_TEXT_SCALING - (CHAR_HEIGHT + 1)/2,
+                  cnt->imgs.height - (CHAR_HEIGHT * 5 + 1)/2 - LARGE_TEXT_SCALING,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
         sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
-        draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->text_size_factor,
+        draw_text(cnt->imgs.out, cnt->imgs.width - LARGE_TEXT_SCALING - (CHAR_HEIGHT + 1)/2,
+                  cnt->imgs.height - (CHAR_HEIGHT * 3 + 1)/2,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
@@ -1987,7 +1989,7 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.text_left) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
                    &cnt->current_image->timestamp_tv, NULL, 0);
-        draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
+        draw_text(cnt->current_image->image, (CHAR_HEIGHT + 1)/2, cnt->imgs.height - (CHAR_HEIGHT * 3 + 1)/2,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
@@ -1995,8 +1997,8 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.text_right) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
                    &cnt->current_image->timestamp_tv, NULL, 0);
-        draw_text(cnt->current_image->image, cnt->imgs.width - 10,
-                  cnt->imgs.height - 10 * cnt->text_size_factor,
+        draw_text(cnt->current_image->image, cnt->imgs.width - LARGE_TEXT_SCALING - (CHAR_HEIGHT + 1)/2,
+                  cnt->imgs.height - (CHAR_HEIGHT * 3 + 1)/2,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
