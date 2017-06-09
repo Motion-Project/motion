@@ -95,7 +95,21 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
     }
 
     retcd = avcodec_receive_frame(ctx_codec, frame);
+
     if (retcd == AVERROR(EAGAIN)) return 0;
+
+    /*
+     * At least one netcam (Wansview K1) is known to always send a bogus
+     * packet at the start of the stream. Just grin and bear it...
+     *
+     * TODO: This error-tolerance should be limited/conditionalized, or
+     * else Motion could end up accepting bogus video data indefinitely
+     */
+    if (retcd == AVERROR_INVALIDDATA) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Ignoring packet with invalid data");
+        return 0;
+    }
+
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error receiving frame from codec: %s", errstr);
@@ -118,11 +132,21 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
     }
 
     retcd = avcodec_decode_video2(ctx_codec, frame, &check, packet);
+
+    /*
+     * See note above
+     */
+    if (retcd == AVERROR_INVALIDDATA) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Ignoring packet with invalid data");
+        return 0;
+    }
+
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Error decoding packet: %s",errstr);
         return -1;
     }
+
     if (check == 0 || retcd == 0) return 0;
     return 1;
 
