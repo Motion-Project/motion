@@ -25,12 +25,14 @@ FFMPEG Packages
     libavcodec-dev
     libavutil-dev
     libswscale-dev
+    libavdevice-dev
 
 Libav Packages
     libavformat-dev
     libavcodec-dev
     libavutil-dev
     libswscale-dev
+    libavdevice-dev
 
 Once required packages are installed, execute:
     autoreconf -fiv
