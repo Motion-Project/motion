@@ -4758,12 +4758,14 @@ to the following.
   <li> Default: 0 (disabled)</li>
 </ul>
 <p></p>
-# The mini-http server listens to this port for requests (default: 0 = disabled)
-TCP port on which motion will listen for incoming connects with its webcam server.
-Note that each camera must have its own unique port number and it must also be different from the control_port number.
+# The mini-http live streaming server listens to this port for requests (default: 0 = disabled)
+TCP port on which motion will listen for incoming connections to its webcam server.
+Note that each camera must have its own unique port number and it must
+also be different from the webcontrol_port number.
 A good value to select is 8081 for camera 1, 8082 for camera 2, 8083 for camera 3 etc etc.
 
-This must be placed in motion.conf and not in a camera config file.
+This must be placed in the camera config file (unless you only have
+one camera, in which case it can be placed in motion.conf).
 
 <p></p>
 
