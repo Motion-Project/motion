@@ -128,6 +128,9 @@ static void image_ring_resize(struct context *cnt, int new_size)
             cnt->current_image = NULL;
 
             cnt->imgs.image_ring_size = new_size;
+
+            cnt->imgs.image_ring_in = 0;
+            cnt->imgs.image_ring_out = 0;
         }
     }
 }
@@ -581,6 +584,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
     /* If image is flaged to be saved and not saved yet, process it */
     do {
         /* Check if we should save/send this image, breakout if not */
+        assert(cnt->imgs.image_ring_out < cnt->imgs.image_ring_size);
         if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE)
             break;
 
