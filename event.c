@@ -554,14 +554,26 @@ static void event_create_extpipe(struct context *cnt,
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
-        fileaccesscheck = access(cnt->extpipefilename, W_OK);
+        fileaccesscheck = access(cnt->conf.filepath, W_OK);
+        MOTION_LOG(NTC, TYPE_EVENTS, SHOW_ERRNO, "%s: %s fileaccesscheck=%d errno=%d", cnt->conf.filepath, fileaccesscheck, errno);
         if (fileaccesscheck != 0) {
             /* Permission denied */
             if (errno ==  EACCES) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s ..."
-                           "check access rights to target directory", cnt->extpipefilename);
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: no write access to target directory %s",
+                           cnt->conf.filepath);
+                return ;
+            /* Path not found - create it */
+            } else if (errno ==  ENOENT) {
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: path not found, trying to create it %s ...",
+                           cnt->conf.filepath);
+                if (create_path(cnt->extpipefilename) == -1)
+                    return ;
+            }
+            else {
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error accesing path %s", cnt->conf.filepath);
                 return ;
             }
+
         }
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
