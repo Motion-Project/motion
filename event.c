@@ -537,7 +537,6 @@ static void event_create_extpipe(struct context *cnt,
     if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
         char stamp[PATH_MAX] = "";
         const char *moviepath;
-        int fileaccesscheck;
 
         /*
          *  conf.mpegpath would normally be defined but if someone deleted it by control interface
@@ -554,9 +553,7 @@ static void event_create_extpipe(struct context *cnt,
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
-        fileaccesscheck = access(cnt->conf.filepath, W_OK);
-        MOTION_LOG(NTC, TYPE_EVENTS, SHOW_ERRNO, "%s: %s fileaccesscheck=%d errno=%d", cnt->conf.filepath, fileaccesscheck, errno);
-        if (fileaccesscheck != 0) {
+        if (access(cnt->conf.filepath, W_OK)!= 0) {
             /* Permission denied */
             if (errno ==  EACCES) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: no write access to target directory %s",
@@ -573,7 +570,6 @@ static void event_create_extpipe(struct context *cnt,
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error accesing path %s", cnt->conf.filepath);
                 return ;
             }
-
         }
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
