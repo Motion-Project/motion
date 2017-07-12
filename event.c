@@ -537,7 +537,7 @@ static void event_create_extpipe(struct context *cnt,
     if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
         char stamp[PATH_MAX] = "";
         const char *moviepath;
-        FILE *fd_dummy = NULL;
+        int fileaccesscheck;
 
         /*
          *  conf.mpegpath would normally be defined but if someone deleted it by control interface
@@ -554,27 +554,15 @@ static void event_create_extpipe(struct context *cnt,
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
-        /* Open a dummy file to check if path is correct */
-        fd_dummy = myfopen(cnt->extpipefilename, "w");
-
-        /* TODO: trigger some warning instead of only log an error message */
-        if (fd_dummy == NULL) {
+        fileaccesscheck = access(cnt->extpipefilename, W_OK);
+        if (fileaccesscheck != 0) {
             /* Permission denied */
             if (errno ==  EACCES) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s ..."
-                           "check access rights to target directory",
-                           cnt->extpipefilename);
-                return ;
-            } else {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "%s: error opening file %s",
-                           cnt->extpipefilename);
+                           "check access rights to target directory", cnt->extpipefilename);
                 return ;
             }
-
         }
-
-        myfclose(fd_dummy);
-        unlink(cnt->extpipefilename);
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
