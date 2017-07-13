@@ -1,5 +1,16 @@
 Summary of Changes
 
+Version 4.0.3 Changes Below
+   * CMake improvements (V4L detection, OpenBSD, FreeBSD)
+   * ffmpeg improvements (3.1)
+   * autotool improvements
+   * RTSP improvements and fixes
+   * webp support
+   * privacy mask support
+   * v4l2 support through ffmpeg (new url v4l2://)
+   * hostname support in config (new var template %{host})
+   * raspberry pi camera support (mmal)
+   * lots of other fixes and improvements
 Version 4.0 Changes Below
    * PI Cam Support
    * Web Interface fixes for preview, IPV6, HTML 

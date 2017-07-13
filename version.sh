@@ -1,5 +1,5 @@
 #!/bin/sh
-BASE_VERSION="4.0.1"
+BASE_VERSION="4.0.3"
 if [ -d .git ]; then
 	GIT_COMMIT=`git show -s --format=%h`
 	printf "$BASE_VERSION+git$GIT_COMMIT"
