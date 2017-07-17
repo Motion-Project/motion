@@ -2006,7 +2006,7 @@ struct context **conf_load(struct context **cnt)
       cnt = conf_process(cnt, fp);
       myfclose(fp);
     } else {
-        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO, "%s: Not config file to process using default values");
+        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO, "%s: No config file to process, using default values");
     }
 
 
