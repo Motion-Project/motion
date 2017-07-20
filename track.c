@@ -72,7 +72,7 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
         unsigned int ret;
         ret = stepper_center(cnt, xoff, yoff);
         if (!ret) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: internal error");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "internal error");
             return 0;
         }
         else return ret;
@@ -90,7 +90,7 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
     else if (cnt->track.type == TRACK_TYPE_GENERIC)
         return 10; // FIX ME. I chose to return something reasonable.
 
-    MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: internal error, %hu is not a known track-type",
+    MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "internal error, %hu is not a known track-type",
                cnt->track.type);
 
     return 0;
@@ -119,7 +119,7 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
     else if (cnt->track.type == TRACK_TYPE_GENERIC)
         return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
 
-    MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO, "%s: internal error, %hu is not a known track-type",
+    MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO, "internal error, %hu is not a known track-type",
                cnt->track.type);
 
     return 0;
@@ -142,7 +142,7 @@ static unsigned int stepper_command(struct context *cnt, unsigned int motor,
     buffer[2] = data;
 
     if (write(cnt->track.dev, buffer, 3) != 3) {
-        MOTION_LOG(NTC, TYPE_TRACK, SHOW_ERRNO, "%s: port %s dev fd %i, motor %hu command %hu data %hu",
+        MOTION_LOG(NTC, TYPE_TRACK, SHOW_ERRNO, "port %s dev fd %i, motor %hu command %hu data %hu",
                    cnt->track.port, cnt->track.dev, motor, command, data);
         return 0;
     }
@@ -150,7 +150,7 @@ static unsigned int stepper_command(struct context *cnt, unsigned int motor,
     while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1);
 
     if (time(NULL) >= timeout + 2) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Status byte timeout!");
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Status byte timeout!");
         return 0;
     }
 
@@ -169,10 +169,10 @@ static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offs
     struct termios adtio;
 
     if (cnt->track.dev < 0) {
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Try to open serial device %s", cnt->track.port);
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Try to open serial device %s", cnt->track.port);
 
         if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Unable to open serial device %s",
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Unable to open serial device %s",
                        cnt->track.port);
             return 0;
         }
@@ -187,12 +187,12 @@ static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offs
         tcflush (cnt->track.dev, TCIFLUSH);
 
         if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Unable to initialize serial device %s",
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Unable to initialize serial device %s",
                        cnt->track.port);
             cnt->track.dev = -1;
             return 0;
         }
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Opened serial device %s and initialize, fd %i",
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Opened serial device %s and initialize, fd %i",
                    cnt->track.port, cnt->track.dev);
     }
 
@@ -229,16 +229,16 @@ static unsigned int stepper_move(struct context *cnt,
     unsigned int command = 0, data = 0;
 
     if (cnt->track.dev < 0) {
-        MOTION_LOG(WRN, TYPE_TRACK, NO_ERRNO, "%s: No device %s started yet , trying stepper_center()",
+        MOTION_LOG(WRN, TYPE_TRACK, NO_ERRNO, "No device %s started yet , trying stepper_center()",
                    cnt->track.port);
 
         if (!stepper_center(cnt, 0, 0)) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: failed to initialize stepper device on %s , fd [%i].",
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "failed to initialize stepper device on %s , fd [%i].",
                        cnt->track.port, cnt->track.dev);
             return 0;
         }
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: succeed , device started %s , fd [%i]",
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "succeed , device started %s , fd [%i]",
                     cnt->track.port, cnt->track.dev);
     }
 
@@ -290,7 +290,7 @@ static int servo_open(struct context *cnt)
     struct termios adtio;
 
     if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Unable to open serial device %s",
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Unable to open serial device %s",
                    cnt->track.port);
         return 0;
     }
@@ -305,13 +305,13 @@ static int servo_open(struct context *cnt)
     tcflush (cnt->track.dev, TCIFLUSH);
 
     if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
-        MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: Unable to initialize serial device %s",
+        MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "Unable to initialize serial device %s",
                    cnt->track.port);
         cnt->track.dev = -1;
         return 0;
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Opened serial device %s and initialize, fd %i",
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Opened serial device %s and initialize, fd %i",
                cnt->track.port, cnt->track.dev);
 
     return 1;
@@ -329,11 +329,11 @@ static unsigned int servo_command(struct context *cnt, unsigned int motor,
     buffer[2] = data;
 
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: SENDS port %s dev fd %i, motor %hu command %hu data %hu",
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "SENDS port %s dev fd %i, motor %hu command %hu data %hu",
                cnt->track.port, cnt->track.dev, buffer[0], buffer[1], buffer[2]);
 
     if (write(cnt->track.dev, buffer, 3) != 3) {
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: port %s dev fd %i, motor %hu command %hu data %hu",
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "port %s dev fd %i, motor %hu command %hu data %hu",
                    cnt->track.port, cnt->track.dev, motor, command, data);
         return 0;
     }
@@ -341,11 +341,11 @@ static unsigned int servo_command(struct context *cnt, unsigned int motor,
     while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1);
 
     if (time(NULL) >= timeout + 2) {
-        MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: Status byte timeout!");
+        MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "Status byte timeout!");
         return 0;
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Command return %d", buffer[0]);
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Command return %d", buffer[0]);
 
 
     return buffer[0];
@@ -377,12 +377,12 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
     /* If device is not open yet , open and center */
     if (cnt->track.dev < 0) {
         if (!servo_center(cnt, 0, 0)) {
-            MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: Problem opening servo!");
+            MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "Problem opening servo!");
             return 0;
         }
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: cent->x %d, cent->y %d, reversex %d,"
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "cent->x %d, cent->y %d, reversex %d,"
                "reversey %d manual %d", cent->x , cent->y,
                cnt->track.motorx_reverse, cnt->track.motory_reverse, manual);
 
@@ -404,7 +404,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
             if ((data + position > (unsigned)cnt->track.maxx) ||
                 (position - offset < (unsigned)cnt->track.minx)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: x %d value out of range! (%d - %d)",
+                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "x %d value out of range! (%d - %d)",
                            data, cnt->track.minx, cnt->track.maxx);
                 return 0;
             }
@@ -429,7 +429,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
             if ((data + position > (unsigned)cnt->track.maxy) ||
                 (position - offset < (unsigned)cnt->track.miny)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: y %d value out of range! (%d - %d)",
+                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "y %d value out of range! (%d - %d)",
                            data, cnt->track.miny, cnt->track.maxy);
                 return 0;
             }
@@ -461,7 +461,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
         }
 
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: X offset %d", data);
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "X offset %d", data);
 
         data = data * cnt->track.stepsize / imgs->width;
 
@@ -472,7 +472,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
             if ((position + data > (unsigned)cnt->track.maxx) ||
                 (position - data < (unsigned)cnt->track.minx)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: x %d value out of range! (%d - %d)",
+                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "x %d value out of range! (%d - %d)",
                            data, cnt->track.minx, cnt->track.maxx);
                 return 0;
             }
@@ -482,7 +482,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
             servo_command(cnt, cnt->track.motorx, SERVO_COMMAND_SPEED, cnt->track.speed);
             servo_command(cnt, cnt->track.motorx, command, data);
 
-            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: X cent->x %d, cent->y %d, reversex %d,"
+            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "X cent->x %d, cent->y %d, reversex %d,"
                        "reversey %d motorx %d data %d command %d",
                        cent->x, cent->y, cnt->track.motorx_reverse,
                        cnt->track.motory_reverse, cnt->track.motorx, data, command);
@@ -508,7 +508,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
             data = cent->y - imgs->height / 2;
         }
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Y offset %d", data);
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Y offset %d", data);
 
         data = data * cnt->track.stepsize / imgs->height;
 
@@ -519,7 +519,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 
             if ((position + data > (unsigned)cnt->track.maxy) ||
                 (position - data < (unsigned)cnt->track.miny)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: y %d value out of range! (%d - %d)",
+                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "y %d value out of range! (%d - %d)",
                            data, cnt->track.miny, cnt->track.maxy);
                 return 0;
             }
@@ -528,7 +528,7 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
             servo_command(cnt, cnt->track.motory, SERVO_COMMAND_SPEED, cnt->track.speed);
             servo_command(cnt, cnt->track.motory, command, data);
 
-            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Y cent->x %d, cent->y %d, reversex %d,"
+            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Y cent->x %d, cent->y %d, reversex %d,"
                        "reversey %d motory %d data %d command %d",
                         cent->x, cent->y, cnt->track.motorx_reverse,
                         cnt->track.motory_reverse, cnt->track.motory, command);
@@ -563,12 +563,12 @@ static unsigned int servo_center(struct context *cnt, int x_offset, int y_offset
     /* If device is not open yet */
     if (cnt->track.dev < 0) {
         if (!servo_open(cnt)) {
-            MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "%s: Problem opening servo!");
+            MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO, "Problem opening servo!");
             return 0;
         }
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: X-offset %d, Y-offset %d, x-position %d. y-position %d,"
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "X-offset %d, Y-offset %d, x-position %d. y-position %d,"
                "reversex %d, reversey %d , stepsize %d", x_offset, y_offset,
                cnt->track.homex + (x_offset * cnt->track.stepsize),
                cnt->track.homey + (y_offset * cnt->track.stepsize),
@@ -621,7 +621,7 @@ static char iomojo_command(struct context *cnt, char *command, int len, unsigned
         while (read(cnt->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 2);
 
         if (time(NULL) >= timeout + 2) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Return byte timeout!");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Return byte timeout!");
             return 0;
         }
     }
@@ -638,7 +638,7 @@ static void iomojo_setspeed(struct context *cnt, unsigned int speed)
     command[2] = speed;
 
     if (iomojo_command(cnt, command, 3, 1) != IOMOJO_SETSPEED_RET)
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Unable to set camera speed");
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Unable to set camera speed");
 }
 
 static void iomojo_movehome(struct context *cnt)
@@ -658,7 +658,7 @@ static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offse
 
     if (cnt->track.dev < 0) {
         if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Unable to open serial device %s",
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Unable to open serial device %s",
                        cnt->track.port);
             return 0;
         }
@@ -672,7 +672,7 @@ static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offse
         adtio.c_cc[VMIN] = 0;   /* blocking read until 1 char */
         tcflush(cnt->track.dev, TCIFLUSH);
         if (tcsetattr(cnt->track.dev, TCSANOW, &adtio) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Unable to initialize serial device %s",
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Unable to initialize serial device %s",
                        cnt->track.port);
             return 0;
         }
@@ -710,7 +710,7 @@ static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offse
         iomojo_command(cnt, command, 5, 0);
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: succeed");
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "succeed");
 
     return cnt->track.move_wait;
 }
@@ -790,14 +790,14 @@ static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y
     if (cnt->track.dev == -1) {
 
         if (ioctl(dev, VIDIOCPWCMPTRESET, &reset) == -1) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset pwc camera to starting position! Reason");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to reset pwc camera to starting position! Reason");
             return 0;
         }
 
         SLEEP(6, 0);
 
         if (ioctl(dev, VIDIOCPWCMPTGRANGE, &pmr) == -1) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: failed VIDIOCPWCMPTGRANGE");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "failed VIDIOCPWCMPTGRANGE");
             return 0;
         }
 
@@ -810,7 +810,7 @@ static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y
     }
 
     if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1)
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: ioctl VIDIOCPWCMPTGANGLE");
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "ioctl VIDIOCPWCMPTGANGLE");
 
     pma.absolute = 1;
 
@@ -821,11 +821,11 @@ static unsigned int lqos_center(struct context *cnt, int dev, int x_angle, int y
         pma.tilt = y_angle * 100;
 
     if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to pan/tilt pwc camera! Reason");
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to pan/tilt pwc camera! Reason");
         return 0;
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: succeed");
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "succeed");
 
     return cnt->track.move_wait;
 }
@@ -856,7 +856,7 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
     /* If we never checked for the min/max values for pan/tilt we do it now */
     if (cnt->track.minmaxfound == 0) {
         if (ioctl(dev, VIDIOCPWCMPTGRANGE, &pmr) == -1) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: failed VIDIOCPWCMPTGRANGE");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "failed VIDIOCPWCMPTGRANGE");
             return 0;
         }
         cnt->track.minmaxfound = 1;
@@ -868,7 +868,7 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
 
     /* Get current camera position */
     if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1)
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: ioctl VIDIOCPWCMPTGANGLE");
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "ioctl VIDIOCPWCMPTGANGLE");
 
 
     /*
@@ -893,7 +893,7 @@ static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
     pma.tilt = move_y_degrees;
 
     if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to pan/tilt pwc camera! Reason");
+        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to pan/tilt pwc camera! Reason");
         return 0;
     }
 
@@ -931,7 +931,7 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         control_s.value = (unsigned char) reset;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset UVC camera to starting position! Reason");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to reset UVC camera to starting position! Reason");
             return 0;
         }
 
@@ -939,11 +939,11 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         control_s.value = (unsigned char) reset;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset UVC camera to starting position! Reason");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to reset UVC camera to starting position! Reason");
             return 0;
         }
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Reseting UVC camera to starting position");
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Reseting UVC camera to starting position");
 
         SLEEP(8, 0);
 
@@ -952,11 +952,11 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         queryctrl.id = V4L2_CID_PAN_RELATIVE;
 
         if (ioctl(dev, VIDIOC_QUERYCTRL, &queryctrl) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: ioctl querycontrol");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "ioctl querycontrol");
             return 0;
         }
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Getting camera range");
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Getting camera range");
 
        /* DWe 30.03.07 The orig request failed :
         * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual
@@ -983,9 +983,9 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
 
     struct v4l2_control control_s;
 
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "%s: INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ",
+    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ",
                cnt->track.minx, cnt->track.maxx, cnt->track.miny, cnt->track.maxy);
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "%s: INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ",
+    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ",
                x_angle, y_angle);
 
     if (x_angle <= cnt->track.maxx && x_angle >= cnt->track.minx)
@@ -1004,7 +1004,7 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
     pan.s16.pan = -move_x_degrees * INCPANTILT;
     pan.s16.tilt = -move_y_degrees * INCPANTILT;
 
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "%s: For_SET_ABS move_X %d,move_Y %d",
+    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "For_SET_ABS move_X %d,move_Y %d",
                move_x_degrees, move_y_degrees);
 
     /* DWe 30.03.07 Must be broken in diff calls, because
@@ -1018,7 +1018,7 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         control_s.value = pan.s16.pan;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to move UVC camera!");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to move UVC camera!");
             return 0;
         }
     }
@@ -1033,16 +1033,16 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
         control_s.value = pan.s16.tilt;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to move UVC camera!");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to move UVC camera!");
             return 0;
         }
     }
 
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Found MINMAX = %d",
+    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Found MINMAX = %d",
                cnt->track.minmaxfound);
 
     if (cnt->track.dev != -1) {
-        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "%s: Before_ABS_Y_Angel : x= %d , Y= %d, ",
+        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "Before_ABS_Y_Angel : x= %d , Y= %d, ",
                    cnt->track.pan_angle, cnt->track.tilt_angle);
 
         if (move_x_degrees != -1) {
@@ -1053,7 +1053,7 @@ static unsigned int uvc_center(struct context *cnt, int dev, int x_angle, int y_
             cnt->track.tilt_angle += move_y_degrees;
         }
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: After_ABS_Y_Angel : x= %d , Y= %d",
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "After_ABS_Y_Angel : x= %d , Y= %d",
                    cnt->track.pan_angle, cnt->track.tilt_angle);
     }
 
@@ -1083,7 +1083,7 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
         control_s.value = (unsigned char) reset;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset UVC camera to starting position! Reason");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to reset UVC camera to starting position! Reason");
             return 0;
         }
 
@@ -1091,11 +1091,11 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
         control_s.value = (unsigned char) reset;
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to reset UVC camera to starting position! Reason");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to reset UVC camera to starting position! Reason");
             return 0;
         }
 
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "%s: Reseting UVC camera to starting position");
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO, "Reseting UVC camera to starting position");
 
         /* set the "helpvalue" back to null because after reset CAM should be in x=0 and not 70 */
         cent->x = 0;
@@ -1192,7 +1192,7 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
                    dev, VIDIOC_S_CTRL, &control_s, pan.s16.pan);
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to move UVC camera!");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to move UVC camera!");
             return 0;
         }
     }
@@ -1211,12 +1211,12 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
                    dev, VIDIOC_S_CTRL, &control_s, pan.s16.tilt);
 
         if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "%s: Failed to move UVC camera!");
+            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "Failed to move UVC camera!");
             return 0;
         }
     }
 
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "%s: Found MINMAX = %d",
+    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO, "Found MINMAX = %d",
                 cnt->track.minmaxfound);
 
     if (cnt->track.minmaxfound == 1) {
