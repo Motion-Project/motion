@@ -554,7 +554,7 @@ static int alg_labeling(struct context *cnt)
             labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
 
             if (labelsize > 0) {
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: Label: %i (%i) Size: %i (%i,%i)",
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Label: %i (%i) Size: %i (%i,%i)",
                             current_label, cnt->current_image->total_labels,
                            labelsize, ix, iy);
 
@@ -578,7 +578,7 @@ static int alg_labeling(struct context *cnt)
         pixelpos++; /* Compensate for ix < width - 1 */
     }
 
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%s: %i Labels found. Largest connected Area: %i Pixel(s). "
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%i Labels found. Largest connected Area: %i Pixel(s). "
                "Largest Label: %i", imgs->largest_label, imgs->labelsize_max,
                cnt->current_image->total_labels);
 

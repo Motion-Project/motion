@@ -187,7 +187,7 @@ static void init_destination(j_compress_ptr cinfo ATTRIBUTE_UNUSED)
 static boolean empty_output_buffer(j_compress_ptr cinfo)
 {
     /*FIXME: */
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small");
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Given jpeg buffer was too small");
     ERREXIT (cinfo, JERR_BUFFER_SIZE);  /* Shouldn't be FILE_WRITE but BUFFER_OVERRUN! */
     return TRUE;
 }
@@ -272,7 +272,7 @@ static void my_error_exit(j_common_ptr cinfo)
      */
     (*cinfo->err->format_message) (cinfo, buffer);
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: %s", buffer);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
 
     /* Return control to the setjmp point. */
     longjmp (myerr->setjmp_buffer, 1);
@@ -290,7 +290,7 @@ static void my_emit_message(j_common_ptr cinfo, int msg_level)
     //msg_level = 3 are the RST markers of the JPG which are not of much interest
     if (msg_level < 3) {
         (*cinfo->err->format_message) (cinfo, buffer);
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "%s: msg_level: %d, %s", msg_level, buffer);
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
     }
 }
 
@@ -330,7 +330,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
         nsymbols += bits[len];
 
     if (nsymbols < 1 || nsymbols > 256)
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Given jpeg buffer was too small");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Given jpeg buffer was too small");
 
     memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
@@ -504,7 +504,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     jpeg_start_decompress (&dinfo);
 
     if (dinfo.output_components != 3) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Output components of JPEG image"
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Output components of JPEG image"
                    " = %d, must be 3", dinfo.output_components);
         goto ERR_EXIT;
     }
@@ -516,7 +516,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
     if ((hsf[0] != 2 && hsf[0] != 1) || hsf[1] != 1 || hsf[2] != 1 ||
         (vsf[0] != 1 && vsf[0] != 2) || vsf[1] != 1 || vsf[2] != 1) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Unsupported sampling factors,"
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Unsupported sampling factors,"
                    " hsf=(%d, %d, %d) vsf=(%d, %d, %d) !", hsf[0], hsf[1],
                    hsf[2], vsf[0], vsf[1], vsf[2]);
         goto ERR_EXIT;
@@ -524,7 +524,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
 
     if (hsf[0] == 1) {
         if (height % 8 != 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: YUV 4:4:4 sampling, but image"
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "YUV 4:4:4 sampling, but image"
                        " height %d not dividable by 8 !", height);
             goto ERR_EXIT;
         }
@@ -544,7 +544,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     } else if (2 * dinfo.output_height == height) {
         numfields = 2;
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Read JPEG: requested height = %d, "
                    "height of image = %d", height, dinfo.output_height);
         goto ERR_EXIT;
     }
@@ -552,7 +552,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max",
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Image width of %d exceeds max",
                    dinfo.output_width);
         goto ERR_EXIT;
     }
@@ -605,7 +605,7 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
                 yl = yc = (1 - field);
                 break;
             default:
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced but"
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Input is interlaced but"
                            " no interlacing set");
                 goto ERR_EXIT;
             }
@@ -823,7 +823,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     dinfo.dct_method = JDCT_IFAST;
 
     if (dinfo.jpeg_color_space != JCS_GRAYSCALE) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Expected grayscale colorspace"
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Expected grayscale colorspace"
                    " for JPEG raw decoding");
         goto ERR_EXIT;
     }
@@ -840,7 +840,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     } else if (2 * dinfo.output_height == height) {
         numfields = 2;
     } else {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Read JPEG: requested height = %d, "
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Read JPEG: requested height = %d, "
                    "height of image = %d", height, dinfo.output_height);
         goto ERR_EXIT;
     }
@@ -848,7 +848,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     /* Width is more flexible */
 
     if (dinfo.output_width > MAX_LUMA_WIDTH) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image width of %d exceeds max",
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Image width of %d exceeds max",
                     dinfo.output_width);
         goto ERR_EXIT;
     }
@@ -901,7 +901,7 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                 yl = yc = (1 - field);
                 break;
             default:
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Input is interlaced"
                            " but no interlacing set");
                 goto ERR_EXIT;
             }
@@ -1112,13 +1112,13 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
 
 
     if ((width > 4096) || (height > 4096)) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) exceed"
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Image dimensions (%dx%d) exceed"
                   " lavtools' max (4096x4096)", width, height);
         goto ERR_EXIT;
     }
 
     if ((width % 16) || (height % 16)) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image dimensions (%dx%d) not"
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Image dimensions (%dx%d) not"
                    " multiples of 16", width, height);
         goto ERR_EXIT;
     }
@@ -1133,7 +1133,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
     default:
         numfields = 1;
         if (height > 2048) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Image height (%d) exceeds"
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Image height (%d) exceeds"
                        " lavtools max for non-interlaced frames", height);
             goto ERR_EXIT;
         }
@@ -1160,7 +1160,7 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
                 yl = yc = (1 - field);
                 break;
             default:
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Input is interlaced"
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Input is interlaced"
                            " but no interlacing set");
                 goto ERR_EXIT;
             }
