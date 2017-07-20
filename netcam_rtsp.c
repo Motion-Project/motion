@@ -584,7 +584,7 @@ static int netcam_rtsp_open_context(netcam_context_ptr netcam){
     {
         char newtname[16];
         char curtname[16] = "unknown";
-#if (!defined(BSD) || defined(__APPLE__))
+#if ((!defined(BSD) && HAVE_PTHREAD_SETNAME_NP) || defined(__APPLE__))
         pthread_getname_np(pthread_self(), curtname, sizeof(curtname));
 #endif
         snprintf(newtname, sizeof(newtname), "av%d%s%s",

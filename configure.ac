@@ -110,6 +110,16 @@ if test x$THREADS = xyes; then
 fi
 
 ##############################################################################
+###  Check for pthread_setname_np (nonstandard GNU extension)
+##############################################################################
+AC_MSG_CHECKING([for pthread_setname_np])
+AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include <pthread.h>], [pthread_setname_np(pthread_self(), "name")])],
+    [AC_DEFINE([HAVE_PTHREAD_SETNAME_NP], [1], [Define if you have pthread_setname_np function.])
+    AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])] )
+
+##############################################################################
 ###  Check for JPG
 ##############################################################################
 AC_CHECK_HEADERS(setjmp.h jerror.h jpeglib.h,[JPGS="yes"],[JPGS="no"])
