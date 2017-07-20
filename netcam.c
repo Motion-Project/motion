@@ -2803,7 +2803,7 @@ int netcam_start(struct context *cnt)
 
     if ((retval = pthread_create(&netcam->thread_id, &handler_attribute,
                                  &netcam_handler_loop, netcam)) < 0) {
-        MOTION_LOG(NTC, TYPE_NETCAM, SHOW_ERRNO, "Starting camera"
+        MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO, "Error starting camera"
                    " handler thread [%d]", netcam->threadnr);
         return -1;
     }
