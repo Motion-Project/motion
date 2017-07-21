@@ -1779,7 +1779,7 @@ static void *netcam_handler_loop(void *arg)
      */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
 
-    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Camera handler thread [%d]"
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Camera handler thread [%d]"
                " started", netcam->threadnr);
     /*
      * The logic of our loop is very simple.  If this is a non-
@@ -1957,7 +1957,7 @@ static void *netcam_handler_loop(void *arg)
     pthread_mutex_unlock(&global_lock);
 
     /* Log out a termination message. */
-    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: netcam camera handler:"
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: netcam camera handler:"
                " finish set, exiting");
 
     /* Setting netcam->thread_id to zero shows netcam_cleanup we're done. */
@@ -2580,7 +2580,7 @@ int netcam_start(struct context *cnt)
 
     memset(&url, 0, sizeof(url));
 
-    MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "%s: Network Camera thread"
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Network Camera thread"
                " starting... for url (%s)", cnt->conf.netcam_url);
     /*
      * Create a new netcam_context for this camera
@@ -2803,7 +2803,7 @@ int netcam_start(struct context *cnt)
 
     if ((retval = pthread_create(&netcam->thread_id, &handler_attribute,
                                  &netcam_handler_loop, netcam)) < 0) {
-        MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO, "%s: Starting camera"
+        MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO, "%s: Error starting camera"
                    " handler thread [%d]", netcam->threadnr);
         return -1;
     }
