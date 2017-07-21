@@ -413,7 +413,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
         }
 
         if (soi_pos != 0){
-            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: SOI position adjusted by %d bytes.", soi_pos);
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "SOI position adjusted by %d bytes.", soi_pos);
         }
 
         memmove(cap_map, cap_map + soi_pos, size - soi_pos);
@@ -429,7 +429,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
     }
 
     if (ret == 1) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "%s: Corrupt image ... continue");
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "Corrupt image ... continue");
         ret = 2;
     }
     return ret;
@@ -570,7 +570,7 @@ void vid_close(struct context *cnt)
 
 #ifdef HAVE_MMAL
     if (cnt->mmalcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling mmalcam_cleanup");
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "calling mmalcam_cleanup");
         mmalcam_cleanup(cnt->mmalcam);
         cnt->mmalcam = NULL;
         return;
@@ -578,25 +578,25 @@ void vid_close(struct context *cnt)
 #endif
 
     if (cnt->netcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: calling netcam_cleanup");
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "calling netcam_cleanup");
         netcam_cleanup(cnt->netcam, 0);
         cnt->netcam = NULL;
         return;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_V4L2) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Cleaning up V4L2 device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Cleaning up V4L2 device");
         v4l2_cleanup(cnt);
         return;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Cleaning up BKTR device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Cleaning up BKTR device");
         bktr_cleanup(cnt);
         return;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)");
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)");
     return;
 
 
@@ -630,47 +630,47 @@ int vid_start(struct context *cnt)
 
 #ifdef HAVE_MMAL
     if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening MMAL cam");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening MMAL cam");
         dev = mmalcam_start(cnt);
         if (dev < 0) {
             mmalcam_cleanup(cnt->mmalcam);
             cnt->mmalcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: MMAL cam failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL cam failed to open");
         }
         return dev;
     }
 #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening Netcam");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening Netcam");
         dev = netcam_start(cnt);
         if (dev < 0) {
             netcam_cleanup(cnt->netcam, 1);
             cnt->netcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: Netcam failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Netcam failed to open");
         }
         return dev;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_V4L2) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening V4L2 device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening V4L2 device");
         dev = v4l2_start(cnt);
         if (dev < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: V4L2 device failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "V4L2 device failed to open");
         }
         return dev;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opening BKTR device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening BKTR device");
         dev = bktr_start(cnt);
         if (dev < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: BKTR device failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "BKTR device failed to open");
         }
         return dev;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: No Camera device specified (MMAL, Netcam, V4L2, BKTR)");
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "No Camera device specified (MMAL, Netcam, V4L2, BKTR)");
     return dev;
 
 }

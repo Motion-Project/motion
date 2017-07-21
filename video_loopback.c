@@ -29,7 +29,7 @@ static int vlp_open_vidpipe(void)
     int len,min;
 
     if ((dir = opendir(prefix)) == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "%s: Failed to open '%s'", prefix);
+        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "Failed to open '%s'", prefix);
         return -1;
     }
 
@@ -38,14 +38,14 @@ static int vlp_open_vidpipe(void)
             strncpy(buffer, prefix, sizeof(buffer));
             strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
             strncat(buffer, "/name", sizeof(buffer) - strlen(buffer));
-            MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO, "%s: Opening buffer: %s",buffer);
+            MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO, "Opening buffer: %s",buffer);
             if ((fd = open(buffer, O_RDONLY)) >= 0) {
                 if ((len = read(fd, buffer, sizeof(buffer)-1)) < 0) {
                     close(fd);
                     continue;
                 }
                 buffer[len]=0;
-                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO, "%s: Read buffer: %s",buffer);
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO, "Read buffer: %s",buffer);
                 if (strncmp(buffer, "Loopback video device",21)) { /* weird stuff after minor */
                     close(fd);
                     continue;
@@ -53,7 +53,7 @@ static int vlp_open_vidpipe(void)
                 min = atoi(&buffer[21]);
                 strcpy(buffer, "/dev/");
                 strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,"%s: found video device '%s' %d", buffer,min);
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "found video device '%s' %d", buffer,min);
                 if ((tfd = open(buffer, O_RDWR)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
                     if (pipe_fd >= 0) close(pipe_fd);
@@ -68,7 +68,7 @@ static int vlp_open_vidpipe(void)
     closedir(dir);
 
     if (pipe_fd >= 0)
-      MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as pipe output", pipepath);
+      MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opened %s as pipe output", pipepath);
 
     return pipe_fd;
 }
@@ -109,28 +109,28 @@ static void vlp_show_vcap(struct v4l2_capability *cap) {
     unsigned int c    = cap->capabilities;
     int i;
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Pipe Device");
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: cap.driver:   %s",cap->driver);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: cap.card:     %s",cap->card);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: cap.bus_info: %s",cap->bus_info);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Device capabilities");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Pipe Device");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.driver:   %s",cap->driver);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %s",cap->card);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
     for (i=0;cap_list[i].code;i++)
         if (c & cap_list[i].code)
-            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: %s",cap_list[i].cap);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: ------------------------");
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
 static void vlp_show_vfmt(struct v4l2_format *v) {
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: type: type:           %d",v->type);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.width:        %d",v->fmt.pix.width);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.height:       %d",v->fmt.pix.height);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.pixelformat:  %d",v->fmt.pix.pixelformat);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.sizeimage:    %d",v->fmt.pix.sizeimage);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.field:        %d",v->fmt.pix.field);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.bytesperline: %d",v->fmt.pix.bytesperline);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: fmt.pix.colorspace:   %d",v->fmt.pix.colorspace);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: ------------------------");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.pixelformat:  %d",v->fmt.pix.pixelformat);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.sizeimage:    %d",v->fmt.pix.sizeimage);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.field:        %d",v->fmt.pix.field);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.bytesperline: %d",v->fmt.pix.bytesperline);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.colorspace:   %d",v->fmt.pix.colorspace);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
 int vlp_startpipe(const char *dev_name, int width, int height)
@@ -143,16 +143,16 @@ int vlp_startpipe(const char *dev_name, int width, int height)
         dev = vlp_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR);
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s: Opened %s as pipe output", dev_name);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opened %s as pipe output", dev_name);
     }
 
     if (dev < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: Opening %s as pipe output failed", dev_name);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "Opening %s as pipe output failed", dev_name);
         return -1;
     }
 
     if (ioctl(dev, VIDIOC_QUERYCAP, &vc) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOC_QUERYCAP)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_QUERYCAP)");
         return -1;
     }
 
@@ -163,10 +163,10 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 
     if (ioctl(dev, VIDIOC_G_FMT, &v) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOC_G_FMT)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_G_FMT)");
         return -1;
     }
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Original pipe specifications");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Original pipe specifications");
     vlp_show_vfmt(&v);
 
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
@@ -177,15 +177,15 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     v.fmt.pix.bytesperline = width;
     v.fmt.pix.field = V4L2_FIELD_NONE;
     v.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Proposed pipe specifications");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Proposed pipe specifications");
     vlp_show_vfmt(&v);
 
     if (ioctl(dev,VIDIOC_S_FMT, &v) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: ioctl (VIDIOC_S_FMT)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_S_FMT)");
         return -1;
     }
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s: Final pipe specifications");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Final pipe specifications");
     vlp_show_vfmt(&v);
 
     return dev;

@@ -981,7 +981,7 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
         return put_jpeg_grey_memory(dest_image, image_size, image,
                                     cnt->imgs.width, cnt->imgs.height, quality);
     default:
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknown image type %d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d",
                    cnt->imgs.type);
     }
 
@@ -1006,7 +1006,7 @@ void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, in
             put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
             break;
         default:
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unknown image type %d",
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d",
                        cnt->imgs.type);
         }
     }
@@ -1022,14 +1022,14 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
-                       "%s: Can't write picture to file %s - check access rights to target directory\n"
+                       "Can't write picture to file %s - check access rights to target directory\n"
                        "Thread is going to finish due to this fatal error", file);
             cnt->finish = 1;
             cnt->restart = 0;
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Can't write picture to file %s", file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Can't write picture to file %s", file);
             return;
         }
     }
@@ -1053,12 +1053,12 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     line[255] = 0;
 
     if (!fgets(line, 255, picture)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Could not read from ppm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Could not read from ppm file");
         return NULL;
     }
 
     if (strncmp(line, "P5", 2)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: This is not a ppm file, starts with '%s'",
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "This is not a ppm file, starts with '%s'",
                    line);
         return NULL;
     }
@@ -1071,7 +1071,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading size in pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading size in pgm file");
         return NULL;
     }
 
@@ -1082,7 +1082,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
             return NULL;
 
     if (sscanf(line, "%d", &maxval) != 1) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading maximum value in pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading maximum value in pgm file");
         return NULL;
     }
 
@@ -1095,7 +1095,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     for (y = 0; y < mask_height; y++) {
         if ((int)fread(&image[y * mask_width], 1, mask_width, picture) != mask_width)
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed reading image data from pgm file");
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading image data from pgm file");
 
         for (x = 0; x < mask_width; x++)
             image[y * mask_width + x] = (int)image[y * mask_width + x] * 255 / maxval;
@@ -1104,8 +1104,8 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Resize mask if required */
     if (mask_width != width || mask_height != height) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: The mask file specified is not the same size as image from camera.");
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Attempting to resize mask image from %dx%d to %dx%d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "The mask file specified is not the same size as image from camera.");
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Attempting to resize mask image from %dx%d to %dx%d",
                    mask_width, mask_height, width, height);
 
         resized_image = mymalloc((width * height * 3) / 2);
@@ -1142,11 +1142,11 @@ void put_fixed_mask(struct context *cnt, const char *file)
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
-                       "%s: can't write mask file %s - check access rights to target directory",
+                       "can't write mask file %s - check access rights to target directory",
                        file);
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: can't write mask file %s", file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "can't write mask file %s", file);
         }
         return;
     }
@@ -1159,13 +1159,13 @@ void put_fixed_mask(struct context *cnt, const char *file)
 
     /* Write pgm image data at once. */
     if ((int)fwrite(cnt->imgs.out, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Failed writing default mask as pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed writing default mask as pgm file");
         return;
     }
 
     myfclose(picture);
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s: Creating empty mask %s\nPlease edit this file and "
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Creating empty mask %s\nPlease edit this file and "
                "re-run motion to enable mask feature", cnt->conf.mask_file);
 }
 
@@ -1212,7 +1212,7 @@ void preview_save(struct context *cnt)
              * Save best preview-shot also when no movies are recorded or imagepath
              * is used. Filename has to be generated - nothing available to reuse!
              */
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: different filename or picture only!");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "different filename or picture only!");
             /*
              * conf.imagepath would normally be defined but if someone deleted it by
              * control interface it is better to revert to the default than fail.

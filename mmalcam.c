@@ -260,7 +260,7 @@ int mmalcam_start(struct context *cnt)
     mmalcam->cnt = cnt;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-            "%s: MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps",
+            "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps",
             cnt->conf.mmalcam_name, cnt->conf.width, cnt->conf.height, cnt->conf.frame_limit);
 
     mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
@@ -378,7 +378,7 @@ int mmalcam_next(struct context *cnt, unsigned char *map)
         memcpy(map, camera_buffer->data, cnt->imgs.size);
         mmal_buffer_header_mem_unlock(camera_buffer);
     } else {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "%s: cmd %d flags %08x size %d/%d at %08x",
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "cmd %d flags %08x size %d/%d at %08x",
                 camera_buffer->cmd, camera_buffer->flags, camera_buffer->length, camera_buffer->alloc_size, camera_buffer->data);
     }
 
