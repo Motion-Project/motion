@@ -429,25 +429,21 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
             ffmpeg->start_time.tv_usec = tv1->tv_usec ;
             pts_interval = 0;
         }
-        pts_interval += ffmpeg->base_pts;
-        if (pts_interval == 0)
-            pts_interval++;
-        if (pts_interval <= ffmpeg->last_pts){
-            //We have a problem with our motion loop timing and sending frames.  Increment by just 1 to at least keep frame in movie.
-            pts_interval = ffmpeg->last_pts + 1;
-            if (ffmpeg->test_mode == 1){
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: BAD TIMING!! PTS reset to incremental counter new PTS %d ", pts_interval);
-            }
-        }
-        // Convert pts_interval to stream time base
-        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base)  + 1;
+        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
         if (ffmpeg->test_mode == 1){
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: ms interval %d PTS %d timebase %d-%d",pts_interval,ffmpeg->pkt.pts,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
         }
 
+        if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
+            //We have a problem with our motion loop timing and sending frames.  Increment by just 1 to at least keep frame in movie.
+            ffmpeg->pkt.pts = ffmpeg->last_pts + 1;
+            if (ffmpeg->test_mode == 1){
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: BAD TIMING!! PTS reset to incremental counter new PTS %d ",ffmpeg->pkt.pts);
+            }
+        }
         ffmpeg->pkt.dts = ffmpeg->pkt.pts;
-        ffmpeg->last_pts = pts_interval;
+        ffmpeg->last_pts = ffmpeg->pkt.pts;
     }
     return 0;
 }
@@ -931,3 +927,19 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct t
 #endif // HAVE_FFMPEG
 }
 
+void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+#ifdef HAVE_FFMPEG
+    int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, ffmpeg->fps},ffmpeg->video_st->time_base);
+    if (one_frame_interval <= 0)
+        one_frame_interval = 1;
+    ffmpeg->base_pts = ffmpeg->last_pts + one_frame_interval;
+
+    ffmpeg->start_time.tv_sec = tv1->tv_sec;
+    ffmpeg->start_time.tv_usec = tv1->tv_usec;
+
+#else
+    if (ffmpeg && tv1) {
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: No ffmpeg support");
+    }
+#endif // HAVE_FFMPEG
+}
