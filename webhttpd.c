@@ -334,6 +334,27 @@ static void response_client(int client_socket, const char *template, char *back)
 }
 
 /**
+ * get_host
+ *      Gets the host (IP) of a client from the socket file descriptor
+ * Returns nothing
+ */
+static void get_host(char *buf, int fd)
+{
+    struct sockaddr_in6 client;
+    socklen_t client_len;
+    int res = getpeername(fd, (struct sockaddr *)&client, &client_len);
+    if (res != 0)
+        return;
+
+    char host[NI_MAXHOST];
+    res = getnameinfo((struct sockaddr *)&client, client_len, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
+    if (res != 0)
+        return;
+
+    strncpy(buf, host, NI_MAXHOST - 1);
+}
+
+/**
  * replace
  */
 static char *replace(const char *str, const char *old, const char *new)
@@ -2520,6 +2541,9 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                         char response[1024] = {'\0'};
                         snprintf(response, sizeof (response), request_auth_response_template, method);
                         warningkill = write_nonblock(client_socket, response, strlen(response));
+                        char host[NI_MAXHOST] = "unknown";
+                        get_host(host, client_socket);
+                        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "motion-httpd - failed auth attempt from %s", host);
                         free(hostname);
                         pthread_mutex_unlock(&httpd_mutex);
                         return 1;
@@ -2638,6 +2662,9 @@ void httpd_run(struct context **cnt)
             /* Get the Client request */
             client_sent_quit_message = read_client(client_socket_fd, cnt, authentication);
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client");
+            char host[NI_MAXHOST] = "unknown";
+            get_host(host, client_socket_fd);
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client (%s)", host);
 
             /* Close Connection */
             if (client_socket_fd)
