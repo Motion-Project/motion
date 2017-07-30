@@ -732,7 +732,8 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output->vbr = cnt->conf.ffmpeg_vbr;
         cnt->ffmpeg_output->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_output->last_pts = 0;
+        cnt->ffmpeg_output->last_pts = -1;
+        cnt->ffmpeg_output->base_pts = 0;
         cnt->ffmpeg_output->gop_cnt = 0;
         cnt->ffmpeg_output->codec_name = codec;
         if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
@@ -762,7 +763,8 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_debug->vbr = cnt->conf.ffmpeg_vbr;
         cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_output_debug->last_pts = 0;
+        cnt->ffmpeg_output_debug->last_pts = -1;
+        cnt->ffmpeg_output_debug->base_pts = 0;
         cnt->ffmpeg_output_debug->gop_cnt = 0;
         cnt->ffmpeg_output_debug->codec_name = codec;
         if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
@@ -817,7 +819,8 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         cnt->ffmpeg_timelapse->vbr = cnt->conf.ffmpeg_vbr;
         cnt->ffmpeg_timelapse->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_timelapse->last_pts = 0;
+        cnt->ffmpeg_timelapse->last_pts = -1;
+        cnt->ffmpeg_timelapse->base_pts = 0;
         cnt->ffmpeg_timelapse->test_mode = 0;
         cnt->ffmpeg_timelapse->gop_cnt = 0;
 
