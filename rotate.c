@@ -198,7 +198,7 @@ void rotate_init(struct context *cnt)
      * we have a value that is safe from changes caused by motion-control.
      */
     if ((cnt->conf.rotate_deg % 90) > 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Config option \"rotate\" not a multiple of 90: %d",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Config option \"rotate\" not a multiple of 90: %d",
                    cnt->conf.rotate_deg);
         cnt->conf.rotate_deg = 0;     /* Disable rotation. */
         cnt->rotate_data.degrees = 0; /* Force return below. */
@@ -259,7 +259,7 @@ void rotate_init(struct context *cnt)
         break;
     default:
         cnt->rotate_data.degrees = 0;
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "%s: Unsupported palette (%d), rotation is disabled",
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unsupported palette (%d), rotation is disabled",
                     cnt->imgs.type);
         return;
     }

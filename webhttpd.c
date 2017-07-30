@@ -269,7 +269,7 @@ static void send_template_ini_client(int client_socket, const char *template)
     nwrite = write_nonblock(client_socket, ok_response, strlen(ok_response));
     nwrite += write_nonblock(client_socket, template, strlen(template));
     if (nwrite != (ssize_t)(strlen(ok_response) + strlen(template)))
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "failure write");
 }
 
 /**
@@ -280,7 +280,7 @@ static void send_template_ini_client_raw(int client_socket)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, ok_response_raw, strlen(ok_response_raw));
     if (nwrite != (ssize_t)strlen(ok_response_raw))
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "failure write");
 }
 
 /**
@@ -291,7 +291,7 @@ static void send_template(int client_socket, char *res)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, res, strlen(res));
     if (nwrite != (ssize_t)strlen(res))
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: failure write");
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "failure write");
 }
 
 /**
@@ -302,7 +302,7 @@ static void send_template_raw(int client_socket, char *res)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, res, strlen(res));
     if (nwrite < 0)
-        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write_nonblock returned value less than zero.");
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "write_nonblock returned value less than zero.");
 }
 
 /**
@@ -313,7 +313,7 @@ static void send_template_end_client(int client_socket)
     ssize_t nwrite = 0;
     nwrite = write_nonblock(client_socket, end_template, strlen(end_template));
     if (nwrite < 0)
-        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write_nonblock returned value less than zero.");
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "write_nonblock returned value less than zero.");
 
 }
 
@@ -329,7 +329,7 @@ static void response_client(int client_socket, const char *template, char *back)
         send_template_end_client(client_socket);
     }
     if (nwrite < 0)
-        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: write_nonblock returned value less than zero.");
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "write_nonblock returned value less than zero.");
 
 }
 
@@ -1051,7 +1051,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             /* call restart */
 
             if (thread == 0) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd is going to restart");
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd is going to restart");
                 kill(getpid(),SIGHUP);
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
@@ -1065,7 +1065,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 0; // to restart
             } else {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd is going to restart thread %d",
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd is going to restart thread %d",
                            thread);
                 if (cnt[thread]->running) {
                     cnt[thread]->makemovie = 1;
@@ -1097,7 +1097,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             /* call quit */
 
             if (thread == 0) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd quits");
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd quits");
                 kill(getpid(),SIGQUIT);
                 if (cnt[0]->conf.webcontrol_html_output) {
                     send_template_ini_client(client_socket, ini_template);
@@ -1111,7 +1111,7 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
                 }
                 return 0; // to quit
             } else {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: httpd quits thread %d",
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd quits thread %d",
                            thread);
                 cnt[thread]->restart = 0;
                 cnt[thread]->makemovie = 1;
@@ -1367,7 +1367,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             if ((question != '=') || (command[0] == '\0')) {
                 /* no valid syntax */
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 1");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 1");
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
                 else
@@ -1417,7 +1417,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 }
             } else {
                 /* no valid syntax */
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 2");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 2");
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
                 else
@@ -1428,7 +1428,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             /* first value check for error */
 
             if (!warningkill) {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 3");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 3");
                 /* error value */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, error_value, NULL);
@@ -1600,7 +1600,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
             warningkill = sscanf(pointer, "%c%255[a-z]" , &question, command);
             if ((question != '&') || (command[0] == '\0')) {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 4");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 4");
                 if (strstr(pointer, "&")) {
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, error_value, NULL);
@@ -1624,7 +1624,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer = pointer + 3;
                 length_uri = length_uri - 3;
                 if (pan || !tilt || X || Y) {
-                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 5");
+                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 5");
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
@@ -1640,7 +1640,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 length_uri = length_uri - 4;
                 if (tilt || !pan || X || Y) {
                     /* no valid syntax */
-                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 6");
+                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 6");
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
                     else
@@ -1654,7 +1654,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer++;
                 length_uri--;
                 if (X || !Y || pan || tilt) {
-                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 7");
+                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 7");
 
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
@@ -1670,7 +1670,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 pointer++;
                 length_uri--;
                 if (Y || !X || pan || tilt) {
-                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 8");
+                    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 8");
                     /* no valid syntax */
                     if (cnt[0]->conf.webcontrol_html_output)
                         response_client(client_socket, not_valid_syntax, NULL);
@@ -1682,7 +1682,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                 warningkill = sscanf(pointer, "%c%10[-0-9]" , &question, y_value);
 
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 9");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 9");
                 /* no valid syntax */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
@@ -1694,7 +1694,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
             /* Second value check */
 
             if ((warningkill < 2) && (question != '=')) {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 10");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 10");
                 /* no valid syntax */
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, not_valid_syntax, NULL);
@@ -1702,7 +1702,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
                     response_client(client_socket, not_valid_syntax_raw, NULL);
                 return 1;
             } else if ((question == '=') && (warningkill == 1)) {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 11");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 11");
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, error_value, NULL);
                 else
@@ -1727,7 +1727,7 @@ static unsigned int track(char *pointer, char *res, unsigned int length_uri,
 
 
             if (length_uri != 0) {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "%s: httpd debug race 12");
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "httpd debug race 12");
                 if (cnt[0]->conf.webcontrol_html_output)
                     response_client(client_socket, error_value, NULL);
                 else
@@ -2383,7 +2383,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
         nread = read_nonblock(client_socket, buffer, length);
 
         if (nread <= 0) {
-            MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd First Read Error");
+            MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "motion-httpd First Read Error");
             pthread_mutex_unlock(&httpd_mutex);
             return 1;
         } else {
@@ -2419,7 +2419,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
                 nread += readb;
 
                 if (nread > length) {
-                    MOTION_LOG(WRN, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd End buffer"
+                    MOTION_LOG(WRN, TYPE_STREAM, SHOW_ERRNO, "motion-httpd End buffer"
                                " reached waiting for buffer ending");
                     break;
                 }
@@ -2431,7 +2431,7 @@ static unsigned int read_client(int client_socket, void *userdata, char *auth)
              * problem with the connection, so give up.
              */
             if (nread == -1) {
-                MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "%s: motion-httpd READ give up!");
+                MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "motion-httpd READ give up!");
                 pthread_mutex_unlock(&httpd_mutex);
                 return 1;
             }
@@ -2609,7 +2609,7 @@ void httpd_run(struct context **cnt)
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"%s: Started motion-httpd server on port %d (auth %s)",
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Started motion-httpd server on port %d (auth %s)",
         cnt[0]->conf.webcontrol_port, cnt[0]->conf.webcontrol_authentication ? "Enabled":"Disabled");
 
     if (cnt[0]->conf.webcontrol_authentication != NULL) {
@@ -2631,13 +2631,13 @@ void httpd_run(struct context **cnt)
 
         if (client_socket_fd < 0) {
             if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Finishing");
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Finishing");
                 closehttpd = 1;
             }
         } else {
             /* Get the Client request */
             client_sent_quit_message = read_client(client_socket_fd, cnt, authentication);
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd - Read from client");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client");
 
             /* Close Connection */
             if (client_socket_fd)
@@ -2648,7 +2648,7 @@ void httpd_run(struct context **cnt)
 
     free(authentication);
     close(sd);
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd Closing");
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd Closing");
     pthread_mutex_destroy(&httpd_mutex);
 }
 
@@ -2674,6 +2674,6 @@ void *motion_web_control(void *arg)
     cnt[0]->webcontrol_running = 0;
     pthread_mutex_unlock(&global_lock);
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "%s: motion-httpd thread exit");
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd thread exit");
     pthread_exit(NULL);
 }

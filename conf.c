@@ -1737,7 +1737,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     }
 
     /* We reached the end of config_params without finding a matching option. */
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s: Unknown config option \"%s\"",
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unknown config option \"%s\"",
                cmd);
 
     return cnt;
@@ -1839,7 +1839,7 @@ void conf_print(struct context **cnt)
     FILE *conffile;
 
     for (thread = 0; cnt[thread]; thread++) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Writing config file to %s",
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Writing config file to %s",
                    cnt[thread]->conf_filename);
 
         conffile = myfopen(cnt[thread]->conf_filename, "w");
@@ -1971,11 +1971,11 @@ struct context **conf_load(struct context **cnt)
         char path[PATH_MAX];
 
         if (cnt[0]->conf_filename[0])
-            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Configfile %s not found - trying defaults.",
+            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Configfile %s not found - trying defaults.",
                        filename);
 
         if (getcwd(path, sizeof(path)) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "%s: Error getcwd");
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Error getcwd");
             exit(-1);
         }
 
@@ -1992,7 +1992,7 @@ struct context **conf_load(struct context **cnt)
             fp = fopen(filename, "r");
 
             if (!fp) /* There is no config file.... use defaults. */
-                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: could not open configfile %s",
+                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "could not open configfile %s",
                            filename);
         }
     }
@@ -2001,12 +2001,12 @@ struct context **conf_load(struct context **cnt)
     if (fp) {
       strncpy(cnt[0]->conf_filename, filename, sizeof(cnt[0]->conf_filename) - 1);
       cnt[0]->conf_filename[sizeof(cnt[0]->conf_filename) - 1] = '\0';
-      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing thread 0 - config file %s",
+      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Processing thread 0 - config file %s",
          filename);
       cnt = conf_process(cnt, fp);
       myfclose(fp);
     } else {
-        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO, "%s: No config file to process, using default values");
+        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO, "No config file to process, using default values");
     }
 
 
@@ -2407,7 +2407,7 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
                 snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
                             str, ep->d_name);
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
-                    "%s: Processing config file %s", conf_file );
+                    "Processing config file %s", conf_file );
                 cnt = config_camera(cnt, conf_file, 0);
             }
         }
@@ -2415,7 +2415,7 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
     }
     else
     {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Camera directory config "
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Camera directory config "
                     "%s not found", str);
     }
 
@@ -2453,7 +2453,7 @@ static struct context **config_camera(struct context **cnt, const char *str,
     fp = fopen(str, "r");
 
     if (!fp) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "%s: Camera config file %s not found",
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Camera config file %s not found",
                    str);
         return cnt;
     }
@@ -2491,7 +2491,7 @@ static struct context **config_camera(struct context **cnt, const char *str,
 
     /* Process the thread's config file and notify user on console. */
     strcpy(cnt[i]->conf_filename, str);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s: Processing camera config file %s",
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Processing camera config file %s",
                str);
     conf_process(cnt + i, fp);
 
