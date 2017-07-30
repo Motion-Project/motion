@@ -2065,10 +2065,8 @@ static void mlp_actions(struct context *cnt){
              *  no motion then we reset the start movie time so that we do not
              *  get a pause in the movie.
             */
-            if ( (cnt->detecting_motion == 0) && (cnt->ffmpeg_output != NULL) ) {
-                cnt->ffmpeg_output->start_time.tv_sec=cnt->current_image->timestamp_tv.tv_sec;
-                cnt->ffmpeg_output->start_time.tv_usec=cnt->current_image->timestamp_tv.tv_usec;
-            }
+            if ( (cnt->detecting_motion == 0) && (cnt->ffmpeg_output != NULL) )
+                ffmpeg_reset_movie_start_time(cnt->ffmpeg_output, &cnt->current_image->timestamp_tv);
 
             cnt->detecting_motion = 1;
 
