@@ -431,13 +431,13 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
         ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
         if (ffmpeg->test_mode == 1){
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: PTS %d Base PTS %d ms interval %d timebase %d-%d",ffmpeg->pkt.pts,ffmpeg->base_pts,pts_interval,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "PTS %d Base PTS %d ms interval %d timebase %d-%d",ffmpeg->pkt.pts,ffmpeg->base_pts,pts_interval,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
         }
 
         if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
             if (ffmpeg->test_mode == 1){
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: BAD TIMING!! Frame skipped.");
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "BAD TIMING!! Frame skipped.");
             }
             return -1;
         }
