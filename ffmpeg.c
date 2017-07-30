@@ -425,22 +425,21 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
         pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            ffmpeg->start_time.tv_sec = tv1->tv_sec ;
-            ffmpeg->start_time.tv_usec = tv1->tv_usec ;
+            ffmpeg_reset_movie_start_time(ffmpeg, tv1);
             pts_interval = 0;
         }
         ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
         if (ffmpeg->test_mode == 1){
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: ms interval %d PTS %d timebase %d-%d",pts_interval,ffmpeg->pkt.pts,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: PTS %d Base PTS %d ms interval %d timebase %d-%d",ffmpeg->pkt.pts,ffmpeg->base_pts,pts_interval,ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
         }
 
         if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
-            //We have a problem with our motion loop timing and sending frames.  Increment by just 1 to at least keep frame in movie.
-            ffmpeg->pkt.pts = ffmpeg->last_pts + 1;
+            //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
             if (ffmpeg->test_mode == 1){
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: BAD TIMING!! PTS reset to incremental counter new PTS %d ",ffmpeg->pkt.pts);
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s: BAD TIMING!! Frame skipped.");
             }
+            return -1;
         }
         ffmpeg->pkt.dts = ffmpeg->pkt.pts;
         ffmpeg->last_pts = ffmpeg->pkt.pts;
@@ -703,11 +702,16 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     ffmpeg->pkt.size = 0;
 
     retcd = ffmpeg_encode_video(ffmpeg);
-    if (retcd != 0) return retcd;
+    if (retcd != 0){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error while encoding picture");
+        my_packet_unref(ffmpeg->pkt);
+        return retcd;
+    }
 
     retcd = ffmpeg_set_pts(ffmpeg, tv1);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error while setting PTS");
+        //If there is an error, it has already been reported.
+        my_packet_unref(ffmpeg->pkt);
         return -1;
     }
 
