@@ -703,7 +703,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     retcd = ffmpeg_encode_video(ffmpeg);
     if (retcd != 0){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "%s: Error while encoding picture");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while encoding picture");
         my_packet_unref(ffmpeg->pkt);
         return retcd;
     }
@@ -943,7 +943,7 @@ void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *
 
 #else
     if (ffmpeg && tv1) {
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "%s: No ffmpeg support");
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "No ffmpeg support");
     }
 #endif // HAVE_FFMPEG
 }
