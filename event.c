@@ -537,7 +537,6 @@ static void event_create_extpipe(struct context *cnt,
     if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
         char stamp[PATH_MAX] = "";
         const char *moviepath;
-        FILE *fd_dummy = NULL;
 
         /*
          *  conf.mpegpath would normally be defined but if someone deleted it by control interface
@@ -554,27 +553,24 @@ static void event_create_extpipe(struct context *cnt,
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
         snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
 
-        /* Open a dummy file to check if path is correct */
-        fd_dummy = myfopen(cnt->extpipefilename, "w");
-
-        /* TODO: trigger some warning instead of only log an error message */
-        if (fd_dummy == NULL) {
+        if (access(cnt->conf.filepath, W_OK)!= 0) {
             /* Permission denied */
             if (errno ==  EACCES) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "error opening file %s ..."
-                           "check access rights to target directory",
-                           cnt->extpipefilename);
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "no write access to target directory %s",
+                           cnt->conf.filepath);
                 return ;
-            } else {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "error opening file %s",
-                           cnt->extpipefilename);
+            /* Path not found - create it */
+            } else if (errno ==  ENOENT) {
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "path not found, trying to create it %s ...",
+                           cnt->conf.filepath);
+                if (create_path(cnt->extpipefilename) == -1)
+                    return ;
+            }
+            else {
+                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "error accesing path %s", cnt->conf.filepath);
                 return ;
             }
-
         }
-
-        myfclose(fd_dummy);
-        unlink(cnt->extpipefilename);
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
