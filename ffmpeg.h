@@ -52,6 +52,7 @@ struct ffmpeg {
     int vbr;
     const char *codec_name;
     int64_t last_pts;
+    int64_t base_pts;
     int test_mode;
     int gop_cnt;
     struct timeval start_time;
@@ -77,5 +78,6 @@ void ffmpeg_avcodec_log(void *, int, const char *, va_list);
 int ffmpeg_open(struct ffmpeg *ffmpeg);
 int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct timeval *tv1);
 void ffmpeg_close(struct ffmpeg *ffmpeg);
+void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1);
 
 #endif /* _INCLUDE_FFMPEG_H_ */
