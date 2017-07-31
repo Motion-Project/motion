@@ -127,6 +127,8 @@ AC_MSG_CHECKING(jpg libraries)
 AC_MSG_RESULT($JPGS)
 if test x$JPGS = xyes ; then
   TEMP_LIBS="$TEMP_LIBS -ljpeg"
+else
+  AC_MSG_ERROR([Required package libjpeg-dev not found, please check motion_guide.html and install necessary dependencies])
 fi
 
 ##############################################################################
