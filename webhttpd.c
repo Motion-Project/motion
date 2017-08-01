@@ -2103,8 +2103,13 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                     httphostname = hostname;
                 }
 
-                //Send the preview section
-                for (y = 0; y < i; y++) {
+                /*
+                 * Send the preview section
+                 * Set y to 1 if multi-threaded and to 0 if single-threaded.
+                 * This prevents showing a duplicate preview if 'stream_port'
+                 * is configured in motion.conf when multi-threaded.
+                 */
+                for (y = (i > 1 ? 1 : 0); y < i; y++) {
                     if (cnt[y]->conf.stream_port) {
                         if (cnt[y]->conf.stream_preview_newline) {
                             sprintf(res, "<br>");
