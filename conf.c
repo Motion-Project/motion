@@ -155,7 +155,7 @@ struct config conf_template = {
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type_str =                    NULL,
-    .camera_dir =                      sysconfdir"/conf.d"
+    .camera_dir =                      NULL
 };
 
 
@@ -1608,7 +1608,9 @@ config_param config_params[] = {
     {
     "camera_dir",
     "\n##############################################################\n"
-    "# Camera config directory - One for each camera.\n"
+    "# Camera config directory\n"
+    "# Any files ending in '.conf' in this directory will be read\n"
+    "# as a camera config file.\n"
     "##############################################################\n",
     1,
     CONF_OFFSET(camera_dir),
@@ -1887,8 +1889,13 @@ void conf_print(struct context **cnt)
 
                     free(val);
                 } else if (thread == 0) {
+                    /* The 'camera_dir' option should keep the installed default value */
+                    val = "value";
+                    if (!strncmp(config_params[i].param_name, "camera_dir", 10))
+                        val =  sysconfdir"/motion/conf.d";
+
                     fprintf(conffile, "%s\n", config_params[i].param_help);
-                    fprintf(conffile, "; %s value\n\n", config_params[i].param_name);
+                    fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, val);
                 }
             }
         }
@@ -2400,7 +2407,7 @@ static const char *print_camera(struct context **cnt, char **str,
 /**
  * config_camera_dir
  *     Read the directory finding all *.conf files in the path
- *     when calls config_camera
+ *     When found calls config_camera
  */
 
 static struct context **read_camera_dir(struct context **cnt, const char *str,

@@ -746,7 +746,9 @@ quiet on
 
 
 ##############################################################
-# Camera config directory - One for each camera.
+# Camera config directory
+# Any files ending in '.conf' in this directory will be read
+# as a camera config file.
 ##############################################################
-#
+
 ; camera_dir @sysconfdir@/motion/conf.d
