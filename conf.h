@@ -167,6 +167,17 @@ typedef struct {
 
 extern config_param config_params[];
 
+/**
+ * description for deprecated parameters in the config file
+ */
+typedef struct {
+    const char *name;
+    const char *last_version;
+    const char *info;
+} dep_config_param;
+
+extern dep_config_param dep_config_params[];
+
 struct context **conf_load(struct context **);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
 const char *config_type(config_param *);

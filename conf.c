@@ -170,10 +170,6 @@ static const char *print_int(struct context **, char **, int, unsigned int);
 static const char *print_string(struct context **, char **, int, unsigned int);
 static const char *print_camera(struct context **, char **, int, unsigned int);
 
-/* Deprcated thread config functions */
-static struct context **config_thread(struct context **cnt, const char *str, int val);
-static const char *print_thread(struct context **, char **, int, unsigned int);
-
 static void usage(void);
 
 /* Pointer magic to determine relative addresses of variables to a
@@ -1590,20 +1586,6 @@ config_param config_params[] = {
     config_camera,
     print_camera
     },
-    {
-    "thread",
-    "\n##############################################################\n"
-    "# Deprecated use camera instead of thread.\n"
-    "# Camera config files - One for each camera.\n"
-    "# Except if only one camera - You only need this config file.\n"
-    "# If you have more than one camera you MUST define one camera\n"
-    "# config file for each camera in addition to this config file.\n"
-    "##############################################################\n",
-    1,
-    0,
-    config_thread,
-    print_thread
-    },
     /* using a conf.d style camera addition */
     {
     "camera_dir",
@@ -1618,6 +1600,22 @@ config_param config_params[] = {
     print_string
     },
     { NULL, NULL, 0, 0, NULL, NULL }
+};
+
+/*
+ * Array of deprecated config options:
+ * When deprecating an option, remove it from above (config_params array)
+ * and create an entry in this array of name, last version, and info.
+ * Upon reading a deprecated config option, a warning will be logged
+ * with the given information and last version it was used in.
+ */
+dep_config_param dep_config_params[] = {
+    {
+    "thread",
+    "3.4.1",
+    "The \"thread\" option has been replaced by the \"camera\" option."
+    },
+    { NULL, NULL, NULL }
 };
 
 /**
@@ -1724,7 +1722,6 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
              * If the option is a bool, copy_bool is called.
              * If the option is an int, copy_int is called.
              * If the option is a string, copy_string is called.
-             * If the option is a thread, config_thread is called.
              * If the option is camera, config_camera is called.
              * The arguments to the function are:
              *  cnt  - a pointer to the context structure.
@@ -1738,10 +1735,23 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
         i++;
     }
 
-    /* We reached the end of config_params without finding a matching option. */
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unknown config option \"%s\"",
-               cmd);
+    /*
+     * We reached the end of config_params without finding a matching option.
+     * Check if it's a deprecated option and log a warning of such.
+     */
+    i = 0;
+    while (dep_config_params[i].name != NULL) {
+        if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Deprecated config option \"%s\" since after version %s:",
+                       cmd, dep_config_params[i].last_version);
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
+            return cnt;
+        }
+        i++;
+    }
 
+    /* If we get here, it's unknown to us. */
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unknown config option \"%s\"", cmd);
     return cnt;
 }
 
@@ -2368,13 +2378,6 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
     return retval;
 }
 
-static const char *print_thread(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
-{
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "thread config option deprecated use camera");
-    return print_camera(cnt, str, parm, threadnr);
-}
-
 /**
  * print_camera
  *      Modifies a pointer to a string with each 'camera' line.
@@ -2464,13 +2467,6 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
     cnt = copy_string(cnt, str, val);
 
     return cnt;
-}
-
-static struct context **config_thread(struct context **cnt, const char *str,
-                                      int val ATTRIBUTE_UNUSED)
-{
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "thread config option deprecated use camera");
-    return config_camera(cnt, str, val);
 }
 
 /**
