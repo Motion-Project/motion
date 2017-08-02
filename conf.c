@@ -80,6 +80,7 @@ struct config conf_template = {
     .ffmpeg_video_codec =              DEF_FFMPEG_CODEC,
     .ipv6_enabled =                    0,
     .stream_port =                     0,
+    .substream_port =                  0,
     .stream_quality =                  50,
     .stream_motion =                   0,
     .stream_maxrate =                  1,
@@ -1054,6 +1055,17 @@ config_param config_params[] = {
     "# The mini-http server listens to this port for requests (default: 0 = disabled)",
     0,
     CONF_OFFSET(stream_port),
+    copy_int,
+    print_int
+    },
+    {
+    "substream_port",
+    "\n############################################################\n"
+    "# Live Substream Server\n"
+    "############################################################\n\n"
+    "# The mini-http server listens to this port for requests (default: 0 = disabled)",
+    0,
+    CONF_OFFSET(substream_port),
     copy_int,
     print_int
     },

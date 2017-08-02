@@ -1032,13 +1032,13 @@ static int stream_check_write(struct stream *list)
  *
  * Returns: stream socket descriptor.
  */
-int stream_init(struct context *cnt)
+int stream_init(struct stream *stm, int stream_port, int stream_localhost, int ipv6_enabled)
 {
-    cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost,
-                                       cnt->conf.ipv6_enabled);
-    cnt->stream.next = NULL;
-    cnt->stream.prev = NULL;
-    return cnt->stream.socket;
+    stm->socket = http_bindsock(stream_port, stream_localhost, ipv6_enabled);
+    stm->next = NULL;
+    stm->prev = NULL;
+
+    return stm->socket;
 }
 
 /**
