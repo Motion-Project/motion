@@ -1046,16 +1046,17 @@ int stream_init(struct stream *stm, int stream_port, int stream_localhost, int i
  *      This function is called from the motion_loop when it ends
  *      and motion is terminated or restarted.
  */
-void stream_stop(struct context *cnt)
+void stream_stop(struct stream *stm)
 {
     struct stream *list;
-    struct stream *next = cnt->stream.next;
+    struct stream *next = stm->next;
 
+    /* TODO friendly info which socket is closing */
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Closing motion-stream listen socket"
                " & active motion-stream sockets");
 
-    close(cnt->stream.socket);
-    cnt->stream.socket = -1;
+    close(stm->socket);
+    stm->socket = -1;
 
     while (next) {
         list = next;
@@ -1090,12 +1091,12 @@ void stream_stop(struct context *cnt)
  *      Note: Clients that have disconnected are handled in the stream_flush()
  *          function.
  */
-void stream_put(struct context *cnt, unsigned char *image)
+void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsigned char *image)
 {
     struct timeval timeout;
     struct stream_buffer *tmpbuffer;
     fd_set fdread;
-    int sl = cnt->stream.socket;
+    int sl = stm->socket;
     int sc;
     /* Tthe following string has an extra 16 chars at end for length. */
     const char jpeghead[] = "--BoundaryString\r\n"
@@ -1111,7 +1112,7 @@ void stream_put(struct context *cnt, unsigned char *image)
     timeout.tv_sec = 0;
     timeout.tv_usec = 0;
     FD_ZERO(&fdread);
-    FD_SET(cnt->stream.socket, &fdread);
+    FD_SET(stm->socket, &fdread);
 
     /*
      * If we have not reached the max number of allowed clients per
@@ -1120,12 +1121,12 @@ void stream_put(struct context *cnt, unsigned char *image)
      * add this to the end of the chain of stream structs that are linked
      * to each other.
      */
-    if ((cnt->stream_count < DEF_MAXSTREAMS) &&
+    if ((*stream_count < DEF_MAXSTREAMS) &&
         (select(sl + 1, &fdread, NULL, NULL, &timeout) > 0)) {
         sc = http_acceptsock(sl);
         if (cnt->conf.stream_auth_method == 0) {
-            stream_add_client(&cnt->stream, sc);
-            cnt->stream_count++;
+            stream_add_client(stm, sc);
+            (*stream_count)++;
         } else  {
             do_client_auth(cnt, sc);
         }
@@ -1137,10 +1138,10 @@ void stream_put(struct context *cnt, unsigned char *image)
 
 
     /* Call flush to send any previous partial-sends which are waiting. */
-    stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
+    stream_flush(stm, stream_count, cnt->conf.stream_limit);
 
     /* Check if any clients have available buffers. */
-    if (stream_check_write(&cnt->stream)) {
+    if (stream_check_write(stm)) {
         /*
          * Yes - create a new tmpbuffer for current image.
          * Note that this should create a buffer which is *much* larger
@@ -1193,7 +1194,7 @@ void stream_put(struct context *cnt, unsigned char *image)
              * And finally put this buffer to all clients with
              * no outstanding data from previous frames.
              */
-            stream_add_write(&cnt->stream, tmpbuffer, cnt->conf.stream_maxrate);
+            stream_add_write(stm, tmpbuffer, cnt->conf.stream_maxrate);
         } else {
             MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer");
         }
@@ -1203,7 +1204,7 @@ void stream_put(struct context *cnt, unsigned char *image)
      * Now we call flush again.  This time (assuming some clients were
      * ready for the new frame) the new data will be written out.
      */
-    stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
+    stream_flush(stm, stream_count, cnt->conf.stream_limit);
 
     /* Unlock the mutex */
     if (cnt->conf.stream_auth_method != 0)

@@ -334,7 +334,10 @@ static void event_stop_stream(struct context *cnt,
             struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if ((cnt->conf.stream_port) && (cnt->stream.socket != -1))
-        stream_stop(cnt);
+        stream_stop(&cnt->stream);
+
+    if ((cnt->conf.substream_port) && (cnt->substream.socket != -1))
+        stream_stop(&cnt->substream);
 }
 
 static void event_stream_put(struct context *cnt,
@@ -343,7 +346,10 @@ static void event_stream_put(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if (cnt->conf.stream_port)
-        stream_put(cnt, img);
+        stream_put(cnt, &cnt->stream, &cnt->stream_count, img);
+
+     if (cnt->conf.substream_port)
+        stream_put(cnt, &cnt->substream, &cnt->substream_count, img);
 }
 
 
