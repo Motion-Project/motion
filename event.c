@@ -77,7 +77,7 @@ static void exec_command(struct context *cnt, char *command, char *filename, int
          * Close any file descriptor except console because we will
          * like to see error messages
          */
-        for (i = getdtablesize(); i > 2; --i)
+        for (i = getdtablesize() - 1; i > 2; i--)
             close(i);
 
         execl("/bin/sh", "sh", "-c", stamp, " &", NULL);
