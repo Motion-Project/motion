@@ -39,7 +39,7 @@ struct stream {
 };
 
 int stream_init(struct stream *, int, int, int);
-void stream_put(struct context *, struct stream *, int *, unsigned char *, int, int, int);
+void stream_put(struct context *, struct stream *, int *, unsigned char *, int);
 void stream_stop(struct stream *);
 
 #endif /* _INCLUDE_STREAM_H_ */

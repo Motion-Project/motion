@@ -1092,7 +1092,7 @@ void stream_stop(struct stream *stm)
  *          function.
  */
 void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsigned char *image,
-            int image_size, int image_width, int image_height)
+            int do_scale_down)
 {
     struct timeval timeout;
     struct stream_buffer *tmpbuffer;
@@ -1105,6 +1105,10 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
                             "Content-Length:                ";
     int headlength = sizeof(jpeghead) - 1;    /* Don't include terminator. */
     char len[20];    /* Will be used for sprintf, must be >= 16 */
+
+    /* will point either to the original image or a scaled down */
+    unsigned char *img = image;
+    int image_width = cnt->imgs.width, image_height = cnt->imgs.height, image_size = cnt->imgs.size;
 
     /*
      * Timeout struct used to timeout the time we wait for a client
@@ -1131,6 +1135,39 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         } else  {
             do_client_auth(cnt, sc);
         }
+    }
+
+    /* if there is no connected clients - nothing to do, return */
+    if (*stream_count <= 0)
+        return;
+
+    /* substream put - scale image down and update pointer to the scaled buffer */
+    if (do_scale_down)
+    {
+        /* TODO for now just scale 50%, better resize image to a config predefined size */
+
+        int origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
+        int subsize = origwidth * origheight * 3 / 2;
+        int subwidth = origwidth/2, subheight = origheight/2;
+
+        /* allocate buffer fore resized image, it will be freed at the bottom of the function */
+        unsigned char *scaled_img = mymalloc (cnt->imgs.width * cnt->imgs.height * 3 / 2);
+
+        int i = 0;
+        for (int y = 0; y < origheight; y+=2)
+            for (int x = 0; x < origwidth; x+=2)
+                scaled_img[i++] = img[y * origwidth + x];
+
+        for (int y = 0; y < origheight / 2; y+=2)
+            for (int x = 0; x < origwidth; x += 4)
+            {
+                scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
+                scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
+            }
+        img = scaled_img;
+        image_width = subwidth;
+        image_height = subheight;
+        image_size = subsize;
     }
 
     /* Lock the mutex */
@@ -1174,7 +1211,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
             wptr += headlength;
 
             /* Create a jpeg image and place into tmpbuffer. */
-            tmpbuffer->size = put_picture_memory(cnt, wptr, cnt->imgs.size, image,
+            tmpbuffer->size = put_picture_memory(cnt, wptr, image_size, img,
                                        cnt->conf.stream_quality, image_width, image_height);
 
             /* Fill in the image length into the header. */
@@ -1210,6 +1247,12 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
     /* Unlock the mutex */
     if (cnt->conf.stream_auth_method != 0)
         pthread_mutex_unlock(&stream_auth_mutex);
+
+    /* free resized image buffer */
+    if (do_scale_down)
+    {
+        free (img);
+    }
 
     return;
 }

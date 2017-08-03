@@ -346,31 +346,10 @@ static void event_stream_put(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
     if (cnt->conf.stream_port)
-        stream_put(cnt, &cnt->stream, &cnt->stream_count, img, cnt->imgs.size,
-                cnt->imgs.width, cnt->imgs.height);
+        stream_put(cnt, &cnt->stream, &cnt->stream_count, img, 0);
 
-     if (cnt->conf.substream_port)
-     {
-        /* TODO for now just scale 50%, better resize image to a config predefined size */
-
-        int origsize = cnt->imgs.size, origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
-        int subsize = origsize/2, subwidth = origwidth/2, subheight = origheight/2;
-
-        unsigned char scaled_img[cnt->imgs.width * cnt->imgs.height * 3 / 2];
-        int i = 0;
-        for (int y = 0; y < origheight; y+=2)
-            for (int x = 0; x < origwidth; x+=2)
-                scaled_img[i++] = img[y * origwidth + x];
-
-        for (int y = 0; y < origheight / 2; y+=2)
-            for (int x = 0; x < origwidth; x += 4)
-            {
-                scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
-                scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
-            }
-
-        stream_put(cnt, &cnt->substream, &cnt->substream_count, scaled_img, subsize, subwidth, subheight);
-    }
+    if (cnt->conf.substream_port)
+        stream_put(cnt, &cnt->substream, &cnt->substream_count, img, 1);
 }
 
 
