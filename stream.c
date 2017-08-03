@@ -1157,13 +1157,13 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         /* allocate buffer fore resized image, it will be freed at the bottom of the function */
         unsigned char *scaled_img = mymalloc (cnt->imgs.width * cnt->imgs.height * 3 / 2);
 
-        int i = 0;
-        for (int y = 0; y < origheight; y+=2)
-            for (int x = 0; x < origwidth; x+=2)
+        int i = 0, x, y;
+        for (y = 0; y < origheight; y+=2)
+            for (x = 0; x < origwidth; x+=2)
                 scaled_img[i++] = img[y * origwidth + x];
 
-        for (int y = 0; y < origheight / 2; y+=2)
-            for (int x = 0; x < origwidth; x += 4)
+        for (y = 0; y < origheight / 2; y+=2)
+            for (x = 0; x < origwidth; x += 4)
             {
                 scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
                 scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
