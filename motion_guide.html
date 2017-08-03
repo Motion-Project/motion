@@ -1606,6 +1606,11 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left">stream_port</td>
 		<td align="left"><a href="#stream_port" >stream_port</a></td>
 	</tr>
+        <tr>
+                <td height="17" align="left">substream_port</td>
+                <td align="left">substream_port</td>
+                <td align="left"><a href="#substream_port" >substream_port</a></td>
+        </tr>
 	<tr>
 		<td height="17" align="left"><br></td>
 		<td align="left">stream_preview_newline</td>
@@ -2177,22 +2182,23 @@ Some configuration options are only used if Motion is built on a system that has
   	  <tr>
        <td bgcolor="#edf4f9" ><a href="#ipv6_enabled" >ipv6_enabled</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_port" >stream_port</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#substream_port" >substream_port</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
      </tr>
   	  <tr>
-  	   <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_localhost" >stream_localhost</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_limit" >stream_limit</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
      </tr>
      <tr>
+       <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
        <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
      </tr>
      <tr>
+       <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
        <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
        <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
        <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
@@ -4768,6 +4774,23 @@ This must be placed in the camera config file (unless you only have
 one camera, in which case it can be placed in motion.conf).
 
 <p></p>
+
+<h3><a name="substream_port"></a> substream_port </h3>
+<p></p>
+<ul>
+  <li> Type: Integer</li>
+  <li> Range / Valid values: 0 - 65535</li>
+  <li> Default: 0 (disabled)</li>
+</ul>
+<p></p>
+# 50% scaled down substream (default: 0 = disabled)
+TCP port on which motion will listen for incoming connections to substream.
+Substream shares same settings as mini-http streaming server
+Image is scaled down by 50% including timestamp
+Substream can save bandwidth when viewing over mobile internet or poor wireless 
+
+<p></p>
+
 
 <h3><a name="stream_quality"></a> stream_quality </h3>
 <p></p>
