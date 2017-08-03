@@ -498,6 +498,7 @@ stream_auth_method 0
 ; stream_authentication username:password
 
 # Percentage to scale the stream image for preview
+# This is scaled on the browser side, motion will keep sending full frames
 # Default: 25
 ; stream_preview_scale 25
 
