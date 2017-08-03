@@ -1091,7 +1091,8 @@ void stream_stop(struct stream *stm)
  *      Note: Clients that have disconnected are handled in the stream_flush()
  *          function.
  */
-void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsigned char *image)
+void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsigned char *image,
+            int image_size, int image_width, int image_height)
 {
     struct timeval timeout;
     struct stream_buffer *tmpbuffer;
@@ -1174,7 +1175,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
 
             /* Create a jpeg image and place into tmpbuffer. */
             tmpbuffer->size = put_picture_memory(cnt, wptr, cnt->imgs.size, image,
-                                                 cnt->conf.stream_quality);
+                                       cnt->conf.stream_quality, image_width, image_height);
 
             /* Fill in the image length into the header. */
             imgsize = sprintf(len, "%9ld\r\n\r\n", tmpbuffer->size);

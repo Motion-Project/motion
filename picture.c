@@ -970,19 +970,17 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
  *
  * Returns the dest_image_size if successful. Otherwise 0.
  */
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size,
-                       unsigned char *image, int quality)
+int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
+        int quality, int width, int height)
 {
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+                                       width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
     case VIDEO_PALETTE_GREY:
-        return put_jpeg_grey_memory(dest_image, image_size, image,
-                                    cnt->imgs.width, cnt->imgs.height, quality);
+        return put_jpeg_grey_memory(dest_image, image_size, image, width, height, quality);
     default:
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d",
-                   cnt->imgs.type);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d", cnt->imgs.type);
     }
 
     return 0;
