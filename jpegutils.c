@@ -32,6 +32,9 @@
 #include <jerror.h>
 #include <assert.h>
 
+#define MAX_LUMA_WIDTH   4096
+#define MAX_CHROMA_WIDTH 2048
+
 /*
  * jpeg_data:       buffer with input / output jpeg
  * len:             Length of jpeg buffer
@@ -294,17 +297,6 @@ static void my_emit_message(j_common_ptr cinfo, int msg_level)
     }
 }
 
-#define MAX_LUMA_WIDTH   4096
-#define MAX_CHROMA_WIDTH 2048
-
-static unsigned char buf0[16][MAX_LUMA_WIDTH];
-static unsigned char buf1[8][MAX_CHROMA_WIDTH];
-static unsigned char buf2[8][MAX_CHROMA_WIDTH];
-static unsigned char chr1[8][MAX_CHROMA_WIDTH];
-static unsigned char chr2[8][MAX_CHROMA_WIDTH];
-
-
-
 #if 1  /* Generation of 'std' Huffman tables... */
 
 static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr,
@@ -451,6 +443,13 @@ int decode_jpeg_raw (unsigned char *jpeg_data, int len,
     int numfields, hsf[3], field, yl, yc;
     int i, xsl, xsc, xs, hdown;
     unsigned int x, y = 0, vsf[3], xd;
+
+    unsigned char buf0[16][MAX_LUMA_WIDTH];
+    unsigned char buf1[8][MAX_CHROMA_WIDTH];
+    unsigned char buf2[8][MAX_CHROMA_WIDTH];
+    unsigned char chr1[8][MAX_CHROMA_WIDTH];
+    unsigned char chr2[8][MAX_CHROMA_WIDTH];
+
 
     JSAMPROW row0[16] = { buf0[0], buf0[1], buf0[2], buf0[3],
                           buf0[4], buf0[5], buf0[6], buf0[7],
@@ -783,8 +782,10 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                          unsigned int height, unsigned char *raw0,
                          unsigned char *raw1, unsigned char *raw2)
 {
-    int numfields, field, yl, yc, xsl, xsc, xs, xd, hdown;
+    int numfields, field, yl, yc, xsl, xs, xd, hdown;
     unsigned int x, y, vsf[3];
+
+    unsigned char buf0[16][MAX_LUMA_WIDTH];
 
     JSAMPROW row0[16] = { buf0[0], buf0[1], buf0[2], buf0[3],
                           buf0[4], buf0[5], buf0[6], buf0[7],
@@ -876,7 +877,6 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
     /* Make xsl even, calculate xsc */
 
     xsl = xsl & ~1;
-    xsc = xsl / 2;
 
     yl = yc = 0;
 
@@ -926,32 +926,6 @@ int decode_jpeg_gray_raw(unsigned char *jpeg_data, int len,
                     for (x = 0; x < width / 2; x++, xd += 2, xs += 3) {
                         raw0[xd] = (2 * row0[y][xs] + row0[y][xs + 1]) / 3;
                         raw0[xd + 1] = (2 * row0[y][xs + 2] + row0[y][xs + 1]) / 3;
-                    }
-                }
-            }
-
-
-            for (y = 0; y < 8; y++) {
-                xs = xsc;
-
-                if (hdown == 0) {
-                    for (x = 0; x < width / 2; x++, xs++) {
-                        chr1[y][x] = 0; //row1[y][xs];
-                        chr2[y][x] = 0; //row2[y][xs];
-                    }
-                } else if (hdown == 1) {
-                    for (x = 0; x < width / 2; x++, xs += 2) {
-                        chr1[y][x] = 0; //(row1[y][xs] + row1[y][xs + 1]) >> 1;
-                        chr2[y][x] = 0; //(row2[y][xs] + row2[y][xs + 1]) >> 1;
-                    }
-                } else {
-                    for (x = 0; x < width / 2; x += 2, xs += 3) {
-                        chr1[y][x] = 0; //(2 * row1[y][xs] + row1[y][xs + 1]) / 3;
-                        chr1[y][x + 1] = 0;
-                        //(2 * row1[y][xs + 2] + row1[y][xs + 1]) / 3;
-                        chr2[y][x] = 0; // (2 * row2[y][xs] + row2[y][xs + 1]) / 3;
-                        chr2[y][x + 1] = 0;
-                        //(2 * row2[y][xs + 2] + row2[y][xs + 1]) / 3;
                     }
                 }
             }
@@ -1059,6 +1033,10 @@ int encode_jpeg_raw(unsigned char *jpeg_data, int len, int quality,
                     unsigned char *raw1, unsigned char *raw2)
 {
     int numfields, field, yl, yc, y, i;
+
+    unsigned char buf0[16][MAX_LUMA_WIDTH];
+    unsigned char buf1[8][MAX_CHROMA_WIDTH];
+    unsigned char buf2[8][MAX_CHROMA_WIDTH];
 
     JSAMPROW row0[16] = { buf0[0], buf0[1], buf0[2], buf0[3],
                           buf0[4], buf0[5], buf0[6], buf0[7],
