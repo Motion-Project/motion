@@ -33,6 +33,8 @@
 typedef void* (*auth_handler)(void*);
 struct auth_param {
     struct context *cnt;
+    struct stream *stm;
+    int *stream_count;
     int sock;
     int sock_flags;
     int* thread_count;
@@ -233,8 +235,8 @@ static void* handle_basic_auth(void* param)
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(&p->cnt->stream, p->sock);
-    p->cnt->stream_count++;
+    stream_add_client(p->stm, p->sock);
+    (*p->stream_count)++;
     p->thread_count--;
 
     /* Unlock the mutex */
@@ -596,8 +598,8 @@ Error:
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(&p->cnt->stream, p->sock);
-    p->cnt->stream_count++;
+    stream_add_client(p->stm, p->sock);
+    (*p->stream_count)++;
 
     p->thread_count--;
     /* Unlock the mutex */
@@ -629,7 +631,7 @@ Invalid_Request:
  *
  *
  */
-static void do_client_auth(struct context *cnt, int sc)
+static void do_client_auth(struct context *cnt, struct stream *stm, int *stream_count, int sc)
 {
     pthread_t thread_id;
     pthread_attr_t attr;
@@ -661,6 +663,8 @@ static void do_client_auth(struct context *cnt, int sc)
 
     handle_param = mymalloc(sizeof(struct auth_param));
     handle_param->cnt = cnt;
+    handle_param->stm = stm;
+    handle_param->stream_count = stream_count;
     handle_param->sock = sc;
     handle_param->conf = &cnt->conf;
     handle_param->thread_count = &thread_count;
@@ -1133,7 +1137,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
             stream_add_client(stm, sc);
             (*stream_count)++;
         } else  {
-            do_client_auth(cnt, sc);
+            do_client_auth(cnt, stm, stream_count, sc);
         }
     }
 
