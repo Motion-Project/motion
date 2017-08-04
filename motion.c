@@ -1142,8 +1142,9 @@ static int motion_init(struct context *cnt)
         }
     }
 
-    /* Initialize substream server if substream port is specified to not 0 */
-    if (cnt->conf.substream_port) {
+    /* Initialize 50% scaled substream server if substream port is specified to not 0
+       But only if dimensions are 8-modulo after scaling. Otherwise disable substream */
+    if (cnt->conf.substream_port && (cnt->conf.width / 2) % 8 == 0  && (cnt->conf.height / 2) % 8 == 0) {
         if (stream_init (&(cnt->substream), cnt->conf.substream_port, cnt->conf.stream_localhost, 
             cnt->conf.ipv6_enabled) == -1) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Problem enabling motion-substream server in port %d",
@@ -1154,6 +1155,8 @@ static int motion_init(struct context *cnt)
                        cnt->conf.substream_port, cnt->conf.stream_auth_method ? "Enabled":"Disabled");
         }
     }
+    else
+        cnt->conf.substream_port = 0;
 
     /* Prevent first few frames from triggering motion... */
     cnt->moved = 8;
