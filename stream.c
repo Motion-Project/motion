@@ -1151,11 +1151,11 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         /* TODO for now just scale 50%, better resize image to a config predefined size */
 
         int origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
-        int subsize = origwidth * origheight * 3 / 2;
         int subwidth = origwidth/2, subheight = origheight/2;
+        int subsize = subwidth * subheight * 3 / 2;
 
         /* allocate buffer fore resized image, it will be freed at the bottom of the function */
-        unsigned char *scaled_img = mymalloc (cnt->imgs.width * cnt->imgs.height * 3 / 2);
+        unsigned char *scaled_img = mymalloc (subwidth* subheight * 3 / 2);
 
         int i = 0, x, y;
         for (y = 0; y < origheight; y+=2)
