@@ -453,7 +453,7 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
 
     char crf[4];
 
-    ffmpeg->opts = 0;
+    ffmpeg->opts = NULL;
     if (ffmpeg->vbr > 100) ffmpeg->vbr = 100;
     if (ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_H264 ||
         ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_HEVC){
@@ -584,13 +584,19 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
         if (retcd < 0){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not open codec %s",errstr);
-            av_dict_free(&ffmpeg->opts);
+            if (ffmpeg->opts) {
+                av_dict_free(&ffmpeg->opts);
+                ffmpeg->opts = NULL;
+            }
             ffmpeg_free_context(ffmpeg);
             return -1;
         }
 
     }
-    av_dict_free(&ffmpeg->opts);
+    if (ffmpeg->opts) {
+        av_dict_free(&ffmpeg->opts);
+        ffmpeg->opts = NULL;
+    }
 
     return 0;
 }
