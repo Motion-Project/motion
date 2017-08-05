@@ -341,7 +341,7 @@ static void response_client(int client_socket, const char *template, char *back)
 static void get_host(char *buf, int fd)
 {
     struct sockaddr_in6 client;
-    socklen_t client_len;
+    socklen_t client_len = sizeof(client);
     int res = getpeername(fd, (struct sockaddr *)&client, &client_len);
     if (res != 0)
         return;
@@ -2661,7 +2661,6 @@ void httpd_run(struct context **cnt)
         } else {
             /* Get the Client request */
             client_sent_quit_message = read_client(client_socket_fd, cnt, authentication);
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client");
             char host[NI_MAXHOST] = "unknown";
             get_host(host, client_socket_fd);
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client (%s)", host);

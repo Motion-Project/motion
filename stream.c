@@ -47,7 +47,7 @@ struct auth_param {
 static void get_host(char *buf, int fd)
 {
     struct sockaddr_storage client;
-    socklen_t client_len;
+    socklen_t client_len = sizeof(client);
     int res = getpeername(fd, (struct sockaddr *)&client, &client_len);
     if (res != 0)
         return;
