@@ -148,14 +148,12 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
     /* cinfo->err really points to a jpgutl_error_mgr struct, so coerce pointer. */
     struct jpgutl_error_mgr *myerr = (struct jpgutl_error_mgr *) cinfo->err;
 
-    if (msg_level < 0)
+    if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
         myerr->warning_seen++ ;
-
-    //msg_level = 3 are the RST markers of the JPG which are not of much interest
-    if (msg_level < 3) {
         (*cinfo->err->format_message) (cinfo, buffer);
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
     }
+
 }
 
 int jpgutl_decode_jpeg (unsigned char *jpeg_data, int len,
