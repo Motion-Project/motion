@@ -1144,19 +1144,26 @@ static int motion_init(struct context *cnt)
 
     /* Initialize 50% scaled substream server if substream port is specified to not 0
        But only if dimensions are 8-modulo after scaling. Otherwise disable substream */
-    if (cnt->conf.substream_port && (cnt->conf.width / 2) % 8 == 0  && (cnt->conf.height / 2) % 8 == 0) {
-        if (stream_init (&(cnt->substream), cnt->conf.substream_port, cnt->conf.stream_localhost, 
-            cnt->conf.ipv6_enabled) == -1) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Problem enabling motion-substream server in port %d",
-                       cnt->conf.substream_port);
-            cnt->finish = 1;
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started motion-substream server on port %d (auth %s)",
+    if (cnt->conf.substream_port){
+        if ((cnt->conf.width / 2) % 8 == 0  && (cnt->conf.height / 2) % 8 == 0
+        && cnt->imgs.type == VIDEO_PALETTE_YUV420P){
+            if (stream_init (&(cnt->substream), cnt->conf.substream_port, cnt->conf.stream_localhost,
+                cnt->conf.ipv6_enabled) == -1) {
+                MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Problem enabling motion-substream server in port %d",
+                           cnt->conf.substream_port);
+                cnt->finish = 1;
+            } else {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started motion-substream server on port %d (auth %s)",
                        cnt->conf.substream_port, cnt->conf.stream_auth_method ? "Enabled":"Disabled");
+            }
+        }
+        else
+        {
+            /* TODO support GRAY scale */
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Subtream does not support GRAY, and original resolution must be modulo of 16");
+            cnt->conf.substream_port = 0;
         }
     }
-    else
-        cnt->conf.substream_port = 0;
 
     /* Prevent first few frames from triggering motion... */
     cnt->moved = 8;
