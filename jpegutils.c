@@ -1,10 +1,6 @@
 /*
  *  jpegutils.c: Some Utility programs for dealing with JPEG encoded images
  *
- *  Currently this module only has de-compression and is only called from vid_mjpegtoyuv420p
- *  TODO:  Include compression and move picture.c code here.
- *  TODO:  Consolidate netcam_jpeg.c to use this module/functions.
- *
  *  Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de>
  *  Copyright (C) 2001 pHilipp Zabel  <pzabel@gmx.de>
  *  Copyright (C) 2008 Angel Carpintero <motiondevelop@gmail.com>
@@ -25,6 +21,31 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+ /*
+ * jpegutils.c
+ *  Purpose:
+ *    Decompress jpeg data into images for use in other parts of program.
+ *    Currently this module only decompresses and it is only called from
+ *    the vid_mjpegtoyuv420p function
+ *  Functional Prefixes
+ *    All functions within the module will use the prefix "jpgutl" for identification
+ *  Module Level Variables:
+ *    EOI_data    Constant value to indicate the end of an image.
+ *  Module Level Structures:
+ *    jpgutl_error_mgr  Used by the JPEG libraries as the error manager to catch/trap messages from library.
+ *  Static Functions:
+ *    The following functions are required by the JPEG library to decompress images.
+ *      jpgutl_init_source
+ *      jpgutl_fill_input_buffer
+ *      jpgutl_skip_data
+ *      jpgutl_term_source
+ *      jpgutl_buffer_src
+ *      jpgutl_error_exit
+ *      jpgutl_emit_message
+ *  Exposed Functions
+ *    jpgutl_decode_jpeg
  */
 
 #include "config.h"
@@ -103,7 +124,18 @@ static void jpgutl_term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
  * This makes it unsafe to use this manager and a different source
  * manager serially with the same JPEG object.  Caveat programmer.
  */
-static void jpgutl_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long num)
+/**
+ * jpgutl_buffer_src
+ *  Purpose:
+ *    Establish the input buffer source for the JPEG libary and associated helper functions.
+ *  Parameters:
+ *    cinfo      The jpeg library compression/decompression information
+ *    buffer     The buffer of JPEG data to decompress.
+ *    buffer_len The length of the buffer.
+ *  Return values:
+ *    None
+ */
+static void jpgutl_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long buffer_len)
 {
 
     if (cinfo->src == NULL) {    /* First time for this JPEG object? */
@@ -117,12 +149,21 @@ static void jpgutl_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, lon
     cinfo->src->skip_input_data = jpgutl_skip_data;
     cinfo->src->resync_to_restart = jpeg_resync_to_restart;    /* Use default method */
     cinfo->src->term_source = jpgutl_term_source;
-    cinfo->src->bytes_in_buffer = num;
+    cinfo->src->bytes_in_buffer = buffer_len;
     cinfo->src->next_input_byte = (JOCTET *) buffer;
 
 
 }
 
+/**
+ * jpgutl_error_exit
+ *  Purpose:
+ *    Exit routine for errors thrown by JPEG library.
+ *  Parameters:
+ *    cinfo      The jpeg library compression/decompression information
+ *  Return values:
+ *    None
+ */
 static void jpgutl_error_exit(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
@@ -142,12 +183,26 @@ static void jpgutl_error_exit(j_common_ptr cinfo)
     longjmp (myerr->setjmp_buffer, 1);
 }
 
+/**
+ * jpgutl_emit_message
+ *  Purpose:
+ *    Process the messages thrown by the JPEG library
+ *  Parameters:
+ *    cinfo      The jpeg library compression/decompression information
+ *    msg_level  Integer indicating the severity of the message.
+ *  Return values:
+ *    None
+ */
 static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
 {
     char buffer[JMSG_LENGTH_MAX];
     /* cinfo->err really points to a jpgutl_error_mgr struct, so coerce pointer. */
     struct jpgutl_error_mgr *myerr = (struct jpgutl_error_mgr *) cinfo->err;
-
+    /*
+     *  The JWRN_EXTRANEOUS_DATA is sent a lot without any particular negative effect.
+     *  There are some messages above zero but they are just informational and not something
+     *  that we are interested in.
+    */
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
         myerr->warning_seen++ ;
         (*cinfo->err->format_message) (cinfo, buffer);
@@ -156,14 +211,27 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
 
 }
 
-int jpgutl_decode_jpeg (unsigned char *jpeg_data, int len,
-                     unsigned int width, unsigned int height, unsigned char *img_y)
+/**
+ * jpgutl_decode_jpeg
+ *  Purpose:  Decompress the jpeg data_in into the img_out buffer.
+ *
+ *  Parameters:
+ *  jpeg_data_in     The jpeg data sent in
+ *  jpeg_data_len    The length of the jpeg data
+ *  width            The width of the image
+ *  height           The height of the image
+ *  img_out          Pointer to the image output
+ *
+ *  Return Values
+ *    Success 0, Failure -1
+ */
+int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
+                     unsigned int width, unsigned int height, unsigned char *img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
-    /* Working variables */
     int             i;
-    unsigned char  *img_cb, *img_cr;
+    unsigned char  *img_y, *img_cb, *img_cr;
     unsigned char   offset_y;
 
     struct jpeg_decompress_struct dinfo;
@@ -186,13 +254,13 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data, int len,
         return -1;
     }
 
-    jpgutl_buffer_src (&dinfo, jpeg_data, len);
+    jpgutl_buffer_src (&dinfo, jpeg_data_in, jpeg_data_len);
 
     jpeg_read_header (&dinfo, TRUE);
 
     //420 sampling is the default for YCbCr so no need to override.
     dinfo.out_color_space = JCS_YCbCr;
-    dinfo.dct_method = JDCT_IFAST;
+    dinfo.dct_method = JDCT_DEFAULT;
 
     jpeg_start_decompress (&dinfo);
 
@@ -210,6 +278,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data, int len,
         return -1;
     }
 
+    img_y  = img_out;
     img_cb = img_y + dinfo.output_width * dinfo.output_height;
     img_cr = img_cb + (dinfo.output_width * dinfo.output_height) / 4;
 

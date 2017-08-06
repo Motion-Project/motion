@@ -11,8 +11,8 @@
 #ifndef __JPEGUTILS_H__
 #define __JPEGUTILS_H__
 
-int jpgutl_decode_jpeg (unsigned char *jpeg_data, int len,
-                     unsigned int width_in, unsigned int height_in, unsigned char *img);
+int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
+                     unsigned int width, unsigned int height, unsigned char *img_out)
 
 
 #endif
