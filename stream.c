@@ -1154,21 +1154,9 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         int subwidth = origwidth/2, subheight = origheight/2;
         int subsize = subwidth * subheight * 3 / 2;
 
-        /* allocate buffer fore resized image, it will be freed at the bottom of the function */
-        unsigned char *scaled_img = mymalloc (subwidth* subheight * 3 / 2);
+        /* allocate new buffer and scale image */
+        img = scale_half_yuv420p (origwidth, origheight, subwidth, subheight, subsize, img);
 
-        int i = 0, x, y;
-        for (y = 0; y < origheight; y+=2)
-            for (x = 0; x < origwidth; x+=2)
-                scaled_img[i++] = img[y * origwidth + x];
-
-        for (y = 0; y < origheight / 2; y+=2)
-            for (x = 0; x < origwidth; x += 4)
-            {
-                scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
-                scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
-            }
-        img = scaled_img;
         image_width = subwidth;
         image_height = subheight;
         image_size = subsize;
