@@ -56,7 +56,7 @@
 #include <jerror.h>
 #include <assert.h>
 
-static uint8_t EOI_data[2] = { 0xFF, 0xD9 };
+static const uint8_t EOI_data[2] = { 0xFF, 0xD9 };
 
 struct jpgutl_error_mgr {
     struct jpeg_error_mgr pub;   /* "public" fields */
