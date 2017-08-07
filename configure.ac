@@ -191,7 +191,7 @@ if test "${WITHOUT_MMAL}" = "no"; then
     AS_IF([test "${DISTRO}" = "FreeBSD" ], [
       MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
       ])
-      MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+      MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -Wl,--push-state,--no-as-needed -lmmal_vc_client -Wl,--pop-state -lvcos -lvchostif -lvchiq_arm"
       AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
   ])
 fi
@@ -237,8 +237,8 @@ AC_ARG_WITH(sqlite3,
       [Disable sqlite3 support in motion.]),
     [SQLITE3="$withval"])
 
+AC_MSG_CHECKING(for sqlite3)
 if test "${SQLITE3}" = "no"; then
-    AC_MSG_CHECKING(for sqlite3)
     AC_MSG_RESULT(skipping)
 else
     # first we check to see if the sqlite3 amalgamation (sqlite3.c), is in with our source
@@ -250,15 +250,19 @@ else
         AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3])
         AC_DEFINE([HAVE_SQLITE3_EMBEDDED],1,[Define to 1 if you have SQLITE3 embedded support])
     else
-        # if sqlite3.c is not found then we look for the shared library
-        AC_CHECK_HEADERS(sqlite3.h,
-            [
-            TEMP_LIBS="$TEMP_LIBS -lsqlite3"
+        DB_DEPS="sqlite3"
+        if pkg-config --exists $DB_DEPS; then
+            DB_CFLAGS=`pkg-config --cflags $DB_DEPS`
+            DB_LIBS=`pkg-config --libs $DB_DEPS`
             SQLITE3_SUPPORT="yes"
+            TEMP_CFLAGS="$TEMP_CFLAGS $DB_CFLAGS"
+            TEMP_LIBS="$TEMP_LIBS $DB_LIBS"
             AC_DEFINE([HAVE_SQLITE3],1,[Define to 1 if you have SQLITE3 shared library support])
-            ]
-        )
+        else
+            SQLITE3_SUPPORT="no"
+        fi
     fi
+    AC_MSG_RESULT($SQLITE3_SUPPORT)
 fi
 AC_SUBST(SQLITE_OBJ)
 
@@ -271,17 +275,22 @@ AC_ARG_WITH([mysql],
     [MYSQL=$withval],
     [MYSQL=yes])
 
+AC_MSG_CHECKING(for mysql support)
 if test "x${MYSQL}" = "xno"; then
-    AC_MSG_CHECKING(for mysql support)
     AC_MSG_RESULT(skipped)
 else
-    AC_CHECK_HEADERS(mysql/mysql.h,[MYSQL="yes"],[MYSQL="no"])
-    AC_MSG_CHECKING(for mysql support)
-    AC_MSG_RESULT($MYSQL)
-    if test "x${MYSQL}" = "xyes"; then
-        TEMP_LIBS="$TEMP_LIBS -lmysqlclient -lz"
+    DB_DEPS="mysqlclient"
+    if pkg-config --exists $DB_DEPS; then
+        DB_CFLAGS=`pkg-config --cflags $DB_DEPS`
+        DB_LIBS=`pkg-config --libs $DB_DEPS`
+        MYSQL="yes"
+        TEMP_CFLAGS="$TEMP_CFLAGS $DB_CFLAGS"
+        TEMP_LIBS="$TEMP_LIBS $DB_LIBS"
         AC_DEFINE([HAVE_MYSQL],1,[Define to 1 if you have MySQL support])
+    else
+        MYSQL="no"
     fi
+    AC_MSG_RESULT($MYSQL)
 fi
 
 ##############################################################################
@@ -292,17 +301,22 @@ AC_ARG_WITH([pgsql],
         [PGSQL=$withval],
         [PGSQL=yes])
 
+AC_MSG_CHECKING(for PostgreSQL support)
 if test "x${PGSQL}" = "xno"; then
-    AC_MSG_CHECKING(for PostgreSQL support)
     AC_MSG_RESULT(skipped)
 else
-    AC_CHECK_HEADERS(postgresql/libpq-fe.h,[PGSQL="yes"],[PGSQL="no"])
-    AC_MSG_CHECKING(for PostgreSQL support)
-    AC_MSG_RESULT($PGSQL)
-    if test "x${PGSQL}" = "xyes"; then
-        TEMP_LIBS="$TEMP_LIBS -lpq"
+    DB_DEPS="libpq"
+    if pkg-config --exists $DB_DEPS; then
+        DB_CFLAGS=`pkg-config --cflags $DB_DEPS`
+        DB_LIBS=`pkg-config --libs $DB_DEPS`
+        PGSQL="yes"
+        TEMP_CFLAGS="$TEMP_CFLAGS $DB_CFLAGS"
+        TEMP_LIBS="$TEMP_LIBS $DB_LIBS"
         AC_DEFINE([HAVE_PGSQL],1,[Define to 1 if you have PostgreSQL support])
+    else
+        PGSQL="no"
     fi
+    AC_MSG_RESULT($PGSQL)
 fi
 
 ##############################################################################
