@@ -572,11 +572,11 @@ static void event_create_extpipe(struct context *cnt,
             }
         }
 
-		/* Temporary solution for https://github.com/Motion-Project/motion/issues/360#issuecomment-320849158
-			Always create any path specified as file name */
-		if (create_path(cnt->extpipefilename) == -1)
-			return ;
-		/* end of fix */
+        /* Temporary solution for https://github.com/Motion-Project/motion/issues/360#issuecomment-320849158
+        Always create any path specified as file name */
+        if (create_path(cnt->extpipefilename) == -1)
+            return ;
+        /* end of fix */
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
