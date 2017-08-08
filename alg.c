@@ -14,6 +14,10 @@
 #include "mmx.h"
 #endif
 
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
@@ -21,7 +25,339 @@
  * alg_locate_center_size
  *      Locates the center and size of the movement.
  */
+#if defined(__ARM_NEON)
 void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
+{
+    unsigned char *out = imgs->out;
+    int *labels = imgs->labels;
+
+    const uint16x8_t c_32768 = vdupq_n_u16(32768);
+    const uint32x2_t c_32768_u32 = vdup_n_u32(32768);
+    const uint16x4_t c_fours = vdup_n_u16(4);
+    const uint8x16_t c_ff = vdupq_n_u8(255);
+    const uint8x8_t c_eigths = vdup_n_u8(8);
+    const uint8x16_t c_ones = vdupq_n_u8(1);
+
+    int32_t centx = 0;
+    uint16_t cntY[height];
+    uint32x2_t centx_x2 = vdup_n_u32(0);
+    /* If Labeling enabled - locate center of largest labelgroup. */
+    if (imgs->labelsize_max) {
+        /* Locate largest labelgroup */
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+
+            uint8x8_t cnt_sum = vdup_n_u8(0);
+            uint32x4_t idx_sum = vdupq_n_u32(0);
+
+            int x = 0;
+            for (; x <= width - 8; x += 8) {
+                uint16x4_t l0 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x4_t l1 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x8_t l = vcombine_u16(l0, l1);
+
+                uint16x8_t mask = vtstq_u16(l, c_32768);
+                cnt_sum = vadd_u8(cnt_sum, vand_u8(vmovn_u16(mask), vget_low_u8(c_ones)));
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(mask, idx));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            uint16x4_t cnt_sum_x4 = vpaddl_u8(cnt_sum);
+
+            if (x <= width - 4) {
+                x += 4;
+                uint16x4_t l = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+
+                uint16x4_t mask = vtst_u16(l, vget_low_u16(c_32768));
+                cnt_sum_x4 = vadd_u16(cnt_sum_x4, vand_u16(vdup_n_u16(1), mask));
+                idx_sum = vaddw_u16(idx_sum, vand_u16(mask, vget_low_u16(idx)));
+            }
+
+            centx_x2 = vadd_u32(centx_x2, vpadd_u32(vget_low_u32(idx_sum), vget_high_u32(idx_sum)));
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+
+            if (x <= width - 2) {
+                uint32x2_t l = vld1_u32((uint32_t *)labels);
+                labels += 2;
+
+                uint32x2_t mask = vtst_u32(l, c_32768_u32);
+                uint32x2_t idxw = vget_low_u32(vmovl_u16(vget_high_u16(idx)));
+                centx_x2 = vadd_u32(centx_x2, vand_u32(mask, idxw));
+
+                uint16x4_t mask_x4 = vqmovn_u32(vcombine_u32(mask, mask));
+                cnt_sum_x4 = vadd_u16(cnt_sum_x4, vand_u16(mask_x4, vdup_n_u16(1)));
+            }
+
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+            vst1_lane_u16(&cntY[y], cnt_sum_x4, 0);
+        }
+    } else {
+        /* Locate movement */
+        uint8x16_t c_one_x16 = vdupq_n_u8(1);
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+
+            uint32x4_t idx_sum = vdupq_n_u32(0);
+            uint16x8_t cnt_sum = vdupq_n_u16(0);
+
+            int x = 0;
+            for (; x <= width - 16; x += 16) {
+                uint8x16_t o = vld1q_u8(out);
+                out += 16;
+
+                uint8x16_t mask = vtstq_u8(o, c_ff);
+                cnt_sum = vpadalq_u8(cnt_sum, vandq_u8(c_one_x16, mask));
+                uint16x8_t mask_lo = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vget_low_u8(mask))));
+                uint16x8_t mask_hi = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vget_high_u8(mask))));
+
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(idx, mask_lo));
+                idx = vaddw_u8(idx, c_eigths);
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(idx, mask_hi));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            if (x <= width - 8) {
+                x += 8;
+                uint8x8_t o = vld1_u8(out);
+                out += 8;
+
+                uint8x8_t mask = vtst_u8(o, vget_low_u8(c_ff));
+                cnt_sum = vaddw_u8(cnt_sum, vand_u8(vget_low_u8(c_one_x16), mask));
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(idx, vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(mask)))));
+            }
+
+            uint16_t lcnt = 0;
+            for (; x < width; x++) {
+                if (*(out++)) {
+                    centx += x;
+                    lcnt++;
+                }
+            }
+
+            centx_x2 = vadd_u32(centx_x2, vpadd_u32(vget_low_u32(idx_sum), vget_high_u32(idx_sum)));
+            uint16x4_t cnt_sum_x4 = vpadd_u16(vget_low_u16(cnt_sum), vget_high_u16(cnt_sum));
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+
+            cntY[y] = lcnt + vget_lane_u16(cnt_sum_x4, 0);
+        }
+    }
+
+    centx_x2 = vpadd_u32(centx_x2, centx_x2);
+    centx += vget_lane_u32(centx_x2, 0);
+    // calculate centc and centy
+    int32_t centc = 0, centy = 0;
+    {
+        uint16x4_t idx = { 0, 1, 2, 3 };
+        uint32x4_t centy_x4 = vdupq_n_u32(0);
+        uint32x4_t centc_x4 = vdupq_n_u32(0);
+        int y = 0;
+        for (; y <= height - 4; y += 4) {
+            uint16x4_t cnt = vld1_u16(&cntY[y]);
+            centy_x4 = vaddq_u32(centy_x4, vmull_u16(idx, cnt));
+            idx = vadd_u16(idx, c_fours);
+            centc_x4 = vaddw_u16(centc_x4, cnt);
+        }
+        uint32x2_t centy_x2 = vpadd_u32(vget_low_u32(centy_x4), vget_high_u32(centy_x4));
+        uint32x2_t centc_x2 = vpadd_u32(vget_low_u32(centc_x4), vget_high_u32(centc_x4));
+        uint32x2_t centy_centc = vpadd_u32(centy_x2, centc_x2);
+        centy = vget_lane_u32(centy_centc, 0);
+        centc = vget_lane_u32(centy_centc, 1);
+
+        for (; y < height; y++) {
+            centy += y*cntY[y];
+            centc += cntY[y];
+        }
+    }
+
+    if (centc) {
+        centx = centx / centc;
+        centy = centy / centc;
+    }
+    /* First reset pointers back to initial value. */
+    labels = imgs->labels;
+    out = imgs->out;
+
+    int xdist = 0;
+    /* If Labeling then we find the area around largest labelgroup instead. */
+    uint32x2_t vxdist = vdup_n_u32(0);
+    if (imgs->labelsize_max) {
+        uint16x8_t centx_x8 = vdupq_n_u16(centx);
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+            uint32x4_t abd_sum = vdupq_n_u32(0);
+
+            int x = 0;
+            for (; x <= width - 8; x += 8) {
+                uint16x4_t l0 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x4_t l1 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x8_t l = vcombine_u16(l0, l1);
+
+                uint16x8_t mask = vtstq_u16(l, c_32768);
+                uint16x8_t vabdx = vabdq_u16(idx, centx_x8);
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(mask, vabdx));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            if (x <= width - 4) {
+                x += 4;
+                uint16x4_t l = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+
+                uint16x4_t mask = vtst_u16(l, vget_low_u16(c_32768));
+                uint16x4_t vabdx = vabd_u16(vget_low_u16(idx), vget_low_u16(centx_x8));
+                abd_sum = vaddw_u16(abd_sum, vand_u16(mask, vabdx));
+            }
+
+            vxdist = vadd_u32(vxdist, vpadd_u32(vget_low_u32(abd_sum), vget_high_u32(abd_sum)));
+
+            if (x <= width - 2) {
+                uint32x2_t l = vld1_u32((uint32_t *)labels);
+                labels += 2;
+
+                uint32x2_t mask = vtst_u32(l, c_32768_u32);
+                uint32x2_t idxw = vget_low_u32(vmovl_u16(vget_high_u16(idx)));
+                uint32x2_t vabdx = vabd_u32(idxw, vdup_n_u32(centx));
+                vxdist = vadd_u32(vxdist, vand_u32(mask, vabdx));
+            }
+        }
+    } else {
+        uint16x8_t centx_x8 = vdupq_n_u16(centx);
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+
+            uint32x4_t abd_sum = vdupq_n_u32(0);
+
+            int x = 0;
+            for (; x <= width - 16; x += 16) {
+                uint8x16_t o = vld1q_u8(out);
+                out += 16;
+
+                uint8x16_t mask = vtstq_u8(o, c_ff);
+                uint16x8_t mask_lo = vreinterpretq_u16_s16(vmovl_s8(vget_low_s8(vreinterpretq_s8_u8(mask))));
+                uint16x8_t mask_hi = vreinterpretq_u16_s16(vmovl_s8(vget_high_s8(vreinterpretq_s8_u8(mask))));
+
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(vabdq_u16(idx, centx_x8), mask_lo));
+                idx = vaddw_u8(idx, c_eigths);
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(vabdq_u16(idx, centx_x8), mask_hi));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            if (x <= width - 8) {
+                x += 8;
+                uint8x8_t o = vld1_u8(out);
+                out += 8;
+
+                uint8x8_t mask = vtst_u8(o, vget_low_u8(c_ff));
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(vabdq_u16(idx, centx_x8), vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(mask)))));
+            }
+            vxdist = vadd_u32(vxdist, vpadd_u32(vget_low_u32(abd_sum), vget_high_u32(abd_sum)));
+
+            for (; x < width; x++) {
+                if (*(out++)) {
+                    if (x > cent->x)
+                        xdist += x - cent->x;
+                    else if (x < cent->x)
+                        xdist += cent->x - x;
+                }
+            }
+        }
+    }
+    vxdist = vpadd_u32(vxdist, vxdist);
+    xdist += vget_lane_u32(vxdist, 0);
+
+    // calculate ydist
+    int32_t ydist = 0;
+    {
+        uint16x4_t idx = { 0, 1, 2, 3 };
+        uint32x4_t ydist_x4 = vdupq_n_u32(0);
+        uint16x4_t centy_x4 = vdup_n_u16(centy);
+        int y = 0;
+        for (; y <= height - 4; y += 4) {
+            uint16x4_t cnt = vld1_u16(&cntY[y]);
+            uint16x4_t vabdx = vabd_u16(idx, centy_x4);
+            ydist_x4 = vaddq_u32(ydist_x4, vmull_u16(vabdx, cnt));
+            idx = vadd_u16(idx, c_fours);
+        }
+        uint32x2_t ydist_x2 = vpadd_u32(vget_low_u32(ydist_x4), vget_high_u32(ydist_x4));
+        ydist_x2 = vpadd_u32(ydist_x2, ydist_x2);
+        ydist = vget_lane_u32(ydist_x2, 0);
+        for (; y < height; y++) {
+            if (y > cent->y)
+                ydist += cntY[y]*(y - cent->y);
+            else if (y < cent->y)
+                ydist += cntY[y]*(cent->y - y);
+        }
+    }
+
+    cent->x = centx;
+    cent->y = centy;
+
+    if (centc) {
+        cent->minx = cent->x - xdist / centc * 2;
+        cent->maxx = cent->x + xdist / centc * 2;
+        /*
+         * Make the box a little bigger in y direction to make sure the
+         * heads fit in so we multiply by 3 instead of 2 which seems to
+         * to work well in practical.
+         */
+        cent->miny = cent->y - ydist / centc * 3;
+        cent->maxy = cent->y + ydist / centc * 2;
+    }
+    else {
+        cent->maxx = 0;
+        cent->maxy = 0;
+        cent->minx = width;
+        cent->miny = height;
+    }
+
+    if (cent->maxx > width - 1)
+        cent->maxx = width - 1;
+    else if (cent->maxx < 0)
+        cent->maxx = 0;
+
+    if (cent->maxy > height - 1)
+        cent->maxy = height - 1;
+    else if (cent->maxy < 0)
+        cent->maxy = 0;
+
+    if (cent->minx > width - 1)
+        cent->minx = width - 1;
+    else if (cent->minx < 0)
+        cent->minx = 0;
+
+    if (cent->miny > height - 1)
+        cent->miny = height - 1;
+    else if (cent->miny < 0)
+        cent->miny = 0;
+
+    /* Align for better locate box handling */
+    cent->minx += cent->minx % 2;
+    cent->miny += cent->miny % 2;
+    cent->maxx -= cent->maxx % 2;
+    cent->maxy -= cent->maxy % 2;
+
+    cent->width = cent->maxx - cent->minx;
+    cent->height = cent->maxy - cent->miny;
+
+    /*
+     * We want to center Y coordinate to be the center of the action.
+     * The head of a person is important so we correct the cent.y coordinate
+     * to match the correction to include a persons head that we just did above.
+     */
+    cent->y = (cent->miny + cent->maxy) / 2;
+}
+
+// Leave ogiginal C function for tests
+void alg_locate_center_size_c(struct images *imgs, int width, int height, struct coord *cent)
+#else
+void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
+#endif
 {
     unsigned char *out = imgs->out;
     int *labels = imgs->labels;
@@ -58,7 +394,6 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
                 }
             }
         }
-
     }
 
     if (centc) {
@@ -163,7 +498,6 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     cent->y = (cent->miny + cent->maxy) / 2;
 
 }
-
 
 /**
  * alg_draw_location
