@@ -15,6 +15,10 @@
 #include "video_bktr.h"
 #include "jpegutils.h"
 
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
@@ -278,6 +282,146 @@ void vid_bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, lon
 
 }
 
+#if defined(__ARM_NEON)
+
+void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+    uint8_t *pY = map;
+    uint8_t *pU = pY + (width * height);
+    uint8_t *pV = pU + (width * height) / 4;
+    uint32_t uv_offset = width * 2 * sizeof(uint8_t);
+
+    for (uint32_t hx = 0; hx < height; hx += 2) {
+        uint32_t wx = 0;
+        for (; wx <= uv_offset - 32; wx += 32) {
+            // Load Y to line.val[0] and UV to line.val[1]
+            uint8x16x2_t line1 = vld2q_u8(&cap_map[wx]);
+            uint8x16x2_t line2 = vld2q_u8(&cap_map[wx + uv_offset]);
+            // Save Ys
+            vst1q_u8(pY + width, line2.val[0]);
+            vst1q_u8(pY, line1.val[0]);
+            pY += 16;
+
+            // Calculate final U and V
+            uint8x16_t uvs_ziped = vhaddq_u8(line1.val[1], line2.val[1]);
+            uint8x8x2_t uvs = vuzp_u8(vget_low_u8(uvs_ziped), vget_high_u8(uvs_ziped));
+
+            // Save U and V
+            vst1_u8(pU, uvs.val[0]);
+            pU += 8;
+            vst1_u8(pV, uvs.val[1]);
+            pV += 8;
+        }
+        for (; wx <= uv_offset - 16; wx += 16) {
+            // Load Y to line.val[0] and UV to line.val[1]
+            uint8x8x2_t line1 = vld2_u8(&cap_map[wx]);
+            uint8x8x2_t line2 = vld2_u8(&cap_map[wx + uv_offset]);
+            // Save Ys 
+            vst1_u8(pY + width, line2.val[0]);
+            vst1_u8(pY, line1.val[0]);
+            pY += 8;
+
+            // Calculate final Us and Vs
+            uint8x8_t uvs_ziped = vhadd_u8(line1.val[1], line2.val[1]);
+
+            // Save Us and Vs
+            vst1_lane_u8(pU++, uvs_ziped, 0);
+            vst1_lane_u8(pV++, uvs_ziped, 1);
+            vst1_lane_u8(pU++, uvs_ziped, 2);
+            vst1_lane_u8(pV++, uvs_ziped, 3);
+            vst1_lane_u8(pU++, uvs_ziped, 4);
+            vst1_lane_u8(pV++, uvs_ziped, 5);
+            vst1_lane_u8(pU++, uvs_ziped, 6);
+            vst1_lane_u8(pV++, uvs_ziped, 7);
+        }
+        for (; wx <= uv_offset - 4; wx += 4) {
+            // Save Ys
+            pV[0] = cap_map[wx];
+            pV[1] = cap_map[wx+2];
+            pV[width] = cap_map[wx+uv_offset];
+            pV[width+1] = cap_map[wx+uv_offset+2];
+            pV+=4;
+
+            // Calculate and save U
+            *pU++ = (cap_map[wx+1] + cap_map[wx+1+uv_offset])/2;
+            // Calculate and save V
+            *pV++ = (cap_map[wx+3] + cap_map[wx+3+uv_offset])/2;
+        }
+        pY += width;
+        cap_map += uv_offset * 2;
+    }
+}
+
+void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+    uint8_t *pY = map;
+    uint8_t *pU = pY + (width * height);
+    uint8_t *pV = pU + (width * height) / 4;
+    uint32_t uv_offset = width * 2 * sizeof(uint8_t);
+
+    for (uint32_t hx = 0; hx < height; hx += 2) {
+        uint32_t wx = 0;
+        for (; wx <= uv_offset - 32; wx += 32) {
+            // Load Y to line.val[1] and UV to line.val[0]
+            uint8x16x2_t line1 = vld2q_u8(&cap_map[wx]);
+            uint8x16x2_t line2 = vld2q_u8(&cap_map[wx + uv_offset]);
+            // Save Ys
+            vst1q_u8(pY + width, line2.val[1]);
+            vst1q_u8(pY, line1.val[1]);
+            pY += 16;
+
+            // Calculate final Us and Vs
+            uint8x16_t uvs_ziped = vhaddq_u8(line1.val[0], line2.val[0]);
+            uint8x8x2_t uvs = vuzp_u8(vget_low_u8(uvs_ziped), vget_high_u8(uvs_ziped));
+
+            // Save U and V
+            vst1_u8(pU, uvs.val[0]);
+            pU += 8;
+            vst1_u8(pV, uvs.val[1]);
+            pV += 8;
+        }
+        for (; wx <= uv_offset - 16; wx += 16) {
+            // Load Y to line.val[1] and UV to line.val[0]
+            uint8x8x2_t line1 = vld2_u8(&cap_map[wx]);
+            uint8x8x2_t line2 = vld2_u8(&cap_map[wx + uv_offset]);
+            // Save Ys
+            vst1_u8(pY + width, line2.val[1]);
+            vst1_u8(pY, line1.val[1]);
+            pY += 8;
+
+            // Calculate final Us and Vs
+            uint8x8_t uvs_ziped = vhadd_u8(line1.val[0], line2.val[0]);
+
+            // Save Us and Vs
+            vst1_lane_u8(pU++, uvs_ziped, 0);
+            vst1_lane_u8(pV++, uvs_ziped, 1);
+            vst1_lane_u8(pU++, uvs_ziped, 2);
+            vst1_lane_u8(pV++, uvs_ziped, 3);
+            vst1_lane_u8(pU++, uvs_ziped, 4);
+            vst1_lane_u8(pV++, uvs_ziped, 5);
+            vst1_lane_u8(pU++, uvs_ziped, 6);
+            vst1_lane_u8(pV++, uvs_ziped, 7);
+        }
+        for (; wx <= uv_offset - 4; wx += 4) {
+            // Save Ys
+            pV[0] = cap_map[wx+1];
+            pV[1] = cap_map[wx+3];
+            pV[width] = cap_map[wx+1+uv_offset];
+            pV[width+1] = cap_map[wx+3+uv_offset];
+            pV+=4;
+
+            // Calculate ans save U
+            *pU++ = (cap_map[wx] + cap_map[wx+uv_offset])/2;
+            // Calculate and save V
+            *pV++ = (cap_map[wx+2] + cap_map[wx+2+uv_offset])/2;
+        }
+        pY += width;
+        cap_map += uv_offset * 2;
+    }
+}
+
+#else
+
 void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     unsigned char *src, *dest, *src2, *dest2;
@@ -311,7 +455,7 @@ void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int
     }
 }
 
-void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
+void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     uint8_t *pY = map;
     uint8_t *pU = pY + (width * height);
@@ -345,6 +489,8 @@ void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int wid
         }
     }
 }
+
+#endif
 
 void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
