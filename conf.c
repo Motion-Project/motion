@@ -2405,13 +2405,13 @@ static const char *print_camera(struct context **cnt, char **str,
 }
 
 /**
- * config_camera_dir
+ * read_camera_dir
  *     Read the directory finding all *.conf files in the path
  *     When found calls config_camera
  */
 
 static struct context **read_camera_dir(struct context **cnt, const char *str,
-                                            int val ATTRIBUTE_UNUSED)
+                                            int val)
 {
     DIR *dp;
     struct dirent *ep;
@@ -2447,6 +2447,9 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Camera directory config "
                     "%s not found", str);
     }
+
+    /* Store the given config value to allow writing it out */
+    cnt = copy_string(cnt, str, val);
 
     return cnt;
 }
