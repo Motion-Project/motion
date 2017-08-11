@@ -1882,9 +1882,10 @@ void conf_print(struct context **cnt)
                  */
                 if (val) {
                     fprintf(conffile, "%s\n", config_params[i].param_help);
-                    fprintf(conffile, "%s\n", val);
 
-                    if (strlen(val) == 0)
+                    if (strlen(val) > 0)
+                        fprintf(conffile, "%s\n", val);
+                    else
                         fprintf(conffile, "; camera %s/motion/camera1.conf\n", sysconfdir);
 
                     free(val);
@@ -2394,6 +2395,10 @@ static const char *print_camera(struct context **cnt, char **str,
     retval[0] = 0;
 
     while (cnt[++i]) {
+        /* Skip config files loaded from conf directory */
+        if (cnt[i]->from_conf_dir)
+            continue;
+
         retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10,
                            "print_camera");
         sprintf(retval + strlen(retval), "camera %s\n", cnt[i]->conf_filename);
@@ -2416,6 +2421,7 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
     DIR *dp;
     struct dirent *ep;
     size_t name_len;
+    int i;
 
     char conf_file[PATH_MAX];
 
@@ -2438,7 +2444,13 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
                     "Processing config file %s", conf_file );
                 cnt = config_camera(cnt, conf_file, 0);
-            }
+                /* The last context thread would be ours,
+                 * set it as created from conf directory.
+                 */
+                i = 0;
+                while (cnt[++i]);
+                cnt[i-1]->from_conf_dir = 1;
+	    }
         }
         closedir(dp);
     }
