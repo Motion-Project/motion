@@ -1605,17 +1605,22 @@ config_param config_params[] = {
 /*
  * Array of deprecated config options:
  * When deprecating an option, remove it from above (config_params array)
- * and create an entry in this array of name, last version, and info.
+ * and create an entry in this array of name, last version, info,
+ * and (if applicable) a replacement conf value and copy funcion.
  * Upon reading a deprecated config option, a warning will be logged
  * with the given information and last version it was used in.
+ * If set, the given value will be copied into the conf value
+ * for backwards compatibility.
  */
 dep_config_param dep_config_params[] = {
     {
     "thread",
     "3.4.1",
-    "The \"thread\" option has been replaced by the \"camera\" option."
+    "The \"thread\" option has been replaced by the \"camera\" option.",
+    0,
+    config_camera
     },
-    { NULL, NULL, NULL }
+    { NULL, NULL, NULL, 0, NULL}
 };
 
 /**
@@ -1737,7 +1742,8 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 
     /*
      * We reached the end of config_params without finding a matching option.
-     * Check if it's a deprecated option and log a warning of such.
+     * Check if it's a deprecated option, log a warning, and if applicable
+     * set the replacement option to the given value.
      */
     i = 0;
     while (dep_config_params[i].name != NULL) {
@@ -1745,6 +1751,10 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Deprecated config option \"%s\" since after version %s:",
                        cmd, dep_config_params[i].last_version);
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
+
+            if (dep_config_params[i].copy != NULL)
+                cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
+
             return cnt;
         }
         i++;
