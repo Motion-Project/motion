@@ -1266,7 +1266,122 @@ void alg_tune_smartmask(struct context *cnt)
  * alg_diff_standard
  *
  */
+#if defined(__ARM_NEON)
 int alg_diff_standard(struct context *cnt, unsigned char *new)
+{
+    struct images *imgs = &cnt->imgs;
+    int noise = cnt->noise;
+    int smartmask_speed = cnt->smartmask_speed;
+    unsigned char *ref = imgs->ref;
+    unsigned char *out = imgs->out;
+    unsigned char *mask = imgs->mask;
+    unsigned char *smartmask_final = imgs->smartmask_final;
+    int *smartmask_buffer = imgs->smartmask_buffer;
+
+    int i = imgs->motionsize;
+    memset(out + i, 128, i / 2); /* Motion pictures are now b/w i.o. green */
+
+    // interlal part of the loop depends on
+    // mask, smartmask_speed and, cnt->event_nr != cnt->prev_event,
+    // 0           0                           0
+    // 0           1                           0
+    // 0           1                           1
+    // 1           0                           0
+    // 1           1                           0
+    // 1           1                           1
+    // There is 6 possible loops variants without conditions
+
+    const uint8x8_t vnoise = vdup_n_u8(noise);
+    const uint8x8_t vones = vdup_n_u8(1);
+    const uint16x4_t vdiv255const = vdup_n_u16(0x8081);
+    const int16x8_t vsmartmask_sensitivity_incr = vdupq_n_s16(SMARTMASK_SENSITIVITY_INCR);
+    uint32x2_t vdiffs = vdup_n_u32(0);
+
+    for (; i >= 8; i -= 8) {
+        uint8x8_t vref = vld1_u8(ref);
+        ref += 8;
+        uint8x8_t vnew = vld1_u8(new);
+        new += 8;
+        uint8x8_t vcurrdiff = vabd_u8(vref, vnew);
+
+        if (mask) {
+            uint8x8_t vmask = vld1_u8(mask);
+            mask += 8;
+            uint16x8_t mul16x8 = vmull_u8(vcurrdiff, vmask);
+            uint32x4_t t0 = vmull_u16(vdiv255const, vget_low_u16(mul16x8));
+            uint32x4_t t1 = vmull_u16(vdiv255const, vget_high_u16(mul16x8));
+            uint16x8_t t3 = vcombine_u16(vshrn_n_u32(t0, 15), vshrn_n_u32(t1, 15));
+            uint16x8_t t4 = vshrq_n_u16(t3, 8);
+            vcurrdiff = vmovn_u16(t4);
+        }
+
+        if (smartmask_speed) {
+            uint8x8_t vcmp = vcgt_u8(vcurrdiff, vnoise);
+            if (cnt->event_nr != cnt->prev_event) {
+                int16x8_t vcmpw = vmovl_s8(vreinterpret_s8_u8(vcmp));
+                vcmpw = vandq_s16(vcmpw, vsmartmask_sensitivity_incr);
+
+                int32x4_t vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_low_s16(vcmpw));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+
+                vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_high_s16(vcmpw));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+            }
+
+            uint8x8_t vsmartmask_final = vld1_u8(smartmask_final); // value in smartmask_final is 0 or 255
+            smartmask_final += 8;
+
+            uint8x8_t vbic_mask = vbic_u8(vcmp, vsmartmask_final);
+            vcurrdiff = vbic_u8(vcurrdiff, vbic_mask);
+        }
+
+        uint8x8_t vcmp = vcgt_u8(vcurrdiff, vnoise);
+        vdiffs = vpadal_u16(vdiffs, vpaddl_u8(vand_u8(vcmp, vones)));
+        vst1_u8(out, vand_u8(vnew, vcmp));
+        out += 8;
+    }
+
+    vdiffs = vpadd_u32(vdiffs, vdiffs);
+    int diffs = vget_lane_u32(vdiffs, 0);
+
+    for (;i > 0; i--) {
+        unsigned char curdiff = abs(*ref - *new);
+        if (mask)
+            curdiff = ((int)(curdiff * *mask++) / 255);
+
+        if (smartmask_speed) {
+            if (curdiff > noise) {
+                if (cnt->event_nr != cnt->prev_event)
+                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                if (!*smartmask_final)
+                    curdiff = 0;
+            }
+            smartmask_final++;
+            smartmask_buffer++;
+        }
+        if (curdiff > noise) {
+            *out = *new;
+            diffs++;
+        }
+        else {
+            *out = 0;
+        }
+        out++;
+        ref++;
+        new++;
+    }
+    return diffs;
+}
+
+// Leave ogiginal C function for tests
+int alg_diff_standard_c(struct context *cnt, unsigned char *new)
+#else
+int alg_diff_standard(struct context *cnt, unsigned char *new)
+#endif
 {
     struct images *imgs = &cnt->imgs;
     int i, diffs = 0;
