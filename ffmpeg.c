@@ -451,6 +451,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
 static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
 
+    char crf[4];
     int bit_rate;
 
     ffmpeg->opts = 0;
@@ -465,9 +466,10 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
             bit_rate = ffmpeg->bps;
             ffmpeg->vbr = 28;
         }
+        snprintf(crf, 4, "%d",ffmpeg->vbr);
         av_dict_set(&ffmpeg->opts, "preset", "ultrafast", 0);
         av_dict_set(&ffmpeg->opts, "tune", "zerolatency", 0);
-        av_dict_set_int(&ffmpeg->opts, "crf", ffmpeg->vbr, 0);
+        av_dict_set(&ffmpeg->opts, "crf", crf, 0);
         if ((strcmp(ffmpeg->codec->name, "h264_omx") == 0) || (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0)) {
             // Clip bit rate to min and max
             if (bit_rate < 40000)
