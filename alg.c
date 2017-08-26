@@ -1771,6 +1771,8 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
  */
 #define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
 #define EXCLUDE_LEVEL_PERCENT 20
+
+#if defined(__ARM_NEON)
 void alg_update_reference_frame(struct context *cnt, int action)
 {
     int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
@@ -1787,7 +1789,135 @@ void alg_update_reference_frame(struct context *cnt, int action)
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
         threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
 
-        for (i = cnt->imgs.motionsize; i > 0; i--) {
+        const uint8x8_t vthreshold_ref = vdup_n_u8(threshold_ref);
+        const uint8x8_t vone = vdup_n_u8(1);
+        const uint16x8_t vonel = vdupq_n_u16(1);
+        const uint16x8_t vzerol = vdupq_n_u16(0);
+        const uint8x8_t vff = vdup_n_u8(0xFF);
+        const uint16x8_t vaccept_timer = vdupq_n_u16(accept_timer);
+
+        for (i = 0; i <= cnt->imgs.motionsize - 8; i += 8) {
+            uint8x8_t vref = vld1_u8(ref);
+            const uint8x8_t vimage_virgin = vld1_u8(image_virgin);
+            image_virgin += 8;
+            const uint8x8_t vsmartmask = vld1_u8(smartmask);
+            smartmask += 8;
+
+            uint8x8_t vcond0 = vtst_u8(vcgt_u8(vabd_u8(vref, vimage_virgin), vthreshold_ref), vsmartmask);
+            uint64_t noFastpath = vget_lane_u64(vreinterpret_u64_u8(vcond0), 0);
+            if (noFastpath) {
+                uint32x4_t vref_dyn_l0 = vld1q_u32((uint32_t*)ref_dyn);
+                uint32x4_t vref_dyn_l1 = vld1q_u32((uint32_t*)&ref_dyn[4]);
+                uint16x8_t vref_dyn = vcombine_u16(vmovn_u32(vref_dyn_l0), vmovn_u32(vref_dyn_l1));
+
+                // read-only values
+                const uint8x8_t vout = vld1_u8(out);
+
+                // calculate all condition masks
+                uint16x8_t vcond0l = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vcond0)));
+
+                uint16x8_t vcond1l = vceqq_u16(vref_dyn, vzerol);
+                uint8x8_t vcond1 = vmovn_u16(vcond1l);
+
+                uint16x8_t vcond2l = vcgtq_u16(vref_dyn, vaccept_timer);
+                uint8x8_t vcond2 = vmovn_u16(vcond2l);
+
+                uint8x8_t vcond3 = vtst_u8(vout, vff);
+                uint16x8_t vcond3l = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vcond3)));
+
+                //vcond3
+                uint16x8_t vref_dyn3 = vbslq_u16(vcond3l, vaddw_u8(vref_dyn, vone), vzerol);
+                uint8x8_t vref3 = vbsl_u8(vcond3, vref, vhadd_u8(vref, vimage_virgin));
+
+                //vcond2
+                uint16x8_t vref_dyn2 = vbslq_u16(vcond2l, vzerol, vref_dyn3);
+                uint8x8_t vref2 = vbsl_u8(vcond2, vimage_virgin, vref3);
+
+                //vcond1
+                uint16x8_t vref_dyn1 = vbslq_u16(vcond1l, vonel, vref_dyn2);
+                uint8x8_t vref1 = vbsl_u8(vcond1, vref, vref2);
+
+                //vcond0
+                vref_dyn = vandq_u16(vcond0l, vref_dyn1);
+                vref = vbsl_u8(vcond0, vref1, vimage_virgin);
+
+                vref_dyn_l0 = vmovl_u16(vget_low_u16(vref_dyn));
+                vst1q_u32((uint32_t*)ref_dyn, vref_dyn_l0);
+                ref_dyn += 4;
+                vref_dyn_l1 = vmovl_u16(vget_high_u16(vref_dyn));
+                vst1q_u32((uint32_t*)ref_dyn, vref_dyn_l1);
+                ref_dyn += 4;
+            }
+            else {
+                vref = vimage_virgin;
+                uint32x4x2_t z = {0};
+                vst2q_u32((uint32_t*)ref_dyn, z);
+                ref_dyn += 8;
+            }
+
+            vst1_u8(ref, vref);
+            ref += 8;
+            out += 8;
+        }
+
+        for (; i < cnt->imgs.motionsize; i++) {
+            /* Exclude pixels from ref frame well below noise level. */
+            if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) { // vcond0
+                if (*ref_dyn == 0) { /* Always give new pixels a chance. */ // vcond1
+                    *ref_dyn = 1;
+                    *ref = *ref;
+                } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */ //vcond2
+                    *ref_dyn = 0;
+                    *ref = *image_virgin;
+                } else if (*out) { // vcond3
+                    (*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame. */
+                    *ref = *ref;
+                } else {
+                    *ref_dyn = 0; /* Nothing special - release pixel. */
+                    *ref = (*ref + *image_virgin) / 2;
+                }
+
+            } else {  /* No motion: copy to ref frame. */
+                *ref_dyn = 0; /* Reset pixel */
+                *ref = *image_virgin;
+            }
+
+            ref++;
+            image_virgin++;
+            smartmask++;
+            ref_dyn++;
+            out++;
+        } /* end for i */
+
+    } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
+        /* Copy fresh image */
+        memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
+        /* Reset static objects */
+        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
+    }
+}
+
+// Leave ogiginal C function for tests
+void alg_update_reference_frame_c(struct context *cnt, int action)
+#else 
+void alg_update_reference_frame(struct context *cnt, int action)
+#endif
+{
+    int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
+    int i, threshold_ref;
+    int *ref_dyn = cnt->imgs.ref_dyn;
+    unsigned char *image_virgin = cnt->imgs.image_virgin;
+    unsigned char *ref = cnt->imgs.ref;
+    unsigned char *smartmask = cnt->imgs.smartmask_final;
+    unsigned char *out = cnt->imgs.out;
+
+    if (cnt->lastrate > 5)  /* Match rate limit */
+        accept_timer /= (cnt->lastrate / 3);
+
+    if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
+        threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
+
+        for (i = 0; i < cnt->imgs.motionsize; i++) {
             /* Exclude pixels from ref frame well below noise level. */
             if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
                 if (*ref_dyn == 0) { /* Always give new pixels a chance. */

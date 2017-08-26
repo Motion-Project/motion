@@ -57,6 +57,9 @@ void alg_locate_center_size_c(struct images *imgs, int width, int height, struct
 int alg_diff_standard(struct context *cnt, unsigned char *new);
 int alg_diff_standard_c(struct context *cnt, unsigned char *new);
 
+void alg_update_reference_frame(struct context *cnt, int action);
+void alg_update_reference_frame_c(struct context *cnt, int action);
+
 void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, ...) {
 }
 
@@ -115,7 +118,7 @@ void test_locate_center_size(int width, int height, unsigned char * out, int * l
 
         TS_CONVERT(first - start, time1);
         TS_CONVERT(second - first, time2);
-        printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRIu64 ") %lf%%\n", __FUNCTION__, time1, time2, time1 - time2, (double)time2/(double)time1*100.0);
+        printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n", __FUNCTION__, time1, time2, time1 - time2, (double)time2/(double)time1*100.0);
     }
 }
 
@@ -157,7 +160,7 @@ static void test_alg_diff_standart_one_case(struct context *cnt, unsigned char *
     TS_CONVERT(second_end - second_start, time2);
 
     if (N) {
-        printf("Test %s:%d passed, %" PRIu64 " vs %" PRIu64 " (%" PRIu64 ") %lf%%\n",
+        printf("Test %s:%d passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
                __FUNCTION__, N, time1, time2, time1 - time2,
                (double)time2/(double)time1*100.0);
     }
@@ -232,6 +235,87 @@ void test_alg_diff_standart(int width, int height, unsigned char noise,
     test_alg_diff_standart_one_case(&cnt, new, 6);
 }
 
+static void test_alg_update_reference_frame_one_case(struct context *cnt,
+                                                     unsigned char *ref_buf,
+                                                     unsigned char *ref_buf_ref,
+                                                     int *ref_dyn_buf,
+                                                     int *ref_dyn_buf_ref,
+                                                     int action,
+                                                     int len, int N)
+{
+    uint64_t first_start, first_end, second_start, second_end;
+
+    cnt->imgs.ref = ref_buf_ref;
+    cnt->imgs.ref_dyn = ref_dyn_buf_ref;
+
+    TS_MARK(first_start);
+    alg_update_reference_frame_c(cnt, action);
+    TS_MARK(first_end);
+
+    cnt->imgs.ref = ref_buf;
+    cnt->imgs.ref_dyn = ref_dyn_buf;
+
+    TS_MARK(second_start);
+    alg_update_reference_frame(cnt, action);
+    TS_MARK(second_end);
+
+    for (int i = 0; i < len; i++) {
+        assert(ref_buf_ref[i] == ref_buf[i]);
+    }
+    for (int i = 0; i < len; i++) {
+        assert(ref_dyn_buf_ref[i] == ref_dyn_buf[i]);
+    }
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s:%d passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, N, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
+void test_alg_update_reference_frame(int width, int height, unsigned char noise,
+                                     unsigned char * image_virgin, unsigned char * ref,
+                                     unsigned char * smartmask, unsigned char * out,
+                                     int *ref_dyn)
+{
+    static unsigned char ref_buf[test_width * test_height];
+    static unsigned char ref_buf_ref[test_width * test_height];
+
+    static int ref_dyn_buf[test_width * test_height];
+    static int ref_dyn_buf_ref[test_width * test_height];
+
+    // Prepeare output buffers
+    memcpy(ref_buf, ref, sizeof(ref_buf));
+    memcpy(ref_buf_ref, ref, sizeof(ref_buf_ref));
+    memcpy(ref_dyn_buf, ref_dyn, sizeof(ref_dyn_buf));
+    memcpy(ref_dyn_buf_ref, ref_dyn, sizeof(ref_dyn_buf_ref));
+
+    struct context cnt;
+    cnt.lastrate = 3;
+    cnt.noise = noise;
+    cnt.imgs.image_virgin = image_virgin;
+    cnt.imgs.smartmask_final = smartmask;
+    cnt.imgs.out = out;
+    cnt.imgs.motionsize = width * height;
+    cnt.imgs.size = width * height;
+
+    test_alg_update_reference_frame_one_case(&cnt, ref_buf, ref_buf_ref,
+                                             ref_dyn_buf, ref_dyn_buf_ref,
+                                             UPDATE_REF_FRAME,
+                                             width * height, 1);
+
+    test_alg_update_reference_frame_one_case(&cnt, ref_buf, ref_buf_ref,
+                                             ref_dyn_buf, ref_dyn_buf_ref,
+                                             RESET_REF_FRAME,
+                                             width * height, 2);
+
+    test_alg_update_reference_frame_one_case(&cnt, ref_buf, ref_buf_ref,
+                                             ref_dyn_buf, ref_dyn_buf_ref,
+                                             UPDATE_REF_FRAME,
+                                             width * height, 3);
+}
+
 static unsigned char test_img_data[test_width * test_height];
 static unsigned char test_img_data_new[test_width * test_height];
 static unsigned char test_img_data_mask[test_width * test_height];
@@ -241,26 +325,42 @@ static unsigned char test_smartmask_final[test_width * test_height];
 int main(int argc, const char* argv[]) {
     TS_INIT();
 
-    // filling test data
-    for (int i = 0; i < test_height * test_width; i++) {
-        uint32_t t = rand();
-        test_img_data[i] = t;
-        test_img_data_new[i] = t >> 8;
-        test_img_data_mask[i] = t >> 13;
-        test_lables[i] = rand();
-        test_smartmask_final[i] = (t >> 16) % 2 ? 0xff : 0;
+    for (int j = 0; j < 2; j++) {
+        // filling test data
+        for (int i = 0; i < test_height * test_width; i++) {
+            uint32_t t = rand();
+            test_img_data[i] = t;
+            test_img_data_new[i] = t >> 8;
+            test_img_data_mask[i] = t >> 13;
+            test_lables[i] = rand();
+            test_smartmask_final[i] = (t >> 16) % 2 ? 0xff : 0;
+        }
+        unsigned char noise = rand();
+
+        test_locate_center_size(test_width, test_height, test_img_data, test_lables);
+        test_locate_center_size(test_width - 2, test_height - 2, test_img_data, test_lables);
+
+        test_alg_diff_standart(test_width, test_height, noise,
+                               test_img_data, test_img_data_mask, test_img_data_new,
+                               test_smartmask_final);
+        test_alg_diff_standart(test_width - 1, test_height, noise,
+                               test_img_data, test_img_data_mask, test_img_data_new,
+                               test_smartmask_final);
+
+        //Make labbels value fit in uint16_t
+        for (int i = 0; i < test_height * test_width; i++) {
+            test_lables[i] = test_lables[i] & 0xFFFF;
+        }
+
+        test_alg_update_reference_frame(test_width, test_height, noise,
+                                        test_img_data, test_img_data_new,
+                                        test_img_data_mask, test_smartmask_final,
+                                        test_lables);
+        test_alg_update_reference_frame(test_width - 1, test_height, noise,
+                                        test_img_data, test_img_data_new,
+                                        test_img_data_mask, test_smartmask_final,
+                                        test_lables);
     }
-    unsigned char noise = rand();
-
-    test_locate_center_size(test_width, test_height, test_img_data, test_lables);
-    test_locate_center_size(test_width - 2, test_height - 2, test_img_data, test_lables);
-
-    test_alg_diff_standart(test_width, test_height, noise,
-                           test_img_data, test_img_data_mask, test_img_data_new,
-                           test_smartmask_final);
-    test_alg_diff_standart(test_width - 1, test_height, noise,
-                           test_img_data, test_img_data_mask, test_img_data_new,
-                           test_smartmask_final);
 
     return 0;
 }
