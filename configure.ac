@@ -172,6 +172,20 @@ AC_ARG_WITH([mmal],
   WITHOUT_MMAL="yes",
   WITHOUT_MMAL="no")
 
+AC_ARG_WITH([mmal-lib],
+  AS_HELP_STRING([--with-mmal-lib[=DIR]],
+    [Use this command to tell configure where mmal libs directory is.]),
+  MMAL_LIBS_DIR="$withval",
+  MMAL_LIBS_DIR="/opt/vc/lib"
+)
+
+AC_ARG_WITH([mmal-include],
+  AS_HELP_STRING([--with-mmal-include[=DIR]],
+    [Use this command to tell configure where mmal include installation root directory is.]),
+  MMAL_HEADERS="$withval",
+  MMAL_HEADERS="/opt/vc/include"
+)
+
 if test "${WITHOUT_MMAL}" = "no"; then
   HAVE_MMAL=""
   if test "${DISTRO}" = "FreeBSD" ; then
@@ -182,6 +196,8 @@ if test "${WITHOUT_MMAL}" = "no"; then
 
   if test -d ${LIBRASPBERRYPIDEVPATH}; then
        HAVE_MMAL="yes"
+  elif test -d ${MMAL_HEADERS}/interface/mmal; then
+       HAVE_MMAL="yes"
   fi
 
   AS_IF([test "${HAVE_MMAL}" = "yes" ], [
@@ -189,11 +205,11 @@ if test "${WITHOUT_MMAL}" = "no"; then
     AC_SUBST(MMAL_OBJ)
     AC_SUBST(MMAL_LIBS)
     MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
-    MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
+    MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I${MMAL_HEADERS}"
     AS_IF([test "${DISTRO}" = "FreeBSD" ], [
       MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
       ])
-      MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+      MMAL_LIBS="-L${MMAL_LIBS_DIR} -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
       AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
   ])
 fi
