@@ -370,6 +370,7 @@ struct context {
     FILE *extpipe;
     int extpipe_open;
     char conf_filename[PATH_MAX];
+    int from_conf_dir;
     int threadnr;
     unsigned int daemon;
     char pid_file[PATH_MAX];
