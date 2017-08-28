@@ -230,7 +230,7 @@ if test "${WITHOUT_MMAL}" = "no"; then
     AS_IF([test "${DISTRO}" = "FreeBSD" ], [
       MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
       ])
-      MMAL_LIBS="-L${MMAL_LIBS_DIR} -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+      MMAL_LIBS="-L${MMAL_LIBS_DIR} -lmmal_core -lmmal_util -Wl,--push-state,--no-as-needed -lmmal_vc_client -Wl,--pop-state -lvcos -lvchostif -lvchiq_arm"
       AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
   ])
 fi
