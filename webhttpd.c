@@ -29,7 +29,7 @@ static const char *ini_template =
     "<!DOCTYPE html>\n"
     "<html>\n"
     "<head><title>Motion "VERSION"</title></head>\n"
-    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=yes\">"
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=yes\">\n"
     "<body>\n";
 
 static const char *set_template =
