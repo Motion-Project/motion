@@ -250,7 +250,12 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
          */
 #if defined(XSI_STRERROR_R)
         /* XSI-compliant strerror_r() */
-        strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+        if (strerror_r(errno_save, buf + n, sizeof(buf) - n))    /* 2 for the ': ' */
+        {
+            /* TODO The XSI-compliant strerror_r() function returns 0 on success
+            On error, a (positive) error number is returned (since glibc 2.13),
+            or -1 is returned and errno is set to indicate the error (glibc versions before */
+        }
 #else
         /* GNU-specific strerror_r() */
         strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
