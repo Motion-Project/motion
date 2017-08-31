@@ -2056,11 +2056,17 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
 
     if (*url == '/') {
         int i = 0;
+        int cams;
         char *res=NULL;
         res = mymalloc(2048);
 
         /* get the number of threads */
         while (cnt[++i]);
+        /* If not single threaded, assume main thread and seperate camera threads */
+        cams = i;
+        if (i > 1)
+            cams--;
+
         /* ROOT_URI -> GET / */
         if (!strcmp(url, "/")) {
             int y;
@@ -2070,8 +2076,8 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
             //Send the webcontrol section if applicable
             if (cnt[0]->conf.webcontrol_html_output) {
                 send_template_ini_client(client_socket, ini_template);
-                sprintf(res, "<b>Motion "VERSION" Running [%d] Cameras</b><br>\n"
-                             "<a href='/0/'>All</a>\n", i);
+                sprintf(res, "<b>Motion "VERSION" Running [%d] Camera%s</b><br>\n"
+                             "<a href='/0/'>All</a>\n", cams, (cams > 1 ? "s" : ""));
                 send_template(client_socket, res);
 
                 counter = 0;
@@ -2097,8 +2103,13 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                     httphostname = hostname;
                 }
 
-                //Send the preview section
-                for (y = 0; y < i; y++) {
+                /*
+                 * Send the preview section
+                 * Set y to 1 if multi-threaded and to 0 if single-threaded.
+                 * This prevents showing a duplicate preview if 'stream_port'
+                 * is configured in motion.conf when multi-threaded.
+                 */
+                for (y = (i > 1 ? 1 : 0); y < i; y++) {
                     if (cnt[y]->conf.stream_port) {
                         if (cnt[y]->conf.stream_preview_newline) {
                             sprintf(res, "<br>");
@@ -2115,7 +2126,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                 send_template_end_client(client_socket);
             } else {
                 send_template_ini_client_raw(client_socket);
-                sprintf(res, "Motion "VERSION" Running [%d] Cameras\n0\n", i);
+                sprintf(res, "Motion "VERSION" Running [%d] Camera%s\n0\n", cams, (cams > 1 ? "s" : ""));
                 send_template_raw(client_socket, res);
                 for (y = 1; y < i; y++) {
                     sprintf(res, "%d\n", y);
