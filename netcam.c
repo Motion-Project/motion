@@ -659,6 +659,10 @@ static int netcam_read_first_header(netcam_context_ptr netcam)
 
                      MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Boundary string [%s]",
                                 netcam->boundary);
+                } else {
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Boundary string not found in header");
+                    free(header);
+                    return -1;
                 }
                 break;
             case 3:  /* MJPG-Block style streaming. */
