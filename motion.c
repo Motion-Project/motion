@@ -1134,6 +1134,7 @@ static int motion_init(struct context *cnt)
         if (stream_init(cnt) == -1) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Problem enabling motion-stream server in port %d",
                        cnt->conf.stream_port);
+            cnt->conf.stream_port = 0;
             cnt->finish = 1;
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started motion-stream server on port %d (auth %s)",
