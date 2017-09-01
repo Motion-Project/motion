@@ -406,8 +406,64 @@ FreeBSD
       <li>libwebp</li>
     </ul>
 </ul>
-
+<p></p>
+<p></p>
+CentOS 7 Packages
+<ul>
+  <li>Required</li>
+  <ul>
+    <p></p>
+    <code><strong>sudo yum groupinstall 'Development Tools'</strong></code>
+    <p></p>
+    <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel</strong></code>
+    <p></p>
+    <code><strong>sudo yum install libzip-devel pkgconfig</strong></code>
+    <p></p>
+  </ul>
+  <p></p>
+  <li>Optional Packages</li>
+  <ul>
+    <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
+    <ul>
+      <p></p>
+      <code><strong>sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro</strong></code>
+      <p></p>
+      <code><strong>sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm</strong></code>
+      <p></p>
+      <code><strong>sudo yum install ffmpeg ffmpeg-devel</strong></code>
+      <p></p>
+    </ul>
+    <li>MySQL database functionality</li>
+    <ul>
+      <p></p>
+      <code><strong>Not known by author</strong></code>
+      <p></p>
+    </ul>
+    <li>PostgreSQL database functionality</li>
+    <ul>
+      <p></p>
+      <code><strong>Not known by author</strong></code>
+      <p></p>
+    </ul>
+    <li>SQLite3 database functionality</li>
+    <ul>
+      <p></p>
+      <code><strong>sudo yum install sqlite-devel</strong></code>
+      <p></p>
+    </ul>
+    <li>Webp Image Support</li>
+    <ul>
+      <p></p>
+      <code><strong>Not known by author</strong></code>
+      <p></p>
+    </ul>
+  </ul>
+  Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
+  change in the future.  Validate that the repository is still valid when doing the install on CentOS systems.
+  The default for the configure is to require that ffmpeg or Libav is installed.  Use the configure option to
+  compile without the ffmpeg / libav functionality.
 </ul>
+
 <h3><a name="Configure_Script"></a>  Configure Script</a> </h3>
 <ul>
 Motion uses a set tools called the "autotools" in order to generate the required scripts in order to
