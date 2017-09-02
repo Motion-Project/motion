@@ -1,26 +1,17 @@
 before_script:
   - autoreconf -fiv
-script: ./configure && make
-
+script: ./configure --with-developer-flags && make
 matrix:
   include:
+  - os: osx
+    language: c
+    compiler: gcc
+  - os: osx
+    language: c
+    compiler: clang
   - os: linux
     language: c
     compiler: gcc
-    addons:
-      apt:
-        packages:
-        - libavformat-dev
-        - libavcodec-dev
-        - libavutil-dev
-        - libswscale-dev
-        - libavdevice-dev
-        - libjpeg8-dev
-        - libzip-dev
-  - os: linux
-    language: c
-    compiler: gcc
-    dist: trusty
     addons:
       apt:
         sources:
@@ -33,4 +24,24 @@ matrix:
         - libavdevice-dev
         - libjpeg8-dev
         - libzip-dev
+  - os: linux
+    language: c
+    compiler: gcc
+    addons:
+      apt:
+        packages:
+        - libavformat-dev
+        - libavcodec-dev
+        - libavutil-dev
+        - libswscale-dev
+        - libavdevice-dev
+        - libjpeg8-dev
+        - libzip-dev
+before_install:
+    - if [ $TRAVIS_OS_NAME = osx ]; then 
+        brew upgrade ffmpeg;
+        brew upgrade pkg-config;
+        brew upgrade jpeg;
+        brew install ffmpeg pkg-config libjpeg;
+      fi;
 
