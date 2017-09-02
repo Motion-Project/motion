@@ -417,7 +417,7 @@ CentOS 7 Packages
     <p></p>
     <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel</strong></code>
     <p></p>
-    <code><strong>sudo yum install libzip-devel pkgconfig</strong></code>
+    <code><strong>sudo yum install libzip-devel</strong></code>
     <p></p>
   </ul>
   <p></p>
@@ -426,9 +426,7 @@ CentOS 7 Packages
     <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
     <ul>
       <p></p>
-      <code><strong>sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro</strong></code>
-      <p></p>
-      <code><strong>sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm</strong></code>
+      <code><strong>sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm</strong></code>
       <p></p>
       <code><strong>sudo yum install ffmpeg ffmpeg-devel</strong></code>
       <p></p>
