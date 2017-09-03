@@ -1358,12 +1358,13 @@ static void mlp_mask_privacy(struct context *cnt){
   // Mask brightness.
   //
   int index = pixels;
+  int increment = sizeof(unsigned long);
 
-  while (index >= sizeof(unsigned long)) {
+  while (index >= increment) {
      *((unsigned long *)image) &= *((unsigned long *)mask);
-     image += sizeof(unsigned long);
-     mask += sizeof(unsigned long);
-     index -= sizeof(unsigned long);
+     image += increment;
+     mask += increment;
+     index -= increment;
   }
   while (--index >= 0) {
      *(image++) &= *(mask++);
@@ -1374,8 +1375,8 @@ static void mlp_mask_privacy(struct context *cnt){
   index = cnt->imgs.size - pixels;
   const unsigned char *maskuv = cnt->imgs.mask_privacy_uv;
 
-  while (index >= sizeof(unsigned long)) {
-     index -= sizeof(unsigned long);
+  while (index >= increment) {
+     index -= increment;
      /*
       * Replace the masked bytes with 0x080. This is done using two masks:
       * the normal privacy mask is used to clear the masked bits, the
@@ -1383,10 +1384,10 @@ static void mlp_mask_privacy(struct context *cnt){
       * is that we process 4 or 8 bytes in just two operations.
       */
      *((unsigned long *)image) &= *((unsigned long *)mask);
-     mask += sizeof(unsigned long);
+     mask += increment;
      *((unsigned long *)image) |= *((unsigned long *)maskuv);
-     maskuv += sizeof(unsigned long);
-     image += sizeof(unsigned long);
+     maskuv += increment;
+     image += increment;
   }
   while (--index >= 0) {
      if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.

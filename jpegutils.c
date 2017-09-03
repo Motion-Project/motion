@@ -230,7 +230,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
-    int             i;
+    unsigned int    i;
     unsigned char  *img_y, *img_cb, *img_cr;
     unsigned char   offset_y;
 
