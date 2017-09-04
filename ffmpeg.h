@@ -5,7 +5,6 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <stdint.h>
-#include <alloca.h>
 #include "config.h"
 
 enum TIMELAPSE_TYPE {
