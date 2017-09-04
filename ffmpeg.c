@@ -237,7 +237,7 @@ static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
 static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
 
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
-    char *codec_name = alloca(codec_name_len + 1);
+    char *codec_name = malloc(codec_name_len + 1);
 
     if (codec_name == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Failed to allocate memory for codec name");
@@ -253,6 +253,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
         (strcmp(codec_name, "swf") == 0) ) && (ffmpeg->fps >50)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "The frame rate specified is too high for the ffmpeg movie type specified. Choose a different ffmpeg container or lower framerate.");
         ffmpeg_free_context(ffmpeg);
+        free(codec_name);
         return -1;
     }
 
@@ -263,8 +264,10 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
         if (!ffmpeg->oc->oformat) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "ffmpeg_video_codec option value %s is not supported", codec_name);
             ffmpeg_free_context(ffmpeg);
+            free(codec_name);
             return -1;
         }
+        free(codec_name);
         return 0;
     }
 
@@ -323,15 +326,18 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     if (!ffmpeg->oc->oformat) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "codec option value %s is not supported", codec_name);
         ffmpeg_free_context(ffmpeg);
+        free(codec_name);
         return -1;
     }
 
     if (ffmpeg->oc->oformat->video_codec == MY_CODEC_ID_NONE) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not get the codec");
         ffmpeg_free_context(ffmpeg);
+        free(codec_name);
         return -1;
     }
 
+    free(codec_name);
     return 0;
 }
 
