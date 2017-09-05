@@ -419,8 +419,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     if (ffmpeg->tlapse != TIMELAPSE_NONE) {
         ffmpeg->last_pts++;
-        ffmpeg->pkt.pts = ffmpeg->last_pts;
-        ffmpeg->pkt.dts = ffmpeg->last_pts;
+        ffmpeg->picture->pts = ffmpeg->last_pts;
     } else {
         pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
         if (pts_interval < 0){
@@ -428,23 +427,22 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
             ffmpeg_reset_movie_start_time(ffmpeg, tv1);
             pts_interval = 0;
         }
-        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
+        ffmpeg->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
         if (ffmpeg->test_mode == 1){
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "PTS %"PRId64" Base PTS %"PRId64" ms interval %"PRId64" timebase %d-%d",
-                       ffmpeg->pkt.pts,ffmpeg->base_pts,pts_interval,
+                       ffmpeg->picture->pts,ffmpeg->base_pts,pts_interval,
                        ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
         }
 
-        if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
+        if (ffmpeg->picture->pts <= ffmpeg->last_pts){
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
             if (ffmpeg->test_mode == 1){
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "BAD TIMING!! Frame skipped.");
             }
             return -1;
         }
-        ffmpeg->pkt.dts = ffmpeg->pkt.pts;
-        ffmpeg->last_pts = ffmpeg->pkt.pts;
+        ffmpeg->last_pts = ffmpeg->picture->pts;
     }
     return 0;
 }
@@ -703,18 +701,18 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     ffmpeg->pkt.data = NULL;
     ffmpeg->pkt.size = 0;
 
-    retcd = ffmpeg_encode_video(ffmpeg);
-    if (retcd != 0){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while encoding picture");
-        my_packet_unref(ffmpeg->pkt);
-        return retcd;
-    }
-
     retcd = ffmpeg_set_pts(ffmpeg, tv1);
     if (retcd < 0) {
         //If there is an error, it has already been reported.
         my_packet_unref(ffmpeg->pkt);
         return -1;
+    }
+
+    retcd = ffmpeg_encode_video(ffmpeg);
+    if (retcd != 0){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while encoding picture");
+        my_packet_unref(ffmpeg->pkt);
+        return retcd;
     }
 
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
