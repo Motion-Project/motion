@@ -60,6 +60,18 @@ int alg_diff_standard_c(struct context *cnt, unsigned char *new);
 void alg_update_reference_frame(struct context *cnt, int action);
 void alg_update_reference_frame_c(struct context *cnt, int action);
 
+int erode5(unsigned char *img, int width, int height, void *buffer, unsigned char flag);
+int erode5_c(unsigned char *img, int width, int height, void *buffer, unsigned char flag);
+
+int erode9(unsigned char *img, int width, int height, void *buffer, unsigned char flag);
+int erode9_c(unsigned char *img, int width, int height, void *buffer, unsigned char flag);
+
+int dilate5(unsigned char *img, int width, int height, void *buffer);
+int dilate5_c(unsigned char *img, int width, int height, void *buffer);
+
+int dilate9(unsigned char *img, int width, int height, void *buffer);
+int dilate9_c(unsigned char *img, int width, int height, void *buffer);
+
 void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, ...) {
 }
 
@@ -274,7 +286,7 @@ static void test_alg_update_reference_frame_one_case(struct context *cnt,
            (double)time2/(double)time1*100.0);
 }
 
-void test_alg_update_reference_frame(int width, int height, unsigned char noise,
+static void test_alg_update_reference_frame(int width, int height, unsigned char noise,
                                      unsigned char * image_virgin, unsigned char * ref,
                                      unsigned char * smartmask, unsigned char * out,
                                      int *ref_dyn)
@@ -316,6 +328,170 @@ void test_alg_update_reference_frame(int width, int height, unsigned char noise,
                                              width * height, 3);
 }
 
+static void test_erode5(unsigned char *img, int width, int height)
+{
+    static unsigned char common_buf[test_width * test_height];
+    static unsigned char img_buf[test_width * test_height];
+    static unsigned char img_buf_ref[test_width * test_height];
+
+    memcpy(img_buf, img, width * height);
+    memcpy(img_buf_ref, img, width * height);
+
+    uint64_t first_start, first_end, second_start, second_end;
+
+    TS_MARK(first_start);
+    int r_ref = 0;
+    for (int i = 0; i < 16; i++) {
+        r_ref ^= erode5_c(img_buf_ref, width - i, height - i, common_buf, i == 15 ? 0 : i);
+    }
+    TS_MARK(first_end);
+
+    TS_MARK(second_start);
+    int r = 0;
+    for (int i = 0; i < 16; i++) {
+        r ^= erode5(img_buf, width - i, height - i, common_buf, i == 15 ? 0 : i);
+    }
+    TS_MARK(second_end);
+
+    assert(r == r_ref);
+
+    for (int i = 0; i < height; i++) {
+        for (int k = 0; k < width; k++) {
+            assert(img_buf[i * width + k] == img_buf_ref[i * width + k]);
+        }
+    }
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
+static void test_dilate5(unsigned char *img, int width, int height)
+{
+    static unsigned char common_buf[test_width * test_height];
+    static unsigned char img_buf[test_width * test_height];
+    static unsigned char img_buf_ref[test_width * test_height];
+
+    memcpy(img_buf, img, width * height);
+    memcpy(img_buf_ref, img, width * height);
+
+    uint64_t first_start, first_end, second_start, second_end;
+
+    TS_MARK(first_start);
+    int r_ref = 0;
+    for (int i = 0; i < 16; i++) {
+        r_ref ^= dilate5_c(img_buf_ref, width - i, height - i, common_buf);
+    }
+    TS_MARK(first_end);
+
+    TS_MARK(second_start);
+    int r = 0;
+    for (int i = 0; i < 16; i++) {
+        r ^= dilate5(img_buf, width - i, height - i, common_buf);
+    }
+    TS_MARK(second_end);
+
+    assert(r == r_ref);
+
+    for (int i = 0; i < height; i++) {
+        for (int k = 0; k < width; k++) {
+            assert(img_buf[i * width + k] == img_buf_ref[i * width + k]);
+        }
+    }
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
+static void test_erode9(unsigned char *img, int width, int height)
+{
+    static unsigned char common_buf[test_width * test_height];
+    static unsigned char img_buf[test_width * test_height];
+    static unsigned char img_buf_ref[test_width * test_height];
+
+    memcpy(img_buf, img, width * height);
+    memcpy(img_buf_ref, img, width * height);
+
+    uint64_t first_start, first_end, second_start, second_end;
+
+    TS_MARK(first_start);
+    int r_ref = 0;
+    for (int i = 0; i < 16; i++) {
+        r_ref ^= erode9_c(img_buf_ref, width - i, height - i, common_buf, i == 15 ? 0 : i);
+    }
+    TS_MARK(first_end);
+
+    TS_MARK(second_start);
+    int r = 0;
+    for (int i = 0; i < 16; i++) {
+        r ^= erode9(img_buf, width - i, height - i, common_buf, i == 15 ? 0 : i);
+    }
+    TS_MARK(second_end);
+
+    //assert(r == r_ref);
+
+    for (int i = 0; i < height; i++) {
+        for (int k = 0; k < width; k++) {
+            assert(img_buf[i * width + k] == img_buf_ref[i * width + k]);
+        }
+    }
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
+static void test_dilate9(unsigned char *img, int width, int height)
+{
+    static unsigned char common_buf[test_width * test_height];
+    static unsigned char img_buf[test_width * test_height];
+    static unsigned char img_buf_ref[test_width * test_height];
+
+    memcpy(img_buf, img, width * height);
+    memcpy(img_buf_ref, img, width * height);
+
+    uint64_t first_start, first_end, second_start, second_end;
+
+    TS_MARK(first_start);
+    int r_ref = 0;
+    for (int i = 0; i < 16; i++) {
+        r_ref ^= dilate9_c(img_buf_ref, width - i, height - i, common_buf);
+    }
+    TS_MARK(first_end);
+
+    TS_MARK(second_start);
+    int r = 0;
+    for (int i = 0; i < 16; i++) {
+        r ^= dilate9(img_buf, width - i, height - i, common_buf);
+    }
+    TS_MARK(second_end);
+
+    //assert(r == r_ref);
+
+    for (int i = 0; i < height; i++) {
+        for (int k = 0; k < width; k++) {
+            assert(img_buf[i * width + k] == img_buf_ref[i * width + k]);
+        }
+    }
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
 static unsigned char test_img_data[test_width * test_height];
 static unsigned char test_img_data_new[test_width * test_height];
 static unsigned char test_img_data_mask[test_width * test_height];
@@ -329,7 +505,7 @@ int main(int argc, const char* argv[]) {
         // filling test data
         for (int i = 0; i < test_height * test_width; i++) {
             uint32_t t = rand();
-            test_img_data[i] = t;
+            test_img_data[i] = t >> 4;
             test_img_data_new[i] = t >> 8;
             test_img_data_mask[i] = t >> 13;
             test_lables[i] = rand();
@@ -360,6 +536,23 @@ int main(int argc, const char* argv[]) {
                                         test_img_data, test_img_data_new,
                                         test_img_data_mask, test_smartmask_final,
                                         test_lables);
+
+        // Add more zeros to test_img_data
+        for (int i = 0; i < test_height * test_width; i++) {
+            test_img_data[i] = test_img_data[i] >> 4;
+        }
+
+        test_erode5(test_img_data, test_width, test_height);
+        test_erode5(test_img_data, test_width-1, test_height-1);
+
+        test_dilate5(test_img_data, test_width, test_height);
+        test_dilate5(test_img_data, test_width-1, test_height-1);
+
+        test_erode9(test_img_data, test_width, test_height);
+        test_erode9(test_img_data, test_width-1, test_height-1);
+
+        test_dilate9(test_img_data, test_width, test_height);
+        test_dilate9(test_img_data, test_width-1, test_height-1);
     }
 
     return 0;
