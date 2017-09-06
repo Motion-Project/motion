@@ -141,7 +141,10 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
 
     set_video_port_format(mmalcam, video_port->format);
     video_port->format->encoding = MMAL_ENCODING_I420;
-        
+    // set buffer size for an aligned/padded frame
+    video_port->buffer_size = VCOS_ALIGN_UP(mmalcam->width, 32) *
+        VCOS_ALIGN_UP(mmalcam->height, 16) * 3 / 2;
+
     if (mmal_port_parameter_set_boolean(video_port, MMAL_PARAMETER_NO_IMAGE_PADDING, 1)
             != MMAL_SUCCESS) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "MMAL no-padding setup failed");
