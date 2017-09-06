@@ -387,8 +387,9 @@ int mmalcam_next(struct context *cnt, unsigned char *map)
         memcpy(map, camera_buffer->data, cnt->imgs.size);
         mmal_buffer_header_mem_unlock(camera_buffer);
     } else {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "cmd %d flags %08x size %d/%d at %08x",
-                camera_buffer->cmd, camera_buffer->flags, camera_buffer->length, camera_buffer->alloc_size, camera_buffer->data);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "cmd %d flags %08x size %d/%d at %08x, img_size=%d",
+                camera_buffer->cmd, camera_buffer->flags, camera_buffer->length,
+                camera_buffer->alloc_size, camera_buffer->data, cnt->imgs.size);
     }
 
     mmal_buffer_header_release(camera_buffer);
