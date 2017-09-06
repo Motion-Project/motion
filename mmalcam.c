@@ -382,7 +382,7 @@ int mmalcam_next(struct context *cnt, unsigned char *map)
     MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
 
     if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
-            && camera_buffer->length == cnt->imgs.size) {
+            && camera_buffer->length >= cnt->imgs.size) {
         mmal_buffer_header_mem_lock(camera_buffer);
         memcpy(map, camera_buffer->data, cnt->imgs.size);
         mmal_buffer_header_mem_unlock(camera_buffer);
