@@ -14,6 +14,10 @@
 #include "mmx.h"
 #endif
 
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
@@ -21,7 +25,339 @@
  * alg_locate_center_size
  *      Locates the center and size of the movement.
  */
+#if defined(__ARM_NEON)
 void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
+{
+    unsigned char *out = imgs->out;
+    int *labels = imgs->labels;
+
+    const uint16x8_t c_32768 = vdupq_n_u16(32768);
+    const uint32x2_t c_32768_u32 = vdup_n_u32(32768);
+    const uint16x4_t c_fours = vdup_n_u16(4);
+    const uint8x16_t c_ff = vdupq_n_u8(255);
+    const uint8x8_t c_eigths = vdup_n_u8(8);
+    const uint8x16_t c_ones = vdupq_n_u8(1);
+
+    int32_t centx = 0;
+    uint16_t cntY[height];
+    uint32x2_t centx_x2 = vdup_n_u32(0);
+    /* If Labeling enabled - locate center of largest labelgroup. */
+    if (imgs->labelsize_max) {
+        /* Locate largest labelgroup */
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+
+            uint8x8_t cnt_sum = vdup_n_u8(0);
+            uint32x4_t idx_sum = vdupq_n_u32(0);
+
+            int x = 0;
+            for (; x <= width - 8; x += 8) {
+                uint16x4_t l0 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x4_t l1 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x8_t l = vcombine_u16(l0, l1);
+
+                uint16x8_t mask = vtstq_u16(l, c_32768);
+                cnt_sum = vadd_u8(cnt_sum, vand_u8(vmovn_u16(mask), vget_low_u8(c_ones)));
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(mask, idx));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            uint16x4_t cnt_sum_x4 = vpaddl_u8(cnt_sum);
+
+            if (x <= width - 4) {
+                x += 4;
+                uint16x4_t l = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+
+                uint16x4_t mask = vtst_u16(l, vget_low_u16(c_32768));
+                cnt_sum_x4 = vadd_u16(cnt_sum_x4, vand_u16(vdup_n_u16(1), mask));
+                idx_sum = vaddw_u16(idx_sum, vand_u16(mask, vget_low_u16(idx)));
+            }
+
+            centx_x2 = vadd_u32(centx_x2, vpadd_u32(vget_low_u32(idx_sum), vget_high_u32(idx_sum)));
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+
+            if (x <= width - 2) {
+                uint32x2_t l = vld1_u32((uint32_t *)labels);
+                labels += 2;
+
+                uint32x2_t mask = vtst_u32(l, c_32768_u32);
+                uint32x2_t idxw = vget_low_u32(vmovl_u16(vget_high_u16(idx)));
+                centx_x2 = vadd_u32(centx_x2, vand_u32(mask, idxw));
+
+                uint16x4_t mask_x4 = vqmovn_u32(vcombine_u32(mask, mask));
+                cnt_sum_x4 = vadd_u16(cnt_sum_x4, vand_u16(mask_x4, vdup_n_u16(1)));
+            }
+
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+            vst1_lane_u16(&cntY[y], cnt_sum_x4, 0);
+        }
+    } else {
+        /* Locate movement */
+        uint8x16_t c_one_x16 = vdupq_n_u8(1);
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+
+            uint32x4_t idx_sum = vdupq_n_u32(0);
+            uint16x8_t cnt_sum = vdupq_n_u16(0);
+
+            int x = 0;
+            for (; x <= width - 16; x += 16) {
+                uint8x16_t o = vld1q_u8(out);
+                out += 16;
+
+                uint8x16_t mask = vtstq_u8(o, c_ff);
+                cnt_sum = vpadalq_u8(cnt_sum, vandq_u8(c_one_x16, mask));
+                uint16x8_t mask_lo = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vget_low_u8(mask))));
+                uint16x8_t mask_hi = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vget_high_u8(mask))));
+
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(idx, mask_lo));
+                idx = vaddw_u8(idx, c_eigths);
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(idx, mask_hi));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            if (x <= width - 8) {
+                x += 8;
+                uint8x8_t o = vld1_u8(out);
+                out += 8;
+
+                uint8x8_t mask = vtst_u8(o, vget_low_u8(c_ff));
+                cnt_sum = vaddw_u8(cnt_sum, vand_u8(vget_low_u8(c_one_x16), mask));
+                idx_sum = vpadalq_u16(idx_sum, vandq_u16(idx, vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(mask)))));
+            }
+
+            uint16_t lcnt = 0;
+            for (; x < width; x++) {
+                if (*(out++)) {
+                    centx += x;
+                    lcnt++;
+                }
+            }
+
+            centx_x2 = vadd_u32(centx_x2, vpadd_u32(vget_low_u32(idx_sum), vget_high_u32(idx_sum)));
+            uint16x4_t cnt_sum_x4 = vpadd_u16(vget_low_u16(cnt_sum), vget_high_u16(cnt_sum));
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+            cnt_sum_x4 = vpadd_u16(cnt_sum_x4, cnt_sum_x4);
+
+            cntY[y] = lcnt + vget_lane_u16(cnt_sum_x4, 0);
+        }
+    }
+
+    centx_x2 = vpadd_u32(centx_x2, centx_x2);
+    centx += vget_lane_u32(centx_x2, 0);
+    // calculate centc and centy
+    int32_t centc = 0, centy = 0;
+    {
+        uint16x4_t idx = { 0, 1, 2, 3 };
+        uint32x4_t centy_x4 = vdupq_n_u32(0);
+        uint32x4_t centc_x4 = vdupq_n_u32(0);
+        int y = 0;
+        for (; y <= height - 4; y += 4) {
+            uint16x4_t cnt = vld1_u16(&cntY[y]);
+            centy_x4 = vaddq_u32(centy_x4, vmull_u16(idx, cnt));
+            idx = vadd_u16(idx, c_fours);
+            centc_x4 = vaddw_u16(centc_x4, cnt);
+        }
+        uint32x2_t centy_x2 = vpadd_u32(vget_low_u32(centy_x4), vget_high_u32(centy_x4));
+        uint32x2_t centc_x2 = vpadd_u32(vget_low_u32(centc_x4), vget_high_u32(centc_x4));
+        uint32x2_t centy_centc = vpadd_u32(centy_x2, centc_x2);
+        centy = vget_lane_u32(centy_centc, 0);
+        centc = vget_lane_u32(centy_centc, 1);
+
+        for (; y < height; y++) {
+            centy += y*cntY[y];
+            centc += cntY[y];
+        }
+    }
+
+    if (centc) {
+        centx = centx / centc;
+        centy = centy / centc;
+    }
+    /* First reset pointers back to initial value. */
+    labels = imgs->labels;
+    out = imgs->out;
+
+    int xdist = 0;
+    /* If Labeling then we find the area around largest labelgroup instead. */
+    uint32x2_t vxdist = vdup_n_u32(0);
+    if (imgs->labelsize_max) {
+        uint16x8_t centx_x8 = vdupq_n_u16(centx);
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+            uint32x4_t abd_sum = vdupq_n_u32(0);
+
+            int x = 0;
+            for (; x <= width - 8; x += 8) {
+                uint16x4_t l0 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x4_t l1 = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+                uint16x8_t l = vcombine_u16(l0, l1);
+
+                uint16x8_t mask = vtstq_u16(l, c_32768);
+                uint16x8_t vabdx = vabdq_u16(idx, centx_x8);
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(mask, vabdx));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            if (x <= width - 4) {
+                x += 4;
+                uint16x4_t l = vmovn_u32(vld1q_u32((uint32_t *)labels));
+                labels += 4;
+
+                uint16x4_t mask = vtst_u16(l, vget_low_u16(c_32768));
+                uint16x4_t vabdx = vabd_u16(vget_low_u16(idx), vget_low_u16(centx_x8));
+                abd_sum = vaddw_u16(abd_sum, vand_u16(mask, vabdx));
+            }
+
+            vxdist = vadd_u32(vxdist, vpadd_u32(vget_low_u32(abd_sum), vget_high_u32(abd_sum)));
+
+            if (x <= width - 2) {
+                uint32x2_t l = vld1_u32((uint32_t *)labels);
+                labels += 2;
+
+                uint32x2_t mask = vtst_u32(l, c_32768_u32);
+                uint32x2_t idxw = vget_low_u32(vmovl_u16(vget_high_u16(idx)));
+                uint32x2_t vabdx = vabd_u32(idxw, vdup_n_u32(centx));
+                vxdist = vadd_u32(vxdist, vand_u32(mask, vabdx));
+            }
+        }
+    } else {
+        uint16x8_t centx_x8 = vdupq_n_u16(centx);
+        for (int y = 0; y < height; y++) {
+            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+
+            uint32x4_t abd_sum = vdupq_n_u32(0);
+
+            int x = 0;
+            for (; x <= width - 16; x += 16) {
+                uint8x16_t o = vld1q_u8(out);
+                out += 16;
+
+                uint8x16_t mask = vtstq_u8(o, c_ff);
+                uint16x8_t mask_lo = vreinterpretq_u16_s16(vmovl_s8(vget_low_s8(vreinterpretq_s8_u8(mask))));
+                uint16x8_t mask_hi = vreinterpretq_u16_s16(vmovl_s8(vget_high_s8(vreinterpretq_s8_u8(mask))));
+
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(vabdq_u16(idx, centx_x8), mask_lo));
+                idx = vaddw_u8(idx, c_eigths);
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(vabdq_u16(idx, centx_x8), mask_hi));
+                idx = vaddw_u8(idx, c_eigths);
+            }
+
+            if (x <= width - 8) {
+                x += 8;
+                uint8x8_t o = vld1_u8(out);
+                out += 8;
+
+                uint8x8_t mask = vtst_u8(o, vget_low_u8(c_ff));
+                abd_sum = vpadalq_u16(abd_sum, vandq_u16(vabdq_u16(idx, centx_x8), vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(mask)))));
+            }
+            vxdist = vadd_u32(vxdist, vpadd_u32(vget_low_u32(abd_sum), vget_high_u32(abd_sum)));
+
+            for (; x < width; x++) {
+                if (*(out++)) {
+                    if (x > cent->x)
+                        xdist += x - cent->x;
+                    else if (x < cent->x)
+                        xdist += cent->x - x;
+                }
+            }
+        }
+    }
+    vxdist = vpadd_u32(vxdist, vxdist);
+    xdist += vget_lane_u32(vxdist, 0);
+
+    // calculate ydist
+    int32_t ydist = 0;
+    {
+        uint16x4_t idx = { 0, 1, 2, 3 };
+        uint32x4_t ydist_x4 = vdupq_n_u32(0);
+        uint16x4_t centy_x4 = vdup_n_u16(centy);
+        int y = 0;
+        for (; y <= height - 4; y += 4) {
+            uint16x4_t cnt = vld1_u16(&cntY[y]);
+            uint16x4_t vabdx = vabd_u16(idx, centy_x4);
+            ydist_x4 = vaddq_u32(ydist_x4, vmull_u16(vabdx, cnt));
+            idx = vadd_u16(idx, c_fours);
+        }
+        uint32x2_t ydist_x2 = vpadd_u32(vget_low_u32(ydist_x4), vget_high_u32(ydist_x4));
+        ydist_x2 = vpadd_u32(ydist_x2, ydist_x2);
+        ydist = vget_lane_u32(ydist_x2, 0);
+        for (; y < height; y++) {
+            if (y > cent->y)
+                ydist += cntY[y]*(y - cent->y);
+            else if (y < cent->y)
+                ydist += cntY[y]*(cent->y - y);
+        }
+    }
+
+    cent->x = centx;
+    cent->y = centy;
+
+    if (centc) {
+        cent->minx = cent->x - xdist / centc * 2;
+        cent->maxx = cent->x + xdist / centc * 2;
+        /*
+         * Make the box a little bigger in y direction to make sure the
+         * heads fit in so we multiply by 3 instead of 2 which seems to
+         * to work well in practical.
+         */
+        cent->miny = cent->y - ydist / centc * 3;
+        cent->maxy = cent->y + ydist / centc * 2;
+    }
+    else {
+        cent->maxx = 0;
+        cent->maxy = 0;
+        cent->minx = width;
+        cent->miny = height;
+    }
+
+    if (cent->maxx > width - 1)
+        cent->maxx = width - 1;
+    else if (cent->maxx < 0)
+        cent->maxx = 0;
+
+    if (cent->maxy > height - 1)
+        cent->maxy = height - 1;
+    else if (cent->maxy < 0)
+        cent->maxy = 0;
+
+    if (cent->minx > width - 1)
+        cent->minx = width - 1;
+    else if (cent->minx < 0)
+        cent->minx = 0;
+
+    if (cent->miny > height - 1)
+        cent->miny = height - 1;
+    else if (cent->miny < 0)
+        cent->miny = 0;
+
+    /* Align for better locate box handling */
+    cent->minx += cent->minx % 2;
+    cent->miny += cent->miny % 2;
+    cent->maxx -= cent->maxx % 2;
+    cent->maxy -= cent->maxy % 2;
+
+    cent->width = cent->maxx - cent->minx;
+    cent->height = cent->maxy - cent->miny;
+
+    /*
+     * We want to center Y coordinate to be the center of the action.
+     * The head of a person is important so we correct the cent.y coordinate
+     * to match the correction to include a persons head that we just did above.
+     */
+    cent->y = (cent->miny + cent->maxy) / 2;
+}
+
+// Leave ogiginal C function for tests
+void alg_locate_center_size_c(struct images *imgs, int width, int height, struct coord *cent)
+#else
+void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
+#endif
 {
     unsigned char *out = imgs->out;
     int *labels = imgs->labels;
@@ -58,7 +394,6 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
                 }
             }
         }
-
     }
 
     if (centc) {
@@ -163,7 +498,6 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     cent->y = (cent->miny + cent->maxy) / 2;
 
 }
-
 
 /**
  * alg_draw_location
@@ -593,7 +927,185 @@ static int alg_labeling(struct context *cnt)
  * dilate9
  *      Dilates a 3x3 box.
  */
+#if defined(__ARM_NEON)
+int dilate9(unsigned char *img, int width, int height, void *buffer)
+{
+    const uint8x16_t vff = vdupq_n_u8(0xFF);
+    const uint8x16_t vone = vdupq_n_u8(1);
+    uint8x16_t protruding = vdupq_n_u8(0);
+    int x = 0;
+    // bufer coinanins height values, saved last processed column form img
+    unsigned char *prev_vals = buffer;
+    for (int i = 0; i < height; i++) {
+        prev_vals[i] = img[i * width];
+        img[i * width] = 0;
+    }
+
+    uint32x2_t vsum = vdup_n_u32(0);
+    unsigned int sum = 0; // for sum calculated in %8 tails processing
+
+    for (x = 1; x <= width - 16 - 1; x += 16) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+        uint16x4_t psum = vdup_n_u16(0);
+
+        uint8x16_t prev_y1_max = vdupq_n_u8(0);
+        uint8x16_t prev_y2 = vld1q_u8(row);
+        uint8x16_t prev_y2_max = prev_y2;
+        {
+            protruding = vld1q_lane_u8(prev_vals, protruding, 15);
+            protruding = vld1q_lane_u8(&row[16], protruding, 0);
+            uint8x16_t tmp_y2l = vextq_u8(protruding, prev_y2_max, 15);
+            uint8x16_t tmp_y2r = vextq_u8(prev_y2_max, protruding, 1);
+            prev_y2_max = vmaxq_u8(prev_y2_max, tmp_y2l);
+            prev_y2_max = vmaxq_u8(prev_y2_max, tmp_y2r);
+        }
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            const uint8x16_t y0_max = prev_y1_max;
+            const uint8x16_t y1_max = prev_y2_max;
+            const uint8x16_t y1 = prev_y2;
+            uint8x16_t y2_max;
+            if (y != height-1) {
+                protruding = vld1q_lane_u8(&prev_vals[y+1], protruding, 15);
+                protruding = vld1q_lane_u8(&row[16], protruding, 0);
+                uint8x16_t y2 = vld1q_u8(row);
+                row += width;
+                uint8x16_t y2l = vextq_u8(protruding, y2, 15);
+                uint8x16_t y2r = vextq_u8(y2, protruding, 1);
+                y2_max = vmaxq_u8(y2, y2l);
+                y2_max = vmaxq_u8(y2_max, y2r);
+                prev_y1_max = y1_max;
+                prev_y2_max = y2_max;
+                prev_y2 = y2;
+            }
+            else {
+                y2_max = vdupq_n_u8(0);
+            }
+            vst1q_lane_u8(&prev_vals[y], y1, 15);
+            // all values are inplace
+            const uint8x16_t t0 = vmaxq_u8(y0_max, y1_max);
+            const uint8x16_t t1 = vmaxq_u8(t0, y2_max);
+            const uint8x16_t rmask = vtstq_u8(t1, vff);
+
+            const uint8x16_t vout = vbslq_u8(rmask, t1, y1);
+            vst1q_u8(out, vout);
+            out += width;
+
+            uint8x16_t psum0 = vandq_u8(rmask, vone);
+            psum = vpadal_u8(psum, vget_low_u8(psum0));
+            psum = vpadal_u8(psum, vget_high_u8(psum0));
+        }
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    if (x <= width - 8 - 1) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+        uint16x4_t psum = vdup_n_u16(0);
+        uint8x8_t protruding = vdup_n_u8(0);
+
+        uint8x8_t prev_y1_max = vdup_n_u8(0);
+        uint8x8_t prev_y2 = vld1_u8(row);
+        uint8x8_t prev_y2_max = prev_y2;
+        {
+            protruding = vld1_lane_u8(prev_vals, protruding, 7);
+            protruding = vld1_lane_u8(&row[16], protruding, 0);
+            uint8x8_t tmp_y2l = vext_u8(protruding, prev_y2_max, 7);
+            uint8x8_t tmp_y2r = vext_u8(prev_y2_max, protruding, 1);
+            prev_y2_max = vmin_u8(prev_y2_max, tmp_y2l);
+            prev_y2_max = vmin_u8(prev_y2_max, tmp_y2r);
+        }
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            const uint8x8_t y0_max = prev_y1_max;
+            const uint8x8_t y1_max = prev_y2_max;
+            const uint8x8_t y1 = prev_y2;
+            uint8x8_t y2_max;
+            if (y != height-1) {
+                protruding = vld1_lane_u8(&prev_vals[y+1], protruding, 7);
+                protruding = vld1_lane_u8(&row[8], protruding, 0);
+                uint8x8_t y2 = vld1_u8(row);
+                row += width;
+                uint8x8_t y2l = vext_u8(protruding, y2, 7);
+                uint8x8_t y2r = vext_u8(y2, protruding, 1);
+                y2_max = vmax_u8(y2, y2l);
+                y2_max = vmax_u8(y2_max, y2r);
+                prev_y1_max = y1_max;
+                prev_y2_max = y2_max;
+                prev_y2 = y2;
+            }
+            else {
+                y2_max = vdup_n_u8(0);
+            }
+            vst1_lane_u8(&prev_vals[y], y1, 7);
+            // all values are inplace
+            const uint8x8_t t0 = vmax_u8(y0_max, y1_max);
+            const uint8x8_t t1 = vmax_u8(t0, y2_max);
+            const uint8x8_t rmask = vtst_u8(t1, vget_low_u8(vff));
+            // write 0 for places were min value is 0
+            const uint8x8_t vout = vbsl_u8(rmask, t1, y1);
+            vst1_u8(out, vout);
+            out += width;
+
+            uint8x8_t psum0 = vand_u8(rmask, vget_low_u8(vone));
+            psum = vpadal_u8(psum, psum0);
+
+        }
+        x += 8;
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    for (; x < width - 1; x++) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint8_t prev_y1_max = 0;
+        uint8_t prev_y2_max = MAX3(prev_vals[0], row[0], row[1]);
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            const uint8_t y0_max = prev_y1_max;
+            const uint8_t y1_max = prev_y2_max;
+            uint8_t y2_max;
+            if (y != height-1) {
+                y2_max = MAX3(prev_vals[y+1], row[0], row[1]);
+                row += width;
+
+                prev_y1_max = y1_max;
+                prev_y2_max = y2_max;
+            }
+            else {
+                y2_max = 0;
+            }
+            prev_vals[y] = out[0];
+
+            uint8_t m = MAX3(y0_max, y1_max, y2_max);
+            if (m) {
+                *out = m;
+                sum++;
+            }
+            out += width;
+        }
+    }
+
+    for (int i = 0; i < height; i++) {
+        img[i * width + width - 1] = 0;
+    }
+    
+    vsum = vpadd_u32(vsum, vsum);
+    return vget_lane_u32(vsum, 0) + sum;
+}
+
+// Leave ogiginal C function for tests
+int dilate9_c(unsigned char *img, int width, int height, void *buffer)
+#else
 static int dilate9(unsigned char *img, int width, int height, void *buffer)
+#endif
 {
     /*
      * - row1, row2 and row3 represent lines in the temporary buffer.
@@ -680,7 +1192,175 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
  * dilate5
  *      Dilates a + shape.
  */
+#if defined(__ARM_NEON)
+int dilate5(unsigned char *img, int width, int height, void *buffer)
+{
+    const uint8x16_t vff = vdupq_n_u8(0xFF);
+    const uint8x16_t vone = vdupq_n_u8(1);
+    uint8x16_t protruding = vdupq_n_u8(0);
+    int x = 0;
+    // bufer coinanins height values, saved last processed column form img
+    unsigned char *prev_vals = buffer;
+    for (int i = 0; i < height; i++) {
+        prev_vals[i] = img[i * width];
+        img[i * width] = 0;
+    }
+
+    uint32x2_t vsum = vdup_n_u32(0);
+    unsigned int sum = 0; // for sum calculated in %8 tails processing
+
+    for (x = 1; x <= width - 16 - 1; x += 16) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint16x4_t psum = vdup_n_u16(0);
+        uint8x16_t prev_y1 = vdupq_n_u8(0);
+        uint8x16_t prev_y2 = vld1q_u8(row);
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            protruding = vld1q_lane_u8(&prev_vals[y], protruding, 15);
+            protruding = vld1q_lane_u8(&out[16], protruding, 0);
+
+            const uint8x16_t y0 = prev_y1;
+            const uint8x16_t y1 = prev_y2;
+            uint8x16_t y2;
+            if (y != height-1) {
+                y2 = vld1q_u8(row);
+                row += width;
+                prev_y1 = y1;
+                prev_y2 = y2;
+            }
+            else {
+                y2 = vdupq_n_u8(0);
+            }
+            uint8x16_t y1l = vextq_u8(protruding, y1, 15);
+            uint8x16_t y1r = vextq_u8(y1, protruding, 1);
+            vst1q_lane_u8(&prev_vals[y], y1, 15);
+            // all values are inplace
+            const uint8x16_t t0 = vmaxq_u8(y0, y1);
+            const uint8x16_t t1 = vmaxq_u8(y2, y1l);
+            const uint8x16_t t2 = vmaxq_u8(t0, y1r);
+            const uint8x16_t t3 = vmaxq_u8(t2, t1);
+            const uint8x16_t rmask = vtstq_u8(t3, vff);
+
+            const uint8x16_t vout = vbslq_u8(rmask, t3, y1);
+            vst1q_u8(out, vout);
+            out += width;
+
+            uint8x16_t psum0 = vandq_u8(rmask, vone);
+            psum = vpadal_u8(psum, vget_low_u8(psum0));
+            psum = vpadal_u8(psum, vget_high_u8(psum0));
+        }
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    if (x <= width - 8 - 1) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint16x4_t psum = vdup_n_u16(0);
+        uint8x8_t prev_y1 = vdup_n_u8(0);
+        uint8x8_t prev_y2 = vld1_u8(row);
+        row += width;
+
+        uint8x8_t protruding = vdup_n_u8(0);
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            protruding = vld1_lane_u8(&prev_vals[y], protruding, 7);
+            protruding = vld1_lane_u8(&out[8], protruding, 0);
+
+            const uint8x8_t y0 = prev_y1;
+            const uint8x8_t y1 = prev_y2;
+            uint8x8_t y2;
+            if (y != height-1) {
+                y2 = vld1_u8(row);
+                row += width;
+                prev_y1 = y1;
+                prev_y2 = y2;
+            }
+            else {
+                y2 = vdup_n_u8(0);
+            }
+            uint8x8_t y1l = vext_u8(protruding, y1, 7);
+            uint8x8_t y1r = vext_u8(y1, protruding, 1);
+            vst1_lane_u8(&prev_vals[y], y1, 7);
+            // all values are inplace
+            const uint8x8_t t0 = vmax_u8(y0, y1);
+            const uint8x8_t t1 = vmax_u8(y2, y1l);
+            const uint8x8_t t2 = vmax_u8(t0, y1r);
+            const uint8x8_t t3 = vmax_u8(t2, t1);
+            const uint8x8_t rmask = vtst_u8(t3, vget_low_u8(vff));
+            // write 0 for places were min value is 0
+            const uint8x8_t vout = vbsl_u8(rmask, t3, y1);
+            vst1_u8(out, vout);
+            out += width;
+
+            uint8x8_t psum0 = vand_u8(rmask, vget_low_u8(vone));
+            psum = vpadal_u8(psum, psum0);
+
+        }
+        x += 8;
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    for (; x < width - 1; x++) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint8_t prev_y1 = 0;
+        uint8_t prev_y2 = *row;
+        row += width;
+
+        uint8_t mem = MAX2(prev_y1, prev_y2);
+        uint8_t blob = 1;
+
+        for (int y = 0; y < height; y++) {
+            const uint8_t y1 = prev_y2;
+            uint8_t y2;
+            if (y != height-1) {
+                y2 = *row;
+                row += width;
+                prev_y1 = y1;
+                prev_y2 = y2;
+            }
+            else {
+                y2 = 0;
+            }
+            const uint8_t y1l = prev_vals[y];
+            const uint8_t y1r = out[1];
+            prev_vals[y] = y1;
+            uint8_t latest = MAX3(y1l, y1r, y2);
+            if (blob == 0) {
+                blob = latest;
+                mem = y2;
+            }
+            else {
+                blob = MAX2(mem, latest);
+                mem = MAX2(y1, y2);
+            }
+            if (blob) {
+                *out = blob;
+                sum++;
+            }
+            out += width;
+        }
+    }
+
+    for (int i = 0; i < height; i++) {
+        img[i * width + width - 1] = 0;
+    }
+
+    vsum = vpadd_u32(vsum, vsum);
+    return vget_lane_u32(vsum, 0) + sum;
+}
+
+// Leave ogiginal C function for tests
+int dilate5_c(unsigned char *img, int width, int height, void *buffer)
+#else
 static int dilate5(unsigned char *img, int width, int height, void *buffer)
+#endif
 {
     /*
      * - row1, row2 and row3 represent lines in the temporary buffer.
@@ -751,7 +1431,186 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
  * erode9
  *      Erodes a 3x3 box.
  */
+#if defined(__ARM_NEON)
+int erode9(unsigned char *const img, int width, int height, void *buffer, unsigned char flag)
+{
+    const uint8x16_t vff = vdupq_n_u8(0xFF);
+    const uint8x16_t vone = vdupq_n_u8(1);
+    uint8x16_t protruding = vdupq_n_u8(0);
+    int x = 0;
+    // bufer coinanins height values, saved last processed column form img
+    unsigned char *prev_vals = buffer;
+    for (int i = 0; i < height; i++) {
+        prev_vals[i] = img[i * width];
+        img[i * width] = flag;
+    }
+
+    uint32x2_t vsum = vdup_n_u32(0);
+    unsigned int sum = 0; // for sum calculated in %8 tails processing
+
+    for (x = 1; x <= width - 16 - 1; x += 16) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+        uint16x4_t psum = vdup_n_u16(0);
+
+        uint8x16_t prev_y1_min = vdupq_n_u8(flag);
+        uint8x16_t prev_y2 = vld1q_u8(row);
+        uint8x16_t prev_y2_min = prev_y2;
+        {
+            protruding = vld1q_lane_u8(prev_vals, protruding, 15);
+            protruding = vld1q_lane_u8(&row[16], protruding, 0);
+            uint8x16_t tmp_y2l = vextq_u8(protruding, prev_y2_min, 15);
+            uint8x16_t tmp_y2r = vextq_u8(prev_y2_min, protruding, 1);
+            prev_y2_min = vminq_u8(prev_y2_min, tmp_y2l);
+            prev_y2_min = vminq_u8(prev_y2_min, tmp_y2r);
+        }
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            const uint8x16_t y0_min = prev_y1_min;
+            const uint8x16_t y1_min = prev_y2_min;
+            const uint8x16_t y1 = prev_y2;
+            uint8x16_t y2_min;
+            if (y != height-1) {
+                protruding = vld1q_lane_u8(&prev_vals[y+1], protruding, 15);
+                protruding = vld1q_lane_u8(&row[16], protruding, 0);
+                uint8x16_t y2 = vld1q_u8(row);
+                row += width;
+                uint8x16_t y2l = vextq_u8(protruding, y2, 15);
+                uint8x16_t y2r = vextq_u8(y2, protruding, 1);
+                y2_min = vminq_u8(y2, y2l);
+                y2_min = vminq_u8(y2_min, y2r);
+                prev_y1_min = y1_min;
+                prev_y2_min = y2_min;
+                prev_y2 = y2;
+            }
+            else {
+                y2_min = vdupq_n_u8(flag);
+            }
+            vst1q_lane_u8(&prev_vals[y], y1, 15);
+            // all values are inplace
+            const uint8x16_t t0 = vminq_u8(y0_min, y1_min);
+            const uint8x16_t t1 = vminq_u8(t0, y2_min);
+            const uint8x16_t rmask = vtstq_u8(t1, vff);
+            // write 0 for places were min value is 0
+            const uint8x16_t vout = vandq_u8(rmask, y1);
+            vst1q_u8(out, vout);
+            out += width;
+
+            uint8x16_t psum0 = vandq_u8(rmask, vone);
+            psum = vpadal_u8(psum, vget_low_u8(psum0));
+            psum = vpadal_u8(psum, vget_high_u8(psum0));
+        }
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    if (x <= width - 8 - 1) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+        uint16x4_t psum = vdup_n_u16(0);
+        uint8x8_t protruding = vdup_n_u8(0);
+
+        uint8x8_t prev_y1_min = vdup_n_u8(flag);
+        uint8x8_t prev_y2 = vld1_u8(row);
+        uint8x8_t prev_y2_min = prev_y2;
+        {
+            protruding = vld1_lane_u8(prev_vals, protruding, 7);
+            protruding = vld1_lane_u8(&row[16], protruding, 0);
+            uint8x8_t tmp_y2l = vext_u8(protruding, prev_y2_min, 7);
+            uint8x8_t tmp_y2r = vext_u8(prev_y2_min, protruding, 1);
+            prev_y2_min = vmin_u8(prev_y2_min, tmp_y2l);
+            prev_y2_min = vmin_u8(prev_y2_min, tmp_y2r);
+        }
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            const uint8x8_t y0_min = prev_y1_min;
+            const uint8x8_t y1_min = prev_y2_min;
+            const uint8x8_t y1 = prev_y2;
+            uint8x8_t y2_min;
+            if (y != height-1) {
+                protruding = vld1_lane_u8(&prev_vals[y+1], protruding, 7);
+                protruding = vld1_lane_u8(&row[8], protruding, 0);
+                uint8x8_t y2 = vld1_u8(row);
+                row += width;
+                uint8x8_t y2l = vext_u8(protruding, y2, 7);
+                uint8x8_t y2r = vext_u8(y2, protruding, 1);
+                y2_min = vmin_u8(y2, y2l);
+                y2_min = vmin_u8(y2_min, y2r);
+                prev_y1_min = y1_min;
+                prev_y2_min = y2_min;
+                prev_y2 = y2;
+            }
+            else {
+                y2_min = vdup_n_u8(flag);
+            }
+            vst1_lane_u8(&prev_vals[y], y1, 7);
+            // all values are inplace
+            const uint8x8_t t0 = vmin_u8(y0_min, y1_min);
+            const uint8x8_t t1 = vmin_u8(t0, y2_min);
+            const uint8x8_t rmask = vtst_u8(t1, vget_low_u8(vff));
+            // write 0 for places were min value is 0
+            const uint8x8_t vout = vand_u8(rmask, y1);
+            vst1_u8(out, vout);
+            out += width;
+
+            uint8x8_t psum0 = vand_u8(rmask, vget_low_u8(vone));
+            psum = vpadal_u8(psum, psum0);
+
+        }
+        x += 8;
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    for (; x < width - 1; x++) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint8_t prev_y1_min = flag;
+        uint8_t prev_y2_min = prev_vals[0] && row[0] && row[1];
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            const uint8_t y0_min = prev_y1_min;
+            const uint8_t y1_min = prev_y2_min;
+            uint8_t y2_min;
+            if (y != height-1) {
+                y2_min = prev_vals[y+1] && row[0] && row[1];
+                row += width;
+
+                prev_y1_min = y1_min;
+                prev_y2_min = y2_min;
+            }
+            else {
+                y2_min = flag;
+            }
+            prev_vals[y] = out[0];
+
+            if (!(y0_min && y1_min && y2_min)) {
+                *out = 0;
+            }
+            else {
+                sum++;
+            }
+            out += width;
+        }
+    }
+    
+    for (int i = 0; i < height; i++) {
+        img[i * width + width - 1] = flag;
+    }
+    
+    vsum = vpadd_u32(vsum, vsum);
+    return vget_lane_u32(vsum, 0) + sum;
+}
+
+// Leave ogiginal C function for tests
+int erode9_c(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
+#else
 static int erode9(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
+#endif
 {
     int y, i, sum = 0;
     char *Row1,*Row2,*Row3;
@@ -795,7 +1654,166 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
  * erode5
  *      Erodes in a + shape.
  */
+#if defined(__ARM_NEON)
+int erode5(unsigned char *const img, int width, int height, void *buffer, unsigned char flag)
+{
+    const uint8x16_t vff = vdupq_n_u8(0xFF);
+    const uint8x16_t vone = vdupq_n_u8(1);
+    uint8x16_t protruding = vdupq_n_u8(0);
+    int x = 0;
+    // bufer coinanins height values, saved last processed column form img
+    unsigned char *prev_vals = buffer;
+    for (int i = 0; i < height; i++) {
+        prev_vals[i] = img[i * width];
+        img[i * width] = flag;
+    }
+
+    uint32x2_t vsum = vdup_n_u32(0);
+    unsigned int sum = 0; // for sum calculated in %8 tails processing
+
+    for (x = 1; x <= width - 16 - 1; x += 16) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint16x4_t psum = vdup_n_u16(0);
+        uint8x16_t prev_y1 = vdupq_n_u8(flag);
+        uint8x16_t prev_y2 = vld1q_u8(row);
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            protruding = vld1q_lane_u8(&prev_vals[y], protruding, 15);
+            protruding = vld1q_lane_u8(&out[16], protruding, 0);
+
+            const uint8x16_t y0 = prev_y1;
+            const uint8x16_t y1 = prev_y2;
+            uint8x16_t y2;
+            if (y != height-1) {
+                y2 = vld1q_u8(row);
+                row += width;
+                prev_y1 = y1;
+                prev_y2 = y2;
+            }
+            else {
+                y2 = vdupq_n_u8(flag);
+            }
+            uint8x16_t y1l = vextq_u8(protruding, y1, 15);
+            uint8x16_t y1r = vextq_u8(y1, protruding, 1);
+            vst1q_lane_u8(&prev_vals[y], y1, 15);
+            // all values are inplace
+            const uint8x16_t t0 = vminq_u8(y0, y1);
+            const uint8x16_t t1 = vminq_u8(y2, y1l);
+            const uint8x16_t t2 = vminq_u8(t0, y1r);
+            const uint8x16_t t3 = vminq_u8(t2, t1);
+            const uint8x16_t rmask = vtstq_u8(t3, vff);
+            // write 0 for places were min value is 0
+            const uint8x16_t vout = vandq_u8(rmask, y1);
+            vst1q_u8(out, vout);
+            out += width;
+
+            uint8x16_t psum0 = vandq_u8(rmask, vone);
+            psum = vpadal_u8(psum, vget_low_u8(psum0));
+            psum = vpadal_u8(psum, vget_high_u8(psum0));
+        }
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    if (x <= width - 8 - 1) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+        uint16x4_t psum = vdup_n_u16(0);
+        uint8x8_t protruding = vdup_n_u8(0);
+
+        uint8x8_t prev_y1 = vdup_n_u8(flag);
+        uint8x8_t prev_y2 = vld1_u8(row);
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            // load all values requried for calculations
+            protruding = vld1_lane_u8(&prev_vals[y], protruding, 7);
+            protruding = vld1_lane_u8(&out[8], protruding, 0);
+
+            const uint8x8_t y0 = prev_y1;
+            const uint8x8_t y1 = prev_y2;
+            uint8x8_t y2;
+            if (y != height-1) {
+                y2 = vld1_u8(row);
+                row += width;
+                prev_y1 = y1;
+                prev_y2 = y2;
+            }
+            else {
+                y2 = vdup_n_u8(flag);
+            }
+            uint8x8_t y1l = vext_u8(protruding, y1, 7);
+            uint8x8_t y1r = vext_u8(y1, protruding, 1);
+            vst1_lane_u8(&prev_vals[y], y1, 7);
+            // all values are inplace
+            const uint8x8_t t0 = vmin_u8(y0, y1);
+            const uint8x8_t t1 = vmin_u8(y2, y1l);
+            const uint8x8_t t2 = vmin_u8(t0, y1r);
+            const uint8x8_t t3 = vmin_u8(t2, t1);
+            const uint8x8_t rmask = vtst_u8(t3, vget_low_u8(vff));
+            // write 0 for places were min value is 0
+            const uint8x8_t vout = vand_u8(rmask, y1);
+            vst1_u8(out, vout);
+            out += width;
+
+            uint8x8_t psum0 = vand_u8(rmask, vget_low_u8(vone));
+            psum = vpadal_u8(psum, psum0);
+
+        }
+        x += 8;
+        vsum = vpadal_u16(vsum, psum);
+    }
+
+    for (; x < width - 1; x++) {
+        unsigned char *row = img+x;
+        unsigned char *out = img+x;
+
+        uint8_t prev_y1 = flag;
+        uint8_t prev_y2 = *row;
+        row += width;
+
+        for (int y = 0; y < height; y++) {
+            const uint8_t y0 = prev_y1;
+            const uint8_t y1 = prev_y2;
+            uint8_t y2;
+            if (y != height-1) {
+                y2 = *row;
+                row += width;
+                prev_y1 = y1;
+                prev_y2 = y2;
+            }
+            else {
+                y2 = flag;
+            }
+            const uint8_t y1l = prev_vals[y];
+            const uint8_t y1r = out[1];
+            prev_vals[y] = y1;
+            if (!(y0 && y1 && y2 && y1l && y1r)) {
+                *out = 0;
+            }
+            else {
+                sum++;
+            }
+            out += width;
+        }
+    }
+
+    for (int i = 0; i < height; i++) {
+        img[i * width + width - 1] = flag;
+    }
+    
+    vsum = vpadd_u32(vsum, vsum);
+    return vget_lane_u32(vsum, 0) + sum;
+}
+
+// Leave ogiginal C function for tests
+int erode5_c(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
+#else
 static int erode5(unsigned char *img, int width, int height, void *buffer, unsigned char flag)
+#endif
 {
     int y, i, sum = 0;
     char *Row1,*Row2,*Row3;
@@ -932,7 +1950,122 @@ void alg_tune_smartmask(struct context *cnt)
  * alg_diff_standard
  *
  */
+#if defined(__ARM_NEON)
 int alg_diff_standard(struct context *cnt, unsigned char *new)
+{
+    struct images *imgs = &cnt->imgs;
+    int noise = cnt->noise;
+    int smartmask_speed = cnt->smartmask_speed;
+    unsigned char *ref = imgs->ref;
+    unsigned char *out = imgs->out;
+    unsigned char *mask = imgs->mask;
+    unsigned char *smartmask_final = imgs->smartmask_final;
+    int *smartmask_buffer = imgs->smartmask_buffer;
+
+    int i = imgs->motionsize;
+    memset(out + i, 128, i / 2); /* Motion pictures are now b/w i.o. green */
+
+    // interlal part of the loop depends on
+    // mask, smartmask_speed and, cnt->event_nr != cnt->prev_event,
+    // 0           0                           0
+    // 0           1                           0
+    // 0           1                           1
+    // 1           0                           0
+    // 1           1                           0
+    // 1           1                           1
+    // There is 6 possible loops variants without conditions
+
+    const uint8x8_t vnoise = vdup_n_u8(noise);
+    const uint8x8_t vones = vdup_n_u8(1);
+    const uint16x4_t vdiv255const = vdup_n_u16(0x8081);
+    const int16x8_t vsmartmask_sensitivity_incr = vdupq_n_s16(SMARTMASK_SENSITIVITY_INCR);
+    uint32x2_t vdiffs = vdup_n_u32(0);
+
+    for (; i >= 8; i -= 8) {
+        uint8x8_t vref = vld1_u8(ref);
+        ref += 8;
+        uint8x8_t vnew = vld1_u8(new);
+        new += 8;
+        uint8x8_t vcurrdiff = vabd_u8(vref, vnew);
+
+        if (mask) {
+            uint8x8_t vmask = vld1_u8(mask);
+            mask += 8;
+            uint16x8_t mul16x8 = vmull_u8(vcurrdiff, vmask);
+            uint32x4_t t0 = vmull_u16(vdiv255const, vget_low_u16(mul16x8));
+            uint32x4_t t1 = vmull_u16(vdiv255const, vget_high_u16(mul16x8));
+            uint16x8_t t3 = vcombine_u16(vshrn_n_u32(t0, 15), vshrn_n_u32(t1, 15));
+            uint16x8_t t4 = vshrq_n_u16(t3, 8);
+            vcurrdiff = vmovn_u16(t4);
+        }
+
+        if (smartmask_speed) {
+            uint8x8_t vcmp = vcgt_u8(vcurrdiff, vnoise);
+            if (cnt->event_nr != cnt->prev_event) {
+                int16x8_t vcmpw = vmovl_s8(vreinterpret_s8_u8(vcmp));
+                vcmpw = vandq_s16(vcmpw, vsmartmask_sensitivity_incr);
+
+                int32x4_t vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_low_s16(vcmpw));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+
+                vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_high_s16(vcmpw));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+            }
+
+            uint8x8_t vsmartmask_final = vld1_u8(smartmask_final); // value in smartmask_final is 0 or 255
+            smartmask_final += 8;
+
+            uint8x8_t vbic_mask = vbic_u8(vcmp, vsmartmask_final);
+            vcurrdiff = vbic_u8(vcurrdiff, vbic_mask);
+        }
+
+        uint8x8_t vcmp = vcgt_u8(vcurrdiff, vnoise);
+        vdiffs = vpadal_u16(vdiffs, vpaddl_u8(vand_u8(vcmp, vones)));
+        vst1_u8(out, vand_u8(vnew, vcmp));
+        out += 8;
+    }
+
+    vdiffs = vpadd_u32(vdiffs, vdiffs);
+    int diffs = vget_lane_u32(vdiffs, 0);
+
+    for (;i > 0; i--) {
+        unsigned char curdiff = abs(*ref - *new);
+        if (mask)
+            curdiff = ((int)(curdiff * *mask++) / 255);
+
+        if (smartmask_speed) {
+            if (curdiff > noise) {
+                if (cnt->event_nr != cnt->prev_event)
+                    (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
+                if (!*smartmask_final)
+                    curdiff = 0;
+            }
+            smartmask_final++;
+            smartmask_buffer++;
+        }
+        if (curdiff > noise) {
+            *out = *new;
+            diffs++;
+        }
+        else {
+            *out = 0;
+        }
+        out++;
+        ref++;
+        new++;
+    }
+    return diffs;
+}
+
+// Leave ogiginal C function for tests
+int alg_diff_standard_c(struct context *cnt, unsigned char *new)
+#else
+int alg_diff_standard(struct context *cnt, unsigned char *new)
+#endif
 {
     struct images *imgs = &cnt->imgs;
     int i, diffs = 0;
@@ -1322,6 +2455,8 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
  */
 #define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
 #define EXCLUDE_LEVEL_PERCENT 20
+
+#if defined(__ARM_NEON)
 void alg_update_reference_frame(struct context *cnt, int action)
 {
     int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
@@ -1338,7 +2473,135 @@ void alg_update_reference_frame(struct context *cnt, int action)
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
         threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
 
-        for (i = cnt->imgs.motionsize; i > 0; i--) {
+        const uint8x8_t vthreshold_ref = vdup_n_u8(threshold_ref);
+        const uint8x8_t vone = vdup_n_u8(1);
+        const uint16x8_t vonel = vdupq_n_u16(1);
+        const uint16x8_t vzerol = vdupq_n_u16(0);
+        const uint8x8_t vff = vdup_n_u8(0xFF);
+        const uint16x8_t vaccept_timer = vdupq_n_u16(accept_timer);
+
+        for (i = 0; i <= cnt->imgs.motionsize - 8; i += 8) {
+            uint8x8_t vref = vld1_u8(ref);
+            const uint8x8_t vimage_virgin = vld1_u8(image_virgin);
+            image_virgin += 8;
+            const uint8x8_t vsmartmask = vld1_u8(smartmask);
+            smartmask += 8;
+
+            uint8x8_t vcond0 = vtst_u8(vcgt_u8(vabd_u8(vref, vimage_virgin), vthreshold_ref), vsmartmask);
+            uint64_t noFastpath = vget_lane_u64(vreinterpret_u64_u8(vcond0), 0);
+            if (noFastpath) {
+                uint32x4_t vref_dyn_l0 = vld1q_u32((uint32_t*)ref_dyn);
+                uint32x4_t vref_dyn_l1 = vld1q_u32((uint32_t*)&ref_dyn[4]);
+                uint16x8_t vref_dyn = vcombine_u16(vmovn_u32(vref_dyn_l0), vmovn_u32(vref_dyn_l1));
+
+                // read-only values
+                const uint8x8_t vout = vld1_u8(out);
+
+                // calculate all condition masks
+                uint16x8_t vcond0l = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vcond0)));
+
+                uint16x8_t vcond1l = vceqq_u16(vref_dyn, vzerol);
+                uint8x8_t vcond1 = vmovn_u16(vcond1l);
+
+                uint16x8_t vcond2l = vcgtq_u16(vref_dyn, vaccept_timer);
+                uint8x8_t vcond2 = vmovn_u16(vcond2l);
+
+                uint8x8_t vcond3 = vtst_u8(vout, vff);
+                uint16x8_t vcond3l = vreinterpretq_u16_s16(vmovl_s8(vreinterpret_s8_u8(vcond3)));
+
+                //vcond3
+                uint16x8_t vref_dyn3 = vbslq_u16(vcond3l, vaddw_u8(vref_dyn, vone), vzerol);
+                uint8x8_t vref3 = vbsl_u8(vcond3, vref, vhadd_u8(vref, vimage_virgin));
+
+                //vcond2
+                uint16x8_t vref_dyn2 = vbslq_u16(vcond2l, vzerol, vref_dyn3);
+                uint8x8_t vref2 = vbsl_u8(vcond2, vimage_virgin, vref3);
+
+                //vcond1
+                uint16x8_t vref_dyn1 = vbslq_u16(vcond1l, vonel, vref_dyn2);
+                uint8x8_t vref1 = vbsl_u8(vcond1, vref, vref2);
+
+                //vcond0
+                vref_dyn = vandq_u16(vcond0l, vref_dyn1);
+                vref = vbsl_u8(vcond0, vref1, vimage_virgin);
+
+                vref_dyn_l0 = vmovl_u16(vget_low_u16(vref_dyn));
+                vst1q_u32((uint32_t*)ref_dyn, vref_dyn_l0);
+                ref_dyn += 4;
+                vref_dyn_l1 = vmovl_u16(vget_high_u16(vref_dyn));
+                vst1q_u32((uint32_t*)ref_dyn, vref_dyn_l1);
+                ref_dyn += 4;
+            }
+            else {
+                vref = vimage_virgin;
+                uint32x4x2_t z = {0};
+                vst2q_u32((uint32_t*)ref_dyn, z);
+                ref_dyn += 8;
+            }
+
+            vst1_u8(ref, vref);
+            ref += 8;
+            out += 8;
+        }
+
+        for (; i < cnt->imgs.motionsize; i++) {
+            /* Exclude pixels from ref frame well below noise level. */
+            if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) { // vcond0
+                if (*ref_dyn == 0) { /* Always give new pixels a chance. */ // vcond1
+                    *ref_dyn = 1;
+                    *ref = *ref;
+                } else if (*ref_dyn > accept_timer) { /* Include static Object after some time. */ //vcond2
+                    *ref_dyn = 0;
+                    *ref = *image_virgin;
+                } else if (*out) { // vcond3
+                    (*ref_dyn)++; /* Motionpixel? Keep excluding from ref frame. */
+                    *ref = *ref;
+                } else {
+                    *ref_dyn = 0; /* Nothing special - release pixel. */
+                    *ref = (*ref + *image_virgin) / 2;
+                }
+
+            } else {  /* No motion: copy to ref frame. */
+                *ref_dyn = 0; /* Reset pixel */
+                *ref = *image_virgin;
+            }
+
+            ref++;
+            image_virgin++;
+            smartmask++;
+            ref_dyn++;
+            out++;
+        } /* end for i */
+
+    } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
+        /* Copy fresh image */
+        memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
+        /* Reset static objects */
+        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
+    }
+}
+
+// Leave ogiginal C function for tests
+void alg_update_reference_frame_c(struct context *cnt, int action)
+#else 
+void alg_update_reference_frame(struct context *cnt, int action)
+#endif
+{
+    int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
+    int i, threshold_ref;
+    int *ref_dyn = cnt->imgs.ref_dyn;
+    unsigned char *image_virgin = cnt->imgs.image_virgin;
+    unsigned char *ref = cnt->imgs.ref;
+    unsigned char *smartmask = cnt->imgs.smartmask_final;
+    unsigned char *out = cnt->imgs.out;
+
+    if (cnt->lastrate > 5)  /* Match rate limit */
+        accept_timer /= (cnt->lastrate / 3);
+
+    if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
+        threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
+
+        for (i = 0; i < cnt->imgs.motionsize; i++) {
             /* Exclude pixels from ref frame well below noise level. */
             if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
                 if (*ref_dyn == 0) { /* Always give new pixels a chance. */
