@@ -141,6 +141,12 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
 
     set_video_port_format(mmalcam, video_port->format);
     video_port->format->encoding = MMAL_ENCODING_I420;
+        
+    if (mmal_port_parameter_set_boolean(video_port, MMAL_PARAMETER_NO_IMAGE_PADDING, 1)
+            != MMAL_SUCCESS) {
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "MMAL no-padding setup failed");
+    }
+
     status = mmal_port_format_commit(video_port);
 
     if (status) {
