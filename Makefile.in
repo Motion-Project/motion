@@ -97,6 +97,16 @@ pre-mobject-info:
 	@echo "--------------------------------------------------------------------------------"
 
 ################################################################################
+# Target for building performance tests.                                       #
+################################################################################
+
+PERF_TEST_DEPS = alg.o video_common.o perf_test.c
+
+perf_test: $(PERF_TEST_DEPS)
+	$(CC) $(CFLAGS) -o $@ $(PERF_TEST_DEPS)
+
+
+################################################################################
 # Define the compile command for C files.                                      #
 ################################################################################
 #%.o: %.c
@@ -223,7 +233,7 @@ uninstall remove: pre-build-info
 ################################################################################
 clean: pre-build-info
 	@echo "Removing compiled files and binaries..."
-	@rm -f *~ *.o $(PROGS) combine $(DEPEND_FILE)
+	@rm -f *~ *.o $(PROGS) perf_test combine $(DEPEND_FILE)
 
 ################################################################################
 # DIST restores the directory to distribution state.                           #

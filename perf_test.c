@@ -2,6 +2,7 @@
 
 #include "motion.h"
 #include "alg.h"
+#include "video_common.h"
 #include <inttypes.h>
 
 #if __APPLE__
@@ -72,12 +73,42 @@ int dilate5_c(unsigned char *img, int width, int height, void *buffer);
 int dilate9(unsigned char *img, int width, int height, void *buffer);
 int dilate9_c(unsigned char *img, int width, int height, void *buffer);
 
+void vid_uyvyto420p_c(unsigned char *map, unsigned char *cap_map, int width, int height);
+void vid_yuv422to420p_c(unsigned char *map, unsigned char *cap_map, int width, int height);
+
+
+/* Stubs to link perf_test with minimal efforts */
 void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, ...) {
 }
 
 int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor) {
     return 0;
 }
+
+void bktr_cleanup() {}
+void bktr_mutex_destroy() {}
+void bktr_mutex_init() {}
+void bktr_next() {}
+void bktr_start() {}
+void jpgutl_decode_jpeg() {}
+void netcam_cleanup() {}
+
+int netcam_next(struct context *image, unsigned char *netcam) {
+  return 0;
+}
+int netcam_start(struct context *cnt) {
+  return 0;
+}
+
+void v4l2_cleanup() {}
+void v4l2_mutex_destroy() {}
+void v4l2_mutex_init() {}
+void v4l2_next() {}
+void v4l2_start() {}
+
+/* End stubs */
+
+
 
 void test_locate_center_size(int width, int height, unsigned char * out, int * lables) {
     width -= 4;
@@ -492,6 +523,58 @@ static void test_dilate9(unsigned char *img, int width, int height)
            (double)time2/(double)time1*100.0);
 }
 
+static void test_vid_yuv422to420p(unsigned char *img, int width, int height)
+{
+    static unsigned char out[test_width * test_height];
+    static unsigned char out_ref[test_width * test_height];
+    uint64_t first_start, first_end, second_start, second_end;
+
+    memcpy(img, out_ref, width*height);
+    TS_MARK(first_start);
+    vid_yuv422to420p_c(out_ref, img, width/2, height/2);
+    TS_MARK(first_end);
+
+    memcpy(img, out, width*height);
+    TS_MARK(second_start);
+    vid_yuv422to420p(out, img, width/2, height/2);
+    TS_MARK(second_end);
+
+    assert(memcmp(out_ref, out, width*height) == 0);
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
+static void test_vid_uyvyto420p(unsigned char *img, int width, int height)
+{
+    static unsigned char out[test_width * test_height];
+    static unsigned char out_ref[test_width * test_height];
+    uint64_t first_start, first_end, second_start, second_end;
+
+    memcpy(img, out_ref, width*height);
+    TS_MARK(first_start);
+    vid_uyvyto420p_c(out_ref, img, width/2, height/2);
+    TS_MARK(first_end);
+
+    memcpy(img, out, width*height);
+    TS_MARK(second_start);
+    vid_uyvyto420p(out, img, width/2, height/2);
+    TS_MARK(second_end);
+
+    assert(memcmp(out_ref, out, width*height) == 0);
+
+    int64_t time1, time2;
+    TS_CONVERT(first_end - first_start, time1);
+    TS_CONVERT(second_end - second_start, time2);
+    printf("Test %s passed, %" PRIu64 " vs %" PRIu64 " (%" PRId64 ") %lf%%\n",
+           __FUNCTION__, time1, time2, time1 - time2,
+           (double)time2/(double)time1*100.0);
+}
+
 static unsigned char test_img_data[test_width * test_height];
 static unsigned char test_img_data_new[test_width * test_height];
 static unsigned char test_img_data_mask[test_width * test_height];
@@ -553,6 +636,12 @@ int main(int argc, const char* argv[]) {
 
         test_dilate9(test_img_data, test_width, test_height);
         test_dilate9(test_img_data, test_width-1, test_height-1);
+
+        test_vid_yuv422to420p(test_img_data_new, test_width, test_height);
+        test_vid_yuv422to420p(test_img_data_new, test_width-1, test_height-1);
+
+        test_vid_uyvyto420p(test_img_data_new, test_width, test_height);
+        test_vid_uyvyto420p(test_img_data_new, test_width-1, test_height-1);
     }
 
     return 0;

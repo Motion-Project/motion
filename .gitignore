@@ -10,6 +10,7 @@ camera1-dist.conf
 camera2-dist.conf
 camera3-dist.conf
 camera4-dist.conf
+perf_test
 
 # automake
 *.o

@@ -14,8 +14,14 @@
 #include "mmx.h"
 #endif
 
+#if defined(HAVE_NEON_2_SSE) && !defined(__ARM_NEON)
+#include "ARM_NEON_2_x86_SSE/NEON_2_SSE.h"
+#define USE_NEON_INTRINSICS
+#endif
+
 #if defined(__ARM_NEON)
 #include <arm_neon.h>
+#define USE_NEON_INTRINSICS
 #endif
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
@@ -25,7 +31,7 @@
  * alg_locate_center_size
  *      Locates the center and size of the movement.
  */
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
 {
     unsigned char *out = imgs->out;
@@ -928,7 +934,7 @@ static int alg_labeling(struct context *cnt)
  * dilate9
  *      Dilates a 3x3 box.
  */
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 int dilate9(unsigned char *img, int width, int height, void *buffer)
 {
     const uint8x16_t vff = vdupq_n_u8(0xFF);
@@ -1193,7 +1199,7 @@ static int dilate9(unsigned char *img, int width, int height, void *buffer)
  * dilate5
  *      Dilates a + shape.
  */
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 int dilate5(unsigned char *img, int width, int height, void *buffer)
 {
     const uint8x16_t vff = vdupq_n_u8(0xFF);
@@ -1432,7 +1438,7 @@ static int dilate5(unsigned char *img, int width, int height, void *buffer)
  * erode9
  *      Erodes a 3x3 box.
  */
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 int erode9(unsigned char *const img, int width, int height, void *buffer, unsigned char flag)
 {
     const uint8x16_t vff = vdupq_n_u8(0xFF);
@@ -1655,7 +1661,7 @@ static int erode9(unsigned char *img, int width, int height, void *buffer, unsig
  * erode5
  *      Erodes in a + shape.
  */
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 int erode5(unsigned char *const img, int width, int height, void *buffer, unsigned char flag)
 {
     const uint8x16_t vff = vdupq_n_u8(0xFF);
@@ -1951,7 +1957,7 @@ void alg_tune_smartmask(struct context *cnt)
  * alg_diff_standard
  *
  */
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 int alg_diff_standard(struct context *cnt, unsigned char *new)
 {
     struct images *imgs = &cnt->imgs;
@@ -1976,13 +1982,80 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
     // 1           1                           1
     // There is 6 possible loops variants without conditions
 
-    const uint8x8_t vnoise = vdup_n_u8(noise);
-    const uint8x8_t vones = vdup_n_u8(1);
-    const uint16x4_t vdiv255const = vdup_n_u16(0x8081);
+    const uint8x16_t vnoise = vdupq_n_u8(noise);
+    const uint8x16_t vones = vdupq_n_u8(1);
+    const uint16x8_t vdiv255const = vdupq_n_u16(0x8081);
     const int16x8_t vsmartmask_sensitivity_incr = vdupq_n_s16(SMARTMASK_SENSITIVITY_INCR);
-    uint32x2_t vdiffs = vdup_n_u32(0);
+    uint16x8_t vdiffs_sum16 = vdupq_n_u16(0);
 
-    for (; i >= 8; i -= 8) {
+    for (; i >= 16; i -= 16) {
+        uint8x16_t vref = vld1q_u8(ref);
+        ref += 16;
+        uint8x16_t vnew = vld1q_u8(new);
+        new += 16;
+        uint8x16_t vcurrdiff = vabdq_u8(vref, vnew);
+
+        if (mask) {
+            uint8x16_t vmask = vld1q_u8(mask);
+            mask += 16;
+            uint16x8_t mul16x8_0 = vmull_u8(vget_low_u8(vcurrdiff), vget_low_u8(vmask));
+            uint16x8_t mul16x8_1 = vmull_u8(vget_high_u8(vcurrdiff), vget_high_u8(vmask));
+            uint32x4_t t0_0 = vmull_u16(vget_low_u16(vdiv255const), vget_low_u16(mul16x8_0));
+            uint32x4_t t0_1 = vmull_u16(vget_low_u16(vdiv255const), vget_low_u16(mul16x8_1));
+            uint32x4_t t1_0 = vmull_u16(vget_high_u16(vdiv255const), vget_high_u16(mul16x8_0));
+            uint32x4_t t1_1 = vmull_u16(vget_high_u16(vdiv255const), vget_high_u16(mul16x8_1));
+            uint16x8_t t3_0 = vcombine_u16(vshrn_n_u32(t0_0, 15), vshrn_n_u32(t1_0, 15));
+            uint16x8_t t3_1 = vcombine_u16(vshrn_n_u32(t0_1, 15), vshrn_n_u32(t1_1, 15));
+            uint16x8_t t4_0 = vshrq_n_u16(t3_0, 8);
+            uint16x8_t t4_1 = vshrq_n_u16(t3_1, 8);
+            vcurrdiff = vcombine_u8(vmovn_u16(t4_0), vmovn_u16(t4_1));
+        }
+
+        if (smartmask_speed) {
+            uint8x16_t vcmp = vcgtq_u8(vcurrdiff, vnoise);
+            if (cnt->event_nr != cnt->prev_event) {
+                int16x8_t vcmpw_0 = vmovl_s8(vreinterpret_s8_u8(vget_low_u8(vcmp)));
+                int16x8_t vcmpw_1 = vmovl_s8(vreinterpret_s8_u8(vget_high_u8(vcmp)));
+                vcmpw_0 = vandq_s16(vcmpw_0, vsmartmask_sensitivity_incr);
+                vcmpw_1 = vandq_s16(vcmpw_1, vsmartmask_sensitivity_incr);
+
+                int32x4_t vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_low_s16(vcmpw_0));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+
+                vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_high_s16(vcmpw_0));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+
+                vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_low_s16(vcmpw_1));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+
+                vsmartmask_buffer = vld1q_s32(smartmask_buffer);
+                vsmartmask_buffer = vaddw_s16(vsmartmask_buffer, vget_high_s16(vcmpw_1));
+                vst1q_s32(smartmask_buffer, vsmartmask_buffer);
+                smartmask_buffer += 4;
+            }
+
+            uint8x16_t vsmartmask_final = vld1q_u8(smartmask_final); // value in smartmask_final is 0 or 255
+            smartmask_final += 16;
+
+            uint8x16_t vbic_mask = vbicq_u8(vcmp, vsmartmask_final);
+            vcurrdiff = vbicq_u8(vcurrdiff, vbic_mask);
+        }
+
+        uint8x16_t vcmp = vcgtq_u8(vcurrdiff, vnoise);
+        vdiffs_sum16 = vpadalq_s8(vdiffs_sum16, vandq_u8(vcmp, vones));
+        vst1q_u8(out, vandq_u8(vnew, vcmp));
+        out += 16;
+    }
+
+    uint32x4_t vdiffs = vaddl_u16(vget_low_u16(vdiffs_sum16), vget_high_u16(vdiffs_sum16));
+
+    if (i >= 8) {
         uint8x8_t vref = vld1_u8(ref);
         ref += 8;
         uint8x8_t vnew = vld1_u8(new);
@@ -1993,15 +2066,15 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
             uint8x8_t vmask = vld1_u8(mask);
             mask += 8;
             uint16x8_t mul16x8 = vmull_u8(vcurrdiff, vmask);
-            uint32x4_t t0 = vmull_u16(vdiv255const, vget_low_u16(mul16x8));
-            uint32x4_t t1 = vmull_u16(vdiv255const, vget_high_u16(mul16x8));
+            uint32x4_t t0 = vmull_u16(vget_low_u16(vdiv255const), vget_low_u16(mul16x8));
+            uint32x4_t t1 = vmull_u16(vget_low_u16(vdiv255const), vget_high_u16(mul16x8));
             uint16x8_t t3 = vcombine_u16(vshrn_n_u32(t0, 15), vshrn_n_u32(t1, 15));
             uint16x8_t t4 = vshrq_n_u16(t3, 8);
             vcurrdiff = vmovn_u16(t4);
         }
 
         if (smartmask_speed) {
-            uint8x8_t vcmp = vcgt_u8(vcurrdiff, vnoise);
+            uint8x8_t vcmp = vcgt_u8(vcurrdiff, vget_low_u8(vnoise));
             if (cnt->event_nr != cnt->prev_event) {
                 int16x8_t vcmpw = vmovl_s8(vreinterpret_s8_u8(vcmp));
                 vcmpw = vandq_s16(vcmpw, vsmartmask_sensitivity_incr);
@@ -2024,14 +2097,18 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
             vcurrdiff = vbic_u8(vcurrdiff, vbic_mask);
         }
 
-        uint8x8_t vcmp = vcgt_u8(vcurrdiff, vnoise);
-        vdiffs = vpadal_u16(vdiffs, vpaddl_u8(vand_u8(vcmp, vones)));
+        uint8x8_t vcmp = vcgt_u8(vcurrdiff, vget_low_u8(vnoise));
+
+        vdiffs_sum16 = vmovl_u8(vand_u8(vcmp, vget_low_u8(vones)));
+        vdiffs = vpadalq_u16(vdiffs, vdiffs_sum16);
         vst1_u8(out, vand_u8(vnew, vcmp));
         out += 8;
+        i -= 8;
     }
 
-    vdiffs = vpadd_u32(vdiffs, vdiffs);
-    int diffs = vget_lane_u32(vdiffs, 0);
+    uint32x2_t vdiffs2 = vpadd_u32(vget_low_u32(vdiffs), vget_high_u32(vdiffs));
+    vdiffs2 = vpadd_u32(vdiffs2, vdiffs2);
+    int diffs = vget_lane_u32(vdiffs2, 0);
 
     for (;i > 0; i--) {
         unsigned char curdiff = abs(*ref - *new);
@@ -2457,7 +2534,7 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 #define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
 #define EXCLUDE_LEVEL_PERCENT 20
 
-#if defined(__ARM_NEON)
+#if defined(USE_NEON_INTRINSICS)
 void alg_update_reference_frame(struct context *cnt, int action)
 {
     int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;

@@ -15,8 +15,14 @@
 #include "video_bktr.h"
 #include "jpegutils.h"
 
+#if defined(HAVE_NEON_2_SSE) && !defined(__ARM_NEON)
+#include "ARM_NEON_2_x86_SSE/NEON_2_SSE.h"
+#define USE_NEON_INTRINSICS
+#endif
+
 #if defined(__ARM_NEON)
 #include <arm_neon.h>
+#define USE_NEON_INTRINSICS
 #endif
 
 typedef unsigned char uint8_t;
@@ -282,8 +288,7 @@ void vid_bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, lon
 
 }
 
-#if defined(__ARM_NEON)
-
+#if defined(USE_NEON_INTRINSICS)
 void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     uint8_t *pY = map;
@@ -352,6 +357,44 @@ void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int
     }
 }
 
+// Leave ogiginal C function for tests
+void vid_yuv422to420p_c(unsigned char *map, unsigned char *cap_map, int width, int height)
+#else
+void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+#endif
+{
+    unsigned char *src, *dest, *src2, *dest2;
+    int i, j;
+
+    /* Create the Y plane. */
+    src = cap_map;
+    dest = map;
+    for (i = width * height; i > 0; i--) {
+        *dest++ = *src;
+        src += 2;
+    }
+    /* Create U and V planes. */
+    src = cap_map + 1;
+    src2 = cap_map + width * 2 + 1;
+    dest = map + width * height;
+    dest2 = dest + (width * height) / 4;
+    for (i = height / 2; i > 0; i--) {
+        for (j = width / 2; j > 0; j--) {
+            *dest = ((int) *src + (int) *src2) / 2;
+            src += 2;
+            src2 += 2;
+            dest++;
+            *dest2 = ((int) *src + (int) *src2) / 2;
+            src += 2;
+            src2 += 2;
+            dest2++;
+        }
+        src += width * 2;
+        src2 += width * 2;
+    }
+}
+
+#if defined(USE_NEON_INTRINSICS)
 void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     uint8_t *pY = map;
@@ -419,43 +462,11 @@ void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int h
         cap_map += uv_offset * 2;
     }
 }
-
+// Leave ogiginal C function for tests
+void vid_uyvyto420p_c(unsigned char *map, unsigned char *cap_map, int width, int height)
 #else
-
-void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height)
-{
-    unsigned char *src, *dest, *src2, *dest2;
-    int i, j;
-
-    /* Create the Y plane. */
-    src = cap_map;
-    dest = map;
-    for (i = width * height; i > 0; i--) {
-        *dest++ = *src;
-        src += 2;
-    }
-    /* Create U and V planes. */
-    src = cap_map + 1;
-    src2 = cap_map + width * 2 + 1;
-    dest = map + width * height;
-    dest2 = dest + (width * height) / 4;
-    for (i = height / 2; i > 0; i--) {
-        for (j = width / 2; j > 0; j--) {
-            *dest = ((int) *src + (int) *src2) / 2;
-            src += 2;
-            src2 += 2;
-            dest++;
-            *dest2 = ((int) *src + (int) *src2) / 2;
-            src += 2;
-            src2 += 2;
-            dest2++;
-        }
-        src += width * 2;
-        src2 += width * 2;
-    }
-}
-
 void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+#endif
 {
     uint8_t *pY = map;
     uint8_t *pU = pY + (width * height);
@@ -490,7 +501,7 @@ void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int h
     }
 }
 
-#endif
+
 
 void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
