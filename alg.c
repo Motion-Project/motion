@@ -31,6 +31,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     unsigned char *out = imgs->out;
     int *labels = imgs->labels;
 
+    const uint16_t c_idx[] = {0, 1, 2, 3, 4, 5, 6, 7};
     const uint16x8_t c_32768 = vdupq_n_u16(32768);
     const uint32x2_t c_32768_u32 = vdup_n_u32(32768);
     const uint16x4_t c_fours = vdup_n_u16(4);
@@ -45,7 +46,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     if (imgs->labelsize_max) {
         /* Locate largest labelgroup */
         for (int y = 0; y < height; y++) {
-            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+            uint16x8_t idx = vld1q_u16(c_idx);
 
             uint8x8_t cnt_sum = vdup_n_u8(0);
             uint32x4_t idx_sum = vdupq_n_u32(0);
@@ -98,7 +99,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
         /* Locate movement */
         uint8x16_t c_one_x16 = vdupq_n_u8(1);
         for (int y = 0; y < height; y++) {
-            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+            uint16x8_t idx = vld1q_u16(c_idx);
 
             uint32x4_t idx_sum = vdupq_n_u32(0);
             uint16x8_t cnt_sum = vdupq_n_u16(0);
@@ -151,7 +152,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     // calculate centc and centy
     int32_t centc = 0, centy = 0;
     {
-        uint16x4_t idx = { 0, 1, 2, 3 };
+        uint16x4_t idx = vld1_u16(c_idx);
         uint32x4_t centy_x4 = vdupq_n_u32(0);
         uint32x4_t centc_x4 = vdupq_n_u32(0);
         int y = 0;
@@ -187,7 +188,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     if (imgs->labelsize_max) {
         uint16x8_t centx_x8 = vdupq_n_u16(centx);
         for (int y = 0; y < height; y++) {
-            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+            uint16x8_t idx = vld1q_u16(c_idx);
             uint32x4_t abd_sum = vdupq_n_u32(0);
 
             int x = 0;
@@ -229,7 +230,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     } else {
         uint16x8_t centx_x8 = vdupq_n_u16(centx);
         for (int y = 0; y < height; y++) {
-            uint16x8_t idx = {0, 1, 2, 3, 4, 5, 6, 7};
+            uint16x8_t idx = vld1q_u16(c_idx);
 
             uint32x4_t abd_sum = vdupq_n_u32(0);
 
@@ -274,7 +275,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     // calculate ydist
     int32_t ydist = 0;
     {
-        uint16x4_t idx = { 0, 1, 2, 3 };
+        uint16x4_t idx = vld1_u16(c_idx);
         uint32x4_t ydist_x4 = vdupq_n_u32(0);
         uint16x4_t centy_x4 = vdup_n_u16(centy);
         int y = 0;
