@@ -6,9 +6,6 @@ matrix:
   - os: osx
     language: c
     compiler: gcc
-  - os: osx
-    language: c
-    compiler: clang
   - os: linux
     language: c
     compiler: gcc
