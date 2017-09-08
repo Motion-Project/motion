@@ -91,7 +91,7 @@ void bktr_mutex_init() {}
 void bktr_next() {}
 void bktr_start() {}
 void jpgutl_decode_jpeg() {}
-void netcam_cleanup() {}
+void netcam_cleanup(struct netcam_context *c, int i) {}
 
 int netcam_next(struct context *image, unsigned char *netcam) {
   return 0;

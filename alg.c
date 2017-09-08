@@ -295,10 +295,10 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
         ydist_x2 = vpadd_u32(ydist_x2, ydist_x2);
         ydist = vget_lane_u32(ydist_x2, 0);
         for (; y < height; y++) {
-            if (y > cent->y)
-                ydist += cntY[y]*(y - cent->y);
-            else if (y < cent->y)
-                ydist += cntY[y]*(cent->y - y);
+            if (y > centy)
+                ydist += cntY[y]*(y - centy);
+            else if (y < centy)
+                ydist += cntY[y]*(centy - y);
         }
     }
 
