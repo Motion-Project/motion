@@ -1986,7 +1986,8 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
     const uint8x16_t vones = vdupq_n_u8(1);
     const uint16x8_t vdiv255const = vdupq_n_u16(0x8081);
     const int16x8_t vsmartmask_sensitivity_incr = vdupq_n_s16(SMARTMASK_SENSITIVITY_INCR);
-    uint16x8_t vdiffs_sum16 = vdupq_n_u16(0);
+
+    uint32x4_t vdiffs = vdupq_n_u32(0);
 
     for (; i >= 16; i -= 16) {
         uint8x16_t vref = vld1q_u8(ref);
@@ -2048,12 +2049,13 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
         }
 
         uint8x16_t vcmp = vcgtq_u8(vcurrdiff, vnoise);
-        vdiffs_sum16 = vpadalq_s8(vdiffs_sum16, vandq_u8(vcmp, vones));
+        uint8x16_t vdiffs_ones = vandq_u8(vcmp, vones);
+        uint16x8_t vdiffs_sum16 = vaddl_u8(vget_low_u8(vdiffs_ones), vget_high_u8(vdiffs_ones));
+        vdiffs = vpadalq_u16(vdiffs, vdiffs_sum16);
+
         vst1q_u8(out, vandq_u8(vnew, vcmp));
         out += 16;
     }
-
-    uint32x4_t vdiffs = vaddl_u16(vget_low_u16(vdiffs_sum16), vget_high_u16(vdiffs_sum16));
 
     if (i >= 8) {
         uint8x8_t vref = vld1_u8(ref);
@@ -2099,7 +2101,7 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
 
         uint8x8_t vcmp = vcgt_u8(vcurrdiff, vget_low_u8(vnoise));
 
-        vdiffs_sum16 = vmovl_u8(vand_u8(vcmp, vget_low_u8(vones)));
+        uint16x8_t vdiffs_sum16 = vmovl_u8(vand_u8(vcmp, vget_low_u8(vones)));
         vdiffs = vpadalq_u16(vdiffs, vdiffs_sum16);
         vst1_u8(out, vand_u8(vnew, vcmp));
         out += 8;
