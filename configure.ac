@@ -254,6 +254,9 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
        if pkg-config $FFMPEG_DEPS; then
                FFMPEG_CFLAGS=`pkg-config --cflags $FFMPEG_DEPS`
                FFMPEG_LIBS=`pkg-config --libs $FFMPEG_DEPS`
+               FFMPEG_VER=`pkg-config --modversion libavformat`
+               AC_MSG_CHECKING(for libavformat)
+               AC_MSG_RESULT(yes $FFMPEG_VER)
                HAVE_FFMPEG="yes"
        else
               AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev libavdevice-dev' were not found.  Please check motion_guide.html and install necessary dependencies or use the '--without-ffmpeg' configuration option.])
