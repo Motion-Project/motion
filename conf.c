@@ -1911,9 +1911,9 @@ void conf_print(struct context **cnt)
                     free(val);
                 } else if (thread == 0) {
                     /* The 'camera_dir' option should keep the installed default value */
-                    val = "value";
+                    sprintf(val, "%s","value");
                     if (!strncmp(config_params[i].param_name, "camera_dir", 10))
-                        val =  sysconfdir"/motion/conf.d";
+                        sprintf(val, "%s",sysconfdir"/motion/conf.d");
 
                     fprintf(conffile, "%s\n", config_params[i].param_help);
                     fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, val);

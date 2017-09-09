@@ -211,6 +211,11 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
 
 }
 
+static int jpgutl_setjmp_error(struct jpgutl_error_mgr *jerr){
+    /* This is a separate function to isolate the jump */
+    return setjmp (jerr->setjmp_buffer);
+}
+
 /**
  * jpgutl_decode_jpeg
  *  Purpose:  Decompress the jpeg data_in into the img_out buffer.
@@ -230,7 +235,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
-    int             i;
+    unsigned int    i;
     unsigned char  *img_y, *img_cb, *img_cr;
     unsigned char   offset_y;
 
@@ -248,8 +253,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
     jpeg_create_decompress (&dinfo);
 
     /* Establish the setjmp return context for jpgutl_error_exit to use. */
-    if (setjmp (jerr.setjmp_buffer)) {
-        /* If we get here, the JPEG code has signaled an error. */
+    if (jpgutl_setjmp_error(&jerr)) {
         jpeg_destroy_decompress (&dinfo);
         return -1;
     }
