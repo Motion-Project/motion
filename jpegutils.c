@@ -317,7 +317,7 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
         myerr->warning_seen++ ;
         (*cinfo->err->format_message) (cinfo, buffer);
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
     }
 
 }

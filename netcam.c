@@ -1062,8 +1062,8 @@ void netcam_image_read_complete(netcam_context_ptr netcam)
                                  (curtime.tv_sec - netcam->last_image.tv_sec) +
                                  (curtime.tv_usec- netcam->last_image.tv_usec)) / 10.0;
 
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Calculated frame time %f",
-                   netcam->av_frame_time);
+        /* The following floods the log.  Comment out until it is needed. */
+        //MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Calculated frame time %f", netcam->av_frame_time);
     }
 
     netcam->last_image = curtime;
@@ -1879,7 +1879,6 @@ static void *netcam_handler_loop(void *arg)
             }
         }
 
-#ifdef HAVE_FFMPEG
         if (netcam->caps.streaming == NCS_RTSP) {
             if (!netcam->rtsp->active) {      // We must have disconnected.  Try to reconnect
                 if ((netcam->rtsp->status == RTSP_CONNECTED) ||
@@ -1903,7 +1902,6 @@ static void *netcam_handler_loop(void *arg)
                 }
             }
         }
-#endif /* HAVE_FFMPEG */
 
         if (netcam->caps.streaming != NCS_RTSP) {
             if (netcam->get_image(netcam) < 0) {
