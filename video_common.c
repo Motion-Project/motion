@@ -402,7 +402,7 @@ void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int h
     uint8_t *pV = pU + (width * height) / 4;
     uint32_t uv_offset = width * 2 * sizeof(uint8_t);
 
-    for (uint32_t hx = 0; hx < height; hx += 2) {
+    for (int hx = 0; hx < height; hx += 2) {
         uint32_t wx = 0;
         for (; wx <= uv_offset - 32; wx += 32) {
             // Load Y to line.val[1] and UV to line.val[0]
@@ -472,7 +472,7 @@ void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int h
     uint8_t *pU = pY + (width * height);
     uint8_t *pV = pU + (width * height) / 4;
     uint32_t uv_offset = width * 2 * sizeof(uint8_t);
-    uint32_t ix, jx;
+    int ix, jx;
 
     for (ix = 0; ix < height; ix++) {
         for (jx = 0; jx < width; jx += 2) {
