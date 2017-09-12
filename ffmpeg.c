@@ -349,8 +349,6 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         //Packet is freed upon failure of encoding
         return -1;
     }
-    if (ffmpeg->picture->key_frame == 1)
-      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
 
     return 0;
 
@@ -372,9 +370,6 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         my_packet_unref(ffmpeg->pkt);
         return -2;
     }
-
-    if (ffmpeg->picture->key_frame == 1)
-      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
 
     return 0;
 
@@ -401,9 +396,6 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
 
     ffmpeg->pkt.size = retcd;
     ffmpeg->pkt.data = video_outbuf;
-
-    if (ffmpeg->picture->key_frame == 1)
-      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
 
     free(video_outbuf);
 
