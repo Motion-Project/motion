@@ -496,6 +496,27 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
     return 0;
 }
 
+static int ffmpeg_codec_is_blacklisted(const char *codec_name){
+
+    static const char *blacklisted_codec[] =
+    {
+        /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
+         * To use h264_omx encoder and workaround the lock up issue:
+         * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
+         * - remove the "h264_omx" from this blacklist.
+         * More information: https://github.com/Motion-Project/motion/issues/433
+         */
+        "h264_omx",
+    };
+    int i;
+
+    for (i = 0; i < sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]); i++) {
+        if (strcmp(codec_name, blacklisted_codec[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
 static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
 
     int retcd;
@@ -505,9 +526,15 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
 
     ffmpeg->codec = NULL;
     if (ffmpeg->codec_name[codec_name_len]) {
-        ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
-        if (!ffmpeg->codec)
-            MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "Preferred codec %s not found", &ffmpeg->codec_name[codec_name_len+1]);
+        if (ffmpeg_codec_is_blacklisted(&ffmpeg->codec_name[codec_name_len+1])) {
+            MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "Preferred codec %s has been blacklisted",
+                       &ffmpeg->codec_name[codec_name_len+1]);
+        } else {
+            ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
+            if (!ffmpeg->codec)
+                MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "Preferred codec %s not found",
+                           &ffmpeg->codec_name[codec_name_len+1]);
+        }
     }
     if (!ffmpeg->codec)
         ffmpeg->codec = avcodec_find_encoder(ffmpeg->oc->oformat->video_codec);
