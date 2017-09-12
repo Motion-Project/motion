@@ -508,7 +508,7 @@ static int ffmpeg_codec_is_blacklisted(const char *codec_name){
          */
         "h264_omx",
     };
-    int i;
+    size_t i;
 
     for (i = 0; i < sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]); i++) {
         if (strcmp(codec_name, blacklisted_codec[i]) == 0)
