@@ -768,7 +768,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     if (retcd < 0) {
         //If there is an error, it has already been reported.
         my_packet_unref(ffmpeg->pkt);
-        return -1;
+        return 0;
     }
 
     retcd = ffmpeg_encode_video(ffmpeg);

@@ -36,6 +36,7 @@ struct rtsp_context {
 struct rtsp_context {
     int*                  format_context;
     enum RTSP_STATUS      status;
+    int                   active;
 };
 
 #endif /* end HAVE_FFMPEG  */
