@@ -394,8 +394,15 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         return -2;
     }
 
+    // Encoder did not provide metadata, set it up manually
     ffmpeg->pkt.size = retcd;
     ffmpeg->pkt.data = video_outbuf;
+
+    if (ffmpeg->picture->key_frame == 1)
+      ffmpeg->pkt.flags |= AV_PKT_FLAG_KEY;
+
+    ffmpeg->pkt.pts = ffmpeg->picture->pts;
+    ffmpeg->pkt.dts = ffmpeg->pkt.pts;
 
     free(video_outbuf);
 
