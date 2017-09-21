@@ -28,6 +28,7 @@ Next, we must be provided the following in order to replicate and ultimately res
 The preferred method of providing these files is by posting them on [gist](https://gist.github.com/).  Only provide 
 the link to the gist files within the issue.  It is recommended that any IP addresses and/or usernames and passwords included in 
 either file be masked to preserve your privacy.  Don't forget database IDs and that the log file may be reporting these things as well.
+For more information please read [privacy wiki article](https://github.com/Motion-Project/motion/wiki/Privacy)
 
 Note that the developers do not use any front-end application to use Motion and we need the actual logs from the Motion
 application rather than logs from the front-end application.
