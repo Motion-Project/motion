@@ -1,10 +1,12 @@
-before_script:
-  - autoreconf -fiv
-script: ./configure && make
+sudo: required
 
 matrix:
   include:
+  - os: osx
+    language: c
+    compiler: gcc
   - os: linux
+    env:  BUILD_IMAGE=14.04
     language: c
     compiler: gcc
     addons:
@@ -17,20 +19,51 @@ matrix:
         - libavdevice-dev
         - libjpeg8-dev
         - libzip-dev
+        - libsqlite3-dev
+        - libpq-dev
+        - libmysqlclient-dev
   - os: linux
+    env:  DOCKER_IMAGE=ubuntu:16.04
+    services:  docker
     language: c
     compiler: gcc
-    dist: trusty
-    addons:
-      apt:
-        sources:
-        - sourceline: 'ppa:mc3man/trusty-media'
-        packages:
-        - libavformat-dev
-        - libavcodec-dev
-        - libavutil-dev
-        - libswscale-dev
-        - libavdevice-dev
-        - libjpeg8-dev
-        - libzip-dev
+  - os: linux
+    env:  DOCKER_IMAGE=ubuntu:17.04
+    services:  docker
+    language: c
+    compiler: gcc
 
+before_install:
+  - if [ "x$DOCKER_IMAGE" != "x" ]; then
+      echo $DOCKER_IMAGE;
+      docker pull $DOCKER_IMAGE;
+      docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
+    fi;
+
+before_script:
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+      brew upgrade ffmpeg pkg-config jpeg;
+      brew install ffmpeg pkg-config libjpeg;
+      autoreconf -fiv;
+    fi;
+  - if [ "$BUILD_IMAGE" = "14.04" ]; then
+      autoreconf -fiv;
+    fi;
+  - if [ "x$DOCKER_IMAGE" != "x" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
+    fi;
+
+script:
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+      ./configure --with-developer-flags && make;
+    fi;
+  - if [ "$BUILD_IMAGE" = "14.04" ]; then
+      ./test_builds.sh;
+    fi;
+  - if [ "x$DOCKER_IMAGE" != "x" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c './test_builds.sh';
+    fi;

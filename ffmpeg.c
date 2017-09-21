@@ -236,12 +236,24 @@ static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
 
 static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
 
+    size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
+    char *codec_name = malloc(codec_name_len + 1);
+
+    if (codec_name == NULL) {
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Failed to allocate memory for codec name");
+        ffmpeg_free_context(ffmpeg);
+        return -1;
+    }
+    memcpy(codec_name, ffmpeg->codec_name, codec_name_len);
+    codec_name[codec_name_len] = 0;
+
     /* Only the newer codec and containers can handle the really fast FPS */
-    if (((strcmp(ffmpeg->codec_name, "msmpeg4") == 0) ||
-        (strcmp(ffmpeg->codec_name, "mpeg4") == 0) ||
-        (strcmp(ffmpeg->codec_name, "swf") == 0) ) && (ffmpeg->fps >50)){
+    if (((strcmp(codec_name, "msmpeg4") == 0) ||
+        (strcmp(codec_name, "mpeg4") == 0) ||
+        (strcmp(codec_name, "swf") == 0) ) && (ffmpeg->fps >50)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "The frame rate specified is too high for the ffmpeg movie type specified. Choose a different ffmpeg container or lower framerate.");
         ffmpeg_free_context(ffmpeg);
+        free(codec_name);
         return -1;
     }
 
@@ -250,59 +262,61 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
         strncat(ffmpeg->filename, ".mpg", 4);
         if (!ffmpeg->oc->oformat) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "ffmpeg_video_codec option value %s is not supported", ffmpeg->codec_name);
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "ffmpeg_video_codec option value %s is not supported", codec_name);
             ffmpeg_free_context(ffmpeg);
+            free(codec_name);
             return -1;
         }
+        free(codec_name);
         return 0;
     }
 
-    if (strcmp(ffmpeg->codec_name, "mpeg4") == 0) {
+    if (strcmp(codec_name, "mpeg4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         strncat(ffmpeg->filename, ".avi", 4);
     }
 
-    if (strcmp(ffmpeg->codec_name, "msmpeg4") == 0) {
+    if (strcmp(codec_name, "msmpeg4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         strncat(ffmpeg->filename, ".avi", 4);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MSMPEG4V2;
     }
 
-    if (strcmp(ffmpeg->codec_name, "swf") == 0) {
+    if (strcmp(codec_name, "swf") == 0) {
         ffmpeg->oc->oformat = av_guess_format("swf", NULL, NULL);
         strncat(ffmpeg->filename, ".swf", 4);
     }
 
-    if (strcmp(ffmpeg->codec_name, "flv") == 0) {
+    if (strcmp(codec_name, "flv") == 0) {
         ffmpeg->oc->oformat = av_guess_format("flv", NULL, NULL);
         strncat(ffmpeg->filename, ".flv", 4);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
     }
 
-    if (strcmp(ffmpeg->codec_name, "ffv1") == 0) {
+    if (strcmp(codec_name, "ffv1") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
         strncat(ffmpeg->filename, ".avi", 4);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FFV1;
     }
 
-    if (strcmp(ffmpeg->codec_name, "mov") == 0) {
+    if (strcmp(codec_name, "mov") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mov", NULL, NULL);
         strncat(ffmpeg->filename, ".mov", 4);
     }
 
-    if (strcmp(ffmpeg->codec_name, "mp4") == 0) {
+    if (strcmp(codec_name, "mp4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
         strncat(ffmpeg->filename, ".mp4", 4);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
     }
 
-    if (strcmp(ffmpeg->codec_name, "mkv") == 0) {
+    if (strcmp(codec_name, "mkv") == 0) {
         ffmpeg->oc->oformat = av_guess_format("matroska", NULL, NULL);
         strncat(ffmpeg->filename, ".mkv", 4);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
     }
 
-    if (strcmp(ffmpeg->codec_name, "hevc") == 0) {
+    if (strcmp(codec_name, "hevc") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
         strncat(ffmpeg->filename, ".mp4", 4);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
@@ -310,17 +324,20 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
 
     //Check for valid results
     if (!ffmpeg->oc->oformat) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "codec option value %s is not supported", ffmpeg->codec_name);
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "codec option value %s is not supported", codec_name);
         ffmpeg_free_context(ffmpeg);
+        free(codec_name);
         return -1;
     }
 
     if (ffmpeg->oc->oformat->video_codec == MY_CODEC_ID_NONE) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not get the codec");
         ffmpeg_free_context(ffmpeg);
+        free(codec_name);
         return -1;
     }
 
+    free(codec_name);
     return 0;
 }
 
@@ -419,8 +436,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     if (ffmpeg->tlapse != TIMELAPSE_NONE) {
         ffmpeg->last_pts++;
-        ffmpeg->pkt.pts = ffmpeg->last_pts;
-        ffmpeg->pkt.dts = ffmpeg->last_pts;
+        ffmpeg->picture->pts = ffmpeg->last_pts;
     } else {
         pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
         if (pts_interval < 0){
@@ -428,44 +444,52 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
             ffmpeg_reset_movie_start_time(ffmpeg, tv1);
             pts_interval = 0;
         }
-        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
+        ffmpeg->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
         if (ffmpeg->test_mode == 1){
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "PTS %"PRId64" Base PTS %"PRId64" ms interval %"PRId64" timebase %d-%d",
-                       ffmpeg->pkt.pts,ffmpeg->base_pts,pts_interval,
+                       ffmpeg->picture->pts,ffmpeg->base_pts,pts_interval,
                        ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
         }
 
-        if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
+        if (ffmpeg->picture->pts <= ffmpeg->last_pts){
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
             if (ffmpeg->test_mode == 1){
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "BAD TIMING!! Frame skipped.");
             }
             return -1;
         }
-        ffmpeg->pkt.dts = ffmpeg->pkt.pts;
-        ffmpeg->last_pts = ffmpeg->pkt.pts;
+        ffmpeg->last_pts = ffmpeg->picture->pts;
     }
     return 0;
 }
 
 static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
 
-    char crf[4];
-
     ffmpeg->opts = 0;
     if (ffmpeg->vbr > 100) ffmpeg->vbr = 100;
     if (ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_H264 ||
         ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_HEVC){
-        if (ffmpeg->vbr > 0) {
-            ffmpeg->vbr = (int)(( (100-ffmpeg->vbr) * 51)/100);
+        if (ffmpeg->vbr <= 0)
+            ffmpeg->vbr = 45; // default to 45% quality
+        av_dict_set(&ffmpeg->opts, "preset", "ultrafast", 0);
+        av_dict_set(&ffmpeg->opts, "tune", "zerolatency", 0);
+        if ((strcmp(ffmpeg->codec->name, "h264_omx") == 0) || (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0)) {
+            // H264 OMX encoder quality can only be controlled via bit_rate
+            // bit_rate = ffmpeg->width * ffmpeg->height * ffmpeg->fps * quality_factor
+            ffmpeg->vbr = (ffmpeg->width * ffmpeg->height * ffmpeg->fps * ffmpeg->vbr) >> 7;
+            // Clip bit rate to min
+            if (ffmpeg->vbr < 4000) // magic number
+                ffmpeg->vbr = 4000;
+            ffmpeg->ctx_codec->profile = FF_PROFILE_H264_HIGH;
+            ffmpeg->ctx_codec->bit_rate = ffmpeg->vbr;
         } else {
-            ffmpeg->vbr = 28;
+            // Control other H264 encoders quality via CRF
+            char crf[4];
+            ffmpeg->vbr = (int)(( (100-ffmpeg->vbr) * 51)/100);
+            snprintf(crf, 4, "%d", ffmpeg->vbr);
+            av_dict_set(&ffmpeg->opts, "crf", crf, 0);
         }
-       snprintf(crf, 4, "%d",ffmpeg->vbr);
-       av_dict_set(&ffmpeg->opts, "preset", "ultrafast", 0);
-       av_dict_set(&ffmpeg->opts, "tune", "zerolatency", 0);
-       av_dict_set(&ffmpeg->opts, "crf", crf, 0);
     } else {
         /* The selection of 8000 in the else is a subjective number based upon viewing output files */
         if (ffmpeg->vbr > 0){
@@ -474,8 +498,29 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
             ffmpeg->ctx_codec->global_quality=ffmpeg->vbr;
         }
     }
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "vbr/crf for codec: %d", ffmpeg->vbr);
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s codec vbr/crf/bit_rate: %d", ffmpeg->codec->name, ffmpeg->vbr);
 
+    return 0;
+}
+
+static int ffmpeg_codec_is_blacklisted(const char *codec_name){
+
+    static const char *blacklisted_codec[] =
+    {
+        /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
+         * To use h264_omx encoder and workaround the lock up issue:
+         * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
+         * - remove the "h264_omx" from this blacklist.
+         * More information: https://github.com/Motion-Project/motion/issues/433
+         */
+        "h264_omx",
+    };
+    size_t i;
+
+    for (i = 0; i < sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]); i++) {
+        if (strcmp(codec_name, blacklisted_codec[i]) == 0)
+            return 1;
+    }
     return 0;
 }
 
@@ -484,13 +529,29 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     int retcd;
     char errstr[128];
     int chkrate;
+    size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
 
-    ffmpeg->codec = avcodec_find_encoder(ffmpeg->oc->oformat->video_codec);
+    ffmpeg->codec = NULL;
+    if (ffmpeg->codec_name[codec_name_len]) {
+        if (ffmpeg_codec_is_blacklisted(&ffmpeg->codec_name[codec_name_len+1])) {
+            MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "Preferred codec %s has been blacklisted",
+                       &ffmpeg->codec_name[codec_name_len+1]);
+        } else {
+            ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
+            if (!ffmpeg->codec)
+                MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "Preferred codec %s not found",
+                           &ffmpeg->codec_name[codec_name_len+1]);
+        }
+    }
+    if (!ffmpeg->codec)
+        ffmpeg->codec = avcodec_find_encoder(ffmpeg->oc->oformat->video_codec);
     if (!ffmpeg->codec) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Codec %s not found", ffmpeg->codec_name);
         ffmpeg_free_context(ffmpeg);
         return -1;
     }
+    if (ffmpeg->codec_name[codec_name_len])
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Using codec %s", ffmpeg->codec->name);
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
@@ -703,18 +764,18 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     ffmpeg->pkt.data = NULL;
     ffmpeg->pkt.size = 0;
 
+    retcd = ffmpeg_set_pts(ffmpeg, tv1);
+    if (retcd < 0) {
+        //If there is an error, it has already been reported.
+        my_packet_unref(ffmpeg->pkt);
+        return 0;
+    }
+
     retcd = ffmpeg_encode_video(ffmpeg);
     if (retcd != 0){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while encoding picture");
         my_packet_unref(ffmpeg->pkt);
         return retcd;
-    }
-
-    retcd = ffmpeg_set_pts(ffmpeg, tv1);
-    if (retcd < 0) {
-        //If there is an error, it has already been reported.
-        my_packet_unref(ffmpeg->pkt);
-        return -1;
     }
 
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {

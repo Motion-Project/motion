@@ -168,6 +168,19 @@ typedef struct {
 
 extern config_param config_params[];
 
+/**
+ * description for deprecated parameters in the config file
+ */
+typedef struct {
+    const char *name;           /* Name of the deprecated option */
+    const char *last_version;   /* Last version this option was used in */
+    const char *info;           /* Short text on why it was deprecated (removed, replaced with, etc) */
+    int conf_value;             /* Pointer to the replacement field in struct context */
+    conf_copy_func copy;        /* Function to set the replacement value */
+} dep_config_param;
+
+extern dep_config_param dep_config_params[];
+
 struct context **conf_load(struct context **);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
 const char *config_type(config_param *);

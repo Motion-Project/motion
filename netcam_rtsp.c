@@ -86,7 +86,6 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
 
     if (packet) {
         retcd = avcodec_send_packet(ctx_codec, packet);
-        assert(retcd != AVERROR(EAGAIN));
         if (retcd < 0 && retcd != AVERROR_EOF){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Error sending packet to codec: %s", errstr);
@@ -119,23 +118,14 @@ static int rtsp_decode_video(AVPacket *packet, AVFrame *frame, AVCodecContext *c
 
 #else
 
-    AVPacket empty_packet;
     int retcd;
     int check = 0;
     char errstr[128];
 
-    if (!packet) {
-        av_init_packet(&empty_packet);
-        empty_packet.data = NULL;
-        empty_packet.size = 0;
-        packet = &empty_packet;
-    }
+    if (!packet)  return 0;
 
     retcd = avcodec_decode_video2(ctx_codec, frame, &check, packet);
 
-    /*
-     * See note above
-     */
     if (retcd == AVERROR_INVALIDDATA) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Ignoring packet with invalid data");
         return 0;
@@ -390,10 +380,11 @@ int netcam_read_rtsp_image(netcam_context_ptr netcam){
     netcam->rtsp->interrupted = 0;
     netcam->rtsp->status = RTSP_READINGIMAGE;
 
-    /* First, check whether the codec has any frames ready to go
-     * before we feed it new packets
+    /* Per ffmpeg documentation, only send NULL when it is desired to drain the codec.
+     * Since this function is our normal capture frame function, set the size decoded to
+     * zero and get another frame to send to codec.
      */
-    size_decoded = rtsp_decode_packet(NULL, buffer, netcam->rtsp->frame, netcam->rtsp->codec_context);
+    size_decoded = 0;
 
     while (size_decoded == 0 && av_read_frame(netcam->rtsp->format_context, &packet) >= 0) {
         if (packet.stream_index == netcam->rtsp->video_stream_index)

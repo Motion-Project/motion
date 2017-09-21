@@ -76,11 +76,11 @@ static void reverse_inplace_quad(unsigned char *src, int size)
 static void flip_inplace_horizontal(unsigned char *src, int width, int height) {
     uint8_t *nsrc, *ndst;
     register uint8_t tmp;
-    unsigned int l,w;
+    int l,w;
 
     for(l=0; l < height/2; l++) {
-        nsrc = (uint8_t *)(src + l*width); 
-        ndst = (uint8_t *)(src + (width*(height-l-1))); 
+        nsrc = (uint8_t *)(src + l*width);
+        ndst = (uint8_t *)(src + (width*(height-l-1)));
         for(w=0; w < width; w++) {
             tmp =*ndst;
             *ndst++ = *nsrc;
@@ -94,11 +94,11 @@ static void flip_inplace_vertical(unsigned char *src, int width, int height)
 {
     uint8_t *nsrc, *ndst;
     register uint8_t tmp;
-    unsigned int l;
+    int l;
 
     for(l=0; l < height; l++) {
-        nsrc = (uint8_t *)src + l*width; 
-        ndst = nsrc + width - 1; 
+        nsrc = (uint8_t *)src + l*width;
+        ndst = nsrc + width - 1;
         while (nsrc < ndst) {
             tmp = *ndst;
             *ndst-- = *nsrc;
@@ -361,7 +361,7 @@ int rotate_map(struct context *cnt, unsigned char *map)
         break;
     default:
         break;
-    }    
+    }
 
     switch (deg) {
     case 90:

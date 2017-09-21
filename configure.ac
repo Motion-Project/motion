@@ -62,6 +62,27 @@ AC_SUBST(CPPFLAGS, "${TEMP_CPPFLAGS}")
 AC_SUBST(LDFLAGS, "${TEMP_LDFLAGS}")
 
 ###############################################################################
+###  Host search paths for MYSQL/PGSQL
+###############################################################################
+#dpkg-architecture may not be available so manually list
+SEARCH_INC="/usr/include/x86_64-linux-gnu"
+SEARCH_INC=$SEARCH_INC" /usr/include/i386-linux-gnu"
+SEARCH_INC=$SEARCH_INC" /usr"
+SEARCH_INC=$SEARCH_INC" /usr/include"
+SEARCH_INC=$SEARCH_INC" /usr/local"
+SEARCH_INC=$SEARCH_INC" /usr/local/include"
+SEARCH_INC=$SEARCH_INC" /opt"
+
+SEARCH_LIB="/usr/lib/x86_64-linux-gnu"
+SEARCH_LIB=$SEARCH_LIB" /usr/lib/i386-linux-gnu"
+SEARCH_LIB=$SEARCH_LIB" /usr"
+SEARCH_LIB=$SEARCH_LIB" /usr/lib64"
+SEARCH_LIB=$SEARCH_LIB" /usr/lib"
+SEARCH_LIB=$SEARCH_LIB" /usr/local"
+SEARCH_LIB=$SEARCH_LIB" /usr/local/lib"
+SEARCH_LIB=$SEARCH_LIB" /opt"
+
+###############################################################################
 ###  Video System
 ###############################################################################
 BKTR="yes"
@@ -127,6 +148,8 @@ AC_MSG_CHECKING(jpg libraries)
 AC_MSG_RESULT($JPGS)
 if test x$JPGS = xyes ; then
   TEMP_LIBS="$TEMP_LIBS -ljpeg"
+else
+  AC_MSG_ERROR([Required package libjpeg-dev not found, please check motion_guide.html and install necessary dependencies])
 fi
 
 ##############################################################################
@@ -170,6 +193,20 @@ AC_ARG_WITH([mmal],
   WITHOUT_MMAL="yes",
   WITHOUT_MMAL="no")
 
+AC_ARG_WITH([mmal-lib],
+  AS_HELP_STRING([--with-mmal-lib[=DIR]],
+    [Use this command to tell configure where mmal libs directory is.]),
+  MMAL_LIBS_DIR="$withval",
+  MMAL_LIBS_DIR="/opt/vc/lib"
+)
+
+AC_ARG_WITH([mmal-include],
+  AS_HELP_STRING([--with-mmal-include[=DIR]],
+    [Use this command to tell configure where mmal include installation root directory is.]),
+  MMAL_HEADERS="$withval",
+  MMAL_HEADERS="/opt/vc/include"
+)
+
 if test "${WITHOUT_MMAL}" = "no"; then
   HAVE_MMAL=""
   if test "${DISTRO}" = "FreeBSD" ; then
@@ -180,6 +217,8 @@ if test "${WITHOUT_MMAL}" = "no"; then
 
   if test -d ${LIBRASPBERRYPIDEVPATH}; then
        HAVE_MMAL="yes"
+  elif test -d ${MMAL_HEADERS}/interface/mmal; then
+       HAVE_MMAL="yes"
   fi
 
   AS_IF([test "${HAVE_MMAL}" = "yes" ], [
@@ -187,11 +226,11 @@ if test "${WITHOUT_MMAL}" = "no"; then
     AC_SUBST(MMAL_OBJ)
     AC_SUBST(MMAL_LIBS)
     MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
-    MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I/opt/vc/include"
+    MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I${MMAL_HEADERS}"
     AS_IF([test "${DISTRO}" = "FreeBSD" ], [
       MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
       ])
-      MMAL_LIBS="-L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lvcos -lvchostif -lvchiq_arm"
+      MMAL_LIBS="-L${MMAL_LIBS_DIR} -lmmal_core -lmmal_util -Wl,--push-state,--no-as-needed -lmmal_vc_client -Wl,--pop-state -lvcos -lvchostif -lvchiq_arm"
       AC_DEFINE([HAVE_MMAL], 1, [Define to 1 if we want MMAL])
   ])
 fi
@@ -215,6 +254,9 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
        if pkg-config $FFMPEG_DEPS; then
                FFMPEG_CFLAGS=`pkg-config --cflags $FFMPEG_DEPS`
                FFMPEG_LIBS=`pkg-config --libs $FFMPEG_DEPS`
+               FFMPEG_VER=`pkg-config --modversion libavformat`
+               AC_MSG_CHECKING(for libavformat)
+               AC_MSG_RESULT(yes $FFMPEG_VER)
                HAVE_FFMPEG="yes"
        else
               AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev libavdevice-dev' were not found.  Please check motion_guide.html and install necessary dependencies or use the '--without-ffmpeg' configuration option.])
@@ -265,44 +307,234 @@ AC_SUBST(SQLITE_OBJ)
 ##############################################################################
 ###  Check mysql
 ##############################################################################
-AC_ARG_WITH([mysql],
-    AS_HELP_STRING([--without-mysql],
-    [Build without mysql support]),
-    [MYSQL=$withval],
-    [MYSQL=yes])
+MYSQL="yes"
+MYSQL_SUPPORT="no"
+MYSQL_HEADERS="yes"
+MYSQL_LIBS="yes"
+MYSQL_INCDIR=""
+MYSQL_LIBDIR=""
 
-if test "x${MYSQL}" = "xno"; then
+AC_ARG_WITH(mysql,
+    AS_HELP_STRING([--without-mysql],[Disable mysql support]),
+    [MYSQL="$withval"])
+AC_ARG_WITH(mysql-lib,
+    AS_HELP_STRING([--with-mysql-lib[=DIR]],[Specify the library path for mysql]),
+    [MYSQL_LIBS="$withval"])
+AC_ARG_WITH(mysql-include,
+    AS_HELP_STRING([--with-mysql-include[=DIR]],[Specify the include path for mysql]),
+    [MYSQL_HEADERS="$withval"])
+
+
+if test "${MYSQL}" = "no"; then
     AC_MSG_CHECKING(for mysql support)
     AC_MSG_RESULT(skipped)
 else
-    AC_CHECK_HEADERS(mysql/mysql.h,[MYSQL="yes"],[MYSQL="no"])
-    AC_MSG_CHECKING(for mysql support)
-    AC_MSG_RESULT($MYSQL)
-    if test "x${MYSQL}" = "xyes"; then
-        TEMP_LIBS="$TEMP_LIBS -lmysqlclient -lz"
-        AC_DEFINE([HAVE_MYSQL],1,[Define to 1 if you have MySQL support])
+    AC_MSG_CHECKING(for db package config)
+    if pkg-config mariadb; then
+        AC_MSG_RESULT(mariadb found)
+        MYSQL_INCDIR=`pkg-config --cflags mariadb`
+        MYSQL_LIBDIR=`pkg-config --libs mariadb`
+    elif pkg-config mysqlclient; then
+        AC_MSG_RESULT(mysqlclient found)
+        MYSQL_INCDIR=`pkg-config --cflags mysqlclient`
+        MYSQL_LIBDIR=`pkg-config --libs mysqlclient`
+    else
+        AC_MSG_RESULT(not found)
+        if test "${MYSQL_HEADERS}" = "yes"; then
+            AC_MSG_CHECKING(for mysql headers)
+            for w in $SEARCH_INC; do
+                if test -f $w/mysql.h; then
+                    MYSQL_INCDIR=$w
+                    break
+                fi
+                if test -f $w/mysql/mysql.h; then
+                    MYSQL_INCDIR=$w/mysql
+                    break
+                fi
+                if test -f $w/mysql/include/mysql.h; then
+                    MYSQL_INCDIR=$w/mysql/include
+                    break
+                fi
+            done
+        elif test "${MYSQL_HEADERS}" = "no"; then
+            AC_MSG_CHECKING(for mysql headers)
+        else
+            AC_MSG_CHECKING(for mysql headers in $MYSQL_HEADERS)
+            if test -f $MYSQL_HEADERS/mysql.h; then
+                MYSQL_INCDIR=$MYSQL_HEADERS
+            fi
+        fi
+
+        if test -z "$MYSQL_INCDIR" ; then
+            MYSQL_HEADERS="no"
+            AC_MSG_RESULT(not found)
+        else
+            AC_MSG_RESULT($MYSQL_INCDIR yes)
+            MYSQL_HEADERS="yes"
+        fi
+
+    	# ******* Search mysql libs *********
+        if test "${MYSQL_LIBS}" = "yes"; then
+            AC_MSG_CHECKING(for mysql libs)
+            for w in $SEARCH_LIB; do
+                if test -f $w/libmysqlclient.a -o -f $w/libmysqlclient.so; then
+                    MYSQL_LIBDIR=$w
+                    break
+                fi
+                if test -f $w/mysql/libmysqlclient.a -o -f $w/mysql/libmysqlclient.so; then
+                    MYSQL_LIBDIR=$w/mysql
+                    break
+                fi
+                if test -f $w/mysql/lib/libmysqlclient.a -o -f $w/mysql/lib/libmysqlclient.so; then
+                    MYSQL_LIBDIR=$w/mysql/lib
+                    break
+                fi
+            done
+            AC_MSG_RESULT($MYSQL_LIBDIR)
+        elif test "${MYSQL_LIBS}" = "no"; then
+            AC_MSG_CHECKING(for mysql libs)
+            AC_MSG_RESULT(skipped)
+        else
+            AC_MSG_CHECKING(for mysql libs in $MYSQL_LIBS)
+            if test -f $MYSQL_LIBS/libmysqlclient.a -o -f $MYSQL_LIBS/libmysqlclient.so; then
+                MYSQL_LIBDIR=$MYSQL_LIBS
+            fi
+            AC_MSG_RESULT($MYSQL_LIBS)
+        fi
+        if test "x$MYSQL_INCDIR" != "x"; then MYSQL_INCDIR="-I$MYSQL_INCDIR"; fi
+        if test "x$MYSQL_LIBDIR" != "x"; then
+            MYSQL_LIBDIR=" -L$MYSQL_LIBDIR -lmysqlclient -lz";
+        else
+            MYSQL_LIBDIR=" -lmysqlclient -lz"
+        fi
     fi
+    # ******* Validate MYSQL *********
+    HOLD_CFLAGS=$CFLAGS
+    HOLD_LIBS=$LIBS
+    CFLAGS=$MYSQL_INCDIR
+    LIBS=$MYSQL_LIBDIR
+    AC_CHECK_LIB(mysqlclient,mysql_init,[
+        TEMP_CFLAGS="$TEMP_CFLAGS $MYSQL_INCDIR"
+        TEMP_LIBS="$TEMP_LIBS $MYSQL_LIBDIR"
+        MYSQL_SUPPORT="yes"
+        AC_DEFINE([HAVE_MYSQL],1,[Define to 1 if you have MYSQL support])])
+    CFLAGS=$HOLD_CFLAGS
+    LIBS=$HOLD_LIBS
 fi
+
 
 ##############################################################################
 ###  Check PostgreSQL
 ##############################################################################
-AC_ARG_WITH([pgsql],
-        AS_HELP_STRING([--without-pgsql], [Build without pgsql support]),
-        [PGSQL=$withval],
-        [PGSQL=yes])
+PGSQL="yes"
+PGSQL_SUPPORT="no"
+PGSQL_HEADERS="yes"
+PGSQL_LIBS="yes"
+PGSQL_INCDIR=""
+PGSQL_LIBDIR=""
 
-if test "x${PGSQL}" = "xno"; then
-    AC_MSG_CHECKING(for PostgreSQL support)
+AC_ARG_WITH(pgsql,
+    AS_HELP_STRING([--without-pgsql],[Disable pgsql support]),
+    [PGSQL="$withval"])
+AC_ARG_WITH(pgsql-lib,
+    AS_HELP_STRING([--with-pgsql-lib[=DIR]],[Specify the library path for pgsql]),
+    [PGSQL_LIBS="$withval"])
+AC_ARG_WITH(pgsql-include,
+    AS_HELP_STRING([--with-pgsql-include[=DIR]],[Specify the include path for pgsql]),
+    [PGSQL_HEADERS="$withval"])
+
+if test "${PGSQL}" = "no"; then
+    AC_MSG_CHECKING(for pgsql support)
     AC_MSG_RESULT(skipped)
 else
-    AC_CHECK_HEADERS(postgresql/libpq-fe.h,[PGSQL="yes"],[PGSQL="no"])
-    AC_MSG_CHECKING(for PostgreSQL support)
-    AC_MSG_RESULT($PGSQL)
-    if test "x${PGSQL}" = "xyes"; then
-        TEMP_LIBS="$TEMP_LIBS -lpq"
-        AC_DEFINE([HAVE_PGSQL],1,[Define to 1 if you have PostgreSQL support])
+    AC_MSG_CHECKING(for pgsql package config)
+    if pkg-config libpq; then
+        AC_MSG_RESULT(found)
+        PGSQL_INCDIR=`pkg-config --cflags libpq`
+        PGSQL_LIBDIR=`pkg-config --libs libpq`
+    else
+        AC_MSG_RESULT(not found)
+        if test "${PGSQL_HEADERS}" = "yes"; then
+            AC_MSG_CHECKING(for pgsql headers)
+            for w in $SEARCH_INC; do
+                if test -f $w/libpq-fe.h; then
+                    PGSQL_INCDIR=$w
+                    break
+                fi
+                if test -f $w/postgresql/libpq-fe.h; then
+                    PGSQL_INCDIR=$w/postgresql
+                    break
+                fi
+                if test -f $w/postgresql/include/libpq-fe.h; then
+                    PGSQL_INCDIR=$w/postgresql/include
+                    break
+                fi
+            done
+        elif test "${PGSQL_HEADERS}" = "no"; then
+            AC_MSG_CHECKING(for pgsql headers)
+            AC_MSG_RESULT(skipped)
+        else
+            AC_MSG_CHECKING(for pgsql headers in $PGSQL_HEADERS)
+            if test -f $PGSQL_HEADERS/libpq-fe.h; then
+                PGSQL_INCDIR=$PGSQL_HEADERS
+            fi
+        fi
+
+        if test -z "$PGSQL_INCDIR" ; then
+            PGSQL_HEADERS="no"
+            AC_MSG_RESULT(not found)
+        else
+            AC_MSG_RESULT($PGSQL_INCDIR yes)
+            PGSQL_HEADERS="yes"
+        fi
+
+    	# ******* Search pgsql libs *********
+        if test "${PGSQL_LIBS}" = "yes"; then
+            AC_MSG_CHECKING(for pgsql libs)
+            for w in $SEARCH_LIB; do
+                if test -f $w/libpq.a -o -f $w/libpq.so; then
+                    PGSQL_LIBDIR=$w
+                    break
+                fi
+                if test -f $w/postgresql/libpq.a -o -f $w/postgresql/libpq.so; then
+                    PGSQL_LIBDIR=$w/postgresql
+                    break
+                fi
+                if test -f $w/postgresql/lib/libpq.a -o -f $w/postgresql/lib/libpq.so; then
+                    PGSQL_LIBDIR=$w/postgresql/lib
+                    break
+                fi
+            done
+            AC_MSG_RESULT($PGSQL_LIBDIR)
+        elif test "${PGSQL_LIBS}" = "no"; then
+            AC_MSG_CHECKING(for pgsql libs)
+            AC_MSG_RESULT(skipped)
+        else
+            AC_MSG_CHECKING(for pgsql libs in $PGSQL_LIBS)
+            if test -f $PGSQL_LIBS/libpq.a -o -f $PGSQL_LIBS/libpq.so; then
+                PGSQL_LIBDIR=$PGSQL_LIBS
+            fi
+            AC_MSG_RESULT($PGSQL_LIBDIR)
+        fi
+        if test "x$PGSQL_INCDIR" != "x"; then PGSQL_INCDIR="-I$PGSQL_INCDIR"; fi
+        if test "x$PGSQL_LIBDIR" != "x"; then
+            PGSQL_LIBDIR=" -L$PGSQL_LIBS -lpq";
+        else
+            PGSQL_LIBDIR=" -lpq"
+        fi
     fi
+    # ******* Validate PGSQL *********
+    HOLD_CFLAGS=$CFLAGS
+    HOLD_LIBS=$LIBS
+    CFLAGS=$PGSQL_INCDIR
+    LIBS=$PGSQL_LIBDIR
+    AC_CHECK_LIB(pq, PQconnectStart, [
+        TEMP_CFLAGS="$TEMP_CFLAGS $PGSQL_INCDIR"
+        TEMP_LIBS="$TEMP_LIBS $PGSQL_LIBDIR"
+        PGSQL_SUPPORT="yes"
+        AC_DEFINE([HAVE_PGSQL],1,[Define to 1 if you have PGSQL support])])
+    CFLAGS=$HOLD_CFLAGS
+    LIBS=$HOLD_LIBS
 fi
 
 ##############################################################################
@@ -315,14 +547,15 @@ AC_ARG_WITH([optimizecpu],
         [OPTIMIZECPU=no])
 
 CPU_OPTIONS=""
-if test -e "/proc/device-tree/model"; then
-    # explicit test for RPI3 as /proc/cpuinfo reports armv7 even though it is armv8
-    RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
-    if test "x${RPI3}" != "x"; then
-    CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+if test "${OPTIMIZECPU}" = "yes"; then
+    if test -e "/proc/device-tree/model"; then
+        # explicit test for RPI3 as /proc/cpuinfo reports armv7 even though it is armv8
+        RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
+        if test "x${RPI3}" != "x"; then
+            CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+        fi
     fi
 fi
-
 
 ##############################################################################
 ###  Developer Flags
@@ -334,7 +567,7 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=no])
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
-    TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CFLAGS="${TEMP_CFLAGS} -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
 fi
 
 CFLAGS="${TEMP_CFLAGS} $CPU_OPTIONS"
@@ -457,13 +690,13 @@ else
     echo "SQLite3 support:     No"
 fi
 
-if test "${MYSQL}" = "yes"; then
+if test "${MYSQL_SUPPORT}" = "yes"; then
     echo "MYSQL support:       Yes"
 else
     echo "MYSQL support:       No"
 fi
 
-if test "${PGSQL}" = "yes"; then
+if test "${PGSQL_SUPPORT}" = "yes"; then
     echo "PostgreSQL support:  Yes"
 else
     echo "PostgreSQL support:  No"

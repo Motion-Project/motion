@@ -156,7 +156,7 @@ struct config conf_template = {
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type_str =                    NULL,
-    .camera_dir =                      sysconfdir"/conf.d"
+    .camera_dir =                      NULL
 };
 
 
@@ -170,10 +170,6 @@ static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
 static const char *print_string(struct context **, char **, int, unsigned int);
 static const char *print_camera(struct context **, char **, int, unsigned int);
-
-/* Deprcated thread config functions */
-static struct context **config_thread(struct context **cnt, const char *str, int val);
-static const char *print_thread(struct context **, char **, int, unsigned int);
 
 static void usage(void);
 
@@ -1602,25 +1598,13 @@ config_param config_params[] = {
     config_camera,
     print_camera
     },
-    {
-    "thread",
-    "\n##############################################################\n"
-    "# Deprecated use camera instead of thread.\n"
-    "# Camera config files - One for each camera.\n"
-    "# Except if only one camera - You only need this config file.\n"
-    "# If you have more than one camera you MUST define one camera\n"
-    "# config file for each camera in addition to this config file.\n"
-    "##############################################################\n",
-    1,
-    0,
-    config_thread,
-    print_thread
-    },
     /* using a conf.d style camera addition */
     {
     "camera_dir",
     "\n##############################################################\n"
-    "# Camera config directory - One for each camera.\n"
+    "# Camera config directory\n"
+    "# Any files ending in '.conf' in this directory will be read\n"
+    "# as a camera config file.\n"
     "##############################################################\n",
     1,
     CONF_OFFSET(camera_dir),
@@ -1628,6 +1612,27 @@ config_param config_params[] = {
     print_string
     },
     { NULL, NULL, 0, 0, NULL, NULL }
+};
+
+/*
+ * Array of deprecated config options:
+ * When deprecating an option, remove it from above (config_params array)
+ * and create an entry in this array of name, last version, info,
+ * and (if applicable) a replacement conf value and copy funcion.
+ * Upon reading a deprecated config option, a warning will be logged
+ * with the given information and last version it was used in.
+ * If set, the given value will be copied into the conf value
+ * for backwards compatibility.
+ */
+dep_config_param dep_config_params[] = {
+    {
+    "thread",
+    "3.4.1",
+    "The \"thread\" option has been replaced by the \"camera\" option.",
+    0,
+    config_camera
+    },
+    { NULL, NULL, NULL, 0, NULL}
 };
 
 /**
@@ -1734,8 +1739,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
              * If the option is a bool, copy_bool is called.
              * If the option is an int, copy_int is called.
              * If the option is a string, copy_string is called.
-             * If the option is a thread, config_thread is called.
-             * If the option is a camera, config_camera is called.
+             * If the option is camera, config_camera is called.
              * The arguments to the function are:
              *  cnt  - a pointer to the context structure.
              *  arg1 - a pointer to the new option value (represented as string).
@@ -1748,10 +1752,28 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
         i++;
     }
 
-    /* We reached the end of config_params without finding a matching option. */
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unknown config option \"%s\"",
-               cmd);
+    /*
+     * We reached the end of config_params without finding a matching option.
+     * Check if it's a deprecated option, log a warning, and if applicable
+     * set the replacement option to the given value.
+     */
+    i = 0;
+    while (dep_config_params[i].name != NULL) {
+        if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Deprecated config option \"%s\" since after version %s:",
+                       cmd, dep_config_params[i].last_version);
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
 
+            if (dep_config_params[i].copy != NULL)
+                cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
+
+            return cnt;
+        }
+        i++;
+    }
+
+    /* If we get here, it's unknown to us. */
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unknown config option \"%s\"", cmd);
     return cnt;
 }
 
@@ -1759,7 +1781,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
  * conf_process
  *      Walks through an already open config file line by line
  *      Any line starting with '#' or ';' or empty lines are ignored as a comments.
- *      Any non empty line is process so that the first word is the name of an option 'cnd'
+ *      Any non empty line is processed so that the first word is the name of an option 'cmd'
  *      and the rest of the line is the argument 'arg1'
  *      White space before the first word, between option and argument and end of the line
  *      is discarded. A '=' between option and first word in argument is also discarded.
@@ -1838,7 +1860,7 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
 /**
  * conf_print
- *       Is used to write out the config file(s) motion.conf and any thread
+ *       Is used to write out the config file(s) motion.conf and any camera
  *       config files. The function is called when using http remote control.
  *
  * Returns nothing.
@@ -1859,8 +1881,13 @@ void conf_print(struct context **cnt)
         if (!conffile)
             continue;
 
+        char timestamp[32];
+        time_t now = time(0);
+        strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
+
         fprintf(conffile, "# %s\n", cnt[thread]->conf_filename);
         fprintf(conffile, "#\n# This config file was generated by motion " VERSION "\n");
+        fprintf(conffile, "# at %s\n", timestamp);
         fprintf(conffile, "\n\n");
 
         for (i = 0; config_params[i].param_name; i++) {
@@ -1880,22 +1907,28 @@ void conf_print(struct context **cnt)
                 val = NULL;
                 config_params[i].print(cnt, &val, i, thread);
                 /*
-                 * It can either be a thread file parameter or a disabled parameter.
-                 * If it is a thread parameter write it out.
+                 * It can either be a camera file parameter or a disabled parameter.
+                 * If it is a camera parameter write it out.
                  * Else write the disabled option to the config file but with a
                  * comment mark in front of the parameter name.
                  */
                 if (val) {
                     fprintf(conffile, "%s\n", config_params[i].param_help);
-                    fprintf(conffile, "%s\n", val);
 
-                    if (strlen(val) == 0)
+                    if (strlen(val) > 0)
+                        fprintf(conffile, "%s\n", val);
+                    else
                         fprintf(conffile, "; camera %s/motion/camera1.conf\n", sysconfdir);
 
                     free(val);
                 } else if (thread == 0) {
+                    /* The 'camera_dir' option should keep the installed default value */
+                    sprintf(val, "%s","value");
+                    if (!strncmp(config_params[i].param_name, "camera_dir", 10))
+                        sprintf(val, "%s",sysconfdir"/motion/conf.d");
+
                     fprintf(conffile, "%s\n", config_params[i].param_help);
-                    fprintf(conffile, "; %s value\n\n", config_params[i].param_name);
+                    fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, val);
                 }
             }
         }
@@ -1919,11 +1952,11 @@ void conf_print(struct context **cnt)
  *   so that they point to a malloc'ed piece of memory containing a copy of
  *   the string given in conf_template.
  * - motion.conf is opened and processed. The process populates the cnt[0] and
- *   for each thread config file it populates a cnt[1], cnt[2]... for each
- *   thread
- * - Finally it process the options given in the Command-line. This is done
- *   for each thread cnt[i] so that the Command-line options overrides any
- *   option given by motion.conf or a thread config file.
+ *   for each camera config file it populates a cnt[1], cnt[2]... for each
+ *   camera.
+ * - Finally it processes the options given in the Command-line. This is done
+ *   for each camera cnt[i] so that the Command-line options overrides any
+ *   option given by motion.conf or a camera config file.
  *
  * Returns context struct.
  */
@@ -1962,7 +1995,7 @@ struct context **conf_load(struct context **cnt)
      * 1. Command-line
      * 2. current working directory
      * 3. $HOME/.motion/motion.conf
-     * 4. sysconfig/motion.conf
+     * 4. sysconfdir/motion.conf
      */
     /* Get filename , pid file & log file from Command-line. */
     cnt[0]->log_type_str[0] = 0;
@@ -2323,7 +2356,7 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  *
  * Returns If the option is not defined NULL is returned.
  *         If the value is the same, NULL is returned which means that
- *         the option is not written to the thread config file.
+ *         the option is not written to the camera config file.
  */
 static const char *print_string(struct context **cnt,
                                 char **str ATTRIBUTE_UNUSED, int parm,
@@ -2342,6 +2375,16 @@ static const char *print_string(struct context **cnt,
     return *cptr1;
 }
 
+/**
+ * print_int
+ *      Returns a pointer to a string containing the integer of the config option value.
+ *      If the thread number is not 0 the integer is compared with the value of the same
+ *      option in thread 0.
+ *
+ * Returns If the option is different, const char *
+ *         If the option is the same, NULL is returned which means that
+ *         the option is not written to the camera config file.
+ */
 static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
                              int parm, unsigned int threadnr)
 {
@@ -2357,13 +2400,13 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
     return retval;
 }
 
-static const char *print_thread(struct context **cnt, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
-{
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "thread config option deprecated use camera");
-    return print_camera(cnt, str, parm, threadnr);
-}
-
+/**
+ * print_camera
+ *      Modifies a pointer to a string with each 'camera' line.
+ *      Does nothing if single threaded or no pointer was supplied.
+ *
+ * Returns NULL
+ */
 static const char *print_camera(struct context **cnt, char **str,
                                 int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
 {
@@ -2377,6 +2420,10 @@ static const char *print_camera(struct context **cnt, char **str,
     retval[0] = 0;
 
     while (cnt[++i]) {
+        /* Skip config files loaded from conf directory */
+        if (cnt[i]->from_conf_dir)
+            continue;
+
         retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10,
                            "print_camera");
         sprintf(retval + strlen(retval), "camera %s\n", cnt[i]->conf_filename);
@@ -2388,17 +2435,18 @@ static const char *print_camera(struct context **cnt, char **str,
 }
 
 /**
- * config_camera_dir
+ * read_camera_dir
  *     Read the directory finding all *.conf files in the path
- *     when calls config_camera
+ *     When found calls config_camera
  */
 
 static struct context **read_camera_dir(struct context **cnt, const char *str,
-                                            int val ATTRIBUTE_UNUSED)
+                                            int val)
 {
     DIR *dp;
     struct dirent *ep;
     size_t name_len;
+    int i;
 
     char conf_file[PATH_MAX];
 
@@ -2421,7 +2469,13 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
                     "Processing config file %s", conf_file );
                 cnt = config_camera(cnt, conf_file, 0);
-            }
+                /* The last context thread would be ours,
+                 * set it as created from conf directory.
+                 */
+                i = 0;
+                while (cnt[++i]);
+                cnt[i-1]->from_conf_dir = 1;
+	    }
         }
         closedir(dp);
     }
@@ -2431,14 +2485,10 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
                     "%s not found", str);
     }
 
-    return cnt;
-}
+    /* Store the given config value to allow writing it out */
+    cnt = copy_string(cnt, str, val);
 
-static struct context **config_thread(struct context **cnt, const char *str,
-                                      int val ATTRIBUTE_UNUSED)
-{
-    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "thread config option deprecated use camera");
-    return config_camera(cnt, str, val);
+    return cnt;
 }
 
 /**
@@ -2449,7 +2499,7 @@ static struct context **config_thread(struct context **cnt, const char *str,
  *      copied to the new thread.
  *
  *      cnt  - pointer to the array of pointers pointing to the context structures
- *      str  - pointer to a string which is the filename of the thread config file
+ *      str  - pointer to a string which is the filename of the camera config file
  *      val  - is not used. It is defined to be function header compatible with
  *            copy_int, copy_bool and copy_string.
  */
@@ -2501,13 +2551,13 @@ static struct context **config_camera(struct context **cnt, const char *str,
     /* Mark the end if the array of pointers to context structures. */
     cnt[i + 1] = NULL;
 
-    /* Process the thread's config file and notify user on console. */
+    /* Process the camera's config file and notify user on console. */
     strcpy(cnt[i]->conf_filename, str);
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Processing camera config file %s",
                str);
     conf_process(cnt + i, fp);
 
-    /* Finally we close the thread config file. */
+    /* Finally we close the camera config file. */
     myfclose(fp);
 
     return cnt;

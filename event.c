@@ -578,6 +578,10 @@ static void event_create_extpipe(struct context *cnt,
             }
         }
 
+        /* Always create any path specified as file name */
+        if (create_path(cnt->extpipefilename) == -1)
+            return ;
+
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "pipe: %s", stamp);
