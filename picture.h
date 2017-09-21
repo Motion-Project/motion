@@ -21,6 +21,6 @@ int put_picture_memory(struct context *, unsigned char*, int, unsigned char *, i
 void put_picture(struct context *, char *, unsigned char *, int);
 unsigned char *get_pgm(FILE *, int, int);
 void preview_save(struct context *);
-unsigned char *scale_half_yuv420p(int, int, int, int, int, unsigned char*);
+unsigned char *scale_half_yuv420p(int, int, unsigned char*);
 
 #endif /* _INCLUDE_PICTURE_H_ */

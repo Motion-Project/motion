@@ -1155,7 +1155,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         int subsize = subwidth * subheight * 3 / 2;
 
         /* allocate new buffer and scale image */
-        img = scale_half_yuv420p (origwidth, origheight, subwidth, subheight, subsize, img);
+        img = scale_half_yuv420p (origwidth, origheight, img);
 
         image_width = subwidth;
         image_height = subheight;
