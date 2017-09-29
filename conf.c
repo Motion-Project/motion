@@ -1640,7 +1640,7 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmnos?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1)
@@ -1654,6 +1654,9 @@ static void conf_cmdline(struct context *cnt, int thread)
             break;
         case 's':
             conf->setup_mode = 1;
+            break;
+        case 'o':
+            cnt->dump_config_options = 1;
             break;
         case 'd':
             /* No validation - just take what user gives. */
@@ -2074,6 +2077,46 @@ struct context **conf_load(struct context **cnt)
         cnt[0]->conf.log_level = cnt[0]->log_level;
 
     return cnt;
+}
+
+/**
+ * dump_config_options
+ *      Dump config options to log, useful for support purposes.
+ *      Redact sensitive information and re-add quotation marks where needed (see conf_print).
+ *      Not using the MOTION_LOG macro here to skip the function naming,
+ *      and produce a slightly cleaner dump.
+ *
+ * Returns nothing
+ */
+void dump_config_options(struct context **cnt)
+{
+    unsigned int i, t = 0;
+    const char *name, *value;
+
+    while(cnt[++t]);
+    motion_log(NTC, TYPE_ALL, NO_ERRNO, "Dumping config options from all files (%d):", t);
+
+    for (t = 0; cnt[t]; t++) {
+        motion_log(NTC, TYPE_ALL, NO_ERRNO, "Thread %d - Config file: %s", t, cnt[t]->conf_filename);
+        i = 0;
+
+        while ((name = config_params[i].param_name) != NULL) {
+            if ((value = config_params[i].print(cnt, NULL, i, t)) != NULL) {
+                if (!strncmp(name, "netcam_url", 10) || !strncmp(name, "netcam_userpass", 15) ||
+                    !strncmp(name, "stream_authentication", 21) || !strncmp(name, "webcontrol_authentication", 25) ||
+                    !strncmp(name, "database_user", 13) || !strncmp(name, "database_password", 17))
+                {
+                    motion_log(NTC, TYPE_ALL, NO_ERRNO, "%s\t<redacted>", name);
+                } else {
+                    if (strncmp(name, "text", 4) || strncmp(value, " ", 1))
+                        motion_log(NTC, TYPE_ALL, NO_ERRNO, "%s\t%s", name, value);
+                    else
+                        motion_log(NTC, TYPE_ALL, NO_ERRNO, "%s\t\"%s\"", name, value);
+                }
+            }
+            i++;
+        }
+    }
 }
 
 /**
@@ -2566,6 +2609,7 @@ static void usage()
     printf("-b\t\t\tRun in background (daemon) mode.\n");
     printf("-n\t\t\tRun in non-daemon mode.\n");
     printf("-s\t\t\tRun in setup mode.\n");
+    printf("-o\t\t\tDump config options to log (for support purposes).\n");
     printf("-c config\t\tFull path and filename of config file.\n");
     printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). default: 6 / NTC.\n");
     printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");

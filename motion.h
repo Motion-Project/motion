@@ -378,6 +378,7 @@ struct context {
     char log_type_str[6];
     int log_level;
     unsigned int log_type;
+    unsigned int dump_config_options;
 
     struct config conf;
     struct images imgs;

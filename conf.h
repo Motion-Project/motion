@@ -184,6 +184,7 @@ struct context **conf_load(struct context **);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
 const char *config_type(config_param *);
 void conf_print(struct context **);
+void dump_config_options(struct context **);
 void malloc_strings(struct context *);
 char *mystrdup(const char *);
 char *mystrcpy(char *, const char *);
