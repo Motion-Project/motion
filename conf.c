@@ -1910,13 +1910,15 @@ void conf_print(struct context **cnt)
 
                     free(val);
                 } else if (thread == 0) {
+                    char value[PATH_MAX];
                     /* The 'camera_dir' option should keep the installed default value */
-                    sprintf(val, "%s","value");
                     if (!strncmp(config_params[i].param_name, "camera_dir", 10))
-                        sprintf(val, "%s",sysconfdir"/motion/conf.d");
+                        sprintf(value, "%s", sysconfdir"/motion/conf.d");
+                    else
+                        sprintf(value, "%s", "value");
 
                     fprintf(conffile, "%s\n", config_params[i].param_help);
-                    fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, val);
+                    fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, value);
                 }
             }
         }
