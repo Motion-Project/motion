@@ -33,6 +33,8 @@
 typedef void* (*auth_handler)(void*);
 struct auth_param {
     struct context *cnt;
+    struct stream *stm;
+    int *stream_count;
     int sock;
     int sock_flags;
     int* thread_count;
@@ -233,8 +235,8 @@ static void* handle_basic_auth(void* param)
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(&p->cnt->stream, p->sock);
-    p->cnt->stream_count++;
+    stream_add_client(p->stm, p->sock);
+    (*p->stream_count)++;
     p->thread_count--;
 
     /* Unlock the mutex */
@@ -596,8 +598,8 @@ Error:
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(&p->cnt->stream, p->sock);
-    p->cnt->stream_count++;
+    stream_add_client(p->stm, p->sock);
+    (*p->stream_count)++;
 
     p->thread_count--;
     /* Unlock the mutex */
@@ -629,7 +631,7 @@ Invalid_Request:
  *
  *
  */
-static void do_client_auth(struct context *cnt, int sc)
+static void do_client_auth(struct context *cnt, struct stream *stm, int *stream_count, int sc)
 {
     pthread_t thread_id;
     pthread_attr_t attr;
@@ -661,6 +663,8 @@ static void do_client_auth(struct context *cnt, int sc)
 
     handle_param = mymalloc(sizeof(struct auth_param));
     handle_param->cnt = cnt;
+    handle_param->stm = stm;
+    handle_param->stream_count = stream_count;
     handle_param->sock = sc;
     handle_param->conf = &cnt->conf;
     handle_param->thread_count = &thread_count;
@@ -1032,13 +1036,13 @@ static int stream_check_write(struct stream *list)
  *
  * Returns: stream socket descriptor.
  */
-int stream_init(struct context *cnt)
+int stream_init(struct stream *stm, int stream_port, int stream_localhost, int ipv6_enabled)
 {
-    cnt->stream.socket = http_bindsock(cnt->conf.stream_port, cnt->conf.stream_localhost,
-                                       cnt->conf.ipv6_enabled);
-    cnt->stream.next = NULL;
-    cnt->stream.prev = NULL;
-    return cnt->stream.socket;
+    stm->socket = http_bindsock(stream_port, stream_localhost, ipv6_enabled);
+    stm->next = NULL;
+    stm->prev = NULL;
+
+    return stm->socket;
 }
 
 /**
@@ -1046,16 +1050,17 @@ int stream_init(struct context *cnt)
  *      This function is called from the motion_loop when it ends
  *      and motion is terminated or restarted.
  */
-void stream_stop(struct context *cnt)
+void stream_stop(struct stream *stm)
 {
     struct stream *list;
-    struct stream *next = cnt->stream.next;
+    struct stream *next = stm->next;
 
+    /* TODO friendly info which socket is closing */
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Closing motion-stream listen socket"
                " & active motion-stream sockets");
 
-    close(cnt->stream.socket);
-    cnt->stream.socket = -1;
+    close(stm->socket);
+    stm->socket = -1;
 
     while (next) {
         list = next;
@@ -1090,12 +1095,13 @@ void stream_stop(struct context *cnt)
  *      Note: Clients that have disconnected are handled in the stream_flush()
  *          function.
  */
-void stream_put(struct context *cnt, unsigned char *image)
+void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsigned char *image,
+            int do_scale_down)
 {
     struct timeval timeout;
     struct stream_buffer *tmpbuffer;
     fd_set fdread;
-    int sl = cnt->stream.socket;
+    int sl = stm->socket;
     int sc;
     /* Tthe following string has an extra 16 chars at end for length. */
     const char jpeghead[] = "--BoundaryString\r\n"
@@ -1104,6 +1110,10 @@ void stream_put(struct context *cnt, unsigned char *image)
     int headlength = sizeof(jpeghead) - 1;    /* Don't include terminator. */
     char len[20];    /* Will be used for sprintf, must be >= 16 */
 
+    /* will point either to the original image or a scaled down */
+    unsigned char *img = image;
+    int image_width = cnt->imgs.width, image_height = cnt->imgs.height, image_size = cnt->imgs.size;
+
     /*
      * Timeout struct used to timeout the time we wait for a client
      * and we do not wait at all.
@@ -1111,7 +1121,7 @@ void stream_put(struct context *cnt, unsigned char *image)
     timeout.tv_sec = 0;
     timeout.tv_usec = 0;
     FD_ZERO(&fdread);
-    FD_SET(cnt->stream.socket, &fdread);
+    FD_SET(stm->socket, &fdread);
 
     /*
      * If we have not reached the max number of allowed clients per
@@ -1120,15 +1130,36 @@ void stream_put(struct context *cnt, unsigned char *image)
      * add this to the end of the chain of stream structs that are linked
      * to each other.
      */
-    if ((cnt->stream_count < DEF_MAXSTREAMS) &&
+    if ((*stream_count < DEF_MAXSTREAMS) &&
         (select(sl + 1, &fdread, NULL, NULL, &timeout) > 0)) {
         sc = http_acceptsock(sl);
         if (cnt->conf.stream_auth_method == 0) {
-            stream_add_client(&cnt->stream, sc);
-            cnt->stream_count++;
+            stream_add_client(stm, sc);
+            (*stream_count)++;
         } else  {
-            do_client_auth(cnt, sc);
+            do_client_auth(cnt, stm, stream_count, sc);
         }
+    }
+
+    /* if there is no connected clients - nothing to do, return */
+    if (*stream_count <= 0)
+        return;
+
+    /* substream put - scale image down and update pointer to the scaled buffer */
+    if (do_scale_down)
+    {
+        /* TODO for now just scale 50%, better resize image to a config predefined size */
+
+        int origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
+        int subwidth = origwidth/2, subheight = origheight/2;
+        int subsize = subwidth * subheight * 3 / 2;
+
+        /* allocate new buffer and scale image */
+        img = scale_half_yuv420p (origwidth, origheight, img);
+
+        image_width = subwidth;
+        image_height = subheight;
+        image_size = subsize;
     }
 
     /* Lock the mutex */
@@ -1137,10 +1168,10 @@ void stream_put(struct context *cnt, unsigned char *image)
 
 
     /* Call flush to send any previous partial-sends which are waiting. */
-    stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
+    stream_flush(stm, stream_count, cnt->conf.stream_limit);
 
     /* Check if any clients have available buffers. */
-    if (stream_check_write(&cnt->stream)) {
+    if (stream_check_write(stm)) {
         /*
          * Yes - create a new tmpbuffer for current image.
          * Note that this should create a buffer which is *much* larger
@@ -1172,8 +1203,8 @@ void stream_put(struct context *cnt, unsigned char *image)
             wptr += headlength;
 
             /* Create a jpeg image and place into tmpbuffer. */
-            tmpbuffer->size = put_picture_memory(cnt, wptr, cnt->imgs.size, image,
-                                                 cnt->conf.stream_quality);
+            tmpbuffer->size = put_picture_memory(cnt, wptr, image_size, img,
+                                       cnt->conf.stream_quality, image_width, image_height);
 
             /* Fill in the image length into the header. */
             imgsize = sprintf(len, "%9ld\r\n\r\n", tmpbuffer->size);
@@ -1193,7 +1224,7 @@ void stream_put(struct context *cnt, unsigned char *image)
              * And finally put this buffer to all clients with
              * no outstanding data from previous frames.
              */
-            stream_add_write(&cnt->stream, tmpbuffer, cnt->conf.stream_maxrate);
+            stream_add_write(stm, tmpbuffer, cnt->conf.stream_maxrate);
         } else {
             MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer");
         }
@@ -1203,11 +1234,17 @@ void stream_put(struct context *cnt, unsigned char *image)
      * Now we call flush again.  This time (assuming some clients were
      * ready for the new frame) the new data will be written out.
      */
-    stream_flush(&cnt->stream, &cnt->stream_count, cnt->conf.stream_limit);
+    stream_flush(stm, stream_count, cnt->conf.stream_limit);
 
     /* Unlock the mutex */
     if (cnt->conf.stream_auth_method != 0)
         pthread_mutex_unlock(&stream_auth_mutex);
+
+    /* free resized image buffer */
+    if (do_scale_down)
+    {
+        free (img);
+    }
 
     return;
 }

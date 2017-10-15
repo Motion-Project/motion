@@ -970,19 +970,17 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
  *
  * Returns the dest_image_size if successful. Otherwise 0.
  */
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size,
-                       unsigned char *image, int quality)
+int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
+        int quality, int width, int height)
 {
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+                                       width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
     case VIDEO_PALETTE_GREY:
-        return put_jpeg_grey_memory(dest_image, image_size, image,
-                                    cnt->imgs.width, cnt->imgs.height, quality);
+        return put_jpeg_grey_memory(dest_image, image_size, image, width, height, quality);
     default:
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d",
-                   cnt->imgs.type);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d", cnt->imgs.type);
     }
 
     return 0;
@@ -1232,3 +1230,31 @@ void preview_save(struct context *cnt)
         cnt->current_image = saved_current_image;
     }
 }
+
+/**
+ * scale_half_yuv420p
+ *      scale down by half yuv420p
+ *
+ * Returns pointer to scaled image
+ */
+
+unsigned char *scale_half_yuv420p(int origwidth, int origheight, unsigned char *img)
+{
+    /* allocate buffer for resized image */
+    unsigned char *scaled_img = mymalloc ((origwidth/2 * origheight/2) * 3 / 2);
+
+    int i = 0, x, y;
+    for (y = 0; y < origheight; y+=2)
+        for (x = 0; x < origwidth; x+=2)
+            scaled_img[i++] = img[y * origwidth + x];
+
+    for (y = 0; y < origheight / 2; y+=2)
+       for (x = 0; x < origwidth; x += 4)
+       {
+          scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
+          scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
+       }
+
+    return scaled_img;
+}
+

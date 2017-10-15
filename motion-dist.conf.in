@@ -466,6 +466,9 @@ ipv6_enabled off
 # The mini-http server listens to this port for requests (default: 0 = disabled)
 stream_port 8081
 
+# 50% scaled down substream (default: 0 = disabled)
+# substream_port 8082
+
 # Quality of the jpeg (in percent) images produced (default: 50)
 stream_quality 50
 
@@ -495,6 +498,7 @@ stream_auth_method 0
 ; stream_authentication username:password
 
 # Percentage to scale the stream image for preview
+# This is scaled on the browser side, motion will keep sending full frames
 # Default: 25
 ; stream_preview_scale 25
 

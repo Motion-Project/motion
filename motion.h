@@ -448,6 +448,10 @@ struct context {
     struct stream stream;
     int stream_count;
 
+    struct stream substream;
+    int substream_count;
+
+
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     int sql_mask;
 #endif
