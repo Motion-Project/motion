@@ -249,7 +249,7 @@ static void destroy_camera_buffer_structures(mmalcam_context_ptr mmalcam)
  *
  *      This routine is called from the main motion thread.  It's job is
  *      to open up the requested camera device via MMAL and do any required
- *      initialisation.
+ *      initialization.
  *
  * Parameters:
  *
@@ -289,7 +289,7 @@ int mmalcam_start(struct context *cnt)
 
     cnt->imgs.width = mmalcam->width;
     cnt->imgs.height = mmalcam->height;
-    cnt->imgs.size = (mmalcam->width * mmalcam->height * 3) / 2;
+    cnt->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
     cnt->imgs.motionsize = mmalcam->width * mmalcam->height;
     cnt->imgs.type = VIDEO_PALETTE_YUV420P;
 
@@ -370,7 +370,7 @@ void mmalcam_cleanup(struct mmalcam_context *mmalcam)
  *
  * Returns:             Error code
  */
-int mmalcam_next(struct context *cnt, unsigned char *map)
+int mmalcam_next(struct context *cnt,  struct image_data *img_data)
 {
     mmalcam_context_ptr mmalcam;
 
@@ -382,14 +382,14 @@ int mmalcam_next(struct context *cnt, unsigned char *map)
     MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
 
     if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
-            && camera_buffer->length >= cnt->imgs.size) {
+            && camera_buffer->length >= cnt->imgs.size_norm) {
         mmal_buffer_header_mem_lock(camera_buffer);
-        memcpy(map, camera_buffer->data, cnt->imgs.size);
+        memcpy(img_data->image_norm, camera_buffer->data, cnt->imgs.size_norm);
         mmal_buffer_header_mem_unlock(camera_buffer);
     } else {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "cmd %d flags %08x size %d/%d at %08x, img_size=%d",
                 camera_buffer->cmd, camera_buffer->flags, camera_buffer->length,
-                camera_buffer->alloc_size, camera_buffer->data, cnt->imgs.size);
+                camera_buffer->alloc_size, camera_buffer->data, cnt->imgs.size_norm);
     }
 
     mmal_buffer_header_release(camera_buffer);
@@ -406,8 +406,7 @@ int mmalcam_next(struct context *cnt, unsigned char *map)
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to return a buffer to the camera video port");
     }
 
-    if (cnt->rotate_data.degrees > 0 || cnt->rotate_data.axis != FLIP_TYPE_NONE)
-        rotate_map(cnt, map);
+    rotate_map(cnt,img_data);
 
     return 0;
 }

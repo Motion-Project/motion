@@ -312,7 +312,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     /* Each IFD takes 12 bytes per tag, plus six more (the tag count and the
      * pointer to the next IFD, always zero in our case)
      */
-    unsigned int ifds_size =
+    int ifds_size =
     ( ifd1_tagcount > 0 ? ( 12 * ifd1_tagcount + 6 ) : 0 ) +
     ( ifd0_tagcount > 0 ? ( 12 * ifd0_tagcount + 6 ) : 0 );
 
@@ -986,26 +986,34 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     return 0;
 }
 
-void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality)
-{
+static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype){
+    int width, height;
+
+    if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!cnt->conf.ffmpeg_passthrough)) {
+        width = cnt->imgs.width_high;
+        height = cnt->imgs.height_high;
+    } else {
+        width = cnt->imgs.width;
+        height = cnt->imgs.height;
+    }
+
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
-        put_ppm_bgr24_file(picture, image, cnt->imgs.width, cnt->imgs.height);
+        put_ppm_bgr24_file(picture, image, width, height);
     } else {
         switch (cnt->imgs.type) {
         case VIDEO_PALETTE_YUV420P:
             #ifdef HAVE_WEBP
             if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
-                put_webp_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
+                put_webp_yuv420p_file(picture, image, width, height, quality);
             #endif /* HAVE_WEBP */
             if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
-                put_jpeg_yuv420p_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+                put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
             break;
         case VIDEO_PALETTE_GREY:
-            put_jpeg_grey_file(picture, image, cnt->imgs.width, cnt->imgs.height, quality);
+            put_jpeg_grey_file(picture, image, width, height, quality);
             break;
         default:
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d",
-                       cnt->imgs.type);
+            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d", cnt->imgs.type);
         }
     }
 }
@@ -1032,7 +1040,8 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
         }
     }
 
-    put_picture_fd(cnt, picture, image, cnt->conf.quality);
+    put_picture_fd(cnt, picture, image, cnt->conf.quality, ftype);
+
     myfclose(picture);
     event(cnt, EVENT_FILECREATE, NULL, file, (void *)(unsigned long)ftype, NULL);
 }
@@ -1051,12 +1060,12 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     line[255] = 0;
 
     if (!fgets(line, 255, picture)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Could not read from ppm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Could not read from pgm file");
         return NULL;
     }
 
     if (strncmp(line, "P5", 2)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "This is not a ppm file, starts with '%s'",
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "This is not a pgm file, starts with '%s'",
                    line);
         return NULL;
     }
@@ -1148,7 +1157,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
         }
         return;
     }
-    memset(cnt->imgs.out, 255, cnt->imgs.motionsize); /* Initialize to unset */
+    memset(cnt->imgs.img_motion.image_norm, 255, cnt->imgs.motionsize); /* Initialize to unset */
 
     /* Write pgm-header. */
     fprintf(picture, "P5\n");
@@ -1156,7 +1165,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
     fprintf(picture, "%d\n", 255);
 
     /* Write pgm image data at once. */
-    if ((int)fwrite(cnt->imgs.out, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
+    if ((int)fwrite(cnt->imgs.img_motion.image_norm, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed writing default mask as pgm file");
         return;
     }
@@ -1204,7 +1213,7 @@ void preview_save(struct context *cnt)
 
             previewname[basename_len] = '\0';
             strcat(previewname, imageext(cnt));
-            put_picture(cnt, previewname, cnt->imgs.preview_image.image , FTYPE_IMAGE);
+            put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm , FTYPE_IMAGE);
         } else {
             /*
              * Save best preview-shot also when no movies are recorded or imagepath
@@ -1223,7 +1232,7 @@ void preview_save(struct context *cnt)
             mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0);
             snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
-            put_picture(cnt, previewname, cnt->imgs.preview_image.image, FTYPE_IMAGE);
+            put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm, FTYPE_IMAGE);
         }
 
         /* Restore global context values. */

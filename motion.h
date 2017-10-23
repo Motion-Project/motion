@@ -10,6 +10,10 @@
 #ifndef _INCLUDE_MOTION_H
 #define _INCLUDE_MOTION_H
 
+/* Forward declarations, used in functional definitions of headers */
+struct images;
+struct image_data;
+
 #include "config.h"
 
 /* Includes */
@@ -58,6 +62,16 @@
 #include "stream.h"
 #include "webhttpd.h"
 
+#include "track.h"
+#include "netcam.h"
+#include "netcam_rtsp.h"
+#include "ffmpeg.h"
+
+#ifdef HAVE_MMAL
+#include "mmalcam.h"
+#endif
+
+
 #ifdef __APPLE__
 #define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(name)
 #elif defined(BSD)
@@ -67,6 +81,8 @@
 #else
 #define MOTION_PTHREAD_SETNAME(name)
 #endif
+
+
 
 /**
  * ATTRIBUTE_UNUSED:
@@ -213,15 +229,6 @@
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
 
-/* Forward declaration, used in track.h */
-struct images;
-
-#include "track.h"
-#include "netcam.h"
-
-#ifdef HAVE_MMAL
-#include "mmalcam.h"
-#endif
 
 /*
  * Structure to hold images information
@@ -244,11 +251,13 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_V4L2,
     CAMERA_TYPE_BKTR,
     CAMERA_TYPE_MMAL,
+    CAMERA_TYPE_RTSP,
     CAMERA_TYPE_NETCAM
 };
 
 struct image_data {
-    unsigned char *image;
+    unsigned char *image_norm;
+    unsigned char *image_high;
     int diffs;
     struct timeval timestamp_tv;
     int shot;                   /* Sub second timestamp count */
@@ -264,6 +273,15 @@ struct image_data {
     struct coord location;      /* coordinates for center and size of last motion detection*/
 
     int total_labels;
+
+#ifdef HAVE_FFMPEG
+    AVPacket    packet_norm;    /* The packet from the normal resolution rtsp thread */
+    AVPacket    packet_high;    /* The packet from the high resolution rtsp thread */
+#else
+    int         packet_norm;    /* Dummy variables for the without ffmpeg option */
+    int         packet_high;    /* Dummy variables for the without ffmpeg option */
+#endif // HAVE_FFMPEG
+
 };
 
 /*
@@ -303,9 +321,9 @@ struct images {
     int image_ring_out;               /* Index in image ring buffer we want to process next time */
 
     unsigned char *ref;               /* The reference frame */
-    unsigned char *out;               /* Picture buffer for motion images */
+    struct image_data img_motion;     /* Picture buffer for motion images */
     int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
-    unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
+    struct image_data image_virgin;   /* Last picture frame with no text or locate overlay */
     struct image_data preview_image;  /* Picture buffer for best image when enables */
     unsigned char *mask;              /* Buffer for the mask file */
     unsigned char *smartmask;
@@ -315,6 +333,9 @@ struct images {
     unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
     unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
 
+    unsigned char *mask_privacy_high;      /* Buffer for the privacy mask values */
+    unsigned char *mask_privacy_high_uv;   /* Buffer for the privacy U&V values */
+
     int *smartmask_buffer;
     int *labels;
     int *labelsize;
@@ -322,7 +343,12 @@ struct images {
     int height;
     int type;
     int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */
-    int size;
+    int size_norm;                    /* Number of bytes for normal size image */
+
+    int width_high;
+    int height_high;
+    int size_high;                 /* Number of bytes for high resolution image */
+
     int motionsize;
     int labelgroup_max;
     int labels_above;
@@ -338,28 +364,18 @@ enum FLIP_TYPE {
 
 /* Contains data for image rotation, see rotate.c. */
 struct rotdata {
-    /* Temporary buffer for 90 and 270 degrees rotation. */
-    unsigned char *temp_buf;
-    /*
-     * Degrees to rotate; copied from conf.rotate_deg. This is the value
-     * that is actually used. The value of conf.rotate_deg cannot be used
-     * because it can be changed by motion-control, and changing rotation
-     * while Motion is running just causes problems.
-     */
-    int degrees;
 
-    /*
-     * Rotate image over the Horizontal or Vertical axis.
-     * As with degrees, this is the value actually used, and value of conf.flip_axis
-     * cannot be used.
-     */
-    enum FLIP_TYPE axis;
-    /*
-     * Capture width and height - different from output width and height if
-     * rotating 90 or 270 degrees.
-     */
-    int cap_width;
-    int cap_height;
+    unsigned char *buffer_norm;  /* Temporary buffer for 90 and 270 degrees rotation of normal resolution image. */
+    unsigned char *buffer_high;  /* Temporary buffer for 90 and 270 degrees rotation of high resolution image. */
+    int degrees;              /* Degrees to rotate; copied from conf.rotate_deg. */
+    enum FLIP_TYPE axis;      /* Rotate image over the Horizontal or Vertical axis. */
+
+    int capture_width_norm;            /* Capture width of normal resolution image */
+    int capture_height_norm;           /* Capture height of normal resolution image */
+
+    int capture_width_high;            /* Capture width of high resolution image */
+    int capture_height_high;           /* Capture height of high resolution image */
+
 };
 
 /*
@@ -389,8 +405,10 @@ struct context {
 #ifdef HAVE_MMAL
     struct mmalcam_context *mmalcam;
 #endif
+    rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
+    rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
 
-    struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
+    struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
 
     int locate_motion_mode;
@@ -478,7 +496,7 @@ struct context {
     struct ffmpeg *ffmpeg_output;
     struct ffmpeg *ffmpeg_output_debug;
     struct ffmpeg *ffmpeg_timelapse;
-    struct ffmpeg *ffmpeg_smartmask;
+
     char timelapsefilename[PATH_MAX];
     char motionfilename[PATH_MAX];
 
@@ -527,4 +545,9 @@ FILE * myfopen(const char *, const char *);
 int myfclose(FILE *);
 size_t mystrftime(const struct context *, char *, size_t, const char *, const struct timeval *, const char *, int);
 int create_path(const char *);
+
+void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
+void util_threadname_get(char *threadname);
+void util_check_passthrough(struct context *cnt);
+
 #endif /* _INCLUDE_MOTION_H */

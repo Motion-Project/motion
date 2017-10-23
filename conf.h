@@ -67,6 +67,7 @@ struct config {
     int ffmpeg_output_debug;
     int ffmpeg_bps;
     int ffmpeg_vbr;
+    int ffmpeg_passthrough;
     const char *ffmpeg_video_codec;
     int ipv6_enabled;
     int stream_port;
@@ -124,6 +125,7 @@ struct config {
     char *on_camera_found;
     const char *motionvidpipe;
     const char *netcam_url;
+    const char *netcam_highres;
     const char *netcam_userpass;
     const char *netcam_keepalive;
     const char *netcam_proxy;

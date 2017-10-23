@@ -31,6 +31,7 @@ typedef struct ftp_context {
     int       control_buffer_answer;
 } ftp_context, *ftp_context_pointer;
 
+
 /* The public interface */
 ftp_context_pointer ftp_new_context(void);
 void ftp_free_context(ftp_context_pointer);
@@ -40,4 +41,6 @@ int ftp_send_type(ftp_context_pointer, const char);
 int ftp_get_socket(ftp_context_pointer);
 int ftp_read(ftp_context_pointer, void *, int);
 int ftp_close(ftp_context_pointer);
+int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url);
+
 #endif
