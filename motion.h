@@ -103,6 +103,11 @@
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
+/* CDL */
+#define LARGE_TEXT_SCALING 4
+#define CHAR_WIDTH (LARGE_TEXT_SCALING * 7)
+#define CHAR_HEIGHT (LARGE_TEXT_SCALING * 8)
+
 #define VIDEO_PALETTE_GREY      1       /* Linear greyscale */
 #define VIDEO_PALETTE_HI240     2       /* High 240 cube (BT848) */
 #define VIDEO_PALETTE_RGB565    3       /* 565 16 bit RGB */

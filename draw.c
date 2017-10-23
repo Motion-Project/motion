@@ -26,7 +26,7 @@ struct draw_char {
 
 struct big_char {
     unsigned char ascii;
-    unsigned char pix[16][14];
+    unsigned char pix[8*LARGE_TEXT_SCALING][7*LARGE_TEXT_SCALING];
 };
 
 struct draw_char draw_table[]= {
@@ -1139,6 +1139,7 @@ int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, un
 {
     int num_nl = 0;
     const char *end, *begin;
+    factor = LARGE_TEXT_SCALING-1;
     const int line_space = (factor + 1) * 9;
 
     /* Count the number of newlines in "text" so we scroll it up the image. */
@@ -1177,13 +1178,13 @@ int initialize_chars(void)
 
     draw_table_size = sizeof(draw_table) / sizeof(struct draw_char);
 
-    /* Fill the structure 'big_table' with double sized characters. */
+    /* Fill the structure 'big_table' with large characters. */
     for (i = 0; i < draw_table_size; i++) {
         big_table[i].ascii = draw_table[i].ascii;
 
-        for(x = 0; x < 14; x++) {
-            for(y = 0; y < 16; y++)
-                big_table[i].pix[y][x] = draw_table[i].pix[y / 2][x / 2];
+        for(x = 0; x < 7*LARGE_TEXT_SCALING; x++) {
+            for(y = 0; y < 8*LARGE_TEXT_SCALING; y++)
+                big_table[i].pix[y][x] = draw_table[i].pix[y / LARGE_TEXT_SCALING][x / LARGE_TEXT_SCALING];
 
         }
     }
