@@ -41,6 +41,27 @@ struct auth_param {
     struct config *conf;
 };
 
+/**
+ * get_host
+ *      Gets the host (IP) of a client from the socket file descriptor
+ * Returns nothing
+ */
+static void get_host(char *buf, int fd)
+{
+    struct sockaddr_storage client;
+    socklen_t client_len = sizeof(client);
+    int res = getpeername(fd, (struct sockaddr *)&client, &client_len);
+    if (res != 0)
+        return;
+
+    char host[NI_MAXHOST];
+    res = getnameinfo((struct sockaddr *)&client, client_len, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
+    if (res != 0)
+        return;
+
+    strncpy(buf, host, NI_MAXHOST - 1);
+}
+
 pthread_mutex_t stream_auth_mutex;
 
 /**
@@ -219,6 +240,9 @@ static void* handle_basic_auth(void* param)
 
         if (strcmp(auth, authentication)) {
             free(authentication);
+            char host[NI_MAXHOST] = "unknown";
+            get_host(host, p->sock);
+            MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "motion-stream - failed auth attempt from %s", host);
             goto Error;
         }
         free(authentication);
