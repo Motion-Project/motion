@@ -152,7 +152,7 @@ void my_avcodec_close(AVCodecContext *codec_context){
 /*********************************************/
 int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-    return av_copy_packet(dest_pkt, src_pkt);
+    return av_packet_ref(dest_pkt, src_pkt);
 #else
     /* Old versions of libav do not support copying packet
      * We therefore disable the pass through recording and
