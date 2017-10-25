@@ -1138,6 +1138,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
     unsigned char *img = image;
     int image_width = cnt->imgs.width;
     int image_height = cnt->imgs.height;
+    int image_size = cnt->imgs.size_norm;
     /*
      * Timeout struct used to timeout the time we wait for a client
      * and we do not wait at all.
@@ -1175,12 +1176,14 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
 
         int origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
         int subwidth = origwidth/2, subheight = origheight/2;
+        int subsize = subwidth * subheight * 3 / 2;
 
         /* allocate new buffer and scale image */
         img = scale_half_yuv420p (origwidth, origheight, img);
 
         image_width = subwidth;
         image_height = subheight;
+        image_size = subsize;
     }
 
     /* Lock the mutex */
@@ -1224,7 +1227,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
             wptr += headlength;
 
             /* Create a jpeg image and place into tmpbuffer. */
-            tmpbuffer->size = put_picture_memory(cnt, wptr, cnt->imgs.size_norm, image,
+            tmpbuffer->size = put_picture_memory(cnt, wptr, image_size, img,
                                        cnt->conf.stream_quality, image_width, image_height);
 
             /* Fill in the image length into the header. */

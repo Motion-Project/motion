@@ -976,7 +976,9 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_YUV420P:
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+                                       width, height, quality, cnt
+                                       , &(cnt->current_image->timestamp_tv)
+                                       , &(cnt->current_image->location));
     case VIDEO_PALETTE_GREY:
         return put_jpeg_grey_memory(dest_image, image_size, image, width, height, quality);
     default:
