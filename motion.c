@@ -994,6 +994,10 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Motion only supports width and height modulo 8");
         return -3;
     }
+    /* We set size_high here so that it can be used in the retry function to determine whether
+     * we need to break and reallocate buffers
+     */
+    cnt->imgs.size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
 
     image_ring_resize(cnt, 1); /* Create a initial precapture ring buffer with 1 frame */
 
@@ -1716,16 +1720,16 @@ static void mlp_resetimages(struct context *cnt){
 
 static int mlp_retry(struct context *cnt){
 
-    /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
     /*
      * If a camera is not available we keep on retrying every 10 seconds
      * until it shows up.
      */
+    int size_high;
+
     if (cnt->video_dev < 0 &&
         cnt->currenttime % 10 == 0 && cnt->shots == 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,
-            "Retrying until successful connection with camera");
-            cnt->video_dev = vid_start(cnt);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Retrying until successful connection with camera");
+        cnt->video_dev = vid_start(cnt);
         /*
          * If the netcam has different dimensions than in the config file
          * we need to restart Motion to re-allocate all the buffers
@@ -1744,6 +1748,13 @@ static int mlp_retry(struct context *cnt){
              */
             return 1;
         }
+        /*
+         * For high res, we check the size of buffer to determine whether to break out
+         * the init_motion function allocated the buffer for high using the cnt->imgs.size_high
+         * and the vid_start ONLY re-populates the height/width so we can check the size here.
+         */
+        size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
+        if (cnt->imgs.size_high != size_high) return 1;
     }
     return 0;
 }

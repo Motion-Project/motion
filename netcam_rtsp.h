@@ -41,6 +41,7 @@ typedef struct rtsp {
     enum RTSP_STATUS          status;                /* Status of whether the camera is connecting, closed, etc*/
     struct timeval            interruptstarttime;    /* The time set before calling the av functions */
     struct timeval            interruptcurrenttime;  /* Time during the interrupt to determine duration since start*/
+    int                       interruptduration;      /* Seconds permitted before triggering a interrupt */
 
     netcam_buff_ptr           img_recv;         /* The image buffer that is currently being processed */
     netcam_buff_ptr           img_latest;       /* The most recent image buffer that finished processing */

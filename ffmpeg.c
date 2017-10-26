@@ -930,16 +930,21 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
     char buf[1024];
     char *end;
 
-    /* Flatten the message coming in from avcodec. */
-    vsnprintf(buf, sizeof(buf), fmt, vl);
-    end = buf + strlen(buf);
-    if (end > buf && end[-1] == '\n')
-    {
-        *--end = 0;
-    }
-
-    //We put the avcodec messages to INF level since their error are not necessarily our errors.
+    /* Valgrind occasionally reports use of uninitialized values in here when we interrupt
+     * some rtsp functions.  The offending value is either fmt or vl and seems to be from a
+     * debug level of av functions.  To address it we flatten the message after we know
+     * the log level.  Now we put the avcodec messages to INF level since their error
+     * are not necessarily our errors.
+     */
     if (errno_flag <= AV_LOG_WARNING){
+        /* Flatten the message coming in from avcodec. */
+        vsnprintf(buf, sizeof(buf), fmt, vl);
+        end = buf + strlen(buf);
+        if (end > buf && end[-1] == '\n')
+        {
+            *--end = 0;
+        }
+
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
     }
 }

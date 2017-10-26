@@ -302,7 +302,7 @@ static int netcam_rtsp_interrupt(void *ctx){
         return FALSE;
     } else if (rtsp_data->status == RTSP_READINGIMAGE) {
         netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
-        if ((rtsp_data->interruptcurrenttime.tv_sec - rtsp_data->interruptstarttime.tv_sec ) > 10){
+        if ((rtsp_data->interruptcurrenttime.tv_sec - rtsp_data->interruptstarttime.tv_sec ) > rtsp_data->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Camera reading (%s) timed out"
                        , rtsp_data->cameratype, rtsp_data->camera_name);
             rtsp_data->interrupted = TRUE;
@@ -317,7 +317,7 @@ static int netcam_rtsp_interrupt(void *ctx){
          * would need to reset the time before each call to a ffmpeg function.
         */
         netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
-        if ((rtsp_data->interruptcurrenttime.tv_sec - rtsp_data->interruptstarttime.tv_sec ) > 30){
+        if ((rtsp_data->interruptcurrenttime.tv_sec - rtsp_data->interruptstarttime.tv_sec ) > rtsp_data->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Camera (%s) timed out"
                        , rtsp_data->cameratype, rtsp_data->camera_name);
             rtsp_data->interrupted = TRUE;
@@ -427,6 +427,7 @@ static int netcam_rtsp_read_image(rtsp_context *rtsp_data){
 
     rtsp_data->interrupted=FALSE;
     netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
+    rtsp_data->interruptduration = 10;
 
     rtsp_data->status = RTSP_READINGIMAGE;
     rtsp_data->img_recv->used = 0;
@@ -751,6 +752,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, rtsp_context *rtsp_data 
     sprintf(rtsp_data->threadname, "%s","Unknown");
     netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
     netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
+    rtsp_data->interruptduration = 5;
     rtsp_data->passthrough = cnt->conf.ffmpeg_passthrough;
     rtsp_data->interrupted = FALSE;
     netcam_rtsp_set_path(cnt, rtsp_data);
@@ -810,6 +812,7 @@ static int netcam_rtsp_open_context(rtsp_context *rtsp_data){
     rtsp_data->interrupted = FALSE;
 
     netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
+    rtsp_data->interruptduration = 20;
 
     if (strncmp(rtsp_data->service, "http", 4) == 0 ){
         netcam_rtsp_set_http(rtsp_data);
@@ -820,6 +823,20 @@ static int netcam_rtsp_open_context(rtsp_context *rtsp_data){
     } else {
         av_dict_free(&rtsp_data->opts);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Invalid camera service", rtsp_data->cameratype);
+        return -1;
+    }
+    /*
+     * There is not many av functions above this (av_dict_free?) but we are not getting clean
+     * interrupts or shutdowns via valgrind and they all point to issues with the avformat_open_input
+     * right below so we make sure that we are not in a interrupt / finish situation before calling it
+     */
+    if ((rtsp_data->interrupted) || (rtsp_data->finish) ){
+        if (rtsp_data->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Unable to open camera(%s)"
+                       , rtsp_data->cameratype, rtsp_data->camera_name);
+        }
+        av_dict_free(&rtsp_data->opts);
+        if (rtsp_data->interrupted) netcam_rtsp_close_context(rtsp_data);
         return -1;
     }
 
@@ -1119,7 +1136,6 @@ int netcam_rtsp_setup(struct context *cnt){
         if (rtsp_data->high_resolution){
             cnt->imgs.width_high = rtsp_data->imgsize.width;
             cnt->imgs.height_high = rtsp_data->imgsize.height;
-            cnt->imgs.size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
         }
 
         retcd = netcam_rtsp_start_handler(rtsp_data);
@@ -1228,10 +1244,14 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
         if (rtsp_data){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Shutting down network camera.",rtsp_data->cameratype);
 
-            /* Throw the finish flag to handler and wait a bit for it to finish its work and close everything */
+            /* Throw the finish flag in context and wait a bit for it to finish its work and close everything
+             * This is shutting down the thread so for the moment, we are not worrying about the
+             * cross threading and protecting these variables with mutex's
+            */
             rtsp_data->finish = TRUE;
+            rtsp_data->interruptduration = 0;
             wait_counter = 0;
-            while ((!rtsp_data->handler_finished) && (wait_counter < 15)) {
+            while ((!rtsp_data->handler_finished) && (wait_counter < 10)) {
                 SLEEP(1,0);
                 wait_counter++;
             }
@@ -1239,6 +1259,7 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: No response from handler thread.",rtsp_data->cameratype);
                 /* Last resort.  Kill the thread. Not safe for posix.  Uncomment if we must later...*/
                 /* pthread_kill(rtsp_data->thread_id); */
+                pthread_cancel(rtsp_data->thread_id);
                 if (!init_retry_flag){
                     pthread_mutex_lock(&global_lock);
                         threads_running--;
