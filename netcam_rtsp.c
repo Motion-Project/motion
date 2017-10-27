@@ -468,7 +468,11 @@ static int netcam_rtsp_read_image(rtsp_context *rtsp_data){
             return -1;
         }
     }
-    rtsp_data->status = RTSP_CONNECTED;
+    /* Skip status change on our first image to keep the "next" function waiting
+     * until the handler thread gets going
+     */
+    if (!rtsp_data->first_image) rtsp_data->status = RTSP_CONNECTED;
+
 
     /* Skip resize/pix format for high pass-through */
     if (!(rtsp_data->high_resolution && rtsp_data->passthrough)){
@@ -746,7 +750,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, rtsp_context *rtsp_data 
     rtsp_data->img_latest = mymalloc(sizeof(netcam_buff));
     rtsp_data->img_latest->ptr = mymalloc(NETCAM_BUFFSIZE);
     rtsp_data->handler_finished = TRUE;
-    rtsp_data->first_image = 1;
+    rtsp_data->first_image = TRUE;
     sprintf(rtsp_data->threadname, "%s","Unknown");
     netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
     netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
@@ -936,7 +940,13 @@ static int netcam_rtsp_connect(rtsp_context *rtsp_data){
 
     if (netcam_rtsp_read_image(rtsp_data) < 0) return -1;
 
-    rtsp_data->status = RTSP_CONNECTED;
+    /* We use the status for determining whether to grab a image from
+     * the Motion loop(see "next" function).  When we are initially starting,
+     * we open and close the context and during this process we do not want the
+     * Motion loop to start quite yet on this first image so we do
+     * not set the status to connected
+     */
+    if (!rtsp_data->first_image) rtsp_data->status = RTSP_CONNECTED;
 
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "%s: Camera (%s) connected"
                , rtsp_data->cameratype,rtsp_data->camera_name);
@@ -1082,8 +1092,7 @@ int netcam_rtsp_setup(struct context *cnt){
     cnt->rtsp = NULL;
     cnt->rtsp_high = NULL;
 
-    retcd = netcam_rtsp_set_dimensions(cnt);
-    if (retcd < 0 ) return retcd;
+    if (netcam_rtsp_set_dimensions(cnt) < 0 ) return -1;
 
     indx_cam = 1;
     indx_max = 1;
@@ -1112,8 +1121,7 @@ int netcam_rtsp_setup(struct context *cnt){
 
         netcam_rtsp_set_parms(cnt, rtsp_data);
 
-        retcd = netcam_rtsp_connect(rtsp_data);
-        if (retcd < 0) return -1;
+        if (netcam_rtsp_connect(rtsp_data) < 0) return -1;
 
         retcd = netcam_rtsp_read_image(rtsp_data);
         if (retcd < 0){
@@ -1124,8 +1132,7 @@ int netcam_rtsp_setup(struct context *cnt){
         /* When running dual, there seems to be contamination across norm/high with codec functions. */
         netcam_rtsp_close_context(rtsp_data);       /* Close in this thread to open it again within handler thread */
         rtsp_data->status = RTSP_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
-        rtsp_data->first_image = FALSE;             /* Set flag to avoid resize messages on subsequent opens */
-
+        rtsp_data->first_image = FALSE;             /* Set flag that we are not processing our first image */
 
         /* For normal resolution, we resize the image to the config parms so we do not need
          * to set the dimension parameters here (it is done in the set_parms).  For high res
@@ -1136,8 +1143,7 @@ int netcam_rtsp_setup(struct context *cnt){
             cnt->imgs.height_high = rtsp_data->imgsize.height;
         }
 
-        retcd = netcam_rtsp_start_handler(rtsp_data);
-        if (retcd < 0 ) return retcd;
+        if (netcam_rtsp_start_handler(rtsp_data) < 0 ) return -1;
 
         indx_cam++;
     }
@@ -1158,8 +1164,6 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
     int  retcd;
     char errstr[128];
 
-    retcd = 0;
-
     if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
         (cnt->rtsp->status == RTSP_NOTCONNECTED)) return 1;
     pthread_mutex_lock(&cnt->rtsp->mutex);
@@ -1174,7 +1178,6 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
                 if (retcd < 0) {
                     av_strerror(retcd, errstr, sizeof(errstr));
                     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: av_copy_packet: %s",cnt->rtsp->cameratype,errstr);
-                    my_packet_unref(img_data->packet_norm);
                     img_data->packet_norm.data = NULL;
                     img_data->packet_norm.size = 0;
                     pthread_mutex_unlock(&cnt->rtsp->mutex);
@@ -1200,7 +1203,6 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
                     if (retcd < 0) {
                         av_strerror(retcd, errstr, sizeof(errstr));
                         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: av_copy_packet: %s",cnt->rtsp_high->cameratype,errstr);
-                        my_packet_unref(img_data->packet_high);
                         img_data->packet_high.data = NULL;
                         img_data->packet_high.size = 0;
                         pthread_mutex_unlock(&cnt->rtsp_high->mutex);

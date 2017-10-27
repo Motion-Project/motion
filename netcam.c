@@ -591,6 +591,7 @@ int netcam_start(struct context *cnt){
     pthread_attr_t handler_attribute; /* Attributes of our handler thread. */
     int retval;                       /* Working var. */
     struct url_t url;                 /* For parsing netcam URL. */
+    char    err_service[6];
 
     memset(&url, 0, sizeof(url));
 
@@ -650,7 +651,8 @@ int netcam_start(struct context *cnt){
     netcam_url_parse(&url, cnt->conf.netcam_url);
 
     if (!url.service) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Invalid netcam service '%s' ", url.service);
+        snprintf(err_service,5,"%s",cnt->conf.netcam_url);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Invalid netcam service '%s' ", err_service);
         netcam_url_free(&url);
         return -1;
     }
