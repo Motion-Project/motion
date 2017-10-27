@@ -291,8 +291,6 @@ static rtsp_context *rtsp_new_context(void){
 static int netcam_rtsp_interrupt(void *ctx){
     rtsp_context *rtsp_data = ctx;
 
-    if (rtsp_data->interrupted) return FALSE;
-
     if (rtsp_data->finish){
         rtsp_data->interrupted = TRUE;
         return TRUE;
@@ -1161,6 +1159,9 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
     char errstr[128];
 
     retcd = 0;
+
+    if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
+        (cnt->rtsp->status == RTSP_NOTCONNECTED)) return 1;
     pthread_mutex_lock(&cnt->rtsp->mutex);
         if (cnt->rtsp->passthrough){
             if ((!cnt->rtsp->interrupted) && (cnt->rtsp->packet_latest.data != NULL)) {
@@ -1176,6 +1177,8 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
                     my_packet_unref(img_data->packet_norm);
                     img_data->packet_norm.data = NULL;
                     img_data->packet_norm.size = 0;
+                    pthread_mutex_unlock(&cnt->rtsp->mutex);
+                    return 1;  /* Non fatal bad image */
                 }
             }
         }
@@ -1183,6 +1186,8 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
     pthread_mutex_unlock(&cnt->rtsp->mutex);
 
     if (cnt->rtsp_high){
+        if ((cnt->rtsp_high->status == RTSP_RECONNECTING) ||
+            (cnt->rtsp_high->status == RTSP_NOTCONNECTED)) return 1;
         pthread_mutex_lock(&cnt->rtsp_high->mutex);
             if (cnt->rtsp_high->passthrough){
                 if ((!cnt->rtsp_high->interrupted) && (cnt->rtsp_high->packet_latest.data != NULL)) {
@@ -1198,6 +1203,8 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
                         my_packet_unref(img_data->packet_high);
                         img_data->packet_high.data = NULL;
                         img_data->packet_high.size = 0;
+                        pthread_mutex_unlock(&cnt->rtsp_high->mutex);
+                        return 1;
                     }
                 }
             }
