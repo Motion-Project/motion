@@ -22,8 +22,6 @@
 */
 
 
-#include "config.h"
-#include "ffmpeg.h"
 #include "motion.h"
 
 #ifdef HAVE_FFMPEG
@@ -149,6 +147,22 @@ void my_avcodec_close(AVCodecContext *codec_context){
     avcodec_free_context(&codec_context);
 #else
     avcodec_close(codec_context);
+#endif
+}
+/*********************************************/
+int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
+#if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+    return av_packet_ref(dest_pkt, src_pkt);
+#else
+    /* Old versions of libav do not support copying packet
+     * We therefore disable the pass through recording and
+     * for this function, simply do not do anything
+    */
+    if (dest_pkt == src_pkt ){
+        return 0;
+    } else {
+        return 0;
+    }
 #endif
 }
 /*********************************************/
@@ -357,6 +371,8 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     retcd = avcodec_receive_packet(ffmpeg->ctx_codec, &ffmpeg->pkt);
     if (retcd == AVERROR(EAGAIN)){
         //Buffered packet.  Throw special return code
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "Receive packet threw EAGAIN returning -2 code :%s",errstr);
         my_packet_unref(ffmpeg->pkt);
         return -2;
     }
@@ -459,6 +475,35 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
             return -1;
         }
         ffmpeg->last_pts = ffmpeg->picture->pts;
+    }
+    return 0;
+}
+
+static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+
+    int64_t pts_interval;
+
+    if (ffmpeg->tlapse != TIMELAPSE_NONE) {
+        ffmpeg->last_pts++;
+        ffmpeg->pkt.pts = ffmpeg->last_pts;
+    } else {
+        pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
+        if (pts_interval < 0){
+            /* This can occur when we have pre-capture frames.  Reset start time of video. */
+            ffmpeg_reset_movie_start_time(ffmpeg, tv1);
+            pts_interval = 0;
+        }
+        ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
+
+        if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
+            //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
+            if (ffmpeg->test_mode == 1){
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "BAD TIMING!! Frame skipped.");
+            }
+            return -1;
+        }
+        ffmpeg->last_pts = ffmpeg->pkt.pts;
+        ffmpeg->pkt.dts=ffmpeg->pkt.pts;
     }
     return 0;
 }
@@ -756,6 +801,56 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
 
 }
 
+static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
+
+#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    //ffmpeg version 3.1 and after
+    int retcd;
+    int recv_cd = 0;
+    char errstr[128];
+
+    retcd = 0;
+    recv_cd = 0;
+    if (ffmpeg->tlapse == TIMELAPSE_NONE) {
+        retcd = avcodec_send_frame(ffmpeg->ctx_codec, NULL);
+        if (retcd < 0 ){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error entering draining mode:%s",errstr);
+            return -1;
+        }
+        while (recv_cd != AVERROR_EOF){
+            av_init_packet(&ffmpeg->pkt);
+            ffmpeg->pkt.data = NULL;
+            ffmpeg->pkt.size = 0;
+            recv_cd = avcodec_receive_packet(ffmpeg->ctx_codec, &ffmpeg->pkt);
+            if (recv_cd != AVERROR_EOF){
+                if (recv_cd < 0){
+                    av_strerror(recv_cd, errstr, sizeof(errstr));
+                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error draining codec:%s",errstr);
+                    my_packet_unref(ffmpeg->pkt);
+                    return -1;
+                }
+                retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
+                if (retcd < 0) {
+                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error writing draining video frame");
+                    return -1;
+                }
+            }
+            my_packet_unref(ffmpeg->pkt);
+        }
+    }
+    return 0;
+#else
+    /* Dummy to kill warnings.  No draining in older ffmpeg versions */
+    if (ffmpeg) {
+        return 0;
+    } else{
+        return 0;
+    }
+#endif
+
+}
+
 static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     int retcd;
 
@@ -786,7 +881,44 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while writing video frame");
-        ffmpeg_free_context(ffmpeg);
+        return -1;
+    }
+    return retcd;
+
+}
+
+static int ffmpeg_put_passthrough(struct ffmpeg *ffmpeg, const struct timeval *tv1, struct image_data *img_data){
+    int retcd;
+    char errstr[128];
+
+    av_init_packet(&ffmpeg->pkt);
+    ffmpeg->pkt.data = NULL;
+    ffmpeg->pkt.size = 0;
+
+    if (ffmpeg->high_resolution){
+        retcd = my_copy_packet(&ffmpeg->pkt, &img_data->packet_high);
+    } else {
+        retcd = my_copy_packet(&ffmpeg->pkt, &img_data->packet_norm);
+    }
+
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "av_copy_packet: %s",errstr);
+        my_packet_unref(img_data->packet_norm);
+    }
+
+    retcd = ffmpeg_set_pktpts(ffmpeg, tv1);
+    if (retcd < 0) {
+        //If there is an error, it has already been reported.
+        my_packet_unref(ffmpeg->pkt);
+        return 0;
+    }
+
+    retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
+    my_packet_unref(ffmpeg->pkt);
+    if (retcd < 0) {
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while writing video frame: %s",errstr);
         return -1;
     }
     return retcd;
@@ -798,16 +930,21 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
     char buf[1024];
     char *end;
 
-    /* Flatten the message coming in from avcodec. */
-    vsnprintf(buf, sizeof(buf), fmt, vl);
-    end = buf + strlen(buf);
-    if (end > buf && end[-1] == '\n')
-    {
-        *--end = 0;
-    }
-
-    //We put the avcodec messages to INF level since their error are not necessarily our errors.
+    /* Valgrind occasionally reports use of uninitialized values in here when we interrupt
+     * some rtsp functions.  The offending value is either fmt or vl and seems to be from a
+     * debug level of av functions.  To address it we flatten the message after we know
+     * the log level.  Now we put the avcodec messages to INF level since their error
+     * are not necessarily our errors.
+     */
     if (errno_flag <= AV_LOG_WARNING){
+        /* Flatten the message coming in from avcodec. */
+        vsnprintf(buf, sizeof(buf), fmt, vl);
+        end = buf + strlen(buf);
+        if (end > buf && end[-1] == '\n')
+        {
+            *--end = 0;
+        }
+
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
     }
 }
@@ -853,6 +990,11 @@ void ffmpeg_global_deinit(void) {
 #ifdef HAVE_FFMPEG
 
     avformat_network_deinit();
+    if (av_lockmgr_register(NULL) < 0)
+    {
+        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "av_lockmgr_register reset failed on cleanup");
+    }
+
 
 #else /* No FFMPEG */
 
@@ -911,8 +1053,6 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 
     if (ffmpeg) {
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "No ffmpeg functionality included");
-    }else {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "No ffmpeg functionality included");
     }
     return -1;
 
@@ -924,6 +1064,11 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
 #ifdef HAVE_FFMPEG
 
     if (ffmpeg != NULL) {
+
+        if (ffmpeg_flush_codec(ffmpeg) < 0){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error flushing codec");
+        }
+
         if (ffmpeg->tlapse != TIMELAPSE_APPEND) {
             av_write_trailer(ffmpeg->oc);
         }
@@ -940,12 +1085,23 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
 #endif // HAVE_FFMPEG
 }
 
-int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct timeval *tv1){
+int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
 #ifdef HAVE_FFMPEG
     int retcd = 0;
     int cnt = 0;
+    unsigned char *image;
+
+    if (ffmpeg->passthrough) {
+        retcd = ffmpeg_put_passthrough(ffmpeg, tv1, img_data);
+        return retcd;
+    }
 
     if (ffmpeg->picture) {
+        if (ffmpeg->high_resolution){
+            image = img_data->image_high;
+        } else {
+            image = img_data->image_norm;
+        }
 
         /* Setup pointers and line widths. */
         ffmpeg->picture->data[0] = image;
@@ -986,7 +1142,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct t
     return retcd;
 
 #else
-    if (ffmpeg && image && tv1) {
+    if (ffmpeg && img_data && tv1) {
         MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "No ffmpeg support");
     }
     return 0;

@@ -78,6 +78,7 @@ struct config conf_template = {
     .ffmpeg_bps =                      DEF_FFMPEG_BPS,
     .ffmpeg_vbr =                      DEF_FFMPEG_VBR,
     .ffmpeg_video_codec =              DEF_FFMPEG_CODEC,
+    .ffmpeg_passthrough =              0,
     .ipv6_enabled =                    0,
     .stream_port =                     0,
     .substream_port =                  0,
@@ -134,6 +135,7 @@ struct config conf_template = {
     .on_camera_found =                 NULL,
     .motionvidpipe =                   NULL,
     .netcam_url =                      NULL,
+    .netcam_highres=                   NULL,
     .netcam_userpass =                 NULL,
     .netcam_keepalive =                "off",
     .netcam_proxy =                    NULL,
@@ -362,6 +364,14 @@ config_param config_params[] = {
     "# Default: Not defined",
     0,
     CONF_OFFSET(netcam_url),
+    copy_string,
+    print_string
+    },
+    {
+    "netcam_highres",
+    "# High resolution URL for rtsp cameras only.  Same format as netcam_url.",
+    0,
+    CONF_OFFSET(netcam_highres),
     copy_string,
     print_string
     },
@@ -817,6 +827,17 @@ config_param config_params[] = {
     CONF_OFFSET(ffmpeg_video_codec),
     copy_string,
     print_string
+    },
+    {
+    "ffmpeg_passthrough",
+    "\n############################################################\n"
+    "# Passthrough the packet from the camera to the recording\n"
+    "############################################################\n\n"
+    "# Pass through the packet without decode/encoding(default: off)",
+    0,
+    CONF_OFFSET(ffmpeg_passthrough),
+    copy_bool,
+    print_bool
     },
     {
     "ffmpeg_duplicate_frames",

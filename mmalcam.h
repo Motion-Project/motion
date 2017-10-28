@@ -28,7 +28,7 @@ typedef struct mmalcam_context {
 } mmalcam_context;
 
 int mmalcam_start (struct context *);
-int mmalcam_next (struct context *, unsigned char *);
+int mmalcam_next (struct context *, struct image_data *img_data);
 void mmalcam_cleanup (struct mmalcam_context *);
 
 #endif /* MMALCAM_H_ */

@@ -14,7 +14,7 @@ void v4l2_mutex_init(void);
 void v4l2_mutex_destroy(void);
 
 int v4l2_start(struct context *cnt);
-int v4l2_next(struct context *cnt, unsigned char *map);
+int v4l2_next(struct context *cnt,  struct image_data *img_data);
 void v4l2_cleanup(struct context *cnt);
 
 #endif /* _INCLUDE_VIDEO_V4L2_H */

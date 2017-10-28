@@ -1136,8 +1136,9 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
 
     /* will point either to the original image or a scaled down */
     unsigned char *img = image;
-    int image_width = cnt->imgs.width, image_height = cnt->imgs.height, image_size = cnt->imgs.size;
-
+    int image_width = cnt->imgs.width;
+    int image_height = cnt->imgs.height;
+    int image_size = cnt->imgs.size_norm;
     /*
      * Timeout struct used to timeout the time we wait for a client
      * and we do not wait at all.
@@ -1170,8 +1171,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         return;
 
     /* substream put - scale image down and update pointer to the scaled buffer */
-    if (do_scale_down)
-    {
+    if (do_scale_down) {
         /* TODO for now just scale 50%, better resize image to a config predefined size */
 
         int origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
@@ -1202,7 +1202,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
          * than necessary, but it is difficult to estimate the
          * minimum size actually required.
          */
-        tmpbuffer = stream_tmpbuffer(cnt->imgs.size);
+        tmpbuffer = stream_tmpbuffer(cnt->imgs.size_norm);
 
         /* Check if allocation was ok. */
         if (tmpbuffer) {

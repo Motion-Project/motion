@@ -186,12 +186,12 @@ static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
  *
  * Returns: nothing
  */
-void rotate_init(struct context *cnt)
-{
-    int size;
+void rotate_init(struct context *cnt){
+    int size_norm, size_high;
 
-    /* Make sure temp_buf isn't freed if it hasn't been allocated. */
-    cnt->rotate_data.temp_buf = NULL;
+    /* Make sure buffer_norm isn't freed if it hasn't been allocated. */
+    cnt->rotate_data.buffer_norm = NULL;
+    cnt->rotate_data.buffer_high = NULL;
 
     /*
      * Assign the value in conf.rotate_deg to rotate_data.degrees. This way,
@@ -220,47 +220,40 @@ void rotate_init(struct context *cnt)
      * netcam source).
      *
      * If rotating 90 or 270 degrees, the capture dimensions and output dimensions
-     * are not the same. Capture dimensions will be contained in cap_width and
-     * cap_height in cnt->rotate_data, while output dimensions will be contained
+     * are not the same. Capture dimensions will be contained in capture_width_norm and
+     * capture_height_norm in cnt->rotate_data, while output dimensions will be contained
      * in imgs.width and imgs.height.
      */
 
-    /* 1. Transfer capture dimensions into cap_width and cap_height. */
-    cnt->rotate_data.cap_width  = cnt->imgs.width;
-    cnt->rotate_data.cap_height = cnt->imgs.height;
+    /* 1. Transfer capture dimensions into capture_width_norm and capture_height_norm. */
+    cnt->rotate_data.capture_width_norm  = cnt->imgs.width;
+    cnt->rotate_data.capture_height_norm = cnt->imgs.height;
+
+    cnt->rotate_data.capture_width_high  = cnt->imgs.width_high;
+    cnt->rotate_data.capture_height_high = cnt->imgs.height_high;
+
+    size_norm = cnt->imgs.width * cnt->imgs.height * 3 / 2;
+    size_high = cnt->imgs.width_high * cnt->imgs.height_high * 3 / 2;
 
     if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
         /* 2. "Swap" imgs.width and imgs.height. */
-        cnt->imgs.width = cnt->rotate_data.cap_height;
-        cnt->imgs.height = cnt->rotate_data.cap_width;
+        cnt->imgs.width = cnt->rotate_data.capture_height_norm;
+        cnt->imgs.height = cnt->rotate_data.capture_width_norm;
+        if (size_high > 0 ) {
+            cnt->imgs.width_high = cnt->rotate_data.capture_height_high;
+            cnt->imgs.height_high = cnt->rotate_data.capture_width_high;
+        }
     }
 
     /*
      * If we're not rotating, let's exit once we have setup the capture dimensions
      * and output dimensions properly.
      */
-    if (cnt->rotate_data.degrees == 0)
-        return;
+    if (cnt->rotate_data.degrees == 0) return;
 
-    switch (cnt->imgs.type) {
-    case VIDEO_PALETTE_YUV420P:
-        /*
-         * For YUV 4:2:0 planar, the memory block used for 90/270 degrees
-         * rotation needs to be width x height x 1.5 bytes large.
-         */
-        size = cnt->imgs.width * cnt->imgs.height * 3 / 2;
-        break;
-    case VIDEO_PALETTE_GREY:
-        /*
-         * For greyscale, the memory block used for 90/270 degrees rotation
-         * needs to be width x height bytes large.
-         */
-        size = cnt->imgs.width * cnt->imgs.height;
-        break;
-    default:
+    if (cnt->imgs.type != VIDEO_PALETTE_YUV420P ) {
         cnt->rotate_data.degrees = 0;
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unsupported palette (%d), rotation is disabled",
-                    cnt->imgs.type);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unsupported palette (%d), rotation is disabled", cnt->imgs.type);
         return;
     }
 
@@ -268,8 +261,11 @@ void rotate_init(struct context *cnt)
      * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).
      */
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270))
-        cnt->rotate_data.temp_buf = mymalloc(size);
+    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)){
+        cnt->rotate_data.buffer_norm = mymalloc(size_norm);
+        if (size_high > 0 ) cnt->rotate_data.buffer_high = mymalloc(size_high);
+    }
+
 }
 
 /**
@@ -283,21 +279,23 @@ void rotate_init(struct context *cnt)
  *
  * Returns: nothing
  */
-void rotate_deinit(struct context *cnt)
-{
-    if (cnt->rotate_data.temp_buf)
-        free(cnt->rotate_data.temp_buf);
+void rotate_deinit(struct context *cnt){
+
+    if (cnt->rotate_data.buffer_norm)
+        free(cnt->rotate_data.buffer_norm);
+
+    if (cnt->rotate_data.buffer_high)
+        free(cnt->rotate_data.buffer_high);
 }
 
 /**
  * rotate_map
  *
- *  Main entry point for rotation. This is the function that is called from
- *  video.c/video_freebsd.c to perform the rotation.
+ *  Main entry point for rotation.
  *
  * Parameters:
  *
- *   map - pointer to the image/data to rotate
+ *   img_data- pointer to the image data to rotate
  *   cnt - the current thread's context structure
  *
  * Returns:
@@ -305,109 +303,98 @@ void rotate_deinit(struct context *cnt)
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct context *cnt, unsigned char *map)
-{
+int rotate_map(struct context *cnt, struct image_data *img_data){
     /*
-     * The image format is either YUV 4:2:0 planar, in which case the pixel
+     * The image format is YUV 4:2:0 planar, which has the pixel
      * data is divided in three parts:
      *    Y - width x height bytes
      *    U - width x height / 4 bytes
      *    V - as U
-     * or, it is in greyscale, in which case the pixel data simply consists
-     * of width x height bytes.
      */
+
+    int indx, indx_max;
     int wh, wh4 = 0, w2 = 0, h2 = 0;  /* width * height, width * height / 4 etc. */
     int size, deg;
     enum FLIP_TYPE axis;
     int width, height;
+    unsigned char *img;
+    unsigned char *temp_buff;
 
-    deg = cnt->rotate_data.degrees;
-    axis = cnt->rotate_data.axis;
-    width = cnt->rotate_data.cap_width;
-    height = cnt->rotate_data.cap_height;
+    if (cnt->rotate_data.degrees == 0 && cnt->rotate_data.axis == FLIP_TYPE_NONE) return 0;
 
-    /*
-     * Pre-calculate some stuff:
-     *  wh   - size of the Y plane, or the entire greyscale image
-     *  size - size of the entire memory block
-     *  wh4  - size of the U plane, and the V plane
-     *  w2   - width of the U plane, and the V plane
-     *  h2   - as w2, but height instead
-     */
-    wh = width * height;
-    if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
+    indx = 0;
+    indx_max = 0;
+    if ((cnt->rotate_data.capture_width_high != 0) && (cnt->rotate_data.capture_height_high != 0)) indx_max = 1;
+
+    while (indx <= indx_max) {
+        deg = cnt->rotate_data.degrees;
+        axis = cnt->rotate_data.axis;
+        wh4 = 0;
+        w2 = 0;
+        h2 = 0;
+        if (indx == 0 ){
+            img = img_data->image_norm;
+            width = cnt->rotate_data.capture_width_norm;
+            height = cnt->rotate_data.capture_height_norm;
+            temp_buff = cnt->rotate_data.buffer_norm;
+        } else {
+            img = img_data->image_high;
+            width = cnt->rotate_data.capture_width_high;
+            height = cnt->rotate_data.capture_height_high;
+            temp_buff = cnt->rotate_data.buffer_high;
+        }
+        /*
+         * Pre-calculate some stuff:
+         *  wh   - size of the Y plane
+         *  size - size of the entire memory block
+         *  wh4  - size of the U plane, and the V plane
+         *  w2   - width of the U plane, and the V plane
+         *  h2   - as w2, but height instead
+         */
+        wh = width * height;
         size = wh * 3 / 2;
         wh4 = wh / 4;
         w2 = width / 2;
         h2 = height / 2;
-    } else { /* VIDEO_PALETTE_GREY */
-        size = wh;
-    }
 
-    switch (axis) {
-    case FLIP_TYPE_HORIZONTAL:
-        flip_inplace_horizontal(map,width, height);
-        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            flip_inplace_horizontal(map + wh, w2, h2);
-            flip_inplace_horizontal(map + wh + wh4, w2, h2);
-        }
-        break;
-    case FLIP_TYPE_VERTICAL:
-        flip_inplace_vertical(map,width, height);
-        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            flip_inplace_vertical(map + wh, w2, h2);
-            flip_inplace_vertical(map + wh + wh4, w2, h2);
-        }
-        break;
-    default:
-        break;
-    }
-
-    switch (deg) {
-    case 90:
-        /* First do the Y part */
-        rot90cw(map, cnt->rotate_data.temp_buf, wh, width, height);
-        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            /* Then do U and V */
-            rot90cw(map + wh, cnt->rotate_data.temp_buf + wh, wh4, w2, h2);
-            rot90cw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4,
-                    wh4, w2, h2);
+        switch (axis) {
+        case FLIP_TYPE_HORIZONTAL:
+            flip_inplace_horizontal(img,width, height);
+            flip_inplace_horizontal(img + wh, w2, h2);
+            flip_inplace_horizontal(img + wh + wh4, w2, h2);
+            break;
+        case FLIP_TYPE_VERTICAL:
+            flip_inplace_vertical(img,width, height);
+            flip_inplace_vertical(img + wh, w2, h2);
+            flip_inplace_vertical(img + wh + wh4, w2, h2);
+            break;
+        default:
+            break;
         }
 
-        /* Then copy back from the temp buffer to map. */
-        memcpy(map, cnt->rotate_data.temp_buf, size);
-        break;
-
-    case 180:
-        /*
-         * 180 degrees is easy - just reverse the data within
-         * Y, U and V.
-         */
-        reverse_inplace_quad(map, wh);
-        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            reverse_inplace_quad(map + wh, wh4);
-            reverse_inplace_quad(map + wh + wh4, wh4);
+        switch (deg) {
+        case 90:
+            rot90cw(img, temp_buff, wh, width, height);
+            rot90cw(img + wh, temp_buff + wh, wh4, w2, h2);
+            rot90cw(img + wh + wh4, temp_buff + wh + wh4, wh4, w2, h2);
+            memcpy(img, temp_buff, size);
+            break;
+        case 180:
+            reverse_inplace_quad(img, wh);
+            reverse_inplace_quad(img + wh, wh4);
+            reverse_inplace_quad(img + wh + wh4, wh4);
+            break;
+        case 270:
+            rot90ccw(img, temp_buff, wh, width, height);
+            rot90ccw(img + wh, temp_buff + wh, wh4, w2, h2);
+            rot90ccw(img + wh + wh4, temp_buff + wh + wh4, wh4, w2, h2);
+            memcpy(img, temp_buff, size);
+            break;
+        default:
+            /* Invalid */
+            return -1;
         }
-        break;
-
-    case 270:
-
-        /* First do the Y part */
-        rot90ccw(map, cnt->rotate_data.temp_buf, wh, width, height);
-        if (cnt->imgs.type == VIDEO_PALETTE_YUV420P) {
-            /* Then do U and V */
-            rot90ccw(map + wh, cnt->rotate_data.temp_buf + wh, wh4, w2, h2);
-            rot90ccw(map + wh + wh4, cnt->rotate_data.temp_buf + wh + wh4,
-                     wh4, w2, h2);
-        }
-
-        /* Then copy back from the temp buffer to map. */
-        memcpy(map, cnt->rotate_data.temp_buf, size);
-        break;
-
-    default:
-        /* Invalid */
-        return -1;
+            indx++;
     }
 
     return 0;

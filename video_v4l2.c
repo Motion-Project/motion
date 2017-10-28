@@ -1111,7 +1111,7 @@ int v4l2_start(struct context *cnt)
 
     /*
      * We use width and height from conf in this function. They will be assigned
-     * to width and height in imgs here, and cap_width and cap_height in
+     * to width and height in imgs here, and capture_width_norm and capture_height_norm in
      * rotate_data won't be set until in rotate_init.
      * Motion requires that width and height is a multiple of 8 so we check
      * for this first.
@@ -1162,7 +1162,7 @@ int v4l2_start(struct context *cnt)
             switch (cnt->imgs.type) {
             case VIDEO_PALETTE_GREY:
                 cnt->imgs.motionsize = width * height;
-                cnt->imgs.size = width * height;
+                cnt->imgs.size_norm = width * height;
                 break;
             case VIDEO_PALETTE_YUYV:
             case VIDEO_PALETTE_RGB24:
@@ -1170,7 +1170,7 @@ int v4l2_start(struct context *cnt)
                 cnt->imgs.type = VIDEO_PALETTE_YUV420P;
             case VIDEO_PALETTE_YUV420P:
                 cnt->imgs.motionsize = width * height;
-                cnt->imgs.size = (width * height * 3) / 2;
+                cnt->imgs.size_norm = (width * height * 3) / 2;
                 break;
             }
             pthread_mutex_unlock(&v4l2_mutex);
@@ -1245,7 +1245,7 @@ int v4l2_start(struct context *cnt)
 
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_GREY:
-        cnt->imgs.size = width * height;
+        cnt->imgs.size_norm = width * height;
         cnt->imgs.motionsize = width * height;
         break;
     case VIDEO_PALETTE_YUYV:
@@ -1253,7 +1253,7 @@ int v4l2_start(struct context *cnt)
     case VIDEO_PALETTE_YUV422:
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     case VIDEO_PALETTE_YUV420P:
-        cnt->imgs.size = (width * height * 3) / 2;
+        cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;
         break;
     }
@@ -1337,7 +1337,7 @@ void v4l2_cleanup(struct context *cnt)
 #endif // HAVE_V4L2
 }
 
-int v4l2_next(struct context *cnt, unsigned char *map)
+int v4l2_next(struct context *cnt, struct image_data *img_data)
 {
 #ifdef HAVE_V4L2
     int ret = -2;
@@ -1346,8 +1346,8 @@ int v4l2_next(struct context *cnt, unsigned char *map)
     int width, height;
 
     /* NOTE: Since this is a capture, we need to use capture dimensions. */
-    width = cnt->rotate_data.cap_width;
-    height = cnt->rotate_data.cap_height;
+    width = cnt->rotate_data.capture_width_norm;
+    height = cnt->rotate_data.capture_height_norm;
 
     pthread_mutex_lock(&v4l2_mutex);
     dev = viddevs;
@@ -1368,8 +1368,8 @@ int v4l2_next(struct context *cnt, unsigned char *map)
     }
 
     if (dev->v4l2) {
-        v4l2_set_input(cnt, dev, map, width, height, conf);
-        ret = v4l2_capture(cnt, dev, map, width, height);
+        v4l2_set_input(cnt, dev,img_data->image_norm, width, height, conf);
+        ret = v4l2_capture(cnt, dev, img_data->image_norm, width, height);
     }
 
     if (--dev->frames <= 0) {
@@ -1379,12 +1379,11 @@ int v4l2_next(struct context *cnt, unsigned char *map)
     }
 
     /* Rotate the image as specified. */
-    if (cnt->rotate_data.degrees > 0 || cnt->rotate_data.axis != FLIP_TYPE_NONE)
-        rotate_map(cnt, map);
+    rotate_map(cnt, img_data);
 
     return ret;
 #else
-    if (!cnt || !map) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "V4L2 is not enabled.");
+    if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "V4L2 is not enabled.");
     return -1;
 #endif // HAVE_V4L2
 

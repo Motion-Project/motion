@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <stdint.h>
 #include "config.h"
+struct image_data; /* forward declare for functions */
 
 enum TIMELAPSE_TYPE {
     TIMELAPSE_NONE,         /* No timelapse, regular processing */
@@ -56,6 +57,9 @@ struct ffmpeg {
     int test_mode;
     int gop_cnt;
     struct timeval start_time;
+    int            high_resolution;
+    int            motion_images;
+    int            passthrough;
 };
 
 
@@ -68,6 +72,7 @@ void my_avcodec_close(AVCodecContext *codec_context);
 int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height);
 int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height,int dest_size);
 int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
+int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
 
 #endif /* HAVE_FFMPEG */
 
@@ -76,7 +81,7 @@ void ffmpeg_global_deinit(void);
 void ffmpeg_avcodec_log(void *, int, const char *, va_list);
 
 int ffmpeg_open(struct ffmpeg *ffmpeg);
-int ffmpeg_put_image(struct ffmpeg *ffmpeg, unsigned char *image, const struct timeval *tv1);
+int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1);
 void ffmpeg_close(struct ffmpeg *ffmpeg);
 void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1);
 

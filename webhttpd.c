@@ -2675,7 +2675,7 @@ void httpd_run(struct context **cnt)
             client_sent_quit_message = read_client(client_socket_fd, cnt, authentication);
             char host[NI_MAXHOST] = "unknown";
             get_host(host, client_socket_fd);
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client (%s)", host);
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "motion-httpd - Read from client (%s)", host);
 
             /* Close Connection */
             if (client_socket_fd)
@@ -2698,7 +2698,7 @@ void *motion_web_control(void *arg)
 {
     struct context **cnt = arg;
 
-    MOTION_PTHREAD_SETNAME("web_control");
+    util_threadname_set("wc", 0,NULL);
 
     httpd_run(cnt);
 

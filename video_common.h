@@ -50,7 +50,7 @@ struct video_dev {
 };
 
 int vid_start(struct context *cnt);
-int vid_next(struct context *cnt, unsigned char *map);
+int vid_next(struct context *cnt, struct image_data *img_data);
 void vid_close(struct context *cnt);
 void vid_mutex_destroy(void);
 void vid_mutex_init(void);

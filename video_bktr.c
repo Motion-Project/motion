@@ -572,7 +572,7 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
 }
 
 static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width,
-                          int height, unsigned input, unsigned norm, int skip, unsigned long freq)
+                          int height, int input, int norm, int skip, unsigned long freq)
 {
     if (input != viddev->input || norm != viddev->norm || freq != viddev->freq) {
         int dummy;
@@ -735,7 +735,7 @@ int bktr_start(struct context *cnt)
 
     /*
      * We use width and height from conf in this function. They will be assigned
-     * to width and height in imgs here, and cap_width and cap_height in
+     * to width and height in imgs here, and capture_width_norm and capture_height_norm in
      * rotate_data won't be set until in rotate_init.
      * Motion requires that width and height are multiples of 8 so we check for this.
      */
@@ -793,16 +793,16 @@ int bktr_start(struct context *cnt)
             switch (cnt->imgs.type) {
             case VIDEO_PALETTE_GREY:
                 cnt->imgs.motionsize = width * height;
-                cnt->imgs.size = width * height;
+                cnt->imgs.size_norm = width * height;
                 break;
             case VIDEO_PALETTE_RGB24:
             case VIDEO_PALETTE_YUV422:
                 cnt->imgs.type = VIDEO_PALETTE_YUV420P;
             case VIDEO_PALETTE_YUV420P:
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P setting"
-                           " imgs.size and imgs.motionsize");
+                           " imgs.size_norm and imgs.motionsize");
                 cnt->imgs.motionsize = width * height;
-                cnt->imgs.size = (width * height * 3) / 2;
+                cnt->imgs.size_norm = (width * height * 3) / 2;
                 break;
             }
 
@@ -883,7 +883,7 @@ int bktr_start(struct context *cnt)
 
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_GREY:
-        cnt->imgs.size = width * height;
+        cnt->imgs.size_norm = width * height;
         cnt->imgs.motionsize = width * height;
         break;
     case VIDEO_PALETTE_RGB24:
@@ -891,7 +891,7 @@ int bktr_start(struct context *cnt)
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     case VIDEO_PALETTE_YUV420P:
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P imgs.type");
-        cnt->imgs.size = (width * height * 3) / 2;
+        cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;
         break;
     }
@@ -910,7 +910,7 @@ int bktr_start(struct context *cnt)
 
 }
 
-int bktr_next(struct context *cnt, unsigned char *map)
+int bktr_next(struct context *cnt,  struct image_data *img_data)
 {
 #ifdef HAVE_BKTR
 
@@ -921,8 +921,8 @@ int bktr_next(struct context *cnt, unsigned char *map)
     int ret = -1;
 
     /* NOTE: Since this is a capture, we need to use capture dimensions. */
-    width = cnt->rotate_data.cap_width;
-    height = cnt->rotate_data.cap_height;
+    width = cnt->rotate_data.capture_width_norm;
+    height = cnt->rotate_data.capture_height_norm;
 
     pthread_mutex_lock(&bktr_mutex);
     dev = viddevs;
@@ -944,10 +944,10 @@ int bktr_next(struct context *cnt, unsigned char *map)
         dev->frames = conf->roundrobin_frames;
     }
 
-    bktr_set_input(cnt, dev, map, width, height, conf->input, conf->norm,
+    bktr_set_input(cnt, dev, img_data->image_norm, width, height, conf->input, conf->norm,
                   conf->roundrobin_skip, conf->frequency);
 
-    ret = bktr_capture(dev, map, width, height);
+    ret = bktr_capture(dev, img_data->image_norm, width, height);
 
     if (--dev->frames <= 0) {
         dev->owner = -1;
@@ -956,12 +956,11 @@ int bktr_next(struct context *cnt, unsigned char *map)
     }
 
     /* Rotate the image as specified */
-    if (cnt->rotate_data.degrees > 0 || cnt->rotate_data.axis != FLIP_TYPE_NONE)
-        rotate_map(cnt, map);
+    rotate_map(cnt, img_data);
 
     return ret;
 #else
-    if (!cnt || !map) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "BKTR is not enabled.");
+    if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "BKTR is not enabled.");
     return -1;
 #endif
 

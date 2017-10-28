@@ -306,6 +306,20 @@ The rotation affects all saved images as well as movies.
 .RE
 
 .TP
+.B flip_axis
+.RS
+.nf
+Values: none, v, h
+Default: none
+Description:
+.fi
+.RS
+Flip the images vertically or horizontally. 
+The flip affects all saved images as well as movies.
+.RE
+.RE
+
+.TP
 .B width
 .RS
 .nf
@@ -382,6 +396,31 @@ rtsp://
 mjpeg://
 file://
 v4l2://
+.RE
+
+The connection string is camera specific.
+It is usually the same as what other video playing applications would use to connect to the camera stream.
+Motion currently only supports basic authentication for the cameras.
+Digest is not currently supported.
+Basic authentication can be specified in the URL or via the netcam_userpass option.
+.RE
+.RE
+
+.TP
+.B netcam_highres
+.RS
+.nf
+Values: User specified string
+Default: None
+Description:
+.fi
+.RS
+Full connection URL string to use to connect to a high resolution network camera.
+The URL must provide a stream of images instead of only a static image.
+The following prefixes are recognized
+
+.RS
+rtsp://
 .RE
 
 The connection string is camera specific.
@@ -1346,6 +1385,19 @@ Description:
 .fi
 .RS
 This option is the port number that the mini-http server listens on for streams of the pictures.
+.RE
+.RE
+
+.TP
+.B substream_port
+.RS
+.nf
+Values: 0 to port number limit
+Default: 0
+Description:
+.fi
+.RS
+This option is the substream port number that the mini-http server listens on for streams of the pictures.
 .RE
 .RE
 

@@ -65,6 +65,44 @@ FILE *ptr_logfile = NULL;
  */
 unsigned int restart = 0;
 
+
+static void imagepkt_init(struct image_data *img_data){
+#ifdef HAVE_FFMPEG
+
+    /* Initialize av packets for ffmpeg_pass through */
+    av_init_packet(&img_data->packet_norm);
+    img_data->packet_norm.data = NULL;
+    img_data->packet_norm.size = 0;
+
+
+    av_init_packet(&img_data->packet_high);
+    img_data->packet_high.data = NULL;
+    img_data->packet_high.size = 0;
+
+    return;
+#else  /* No FFmpeg/Libav */
+    /* Stop compiler warnings */
+    if (img_data->packet_norm) img_data->packet_norm = 0;
+    return;
+#endif /* End #ifdef HAVE_FFMPEG */
+
+}
+
+static void imagepkt_deinit(struct image_data *img_data){
+#ifdef HAVE_FFMPEG
+    /* free the av packets for ffmpeg_pass through */
+    my_packet_unref(img_data->packet_norm);
+    my_packet_unref(img_data->packet_high);
+
+    return;
+#else  /* No FFmpeg/Libav */
+    /* Stop compiler warnings */
+    if (img_data->packet_norm) img_data->packet_norm = 1;
+    return;
+#endif /* End #ifdef HAVE_FFMPEG */
+
+}
+
 /**
  * image_ring_resize
  *
@@ -115,8 +153,13 @@ static void image_ring_resize(struct context *cnt, int new_size)
             {
                 int i;
                 for(i = smallest; i < new_size; i++) {
-                    tmp[i].image = mymalloc(cnt->imgs.size);
-                    memset(tmp[i].image, 0x80, cnt->imgs.size);  /* initialize to grey */
+                    tmp[i].image_norm = mymalloc(cnt->imgs.size_norm);
+                    memset(tmp[i].image_norm, 0x80, cnt->imgs.size_norm);  /* initialize to grey */
+                    if (cnt->imgs.size_high > 0){
+                        tmp[i].image_high = mymalloc(cnt->imgs.size_high);
+                        memset(tmp[i].image_high, 0x80, cnt->imgs.size_high);
+                    }
+                    imagepkt_init(&tmp[i]);
                 }
             }
 
@@ -155,9 +198,11 @@ static void image_ring_destroy(struct context *cnt)
         return;
 
     /* Free all image buffers */
-    for (i = 0; i < cnt->imgs.image_ring_size; i++)
-        free(cnt->imgs.image_ring[i].image);
-
+    for (i = 0; i < cnt->imgs.image_ring_size; i++){
+        free(cnt->imgs.image_ring[i].image_norm);
+        if (cnt->imgs.size_high >0 ) free(cnt->imgs.image_ring[i].image_high);
+        imagepkt_deinit(&cnt->imgs.image_ring[i]);
+    }
 
     /* Free the ring */
     free(cnt->imgs.image_ring);
@@ -183,14 +228,14 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
 {
     void * image;
     /* Save preview image pointer */
-    image = cnt->imgs.preview_image.image;
+    image = cnt->imgs.preview_image.image_norm;
     /* Copy all info */
-    memcpy(&cnt->imgs.preview_image.image, img, sizeof(struct image_data));
+    memcpy(&cnt->imgs.preview_image.image_norm, img, sizeof(struct image_data));
     /* restore image pointer */
-    cnt->imgs.preview_image.image = image;
+    cnt->imgs.preview_image.image_norm = image;
 
     /* Copy image */
-    memcpy(cnt->imgs.preview_image.image, img->image, cnt->imgs.size);
+    memcpy(cnt->imgs.preview_image.image_norm, img->image_norm, cnt->imgs.size_norm);
 
     /*
      * If we set output_all to yes and during the event
@@ -203,16 +248,16 @@ static void image_save_as_preview(struct context *cnt, struct image_data *img)
     if (cnt->locate_motion_mode == LOCATE_PREVIEW) {
 
         if (cnt->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image_norm,
                               LOCATE_BOX, LOCATE_NORMAL, cnt->process_thisframe);
         } else if (cnt->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image_norm,
                                   LOCATE_REDBOX, LOCATE_NORMAL, cnt->process_thisframe);
         } else if (cnt->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+            alg_draw_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image_norm,
                               LOCATE_CROSS, LOCATE_NORMAL, cnt->process_thisframe);
         } else if (cnt->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image,
+            alg_draw_red_location(&img->location, &cnt->imgs, cnt->imgs.width, cnt->imgs.preview_image.image_norm,
                                   LOCATE_REDCROSS, LOCATE_NORMAL, cnt->process_thisframe);
         }
     }
@@ -475,16 +520,16 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     if (cnt->locate_motion_mode == LOCATE_ON) {
 
         if (cnt->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_BOX,
+            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
                               LOCATE_BOTH, cnt->process_thisframe);
         } else if (cnt->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDBOX,
+            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDBOX,
                                   LOCATE_BOTH, cnt->process_thisframe);
         } else if (cnt->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(location, imgs, imgs->width, img->image, LOCATE_CROSS,
+            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_CROSS,
                               LOCATE_BOTH, cnt->process_thisframe);
         } else if (cnt->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(location, imgs, imgs->width, img->image, LOCATE_REDCROSS,
+            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDCROSS,
                                   LOCATE_BOTH, cnt->process_thisframe);
         }
     }
@@ -519,8 +564,8 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
             /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
-            event(cnt, EVENT_FIRSTMOTION, img->image, NULL, NULL,
-                  &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
+            event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL,
+                &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion detected - starting event %d",
                        cnt->event_nr);
@@ -544,7 +589,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
          * We also disable this in setup_mode.
          */
         if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
-            event(cnt, EVENT_STREAM, img->image, NULL, NULL, &img->timestamp_tv);
+            event(cnt, EVENT_STREAM, img, NULL, NULL, &img->timestamp_tv);
 
         /*
          * Save motion jpeg, if configured
@@ -609,16 +654,17 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
                 mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q",
                            &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv, NULL, 0);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 20,
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm, 10, 20,
                           cnt->imgs.width, tmp, cnt->conf.text_double);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 30,
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm, 10, 30,
                           cnt->imgs.width, t, cnt->conf.text_double);
             }
 
             /* Output the picture to jpegs and ffmpeg */
             event(cnt, EVENT_IMAGE_DETECTED,
-                  cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL,
-                  &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
+              &cnt->imgs.image_ring[cnt->imgs.image_ring_out], NULL, NULL,
+              &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
+
 
             /*
              * Check if we must add any "filler" frames into movie to keep up fps
@@ -643,7 +689,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Added %d fillerframes into movie",
                                        frames);
                             sprintf(tmp, "Fillerframes %d", frames);
-                            draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, 10, 40,
+                            draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm, 10, 40,
                                       cnt->imgs.width, tmp, cnt->conf.text_double);
                         }
                     }
@@ -651,8 +697,8 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                     while ((cnt->movie_last_shot + 1) < cnt->movie_fps) {
                         /* Add a filler frame into encoder */
                         event(cnt, EVENT_FFMPEG_PUT,
-                              cnt->imgs.image_ring[cnt->imgs.image_ring_out].image, NULL, NULL,
-                              &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
+                          &cnt->imgs.image_ring[cnt->imgs.image_ring_out], NULL, NULL,
+                          &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
                         cnt->movie_last_shot++;
                     }
@@ -720,7 +766,13 @@ static int init_camera_type(struct context *cnt){
 #endif // HAVE_MMAL
 
     if (cnt->conf.netcam_url) {
-        cnt->camera_type = CAMERA_TYPE_NETCAM;
+        if ((strncmp(cnt->conf.netcam_url,"mjpeg",5) == 0) ||
+            (strncmp(cnt->conf.netcam_url,"v4l2" ,4) == 0) ||
+            (strncmp(cnt->conf.netcam_url,"rtsp" ,4) == 0)) {
+            cnt->camera_type = CAMERA_TYPE_RTSP;
+        } else {
+            cnt->camera_type = CAMERA_TYPE_NETCAM;
+        }
         return 0;
     }
 
@@ -746,33 +798,46 @@ static int init_camera_type(struct context *cnt){
 
 static void init_mask_privacy(struct context *cnt){
 
-    int indxrow;
-    int indxcol;
+    int indxrow, indxcol;
     int start_cr, offset_cb, start_cb;
+    int y_index, uv_index;
+    int indx_img, indx_max;         /* Counter and max for norm/high */
+    int indx_width, indx_height;
+    unsigned char *img_temp, *img_temp_uv;
+
 
     FILE *picture;
 
     /* Load the privacy file if any */
+    cnt->imgs.mask_privacy = NULL;
+    cnt->imgs.mask_privacy_uv = NULL;
+    cnt->imgs.mask_privacy_high = NULL;
+    cnt->imgs.mask_privacy_high_uv = NULL;
+
     if (cnt->conf.mask_privacy) {
         if ((picture = myfopen(cnt->conf.mask_privacy, "r"))) {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Opening privacy mask file");
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
              * width and height from imgs.
              */
             cnt->imgs.mask_privacy = get_pgm(picture, cnt->imgs.width, cnt->imgs.height);
-            /*
-             * We only need the "or" mask for the U & V chrominance area.
-             */
+
+            /* We only need the "or" mask for the U & V chrominance area.  */
             cnt->imgs.mask_privacy_uv = mymalloc((cnt->imgs.height * cnt->imgs.width) / 2);
+            if (cnt->imgs.size_high > 0){
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Opening high resolution privacy mask file");
+                rewind(picture);
+                cnt->imgs.mask_privacy_high = get_pgm(picture, cnt->imgs.width_high, cnt->imgs.height_high);
+                cnt->imgs.mask_privacy_high_uv = mymalloc((cnt->imgs.height_high * cnt->imgs.width_high) / 2);
+            }
+
             myfclose(picture);
         } else {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Error opening mask file %s",
                        cnt->conf.mask_privacy);
-            /*
-             * Try to write an empty mask file to make it easier
-             * for the user to edit it
-             */
+            /* Try to write an empty mask file to make it easier for the user to edit it */
             put_fixed_mask(cnt, cnt->conf.mask_privacy);
         }
 
@@ -780,38 +845,56 @@ static void init_mask_privacy(struct context *cnt){
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Failed to read mask privacy image. Mask privacy feature disabled.");
         } else {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Mask privacy file \"%s\" loaded.", cnt->conf.mask_privacy);
-            start_cr = (cnt->imgs.height * cnt->imgs.width);
-            offset_cb = ((cnt->imgs.height * cnt->imgs.width)/4);
-            start_cb = start_cr + offset_cb;
 
-            for (indxrow = 0; indxrow < cnt->imgs.height; indxrow++) {
-                for (indxcol = 0; indxcol < cnt->imgs.width; indxcol++) {
-                    int y_index = indxcol + (indxrow * cnt->imgs.width);
-                    if ( cnt->imgs.mask_privacy[y_index] == 0xff) {
-                        if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
-                            int uv_index = (indxcol/2) + ((indxrow * cnt->imgs.width)/4);
-                            cnt->imgs.mask_privacy[start_cr + uv_index] = 0xff;
-                            cnt->imgs.mask_privacy[start_cb + uv_index] = 0xff;
-                            cnt->imgs.mask_privacy_uv[uv_index] = 0x00;
-                            cnt->imgs.mask_privacy_uv[offset_cb + uv_index] = 0x00;
-                        }
-                    } else{
-                        cnt->imgs.mask_privacy[y_index] = 0x00;
-                        if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
-                            int uv_index = (indxcol/2) + ((indxrow * cnt->imgs.width)/4);
-                            cnt->imgs.mask_privacy[start_cr + uv_index] = 0x00;
-                            cnt->imgs.mask_privacy[start_cb + uv_index] = 0x00;
-                            cnt->imgs.mask_privacy_uv[uv_index] = 0x80;
-                            cnt->imgs.mask_privacy_uv[offset_cb + uv_index] = 0x80;
-                        }
+            indx_img = 1;
+            indx_max = 1;
+            if (cnt->imgs.size_high > 0) indx_max = 2;
 
+            while (indx_img <= indx_max){
+                if (indx_img == 1){
+                    start_cr = (cnt->imgs.height * cnt->imgs.width);
+                    offset_cb = ((cnt->imgs.height * cnt->imgs.width)/4);
+                    start_cb = start_cr + offset_cb;
+                    indx_width = cnt->imgs.width;
+                    indx_height = cnt->imgs.height;
+                    img_temp = cnt->imgs.mask_privacy;
+                    img_temp_uv = cnt->imgs.mask_privacy_uv;
+                } else {
+                    start_cr = (cnt->imgs.height_high * cnt->imgs.width_high);
+                    offset_cb = ((cnt->imgs.height_high * cnt->imgs.width_high)/4);
+                    start_cb = start_cr + offset_cb;
+                    indx_width = cnt->imgs.width_high;
+                    indx_height = cnt->imgs.height_high;
+                    img_temp = cnt->imgs.mask_privacy_high;
+                    img_temp_uv = cnt->imgs.mask_privacy_high_uv;
+                }
+
+                for (indxrow = 0; indxrow < indx_height; indxrow++) {
+                    for (indxcol = 0; indxcol < indx_width; indxcol++) {
+                        y_index = indxcol + (indxrow * indx_width);
+                        if (img_temp[y_index] == 0xff) {
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                                uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
+                                img_temp[start_cr + uv_index] = 0xff;
+                                img_temp[start_cb + uv_index] = 0xff;
+                                img_temp_uv[uv_index] = 0x00;
+                                img_temp_uv[offset_cb + uv_index] = 0x00;
+                            }
+                        } else {
+                            img_temp[y_index] = 0x00;
+                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
+                                uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
+                                img_temp[start_cr + uv_index] = 0x00;
+                                img_temp[start_cb + uv_index] = 0x00;
+                                img_temp_uv[uv_index] = 0x80;
+                                img_temp_uv[offset_cb + uv_index] = 0x80;
+                            }
+                        }
                     }
                 }
+                indx_img++;
             }
         }
-    } else {
-        cnt->imgs.mask_privacy = NULL;
-        cnt->imgs.mask_privacy_uv = NULL;
     }
 
 }
@@ -820,7 +903,7 @@ static void init_mask_privacy(struct context *cnt){
  * motion_init
  *
  * This routine is called from motion_loop (the main thread of the program) to do
- * all of the initialisation required before starting the actual run.
+ * all of the initialization required before starting the actual run.
  *
  * Parameters:
  *
@@ -836,12 +919,7 @@ static int motion_init(struct context *cnt)
     FILE *picture;
     int indx;
 
-    char tname[16];
-    snprintf(tname, sizeof(tname), "ml%d%s%s",
-             cnt->threadnr,
-             cnt->conf.camera_name ? ":" : "",
-             cnt->conf.camera_name ? cnt->conf.camera_name : "");
-    MOTION_PTHREAD_SETNAME(tname);
+    util_threadname_set("ml",cnt->threadnr,cnt->conf.camera_name);
 
     /* Store thread number in TLS. */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
@@ -864,6 +942,11 @@ static int motion_init(struct context *cnt)
     cnt->detecting_motion = 0;
     cnt->makemovie = 0;
 
+    /* Make sure to default the high res to zero */
+    cnt->imgs.width_high = 0;
+    cnt->imgs.height_high = 0;
+    cnt->imgs.size_high = 0;
+
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera %d started: motion detection %s",
                cnt->conf.camera_id, cnt->pause ? "Disabled":"Enabled");
 
@@ -871,6 +954,12 @@ static int motion_init(struct context *cnt)
         cnt->conf.filepath = mystrdup(".");
 
     if (init_camera_type(cnt) != 0 ) return -3;
+
+    if ((cnt->camera_type != CAMERA_TYPE_RTSP) &&
+        (cnt->conf.ffmpeg_passthrough)) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Pass-through processing disabled.");
+        cnt->conf.ffmpeg_passthrough = 0;
+    }
 
     if ((cnt->conf.height == 0) || (cnt->conf.width == 0)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Invalid configuration dimensions %dx%d",cnt->conf.height,cnt->conf.width);
@@ -888,11 +977,11 @@ static int motion_init(struct context *cnt)
      * file options.
      */
     if (cnt->video_dev == -1) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Could not fetch initial image from camera "
-                   "Motion continues using width and height from config file(s)");
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Could not fetch initial image from camera ");
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Motion continues using width and height from config file(s)");
         cnt->imgs.width = cnt->conf.width;
         cnt->imgs.height = cnt->conf.height;
-        cnt->imgs.size = cnt->conf.width * cnt->conf.height * 3 / 2;
+        cnt->imgs.size_norm = cnt->conf.width * cnt->conf.height * 3 / 2;
         cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     } else if (cnt->video_dev == -2) {
@@ -900,15 +989,20 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Motion only supports width and height modulo 8");
         return -3;
     }
+    /* We set size_high here so that it can be used in the retry function to determine whether
+     * we need to break and reallocate buffers
+     */
+    cnt->imgs.size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
 
     image_ring_resize(cnt, 1); /* Create a initial precapture ring buffer with 1 frame */
 
-    cnt->imgs.ref = mymalloc(cnt->imgs.size);
-    cnt->imgs.out = mymalloc(cnt->imgs.size);
+    cnt->imgs.ref = mymalloc(cnt->imgs.size_norm);
+    cnt->imgs.img_motion.image_norm = mymalloc(cnt->imgs.size_norm);
 
     /* contains the moving objects of ref. frame */
     cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
-    cnt->imgs.image_virgin = mymalloc(cnt->imgs.size);
+    cnt->imgs.image_virgin.image_norm = mymalloc(cnt->imgs.size_norm);
+    imagepkt_init(&cnt->imgs.image_virgin);
     cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
@@ -931,7 +1025,7 @@ static int motion_init(struct context *cnt)
         cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
 
     /* allocate buffer here for preview buffer */
-    cnt->imgs.preview_image.image = mymalloc(cnt->imgs.size);
+    cnt->imgs.preview_image.image_norm = mymalloc(cnt->imgs.size_norm);
 
     /*
      * Allocate a buffer for temp. usage in some places
@@ -955,14 +1049,14 @@ static int motion_init(struct context *cnt)
         int i;
 
         for (i = 0; i < 5; i++) {
-            if (vid_next(cnt, cnt->imgs.image_virgin) == 0)
+            if (vid_next(cnt, &cnt->imgs.image_virgin) == 0)
                 break;
             SLEEP(2, 0);
         }
 
         if (i >= 5) {
-            memset(cnt->imgs.image_virgin, 0x80, cnt->imgs.size);       /* initialize to grey */
-            draw_text(cnt->imgs.image_virgin, 10, 20, cnt->imgs.width,
+            memset(cnt->imgs.image_virgin.image_norm, 0x80, cnt->imgs.size_norm);       /* initialize to grey */
+            draw_text(cnt->imgs.image_virgin.image_norm, 10, 20, cnt->imgs.width,
                       "Error capturing first image", cnt->conf.text_double);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error capturing first image");
         }
@@ -1280,8 +1374,8 @@ static void motion_cleanup(struct context *cnt)
         vid_close(cnt);
     }
 
-    free(cnt->imgs.out);
-    cnt->imgs.out = NULL;
+    free(cnt->imgs.img_motion.image_norm);
+    cnt->imgs.img_motion.image_norm = NULL;
 
     free(cnt->imgs.ref);
     cnt->imgs.ref = NULL;
@@ -1289,8 +1383,9 @@ static void motion_cleanup(struct context *cnt)
     free(cnt->imgs.ref_dyn);
     cnt->imgs.ref_dyn = NULL;
 
-    free(cnt->imgs.image_virgin);
-    cnt->imgs.image_virgin = NULL;
+    free(cnt->imgs.image_virgin.image_norm);
+    cnt->imgs.image_virgin.image_norm = NULL;
+    imagepkt_deinit(&cnt->imgs.image_virgin);
 
     free(cnt->imgs.labels);
     cnt->imgs.labels = NULL;
@@ -1316,11 +1411,17 @@ static void motion_cleanup(struct context *cnt)
     if (cnt->imgs.mask_privacy_uv) free(cnt->imgs.mask_privacy_uv);
     cnt->imgs.mask_privacy_uv = NULL;
 
+    if (cnt->imgs.mask_privacy_high) free(cnt->imgs.mask_privacy_high);
+    cnt->imgs.mask_privacy_high = NULL;
+
+    if (cnt->imgs.mask_privacy_high_uv) free(cnt->imgs.mask_privacy_high_uv);
+    cnt->imgs.mask_privacy_high_uv = NULL;
+
     free(cnt->imgs.common_buffer);
     cnt->imgs.common_buffer = NULL;
 
-    free(cnt->imgs.preview_image.image);
-    cnt->imgs.preview_image.image = NULL;
+    free(cnt->imgs.preview_image.image_norm);
+    cnt->imgs.preview_image.image_norm = NULL;
 
     image_ring_destroy(cnt); /* Cleanup the precapture ring buffer */
 
@@ -1369,55 +1470,78 @@ static void motion_cleanup(struct context *cnt)
 
 static void mlp_mask_privacy(struct context *cnt){
 
-  if (cnt->imgs.mask_privacy == NULL) return;
+    if (cnt->imgs.mask_privacy == NULL) return;
 
-  /*
-   * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
-   * bytes at a time, providing a significant boost in performance.
-   * Then a trailer loop takes care of any remaining bytes.
-   */
-  int pixels = cnt->imgs.height * cnt->imgs.width;
-  unsigned char *image = cnt->current_image->image;
-  const unsigned char *mask = cnt->imgs.mask_privacy;
+    /*
+    * This function uses long operations to process 4 (32 bit) or 8 (64 bit)
+    * bytes at a time, providing a significant boost in performance.
+    * Then a trailer loop takes care of any remaining bytes.
+    */
+    unsigned char *image;
+    const unsigned char *mask;
+    const unsigned char *maskuv;
 
-  // Mask brightness.
-  //
-  int index = pixels;
-  int increment = sizeof(unsigned long);
+    int index_y;
+    int index_crcb;
+    int increment;
+    int indx_img;                /* Counter for how many images we need to apply the mask to */
+    int indx_max;                /* 1 if we are only doing norm, 2 if we are doing both norm and high */
 
-  while (index >= increment) {
-     *((unsigned long *)image) &= *((unsigned long *)mask);
-     image += increment;
-     mask += increment;
-     index -= increment;
-  }
-  while (--index >= 0) {
-     *(image++) &= *(mask++);
-  }
+    indx_img = 1;
+    indx_max = 1;
+    if (cnt->imgs.size_high > 0) indx_max = 2;
+    increment = sizeof(unsigned long);
 
-  // Mask chrominance.
-  //
-  index = cnt->imgs.size - pixels;
-  const unsigned char *maskuv = cnt->imgs.mask_privacy_uv;
+    while (indx_img <= indx_max){
+        if (indx_img == 1) {
+            /* Normal Resolution */
+            index_y = cnt->imgs.height * cnt->imgs.width;
+            image = cnt->current_image->image_norm;
+            mask = cnt->imgs.mask_privacy;
+            index_crcb = cnt->imgs.size_norm - index_y;
+            maskuv = cnt->imgs.mask_privacy_uv;
+        } else {
+            /* High Resolution */
+            index_y = cnt->imgs.height_high * cnt->imgs.width_high;
+            image = cnt->current_image->image_high;
+            mask = cnt->imgs.mask_privacy_high;
+            index_crcb = cnt->imgs.size_high - index_y;
+            maskuv = cnt->imgs.mask_privacy_high_uv;
+        }
 
-  while (index >= increment) {
-     index -= increment;
-     /*
-      * Replace the masked bytes with 0x080. This is done using two masks:
-      * the normal privacy mask is used to clear the masked bits, the
-      * "or" privacy mask is used to write 0x80. The benefit of that method
-      * is that we process 4 or 8 bytes in just two operations.
-      */
-     *((unsigned long *)image) &= *((unsigned long *)mask);
-     mask += increment;
-     *((unsigned long *)image) |= *((unsigned long *)maskuv);
-     maskuv += increment;
-     image += increment;
-  }
-  while (--index >= 0) {
-     if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
-     image += 1;
-  }
+        while (index_y >= increment) {
+            *((unsigned long *)image) &= *((unsigned long *)mask);
+            image += increment;
+            mask += increment;
+            index_y -= increment;
+        }
+        while (--index_y >= 0) {
+            *(image++) &= *(mask++);
+        }
+
+        /* Mask chrominance. */
+        while (index_crcb >= increment) {
+            index_crcb -= increment;
+            /*
+            * Replace the masked bytes with 0x080. This is done using two masks:
+            * the normal privacy mask is used to clear the masked bits, the
+            * "or" privacy mask is used to write 0x80. The benefit of that method
+            * is that we process 4 or 8 bytes in just two operations.
+            */
+            *((unsigned long *)image) &= *((unsigned long *)mask);
+            mask += increment;
+            *((unsigned long *)image) |= *((unsigned long *)maskuv);
+            maskuv += increment;
+            image += increment;
+        }
+
+        while (--index_crcb >= 0) {
+            if (*(mask++) == 0x00) *image = 0x80; // Mask last remaining bytes.
+            image += 1;
+        }
+
+        indx_img++;
+    }
 }
 
 static void mlp_areadetect(struct context *cnt){
@@ -1591,16 +1715,16 @@ static void mlp_resetimages(struct context *cnt){
 
 static int mlp_retry(struct context *cnt){
 
-    /***** MOTION LOOP - RETRY INITIALIZING SECTION *****/
     /*
      * If a camera is not available we keep on retrying every 10 seconds
      * until it shows up.
      */
+    int size_high;
+
     if (cnt->video_dev < 0 &&
         cnt->currenttime % 10 == 0 && cnt->shots == 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,
-            "Retrying until successful connection with camera");
-            cnt->video_dev = vid_start(cnt);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Retrying until successful connection with camera");
+        cnt->video_dev = vid_start(cnt);
         /*
          * If the netcam has different dimensions than in the config file
          * we need to restart Motion to re-allocate all the buffers
@@ -1619,6 +1743,13 @@ static int mlp_retry(struct context *cnt){
              */
             return 1;
         }
+        /*
+         * For high res, we check the size of buffer to determine whether to break out
+         * the init_motion function allocated the buffer for high using the cnt->imgs.size_high
+         * and the vid_start ONLY re-populates the height/width so we can check the size here.
+         */
+        size_high = (cnt->imgs.width_high * cnt->imgs.height_high * 3) / 2;
+        if (cnt->imgs.size_high != size_high) return 1;
     }
     return 0;
 }
@@ -1640,7 +1771,7 @@ static int mlp_capture(struct context *cnt){
      * >0 = non fatal error - copy last image or show grey image with message
      */
     if (cnt->video_dev >= 0)
-        vid_return_code = vid_next(cnt, cnt->current_image->image);
+        vid_return_code = vid_next(cnt, cnt->current_image);
     else
         vid_return_code = 1; /* Non fatal error */
 
@@ -1662,7 +1793,7 @@ static int mlp_capture(struct context *cnt){
          * Save the newly captured still virgin image to a buffer
          * which we will not alter with text and location graphics
          */
-        memcpy(cnt->imgs.image_virgin, cnt->current_image->image, cnt->imgs.size);
+        memcpy(cnt->imgs.image_virgin.image_norm, cnt->current_image->image_norm, cnt->imgs.size_norm);
 
         mlp_mask_privacy(cnt);
 
@@ -1686,7 +1817,7 @@ static int mlp_capture(struct context *cnt){
          * a gray image with message is applied
          * flag lost_connection
          */
-        memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
+        memcpy(cnt->current_image->image_norm, cnt->imgs.image_virgin.image_norm, cnt->imgs.size_norm);
         cnt->lost_connection = 1;
     /* NO FATAL ERROR -
     *        copy last image or show grey image with message
@@ -1697,7 +1828,8 @@ static int mlp_capture(struct context *cnt){
     */
     } else {
 
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "vid_return_code %d",vid_return_code);
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "vid_return_code %d",vid_return_code);
+
         /*
          * Netcams that change dimensions while Motion is running will
          * require that Motion restarts to reinitialize all the many
@@ -1734,7 +1866,7 @@ static int mlp_capture(struct context *cnt){
 
         if (cnt->video_dev >= 0 &&
             cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
-            memcpy(cnt->current_image->image, cnt->imgs.image_virgin, cnt->imgs.size);
+            memcpy(cnt->current_image->image_norm, cnt->imgs.image_virgin.image_norm, cnt->imgs.size_norm);
         } else {
             cnt->lost_connection = 1;
 
@@ -1745,9 +1877,9 @@ static int mlp_capture(struct context *cnt){
 
             tv1.tv_sec=cnt->connectionlosttime;
             tv1.tv_usec = 0;
-            memset(cnt->current_image->image, 0x80, cnt->imgs.size);
+            memset(cnt->current_image->image_norm, 0x80, cnt->imgs.size_norm);
             mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
-            draw_text(cnt->current_image->image, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
+            draw_text(cnt->current_image->image_norm, 10, 20 * cnt->text_size_factor, cnt->imgs.width,
                       tmpout, cnt->conf.text_double);
 
             /* Write error message only once */
@@ -1796,9 +1928,9 @@ static void mlp_detection(struct context *cnt){
              * anyway
              */
             if (cnt->detecting_motion || cnt->conf.setup_mode)
-                cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin);
+                cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin.image_norm);
             else
-                cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin);
+                cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin.image_norm);
 
             /* Lightswitch feature - has light intensity changed?
              * This can happen due to change of light conditions or due to a sudden change of the camera
@@ -1829,7 +1961,7 @@ static void mlp_detection(struct context *cnt){
              */
             if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
                 cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs,
-                                                             cnt->current_image->image);
+                                                             cnt->current_image->image_norm);
 
                 if (cnt->current_image->diffs <= cnt->threshold) {
                     cnt->current_image->diffs = 0;
@@ -1895,7 +2027,7 @@ static void mlp_tuning(struct context *cnt){
      */
     if ((cnt->conf.noise_tune && cnt->shots == 0) &&
          (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold)))
-        alg_noise_tune(cnt, cnt->imgs.image_virgin);
+        alg_noise_tune(cnt, cnt->imgs.image_virgin.image_norm);
 
 
     /*
@@ -1969,17 +2101,17 @@ static void mlp_overlay(struct context *cnt){
     /* Smartmask overlay */
     if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
         cnt->conf.setup_mode))
-        overlay_smartmask(cnt, cnt->imgs.out);
+        overlay_smartmask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Largest labels overlay */
     if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
         cnt->conf.setup_mode))
-        overlay_largest_label(cnt, cnt->imgs.out);
+        overlay_largest_label(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Fixed mask overlay */
     if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
         cnt->conf.setup_mode))
-        overlay_fixed_mask(cnt, cnt->imgs.out);
+        overlay_fixed_mask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Initialize the double sized characters if needed. */
     if (cnt->conf.text_double && cnt->text_size_factor == 1) {
@@ -1996,7 +2128,7 @@ static void mlp_overlay(struct context *cnt){
         else
             sprintf(tmp, "-");
 
-        draw_text(cnt->current_image->image, cnt->imgs.width - 10, 10,
+        draw_text(cnt->current_image->image_norm, cnt->imgs.width - 10, 10,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
@@ -2007,10 +2139,10 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.setup_mode) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                 cnt->current_image->total_labels, cnt->noise);
-        draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->text_size_factor,
+        draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
         sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
-        draw_text(cnt->imgs.out, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->text_size_factor,
+        draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
@@ -2018,7 +2150,7 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.text_left) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
                    &cnt->current_image->timestamp_tv, NULL, 0);
-        draw_text(cnt->current_image->image, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
+        draw_text(cnt->current_image->image_norm, 10, cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
 
@@ -2026,7 +2158,7 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.text_right) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
                    &cnt->current_image->timestamp_tv, NULL, 0);
-        draw_text(cnt->current_image->image, cnt->imgs.width - 10,
+        draw_text(cnt->current_image->image_norm, cnt->imgs.width - 10,
                   cnt->imgs.height - 10 * cnt->text_size_factor,
                   cnt->imgs.width, tmp, cnt->conf.text_double);
     }
@@ -2059,8 +2191,7 @@ static void mlp_actions(struct context *cnt){
         if (cnt->conf.post_capture > 0) {
             /* Setup the postcap counter */
             cnt->postcap = cnt->conf.post_capture;
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "(Em) Init post capture %d",
-                       cnt->postcap);
+            // MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "(Em) Init post capture %d", cnt->postcap);
         }
 
         cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
@@ -2099,8 +2230,7 @@ static void mlp_actions(struct context *cnt){
 
             /* Setup the postcap counter */
             cnt->postcap = cnt->conf.post_capture;
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Setup post capture %d",
-                       cnt->postcap);
+            //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Setup post capture %d", cnt->postcap);
 
             /* Mark all images in image_ring to be saved */
             for (indx = 0; indx < cnt->imgs.image_ring_size; indx++)
@@ -2110,8 +2240,7 @@ static void mlp_actions(struct context *cnt){
            /* we have motion in this frame, but not enought frames for trigger. Check postcap */
             cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
             cnt->postcap--;
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "post capture %d",
-                       cnt->postcap);
+            //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "post capture %d", cnt->postcap);
         } else {
             cnt->current_image->flags |= IMAGE_PRECAP;
         }
@@ -2122,8 +2251,7 @@ static void mlp_actions(struct context *cnt){
         /* No motion, doing postcap */
         cnt->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
         cnt->postcap--;
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "post capture %d",
-                   cnt->postcap);
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "post capture %d", cnt->postcap);
     } else {
         /* Done with postcap, so just have the image in the precap buffer */
         cnt->current_image->flags |= IMAGE_PRECAP;
@@ -2174,8 +2302,7 @@ static void mlp_actions(struct context *cnt){
             if (cnt->track.type)
                 cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "End of event %d",
-                       cnt->event_nr);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "End of event %d", cnt->event_nr);
 
             cnt->makemovie = 0;
             /* Reset post capture */
@@ -2252,7 +2379,7 @@ static void mlp_snapshot(struct context *cnt){
     if ((cnt->conf.snapshot_interval > 0 && cnt->shots == 0 &&
          cnt->time_current_frame % cnt->conf.snapshot_interval <= cnt->time_last_frame % cnt->conf.snapshot_interval) ||
          cnt->snapshot) {
-        event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image->image, NULL, NULL, &cnt->current_image->timestamp_tv);
+        event(cnt, EVENT_IMAGE_SNAPSHOT, cnt->current_image, NULL, NULL, &cnt->current_image->timestamp_tv);
         cnt->snapshot = 0;
     }
 
@@ -2316,9 +2443,10 @@ static void mlp_timelapse(struct context *cnt){
          * add a timelapse frame to the timelapse movie.
          */
         if (cnt->shots == 0 && cnt->time_current_frame % cnt->conf.timelapse <=
-            cnt->time_last_frame % cnt->conf.timelapse)
-            event(cnt, EVENT_TIMELAPSE, cnt->current_image->image, NULL, NULL,
-                  &cnt->current_image->timestamp_tv);
+            cnt->time_last_frame % cnt->conf.timelapse) {
+                event(cnt, EVENT_TIMELAPSE, cnt->current_image, NULL, NULL,
+                    &cnt->current_image->timestamp_tv);
+        }
     } else if (cnt->ffmpeg_timelapse) {
     /*
      * If timelapse movie is in progress but conf.timelapse is zero then close timelapse file
@@ -2345,18 +2473,19 @@ static void mlp_loopback(struct context *cnt){
      * sends all detected pictures to the stream except the 1st per second which is already sent.
      */
     if (cnt->conf.setup_mode) {
-        event(cnt, EVENT_IMAGE, cnt->imgs.out, NULL, &cnt->pipe, &cnt->current_image->timestamp_tv);
-        event(cnt, EVENT_STREAM, cnt->imgs.out, NULL, NULL, &cnt->current_image->timestamp_tv);
+
+        event(cnt, EVENT_IMAGE, &cnt->imgs.img_motion, NULL, &cnt->pipe, &cnt->current_image->timestamp_tv);
+        event(cnt, EVENT_STREAM, &cnt->imgs.img_motion, NULL, NULL, &cnt->current_image->timestamp_tv);
     } else {
-        event(cnt, EVENT_IMAGE, cnt->current_image->image, NULL,
+        event(cnt, EVENT_IMAGE, cnt->current_image, NULL,
               &cnt->pipe, &cnt->current_image->timestamp_tv);
 
         if (!cnt->conf.stream_motion || cnt->shots == 1)
-            event(cnt, EVENT_STREAM, cnt->current_image->image, NULL, NULL,
+            event(cnt, EVENT_STREAM, cnt->current_image, NULL, NULL,
                   &cnt->current_image->timestamp_tv);
     }
 
-    event(cnt, EVENT_IMAGEM, cnt->imgs.out, NULL, &cnt->mpipe, &cnt->current_image->timestamp_tv);
+    event(cnt, EVENT_IMAGEM, &cnt->imgs.img_motion, NULL, &cnt->mpipe, &cnt->current_image->timestamp_tv);
 
 }
 
@@ -2688,7 +2817,6 @@ static void cntlist_create(int argc, char *argv[])
     cnt_list = conf_load(cnt_list);
 }
 
-
 /**
  * motion_shutdown
  *
@@ -2911,6 +3039,7 @@ int main (int argc, char **argv)
     int i;
     pthread_attr_t thread_attr;
     pthread_t thread_id;
+    char service[6];
 
     /*
      * Setup signals and do some initialization. 1 in the call to
@@ -3013,17 +3142,21 @@ int main (int argc, char **argv)
             {
                 cnt_list[i]->conf_filename[sizeof(cnt_list[i]->conf_filename) - 1] = '\0';
 
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera %d is from %s",
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera ID: %d is from %s",
                            cnt_list[i]->conf.camera_id, cnt_list[i]->conf_filename);
             }
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera %d is device: %s input %d",
-                       cnt_list[i]->conf.camera_id, cnt_list[i]->conf.netcam_url ?
-                       cnt_list[i]->conf.netcam_url : cnt_list[i]->conf.video_device,
-                       cnt_list[i]->conf.netcam_url ? -1 : cnt_list[i]->conf.input);
-
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Stream port %d",
+            if (cnt_list[i]->conf.netcam_url){
+                snprintf(service,6,"%s",cnt_list[i]->conf.netcam_url);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera ID: %d Camera Name: %s Service: %s"
+                       ,cnt_list[i]->conf.camera_id, cnt_list[i]->conf.camera_name,service);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Stream port %d",
                        cnt_list[i]->conf.stream_port);
+            } else {
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera ID: %d Camera Name: %s Device: %s"
+                       ,cnt_list[i]->conf.camera_id, cnt_list[i]->conf.camera_name,cnt_list[i]->conf.video_device);
+            }
+
 #ifdef HAVE_SQLITE
             /* this is done to share the seralized handle
              * and supress creation of new handles in the threads */
@@ -3147,6 +3280,11 @@ int main (int argc, char **argv)
     } while (restart); /* loop if we're supposed to restart */
 
     ffmpeg_global_deinit();
+
+#ifdef HAVE_MYSQL
+    /* We started it up at the beginning of this function so we now need to clean up */
+    mysql_library_end();
+#endif /* HAVE_MYSQL */
 
     // Be sure that http control exits fine
     cnt_list[0]->webcontrol_finish = 1;
@@ -3596,4 +3734,63 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
 
     return strftime(s, max, format, &timestamp_tm);
 }
+/* This is a temporary location for these util functions.  All the generic utility
+ * functions will be collected here and ultimately moved into a new common "util" module
+ */
+void util_threadname_set(const char *abbr, int threadnbr, const char *threadname){
+    /* When the abbreviation is sent in as null, that means we are being
+     * provided a fully filled out thread name (usually obtained from a
+     * previously called get_threadname so we set it without additional
+     *  formatting.
+     */
 
+    char tname[16];
+    if (abbr != NULL){
+        snprintf(tname, sizeof(tname), "%s%d%s%s",abbr,threadnbr,
+             threadname ? ":" : "",
+             threadname ? threadname : "");
+    } else {
+        snprintf(tname, sizeof(tname), "%s",threadname);
+    }
+
+#ifdef __APPLE__
+    pthread_setname_np(tname);
+#elif defined(BSD)
+    pthread_set_name_np(pthread_self(), tname);
+#elif HAVE_PTHREAD_SETNAME_NP
+    pthread_setname_np(pthread_self(), tname);
+#else
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Unable to set thread name %s", tname);
+#endif
+
+}
+
+void util_threadname_get(char *threadname){
+
+#if ((!defined(BSD) && HAVE_PTHREAD_SETNAME_NP) || defined(__APPLE__))
+    char currname[16];
+    pthread_getname_np(pthread_self(), currname, sizeof(currname));
+    snprintf(threadname, sizeof(currname), "%s",currname);
+#else
+    snprintf(threadname, 8, "%s","Unknown");
+#endif
+
+}
+int util_check_passthrough(struct context *cnt){
+#if (HAVE_FFMPEG && LIBAVFORMAT_VERSION_MAJOR < 55)
+    if (cnt->conf.ffmpeg_passthrough)
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "FFMPEG version too old. Disabling pass-through processing.");
+    return 0;
+#else
+    if (cnt->conf.ffmpeg_passthrough){
+        /* Disable passthrough until functional */
+        //MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
+        //return 1;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through disabled.");
+        return 0;
+    } else {
+        return 0;
+    }
+#endif
+
+}

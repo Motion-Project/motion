@@ -883,3 +883,105 @@ int ftp_close(ftp_context_pointer ctxt)
     ftp_free_context(ctxt);
     return 0;
 }
+
+/**
+ * netcam_read_ftp_jpeg
+ *
+ *      This routine reads from a netcam using the FTP protocol.
+ *      The current implementation is still a little experimental,
+ *      and needs some additional code for error detection and
+ *      recovery.
+ */
+static int netcam_read_ftp_jpeg(netcam_context_ptr netcam)
+{
+    netcam_buff_ptr buffer;
+    int len;
+
+    /* Point to our working buffer. */
+    buffer = netcam->receiving;
+    buffer->used = 0;
+
+    /* Request the image from the remote server. */
+    if (ftp_get_socket(netcam->ftp) <= 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "ftp_get_socket failed");
+        return -1;
+    }
+
+    /* Now fetch the image using ftp_read.  Note this is a blocking call. */
+    do {
+        /* Assure there's enough room in the buffer. */
+        netcam_check_buffsize(buffer, FTP_BUF_SIZE);
+
+        /* Do the read */
+        if ((len = ftp_read(netcam->ftp, buffer->ptr + buffer->used, FTP_BUF_SIZE)) < 0)
+            return -1;
+
+        buffer->used += len;
+    } while (len > 0);
+
+    netcam_image_read_complete(netcam);
+
+    return 0;
+}
+
+int netcam_setup_ftp(netcam_context_ptr netcam, struct url_t *url)
+{
+    struct context *cnt = netcam->cnt;
+    const char *ptr;
+
+
+    if ((netcam->ftp = ftp_new_context()) == NULL)
+        return -1;
+    /*
+     * We copy the strings out of the url structure into the ftp_context
+     * structure.  By setting url->{string} to NULL we effectively "take
+     * ownership" of the string away from the URL (i.e. it won't be freed
+     * when we cleanup the url structure later).
+     */
+    if (strcmp(url->path,"/")){
+        netcam->ftp->path = mystrdup(url->path + 1);
+    } else {
+        netcam->ftp->path = mystrdup(url->path);
+    }
+
+    url->path = NULL;
+
+    if (cnt->conf.netcam_userpass != NULL) {
+        ptr = cnt->conf.netcam_userpass;
+    } else {
+        ptr = url->userpass;  /* Don't set this one NULL, gets freed. */
+    }
+
+    if (ptr != NULL) {
+        char *cptr;
+
+        if ((cptr = strchr(ptr, ':')) == NULL) {
+            netcam->ftp->user = mystrdup(ptr);
+        } else {
+            netcam->ftp->user = mymalloc((cptr - ptr));
+            memcpy(netcam->ftp->user, ptr,(cptr - ptr));
+            netcam->ftp->passwd = mystrdup(cptr + 1);
+        }
+    }
+
+    netcam_url_free(url);
+
+    /*
+     * The ftp context should be all ready to attempt a connection with
+     * the server, so we try ....
+     */
+    if (ftp_connect(netcam) < 0) {
+        ftp_free_context(netcam->ftp);
+        netcam->ftp = NULL;
+        return -1;
+    }
+
+    if (ftp_send_type(netcam->ftp, 'I') < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Error sending"
+                   " TYPE I to ftp server");
+        return -1;
+    }
+
+    netcam->get_image = netcam_read_ftp_jpeg;
+    return 0;
+}
