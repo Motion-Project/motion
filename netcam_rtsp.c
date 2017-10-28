@@ -740,6 +740,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, rtsp_context *rtsp_data 
     }
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Setting up %s stream.",rtsp_data->cameratype);
 
+    util_check_passthrough(cnt); /* In case it was turned on via webcontrol */
     rtsp_data->status = RTSP_NOTCONNECTED;
     rtsp_data->rtsp_uses_tcp =cnt->conf.rtsp_uses_tcp;
     rtsp_data->v4l2_palette = cnt->conf.v4l2_palette;
@@ -755,7 +756,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, rtsp_context *rtsp_data 
     netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
     netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
     rtsp_data->interruptduration = 5;
-    rtsp_data->passthrough = cnt->conf.ffmpeg_passthrough;
+    rtsp_data->passthrough = util_check_passthrough(cnt);
     rtsp_data->interrupted = FALSE;
     netcam_rtsp_set_path(cnt, rtsp_data);
 

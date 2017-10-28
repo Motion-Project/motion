@@ -548,6 +548,6 @@ int create_path(const char *);
 
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);
-void util_check_passthrough(struct context *cnt);
+int util_check_passthrough(struct context *cnt);
 
 #endif /* _INCLUDE_MOTION_H */

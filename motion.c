@@ -955,11 +955,6 @@ static int motion_init(struct context *cnt)
 
     if (init_camera_type(cnt) != 0 ) return -3;
 
-    /* Disable pass-through for all cameras until it is functional.  Comment out line for development/testing */
-    //cnt->conf.ffmpeg_passthrough = 0;
-
-    util_check_passthrough(cnt);
-
     if ((cnt->camera_type != CAMERA_TYPE_RTSP) &&
         (cnt->conf.ffmpeg_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Pass-through processing disabled.");
@@ -3777,17 +3772,25 @@ void util_threadname_get(char *threadname){
     pthread_getname_np(pthread_self(), currname, sizeof(currname));
     snprintf(threadname, sizeof(currname), "%s",currname);
 #else
-    if (threadname) return;
+    snprintf(threadname, 8, "%s","Unknown");
 #endif
 
 }
-void util_check_passthrough(struct context *cnt){
+int util_check_passthrough(struct context *cnt){
 #if (HAVE_FFMPEG && LIBAVFORMAT_VERSION_MAJOR < 55)
     if (cnt->conf.ffmpeg_passthrough)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "FFMPEG version too old. Disabling pass-through processing.");
-    cnt->conf.ffmpeg_passthrough = 0;
+    return 0;
 #else
-    if (cnt->conf.ffmpeg_passthrough)
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
+    if (cnt->conf.ffmpeg_passthrough){
+        /* Disable passthrough until functional */
+        //MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
+        //return 1;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through disabled.");
+        return 0;
+    } else {
+        return 0;
+    }
 #endif
+
 }

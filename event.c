@@ -384,6 +384,7 @@ static void event_image_detect(struct context *cnt,
 {
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
+    int  passthrough;
 
     if (cnt->new_img & NEWIMG_ON) {
         const char *imagepath;
@@ -400,7 +401,8 @@ static void event_image_detect(struct context *cnt,
         mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
         snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
-        if ((cnt->imgs.size_high > 0) && (!cnt->conf.ffmpeg_passthrough)) {
+        passthrough = util_check_passthrough(cnt);
+        if ((cnt->imgs.size_high > 0) && (!passthrough)) {
             put_picture(cnt, fullfilename,img_data->image_high, FTYPE_IMAGE);
         } else {
             put_picture(cnt, fullfilename,img_data->image_norm, FTYPE_IMAGE);
@@ -611,13 +613,15 @@ static void event_extpipe_put(struct context *cnt,
             struct image_data *img_data, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
+    int passthrough;
+
     /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cnt->conf.useextpipe) && (cnt->extpipe != NULL)) {
         MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, "Using extpipe");
-
+        passthrough = util_check_passthrough(cnt);
         /* Check that is open */
         if ((cnt->extpipe_open) && (fileno(cnt->extpipe) > 0)) {
-            if ((cnt->imgs.size_high > 0) && (!cnt->conf.ffmpeg_passthrough)){
+            if ((cnt->imgs.size_high > 0) && (!passthrough)){
                 if (!fwrite(img_data->image_high, cnt->imgs.size_high, 1, cnt->extpipe))
                     MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, "Error writing in pipe , state error %d",
                            ferror(cnt->extpipe));
@@ -765,7 +769,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
             cnt->ffmpeg_output->test_mode = 0;
         }
         cnt->ffmpeg_output->motion_images = 0;
-        cnt->ffmpeg_output->passthrough = cnt->conf.ffmpeg_passthrough;
+        cnt->ffmpeg_output->passthrough =util_check_passthrough(cnt);
 
         retcd = ffmpeg_open(cnt->ffmpeg_output);
         if (retcd < 0){
@@ -817,6 +821,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             struct timeval *currenttime_tv)
 {
     int retcd;
+    int passthrough;
 
     if (!cnt->ffmpeg_timelapse) {
         char tmp[PATH_MAX];
@@ -837,9 +842,9 @@ static void event_ffmpeg_timelapse(struct context *cnt,
 
         /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
         snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
-
+        passthrough = util_check_passthrough(cnt);
         cnt->ffmpeg_timelapse = mymalloc(sizeof(struct ffmpeg));
-        if ((cnt->imgs.size_high > 0) && (!cnt->conf.ffmpeg_passthrough)){
+        if ((cnt->imgs.size_high > 0) && (!passthrough)){
             cnt->ffmpeg_timelapse->width  = cnt->imgs.width_high;
             cnt->ffmpeg_timelapse->height = cnt->imgs.height_high;
             cnt->ffmpeg_timelapse->high_resolution = 1;

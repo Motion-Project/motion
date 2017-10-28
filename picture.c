@@ -990,8 +990,10 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
 
 static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype){
     int width, height;
+    int passthrough;
 
-    if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!cnt->conf.ffmpeg_passthrough)) {
+    passthrough = util_check_passthrough(cnt);
+    if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!passthrough)) {
         width = cnt->imgs.width_high;
         height = cnt->imgs.height_high;
     } else {
