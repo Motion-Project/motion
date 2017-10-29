@@ -85,7 +85,7 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     char *s;
     int i;
 
-    const char *re = "(http|ftp|mjpg|mjpeg|rtsp)://(((.*):(.*))@)?"
+    const char *re = "(http|ftp|mjpg|mjpeg|rtsp|rtmp)://(((.*):(.*))@)?"
                      "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
     regex_t pattbuf;
     regmatch_t matches[10];
@@ -150,6 +150,8 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
             parse_url->port = 80;
         else if (!strcmp(parse_url->service, "ftp"))
             parse_url->port = 21;
+        else if (!strcmp(parse_url->service, "rtmp"))
+            parse_url->port = 1935;
         else if (!strcmp(parse_url->service, "rtsp"))
             parse_url->port = 554;
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Using port number %d",parse_url->port);

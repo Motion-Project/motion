@@ -837,6 +837,8 @@ static int netcam_rtsp_open_context(rtsp_context *rtsp_data){
         netcam_rtsp_set_http(rtsp_data);
     } else if (strncmp(rtsp_data->service, "rtsp", 4) == 0 ){
         netcam_rtsp_set_rtsp(rtsp_data);
+    } else if (strncmp(rtsp_data->service, "rtmp", 4) == 0 ){
+        netcam_rtsp_set_rtsp(rtsp_data);
     } else if (strncmp(rtsp_data->service, "v4l2", 4) == 0 ){
         netcam_rtsp_set_v4l2(rtsp_data);
     } else {

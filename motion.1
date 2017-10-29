@@ -314,7 +314,7 @@ Default: none
 Description:
 .fi
 .RS
-Flip the images vertically or horizontally. 
+Flip the images vertically or horizontally.
 The flip affects all saved images as well as movies.
 .RE
 .RE
@@ -393,6 +393,7 @@ http://
 ftp://
 mjpg://
 rtsp://
+rtmp://
 mjpeg://
 file://
 v4l2://
@@ -421,6 +422,7 @@ The following prefixes are recognized
 
 .RS
 rtsp://
+rtmp://
 .RE
 
 The connection string is camera specific.
@@ -470,7 +472,7 @@ Description:
 .RS
 This setting is to keep-alive (open) the network socket between requests.
 When used, this option should improve performance on compatible net cameras.
-This option is not applicable for the rtsp:// and mjpeg:// formats.
+This option is not applicable for the rtsp://, rtmp:// and mjpeg:// formats.
 .RE
 .RE
 
@@ -513,7 +515,7 @@ Default: on
 Description:
 .fi
 .RS
-When using a RTSP connection for a network camera, use a TCP transport instead of UDP.
+When using a RTSP/RTMP connection for a network camera, use a TCP transport instead of UDP.
 The UDP transport frequently results in "smeared" corrupt images.
 .RE
 .RE
