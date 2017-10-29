@@ -178,6 +178,11 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
     va_list ap;
     int threadnr;
 
+    static int flood_cnt = 0;
+    static char flood_msg[1024];
+    char flood_repeats[1024];
+
+
     /* Exit if level is greater than log_level */
     if ((unsigned int)level > log_level)
         return;
@@ -257,19 +262,45 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 #endif
     }
 
-    switch (log_mode) {
-    case LOGMODE_FILE:
-        strncat(buf, "\n", 1024 - strlen(buf));
-        fputs(buf, logfile);
-        fflush(logfile);
-        break;
+    if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)){
+        flood_cnt++;
+    } else {
+        if (flood_cnt > 1){
+            snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
+                     threadnr, threadname, get_log_level_str(level)
+                     , get_log_type_str(type), flood_cnt-1);
+            switch (log_mode) {
+            case LOGMODE_FILE:
+                strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
+                fputs(flood_repeats, logfile);
+                fflush(logfile);
+                break;
 
-    case LOGMODE_SYSLOG:
-        syslog(level, "%s", buf);
-        strncat(buf, "\n", 1024 - strlen(buf));
-        fputs(buf, stderr);
-        fflush(stderr);
-        break;
+            case LOGMODE_SYSLOG:
+                syslog(level, "%s", flood_repeats);
+                strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
+                fputs(flood_repeats, stderr);
+                fflush(stderr);
+                break;
+            }
+        }
+        flood_cnt = 1;
+        snprintf(flood_msg,1024,"%s",buf);
+        switch (log_mode) {
+        case LOGMODE_FILE:
+            strncat(buf, "\n", 1024 - strlen(buf));
+            fputs(buf, logfile);
+            fflush(logfile);
+            break;
+
+        case LOGMODE_SYSLOG:
+            syslog(level, "%s", buf);
+            strncat(buf, "\n", 1024 - strlen(buf));
+            fputs(buf, stderr);
+            fflush(stderr);
+            break;
+        }
     }
+
 }
 
