@@ -2115,7 +2115,7 @@ struct context **conf_load(struct context **cnt)
 }
 
 /**
- * dump_config_options
+ * conf_output_parms
  *      Dump config options to log, useful for support purposes.
  *      Redact sensitive information and re-add quotation marks where needed (see conf_print).
  *      Not using the MOTION_LOG macro here to skip the function naming,
@@ -2123,30 +2123,34 @@ struct context **conf_load(struct context **cnt)
  *
  * Returns nothing
  */
-void dump_config_options(struct context **cnt)
+void conf_output_parms(struct context **cnt)
 {
     unsigned int i, t = 0;
     const char *name, *value;
 
     while(cnt[++t]);
-    motion_log(NTC, TYPE_ALL, NO_ERRNO, "Dumping config options from all files (%d):", t);
 
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Writing configuration parameters from all files (%d):", t);
     for (t = 0; cnt[t]; t++) {
-        motion_log(NTC, TYPE_ALL, NO_ERRNO, "Thread %d - Config file: %s", t, cnt[t]->conf_filename);
+        motion_log(INF, TYPE_ALL, NO_ERRNO, "Thread %d - Config file: %s", t, cnt[t]->conf_filename);
         i = 0;
-
-        while ((name = config_params[i].param_name) != NULL) {
+        while (config_params[i].param_name != NULL) {
+            name=config_params[i].param_name;
             if ((value = config_params[i].print(cnt, NULL, i, t)) != NULL) {
-                if (!strncmp(name, "netcam_url", 10) || !strncmp(name, "netcam_userpass", 15) ||
-                    !strncmp(name, "stream_authentication", 21) || !strncmp(name, "webcontrol_authentication", 25) ||
-                    !strncmp(name, "database_user", 13) || !strncmp(name, "database_password", 17))
+                if (!strncmp(name, "netcam_url", 10) ||
+                    !strncmp(name, "netcam_userpass", 15) ||
+                    !strncmp(name, "netcam_highres", 14) ||
+                    !strncmp(name, "stream_authentication", 21) ||
+                    !strncmp(name, "webcontrol_authentication", 25) ||
+                    !strncmp(name, "database_user", 13) ||
+                    !strncmp(name, "database_password", 17))
                 {
-                    motion_log(NTC, TYPE_ALL, NO_ERRNO, "%s\t<redacted>", name);
+                    motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s <redacted>", name);
                 } else {
                     if (strncmp(name, "text", 4) || strncmp(value, " ", 1))
-                        motion_log(NTC, TYPE_ALL, NO_ERRNO, "%s\t%s", name, value);
+                        motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s %s", name, value);
                     else
-                        motion_log(NTC, TYPE_ALL, NO_ERRNO, "%s\t\"%s\"", name, value);
+                        motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s \"%s\"", name, value);
                 }
             }
             i++;

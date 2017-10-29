@@ -2918,8 +2918,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     set_log_level(cnt_list[0]->log_level);
     set_log_type(cnt_list[0]->log_type);
 
-    if (cnt_list[0]->dump_config_options)
-        dump_config_options(cnt_list);
+    conf_output_parms(cnt_list);
 
     initialize_chars();
 
