@@ -2388,11 +2388,10 @@ static void mlp_snapshot(struct context *cnt){
 }
 
 static void mlp_timelapse(struct context *cnt){
+
     struct tm timestamp_tm;
 
-    /***** MOTION LOOP - TIMELAPSE FEATURE SECTION *****/
-
-    if (cnt->conf.timelapse) {
+    if (cnt->conf.timelapse_interval) {
         localtime_r(&cnt->current_image->timestamp_tv.tv_sec, &timestamp_tm);
 
         /*
@@ -2444,14 +2443,14 @@ static void mlp_timelapse(struct context *cnt){
          * If ffmpeg timelapse is enabled and time since epoch MOD ffmpeg_timelaps = 0
          * add a timelapse frame to the timelapse movie.
          */
-        if (cnt->shots == 0 && cnt->time_current_frame % cnt->conf.timelapse <=
-            cnt->time_last_frame % cnt->conf.timelapse) {
+        if (cnt->shots == 0 && cnt->time_current_frame % cnt->conf.timelapse_interval <=
+            cnt->time_last_frame % cnt->conf.timelapse_interval) {
                 event(cnt, EVENT_TIMELAPSE, cnt->current_image, NULL, NULL,
                     &cnt->current_image->timestamp_tv);
         }
     } else if (cnt->ffmpeg_timelapse) {
     /*
-     * If timelapse movie is in progress but conf.timelapse is zero then close timelapse file
+     * If timelapse movie is in progress but conf.timelapse_interval is zero then close timelapse file
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */

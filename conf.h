@@ -87,8 +87,10 @@ struct config {
     const char *webcontrol_authentication;
     unsigned long frequency;
     int tuner_number;
-    int timelapse;
+    int         timelapse_interval;
+    int         timelapse_fps;
     const char *timelapse_mode;
+    const char *timelapse_codec;
     const char *tuner_device;
     const char *video_device;
     int v4l2_palette;

@@ -853,7 +853,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             cnt->ffmpeg_timelapse->height = cnt->imgs.height;
             cnt->ffmpeg_timelapse->high_resolution = 0;
         }
-        cnt->ffmpeg_timelapse->fps = cnt->conf.frame_limit;
+        cnt->ffmpeg_timelapse->fps = cnt->conf.timelapse_fps;
         cnt->ffmpeg_timelapse->bps = cnt->conf.ffmpeg_bps;
         cnt->ffmpeg_timelapse->filename = cnt->timelapsefilename;
         cnt->ffmpeg_timelapse->vbr = cnt->conf.ffmpeg_vbr;
@@ -866,11 +866,12 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         cnt->ffmpeg_timelapse->motion_images = 0;
         cnt->ffmpeg_timelapse->passthrough = 0;
 
-        if ((strcmp(cnt->conf.ffmpeg_video_codec,"mpg") == 0) ||
-            (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) ){
+        if ((strcmp(cnt->conf.timelapse_codec,"mpg") == 0) ||
+            (strcmp(cnt->conf.timelapse_codec,"swf") == 0) ){
 
-            if (strcmp(cnt->conf.ffmpeg_video_codec,"swf") == 0) {
-                MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO, "The swf container for timelapse no longer supported.  Using mpg container.");
+            if (strcmp(cnt->conf.timelapse_codec,"swf") == 0) {
+                MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO,
+                    "The swf container for timelapse no longer supported.  Using mpg container.");
             }
 
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "Timelapse using mpg codec.");

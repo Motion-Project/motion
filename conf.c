@@ -97,8 +97,10 @@ struct config conf_template = {
     .webcontrol_authentication =       NULL,
     .frequency =                       0,
     .tuner_number =                    0,
-    .timelapse =                       0,
+    .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
+    .timelapse_fps =                   30,
+    .timelapse_codec =                 DEF_FFMPEG_CODEC,
     .tuner_device =                    NULL,
     .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
@@ -769,24 +771,6 @@ config_param config_params[] = {
     print_bool
     },
     {
-    "ffmpeg_timelapse",
-    "# Use ffmpeg to encode a timelapse movie\n"
-    "# Default value 0 = off - else save frame every Nth second",
-    0,
-    CONF_OFFSET(timelapse),
-    copy_int,
-    print_int
-    },
-    {
-    "ffmpeg_timelapse_mode",
-    "# The file rollover mode of the timelapse video\n"
-    "# Valid values: hourly, daily (default), weekly-sunday, weekly-monday, monthly, manual",
-    0,
-    CONF_OFFSET(timelapse_mode),
-    copy_string,
-    print_string
-    },
-    {
     "ffmpeg_bps",
     "# Bitrate to be used by the ffmpeg encoder (default: 400000)\n"
     "# This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)",
@@ -808,10 +792,7 @@ config_param config_params[] = {
     },
     {
     "ffmpeg_video_codec",
-    "# Codec to used by ffmpeg for the video compression.\n"
-    "# Timelapse movies are always made in mpeg1 format independent from this option.\n"
-    "# Supported formats are (default:mpeg4):\n"
-    "# mpeg1 - gives you files with extension .mpg (ffmpeg-0.4.8 or later)\n"
+    "# Container/Codec to used by ffmpeg for the video compression.\n"
     "# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
     "# msmpeg4 is recommended for use with Windows Media Player because\n"
     "# it requires no installation of codec on the Windows client.\n"
@@ -1034,7 +1015,7 @@ config_param config_params[] = {
     "# Default: "DEF_MOVIEPATH"\n"
     "# Default value is equivalent to legacy oldlayout option\n"
     "# For Motion 3.0 compatible mode choose: %Y/%m/%d/%H%M%S\n"
-    "# File extension .mpg or .avi is automatically added so do not include this\n"
+    "# File extension is automatically added so do not include this\n"
     "# This option was previously called ffmpeg_filename",
     0,
     CONF_OFFSET(moviepath),
@@ -1042,12 +1023,44 @@ config_param config_params[] = {
     print_string
     },
     {
+    "timelapse_interval",
+    "# Interval in seconds between timelapse captures.  Default: 0 = off",
+    0,
+    CONF_OFFSET(timelapse_interval),
+    copy_int,
+    print_int
+    },
+    {
+    "timelapse_mode",
+    "# Timelapse file rollover mode. See motion_guide.html for options and uses.",
+    0,
+    CONF_OFFSET(timelapse_mode),
+    copy_string,
+    print_string
+    },
+    {
+    "timelapse_codec",
+    "# Container/Codec for timelapse video. Valid values: mpg or mpeg4",
+    0,
+    CONF_OFFSET(timelapse_codec),
+    copy_string,
+    print_string
+    },
+    {
+    "timelapse_fps",
+    "# Frame rate for timelapse playback",
+    0,
+    CONF_OFFSET(timelapse_fps),
+    copy_int,
+    print_int
+    },
+    {
     "timelapse_filename",
     "# File path for timelapse movies relative to target_dir\n"
     "# Default: "DEF_TIMEPATH"\n"
     "# Default value is near equivalent to legacy oldlayout option\n"
     "# For Motion 3.0 compatible mode choose: %Y/%m/%d-timelapse\n"
-    "# File extension .mpg is automatically added so do not include this",
+    "# File extension is automatically added so do not include this",
     0,
     CONF_OFFSET(timepath),
     copy_string,
@@ -1653,6 +1666,20 @@ dep_config_param dep_config_params[] = {
     0,
     config_camera
     },
+    {
+    "ffmpeg_timelapse",
+    "4.0.1",
+    "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\" option.",
+    CONF_OFFSET(timelapse_interval),
+    copy_int
+    },
+    {
+    "ffmpeg_timelapse_mode",
+    "4.0.1",
+    "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\" option.",
+    CONF_OFFSET(timelapse_mode),
+    copy_string
+    },
     { NULL, NULL, NULL, 0, NULL}
 };
 
@@ -1880,7 +1907,6 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
 
     return cnt;
 }
-
 
 /**
  * conf_print
