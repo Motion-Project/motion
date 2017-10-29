@@ -1022,7 +1022,7 @@ config_param config_params[] = {
     copy_string,
     print_string
     },
-        {
+    {
     "timelapse_interval",
     "# Interval in seconds between timelapse captures.  Default: 0 = off",
     0,
