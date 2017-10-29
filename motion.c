@@ -9,6 +9,7 @@
 #include "motion.h"
 #include "ffmpeg.h"
 #include "video_common.h"
+#include "video_v4l2.h"
 #include "video_loopback.h"
 #include "conf.h"
 #include "alg.h"

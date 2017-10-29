@@ -112,6 +112,8 @@
 #define ZC301_V4L2_CID_DAC_MAGN       V4L2_CID_PRIVATE_BASE
 #define ZC301_V4L2_CID_GREEN_BALANCE  (V4L2_CID_PRIVATE_BASE+1)
 
+#define V4L2_PALETTE_COUNT_MAX             21
+
 static pthread_mutex_t v4l2_mutex;
 
 static struct video_dev *viddevs = NULL;
@@ -161,6 +163,64 @@ typedef struct {
     volatile unsigned int *finish;      /* End the thread */
 
 } src_v4l2_t;
+
+typedef struct palette_item_struct{
+    u32      v4l2id;
+    char     fourcc[5];
+} palette_item;
+
+
+static void v4l2_palette_init(palette_item *palette_array){
+
+    /* When adding here, update the max defined as V4L2_PALETTE_COUNT_MAX above */
+    palette_array[0].v4l2id = V4L2_PIX_FMT_SN9C10X;
+    palette_array[1].v4l2id = V4L2_PIX_FMT_SBGGR16;
+    palette_array[2].v4l2id = V4L2_PIX_FMT_SBGGR8;
+    palette_array[3].v4l2id = V4L2_PIX_FMT_SPCA561;
+    palette_array[4].v4l2id = V4L2_PIX_FMT_SGBRG8;
+    palette_array[5].v4l2id = V4L2_PIX_FMT_SGRBG8;
+    palette_array[6].v4l2id = V4L2_PIX_FMT_PAC207;
+    palette_array[7].v4l2id = V4L2_PIX_FMT_PJPG;
+    palette_array[8].v4l2id = V4L2_PIX_FMT_MJPEG;
+    palette_array[9].v4l2id = V4L2_PIX_FMT_JPEG;
+    palette_array[10].v4l2id = V4L2_PIX_FMT_RGB24;
+    palette_array[11].v4l2id = V4L2_PIX_FMT_SPCA501;
+    palette_array[12].v4l2id = V4L2_PIX_FMT_SPCA505;
+    palette_array[13].v4l2id = V4L2_PIX_FMT_SPCA508;
+    palette_array[14].v4l2id = V4L2_PIX_FMT_UYVY;
+    palette_array[15].v4l2id = V4L2_PIX_FMT_YUYV;
+    palette_array[16].v4l2id = V4L2_PIX_FMT_YUV422P;
+    palette_array[17].v4l2id = V4L2_PIX_FMT_YUV420; /* most efficient for motion */
+    palette_array[18].v4l2id = V4L2_PIX_FMT_Y10;
+    palette_array[19].v4l2id = V4L2_PIX_FMT_Y12;
+    palette_array[20].v4l2id = V4L2_PIX_FMT_GREY;
+    palette_array[21].v4l2id = V4L2_PIX_FMT_H264;
+
+    sprintf(palette_array[0].fourcc ,"%s", "S910");
+    sprintf(palette_array[1].fourcc ,"%s", "BYR2");
+    sprintf(palette_array[2].fourcc ,"%s", "BA81");
+    sprintf(palette_array[3].fourcc ,"%s", "S561");
+    sprintf(palette_array[4].fourcc ,"%s", "GBRG");
+    sprintf(palette_array[5].fourcc ,"%s", "GRBG");
+    sprintf(palette_array[6].fourcc ,"%s", "P207");
+    sprintf(palette_array[7].fourcc ,"%s", "PJPG");
+    sprintf(palette_array[8].fourcc ,"%s", "MJPG");
+    sprintf(palette_array[9].fourcc ,"%s", "JPEG");
+    sprintf(palette_array[10].fourcc ,"%s", "RGB3");
+    sprintf(palette_array[11].fourcc ,"%s", "S501");
+    sprintf(palette_array[12].fourcc ,"%s", "S505");
+    sprintf(palette_array[13].fourcc ,"%s", "S508");
+    sprintf(palette_array[14].fourcc ,"%s", "UYVY");
+    sprintf(palette_array[15].fourcc ,"%s", "YUYV");
+    sprintf(palette_array[16].fourcc ,"%s", "422P");
+    sprintf(palette_array[17].fourcc ,"%s", "YU12"); /* most efficient for motion */
+    sprintf(palette_array[18].fourcc ,"%s", "Y10 ");
+    sprintf(palette_array[19].fourcc ,"%s", "Y12 ");
+    sprintf(palette_array[20].fourcc ,"%s", "GREY");
+    sprintf(palette_array[21].fourcc ,"%s", "H264");
+
+}
+
 
 /**
  * xioctl
@@ -271,7 +331,7 @@ static int v4l2_select_input(struct config *conf, struct video_dev *viddev,
      * return V4L2_STD_UNKNOWN
      */
     if (xioctl(vid_source, VIDIOC_G_STD, &std_id) == -1) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Device doesn't support specifying PAL/NTSC norm");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Device does not support specifying PAL/NTSC norm");
         norm = std_id = 0;    // V4L2_STD_UNKNOWN = 0
     }
 
@@ -425,106 +485,65 @@ static int v4l2_set_pix_format(struct context *cnt, src_v4l2_t * vid_source,
                                int *width, int *height)
 {
     struct v4l2_fmtdesc fmtd;
-    int v4l2_pal;
+    int v4l2_pal, indx_palette, indx, retcd;
+    palette_item *palette_array;
 
-    /*
-     * Note that this array MUST exactly match the config file list.
-     * A higher index means better chance to be used
-     * Special note on the H264:  It must be kept within this
-     * list to keep the numbering correct even though it is not a
-     * valid format for the v4l2 components.  We edit conf option in
-     * the v4l2_start function so that it is impossible that this
-     * routine will ever get sent the H264.
-     */
-    static const u32 supported_formats[] = {
-        V4L2_PIX_FMT_SN9C10X,
-        V4L2_PIX_FMT_SBGGR16,
-        V4L2_PIX_FMT_SBGGR8,
-        V4L2_PIX_FMT_SPCA561,
-        V4L2_PIX_FMT_SGBRG8,
-        V4L2_PIX_FMT_SGRBG8,
-        V4L2_PIX_FMT_PAC207,
-        V4L2_PIX_FMT_PJPG,
-        V4L2_PIX_FMT_MJPEG,
-        V4L2_PIX_FMT_JPEG,
-        V4L2_PIX_FMT_RGB24,
-        V4L2_PIX_FMT_SPCA501,
-        V4L2_PIX_FMT_SPCA505,
-        V4L2_PIX_FMT_SPCA508,
-        V4L2_PIX_FMT_UYVY,
-        V4L2_PIX_FMT_YUYV,
-        V4L2_PIX_FMT_YUV422P,
-        V4L2_PIX_FMT_YUV420, /* most efficient for motion */
-        V4L2_PIX_FMT_Y10,
-        V4L2_PIX_FMT_Y12,
-        V4L2_PIX_FMT_GREY,
-        V4L2_PIX_FMT_H264
-    };
+    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
 
-    int array_size = sizeof(supported_formats) / sizeof(supported_formats[0]);
-    int index_format = -1; /* -1 says not yet chosen */
+    v4l2_palette_init(palette_array);
+
+    /* First we try setting the config file value */
+    indx_palette = cnt->conf.v4l2_palette;
+    if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
+        retcd = v4l2_do_set_pix_format(palette_array[indx_palette].v4l2id, vid_source, width, height);
+        if (retcd >= 0){
+            free(palette_array);
+            return 0;
+        }
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Configuration palette index %d (%s) doesn't work."
+                   , indx_palette, palette_array[indx_palette].fourcc);
+    }
+
     CLEAR(fmtd);
     fmtd.index = v4l2_pal = 0;
     fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-    /* First we try a shortcut of just setting the config file value */
-    if (cnt->conf.v4l2_palette >= 0) {
-        char name[5] = {supported_formats[cnt->conf.v4l2_palette] >>  0,
-                        supported_formats[cnt->conf.v4l2_palette] >>  8,
-                        supported_formats[cnt->conf.v4l2_palette] >>  16,
-                        supported_formats[cnt->conf.v4l2_palette] >>  24, 0};
-
-        if (v4l2_do_set_pix_format(supported_formats[cnt->conf.v4l2_palette],
-                                   vid_source, width, height) >= 0)
-            return 0;
-
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Config palette index %d (%s)"
-                   " doesn't work.", cnt->conf.v4l2_palette, name);
-    }
-
+    indx_palette = -1; /* -1 says not yet chosen */
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Supported palettes:");
 
     while (xioctl(vid_source, VIDIOC_ENUM_FMT, &fmtd) != -1) {
-
-        int i;
-
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "(%i) %c%c%c%c (%s)",
                    v4l2_pal, fmtd.pixelformat >> 0,
                    fmtd.pixelformat >> 8, fmtd.pixelformat >> 16,
                    fmtd.pixelformat >> 24, fmtd.description);
-
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%d - %s (compressed : %d) (%#x)",
                    fmtd.index, fmtd.description, fmtd.flags, fmtd.pixelformat);
 
-         /* Adjust index_format if larger value found */
-        for (i = index_format + 1; i < array_size; i++)
-            if (supported_formats[i] == fmtd.pixelformat)
-                index_format = i;
+         /* Adjust indx_palette if larger value found */
+         /* Prevent the selection of H264 since this module does not support it */
+        for (indx = 0; indx <= V4L2_PALETTE_COUNT_MAX; indx++)
+            if ((palette_array[indx].v4l2id == fmtd.pixelformat) &&
+                (palette_array[indx].v4l2id != V4L2_PIX_FMT_H264))
+                indx_palette = indx;
 
         CLEAR(fmtd);
         fmtd.index = ++v4l2_pal;
         fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
 
-    if (index_format >= 0) {
-        char name[5] = {supported_formats[index_format] >>  0,
-                        supported_formats[index_format] >>  8,
-                        supported_formats[index_format] >>  16,
-                        supported_formats[index_format] >>  24, 0};
-
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Selected palette %s", name);
-
-        if (v4l2_do_set_pix_format(supported_formats[index_format],
-                                   vid_source, width, height) >= 0)
+    if (indx_palette >= 0) {
+        retcd = v4l2_do_set_pix_format(palette_array[indx_palette].v4l2id, vid_source, width, height);
+        if (retcd >= 0){
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Selected palette %s",palette_array[indx_palette].fourcc);
+            free(palette_array);
             return 0;
-
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_TRY_FMT failed for "
-                   "format %s", name);
+        }
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "Palette selection failed for format %s"
+                   , palette_array[indx_palette].fourcc);
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to find a compatible"
-               " palette format.");
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to find a compatible palette format.");
 
+    free(palette_array);
     return -1;
 }
 
@@ -1337,8 +1356,7 @@ void v4l2_cleanup(struct context *cnt)
 #endif // HAVE_V4L2
 }
 
-int v4l2_next(struct context *cnt, struct image_data *img_data)
-{
+int v4l2_next(struct context *cnt, struct image_data *img_data){
 #ifdef HAVE_V4L2
     int ret = -2;
     struct config *conf = &cnt->conf;
@@ -1388,4 +1406,89 @@ int v4l2_next(struct context *cnt, struct image_data *img_data)
 #endif // HAVE_V4L2
 
 }
+
+int v4l2_palette_valid(char *video_device, int v4l2_palette){
+#ifdef HAVE_V4L2
+
+    /* This function is a boolean that returns true(1) if the palette selected in the
+     * configuration file is valid for the device and false(0) if the palette is not valid
+     */
+
+    palette_item *palette_array;
+    struct v4l2_fmtdesc fmtd;
+
+    int device_palette;
+    int retcd;
+    src_v4l2_t *vid_source;
+
+    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+
+    v4l2_palette_init(palette_array);
+
+    vid_source = calloc(sizeof(src_v4l2_t), 1);
+    vid_source->fd_device = open(video_device, O_RDWR);
+    if (vid_source->fd_device < 0) {
+        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "Failed to open video device %s",video_device);
+        return 0;
+    }
+
+    memset(&fmtd, 0, sizeof(fmtd));
+    fmtd.index = device_palette = 0;
+    fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    retcd = 0;
+    while (xioctl(vid_source, VIDIOC_ENUM_FMT, &fmtd) != -1) {
+        if (palette_array[v4l2_palette].v4l2id == fmtd.pixelformat ) retcd = 1;
+
+        memset(&fmtd, 0, sizeof(fmtd));
+        fmtd.index = ++device_palette;
+        fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    }
+
+    close(vid_source->fd_device);
+
+    free(vid_source);
+
+    free(palette_array);
+
+    return retcd;
+#else
+    /* We do not have v4l2 so we can not determine whether it is valid or not */
+    if ((video_device) || (v4l2_palette)) return 0;
+    return 0;
+#endif // HAVE_V4L2
+
+}
+
+void v4l2_palette_fourcc(int v4l2_palette, char *fourcc){
+#ifdef HAVE_V4L2
+
+    /* This function populates the provided fourcc pointer with the fourcc code for the
+     * requested palette id code.  If the palette is not one of the ones that Motion supports
+     * it returns the string as "NULL"
+     */
+
+    palette_item *palette_array;
+
+    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+
+    v4l2_palette_init(palette_array);
+
+    if ((v4l2_palette > V4L2_PALETTE_COUNT_MAX) || (v4l2_palette < 0)){
+        sprintf(fourcc,"%s","NULL");
+    } else {
+        sprintf(fourcc,"%s",palette_array[v4l2_palette].fourcc);
+    }
+
+    free(palette_array);
+
+    return;
+#else
+    sprintf(fourcc,"%s","NULL");
+    if (v4l2_palette) return;
+    return;
+#endif // HAVE_V4L2
+
+}
+
+
 
