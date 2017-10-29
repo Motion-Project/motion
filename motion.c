@@ -9,6 +9,7 @@
 #include "motion.h"
 #include "ffmpeg.h"
 #include "video_common.h"
+#include "video_v4l2.h"
 #include "video_loopback.h"
 #include "conf.h"
 #include "alg.h"
@@ -768,6 +769,7 @@ static int init_camera_type(struct context *cnt){
     if (cnt->conf.netcam_url) {
         if ((strncmp(cnt->conf.netcam_url,"mjpeg",5) == 0) ||
             (strncmp(cnt->conf.netcam_url,"v4l2" ,4) == 0) ||
+            (strncmp(cnt->conf.netcam_url,"rtmp" ,4) == 0) ||
             (strncmp(cnt->conf.netcam_url,"rtsp" ,4) == 0)) {
             cnt->camera_type = CAMERA_TYPE_RTSP;
         } else {
@@ -2917,8 +2919,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     set_log_level(cnt_list[0]->log_level);
     set_log_type(cnt_list[0]->log_type);
 
-    if (cnt_list[0]->dump_config_options)
-        dump_config_options(cnt_list);
+    conf_output_parms(cnt_list);
 
     initialize_chars();
 

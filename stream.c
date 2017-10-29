@@ -589,8 +589,14 @@ static void* handle_md5_digest(void* param)
         DigestCalcHA1((char*)"md5", server_user, (char*)STREAM_REALM, server_pass, (char*)server_nonce, (char*)NULL, HA1);
         DigestCalcResponse(HA1, server_nonce, NULL, NULL, (char*)"", (char*)"GET", server_uri, HA2, server_response);
 
-        if (strcmp(server_response, response) == 0)
+        if (strcmp(server_response, response) == 0){
             break;
+        } else {
+            char host[NI_MAXHOST] = "unknown";
+            get_host(host, p->sock);
+            MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "motion-stream - failed auth attempt from %s", host);
+        }
+
 Error:
         rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
         rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));

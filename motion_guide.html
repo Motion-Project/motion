@@ -3277,7 +3277,7 @@ This is a round robin related feature used when you have a capture card with mul
 Motion can connect to a network camera through a normal TCP socket. All you need to give it is the URL.
 The URL given must return either one single jpeg picture or an mjpeg stream. For the time being Motion
 cannot connect to a video stream such a mpeg, mpeg4, divx. The URL must return one single jpeg image, a mjpeg stream
-a rtsp stream, file or ftp.  When getting a still image, make sure to validate that the camera is serving up
+a RTSP stream, RTMP file or ftp.  When getting a still image, make sure to validate that the camera is serving up
 a actual raw JPG file and not a HTML page with an embedded JPG which is the current
 standard.
 When the <a href="#netcam_url" >netcam_url</a> is defined the videodevice options above are mostly ignored.
@@ -3336,6 +3336,20 @@ Available prefixes to the URL:
 </ul>
 <p></p>
 
+<i>rtmp://</i>
+<ul>
+    This prefix may be available on modern network cameras.  It is recommended that users search the
+    web or the camera manual for the exact connection string to use for their camera.
+    <p></p>
+    Once a potential connection string is found, it should be validated as being functional using a
+    external application such as ffplay or vlc.
+    <p></p>
+    The connection string that works for these applications is what needs to be specified for this option.
+    <p></p>
+    When using the rtmp format, Motion will ignore the netcam_keepalive and netcam_tolerant_check options.
+</ul>
+<p></p>
+
 <i>mjpeg://</i>
 <ul>
     This is a experimental prefix.  The mjpeg is replaced with http by Motion internally and forces the
@@ -3385,7 +3399,7 @@ Available prefixes to the URL:
   <li> Default: Not defined</li>
 </ul>
 <p></p>
-The network camera high resolution URL.  This option can be used in conjunction with the netcam_url for rtsp cameras.
+The network camera high resolution URL.  This option can be used in conjunction with the netcam_url for rtsp/rtmp cameras.
 Users may specify the normal resolution url in the netcam_url which will be used for the motion detection and then
 specify the high resolution url for this parameter.  Motion detection on the normal resolution will trigger the saving
 of images from the high resolution stream.  Note that the ONLY overlay that will be present on the resulting high
@@ -3406,7 +3420,7 @@ If the netcam_url is not specified, this option is ignored.
 <p></p>
 The Username and password for the network camera.  For http protocols, this
 option is for HTTP 1.1 Basic authentication only. The string is specified as username:password.
-To use no authentication simply remove this option.  Digest authentication is only available for rtsp cameras.
+To use no authentication simply remove this option.  Digest authentication is only available for rtsp/rtmp cameras.
 <p></p>
 
 <h3><a name="netcam_keepalive"></a> netcam_keepalive </h3>
@@ -3461,8 +3475,8 @@ Use less strict jpeg checks for network cameras
   <li> Default: on</li>
 </ul>
 <p></p>
-This option specifies the transport method for rtsp cameras.  The TCP transport is highly preferred because
-without this option the rtsp images are frequently corrupted and result in many false positive values and
+This option specifies the transport method for rtsp/rtmp cameras.  The TCP transport is highly preferred because
+without this option the rtsp/rtmp images are frequently corrupted and result in many false positive values and
 images that appear to be smeared.  Off indicates that UDP will be used.
 <p></p>
 <p></p>

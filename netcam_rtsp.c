@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include "rotate.h"    /* already includes motion.h */
 #include "netcam_rtsp.h"
+#include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
 
 #ifdef HAVE_FFMPEG
 
@@ -637,22 +638,30 @@ static void netcam_rtsp_set_rtsp(rtsp_context *rtsp_data){
         if (rtsp_data->status == RTSP_NOTCONNECTED)
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting rtsp transport to tcp",rtsp_data->cameratype);
     }
-
 }
 
 static void netcam_rtsp_set_v4l2(rtsp_context *rtsp_data){
 
     char optsize[10], optfmt[8], optfps[5];
+    char *fourcc;
 
     rtsp_data->format_context->iformat = av_find_input_format("video4linux2");
 
-    if (rtsp_data->v4l2_palette == 8) {
+    fourcc=malloc(5*sizeof(char));
+
+    v4l2_palette_fourcc(rtsp_data->v4l2_palette, fourcc);
+
+    if (strcmp(fourcc,"MJPG") == 0) {
         sprintf(optfmt, "%s","mjpeg");
         av_dict_set(&rtsp_data->opts, "input_format", optfmt, 0);
-    } else if (rtsp_data->v4l2_palette == 21){
-        sprintf(optfmt, "%s","h264");
-        av_dict_set(&rtsp_data->opts, "input_format", optfmt, 0);
-    } else{
+    } else if (strcmp(fourcc,"H264") == 0){
+        if (v4l2_palette_valid(rtsp_data->path,rtsp_data->v4l2_palette)){
+            sprintf(optfmt, "%s","h264");
+            av_dict_set(&rtsp_data->opts, "input_format", optfmt, 0);
+        } else {
+            sprintf(optfmt, "%s","default");
+        }
+    } else {
         sprintf(optfmt, "%s","default");
     }
 
@@ -663,10 +672,15 @@ static void netcam_rtsp_set_v4l2(rtsp_context *rtsp_data){
     av_dict_set(&rtsp_data->opts, "video_size", optsize, 0);
 
     if (rtsp_data->status == RTSP_NOTCONNECTED){
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Requested v4l2_palette option: %d"
+                   ,rtsp_data->cameratype,rtsp_data->v4l2_palette);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Requested FOURCC code: %s",rtsp_data->cameratype,fourcc);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 input_format %s",rtsp_data->cameratype,optfmt);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 framerate %s",rtsp_data->cameratype, optfps);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 video_size %s",rtsp_data->cameratype, optsize);
     }
+
+    free(fourcc);
 
 }
 
@@ -718,6 +732,8 @@ static void netcam_rtsp_set_path (struct context *cnt, rtsp_context *rtsp_data )
                 url.host, url.port, url.path);
         }
     }
+
+    sprintf(rtsp_data->service, "%s",url.service);
 
     sprintf(rtsp_data->service, "%s",url.service);
 
@@ -820,6 +836,8 @@ static int netcam_rtsp_open_context(rtsp_context *rtsp_data){
     if (strncmp(rtsp_data->service, "http", 4) == 0 ){
         netcam_rtsp_set_http(rtsp_data);
     } else if (strncmp(rtsp_data->service, "rtsp", 4) == 0 ){
+        netcam_rtsp_set_rtsp(rtsp_data);
+    } else if (strncmp(rtsp_data->service, "rtmp", 4) == 0 ){
         netcam_rtsp_set_rtsp(rtsp_data);
     } else if (strncmp(rtsp_data->service, "v4l2", 4) == 0 ){
         netcam_rtsp_set_v4l2(rtsp_data);
