@@ -1407,18 +1407,6 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">ffmpeg_timelapse</td>
-		<td align="left">ffmpeg_timelapse</td>
-		<td align="left">ffmpeg_timelapse</td>
-		<td align="left"><a href="#ffmpeg_timelapse" >ffmpeg_timelapse</a></td>
-	</tr>
-	<tr>
-		<td height="17" align="left">ffmpeg_timelapse_mode</td>
-		<td align="left">ffmpeg_timelapse_mode</td>
-		<td align="left">ffmpeg_timelapse_mode</td>
-		<td align="left"><a href="#ffmpeg_timelapse_mode" >ffmpeg_timelapse_mode</a></td>
-	</tr>
-	<tr>
 		<td height="17" align="left">ffmpeg_variable_bitrate</td>
 		<td align="left">ffmpeg_variable_bitrate</td>
 		<td align="left">ffmpeg_variable_bitrate</td>
@@ -1569,7 +1557,6 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"></td>
 		<td align="left"><a href="#netcam_highres" >netcam_highres</a></td>
 	</tr>
-
 	<tr>
 		<td height="17" align="left">netcam_keepalive</td>
 		<td align="left">netcam_keepalive</td>
@@ -1943,10 +1930,34 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
 	</tr>
 	<tr>
+		<td height="17" align="left">ffmpeg_video_codec</td>
+		<td align="left">ffmpeg_video_codec</td>
+		<td align="left">ffmpeg_video_codec</td>
+		<td align="left"><a href="#timelapse_codec" >timelapse_codec</a></td>
+	</tr>
+	<tr>
 		<td height="17" align="left">timelapse_filename</td>
 		<td align="left">timelapse_filename</td>
 		<td align="left">timelapse_filename</td>
 		<td align="left"><a href="#timelapse_filename" >timelapse_filename</a></td>
+	</tr>
+    <tr>
+		<td height="17" align="left"></td>
+		<td align="left"></td>
+		<td align="left"></td>
+		<td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
+	</tr>
+	<tr>
+		<td height="17" align="left">ffmpeg_timelapse</td>
+		<td align="left">ffmpeg_timelapse</td>
+		<td align="left">ffmpeg_timelapse</td>
+		<td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
+	</tr>
+    <tr>
+		<td height="17" align="left">ffmpeg_timelapse_mode</td>
+		<td align="left">ffmpeg_timelapse_mode</td>
+		<td align="left">ffmpeg_timelapse_mode</td>
+		<td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
 	</tr>
 	<tr>
 		<td height="17" align="left">track_auto</td>
@@ -2420,19 +2431,24 @@ Some configuration options are only used if Motion is built on a system that has
        <td bgcolor="#edf4f9" ><a href="#max_movie_time" >max_movie_time</a> </td>
        <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a> </td>
        <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#ffmpeg_timelapse" >ffmpeg_timelapse</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#ffmpeg_bps" >ffmpeg_bps</a> </td>
      </tr>
   	  <tr>
-  	    <td bgcolor="#edf4f9" ><a href="#ffmpeg_timelapse_mode" >ffmpeg_timelapse_mode</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#ffmpeg_bps" >ffmpeg_bps</a> </td>
        <td bgcolor="#edf4f9" ><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a> </td>
        <td bgcolor="#edf4f9" ><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
      </tr>
   	  <tr>
-    	 <td bgcolor="#edf4f9" ><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a> </td>
-       <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
        <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
+       <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
      </tr>
+     <tr>
+       <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
+     </tr>
+
    </tbody>
 </table>
 
@@ -3625,8 +3641,6 @@ Set this parameter to the maximum number of images per second that you want
 to store either as images or movies.
 To set intervals longer than one second use the 'minimum_gap' option instead.
 <p></p>
-Note that this option also specifies the playback FPS associated with timelapse movies.
-<p></p>
 
 <h3><a name="minimum_frame_time"></a> minimum_frame_time </h3>
 <p></p>
@@ -4709,38 +4723,6 @@ have an 'm' appended after the filename.
 <p></p>
 <p></p>
 
-<h3><a name="ffmpeg_timelapse"></a> ffmpeg_timelapse </h3>
-<p></p>
-<ul>
-  <li> Type: Boolean</li>
-  <li> Range / Valid values: 0 - 2147483647</li>
-  <li> Default: 0 (disabled)</li>
-</ul>
-<p></p>
-Create a timelapse movie saving a picture frame at the interval in seconds set by this parameter.
-<p></p>
-<p></p>
-
-<h3><a name="ffmpeg_timelapse_mode"></a> ffmpeg_timelapse_mode </h3>
-<p></p>
-<ul>
-  <li> Type: Discrete Strings</li>
-  <li> Range / Valid values: hourly, daily, weekly-sunday, weekly-monday, monthly, manual</li>
-  <li> Default: daily</li>
-</ul>
-<p></p>
-The file rollover mode of the timelapse video.
-Note that it is important that you use the conversion specifiers in ffmpeg_filename that ensure that
-the new timelapse file indeed is a new file. If the filename does not change Motion will simply append
-the timelapse pictures to the existing file.
-The value 'Manual' means that Motion does not automatically rollover to a new filename. You can do it
-manually using the http control interface by setting the option 'ffmpeg_timelapse' to 0 and then back
-to your chosen value. Value 'hourly' rolls over on the full hour. Value 'daily' which is the default
-rolls over at midnight. There are two weekly options because depending on where you come from a week
-may either start on Sunday or Monday. And 'monthly' naturally rolls over on the 1st of the month.
-<p></p>
-<p></p>
-
 <h3><a name="ffmpeg_bps"></a> ffmpeg_bps </h3>
 <p></p>
 <ul>
@@ -4777,21 +4759,12 @@ Experiment for the value that gives you the desired compromise between size and 
 <p></p>
 <ul>
   <li> Type: Discrete Strings</li>
-  <li> Range / Valid values: mpeg1, mpeg4, msmpeg4, swf, flv, ffv1, mov, ogg, mp4, mkv, hevc</li>
+  <li> Range / Valid values: mpeg4, msmpeg4, swf, flv, ffv1, mov, ogg, mp4, mkv, hevc</li>
   <li> Default: mpeg4</li>
 </ul>
 <p></p>
-Codec to be used by ffmpeg for the video compression.
+Container/Codec to be used for the video.
 <p></p>
-Timelapse videos have two options.
-<ul>
-<li>mpg - Creates mpg file with mpeg-2 encoding. If Motion is shutdown and restarted, new pics will be appended
-     to any previously created file with name indicated for timelapse.</li>
-<li>mpeg4 - Creates avi file with the default encoding.  If Motion is shutdown and restarted, new pics will
-create a new file with the name indicated for timelapse.</li>
-</ul>
-<p></p>
-Movie files have the following options
 <ul>
 <li>mpeg4 or msmpeg4 - gives you files with extension .avi</li>
 <li>swf - gives you a flash film with extension .swf</li>
@@ -4811,8 +4784,8 @@ Movie files have the following options
 <p></p>
 <ul>
   <li> Type: String</li>
-  <li> Range / Valid values: Max 4095 characters</li>
-  <li> Default: </li>
+  <li> Range / Valid values: on/off</li>
+  <li> Default: off</li>
 </ul>
 <p></p>
 When specified, if the CPU can not keep up with the requested frame rate for the movies,
@@ -4837,7 +4810,6 @@ You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this o
 <p></p>
 <p></p>
 
-
 <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
 <p></p>
 <ul>
@@ -4846,12 +4818,77 @@ You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this o
   <li> Default: %v-%Y%m%d-timelapse</li>
 </ul>
 <p></p>
-File path for the timelapse movies relative to target_dir. Note that the file
+File path for the timelapse videos relative to target_dir. Note that the file
 extension is automatically added to the name based upon the codec selected.
 <p></p>
 You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
 <p></p>
 <p></p>
+
+<h3><a name="timelapse_interval"></a> timelapse_interval </h3>
+<p></p>
+<ul>
+  <li> Type: Boolean</li>
+  <li> Range / Valid values: 0 - 2147483647</li>
+  <li> Default: 0 (disabled)</li>
+</ul>
+<p></p>
+Create a timelapse video saving a picture frame at the interval in seconds set by this parameter.
+<p></p>
+<p></p>
+
+<h3><a name="timelapse_mode"></a> timelapse_mode </h3>
+<p></p>
+<ul>
+  <li> Type: Discrete Strings</li>
+  <li> Range / Valid values: hourly, daily, weekly-sunday, weekly-monday, monthly, manual</li>
+  <li> Default: daily</li>
+</ul>
+<p></p>
+The file rollover mode of the timelapse video.
+Note that it is important that you use the conversion specifiers in ffmpeg_filename that ensure that
+the new timelapse file indeed is a new file. If the filename does not change Motion will simply append
+the timelapse pictures to the existing file.
+The value 'Manual' means that Motion does not automatically rollover to a new filename. You can do it
+manually using the http control interface by setting the option 'ffmpeg_timelapse' to 0 and then back
+to your chosen value. Value 'hourly' rolls over on the full hour. Value 'daily' which is the default
+rolls over at midnight. There are two weekly options because depending on where you come from a week
+may either start on Sunday or Monday. And 'monthly' naturally rolls over on the 1st of the month.
+<p></p>
+<p></p>
+
+<h3><a name="timelapse_codec"></a> timelapse_codec </h3>
+<p></p>
+<ul>
+  <li> Type: Discrete Strings</li>
+  <li> Range / Valid values: mpg, mpeg4</li>
+  <li> Default: mpg</li>
+</ul>
+<p></p>
+Container/Codec to be used by timelapse video.
+<p></p>
+<ul>
+<li>mpg - Creates mpg file with mpeg-2 encoding. If Motion is shutdown and restarted, new pics will be appended
+     to any previously created file with name indicated for timelapse.</li>
+<li>mpeg4 - Creates avi file with the default encoding.  If Motion is shutdown and restarted, new pics will
+create a new file with the name indicated for timelapse.</li>
+</ul>
+<p></p>
+<p></p>
+
+<h3><a name="timelapse_fps"></a> timelapse_fps </h3>
+<p></p>
+<ul>
+  <li> Type: Boolean</li>
+  <li> Range / Valid values: 0 - 2147483647</li>
+  <li> Default: 30</li>
+</ul>
+<p></p>
+The frame per second rate to use in the playback of the timelapse video.
+<p></p>
+<p></p>
+
+
 </ul>
 
 <h3><a name="Options_Pipe"></a>Output - Pipe Options</h3>

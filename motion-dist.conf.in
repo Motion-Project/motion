@@ -73,12 +73,12 @@ rotate 0
 
 # Flip image over a given axis (vertical or horizontal), vertical means from left to right
 # horizontal means top to bottom. Valid values: none, v and h.
-flip_axis none 
+flip_axis none
 
-# Image width (pixels). Valid range: Camera dependent, default: 352
+# Image width (pixels). Valid range: Camera dependent, default: 320
 width 320
 
-# Image height (pixels). Valid range: Camera dependent, default: 288
+# Image height (pixels). Valid range: Camera dependent, default: 240
 height 240
 
 # Maximum number of frames to be captured per second.
@@ -90,13 +90,10 @@ framerate 2
 # This option is used when you want to capture images at a rate lower than 2 per second.
 minimum_frame_time 0
 
-# URL to use if you are using a network camera, size will be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)
-# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. A trailing slash may be required for some cameras.
-# Default: Not defined
+# Full Network Camera URL.  Valid Services: http:// ftp:// mjpg:// rtsp:// mjpeg:// file:// rtmp://
 ; netcam_url value
 
-# Username and password for network camera (only if required). Default: not defined
-# Syntax is user:password
+# Username and password for network camera if required. Syntax is user:password
 ; netcam_userpass value
 
 # The setting for keep-alive of network socket, should improve performance on compatible net cameras.
@@ -247,13 +244,13 @@ emulate_motion off
 # Image File Output
 ############################################################
 
-# Output 'normal' pictures when motion is detected (default: on)
+# Output 'normal' pictures when motion is detected (default: off)
 # Valid values: on, off, first, best, center
 # When set to 'first', only the first picture of an event is saved.
 # Picture with most motion of an event is saved when set to 'best'.
 # Picture with motion nearest center of picture is saved when set to 'center'.
 # Can be used as preview shot for the corresponding movie.
-output_pictures on
+output_pictures off
 
 # Output pictures with only the pixels moving object (ghost images) (default: off)
 output_debug_pictures off
@@ -266,26 +263,12 @@ quality 75
 picture_type jpeg
 
 ############################################################
-# FFMPEG related options
-# Film (movies) file output, and deinterlacing of the video input
-# The options movie_filename and timelapse_filename are also used
-# by the ffmpeg feature
-############################################################
 
-# Use ffmpeg to encode movies in realtime (default: off)
+# Use ffmpeg to encode videos of motion (default: off)
 ffmpeg_output_movies on
 
-# Use ffmpeg to make movies with only the pixels moving
-# object (ghost images) (default: off)
+# Use ffmpeg to make videos showing the moving pixels (ghost images) (default: off)
 ffmpeg_output_debug_movies off
-
-# Use ffmpeg to encode a timelapse movie
-# Default value 0 = off - else save frame every Nth second
-ffmpeg_timelapse 0
-
-# The file rollover mode of the timelapse video
-# Valid values: hourly, daily (default), weekly-sunday, weekly-monday, monthly, manual
-ffmpeg_timelapse_mode daily
 
 # Bitrate to be used by the ffmpeg encoder (default: 400000)
 # This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)
@@ -297,31 +280,26 @@ ffmpeg_bps 400000
 # or the range 1 - 100 where 1 means worst quality and 100 is best.
 ffmpeg_variable_bitrate 0
 
-# Codec to used by ffmpeg for the video compression.
-# Timelapse videos have two options.
-#   mpg - Creates mpg file with mpeg-2 encoding.
-#     If motion is shutdown and restarted, new pics will be appended
-#     to any previously created file with name indicated for timelapse.
-#   mpeg4 - Creates avi file with the default encoding.
-#     If motion is shutdown and restarted, new pics will create a
-#     new file with the name indicated for timelapse.
-# Supported formats are:
-# mpeg4 or msmpeg4 - gives you files with extension .avi
-# msmpeg4 is recommended for use with Windows Media Player because
-# it requires no installation of codec on the Windows client.
-# swf - gives you a flash film with extension .swf
-# flv - gives you a flash video with extension .flv
-# ffv1 - FF video codec 1 for Lossless Encoding
-# mov - QuickTime
-# mp4 - MPEG-4 Part 14 H264 encoding
-# mkv - Matroska H264 encoding
-# hevc - H.265 / HEVC (High Efficiency Video Coding)
-ffmpeg_video_codec mpeg4
+# Container/Codec output videos
+# Valid values: mpeg4, msmpeg4, swf,flv, ffv1, mov, mp4, mkv, hevc
+ffmpeg_video_codec mkv
 
 # When creating videos, should frames be duplicated in order
 # to keep up with the requested frames per second
 # (default: true)
 ffmpeg_duplicate_frames true
+
+# Interval in seconds between timelapse captures.  Default: 0 = off
+timelapse_interval 0
+
+# Timelapse file rollover mode. See motion_guide.html for options and uses.
+timelapse_mode daily
+
+# Frame rate for timelapse playback
+timelapse_fps 30
+
+# Container/Codec for timelapse video. Valid values: mpg or mpeg4
+timelapse_codec mpg
 
 ############################################################
 # External pipe to video encoder

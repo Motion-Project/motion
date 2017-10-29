@@ -1,4 +1,4 @@
-.TH MOTION 1 2016-09-28 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2017-10-29 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -992,46 +992,6 @@ Use ffmpeg to encode movies with only the pixels moving object (ghost images)
 .RE
 
 .TP
-.B ffmpeg_timelapse
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-Number of seconds between frame captures for a timelapse movie.
-Specify 0 to disable the timelapse.
-.RE
-.RE
-
-.TP
-.B ffmpeg_timelapse_mode
-.RS
-.nf
-Values:
-.RS
-hourly
-.br
-daily
-.br
-weekly-sunday
-.br
-weekly-monday
-.br
-monthly
-.br
-manual
-.RE
-Default: daily
-Description:
-.fi
-.RS
-File rollover mode for the timelapse video.
-.RE
-.RE
-
-.TP
 .B ffmpeg_bps
 .RS
 .nf
@@ -1068,11 +1028,6 @@ A value of 1 is worst quality versus a value of 100 is best quality.
 .nf
 Values:
 .RS
-Timelapse videos:
-.RS
-mpg - Creates mpg file with mpeg-2 encoding.
-mpeg4 - Creates avi file with the default encoding.
-.RE
 Motion videos:
 .RS
 mpeg4 - Creates .avi file
@@ -1090,12 +1045,6 @@ Default: mpeg4
 Description:
 .fi
 .RS
-The container and codec to use when creating videos.
-When creating timelapse videos, there are only two options and the processing varies due to container/codec limitations.
-For mpg timelapse videos, if motion is shutdown and restarted, new pics will be appended
-to any previously created file with name indicated for timelapse.
-For mpeg4 timelapse videos, if motion is shutdown and restarted, new pics will create a
-new file with the name indicated for timelapse.
 For regular motion videos, the container/codec must be available in the ffmpeg installed on the computer.
 .RE
 .RE
@@ -1110,6 +1059,79 @@ Description:
 .fi
 .RS
 When creating videos, should frames be duplicated in order to keep up with the requested frames per second
+.RE
+.RE
+
+.TP
+.B timelapse_fps
+.RS
+.nf
+Values: 0 to unlimited
+Default: 30
+Description:
+.fi
+.RS
+Frames per second used for playback of the timelapse video.
+.RE
+.RE
+
+.TP
+.B timelapse_interval
+.RS
+.nf
+Values: 0 to unlimited
+Default: 0
+Description:
+.fi
+.RS
+Number of seconds between frame captures for a timelapse movie.
+Specify 0 to disable the timelapse.
+.RE
+.RE
+
+.TP
+.B timelapse_mode
+.RS
+.nf
+Values:
+.RS
+hourly
+.br
+daily
+.br
+weekly-sunday
+.br
+weekly-monday
+.br
+monthly
+.br
+manual
+.RE
+Default: daily
+Description:
+.fi
+.RS
+File rollover mode for the timelapse video.
+.RE
+.RE
+
+.TP
+.B timelapse_codec
+.RS
+.nf
+Values:
+.RS
+mpg - Creates mpg file with mpeg-2 encoding.
+mpeg4 - Creates avi file with the default encoding.
+.RE
+Default: mpg
+Description:
+.fi
+.RS
+For mpg timelapse videos, if motion is shutdown and restarted, new pics will be appended
+to any previously created file with name indicated for timelapse.
+For mpeg4 timelapse videos, if motion is shutdown and restarted, new pics will create a
+new file with the name indicated for timelapse.
 .RE
 .RE
 
@@ -2191,4 +2213,5 @@ Jeroen Vreeken (pe1rxq@amsat.org),
 Folkert van Heusden,
 Kenneth Lavrsen (kenneth@lavrsen.dk),
 Juan Angulo Moreno <juan@apuntale.com>,
+the motion-project team,
 and many others
