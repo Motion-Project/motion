@@ -867,7 +867,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     retcd = ffmpeg_encode_video(ffmpeg);
     if (retcd != 0){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while encoding picture");
+        if (retcd != -2) MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while encoding picture");
         my_packet_unref(ffmpeg->pkt);
         return retcd;
     }
