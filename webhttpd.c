@@ -466,7 +466,9 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
 
                 for (i=0; config_params[i].param_name != NULL; i++) {
 
-                    if ((thread != 0) && (config_params[i].main_thread))
+                    if (((thread != 0) && (config_params[i].main_thread)) ||
+                        (config_params[i].webui_level > cnt[0]->conf.webcontrol_parms) ||
+                        (config_params[i].webui_level == WEBUI_LEVEL_NEVER) )
                         continue;
 
                     value = config_params[i].print(cnt, NULL, i, thread);
@@ -568,7 +570,10 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                 /* check if command exists and type of command and not end of URI */
                 i=0;
                 while (config_params[i].param_name != NULL) {
-                    if ((thread != 0) && (config_params[i].main_thread)) {
+
+                    if (((thread != 0) && (config_params[i].main_thread)) ||
+                        (config_params[i].webui_level > cnt[0]->conf.webcontrol_parms) ||
+                        (config_params[i].webui_level == WEBUI_LEVEL_NEVER) ) {
                         i++;
                         continue;
                     }
@@ -670,7 +675,9 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                     (((length_uri = length_uri - strlen(command)) == 0))) {
                     i=0;
                     while (config_params[i].param_name != NULL) {
-                        if ((thread != 0) && (config_params[i].main_thread)) {
+                        if (((thread != 0) && (config_params[i].main_thread)) ||
+                            (config_params[i].webui_level > cnt[0]->conf.webcontrol_parms) ||
+                            (config_params[i].webui_level == WEBUI_LEVEL_NEVER) ) {
                             i++;
                             continue;
                         }
@@ -768,7 +775,9 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
 
                 send_template(client_socket, res);
                 for (i=0; config_params[i].param_name != NULL; i++) {
-                    if ((thread != 0) && (config_params[i].main_thread))
+                    if (((thread != 0) && (config_params[i].main_thread)) ||
+                        (config_params[i].webui_level > cnt[0]->conf.webcontrol_parms) ||
+                        (config_params[i].webui_level == WEBUI_LEVEL_NEVER) )
                         continue;
                     sprintf(res, "<option value='%s'>%s</option>\n",
                             config_params[i].param_name, config_params[i].param_name);
@@ -816,7 +825,9 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                     const char *value = NULL;
                     i = 0;
                     while (config_params[i].param_name != NULL) {
-                        if ((thread != 0) && (config_params[i].main_thread)) {
+                        if (((thread != 0) && (config_params[i].main_thread)) ||
+                            (config_params[i].webui_level > cnt[0]->conf.webcontrol_parms) ||
+                            (config_params[i].webui_level == WEBUI_LEVEL_NEVER) ) {
                             i++;
                             continue;
                         }
@@ -901,7 +912,9 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                         cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "");
                 send_template(client_socket, res);
                 for (i=0; config_params[i].param_name != NULL; i++) {
-                    if ((thread != 0) && (config_params[i].main_thread))
+                    if (((thread != 0) && (config_params[i].main_thread)) ||
+                        (config_params[i].webui_level > cnt[0]->conf.webcontrol_parms) ||
+                        (config_params[i].webui_level == WEBUI_LEVEL_NEVER) )
                         continue;
                     sprintf(res, "<option value='%s'>%s</option>\n",
                             config_params[i].param_name, config_params[i].param_name);
@@ -2701,6 +2714,8 @@ void *motion_web_control(void *arg)
     util_threadname_set("wc", 0,NULL);
 
     httpd_run(cnt);
+
+
 
     /*
      * Update how many threads we have running. This is done within a

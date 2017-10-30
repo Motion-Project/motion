@@ -501,6 +501,10 @@ webcontrol_html_output on
 # Default: not defined (Disabled)
 ; webcontrol_authentication username:password
 
+# Parameters to include on webcontrol.  0=none, 1=limited, 2=advanced, 3=restricted
+# Default: 0 (none)
+webcontrol_parms 0
+
 
 ############################################################
 # Tracking (Pan/Tilt)

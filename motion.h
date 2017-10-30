@@ -255,6 +255,14 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_NETCAM
 };
 
+enum WEBUI_LEVEL{
+  WEBUI_LEVEL_ALWAYS     = 0,
+  WEBUI_LEVEL_LIMITED    = 1,
+  WEBUI_LEVEL_ADVANCED   = 2,
+  WEBUI_LEVEL_RESTRICTED = 3,
+  WEBUI_LEVEL_NEVER      = 99
+};
+
 struct image_data {
     unsigned char *image_norm;
     unsigned char *image_high;
