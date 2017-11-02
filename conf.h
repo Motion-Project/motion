@@ -84,6 +84,7 @@ struct config {
     int webcontrol_port;
     int webcontrol_localhost;
     int webcontrol_html_output;
+    int webcontrol_parms;
     const char *webcontrol_authentication;
     unsigned long frequency;
     int tuner_number;
@@ -168,6 +169,7 @@ typedef struct {
     int conf_value;                   /* pointer to a field in struct context     */
     conf_copy_func  copy;             /* a function to set the value in 'config'  */
     conf_print_func print;            /* a function to output the value to a file */
+    int  webui_level;                 /* Enum to display in webui: 0,1,2,3,99(always to never)*/
 } config_param;
 
 extern config_param config_params[];

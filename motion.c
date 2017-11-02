@@ -3169,6 +3169,7 @@ int main (int argc, char **argv)
          * Create a thread for the control interface if requested. Create it
          * detached and with 'motion_web_control' as the thread function.
          */
+
         if (cnt_list[0]->conf.webcontrol_port) {
             pthread_mutex_lock(&global_lock);
             threads_running++;

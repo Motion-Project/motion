@@ -2085,6 +2085,12 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left">webcontrol_localhost</td>
 		<td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
 	</tr>
+    <tr>
+		<td height="17" align="left"></td>
+		<td align="left"></td>
+		<td align="left"></td>
+		<td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
+	</tr>
 	<tr>
 		<td height="17" align="left">control_port</td>
 		<td align="left">webcontrol_port</td>
@@ -2516,6 +2522,10 @@ Some configuration options are only used if Motion is built on a system that has
        <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
        <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
      </tr>
+     <tr>
+       <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
+     </tr>
+
    </tbody>
 </table>
 
@@ -5355,6 +5365,28 @@ The syntax is username:password
 <p></p>
 <p></p>
 </ul>
+
+<h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
+<p></p>
+<ul>
+  <li> Type: Integer</li>
+  <li> Range / Valid values: 0 - 3</li>
+  <li> Default: 0 (disabled)</li>
+</ul>
+<p></p>
+Sets the type of parameters that will be listed on the webcontrol page and available for
+modification.
+<ul>
+  <li> 0: None - No configuration parameters will be available.</li>
+  <li> 1: Limited- A limited list of parameters will be available. </li>
+  <li> 2: Advanced - The advanced list of parameters will be available.  These typically require Motion to be restarted to become effective.</li>
+  <li> 3: Restricted - User IDs, passwords and "On" commands.</li>
+</ul>
+The default for this parameter is 0 none to enhance the security of the web interface.  The setting of the
+webcontrol_parms is NEVER included on the web interface and this parameter must be specified via the configuration file.
+Care should be exercised when using level restricted level because if the webcontrol is compromised,
+it may compromise the computer.
+<p></p>
 
 <h3><a name="Options_Database"></a>Database</h3>
 <ul>

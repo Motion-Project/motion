@@ -1611,6 +1611,26 @@ The authentication method to use for viewing the web control.
 .RE
 
 .TP
+.B webcontrol_parms
+.RS
+.nf
+Values:
+.RS
+0 = No parameters available to change on web control
+1 = Limited list of parameters available to change
+2 = Advanced list of parameters (usually requires restart to become effective)
+3 = Restricted list of parameters (User IDs, passwords, commands to execute, etc)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The type of parameters that are able to be modified via the web interface.  This parameter can never be modified
+via the web interface and must be specified directly in the configuration file.
+.RE
+.RE
+
+.TP
 .B track_type
 .RS
 .nf
