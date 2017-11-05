@@ -5,18 +5,36 @@
 <ul>
 <li> <a href="#Motion_Overview"> Overview </a> </li>
 <li> <a href="#Install_Build"> Installing with apt / debs / building from source </a></li>
+<li> <a href="#Error_Logging"> Questions, Issues and Error Reporting </a></li>
 <li> <a href="#Important_Definitions"> Important Definitions </a></li>
 <li> <a href="#The_Config_Files"> The Configuration Files </a></li>
 <li> <a href="#Command_Line_Options"> Command Line Options </a></li>
 <li> <a href="#Signals_Sent"> Signals (sent with e.g. kill command) </a></li>
-<li> <a href="#Error_Logging"> Error Logging </a></li>
 <li> <a href="#Basic_Setup"> The Basic Setup </a></li>
 <li> Configuration Options</li>
   <ul>
     <li> <a href="#Configuration_OptionsAlpha"> Listed alphabetically with mapping of old option names to current names </a></li>
     <li> <a href="#Configuration_OptionsTopic"> Listed by topic </a></li>
     <li> <a href="#Configuration_OptionsDetail"> Detail descriptions of each option</a></li>
-  </ul>
+      <ul>
+
+        <li> <a href="#conversion_specifiers"> Conversion Specifiers</a></li>
+        <li> <a href="#Options_System_Processing"> System Processing</a></li>
+        <li> <a href="#Options_Video4Linux_Devices"> Video4Linux Devices</a></li>
+        <li> <a href="#Options_Network_Cameras"> Network Cameras</a></li>
+        <li> <a href="#Options_Raspi_Cameras"> Raspberry Cameras</a></li>
+        <li> <a href="#Options_Image_Processing"> Image Processing</a></li>
+        <li> <a href="#Options_Motion_Detection"> Motion Detection</a></li>
+        <li> <a href="#Options_Scripts"> Script Execution</a></li>
+        <li> <a href="#Options_Output_General"> General Output Options</a></li>
+        <li> <a href="#Options_Pictures"> Picture Output</a></li>
+        <li> <a href="#Options_Movies"> Movie Output</a></li>
+        <li> <a href="#Options_Pipe"> Pipe Output</a></li>
+        <li> <a href="#Options_Stream_Webcontrol"> Stream and Webcontrol</a></li>
+        <li> <a href="#Options_Database"> Database Options</a></li>
+        <li> <a href="#Options_Tracking"> Tracking Camera Options</a></li>
+      </ul>
+    </ul>
 <p></p>
 <p></p>
 </ul>
@@ -151,8 +169,10 @@ often convenient to first get the device working with other software and then us
 <h3><a name="Known_Problems"></a>  Known Problems</a> </h3>
 
 <p></p>
-See also the <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a>
-and <a href="https://github.com/Motion-Project/motion/issues">Issues</a> for known open issues.
+See the <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a>,
+<a href="https://github.com/Motion-Project/motion/issues">Issues</a> and the release notes for the
+particular version on the <a href="https://github.com/Motion-Project/motion/releases">releases</a> page
+for known open issues.
 <p></p>
 <p></p>
 
@@ -922,6 +942,58 @@ The make command can be run with several options.
 </ul>
 
 </ul>
+</ul>
+
+<h2><a name="Error_Logging"></a> Questions, Issues and Error Reporting</h2>
+<ul>
+<p></p>
+Issues on the github site are for discussing code problems, crashes and application enhancements only.
+<p></p>
+"How to" questions or issues with the setup, configuration or use of Motion, should be asked to the mailing list or on IRC.
+<p></p>
+<ul>
+    <li>User Group List:  Please sign-up and send your question to the
+    <a href="https://lists.sourceforge.net/lists/listinfo/motion-user" rel="nofollow" target="_top">motion-user</a>.
+    list </li>
+    <li>#motion(irc://chat.freenode.net/motion) on freenode</li>
+</ul>
+<p></p>
+It is very important to use these resources for non-code issues since it engages a much wider audience who may have experience resolving
+the particular issue you are trying to resolve.
+
+<h3><a name="Error_Submitting"></a>  Submitting Problems</h3>
+
+Before submitting a error to the github site, please make sure that you are using either the latest release as posted
+on the <a href="https://github.com/Motion-Project/motion/releases" rel="nofollow" target="_top">project release page</a>.
+or that you have built the latest source code from the github master branch.
+<p></p>
+If the issue still remains with the current version, please validate that the issue has not already been reported
+by searching through the issue log.
+<p></p>
+Next, the project maintainers must be provided the following in order to replicate and ultimately resolve the issue:
+<p></p>
+<ul>
+  <li>A complete Motion log for a single run from startup to shutdown at the
+  <a href="#log_level" >log_level</a> of 7(INF).</li>
+  <li> The expected versus actual result</li>
+</ul>
+<p></p>
+The preferred method of providing the log file is by posting it on
+<a href="https://gist.github.com/" rel="nofollow" target="_top">gist</a> and only providing the link to the
+file within the issue.
+<p></p>
+It is recommended that any IP addresses and/or usernames and passwords included in the file be masked to preserve
+your privacy.  Also do not forget to mask any database IDs that the log file may be reporting.
+<p></p>
+For more information please read the
+<a href="https://github.com/Motion-Project/motion/wiki/Privacy" rel="nofollow" target="_top">privacy wiki article</a>.
+<p></p>
+Note that the developers do not use any front-end application to use Motion and we need the actual logs from the Motion
+application rather than logs from the front-end application.
+<p></p>
+<p></p>
+<p></p>
+</ul>
 
 <h2><a name="Important_Definitions"></a>  Important Definitions </h2>
 <ul>
@@ -947,6 +1019,7 @@ A few important definitions.
 </ul>
 
 <h2><a name="The_Config_Files"></a>  The Configuration Files </h2>
+<ul>
 <p></p>
 If Motion was invoked with command line option <code>-c pathname</code> Motion will expect the config file to be as specified. When you specify the config file on the command line with -c you can call it anything.
 <p></p>
@@ -1055,7 +1128,6 @@ motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process
   <li>-b : Run in daemon mode</li>
   <li>-n : Run in non-daemon mode</li>
   <li>-s : Run in setup mode. Also forces non-daemon mode.</li>
-  <li>-o : Dump config options to log (for support purposes).</li>
   <li>-d : Run with message log level 1 - 9</li>
   <li>-k : Run with message log type 1 - 9</li>
   <li>-l : Full path and file name for log file</li>
@@ -1107,22 +1179,6 @@ Motion responds to the following signals:
 	</tbody>
 </table>
 
-<p></p>
-<p></p>
-</ul>
-
-<h2><a name="Error_Logging"></a>  Error Logging </h2>
-<ul>
-
-<p></p>
-Motion reports errors to the console when it runs in non-daemon mode. And it outputs
-even more information when run in setup mode.
-<p></p>
-Error logging has been implemented so that errors during daemon (background) mode are logged in the syslog or to the user
-specified log file.
-<p></p>
-The log is in most Linux systems the file <code>/var/log/messages</code> (e.g. RedHat/Fedora)
-or <code>/var/log/syslog</code> and <code>/var/log/user.log</code> (e.g. Debian).
 <p></p>
 <p></p>
 </ul>
@@ -1671,13 +1727,13 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">output_normal</td>
+		<td height="17" align="left">output_motion</td>
 		<td align="left">output_debug_pictures</td>
 		<td align="left">output_debug_pictures</td>
 		<td align="left"><a href="#output_debug_pictures" >output_debug_pictures</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">output_motion</td>
+		<td height="17" align="left">output_normal</td>
 		<td align="left">output_pictures</td>
 		<td align="left">output_pictures</td>
 		<td align="left"><a href="#output_pictures" >output_pictures</a></td>
@@ -1815,9 +1871,9 @@ Some configuration options are only used if Motion is built on a system that has
         <td align="left"><a href="#sql_query" >sql_query</a></td>
 	</tr>
     <tr>
-        <td height="17" align="left">sql_query_start</td>
-        <td align="left">sql_query_start</td>
-        <td align="left">sql_query_start</td>
+        <td height="17" align="left"></td>
+        <td align="left"></td>
+        <td align="left"></td>
         <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
     </tr>
     <tr>
@@ -2649,8 +2705,8 @@ Some configuration options are only used if Motion is built on a system that has
 <p></p>
 <p></p>
 The following section provides detailed descriptions of each of the configuration options.
-
 <p></p>
+
 <h3><a name="conversion_specifiers"></a>Conversion Specifiers</h3>
 <ul>
 <table border="1" class="fixed" >
@@ -2922,6 +2978,8 @@ Any files ending in '.conf' in this directory will be read as a camera config fi
 <h3><a name="Options_Video4Linux_Devices"></a>Video4Linux Device</h3>
 <ul>
 <p></p>
+Please refer to the <a href="#Basic_Setup">Basic Setup</a> section of this guide for an additional discussion
+of Video4Linux devices and how to test and specify them correctly for Motion.
 <h3><a name="videodevice"></a> videodevice </h3>
 <p></p>
 <ul>
@@ -3067,12 +3125,12 @@ specify the numeric value as the Motion option.
         </tr>
         <tr>
             <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
-            <td bgcolor="#edf4f9" align="center" >YU10</li>
+            <td bgcolor="#edf4f9" align="center" >Y10</li>
             <td bgcolor="#edf4f9" align="center" >18</td>
         </tr>
         <tr>
             <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
-            <td bgcolor="#edf4f9" align="center" >YU12</li>
+            <td bgcolor="#edf4f9" align="center" >Y12</li>
             <td bgcolor="#edf4f9" align="center" >19</td>
         </tr>
         <tr>
@@ -3097,12 +3155,9 @@ are specified when using the <a href="#netcam_url" >netcam_url</a> the v4l2_pale
 is ignored and the camera default is used.
 
 <p></p>
-
 The V4L2_PIX_FMT_H264(21) option is valid ONLY when using the <a href="#netcam_url" >netcam_url</a> option.
 When V4L2_PIX_FMT_H264(21) is specified using the videodevice, Motion will change the v4l2_palette option to the
 default of V4L2_PIX_FMT_YUV420 (17)
-</ul>
-
 <p></p>
 
 <h3><a name="tunerdevice"></a> tunerdevice </h3>
@@ -3320,14 +3375,20 @@ This is a round robin related feature used when you have a capture card with mul
 <h3><a name="Options_Network_Cameras"></a>Network Cameras</h3>
 <ul>
 <p></p>
-Motion can connect to a network camera through a normal TCP socket. All you need to give it is the URL.
+Motion can connect to certain network cameras.  Please refer to the <a href="#Basic_Setup">Basic Setup</a> section
+of this guide for an additional discussion of network camera and how to test and specify them correctly for Motion.
+<p></p>
 Motion cannot connect to a video stream such a mpeg, mpeg4, divx to connect to streams such as these
-the user may review the static files section of this guide which illustrates some possible work arounds
-using ffmpeg and v4l2loopback devices. The URL must return one single jpeg image, a mjpeg stream
+the user may review the static files portion of the <a href="#Basic_Setup">Basic Setup</a>
+section of this guide which illustrates some possible work arounds using ffmpeg and v4l2loopback devices.
+<p></p>
+The URL must return one single jpeg image, a mjpeg stream
 a RTSP stream, RTMP stream, file or ftp.  When getting a still image, make sure to validate that
 the camera is serving up a actual raw JPG file and not a HTML page with an embedded JPG which Motion
 will not be able to process.
-When the <a href="#netcam_url" >netcam_url</a> is defined the videodevice options above are mostly ignored.
+When the <a href="#netcam_url" >netcam_url</a> is defined the
+<a href="#Options_Video4Linux_Devices" >video4linux</a> options above are mostly ignored.
+<p></p>
 If the connection to a network camera is lost, Motion will reuse the last good image for
 approx 30 seconds. After 30 seconds the image is replaced by a grey image with a text
 telling that the signal is lost and when the connection was lost.
@@ -3541,7 +3602,10 @@ images that appear to be smeared.  Off indicates that UDP will be used.
 Motion can use the Raspberry Pi camera when connected and Motion is compiled and installed with the
 MMAL support.  Before setting up Motion with the camera, it is recommended that the user first
 validate that the camera is functional with the raspistill/raspivid applications.
-
+<p></p>
+Please refer to the <a href="#Basic_Setup">Basic Setup</a> section
+of this guide for an additional discussion of network camera and how to test and specify them correctly for Motion.
+<p></p>
 <h3><a name="mmalcam_name"></a> mmalcam_name </h3>
 <p></p>
 <ul>
@@ -5932,6 +5996,8 @@ Only used for stepper motor tracking.
 Number of steps to make.
 Only used for stepper motor tracking.
 <p></p>
+</ul>
+
 </ul>
 
 </ul>
