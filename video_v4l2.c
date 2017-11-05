@@ -1186,15 +1186,20 @@ int v4l2_start(struct context *cnt)
         if (!strcmp(conf->video_device, dev->video_device)) {
             dev->usage_count++;
             cnt->imgs.type = dev->v4l_fmt;
+            /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
+            /* FIXME:  This switch can probably be removed.  We only get yuv420 */
             switch (cnt->imgs.type) {
             case VIDEO_PALETTE_GREY:
                 cnt->imgs.motionsize = width * height;
                 cnt->imgs.size_norm = width * height;
                 break;
             case VIDEO_PALETTE_YUYV:
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_RGB24:
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_YUV422:
                 cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_YUV420P:
                 cnt->imgs.motionsize = width * height;
                 cnt->imgs.size_norm = (width * height * 3) / 2;
