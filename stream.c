@@ -18,8 +18,13 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define STREAM_REALM       "Motion Stream Security Access"
+#define KEEP_ALIVE_TIMEOUT 100
+
+
 #include "md5.h"
 #include "picture.h"
+#include "motion.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -27,8 +32,7 @@
 #include <ctype.h>
 #include <sys/fcntl.h>
 
-#define STREAM_REALM       "Motion Stream Security Access"
-#define KEEP_ALIVE_TIMEOUT 100
+
 
 typedef void* (*auth_handler)(void*);
 struct auth_param {
@@ -182,11 +186,6 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
 
 static void stream_add_client(struct stream *list, int sc);
 
-/**
- * handle_basic_auth
- *
- *
- */
 static void* handle_basic_auth(void* param)
 {
     struct auth_param *p = (struct auth_param*)param;
@@ -272,6 +271,109 @@ static void* handle_basic_auth(void* param)
 Error:
     if (write(p->sock, request_auth_response_template, strlen (request_auth_response_template)) < 0)
         MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "write failure 1:handle_basic_auth");
+
+Invalid_Request:
+    close(p->sock);
+
+    pthread_mutex_lock(&stream_auth_mutex);
+    p->thread_count--;
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    free(p);
+    pthread_exit(NULL);
+}
+
+/**
+ * handle_hashed_auth
+ * Handle authentication where the username:password are save as a hash
+ * in the config file.
+ * Runs similar hash or received auth and compares
+ */
+static void* handle_hashed_auth(void* param)
+{
+    struct auth_param *p = (struct auth_param*)param;
+    char buffer[1024] = {'\0'};
+    ssize_t length = 1023;
+    char *auth, *h;// *authentication;
+    static const char *request_auth_response_template=
+        "HTTP/1.0 401 Authorization Required\r\n"
+        "Server: Motion/"VERSION"\r\n"
+        "Max-Age: 0\r\n"
+        "Expires: 0\r\n"
+        "Cache-Control: no-cache, private\r\n"
+        "Pragma: no-cache\r\n"
+        "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
+
+    MOTION_PTHREAD_SETNAME("handle_basic_auth");
+
+    pthread_mutex_lock(&stream_auth_mutex);
+    p->thread_count++;
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    if (!read_http_request(p->sock,buffer, length, NULL, 0))
+        goto Invalid_Request;
+
+
+    auth = strstr(buffer, "Authorization: Basic");
+
+    if (!auth)
+        goto Error;
+
+    auth += sizeof("Authorization: Basic");
+    h = strstr(auth, "\r\n");
+
+    if(!h)
+        goto Error;
+
+    *h='\0';
+
+    if (p->conf->stream_authentication != NULL) {
+
+        char *userpass = NULL;
+        size_t auth_size = strlen(p->conf->stream_authentication);
+
+        // userpass is username:password written in the config file
+        userpass = mymalloc(auth_size + 4);
+        memset(userpass, 0, auth_size + 4);
+        strcpy(userpass, p->conf->stream_authentication);
+
+        // Salt is usually 8 charachters with addtional $ signs
+        // TODO: Use any size of salt
+        char* salt = mymalloc(12);
+        strncpy(salt, userpass, 12);
+
+        unsigned char* decoded = calloc(BASE64_DECODE_LENGTH(strlen(auth)), 1);
+        motion_base64_decode(auth, decoded, strlen(auth));
+        if (strcmp(crypt((char*)decoded, salt), userpass)) {
+            goto Error;
+        }
+        free(userpass);
+    }
+
+    // OK - Access
+
+    /* Set socket to non blocking */
+    if (fcntl(p->sock, F_SETFL, p->sock_flags) < 0) {
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "fcntl");
+        goto Error;
+    }
+
+    /* Lock the mutex */
+    pthread_mutex_lock(&stream_auth_mutex);
+
+    stream_add_client(p->stm, p->sock);
+    (*p->stream_count)++;
+    p->thread_count--;
+
+    /* Unlock the mutex */
+    pthread_mutex_unlock(&stream_auth_mutex);
+
+    free(p);
+    pthread_exit(NULL);
+
+Error:
+    if (write(p->sock, request_auth_response_template, strlen (request_auth_response_template)) < 0)
+        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "write failure 1:handle_hashed_auth");
 
 Invalid_Request:
     close(p->sock);
@@ -684,6 +786,9 @@ static void do_client_auth(struct context *cnt, struct stream *stm, int *stream_
       break;
     case 2: // MD5 Digest
       handle_func = handle_md5_digest;
+      break;
+    case 3: // Encrypted in file
+      handle_func = handle_hashed_auth;
       break;
     default:
       MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error unknown stream authentication method");
