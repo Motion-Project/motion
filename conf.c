@@ -2823,14 +2823,13 @@ static struct context **config_camera(struct context **cnt, const char *str,
  */
 static void usage()
 {
-    printf("motion Version "VERSION", Copyright 2000-2016 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
+    printf("motion Version "VERSION", Copyright 2000-2017 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
     printf("-b\t\t\tRun in background (daemon) mode.\n");
     printf("-n\t\t\tRun in non-daemon mode.\n");
     printf("-s\t\t\tRun in setup mode.\n");
-    printf("-o\t\t\tDump config options to log (for support purposes).\n");
     printf("-c config\t\tFull path and filename of config file.\n");
     printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). default: 6 / NTC.\n");
     printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");

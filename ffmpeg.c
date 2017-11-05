@@ -529,9 +529,9 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
             ffmpeg->ctx_codec->bit_rate = ffmpeg->vbr;
         } else {
             // Control other H264 encoders quality via CRF
-            char crf[4];
+            char crf[10];
             ffmpeg->vbr = (int)(( (100-ffmpeg->vbr) * 51)/100);
-            snprintf(crf, 4, "%d", ffmpeg->vbr);
+            snprintf(crf, 10, "%d", ffmpeg->vbr);
             av_dict_set(&ffmpeg->opts, "crf", crf, 0);
         }
     } else {

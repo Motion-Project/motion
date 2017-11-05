@@ -433,15 +433,21 @@ int ftp_connect(netcam_context_ptr netcam)
 
     res = ftp_get_response(ctxt);
 
+    /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
+    /*FIXME:  Refactor this switch....*/
     switch (res) {
     case 2:
         return 0;
     case 3:
         break;
     case 1:
+        /*FALLTHROUGH*/
     case 4:
+        /*FALLTHROUGH*/
     case 5:
+        /*FALLTHROUGH*/
     case -1:
+        /*FALLTHROUGH*/
     default:
         close(ctxt->control_file_desc);
         ctxt->control_file_desc = -1;

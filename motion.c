@@ -338,6 +338,7 @@ static void sig_handler(int signo)
 {
     int i;
 
+    /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
     switch(signo) {
     case SIGALRM:
         /*
@@ -371,8 +372,11 @@ static void sig_handler(int signo)
          * Fall through, as the value of 'restart' is the only difference
          * between SIGHUP and the ones below.
          */
+         /*FALLTHROUGH*/
     case SIGINT:
+        /*FALLTHROUGH*/
     case SIGQUIT:
+        /*FALLTHROUGH*/
     case SIGTERM:
         /*
          * Somebody wants us to quit! We should better finish the actual
