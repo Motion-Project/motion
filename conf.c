@@ -1856,7 +1856,7 @@ static void conf_cmdline(struct context *cnt, int thread)
      * if necessary. This is accomplished by calling mystrcpy();
      * see this function for more information.
      */
-    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmnos?p:k:l:")) != EOF)
+    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
         switch (c) {
         case 'c':
             if (thread == -1)
@@ -1870,9 +1870,6 @@ static void conf_cmdline(struct context *cnt, int thread)
             break;
         case 's':
             conf->setup_mode = 1;
-            break;
-        case 'o':
-            cnt->dump_config_options = 1;
             break;
         case 'd':
             /* No validation - just take what user gives. */
