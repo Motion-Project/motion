@@ -32,6 +32,11 @@ matrix:
     services:  docker
     language: c
     compiler: gcc
+  - os: linux
+    env:  DOCKER_IMAGE=ubuntu:17.10
+    services:  docker
+    language: c
+    compiler: gcc
 
 before_install:
   - if [ "x$DOCKER_IMAGE" != "x" ]; then

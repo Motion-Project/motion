@@ -930,6 +930,7 @@ static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned 
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "the_buffer index %d Address (%x)",
                    vid_source->buf.index, the_buffer->ptr);
 
+        /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
         switch (vid_source->dst_fmt.fmt.pix.pixelformat) {
         case V4L2_PIX_FMT_RGB24:
             vid_rgb24toyuv420p(map, the_buffer->ptr, width, height);
@@ -940,6 +941,7 @@ static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned 
             return 0;
 
         case V4L2_PIX_FMT_YUYV:
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_YUV422P:
             vid_yuv422to420p(map, the_buffer->ptr, width, height);
             return 0;
@@ -949,22 +951,27 @@ static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned 
             return 0;
 
         case V4L2_PIX_FMT_PJPG:
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_JPEG:
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_MJPEG:
             return vid_mjpegtoyuv420p(map, the_buffer->ptr, width, height,
                                   vid_source->buffers[vid_source->buf.index].content_length);
 
         /* FIXME: quick hack to allow work all bayer formats */
         case V4L2_PIX_FMT_SBGGR16:
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_SGBRG8:
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_SGRBG8:
-        /* case V4L2_PIX_FMT_SPCA561: */
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
             vid_bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
             vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
             return 0;
 
         case V4L2_PIX_FMT_SPCA561:
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_SN9C10X:
             vid_sonix_decompress(map, the_buffer->ptr, width, height);
             vid_bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
@@ -972,6 +979,7 @@ static int v4l2_capture(struct context *cnt, struct video_dev *viddev, unsigned 
             return 0;
         case V4L2_PIX_FMT_Y12:
             shift += 2;
+            /*FALLTHROUGH*/
         case V4L2_PIX_FMT_Y10:
             shift += 2;
             vid_y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
@@ -1178,15 +1186,20 @@ int v4l2_start(struct context *cnt)
         if (!strcmp(conf->video_device, dev->video_device)) {
             dev->usage_count++;
             cnt->imgs.type = dev->v4l_fmt;
+            /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
+            /* FIXME:  This switch can probably be removed.  We only get yuv420 */
             switch (cnt->imgs.type) {
             case VIDEO_PALETTE_GREY:
                 cnt->imgs.motionsize = width * height;
                 cnt->imgs.size_norm = width * height;
                 break;
             case VIDEO_PALETTE_YUYV:
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_RGB24:
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_YUV422:
                 cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_YUV420P:
                 cnt->imgs.motionsize = width * height;
                 cnt->imgs.size_norm = (width * height * 3) / 2;
@@ -1261,16 +1274,20 @@ int v4l2_start(struct context *cnt)
     }
 
     cnt->imgs.type = dev->v4l_fmt;
-
+    /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
+    /* FIXME:  This switch can probably be removed.  We only get yuv420 */
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_GREY:
         cnt->imgs.size_norm = width * height;
         cnt->imgs.motionsize = width * height;
         break;
     case VIDEO_PALETTE_YUYV:
+        /*FALLTHROUGH*/
     case VIDEO_PALETTE_RGB24:
+        /*FALLTHROUGH*/
     case VIDEO_PALETTE_YUV422:
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+        /*FALLTHROUGH*/
     case VIDEO_PALETTE_YUV420P:
         cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;

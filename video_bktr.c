@@ -51,7 +51,7 @@ static pthread_mutex_t bktr_mutex;
 
 static struct video_dev *viddevs = NULL;
 
-static void catchsignal(int sig)
+static void catchsignal(int sig ATTRIBUTE_UNUSED)
 {
     bktr_frame_waiting++;
 }
@@ -789,15 +789,18 @@ int bktr_start(struct context *cnt)
                        dev->input, conf->input);
 
             dev->capture_method = METEOR_CAP_SINGLE;
-
+            /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
+            /*FIXME:  This switch can probably be removed */
             switch (cnt->imgs.type) {
             case VIDEO_PALETTE_GREY:
                 cnt->imgs.motionsize = width * height;
                 cnt->imgs.size_norm = width * height;
                 break;
             case VIDEO_PALETTE_RGB24:
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_YUV422:
                 cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+                /*FALLTHROUGH*/
             case VIDEO_PALETTE_YUV420P:
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P setting"
                            " imgs.size_norm and imgs.motionsize");
@@ -880,15 +883,17 @@ int bktr_start(struct context *cnt)
     }
 
     cnt->imgs.type = dev->v4l_fmt;
-
+    /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
     switch (cnt->imgs.type) {
     case VIDEO_PALETTE_GREY:
         cnt->imgs.size_norm = width * height;
         cnt->imgs.motionsize = width * height;
         break;
     case VIDEO_PALETTE_RGB24:
+        /*FALLTHROUGH*/
     case VIDEO_PALETTE_YUV422:
         cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+        /*FALLTHROUGH*/
     case VIDEO_PALETTE_YUV420P:
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P imgs.type");
         cnt->imgs.size_norm = (width * height * 3) / 2;
