@@ -1,38 +1,17 @@
-The following is a brief overview of the building and installing instructions.
+The following is a brief overview of the building and installing instructions for debian / ubuntu.
 
-For full instructions on how to build and install Motion, see the
-motion_guide.html that is distributed with this source code.
+For full instructions on how to build and install Motion, see the motion_guide.html that is
+distributed with this source code. The guide also includes instructions for building Motion
+on distributions other than debian/ubuntu such as BSD, Mac and Centos.
 
-The building instructions vary based upon the base system and the desired options.
-For most installs, it will be desired to include either ffmpeg or libav and these will
-have associated dependencies which dictate the configuration options.
+The packages and library names change frequently and vary across base operating systems.
+Adjust the following lines as required by the base operating system.
 
-Build Packages:
-    autoconf
-    automake
-    pkgconf
-    libtool
-    libjpeg8-dev
-    build-essential
-    libzip-dev
+Install basic build packages:
+    sudo apt-get install autoconf automake pkgconf libtool libjpeg8-dev build-essential libzip-dev
 
-The option to include FFMPEG or Libav functionality in motion is a choice of one OR the other not both.
-The packages and library names change frequently and vary across base operating systems.  If ffmpeg or
-libav are built and installed from source the custom motion configuration options will usually be needed.
-
-FFMPEG Packages
-    libavformat-dev
-    libavcodec-dev
-    libavutil-dev
-    libswscale-dev
-    libavdevice-dev
-
-Libav Packages
-    libavformat-dev
-    libavcodec-dev
-    libavutil-dev
-    libswscale-dev
-    libavdevice-dev
+Install FFMPEG packages
+    sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
 
 Once required packages are installed, execute:
     autoreconf -fiv

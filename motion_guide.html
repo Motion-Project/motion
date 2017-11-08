@@ -5,18 +5,36 @@
 <ul>
 <li> <a href="#Motion_Overview"> Overview </a> </li>
 <li> <a href="#Install_Build"> Installing with apt / debs / building from source </a></li>
+<li> <a href="#Error_Logging"> Questions, Issues and Error Reporting </a></li>
 <li> <a href="#Important_Definitions"> Important Definitions </a></li>
 <li> <a href="#The_Config_Files"> The Configuration Files </a></li>
 <li> <a href="#Command_Line_Options"> Command Line Options </a></li>
 <li> <a href="#Signals_Sent"> Signals (sent with e.g. kill command) </a></li>
-<li> <a href="#Error_Logging"> Error Logging </a></li>
 <li> <a href="#Basic_Setup"> The Basic Setup </a></li>
 <li> Configuration Options</li>
   <ul>
     <li> <a href="#Configuration_OptionsAlpha"> Listed alphabetically with mapping of old option names to current names </a></li>
     <li> <a href="#Configuration_OptionsTopic"> Listed by topic </a></li>
     <li> <a href="#Configuration_OptionsDetail"> Detail descriptions of each option</a></li>
-  </ul>
+      <ul>
+
+        <li> <a href="#conversion_specifiers"> Conversion Specifiers</a></li>
+        <li> <a href="#Options_System_Processing"> System Processing</a></li>
+        <li> <a href="#Options_Video4Linux_Devices"> Video4Linux Devices</a></li>
+        <li> <a href="#Options_Network_Cameras"> Network Cameras</a></li>
+        <li> <a href="#Options_Raspi_Cameras"> Raspberry Cameras</a></li>
+        <li> <a href="#Options_Image_Processing"> Image Processing</a></li>
+        <li> <a href="#Options_Motion_Detection"> Motion Detection</a></li>
+        <li> <a href="#Options_Scripts"> Script Execution</a></li>
+        <li> <a href="#Options_Output_General"> General Output Options</a></li>
+        <li> <a href="#Options_Pictures"> Picture Output</a></li>
+        <li> <a href="#Options_Movies"> Movie Output</a></li>
+        <li> <a href="#Options_Pipe"> Pipe Output</a></li>
+        <li> <a href="#Options_Stream_Webcontrol"> Stream and Webcontrol</a></li>
+        <li> <a href="#Options_Database"> Database Options</a></li>
+        <li> <a href="#Options_Tracking"> Tracking Camera Options</a></li>
+      </ul>
+    </ul>
 <p></p>
 <p></p>
 </ul>
@@ -81,14 +99,14 @@ To get Motion direct your browser to the <a href="https://motion-project.github.
 <p></p>
 On the <a href="https://github.com/Motion-Project/motion/releases/">Releases</a> page you will find
 links to the latest stable version binaries for some of the most popular Linux distributions.
-p></p>
+<p></p>
 Motion was originally written by Jeroen Vreeken and later Folkert van Heusden continued as a
 lead programmer with Kenneth Lavrsen responsible for Motion Guide, website and releases on Sourceforge.
 <p></p>
 Staring with version 3.4.1 Motion is managed on github with many maintainers and contributors.
 <p></p>
-For support we encourage you to join the mailing list instead of writing to the maintainers directly.
-Newbies and stupid questions are welcome on the list. Contributions in the form of pull requests to the github
+For support we encourage you to join the mailing list instead of writing to the maintainers directly.  Newbies
+and stupid questions are welcome on the list. Contributions in the form of pull requests to the github
 repository are also very welcome.
 <p></p>
 <h3><a name="Which_version_to_download_and_use"></a>  Which version to download and use? </h3>
@@ -104,7 +122,7 @@ and the legacy SVN trunk. Since 3.2.12 many options have been renamed to make se
 A cross reference of the old 3.2.12 option names to the new names can be
 reviewed <a href="#Configuration_OptionsAlpha">here</a>
 <p></p>
-Motion is included in Debian and Ubuntu while RPM users currently must build from source.
+Motion is included in Debian, Ubuntu and Raspbian respositories and RPM can obtain Motion from rpmfusion.
 <p></p>
 <h3><a name="What_features_does_Motion_have"></a>  What features does Motion have? </h3>
 <ul>
@@ -133,7 +151,7 @@ You have the following sources of information:
 <ul>
   <li> This Motion Guide</li>
   <li> The <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a></li>
-  <li> The author of the program has written a description of the <a href="https://github.com/Motion-Project/motion/wiki/Technology">technology behind motion</a>.</li>
+  <li> The original author of the program has written a description of the <a href="https://github.com/Motion-Project/motion/wiki/Technology">technology behind motion</a>.</li>
   <li> The man page. After installation simply type 'man motion' into a terminal screen.</li>
 </ul>
 <p></p>
@@ -151,8 +169,10 @@ often convenient to first get the device working with other software and then us
 <h3><a name="Known_Problems"></a>  Known Problems</a> </h3>
 
 <p></p>
-See also the <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a>
-and <a href="https://github.com/Motion-Project/motion/issues">Issues</a> for known open issues.
+See the <a href="https://github.com/Motion-Project/motion/wiki/FAQ">Frequently Asked Questions</a>,
+<a href="https://github.com/Motion-Project/motion/issues">Issues</a> and the release notes for the
+particular version on the <a href="https://github.com/Motion-Project/motion/releases">releases</a> page
+for known open issues.
 <p></p>
 <p></p>
 
@@ -180,7 +200,9 @@ and <a href="https://github.com/Motion-Project/motion/issues">Issues</a> for kno
 <h3><a name="Install_Apt"></a> Installing with apt </h3>
 <ul>
 <p></p>
-Motion is part of the Ubuntu and Debian repositories and can be installed with the apt tool.
+Motion is part of the Ubuntu and Debian repositories and can be installed with the apt tool.  The
+version included with apt will be the version that was available when the Ubuntu or Debian version
+was initially deployed.
 <p></p>
 Open up a terminal window and type: <code><strong>sudo apt-get install motion</strong></code>
 <p></p>
@@ -188,7 +210,8 @@ Open up a terminal window and type: <code><strong>sudo apt-get install motion</s
 
 <h3><a name="Install_Deb"></a> Installing with a release deb package </h3>
 <ul>
-Motion can also be installed from the release deb files.
+Motion can also be installed from the release deb files which may provide a more recent version than what
+is available via apt.
 <p></p>
 Determine the deb file name that is appropriate for the distribution and platform from
 the <a href="https://github.com/Motion-Project/motion/releases">Releases</a> page
@@ -221,15 +244,15 @@ review the extended building instructions further below.
 Ubuntu / Debian Packages
 <ul>
     <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
-    libjpeg62 libjpeg62-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev </strong></code>
+    libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev </strong></code>
     <p></p>
     <code><strong>cd ~</strong></code>
-    <br><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
-    <br><code><strong>cd motion</strong></code>
-    <br><code><strong>autoreconf -fiv</strong></code>
-    <br><code><strong>./configure</strong></code>
-    <br><code><strong>make</strong></code>
-    <br><code><strong>make install</strong></code>
+    <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+    <br /><code><strong>cd motion</strong></code>
+    <br /><code><strong>autoreconf -fiv</strong></code>
+    <br /><code><strong>./configure</strong></code>
+    <br /><code><strong>make</strong></code>
+    <br /><code><strong>make install</strong></code>
     <p></p>
 </ul>
 FreeBSD
@@ -237,12 +260,12 @@ FreeBSD
     <code><strong>sudo pkg install autoconf pkgconf automake gmake git ffmpeg</strong></code>
     <p></p>
     <code><strong>cd ~</strong></code>
-    <br><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
-    <br><code><strong>cd motion</strong></code>
-    <br><code><strong>autoreconf -fiv</strong></code>
-    <br><code><strong>./configure</strong></code>
-    <br><code><strong>gmake</strong></code>
-    <br><code><strong>gmake install</strong></code>
+    <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+    <br /><code><strong>cd motion</strong></code>
+    <br /><code><strong>autoreconf -fiv</strong></code>
+    <br /><code><strong>./configure</strong></code>
+    <br /><code><strong>gmake</strong></code>
+    <br /><code><strong>gmake install</strong></code>
     <p></p>
 </ul>
 Mac OS X
@@ -250,12 +273,12 @@ Mac OS X
     <code><strong>sudo brew install ffmpeg pkg-config libjpeg </strong></code>
     <p></p>
     <code><strong>cd ~</strong></code>
-    <br><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
-    <br><code><strong>cd motion</strong></code>
-    <br><code><strong>autoreconf -fiv</strong></code>
-    <br><code><strong>./configure</strong></code>
-    <br><code><strong>make</strong></code>
-    <br><code><strong>make install</strong></code>
+    <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+    <br /><code><strong>cd motion</strong></code>
+    <br /><code><strong>autoreconf -fiv</strong></code>
+    <br /><code><strong>./configure</strong></code>
+    <br /><code><strong>make</strong></code>
+    <br /><code><strong>make install</strong></code>
     <p></p>
 </ul>
 
@@ -273,7 +296,7 @@ The particular libraries needed will vary depending upon the features desired.
 <p></p>
 When you install software using pre-compiled binaries (Redhat type RPMs, Debian debs etc)
 you normally only get what is needed to run the programs themselves. In order to compile programs
-from source that use these libraries you also need to installed the development packages.
+from source that use these libraries you also need to install the development packages.
 These are normally called the same name as the package suffixed by -devel or -dev. These development
 packages contain the header files (xxx.h) that Motion needs to build.  If
 you build a library from sources you already have these header files. It is recommended to simply
@@ -286,13 +309,13 @@ Ubuntu / Debian Packages
   <li>Required</li>
   <ul>
     <p></p>
-    <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg62 libjpeg62-dev </strong></code>
+    <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg-dev </strong></code>
     <p></p>
   </ul>
   <p></p>
   <li>Optional Packages</li>
   <ul>
-    <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  See note below!)</li>
+    <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.)</li>
     <ul>
       <p></p>
       <code><strong>sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev</strong></code>
@@ -303,17 +326,21 @@ Ubuntu / Debian Packages
       <p></p>
       <code><strong>sudo apt-get install mysql-server libmysqlclient-dev</strong></code>
       <p></p>
+      or (depends upon your distribution and version)
+      <p></p>
+      <code><strong>sudo apt-get install default-libmysqlclient-dev</strong></code>
+      <p></p>
     </ul>
     <li>PostgreSQL database functionality</li>
     <ul>
       <p></p>
-      <code><strong>sudo apt-get install postgresql libpq-dev</strong></code>
+      <code><strong>sudo apt-get install libpq-dev</strong></code>
       <p></p>
     </ul>
     <li>SQLite3 database functionality</li>
     <ul>
       <p></p>
-      <code><strong>sudo apt-get install sqlite3</strong></code>
+      <code><strong>sudo apt-get install libsqlite3-dev</strong></code>
       <p></p>
     </ul>
     <li>JPEG Turbo</li>
@@ -330,12 +357,6 @@ Ubuntu / Debian Packages
     </ul>
 
   </ul>
-  Important ffmpeg/libav note:  Motion has been built to use either the libav or the ffmpeg set of libraries.
-  Which set of libraries to use is a user selection and possibly dependent upon which is available in the
-  Ubuntu/Debian repositories.  The packages listed above are those that are available within Ubuntu 16.04.
-  The package names in earlier versions or on other distributions will vary.  The configure
-  option can also be used to remove the ffmpeg/libav functionality and the dependency on these libraries.
-
 </ul>
 <p></p>
 <p></p>
@@ -393,8 +414,8 @@ openSUSE Packages
   </ul>
   Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
   change in the future.  Validate that the repository is still valid when doing the install on openSUSE systems.
-  The default for the configure is to require that ffmpeg or Libav is installed.  Use the configure option to
-  compile without the ffmpeg / libav functionality.
+  The default for the configure is to require that ffmpeg is installed.  Use the configure option to
+  compile without the ffmpeg functionality.
 </ul>
 <p></p>
 <p></p>
@@ -461,11 +482,11 @@ FreeBSD
     </ul>
    <li>Persistent bktr Support</li>
     <ul>
-      <li>Add bktr_mem_load="YES" in /boot/loader.conf</li>
-      <li>Add bktr_load="YES" in /boot/loader.conf</li>
-      <li>Add hw.bt848.card=1 in /etc/sysctl.conf</li>
-      <li>Add hw.bt848.tuner=10 in /etc/sysctl.conf</li>
-      <li>Add hw.bt848.format=0 in /etc/sysctl.conf</li>
+      <li>Add <code><strong>bktr_mem_load="YES"</strong></code> in /boot/loader.conf</li>
+      <li>Add <code><strong>bktr_load="YES"</strong></code> in /boot/loader.conf</li>
+      <li>Add <code><strong>hw.bt848.card=1</strong></code> in /etc/sysctl.conf</li>
+      <li>Add <code><strong>hw.bt848.tuner=10</strong></code> in /etc/sysctl.conf</li>
+      <li>Add <code><strong>hw.bt848.format=0</strong></code> in /etc/sysctl.conf</li>
     </ul>
   </ul>
 </ul>
@@ -521,8 +542,8 @@ CentOS 7 Packages
   </ul>
   Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
   change in the future.  Validate that the repository is still valid when doing the install on CentOS systems.
-  The default for the configure is to require that ffmpeg or Libav is installed.  Use the configure option to
-  compile without the ffmpeg / libav functionality.
+  The default for the configure is to require that ffmpeg is installed.  Use the configure option to
+  compile without the ffmpeg functionality.
 </ul>
 <p></p>
 MacOSX
@@ -590,7 +611,7 @@ For a long term option, you can edit the file
 and within it place the following two lines at the end
 <code>PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf:$PKG_CONFIG_PATH</code>
 <code>export PKG_CONFIG_PATH</code> This option will however only become
-effective the next time you get into the terminal shell.
+effective the next time you open the terminal shell.
 <p></p>
 <p></p>
 The following options can be specified with the configure script to customize
@@ -604,7 +625,7 @@ how Motion is built.
   <tbody>
   	  <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > Options</td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Description <br> Defaults for the options are specified in brackets [ ]</td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Description <br /> Defaults for the options are specified in brackets [ ]</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > Editors comment </td>
      </tr>
      <tr>
@@ -615,7 +636,7 @@ how Motion is built.
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --help=short</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > display options specific to this package </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > This command shows the options special to motion.</td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > This command shows the options special to Motion.</td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --help=recursive </td>
@@ -660,43 +681,52 @@ how Motion is built.
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --prefix=PREFIX </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > install architecture-independent files in PREFIX <br /> [/usr/local]</td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > The default /usr/local means that <br><br> The executable binary "motion" is installed in /usr/local/bin <br> The manual page in /usr/local/man/man1 <br>The document files in /usr/local/docs/motion<br>The configuration file in /usr/local/etc/motion <br>The example config files in /usr/local/motion/examples <br><br> If you are experimenting with many parallel versions it may be interesting to set the PREFIX to e.g. /usr/local/motion and then add /usr/local/motion/bin to your search path (or simply cd /usr/local/motion/bin before execution). <br /> This way you can change version just by changing the symbolic link in /usr/local/motion as suggested earlier in this guide. <br /> If you are installing the software on a machine where you have no access to the /usr/local but have write access to a home directory, then you should change this to point to a directory within your home tree. <br /> Example: --prefix=$HOME </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > The default /usr/local means that
+       <br /><br />The executable binary "motion" is installed in /usr/local/bin
+       <br /> The manual page in /usr/local/man/man1
+       <br />The document files in /usr/local/docs/motion
+       <br />The configuration file in /usr/local/etc/motion
+       <br />The example config files in /usr/local/motion/examples
+       <br /><br />If you are experimenting with many parallel versions it may be desirable to set the PREFIX to e.g. /usr/local/motion and then add /usr/local/motion/bin to your search path (or simply cd /usr/local/motion/bin before execution).
+       <br /><br />This way you can change version just by changing the symbolic link in /usr/local/motion.
+       <br /><br />If you are installing the software on a machine where you do not have access to the /usr/local but have write access to a home directory, then you should change this to point to a directory within your home tree.
+       <br /><br />Example: --prefix=$HOME </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --exec-prefix=EPREFIX </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > install architecture-dependent files in EPREFIX <br /> [PREFIX] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > If you set this it only defines an alternative installation directory for the executable binary. <br /> Note: The executable binary will be placed in a directory "bin" below the directory specified by this option <br /> Editor recommends leaving this as default (i.e. not setting it). </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > This defines an alternative installation directory for the executable binary. <br /> Note: The executable binary will be placed in a directory "bin" below the directory specified by this option <br /> Author recommends leaving this as default (i.e. not setting it). </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --bindir=DIR</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > user executables [EPREFIX/bin] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > With this option you can control exactly in which directory the executable binary is installed. The previous option automatically adds the bin directory. Here you are in fill control. </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > With this option you can control exactly which directory the executable binary is installed. The previous option automatically adds the bin directory. Here you are in full control of the directory. </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --sbindir=DIR </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > System admin executables [EPREFIX/sbin] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion. </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion. </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --libexecdir=DIR</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > program executables [EPREFIX/libexec] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion. </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion. </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --datadir=DIR</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > read-only architecture-independent data [PREFIX/share] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion. </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion. </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --sysconfdir=DIR</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > read-only single-machine data [PREFIX/etc] </td>
        <td bgcolor="#edf4f9" word-wrap:break-word >
-         This is where motion both installs the default configuration file and also where it later searches for it. <br />
+         This is where Motion both installs the default configuration file and also where it will later search for it. <br />
          Motion searches for the configuration file "motion.conf" in the following order:
          <br />
-         <UL>  <br /> 1. Current directory from where motion was invoked
-               <br /> 2. $HOME/.motion
-               <br /> 3. The motion/ subdirectory inside the sysconfig directory set by this switch. If not defined the default is /usr/local/etc/ <br />
+         <UL>  <br />1. Current directory from where Motion was invoked
+               <br />2. $HOME/.motion
+               <br />3. The motion subdirectory inside the sysconfig directory set by this switch. If not defined the default is /usr/local/etc/ <br />
          </UL> <br /> Editor recommends leaving this at default. Be careful if you run "make install" again.
          This will overwrite the motion-dist.conf file that you may have edited.
        </td>
@@ -704,32 +734,32 @@ how Motion is built.
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --sharedstatedir=DIR </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > modifiable architecture-independent data [PREFIX/com] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion.  </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --localstatedir=DIR </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > modifiable single-machine data [PREFIX/var] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion.  </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --libdir=DIR </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > object code libraries [EPREFIX/lib]</td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion.  </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --includedir=DIR</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > C header files [PREFIX/include] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion.  </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --oldincludedir=DIR</td>
        <td bgcolor="#edf4f9" word-wrap:break-word > C header files for non-gcc [/usr/include] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion.  </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --infodir=DIR </td>
        <td bgcolor="#edf4f9" word-wrap:break-word > info documentation [PREFIX/info] </td>
-       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by motion.  </td>
+       <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
      </tr>
      <tr>
        <td bgcolor="#edf4f9" word-wrap:break-word > --mandir=DIR</td>
@@ -749,7 +779,7 @@ how Motion is built.
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support and maybe lack some of the libraries for it. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support or lack some of the libraries for it. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-webp </td>
@@ -759,20 +789,22 @@ how Motion is built.
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg=DIR </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the path for the directory prefix in which the
-			library and headers are installed  .<br /> If not specified configure will search in /usr/ and /usr/local/ </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word >
-			DIR is the directory PREFIX in which the ffmpeg shared libraries
-			and their headers are installed.
-			<br /> If you install ffmpeg from sources and use the	default directories or
+			library and headers are installed.
+			<br /> If not specified configure will search in /usr/ and /usr/local/ </td>
+
+			<td bgcolor="#edf4f9" word-wrap:break-word > DIR is the directory PREFIX in which
+			the ffmpeg shared libraries and their headers are installed.
+			<br /> If you install ffmpeg from sources and use the default directories or
 			if ffmpeg is installed as a binary package (RPM or deb) you may not need to specify the directory prefix.
-			Configure should find the libraries automatically. If you installed ffmpeg from sources and specified a
-			different --prefix when building ffmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR)
+			Configure should find the libraries automatically.
+			<br />If you installed ffmpeg from sources and specified a different --prefix when building f
+			fmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR)
 			or export that location to be included in the PKG_CONFIG_PATH
-			The option of --with-ffmpeg is the default for Motion.  If the required libraries are not located, the
+			<br />The option of --with-ffmpeg is the default for Motion.  If the required libraries are not located, the
 			configure script will stop at the ffmpeg section and report which libraries need to be installed.
 			Once the required libraries are installed, run the script again.  As noted previously, make sure
 			to install the -dev versions.
-			For more information on FFmpeg see the documentation for the FFmpeg project. <br />
+			<br />For more information on FFmpeg see the documentation for the FFmpeg project.
 			</td>
 		</tr>
 		<tr>
@@ -793,17 +825,17 @@ how Motion is built.
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-sqlite3 </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Disable sqlite3 support in motion. </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include SQLite3 support in the package. <br /> This can also be useful if you get compilation errors related to SQLite4 and you actually do not need the feature anyway. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include SQLite3 support in the package. <br /> This can also be useful if you get compilation errors related to SQLite3 and you actually do not need the feature anyway. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --without-optimizecpu </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude autodetecting platform and cpu type. This will disable the compilation of gcc optimizing code by platform and cpu. </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if the optimization causes problems. Typically if you build on some non X386 compatible CPU. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if the optimization causes problems. Not typically needed. </td>
 		</tr>
 		<tr>
 			<td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
 			<td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
-			<td bgcolor="#edf4f9" word-wrap:break-word > This option is for developers only. It produces a flood of warnings that helps the developer to write more robust code. These warnings are normally harmless but can sometimes be a latent defect. </td>
+			<td bgcolor="#edf4f9" word-wrap:break-word > This option is for developers only. It checks to ensure that the code is robust. </td>
 		</tr>
 	</tbody>
 </table>
@@ -817,13 +849,14 @@ Once the configure script has successfully finished and indicates all options de
 The makefile builds the Motion program and links in all of the required libraries. To run the makefile on most
 distributions, type: <code>make</code>  For FreeBSD distributions use <code>gmake</code>
 <p></p>
-The makefile will go through each of the files and compile it.  Depending upon the source code obtained, there may be many
-warnings or possibly none.
+The makefile will go through each of the files and compile them.  Depending upon the source code obtained, there may be
+warnings or usually none.
 <p></p>
 If the notifications indicate undefined references, then it is most likely that
 an additional library needs to be added in via the configure switches.  Many of these additional missing libraries
-issues are related to the version of ffmpeg and how it was built or installed.  The following is a sample of some
-of the extra ffmpeg libraries that may need to be added.
+issues may be related to the version of ffmpeg and how it was built or installed.  The following is a sample of some
+of the extra ffmpeg libraries that may need to be added to pkg-config <strong><code>.pc</code></strong> files that are
+located in the ffmpeg /lib/pkgconfig directory.
 <p></p>
 <code>
 -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec
@@ -840,7 +873,7 @@ before you rebuild Motion you may not get the additional feature included.
 For example: If you built Motion without ffmpeg support and then add it later and rebuild Motion
 without running <code>make clean</code> first the ffmpeg feature does not get compiled into the Motion binary.
 <p></p>
-First time you build motion run <code>./configure</code>, <code>make</code>, <code>make install</code>.
+The first time you build Motion run <code>./configure</code>, <code>make</code>, <code>make install</code>.
 If you need to build it again (to run with different configure options) run <code>./configure</code>,
 <code>make clean</code>, <code>make</code>, <code>make install</code>.
 <p></p>
@@ -858,24 +891,24 @@ These commands create the required directories and copy the files into the follo
 </ul>
 <p></p>
 The contents of what gets copied into each directory is as follows:
-(assuming the default PREFIX /usr/local was used when running configure.  Otherwise adjust to the actuals you chose)
+(assuming the default PREFIX /usr/local was used when running configure.  Otherwise adjust to the actual directory specified during the configure step.)
 <ul>
   <li> Executable binary "motion" to /usr/local/bin</li>
   <li> Manual page "motion.1" to /usr/local/man/man1</li>
-  <li> Document files "CHANGELOG, COPYING, CREDITS, INSTALL, and README to /usr/local/share/doc/motion</li>
+  <li> Document files "CHANGELOG, COPYING, CREDITS, motion_guide.html, and README.md to /usr/local/share/doc/motion</li>
   <li> Example configuration files "*.conf" to /usr/local/share/motion/examples</li>
   <li> Configuration file "motion-dist.conf" to /usr/local/etc/motion</li>
 </ul>
 
-Note that any existing files are overwritten. The default config file motion-dist.conf is named like
+Note that any existing files are overwritten. The default configuration file motion-dist.conf is named like
 this so that you do not get your working motion.conf file overwritten when you upgrade Motion.
 
 <p></p>
 <h3><a name="Un_Install"></a>  Un-install </h3>
-From the motion base installation directory you simply run <code>make uninstall</code>
+From the Motion base installation directory run <code>make uninstall</code>
 <p></p>
 And delete the base installation directory in /usr/local and any link pointing to it. If you have forgotten where
-you installed it or someone else did it for you, simply search for the files and directories starting with motion.
+you installed it or someone else did it for you, simply search for the files and directories starting with Motion.
 If the filenames and the directories match the names described in the "Make Install" section of this document, you
 can safely delete them.
 <p></p>
@@ -909,21 +942,73 @@ The make command can be run with several options.
 </ul>
 
 </ul>
+</ul>
+
+<h2><a name="Error_Logging"></a> Questions, Issues and Error Reporting</h2>
+<ul>
+<p></p>
+Issues on the github site are for discussing code problems, crashes and application enhancements only.
+<p></p>
+"How to" questions or issues with the setup, configuration or use of Motion, should be asked to the mailing list or on IRC.
+<p></p>
+<ul>
+    <li>User Group List:  Please sign-up and send your question to the
+    <a href="https://lists.sourceforge.net/lists/listinfo/motion-user" rel="nofollow" target="_top">motion-user</a>.
+    list </li>
+    <li>#motion(irc://chat.freenode.net/motion) on freenode</li>
+</ul>
+<p></p>
+It is very important to use these resources for non-code issues since it engages a much wider audience who may have experience resolving
+the particular issue you are trying to resolve.
+
+<h3><a name="Error_Submitting"></a>  Submitting Problems</h3>
+
+Before submitting a error to the github site, please make sure that you are using either the latest release as posted
+on the <a href="https://github.com/Motion-Project/motion/releases" rel="nofollow" target="_top">project release page</a>.
+or that you have built the latest source code from the github master branch.
+<p></p>
+If the issue still remains with the current version, please validate that the issue has not already been reported
+by searching through the issue log.
+<p></p>
+Next, the project maintainers must be provided the following in order to replicate and ultimately resolve the issue:
+<p></p>
+<ul>
+  <li>A complete Motion log for a single run from startup to shutdown at the
+  <a href="#log_level" >log_level</a> of 7(INF).</li>
+  <li> The expected versus actual result</li>
+</ul>
+<p></p>
+The preferred method of providing the log file is by posting it on
+<a href="https://gist.github.com/" rel="nofollow" target="_top">gist</a> and only providing the link to the
+file within the issue.
+<p></p>
+It is recommended that any IP addresses and/or usernames and passwords included in the file be masked to preserve
+your privacy.  Also do not forget to mask any database IDs that the log file may be reporting.
+<p></p>
+For more information please read the
+<a href="https://github.com/Motion-Project/motion/wiki/Privacy" rel="nofollow" target="_top">privacy wiki article</a>.
+<p></p>
+Note that the developers do not use any front-end application to use Motion and we need the actual logs from the Motion
+application rather than logs from the front-end application.
+<p></p>
+<p></p>
+<p></p>
+</ul>
 
 <h2><a name="Important_Definitions"></a>  Important Definitions </h2>
 <ul>
 
 <p></p>
-Motion is invoked from the command line. It has no GUI. Everything is controlled from config files.
-From version 3.2 the command line is only used to define location of config file and a few special
+Motion is invoked from the command line. It has no GUI. It is designed to be controlled from config files.
+From version 3.2 the command line is only used to define location of config file and has only a few special
 options.
 <p></p>
 A few important definitions.
 <ul>
   <li> A snapshot is a picture taken at regular intervals independently of any movement in the picture.</li>
-  <li> A "motion" image/movie shows the pixels that have actually changed during the last frames.
+  <li> A "motion" or "debug" image/movie shows the pixels that have actually changed during the last frames.
   These pictures are not very useful for normal presentation to the public but they are quite useful
-  for testing and tuning and making mask files as you can see exactly where motion sees something moving.
+  for testing, tuning and making mask files as you can see exactly where Motion sees something moving.
   Motion is shown in greytones. If labelling is enabled the largest area is marked as blue. Smart mask is
   shown in red.</li>
   <li> A "normal" image is the real image taken by the camera with text overlaid.</li>
@@ -934,6 +1019,7 @@ A few important definitions.
 </ul>
 
 <h2><a name="The_Config_Files"></a>  The Configuration Files </h2>
+<ul>
 <p></p>
 If Motion was invoked with command line option <code>-c pathname</code> Motion will expect the config file to be as specified. When you specify the config file on the command line with -c you can call it anything.
 <p></p>
@@ -952,7 +1038,7 @@ Motion has a configuration file in the distribution package called motion-dist.c
 file gets copied to the /usr/local/etc/motion directory.
 <p></p>
 The configuration file needs to be renamed from motion-dist.conf to motion.conf. The original file is called
-motion-dist.conf so that your perfectly working motion.conf file does not accidentally get overwritten when
+motion-dist.conf so that your working motion.conf file does not accidentally get overwritten when
 you re-install or upgrade to a newer version of Motion.
 <p></p>
 If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with
@@ -963,17 +1049,13 @@ have one camera you only need the motion.conf file but if you have more than one
 need to have
 <strong>one camera config file per camera</strong> plus the motion.conf file.
 <p></p>
-So if you have for example two cameras you need motion.conf
+If you have for example two cameras you need motion.conf
 <strong>and two</strong> camera config files. So a total of <strong>three</strong> config files.
 <p></p>
 An option that is common to all cameras can be placed in motion.conf. (You can also put all parameters in the
 camera files but that makes a lot of editing when you change a common thing).
 <p></p>
-An option that is unique to a camera must be defined in each camera file.
-<p></p>
-<em>It is often seen that people copy the entire motion.conf into the camera config files and change a
-few options. This works but it not recommended because it is more difficult to maintain and overview.
-Keep all the common options in motion.conf and the few unique only in the camera config files</em>
+An option that is unique to a camera must be specified in each camera file.
 <p></p>
 The first camera is defined in the first camera file called from motion.conf. The 2nd camera is defined in the
 2nd camera file called from motion.conf etc.
@@ -989,14 +1071,14 @@ camera files can be as simple as
 <p></p>
 <p></p>
 camera0.conf:
-<br><code><strong> videodevice /dev/video0</strong></code>
-<br><code><strong>stream_port 8081</strong></code>
+<br /><code><strong> videodevice /dev/video0</strong></code>
+<br /><code><strong>stream_port 8081</strong></code>
 
 <p></p>
 <p></p>
 camera1.conf:
-<br><code><strong> videodevice /dev/video1</strong></code>
-<br><code><strong>stream_port 8082</strong></code>
+<br /><code><strong> videodevice /dev/video1</strong></code>
+<br /><code><strong>stream_port 8082</strong></code>
 <p></p>
 <p></p>
 <p></p>
@@ -1019,14 +1101,14 @@ There are a few options that must be in motion.conf and cannot be in a camera co
 file: stream_auth_method, webcontrol_* , daemon, and camera.
 <p></p>
 If motion is built without specific features such as ffmpeg, mysql etc it will ignore the options that
-belong to those features.
+belong to those features and report them as unknown configuration options.
 <p></p>
 If you run the http control command
  <a href="http://host:port/0/config/writeyes" rel="nofollow" target="_top">http://host:port/0/config/writeyes</a>,
  motion will overwrite motion.conf and all the camera.conf files by autogenerated config files neatly formatted and
  only with the features included that Motion was built with. If you later re-build Motion with more features or
  upgrade to a new version, you can use your old config files, run the motion.conf.write command, and you will have
- new config files with the new options included all set to their default values. This makes upgrading very easy to do.
+ new config files with the new options included all set to their default values.
 <p></p>
 <p></p>
 </ul>
@@ -1046,7 +1128,6 @@ motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process
   <li>-b : Run in daemon mode</li>
   <li>-n : Run in non-daemon mode</li>
   <li>-s : Run in setup mode. Also forces non-daemon mode.</li>
-  <li>-o : Dump config options to log (for support purposes).</li>
   <li>-d : Run with message log level 1 - 9</li>
   <li>-k : Run with message log type 1 - 9</li>
   <li>-l : Full path and file name for log file</li>
@@ -1102,22 +1183,6 @@ Motion responds to the following signals:
 <p></p>
 </ul>
 
-<h2><a name="Error_Logging"></a>  Error Logging </h2>
-<ul>
-
-<p></p>
-Motion reports errors to the console when it runs in non-daemon mode. And it outputs
-even more information when run in setup mode.
-<p></p>
-Error logging has been implemented so that errors during daemon (background) mode are logged in the syslog or to the user
-specified log file.
-<p></p>
-The log is in most Linux systems the file <code>/var/log/messages</code> (e.g. RedHat/Fedora)
-or <code>/var/log/syslog</code> and <code>/var/log/user.log</code> (e.g. Debian).
-<p></p>
-<p></p>
-</ul>
-
 <h2><a name="Basic_Setup"></a>  Basic Setup </h2>
 <ul>
 <p></p>
@@ -1143,7 +1208,7 @@ may work since they are on different controllers.
 
 <p></p>
 Motion permits the use of video cards that have discreet input channels.  Since USB cameras do not have input channels,
-the option <code>input</code> must be set to the value -1 for USB cameras.
+the option <code><a href="#input" >input</a> </code> must be set to the value -1 for USB cameras.
 <p></p>
 
 <strong>Network cameras</strong> are set up via the
@@ -1157,12 +1222,13 @@ for additional options.
 <p></p>
 
 <strong>Raspberry Pi cameras</strong> can be set up two different ways.  If Motion is installed by using the
-apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module.  Users will
-need to install this module using the command <code><strong>sudo modprobe bcm2835-v4l2</strong></code>.  This
+apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
+a v4l2 device for the camera.  Users will need to install this module using the
+command <code><strong>sudo modprobe bcm2835-v4l2</strong></code>.  This
 will set up the camera as a normal v4l2 device and it can be accessed via a standard /dev/videoX device.  If Motion is
 built from source or installed via the deb packages on the project release page, then an additional option is to set
 up the camera using the <code><strong><a href="#mmalcam_name" >mmalcam_name</a> </code></strong> parameter or using
-the bcm2835-v4l2 module.  When Motion is installed via apt, the mmalcam option is not available.
+the bcm2835-v4l2 module.  <strong><code>When Motion is installed via apt, the mmalcam option is not available.</code></strong>
 <p></p>
 
 <strong>Composite video cards</strong> are normally made with a chip called BT878 (older cards have a BT848). They
@@ -1173,7 +1239,7 @@ input is selected with the config option <code>input</code>. Input channel numbe
 (which is why the value -1 and not 0 disables input selection). There are video capture cards available
 with 4 or 8 inputs but only one chip. They present themselves as one single video device and
 you select input using the 'input' option. If you define e.g. 4 camera config files with the
-same videodevice name but different input numbers Motion automatically
+same video device name but different input numbers Motion automatically
 goes into round robin mode.
 <p></p>
 Many TV tuner cards have the input channels: TV Tuner = 0, Standard composite video = 1, S-VHS = 3.
@@ -1183,13 +1249,14 @@ For video capture cards input 1 is normally the composite video input.
 Some capture cards are specially made for surveillance with for example 4 inputs.
 Others have a TV tuner, a composite input and perhaps also a S-Video input.
 For all these cards the inputs are numbered. The numbering varies from card to card so the easiest
-is to experiment for 5 minutes with a program that can show the videostream.
-Use a program such as VLC to experiment with the values.
+is to experiment with a program such as VLC that can show the video stream.
 <p></p>
 If you use the TV tuner input you also need to set the frequency of the TV channel using the
-option <code>frequency</code>. Otherwise set <code>frequency</code> to 0.
+option <code><strong><a href="#frequency" >frequency</a></strong></code>. Otherwise
+set <code><strong><a href="#frequency" >frequency</a></strong></code> to 0.
 <p></p>
-Finally you need to set the TV norm. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default is 0 (PAL).
+Finally you need to set the TV <code><strong><a href="#norm" >norm</a></strong></code>.
+Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default is 0 (PAL).
 If your camera is a PAL black and white you may get a better result with norm=3 (PAL no colour).
 <p></p>
 
@@ -1257,20 +1324,20 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#camera" >camera</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
-		<td align="left"><br></td>
+		<td height="17" align="left"><br /></td>
+		<td align="left"><br /></td>
 		<td align="left">camera_dir</td>
 		<td align="left"><a href="#camera_dir" >camera_dir</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
-		<td align="left"><br></td>
+		<td height="17" align="left"><br /></td>
+		<td align="left"><br /></td>
 		<td align="left">camera_id</td>
 		<td align="left"><a href="#camera_id" >camera_id</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
-		<td align="left"><br></td>
+		<td height="17" align="left"><br /></td>
+		<td align="left"><br /></td>
 		<td align="left">camera_name</td>
 		<td align="left"><a href="#camera_name" >camera_name</a></td>
 	</tr>
@@ -1287,7 +1354,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#daemon" >daemon</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">database_busy_timeout</td>
 		<td align="left">database_busy_timeout</td>
 		<td align="left"><a href="#database_busy_timeout" >database_busy_timeout</a></td>
@@ -1335,7 +1402,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#database_port" >database_port</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">database_type</td>
 		<td align="left">database_type</td>
 		<td align="left"><a href="#database_type" >database_type</a></td>
@@ -1371,13 +1438,13 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#event_gap" >event_gap</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">exif_text</td>
 		<td align="left">exif_text</td>
 		<td align="left"><a href="#exif_text" >exif_text</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">extpipe</td>
 		<td align="left">extpipe</td>
 		<td align="left"><a href="#extpipe" >extpipe</a></td>
@@ -1389,7 +1456,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#ffmpeg_bps" >ffmpeg_bps</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">ffmpeg_duplicate_frames</td>
 		<td align="left">ffmpeg_duplicate_frames</td>
 		<td align="left"><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a></td>
@@ -1455,7 +1522,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#input" >input</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">ipv6_enabled</td>
 		<td align="left">ipv6_enabled</td>
 		<td align="left"><a href="#ipv6_enabled" >ipv6_enabled</a></td>
@@ -1473,25 +1540,25 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#locate_motion_mode" >locate_motion_mode</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">locate_motion_style</td>
 		<td align="left">locate_motion_style</td>
 		<td align="left"><a href="#locate_motion_style" >locate_motion_style</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">log_level</td>
 		<td align="left">log_level</td>
 		<td align="left"><a href="#log_level" >log_level</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">log_type</td>
 		<td align="left">log_type</td>
 		<td align="left"><a href="#log_type" >log_type</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">logfile</td>
 		<td align="left">logfile</td>
 		<td align="left"><a href="#logfile" >logfile</a></td>
@@ -1528,14 +1595,14 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
-		<td align="left"><br></td>
+		<td height="17" align="left"><br /></td>
+		<td align="left"><br /></td>
 		<td align="left">mmalcam_control_params</td>
 		<td align="left"><a href="#mmalcam_control_params" >mmalcam_control_params</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
-		<td align="left"><br></td>
+		<td height="17" align="left"><br /></td>
+		<td align="left"><br /></td>
 		<td align="left">mmalcam_name</td>
 		<td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
 	</tr>
@@ -1618,9 +1685,9 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">on_camera_found</td>
-		<td align="left">on_camera_found</td>
-		<td align="left">on_camera_found</td>
+		<td height="17" align="left"></td>
+		<td align="left"></td>
+		<td align="left"></td>
 		<td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
 	</tr>
 	<tr>
@@ -1660,13 +1727,13 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">output_normal</td>
+		<td height="17" align="left">output_motion</td>
 		<td align="left">output_debug_pictures</td>
 		<td align="left">output_debug_pictures</td>
 		<td align="left"><a href="#output_debug_pictures" >output_debug_pictures</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left">output_motion</td>
+		<td height="17" align="left">output_normal</td>
 		<td align="left">output_pictures</td>
 		<td align="left">output_pictures</td>
 		<td align="left"><a href="#output_pictures" >output_pictures</a></td>
@@ -1690,7 +1757,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#post_capture" >post_capture</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">power_line_frequency</td>
 		<td align="left">power_line_frequency</td>
 		<td align="left"><a href="#power_line_frequency" >power_line_frequency</a></td>
@@ -1738,7 +1805,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#roundrobin_skip" >roundrobin_skip</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">rtsp_uses_tcp</td>
 		<td align="left">rtsp_uses_tcp</td>
 		<td align="left"><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a></td>
@@ -1804,19 +1871,19 @@ Some configuration options are only used if Motion is built on a system that has
         <td align="left"><a href="#sql_query" >sql_query</a></td>
 	</tr>
     <tr>
-        <td height="17" align="left">sql_query_start</td>
-        <td align="left">sql_query_start</td>
-        <td align="left">sql_query_start</td>
+        <td height="17" align="left"></td>
+        <td align="left"></td>
+        <td align="left"></td>
         <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
     </tr>
     <tr>
-        <td height="17" align="left"><br></td>
+        <td height="17" align="left"><br /></td>
         <td align="left">stream_auth_method</td>
         <td align="left">stream_auth_method</td>
         <td align="left"><a href="#stream_auth_method" >stream_auth_method</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">stream_authentication</td>
 		<td align="left">stream_authentication</td>
 		<td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
@@ -1851,20 +1918,14 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left">stream_port</td>
 		<td align="left"><a href="#stream_port" >stream_port</a></td>
 	</tr>
-        <tr>
-		<td height="17" align="left"></td>
-		<td align="left"></td>
-		<td align="left"></td>
-		<td align="left"><a href="#substream_port" >substream_port</a></td>
-        </tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">stream_preview_newline</td>
 		<td align="left">stream_preview_newline</td>
 		<td align="left"><a href="#stream_preview_newline" >stream_preview_newline</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">stream_preview_scale</td>
 		<td align="left">stream_preview_scale</td>
 		<td align="left"><a href="#stream_preview_scale" >stream_preview_scale</a></td>
@@ -1875,6 +1936,12 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left">stream_quality</td>
 		<td align="left"><a href="#stream_quality" >stream_quality</a></td>
 	</tr>
+m   <tr>
+		<td height="17" align="left"></td>
+		<td align="left"></td>
+		<td align="left"></td>
+		<td align="left"><a href="#substream_port" >substream_port</a></td>
+    </tr>
 	<tr>
 		<td height="17" align="left">switchfilter</td>
 		<td align="left">switchfilter</td>
@@ -2044,7 +2111,7 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left"><a href="#tunerdevice" >tunerdevice</a></td>
 	</tr>
 	<tr>
-		<td height="17" align="left"><br></td>
+		<td height="17" align="left"><br /></td>
 		<td align="left">use_extpipe</td>
 		<td align="left">use_extpipe</td>
 		<td align="left"><a href="#use_extpipe" >use_extpipe</a></td>
@@ -2109,6 +2176,14 @@ Some configuration options are only used if Motion is built on a system that has
 		<td align="left">-Depreciated</td>
 		<td align="left">-Depreciated</td>
 	</tr>
+	<tr>
+		<td height="17" align="left"><br></td>
+		<td align="left">sdl_threadnr</td>
+		<td align="left">sdl_threadnr</td>
+		<td align="left">-Depreciated</td>
+    </tr>
+
+
 </table>
 </ul>
 
@@ -2630,8 +2705,8 @@ Some configuration options are only used if Motion is built on a system that has
 <p></p>
 <p></p>
 The following section provides detailed descriptions of each of the configuration options.
-
 <p></p>
+
 <h3><a name="conversion_specifiers"></a>Conversion Specifiers</h3>
 <ul>
 <table border="1" class="fixed" >
@@ -2822,6 +2897,9 @@ messages will be output.
 <p></p>
 The various levels are [1..9] (EMR, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL).
 <p></p>
+When reporting any issues or errors associated with the Motion application,
+use the INF level.
+<p></p>
 <p></p>
 
 <h3><a name="log_type"></a> log_type </h3>
@@ -2851,7 +2929,7 @@ Motion allows for this line to be listed in the motion.conf file multiple
 times.  These specifications should be the LAST lines in the
 motion.conf file.
 See the <a href="#The_Config_Files">Configuration Files</a> section within
-this guide for a completed discussion of what to put into the
+this guide for a complete discussion of what to put into the
 camera0.conf, camera1.conf, cameraX.conf files that would be specified
 in this option.
 <p></p>
@@ -2891,7 +2969,7 @@ specifiers as well as on the web interface.
 <p></p>
 This option specifies a directory to contain the individual camera configuration files.
 Any files ending in '.conf' in this directory will be read as a camera config file.
-Disable a camera (config file) by renaming it so it does not end with '.conf'.
+<br />Users can disable a camera (config file) by renaming it so it does not end with '.conf'.
 <p></p>
 
 <p></p>
@@ -2900,6 +2978,8 @@ Disable a camera (config file) by renaming it so it does not end with '.conf'.
 <h3><a name="Options_Video4Linux_Devices"></a>Video4Linux Device</h3>
 <ul>
 <p></p>
+Please refer to the <a href="#Basic_Setup">Basic Setup</a> section of this guide for an additional discussion
+of Video4Linux devices and how to test and specify them correctly for Motion.
 <h3><a name="videodevice"></a> videodevice </h3>
 <p></p>
 <ul>
@@ -2910,7 +2990,7 @@ Disable a camera (config file) by renaming it so it does not end with '.conf'.
 <p></p>
 The video device to be used for capturing. Default is /dev/video0.
 See the <a href="#Basic_Setup">Basic Setup</a>
-section of this guide for a additional discussion of this option.
+section of this guide for an additional discussion of this option.
 <p></p>
 This option is the preferred way to specify the video4linux device name. If the camera does
 not work when specifying the device with this option, it is also possible to specify the device
@@ -2928,7 +3008,7 @@ either this alternative method or for a normal network camera, the videodevice o
   <li> Default: </li>
 </ul>
 <p></p>
-The v4l2_palette allows the user to choose preferable palette to be use by Motion.  This
+The v4l2_palette allows the user to choose a palette to be use by Motion.  This
 is only the <u>preferred</u> option.  If the video device does not support this preferred format,
 Motion will loop through the available palettes to try to find one that is supported by both Motion
 and the device.
@@ -3045,12 +3125,12 @@ specify the numeric value as the Motion option.
         </tr>
         <tr>
             <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
-            <td bgcolor="#edf4f9" align="center" >YU10</li>
+            <td bgcolor="#edf4f9" align="center" >Y10</li>
             <td bgcolor="#edf4f9" align="center" >18</td>
         </tr>
         <tr>
             <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
-            <td bgcolor="#edf4f9" align="center" >YU12</li>
+            <td bgcolor="#edf4f9" align="center" >Y12</li>
             <td bgcolor="#edf4f9" align="center" >19</td>
         </tr>
         <tr>
@@ -3075,12 +3155,9 @@ are specified when using the <a href="#netcam_url" >netcam_url</a> the v4l2_pale
 is ignored and the camera default is used.
 
 <p></p>
-
 The V4L2_PIX_FMT_H264(21) option is valid ONLY when using the <a href="#netcam_url" >netcam_url</a> option.
 When V4L2_PIX_FMT_H264(21) is specified using the videodevice, Motion will change the v4l2_palette option to the
 default of V4L2_PIX_FMT_YUV420 (17)
-</ul>
-
 <p></p>
 
 <h3><a name="tunerdevice"></a> tunerdevice </h3>
@@ -3106,16 +3183,12 @@ See the <a href="#Basic_Setup">Basic Setup</a> section of this guide for a addit
 <p></p>
 Input channel to use expressed as an integer number starting from 0.
 This option should normally be set to 1 for video/TV cards, and -1 for USB cameras.
-This parameter is used only with video capture cards that has more than one input.
-However if you set the input number to e.g. 1 for a USB camera Motion writes an error message
-back. If you set it to -1 it does not give you any warning.
-If you have a video capture card you can define the channel to tune to using this option.
-If you are using a USB device, network camera or a capture card without tuner you should
-set the value to the default -1.
-Many TV tuner cards have the input channels: TV Tuner = 0,
-Standard composite video = 1, S-VHS = 3. Other have TV=0, composite video 1= 1,
-composite video = 2,  S-VHS = 3. It is recommended to set the parameter to -1 for USB cameras as
-your first try. For video capture cards input 1 is normally the composite video input.
+This parameter is used only with video capture cards that have more than one input.
+If you set the input number to values other than -1 USB cameras Motion will report
+an error message back. For video capture cards with tuners or multiple inputs such as
+S-VHS or Composite you may need to use this option to specify the correct input for
+the camera. Using a external application such as VLC which allows for easier specification
+of the input associated with the camera can assist  in determining the correct value for Motion.
 <p></p>
 
 <h3><a name="norm"></a> norm </h3>
@@ -3126,7 +3199,7 @@ your first try. For video capture cards input 1 is normally the composite video 
   <li> Default: 0 (PAL) </li>
 </ul>
 <p></p>
-Select the norm of the video device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
+Select the video norm of the device. Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)
 This value is only used for capture cards using the BTTV driver.
 <p></p>
 
@@ -3254,11 +3327,13 @@ camera for a long time. But then you may miss the action on one of the inactive 
 afford it avoid Round Robin and buy the more expensive type of capture cards that has one decoder chip
 per input. If you only need 2 or 3 cameras you can also simply put 2 or 3 cheap TV cards in the computer.
 Linux has no problem working with multiple TV cards. (or better yet, it multiple cheap network cameras)
-If multiple cameras use the same video device, they each can capture <code>roundrobin_frames</code> number of frames
+If multiple cameras use the same video device, they each can capture
+<code><a href="#roundrobin_frames">roundrobin_frames</a></code> number of frames
 before having to share the device with the other cameras.
 When another camera wants to watch another input or frequency or size the first
-<code>roundrobin_skip</code> number of frames are skipped to allow the device to settle.
-The last option <code>switch_filter</code> is supposed to prevent the change of camera from being detected
+<code><a href="#roundrobin_skip">roundrobin_skip</a> </code> number of frames are skipped to allow the
+device to settle.  The last option <code><a href="#switchfilter">switchfilter</a></code> is supposed
+to prevent the change of camera from being detected
 as Motion. Its function is not perfect and sometimes prevents detection of real motion. You should start
 with having the option disabled and then try with the option enabled to see if you can skip less frames
 without loosing the detection of the type of motion you normally want to detect.
@@ -3300,13 +3375,20 @@ This is a round robin related feature used when you have a capture card with mul
 <h3><a name="Options_Network_Cameras"></a>Network Cameras</h3>
 <ul>
 <p></p>
-Motion can connect to a network camera through a normal TCP socket. All you need to give it is the URL.
-The URL given must return either one single jpeg picture or an mjpeg stream. For the time being Motion
-cannot connect to a video stream such a mpeg, mpeg4, divx. The URL must return one single jpeg image, a mjpeg stream
-a RTSP stream, RTMP file or ftp.  When getting a still image, make sure to validate that the camera is serving up
-a actual raw JPG file and not a HTML page with an embedded JPG which is the current
-standard.
-When the <a href="#netcam_url" >netcam_url</a> is defined the videodevice options above are mostly ignored.
+Motion can connect to certain network cameras.  Please refer to the <a href="#Basic_Setup">Basic Setup</a> section
+of this guide for an additional discussion of network camera and how to test and specify them correctly for Motion.
+<p></p>
+Motion cannot connect to a video stream such a mpeg, mpeg4, divx to connect to streams such as these
+the user may review the static files portion of the <a href="#Basic_Setup">Basic Setup</a>
+section of this guide which illustrates some possible work arounds using ffmpeg and v4l2loopback devices.
+<p></p>
+The URL must return one single jpeg image, a mjpeg stream
+a RTSP stream, RTMP stream, file or ftp.  When getting a still image, make sure to validate that
+the camera is serving up a actual raw JPG file and not a HTML page with an embedded JPG which Motion
+will not be able to process.
+When the <a href="#netcam_url" >netcam_url</a> is defined the
+<a href="#Options_Video4Linux_Devices" >video4linux</a> options above are mostly ignored.
+<p></p>
 If the connection to a network camera is lost, Motion will reuse the last good image for
 approx 30 seconds. After 30 seconds the image is replaced by a grey image with a text
 telling that the signal is lost and when the connection was lost.
@@ -3344,7 +3426,7 @@ Available prefixes to the URL:
     This prefix is experimental and when Motion sees this prefix it will replace the mjpg with http and
     then process the network camera using the extremely experimental method of grabbing motion jpg images.
     <p></p>
-    The functionality of this option is unknown.
+    The functionality of this option is unknown and may be removed in future releases.
 </ul>
 <p></p>
 
@@ -3378,7 +3460,7 @@ Available prefixes to the URL:
 
 <i>mjpeg://</i>
 <ul>
-    This is a experimental prefix.  The mjpeg is replaced with http by Motion internally and forces the
+    This is an alternative prefix for http.  The mjpeg is replaced with http by Motion internally and forces the
     use of the ffmpeg libraries and the mjpeg format.
     <p></p>
     This option is equivalent to using <code>ffplay -f mjpeg http://{yourip}</code>.
@@ -3391,7 +3473,8 @@ Available prefixes to the URL:
 
 <i>file://</i>
 <ul>
-    This option allows for the processing of a static image.  A process outside of Motion is required to replace the image.
+    This option allows for the processing of a static image.  A process outside of Motion is required to
+    replace the image.
     <p></p>
     A scenario for this would be processing a large number of previously saved images.  The file
     option would point to a single location such as <code>/home/user/test/currentimage.jpg</code>  and a script
@@ -3463,7 +3546,8 @@ The setting for keep-alive of network socket, should improve performance on comp
 <li> force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.</li>
 <li> on:    Use HTTP/1.1 requests that support keep alive as default.</li>
 </ul>
-
+<p></p>
+    Motion will ignore this option for rtsp/rtmp cameras.
 <p></p>
 
 <h3><a name="netcam_proxy"></a> netcam_proxy </h3>
@@ -3481,6 +3565,8 @@ Example of syntax: "http://myproxy.mydomain.com:1024
 If the proxy port number is 80 you can omit the port number. Then the syntax is use "http://myproxy.mydomain.com" .
 Leave this option undefined if you do not use a proxy server.
 <p></p>
+    Motion will ignore this option for rtsp/rtmp cameras.
+<p></p>
 
 <h3><a name="netcam_tolerant_check"></a> netcam_tolerant_check </h3>
 <p></p>
@@ -3491,6 +3577,8 @@ Leave this option undefined if you do not use a proxy server.
 </ul>
 <p></p>
 Use less strict jpeg checks for network cameras
+<p></p>
+    Motion will ignore this option for rtsp/rtmp cameras.
 <p></p>
 
 <h3><a name="rtsp_uses_tcp"></a> rtsp_uses_tcp </h3>
@@ -3511,10 +3599,13 @@ images that appear to be smeared.  Off indicates that UDP will be used.
 <h3><a name="Options_Raspi_Cameras"></a>Raspberry Pi Camera</h3>
 <ul>
 <p></p>
-Motion can use the Raspberry Pi camera when connected.
-Before setting up Motion with the camera, it is recommended that the user first
+Motion can use the Raspberry Pi camera when connected and Motion is compiled and installed with the
+MMAL support.  Before setting up Motion with the camera, it is recommended that the user first
 validate that the camera is functional with the raspistill/raspivid applications.
-
+<p></p>
+Please refer to the <a href="#Basic_Setup">Basic Setup</a> section
+of this guide for an additional discussion of network camera and how to test and specify them correctly for Motion.
+<p></p>
 <h3><a name="mmalcam_name"></a> mmalcam_name </h3>
 <p></p>
 <ul>
@@ -3525,6 +3616,10 @@ validate that the camera is functional with the raspistill/raspivid applications
 <p></p>
 Name of camera to use if you are using a camera accessed through OpenMax/MMAL.  The standard
 Raspberry Pi camera device name is "vc.ril.camera" without the quotes.
+<p></p>
+    Motion will ignore this option when the MMAL support is not included.  In these situations,
+    users will need to use the modprobe method of setting up the camera as a v4l2 device.  See
+    the <a href="#Basic_Setup">Basic Setup</a> section of this guide for further details.
 <p></p>
 
 <h3><a name="mmalcam_control_params"></a> mmalcam_control_params</h3>
@@ -3547,6 +3642,10 @@ Some of the more frequently used options are:
   <li>Rotation:         -rot</li>
 </ul>
 <p></p>
+<p></p>
+    Motion will ignore this option when the MMAL support is not included.  In these situations,
+    users will need to use the modprobe method of setting up the camera as a v4l2 device.  See
+    the <a href="#Basic_Setup">Basic Setup</a> section of this guide for further details.
 <p></p>
 </ul>
 
@@ -3590,23 +3689,28 @@ Note that the CPU load increases when using this feature with a value other than
 </ul>
 <p></p>
 The width in pixels of each frame. Valid range is camera dependent.
-Motion does not scale so should be set to the actual size of the v4l2 device.
-In case of a net camera motion sets the height to the height of the first image read
-except for rtsp streams which does rescale the network camera image to the
-requested dimensions.  Note that this rescaling comes at a very high CPU cost so it
+<p></p>
+For all devices, the width must be a multiple of 8.
+<p></p>
+Motion does not scale v4l2 devices and http netcams so the value should be set to the actual
+size of the image provided by the device.
+In case of a rtsp/rtmp network camera, Motion will rescale the camera image to the
+requested dimensions.  This rescaling comes at a very high CPU cost so it
 is recommended that the network camera send the image in the same dimensions as included
 in the configuration file.
-Motion actually set the size of the image coming from the video4linux device.
-Your camera or capture/TV card will not support any picture size. You must know
-which frame size (width and height) the camera supports. If you do not know start with
-width 320 and height 240 which most cameras and capture cards supports.
+<p></p>
+While Motion will not rescale the image provided, it will attempt to set the size of the image
+coming from the video4linux device to match the values provided for height/width.
+<p></p>
+It is important to realize that certain height/width combinations are only valid at
+certain frame rates.  The particular combinations which are valid are dependent upon
+the device.
+<p></p>
 For some device drivers like pwc (driver for Philips USB cameras) setting the
 size to a non-standard value makes the driver create an image of the nearest
 smaller size and create a gray band around the image to fit the size given by
 motion. Note that it is the driver and not motion that generates the gray band.
 Motion will try to detect motion in the entire image including the gray band.
-Older versions of Motion required that dimensions of image must have both height and width that are a multiple of 16.
-The latest versions have relaxed this condition, requiring both dimensions to be a multiple of 8.
 <p></p>
 
 <h3><a name="height"></a> height </h3>
@@ -3617,22 +3721,29 @@ The latest versions have relaxed this condition, requiring both dimensions to be
   <li> Default: 288</li>
 </ul>
 <p></p>
-The height of the image in pixels. Motion does not scale so should be set to the actual size of the device.
-In case of a net camera motion sets the height to the height of the first image read
-except for rtsp streams which does rescale the network camera image to the
-requested dimensions.  Note that this rescaling comes at a very high CPU cost so it
+The height in pixels of each frame. Valid range is camera dependent.
+<p></p>
+For all devices, the height must be a multiple of 8.
+<p></p>
+Motion does not scale v4l2 devices and http netcams so the value should be set to the actual
+size of the image provided by the device.
+In case of a rtsp/rtmp network camera, Motion will rescale the camera image to the
+requested dimensions.  This rescaling comes at a very high CPU cost so it
 is recommended that the network camera send the image in the same dimensions as included
 in the configuration file.
-Motion actually set the size of the image coming from the device.
-Your camera or capture/TV card will not support any picture size. You must know which frame size
-(width and height) the camera supports. If you do not know start with width 320 and height 240 which
-most cameras and capture cards supports.
+<p></p>
+While Motion will not rescale the image provided, it will attempt to set the size of the image
+coming from the video4linux device to match the values provided for height/width.
+<p></p>
+It is important to realize that certain height/width combinations are only valid at
+certain frame rates.  The particular combinations which are valid are dependent upon
+the device.
+<p></p>
 For some device drivers like pwc (driver for Philips USB cameras) setting the size to a non-standard value
 makes the driver create an image of the nearest smaller size and create a gray band around the image to fit
 the size given by motion. Note that it is the driver and not motion that generates the gray band. Motion will
 try to detect motion in the entire image including the gray band.
-Older versions of Motion required that dimensions of image must have both height and width that are a multiple of 16.
-The latest versions have relaxed this condition, requiring both dimensions to be a multiple of 8.
+
 <p></p>
 
 <h3><a name="framerate"></a> framerate </h3>
@@ -3679,10 +3790,12 @@ webcam port etc.
 Despeckle motion image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
 A way of tuning (by removing or enhancing) noise in the motion image. Options for the despeckle feature are
 any of 'e', 'E', 'd' or 'D'. This can be combined by a trailing 'l' (letter l) which enables the labeling
-feature. Default: Not Defined (Don't despeckle and label).
+feature.
+<p></p>
 Wind blowing grass and trees around or poor light conditions can cause a lot of dots (or noise) to appear in the
 motion image (See the section on Tuning Motion). This feature removes (or enhances!) this noise and so improves
 the reliability of motion.
+<p></p>
 The 'e' option removes diamonds, 'E' removes squares and alternating eE will remove circles. Each e/E you add will
 shrink the noise by a pixel all the way around. So 'despeckle Ee' will remove circles of radius 2. However, this
 will also shrink the detection by 2 and will affect the threshold. So to remove noise and then restore the detected
@@ -3695,6 +3808,7 @@ find the best combination. Just remember that the labeling feature only works as
 despeckle feature. Ie. the letter 'l' must be the last letter and only one 'l'.
 If you have very few problems with false detections leave this option either blank or at EedD which will remove
 most of the single pixel noise.
+<p></p>
 A very detailed technical explanation of the despeckle part can be found at the webpage of the author of this
 feature <a href="http://emit.demon.co.uk/motion/" rel="nofollow" target="_top">Ian McConnell's Webcam: Motion
 Web Page</a>
@@ -3755,18 +3869,18 @@ This is how the overlaid text is located.
             <table cellpadding="0" cellspacing="0" width="344">
                 <tr>
                     <td width="216">
-                        <p>&nbsp;&nbsp;<br><br><br><br><br><br>&nbsp;</p>
+                        <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
                     </td>
                     <td width="128">
-                        <p align="right">&nbsp;CHANGES<br><br><br><br><br><br>&nbsp;</p>
+                        <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
                     </td>
                 </tr>
                 <tr>
                     <td width="216">
-                        <p><br><br>TEXT_LEFT</p>
+                        <p><br /><br />TEXT_LEFT</p>
                     </td>
                     <td width="128">
-                        <p align="right">TEXT_RIGHT<br>YYYY-MM-DD<br>HH:MM:SS&nbsp;</p>
+                        <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
                     </td>
                 </tr>
             </table>
@@ -3811,18 +3925,18 @@ This is how the overlaid text is located.
             <table cellpadding="0" cellspacing="0" width="344">
                 <tr>
                     <td width="216">
-                        <p>&nbsp;&nbsp;<br><br><br><br><br><br>&nbsp;</p>
+                        <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
                     </td>
                     <td width="128">
-                        <p align="right">&nbsp;CHANGES<br><br><br><br><br><br>&nbsp;</p>
+                        <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
                     </td>
                 </tr>
                 <tr>
                     <td width="216">
-                        <p><br><br>TEXT_LEFT</p>
+                        <p><br /><br />TEXT_LEFT</p>
                     </td>
                     <td width="128">
-                        <p align="right">TEXT_RIGHT<br>YYYY-MM-DD<br>HH:MM:SS&nbsp;</p>
+                        <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
                     </td>
                 </tr>
             </table>
@@ -3851,18 +3965,18 @@ This is how the overlaid text is located.
             <table cellpadding="0" cellspacing="0" width="344">
                 <tr>
                     <td width="216">
-                        <p>&nbsp;&nbsp;<br><br><br><br><br><br>&nbsp;</p>
+                        <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
                     </td>
                     <td width="128">
-                        <p align="right">&nbsp;CHANGES<br><br><br><br><br><br>&nbsp;</p>
+                        <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
                     </td>
                 </tr>
                 <tr>
                     <td width="216">
-                        <p><br><br>TEXT_LEFT</p>
+                        <p><br /><br />TEXT_LEFT</p>
                     </td>
                     <td width="128">
-                        <p align="right">TEXT_RIGHT<br>YYYY-MM-DD<br>HH:MM:SS&nbsp;</p>
+                        <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
                     </td>
                 </tr>
             </table>
@@ -4029,12 +4143,14 @@ captured.
 If you have one or more areas of the camera image in which you do NOT want motion detected (e.g. a tree that
 moves in the wind or a corner of the picture where you can see cars/pedestrians passing by) you need a mask file.
 This file is a picture that you create in your favorite photo editing program. The areas that you want detected must
-be white. The error that you want ignored must be black. The pgm image must be the same size (number of pixels high
-and wide) as the pictures that are taken by the camera.
+be white. The area that you want ignored must be black. The pgm image should be the same size (number of pixels high
+and wide) as the pictures that are taken by the camera so you can define the correct area to mask.
 You can adjust sensitivity by using gray tones.
 If you do not have a mask file disable this option by not having it in the config file or comment
 it out.
-If you are using the <code>rotate</code> or <code>flip_axis</code> options, note that the mask is applied <em>after</em> the rotation.
+If you are using the <code>rotate</code> or <code>flip_axis</code> options, note that the mask is
+applied <em>after</em> the rotation.
+<p></p>
 <strong>Detailed Description</strong>
 <p></p>
 The mask file must be a pgm format image file (portable gray map). Note that you must choose the BINARY format.
@@ -4057,7 +4173,8 @@ If you cannot save in this format save as a grayscale jpg and then you can conve
 (assuming you have djpeg installed - part of the jpeg lib package).
 <p></p>
 Note that the mask file option masks off the detection of motion. The entire picture is still shown on the picture.
-This means that you cannot use the feature to mask off an area that you do not want people to see.
+This means that you cannot use the feature to mask off an area that you do not want people to see.  Instead
+use the mask_privacy option.
 <p></p>
 Below are an example of a webcam picture and a mask file to prevent the detection cars in the street.
 <p></p>
@@ -4087,13 +4204,15 @@ Mask file (converted to png format so it can be shown by your web browser)
   <li> Default: Not defined</li>
 </ul>
 <p></p>
-The full path and filename for the privacy masking pgm file.  This file works like the mask_file as
+The full path and filename for the privacy masking pgm file.  This file works like
+the <a href="#mask_file">mask_file</a>  as
 described above.  The difference with this parameter is that while the mask_file excludes the section from
 detecting motion, this file excludes the section of the image completely.
 <p></p>
 mask_privacy is applied before detection so no motion will ever be detected in the excluded area.
 This parameter could however still be used with the mask_file.  e.g.  This file could exclude the
-neighbors yard and the mask_file would exclude the blowing tree from motion detection.  The resulting
+neighbors yard and the <a href="#mask_file">mask_file</a> would exclude the blowing tree from motion
+detection.  The resulting
 pictures/movies would show solid black in place of the neighbors yard but the tree would still be in
 the pictures/movies.
 <p></p>
@@ -4115,18 +4234,20 @@ reliable when sudden moves occur under windy conditions.
 <p></p>
 Fast means here that the mask is built quick, but it is also not staying very long with no more motion.
 Slow means that it takes a while until the mask is built but it also stays longer. A good start value
-for smart_mask_speed is 5. This setting is independent from the framerate. The attack and decay time
+for smart_mask_speed is 5. This setting is independent from the <a href="#framerate">framerate</a>. The
+attack and decay time
 is constant over all available framerates.
 When smartmask is enabled and motion is also configured to either write motion-images or motion-mpegs,
 the current smartmask is copied as an overlay into the black/white motion-pictures/mpegs in red colour.
-Same thing happens to the webcam stream when Motion runs in <code>setup_mode</code>. That way you can
+Same thing happens to the webcam stream when Motion runs in <code><a href="#setup_mode">setup_mode</a></code>.
+That way you can
 easily adjust smart_mask_speed.
 <p></p>
 The <code>mask_file</code> option provides a static mask to turn off sensitivity in certain areas.
 This is very useful to mask a street with cars passing by all day long etc...
 <p></p>
 But imagine a scenario with large bushes and big trees where all the leaves are moving
-in the wind also triggering motion from time to time even with despeckle turned on. Of
+in the wind also triggering motion from time to time even with <a href="#despeckle">despeckle</a> turned on. Of
 course you can also define a static mask here, but what if the bushes are growing during
 spring and summer? Well, you have to adapt the mask from time to time. What if the camera
 position moves slightly? What if someone grows new plants in your garden? You always have to setup a new static mask.
@@ -4186,7 +4307,7 @@ The seconds of no motion detection that triggers the end of an event.
 An event is defined as a series of motion images taken within a short timeframe.
 The value -1 is allowed and disables
  events causing all Motion to be written to one single movie file and no pre_capture.
- If set to 0, motion is running in gapless mode. Movies don't have gaps anymore. An
+ If set to 0, motion is running in gapless mode. An
  event ends right after no more motion is detected and post_capture is over.
 
 Disabling events has bad side effects on
@@ -4196,23 +4317,23 @@ An event is defined as a series of motion images taken within a short timeframe.
 E.g. a person walking through the room is an event that may have caused 10 single
 jpg images to be stored. This option defines how long a pause between detected motions
 that is needed to be defined as a new event.
-The timer starts after the last motion is detected and post_capture images
+The timer starts after the last motion is detected and <a href="#post_capture">post_capture</a> images
 have been saved and appended to open movie files.
 Any motion detected before the gap timer times out resets the gap timer so it starts counting over again.
 The option 'event_gap' is important. It defines how long a period of no motion detected it takes before we say an event is over. An event is defined as a series of motion images taken within a short timeframe. E.g. a person walking through the room is an event that may have caused 10 single jpg images to be stored. Motion detected includes post_captured frames set by the 'post_capture' option. The 'gap' option defines how long a pause between detected motions that is needed to be defined as a new event. A good starting value is 60 seconds.
 The way 'gap' works in more technical terms is:
 <ul>
   <li> A timer that timeouts 'event_gap' seconds after the last video frame with motion is detected.</li>
-  <li> If 'post_capture' is activated then the gap timer starts counting after the last image of the post_capture buffer has been saved.</li>
-  <li> The gap timer is reset and starts all over each time new motion is detected, so you will not miss any action by having a short 'gap' value. It will just create more events (e.g. more mpegs files)</li>
+  <li> If <a href="#post_capture">post_capture</a> is activated then the gap timer starts counting after the last image of the <a href="#post_capture">post_capture</a> buffer has been saved.</li>
+  <li> The event_gap timer is reset and starts all over each time new motion is detected, so you will not miss any action by having a short 'gap' value. It will just create more events (e.g. more mpegs files)</li>
 </ul>
-The gap value impacts many functions in Motion.
+The event_gap value impacts many functions in Motion.
 <ul>
   <li> When the timer runs out the event number is increased by one next time motion is detected.
        When you use the %v conversion specifier in filenames or text features this means that the
        number in filename or text increased by one.</li>
-  <li> The pre_capture feature only works at the beginning of an event. So if you have a very large 'event_gap'
-       value pre_capture is not working very often.</li>
+  <li> The <a href="#pre_capture">pre_capture</a> feature only works at the beginning of an event. So if you have a very large 'event_gap'
+       value <a href="#pre_capture">pre_capture</a> is not working very often.</li>
   <li> When you make movies using the ffmpeg features a new movie file is started at the beginning of an event
        when the first motion is detected. When 'event_gap' seconds has passed without motion (and post_captured frames
        saved) the movie files are completed and closed.</li>
@@ -4395,8 +4516,8 @@ Use %f for passing filename (with full path) to the command.
   <li> Default: </li>
 </ul>
 <p></p>
-The full path and file name of the command to be executed when a camera can't be opened or if it is lost
-Note that there are situations when motion doesn't detect a lost camera.  It is
+The full path and file name of the command to be executed when a camera can't be opened or if it is lost.
+<br />Note that there are situations when motion doesn't detect a lost camera.  It is
 dependent upon the camera and driver and it is advised that this option be tested
 for each configuration.  It has also been observed that there are also
 situations in which the disconnection of the camera even hangs the PC in which
@@ -4458,7 +4579,15 @@ Specifies the number of pre-captured (buffered) pictures from before motion
 was detected that will be output at motion detection.
 The recommended range is 0 to 5.  It is not recommended to use large values.
 Large values will cause Motion to skip video frames and cause unsmooth movies.
-To smooth movies use larger values of post_capture instead.
+<p></p>
+This is because Motion is processing all the buffered images including saving jpegs,
+encoding the movie, writing to databases and executing external programs immediately
+after the first image is detected as Motion.
+<p></p>
+Motion will not grab another image until this is done. This means that even moderate values for pre_capture combined
+with high framerates will mean that you will probably miss many frames of Motion.
+<p></p>
+To create smooth movies use larger values of <a href="#post_capture">post_capture</a> instead.
 <p></p>
 Motion buffers the number of picture frames defined by 'pre_capture'. When motion is detected the pictures in the
 buffer are included in the movie.  The effect is that it seems the program knew in advance
@@ -4470,19 +4599,10 @@ video so the value should be defined so it fits the framerate and the desired pr
 You can in theory have up to 100s of pre-captured frames but naturally this makes motion leave a larger footprint in
 the memory of the computer.
 <p></p>
-More important Motion is processing all the buffered images including saving jpegs,
-encoding the movie, writing to databases and executing external programs after the first image is detected as Motion.
-<p></p>
-Motion will not grab another image until this is done. This means that even moderate values for pre_capture combined
-with high framerates will mean that you will probably miss many frames of Motion.
-<p></p>
 It is therefore recommended to use relatively small values for pre_capture.
 Depending on your chosen framerate and depending on the features enabled values from 1-5 are sensible.
 <p></p>
-If you wish to create a smooth movie during events using large pre_capture values will do the opposite! It will create
-a long pause where a lot of action is missed.
-<p></p>
-To get a smooth movie use a large value for <code>post_capture</code> which does not cost any performance hit or RAM
+To get a smooth movie use a large value for <a href="#post_capture">post_capture</a> which does not cost any performance hit or RAM
 space.
 <p></p>
 <p></p>
@@ -4501,7 +4621,7 @@ taste (and disk space)..
 This option is the preferred way to create continuous movies. Post_capture does not consume extra RAM and it
 does not create pauses in the movie even with large values.
 If you only store movies and do not have output_normal on, then the recommended post_capture value is what is
-equivalent to 1-5 seconds of movie.
+equivalent to 1-5 seconds (Don't forget to multiply the seconds desired by the framerate for this parameter)
 <p></p>
 <p></p>
 
@@ -4558,12 +4678,12 @@ This option controls the output of the normal image.
 <p></p>
 'on' is the usual selection.
 <p></p>
-If you set the value to 'first' Motion saves only the first motion detected picture per event.
+'first' is Motion saves only the first motion detected picture per event.
+<p></p>
+"best" requires a little more CPU power and resources compared to "first".
 If you set it to "best" Motion saves the picture with most changed pixels during the event.
 This may be useful if you store movies on a server and want to present a jpeg to show the content of the movie
 on a webpage.
-<p></p>
-"best" requires a little more CPU power and resources compared to "first".
 <p></p>
 'off' to don't write pictures
 <p></p>
@@ -4583,8 +4703,7 @@ changes as a graytone image. If labelling is enabled you see the largest area in
 <p></p>
 If a Smartmask is specified, it is shown in red.
 <p></p>
-Motion images shows the motion content of the pictures.
-This is good for tuning and testing but probably not very interesting for the general public.
+This option is good for tuning and testing but probably not very interesting for the general public.
 <p></p>
 Default is not to store these motion images.
 Motion pictures are stored the same place and with the same filename as normal motion
@@ -4602,7 +4721,7 @@ the .jpg or .ppm. E.g. the name can be 01-20020424232936-00m.jpg.
 </ul>
 <p></p>
 The quality for the jpeg or webp images in percent.
-100 means hardly compressed. A small number means a much smaller file size but also a less nice
+100 means hardly compressed. A small number means a much smaller file size but also a poorer
 quality image to look at.
 <p></p>
 <p></p>
@@ -4712,8 +4831,6 @@ movie for each motion detected within the same event.
 The current event ends when the time defined by the 'event_gap' option has passed with no motion detected.
 At the next detection of motion a new movie is started.
 <p></p>
-To use this feature you need to install ffmpeg or Libav.
-<p></p>
 <p></p>
 
 <h3><a name="ffmpeg_output_debug_movies"></a> ffmpeg_output_debug_movies </h3>
@@ -4781,13 +4898,17 @@ Container/Codec to be used for the video.
 <li>flv - gives you a flash video with extension .flv </li>
 <li>ffv1 - FF video codec 1 for Lossless Encoding </li>
 <li>mov - QuickTime </li>
-<li>ogg - Ogg/Theora </li>
 <li>mp4 - MPEG-4 Part 14 H264 encoding</li>
-<li>mkv - Matroska H264 encoding</li>
-<li>hevc - H.265 / HEVC (High Efficiency Video Coding)</li>
+<li>mkv - Matroska container with H264 encoding</li>
+<li>hevc -MP4 container with H.265 / HEVC (High Efficiency Video Coding)</li>
 </ul>
 
 <p></p>
+Note that certain containers can handle different codecs than the defaults indicated above.  For example, the
+mkv container can handle virtually any codec.  Motion can optionally take an additional specification with this
+parameter.  By specifying the container (mkv) and then appending a semicolon and the ffmpeg codec name Motion
+will attempt to use the specified codec for the container.  This permits options such as encoding the h265 codec
+into a mkv container instead of mp4 by specifying the option as <code>mkv:h265</code>
 <p></p>
 
 <h3><a name="ffmpeg_duplicate_frames"></a> ffmpeg_duplicate_frames </h3>
@@ -4801,7 +4922,7 @@ Container/Codec to be used for the video.
 When specified, if the CPU can not keep up with the requested frame rate for the movies,
 frames will be duplicated in order to keep up with the frame rate.  Use this option with care
 since the resulting movies will have the same frame sent multiple times and therefore the
-movie may appear to "stall".
+movie may appear to "stall" and look terrible.
 <p></p>
 <p></p>
 
@@ -4856,12 +4977,14 @@ Create a timelapse video saving a picture frame at the interval in seconds set b
 </ul>
 <p></p>
 The file rollover mode of the timelapse video.
-Note that it is important that you use the conversion specifiers in ffmpeg_filename that ensure that
-the new timelapse file indeed is a new file. If the filename does not change Motion will simply append
-the timelapse pictures to the existing file.
-The value 'Manual' means that Motion does not automatically rollover to a new filename. You can do it
-manually using the http control interface by setting the option 'ffmpeg_timelapse' to 0 and then back
-to your chosen value. Value 'hourly' rolls over on the full hour. Value 'daily' which is the default
+Note that it is important that you use the <a href="#conversion_specifiers">Conversion Specifiers</a>
+in timelapse_filename that ensure that the new timelapse file indeed is a new file. If the filename
+does not change Motion will simply append the timelapse pictures to the existing file.
+<br />The value 'Manual' means that Motion does not automatically rollover to a new filename. You can do it
+manually using the http control interface by setting the option
+<a href="#timelapse_interval">timelapse_interval</a> to 0 and then back to your chosen value.
+<p></p>
+The value 'hourly' rolls over on the full hour. Value 'daily' which is the default
 rolls over at midnight. There are two weekly options because depending on where you come from a week
 may either start on Sunday or Monday. And 'monthly' naturally rolls over on the 1st of the month.
 <p></p>
@@ -4884,6 +5007,10 @@ Container/Codec to be used by timelapse video.
 create a new file with the name indicated for timelapse.</li>
 </ul>
 <p></p>
+Note that different containers are NOT planned for this option since the nature of recording a timelapse
+is not what typical movies containers and codecs are designed to do.  Users desiring a different container/codec
+can use ffmpeg directly to either re-encode a finished timelapse video or output the timelapse as jpg picture
+files and use ffmpeg to encode those jpgs into a movie.
 <p></p>
 
 <h3><a name="timelapse_fps"></a> timelapse_fps </h3>
@@ -4913,10 +5040,11 @@ one application can have a device open at one time.  Unlike a physical device, t
 devices take both input and output.  The module simply takes anything that comes on its input
 and send it out at the output.
 <p></p>
-When you install the video loopback device it will create an input -
-for example /dev/video5 and an output - for example /dev/video6. You can then tell motion to "pipe"
-the video signal to the /dev/video5 and look at the pictures live using e.g. Camstream on /dev/video6.
-Camstream is "fooled" to think it is looking at a real camera.
+When you install the video loopback device it will create a new device for example /dev/video1 while
+the actual webcam device would be /dev/video0.  You can then tell motion to open the physical
+device (/dev/video0) and "pipe" the video signal to the /dev/video1.  You will then be able to open
+the /dev/video1 device with external videoplayers such as VLC and and look at the pictures live.
+VLC is "fooled" to think it is looking at a real camera.
 <p></p>
 <strong>Installing</strong>
 <p></p>
@@ -4927,10 +5055,11 @@ can use for the loopback.  It is believed that there are additional options asso
 v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
 project for additional details.
 <p></p>
-To activate the vloopback device in motion set the 'video_pipe' option in the motion.conf file.
-You can also view the special motion pictures where you see the changed pixels by setting the option
-'motion_video_pipe' in motion.conf. When setting the video_pipe and/or motion_video_pipe options either
-specify the input device as e.g. /dev/video4.
+To activate the vloopback device in Motion set the 'video_pipe' option in the motion.conf file to the
+device name associated with the one created by v4l2loopback.
+<br />You can also view the special motion pictures where you see the changed pixels by setting the option
+'motion_video_pipe' in motion.conf. When setting the video_pipe and/or motion_video_pipe options
+specify the input device as e.g. /dev/video1.
 <p></p>
 De-activating should be done with this command
 <p></p>
@@ -4951,7 +5080,7 @@ images which can then be picked up by external recording applications.
 </ul>
 <p></p>
 Default: not set
-The video4linux video loopback input device for normal images. The device would be specified
+The video4linux video loopback device for normal images. The device would be specified
 in the format like /dev/video1
 <p></p>
 <p></p>
@@ -4963,7 +5092,7 @@ in the format like /dev/video1
 </li> <li> Default: Not defined
 </li></ul>
 <p></p>
-The video4linux video loopback input device for motion images. The device would be specified
+The video4linux video loopback device for motion images. The device would be specified
 in the format like /dev/video1
 <p></p>
 <p></p>
@@ -4980,10 +5109,10 @@ This option specifies whether to send the output to a
 pipe for external encoding into a movie.
 <p></p>
 Piping raw video to stdout has some advantages comparing to using built-in ffmpeg encoder.
-First, this way you can use any encoder that supports RAW frames from stdin so you are not limited to the formats
+<br />First, you can use any encoder that supports RAW frames from stdin so you are not limited to the formats
 that are currently implemented in motion. See examples in <a href="#extpipe">extpipe</a>
-Second, external encoder utilizes separate cpu core on a multi-core system so movie encoding is offloaded
-from main motion thread to a separate core(s) giving noticeable performance boost
+<br />Second, external encoders utilize separate cpu core(s) on multi-core systems so movie encoding
+is offloaded from main motion thread to separate core(s) giving noticeable performance boost
 <p></p>
 Note that this option does not require the install or configure of the videoloopback software.
 <p></p>
@@ -5022,7 +5151,7 @@ extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps
 <ul>
 
 Motion has simple webcam server built in. The server can be configured to
-stream both the images as well allow for a very basic http control of these Motion parameters.
+stream both the images as well allow for a very basic http control of Motion parameters.
 <p></p>
 Each camera can have its own stream  and it is enabled by specifying
 the port number.  If there are multiple cameras, each camera must have
@@ -5034,13 +5163,14 @@ HTML page that references the raw stream(s).
 
 <p></p>
 Open up a text editor and paste in the following.
-<code>
+<p></p>
+<code><strong>
 &lt;html&gt;
 &lt;body bgcolor=000000&gt;
 &lt;img src=http://yourmotionpc:yourstreamport/ border="0" width=25%&gt;&lt;/a&gt;
 &lt;/body&gt;
 &lt;/html&gt;
-</code>
+</strong></code>
 <p></p>
 Change the yourmotionpc with the IP or name of the computer running Motion.  Also revise the port
 number to be the one referenced for the stream.
@@ -5059,9 +5189,8 @@ http://localhost:myportnumber/stream.mjpg
 <p></p>
 Motion can be remote controlled via the simple http interface.
 <p></p>
-Some Motion configuration options can be changed while Motion is running except
-options related to the size of the captured images and mask files which
-are loaded only when Motion starts.
+Some Motion configuration options can be changed while Motion is running while others require
+that the options be saved and Motion be restarted.
 <p></p>
 The most obvious tool to use to remote control Motion is any web browser.
 All commands are sent using the http GET method which simply means that the information is
@@ -5075,7 +5204,7 @@ you want, and copy the URL from the browser URL entry line.
 If your <code>webcontrol_port</code> is 8080 and you browse from the same machine
 on which Motion runs simply look up
 <a href="http://localhost:8080/" rel="nofollow" target="_top">http://localhost:8080/</a> and navigate around.
-Connecting from a remote machine is done by using a domain name (example
+Connecting from a remote machine can be done by using a domain name (example
  <a href="http://mydomain.com:8080/" rel="nofollow" target="_top">http://mydomain.com:8080/</a>) or the
  IP address of the machine (example
  <a href="http://192.168.1.4:8080/" rel="nofollow" target="_top">http://192.168.1.4:8080/</a>).
@@ -5093,7 +5222,7 @@ stop motion detection via cron. These two lines are added to /etc/crontab.
 <p></p>
 If you want to use the http remote control from your own software (for example your own PHP front end)
 you can set the motion.conf option <a href="#webcontrol_html_output">webcontrol_html_output</a> off. Then
-Motion answers back with very basic text only with html around it.
+Motion answers back with very basic text only without html around it.
 <p></p>
 To remote control Motion from a web pages you can for example use PHP.
 In PHP it takes this simple code line to send a remote commend to Motion.
@@ -5106,7 +5235,7 @@ Here we pause motion detection for camera 2
 <strong>ALERT!</strong> Security Warning! This feature also means you have to pay attention
 to the following.
 <ul>
-  <li> Anyone with access to the remote control port (http) can alter the values of any options
+  <li> Anyone with access to the remote control port (http) can alter the values of options
   and save files anywhere on your server with the same privileges as the user running Motion.
   They can execute any command on your computer with the same privileges as the user running Motion.
   Anyone can access your control port if you have not either limited access to localhost or limited
@@ -5178,8 +5307,12 @@ one camera, in which case it can be placed in motion.conf).
   <li> Default: 50</li>
 </ul>
 <p></p>
-Quality setting in percent for the mjpeg picture frames transferred over the webcam connection. Keep it low to restrict needed bandwidth.
-The mjpeg stream consists of a header followed by jpeg frames separated by content-length and boundary string. The quality level defines the size of the individual jpeg pictures in the mjpeg stream. If you set it too high you need quite a high bandwidth to view the stream.
+Quality setting in percent for the mjpeg picture frames transferred over the webcam connection.
+Keep it low to restrict needed bandwidth.
+<br />The mjpeg stream consists of a header followed by jpeg frames separated by content-length
+and the boundary string.
+<br />The quality level defines the size of the individual jpeg pictures in the mjpeg stream.
+If you set it too high you need a lot of bandwidth to view the stream.
 
 <p></p>
 
@@ -5193,6 +5326,7 @@ The mjpeg stream consists of a header followed by jpeg frames separated by conte
 <p></p>
 When set to 'on', slow down the stream to 1 picture per second when no motion is detected.
 When motion is detected the stream runs as defined by <a name="stream_maxrate"></a> stream_maxrate
+<p></p>
 When 'off' the stream always runs as defined by <a name="stream_maxrate"></a> stream_maxrate.
 Use this option to save bandwidth when there is not anything important to see from the camera anyway.
 <p></p>
@@ -5364,7 +5498,7 @@ This parameter establishes the username and password to use for the stream.
 The syntax is username:password
 <p></p>
 <p></p>
-</ul>
+
 
 <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
 <p></p>
@@ -5387,6 +5521,8 @@ webcontrol_parms is NEVER included on the web interface and this parameter must 
 Care should be exercised when using level restricted level because if the webcontrol is compromised,
 it may compromise the computer.
 <p></p>
+
+</ul>
 
 <h3><a name="Options_Database"></a>Database</h3>
 <ul>
@@ -5425,7 +5561,7 @@ CREATE TABLE security_file (file_id int primary key auto_increment, event_id int
   <li> Default: on</li>
 </ul>
 <p></p>
-Log to the database when a motion triggered image file is created.
+Log to the database when Motion triggers a image file to be saved.
 <p></p>
 
 <h3><a name="sql_log_snapshot"></a> sql_log_snapshot </h3>
@@ -5478,9 +5614,9 @@ within the query.
 <p></p>
 Sample Queries (depend upon the table created)
 <p></p>
-insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
-insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
+<br />insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
+<br />insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
+<br />insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
 <p></p>
 <p></p>
 
@@ -5492,7 +5628,7 @@ insert into security_file(camera, event_id, filename, frame, file_type, time_sta
   <li> Default: Not Defined</li>
 </ul>
 <p></p>
-SQL query string that executes against the event table which tracks the unique events of motion.
+SQL query that executes against the event table which tracks the unique events of motion.
 <p></p>
 Once the new record is added to this table, the mysql function <code><b>mysql_insert_id</b></code> is then
 executed to provide the key back into the <code><b>dbeventid</b></code> specifier.
@@ -5505,7 +5641,7 @@ only set for mysql databases.  For the other databases, the <code><b>dbeventid</
 to zero.
 <p></p>
 <p></p>
-You can use <a href="#conversion_specifiers">Conversion Specifiers</a>within the query.
+You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
 <p></p>
 <p></p>
 Sample Query
@@ -5600,12 +5736,13 @@ wait before issuing a timeout message.
 <ul>
 
 <p></p>
-This is still at the experimental stage.
+This is <strike>still</strike> permanently at the experimental stage.
 <p></p>
 Motion can move the camera to a fixed position given in degrees pan (left-right) and tilt (down-up).
 Movement can be set with absolute coordinates or relative to current position. There is also an auto tracking
-feature for the Logitech Quickcam Sphere/Orbit but it is not very mature. Search the Motion home website
-or community development pages for additional information regarding tracking if these features are required.
+feature for the Logitech Quickcam Sphere/Orbit but it is not very mature. Review and revise the Motion code
+regarding tracking if these features are required.  The Motion developers do not have any tracking cameras
+so it is unlikely that tracking features will be developed in any way.  (We have no way to test anything!)
 <p></p>
 <p></p>
 
@@ -5859,6 +5996,8 @@ Only used for stepper motor tracking.
 Number of steps to make.
 Only used for stepper motor tracking.
 <p></p>
+</ul>
+
 </ul>
 
 </ul>

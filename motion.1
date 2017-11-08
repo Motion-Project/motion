@@ -1,4 +1,4 @@
-.TH MOTION 1 2017-10-29 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2017-11-05 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -27,9 +27,6 @@ Run in non-daemon mode.
 .TP
 .B \-s
 Run in setup mode. Also forces non-daemon mode.
-.TP
-.B \-o
-Dump config options to log (for support purposes).
 .TP
 .B \-d
 Run with message log level 1-9.
@@ -197,6 +194,10 @@ V4L2_PIX_FMT_UYVY    : 14 'UYVY'
 V4L2_PIX_FMT_YUYV    : 15 'YUYV'
 V4L2_PIX_FMT_YUV422P : 16 '422P'
 V4L2_PIX_FMT_YUV420  : 17 'YU12'
+V4L2_PIX_FMT_Y10     : 18 'Y10'
+V4L2_PIX_FMT_Y12     : 19 'Y12'
+V4L2_PIX_FMT_GREY    : 20 'GREY'
+V4L2_PIX_FMT_H264    : 21 'H264'
 .RE
 Default: 17
 Description:
@@ -1598,15 +1599,8 @@ Specified whether the web control/preview page should be raw or html format.  Pr
 .nf
 Values:
 .RS
-0 = disabled
-1 = Basic authentication
-2 = MD5 digest (the safer authentication)
-.RE
-Default: 0
-Description:
-.fi
-.RS
-The authentication method to use for viewing the web control.
+The username and password to use for authentication of the webcontrol.
+The format is Username:Password
 .RE
 .RE
 
