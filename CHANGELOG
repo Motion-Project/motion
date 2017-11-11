@@ -1,5 +1,31 @@
 Summary of Changes
-
+Version 4.1 Changes Below
+   * Add flip_axis option
+   * Add mask_privacy option
+   * Add netcam_highres option
+   * Add on_camera_found option
+   * Add substream_port option
+   * Add webcontrol_parms option
+   * Rename ffmpeg_timelapse to timelapse_interval
+   * Rename ffmpeg_timelapse_mode to timelapse_mode
+   * Add timelapse_fps option
+   * Add timelapse_codec option 
+   * Remove sdl_threadnr option
+   * Remove v4l1 functionality
+   * Add support for RTMP and additional v4l2 palette options
+   * Add support for network cameras on macOSX
+   * Add additional conversion specifiers
+   * Add flood control for Motion log
+   * Demote the ffmpeg log messages to INF level.
+   * Additional reporting of configuration parms at the INF log level.
+   * Remove debug messages at every frame
+   * Report to log the IP of failed authentication attempts
+   * Add option for output of images in WEBP format(via build option)
+   * Added webcam on FreeBSD functionality/instructions.
+   * Added functionality for v4l2 devices via the netcam modules
+   * Refactoring of code for v4l2, netcam_rtsp, motion_loop, ffmpeg, configure.ac to assist future development. 
+   * Fix movie playback issues with timestamps.
+   * Updated motion_guide.html, motion.1 documentation 
 Version 4.0 Changes Below
    * PI Cam Support
    * Web Interface fixes for preview, IPV6, HTML 
