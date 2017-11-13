@@ -1,0 +1,17 @@
+#osx noise:
+.DS_Store
+
+# emacs noise
+*~
+
+# Hunter/polly
+_logs/
+_builds/
+_install/
+_framework/
+_archives/
+_bin/
+
+*.hpp.orig
+*.h.orig
+*.cpp.orig

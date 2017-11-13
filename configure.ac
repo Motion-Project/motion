@@ -558,6 +558,26 @@ if test "${OPTIMIZECPU}" = "yes"; then
 fi
 
 ##############################################################################
+###  NEON 2 SSE optimizations
+##############################################################################
+AC_ARG_WITH([neon2sse],
+    AS_HELP_STRING([--with-neon2sse[=OPT]],
+      [Compile with ARM NEON intrinsics with Intel NEON_2_SSE.h OPT can be yes, no or sse4]),
+    [NEON_2_SSE=$withval],
+    [NEON_2_SSE=no])
+
+HAVE_NEON_2_SSE="no"
+USE_SSE4="no"
+if test "${NEON_2_SSE}" != "no"; then
+  HAVE_NEON_2_SSE="yes"
+  AC_DEFINE([HAVE_NEON_2_SSE], 1, [Define to 1 if NEON_2_SSE is enabled])
+  if test "${NEON_2_SSE}" = "sse4"; then
+    USE_SSE4="yes"
+    AC_DEFINE([USE_SSE4], 1, [Define to 1 if sse4 useage is always enabled])
+  fi
+fi
+
+##############################################################################
 ###  Developer Flags
 ##############################################################################
 AC_ARG_WITH([developer-flags],
@@ -701,6 +721,15 @@ if test "${PGSQL_SUPPORT}" = "yes"; then
 else
     echo "PostgreSQL support:  No"
 fi
+if test "${HAVE_NEON_2_SSE}" = "yes"; then
+    echo "NEON_2_SSE support:  Yes"
+    if test "${USE_SSE4}" = "yes"; then
+      echo "USE_SSE4:  Yes"
+    fi
+else
+    echo "NEON_2_SSE support:  No"
+fi
+
 echo
 echo "CFLAGS: $CFLAGS"
 echo "LIBS: $LIBS"
