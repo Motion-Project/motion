@@ -782,13 +782,18 @@ static void event_ffmpeg_newfile(struct context *cnt,
     }
 
     if (cnt->conf.ffmpeg_output_debug) {
+        char debugfilename[PATH_MAX];
         cnt->ffmpeg_output_debug = mymalloc(sizeof(struct ffmpeg));
         cnt->ffmpeg_output_debug->width  = cnt->imgs.width;
         cnt->ffmpeg_output_debug->height = cnt->imgs.height;
         cnt->ffmpeg_output_debug->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output_debug->fps = cnt->movie_fps;
         cnt->ffmpeg_output_debug->bps = cnt->conf.ffmpeg_bps;
-        cnt->ffmpeg_output_debug->filename = cnt->newfilename;
+        strcpy(debugfilename,cnt->newfilename);
+        debugfilename[strlen(debugfilename)-4] = 0;
+        strcat(debugfilename,"-debug");
+        cnt->ffmpeg_output_debug->filename = debugfilename;
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "ffopen_open creating (new debug) file [%s]",cnt->ffmpeg_output_debug->filename);
         cnt->ffmpeg_output_debug->vbr = cnt->conf.ffmpeg_vbr;
         cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
