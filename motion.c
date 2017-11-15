@@ -572,8 +572,8 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL,
                 &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion detected - starting event %d",
-                       cnt->event_nr);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion detected (%d)- starting event %d",
+                       cnt->current_image->diffs, cnt->event_nr);
 
             /* always save first motion frame as preview-shot, may be changed to an other one later */
             if (cnt->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
