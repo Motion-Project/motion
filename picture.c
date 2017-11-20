@@ -220,12 +220,12 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
     into->data_offset += 8;
 }
 
-/*
- * put_jpeg_exif writes the EXIF APP1 chunk to the jpeg file.
- * It must be called after jpeg_start_compress() but before
- * any image data is written by jpeg_write_scanlines().
- */
-static void put_jpeg_exif(j_compress_ptr cinfo,
+/* 
+ * prepare_exif() is a comon function used to prepare
+ * exif data to be inserted into jpeg or webp files
+ *
+ */ 
+static unsigned prepare_exif(unsigned char **exif,
               const struct context *cnt,
               const struct timeval *tv1,
               const struct coord *box)
@@ -318,7 +318,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
 
     if (ifds_size == 0) {
         /* We're not actually going to write any information. */
-        return;
+        return 0;
     }
 
     unsigned int buffer_size = 6 /* EXIF marker signature */ +
@@ -393,12 +393,30 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     /* assert we didn't underestimate the original buffer size */
     assert(marker_len <= buffer_size);
 
-    /* EXIF data lives in a JPEG APP1 marker */
-    jpeg_write_marker(cinfo, JPEG_APP0 + 1, marker, marker_len);
-
     free(description);
 
-    free(marker);
+    *exif = marker;
+    return marker_len;
+}
+
+/*
+ * put_jpeg_exif writes the EXIF APP1 chunk to the jpeg file.
+ * It must be called after jpeg_start_compress() but before
+ * any image data is written by jpeg_write_scanlines().
+ */
+static void put_jpeg_exif(j_compress_ptr cinfo,
+              const struct context *cnt,
+              const struct timeval *tv1,
+              const struct coord *box)
+{
+    unsigned char *exif = NULL;
+    unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
+
+    if(exif_len > 0) {
+        /* EXIF data lives in a JPEG APP1 marker */
+        jpeg_write_marker(cinfo, JPEG_APP0 + 1, exif, exif_len);
+        free(exif);
+    }
 }
 
 /**
