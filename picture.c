@@ -609,7 +609,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
  */
 static void put_webp_yuv420p_file(FILE *fp,
                   unsigned char *image, int width, int height,
-                  int quality)
+                  int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
@@ -648,8 +648,24 @@ static void put_webp_yuv420p_file(FILE *fp,
     if (!WebPEncode(&webp_config, &webp_image))
         MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO, "libwebp image compression error");
 
-    /* Write the webp bytestream to file */
-    if (fwrite(webp_writer.mem, sizeof(uint8_t), webp_writer.size, fp) != webp_writer.size)
+    /* A bitstream object is needed for the muxing proces */
+    WebPData webp_bitstream;
+    webp_bitstream.bytes = webp_writer.mem;
+    webp_bitstream.size = webp_writer.size;
+    
+    /* Create a mux from the prepared image data */
+    WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
+    put_webp_exif(webp_mux, cnt, tv1, box);
+    
+    /* Add Exif data to the webp image data */
+    WebPData webp_output;
+    WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
+    if (err != WEBP_MUX_OK) {
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to assemble webp image");
+    }
+    
+    /* Write the webp final bitstream to the file */
+    if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to save webp image to file");
 
 #if WEBP_ENCODER_ABI_VERSION > 0x0202
@@ -660,8 +676,12 @@ static void put_webp_yuv420p_file(FILE *fp,
     free(webp_writer.mem);
 #endif /* WEBP_ENCODER_ABI_VERSION */
 
-    /* free the memory used by webp for image object */
+    /* free the memory used by webp for image data */
     WebPPictureFree(&webp_image);
+    /* free the memory used by webp mux object */
+    WebPMuxDelete(webp_mux);
+    /* free the memory used by webp for output data */
+    WebPDataClear(&webp_output);
 }
 #endif /* HAVE_WEBP */
 
@@ -1055,7 +1075,7 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
         case VIDEO_PALETTE_YUV420P:
             #ifdef HAVE_WEBP
             if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
-                put_webp_yuv420p_file(picture, image, width, height, quality);
+                put_webp_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
             #endif /* HAVE_WEBP */
             if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
                 put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
