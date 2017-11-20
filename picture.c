@@ -419,6 +419,35 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
     }
 }
 
+#ifdef HAVE_WEBP
+/*
+ * put_webp_exif writes the EXIF APP1 chunk to the webp file.
+ * It must be called after WebPEncode() and the result
+ * can then be written out to webp a file
+ */
+static void put_webp_exif(WebPMux* webp_mux,
+              const struct context *cnt,
+              const struct timeval *tv1,
+              const struct coord *box)
+{
+    unsigned char *exif = NULL;
+    unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
+
+    if(exif_len > 0) {
+        WebPData webp_exif;
+        /* EXIF in WEBP does not need the EXIF marker signature (6 bytes) that are needed by jpeg */
+        webp_exif.bytes = exif + 6;
+        webp_exif.size = exif_len - 6;
+        
+        WebPMuxError err = WebPMuxSetChunk(webp_mux, "EXIF", &webp_exif, 1);
+        if (err != WEBP_MUX_OK) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "Unable to set set EXIF to webp chunk");
+        }
+        free(exif);
+    }
+}
+#endif /* HAVE_WEBP */
+
 /**
  * put_jpeg_yuv420p_memory
  *      Converts an input image in the YUV420P format into a jpeg image and puts
