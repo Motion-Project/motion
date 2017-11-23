@@ -3772,7 +3772,7 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
 
 void util_threadname_get(char *threadname){
 
-#if ((!defined(BSD) && HAVE_PTHREAD_SETNAME_NP) || defined(__APPLE__))
+#if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
     char currname[16];
     pthread_getname_np(pthread_self(), currname, sizeof(currname));
     snprintf(threadname, sizeof(currname), "%s",currname);

@@ -140,6 +140,17 @@ if test x$THREADS = xyes; then
     [AC_DEFINE([HAVE_PTHREAD_SETNAME_NP], [1], [Define if you have pthread_setname_np function.])
     AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])] )
+
+##############################################################################
+###  Check for pthread_getname_np (nonstandard GNU extension)
+##############################################################################
+  AC_MSG_CHECKING([for pthread_getname_np])
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include <pthread.h>], [pthread_getname_np(pthread_self(), NULL, 0)])],
+    [AC_DEFINE([HAVE_PTHREAD_GETNAME_NP], [1], [Define if you have pthread_getname_np function.])
+    AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])] )
+
   LIBS="$HOLD_LIBS"
 fi
 
