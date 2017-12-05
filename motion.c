@@ -6,6 +6,9 @@
  *    See also the file 'COPYING'.
  *
  */
+#define _GNU_SOURCE   /* pthread_setname_np/pthread_getname_np needs this */
+#include <pthread.h>
+
 #include "motion.h"
 #include "ffmpeg.h"
 #include "video_common.h"

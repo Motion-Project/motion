@@ -100,11 +100,6 @@ struct image_data;
 #define ATTRIBUTE_UNUSED
 #endif
 
-/* strerror_r() XSI vs GNU */
-#if (defined(BSD)) || ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
-#define XSI_STRERROR_R
-#endif
-
 
 /*
  *  The macro below defines a version of sleep using nanosleep
