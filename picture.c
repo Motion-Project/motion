@@ -1194,6 +1194,7 @@ void preview_save(struct context *cnt)
     char previewname[PATH_MAX];
     char filename[PATH_MAX];
     struct image_data *saved_current_image;
+    int passthrough;
 
     if (cnt->imgs.preview_image.diffs) {
         /* Save current global context. */
@@ -1217,7 +1218,14 @@ void preview_save(struct context *cnt)
 
             previewname[basename_len] = '\0';
             strcat(previewname, imageext(cnt));
-            put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm , FTYPE_IMAGE);
+
+            passthrough = util_check_passthrough(cnt);
+            if ((cnt->imgs.size_high > 0) && (!passthrough)) {
+                put_picture(cnt, previewname, cnt->imgs.preview_image.image_high , FTYPE_IMAGE);
+            } else {
+                put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm , FTYPE_IMAGE);
+            }
+
         } else {
             /*
              * Save best preview-shot also when no movies are recorded or imagepath
@@ -1236,7 +1244,12 @@ void preview_save(struct context *cnt)
             mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0);
             snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
 
-            put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm, FTYPE_IMAGE);
+            passthrough = util_check_passthrough(cnt);
+            if ((cnt->imgs.size_high > 0) && (!passthrough)) {
+                put_picture(cnt, previewname, cnt->imgs.preview_image.image_high , FTYPE_IMAGE);
+            } else {
+                put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm, FTYPE_IMAGE);
+            }
         }
 
         /* Restore global context values. */
