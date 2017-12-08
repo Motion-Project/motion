@@ -788,7 +788,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_debug->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output_debug->fps = cnt->movie_fps;
         cnt->ffmpeg_output_debug->bps = cnt->conf.ffmpeg_bps;
-        cnt->ffmpeg_output_debug->filename = cnt->newfilename;
+        cnt->ffmpeg_output_debug->filename = cnt->motionfilename;
         cnt->ffmpeg_output_debug->vbr = cnt->conf.ffmpeg_vbr;
         cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
