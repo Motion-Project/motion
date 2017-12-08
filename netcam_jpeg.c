@@ -12,6 +12,9 @@
  *    This program is published under the GNU Public license
  */
 
+#define _GNU_SOURCE    /* memmem needs this */
+#include <string.h>
+
 #include "rotate.h"    /* already includes motion.h */
 #include <jpeglib.h>
 #include <jerror.h>

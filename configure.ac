@@ -1,7 +1,6 @@
 # Process this file with autoconf to produce a configure script
 
 AC_INIT(motion, esyscmd(['./version.sh']))
-AC_GNU_SOURCE
 AC_CONFIG_SRCDIR([motion.c])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CC
@@ -128,17 +127,67 @@ fi
 if test x$THREADS = xyes; then
   TEMP_LIBS="$TEMP_LIBS -pthread"
   TEMP_CFLAGS="${TEMP_CFLAGS} -D_THREAD_SAFE"
-fi
 
 ##############################################################################
 ###  Check for pthread_setname_np (nonstandard GNU extension)
 ##############################################################################
-AC_MSG_CHECKING([for pthread_setname_np])
-AC_COMPILE_IFELSE(
-    [AC_LANG_PROGRAM([#include <pthread.h>], [pthread_setname_np(pthread_self(), "name")])],
+  AC_MSG_CHECKING([for pthread_setname_np])
+  HOLD_LIBS="$LIBS"
+  LIBS="$TEMP_LIBS"
+  AC_LINK_IFELSE(
+    [AC_LANG_SOURCE[
+      #define _GNU_SOURCE
+      #include <pthread.h>
+      int main(int argc, char** argv) {
+        int ret = pthread_setname_np(pthread_self(), "name");
+        return ret;
+      }
+    ]],
     [AC_DEFINE([HAVE_PTHREAD_SETNAME_NP], [1], [Define if you have pthread_setname_np function.])
     AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])] )
+
+##############################################################################
+###  Check for pthread_getname_np (nonstandard GNU extension)
+##############################################################################
+  AC_MSG_CHECKING([for pthread_getname_np])
+  AC_LINK_IFELSE(
+    [AC_LANG_SOURCE[
+      #define _GNU_SOURCE
+      #include <pthread.h>
+      int main(int argc, char** argv) {
+        char buf[1024];
+        int ret = pthread_getname_np(pthread_self(), buf, sizeof(buf));
+        return ret;
+      }
+    ]],
+    [AC_DEFINE([HAVE_PTHREAD_GETNAME_NP], [1], [Define if you have pthread_getname_np function.])
+    AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])] )
+
+  LIBS="$HOLD_LIBS"
+fi
+
+##############################################################################
+###  Check for XSI strerror_r
+##############################################################################
+AC_MSG_CHECKING([for XSI strerror_r])
+HOLD_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
+AC_LINK_IFELSE(
+  [AC_LANG_SOURCE[
+    #include <string.h>
+    #include <errno.h>
+    int main(int argc, char** argv) {
+      char buf[1024];
+      int ret = strerror_r(ENOMEM, buf, sizeof(buf));
+      return ret;
+    }
+  ]],
+  [AC_DEFINE([XSI_STRERROR_R], [1], [Define if you have XSI strerror_r function.])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])] )
+CFLAGS="$HOLD_CFLAGS"
 
 ##############################################################################
 ###  Check for JPG

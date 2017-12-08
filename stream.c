@@ -18,6 +18,9 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define _GNU_SOURCE   /* MOTION_PTHREAD_SETNAME (pthread_setname_np) needs this */
+#include <pthread.h>
+
 #include "md5.h"
 #include "picture.h"
 #include <sys/socket.h>
