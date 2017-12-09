@@ -82,4 +82,4 @@ script:
       docker exec $(docker ps -aq) /bin/sh -c './test_builds.sh';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c './test_builds.sh';
-fi;
+    fi;
