@@ -469,10 +469,17 @@ stream_limit 0
 # 0 = disabled
 # 1 = Basic authentication
 # 2 = MD5 digest (the safer authentication)
+# 3 = Use hashed usename password
 stream_auth_method 0
 
 # Authentication for the stream. Syntax username:password
 # Default: not defined (Disabled)
+# With auth_method 3:
+#     Create a password by using:
+#     openssl passwd -1 username:password
+#     or
+#     mkpasswd -5 username:password
+#     Example: $1$yt0rVCkg$XmPoafhISxC8KqFpPPtb11
 ; stream_authentication username:password
 
 # Percentage to scale the stream image for preview
