@@ -37,9 +37,18 @@ matrix:
     services:  docker
     language: c
     compiler: gcc
+  - os: linux
+    env:  DOCKER_IMAGE=alpine:latest
+    services:  docker
+    language: c
+    compiler: gcc
 
 before_install:
-  - if [ "x$DOCKER_IMAGE" != "x" ]; then
+  - if [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
+      echo $DOCKER_IMAGE;
+      docker pull $DOCKER_IMAGE;
+      docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/sh -c 'while true; do sleep 1; done';
+    elif [ "x$DOCKER_IMAGE" != "x" ]; then
       echo $DOCKER_IMAGE;
       docker pull $DOCKER_IMAGE;
       docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
@@ -50,11 +59,13 @@ before_script:
       brew upgrade ffmpeg pkg-config jpeg;
       brew install ffmpeg pkg-config libjpeg;
       autoreconf -fiv;
-    fi;
-  - if [ "$BUILD_IMAGE" = "14.04" ]; then
+    elif [ "$BUILD_IMAGE" = "14.04" ]; then
       autoreconf -fiv;
-    fi;
-  - if [ "x$DOCKER_IMAGE" != "x" ]; then
+    elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
+      docker exec $(docker ps -aq) /bin/sh -c 'apk update';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add alpine-sdk autoconf automake pkgconf libtool libjpeg-turbo-dev libzip-dev ffmpeg-dev';
+      docker exec $(docker ps -aq) /bin/sh -c 'autoreconf -fiv';
+    elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake pkgconf libtool git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
@@ -65,10 +76,10 @@ before_script:
 script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
       ./configure --with-developer-flags && make;
-    fi;
-  - if [ "$BUILD_IMAGE" = "14.04" ]; then
+    elif [ "$BUILD_IMAGE" = "14.04" ]; then
       ./test_builds.sh;
-    fi;
-  - if [ "x$DOCKER_IMAGE" != "x" ]; then
+    elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
+      docker exec $(docker ps -aq) /bin/sh -c './test_builds.sh';
+    elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c './test_builds.sh';
-    fi;
+fi;

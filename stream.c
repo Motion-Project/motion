@@ -25,7 +25,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <ctype.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 
 #define STREAM_REALM       "Motion Stream Security Access"
 #define KEEP_ALIVE_TIMEOUT 100
