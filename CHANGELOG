@@ -1,4 +1,10 @@
 Summary of Changes
+Version 4.1.1 Changes Below
+   * Fix file name for debug movies
+   * Fix image saving when using highres option
+   * Add error checking of jpeg decompression.
+   * Fix version script for old distributions.
+   * Fix building on musl based systems.
 Version 4.1 Changes Below
    * Add flip_axis option
    * Add mask_privacy option
