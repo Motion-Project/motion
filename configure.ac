@@ -201,7 +201,7 @@ AC_ARG_WITH([webp],
     AS_HELP_STRING([--with-webp],
       [Compile with Webp image support]),
     WEBP="$withval",
-    WEBP="no")
+    WEBP="yes")
 
 HAVE_WEBP=""
 if test "${WEBP}" = "yes"; then
@@ -214,7 +214,6 @@ if test "${WEBP}" = "yes"; then
     TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
   else
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.])
   fi
 fi
 
