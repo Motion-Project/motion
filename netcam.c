@@ -67,6 +67,21 @@ static char *netcam_url_match(regmatch_t m, const char *input)
     return match;
 }
 
+static void netcam_url_invalid(struct url_t *parse_url){
+
+    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Invalid URL.  Can not parse values.");
+
+    parse_url->host = malloc(5);
+    parse_url->service = malloc(5);
+    parse_url->path = malloc(10);
+    parse_url->userpass = malloc(10);
+    parse_url->port = 0;
+    sprintf(parse_url->host, "%s","????");
+    sprintf(parse_url->service, "%s","????");
+    sprintf(parse_url->path, "%s","INVALID");
+    sprintf(parse_url->userpass, "%s","INVALID");
+
+}
 /**
  * netcam_url_parse
  *
@@ -142,7 +157,11 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
                     }
                 }
             }
+        } else {
+            netcam_url_invalid(parse_url);
         }
+    } else {
+        netcam_url_invalid(parse_url);
     }
     if (((!parse_url->port) && (parse_url->service)) ||
         ((parse_url->port > 65535) && (parse_url->service))) {
