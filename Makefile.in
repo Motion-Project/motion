@@ -41,7 +41,10 @@ OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
 			   stream.o md5.o netcam_rtsp.o ffmpeg.o \
 			   @MMAL_OBJ@ @SQLITE_OBJ@
 SRC          = $(foreach obj,$(OBJ:.o=.c),@top_srcdir@/$(obj))
-DOC          = CHANGELOG COPYING CREDITS README.md motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
+DOC          = CHANGELOG COPYING CREDITS README.md  \
+			   motion_guide.html motion_stylesheet.css \
+			   motion_config.html motion_build.html \
+			   mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
 DOC_FILES    = $(foreach doc,$(DOC),@top_srcdir@/$(doc))
 EXAMPLES     = *.conf motion.service
 EXAMPLES_BIN = motion.init-Debian motion.init-FreeBSD.sh
