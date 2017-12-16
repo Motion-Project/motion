@@ -22,6 +22,7 @@ matrix:
         - libsqlite3-dev
         - libpq-dev
         - libmysqlclient-dev
+        - libwebp-dev
   - os: linux
     env:  DOCKER_IMAGE=ubuntu:16.04
     services:  docker
@@ -69,7 +70,7 @@ before_script:
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake pkgconf libtool git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     fi;
 
