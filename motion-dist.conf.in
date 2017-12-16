@@ -667,6 +667,8 @@ quiet on
 # insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 ; sql_query insert into security(camera, filename, frame, file_type, time_stamp, event_time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 
+# SQL query to execute at the start of an event to provide the dbeventid number
+; sql_query_start
 
 ############################################################
 # Database Options
