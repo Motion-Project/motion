@@ -182,10 +182,6 @@ struct image_data;
 
 #define DEF_TIMELAPSE_MODE      "daily"
 
-/* Do not break this line into two or more. Must be ONE line */
-#define DEF_SQL_QUERY_START "sql_query_start insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
-#define DEF_SQL_QUERY       "sql_query insert into security_file(camera, filename, frame, file_type, time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T')"
-
 /* OUTPUT Image types */
 #define IMAGE_TYPE_JPEG        0
 #define IMAGE_TYPE_PPM         1
