@@ -67,43 +67,6 @@ FILE *ptr_logfile = NULL;
 unsigned int restart = 0;
 
 
-static void imagepkt_init(struct image_data *img_data){
-#ifdef HAVE_FFMPEG
-
-    /* Initialize av packets for ffmpeg_pass through */
-    av_init_packet(&img_data->packet_norm);
-    img_data->packet_norm.data = NULL;
-    img_data->packet_norm.size = 0;
-
-
-    av_init_packet(&img_data->packet_high);
-    img_data->packet_high.data = NULL;
-    img_data->packet_high.size = 0;
-
-    return;
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (img_data->packet_norm) img_data->packet_norm = 0;
-    return;
-#endif /* End #ifdef HAVE_FFMPEG */
-
-}
-
-static void imagepkt_deinit(struct image_data *img_data){
-#ifdef HAVE_FFMPEG
-    /* free the av packets for ffmpeg_pass through */
-    my_packet_unref(img_data->packet_norm);
-    my_packet_unref(img_data->packet_high);
-
-    return;
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (img_data->packet_norm) img_data->packet_norm = 1;
-    return;
-#endif /* End #ifdef HAVE_FFMPEG */
-
-}
-
 /**
  * image_ring_resize
  *
@@ -160,7 +123,6 @@ static void image_ring_resize(struct context *cnt, int new_size)
                         tmp[i].image_high = mymalloc(cnt->imgs.size_high);
                         memset(tmp[i].image_high, 0x80, cnt->imgs.size_high);
                     }
-                    imagepkt_init(&tmp[i]);
                 }
             }
 
@@ -202,7 +164,6 @@ static void image_ring_destroy(struct context *cnt)
     for (i = 0; i < cnt->imgs.image_ring_size; i++){
         free(cnt->imgs.image_ring[i].image_norm);
         if (cnt->imgs.size_high >0 ) free(cnt->imgs.image_ring[i].image_high);
-        imagepkt_deinit(&cnt->imgs.image_ring[i]);
     }
 
     /* Free the ring */
@@ -1008,7 +969,6 @@ static int motion_init(struct context *cnt)
     /* contains the moving objects of ref. frame */
     cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
     cnt->imgs.image_virgin.image_norm = mymalloc(cnt->imgs.size_norm);
-    imagepkt_init(&cnt->imgs.image_virgin);
     cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
@@ -1391,7 +1351,6 @@ static void motion_cleanup(struct context *cnt)
 
     free(cnt->imgs.image_virgin.image_norm);
     cnt->imgs.image_virgin.image_norm = NULL;
-    imagepkt_deinit(&cnt->imgs.image_virgin);
 
     free(cnt->imgs.labels);
     cnt->imgs.labels = NULL;
@@ -3789,10 +3748,10 @@ int util_check_passthrough(struct context *cnt){
 #else
     if (cnt->conf.ffmpeg_passthrough){
         /* Disable passthrough until functional */
-        //MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
-        //return 1;
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through disabled.");
-        return 0;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
+        return 1;
+        //MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through disabled.");
+        //return 0;
     } else {
         return 0;
     }

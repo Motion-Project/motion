@@ -1,7 +1,8 @@
 #ifndef _INCLUDE_NETCAM_RTSP_H
 #define _INCLUDE_NETCAM_RTSP_H
 
-#include "netcam.h"
+struct context;
+struct image_data;
 
 enum RTSP_STATUS {
     RTSP_NOTCONNECTED,   /* The camera has never connected */
@@ -23,9 +24,15 @@ struct imgsize_context {
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+struct packet_item{
+    AVPacket                  packet;
+    int64_t                   idnbr;
+    int                       iskey;
+    int                       iswritten;
+    struct timeval            timestamp_tv;
+};
 
-
-typedef struct rtsp {
+struct rtsp_context {
     AVFormatContext          *format_context;        /* Main format context for the camera */
     AVCodecContext           *codec_context;         /* Codec being sent from the camera */
     AVFrame                  *frame;                 /* Reusable frame for images from camera */
@@ -33,7 +40,10 @@ typedef struct rtsp {
     AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
     struct SwsContext        *swsctx;                /* Context for the resizing of the image */
     AVPacket                  packet_recv;           /* The packet that is currently being processed */
-    AVPacket                  packet_latest;         /* The most recent packet that has finished processing */
+    struct packet_item       *pktarray;              /* Pointer to array of packets for passthru processing */
+    int                       pktarray_size;         /* The number of packets in array.  1 based */
+    int                       pktarray_index;        /* The index to the most current packet in array */
+    int64_t                   idnbr;                 /* A ID number to track the packet vs image */
     AVDictionary             *opts;                  /* AVOptions when opening the format context */
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
@@ -68,13 +78,13 @@ typedef struct rtsp {
     pthread_t                 thread_id;        /* thread i.d. for a camera-handling thread (if required). */
     pthread_mutex_t           mutex;            /* mutex used with conditional waits */
 
-}rtsp_context;
+};
 
 #else /* Do not have FFmpeg */
 
-typedef struct rtsp {
+struct rtsp_context {
     int                   dummy;
-}rtsp_context;
+};
 
 #endif /* end HAVE_FFMPEG  */
 

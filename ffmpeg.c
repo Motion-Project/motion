@@ -887,31 +887,41 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
 }
 
-static int ffmpeg_put_passthrough(struct ffmpeg *ffmpeg, const struct timeval *tv1, struct image_data *img_data){
-    int retcd;
+static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
+    /* Reset the written flag at start of each event */
+    int indx;
+
+    pthread_mutex_lock(&ffmpeg->rtsp_data->mutex);
+        for(indx = 0; indx < ffmpeg->rtsp_data->pktarray_size; indx++) {
+            ffmpeg->rtsp_data->pktarray[indx].iswritten = FALSE;
+        }
+    pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex);
+}
+
+static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
+    /* Write the packet in the buffer at indx to file */
     char errstr[128];
+    int retcd;
 
     av_init_packet(&ffmpeg->pkt);
     ffmpeg->pkt.data = NULL;
     ffmpeg->pkt.size = 0;
 
-    if (ffmpeg->high_resolution){
-        retcd = my_copy_packet(&ffmpeg->pkt, &img_data->packet_high);
-    } else {
-        retcd = my_copy_packet(&ffmpeg->pkt, &img_data->packet_norm);
-    }
+    pthread_mutex_lock(&ffmpeg->rtsp_data->mutex);
+        ffmpeg->rtsp_data->pktarray[indx].iswritten = TRUE;
+        retcd = my_copy_packet(&ffmpeg->pkt, &ffmpeg->rtsp_data->pktarray[indx].packet);
+    pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex);
 
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "av_copy_packet: %s",errstr);
-        my_packet_unref(img_data->packet_norm);
+        return;
     }
 
-    retcd = ffmpeg_set_pktpts(ffmpeg, tv1);
+    retcd = ffmpeg_set_pktpts(ffmpeg, &ffmpeg->rtsp_data->pktarray[indx].timestamp_tv);
     if (retcd < 0) {
-        //If there is an error, it has already been reported.
         my_packet_unref(ffmpeg->pkt);
-        return 0;
+        return;
     }
 
     retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
@@ -919,10 +929,51 @@ static int ffmpeg_put_passthrough(struct ffmpeg *ffmpeg, const struct timeval *t
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while writing video frame: %s",errstr);
-        return -1;
+        return;
     }
-    return retcd;
 
+}
+static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data){
+
+    int idnbr_image, idnbr_lastkey;
+    int indx, indx_lastkey;
+
+    if (ffmpeg->high_resolution){
+        idnbr_image = img_data->idnbr_high;
+    } else {
+        idnbr_image = img_data->idnbr_norm;
+    }
+
+    /* Determine last key packet */
+    idnbr_lastkey = 0;
+    indx_lastkey  =-1;
+    for(indx = 0; indx < ffmpeg->rtsp_data->pktarray_size; indx++) {
+        if ((ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image) &&
+            (ffmpeg->rtsp_data->pktarray[indx].iskey) &&
+            (ffmpeg->rtsp_data->pktarray[indx].idnbr > idnbr_lastkey)){
+            idnbr_lastkey=ffmpeg->rtsp_data->pktarray[indx].idnbr;
+            indx_lastkey=indx;
+        }
+    }
+
+    /* Write all packets not written out already since last key packet */
+    indx = indx_lastkey;
+    while (indx != -1){
+        if (!ffmpeg->rtsp_data->pktarray[indx].iswritten){
+            if ((ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr >= idnbr_lastkey)){
+                ffmpeg_passthru_write(ffmpeg, indx);
+            }
+        }
+        if (ffmpeg->rtsp_data->pktarray[indx].idnbr == idnbr_image) {
+            indx =-1;
+        } else {
+            indx++;
+            if (indx == ffmpeg->rtsp_data->pktarray_size ) indx = 0;
+        }
+    }
+
+    return 0;
 }
 
 void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl){
@@ -995,7 +1046,6 @@ void ffmpeg_global_deinit(void) {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "av_lockmgr_register reset failed on cleanup");
     }
 
-
 #else /* No FFMPEG */
 
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "No ffmpeg functionality included");
@@ -1008,6 +1058,8 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 #ifdef HAVE_FFMPEG
 
     int retcd;
+
+    if (ffmpeg->passthrough) ffmpeg_passthru_reset(ffmpeg);
 
     ffmpeg->oc = avformat_alloc_context();
     if (!ffmpeg->oc) {
@@ -1092,7 +1144,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
     unsigned char *image;
 
     if (ffmpeg->passthrough) {
-        retcd = ffmpeg_put_passthrough(ffmpeg, tv1, img_data);
+        retcd = ffmpeg_passthru_put(ffmpeg, img_data);
         return retcd;
     }
 

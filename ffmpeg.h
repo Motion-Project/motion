@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "config.h"
 struct image_data; /* forward declare for functions */
+struct rtsp_context;
 
 enum TIMELAPSE_TYPE {
     TIMELAPSE_NONE,         /* No timelapse, regular processing */
@@ -43,6 +44,7 @@ struct ffmpeg {
     AVPacket pkt;
     AVFrame *picture;       /* contains default image pointers */
     AVDictionary *opts;
+    struct rtsp_context *rtsp_data;
 #endif
     int width;
     int height;
