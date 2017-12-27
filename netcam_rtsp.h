@@ -5,10 +5,10 @@ struct context;
 struct image_data;
 
 enum RTSP_STATUS {
-    RTSP_NOTCONNECTED,   /* The camera has never connected */
     RTSP_CONNECTED,      /* The camera is currently connected */
-    RTSP_RECONNECTING,   /* Motion is trying to reconnect to camera */
-    RTSP_READINGIMAGE    /* Motion is reading a image from camera */
+    RTSP_READINGIMAGE,   /* Motion is reading a image from camera */
+    RTSP_NOTCONNECTED,   /* The camera has never connected */
+    RTSP_RECONNECTING   /* Motion is trying to reconnect to camera */
 };
 
 struct imgsize_context {
@@ -40,6 +40,7 @@ struct rtsp_context {
     AVFrame                  *swsframe_out;          /* Used when resizing image sent from camera */
     struct SwsContext        *swsctx;                /* Context for the resizing of the image */
     AVPacket                  packet_recv;           /* The packet that is currently being processed */
+    AVFormatContext          *transfer_format;       /* Format context just for transferring to pass-through */
     struct packet_item       *pktarray;              /* Pointer to array of packets for passthru processing */
     int                       pktarray_size;         /* The number of packets in array.  1 based */
     int                       pktarray_index;        /* The index to the most current packet in array */
@@ -77,6 +78,8 @@ struct rtsp_context {
     int                       threadnbr;        /* The thread number */
     pthread_t                 thread_id;        /* thread i.d. for a camera-handling thread (if required). */
     pthread_mutex_t           mutex;            /* mutex used with conditional waits */
+    pthread_mutex_t           mutex_transfer;   /* mutex used with transferring stream info for pass-through */
+    pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
 
 };
 

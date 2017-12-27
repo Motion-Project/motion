@@ -747,12 +747,13 @@ static void event_ffmpeg_newfile(struct context *cnt,
             cnt->ffmpeg_output->width  = cnt->imgs.width_high;
             cnt->ffmpeg_output->height = cnt->imgs.height_high;
             cnt->ffmpeg_output->high_resolution = TRUE;
-            cnt->ffmpeg_output->rtsp_data = cnt->rtsp_high;
+                cnt->ffmpeg_output->rtsp_data = cnt->rtsp_high;
         } else {
             cnt->ffmpeg_output->width  = cnt->imgs.width;
             cnt->ffmpeg_output->height = cnt->imgs.height;
             cnt->ffmpeg_output->high_resolution = FALSE;
             cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
+                cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
         }
         cnt->ffmpeg_output->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output->fps = cnt->movie_fps;
@@ -776,7 +777,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
 
         retcd = ffmpeg_open(cnt->ffmpeg_output);
         if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "ffopen_open error creating (new) file [%s]",cnt->newfilename);
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "Error opening context for movie output.");
             free(cnt->ffmpeg_output);
             cnt->ffmpeg_output=NULL;
             return;
@@ -916,7 +917,7 @@ static void event_ffmpeg_put(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
     if (cnt->ffmpeg_output) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1) {
+        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "Error encoding image");
         }
     }

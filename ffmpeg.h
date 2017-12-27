@@ -35,8 +35,8 @@ enum TIMELAPSE_TYPE {
 
 #endif // HAVE_FFMPEG
 
-struct ffmpeg {
 #ifdef HAVE_FFMPEG
+struct ffmpeg {
     AVFormatContext *oc;
     AVStream *video_st;
     AVCodecContext *ctx_codec;
@@ -45,7 +45,6 @@ struct ffmpeg {
     AVFrame *picture;       /* contains default image pointers */
     AVDictionary *opts;
     struct rtsp_context *rtsp_data;
-#endif
     int width;
     int height;
     enum TIMELAPSE_TYPE tlapse;
@@ -63,6 +62,28 @@ struct ffmpeg {
     int            motion_images;
     int            passthrough;
 };
+#else
+struct ffmpeg {
+    struct rtsp_context *rtsp_data;
+    int width;
+    int height;
+    enum TIMELAPSE_TYPE tlapse;
+    int fps;
+    int bps;
+    char *filename;
+    int vbr;
+    const char *codec_name;
+    int64_t last_pts;
+    int64_t base_pts;
+    int test_mode;
+    int gop_cnt;
+    struct timeval start_time;
+    int            high_resolution;
+    int            motion_images;
+    int            passthrough;
+};
+#endif // HAVE_FFMPEG
+
 
 
 #ifdef HAVE_FFMPEG
