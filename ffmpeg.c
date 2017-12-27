@@ -1060,7 +1060,8 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
         }
         ffmpeg->video_st->codecpar->codec_tag  = 0;
 
-#else
+#elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+
         stream_in = ffmpeg->rtsp_data->transfer_format->streams[0];
 
         ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, stream_in->codec->codec);
@@ -1079,6 +1080,11 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
         }
         ffmpeg->video_st->codec->flags     |= AV_CODEC_FLAG_GLOBAL_HEADER;
         ffmpeg->video_st->codec->codec_tag  = 0;
+#else
+        /* This is disabled in the util_check_passthrough but we need it here for compiling */
+        pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through disabled.  ffmpeg too old");
+        return -1;
 #endif
 
         ffmpeg->video_st->time_base         = stream_in->time_base;

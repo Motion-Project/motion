@@ -140,13 +140,14 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
         rtsp_data = cnt->rtsp;
     }
 
+    /* The 30 is arbitrary */
+
     /* Double the size plus double last diff so we don't catch our tail */
     newsize =((idnbr_first - idnbr_last) * 2 );
     newsize = newsize + ((rtsp_data->idnbr - idnbr_last ) * 2);
+    if (newsize < 30) newsize = 30;
     if (rtsp_data->pktarray_size > newsize) resize_pktarray = FALSE;
 
-
-    /* The 30 is arbitrary */
     if ((resize_pktarray) ||  (rtsp_data->pktarray_size < 30)){
         tmp = mymalloc(newsize * sizeof(struct packet_item));
         if (rtsp_data->pktarray_size > 0 ){
@@ -950,7 +951,8 @@ static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data){
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Stream copied for pass-through");
     return 0;
-#else
+#elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+
     AVStream  *transfer_stream, *stream_in;
     int        retcd;
 
@@ -970,6 +972,10 @@ static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data){
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Stream copied for pass-through");
     return 0;
+#else
+    /* This is disabled in the util_check_passthrough but we need it here for compiling */
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through disabled.  ffmpeg too old");
+    return -1;
 #endif
 
 }
