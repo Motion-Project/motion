@@ -974,7 +974,7 @@ static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data){
     return 0;
 #else
     /* This is disabled in the util_check_passthrough but we need it here for compiling */
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through disabled.  ffmpeg too old");
+    if (rtsp_data != NULL) MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "ffmpeg too old");
     return -1;
 #endif
 
