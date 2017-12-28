@@ -2922,6 +2922,11 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     set_log_level(cnt_list[0]->log_level);
     set_log_type(cnt_list[0]->log_type);
 
+    /* Initialize some static and global string variables */
+    gethostname (cnt_list[0]->hostname, PATH_MAX);
+    cnt_list[0]->hostname[PATH_MAX-1] = '\0';
+    /* end of variables */
+
     conf_output_parms(cnt_list);
 
     initialize_chars();
@@ -3525,10 +3530,7 @@ static void mystrftime_long (const struct context *cnt,
 #define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
 
     if (SPECIFIERWORD("host")) {
-        char host[PATH_MAX];
-        gethostname (host, PATH_MAX);
-        host[PATH_MAX-1] = 0; // see man page for gethostname.
-        snprintf (out, PATH_MAX, "%*s", width, host);
+        snprintf (out, PATH_MAX, "%*s", width, cnt->hostname);
         return;
     }
     if (SPECIFIERWORD("fps")) {
@@ -3537,6 +3539,10 @@ static void mystrftime_long (const struct context *cnt,
     }
     if (SPECIFIERWORD("dbeventid")) {
         sprintf(out, "%*llu", width, cnt->database_event_id);
+        return;
+    }
+    if (SPECIFIERWORD("ver")) {
+        sprintf(out, "%*s", width, VERSION);
         return;
     }
 
