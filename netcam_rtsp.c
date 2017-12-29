@@ -102,23 +102,20 @@ static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data){
 
 static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
     /* This is called from netcam_rtsp_next and is on the motion loop thread
-     * The mutex is locked around the call to this function.
-     * This function checks whether there is a key packet that occurs prior
-     * to the last image that is within the Motion image ring.  If a key packet
-     * is not found, then this function expands the packet array.
+     * The rtsp_data->mutex is locked around the call to this function.
     */
 
-    /* Remember that this is a ring and we have two thread chasing around it
+    /* Remember that this is a ring and we have two threads chasing around it
      * the ffmpeg is writing out of this ring while we are filling it up.  "Bad"
-     * things will occur if "add" thread catches up with the "write" thread.
+     * things will occur if the "add" thread catches up with the "write" thread.
      * We need this ring to be big enough so they don't collide.
      * The alternative is that we'd need to make a copy of the entire packet
      * array in the ffmpeg module and do our writing from that copy.  The
      * downside is that is a lot to be copying around for each image we want
-     * to write out.  And putting a mutex on the array during add / write would
-     * slow down the capture thread to the speed of the writing thread.  And the
-     * writing thread operates at the user specified FPS...So....make this big
-     * enough so we never catch our tail.  :)
+     * to write out.  And putting a mutex on the array during adding function would
+     * slow down the capture thread to the speed of the writing thread.  And that
+     * writing thread operates at the user specified FPS which could be really slow
+     * ...So....make this array big enough so we never catch our tail.  :)
      */
 
     int64_t               idnbr_last, idnbr_first;
@@ -161,8 +158,8 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
             tmp[indx].iskey = FALSE;
             tmp[indx].iswritten = FALSE;
         }
-        if (rtsp_data->pktarray != NULL) free(rtsp_data->pktarray);
         pthread_mutex_lock(&rtsp_data->mutex_pktarray);
+            if (rtsp_data->pktarray != NULL) free(rtsp_data->pktarray);
             rtsp_data->pktarray = tmp;
             rtsp_data->pktarray_size = newsize;
         pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
@@ -210,8 +207,8 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data){
         rtsp_data->pktarray[indx_next].iskey = FALSE;
     }
     rtsp_data->pktarray[indx_next].iswritten = FALSE;
-    rtsp_data->pktarray[indx_next].timestamp_tv.tv_sec = rtsp_data->img_latest->image_time.tv_sec;
-    rtsp_data->pktarray[indx_next].timestamp_tv.tv_usec = rtsp_data->img_latest->image_time.tv_usec;
+    rtsp_data->pktarray[indx_next].timestamp_tv.tv_sec = rtsp_data->img_recv->image_time.tv_sec;
+    rtsp_data->pktarray[indx_next].timestamp_tv.tv_usec = rtsp_data->img_recv->image_time.tv_usec;
     rtsp_data->pktarray_index = indx_next;
 }
 
@@ -622,11 +619,11 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
     }
 
     pthread_mutex_lock(&rtsp_data->mutex);
+        rtsp_data->idnbr++;
+        if (rtsp_data->passthrough) netcam_rtsp_pktarray_add(rtsp_data);
         xchg = rtsp_data->img_latest;
         rtsp_data->img_latest = rtsp_data->img_recv;
         rtsp_data->img_recv = xchg;
-        rtsp_data->idnbr++;
-        if (rtsp_data->passthrough) netcam_rtsp_pktarray_add(rtsp_data);
     pthread_mutex_unlock(&rtsp_data->mutex);
 
     my_packet_unref(rtsp_data->packet_recv);

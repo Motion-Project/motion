@@ -927,6 +927,7 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
+        my_packet_unref(ffmpeg->pkt);
         return;
     }
 
@@ -1035,7 +1036,6 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
         retcd = ffmpeg_get_oformat(ffmpeg);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not get codec!");
-            ffmpeg_free_context(ffmpeg);
             pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
             return -1;
         }
@@ -1047,7 +1047,6 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
         ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL);
         if (!ffmpeg->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not alloc stream");
-            ffmpeg_free_context(ffmpeg);
             pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
             return -1;
         }
@@ -1067,7 +1066,6 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
         ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, stream_in->codec->codec);
         if (!ffmpeg->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not alloc stream");
-            ffmpeg_free_context(ffmpeg);
             pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
             return -1;
         }

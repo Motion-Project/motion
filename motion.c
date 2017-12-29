@@ -3747,11 +3747,8 @@ int util_check_passthrough(struct context *cnt){
     return 0;
 #else
     if (cnt->conf.ffmpeg_passthrough){
-        /* Disable passthrough until functional */
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through is enabled but is still experimental.");
         return 1;
-        //MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through disabled.");
-        //return 0;
     } else {
         return 0;
     }
