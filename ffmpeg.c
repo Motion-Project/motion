@@ -909,6 +909,7 @@ static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
             ffmpeg->rtsp_data->pktarray[indx].iswritten = FALSE;
         }
     pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_pktarray);
+
 }
 
 static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
@@ -922,8 +923,8 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
 
 
     ffmpeg->rtsp_data->pktarray[indx].iswritten = TRUE;
-    retcd = my_copy_packet(&ffmpeg->pkt, &ffmpeg->rtsp_data->pktarray[indx].packet);
 
+    retcd = my_copy_packet(&ffmpeg->pkt, &ffmpeg->rtsp_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
@@ -949,8 +950,8 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
 
 static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data){
 
-    int idnbr_image, idnbr_lastwritten;
-    int indx, indx_lastwritten;
+    int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
+    int indx, indx_lastwritten, indx_firstkey;
 
     if (ffmpeg->rtsp_data == NULL) return -1;
 
@@ -967,43 +968,51 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
 
     pthread_mutex_lock(&ffmpeg->rtsp_data->mutex_pktarray);
         idnbr_lastwritten = 0;
-        indx_lastwritten = 0;
-        /* Determine last packet written */
+        idnbr_firstkey = idnbr_image;
+        idnbr_stop = 0;
+        indx_lastwritten = -1;
+        indx_firstkey = -1;
+
         for(indx = 0; indx < ffmpeg->rtsp_data->pktarray_size; indx++) {
             if ((ffmpeg->rtsp_data->pktarray[indx].iswritten) &&
                 (ffmpeg->rtsp_data->pktarray[indx].idnbr > idnbr_lastwritten)){
                 idnbr_lastwritten=ffmpeg->rtsp_data->pktarray[indx].idnbr;
                 indx_lastwritten = indx;
             }
-        }
-        /* New event, look to start at first key packet*/
-        if (idnbr_lastwritten == 0) {
-            /* Look for idnbr's that are less than current image id */
-            idnbr_lastwritten = idnbr_image;
-            for(indx = 0; indx < ffmpeg->rtsp_data->pktarray_size; indx++) {
-                if ((ffmpeg->rtsp_data->pktarray[indx].iskey) &&
-                    (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_lastwritten)){
-                    idnbr_lastwritten=ffmpeg->rtsp_data->pktarray[indx].idnbr;
-                    indx_lastwritten = indx;
-                }
+            if ((ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_stop) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image)){
+                idnbr_stop=ffmpeg->rtsp_data->pktarray[indx].idnbr;
+            }
+            if ((ffmpeg->rtsp_data->pktarray[indx].iskey) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_firstkey)){
+                    idnbr_firstkey=ffmpeg->rtsp_data->pktarray[indx].idnbr;
+                    indx_firstkey = indx;
             }
         }
 
-        /* Write all packets not written out already */
-        indx = indx_lastwritten;
-        while (indx != -1){
+        if (idnbr_stop == 0){
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_pktarray);
+            return 0;
+        }
+
+        if (indx_lastwritten != -1){
+            indx = indx_lastwritten;
+        } else if (indx_firstkey != -1) {
+            indx = indx_firstkey;
+        } else {
+            indx = 0;
+        }
+
+        while (TRUE){
             if ((!ffmpeg->rtsp_data->pktarray[indx].iswritten) &&
                 (ffmpeg->rtsp_data->pktarray[indx].packet.size > 0) &&
-                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image) &&
-                (ffmpeg->rtsp_data->pktarray[indx].idnbr >= idnbr_lastwritten)) {
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image)) {
                 ffmpeg_passthru_write(ffmpeg, indx);
             }
-            if (ffmpeg->rtsp_data->pktarray[indx].idnbr == idnbr_image) {
-                indx =-1;
-            } else {
-                indx++;
-                if (indx == ffmpeg->rtsp_data->pktarray_size ) indx = 0;
-            }
+            if (ffmpeg->rtsp_data->pktarray[indx].idnbr == idnbr_stop) break;
+            indx++;
+            if (indx == ffmpeg->rtsp_data->pktarray_size ) indx = 0;
         }
     pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_pktarray);
     return 0;
@@ -1076,7 +1085,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
             pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
             return -1;
         }
-        ffmpeg->video_st->codec->flags     |= AV_CODEC_FLAG_GLOBAL_HEADER;
+        ffmpeg->video_st->codec->flags     |= CODEC_FLAG_GLOBAL_HEADER;
         ffmpeg->video_st->codec->codec_tag  = 0;
 #else
         /* This is disabled in the util_check_passthrough but we need it here for compiling */

@@ -137,8 +137,9 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
         rtsp_data = cnt->rtsp;
     }
 
-    /* The 30 is arbitrary */
+    if (!rtsp_data->passthrough) return;
 
+    /* The 30 is arbitrary */
     /* Double the size plus double last diff so we don't catch our tail */
     newsize =((idnbr_first - idnbr_last) * 2 );
     newsize = newsize + ((rtsp_data->idnbr - idnbr_last ) * 2);
@@ -163,7 +164,7 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
             rtsp_data->pktarray = tmp;
             rtsp_data->pktarray_size = newsize;
         pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Resized packet array to %d",newsize);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Resized packet array to %d", rtsp_data->cameratype,newsize);
     }
 
 }
@@ -888,8 +889,14 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     sprintf(rtsp_data->threadname, "%s","Unknown");
     netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
     netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
+    /* If this is the norm and we have a highres, then disable passthru on the norm */
+    if ((!rtsp_data->high_resolution) &&
+        (cnt->conf.netcam_highres)) {
+        rtsp_data->passthrough = FALSE;
+    } else {
+        rtsp_data->passthrough = util_check_passthrough(cnt);
+    }
     rtsp_data->interruptduration = 5;
-    rtsp_data->passthrough = util_check_passthrough(cnt);
     rtsp_data->interrupted = FALSE;
     netcam_rtsp_set_path(cnt, rtsp_data);
 
@@ -1086,6 +1093,8 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
     if (rtsp_data->high_resolution){
         rtsp_data->imgsize.width = rtsp_data->codec_context->width;
         rtsp_data->imgsize.height = rtsp_data->codec_context->height;
+    } else {
+        if (netcam_rtsp_open_sws(rtsp_data) < 0) return -1;
     }
 
     rtsp_data->frame = my_frame_alloc();
@@ -1096,8 +1105,6 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
         netcam_rtsp_close_context(rtsp_data);
         return -1;
     }
-
-    if (netcam_rtsp_open_sws(rtsp_data) < 0) return -1;
 
     if (rtsp_data->passthrough){
         retcd = netcam_rtsp_copy_stream(rtsp_data);
@@ -1230,6 +1237,8 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
     pthread_attr_t handler_attribute;
 
     pthread_mutex_init(&rtsp_data->mutex, NULL);
+    pthread_mutex_init(&rtsp_data->mutex_pktarray, NULL);
+    pthread_mutex_init(&rtsp_data->mutex_transfer, NULL);
 
     pthread_attr_init(&handler_attribute);
     pthread_attr_setdetachstate(&handler_attribute, PTHREAD_CREATE_DETACHED);
@@ -1439,19 +1448,21 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
             netcam_rtsp_shutdown(rtsp_data);
 
             pthread_mutex_destroy(&rtsp_data->mutex);
+            pthread_mutex_destroy(&rtsp_data->mutex_pktarray);
+            pthread_mutex_destroy(&rtsp_data->mutex_transfer);
 
             free(rtsp_data);
             rtsp_data = NULL;
             if (indx_cam == 1){
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Normal resolution: Shut down complete.");
-                cnt->rtsp = NULL;
             } else {
                 MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "High resolution: Shut down complete.");
-                cnt->rtsp_high = NULL;
             }
         }
         indx_cam++;
     }
+    cnt->rtsp = NULL;
+    cnt->rtsp_high = NULL;
 
 #else  /* No FFmpeg/Libav */
     /* Stop compiler warnings */
