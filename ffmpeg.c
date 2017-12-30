@@ -461,7 +461,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
         }
         ffmpeg->picture->pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
-        if (ffmpeg->test_mode == 1){
+        if (ffmpeg->test_mode == TRUE){
             MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "PTS %"PRId64" Base PTS %"PRId64" ms interval %"PRId64" timebase %d-%d",
                        ffmpeg->picture->pts,ffmpeg->base_pts,pts_interval,
                        ffmpeg->video_st->time_base.num,ffmpeg->video_st->time_base.den);
@@ -469,7 +469,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
         if (ffmpeg->picture->pts <= ffmpeg->last_pts){
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
-            if (ffmpeg->test_mode == 1){
+            if (ffmpeg->test_mode == TRUE){
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "BAD TIMING!! Frame skipped.");
             }
             return -1;
@@ -495,9 +495,19 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
         }
         ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
 
+        if (ffmpeg->test_mode == TRUE){
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+                       , "PTS %"PRId64" Base PTS %"PRId64" ms interval %"PRId64" timebase %d-%d Change %d"
+                       ,ffmpeg->pkt.pts
+                       ,ffmpeg->base_pts,pts_interval
+                       ,ffmpeg->video_st->time_base.num
+                       ,ffmpeg->video_st->time_base.den
+                       ,(ffmpeg->pkt.pts-ffmpeg->last_pts) );
+        }
+
         if (ffmpeg->pkt.pts <= ffmpeg->last_pts){
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
-            if (ffmpeg->test_mode == 1){
+            if (ffmpeg->test_mode == TRUE){
                 MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "BAD TIMING!! Frame skipped.");
             }
             return -1;
@@ -535,7 +545,7 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
             av_dict_set(&ffmpeg->opts, "crf", crf, 0);
         }
     } else {
-        /* The selection of 8000 in the else is a subjective number based upon viewing output files */
+        /* The selection of 8000 is a subjective number based upon viewing output files */
         if (ffmpeg->vbr > 0){
             ffmpeg->vbr =(int)(((100-ffmpeg->vbr)*(100-ffmpeg->vbr)*(100-ffmpeg->vbr) * 8000) / 1000000) + 1;
             ffmpeg->ctx_codec->flags |= CODEC_FLAG_QSCALE;
@@ -607,7 +617,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     }
     ffmpeg->ctx_codec = avcodec_alloc_context3(ffmpeg->codec);
     if (ffmpeg->ctx_codec == NULL) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Failed to allocate decoder!");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Failed to allocate decoder!");
         ffmpeg_free_context(ffmpeg);
         return -1;
     }
@@ -805,9 +815,12 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     //ffmpeg version 3.1 and after
+
     int retcd;
     int recv_cd = 0;
     char errstr[128];
+
+    if (ffmpeg->passthrough) return 0;
 
     retcd = 0;
     recv_cd = 0;
@@ -887,31 +900,42 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
 }
 
-static int ffmpeg_put_passthrough(struct ffmpeg *ffmpeg, const struct timeval *tv1, struct image_data *img_data){
-    int retcd;
+static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
+    /* Reset the written flag at start of each event */
+    int indx;
+
+    pthread_mutex_lock(&ffmpeg->rtsp_data->mutex_pktarray);
+        for(indx = 0; indx < ffmpeg->rtsp_data->pktarray_size; indx++) {
+            ffmpeg->rtsp_data->pktarray[indx].iswritten = FALSE;
+        }
+    pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_pktarray);
+
+}
+
+static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
+    /* Write the packet in the buffer at indx to file */
     char errstr[128];
+    int retcd;
 
     av_init_packet(&ffmpeg->pkt);
     ffmpeg->pkt.data = NULL;
     ffmpeg->pkt.size = 0;
 
-    if (ffmpeg->high_resolution){
-        retcd = my_copy_packet(&ffmpeg->pkt, &img_data->packet_high);
-    } else {
-        retcd = my_copy_packet(&ffmpeg->pkt, &img_data->packet_norm);
-    }
 
+    ffmpeg->rtsp_data->pktarray[indx].iswritten = TRUE;
+
+    retcd = my_copy_packet(&ffmpeg->pkt, &ffmpeg->rtsp_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "av_copy_packet: %s",errstr);
-        my_packet_unref(img_data->packet_norm);
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
+        my_packet_unref(ffmpeg->pkt);
+        return;
     }
 
-    retcd = ffmpeg_set_pktpts(ffmpeg, tv1);
+    retcd = ffmpeg_set_pktpts(ffmpeg, &ffmpeg->rtsp_data->pktarray[indx].timestamp_tv);
     if (retcd < 0) {
-        //If there is an error, it has already been reported.
         my_packet_unref(ffmpeg->pkt);
-        return 0;
+        return;
     }
 
     retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
@@ -919,9 +943,161 @@ static int ffmpeg_put_passthrough(struct ffmpeg *ffmpeg, const struct timeval *t
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error while writing video frame: %s",errstr);
+        return;
+    }
+
+}
+
+static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data){
+
+    int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
+    int indx, indx_lastwritten, indx_firstkey;
+
+    if (ffmpeg->rtsp_data == NULL) return -1;
+
+    if ((ffmpeg->rtsp_data->status == RTSP_NOTCONNECTED  ) ||
+        (ffmpeg->rtsp_data->status == RTSP_RECONNECTING  ) ){
         return -1;
     }
-    return retcd;
+
+    if (ffmpeg->high_resolution){
+        idnbr_image = img_data->idnbr_high;
+    } else {
+        idnbr_image = img_data->idnbr_norm;
+    }
+
+    pthread_mutex_lock(&ffmpeg->rtsp_data->mutex_pktarray);
+        idnbr_lastwritten = 0;
+        idnbr_firstkey = idnbr_image;
+        idnbr_stop = 0;
+        indx_lastwritten = -1;
+        indx_firstkey = -1;
+
+        for(indx = 0; indx < ffmpeg->rtsp_data->pktarray_size; indx++) {
+            if ((ffmpeg->rtsp_data->pktarray[indx].iswritten) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr > idnbr_lastwritten)){
+                idnbr_lastwritten=ffmpeg->rtsp_data->pktarray[indx].idnbr;
+                indx_lastwritten = indx;
+            }
+            if ((ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_stop) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image)){
+                idnbr_stop=ffmpeg->rtsp_data->pktarray[indx].idnbr;
+            }
+            if ((ffmpeg->rtsp_data->pktarray[indx].iskey) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_firstkey)){
+                    idnbr_firstkey=ffmpeg->rtsp_data->pktarray[indx].idnbr;
+                    indx_firstkey = indx;
+            }
+        }
+
+        if (idnbr_stop == 0){
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_pktarray);
+            return 0;
+        }
+
+        if (indx_lastwritten != -1){
+            indx = indx_lastwritten;
+        } else if (indx_firstkey != -1) {
+            indx = indx_firstkey;
+        } else {
+            indx = 0;
+        }
+
+        while (TRUE){
+            if ((!ffmpeg->rtsp_data->pktarray[indx].iswritten) &&
+                (ffmpeg->rtsp_data->pktarray[indx].packet.size > 0) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
+                (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image)) {
+                ffmpeg_passthru_write(ffmpeg, indx);
+            }
+            if (ffmpeg->rtsp_data->pktarray[indx].idnbr == idnbr_stop) break;
+            indx++;
+            if (indx == ffmpeg->rtsp_data->pktarray_size ) indx = 0;
+        }
+    pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_pktarray);
+    return 0;
+}
+
+static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
+
+    int retcd;
+    AVStream    *stream_in;
+
+    if (ffmpeg->rtsp_data == NULL){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "RTSP context not available.");
+        return -1;
+    }
+
+    pthread_mutex_lock(&ffmpeg->rtsp_data->mutex_transfer);
+
+        if ((ffmpeg->rtsp_data->status == RTSP_NOTCONNECTED  ) ||
+            (ffmpeg->rtsp_data->status == RTSP_RECONNECTING  ) ){
+            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "rtsp camera not ready for pass-through.");
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+            return -1;
+        }
+
+        if (strcmp(ffmpeg->codec_name, "mp4") != 0){
+            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "pass-through mode enabled.  Changing to MP4 container.");
+            ffmpeg->codec_name = "mp4";
+        }
+
+        retcd = ffmpeg_get_oformat(ffmpeg);
+        if (retcd < 0 ) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not get codec!");
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+            return -1;
+        }
+
+#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        stream_in = ffmpeg->rtsp_data->transfer_format->streams[0];
+        ffmpeg->oc->oformat->video_codec = stream_in->codecpar->codec_id;
+
+        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL);
+        if (!ffmpeg->video_st) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not alloc stream");
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+            return -1;
+        }
+
+        retcd = avcodec_parameters_copy(ffmpeg->video_st->codecpar, stream_in->codecpar);
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Unable to copy codec parameters");
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+            return -1;
+        }
+        ffmpeg->video_st->codecpar->codec_tag  = 0;
+
+#elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+
+        stream_in = ffmpeg->rtsp_data->transfer_format->streams[0];
+
+        ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, stream_in->codec->codec);
+        if (!ffmpeg->video_st) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not alloc stream");
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+            return -1;
+        }
+
+        retcd = avcodec_copy_context(ffmpeg->video_st->codec, stream_in->codec);
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Unable to copy codec parameters");
+            pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+            return -1;
+        }
+        ffmpeg->video_st->codec->flags     |= CODEC_FLAG_GLOBAL_HEADER;
+        ffmpeg->video_st->codec->codec_tag  = 0;
+#else
+        /* This is disabled in the util_check_passthrough but we need it here for compiling */
+        pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through disabled.  ffmpeg too old");
+        return -1;
+#endif
+
+        ffmpeg->video_st->time_base         = stream_in->time_base;
+    pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through stream opened");
+    return 0;
 
 }
 
@@ -995,7 +1171,6 @@ void ffmpeg_global_deinit(void) {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, "av_lockmgr_register reset failed on cleanup");
     }
 
-
 #else /* No FFMPEG */
 
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "No ffmpeg functionality included");
@@ -1016,30 +1191,44 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
         return -1;
     }
 
-    retcd = ffmpeg_get_oformat(ffmpeg);
-    if (retcd < 0 ) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Could not get codec!");
-        ffmpeg_free_context(ffmpeg);
-        return -1;
+    if (ffmpeg->passthrough) {
+        retcd = ffmpeg_passthru_codec(ffmpeg);
+        if (retcd < 0 ) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not setup passthru!");
+            ffmpeg_free_context(ffmpeg);
+            return -1;
+        }
+
+        ffmpeg_passthru_reset(ffmpeg);
+
+    } else {
+        retcd = ffmpeg_get_oformat(ffmpeg);
+        if (retcd < 0 ) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not get codec!");
+            ffmpeg_free_context(ffmpeg);
+            return -1;
+        }
+
+        retcd = ffmpeg_set_codec(ffmpeg);
+        if (retcd < 0 ) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Failed to allocate codec!");
+            return -1;
+        }
+
+        retcd = ffmpeg_set_stream(ffmpeg);
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not set the stream");
+            return -1;
+        }
+
+        retcd = ffmpeg_set_picture(ffmpeg);
+        if (retcd < 0){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not set the stream");
+            return -1;
+        }
     }
 
-    retcd = ffmpeg_set_codec(ffmpeg);
-    if (retcd < 0 ) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Failed to allocate codec!");
-        return -1;
-    }
 
-    retcd = ffmpeg_set_stream(ffmpeg);
-    if (retcd < 0){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not set the stream");
-        return -1;
-    }
-
-    retcd = ffmpeg_set_picture(ffmpeg);
-    if (retcd < 0){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Could not set the stream");
-        return -1;
-    }
 
     retcd = ffmpeg_set_outputfile(ffmpeg);
     if (retcd < 0){
@@ -1092,7 +1281,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
     unsigned char *image;
 
     if (ffmpeg->passthrough) {
-        retcd = ffmpeg_put_passthrough(ffmpeg, tv1, img_data);
+        retcd = ffmpeg_passthru_put(ffmpeg, img_data);
         return retcd;
     }
 
