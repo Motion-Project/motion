@@ -1011,7 +1011,7 @@ static int motion_init(struct context *cnt)
     rotate_init(cnt); /* rotate_deinit is called in main */
 
     /* Capture first image, or we will get an alarm on start */
-    if (cnt->video_dev > 0) {
+    if (cnt->video_dev >= 0) {
         int i;
 
         for (i = 0; i < 5; i++) {
