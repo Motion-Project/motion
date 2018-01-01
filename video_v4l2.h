@@ -17,6 +17,7 @@ int v4l2_start(struct context *cnt);
 int v4l2_next(struct context *cnt,  struct image_data *img_data);
 void v4l2_cleanup(struct context *cnt);
 int v4l2_palette_valid(char *video_device, int v4l2_palette);
+int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height);
 void v4l2_palette_fourcc(int v4l2_palette, char *fourcc);
 
 #endif /* _INCLUDE_VIDEO_V4L2_H */
