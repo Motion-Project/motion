@@ -754,7 +754,7 @@ static void netcam_rtsp_set_rtsp(struct rtsp_context *rtsp_data){
         av_dict_set(&rtsp_data->opts, "rtsp_transport", "udp", 0);
         av_dict_set(&rtsp_data->opts, "max_delay", "500000", 0);  /* 100000 is the default */
         if (rtsp_data->status == RTSP_NOTCONNECTED)
-            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting rtsp transport to tcp",rtsp_data->cameratype);
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting rtsp transport to udp",rtsp_data->cameratype);
     }
 }
 
