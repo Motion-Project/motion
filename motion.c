@@ -2845,10 +2845,6 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     }
 
 
-    //set_log_level(cnt_list[0]->log_level);
-
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion "VERSION" Started");
-
     if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file, "syslog", 6))) {
         set_log_mode(LOGMODE_FILE);
         ptr_logfile = set_logfile(cnt_list[0]->conf.log_file);
@@ -2866,6 +2862,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Logging to syslog");
     }
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion "VERSION" Started");
 
     if ((cnt_list[0]->conf.log_type_str == NULL) ||
         !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
@@ -3012,7 +3010,21 @@ int main (int argc, char **argv)
      */
     struct sigaction sig_handler_action;
     struct sigaction sigchild_action;
+
+
     setup_signals(&sig_handler_action, &sigchild_action);
+
+    /*
+     * Create and a thread attribute for the threads we spawn later on.
+     * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
+     * their termination cannot be synchronized through 'pthread_join'.
+     */
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+
+    /* Create the TLS key for thread number. */
+    pthread_key_create(&tls_key_threadnr, NULL);
+    pthread_setspecific(tls_key_threadnr, (void *)(0));
 
     motion_startup(1, argc, argv);
 
@@ -3061,16 +3073,6 @@ int main (int argc, char **argv)
     if (cnt_list[0]->conf.setup_mode)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion running in setup mode.");
 
-    /*
-     * Create and a thread attribute for the threads we spawn later on.
-     * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
-     * their termination cannot be synchronized through 'pthread_join'.
-     */
-    pthread_attr_init(&thread_attr);
-    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
-
-    /* Create the TLS key for thread number. */
-    pthread_key_create(&tls_key_threadnr, NULL);
 
     do {
         if (restart) {
