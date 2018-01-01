@@ -193,11 +193,6 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 
     //printf("log_type %d, type %d level %d\n", log_type, type, level);
 
-    /*
-     * If pthread_getspecific fails (e.g., because the thread's TLS doesn't
-     * contain anything for thread number, it returns NULL which casts to zero,
-     * which is nice because that's what we want in that case.
-     */
     threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
 
     /*
