@@ -760,7 +760,7 @@ static void netcam_rtsp_set_rtsp(struct rtsp_context *rtsp_data){
 
 static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
 
-    char optsize[10], optfmt[8], optfps[5];
+    char optsize[10], optfmt[10], optfps[10];
     char *fourcc;
 
     rtsp_data->format_context->iformat = av_find_input_format("video4linux2");
@@ -770,8 +770,12 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
     v4l2_palette_fourcc(rtsp_data->v4l2_palette, fourcc);
 
     if (strcmp(fourcc,"MJPG") == 0) {
-        sprintf(optfmt, "%s","mjpeg");
-        av_dict_set(&rtsp_data->opts, "input_format", optfmt, 0);
+        if (v4l2_palette_valid(rtsp_data->path,rtsp_data->v4l2_palette)){
+            sprintf(optfmt, "%s","mjpeg");
+            av_dict_set(&rtsp_data->opts, "input_format", optfmt, 0);
+        } else {
+            sprintf(optfmt, "%s","default");
+        }
     } else if (strcmp(fourcc,"H264") == 0){
         if (v4l2_palette_valid(rtsp_data->path,rtsp_data->v4l2_palette)){
             sprintf(optfmt, "%s","h264");
@@ -783,19 +787,31 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
         sprintf(optfmt, "%s","default");
     }
 
-    sprintf(optfps, "%d",rtsp_data->frame_limit);
-    av_dict_set(&rtsp_data->opts, "framerate", optfps, 0);
+    if (strcmp(optfmt,"default") != 0) {
+        if (v4l2_parms_valid(rtsp_data->path
+                             ,rtsp_data->v4l2_palette
+                             ,rtsp_data->frame_limit
+                             ,rtsp_data->imgsize.width
+                             ,rtsp_data->imgsize.height)) {
+            sprintf(optfps, "%d",rtsp_data->frame_limit);
+            av_dict_set(&rtsp_data->opts, "framerate", optfps, 0);
 
-    sprintf(optsize, "%dx%d",rtsp_data->imgsize.width,rtsp_data->imgsize.height);
-    av_dict_set(&rtsp_data->opts, "video_size", optsize, 0);
+            sprintf(optsize, "%dx%d",rtsp_data->imgsize.width,rtsp_data->imgsize.height);
+            av_dict_set(&rtsp_data->opts, "video_size", optsize, 0);
+        } else {
+            sprintf(optfps, "%s","default");
+            sprintf(optsize, "%s","default");
+        }
+    }
+
 
     if (rtsp_data->status == RTSP_NOTCONNECTED){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Requested v4l2_palette option: %d"
                    ,rtsp_data->cameratype,rtsp_data->v4l2_palette);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Requested FOURCC code: %s",rtsp_data->cameratype,fourcc);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 input_format %s",rtsp_data->cameratype,optfmt);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 framerate %s",rtsp_data->cameratype, optfps);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 video_size %s",rtsp_data->cameratype, optsize);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 input_format: %s",rtsp_data->cameratype,optfmt);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 framerate: %s",rtsp_data->cameratype, optfps);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Setting v4l2 video_size: %s",rtsp_data->cameratype, optsize);
     }
 
     free(fourcc);

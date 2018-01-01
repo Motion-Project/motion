@@ -1,5 +1,5 @@
 /*
- *    video2.c
+ *    video_v4l2.c
  *
  *    V4L2 interface with basically JPEG decompression support and even more ...
  *    Copyright 2006 Krzysztof Blaszkowski (kb@sysmikro.com.pl)
@@ -1446,6 +1446,8 @@ int v4l2_palette_valid(char *video_device, int v4l2_palette){
     vid_source->fd_device = open(video_device, O_RDWR);
     if (vid_source->fd_device < 0) {
         MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "Failed to open video device %s",video_device);
+        free(vid_source);
+        free(palette_array);
         return 0;
     }
 
@@ -1507,5 +1509,98 @@ void v4l2_palette_fourcc(int v4l2_palette, char *fourcc){
 
 }
 
+int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height){
+#ifdef HAVE_V4L2
+
+    /* This function is a boolean that returns true(1) if the parms selected in the
+     * configuration file are valid for the device and false(0) if not valid
+     */
+    palette_item *palette_array;
+    struct v4l2_fmtdesc         dev_format;
+    struct v4l2_frmsizeenum     dev_sizes;
+    struct v4l2_frmivalenum     dev_frameint;
+
+    int retcd;
+    int indx_format, indx_sizes, indx_frameint;
+
+    src_v4l2_t *vid_source;
+
+    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+
+    v4l2_palette_init(palette_array);
+
+    vid_source = calloc(sizeof(src_v4l2_t), 1);
+    vid_source->fd_device = open(video_device, O_RDWR);
+    if (vid_source->fd_device < 0) {
+        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO, "Failed to open video device %s",video_device);
+        free(vid_source);
+        free(palette_array);
+        return 0;
+    }
+
+    retcd = 0;
+    memset(&dev_format, 0, sizeof(dev_format));
+    dev_format.index = indx_format = 0;
+    dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    while (xioctl(vid_source, VIDIOC_ENUM_FMT, &dev_format) != -1) {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Testing palette %s (%c%c%c%c)"
+                   ,dev_format.description
+                   ,dev_format.pixelformat >> 0
+                   ,dev_format.pixelformat >> 8
+                   ,dev_format.pixelformat >> 16
+                   ,dev_format.pixelformat >> 24);
+
+        memset(&dev_sizes, 0, sizeof(dev_sizes));
+        dev_sizes.index = indx_sizes = 0;
+        dev_sizes.pixel_format = dev_format.pixelformat;
+        while (xioctl(vid_source, VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "  Width: %d, Height %d"
+                       ,dev_sizes.discrete.width
+                       ,dev_sizes.discrete.height);
+
+            memset(&dev_frameint, 0, sizeof(dev_frameint));
+            dev_frameint.index = indx_frameint = 0;
+            dev_frameint.pixel_format = dev_format.pixelformat;
+            dev_frameint.width = dev_sizes.discrete.width;
+            dev_frameint.height = dev_sizes.discrete.height;
+            while (xioctl(vid_source, VIDIOC_ENUM_FRAMEINTERVALS, &dev_frameint) != -1) {
+                MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "    Framerate %d/%d"
+                           ,dev_frameint.discrete.numerator
+                           ,dev_frameint.discrete.denominator);
+                if ((palette_array[v4l2_palette].v4l2id == dev_format.pixelformat) &&
+                    ((int)dev_sizes.discrete.width == v4l2_width) &&
+                    ((int)dev_sizes.discrete.height == v4l2_height) &&
+                    ((int)dev_frameint.discrete.numerator == 1) &&
+                    ((int)dev_frameint.discrete.denominator == v4l2_fps)) retcd = 1;
+                memset(&dev_frameint, 0, sizeof(dev_frameint));
+                dev_frameint.index = ++indx_frameint;
+                dev_frameint.pixel_format = dev_format.pixelformat;
+                dev_frameint.width = dev_sizes.discrete.width;
+                dev_frameint.height = dev_sizes.discrete.height;
+            }
+            memset(&dev_sizes, 0, sizeof(dev_sizes));
+            dev_sizes.index = ++indx_sizes;
+            dev_sizes.pixel_format = dev_format.pixelformat;
+        }
+        memset(&dev_format, 0, sizeof(dev_format));
+        dev_format.index = ++indx_format;
+        dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    }
+
+    close(vid_source->fd_device);
+
+    free(vid_source);
+
+    free(palette_array);
+
+    return retcd;
+#else
+    /* We do not have v4l2 so we can not determine whether it is valid or not */
+    if ((video_device) || (v4l2_fps) || (v4l2_palette) ||
+        (v4l2_width)   || (v4l2_height) ) return 0;
+    return 0;
+#endif // HAVE_V4L2
+
+}
 
 
