@@ -1171,6 +1171,29 @@ static unsigned int action(char *pointer, char *res, unsigned int length_uri,
             else
                 response_client(client_socket, not_found_response_valid_command_raw, NULL);
         }
+    } else if (!strcmp(command, "custom")) {
+        length_uri = length_uri - 6;
+        if (length_uri > 1)
+        {
+            url_decode(pointer + 6 + 1, length_uri);
+            strncpy (cnt[0]->customtext, pointer + 6 + 1, length_uri);
+            if (cnt[0]->conf.webcontrol_html_output) {
+                    send_template_ini_client(client_socket, ini_template);
+                    sprintf(res, "Custom text saved\n");
+                    send_template(client_socket, res);
+                    send_template_end_client(client_socket);
+                } else {
+                    send_template_ini_client_raw(client_socket);
+                    sprintf(res, "Custom text saved\n");
+                    send_template_raw(client_socket, res);
+                }
+        }
+        else
+        {
+            send_template_ini_client_raw(client_socket);
+            sprintf(res, "Custom payload is missing\n");
+            send_template_raw(client_socket, res);
+        }
     } else {
         if (cnt[0]->conf.webcontrol_html_output)
             response_client(client_socket, not_found_response_valid_command, NULL);
@@ -2246,7 +2269,8 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                                              "<a href=/%d/action/makemovie>makemovie</a><br>\n"
                                              "<a href=/%d/action/snapshot>snapshot</a><br>\n"
                                              "<a href=/%d/action/restart>restart</a><br>\n"
-                                             "<a href=/%d/action/quit>quit</a><br>\n",
+                                             "<a href=/%d/action/quit>quit</a><br>\n"
+                                             "custom<br>\n",
                                              thread, cnt[thread]->conf.camera_id,
                                              cnt[thread]->conf.camera_name ? " -- " : "",
                                              cnt[thread]->conf.camera_name ? cnt[thread]->conf.camera_name : "",
@@ -2255,7 +2279,7 @@ static unsigned int handle_get(int client_socket, const char *url, void *userdat
                                 send_template_end_client(client_socket);
                             } else {
                                 send_template_ini_client_raw(client_socket);
-                                sprintf(res, "Camera %d\nmakemovie\nsnapshot\nrestart\nquit\n", cnt[thread]->conf.camera_id);
+                                sprintf(res, "Camera %d\nmakemovie\nsnapshot\nrestart\nquit\ncustom\n", cnt[thread]->conf.camera_id);
                                 send_template_raw(client_socket, res);
                             }
                         } else if ((slash == '/') && (length_uri > 4)) {
