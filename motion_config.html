@@ -25,7 +25,7 @@
   <section class="vertical-menu">
     <button class="accordian">Basic Setup</button>
       <div class="panel">
-        <a href="#Basic_Setup">General</a>
+        <a href="#top">General</a>
         <a href="#Basic_Setup_V4L2">V4L2 Devices</a>
         <a href="#Basic_Setup_Network">Network Cameras</a>
         <a href="#Basic_Setup_PiCam">Pi Camera</a>
@@ -3008,28 +3008,28 @@
         This is how the overlaid text is located.
         <p></p>
         <table border="1" width="354">
-            <tr>
-                <td width="344">
-                    <table cellpadding="0" cellspacing="0" width="344">
-                        <tr>
-                            <td width="216">
-                                <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="216">
-                                <p><br /><br />TEXT_LEFT</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
+          <tr>
+            <td width="344">
+              <table cellpadding="0" cellspacing="0" width="344">
+                <tr>
+                  <td width="216">
+                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="216">
+                    <p><br /><br />TEXT_LEFT</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
         </table>
         <p></p>
         <p></p>
@@ -3048,28 +3048,28 @@
         This is how the overlaid text is located.
         <p></p>
         <table border="1" width="354">
-            <tr>
-                <td width="344">
-                    <table cellpadding="0" cellspacing="0" width="344">
-                        <tr>
-                            <td width="216">
-                                <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="216">
-                                <p><br /><br />TEXT_LEFT</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
+          <tr>
+            <td width="344">
+              <table cellpadding="0" cellspacing="0" width="344">
+                <tr>
+                  <td width="216">
+                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="216">
+                    <p><br /><br />TEXT_LEFT</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
         </table>
         <p></p>
 
@@ -4260,6 +4260,7 @@
 
       <h3><a name="OptDetail_Stream_Webcontrol"></a> Stream and Webcontrol</a> </h3>
       <ul>
+        <h4><a name="OptDetail_Stream"></a> Stream</a> </h4>
         Motion has simple webcam server built in. The server can be configured to
         stream both the images as well allow for a very basic http control of Motion parameters.
         <p></p>
@@ -4274,13 +4275,12 @@
         <p></p>
         Open up a text editor and paste in the following.
         <p></p>
-        <code><strong>
+        <pre>
         &lt;html&gt;
         &lt;body bgcolor=000000&gt;
         &lt;img src=http://yourmotionpc:yourstreamport/ border="0" width=25%&gt;&lt;/a&gt;
         &lt;/body&gt;
-        &lt;/html&gt;
-        </strong></code>
+        &lt;/html&gt;</pre>
         <p></p>
         Change the yourmotionpc with the IP or name of the computer running Motion.  Also revise the port
         number to be the one referenced for the stream.
@@ -4296,49 +4296,69 @@
         <p></p>
         <p></p>
 
+        <h4><a name="OptDetail_Webcontrol"></a>Web Control</a> </h4>
         <p></p>
-        Motion can be remote controlled via the simple http interface.
+        Motion may also be controlled via the web interface.  By default, this functionality is disabled
+        via the <a href="#webcontrol_parms">webcontrol_parms</a> configuration option.  This is for
+        security purposes.  If the <a href="#webcontrol_parms">webcontrol_parms</a> is enabled, some Motion
+        configuration options can be changed while Motion is running.  Other configuration options must be
+        saved and Motion restarted to become effective.
         <p></p>
-        Some Motion configuration options can be changed while Motion is running while others require
-        that the options be saved and Motion be restarted.
+        If your <a href="#webcontrol_port">webcontrol_port</a> is 8080, then open the following from the same
+        machine on which Motion is running
+        <a href="http://localhost:8080/" rel="nofollow" target="_top">http://localhost:8080/</a>
         <p></p>
-        The most obvious tool to use to remote control Motion is any web browser.
-        All commands are sent using the http GET method which simply means that the information is
-        sent via the URL and maybe a query string. You can use any browser (Firefox, Mozilla, Internet Explorer
-        , etc). You can also use the text based browser lynx to control Motion from a console.
-        It navigates fine through the very simple and minimalistic http control interface of Motion.
-        <p></p>
-        <p></p>
-        But it is probably simpler to connect to the control port with a browser, navigate to the function
-        you want, and copy the URL from the browser URL entry line.
-        If your <code>webcontrol_port</code> is 8080 and you browse from the same machine
-        on which Motion runs simply look up
-        <a href="http://localhost:8080/" rel="nofollow" target="_top">http://localhost:8080/</a> and navigate around.
-        Connecting from a remote machine can be done by using a domain name (example
-         <a href="http://mydomain.com:8080/" rel="nofollow" target="_top">http://mydomain.com:8080/</a>) or the
-         IP address of the machine (example
+        To access the web control from remote machine, first set the
+        <a href="#webcontrol_localhost">webcontrol_localhost</a> to <code>off</code> then
+        connect using the IP of the remote machine instead of <code>localhost</code> (example
          <a href="http://192.168.1.4:8080/" rel="nofollow" target="_top">http://192.168.1.4:8080/</a>).
-         The option <code>webcontrol_localhost</code> must be off to allow connection from a remote machine.
         <p></p>
-        If you want to use a script or cron to automatically change Motion settings while Motion runs you use a
-        program that can fetch a webpage. We simply just throw away the html page that Motion returns. Programs
-        commonly available on Linux machines are wget and lwp-request. Here is an example of how to start and
-        stop motion detection via cron. These two lines are added to /etc/crontab.
+        If you want to use a script or cron to automatically change Motion settings while Motion runs, use a
+        program that can fetch or send a webpage. Common programs are <code> wget </code>, <code>lwp-request</code>
+        and <code>curl</code>.
+        <p></p>
+        Example to pause motion detection
         <p></p>
         <pre>
-        0 9 &#42; &#42; &#42; root /usr/bin/lwp-request http://localhost:8080/0/detection/start &#62; /dev/null
-        0 18 &#42; &#42; &#42; root /usr/bin/lwp-request http://localhost:8080/0/detection/pause &#62; /dev/null
-        </pre>
+        lwp-request http://localhost:8080/0/detection/pause</pre>
         <p></p>
-        If you want to use the http remote control from your own software (for example your own PHP front end)
-        you can set the motion.conf option <a href="#webcontrol_html_output">webcontrol_html_output</a> off. Then
-        Motion answers back with very basic text only without html around it.
+        Example to start motion detection
         <p></p>
-        To remote control Motion from a web pages you can for example use PHP.
-        In PHP it takes this simple code line to send a remote commend to Motion.
-        Here we pause motion detection for camera 2
+        <pre>
+        lwp-request http://localhost:8080/0/detection/start</pre>
         <p></p>
-        <code>readfile('http://localhost:8080/2/detection/pause');</code>
+        Example script to update the text_left with cpu load (verbose for clarity)
+        <pre>
+          #!/bin/bash
+
+          LOAD=`top -b -n2 | grep "Cpu(s)" | awk '{print $2+$4}' | tail -n1`
+
+          TEXTLEFT=""
+          TEXTLEFT=$TEXTLEFT"System at %{host}"
+          TEXTLEFT=$TEXTLEFT"\nCPU $LOAD "
+          TEXTLEFT=$TEXTLEFT"\nfps: %{fps}"
+          TEXTLEFT=$TEXTLEFT"\nDate: %Y-%m-%d"
+          TEXTLEFT=$TEXTLEFT"\n%T-%q"
+
+          # Replace special chars with needed urlcodes
+          TEXTLEFT="${TEXTLEFT//%/%25}"     #Replace % with %25
+          TEXTLEFT="${TEXTLEFT// /%20}"     #Replace spaces with %20
+          TEXTLEFT="${TEXTLEFT//\{/%7B}"    #Replace { with %7B
+          TEXTLEFT="${TEXTLEFT//\}/%7D}"    #Replace } with %7D
+
+          curl http://localhost:8080/1/config/set?text_left=$TEXTLEFT
+
+          return 0</pre>
+        Note that the replacement of characters with the urlcode values is required whenever updating via
+        the web interface.
+        <p></p>
+        To control from your own software (for example your own PHP front end) the motion.conf
+        option <a href="#webcontrol_html_output">webcontrol_html_output</a> can be set to <code>off</code> which
+        will cause Motion to remove the html tags in the responses.
+        <p></p>
+        Example PHP to pause camera 2
+        <pre>
+        readfile('http://localhost:8080/2/detection/pause');</pre>
         <p></p>
 
         </p>
