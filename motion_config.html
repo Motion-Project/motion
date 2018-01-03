@@ -23,28 +23,80 @@
   </section>
 
   <section class="vertical-menu">
-    <a href="#Basic_Setup"> The Basic Setup </a>
-    <a href="#Command_Line_Options"> Command Line Options </a>
-    <a href="#The_Config_Files"> The Configuration Files </a>
-    <a href="#Signals_Sent"> Signals (sent with e.g. kill command) </a>
-    <a href="#Configuration_OptionsAlpha"> Listed alphabetically with mapping of old option names to current names </a>
-    <a href="#Configuration_OptionsTopic"> Listed by topic </a>
-    <a href="#Configuration_OptionsDetail"> Detail descriptions of each option</a>
-    <a href="#conversion_specifiers"> Conversion Specifiers</a>
-    <a href="#Options_System_Processing"> System Processing</a>
-    <a href="#Options_Video4Linux_Devices"> Video4Linux Devices</a>
-    <a href="#Options_Network_Cameras"> Network Cameras</a>
-    <a href="#Options_Raspi_Cameras"> Raspberry Cameras</a>
-    <a href="#Options_Image_Processing"> Image Processing</a>
-    <a href="#Options_Motion_Detection"> Motion Detection</a>
-    <a href="#Options_Scripts"> Script Execution</a>
-    <a href="#Options_Output_General"> General Output Options</a>
-    <a href="#Options_Pictures"> Picture Output</a>
-    <a href="#Options_Movies"> Movie Output</a>
-    <a href="#Options_Pipe"> Pipe Output</a>
-    <a href="#Options_Stream_Webcontrol"> Stream and Webcontrol</a>
-    <a href="#Options_Database"> Database Options</a>
-    <a href="#Options_Tracking"> Tracking Camera Options</a>
+    <button class="accordian">Basic Setup</button>
+      <div class="panel">
+        <a href="#top">General</a>
+        <a href="#Basic_Setup_V4L2">V4L2 Devices</a>
+        <a href="#Basic_Setup_Network">Network Cameras</a>
+        <a href="#Basic_Setup_PiCam">Pi Camera</a>
+        <a href="#Basic_Setup_Composite">Composite Cards</a>
+        <a href="#Basic_Setup_Static">Static Files</a>
+      </div>
+    <button class="accordian">Commands/Files</button>
+      <div class="panel">
+        <a href="#Command_Line_Options">Command Line</a>
+        <a href="#The_Config_Files">Configuration Files </a>
+        <a href="#Signals_Sent">Signals</a>
+      </div>
+    <a href="#Configuration_OptionsAlpha">Options-Alpha</a>
+    <a href="#Configuration_OptionsTopic">Options-Topic</a>
+    <button class="accordian">Options-General</a></button>
+      <div class="panel">
+        <a href="#OptTopic_System_Processing">System Processing</a>
+        <a href="#conversion_specifiers">Conversion Specifiers</a>
+      </div>
+    <button class="accordian">Options-Cameras</a></button>
+      <div class="panel">
+        <a href="#OptTopic_Video4Linux_Devices">Video4Linux Devices</a>
+        <a href="#OptTopic_Network_Cameras">Network Cameras</a>
+        <a href="#OptTopic_Raspi_Cameras">Pi Cameras</a>
+      </div>
+    <button class="accordian">Options-Processing/Scripts</a></button>
+      <div class="panel">
+        <a href="#OptTopic_Image_Processing">Image Processing</a>
+        <a href="#OptTopic_Motion_Detection">Motion Detection</a>
+        <a href="#OptTopic_Scripts">Script Execution</a>
+      </div>
+    <button class="accordian">Options-Output</a></button>
+      <div class="panel">
+        <a href="#OptTopic_Output_General">General</a>
+        <a href="#OptTopic_Pictures">Pictures</a>
+        <a href="#OptTopic_Movies">Movies</a>
+      </div>
+    <button class="accordian">Options-Pipe/Steams</a></button>
+      <div class="panel">
+        <a href="#OptTopic_Pipe">Pipe Output</a>
+        <a href="#OptTopic_Stream_Webcontrol">Stream/Webcontrol</a>
+      </div>
+    <button class="accordian">Options-Database/Tracking</a></button>
+      <div class="panel">
+        <a href="#OptTopic_Database">Database Options</a>
+        <a href="#OptTopic_Tracking">Tracking Options</a>
+      </div>
+    <script>
+      var acc = document.getElementsByClassName("accordian");
+      var i;
+      for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+          var fnodes = document.getElementsByClassName("accordian");
+          var indx;
+          for (indx = 0; indx < fnodes.length; indx++){
+            if (this.isSameNode(fnodes[indx])) {
+              this.classList.toggle("active");
+              var panel = this.nextElementSibling;
+              if (panel.style.maxHeight){
+                panel.style.maxHeight = null;
+              } else {
+                panel.style.maxHeight = (panel.scrollHeight+50) + "px";
+              }
+            } else {
+              var panel = fnodes[indx].nextElementSibling;
+              panel.style.maxHeight = null;
+            }
+          }
+        });
+      }
+    </script>
   </section>
 
   <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
@@ -54,6 +106,7 @@
       <p></p>
       Before you can start using Motion you need to know some basics about your camera(s).
       <p></p>
+      <a name="Basic_Setup_V4L2"></a>
       For video4linux devices, the camera must be installed per the requirements of the camera.  It is
       out of the scope of this document to tell you how to do this and it depends on which type of camera.  Once
       the camera is installed it will have the device name(s) of /dev/video0, /dev/video1, /dev/video2...
@@ -76,6 +129,7 @@
       the option <code><a href="#input" >input</a> </code> must be set to the value -1 for USB cameras.
       <p></p>
 
+      <a name="Basic_Setup_Network"></a>
       <strong>Network cameras</strong> are set up via the
       <code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong> parameter.
       The latest versions of Motion support rtsp format which many cameras now stream.
@@ -86,6 +140,7 @@
       for additional options.
       <p></p>
 
+      <a name="Basic_Setup_PiCam"></a>
       <strong>Raspberry Pi cameras</strong> can be set up two different ways.  If Motion is installed by using the
       apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
       a v4l2 device for the camera.  Users will need to install this module using the
@@ -96,6 +151,7 @@
       the bcm2835-v4l2 module.  <strong><code>When Motion is installed via apt, the mmalcam option is not available.</code></strong>
       <p></p>
 
+      <a name="Basic_Setup_Composite"></a>
       <strong>Composite video cards</strong> are normally made with a chip called BT878 (older cards have a BT848). They
       all use the Linux driver called 'bttv'.
       <p></p>
@@ -125,9 +181,10 @@
       If your camera is a PAL black and white you may get a better result with norm=3 (PAL no colour).
       <p></p>
 
+      <a name="Basic_Setup_Static"></a>
       <strong>Static files</strong> can also be processed with a bit of additional setup via a v4l2loopback device.
       Install the loopback software as described in the
-      <code><strong><a href="#Options_Pipe" >Output - Pipe Options</a> </code></strong>
+      <code><strong><a href="#OptDetail_Pipe" >Output - Pipe Options</a> </code></strong>
       section of this guide to create a /dev/videoX device and then use software such as ffmpeg to stream
       the static file into the v4l2 device.  e.g.
       <code><strong> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </strong></code>  Then in a separate terminal, start Motion
@@ -291,29 +348,29 @@
           <col width="250px">
         </colgroup>
         <thead>
-        	<tr>
-      			<th bgcolor="#edf4f9" word-wrap:break-word > Signal </th>
-      			<th bgcolor="#edf4f9" word-wrap:break-word > Description </th>
-      			<th bgcolor="#edf4f9" word-wrap:break-word > Editors comment </th>
-      		</tr>
-      	</thead>
-      	<tbody>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > SIGHUP </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > The config file will be reread. </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > This is a very useful signal when you experiment with settings in the config file. </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > SIGTERM </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > If needed motion will create an movie file of the last event and exit </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
-      		</tr>
-      		<tr>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > SIGUSR1 </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Motion will create an movie file of the current event. </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
-      		</tr>
-      	</tbody>
+          <tr>
+            <th bgcolor="#edf4f9" word-wrap:break-word > Signal </th>
+            <th bgcolor="#edf4f9" word-wrap:break-word > Description </th>
+            <th bgcolor="#edf4f9" word-wrap:break-word > Editors comment </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGHUP </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > The config file will be reread. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > This is a very useful signal when you experiment with settings in the config file. </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGTERM </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > If needed motion will create an movie file of the last event and exit </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >  </td>
+          </tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > SIGUSR1 </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Motion will create an movie file of the current event. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word >  </td>
+          </tr>
+        </tbody>
       </table>
       <p></p>
       <p></p>
@@ -330,593 +387,592 @@
       <p></p>
       <p></p>
       <table cellspacing="0" border="0">
-      	<colgroup width="152"></colgroup>
-      	<colgroup width="190"></colgroup>
-      	<colgroup width="160"></colgroup>
-      	<colgroup width="160"></colgroup>
-      	<tr>
-      		<td height="17" align="left"><b>Version 3.2</b></td>
-      		<td align="left"><b>Version 4.0</b></td>
-      		<td align="left"><b>Version 4.1</b></td>
-      		<td align="left"><b>Current Version</b></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">area_detect</td>
-      		<td align="left">area_detect</td>
-      		<td align="left">area_detect</td>
-      		<td align="left"><a href="#area_detect" >area_detect</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">auto_brightness</td>
-      		<td align="left">auto_brightness</td>
-      		<td align="left">auto_brightness</td>
-      		<td align="left"><a href="#auto_brightness" >auto_brightness</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">brightness</td>
-      		<td align="left">brightness</td>
-      		<td align="left">brightness</td>
-      		<td align="left"><a href="#brightness" >brightness</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">thread</td>
-      		<td align="left">camera</td>
-      		<td align="left">camera</td>
-      		<td align="left"><a href="#camera" >camera</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">camera_dir</td>
-      		<td align="left">camera_dir</td>
-      		<td align="left"><a href="#camera_dir" >camera_dir</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">camera_id</td>
-      		<td align="left">camera_id</td>
-      		<td align="left"><a href="#camera_id" >camera_id</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">camera_name</td>
-      		<td align="left">camera_name</td>
-      		<td align="left"><a href="#camera_name" >camera_name</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">contrast</td>
-      		<td align="left">contrast</td>
-      		<td align="left">contrast</td>
-      		<td align="left"><a href="#contrast" >contrast</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">daemon</td>
-      		<td align="left">daemon</td>
-      		<td align="left">daemon</td>
-      		<td align="left"><a href="#daemon" >daemon</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">database_busy_timeout</td>
-      		<td align="left">database_busy_timeout</td>
-      		<td align="left"><a href="#database_busy_timeout" >database_busy_timeout</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">mysql_db</td>
-      		<td align="left">database_dbname</td>
-      		<td align="left">database_dbname</td>
-      		<td align="left"><a href="#database_dbname" >database_dbname</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">pgsql_db</td>
-      		<td align="left">database_dbname</td>
-      		<td align="left">database_dbname</td>
-      		<td align="left"><a href="#database_dbname" >database_dbname</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">mysql_host</td>
-      		<td align="left">database_host</td>
-      		<td align="left">database_host</td>
-      		<td align="left"><a href="#database_host" >database_host</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">pgsql_host</td>
-      		<td align="left">database_host</td>
-      		<td align="left">database_host</td>
-      		<td align="left"><a href="#database_host" >database_host</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">mysql_password</td>
-      		<td align="left">database_password</td>
-      		<td align="left">database_password</td>
-      		<td align="left"><a href="#database_password" >database_password</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">pgsql_password</td>
-      		<td align="left">database_password</td>
-      		<td align="left">database_password</td>
-      		<td align="left"><a href="#database_password" >database_password</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">pgsql_port</td>
-      		<td align="left">database_port</td>
-      		<td align="left">database_port</td>
-      		<td align="left"><a href="#database_port" >database_port</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">database_type</td>
-      		<td align="left">database_type</td>
-      		<td align="left"><a href="#database_type" >database_type</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">mysql_user</td>
-      		<td align="left">database_user</td>
-      		<td align="left">database_user</td>
-      		<td align="left"><a href="#database_user" >database_user</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">pgsql_user</td>
-      		<td align="left">database_user</td>
-      		<td align="left">database_user</td>
-      		<td align="left"><a href="#database_user" >database_user</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">despeckle</td>
-      		<td align="left">despeckle_filter</td>
-      		<td align="left">despeckle_filter</td>
-      		<td align="left"><a href="#despeckle_filter" >despeckle_filter</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">output_all</td>
-      		<td align="left">emulate_motion</td>
-      		<td align="left">emulate_motion</td>
-      		<td align="left"><a href="#emulate_motion" >emulate_motion</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">gap</td>
-      		<td align="left">event_gap</td>
-      		<td align="left">event_gap</td>
-      		<td align="left"><a href="#event_gap" >event_gap</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">exif_text</td>
-      		<td align="left">exif_text</td>
-      		<td align="left"><a href="#exif_text" >exif_text</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">extpipe</td>
-      		<td align="left">extpipe</td>
-      		<td align="left"><a href="#extpipe" >extpipe</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_bps</td>
-      		<td align="left">ffmpeg_bps</td>
-      		<td align="left">ffmpeg_bps</td>
-      		<td align="left"><a href="#ffmpeg_bps" >ffmpeg_bps</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">ffmpeg_duplicate_frames</td>
-      		<td align="left">ffmpeg_duplicate_frames</td>
-      		<td align="left"><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_cap_motion</td>
-      		<td align="left">ffmpeg_output_debug_movies</td>
-      		<td align="left">ffmpeg_output_debug_movies</td>
-      		<td align="left"><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_cap_new</td>
-      		<td align="left">ffmpeg_output_movies</td>
-      		<td align="left">ffmpeg_output_movies</td>
-      		<td align="left"><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left"></td>
-      		<td align="left"><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_variable_bitrate</td>
-      		<td align="left">ffmpeg_variable_bitrate</td>
-      		<td align="left">ffmpeg_variable_bitrate</td>
-      		<td align="left"><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_video_codec</td>
-      		<td align="left">ffmpeg_video_codec</td>
-      		<td align="left">ffmpeg_video_codec</td>
-      		<td align="left"><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">flip_axis</td>
-      		<td align="left"><a href="#flip_axis" >flip_axis</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">framerate</td>
-      		<td align="left">framerate</td>
-      		<td align="left">framerate</td>
-      		<td align="left"><a href="#framerate" >framerate</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">frequency</td>
-      		<td align="left">frequency</td>
-      		<td align="left">frequency</td>
-      		<td align="left"><a href="#frequency" >frequency</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">height</td>
-      		<td align="left">height</td>
-      		<td align="left">height</td>
-      		<td align="left"><a href="#height" >height</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">hue</td>
-      		<td align="left">hue</td>
-      		<td align="left">hue</td>
-      		<td align="left"><a href="#hue" >hue</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">input</td>
-      		<td align="left">input</td>
-      		<td align="left">input</td>
-      		<td align="left"><a href="#input" >input</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">ipv6_enabled</td>
-      		<td align="left">ipv6_enabled</td>
-      		<td align="left"><a href="#ipv6_enabled" >ipv6_enabled</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">lightswitch</td>
-      		<td align="left">lightswitch</td>
-      		<td align="left">lightswitch</td>
-      		<td align="left"><a href="#lightswitch" >lightswitch</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">locate</td>
-      		<td align="left">locate_motion_mode</td>
-      		<td align="left">locate_motion_mode</td>
-      		<td align="left"><a href="#locate_motion_mode" >locate_motion_mode</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">locate_motion_style</td>
-      		<td align="left">locate_motion_style</td>
-      		<td align="left"><a href="#locate_motion_style" >locate_motion_style</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">log_level</td>
-      		<td align="left">log_level</td>
-      		<td align="left"><a href="#log_level" >log_level</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">log_type</td>
-      		<td align="left">log_type</td>
-      		<td align="left"><a href="#log_type" >log_type</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">logfile</td>
-      		<td align="left">logfile</td>
-      		<td align="left"><a href="#logfile" >logfile</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">mask_file</td>
-      		<td align="left">mask_file</td>
-      		<td align="left">mask_file</td>
-      		<td align="left"><a href="#mask_file" >mask_file</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">mask_privacy</td>
-      		<td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
-      	</tr>
-
-      	<tr>
-      		<td height="17" align="left">max_mpeg_time</td>
-      		<td align="left">max_movie_time</td>
-      		<td align="left">max_movie_time</td>
-      		<td align="left"><a href="#max_movie_time" >max_movie_time</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">minimum_frame_time</td>
-      		<td align="left">minimum_frame_time</td>
-      		<td align="left">minimum_frame_time</td>
-      		<td align="left"><a href="#minimum_frame_time" >minimum_frame_time</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">minimum_motion_frames</td>
-      		<td align="left">minimum_motion_frames</td>
-      		<td align="left">minimum_motion_frames</td>
-      		<td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">mmalcam_control_params</td>
-      		<td align="left">mmalcam_control_params</td>
-      		<td align="left"><a href="#mmalcam_control_params" >mmalcam_control_params</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">mmalcam_name</td>
-      		<td align="left">mmalcam_name</td>
-      		<td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">motion_video_pipe</td>
-      		<td align="left">motion_video_pipe</td>
-      		<td align="left">motion_video_pipe</td>
-      		<td align="left"><a href="#motion_video_pipe" >motion_video_pipe</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">movie_filename</td>
-      		<td align="left">movie_filename</td>
-      		<td align="left">movie_filename</td>
-      		<td align="left"><a href="#movie_filename" >movie_filename</a></td>
-      	</tr>
+        <colgroup width="152"></colgroup>
+        <colgroup width="190"></colgroup>
+        <colgroup width="160"></colgroup>
+        <colgroup width="160"></colgroup>
+        <tr>
+          <td height="17" align="left"><b>Version 3.2</b></td>
+          <td align="left"><b>Version 4.0</b></td>
+          <td align="left"><b>Version 4.1</b></td>
+          <td align="left"><b>Current Version</b></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">area_detect</td>
+          <td align="left">area_detect</td>
+          <td align="left">area_detect</td>
+          <td align="left"><a href="#area_detect" >area_detect</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">auto_brightness</td>
+          <td align="left">auto_brightness</td>
+          <td align="left">auto_brightness</td>
+          <td align="left"><a href="#auto_brightness" >auto_brightness</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">brightness</td>
+          <td align="left">brightness</td>
+          <td align="left">brightness</td>
+          <td align="left"><a href="#brightness" >brightness</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">thread</td>
+          <td align="left">camera</td>
+          <td align="left">camera</td>
+          <td align="left"><a href="#camera" >camera</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">camera_dir</td>
+          <td align="left">camera_dir</td>
+          <td align="left"><a href="#camera_dir" >camera_dir</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">camera_id</td>
+          <td align="left">camera_id</td>
+          <td align="left"><a href="#camera_id" >camera_id</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">camera_name</td>
+          <td align="left">camera_name</td>
+          <td align="left"><a href="#camera_name" >camera_name</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">contrast</td>
+          <td align="left">contrast</td>
+          <td align="left">contrast</td>
+          <td align="left"><a href="#contrast" >contrast</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">daemon</td>
+          <td align="left">daemon</td>
+          <td align="left">daemon</td>
+          <td align="left"><a href="#daemon" >daemon</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">database_busy_timeout</td>
+          <td align="left">database_busy_timeout</td>
+          <td align="left"><a href="#database_busy_timeout" >database_busy_timeout</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">mysql_db</td>
+          <td align="left">database_dbname</td>
+          <td align="left">database_dbname</td>
+          <td align="left"><a href="#database_dbname" >database_dbname</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">pgsql_db</td>
+          <td align="left">database_dbname</td>
+          <td align="left">database_dbname</td>
+          <td align="left"><a href="#database_dbname" >database_dbname</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">mysql_host</td>
+          <td align="left">database_host</td>
+          <td align="left">database_host</td>
+          <td align="left"><a href="#database_host" >database_host</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">pgsql_host</td>
+          <td align="left">database_host</td>
+          <td align="left">database_host</td>
+          <td align="left"><a href="#database_host" >database_host</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">mysql_password</td>
+          <td align="left">database_password</td>
+          <td align="left">database_password</td>
+          <td align="left"><a href="#database_password" >database_password</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">pgsql_password</td>
+          <td align="left">database_password</td>
+          <td align="left">database_password</td>
+          <td align="left"><a href="#database_password" >database_password</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">pgsql_port</td>
+          <td align="left">database_port</td>
+          <td align="left">database_port</td>
+          <td align="left"><a href="#database_port" >database_port</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">database_type</td>
+          <td align="left">database_type</td>
+          <td align="left"><a href="#database_type" >database_type</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">mysql_user</td>
+          <td align="left">database_user</td>
+          <td align="left">database_user</td>
+          <td align="left"><a href="#database_user" >database_user</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">pgsql_user</td>
+          <td align="left">database_user</td>
+          <td align="left">database_user</td>
+          <td align="left"><a href="#database_user" >database_user</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">despeckle</td>
+          <td align="left">despeckle_filter</td>
+          <td align="left">despeckle_filter</td>
+          <td align="left"><a href="#despeckle_filter" >despeckle_filter</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">output_all</td>
+          <td align="left">emulate_motion</td>
+          <td align="left">emulate_motion</td>
+          <td align="left"><a href="#emulate_motion" >emulate_motion</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">gap</td>
+          <td align="left">event_gap</td>
+          <td align="left">event_gap</td>
+          <td align="left"><a href="#event_gap" >event_gap</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">exif_text</td>
+          <td align="left">exif_text</td>
+          <td align="left"><a href="#exif_text" >exif_text</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">extpipe</td>
+          <td align="left">extpipe</td>
+          <td align="left"><a href="#extpipe" >extpipe</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_bps</td>
+          <td align="left">ffmpeg_bps</td>
+          <td align="left">ffmpeg_bps</td>
+          <td align="left"><a href="#ffmpeg_bps" >ffmpeg_bps</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">ffmpeg_duplicate_frames</td>
+          <td align="left">ffmpeg_duplicate_frames</td>
+          <td align="left"><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_cap_motion</td>
+          <td align="left">ffmpeg_output_debug_movies</td>
+          <td align="left">ffmpeg_output_debug_movies</td>
+          <td align="left"><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_cap_new</td>
+          <td align="left">ffmpeg_output_movies</td>
+          <td align="left">ffmpeg_output_movies</td>
+          <td align="left"><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">ffmpeg_variable_bitrate</td>
+          <td align="left"><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
+          <td align="left"><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">flip_axis</td>
+          <td align="left"><a href="#flip_axis" >flip_axis</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">framerate</td>
+          <td align="left">framerate</td>
+          <td align="left">framerate</td>
+          <td align="left"><a href="#framerate" >framerate</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">frequency</td>
+          <td align="left">frequency</td>
+          <td align="left">frequency</td>
+          <td align="left"><a href="#frequency" >frequency</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">height</td>
+          <td align="left">height</td>
+          <td align="left">height</td>
+          <td align="left"><a href="#height" >height</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">hue</td>
+          <td align="left">hue</td>
+          <td align="left">hue</td>
+          <td align="left"><a href="#hue" >hue</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">input</td>
+          <td align="left">input</td>
+          <td align="left">input</td>
+          <td align="left"><a href="#input" >input</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">ipv6_enabled</td>
+          <td align="left">ipv6_enabled</td>
+          <td align="left"><a href="#ipv6_enabled" >ipv6_enabled</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">lightswitch</td>
+          <td align="left">lightswitch</td>
+          <td align="left">lightswitch</td>
+          <td align="left"><a href="#lightswitch" >lightswitch</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">locate</td>
+          <td align="left">locate_motion_mode</td>
+          <td align="left">locate_motion_mode</td>
+          <td align="left"><a href="#locate_motion_mode" >locate_motion_mode</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">locate_motion_style</td>
+          <td align="left">locate_motion_style</td>
+          <td align="left"><a href="#locate_motion_style" >locate_motion_style</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">log_level</td>
+          <td align="left">log_level</td>
+          <td align="left"><a href="#log_level" >log_level</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">log_type</td>
+          <td align="left">log_type</td>
+          <td align="left"><a href="#log_type" >log_type</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">logfile</td>
+          <td align="left">logfile</td>
+          <td align="left"><a href="#logfile" >logfile</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">mask_file</td>
+          <td align="left">mask_file</td>
+          <td align="left">mask_file</td>
+          <td align="left"><a href="#mask_file" >mask_file</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">mask_privacy</td>
+          <td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">max_mpeg_time</td>
+          <td align="left">max_movie_time</td>
+          <td align="left">max_movie_time</td>
+          <td align="left"><a href="#max_movie_time" >max_movie_time</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">minimum_frame_time</td>
+          <td align="left">minimum_frame_time</td>
+          <td align="left">minimum_frame_time</td>
+          <td align="left"><a href="#minimum_frame_time" >minimum_frame_time</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">minimum_motion_frames</td>
+          <td align="left">minimum_motion_frames</td>
+          <td align="left">minimum_motion_frames</td>
+          <td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left">mmalcam_control_params</td>
+          <td align="left"><a href="#mmalcam_control_params" >mmalcam_control_params</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">mmalcam_name</td>
+          <td align="left">mmalcam_name</td>
+          <td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">motion_video_pipe</td>
+          <td align="left">motion_video_pipe</td>
+          <td align="left">motion_video_pipe</td>
+          <td align="left"><a href="#motion_video_pipe" >motion_video_pipe</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">movie_filename</td>
+          <td align="left">movie_filename</td>
+          <td align="left">movie_filename</td>
+          <td align="left"><a href="#movie_filename" >movie_filename</a></td>
+        </tr>
           <tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">netcam_highres</td>
-      		<td align="left"><a href="#netcam_highres" >netcam_highres</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">netcam_keepalive</td>
-      		<td align="left">netcam_keepalive</td>
-      		<td align="left">netcam_keepalive</td>
-      		<td align="left"><a href="#netcam_keepalive" >netcam_keepalive</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">netcam_proxy</td>
-      		<td align="left">netcam_proxy</td>
-      		<td align="left">netcam_proxy</td>
-      		<td align="left"><a href="#netcam_proxy" >netcam_proxy</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">netcam_tolerant_check</td>
-      		<td align="left">netcam_tolerant_check</td>
-      		<td align="left">netcam_tolerant_check</td>
-      		<td align="left"><a href="#netcam_tolerant_check" >netcam_tolerant_check</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">netcam_url</td>
-      		<td align="left">netcam_url</td>
-      		<td align="left">netcam_url</td>
-      		<td align="left"><a href="#netcam_url" >netcam_url</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">netcam_userpass</td>
-      		<td align="left">netcam_userpass</td>
-      		<td align="left">netcam_userpass</td>
-      		<td align="left"><a href="#netcam_userpass" >netcam_userpass</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">noise_level</td>
-      		<td align="left">noise_level</td>
-      		<td align="left">noise_level</td>
-      		<td align="left"><a href="#noise_level" >noise_level</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">noise_tune</td>
-      		<td align="left">noise_tune</td>
-      		<td align="left">noise_tune</td>
-      		<td align="left"><a href="#noise_tune" >noise_tune</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">norm</td>
-      		<td align="left">norm</td>
-      		<td align="left">norm</td>
-      		<td align="left"><a href="#norm" >norm</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_area_detected</td>
-      		<td align="left">on_area_detected</td>
-      		<td align="left">on_area_detected</td>
-      		<td align="left"><a href="#on_area_detected" >on_area_detected</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_camera_lost</td>
-      		<td align="left">on_camera_lost</td>
-      		<td align="left">on_camera_lost</td>
-      		<td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">on_camera_found</td>
-      		<td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_event_end</td>
-      		<td align="left">on_event_end</td>
-      		<td align="left">on_event_end</td>
-      		<td align="left"><a href="#on_event_end" >on_event_end</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_event_start</td>
-      		<td align="left">on_event_start</td>
-      		<td align="left">on_event_start</td>
-      		<td align="left"><a href="#on_event_start" >on_event_start</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_motion_detected</td>
-      		<td align="left">on_motion_detected</td>
-      		<td align="left">on_motion_detected</td>
-      		<td align="left"><a href="#on_motion_detected" >on_motion_detected</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_movie_end</td>
-      		<td align="left">on_movie_end</td>
-      		<td align="left">on_movie_end</td>
-      		<td align="left"><a href="#on_movie_end" >on_movie_end</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_movie_start</td>
-      		<td align="left">on_movie_start</td>
-      		<td align="left">on_movie_start</td>
-      		<td align="left"><a href="#on_movie_start" >on_movie_start</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">on_picture_save</td>
-      		<td align="left">on_picture_save</td>
-      		<td align="left">on_picture_save</td>
-      		<td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">output_motion</td>
-      		<td align="left">output_debug_pictures</td>
-      		<td align="left">output_debug_pictures</td>
-      		<td align="left"><a href="#output_debug_pictures" >output_debug_pictures</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">output_normal</td>
-      		<td align="left">output_pictures</td>
-      		<td align="left">output_pictures</td>
-      		<td align="left"><a href="#output_pictures" >output_pictures</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">jpeg_filename</td>
-      		<td align="left">picture_filename</td>
-      		<td align="left">picture_filename</td>
-      		<td align="left"><a href="#picture_filename" >picture_filename</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ppm</td>
-      		<td align="left">picture_type</td>
-      		<td align="left">picture_type</td>
-      		<td align="left"><a href="#picture_type" >picture_type</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">post_capture</td>
-      		<td align="left">post_capture</td>
-      		<td align="left">post_capture</td>
-      		<td align="left"><a href="#post_capture" >post_capture</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">power_line_frequency</td>
-      		<td align="left">power_line_frequency</td>
-      		<td align="left"><a href="#power_line_frequency" >power_line_frequency</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">pre_capture</td>
-      		<td align="left">pre_capture</td>
-      		<td align="left">pre_capture</td>
-      		<td align="left"><a href="#pre_capture" >pre_capture</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">process_id_file</td>
-      		<td align="left">process_id_file</td>
-      		<td align="left">process_id_file</td>
-      		<td align="left"><a href="#process_id_file" >process_id_file</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">quality</td>
-      		<td align="left">quality</td>
-      		<td align="left">quality</td>
-      		<td align="left"><a href="#quality" >quality</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">quiet</td>
-      		<td align="left">quiet</td>
-      		<td align="left">quiet</td>
-      		<td align="left"><a href="#quiet" >quiet</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">rotate</td>
-      		<td align="left">rotate</td>
-      		<td align="left">rotate</td>
-      		<td align="left"><a href="#rotate" >rotate</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">roundrobin_frames</td>
-      		<td align="left">roundrobin_frames</td>
-      		<td align="left">roundrobin_frames</td>
-      		<td align="left"><a href="#roundrobin_frames" >roundrobin_frames</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">roundrobin_skip</td>
-      		<td align="left">roundrobin_skip</td>
-      		<td align="left">roundrobin_skip</td>
-      		<td align="left"><a href="#roundrobin_skip" >roundrobin_skip</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">rtsp_uses_tcp</td>
-      		<td align="left">rtsp_uses_tcp</td>
-      		<td align="left"><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">saturation</td>
-      		<td align="left">saturation</td>
-      		<td align="left">saturation</td>
-      		<td align="left"><a href="#saturation" >saturation</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">setup_mode</td>
-      		<td align="left">setup_mode</td>
-      		<td align="left">setup_mode</td>
-      		<td align="left"><a href="#setup_mode" >setup_mode</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">smart_mask_speed</td>
-      		<td align="left">smart_mask_speed</td>
-      		<td align="left">smart_mask_speed</td>
-      		<td align="left"><a href="#smart_mask_speed" >smart_mask_speed</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">snapshot_filename</td>
-      		<td align="left">snapshot_filename</td>
-      		<td align="left">snapshot_filename</td>
-      		<td align="left"><a href="#snapshot_filename" >snapshot_filename</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">snapshot_interval</td>
-      		<td align="left">snapshot_interval</td>
-      		<td align="left">snapshot_interval</td>
-      		<td align="left"><a href="#snapshot_interval" >snapshot_interval</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">sql_log_mpeg</td>
-      		<td align="left">sql_log_movie</td>
-      		<td align="left">sql_log_movie</td>
-      		<td align="left"><a href="#sql_log_movie" >sql_log_movie</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">sql_log_image</td>
-      		<td align="left">sql_log_picture</td>
-      		<td align="left">sql_log_picture</td>
-      		<td align="left"><a href="#sql_log_picture" >sql_log_picture</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">sql_log_snapshot</td>
-      		<td align="left">sql_log_snapshot</td>
-      		<td align="left">sql_log_snapshot</td>
-      		<td align="left"><a href="#sql_log_snapshot" >sql_log_snapshot</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">sql_log_timelapse</td>
-      		<td align="left">sql_log_timelapse</td>
-      		<td align="left">sql_log_timelapse</td>
-      		<td align="left"><a href="#sql_log_timelapse" >sql_log_timelapse</a></td>
-      	</tr>
-      	<tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">netcam_highres</td>
+          <td align="left"><a href="#netcam_highres" >netcam_highres</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">netcam_keepalive</td>
+          <td align="left">netcam_keepalive</td>
+          <td align="left">netcam_keepalive</td>
+          <td align="left"><a href="#netcam_keepalive" >netcam_keepalive</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">netcam_proxy</td>
+          <td align="left">netcam_proxy</td>
+          <td align="left">netcam_proxy</td>
+          <td align="left"><a href="#netcam_proxy" >netcam_proxy</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">netcam_tolerant_check</td>
+          <td align="left">netcam_tolerant_check</td>
+          <td align="left">netcam_tolerant_check</td>
+          <td align="left"><a href="#netcam_tolerant_check" >netcam_tolerant_check</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">netcam_url</td>
+          <td align="left">netcam_url</td>
+          <td align="left">netcam_url</td>
+          <td align="left"><a href="#netcam_url" >netcam_url</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">netcam_userpass</td>
+          <td align="left">netcam_userpass</td>
+          <td align="left">netcam_userpass</td>
+          <td align="left"><a href="#netcam_userpass" >netcam_userpass</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">noise_level</td>
+          <td align="left">noise_level</td>
+          <td align="left">noise_level</td>
+          <td align="left"><a href="#noise_level" >noise_level</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">noise_tune</td>
+          <td align="left">noise_tune</td>
+          <td align="left">noise_tune</td>
+          <td align="left"><a href="#noise_tune" >noise_tune</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">norm</td>
+          <td align="left">norm</td>
+          <td align="left">norm</td>
+          <td align="left"><a href="#norm" >norm</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_area_detected</td>
+          <td align="left">on_area_detected</td>
+          <td align="left">on_area_detected</td>
+          <td align="left"><a href="#on_area_detected" >on_area_detected</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_camera_lost</td>
+          <td align="left">on_camera_lost</td>
+          <td align="left">on_camera_lost</td>
+          <td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">on_camera_found</td>
+          <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_event_end</td>
+          <td align="left">on_event_end</td>
+          <td align="left">on_event_end</td>
+          <td align="left"><a href="#on_event_end" >on_event_end</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_event_start</td>
+          <td align="left">on_event_start</td>
+          <td align="left">on_event_start</td>
+          <td align="left"><a href="#on_event_start" >on_event_start</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_motion_detected</td>
+          <td align="left">on_motion_detected</td>
+          <td align="left">on_motion_detected</td>
+          <td align="left"><a href="#on_motion_detected" >on_motion_detected</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_movie_end</td>
+          <td align="left">on_movie_end</td>
+          <td align="left">on_movie_end</td>
+          <td align="left"><a href="#on_movie_end" >on_movie_end</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_movie_start</td>
+          <td align="left">on_movie_start</td>
+          <td align="left">on_movie_start</td>
+          <td align="left"><a href="#on_movie_start" >on_movie_start</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_picture_save</td>
+          <td align="left">on_picture_save</td>
+          <td align="left">on_picture_save</td>
+          <td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">output_motion</td>
+          <td align="left">output_debug_pictures</td>
+          <td align="left">output_debug_pictures</td>
+          <td align="left"><a href="#output_debug_pictures" >output_debug_pictures</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">output_normal</td>
+          <td align="left">output_pictures</td>
+          <td align="left">output_pictures</td>
+          <td align="left"><a href="#output_pictures" >output_pictures</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">jpeg_filename</td>
+          <td align="left">picture_filename</td>
+          <td align="left">picture_filename</td>
+          <td align="left"><a href="#picture_filename" >picture_filename</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ppm</td>
+          <td align="left">picture_type</td>
+          <td align="left">picture_type</td>
+          <td align="left"><a href="#picture_type" >picture_type</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">post_capture</td>
+          <td align="left">post_capture</td>
+          <td align="left">post_capture</td>
+          <td align="left"><a href="#post_capture" >post_capture</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">power_line_frequency</td>
+          <td align="left">power_line_frequency</td>
+          <td align="left"><a href="#power_line_frequency" >power_line_frequency</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">pre_capture</td>
+          <td align="left">pre_capture</td>
+          <td align="left">pre_capture</td>
+          <td align="left"><a href="#pre_capture" >pre_capture</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">process_id_file</td>
+          <td align="left">process_id_file</td>
+          <td align="left">process_id_file</td>
+          <td align="left"><a href="#process_id_file" >process_id_file</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">quality</td>
+          <td align="left">quality</td>
+          <td align="left">quality</td>
+          <td align="left"><a href="#quality" >quality</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">quiet</td>
+          <td align="left">quiet</td>
+          <td align="left">quiet</td>
+          <td align="left"><a href="#quiet" >quiet</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">rotate</td>
+          <td align="left">rotate</td>
+          <td align="left">rotate</td>
+          <td align="left"><a href="#rotate" >rotate</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">roundrobin_frames</td>
+          <td align="left">roundrobin_frames</td>
+          <td align="left">roundrobin_frames</td>
+          <td align="left"><a href="#roundrobin_frames" >roundrobin_frames</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">roundrobin_skip</td>
+          <td align="left">roundrobin_skip</td>
+          <td align="left">roundrobin_skip</td>
+          <td align="left"><a href="#roundrobin_skip" >roundrobin_skip</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">rtsp_uses_tcp</td>
+          <td align="left">rtsp_uses_tcp</td>
+          <td align="left"><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">saturation</td>
+          <td align="left">saturation</td>
+          <td align="left">saturation</td>
+          <td align="left"><a href="#saturation" >saturation</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">setup_mode</td>
+          <td align="left">setup_mode</td>
+          <td align="left">setup_mode</td>
+          <td align="left"><a href="#setup_mode" >setup_mode</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">smart_mask_speed</td>
+          <td align="left">smart_mask_speed</td>
+          <td align="left">smart_mask_speed</td>
+          <td align="left"><a href="#smart_mask_speed" >smart_mask_speed</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">snapshot_filename</td>
+          <td align="left">snapshot_filename</td>
+          <td align="left">snapshot_filename</td>
+          <td align="left"><a href="#snapshot_filename" >snapshot_filename</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">snapshot_interval</td>
+          <td align="left">snapshot_interval</td>
+          <td align="left">snapshot_interval</td>
+          <td align="left"><a href="#snapshot_interval" >snapshot_interval</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">sql_log_mpeg</td>
+          <td align="left">sql_log_movie</td>
+          <td align="left">sql_log_movie</td>
+          <td align="left"><a href="#sql_log_movie" >sql_log_movie</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">sql_log_image</td>
+          <td align="left">sql_log_picture</td>
+          <td align="left">sql_log_picture</td>
+          <td align="left"><a href="#sql_log_picture" >sql_log_picture</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">sql_log_snapshot</td>
+          <td align="left">sql_log_snapshot</td>
+          <td align="left">sql_log_snapshot</td>
+          <td align="left"><a href="#sql_log_snapshot" >sql_log_snapshot</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">sql_log_timelapse</td>
+          <td align="left">sql_log_timelapse</td>
+          <td align="left">sql_log_timelapse</td>
+          <td align="left"><a href="#sql_log_timelapse" >sql_log_timelapse</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">sql_query</td>
           <td align="left">sql_query</td>
           <td align="left">sql_query</td>
           <td align="left"><a href="#sql_query" >sql_query</a></td>
-      	</tr>
+        </tr>
         <tr>
           <td height="17" align="left"></td>
           <td align="left"></td>
@@ -928,306 +984,306 @@
           <td align="left">stream_auth_method</td>
           <td align="left">stream_auth_method</td>
           <td align="left"><a href="#stream_auth_method" >stream_auth_method</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">stream_authentication</td>
-      		<td align="left">stream_authentication</td>
-      		<td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">webcam_limit</td>
-      		<td align="left">stream_limit</td>
-      		<td align="left">stream_limit</td>
-      		<td align="left"><a href="#stream_limit" >stream_limit</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">webcam_localhost</td>
-      		<td align="left">stream_localhost</td>
-      		<td align="left">stream_localhost</td>
-      		<td align="left"><a href="#stream_localhost" >stream_localhost</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">webcam_maxrate</td>
-      		<td align="left">stream_maxrate</td>
-      		<td align="left">stream_maxrate</td>
-      		<td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">webcam_motion</td>
-      		<td align="left">stream_motion</td>
-      		<td align="left">stream_motion</td>
-      		<td align="left"><a href="#stream_motion" >stream_motion</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">webcam_port</td>
-      		<td align="left">stream_port</td>
-      		<td align="left">stream_port</td>
-      		<td align="left"><a href="#stream_port" >stream_port</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">stream_preview_newline</td>
-      		<td align="left">stream_preview_newline</td>
-      		<td align="left"><a href="#stream_preview_newline" >stream_preview_newline</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">stream_preview_scale</td>
-      		<td align="left">stream_preview_scale</td>
-      		<td align="left"><a href="#stream_preview_scale" >stream_preview_scale</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">webcam_quality</td>
-      		<td align="left">stream_quality</td>
-      		<td align="left">stream_quality</td>
-      		<td align="left"><a href="#stream_quality" >stream_quality</a></td>
-      	</tr>
-        <tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">substream_port</td>
-      		<td align="left"><a href="#substream_port" >substream_port</a></td>
         </tr>
-      	<tr>
-      		<td height="17" align="left">switchfilter</td>
-      		<td align="left">switchfilter</td>
-      		<td align="left">switchfilter</td>
-      		<td align="left"><a href="#switchfilter" >switchfilter</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">target_dir</td>
-      		<td align="left">target_dir</td>
-      		<td align="left">target_dir</td>
-      		<td align="left"><a href="#target_dir" >target_dir</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">text_changes</td>
-      		<td align="left">text_changes</td>
-      		<td align="left">text_changes</td>
-      		<td align="left"><a href="#text_changes" >text_changes</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">text_double</td>
-      		<td align="left">text_double</td>
-      		<td align="left">text_double</td>
-      		<td align="left"><a href="#text_double" >text_double</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">text_event</td>
-      		<td align="left">text_event</td>
-      		<td align="left">text_event</td>
-      		<td align="left"><a href="#text_event" >text_event</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">text_left</td>
-      		<td align="left">text_left</td>
-      		<td align="left">text_left</td>
-      		<td align="left"><a href="#text_left" >text_left</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">text_right</td>
-      		<td align="left">text_right</td>
-      		<td align="left">text_right</td>
-      		<td align="left"><a href="#text_right" >text_right</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">threshold</td>
-      		<td align="left">threshold</td>
-      		<td align="left">threshold</td>
-      		<td align="left"><a href="#threshold" >threshold</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">threshold_tune</td>
-      		<td align="left">threshold_tune</td>
-      		<td align="left">threshold_tune</td>
-      		<td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_video_codec</td>
-      		<td align="left">ffmpeg_video_codec</td>
-      		<td align="left">timelapse_codec</td>
-      		<td align="left"><a href="#timelapse_codec" >timelapse_codec</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">timelapse_filename</td>
-      		<td align="left">timelapse_filename</td>
-      		<td align="left">timelapse_filename</td>
-      		<td align="left"><a href="#timelapse_filename" >timelapse_filename</a></td>
-      	</tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">stream_authentication</td>
+          <td align="left">stream_authentication</td>
+          <td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_limit</td>
+          <td align="left">stream_limit</td>
+          <td align="left">stream_limit</td>
+          <td align="left"><a href="#stream_limit" >stream_limit</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_localhost</td>
+          <td align="left">stream_localhost</td>
+          <td align="left">stream_localhost</td>
+          <td align="left"><a href="#stream_localhost" >stream_localhost</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_maxrate</td>
+          <td align="left">stream_maxrate</td>
+          <td align="left">stream_maxrate</td>
+          <td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_motion</td>
+          <td align="left">stream_motion</td>
+          <td align="left">stream_motion</td>
+          <td align="left"><a href="#stream_motion" >stream_motion</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_port</td>
+          <td align="left">stream_port</td>
+          <td align="left">stream_port</td>
+          <td align="left"><a href="#stream_port" >stream_port</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">stream_preview_newline</td>
+          <td align="left">stream_preview_newline</td>
+          <td align="left"><a href="#stream_preview_newline" >stream_preview_newline</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">stream_preview_scale</td>
+          <td align="left">stream_preview_scale</td>
+          <td align="left"><a href="#stream_preview_scale" >stream_preview_scale</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_quality</td>
+          <td align="left">stream_quality</td>
+          <td align="left">stream_quality</td>
+          <td align="left"><a href="#stream_quality" >stream_quality</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">substream_port</td>
+          <td align="left"><a href="#substream_port" >substream_port</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">switchfilter</td>
+          <td align="left">switchfilter</td>
+          <td align="left">switchfilter</td>
+          <td align="left"><a href="#switchfilter" >switchfilter</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">target_dir</td>
+          <td align="left">target_dir</td>
+          <td align="left">target_dir</td>
+          <td align="left"><a href="#target_dir" >target_dir</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">text_changes</td>
+          <td align="left">text_changes</td>
+          <td align="left">text_changes</td>
+          <td align="left"><a href="#text_changes" >text_changes</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">text_double</td>
+          <td align="left">text_double</td>
+          <td align="left">text_double</td>
+          <td align="left"><a href="#text_double" >text_double</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">text_event</td>
+          <td align="left">text_event</td>
+          <td align="left">text_event</td>
+          <td align="left"><a href="#text_event" >text_event</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">text_left</td>
+          <td align="left">text_left</td>
+          <td align="left">text_left</td>
+          <td align="left"><a href="#text_left" >text_left</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">text_right</td>
+          <td align="left">text_right</td>
+          <td align="left">text_right</td>
+          <td align="left"><a href="#text_right" >text_right</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">threshold</td>
+          <td align="left">threshold</td>
+          <td align="left">threshold</td>
+          <td align="left"><a href="#threshold" >threshold</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">threshold_tune</td>
+          <td align="left">threshold_tune</td>
+          <td align="left">threshold_tune</td>
+          <td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">timelapse_codec</td>
+          <td align="left"><a href="#timelapse_codec" >timelapse_codec</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">timelapse_filename</td>
+          <td align="left">timelapse_filename</td>
+          <td align="left">timelapse_filename</td>
+          <td align="left"><a href="#timelapse_filename" >timelapse_filename</a></td>
+        </tr>
           <tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">timelapse_fps</td>
-      		<td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_timelapse</td>
-      		<td align="left">ffmpeg_timelapse</td>
-      		<td align="left">timelapse_interval</td>
-      		<td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
-      	</tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">timelapse_fps</td>
+          <td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_timelapse</td>
+          <td align="left">ffmpeg_timelapse</td>
+          <td align="left">timelapse_interval</td>
+          <td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
+        </tr>
           <tr>
-      		<td height="17" align="left">ffmpeg_timelapse_mode</td>
-      		<td align="left">ffmpeg_timelapse_mode</td>
-      		<td align="left">ffmpeg_timelapse_mode</td>
-      		<td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_auto</td>
-      		<td align="left">track_auto</td>
-      		<td align="left">track_auto</td>
-      		<td align="left"><a href="#track_auto" >track_auto</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_iomojo_id</td>
-      		<td align="left">track_iomojo_id</td>
-      		<td align="left">track_iomojo_id</td>
-      		<td align="left"><a href="#track_iomojo_id" >track_iomojo_id</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_maxx</td>
-      		<td align="left">track_maxx</td>
-      		<td align="left">track_maxx</td>
-      		<td align="left"><a href="#track_maxx" >track_maxx</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_maxy</td>
-      		<td align="left">track_maxy</td>
-      		<td align="left">track_maxy</td>
-      		<td align="left"><a href="#track_maxy" >track_maxy</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_motorx</td>
-      		<td align="left">track_motorx</td>
-      		<td align="left">track_motorx</td>
-      		<td align="left"><a href="#track_motorx" >track_motorx</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_motory</td>
-      		<td align="left">track_motory</td>
-      		<td align="left">track_motory</td>
-      		<td align="left"><a href="#track_motory" >track_motory</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_move_wait</td>
-      		<td align="left">track_move_wait</td>
-      		<td align="left">track_move_wait</td>
-      		<td align="left"><a href="#track_move_wait" >track_move_wait</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_port</td>
-      		<td align="left">track_port</td>
-      		<td align="left">track_port</td>
-      		<td align="left"><a href="#track_port" >track_port</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_speed</td>
-      		<td align="left">track_speed</td>
-      		<td align="left">track_speed</td>
-      		<td align="left"><a href="#track_speed" >track_speed</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_step_angle_x</td>
-      		<td align="left">track_step_angle_x</td>
-      		<td align="left">track_step_angle_x</td>
-      		<td align="left"><a href="#track_step_angle_x" >track_step_angle_x</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_step_angle_y</td>
-      		<td align="left">track_step_angle_y</td>
-      		<td align="left">track_step_angle_y</td>
-      		<td align="left"><a href="#track_step_angle_y" >track_step_angle_y</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_stepsize</td>
-      		<td align="left">track_stepsize</td>
-      		<td align="left">track_stepsize</td>
-      		<td align="left"><a href="#track_stepsize" >track_stepsize</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">track_type</td>
-      		<td align="left">track_type</td>
-      		<td align="left">track_type</td>
-      		<td align="left"><a href="#track_type" >track_type</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">tunerdevice</td>
-      		<td align="left">tunerdevice</td>
-      		<td align="left">tunerdevice</td>
-      		<td align="left"><a href="#tunerdevice" >tunerdevice</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br /></td>
-      		<td align="left">use_extpipe</td>
-      		<td align="left">use_extpipe</td>
-      		<td align="left"><a href="#use_extpipe" >use_extpipe</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">v4l2_palette</td>
-      		<td align="left">v4l2_palette</td>
-      		<td align="left">v4l2_palette</td>
-      		<td align="left"><a href="#v4l2_palette" >v4l2_palette</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">video_pipe</td>
-      		<td align="left">video_pipe</td>
-      		<td align="left">video_pipe</td>
-      		<td align="left"><a href="#video_pipe" >video_pipe</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">videodevice</td>
-      		<td align="left">videodevice</td>
-      		<td align="left">videodevice</td>
-      		<td align="left"><a href="#videodevice" >videodevice</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">control_authentication</td>
-      		<td align="left">webcontrol_authentication</td>
-      		<td align="left">webcontrol_authentication</td>
-      		<td align="left"><a href="#webcontrol_authentication" >webcontrol_authentication</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">control_html_output</td>
-      		<td align="left">webcontrol_html_output</td>
-      		<td align="left">webcontrol_html_output</td>
-      		<td align="left"><a href="#webcontrol_html_output" >webcontrol_html_output</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">control_localhost</td>
-      		<td align="left">webcontrol_localhost</td>
-      		<td align="left">webcontrol_localhost</td>
-      		<td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
-      	</tr>
+          <td height="17" align="left">ffmpeg_timelapse_mode</td>
+          <td align="left">ffmpeg_timelapse_mode</td>
+          <td align="left">ffmpeg_timelapse_mode</td>
+          <td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_auto</td>
+          <td align="left">track_auto</td>
+          <td align="left">track_auto</td>
+          <td align="left"><a href="#track_auto" >track_auto</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_iomojo_id</td>
+          <td align="left">track_iomojo_id</td>
+          <td align="left">track_iomojo_id</td>
+          <td align="left"><a href="#track_iomojo_id" >track_iomojo_id</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_maxx</td>
+          <td align="left">track_maxx</td>
+          <td align="left">track_maxx</td>
+          <td align="left"><a href="#track_maxx" >track_maxx</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_maxy</td>
+          <td align="left">track_maxy</td>
+          <td align="left">track_maxy</td>
+          <td align="left"><a href="#track_maxy" >track_maxy</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_motorx</td>
+          <td align="left">track_motorx</td>
+          <td align="left">track_motorx</td>
+          <td align="left"><a href="#track_motorx" >track_motorx</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_motory</td>
+          <td align="left">track_motory</td>
+          <td align="left">track_motory</td>
+          <td align="left"><a href="#track_motory" >track_motory</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_move_wait</td>
+          <td align="left">track_move_wait</td>
+          <td align="left">track_move_wait</td>
+          <td align="left"><a href="#track_move_wait" >track_move_wait</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_port</td>
+          <td align="left">track_port</td>
+          <td align="left">track_port</td>
+          <td align="left"><a href="#track_port" >track_port</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_speed</td>
+          <td align="left">track_speed</td>
+          <td align="left">track_speed</td>
+          <td align="left"><a href="#track_speed" >track_speed</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_step_angle_x</td>
+          <td align="left">track_step_angle_x</td>
+          <td align="left">track_step_angle_x</td>
+          <td align="left"><a href="#track_step_angle_x" >track_step_angle_x</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_step_angle_y</td>
+          <td align="left">track_step_angle_y</td>
+          <td align="left">track_step_angle_y</td>
+          <td align="left"><a href="#track_step_angle_y" >track_step_angle_y</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_stepsize</td>
+          <td align="left">track_stepsize</td>
+          <td align="left">track_stepsize</td>
+          <td align="left"><a href="#track_stepsize" >track_stepsize</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">track_type</td>
+          <td align="left">track_type</td>
+          <td align="left">track_type</td>
+          <td align="left"><a href="#track_type" >track_type</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">tunerdevice</td>
+          <td align="left">tunerdevice</td>
+          <td align="left">tunerdevice</td>
+          <td align="left"><a href="#tunerdevice" >tunerdevice</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">use_extpipe</td>
+          <td align="left">use_extpipe</td>
+          <td align="left"><a href="#use_extpipe" >use_extpipe</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">v4l2_palette</td>
+          <td align="left">v4l2_palette</td>
+          <td align="left">v4l2_palette</td>
+          <td align="left"><a href="#v4l2_palette" >v4l2_palette</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">video_pipe</td>
+          <td align="left">video_pipe</td>
+          <td align="left">video_pipe</td>
+          <td align="left"><a href="#video_pipe" >video_pipe</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">videodevice</td>
+          <td align="left">videodevice</td>
+          <td align="left">videodevice</td>
+          <td align="left"><a href="#videodevice" >videodevice</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">control_authentication</td>
+          <td align="left">webcontrol_authentication</td>
+          <td align="left">webcontrol_authentication</td>
+          <td align="left"><a href="#webcontrol_authentication" >webcontrol_authentication</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">control_html_output</td>
+          <td align="left">webcontrol_html_output</td>
+          <td align="left">webcontrol_html_output</td>
+          <td align="left"><a href="#webcontrol_html_output" >webcontrol_html_output</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">control_localhost</td>
+          <td align="left">webcontrol_localhost</td>
+          <td align="left">webcontrol_localhost</td>
+          <td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
+        </tr>
           <tr>
-      		<td height="17" align="left"></td>
-      		<td align="left"></td>
-      		<td align="left">webcontrol_parms</td>
-      		<td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">control_port</td>
-      		<td align="left">webcontrol_port</td>
-      		<td align="left">webcontrol_port</td>
-      		<td align="left"><a href="#webcontrol_port" >webcontrol_port</a></td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">width</td>
-      		<td align="left">width</td>
-      		<td align="left">width</td>
-      		<td align="left"><a href="#width" >width</td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left">ffmpeg_deinterlace</td>
-      		<td align="left">-Depreciated</td>
-      		<td align="left">-Depreciated</td>
-      		<td align="left">-Depreciated</td>
-      	</tr>
-      	<tr>
-      		<td height="17" align="left"><br></td>
-      		<td align="left">sdl_threadnr</td>
-      		<td align="left">-Depreciated</td>
-      		<td align="left">-Depreciated</td>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">webcontrol_parms</td>
+          <td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">control_port</td>
+          <td align="left">webcontrol_port</td>
+          <td align="left">webcontrol_port</td>
+          <td align="left"><a href="#webcontrol_port" >webcontrol_port</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">width</td>
+          <td align="left">width</td>
+          <td align="left">width</td>
+          <td align="left"><a href="#width" >width</td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_deinterlace</td>
+          <td align="left">-Depreciated</td>
+          <td align="left">-Depreciated</td>
+          <td align="left">-Depreciated</td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br></td>
+          <td align="left">sdl_threadnr</td>
+          <td align="left">-Depreciated</td>
+          <td align="left">-Depreciated</td>
           </tr>
       </table>
     </ul>
@@ -1243,433 +1299,401 @@
       <p></p>
       <p></p>
 
-      <a href="#Options_System_Processing" >System Processing</a>
+      <a name="OptTopic_System_Processing" ></a>
+      <a href="#OptDetail_System_Processing" >System Processing-General Info</a>
       <ul>
         <table border="1" class="fixed" >
-            <colgroup>
+          <colgroup>
             <col width="250px">
             <col width="250px">
             <col width="250px">
             <col width="250px">
           </colgroup>
           <tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#daemon" >daemon</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#process_id_file" >process_id_file</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#setup_mode" >setup_mode</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#logfile" >logfile</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#camera_id" >camera_id</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#camera_name" >camera_name</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#camera_dir" >camera_dir</a> </td>
-             </tr>
-           </tbody>
-        </table>
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Video4Linux_Devices" >Video4Linux Devices</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-            <tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#videodevice" >videodevice</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#v4l2_palette" >v4l2_palette</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#tunerdevice" >tunerdevice</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#input" >input</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#norm" >norm</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#frequency" >frequency</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#power_line_frequency" >power_line_frequency</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#auto_brightness" >auto_brightness</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#brightness" >brightness</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#contrast" >contrast</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#saturation" >saturation</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#hue" >hue</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#roundrobin_frames" >roundrobin_frames</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#roundrobin_skip" >roundrobin_skip</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#switchfilter" >switchfilter</a> </td>
-             </tr>
-           </tbody>
-        </table>
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Network_Cameras" >Network Cameras</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#netcam_highres" >netcam_highres</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Raspi_Cameras" >Raspberry Pi Camera</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#mmalcam_name" >mmalcam_name</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#mmalcam_control_params" >mmalcam_control_params</a> </td>
-             </tr>
-           </tbody>
-        </table>
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Image_Processing" >Image_Processing</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#width" >width</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#height" >height</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
-             </tr>
-          	  <tr>
-          	    <td bgcolor="#edf4f9" ><a href="#minimum_frame_time" >minimum_frame_time</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
-             </tr>
-          	  <tr>
-          	    <td bgcolor="#edf4f9" ><a href="#text_left" >text_left</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#text_right" >text_right</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#text_changes" >text_changes</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
-             </tr>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#text_double" >text_double</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Motion_Detection" >Motion Detection</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#emulate_motion" >emulate_motion</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#threshold" >threshold</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#threshold_tune" >threshold_tune</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
-             </tr>
-          	  <tr>
-           	 <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
-             </tr>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
-          	    <td bgcolor="#edf4f9" ><a href="#lightswitch" >lightswitch</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Scripts" >Script Execution</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#on_event_start" >on_event_start</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#on_event_end" >on_event_end</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#on_picture_save" >on_picture_save</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#on_motion_detected" >on_motion_detected</a> </td>
-             </tr>
-             <tr>
-           	   <td bgcolor="#edf4f9" ><a href="#on_area_detected" >on_area_detected</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#on_movie_start" >on_movie_start</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#on_movie_end" >on_movie_end</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#on_camera_lost" >on_camera_lost</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
-             </tr>
-
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Output_General" >Output - General</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#quiet" >quiet</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Pictures" >Output - Picture </a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#output_pictures" >output_pictures</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#output_debug_pictures" >output_debug_pictures</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#quality" >quality</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#picture_type" >picture_type</a> </td>
-             </tr>
-          	  <tr>
-           	 <td bgcolor="#edf4f9" ><a href="#snapshot_interval" >snapshot_interval</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#snapshot_filename" >snapshot_filename</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#picture_filename" >picture_filename</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#exif_text" >exif_text</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Movies" >Output - Movie</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#max_movie_time" >max_movie_time</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_bps" >ffmpeg_bps</a> </td>
-             </tr>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
-             </tr>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Pipe" >Output - Pipe</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#video_pipe" >video_pipe</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#motion_video_pipe" >motion_video_pipe</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#use_extpipe" >use_extpipe</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#extpipe" >extpipe</a> </td>
-             </tr>
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Stream_Webcontrol" >Stream and Webcontrol</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#ipv6_enabled" >ipv6_enabled</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_port" >stream_port</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#substream_port" >substream_port</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
-             </tr>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_localhost" >stream_localhost</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_limit" >stream_limit</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
-             </tr>
-
-           </tbody>
-        </table>
-
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <a href="#Options_Database" >Database</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#sql_log_picture" >sql_log_picture</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#sql_log_snapshot" >sql_log_snapshot</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#sql_log_movie" >sql_log_movie</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#sql_log_timelapse" >sql_log_timelapse</a> </td>
-             </tr>
             <tr>
-                <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
-                <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
-                <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
-                <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#daemon" >daemon</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#process_id_file" >process_id_file</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#setup_mode" >setup_mode</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#logfile" >logfile</a> </td>
             </tr>
             <tr>
-                <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
-                <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
-                <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
-                <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera_id" >camera_id</a> </td>
             </tr>
             <tr>
-                <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera_name" >camera_name</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera_dir" >camera_dir</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Video4Linux_Devices" ></a>
+      <a href="#OptDetail_Video4Linux_Devices" >Video4Linux Devices-General Info</a>
+      <ul>
+
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#videodevice" >videodevice</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#v4l2_palette" >v4l2_palette</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#tunerdevice" >tunerdevice</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#input" >input</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#norm" >norm</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#frequency" >frequency</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#power_line_frequency" >power_line_frequency</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#auto_brightness" >auto_brightness</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#brightness" >brightness</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#contrast" >contrast</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#saturation" >saturation</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#hue" >hue</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#roundrobin_frames" >roundrobin_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#roundrobin_skip" >roundrobin_skip</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#switchfilter" >switchfilter</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Network_Cameras" ></a>
+      <a href="#OptDetail_Network_Cameras" >Network Cameras-General Info</a>
+      <ul>
+
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_highres" >netcam_highres</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Raspi_Cameras" ></a>
+      <a href="#OptDetail_Raspi_Cameras" >Raspberry Pi Camera-General Info</a>
+      <ul>
+
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#mmalcam_name" >mmalcam_name</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mmalcam_control_params" >mmalcam_control_params</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Image_Processing" ></a>
+      <a href="#OptDetail_Image_Processing" >Image Processing-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#width" >width</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#height" >height</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#minimum_frame_time" >minimum_frame_time</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#text_left" >text_left</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_right" >text_right</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_changes" >text_changes</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#text_double" >text_double</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Motion_Detection" ></a>
+      <a href="#OptDetail_Motion_Detection" >Motion Detection-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#emulate_motion" >emulate_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold" >threshold</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_tune" >threshold_tune</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch" >lightswitch</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Scripts" ></a>
+      <a href="#OptDetail_Scripts" >Script Execution-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#on_event_start" >on_event_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_event_end" >on_event_end</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_picture_save" >on_picture_save</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_motion_detected" >on_motion_detected</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#on_area_detected" >on_area_detected</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_movie_start" >on_movie_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_movie_end" >on_movie_end</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_camera_lost" >on_camera_lost</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Output_General" ></a>
+      <a href="#OptDetail_Output_General" >Output-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#quiet" >quiet</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Pictures" ></a>
+      <a href="#OptDetail_Pictures" >Pictures-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#output_pictures" >output_pictures</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#output_debug_pictures" >output_debug_pictures</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#quality" >quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_type" >picture_type</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#snapshot_interval" >snapshot_interval</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#snapshot_filename" >snapshot_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_filename" >picture_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#exif_text" >exif_text</a> </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Movies" ></a>
+      <a href="#OptDetail_Movies" >Movies-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#max_movie_time" >max_movie_time</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_bps" >ffmpeg_bps</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Pipe" ></a>
+      <a href="#OptDetail_Pipe" >Pipes-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#video_pipe" >video_pipe</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#motion_video_pipe" >motion_video_pipe</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#use_extpipe" >use_extpipe</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#extpipe" >extpipe</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Stream_Webcontrol" ></a>
+      <a href="#OptDetail_Stream_Webcontrol" >Stream and Webcontrol-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#ipv6_enabled" >ipv6_enabled</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_port" >stream_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#substream_port" >substream_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_localhost" >stream_localhost</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_limit" >stream_limit</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
             </tr>
            </tbody>
         </table>
@@ -1679,7 +1703,8 @@
         <p></p>
       </ul>
 
-      <a href="#Options_Tracking" >Tracking</a>
+      <a name="OptTopic_Database" ></a>
+      <a href="#OptDetail_Database" >Database-General Info</a>
       <ul>
         <table border="1" class="fixed" >
           <colgroup>
@@ -1688,37 +1713,77 @@
             <col width="250px">
             <col width="250px">
           </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" ><a href="#track_type" >track_type</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_auto" >track_auto</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_port" >track_port</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_motorx" >track_motorx</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#track_motorx_reverse" >track_motorx_reverse</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_motory" >track_motory</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_motory_reverse" >track_motory_reverse</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_maxx" >track_maxx</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#track_minx" >track_minx</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_maxy" >track_maxy</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_miny" >track_miny</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_homex" >track_homex</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#track_homey" >track_homey</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_iomojo_id" >track_iomojo_id</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_step_angle_x" >track_step_angle_x</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_step_angle_y" >track_step_angle_y</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" ><a href="#track_move_wait" >track_move_wait</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_speed" >track_speed</a> </td>
-               <td bgcolor="#edf4f9" ><a href="#track_stepsize" >track_stepsize</a> </td>
-             </tr>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#sql_log_picture" >sql_log_picture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_log_snapshot" >sql_log_snapshot</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_log_movie" >sql_log_movie</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_log_timelapse" >sql_log_timelapse</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
+            </tr>
            </tbody>
+        </table>
+
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Tracking" ></a>
+      <a href="#OptDetail_Tracking" >Tracking-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#track_type" >track_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_auto" >track_auto</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_port" >track_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_motorx" >track_motorx</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#track_motorx_reverse" >track_motorx_reverse</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_motory" >track_motory</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_motory_reverse" >track_motory_reverse</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_maxx" >track_maxx</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#track_minx" >track_minx</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_maxy" >track_maxy</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_miny" >track_miny</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_homex" >track_homex</a> </td>
+            </tr>
+             <tr>
+              <td bgcolor="#edf4f9" ><a href="#track_homey" >track_homey</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_iomojo_id" >track_iomojo_id</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_step_angle_x" >track_step_angle_x</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_step_angle_y" >track_step_angle_y</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#track_move_wait" >track_move_wait</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_speed" >track_speed</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_stepsize" >track_stepsize</a> </td>
+            </tr>
+          </tbody>
         </table>
 
         <p></p>
@@ -1728,7 +1793,7 @@
 
 
       <p></p>
-   	</ul>
+     </ul>
 
     <h2><a name="Configuration_OptionsDetail"></a>  Configuration Options-Detail Descriptions </h2>
     <ul>
@@ -1748,40 +1813,38 @@
             <col width="50px">
             <col width="300px">
           </colgroup>
-         	<tbody>
-          	  <tr>
-               <td bgcolor="#edf4f9" >%Y </a> </td>
-               <td bgcolor="#edf4f9" >year</a> </td>
-               <td bgcolor="#edf4f9" >%m  </a> </td>
-               <td bgcolor="#edf4f9" >month</a> </td>
-               <td bgcolor="#edf4f9" >%d   </a> </td>
-               <td bgcolor="#edf4f9" >day</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" >%H   </a> </td>
-               <td bgcolor="#edf4f9" >hour</a> </td>
-               <td bgcolor="#edf4f9" >%M   </a> </td>
-               <td bgcolor="#edf4f9" >minute</a> </td>
-               <td bgcolor="#edf4f9" >%S   </a> </td>
-               <td bgcolor="#edf4f9" >second</a> </td>
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" >%T   </a> </td>
-               <td bgcolor="#edf4f9" >HH:MM:SS </a> </td>
-               <td bgcolor="#edf4f9" >%v   </a> </td>
-               <td bgcolor="#edf4f9" >event</a> </td>
-               <td bgcolor="#edf4f9" >%q    </a> </td>
-               <td bgcolor="#edf4f9" >frame number</a> </td>
-
-             </tr>
-             <tr>
-               <td bgcolor="#edf4f9" >%t    </a> </td>
-               <td bgcolor="#edf4f9" >camera id number</a> </td>
-               <td bgcolor="#edf4f9" >%D </a> </td>
-               <td bgcolor="#edf4f9" >changed pixels</a> </td>
-               <td bgcolor="#edf4f9" >%N </a> </td>
-               <td bgcolor="#edf4f9" >noise level</a> </td>
-
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" >%Y </a> </td>
+              <td bgcolor="#edf4f9" >year</a> </td>
+              <td bgcolor="#edf4f9" >%m  </a> </td>
+              <td bgcolor="#edf4f9" >month</a> </td>
+              <td bgcolor="#edf4f9" >%d   </a> </td>
+              <td bgcolor="#edf4f9" >day</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" >%H   </a> </td>
+              <td bgcolor="#edf4f9" >hour</a> </td>
+              <td bgcolor="#edf4f9" >%M   </a> </td>
+              <td bgcolor="#edf4f9" >minute</a> </td>
+              <td bgcolor="#edf4f9" >%S   </a> </td>
+              <td bgcolor="#edf4f9" >second</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" >%T   </a> </td>
+              <td bgcolor="#edf4f9" >HH:MM:SS </a> </td>
+              <td bgcolor="#edf4f9" >%v   </a> </td>
+              <td bgcolor="#edf4f9" >event</a> </td>
+              <td bgcolor="#edf4f9" >%q    </a> </td>
+              <td bgcolor="#edf4f9" >frame number</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" >%t    </a> </td>
+              <td bgcolor="#edf4f9" >camera id number</a> </td>
+              <td bgcolor="#edf4f9" >%D </a> </td>
+              <td bgcolor="#edf4f9" >changed pixels</a> </td>
+              <td bgcolor="#edf4f9" >%N </a> </td>
+              <td bgcolor="#edf4f9" >noise level</a> </td>
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%i </a> </td>
@@ -1790,7 +1853,6 @@
                <td bgcolor="#edf4f9" >height of motion area</a> </td>
                <td bgcolor="#edf4f9" >%J  </a> </td>
                <td bgcolor="#edf4f9" >height of motion area</a> </td>
-
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%K   </a> </td>
@@ -1799,7 +1861,6 @@
                <td bgcolor="#edf4f9" >Y coordinates of motion center</a> </td>
                <td bgcolor="#edf4f9" >%C   </a> </td>
                <td bgcolor="#edf4f9" >value defined by text_event</a> </td>
-
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%f</a> </td>
@@ -1808,7 +1869,6 @@
                <td bgcolor="#edf4f9" >number indicating filetype</a> </td>
                <td bgcolor="#edf4f9" >%$</a> </td>
                <td bgcolor="#edf4f9" >camera name</a> </td>
-
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%{host}</a> </td>
@@ -1826,7 +1886,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_System_Processing"></a>System Processing</h3>
+      <h3><a name="OptDetail_System_Processing"></a>System Processing</h3>
       <ul>
         <p></p>
         <h3><a name="daemon"></a> daemon </h3>
@@ -2004,7 +2064,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Video4Linux_Devices"></a>Video4Linux Device</h3>
+      <h3><a name="OptDetail_Video4Linux_Devices"></a>Video4Linux Device</h3>
       <ul>
         <p></p>
         Please refer to the <a href="#Basic_Setup">Basic Setup</a> section of this guide for an additional discussion
@@ -2051,128 +2111,128 @@
         specify the numeric value as the Motion option.
         <p></p>
         <table border="1" class="fixed" >
-            <colgroup>
-                <col width="250px">
-                <col width="200px">
-                <col width="200px">
-            </colgroup>
-            <tbody>
-                <tr>
-                    <td bgcolor="#edf4f9" align="center" > V4l2 Option</td>
-                    <td bgcolor="#edf4f9" align="center" > FOURCC</td>
-                    <td bgcolor="#edf4f9" align="center" > v4l2_palette option </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SN9C10X</td>
-                    <td bgcolor="#edf4f9" align="center" >S910</td>
-                    <td bgcolor="#edf4f9" align="center" >0</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR16</td>
-                    <td bgcolor="#edf4f9" align="center" >BYR2</td>
-                    <td bgcolor="#edf4f9" align="center" >1</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR8</td>
-                    <td bgcolor="#edf4f9" align="center" >BA81</td>
-                    <td bgcolor="#edf4f9" align="center" >2</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SPCA561</td>
-                    <td bgcolor="#edf4f9" align="center" >S561</td>
-                    <td bgcolor="#edf4f9" align="center" >3</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGBRG8</td>
-                    <td bgcolor="#edf4f9" align="center" >GBRG</td>
-                    <td bgcolor="#edf4f9" align="center" >4</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGRBG8</td>
-                    <td bgcolor="#edf4f9" align="center" >GRBG</td>
-                    <td bgcolor="#edf4f9" align="center" >5</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_PAC207</td>
-                    <td bgcolor="#edf4f9" align="center" >P207</td>
-                    <td bgcolor="#edf4f9" align="center" >6</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_PJPG</td>
-                    <td bgcolor="#edf4f9" align="center" >PJPG</li>
-                    <td bgcolor="#edf4f9" align="center" >7</td>
-        	    </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_MJPEG</td>
-                    <td bgcolor="#edf4f9" align="center" >MJPG</li>
-                    <td bgcolor="#edf4f9" align="center" >8</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_JPEG</td>
-                    <td bgcolor="#edf4f9" align="center" >JPEG</li>
-                    <td bgcolor="#edf4f9" align="center" >9</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_RGB24</td>
-                    <td bgcolor="#edf4f9" align="center" >RGB3</li>
-                    <td bgcolor="#edf4f9" align="center" >10</td>
-                </tr>
-        	    <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA501</td>
-                    <td bgcolor="#edf4f9" align="center" >S501</li>
-                    <td bgcolor="#edf4f9" align="center" >11</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA505</td>
-                    <td bgcolor="#edf4f9" align="center" >S505</li>
-                    <td bgcolor="#edf4f9" align="center" >12</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA508</td>
-                    <td bgcolor="#edf4f9" align="center" >S508</li>
-                    <td bgcolor="#edf4f9" align="center" >13</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_UYVY</td>
-                    <td bgcolor="#edf4f9" align="center" >UYVY</li>
-                    <td bgcolor="#edf4f9" align="center" >14</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUYV</td>
-                    <td bgcolor="#edf4f9" align="center" >YUYV</li>
-                    <td bgcolor="#edf4f9" align="center" >15</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV422P</td>
-                    <td bgcolor="#edf4f9" align="center" >422P</li>
-                    <td bgcolor="#edf4f9" align="center" >16</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV420</td>
-                    <td bgcolor="#edf4f9" align="center" >YU12</li>
-                    <td bgcolor="#edf4f9" align="center" >17</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
-                    <td bgcolor="#edf4f9" align="center" >Y10</li>
-                    <td bgcolor="#edf4f9" align="center" >18</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
-                    <td bgcolor="#edf4f9" align="center" >Y12</li>
-                    <td bgcolor="#edf4f9" align="center" >19</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_GREY</td>
-                    <td bgcolor="#edf4f9" align="center" >GREY</li>
-                    <td bgcolor="#edf4f9" align="center" >20</td>
-                </tr>
-                <tr>
-                    <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_H264</td>
-                    <td bgcolor="#edf4f9" align="center" >H264</li>
-                    <td bgcolor="#edf4f9" align="center" >21</td>
-                </tr>
-            </tbody>
+          <colgroup>
+              <col width="250px">
+              <col width="200px">
+              <col width="200px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" align="center" > V4l2 Option</td>
+              <td bgcolor="#edf4f9" align="center" > FOURCC</td>
+              <td bgcolor="#edf4f9" align="center" > v4l2_palette option </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SN9C10X</td>
+              <td bgcolor="#edf4f9" align="center" >S910</td>
+              <td bgcolor="#edf4f9" align="center" >0</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR16</td>
+              <td bgcolor="#edf4f9" align="center" >BYR2</td>
+              <td bgcolor="#edf4f9" align="center" >1</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SBGGR8</td>
+              <td bgcolor="#edf4f9" align="center" >BA81</td>
+              <td bgcolor="#edf4f9" align="center" >2</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SPCA561</td>
+              <td bgcolor="#edf4f9" align="center" >S561</td>
+              <td bgcolor="#edf4f9" align="center" >3</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGBRG8</td>
+              <td bgcolor="#edf4f9" align="center" >GBRG</td>
+              <td bgcolor="#edf4f9" align="center" >4</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_SGRBG8</td>
+              <td bgcolor="#edf4f9" align="center" >GRBG</td>
+              <td bgcolor="#edf4f9" align="center" >5</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" >V4L2_PIX_FMT_PAC207</td>
+              <td bgcolor="#edf4f9" align="center" >P207</td>
+              <td bgcolor="#edf4f9" align="center" >6</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_PJPG</td>
+              <td bgcolor="#edf4f9" align="center" >PJPG</li>
+              <td bgcolor="#edf4f9" align="center" >7</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_MJPEG</td>
+              <td bgcolor="#edf4f9" align="center" >MJPG</li>
+              <td bgcolor="#edf4f9" align="center" >8</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_JPEG</td>
+              <td bgcolor="#edf4f9" align="center" >JPEG</li>
+              <td bgcolor="#edf4f9" align="center" >9</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_RGB24</td>
+              <td bgcolor="#edf4f9" align="center" >RGB3</li>
+              <td bgcolor="#edf4f9" align="center" >10</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA501</td>
+              <td bgcolor="#edf4f9" align="center" >S501</li>
+              <td bgcolor="#edf4f9" align="center" >11</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA505</td>
+              <td bgcolor="#edf4f9" align="center" >S505</li>
+              <td bgcolor="#edf4f9" align="center" >12</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_SPCA508</td>
+              <td bgcolor="#edf4f9" align="center" >S508</li>
+              <td bgcolor="#edf4f9" align="center" >13</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_UYVY</td>
+              <td bgcolor="#edf4f9" align="center" >UYVY</li>
+              <td bgcolor="#edf4f9" align="center" >14</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUYV</td>
+              <td bgcolor="#edf4f9" align="center" >YUYV</li>
+              <td bgcolor="#edf4f9" align="center" >15</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV422P</td>
+              <td bgcolor="#edf4f9" align="center" >422P</li>
+              <td bgcolor="#edf4f9" align="center" >16</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_YUV420</td>
+              <td bgcolor="#edf4f9" align="center" >YU12</li>
+              <td bgcolor="#edf4f9" align="center" >17</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y10</td>
+              <td bgcolor="#edf4f9" align="center" >Y10</li>
+              <td bgcolor="#edf4f9" align="center" >18</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_Y12</td>
+              <td bgcolor="#edf4f9" align="center" >Y12</li>
+              <td bgcolor="#edf4f9" align="center" >19</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_GREY</td>
+              <td bgcolor="#edf4f9" align="center" >GREY</li>
+              <td bgcolor="#edf4f9" align="center" >20</td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" align="left" > V4L2_PIX_FMT_H264</td>
+              <td bgcolor="#edf4f9" align="center" >H264</li>
+              <td bgcolor="#edf4f9" align="center" >21</td>
+            </tr>
+          </tbody>
         </table>
         <p></p>
         It is possible that after looping through all of the palette options for the camera, Motion will not
@@ -2400,7 +2460,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Network_Cameras"></a>Network Cameras</h3>
+      <h3><a name="OptDetail_Network_Cameras"></a>Network Cameras</h3>
       <ul>
         <p></p>
         Motion can connect to certain network cameras.  Please refer to the <a href="#Basic_Setup">Basic Setup</a> section
@@ -2415,7 +2475,7 @@
         the camera is serving up a actual raw JPG file and not a HTML page with an embedded JPG which Motion
         will not be able to process.
         When the <a href="#netcam_url" >netcam_url</a> is defined the
-        <a href="#Options_Video4Linux_Devices" >video4linux</a> options above are mostly ignored.
+        <a href="#OptTopic_Video4Linux_Devices" >video4linux</a> options above are mostly ignored.
         <p></p>
         If the connection to a network camera is lost, Motion will reuse the last good image for
         approx 30 seconds. After 30 seconds the image is replaced by a grey image with a text
@@ -2624,7 +2684,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Raspi_Cameras"></a>Raspberry Pi Camera</h3>
+      <h3><a name="OptDetail_Raspi_Cameras"></a>Raspberry Pi Camera</h3>
       <ul>
         <p></p>
         Motion can use the Raspberry Pi camera when connected and Motion is compiled and installed with the
@@ -2677,7 +2737,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Image_Processing"></a> Image Processing</h3>
+      <h3><a name="OptDetail_Image_Processing"></a> Image Processing</h3>
       <ul>
         <p></p>
         <h3><a name="rotate"></a> rotate </h3>
@@ -2948,28 +3008,28 @@
         This is how the overlaid text is located.
         <p></p>
         <table border="1" width="354">
-            <tr>
-                <td width="344">
-                    <table cellpadding="0" cellspacing="0" width="344">
-                        <tr>
-                            <td width="216">
-                                <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="216">
-                                <p><br /><br />TEXT_LEFT</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
+          <tr>
+            <td width="344">
+              <table cellpadding="0" cellspacing="0" width="344">
+                <tr>
+                  <td width="216">
+                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="216">
+                    <p><br /><br />TEXT_LEFT</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
         </table>
         <p></p>
         <p></p>
@@ -2988,28 +3048,28 @@
         This is how the overlaid text is located.
         <p></p>
         <table border="1" width="354">
-            <tr>
-                <td width="344">
-                    <table cellpadding="0" cellspacing="0" width="344">
-                        <tr>
-                            <td width="216">
-                                <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="216">
-                                <p><br /><br />TEXT_LEFT</p>
-                            </td>
-                            <td width="128">
-                                <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
+          <tr>
+            <td width="344">
+              <table cellpadding="0" cellspacing="0" width="344">
+                <tr>
+                  <td width="216">
+                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="216">
+                    <p><br /><br />TEXT_LEFT</p>
+                  </td>
+                  <td width="128">
+                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
         </table>
         <p></p>
 
@@ -3051,7 +3111,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Motion_Detection"></a>Motion Detection</h3>
+      <h3><a name="OptDetail_Motion_Detection"></a>Motion Detection</h3>
       <ul>
         <p></p>
         <h3><a name="emulate_motion"></a> emulate_motion </h3>
@@ -3376,7 +3436,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Scripts"></a> Script Execution </h3>
+      <h3><a name="OptDetail_Scripts"></a> Script Execution </h3>
       <ul>
         <p></p>
         Motion can execute external commands based on the motion detection and related events.
@@ -3578,7 +3638,7 @@
 
       </ul>
 
-      <h3><a name="Options_Output_General"></a>Output - General Options</h3>
+      <h3><a name="OptDetail_Output_General"></a>Output - General Options</h3>
       <ul>
         <p></p>
         <h3><a name="quiet"></a> quiet </h3>
@@ -3673,7 +3733,7 @@
 
       </ul>
 
-      <h3><a name="Options_Pictures"></a>Output - Picture Options </h3>
+      <h3><a name="OptDetail_Pictures"></a>Output - Picture Options </h3>
       <ul>
         <p></p>
         Motion can output different types of pictures.  The normal picture is indicated below.
@@ -3828,7 +3888,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Movies"></a>Output - Movie Options</h3>
+      <h3><a name="OptDetail_Movies"></a>Output - Movie Options</h3>
       <ul>
         <p></p>
         <h3><a name="max_movie_time"></a> max_movie_time </h3>
@@ -4080,7 +4140,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Pipe"></a>Output - Pipe Options</h3>
+      <h3><a name="OptDetail_Pipe"></a>Output - Pipe Options</h3>
       <ul>
         <p></p>
         There are two pipe variations available with Motion.  The first option is a v4l2loopback device.
@@ -4198,8 +4258,9 @@
 
       </ul>
 
-      <h3><a name="Options_Stream_Webcontrol"></a> Stream and Webcontrol</a> </h3>
+      <h3><a name="OptDetail_Stream_Webcontrol"></a> Stream and Webcontrol</a> </h3>
       <ul>
+        <h4><a name="OptDetail_Stream"></a> Stream</a> </h4>
         Motion has simple webcam server built in. The server can be configured to
         stream both the images as well allow for a very basic http control of Motion parameters.
         <p></p>
@@ -4214,13 +4275,12 @@
         <p></p>
         Open up a text editor and paste in the following.
         <p></p>
-        <code><strong>
+        <pre>
         &lt;html&gt;
         &lt;body bgcolor=000000&gt;
         &lt;img src=http://yourmotionpc:yourstreamport/ border="0" width=25%&gt;&lt;/a&gt;
         &lt;/body&gt;
-        &lt;/html&gt;
-        </strong></code>
+        &lt;/html&gt;</pre>
         <p></p>
         Change the yourmotionpc with the IP or name of the computer running Motion.  Also revise the port
         number to be the one referenced for the stream.
@@ -4236,49 +4296,69 @@
         <p></p>
         <p></p>
 
+        <h4><a name="OptDetail_Webcontrol"></a>Web Control</a> </h4>
         <p></p>
-        Motion can be remote controlled via the simple http interface.
+        Motion may also be controlled via the web interface.  By default, this functionality is disabled
+        via the <a href="#webcontrol_parms">webcontrol_parms</a> configuration option.  This is for
+        security purposes.  If the <a href="#webcontrol_parms">webcontrol_parms</a> is enabled, some Motion
+        configuration options can be changed while Motion is running.  Other configuration options must be
+        saved and Motion restarted to become effective.
         <p></p>
-        Some Motion configuration options can be changed while Motion is running while others require
-        that the options be saved and Motion be restarted.
+        If your <a href="#webcontrol_port">webcontrol_port</a> is 8080, then open the following from the same
+        machine on which Motion is running
+        <a href="http://localhost:8080/" rel="nofollow" target="_top">http://localhost:8080/</a>
         <p></p>
-        The most obvious tool to use to remote control Motion is any web browser.
-        All commands are sent using the http GET method which simply means that the information is
-        sent via the URL and maybe a query string. You can use any browser (Firefox, Mozilla, Internet Explorer
-        , etc). You can also use the text based browser lynx to control Motion from a console.
-        It navigates fine through the very simple and minimalistic http control interface of Motion.
-        <p></p>
-        <p></p>
-        But it is probably simpler to connect to the control port with a browser, navigate to the function
-        you want, and copy the URL from the browser URL entry line.
-        If your <code>webcontrol_port</code> is 8080 and you browse from the same machine
-        on which Motion runs simply look up
-        <a href="http://localhost:8080/" rel="nofollow" target="_top">http://localhost:8080/</a> and navigate around.
-        Connecting from a remote machine can be done by using a domain name (example
-         <a href="http://mydomain.com:8080/" rel="nofollow" target="_top">http://mydomain.com:8080/</a>) or the
-         IP address of the machine (example
+        To access the web control from remote machine, first set the
+        <a href="#webcontrol_localhost">webcontrol_localhost</a> to <code>off</code> then
+        connect using the IP of the remote machine instead of <code>localhost</code> (example
          <a href="http://192.168.1.4:8080/" rel="nofollow" target="_top">http://192.168.1.4:8080/</a>).
-         The option <code>webcontrol_localhost</code> must be off to allow connection from a remote machine.
         <p></p>
-        If you want to use a script or cron to automatically change Motion settings while Motion runs you use a
-        program that can fetch a webpage. We simply just throw away the html page that Motion returns. Programs
-        commonly available on Linux machines are wget and lwp-request. Here is an example of how to start and
-        stop motion detection via cron. These two lines are added to /etc/crontab.
+        If you want to use a script or cron to automatically change Motion settings while Motion runs, use a
+        program that can fetch or send a webpage. Common programs are <code> wget </code>, <code>lwp-request</code>
+        and <code>curl</code>.
+        <p></p>
+        Example to pause motion detection
         <p></p>
         <pre>
-        0 9 &#42; &#42; &#42; root /usr/bin/lwp-request http://localhost:8080/0/detection/start &#62; /dev/null
-        0 18 &#42; &#42; &#42; root /usr/bin/lwp-request http://localhost:8080/0/detection/pause &#62; /dev/null
-        </pre>
+        lwp-request http://localhost:8080/0/detection/pause</pre>
         <p></p>
-        If you want to use the http remote control from your own software (for example your own PHP front end)
-        you can set the motion.conf option <a href="#webcontrol_html_output">webcontrol_html_output</a> off. Then
-        Motion answers back with very basic text only without html around it.
+        Example to start motion detection
         <p></p>
-        To remote control Motion from a web pages you can for example use PHP.
-        In PHP it takes this simple code line to send a remote commend to Motion.
-        Here we pause motion detection for camera 2
+        <pre>
+        lwp-request http://localhost:8080/0/detection/start</pre>
         <p></p>
-        <code>readfile('http://localhost:8080/2/detection/pause');</code>
+        Example script to update the text_left with cpu load (verbose for clarity)
+        <pre>
+          #!/bin/bash
+
+          LOAD=`top -b -n2 | grep "Cpu(s)" | awk '{print $2+$4}' | tail -n1`
+
+          TEXTLEFT=""
+          TEXTLEFT=$TEXTLEFT"System at %{host}"
+          TEXTLEFT=$TEXTLEFT"\nCPU $LOAD "
+          TEXTLEFT=$TEXTLEFT"\nfps: %{fps}"
+          TEXTLEFT=$TEXTLEFT"\nDate: %Y-%m-%d"
+          TEXTLEFT=$TEXTLEFT"\n%T-%q"
+
+          # Replace special chars with needed urlcodes
+          TEXTLEFT="${TEXTLEFT//%/%25}"     #Replace % with %25
+          TEXTLEFT="${TEXTLEFT// /%20}"     #Replace spaces with %20
+          TEXTLEFT="${TEXTLEFT//\{/%7B}"    #Replace { with %7B
+          TEXTLEFT="${TEXTLEFT//\}/%7D}"    #Replace } with %7D
+
+          curl http://localhost:8080/1/config/set?text_left=$TEXTLEFT
+
+          return 0</pre>
+        Note that the replacement of characters with the urlcode values is required whenever updating via
+        the web interface.
+        <p></p>
+        To control from your own software (for example your own PHP front end) the motion.conf
+        option <a href="#webcontrol_html_output">webcontrol_html_output</a> can be set to <code>off</code> which
+        will cause Motion to remove the html tags in the responses.
+        <p></p>
+        Example PHP to pause camera 2
+        <pre>
+        readfile('http://localhost:8080/2/detection/pause');</pre>
         <p></p>
 
         </p>
@@ -4375,9 +4455,9 @@
         </ul>
         <p></p>
         When set to 'on', slow down the stream to 1 picture per second when no motion is detected.
-        When motion is detected the stream runs as defined by <a name="stream_maxrate"></a> stream_maxrate
+        When motion is detected the stream runs as defined by <a href="#stream_maxrate"></a> stream_maxrate
         <p></p>
-        When 'off' the stream always runs as defined by <a name="stream_maxrate"></a> stream_maxrate.
+        When 'off' the stream always runs as defined by <a href="#stream_maxrate"></a> stream_maxrate.
         Use this option to save bandwidth when there is not anything important to see from the camera anyway.
         <p></p>
 
@@ -4574,7 +4654,7 @@
 
       </ul>
 
-      <h3><a name="Options_Database"></a>Database</h3>
+      <h3><a name="OptDetail_Database"></a>Database</h3>
       <ul>
         Motion can be compiled with MySQL, PostgreSQL or SQLite3 database support.
         When enabled Motion can be configured to add a record to a table in the database
@@ -4780,7 +4860,7 @@
         <p></p>
       </ul>
 
-      <h3><a name="Options_Tracking"></a>Tracking</h3>
+      <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
       <ul>
         <p></p>
         This is <strike>still</strike> permanently at the experimental stage.
@@ -5048,4 +5128,7 @@
     </ul>
 
   </section>
-</body>  
+
+
+</body>
+</html>

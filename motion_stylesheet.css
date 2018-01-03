@@ -133,7 +133,7 @@ a {
   background-color: #f3f6fa;
   border: solid 1px #dce6f0;
   border-radius: 0.3rem; }
-  .main-content pre > code {
+.main-content pre > code {
     padding: 0;
     margin: 0;
     font-size: 0.9rem;
@@ -144,7 +144,7 @@ a {
     border: 0; }
 .main-content .highlight {
   margin-bottom: 1rem; }
-  .main-content .highlight pre {
+.main-content .highlight pre {
     margin-bottom: 0;
     word-break: normal; }
 .main-content .highlight pre, .main-content pre {
@@ -163,7 +163,7 @@ a {
   word-wrap: normal;
   background-color: transparent;
   border: 0; }
-  .main-content pre code:before, .main-content pre code:after, .main-content pre tt:before, .main-content pre tt:after {
+.main-content pre code:before, .main-content pre code:after, .main-content pre tt:before, .main-content pre tt:after {
     content: normal; }
 .main-content ul, .main-content ol {
   margin-top: 0; }
@@ -172,9 +172,9 @@ a {
   margin-left: 0;
   color: #819198;
   border-left: 0.3rem solid #dce6f0; }
-  .main-content blockquote > :first-child {
+.main-content blockquote > :first-child {
     margin-top: 0; }
-  .main-content blockquote > :last-child {
+.main-content blockquote > :last-child {
     margin-bottom: 0; }
 .main-content table {
   display: block;
@@ -182,7 +182,7 @@ a {
   overflow: auto;
   word-break: normal;
   word-break: keep-all; }
-  .main-content table th {
+.main-content table th {
     font-weight: bold; }
   .main-content table th, .main-content table td {
     padding: 0.5rem 1rem;
@@ -263,7 +263,7 @@ a {
 .nav-button li {
     float: right;
   }
-.nav-button li a {
+  .nav-button li a {
     display: block;
     color: white;
     text-align: center;
@@ -304,7 +304,7 @@ a {
 .nav-vertical li {
     float: left;
   }
-.nav-vertical li a {
+  .nav-vertical li a {
     display: block;
     color: #000;
     padding: 8px 16px;
@@ -334,22 +334,46 @@ a {
     padding-top: 60px;
     transition: 0.5s;
 }
-
-.vertical-menu a {
+  .vertical-menu a {
     padding: 5px 14px 4px 16px;
     text-decoration: none;
     font-size: 0.80em ;
     display: block;
     transition: 0.3s
+  }
+    .vertical-menu a:hover {
+      background-color: #ccc;
+    }
+    .vertical-menu a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+  .vertical-menu button {
+    padding: 5px 14px 4px 16px;
+    text-decoration: none;
+    display: block;
+    transition: 0.3s;
+    border: none;
+    width: 100%;
+    overflow-x: scroll;
+    text-align: left;
+    outline: none;
+    background-color: white;
+    color: #1e6bb8;
+
 }
 
-.vertical-menu a:hover {
-    background-color: #ccc;
+.vertical-menu button:hover {
+    background-color: #cdc;
 }
 
-.vertical-menu a.active {
-    background-color: #4CAF50;
-    color: white;
+.panel {
+    padding: 5px 14px 4px 16px;
+    background-color: white;
+    max-height: 0;
+    overflow: scroll;
+    overflow-x: hidden;
+    transition: max-height 0.2s ease-out;
 }
 
 @media screen and (min-width: 64em) {
@@ -363,3 +387,4 @@ a {
 @media screen and (max-width: 42em) {
   .vertical-menu {
     font-size: 0.9rem; } }
+
