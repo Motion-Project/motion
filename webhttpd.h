@@ -15,7 +15,7 @@
 
 #include "motion.h"
 
-#define TWIKI_URL "http://www.lavrsen.dk/twiki/bin/view/Motion/MotionGuideAlphabeticalOptionReferenceManual"
+#define GUIDE_URL "https://motion-project.github.io/motion_config.html"
 
 void * motion_web_control(void *arg);
 void httpd_run(struct context **);
