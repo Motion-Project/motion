@@ -2769,6 +2769,11 @@ static void cntlist_create(int argc, char *argv[])
     /* Populate context structure with start/default values */
     context_init(cnt_list[0]);
 
+    /* Initialize some static and global string variables */
+    gethostname (cnt_list[0]->hostname, PATH_MAX);
+    cnt_list[0]->hostname[PATH_MAX-1] = '\0';
+    /* end of variables */
+
     /* cnt_list[1] pointing to zero indicates no more thread context structures - they get added later */
     cnt_list[1] = NULL;
 
@@ -2878,11 +2883,6 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     set_log_level(cnt_list[0]->log_level);
     set_log_type(cnt_list[0]->log_type);
-
-    /* Initialize some static and global string variables */
-    gethostname (cnt_list[0]->hostname, PATH_MAX);
-    cnt_list[0]->hostname[PATH_MAX-1] = '\0';
-    /* end of variables */
 
     conf_output_parms(cnt_list);
 
