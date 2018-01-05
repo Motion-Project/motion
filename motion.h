@@ -257,6 +257,8 @@ struct image_data {
     unsigned char *image_norm;
     unsigned char *image_high;
     int diffs;
+    int64_t        idnbr_norm;
+    int64_t        idnbr_high;
     struct timeval timestamp_tv;
     int shot;                   /* Sub second timestamp count */
 
@@ -271,14 +273,6 @@ struct image_data {
     struct coord location;      /* coordinates for center and size of last motion detection*/
 
     int total_labels;
-
-#ifdef HAVE_FFMPEG
-    AVPacket    packet_norm;    /* The packet from the normal resolution rtsp thread */
-    AVPacket    packet_high;    /* The packet from the high resolution rtsp thread */
-#else
-    int         packet_norm;    /* Dummy variables for the without ffmpeg option */
-    int         packet_high;    /* Dummy variables for the without ffmpeg option */
-#endif // HAVE_FFMPEG
 
 };
 
@@ -402,8 +396,8 @@ struct context {
 #ifdef HAVE_MMAL
     struct mmalcam_context *mmalcam;
 #endif
-    rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
-    rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
+    struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
+    struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
 
     struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;

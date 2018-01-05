@@ -101,17 +101,17 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     int i;
 
     const char *re = "(http|ftp|mjpg|mjpeg|rtsp|rtmp)://(((.*):(.*))@)?"
-                     "([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
+                     "([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
     regex_t pattbuf;
     regmatch_t matches[10];
 
     if (!strncmp(text_url, "file", 4))
         re = "(file)://(((.*):(.*))@)?"
-             "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
+             "([^/:]|[-_.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
 
     if (!strncmp(text_url, "v4l2", 4))
         re = "(v4l2)://(((.*):(.*))@)?"
-             "([^/:]|[-.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
+             "([^/:]|[-_.a-z0-9]*)(:([0-9]*))?($|(/[^:][/-_.a-z0-9]+))";
 
     /*  Note that log messages are commented out to avoid leaking info related
      *  to user/host/pass etc.  Keeing them in the code for easier debugging if

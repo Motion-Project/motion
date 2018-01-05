@@ -7,8 +7,8 @@
     This software is distributed under the GNU Public License Version 2
     see also the file 'COPYING'.
 */
-
-#include "ffmpeg.h"    /* must be first to avoid 'shadow' warning */
+#include "netcam_rtsp.h"
+#include "ffmpeg.h"
 #include "picture.h"   /* already includes motion.h */
 #include "event.h"
 #include "video_loopback.h"
@@ -746,11 +746,14 @@ static void event_ffmpeg_newfile(struct context *cnt,
         if (cnt->imgs.size_high > 0){
             cnt->ffmpeg_output->width  = cnt->imgs.width_high;
             cnt->ffmpeg_output->height = cnt->imgs.height_high;
-            cnt->ffmpeg_output->high_resolution = 1;
+            cnt->ffmpeg_output->high_resolution = TRUE;
+                cnt->ffmpeg_output->rtsp_data = cnt->rtsp_high;
         } else {
             cnt->ffmpeg_output->width  = cnt->imgs.width;
             cnt->ffmpeg_output->height = cnt->imgs.height;
-            cnt->ffmpeg_output->high_resolution = 0;
+            cnt->ffmpeg_output->high_resolution = FALSE;
+            cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
+                cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
         }
         cnt->ffmpeg_output->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output->fps = cnt->movie_fps;
@@ -771,9 +774,10 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output->motion_images = 0;
         cnt->ffmpeg_output->passthrough =util_check_passthrough(cnt);
 
+
         retcd = ffmpeg_open(cnt->ffmpeg_output);
         if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "ffopen_open error creating (new) file [%s]",cnt->newfilename);
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "Error opening context for movie output.");
             free(cnt->ffmpeg_output);
             cnt->ffmpeg_output=NULL;
             return;
@@ -785,6 +789,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_debug = mymalloc(sizeof(struct ffmpeg));
         cnt->ffmpeg_output_debug->width  = cnt->imgs.width;
         cnt->ffmpeg_output_debug->height = cnt->imgs.height;
+        cnt->ffmpeg_output_debug->rtsp_data = NULL;
         cnt->ffmpeg_output_debug->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output_debug->fps = cnt->movie_fps;
         cnt->ffmpeg_output_debug->bps = cnt->conf.ffmpeg_bps;
@@ -797,13 +802,14 @@ static void event_ffmpeg_newfile(struct context *cnt,
         cnt->ffmpeg_output_debug->gop_cnt = 0;
         cnt->ffmpeg_output_debug->codec_name = codec;
         if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
-            cnt->ffmpeg_output_debug->test_mode = 1;
+            cnt->ffmpeg_output_debug->test_mode = TRUE;
         } else {
-            cnt->ffmpeg_output_debug->test_mode = 0;
+            cnt->ffmpeg_output_debug->test_mode = FALSE;
         }
-        cnt->ffmpeg_output_debug->motion_images = 1;
-        cnt->ffmpeg_output_debug->passthrough = 0;
-        cnt->ffmpeg_output_debug->high_resolution = 0;
+        cnt->ffmpeg_output_debug->motion_images = TRUE;
+        cnt->ffmpeg_output_debug->passthrough = FALSE;
+        cnt->ffmpeg_output_debug->high_resolution = FALSE;
+        cnt->ffmpeg_output_debug->rtsp_data = NULL;
 
         retcd = ffmpeg_open(cnt->ffmpeg_output_debug);
         if (retcd < 0){
@@ -847,11 +853,11 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         if ((cnt->imgs.size_high > 0) && (!passthrough)){
             cnt->ffmpeg_timelapse->width  = cnt->imgs.width_high;
             cnt->ffmpeg_timelapse->height = cnt->imgs.height_high;
-            cnt->ffmpeg_timelapse->high_resolution = 1;
+            cnt->ffmpeg_timelapse->high_resolution = TRUE;
         } else {
             cnt->ffmpeg_timelapse->width  = cnt->imgs.width;
             cnt->ffmpeg_timelapse->height = cnt->imgs.height;
-            cnt->ffmpeg_timelapse->high_resolution = 0;
+            cnt->ffmpeg_timelapse->high_resolution = FALSE;
         }
         cnt->ffmpeg_timelapse->fps = cnt->conf.timelapse_fps;
         cnt->ffmpeg_timelapse->bps = cnt->conf.ffmpeg_bps;
@@ -861,10 +867,11 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         cnt->ffmpeg_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_timelapse->last_pts = -1;
         cnt->ffmpeg_timelapse->base_pts = 0;
-        cnt->ffmpeg_timelapse->test_mode = 0;
+        cnt->ffmpeg_timelapse->test_mode = FALSE;
         cnt->ffmpeg_timelapse->gop_cnt = 0;
-        cnt->ffmpeg_timelapse->motion_images = 0;
-        cnt->ffmpeg_timelapse->passthrough = 0;
+        cnt->ffmpeg_timelapse->motion_images = FALSE;
+        cnt->ffmpeg_timelapse->passthrough = FALSE;
+        cnt->ffmpeg_timelapse->rtsp_data = NULL;
 
         if ((strcmp(cnt->conf.timelapse_codec,"mpg") == 0) ||
             (strcmp(cnt->conf.timelapse_codec,"swf") == 0) ){
@@ -910,7 +917,7 @@ static void event_ffmpeg_put(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
     if (cnt->ffmpeg_output) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1) {
+        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, "Error encoding image");
         }
     }

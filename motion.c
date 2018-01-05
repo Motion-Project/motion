@@ -67,43 +67,6 @@ FILE *ptr_logfile = NULL;
 unsigned int restart = 0;
 
 
-static void imagepkt_init(struct image_data *img_data){
-#ifdef HAVE_FFMPEG
-
-    /* Initialize av packets for ffmpeg_pass through */
-    av_init_packet(&img_data->packet_norm);
-    img_data->packet_norm.data = NULL;
-    img_data->packet_norm.size = 0;
-
-
-    av_init_packet(&img_data->packet_high);
-    img_data->packet_high.data = NULL;
-    img_data->packet_high.size = 0;
-
-    return;
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (img_data->packet_norm) img_data->packet_norm = 0;
-    return;
-#endif /* End #ifdef HAVE_FFMPEG */
-
-}
-
-static void imagepkt_deinit(struct image_data *img_data){
-#ifdef HAVE_FFMPEG
-    /* free the av packets for ffmpeg_pass through */
-    my_packet_unref(img_data->packet_norm);
-    my_packet_unref(img_data->packet_high);
-
-    return;
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (img_data->packet_norm) img_data->packet_norm = 1;
-    return;
-#endif /* End #ifdef HAVE_FFMPEG */
-
-}
-
 /**
  * image_ring_resize
  *
@@ -160,7 +123,6 @@ static void image_ring_resize(struct context *cnt, int new_size)
                         tmp[i].image_high = mymalloc(cnt->imgs.size_high);
                         memset(tmp[i].image_high, 0x80, cnt->imgs.size_high);
                     }
-                    imagepkt_init(&tmp[i]);
                 }
             }
 
@@ -202,7 +164,6 @@ static void image_ring_destroy(struct context *cnt)
     for (i = 0; i < cnt->imgs.image_ring_size; i++){
         free(cnt->imgs.image_ring[i].image_norm);
         if (cnt->imgs.size_high >0 ) free(cnt->imgs.image_ring[i].image_high);
-        imagepkt_deinit(&cnt->imgs.image_ring[i]);
     }
 
     /* Free the ring */
@@ -1008,7 +969,6 @@ static int motion_init(struct context *cnt)
     /* contains the moving objects of ref. frame */
     cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
     cnt->imgs.image_virgin.image_norm = mymalloc(cnt->imgs.size_norm);
-    imagepkt_init(&cnt->imgs.image_virgin);
     cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
@@ -1051,7 +1011,7 @@ static int motion_init(struct context *cnt)
     rotate_init(cnt); /* rotate_deinit is called in main */
 
     /* Capture first image, or we will get an alarm on start */
-    if (cnt->video_dev > 0) {
+    if (cnt->video_dev >= 0) {
         int i;
 
         for (i = 0; i < 5; i++) {
@@ -1391,7 +1351,6 @@ static void motion_cleanup(struct context *cnt)
 
     free(cnt->imgs.image_virgin.image_norm);
     cnt->imgs.image_virgin.image_norm = NULL;
-    imagepkt_deinit(&cnt->imgs.image_virgin);
 
     free(cnt->imgs.labels);
     cnt->imgs.labels = NULL;
@@ -2886,10 +2845,6 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     }
 
 
-    //set_log_level(cnt_list[0]->log_level);
-
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion "VERSION" Started");
-
     if ((cnt_list[0]->conf.log_file) && (strncmp(cnt_list[0]->conf.log_file, "syslog", 6))) {
         set_log_mode(LOGMODE_FILE);
         ptr_logfile = set_logfile(cnt_list[0]->conf.log_file);
@@ -2907,6 +2862,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Logging to syslog");
     }
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion "VERSION" Started");
 
     if ((cnt_list[0]->conf.log_type_str == NULL) ||
         !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
@@ -3058,7 +3015,21 @@ int main (int argc, char **argv)
      */
     struct sigaction sig_handler_action;
     struct sigaction sigchild_action;
+
+
     setup_signals(&sig_handler_action, &sigchild_action);
+
+    /*
+     * Create and a thread attribute for the threads we spawn later on.
+     * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
+     * their termination cannot be synchronized through 'pthread_join'.
+     */
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+
+    /* Create the TLS key for thread number. */
+    pthread_key_create(&tls_key_threadnr, NULL);
+    pthread_setspecific(tls_key_threadnr, (void *)(0));
 
     motion_startup(1, argc, argv);
 
@@ -3107,16 +3078,6 @@ int main (int argc, char **argv)
     if (cnt_list[0]->conf.setup_mode)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion running in setup mode.");
 
-    /*
-     * Create and a thread attribute for the threads we spawn later on.
-     * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
-     * their termination cannot be synchronized through 'pthread_join'.
-     */
-    pthread_attr_init(&thread_attr);
-    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
-
-    /* Create the TLS key for thread number. */
-    pthread_key_create(&tls_key_threadnr, NULL);
 
     do {
         if (restart) {
@@ -3794,11 +3755,8 @@ int util_check_passthrough(struct context *cnt){
     return 0;
 #else
     if (cnt->conf.ffmpeg_passthrough){
-        /* Disable passthrough until functional */
-        //MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through enabled.");
-        //return 1;
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through disabled.");
-        return 0;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "pass-through is enabled but is still experimental.");
+        return 1;
     } else {
         return 0;
     }
