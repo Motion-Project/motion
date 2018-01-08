@@ -1,4 +1,16 @@
 Summary of Changes
+   * Updated motion_guide.html
+   * Revise webcontrol page to indicate the webcontrol_parms selection
+   * Validate v4l2 parms when using v4l2 via netcam
+   * Capture images at start to prevent immediate events
+   * Initialize thread number to eliminate inaccurate log notice.
+   * Allow URLS with underscores
+   * Passthrough recording for rtsp cameras.
+   * Remove default SQL (which was specific to Maria)
+   * Default webp image type to be included in builds.
+   * Include EXIF for webp images.
+   * Report to log when user specifies invalid URL.
+   * Updated version script to include date and dirty vs clean.
 Version 4.1.1 Changes Below
    * Fix file name for debug movies
    * Fix image saving when using highres option
