@@ -3,7 +3,7 @@
 Issues on the github site are intended to discuss code problems, crashes and application enhancements.  If you are having an issue with the setup, 
 configuration or use of Motion, we have the following additional resources which are better suited to meet these needs.
 
-  * User guide:  [Motion User Guide](http://htmlpreview.github.com/?https://github.com/Motion-Project/motion/blob/master/motion_guide.html)
+  * User guide:  [Motion User Guide](https://motion-project.github.io/motion_guide.html)
   * User Group List:  Please sign-up and send your issue to the list [Motion User](https://lists.sourceforge.net/lists/listinfo/motion-user)  
   * IRC:  [#motion](irc://chat.freenode.net/motion) on freenode
 

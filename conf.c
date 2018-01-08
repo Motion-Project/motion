@@ -2821,6 +2821,7 @@ static struct context **config_camera(struct context **cnt, const char *str,
 static void usage()
 {
     printf("motion Version "VERSION", Copyright 2000-2017 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
+    printf("\nHome page :\t https://motion-project.github.io/ \n");
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
