@@ -68,6 +68,7 @@ static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data){
         free(rtsp_data->pktarray);
         rtsp_data->pktarray = NULL;
         rtsp_data->pktarray_size = 0;
+        rtsp_data->pktarray_index = -1;
     pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
 
 }
@@ -144,7 +145,7 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
     newsize =((idnbr_first - idnbr_last) * 2 );
     newsize = newsize + ((rtsp_data->idnbr - idnbr_last ) * 2);
     if (newsize < 30) newsize = 30;
-    if (rtsp_data->pktarray_size > newsize) resize_pktarray = FALSE;
+    if (rtsp_data->pktarray_size >= newsize) resize_pktarray = FALSE;
 
     if ((resize_pktarray) ||  (rtsp_data->pktarray_size < 30)){
         tmp = mymalloc(newsize * sizeof(struct packet_item));
@@ -1134,15 +1135,17 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
     }
 
 
-    /* Validate that the previous steps opened the camera */
-    retcd = netcam_rtsp_read_image(rtsp_data);
-    if ((retcd < 0) || (rtsp_data->interrupted)){
-        if (rtsp_data->status == RTSP_NOTCONNECTED){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to read first image",rtsp_data->cameratype);
+    pthread_mutex_lock(&rtsp_data->mutex_pktarray);
+        /* Validate that the previous steps opened the camera */
+        retcd = netcam_rtsp_read_image(rtsp_data);
+        if ((retcd < 0) || (rtsp_data->interrupted)){
+            if (rtsp_data->status == RTSP_NOTCONNECTED){
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to read first image",rtsp_data->cameratype);
+            }
+            netcam_rtsp_close_context(rtsp_data);
+            return -1;
         }
-        netcam_rtsp_close_context(rtsp_data);
-        return -1;
-    }
+    pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
 
     return 0;
 
