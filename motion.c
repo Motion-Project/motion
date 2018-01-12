@@ -2769,6 +2769,11 @@ static void cntlist_create(int argc, char *argv[])
     /* Populate context structure with start/default values */
     context_init(cnt_list[0]);
 
+    /* Initialize some static and global string variables */
+    gethostname (cnt_list[0]->hostname, PATH_MAX);
+    cnt_list[0]->hostname[PATH_MAX-1] = '\0';
+    /* end of variables */
+
     /* cnt_list[1] pointing to zero indicates no more thread context structures - they get added later */
     cnt_list[1] = NULL;
 
@@ -3486,10 +3491,7 @@ static void mystrftime_long (const struct context *cnt,
 #define SPECIFIERWORD(k) ((strlen(k)==l) && (!strncmp (k, word, l)))
 
     if (SPECIFIERWORD("host")) {
-        char host[PATH_MAX];
-        gethostname (host, PATH_MAX);
-        host[PATH_MAX-1] = 0; // see man page for gethostname.
-        snprintf (out, PATH_MAX, "%*s", width, host);
+        snprintf (out, PATH_MAX, "%*s", width, cnt->hostname);
         return;
     }
     if (SPECIFIERWORD("fps")) {
@@ -3498,6 +3500,10 @@ static void mystrftime_long (const struct context *cnt,
     }
     if (SPECIFIERWORD("dbeventid")) {
         sprintf(out, "%*llu", width, cnt->database_event_id);
+        return;
+    }
+    if (SPECIFIERWORD("ver")) {
+        sprintf(out, "%*s", width, VERSION);
         return;
     }
 
