@@ -44,6 +44,7 @@ struct config conf_template = {
     .max_changes =                     DEF_CHANGES,
     .threshold_tune =                  0,
     .output_pictures =                 "on",
+    .watchdog =                        "on",
     .motion_img =                      0,
     .emulate_motion =                  0,
     .event_gap =                       DEF_EVENT_GAP,
@@ -761,6 +762,20 @@ config_param config_params[] = {
     "# Can be used as preview shot for the corresponding movie.",
     0,
     CONF_OFFSET(output_pictures),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "watchdog",
+    "\n############################################################\n"
+    "# Motion loop detection devices\n"
+    "############################################################\n\n"
+    "# Enable loop detection device (default: on)\n"
+    "# Valid values: on, off\n"
+    "# When set to 'off', motion not detect in loop if device is connected",
+    0,
+    CONF_OFFSET(watchdog),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED

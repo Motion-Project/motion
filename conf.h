@@ -33,6 +33,7 @@ struct config {
     int max_changes;
     int threshold_tune;
     const char *output_pictures;
+    const char *watchdog;
     int ffmpeg_duplicate_frames;
     int motion_img;
     int emulate_motion;
