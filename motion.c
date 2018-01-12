@@ -2601,7 +2601,7 @@ static void *motion_loop(void *arg)
         mlp_prepare(cnt);
         if (cnt->get_image) {
             mlp_resetimages(cnt);
-            if (mlp_retry(cnt) == 1)  break;
+            if (cnt->conf.watchdog == 'on' && mlp_retry(cnt) == 1)  break;
             if (mlp_capture(cnt) == 1)  break;
             mlp_detection(cnt);
             mlp_tuning(cnt);
