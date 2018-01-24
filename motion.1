@@ -2027,7 +2027,7 @@ Motion has a configuration file in the distribution package called motion-dist.c
 .br
 The configuration file needs to be renamed from motion-dist.conf to motion.conf. The original file is called motion-dist.conf so that your perfectly working motion.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of Motion.
 .br
-If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. Motion will then create an extra tread of itself for each camera. If you only have one camera you only need the motion.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motion.conf file.
+If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. Motion will then create an extra thread of itself for each camera. If you only have one camera you only need the motion.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motion.conf file.
 .br
 So if you have for example two cameras you need motion.conf and two camera config files. Total of 3 config files.
 .br
