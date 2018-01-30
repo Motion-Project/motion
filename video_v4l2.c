@@ -175,33 +175,10 @@ static int v4l2_ctrls_count(struct video_dev *curdev){
     memset(&vid_ctrl, 0, sizeof(struct v4l2_queryctrl));
     vid_ctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
     while (xioctl (vid_source, VIDIOC_QUERYCTRL, &vid_ctrl) == 0) {
-        /* There is certainly a better method for this if statement using bitwise
-           operators...someone else can figure it out for me another day.
-        */
-        /*Per the documentation of v4l2
-          The 32-bit qctrl.id value is subdivided into three bit ranges: the top 4 bits are
-          reserved for flags (e. g. V4L2_CTRL_FLAG_NEXT_CTRL) and are not actually part of
-          the ID. The remaining 28 bits form the control ID, of which the most significant
-          12 bits define the control class and the least significant 16 bits identify the
-          control within the control class. It is guaranteed that these last 16 bits are
-          always non-zero for controls.
-        */
-        if ((vid_ctrl.id == V4L2_CID_USER_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_MPEG_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_CAMERA_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_FM_TX_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_FLASH_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_JPEG_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_IMAGE_SOURCE_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_IMAGE_PROC_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_DV_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_FM_RX_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_RF_TUNER_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_DETECT_CLASS)){
-                vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-                continue;
-            }
-
+        if (vid_ctrl.type == V4L2_CTRL_TYPE_CTRL_CLASS){
+            vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+            continue;
+        }
         curdev->devctrl_count++;
         if (vid_ctrl.type == V4L2_CTRL_TYPE_MENU) {
             for (indx = vid_ctrl.minimum; indx<=vid_ctrl.maximum; indx++){
@@ -238,22 +215,10 @@ static int v4l2_ctrls_list(struct video_dev *curdev){
     vid_ctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
     indx_ctrl = 0;
     while (xioctl (vid_source, VIDIOC_QUERYCTRL, &vid_ctrl) == 0) {
-        /* See comment in other function regarding this IF statement.*/
-        if ((vid_ctrl.id == V4L2_CID_USER_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_MPEG_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_CAMERA_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_FM_TX_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_FLASH_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_JPEG_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_IMAGE_SOURCE_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_IMAGE_PROC_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_DV_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_FM_RX_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_RF_TUNER_CLASS) ||
-            (vid_ctrl.id == V4L2_CID_DETECT_CLASS)){
-                vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-                continue;
-            }
+        if (vid_ctrl.type == V4L2_CTRL_TYPE_CTRL_CLASS){
+            vid_ctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+            continue;
+        }
 
         curdev->devctrl_array[indx_ctrl].ctrl_id = vid_ctrl.id;
         curdev->devctrl_array[indx_ctrl].ctrl_type = vid_ctrl.type;
