@@ -111,8 +111,6 @@ struct image_data;
                 while (nanosleep(&tv, &tv) == -1); \
         }
 
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
-
 #define VIDEO_PALETTE_GREY      1       /* Linear greyscale */
 #define VIDEO_PALETTE_HI240     2       /* High 240 cube (BT848) */
 #define VIDEO_PALETTE_RGB565    3       /* 565 16 bit RGB */
@@ -252,6 +250,22 @@ enum WEBUI_LEVEL{
   WEBUI_LEVEL_RESTRICTED = 3,
   WEBUI_LEVEL_NEVER      = 99
 };
+
+struct vdev_usrctrl_ctx {
+    char          *ctrl_name;       /* The name or description of the ID as requested by user*/
+    int            ctrl_value;      /* The value that the user wants the control set to*/
+};
+
+struct vdev_context {
+    /* As v4l2 and bktr get rewritten, put thread specific items here
+     * Rather than use conf options directly, copy from conf to here
+     * to handle cross thread webui changes which could cause problems
+     */
+    struct vdev_usrctrl_ctx *usrctrl_array;     /*Array of the controls the user specified*/
+    int usrctrl_count;                          /*Count of the controls the user specified*/
+    int update_parms;                           /*Bool for whether to update the parameters on the device*/
+};
+
 
 struct image_data {
     unsigned char *image_norm;
@@ -398,6 +412,8 @@ struct context {
 #endif
     struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
     struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
+
+    struct vdev_context *vdev;              /* Structure for v4l2 and bktr device information */
 
     struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
