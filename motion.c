@@ -257,6 +257,7 @@ static void context_init(struct context *cnt)
     cnt->pipe = -1;
     cnt->mpipe = -1;
 
+    cnt->vdev = NULL;    /*Init to NULL to check loading parms vs web updates*/
 }
 
 /**

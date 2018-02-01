@@ -53,11 +53,7 @@ struct config {
     int minimum_frame_time;
     int lightswitch;
     int autobright;
-    int brightness;
-    int contrast;
-    int saturation;
-    int hue;
-    int power_line_frequency;
+    char *vid_control_params;
     int roundrobin_frames;
     int roundrobin_skip;
     int pre_capture;
@@ -134,10 +130,8 @@ struct config {
     const char *netcam_proxy;
     unsigned int netcam_tolerant_check;
     unsigned int rtsp_uses_tcp;
-#ifdef HAVE_MMAL
     const char *mmalcam_name;
     const char *mmalcam_control_params;
-#endif
     int text_changes;
     const char *text_left;
     const char *text_right;
@@ -188,13 +182,12 @@ typedef struct {
 extern dep_config_param dep_config_params[];
 
 struct context **conf_load(struct context **);
+struct context **copy_string(struct context **, const char *, int);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
+void conf_output_parms(struct context **cnt);
 const char *config_type(config_param *);
 void conf_print(struct context **);
-void conf_output_parms(struct context **cnt);
-void malloc_strings(struct context *);
 char *mystrdup(const char *);
 char *mystrcpy(char *, const char *);
-struct context **copy_string(struct context **, const char *, int);
 
 #endif /* _INCLUDE_CONF_H */

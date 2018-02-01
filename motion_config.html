@@ -410,12 +410,6 @@
           <td align="left"><a href="#auto_brightness" >auto_brightness</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">brightness</td>
-          <td align="left">brightness</td>
-          <td align="left">brightness</td>
-          <td align="left"><a href="#brightness" >brightness</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">thread</td>
           <td align="left">camera</td>
           <td align="left">camera</td>
@@ -438,12 +432,6 @@
           <td align="left">camera_name</td>
           <td align="left">camera_name</td>
           <td align="left"><a href="#camera_name" >camera_name</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">contrast</td>
-          <td align="left">contrast</td>
-          <td align="left">contrast</td>
-          <td align="left"><a href="#contrast" >contrast</a></td>
         </tr>
         <tr>
           <td height="17" align="left">daemon</td>
@@ -612,12 +600,6 @@
           <td align="left">height</td>
           <td align="left">height</td>
           <td align="left"><a href="#height" >height</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">hue</td>
-          <td align="left">hue</td>
-          <td align="left">hue</td>
-          <td align="left"><a href="#hue" >hue</a></td>
         </tr>
         <tr>
           <td height="17" align="left">input</td>
@@ -860,12 +842,6 @@
           <td align="left"><a href="#post_capture" >post_capture</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">power_line_frequency</td>
-          <td align="left">power_line_frequency</td>
-          <td align="left"><a href="#power_line_frequency" >power_line_frequency</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">pre_capture</td>
           <td align="left">pre_capture</td>
           <td align="left">pre_capture</td>
@@ -912,12 +888,6 @@
           <td align="left">rtsp_uses_tcp</td>
           <td align="left">rtsp_uses_tcp</td>
           <td align="left"><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">saturation</td>
-          <td align="left">saturation</td>
-          <td align="left">saturation</td>
-          <td align="left"><a href="#saturation" >saturation</a></td>
         </tr>
         <tr>
           <td height="17" align="left">setup_mode</td>
@@ -1226,6 +1196,36 @@
           <td align="left"><a href="#v4l2_palette" >v4l2_palette</a></td>
         </tr>
         <tr>
+          <td height="17" align="left">brightness</td>
+          <td align="left">brightness</td>
+          <td align="left">brightness</td>
+          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">contrast</td>
+          <td align="left">contrast</td>
+          <td align="left">contrast</td>
+          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">hue</td>
+          <td align="left">hue</td>
+          <td align="left">hue</td>
+          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">power_line_frequency</td>
+          <td align="left">power_line_frequency</td>
+          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">saturation</td>
+          <td align="left">saturation</td>
+          <td align="left">saturation</td>
+          <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">video_pipe</td>
           <td align="left">video_pipe</td>
           <td align="left">video_pipe</td>
@@ -1347,21 +1347,15 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#videodevice" >videodevice</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#vid_control_params" >vid_control_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#v4l2_palette" >v4l2_palette</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#tunerdevice" >tunerdevice</a> </td>
               <td bgcolor="#edf4f9" ><a href="#input" >input</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#norm" >norm</a> </td>
               <td bgcolor="#edf4f9" ><a href="#frequency" >frequency</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#power_line_frequency" >power_line_frequency</a> </td>
               <td bgcolor="#edf4f9" ><a href="#auto_brightness" >auto_brightness</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#brightness" >brightness</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#contrast" >contrast</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#saturation" >saturation</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#hue" >hue</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#tunerdevice" >tunerdevice</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#roundrobin_frames" >roundrobin_frames</a> </td>
@@ -2093,6 +2087,119 @@
         either this alternative method or for a normal network camera, the videodevice option is ignored.
         <p></p>
 
+        <h3><a name="vid_control_params"></a>vid_control_params</h3>
+        <p></p>
+        <ul>
+         <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default:  </li>
+         </ul>
+        <p></p>
+        For v4l2 and bktr devices, most of the configuration options are automatic.  However most devices also allow
+        the user to change certain settings to suit their needs.  The options which the camera manufacturer permits
+        the user to change are called "controls".
+        <p></p>
+        The <a href="#vid_control_params" >vid_control_params</a> option allows users of Motion to change any of these
+        controls.  The specific controls that can be changed is however entirely dependent upon the device.
+        <p></p>
+        This option replaces the previous configuration options for:
+        <ul>
+          <li> brightness</li>
+          <li> contrast</li>
+          <li> hue</li>
+          <li> power_line_frequency</li>
+          <li> saturation</li>
+        </ul>
+        <p></p>
+        This option permits the V4l2 users of Motion to change the value of any control that is available
+        to the device rather than being limited to only the 5 listed above.  For FreeBSD users with BKTR devices,
+        the options are limited to brightness, contrast, hue and saturation due to the limitations of the driver.
+        <p></p>
+        While it always recommended that users remove older configuration options and only use the new options,
+        if users have within the configuration file any of the depreciated options list above, Motion will
+        continue to read those values and upgrade them into the new vid_control_params option.  The resulting
+        pictures from the device may however may not be comparable due to different interpretations of the values.
+        <p></p>
+        It is therefore highly recommended that users remove the old configuration values and calibrate their devices
+        only using this new configuration option.
+        <p></p>
+        To use this parameter, users will need to first identify the name or ID description of the particular control.
+        Next, simply specify the control/id followed by an equal sign and then the desired value.  The specification
+        of multiple controls can be specified by separating them with a comma.
+        <p></p>
+        Since the name of some controls can include a comma or spaces, names can also be specified by enclosing them
+        in double quotes.
+        <p></p>
+        Finally, to help users know which controls are available for their device, the Motion log will report all the
+        available controls, associated IDs and minimum/maximum values permitted at the
+        <a href="#log_level" >log_level</a> of INF.
+        <p></p>
+        e.g.  Change the <a href="#log_level" >log_level</a>
+        to INF, start up Motion with the device attached and specified, let it report items to the log and then
+        shut Motion down.  Within the Motion log, it will list which controls the device has that can be adjusted.
+        <p></p>
+        The following is a sample output from the log and examples of how to specify the parameters
+        <p></p>
+        <ul style="list-style: none;">
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ---------Controls---------</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   V4L2 ID   Name and Range</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963776 Brightness, 0 to 127</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963777 Contrast, 0 to 63</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963778 Saturation, -100 to 100</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963788 White Balance, Automatic, 0 to 4</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 0 Indoor (Incandescant Lighting)</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 1 Outdoor (Sunlight) Mode</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 2 Indoor (Fluorescent Lighting) M</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 3 Manual Mode</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 4 Auto Mode</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963790 Red Balance, 0 to 255</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963791 Blue Balance, 0 to 255</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963792 Gamma, 0 to 31</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963793 Exposure, 0 to 255</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963794 Gain, Automatic, 0 to 1</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963795 Gain, 0 to 63</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963804 Backlight Compensation, 0 to 1</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963807 Color Effects, 0 to 1</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 0 None</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list:   menu item: Value 1 Black & White</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID09963809 Band-Stop Filter, 0 to 1</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025216 Auto contour, 0 to 1</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025217 Contour, 0 to 63</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025218 Dynamic Noise Reduction, 0 to 3</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025219 Auto White Balance Speed, 1 to 32</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025220 Auto White Balance Delay, 0 to 63</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025221 Save User Settings, 0 to 0</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025222 Restore User Settings, 0 to 0</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: ID10025223 Restore Factory Settings, 0 to 0</li>
+        <li>[1:ml1:c1] [INF] [VID] v4l2_ctrls_list: --------------------------</li>
+        </ul>
+
+
+        <p></p>
+        Example 1:  Set the gain to manual, then the gain to 50 and the brightness to 30
+        <p></p>
+        <code>vid_control_params "Gain, Automatic"=1,ID09963795=50, brightness=30</code>
+        <p></p>
+        a equally valid alternative method for specifying this example would be
+        <p></p>
+        <code>vid_control_params ID09963794=1,ID09963795=50, ID09963776=30</code>
+        <p></p>
+        or another way of specifying it could be
+        <p></p>
+        <code>vid_control_params ID09963794=1,"Gain"=50, "brightness"=30</code>
+        <p></p>
+        Example 2:  Set the saturation to 50 and the contrast to 100
+        <p></p>
+        <code>vid_control_params saturation=50,contrast=100</code>
+        <p></p>
+        As can be seen in these examples, the specification can use either the control ID or the name of the
+        control.  If the control name has embedded blanks or commas, then it must be enclosed in quotes.  Special
+        care should be taken when using the name.  As shown above, there is a comma that separates the name
+        of the control versus the valid range of values.  That comma is NOT part of the control name and only
+        delimits the end of the name for the Motion log.
+        <p></p>
+
+
         <h3><a name="v4l2_palette"></a> v4l2_palette </h3>
         <p></p>
         <ul>
@@ -2309,90 +2416,33 @@
         Your tuner card must support this feature.
         <p></p>
 
-        <h3><a name="power_line_frequency"></a> power_line_frequency </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: -1 to 3 </li>
-          <li> Default: -1 </li>
-        </ul>
-        <p></p>
-        This option allows the user to specify the power line frequency that is applicable to the user.  This option
-        can help stabilize the images of some webcams that are sensitive to this frequency.  This is not normally necessary.
-        <ul>
-          <li> -1 : Do not modify device setting</li>
-          <li> 0  : Power line frequency Disabled</li>
-          <li> 1  : 50hz</li>
-          <li> 2  : 60hz</li>
-          <li> 3  : Auto</li>
-        </ul>
-        <p></p>
-
         <h3><a name="auto_brightness"></a> auto_brightness </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
+          <li> Range / Valid values: integer, on, off</li>
           <li> Default: off </li>
         </ul>
         <p></p>
         Let motion regulate the brightness of a video device. Only recommended for cameras without auto brightness
         Motion will try to adjust the brightness of the video device if the images captured are too dark or too light.
         This option will be most useful for video devices which sometimes don't have such an option in
-        hardware.  The auto_brightness feature will adjust the brightness of the device up or down until the value defined
-        by the option brightness is reached (1 = dark, 255 = bright). If brightness is zero auto_brightness will try to
-        adjust to the average brightness level 128.  You need to know if the camera supports auto brightness. Most cameras
-        have auto everything. If your video device already does this for you this option might cause oscillations. If you
-        do not know assume that it has and do not use the Motion auto brightness feature. At least not to start with.
+        hardware.  The auto_brightness feature will adjust the brightness of the device up or down until the value
+        is close to a target value.
         <p></p>
-
-        <h3><a name="brightness"></a> brightness </h3>
+        By default, the target value is the midpoint between the minimum and maximum value permitted for the control
+        being adjusted.  (See methods available below)
         <p></p>
+        Users can specify a different target value by specifying a value for the control in
+        the <a href="#vid_control_params">vid_control_params</a> option.
+        <p></p>
+        Motion allows for three possible methods for adjusting the brightness.
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 255</li>
-          <li> Default: 0 (disabled) </li>
+        <li> 1: Use the brightness control to regulate the brightness (equivalent to specifying on/yes)</li>
+        <li> 2: Use the exposure control to regulate the brightness</li>
+        <li> 3: Use the exposure absolute control to regulate the brightness</li>
         </ul>
         <p></p>
-        The brightness level for the video device.  Value 0 means that Motion does not set the brightness value but
-        leaves it unchanged.  If this setting is used in conjunction with the auto_brightness feature then this setting
-        is the average brightness level in the range 1 (dark) to 255 (bright) that the auto_brightness feature will try
-        to achieve by adjusting the device brightness up and down.
-        <p></p>
-
-        <h3><a name="contrast"></a> contrast </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 255</li>
-          <li> Default: 0 (disabled) </li>
-        </ul>
-        <p></p>
-        The contrast level for the video device.  Disabled (Value 0) means that Motion does not set the contrast value.
-        <p></p>
-
-        <h3><a name="saturation"></a> saturation </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 255</li>
-          <li> Default: 0 (disabled) </li>
-        </ul>
-        <p></p>
-        The color saturation level for the video device.
-        <p></p>
-
-        <h3><a name="hue"></a> hue </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 255</li>
-          <li> Default: 0 (disabled) </li>
-        </ul>
-        <p></p>
-        The hue level for the video device.
-        <p></p>
-
 
         <h3><a name="roundrobin_frames"></a> roundrobin_frames </h3>
         <p></p>

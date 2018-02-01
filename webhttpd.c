@@ -607,7 +607,13 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                         if ((length_uri == 0) && (strlen(Value) > 0)) {
                             /* FIXME need to assure that is a valid value */
                             url_decode(Value, strlen(Value));
+
                             conf_cmdparse(cnt + thread, config_params[i].param_name, Value);
+
+                            /*If we are updating vid parms, set the flag to update the device.*/
+                            if (!strcasecmp(config_params[i].param_name, "vid_control_params") &&
+                                (cnt[thread]->vdev != NULL)) cnt[thread]->vdev->update_parms = TRUE;
+
                             if (cnt[0]->conf.webcontrol_html_output) {
                                 sprintf(res,
                                     "<a href=/%u/config/list>&lt;&ndash; back</a>"
@@ -644,6 +650,11 @@ static unsigned int config(char *pointer, char *res, unsigned int length_uri,
                             conf_cmdparse(cnt+thread, config_params[i].param_name, value);
                             free(type);
                             type = mystrdup("(null)");
+
+                            /*If we are updating vid parms, set the flag to update the device.*/
+                            if (!strcasecmp(config_params[i].param_name, "vid_control_params") &&
+                                (cnt[thread]->vdev != NULL)) cnt[thread]->vdev->update_parms = TRUE;
+
                         } else if (!strcmp(type, "int")) {
                             free(type);
                             type = mystrdup("0");

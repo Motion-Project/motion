@@ -56,8 +56,7 @@ static void catchsignal(int sig ATTRIBUTE_UNUSED)
     bktr_frame_waiting++;
 }
 
-static int bktr_set_hue(int viddev, int new_hue)
-{
+static int bktr_set_hue(int viddev, int new_hue) {
     signed char ioctlval = new_hue;
 
     if (ioctl(viddev, METEORSHUE, &ioctlval) < 0) {
@@ -71,8 +70,7 @@ static int bktr_set_hue(int viddev, int new_hue)
     return ioctlval;
 }
 
-static int bktr_get_hue(int viddev , int *hue)
-{
+static int bktr_get_hue(int viddev , int *hue) {
     signed char ioctlval;
 
     if (ioctl(viddev, METEORGHUE, &ioctlval) < 0) {
@@ -86,8 +84,7 @@ static int bktr_get_hue(int viddev , int *hue)
     return ioctlval;
 }
 
-static int bktr_set_saturation(int viddev, int new_saturation)
-{
+static int bktr_set_saturation(int viddev, int new_saturation) {
     unsigned char ioctlval= new_saturation;
 
     if (ioctl(viddev, METEORSCSAT, &ioctlval) < 0) {
@@ -101,8 +98,7 @@ static int bktr_set_saturation(int viddev, int new_saturation)
     return ioctlval;
 }
 
-static int bktr_get_saturation(int viddev , int *saturation)
-{
+static int bktr_get_saturation(int viddev , int *saturation) {
     unsigned char ioctlval;
 
     if (ioctl(viddev, METEORGCSAT, &ioctlval) < 0) {
@@ -116,8 +112,7 @@ static int bktr_get_saturation(int viddev , int *saturation)
     return ioctlval;
 }
 
-static int bktr_set_contrast(int viddev, int new_contrast)
-{
+static int bktr_set_contrast(int viddev, int new_contrast) {
     unsigned char ioctlval = new_contrast;
 
     if (ioctl(viddev, METEORSCONT, &ioctlval) < 0) {
@@ -131,8 +126,7 @@ static int bktr_set_contrast(int viddev, int new_contrast)
     return ioctlval;
 }
 
-static int bktr_get_contrast(int viddev, int *contrast)
-{
+static int bktr_get_contrast(int viddev, int *contrast) {
     unsigned char ioctlval;
 
     if (ioctl(viddev, METEORGCONT, &ioctlval) < 0) {
@@ -178,7 +172,7 @@ static int bktr_get_brightness(int viddev, int *brightness)
 
 static int bktr_set_freq(struct video_dev *viddev, unsigned long freq)
 {
-    int tuner_fd = viddev->fd_tuner;
+    int tuner_fd = viddev->bktr_fdtuner;
     int old_audio;
 
     MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "Not implemented");
@@ -285,6 +279,21 @@ static int bktr_set_geometry(struct video_dev *viddev, int width, int height)
     geom.rows = height;
     geom.oformat = METEOR_GEO_YUV_422 | METEOR_GEO_YUV_12;
 
+    /* FIXME:  These seem to be problematic on whether they work the same on bktr...*/
+    /* FIXME:  Best result in testing was only a BW picture with no color.*/
+    /*
+    The following are supported pixel format types:
+    METEOR_GEO_RGB16        16-bit RGB
+    METEOR_GEO_RGB24        24-bit RGB in 32 bits
+    METEOR_GEO_YUV_PACKED   16-bit 4:2:2 YUV
+    METEOR_GEO_YUV_PLANAR   16-bit 4:2:2 YUV
+    METEOR_GEO_YUV_UNSIGNED unsigned UV
+    METEOR_GEO_YUV_422
+    METEOR_GEO_YUV_12
+    METEOR_GEO_YUV_9
+    */
+    viddev->pixfmt_src = geom.oformat;
+
     switch (viddev->norm) {
     case BKTR_PAL:
         h_max = BKTR_PAL_HEIGHT;
@@ -315,31 +324,27 @@ static int bktr_set_geometry(struct video_dev *viddev, int width, int height)
     return 0;
 }
 
-static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev)
-{
+static void bktr_picture_controls(struct context *cnt, struct video_dev *viddev) {
+
     int dev = viddev->fd_device;
+    int indx_user, retcd;
+    struct vdev_usrctrl_ctx *usritem;
 
-    if ((cnt->conf.contrast) && (cnt->conf.contrast != viddev->contrast)) {
-        bktr_set_contrast(dev, cnt->conf.contrast);
-        viddev->contrast = cnt->conf.contrast;
+    if (!cnt->vdev->update_parms) return;
+
+    retcd = vid_parms_parse(cnt);
+    if (retcd < 0) return;
+
+    for (indx_user=0; indx_user<cnt->vdev->usrctrl_count; indx_user++){
+        usritem=&cnt->vdev->usrctrl_array[indx_user];
+        if (!strcasecmp(usritem->ctrl_name,"contrast")) bktr_set_contrast(dev,usritem->ctrl_value);
+        if (!strcasecmp(usritem->ctrl_name,"hue")) bktr_set_hue(dev,usritem->ctrl_value);
+        if (!strcasecmp(usritem->ctrl_name,"brightness")) bktr_set_brightness(dev,usritem->ctrl_value);
+        if (!strcasecmp(usritem->ctrl_name,"saturation")) bktr_set_saturation(dev,usritem->ctrl_value);
     }
 
-    if ((cnt->conf.hue) && (cnt->conf.hue != viddev->hue)) {
-        bktr_set_hue(dev, cnt->conf.hue);
-        viddev->hue = cnt->conf.hue;
-    }
+    cnt->vdev->update_parms = FALSE;
 
-    if ((cnt->conf.brightness) &&
-        (cnt->conf.brightness != viddev->brightness)) {
-        bktr_set_brightness(dev, cnt->conf.brightness);
-        viddev->brightness = cnt->conf.brightness;
-    }
-
-    if ((cnt->conf.saturation) &&
-        (cnt->conf.saturation != viddev->saturation)) {
-        bktr_set_saturation(dev, cnt->conf.saturation);
-        viddev->saturation = cnt->conf.saturation;
-    }
 }
 
 static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int height,
@@ -347,7 +352,7 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
 {
     int dev_bktr = viddev->fd_device;
     struct sigaction act, old;
-    //int dev_tunner = viddev->fd_tuner;
+    //int dev_tunner = viddev->bktr_fdtuner;
     /* to ensure that all device will be support the capture mode
       _TODO_ : Autodected the best capture mode .
     */
@@ -357,7 +362,7 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
     void *map;
 
     /* If we have choose the tuner is needed to setup the frequency. */
-    if ((viddev->tuner_device != NULL) && (input == BKTR_IN_TV)) {
+    if ((viddev->bktr_tuner != NULL) && (input == BKTR_IN_TV)) {
         if (!freq) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "Not valid Frequency [%lu] for "
                        "Source input [%i]", freq, input);
@@ -393,7 +398,6 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
 
     if (freq) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "Frequency set (no implemented yet");
-
     }
 
     /*
@@ -401,11 +405,34 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
      * That is the buffer size for capture images ,
      * so is dependent of color space of input format / FIXME
      */
-    viddev->v4l_bufsize = (((width * height * 3 / 2)) * sizeof(unsigned char));
-    viddev->v4l_fmt = VIDEO_PALETTE_YUV420P;
+     /* FIXME:  These seem to be problematic on whether they work the same on bktr...*/
+     /* FIXME:  Spec says some of these should be 3/2 but testing indicates it is too small.*/
+    switch (viddev->pixfmt_src) {
+    case METEOR_GEO_RGB16:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_RGB24:
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Sizing buffer to 3x");
+        viddev->bktr_bufsize = ((width * height * 3) * sizeof(unsigned char));
+    case METEOR_GEO_YUV_PACKED:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_YUV_PLANAR:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_YUV_422:
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Sizing buffer to 3/2x");
+        viddev->bktr_bufsize = (((width * height * 3 / 2)) * sizeof(unsigned char));
+        break;
+    case METEOR_GEO_YUV_9:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_YUV_12:
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Sizing buffer to 3x");
+        viddev->bktr_bufsize = ((width * height * 3) * sizeof(unsigned char));
+        break;
+    default:
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Sizing buffer to 3/2x");
+        viddev->bktr_bufsize = (((width * height * 3 / 2)) * sizeof(unsigned char));
+    }
 
-
-    map = mmap((caddr_t)0, viddev->v4l_bufsize, PROT_READ|PROT_WRITE, MAP_SHARED,
+    map = mmap((caddr_t)0, viddev->bktr_bufsize, PROT_READ|PROT_WRITE, MAP_SHARED,
                dev_bktr, (off_t)0);
 
     if (map == MAP_FAILED) {
@@ -415,16 +442,16 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
 
     /* FIXME double buffer */
     if (0) {
-        viddev->v4l_maxbuffer = 2;
-        viddev->v4l_buffers[0] = map;
-        viddev->v4l_buffers[1] = (unsigned char *)map + 0; /* 0 is not valid just a test */
-        //viddev->v4l_buffers[1] = map+vid_buf.offsets[1];
+        viddev->bktr_maxbuffer = 2;
+        viddev->bktr_buffers[0] = map;
+        viddev->bktr_buffers[1] = (unsigned char *)map + 0; /* 0 is not valid just a test */
+        //viddev->bktr_buffers[1] = map+vid_buf.offsets[1];
     } else {
-        viddev->v4l_buffers[0] = map;
-        viddev->v4l_maxbuffer = 1;
+        viddev->bktr_buffers[0] = map;
+        viddev->bktr_maxbuffer = 1;
     }
 
-    viddev->v4l_curbuffer = 0;
+    viddev->bktr_curbuffer = 0;
 
     /* Clear the buffer */
     if (ioctl(dev_bktr, BT848SCBUF, &dummy) < 0) {
@@ -440,55 +467,38 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
 
     dummy = SIGUSR2;
 
-    //viddev->capture_method = METEOR_CAP_CONTINOUS;
-    //viddev->capture_method = METEOR_CAP_SINGLE;
+    //viddev->bktr_method = METEOR_CAP_CONTINOUS;
+    //viddev->bktr_method = METEOR_CAP_SINGLE;
 
-    if ((viddev->capture_method == METEOR_CAP_CONTINOUS) &&
+    if ((viddev->bktr_method == METEOR_CAP_CONTINOUS) &&
         (ioctl(dev_bktr, METEORSSIGNAL, &dummy) < 0)) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "METEORSSIGNAL");
 
-        viddev->capture_method = METEOR_CAP_SINGLE;
+        viddev->bktr_method = METEOR_CAP_SINGLE;
 
-        if (ioctl(dev_bktr, METEORCAPTUR, &viddev->capture_method) < 0) {
+        if (ioctl(dev_bktr, METEORCAPTUR, &viddev->bktr_method) < 0) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "METEORCAPTUR using single method "
                        "Error capturing");
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "METEORCAPTUR using single method "
                        "Error capturing");
         }
     } else {
-        if (ioctl(dev_bktr, METEORCAPTUR, &viddev->capture_method) < 0) {
-            viddev->capture_method = METEOR_CAP_SINGLE;
+        if (ioctl(dev_bktr, METEORCAPTUR, &viddev->bktr_method) < 0) {
+            viddev->bktr_method = METEOR_CAP_SINGLE;
 
-            if (ioctl(dev_bktr, METEORCAPTUR, &viddev->capture_method) < 0) {
+            if (ioctl(dev_bktr, METEORCAPTUR, &viddev->bktr_method) < 0) {
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "METEORCAPTUR using single method "
                            "Error capturing");
             }
         }
     }
 
-    if (viddev->capture_method == METEOR_CAP_CONTINOUS)
+    if (viddev->bktr_method == METEOR_CAP_CONTINOUS)
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "METEORCAPTUR METEOR_CAP_CONTINOUS");
     else
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "METEORCAPTUR METEOR_CAP_SINGLE");
 
-    // settle , sleep(1) replaced
     SLEEP(1, 0);
-
-    /* FIXME */
-    switch (viddev->v4l_fmt) {
-    case VIDEO_PALETTE_YUV420P:
-        viddev->v4l_bufsize = (width * height * 3) / 2;
-        break;
-    case VIDEO_PALETTE_YUV422:
-        viddev->v4l_bufsize = (width * height * 2);
-        break;
-    case VIDEO_PALETTE_RGB24:
-        viddev->v4l_bufsize = (width * height * 3);
-        break;
-    case VIDEO_PALETTE_GREY:
-        viddev->v4l_bufsize = width * height;
-        break;
-    }
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "HUE [%d]",
                bktr_get_hue(dev_bktr, &dummy));
@@ -515,10 +525,10 @@ static unsigned char *bktr_device_init(struct video_dev *viddev, int width, int 
  *    -1          Fatal error
  *     1          Non fatal error (not implemented)
  */
-static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width, int height)
-{
+static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width, int height) {
     int dev_bktr = viddev->fd_device;
     unsigned char *cap_map = NULL;
+    unsigned char *common_buffer;
     int single = METEOR_CAP_SINGLE;
     sigset_t set, old;
 
@@ -536,15 +546,15 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
     sigaddset (&set, SIGTERM);
     sigaddset (&set, SIGHUP);
     pthread_sigmask(SIG_BLOCK, &set, &old);
-    cap_map = viddev->v4l_buffers[viddev->v4l_curbuffer];
+    cap_map = viddev->bktr_buffers[viddev->bktr_curbuffer];
 
-    viddev->v4l_curbuffer++;
-    if (viddev->v4l_curbuffer >= viddev->v4l_maxbuffer)
-        viddev->v4l_curbuffer = 0;
+    viddev->bktr_curbuffer++;
+    if (viddev->bktr_curbuffer >= viddev->bktr_maxbuffer)
+        viddev->bktr_curbuffer = 0;
 
     /* Capture */
 
-    if (viddev->capture_method == METEOR_CAP_CONTINOUS) {
+    if (viddev->bktr_method == METEOR_CAP_CONTINOUS) {
         if (bktr_frame_waiting)
             bktr_frame_waiting = 0;
 
@@ -556,16 +566,39 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
 
     /* Undo the signal blocking */
     pthread_sigmask(SIG_UNBLOCK, &old, NULL);
-
-    switch (viddev->v4l_fmt) {
-    case VIDEO_PALETTE_RGB24:
+    /*
+    METEOR_GEO_RGB16        16-bit RGB
+    METEOR_GEO_RGB24        24-bit RGB in 32 bits
+    METEOR_GEO_YUV_PACKED   16-bit 4:2:2 YUV
+    METEOR_GEO_YUV_PLANAR   16-bit 4:2:2 YUV
+    METEOR_GEO_YUV_422
+    METEOR_GEO_YUV_12
+    METEOR_GEO_YUV_9
+    */
+    /* FIXME:  These seem to be problematic on whether they work the same on bktr...*/
+    switch (viddev->pixfmt_src) {
+    case METEOR_GEO_RGB16:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_RGB24:
         vid_rgb24toyuv420p(map, cap_map, width, height);
         break;
-    case VIDEO_PALETTE_YUV422:
+    case METEOR_GEO_YUV_PACKED:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_YUV_PLANAR:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_YUV_422:
         vid_yuv422to420p(map, cap_map, width, height);
         break;
+    case METEOR_GEO_YUV_9:
+        /*FALLTHROUGH*/
+    case METEOR_GEO_YUV_12:
+        common_buffer = mymalloc(width * height * 3);
+        vid_y10torgb24(common_buffer, cap_map, width, height, 2);
+        vid_rgb24toyuv420p(map, common_buffer, width, height);
+        free(common_buffer);
+        break;
     default:
-        memcpy(map, cap_map, viddev->v4l_bufsize);
+        memcpy(map, cap_map, ((width*height*3)/2));
     }
 
     return 0;
@@ -574,7 +607,7 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
 static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsigned char *map, int width,
                           int height, int input, int norm, int skip, unsigned long freq)
 {
-    if (input != viddev->input || norm != viddev->norm || freq != viddev->freq) {
+    if (input != viddev->input || norm != viddev->norm || freq != viddev->frequency) {
         int dummy;
         unsigned long frequnits = freq;
 
@@ -589,7 +622,7 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
 
         viddev->norm = dummy;
 
-        if ((viddev->tuner_device != NULL) && (viddev->input == BKTR_IN_TV) &&
+        if ((viddev->bktr_tuner != NULL) && (viddev->input == BKTR_IN_TV) &&
             (frequnits > 0)) {
             if (bktr_set_freq(viddev, freq) == -1)
                 return;
@@ -597,7 +630,7 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
 
         bktr_picture_controls(cnt, viddev);
 
-        viddev->freq = freq;
+        viddev->frequency = freq;
 
         /* skip a few frames if needed */
         for (dummy = 0; dummy < skip; dummy++)
@@ -611,37 +644,28 @@ static void bktr_set_input(struct context *cnt, struct video_dev *viddev, unsign
 #endif /* HAVE_BKTR */
 
 
-void bktr_mutex_init(void)
-{
-    int chk_bktr;
+void bktr_mutex_init(void) {
 #ifdef HAVE_BKTR
     pthread_mutex_init(&bktr_mutex, NULL);
-    chk_bktr = 0;
 #else
-    chk_bktr = 1;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "BKTR is not enabled.");
 #endif
-    if (chk_bktr == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "BKTR is not enabled.");
 }
 
-void bktr_mutex_destroy(void)
-{
-    int chk_bktr;
+void bktr_mutex_destroy(void) {
 #ifdef HAVE_BKTR
     pthread_mutex_destroy(&bktr_mutex);
-    chk_bktr = 0;
 #else
-    chk_bktr = 1;
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "BKTR is not enabled.");
 #endif
-    if (chk_bktr == 1) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "BKTR is not enabled.");
-
 }
 
-void bktr_cleanup(struct context *cnt)
-{
+void bktr_cleanup(struct context *cnt){
 #ifdef HAVE_BKTR
 
     struct video_dev *dev = viddevs;
     struct video_dev *prev = NULL;
+    int indx;
 
     /* Cleanup the v4l part */
     pthread_mutex_lock(&bktr_mutex);
@@ -658,6 +682,23 @@ void bktr_cleanup(struct context *cnt)
     /* Set it as closed in thread context. */
     cnt->video_dev = -1;
 
+    /* free the information we collected regarding the controls */
+    if (cnt->vdev != NULL){
+        if (cnt->vdev->usrctrl_count > 0){
+            for (indx=0;indx<cnt->vdev->usrctrl_count;indx++){
+                free(cnt->vdev->usrctrl_array[indx].ctrl_name);
+                cnt->vdev->usrctrl_array[indx].ctrl_name=NULL;
+            }
+        }
+        cnt->vdev->usrctrl_count = 0;
+        if (cnt->vdev->usrctrl_array != NULL){
+            free(cnt->vdev->usrctrl_array);
+            cnt->vdev->usrctrl_array = NULL;
+        }
+
+        free(cnt->vdev);
+    }
+
     if (dev == NULL) {
         MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "Unable to find video device");
         return;
@@ -667,21 +708,21 @@ void bktr_cleanup(struct context *cnt)
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Closing video device %s",
                    dev->video_device);
 
-        if (dev->fd_tuner > 0)
-            close(dev->fd_tuner);
+        if (dev->bktr_fdtuner > 0)
+            close(dev->bktr_fdtuner);
 
         if (dev->fd_device > 0) {
-            if (dev->capture_method == METEOR_CAP_CONTINOUS) {
-                dev->fd_tuner = METEOR_CAP_STOP_CONT;
-                ioctl(dev->fd_device, METEORCAPTUR, &dev->fd_tuner);
+            if (dev->bktr_method == METEOR_CAP_CONTINOUS) {
+                dev->bktr_fdtuner = METEOR_CAP_STOP_CONT;
+                ioctl(dev->fd_device, METEORCAPTUR, &dev->bktr_fdtuner);
             }
             close(dev->fd_device);
-            dev->fd_tuner = -1;
+            dev->bktr_fdtuner = -1;
         }
 
 
-        munmap(viddevs->v4l_buffers[0], viddevs->v4l_bufsize);
-        viddevs->v4l_buffers[0] = MAP_FAILED;
+        munmap(viddevs->bktr_buffers[0], viddevs->bktr_bufsize);
+        viddevs->bktr_buffers[0] = MAP_FAILED;
 
         dev->fd_device = -1;
         pthread_mutex_lock(&bktr_mutex);
@@ -718,14 +759,13 @@ void bktr_cleanup(struct context *cnt)
 
 }
 
-int bktr_start(struct context *cnt)
-{
+int bktr_start(struct context *cnt) {
 #ifdef HAVE_BKTR
 
     struct config *conf = &cnt->conf;
     struct video_dev *dev;
-    int fd_tuner = -1;
-    int width, height, capture_method;
+    int bktr_fdtuner = -1;
+    int width, height, bktr_method;
     unsigned input, norm;
     unsigned long frequency;
     int fd_device = -1;
@@ -754,7 +794,7 @@ int bktr_start(struct context *cnt)
     input = conf->input;
     norm = conf->norm;
     frequency = conf->frequency;
-    capture_method = METEOR_CAP_CONTINOUS;
+    bktr_method = METEOR_CAP_CONTINOUS;
 
     pthread_mutex_lock(&bktr_mutex);
 
@@ -765,6 +805,13 @@ int bktr_start(struct context *cnt)
      */
     cnt->imgs.width = width;
     cnt->imgs.height = height;
+
+    cnt->vdev = mymalloc(sizeof(struct vdev_context));
+    memset(cnt->vdev, 0, sizeof(struct vdev_context));
+    cnt->vdev->usrctrl_array = NULL;
+    cnt->vdev->usrctrl_count = 0;
+    cnt->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
+    cnt->vdev->autobright = FALSE;      /*Default to not have device do an update for autobrightness*/
 
     /*
      * First we walk through the already discovered video devices to see
@@ -777,7 +824,6 @@ int bktr_start(struct context *cnt)
         if (!strcmp(conf->video_device, dev->video_device)) {
             int dummy = METEOR_CAP_STOP_CONT;
             dev->usage_count++;
-            cnt->imgs.type = dev->v4l_fmt;
 
             if (ioctl(dev->fd_device, METEORCAPTUR, &dummy) < 0) {
                 MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "Stopping capture");
@@ -788,29 +834,17 @@ int bktr_start(struct context *cnt)
                        "capture method METEOR_CAP_SINGLE", dev->video_device,
                        dev->input, conf->input);
 
-            dev->capture_method = METEOR_CAP_SINGLE;
-            /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
-            /*FIXME:  This switch can probably be removed */
-            switch (cnt->imgs.type) {
-            case VIDEO_PALETTE_GREY:
-                cnt->imgs.motionsize = width * height;
-                cnt->imgs.size_norm = width * height;
-                break;
-            case VIDEO_PALETTE_RGB24:
-                /*FALLTHROUGH*/
-            case VIDEO_PALETTE_YUV422:
-                cnt->imgs.type = VIDEO_PALETTE_YUV420P;
-                /*FALLTHROUGH*/
-            case VIDEO_PALETTE_YUV420P:
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P setting"
+            dev->bktr_method = METEOR_CAP_SINGLE;
+
+
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P setting"
                            " imgs.size_norm and imgs.motionsize");
-                cnt->imgs.motionsize = width * height;
-                cnt->imgs.size_norm = (width * height * 3) / 2;
-                break;
-            }
+            cnt->imgs.motionsize = width * height;
+            cnt->imgs.size_norm = (width * height * 3) / 2;
+            cnt->imgs.type = VIDEO_PALETTE_YUV420P;
 
             pthread_mutex_unlock(&bktr_mutex);
-            return dev->fd_device; // FIXME return fd_tuner ?!
+            return dev->fd_device; // FIXME return bktr_fdtuner ?!
         }
         dev = dev->next;
     }
@@ -831,8 +865,8 @@ int bktr_start(struct context *cnt)
 
     /* Only open tuner if conf->tuner_device has set , freq and input is 1. */
     if ((conf->tuner_device != NULL) && (frequency > 0) && (input == BKTR_IN_TV)) {
-        fd_tuner = open(conf->tuner_device, O_RDWR);
-        if (fd_tuner < 0) {
+        bktr_fdtuner = open(conf->tuner_device, O_RDWR);
+        if (bktr_fdtuner < 0) {
             MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "open tuner device %s",
                        conf->tuner_device);
             free(dev);
@@ -846,31 +880,27 @@ int bktr_start(struct context *cnt)
 
     dev->usage_count = 1;
     dev->video_device = conf->video_device;
-    dev->tuner_device = conf->tuner_device;
+    dev->bktr_tuner = conf->tuner_device;
     dev->fd_device = fd_device;
-    dev->fd_tuner = fd_tuner;
+    dev->bktr_fdtuner = bktr_fdtuner;
     dev->input = input;
     dev->height = height;
     dev->width = width;
-    dev->freq = frequency;
+    dev->frequency = frequency;
     dev->owner = -1;
-    dev->capture_method = capture_method;
+    dev->bktr_method = bktr_method;
 
     /*
      * We set brightness, contrast, saturation and hue = 0 so that they only get
      * set if the config is not zero.
      */
 
-    dev->brightness = 0;
-    dev->contrast = 0;
-    dev->saturation = 0;
-    dev->hue = 0;
     dev->owner = -1;
 
     /* Default palette */
-    dev->v4l_fmt = VIDEO_PALETTE_YUV420P;
-    dev->v4l_curbuffer = 0;
-    dev->v4l_maxbuffer = 1;
+    dev->pixfmt_src = METEOR_GEO_YUV_422;
+    dev->bktr_curbuffer = 0;
+    dev->bktr_maxbuffer = 1;
 
     if (!bktr_device_init(dev, width, height, input, norm, frequency)) {
         close(dev->fd_device);
@@ -882,24 +912,9 @@ int bktr_start(struct context *cnt)
         return -1;
     }
 
-    cnt->imgs.type = dev->v4l_fmt;
-    /*The FALLTHROUGH is a special comment required by compiler.  Do not edit it*/
-    switch (cnt->imgs.type) {
-    case VIDEO_PALETTE_GREY:
-        cnt->imgs.size_norm = width * height;
-        cnt->imgs.motionsize = width * height;
-        break;
-    case VIDEO_PALETTE_RGB24:
-        /*FALLTHROUGH*/
-    case VIDEO_PALETTE_YUV422:
-        cnt->imgs.type = VIDEO_PALETTE_YUV420P;
-        /*FALLTHROUGH*/
-    case VIDEO_PALETTE_YUV420P:
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "VIDEO_PALETTE_YUV420P imgs.type");
-        cnt->imgs.size_norm = (width * height * 3) / 2;
-        cnt->imgs.motionsize = width * height;
-        break;
-    }
+    cnt->imgs.type = VIDEO_PALETTE_YUV420P;
+    cnt->imgs.size_norm = (width * height * 3) / 2;
+    cnt->imgs.motionsize = width * height;
 
     /* Insert into linked list */
     dev->next = viddevs;
@@ -915,8 +930,7 @@ int bktr_start(struct context *cnt)
 
 }
 
-int bktr_next(struct context *cnt,  struct image_data *img_data)
-{
+int bktr_next(struct context *cnt,  struct image_data *img_data) {
 #ifdef HAVE_BKTR
 
     struct config *conf = &cnt->conf;
@@ -940,8 +954,7 @@ int bktr_next(struct context *cnt,  struct image_data *img_data)
 
     pthread_mutex_unlock(&bktr_mutex);
 
-    if (dev == NULL)
-        return V4L2_FATAL_ERROR;
+    if (dev == NULL) return -1;
 
     if (dev->owner != cnt->threadnr) {
         pthread_mutex_lock(&dev->mutex);

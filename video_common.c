@@ -20,29 +20,6 @@ typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 
 #define CLAMP(x)  ((x) < 0 ? 0 : ((x) > 255) ? 255 : (x))
-#define MAX2(x, y) ((x) > (y) ? (x) : (y))
-#define MIN2(x, y) ((x) < (y) ? (x) : (y))
-
-/* Constants used by auto brightness feature
- * Defined as constant to make it easier for people to tweak code for a
- * difficult camera.
- * The experience gained from people could help improving the feature without
- * adding too many new options.
- * AUTOBRIGHT_HYSTERESIS sets the minimum the light intensity must change before
- * we adjust brigtness.
- * AUTOBRIGHTS_DAMPER damps the speed with which we adjust the brightness
- * When the brightness changes a lot we step in large steps and as we approach the
- * target value we slow down to avoid overshoot and oscillations. If the camera
- * adjusts too slowly decrease the DAMPER value. If the camera oscillates try
- * increasing the DAMPER value. DAMPER must be minimum 1.
- * MAX and MIN are the max and min values of brightness setting we will send to
- * the camera device.
- */
-#define AUTOBRIGHT_HYSTERESIS 10
-#define AUTOBRIGHT_DAMPER 5
-#define AUTOBRIGHT_MAX 255
-#define AUTOBRIGHT_MIN 0
-
 
 typedef struct {
     int is_abs;
@@ -311,13 +288,13 @@ void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int
     }
 }
 
-void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
+void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     uint8_t *pY = map;
     uint8_t *pU = pY + (width * height);
     uint8_t *pV = pU + (width * height) / 4;
     uint32_t uv_offset = width * 2 * sizeof(uint8_t);
-    uint32_t ix, jx;
+    int ix, jx;
 
     for (ix = 0; ix < height; ix++) {
         for (jx = 0; jx < width; jx += 2) {
@@ -500,53 +477,159 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
         }
     }
 
+}
+
+static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char *config_val){
+
+    /* Add the parameter and value to our user control array*/
+    struct vdev_usrctrl_ctx *tmp;
+    int indx;
+
+    tmp = mymalloc(sizeof(struct vdev_usrctrl_ctx)*(vdevctx->usrctrl_count+1));
+    for (indx=0;indx<vdevctx->usrctrl_count;indx++){
+        tmp[indx].ctrl_name = mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
+        sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
+        free(vdevctx->usrctrl_array[indx].ctrl_name);
+        vdevctx->usrctrl_array[indx].ctrl_name=NULL;
+        tmp[indx].ctrl_value = vdevctx->usrctrl_array[indx].ctrl_value;
+    }
+    if (vdevctx->usrctrl_array != NULL){
+      free(vdevctx->usrctrl_array);
+      vdevctx->usrctrl_array =  NULL;
+    }
+
+    vdevctx->usrctrl_array = tmp;
+    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name = mymalloc(strlen(config_name)+1);
+    sprintf(vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name,"%s",config_name);
+    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_value=atoi(config_val);
+    vdevctx->usrctrl_count++;
 
 }
 
-int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
-{
+int vid_parms_parse(struct context *cnt){
 
-    int brightness_window_high;
-    int brightness_window_low;
-    int brightness_target;
-    int i, j = 0, avg = 0, step = 0;
-    unsigned char *image = cnt->imgs.image_virgin.image_norm; /* Or cnt->current_image ? */
+    /* Parse through the configuration option to get values
+     * The values are separated by commas but may also have
+     * double quotes around the names which include a comma.
+     * Examples:
+     * vid_control_parms ID01234= 1, ID23456=2
+     * vid_control_parms "Brightness, auto" = 1, ID23456=2
+     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
+     */
+    int indx_parm;
+    int parmval_st , parmval_len;
+    int parmdesc_st, parmdesc_len;
+    int qte_open;
+    struct vdev_context *vdevctx;
+    char tst;
+    char *parmdesc, *parmval;
 
-    int make_change = 0;
+    if (!cnt->vdev->update_parms) return 0;
 
-    if (cnt->conf.brightness)
-        brightness_target = cnt->conf.brightness;
-    else
-        brightness_target = 128;
+    vdevctx = cnt->vdev;
 
-    brightness_window_high = MIN2(brightness_target + AUTOBRIGHT_HYSTERESIS, 255);
-    brightness_window_low = MAX2(brightness_target - AUTOBRIGHT_HYSTERESIS, 1);
-
-    for (i = 0; i < cnt->imgs.motionsize; i += 101) {
-        avg += image[i];
-        j++;
+    for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
+        free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
+        vdevctx->usrctrl_array[indx_parm].ctrl_name=NULL;
     }
-    avg = avg / j;
+    if (vdevctx->usrctrl_array != NULL){
+      free(vdevctx->usrctrl_array);
+      vdevctx->usrctrl_array = NULL;
+    }
+    vdevctx->usrctrl_count = 0;
 
-    /* Average is above window - turn down brightness - go for the target. */
-    if (avg > brightness_window_high) {
-        step = MIN2((avg - brightness_target) / AUTOBRIGHT_DAMPER + 1, viddev->brightness - AUTOBRIGHT_MIN);
+    if (cnt->conf.vid_control_params != NULL){
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Parsing controls: %s",cnt->conf.vid_control_params);
 
-        if (viddev->brightness > step + 1 - AUTOBRIGHT_MIN) {
-            viddev->brightness -= step;
-            make_change = 1;
+        indx_parm = 0;
+        parmdesc_st  = parmval_st  = -1;
+        parmdesc_len = parmval_len = 0;
+        qte_open = FALSE;
+        parmdesc = parmval = NULL;
+        tst = cnt->conf.vid_control_params[indx_parm];
+        while (tst != '\0') {
+            if (!qte_open) {
+                if (tst == '\"') {                    /* This is the opening quotation */
+                    qte_open = TRUE;
+                    parmdesc_st = indx_parm + 1;
+                    parmval_st  = -1;
+                    parmdesc_len = parmval_len = 0;
+                    if (parmdesc != NULL) free(parmdesc);
+                    if (parmval  != NULL) free(parmval);
+                    parmdesc = parmval = NULL;
+                } else if (tst == ','){               /* Designator for next parm*/
+                    if ((parmval_st >= 0) && (parmval_len > 0)){
+                        if (parmval  != NULL) free(parmval);
+                        parmval = mymalloc(parmval_len);
+                        snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
+                    }
+                    parmdesc_st  = indx_parm + 1;
+                    parmval_st  = -1;
+                    parmdesc_len = parmval_len = 0;
+                } else if (tst == '='){               /* Designator for end of desc and start of value*/
+                    if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
+                        if (parmdesc != NULL) free(parmdesc);
+                        parmdesc = mymalloc(parmdesc_len);
+                        snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
+                    }
+                    parmdesc_st = -1;
+                    parmval_st = indx_parm + 1;
+                    parmdesc_len = parmval_len = 0;
+                    if (parmval != NULL) free(parmval);
+                    parmval = NULL;
+                } else if (tst == ' '){               /* Skip leading spaces */
+                    if (indx_parm == parmdesc_st) parmdesc_st++;
+                    if (indx_parm == parmval_st) parmval_st++;
+                } else if (tst != ' '){               /* Revise the length making sure it is not a space*/
+                    parmdesc_len = indx_parm - parmdesc_st + 2;
+                    parmval_len = indx_parm - parmval_st + 2;
+                    if (parmdesc_st == -1) parmdesc_st = indx_parm;
+                }
+            } else if (tst == '\"') {                /* This is the closing quotation */
+                parmdesc_len = indx_parm - parmdesc_st + 1;
+                if (parmdesc_len > 0 ){
+                    if (parmdesc != NULL) free(parmdesc);
+                    parmdesc = mymalloc(parmdesc_len);
+                    snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
+                }
+                parmdesc_st = -1;
+                parmval_st = indx_parm + 1;
+                parmdesc_len = parmval_len = 0;
+                if (parmval != NULL) free(parmval);
+                parmval = NULL;
+                qte_open = FALSE;   /* Reset the open/close on quotation */
+            }
+            if ((parmdesc != NULL) && (parmval  != NULL)){
+                vid_parms_add(vdevctx, parmdesc, parmval);
+                free(parmdesc);
+                free(parmval);
+                parmdesc = parmval = NULL;
+            }
+
+            indx_parm++;
+            tst = cnt->conf.vid_control_params[indx_parm];
         }
-    } else if (avg < brightness_window_low) {
-        /* Average is below window - turn up brightness - go for the target. */
-        step = MIN2((brightness_target - avg) / AUTOBRIGHT_DAMPER + 1, AUTOBRIGHT_MAX - viddev->brightness);
-
-        if (viddev->brightness < AUTOBRIGHT_MAX - step) {
-            viddev->brightness += step;
-            make_change = 1;
+        /* Process the last parameter */
+        if ((parmval_st >= 0) && (parmval_len > 0)){
+            if (parmval  != NULL) free(parmval);
+            parmval = mymalloc(parmval_len+1);
+            snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
         }
+        if ((parmdesc != NULL) && (parmval  != NULL)){
+            vid_parms_add(vdevctx, parmdesc, parmval);
+            free(parmdesc);
+            free(parmval);
+            parmdesc = parmval = NULL;
+        }
+
+        if (parmdesc != NULL) free(parmdesc);
+        if (parmval  != NULL) free(parmval);
     }
 
-    return make_change;
+    cnt->vdev->update_parms = FALSE;
+
+    return 0;
+
 }
 
 void vid_mutex_init(void)
@@ -561,8 +644,7 @@ void vid_mutex_destroy(void)
     bktr_mutex_destroy();
 }
 
-void vid_close(struct context *cnt)
-{
+void vid_close(struct context *cnt) {
 
 #ifdef HAVE_MMAL
     if (cnt->mmalcam) {
@@ -602,7 +684,6 @@ void vid_close(struct context *cnt)
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)");
     return;
 
-
 }
 
 /**
@@ -627,8 +708,7 @@ void vid_close(struct context *cnt)
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 8
  */
-int vid_start(struct context *cnt)
-{
+int vid_start(struct context *cnt) {
     int dev = -1;
 
 #ifdef HAVE_MMAL
