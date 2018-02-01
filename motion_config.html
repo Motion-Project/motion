@@ -1833,7 +1833,7 @@
               <td bgcolor="#edf4f9" >frame number</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" >%t    </a> </td>
+              <td bgcolor="#edf4f9" >%t</a> </td>
               <td bgcolor="#edf4f9" >camera id number</a> </td>
               <td bgcolor="#edf4f9" >%D </a> </td>
               <td bgcolor="#edf4f9" >changed pixels</a> </td>
@@ -1841,36 +1841,44 @@
               <td bgcolor="#edf4f9" >noise level</a> </td>
              </tr>
              <tr>
+               <td bgcolor="#edf4f9" >%w </a> </td>
+               <td bgcolor="#edf4f9" >width of the image</a> </td>
+               <td bgcolor="#edf4f9" >%h </a> </td>
+               <td bgcolor="#edf4f9" >height of the image</a> </td>
                <td bgcolor="#edf4f9" >%i </a> </td>
-               <td bgcolor="#edf4f9" >width of motion area,</a> </td>
-               <td bgcolor="#edf4f9" >%J  </a> </td>
-               <td bgcolor="#edf4f9" >height of motion area</a> </td>
-               <td bgcolor="#edf4f9" >%J  </a> </td>
-               <td bgcolor="#edf4f9" >height of motion area</a> </td>
+               <td bgcolor="#edf4f9" >width of motion area</a> </td>
              </tr>
              <tr>
+               <td bgcolor="#edf4f9" >%J  </a> </td>
+               <td bgcolor="#edf4f9" >height of motion area</a> </td>
                <td bgcolor="#edf4f9" >%K   </a> </td>
                <td bgcolor="#edf4f9" >X coordinates of motion center</a> </td>
                <td bgcolor="#edf4f9" >%L  </a> </td>
                <td bgcolor="#edf4f9" >Y coordinates of motion center</a> </td>
-               <td bgcolor="#edf4f9" >%C   </a> </td>
-               <td bgcolor="#edf4f9" >value defined by text_event</a> </td>
              </tr>
              <tr>
+               <td bgcolor="#edf4f9" >%C   </a> </td>
+               <td bgcolor="#edf4f9" >value defined by text_event</a> </td>
                <td bgcolor="#edf4f9" >%f</a> </td>
                <td bgcolor="#edf4f9" >filename with full path</a> </td>
                <td bgcolor="#edf4f9" >%n   </a> </td>
                <td bgcolor="#edf4f9" >number indicating filetype</a> </td>
-               <td bgcolor="#edf4f9" >%$</a> </td>
-               <td bgcolor="#edf4f9" >camera name</a> </td>
              </tr>
              <tr>
-               <td bgcolor="#edf4f9" >%{host}</a> </td>
-               <td bgcolor="#edf4f9" >name of computer running Motion</a> </td>
-               <td bgcolor="#edf4f9" >%{fps}</a> </td>
-               <td bgcolor="#edf4f9" >current frames per second</a> </td>
+               <td bgcolor="#edf4f9" >%o</a> </td>
+               <td bgcolor="#edf4f9" >threshold</a> </td>
+	             <td bgcolor="#edf4f9" >%Q</a> </td>
+               <td bgcolor="#edf4f9" >Number of labels from despeckle</a> </td>
                <td bgcolor="#edf4f9" >%{dbeventid}</a> </td>
                <td bgcolor="#edf4f9" >See <a href="#sql_query_start">sql_query_start</a> </a> </td>
+             </tr>
+             <tr>
+               <td bgcolor="#edf4f9" >%$</a> </td>
+               <td bgcolor="#edf4f9" >camera name</a> </td>
+               <td bgcolor="#edf4f9" >%{fps}</a> </td>
+               <td bgcolor="#edf4f9" >current frames per second</a> </td>
+               <td bgcolor="#edf4f9" >%{host}</a> </td>
+               <td bgcolor="#edf4f9" >name of computer running Motion</a> </td>
              </tr>
              <tr>
                <td bgcolor="#edf4f9" >%{ver}</a> </td>
@@ -1879,8 +1887,8 @@
             </tbody>
         </table>
         <p></p>
-        The use of quotation marks around string is permitted.  The conversion specifiers used have
-        the same options as for the C function strftime (3) plus the few that are unique to Motion.
+        The use of quotation marks around string is permitted.  In addition to the above, the conversion
+        specifiers include the same options as for the C function strftime (3).
         <p></p>
       </ul>
 
