@@ -776,6 +776,12 @@
           <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
         </tr>
         <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#on_camera_move" >on_camera_move</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">on_event_end</td>
           <td align="left">on_event_end</td>
           <td align="left">on_event_end</td>
@@ -1524,6 +1530,7 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#on_camera_move" >on_camera_move</a> </td>
             </tr>
           </tbody>
         </table>
@@ -3689,12 +3696,32 @@
         </ul>
         <p></p>
         The full path and file name of the command to be executed when a lost camera is found
-        If motion fails to detect a lost camera, it will also fail to know it found one.
+        <br />If motion fails to detect a lost camera, it will also fail to know it found one.
         <p></p>
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
         and spaces as part of the command.  This can be any type of program or script.
         Remember to set the execution bit in the ACL and if it is a script type program such as perl or bash
         also remember the shebang line (e.g. #!/user/bin/perl) as the first line of the script.
+        <p></p>
+        <p></p>
+
+        <h3><a name="on_camera_move"></a> on_camera_move </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: </li>
+        </ul>
+        <p></p>
+        The full path and file name of the command to be executed when a PTZ camera moves in tracking mode
+        <br />This hook is called by track_move() (when a motion is detected and has to be tracked), and by track_center() (at the end of a motion event).
+        <p></p>
+        Several parameters are provided as environment variables:
+        <ul>
+          <li> When called by track_center(): TRACK_ACTION=center TRACK_XOFF TRACK_YOFF</li>
+          <li> When called by track_move(): TRACK_ACTION=move TRACK_CENT_X TRACK_CENT_Y TRACK_CENT_WIDTH TRACK_CENT_HEIGHT TRACK_CENT_MINX TRACK_CENT_MAXX TRACK_CENT_MINY TRACK_CENT_MAXY TRACK_IMGS_WIDTH TRACK_IMGS_HEIGHT TRACK_IMGS_MOTIONSIZE</li>
+          <li> and in both cases: TRACK_TYPE TRACK_PORT TRACK_MOTORX TRACK_MOTORY TRACK_MINX TRACK_MAXX TRACK_MINY TRACK_MAXY TRACK_STEPSIZE TRACK_SPEED TRACK_HOMEX TRACK_HOMEY TRACK_IOMOJO_ID TRACK_MOTHORX_REVERSE TRACK_MOTHORY_REVERSE TRACK_MINMAXFOUND TRACK_STEP_ANGLE_X TRACK_STEP_ANGLE_Y TRACK_MOVE_WAIT TRACK_PAN_ANGLE TRACK_TILT_ANGLE TRACK_MANUAL</li>
+        </ul>
         <p></p>
         <p></p>
 
