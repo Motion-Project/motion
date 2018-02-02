@@ -306,6 +306,7 @@ static int netcam_rtsp_decode_packet(struct rtsp_context *rtsp_data){
                                           ,rtsp_data->codec_context->height);
 
     netcam_check_buffsize(rtsp_data->img_recv, frame_size);
+    netcam_check_buffsize(rtsp_data->img_latest, frame_size);
 
     retcd = my_image_copy_to_buffer(rtsp_data->frame
                                     ,(uint8_t *)rtsp_data->img_recv->ptr
@@ -364,6 +365,7 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
                    ,rtsp_data->cameratype, errstr, rtsp_data->interrupted ? "True":"False");
         return -1;
     }
+
     retcd = avcodec_open2(rtsp_data->codec_context, decoder, NULL);
     if ((retcd < 0) || (rtsp_data->interrupted)){
         av_strerror(retcd, errstr, sizeof(errstr));
@@ -582,12 +584,11 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
 
         if (rtsp_data->packet_recv.stream_index == rtsp_data->video_stream_index){
             /* For a high resolution pass-through we don't decode the image */
-            if ((rtsp_data->high_resolution) && (rtsp_data->passthrough)){
+            if (rtsp_data->high_resolution && rtsp_data->passthrough){
                 if (rtsp_data->packet_recv.data != NULL) size_decoded = 1;
             } else {
                 size_decoded = netcam_rtsp_decode_packet(rtsp_data);
             }
-
         }
 
         if (size_decoded > 0 ){
@@ -623,9 +624,11 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
     pthread_mutex_lock(&rtsp_data->mutex);
         rtsp_data->idnbr++;
         if (rtsp_data->passthrough) netcam_rtsp_pktarray_add(rtsp_data);
-        xchg = rtsp_data->img_latest;
-        rtsp_data->img_latest = rtsp_data->img_recv;
-        rtsp_data->img_recv = xchg;
+        if (!(rtsp_data->high_resolution && rtsp_data->passthrough)) {
+            xchg = rtsp_data->img_latest;
+            rtsp_data->img_latest = rtsp_data->img_recv;
+            rtsp_data->img_recv = xchg;
+        }
     pthread_mutex_unlock(&rtsp_data->mutex);
 
     my_packet_unref(rtsp_data->packet_recv);
@@ -950,6 +953,7 @@ static int netcam_rtsp_set_dimensions (struct context *cnt) {
 
     return 0;
 }
+
 static int netcam_rtsp_copy_stream(struct rtsp_context *rtsp_data){
     /* Make a static copy of the stream information for use in passthrough processing */
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
@@ -1387,7 +1391,9 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
 
     pthread_mutex_lock(&cnt->rtsp->mutex);
         netcam_rtsp_pktarray_resize(cnt, FALSE);
-        memcpy(img_data->image_norm, cnt->rtsp->img_latest->ptr, cnt->rtsp->img_latest->used);
+        memcpy(img_data->image_norm
+               , cnt->rtsp->img_latest->ptr
+               , cnt->rtsp->img_latest->used);
         img_data->idnbr_norm = cnt->rtsp->idnbr;
     pthread_mutex_unlock(&cnt->rtsp->mutex);
 
@@ -1397,7 +1403,11 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
 
         pthread_mutex_lock(&cnt->rtsp_high->mutex);
             netcam_rtsp_pktarray_resize(cnt, TRUE);
-            memcpy(img_data->image_high, cnt->rtsp_high->img_latest->ptr, cnt->rtsp_high->img_latest->used);
+            if (!(cnt->rtsp_high->high_resolution && cnt->rtsp_high->passthrough)) {
+                memcpy(img_data->image_high
+                       ,cnt->rtsp_high->img_latest->ptr
+                       ,cnt->rtsp_high->img_latest->used);
+            }
             img_data->idnbr_high = cnt->rtsp_high->idnbr;
         pthread_mutex_unlock(&cnt->rtsp_high->mutex);
     }
