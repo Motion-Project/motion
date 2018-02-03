@@ -979,17 +979,18 @@ static void stream_add_client(struct stream *list, int sc, const char *cors_head
 {
     struct stream *new = mymalloc(sizeof(struct stream));
 
-    static char header_buffer[HEADER_BUFFER_LEN] = "HTTP/1.0 200 OK\r\n"
-                                                   "Server: Motion/"VERSION"\r\n"
-                                                   "Connection: close\r\n"
-                                                   "Max-Age: 0\r\n"
-                                                   "Expires: 0\r\n"
-                                                   "Cache-Control: no-cache, private\r\n"
-                                                   "Pragma: no-cache\r\n"
-                                                   "Content-Type: multipart/x-mixed-replace; "
-                                                   "boundary=BoundaryString\r\n\r\n";
-
-    size_t header_len = strlen(header_buffer);
+    static char header_buffer[HEADER_BUFFER_LEN];
+    size_t header_len = snprintf(header_buffer,
+                                 HEADER_BUFFER_LEN,
+                                 "HTTP/1.0 200 OK\r\n"
+                                 "Server: Motion/"VERSION"\r\n"
+                                 "Connection: close\r\n"
+                                 "Max-Age: 0\r\n"
+                                 "Expires: 0\r\n"
+                                 "Cache-Control: no-cache, private\r\n"
+                                 "Pragma: no-cache\r\n"
+                                 "Content-Type: multipart/x-mixed-replace; "
+                                 "boundary=BoundaryString\r\n\r\n");
 
     if (cors_header != NULL) {
         header_len += snprintf(&header_buffer[header_len-2], HEADER_BUFFER_LEN-header_len, "Access-Control-Allow-Origin: %s\r\n\r\n", cors_header);
@@ -1005,7 +1006,6 @@ static void stream_add_client(struct stream *list, int sc, const char *cors_head
     if ((new->tmpbuffer = stream_tmpbuffer(header_len)) == NULL) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
     } else {
-        //memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
         memcpy(new->tmpbuffer->ptr, header_buffer, header_len);
         new->tmpbuffer->size = header_len;
     }
