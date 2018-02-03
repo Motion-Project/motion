@@ -74,6 +74,7 @@ struct config {
     int stream_localhost;
     int stream_limit;
     int stream_auth_method;
+    const char *stream_cors_header;
     const char *stream_authentication;
     int stream_preview_scale;
     int stream_preview_newline;

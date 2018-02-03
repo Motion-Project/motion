@@ -180,7 +180,7 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
     return 1;
 }
 
-static void stream_add_client(struct stream *list, int sc);
+static void stream_add_client(struct stream *list, int sc, const char *cors_header);
 
 /**
  * handle_basic_auth
@@ -259,7 +259,7 @@ static void* handle_basic_auth(void* param)
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(p->stm, p->sock);
+    stream_add_client(p->stm, p->sock, p->conf->stream_cors_header);
     (*p->stream_count)++;
     p->thread_count--;
 
@@ -628,7 +628,7 @@ Error:
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(p->stm, p->sock);
+    stream_add_client(p->stm, p->sock, p->conf->stream_cors_header);
     (*p->stream_count)++;
 
     p->thread_count--;
@@ -969,33 +969,47 @@ static struct stream_buffer *stream_tmpbuffer(int size)
     return tmpbuffer;
 }
 
+#define HEADER_BUFFER_LEN 1024
 /**
  * stream_add_client
  *
  *
  */
-static void stream_add_client(struct stream *list, int sc)
+static void stream_add_client(struct stream *list, int sc, const char *cors_header)
 {
     struct stream *new = mymalloc(sizeof(struct stream));
-    static const char header[] = "HTTP/1.0 200 OK\r\n"
-                                 "Server: Motion/"VERSION"\r\n"
-                                 "Access-Control-Allow-Origin: *\r\n" // TODO(jack) Add a config.
-                                 "Connection: close\r\n"
-                                 "Max-Age: 0\r\n"
-                                 "Expires: 0\r\n"
-                                 "Cache-Control: no-cache, private\r\n"
-                                 "Pragma: no-cache\r\n"
-                                 "Content-Type: multipart/x-mixed-replace; "
-                                 "boundary=BoundaryString\r\n\r\n";
+
+    static char header_buffer[HEADER_BUFFER_LEN];
+    strncpy(header_buffer,
+            "HTTP/1.0 200 OK\r\n"
+            "Server: Motion/"VERSION"\r\n"
+            "Connection: close\r\n"
+            "Max-Age: 0\r\n"
+            "Expires: 0\r\n"
+            "Cache-Control: no-cache, private\r\n"
+            "Pragma: no-cache\r\n"
+            "Content-Type: multipart/x-mixed-replace; "
+            "boundary=BoundaryString\r\n",
+            HEADER_BUFFER_LEN);
+
+    if (cors_header == NULL) {
+        strncat(header_buffer, "\r\n", HEADER_BUFFER_LEN);
+    } else {
+        strncat(header_buffer, "Access-Control-Allow-Origin: ", HEADER_BUFFER_LEN);
+        strncat(header_buffer, cors_header, HEADER_BUFFER_LEN);
+        strncat(header_buffer, "\r\n\r\n", HEADER_BUFFER_LEN);
+    }
 
     memset(new, 0, sizeof(struct stream));
     new->socket = sc;
 
-    if ((new->tmpbuffer = stream_tmpbuffer(sizeof(header))) == NULL) {
+    const size_t len = strlen(header_buffer);
+    if ((new->tmpbuffer = stream_tmpbuffer(len)) == NULL) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
     } else {
-        memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
-        new->tmpbuffer->size = sizeof(header)-1;
+        //memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
+        memcpy(new->tmpbuffer->ptr, header_buffer, len);
+        new->tmpbuffer->size = len;
     }
 
     new->prev = list;
@@ -1166,7 +1180,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         (select(sl + 1, &fdread, NULL, NULL, &timeout) > 0)) {
         sc = http_acceptsock(sl);
         if (cnt->conf.stream_auth_method == 0) {
-            stream_add_client(stm, sc);
+            stream_add_client(stm, sc, cnt->conf.stream_cors_header);
             (*stream_count)++;
         } else  {
             do_client_auth(cnt, stm, stream_count, sc);

@@ -85,6 +85,7 @@ struct config conf_template = {
     .stream_localhost =                1,
     .stream_limit =                    0,
     .stream_auth_method =              0,
+    .stream_cors_header =              NULL,
     .stream_authentication =           NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          0,
@@ -1271,6 +1272,16 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
+    "stream_cors_header",
+    "# Set the cross-origin resource sharing (CORS) header\n"
+    "# Default: not defined (Disabled)",
+    0,
+    CONF_OFFSET(stream_cors_header),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
     "stream_authentication",
     "# Authentication for the stream. Syntax username:password\n"
     "# Default: not defined (Disabled)",
@@ -2246,6 +2257,7 @@ void conf_output_parms(struct context **cnt)
                 if (!strncmp(name, "netcam_url", 10) ||
                     !strncmp(name, "netcam_userpass", 15) ||
                     !strncmp(name, "netcam_highres", 14) ||
+                    !strncmp(name, "stream_cors_header", 18) ||
                     !strncmp(name, "stream_authentication", 21) ||
                     !strncmp(name, "webcontrol_authentication", 25) ||
                     !strncmp(name, "database_user", 13) ||
