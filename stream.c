@@ -979,6 +979,7 @@ static void stream_add_client(struct stream *list, int sc)
     struct stream *new = mymalloc(sizeof(struct stream));
     static const char header[] = "HTTP/1.0 200 OK\r\n"
                                  "Server: Motion/"VERSION"\r\n"
+                                 "Access-Control-Allow-Origin: *\r\n" // TODO(jack) Add a config.
                                  "Connection: close\r\n"
                                  "Max-Age: 0\r\n"
                                  "Expires: 0\r\n"
