@@ -995,6 +995,10 @@ static void stream_add_client(struct stream *list, int sc, const char *cors_head
         header_len += snprintf(&header_buffer[header_len-2], HEADER_BUFFER_LEN-header_len, "Access-Control-Allow-Origin: %s\r\n\r\n", cors_header);
     }
 
+    if (header_len == HEADER_BUFFER_LEN-1) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error building header in stream_add_client, stream_cors_header config parameter is probably too long");
+    }
+
     memset(new, 0, sizeof(struct stream));
     new->socket = sc;
 
