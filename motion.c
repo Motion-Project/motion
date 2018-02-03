@@ -976,6 +976,8 @@ static int motion_init(struct context *cnt)
     cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.labels));
     cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(*cnt->imgs.labelsize));
 
+    if (cnt->imgs.size_high > 0) cnt->imgs.image_virgin.image_high = mymalloc(cnt->imgs.size_high);
+
     /* Set output picture type */
     if (!strcmp(cnt->conf.picture_type, "ppm"))
         cnt->imgs.picture_type = IMAGE_TYPE_PPM;

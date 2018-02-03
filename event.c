@@ -747,13 +747,12 @@ static void event_ffmpeg_newfile(struct context *cnt,
             cnt->ffmpeg_output->width  = cnt->imgs.width_high;
             cnt->ffmpeg_output->height = cnt->imgs.height_high;
             cnt->ffmpeg_output->high_resolution = TRUE;
-                cnt->ffmpeg_output->rtsp_data = cnt->rtsp_high;
+            cnt->ffmpeg_output->rtsp_data = cnt->rtsp_high;
         } else {
             cnt->ffmpeg_output->width  = cnt->imgs.width;
             cnt->ffmpeg_output->height = cnt->imgs.height;
             cnt->ffmpeg_output->high_resolution = FALSE;
             cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
-                cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
         }
         cnt->ffmpeg_output->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output->fps = cnt->movie_fps;
