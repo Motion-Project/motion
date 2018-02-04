@@ -1095,21 +1095,22 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     image_ptr = image + startx + starty * width;
 
     //char_arr_ptr = factor ? big_char_arr_ptr : small_char_arr_ptr; // TODO
-    char_arr_ptr = big_char_arr_ptr; // TODO
+    char_arr_ptr = small_char_arr_ptr; // TODO
 
     for (pos = 0; pos < len; pos++) {
         int pos_check = (int)text[pos];
 
         char_ptr = char_arr_ptr[pos_check];
 
-        for (y = 8 * factor; y--;) {
-            for (x = 7 * factor; x--;) {
+        for (y = 0; y < 8 * factor; y++) {
+            for (x = 0; x < 7 * factor; x++) {
 
                 if (pos_check < 0) {
                     image_ptr++;
-                    char_ptr++;
                     continue;
                 }
+
+                char_ptr = char_arr_ptr[pos_check] + y/factor*7 + x/factor;
 
                 switch(*char_ptr) {
                 case 1:
@@ -1123,7 +1124,6 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
                 }
 
                 image_ptr++;
-                char_ptr++;
             }
             image_ptr += line_offset;
         }
