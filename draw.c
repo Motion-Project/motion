@@ -1071,7 +1071,8 @@ struct draw_char draw_table[]= {
  */
 static int draw_textn(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, int len, unsigned int factor)
 {
-    int pos, x, y, line_offset, next_char_offs;
+    unsigned int x, y;
+    int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
 
     if (startx > width / 2)
