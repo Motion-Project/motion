@@ -1084,25 +1084,26 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     unsigned char *image_ptr, *char_ptr, **char_arr_ptr;
 
     if (startx > width / 2)
-        startx -= len * (6 * (factor + 1));
+        startx -= len * (6 * factor);
 
-    if (startx + len * 6 * (factor + 1) >= width)
-        len = (width-startx-1)/(6*(factor+1));
+    if (startx + len * 6 * factor >= width)
+        len = (width-startx-1)/(6*factor);
 
-    line_offset = width - 7 * (factor + 1);
-    next_char_offs = width * 8 * (factor + 1) - 6 * (factor + 1);
+    line_offset = width - 7 * factor;
+    next_char_offs = width * 8 * factor - 6 * factor;
 
     image_ptr = image + startx + starty * width;
 
-    char_arr_ptr = factor ? big_char_arr_ptr : small_char_arr_ptr;
+    //char_arr_ptr = factor ? big_char_arr_ptr : small_char_arr_ptr; // TODO
+    char_arr_ptr = big_char_arr_ptr; // TODO
 
     for (pos = 0; pos < len; pos++) {
         int pos_check = (int)text[pos];
 
         char_ptr = char_arr_ptr[pos_check];
 
-        for (y = 8 * (factor + 1); y--;) {
-            for (x = 7 * (factor + 1); x--;) {
+        for (y = 8 * factor; y--;) {
+            for (x = 7 * factor; x--;) {
 
                 if (pos_check < 0) {
                     image_ptr++;
@@ -1139,7 +1140,7 @@ int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, un
 {
     int num_nl = 0;
     const char *end, *begin;
-    const int line_space = (factor + 1) * 9;
+    const int line_space = factor * 9;
 
     /* Count the number of newlines in "text" so we scroll it up the image. */
     end = text;

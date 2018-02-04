@@ -136,7 +136,7 @@ struct config {
     const char *text_left;
     const char *text_right;
     const char *text_event;
-    int text_double;
+    int text_scale;
     const char *despeckle_filter;
     const char *area_detect;
     const char *camera_dir;

@@ -519,7 +519,6 @@ struct context {
     int minimum_frame_time_downcounter;
     unsigned int get_image;    /* Flag used to signal that we capture new image when we run the loop */
 
-    unsigned int text_size_factor;
     long int required_frame_time, frame_delay;
 
     long int rolling_average_limit;
