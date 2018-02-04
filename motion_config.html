@@ -957,6 +957,12 @@
         </tr>
         <tr>
           <td height="17" align="left"><br /></td>
+          <td align="left">stream_cors_header</td>
+          <td align="left">stream_cors_header</td>
+          <td align="left"><a href="#stream_cors_header" >stream_cors_header</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
           <td align="left">stream_authentication</td>
           <td align="left">stream_authentication</td>
           <td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
@@ -1676,6 +1682,7 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
@@ -4591,6 +4598,20 @@
         <p></p>
         This parameter establishes the username and password to use for the stream.
         The syntax is username:password
+        <p></p>
+
+        <h3><a name="stream_cors_header"></a> stream_cors_header </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: TODO</li>
+          <li> Default: Not Defined</li>
+        </ul>
+        <p></p>
+        The Access-Control-Allow-Origin header value to be sent with the stream.
+        If unspecified, no Access-Control-Allow-Origin header is sent.
+        The header allows browsers to access the stream via cross-origin resource sharing (CORS).
+        For example, * allows access from browser client code served from any domain.
         <p></p>
 
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
