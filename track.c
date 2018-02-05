@@ -61,12 +61,18 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
                                    struct images *imgs, unsigned int manual);
 #endif /* HAVE_V4L2 */
 
+static void on_camera_move(struct context *cnt, enum track_action action, unsigned int manual,
+                                   int xoff, int yoff, struct coord *cent, struct images *imgs);
+
 /* Add a call to your functions here: */
 unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
                                 unsigned int manual, int xoff, int yoff)
 {
     if (!manual && !cnt->track.active)
         return 0;
+
+    if (cnt->conf.on_camera_move)
+        on_camera_move(cnt, TRACK_CENTER, manual, xoff, yoff, NULL, NULL);
 
     if (cnt->track.type == TRACK_TYPE_STEPPER) {
         unsigned int ret;
@@ -103,6 +109,9 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
 
     if (!manual && !cnt->track.active)
         return 0;
+
+    if (cnt->conf.on_camera_move)
+        on_camera_move(cnt, TRACK_MOVE, manual, 0, 0, cent, imgs);
 
     if (cnt->track.type == TRACK_TYPE_STEPPER)
         return stepper_move(cnt, cent, imgs);
@@ -1236,3 +1245,82 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
     return cnt->track.move_wait;
 }
 #endif /* HAVE_V4L2 */
+
+static void on_camera_move(struct context *cnt, enum track_action action, unsigned int manual,
+                                   int xoff, int yoff, struct coord *cent, struct images *imgs)
+{
+    if (!fork()) {
+        int i;
+        char buf[12];
+
+        /* Detach from parent */
+        setsid();
+
+        /* Provides data as environment variables */
+        sprintf(buf, "%u", cnt->track.type);		setenv("TRACK_TYPE", buf, 1);
+        setenv("TRACK_PORT", cnt->track.port? cnt->track.port : "", 1);
+        sprintf(buf, "%u", cnt->track.motorx);		setenv("TRACK_MOTORX", buf, 1);
+        sprintf(buf, "%u", cnt->track.motory);		setenv("TRACK_MOTORY", buf, 1);
+        sprintf(buf, "%d", cnt->track.minx);		setenv("TRACK_MINX", buf, 1);
+        sprintf(buf, "%d", cnt->track.maxx);		setenv("TRACK_MAXX", buf, 1);
+        sprintf(buf, "%d", cnt->track.miny);		setenv("TRACK_MINY", buf, 1);
+        sprintf(buf, "%d", cnt->track.maxy);		setenv("TRACK_MAXY", buf, 1);
+        sprintf(buf, "%u", cnt->track.stepsize);	setenv("TRACK_STEPSIZE", buf, 1);
+        sprintf(buf, "%u", cnt->track.speed);		setenv("TRACK_SPEED", buf, 1);
+        sprintf(buf, "%u", cnt->track.homex);		setenv("TRACK_HOMEX", buf, 1);
+        sprintf(buf, "%u", cnt->track.homey);		setenv("TRACK_HOMEY", buf, 1);
+        sprintf(buf, "%u", cnt->track.iomojo_id);	setenv("TRACK_IOMOJO_ID", buf, 1);
+        sprintf(buf, "%u", cnt->track.motorx_reverse);	setenv("TRACK_MOTHORX_REVERSE", buf, 1);
+        sprintf(buf, "%u", cnt->track.motory_reverse);	setenv("TRACK_MOTHORY_REVERSE", buf, 1);
+        sprintf(buf, "%u", cnt->track.minmaxfound);	setenv("TRACK_MINMAXFOUND", buf, 1);
+        sprintf(buf, "%u", cnt->track.step_angle_x);	setenv("TRACK_STEP_ANGLE_X", buf, 1);
+        sprintf(buf, "%u", cnt->track.step_angle_y);	setenv("TRACK_STEP_ANGLE_Y", buf, 1);
+        sprintf(buf, "%u", cnt->track.move_wait);	setenv("TRACK_MOVE_WAIT", buf, 1);
+        sprintf(buf, "%d", cnt->track.pan_angle);	setenv("TRACK_PAN_ANGLE", buf, 1);
+        sprintf(buf, "%d", cnt->track.tilt_angle);	setenv("TRACK_TILT_ANGLE", buf, 1);
+        if (manual)
+          setenv("TRACK_MANUAL", "manual", 1);
+        switch (action) {
+          case TRACK_CENTER:
+            setenv("TRACK_ACTION", "center", 1);
+            sprintf(buf, "%d", xoff);	setenv("TRACK_XOFF", buf, 1);
+            sprintf(buf, "%d", yoff);	setenv("TRACK_YOFF", buf, 1);
+            break;
+          case TRACK_MOVE:
+            setenv("TRACK_ACTION", "move", 1);
+            if (cent) {
+              sprintf(buf, "%d", cent->x);	setenv("TRACK_CENT_X", buf, 1);
+              sprintf(buf, "%d", cent->y);	setenv("TRACK_CENT_Y", buf, 1);
+              sprintf(buf, "%d", cent->width);	setenv("TRACK_CENT_WIDTH", buf, 1);
+              sprintf(buf, "%d", cent->height);	setenv("TRACK_CENT_HEIGHT", buf, 1);
+              sprintf(buf, "%d", cent->minx);	setenv("TRACK_CENT_MINX", buf, 1);
+              sprintf(buf, "%d", cent->maxx);	setenv("TRACK_CENT_MAXX", buf, 1);
+              sprintf(buf, "%d", cent->miny);	setenv("TRACK_CENT_MINY", buf, 1);
+              sprintf(buf, "%d", cent->maxy);	setenv("TRACK_CENT_MAXY", buf, 1);
+            }
+            if (imgs) {
+              sprintf(buf, "%d", imgs->width);	setenv("TRACK_IMGS_WIDTH", buf, 1);
+              sprintf(buf, "%d", imgs->height);	setenv("TRACK_IMGS_HEIGHT", buf, 1);
+              sprintf(buf, "%d", imgs->motionsize); setenv("TRACK_IMGS_MOTIONSIZE", buf, 1);
+            }
+        }
+
+        /*
+         * Close any file descriptor except console because we will
+         * like to see error messages
+         */
+        for (i = getdtablesize() - 1; i > 2; i--)
+            close(i);
+
+        execl("/bin/sh", "sh", "-c", cnt->conf.on_camera_move, " &", NULL);
+
+        /* if above function succeeds the program never reach here */
+        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO, "Unable to start external command '%s'",
+                   cnt->conf.on_camera_move);
+
+        exit(1);
+    }
+
+    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, "Executing external command '%s'",
+               cnt->conf.on_camera_move);
+}
