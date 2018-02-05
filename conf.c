@@ -167,7 +167,7 @@ static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 static struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
-static struct context **copy_cors_header(struct context **cnt, const char *str, int val);
+static struct context **copy_uri(struct context **cnt, const char *str, int val);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -1278,7 +1278,7 @@ config_param config_params[] = {
     "# Default: not defined (Disabled)",
     0,
     CONF_OFFSET(stream_cors_header),
-    copy_cors_header,
+    copy_uri,
     print_string,
     WEBUI_LEVEL_RESTRICTED
     },
@@ -2501,24 +2501,24 @@ struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int
     return cnt;
 }
 
-static struct context **copy_cors_header(struct context **cnt, const char *str, int val) {
+static struct context **copy_uri(struct context **cnt, const char *str, int val) {
 
-    // Here's a complicated URI regex I found here: http://snipplr.com/view/6889/regular-expressions-for-uri-validationparsing/
-    const char *regex_str = "/^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$/i";
+    // Here's a complicated regex I found here: https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
+    // Use it for validating URIs.
+    const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
 
     regex_t regex;
-    if (regcomp(&regex, regex_str, 0) != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error compiling regex in copy_cors_header");
+    if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error compiling regex in copy_uri");
         cnt = copy_string(cnt, "", val);
         return cnt;
     }
 
     // A single asterisk is also valid, so check for that.
     if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid origin for cors_header in copy_cors_header");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid origin for cors_header in copy_uri");
         cnt = copy_string(cnt, "", val);
         return cnt;
-
     }
 
     cnt = copy_string(cnt, str, val);
