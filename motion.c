@@ -1195,7 +1195,7 @@ static int motion_init(struct context *cnt)
     /* Initialize stream server if stream port is specified to not 0 */
     if (cnt->conf.stream_port) {
         if (stream_init (&(cnt->stream), cnt->conf.stream_port, cnt->conf.stream_localhost,
-            cnt->conf.ipv6_enabled) == -1) {
+            cnt->conf.ipv6_enabled, cnt->conf.stream_cors_header) == -1) {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Problem enabling motion-stream server in port %d",
                        cnt->conf.stream_port);
             cnt->conf.stream_port = 0;
@@ -1212,7 +1212,7 @@ static int motion_init(struct context *cnt)
         if ((cnt->conf.width / 2) % 8 == 0  && (cnt->conf.height / 2) % 8 == 0
         && cnt->imgs.type == VIDEO_PALETTE_YUV420P){
             if (stream_init (&(cnt->substream), cnt->conf.substream_port, cnt->conf.stream_localhost,
-                cnt->conf.ipv6_enabled) == -1) {
+                cnt->conf.ipv6_enabled, cnt->conf.stream_cors_header) == -1) {
                 MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Problem enabling motion-substream server in port %d",
                            cnt->conf.substream_port);
                 cnt->conf.substream_port = 0;

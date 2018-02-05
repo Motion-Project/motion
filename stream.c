@@ -1079,11 +1079,29 @@ static int stream_check_write(struct stream *list)
  *
  * Returns: stream socket descriptor.
  */
-int stream_init(struct stream *stm, int stream_port, int stream_localhost, int ipv6_enabled)
+int stream_init(struct stream *stm,
+                int port,
+                int localhost,
+                int ipv6_enabled,
+                const char *cors_header)
 {
-    stm->socket = http_bindsock(stream_port, stream_localhost, ipv6_enabled);
+    stm->socket = http_bindsock(port, localhost, ipv6_enabled);
     stm->next = NULL;
     stm->prev = NULL;
+
+    // TODO Regex validate cors_header.
+
+    if (cors_header == NULL) {
+        stm->cors_header = NULL;
+    } else {
+        size_t size = strlen(cors_header) + 1;
+        stm->cors_header = mymalloc(size);
+        if (stm->cors_header == NULL) {
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error allocated cors_header in stream_init");
+        } else {
+            memcpy(stm->cors_header, cors_header, size);
+        }
+    }
 
     return stm->socket;
 }
@@ -1112,6 +1130,9 @@ void stream_stop(struct stream *stm)
         if (list->tmpbuffer) {
             free(list->tmpbuffer->ptr);
             free(list->tmpbuffer);
+            if (list->cors_header != NULL) {
+                free(list->cors_header);
+            }
         }
 
         close(list->socket);
