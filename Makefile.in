@@ -180,7 +180,6 @@ install:
 	@sed -e 's|$${prefix}|$(prefix)|' camera2-dist.conf > camera2-dist.conf.tmp && mv -f camera2-dist.conf.tmp camera2-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' camera3-dist.conf > camera3-dist.conf.tmp && mv -f camera3-dist.conf.tmp camera3-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' camera4-dist.conf > camera4-dist.conf.tmp && mv -f camera4-dist.conf.tmp camera4-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' camera5-dist.conf > camera5-dist.conf.tmp && mv -f camera5-dist.conf.tmp camera5-dist.conf
 	$(INSTALL_DATA) @top_srcdir@/motion.1 $(DESTDIR)$(mandir)/man1
 	$(INSTALL_DATA) $(DOC_FILES) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $(EXAMPLES) $(DESTDIR)$(examplesdir)
@@ -190,8 +189,6 @@ install:
 	$(INSTALL_DATA) camera2-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	$(INSTALL_DATA) camera3-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	$(INSTALL_DATA) camera4-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) camera5-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	$(INSTALL_DATA) on_camera_move_netcam-dist.sh $(DESTDIR)$(sysconfdir)/motion
 	for prog in $(PROGS); \
 	do \
 	($(INSTALL) $$prog $(DESTDIR)$(bindir) ); \

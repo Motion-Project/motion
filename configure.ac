@@ -634,7 +634,6 @@ camera1-dist.conf
 camera2-dist.conf
 camera3-dist.conf
 camera4-dist.conf
-camera5-dist.conf
 motion-dist.conf
 motion.init-FreeBSD.sh
 motion.init-Debian
