@@ -26,7 +26,6 @@
 #include <netdb.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <regex.h>      /* For validating the CORS header parameter. */
 
 #define STREAM_REALM       "Motion Stream Security Access"
 #define KEEP_ALIVE_TIMEOUT 100
@@ -1107,26 +1106,6 @@ int stream_init(struct stream *stm,
     stm->cors_header = NULL;
 
     if (cors_header != NULL) {
-
-        // Validate cors_header.
-
-        // A single asterisk is valid.
-        if (strcmp(cors_header, "*") != 0) {
-
-            // Here's a complicated URI regex I found here: http://snipplr.com/view/6889/regular-expressions-for-uri-validationparsing/
-            regex_t regex;
-            const char *str = "/^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$/i";
-
-            if (regcomp(&regex, str, 0) != 0) {
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error compiling regex in stream_init");
-                return stm->socket;
-            }
-            if (regexec(&regex, cors_header, 0, NULL, 0) == REG_NOMATCH) {
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid origin for cors_header in stream_init");
-                return stm->socket;
-            }
-
-        }
 
         size_t size = strlen(cors_header) + 1;
         stm->cors_header = mymalloc(size);
