@@ -180,7 +180,7 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
     return 1;
 }
 
-static void stream_add_client(struct stream *list, int sc, const char *cors_header);
+static void stream_add_client(struct stream *list, int sc);
 
 /**
  * handle_basic_auth
@@ -259,7 +259,7 @@ static void* handle_basic_auth(void* param)
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(p->stm, p->sock, p->conf->stream_cors_header);
+    stream_add_client(p->stm, p->sock);
     (*p->stream_count)++;
     p->thread_count--;
 
@@ -628,7 +628,7 @@ Error:
     /* Lock the mutex */
     pthread_mutex_lock(&stream_auth_mutex);
 
-    stream_add_client(p->stm, p->sock, p->conf->stream_cors_header);
+    stream_add_client(p->stm, p->sock);
     (*p->stream_count)++;
 
     p->thread_count--;
@@ -969,45 +969,59 @@ static struct stream_buffer *stream_tmpbuffer(int size)
     return tmpbuffer;
 }
 
-#define HEADER_BUFFER_LEN 1024
+const char *base_header = "HTTP/1.0 200 OK\r\n"
+                          "Server: Motion/"VERSION"\r\n"
+                          "Connection: close\r\n"
+                          "Max-Age: 0\r\n"
+                          "Expires: 0\r\n"
+                          "Cache-Control: no-cache, private\r\n"
+                          "Pragma: no-cache\r\n"
+                          "Content-Type: multipart/x-mixed-replace; "
+                          "boundary=BoundaryString\r\n\r\n";
+#define BASE_HEADER_LEN strlen(base_header)
 /**
  * stream_add_client
  *
  *
  */
-static void stream_add_client(struct stream *list, int sc, const char *cors_header)
+static void stream_add_client(struct stream *list, int sc)
 {
     struct stream *new = mymalloc(sizeof(struct stream));
-
-    static char header_buffer[HEADER_BUFFER_LEN];
-    size_t header_len = snprintf(header_buffer,
-                                 HEADER_BUFFER_LEN,
-                                 "HTTP/1.0 200 OK\r\n"
-                                 "Server: Motion/"VERSION"\r\n"
-                                 "Connection: close\r\n"
-                                 "Max-Age: 0\r\n"
-                                 "Expires: 0\r\n"
-                                 "Cache-Control: no-cache, private\r\n"
-                                 "Pragma: no-cache\r\n"
-                                 "Content-Type: multipart/x-mixed-replace; "
-                                 "boundary=BoundaryString\r\n\r\n");
-
-    if (cors_header != NULL) {
-        header_len += snprintf(&header_buffer[header_len-2], HEADER_BUFFER_LEN-header_len, "Access-Control-Allow-Origin: %s\r\n\r\n", cors_header);
-    }
-
-    if (header_len == HEADER_BUFFER_LEN-1) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error building header in stream_add_client, stream_cors_header config parameter is probably too long");
-    }
-
     memset(new, 0, sizeof(struct stream));
     new->socket = sc;
 
-    if ((new->tmpbuffer = stream_tmpbuffer(header_len)) == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
+    // Copy the HTTP headers into tmpbuffer.
+
+    if (list->cors_header == NULL) {
+
+        new->tmpbuffer = stream_tmpbuffer(BASE_HEADER_LEN);
+        if (new->tmpbuffer == NULL) {
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
+        } else {
+            memcpy(new->tmpbuffer->ptr, base_header, BASE_HEADER_LEN);
+            new->tmpbuffer->size = BASE_HEADER_LEN;
+        }
+
     } else {
-        memcpy(new->tmpbuffer->ptr, header_buffer, header_len);
-        new->tmpbuffer->size = header_len;
+
+        const char *cors_header_key = "Access-Control-Allow-Origin: ";
+        size_t cors_header_key_len = strlen(cors_header_key);
+        size_t cors_header_len = strlen(list->cors_header);
+        size_t size = BASE_HEADER_LEN-2 + cors_header_key_len + cors_header_len + 4;
+
+        new->tmpbuffer = stream_tmpbuffer(size);
+        if (new->tmpbuffer == NULL) {
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
+        } else {
+            // Basically copy over the base headers (without the second \r\n),
+            // and then the CORS header key, value, and \r\n\r\n.
+            memcpy(new->tmpbuffer->ptr, base_header, BASE_HEADER_LEN-2);
+            memcpy(&new->tmpbuffer->ptr[BASE_HEADER_LEN-2], cors_header_key, cors_header_key_len);
+            memcpy(&new->tmpbuffer->ptr[BASE_HEADER_LEN-2 + cors_header_key_len], list->cors_header, cors_header_len);
+            memcpy(&new->tmpbuffer->ptr[BASE_HEADER_LEN-2 + cors_header_key_len + cors_header_len], "\r\n\r\n", 4);
+            new->tmpbuffer->size = size;
+        }
+
     }
 
     new->prev = list;
@@ -1199,7 +1213,7 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
         (select(sl + 1, &fdread, NULL, NULL, &timeout) > 0)) {
         sc = http_acceptsock(sl);
         if (cnt->conf.stream_auth_method == 0) {
-            stream_add_client(stm, sc, cnt->conf.stream_cors_header);
+            stream_add_client(stm, sc);
             (*stream_count)++;
         } else  {
             do_client_auth(cnt, stm, stream_count, sc);
