@@ -1071,6 +1071,10 @@ struct draw_char draw_table[]= {
  */
 static int draw_textn(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, int len, unsigned int factor)
 {
+
+    // TODO Try setting text_scale to a negative number or a very large number.
+    // TODO It totally fails! We're reaching outside of the image bounds. Get on that.
+
     unsigned int x, y;
     int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
@@ -1125,7 +1129,7 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
 /**
  * draw_text
  */
-int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor)
+int draw_text(unsigned char *image, unsigned int width, unsigned int height, unsigned int startx, unsigned int starty, const char *text, unsigned int factor)
 {
     int num_nl = 0;
     const char *end, *begin;
@@ -1145,6 +1149,8 @@ int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, un
 
     while ((end = strstr(end, NEWLINE))) {
         int len = end-begin;
+
+        //if (startx + 8*len*factor >= width) return 1; // TODO
 
         draw_textn(image, startx, starty, width, begin, len, factor);
         end += sizeof(NEWLINE)-1;

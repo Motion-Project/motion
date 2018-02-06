@@ -317,7 +317,10 @@ struct image_data {
  */
 
 /* date/time drawing, draw.c */
-int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor);
+int draw_text(unsigned char *image,
+              unsigned int width, unsigned int height,
+              unsigned int startx, unsigned int starty,
+              const char *text, unsigned int factor);
 int initialize_chars(void);
 
 struct images {

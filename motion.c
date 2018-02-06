@@ -621,10 +621,10 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
                 mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q",
                            &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv, NULL, 0);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm, 10, 20,
-                          cnt->imgs.width, tmp, cnt->conf.text_scale);
-                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm, 10, 30,
-                          cnt->imgs.width, t, cnt->conf.text_scale);
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
+                          cnt->imgs.width, cnt->imgs.height, 10, 20, tmp, cnt->conf.text_scale);
+                draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
+                          cnt->imgs.width, cnt->imgs.height, 10, 30, t, cnt->conf.text_scale);
             }
 
             /* Output the picture to jpegs and ffmpeg */
@@ -656,8 +656,8 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Added %d fillerframes into movie",
                                        frames);
                             sprintf(tmp, "Fillerframes %d", frames);
-                            draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm, 10, 40,
-                                      cnt->imgs.width, tmp, cnt->conf.text_scale);
+                            draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
+                                      cnt->imgs.width, cnt->imgs.height, 10, 40, tmp, cnt->conf.text_scale);
                         }
                     }
                     /* Check how many frames it was last sec */
@@ -1025,8 +1025,8 @@ static int motion_init(struct context *cnt)
 
         if (i >= 5) {
             memset(cnt->imgs.image_virgin.image_norm, 0x80, cnt->imgs.size_norm);       /* initialize to grey */
-            draw_text(cnt->imgs.image_virgin.image_norm, 10, 20, cnt->imgs.width,
-                      "Error capturing first image", cnt->conf.text_scale);
+            draw_text(cnt->imgs.image_virgin.image_norm, cnt->imgs.width, cnt->imgs.height,
+                      10, 20, "Error capturing first image", cnt->conf.text_scale);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error capturing first image");
         }
     }
@@ -1842,7 +1842,8 @@ static int mlp_capture(struct context *cnt){
             tv1.tv_usec = 0;
             memset(cnt->current_image->image_norm, 0x80, cnt->imgs.size_norm);
             mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
-            draw_text(cnt->current_image->image_norm, 10, 20 * cnt->conf.text_scale, cnt->imgs.width,
+            draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
+                      10, 20 * cnt->conf.text_scale,
                       tmpout, cnt->conf.text_scale);
 
             /* Write error message only once */
@@ -2083,8 +2084,9 @@ static void mlp_overlay(struct context *cnt){
         else
             sprintf(tmp, "-");
 
-        draw_text(cnt->current_image->image_norm, cnt->imgs.width - 10, 10,
-                  cnt->imgs.width, tmp, cnt->conf.text_scale);
+        draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
+                  cnt->imgs.width - 10, 10,
+                  tmp, cnt->conf.text_scale);
     }
 
     /*
@@ -2094,28 +2096,31 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.setup_mode) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                 cnt->current_image->total_labels, cnt->noise);
-        draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->conf.text_scale,
-                  cnt->imgs.width, tmp, cnt->conf.text_scale);
+        draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height,
+                  cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->conf.text_scale,
+                  tmp, cnt->conf.text_scale);
         sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
-        draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->conf.text_scale,
-                  cnt->imgs.width, tmp, cnt->conf.text_scale);
+        draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height,
+                  cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->conf.text_scale,
+                  tmp, cnt->conf.text_scale);
     }
 
     /* Add text in lower left corner of the pictures */
     if (cnt->conf.text_left) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
                    &cnt->current_image->timestamp_tv, NULL, 0);
-        draw_text(cnt->current_image->image_norm, 10, cnt->imgs.height - 10 * cnt->conf.text_scale,
-                  cnt->imgs.width, tmp, cnt->conf.text_scale);
+        draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
+                  10, cnt->imgs.height - 10 * cnt->conf.text_scale,
+                  tmp, cnt->conf.text_scale);
     }
 
     /* Add text in lower right corner of the pictures */
     if (cnt->conf.text_right) {
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
                    &cnt->current_image->timestamp_tv, NULL, 0);
-        draw_text(cnt->current_image->image_norm, cnt->imgs.width - 10,
-                  cnt->imgs.height - 10 * cnt->conf.text_scale,
-                  cnt->imgs.width, tmp, cnt->conf.text_scale);
+        draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
+                  cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->conf.text_scale,
+                  tmp, cnt->conf.text_scale);
     }
 
 }

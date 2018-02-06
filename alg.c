@@ -1300,7 +1300,7 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
         if (cnt->conf.text_changes) {
             char tmp[80];
             sprintf(tmp, "%d %d", lines, vertlines);
-            draw_text(newimg, cnt->imgs.width - 10, 20, cnt->imgs.width, tmp, cnt->conf.text_scale);
+            draw_text(newimg, cnt->imgs.width, cnt->imgs.height, cnt->imgs.width - 10, 20, tmp, cnt->conf.text_scale);
         }
         return diffs;
     }
