@@ -1072,9 +1072,6 @@ struct draw_char draw_table[]= {
 static int draw_textn(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, int len, unsigned int factor)
 {
 
-    // TODO Try setting text_scale to a negative number or a very large number.
-    // TODO It totally fails! We're reaching outside of the image bounds. Get on that.
-
     unsigned int x, y;
     int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
@@ -1150,7 +1147,11 @@ int draw_text(unsigned char *image, unsigned int width, unsigned int height, uns
     while ((end = strstr(end, NEWLINE))) {
         int len = end-begin;
 
-        //if (startx + 8*len*factor >= width) return 1; // TODO
+        // Check that we won't be writing outside of the image.
+        if (startx < len*8*factor || starty + 7*factor > height) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "Text was too large for image in draw_text");
+            return 1;
+        }
 
         draw_textn(image, startx, starty, width, begin, len, factor);
         end += sizeof(NEWLINE)-1;
