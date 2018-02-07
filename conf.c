@@ -2510,17 +2510,17 @@ static struct context **copy_uri(struct context **cnt, const char *str, int val)
     regex_t regex;
     if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error compiling regex in copy_uri");
-        cnt = copy_string(cnt, "", val);
         return cnt;
     }
 
     // A single asterisk is also valid, so check for that.
     if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid origin for cors_header in copy_uri");
-        cnt = copy_string(cnt, "", val);
+        regfree(&regex);
         return cnt;
     }
 
+    regfree(&regex);
     cnt = copy_string(cnt, str, val);
     return cnt;
 
