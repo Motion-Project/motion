@@ -908,6 +908,7 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 if (--client->tmpbuffer->ref <= 0) {
                     free(client->tmpbuffer->ptr);
                     free(client->tmpbuffer);
+                    if (client->cors_header != NULL) free(client->cors_header);
                 }
 
                 /* Mark this client's buffer as empty. */
@@ -1102,7 +1103,6 @@ int stream_init(struct stream *stm,
     stm->socket = http_bindsock(port, localhost, ipv6_enabled);
     stm->next = NULL;
     stm->prev = NULL;
-
     stm->cors_header = NULL;
 
     if (cors_header != NULL) {
@@ -1144,9 +1144,7 @@ void stream_stop(struct stream *stm)
         if (list->tmpbuffer) {
             free(list->tmpbuffer->ptr);
             free(list->tmpbuffer);
-            if (list->cors_header != NULL) {
-                free(list->cors_header);
-            }
+            if (list->cors_header != NULL) free(list->cors_header);
         }
 
         close(list->socket);
