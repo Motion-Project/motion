@@ -1753,6 +1753,13 @@ dep_config_param dep_config_params[] = {
     CONF_OFFSET(vid_control_params),
     copy_vid_ctrl
     },
+    {
+    "text_double",
+    "4.1.1",
+    "\"text_double\" replaced with \"text_scale\" option.",
+    CONF_OFFSET(text_scale),
+    copy_bool
+    },
     { NULL, NULL, NULL, 0, NULL}
 };
 
