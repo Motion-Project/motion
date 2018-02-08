@@ -33,7 +33,8 @@ struct trackoptions track_template = {
     .minmaxfound =     0,              /* flag for minmax values stored for pwc based camera */
     .step_angle_x =    10,             /* UVC step angle in degrees X-axis that camera moves during auto tracking */
     .step_angle_y =    10,             /* UVC step angle in degrees Y-axis that camera moves during auto tracking */
-    .move_wait =       10              /* number of frames to disable motion detection after camera moving */
+    .move_wait =       10,             /* number of frames to disable motion detection after camera moving */
+    .generic_move =    NULL            /* command to execute to move a generic camera */
 };
 
 
@@ -49,30 +50,28 @@ static unsigned int iomojo_center(struct context *cnt, int xoff, int yoff);
 
 static unsigned int stepper_move(struct context *cnt, struct coord *cent, struct images *imgs);
 static unsigned int servo_move(struct context *cnt, struct coord *cent,
-                                     struct images *imgs, unsigned int manual);
+                               struct images *imgs, unsigned int manual);
 static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 
 #ifdef HAVE_V4L2
 static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
 static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
-                                    struct images *imgs, unsigned int manual);
+                              struct images *imgs, unsigned int manual);
 static unsigned int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
 static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
-                                   struct images *imgs, unsigned int manual);
+                             struct images *imgs, unsigned int manual);
 #endif /* HAVE_V4L2 */
 
-static void on_camera_move(struct context *cnt, enum track_action action, unsigned int manual,
-                                   int xoff, int yoff, struct coord *cent, struct images *imgs);
+static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual,
+                                 int xoff, int yoff, struct coord *cent, struct images *imgs);
+
 
 /* Add a call to your functions here: */
 unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
-                                unsigned int manual, int xoff, int yoff)
+                          unsigned int manual, int xoff, int yoff)
 {
     if (!manual && !cnt->track.active)
         return 0;
-
-    if (cnt->conf.on_camera_move)
-        on_camera_move(cnt, TRACK_CENTER, manual, xoff, yoff, NULL, NULL);
 
     if (cnt->track.type == TRACK_TYPE_STEPPER) {
         unsigned int ret;
@@ -93,8 +92,12 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
 #endif
     else if (cnt->track.type == TRACK_TYPE_IOMOJO)
         return iomojo_center(cnt, xoff, yoff);
-    else if (cnt->track.type == TRACK_TYPE_GENERIC)
-        return 10; // FIX ME. I chose to return something reasonable.
+    else if (cnt->track.type == TRACK_TYPE_GENERIC) {
+        if (cnt->track.generic_move)
+            return generic_move(cnt, TRACK_CENTER, manual, xoff, yoff, NULL, NULL);
+        else
+            return 10; // FIX ME. I chose to return something reasonable.
+    }
 
     MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO, "internal error, %hu is not a known track-type",
                cnt->track.type);
@@ -104,14 +107,11 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
 
 /* Add a call to your functions here: */
 unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs,
-                              unsigned int manual)
+                        unsigned int manual)
 {
 
     if (!manual && !cnt->track.active)
         return 0;
-
-    if (cnt->conf.on_camera_move)
-        on_camera_move(cnt, TRACK_MOVE, manual, 0, 0, cent, imgs);
 
     if (cnt->track.type == TRACK_TYPE_STEPPER)
         return stepper_move(cnt, cent, imgs);
@@ -125,8 +125,12 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
 #endif
     else if (cnt->track.type == TRACK_TYPE_IOMOJO)
         return iomojo_move(cnt, dev, cent, imgs);
-    else if (cnt->track.type == TRACK_TYPE_GENERIC)
-        return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
+    else if (cnt->track.type == TRACK_TYPE_GENERIC) {
+        if (cnt->track.generic_move)
+            generic_move(cnt, TRACK_MOVE, manual, 0, 0, cent, imgs);
+        else
+          return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
+    }
 
     MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO, "internal error, %hu is not a known track-type",
                cnt->track.type);
@@ -233,7 +237,7 @@ static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offs
 }
 
 static unsigned int stepper_move(struct context *cnt,
-                                       struct coord *cent, struct images *imgs)
+                                 struct coord *cent, struct images *imgs)
 {
     unsigned int command = 0, data = 0;
 
@@ -377,7 +381,7 @@ static unsigned int servo_position(struct context *cnt, unsigned int motor)
  *
  */
 static unsigned int servo_move(struct context *cnt, struct coord *cent,
-                                     struct images *imgs, unsigned int manual)
+                               struct images *imgs, unsigned int manual)
 {
     unsigned int command = 0;
     unsigned int data = 0;
@@ -1246,8 +1250,8 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
 }
 #endif /* HAVE_V4L2 */
 
-static void on_camera_move(struct context *cnt, enum track_action action, unsigned int manual,
-                                   int xoff, int yoff, struct coord *cent, struct images *imgs)
+static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual,
+                                 int xoff, int yoff, struct coord *cent, struct images *imgs)
 {
     if (!fork()) {
         int i;
@@ -1257,27 +1261,6 @@ static void on_camera_move(struct context *cnt, enum track_action action, unsign
         setsid();
 
         /* Provides data as environment variables */
-        sprintf(buf, "%u", cnt->track.type);		setenv("TRACK_TYPE", buf, 1);
-        setenv("TRACK_PORT", cnt->track.port? cnt->track.port : "", 1);
-        sprintf(buf, "%u", cnt->track.motorx);		setenv("TRACK_MOTORX", buf, 1);
-        sprintf(buf, "%u", cnt->track.motory);		setenv("TRACK_MOTORY", buf, 1);
-        sprintf(buf, "%d", cnt->track.minx);		setenv("TRACK_MINX", buf, 1);
-        sprintf(buf, "%d", cnt->track.maxx);		setenv("TRACK_MAXX", buf, 1);
-        sprintf(buf, "%d", cnt->track.miny);		setenv("TRACK_MINY", buf, 1);
-        sprintf(buf, "%d", cnt->track.maxy);		setenv("TRACK_MAXY", buf, 1);
-        sprintf(buf, "%u", cnt->track.stepsize);	setenv("TRACK_STEPSIZE", buf, 1);
-        sprintf(buf, "%u", cnt->track.speed);		setenv("TRACK_SPEED", buf, 1);
-        sprintf(buf, "%u", cnt->track.homex);		setenv("TRACK_HOMEX", buf, 1);
-        sprintf(buf, "%u", cnt->track.homey);		setenv("TRACK_HOMEY", buf, 1);
-        sprintf(buf, "%u", cnt->track.iomojo_id);	setenv("TRACK_IOMOJO_ID", buf, 1);
-        sprintf(buf, "%u", cnt->track.motorx_reverse);	setenv("TRACK_MOTHORX_REVERSE", buf, 1);
-        sprintf(buf, "%u", cnt->track.motory_reverse);	setenv("TRACK_MOTHORY_REVERSE", buf, 1);
-        sprintf(buf, "%u", cnt->track.minmaxfound);	setenv("TRACK_MINMAXFOUND", buf, 1);
-        sprintf(buf, "%u", cnt->track.step_angle_x);	setenv("TRACK_STEP_ANGLE_X", buf, 1);
-        sprintf(buf, "%u", cnt->track.step_angle_y);	setenv("TRACK_STEP_ANGLE_Y", buf, 1);
-        sprintf(buf, "%u", cnt->track.move_wait);	setenv("TRACK_MOVE_WAIT", buf, 1);
-        sprintf(buf, "%d", cnt->track.pan_angle);	setenv("TRACK_PAN_ANGLE", buf, 1);
-        sprintf(buf, "%d", cnt->track.tilt_angle);	setenv("TRACK_TILT_ANGLE", buf, 1);
         if (manual)
           setenv("TRACK_MANUAL", "manual", 1);
         switch (action) {
@@ -1312,15 +1295,17 @@ static void on_camera_move(struct context *cnt, enum track_action action, unsign
         for (i = getdtablesize() - 1; i > 2; i--)
             close(i);
 
-        execl("/bin/sh", "sh", "-c", cnt->conf.on_camera_move, " &", NULL);
+        execl("/bin/sh", "sh", "-c", cnt->track.generic_move, " &", NULL);
 
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO, "Unable to start external command '%s'",
-                   cnt->conf.on_camera_move);
+                   cnt->track.generic_move);
 
         exit(1);
     }
 
     MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, "Executing external command '%s'",
-               cnt->conf.on_camera_move);
+               cnt->track.generic_move);
+
+    return cnt->track.move_wait;
 }

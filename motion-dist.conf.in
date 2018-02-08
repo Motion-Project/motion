@@ -551,8 +551,8 @@ track_speed 255
 # Number of steps to make (stepper motor option) (default: 40)
 track_stepsize 40
 
-# Command to be executed when a PTZ camera moves (default: none)
-; on_camera_move value
+# Command to execute to move a generic PTZ camera (default: none)
+; track_generic_move value
 
 
 ############################################################

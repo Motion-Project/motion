@@ -38,6 +38,7 @@ struct trackoptions {
     /* UVC */
     int pan_angle; // degrees
     int tilt_angle; // degrees
+    char *generic_move;
 };
 
 extern struct trackoptions track_template;

@@ -202,9 +202,7 @@
     <ul>
       <p></p>
         SYNOPSIS
-      <pre>
-        motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process_id_file ] [ -l log_file ]
-      </pre>
+      <pre>motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process_id_file ] [ -l log_file ]</pre>
       <p></p>
       <ul>
         <li>-c : Full path and filename of config file.</li>
@@ -776,12 +774,6 @@
           <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#on_camera_move" >on_camera_move</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">on_event_end</td>
           <td align="left">on_event_end</td>
           <td align="left">on_event_end</td>
@@ -1184,6 +1176,12 @@
           <td align="left"><a href="#track_type" >track_type</a></td>
         </tr>
         <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
@@ -1530,7 +1528,6 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#on_camera_found" >on_camera_found</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#on_camera_move" >on_camera_move</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1783,6 +1780,7 @@
               <td bgcolor="#edf4f9" ><a href="#track_move_wait" >track_move_wait</a> </td>
               <td bgcolor="#edf4f9" ><a href="#track_speed" >track_speed</a> </td>
               <td bgcolor="#edf4f9" ><a href="#track_stepsize" >track_stepsize</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_generic_move" >track_generic_move</a> </td>
             </tr>
           </tbody>
         </table>
@@ -3705,65 +3703,6 @@
         <p></p>
         <p></p>
 
-        <h3><a name="on_camera_move"></a> on_camera_move </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The full path and file name of the command to be executed when a PTZ camera moves in tracking mode
-        <br />This hook is called by track_move() (when a motion is detected and has to be tracked), and by track_center() (at the end of a motion event).
-        <p></p>
-        Several parameters are provided as environment variables:
-        <ul>
-          <li> When called by track_center(): TRACK_ACTION=center TRACK_XOFF TRACK_YOFF</li>
-          <li> When called by track_move(): TRACK_ACTION=move TRACK_CENT_X TRACK_CENT_Y TRACK_CENT_WIDTH TRACK_CENT_HEIGHT TRACK_CENT_MINX TRACK_CENT_MAXX TRACK_CENT_MINY TRACK_CENT_MAXY TRACK_IMGS_WIDTH TRACK_IMGS_HEIGHT TRACK_IMGS_MOTIONSIZE</li>
-          <li> and in both cases: TRACK_TYPE TRACK_PORT TRACK_MOTORX TRACK_MOTORY TRACK_MINX TRACK_MAXX TRACK_MINY TRACK_MAXY TRACK_STEPSIZE TRACK_SPEED TRACK_HOMEX TRACK_HOMEY TRACK_IOMOJO_ID TRACK_MOTHORX_REVERSE TRACK_MOTHORY_REVERSE TRACK_MINMAXFOUND TRACK_STEP_ANGLE_X TRACK_STEP_ANGLE_Y TRACK_MOVE_WAIT TRACK_PAN_ANGLE TRACK_TILT_ANGLE TRACK_MANUAL</li>
-        </ul>
-        <p></p>
-        For instance, the following script may be called to move a PTZ netcam (Tested with VIVOTEK PZ81X1):
-<pre><code>#!/bin/bash
-
-LOCKFILE=/tmp/on_camera_move_netcam.lock
-if [ -e "$LOCKFILE" ]; then  # Trick to avoid flooding
-  exit 0                     # the netcam of multiple
-fi                           # moving commands.
-
-function movecam() {
-  touch $LOCKFILE
-  curl "http://10.42.0.96/cgi-bin/camctrl/camctrl.cgi?move=$1"
-  LOCKED=true
-}
-
-case "$TRACK_ACTION" in
-  "center")
-    movecam home
-    ;;
-  "move")
-    if [ "$TRACK_CENT_X" -lt "$((TRACK_IMGS_WIDTH*3/8))" ]; then
-      movecam left
-    fi
-    if [ "$TRACK_CENT_X" -gt "$((TRACK_IMGS_WIDTH*5/8))" ]; then
-      movecam right
-    fi
-    if [ "$TRACK_CENT_Y" -lt "$((TRACK_IMGS_HEIGHT*3/8))" ]; then
-      movecam up
-    fi
-    if [ "$TRACK_CENT_Y" -gt "$((TRACK_IMGS_HEIGHT*5/8))" ]; then
-      movecam down
-    fi
-    ;;
-esac
-
-if [ "$LOCKED" = "true" ]; then
-  sleep 2
-  rm -f "$LOCKFILE"
-fi</code></pre>
-        <p></p>
-        <p></p>
-
       </ul>
 
       <h3><a name="OptDetail_Output_General"></a>Output - General Options</h3>
@@ -4489,7 +4428,7 @@ fi</code></pre>
         readfile('http://localhost:8080/2/detection/pause');</pre>
         <p></p>
 
-        </p>
+        <p></p>
         <strong>ALERT!</strong> Security Warning! This feature also means you have to pay attention
         to the following.
         <ul>
@@ -5251,6 +5190,66 @@ fi</code></pre>
         Number of steps to make.
         Only used for stepper motor tracking.
         <p></p>
+        
+        <p></p>
+
+        <h3><a name="track_generic_move"></a> track_generic_move </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: </li>
+        </ul>
+        <p></p>
+        The full path and file name of the command to execute to move a PTZ camera in generic tracking mode
+        <p></p>
+        Several parameters are provided as environment variables:
+        <ul>
+          <li> When called to recenter the camera: TRACK_ACTION=center TRACK_XOFF TRACK_YOFF</li>
+          <li> When called to track a motion: TRACK_ACTION=move TRACK_CENT_X TRACK_CENT_Y TRACK_CENT_WIDTH TRACK_CENT_HEIGHT TRACK_CENT_MINX TRACK_CENT_MAXX TRACK_CENT_MINY TRACK_CENT_MAXY TRACK_IMGS_WIDTH TRACK_IMGS_HEIGHT TRACK_IMGS_MOTIONSIZE</li>
+        </ul>
+        <p></p>
+        For instance, the following script may be called to move a PTZ netcam (Tested with VIVOTEK PZ81X1):
+<pre><code>#!/bin/bash
+
+LOCKFILE=/tmp/track_generic_move_netcam.lock
+if [ -e "$LOCKFILE" ]; then  # Trick to avoid flooding
+  exit 0                     # the netcam of multiple
+fi                           # moving commands.
+
+function movecam() {
+  touch $LOCKFILE
+  curl "http://10.42.0.96/cgi-bin/camctrl/camctrl.cgi?move=$1"
+  LOCKED=true
+}
+
+case "$TRACK_ACTION" in
+  "center")
+    movecam home
+    ;;
+  "move")
+    if [ "$TRACK_CENT_X" -lt "$((TRACK_IMGS_WIDTH*3/8))" ]; then
+      movecam left
+    fi
+    if [ "$TRACK_CENT_X" -gt "$((TRACK_IMGS_WIDTH*5/8))" ]; then
+      movecam right
+    fi
+    if [ "$TRACK_CENT_Y" -lt "$((TRACK_IMGS_HEIGHT*3/8))" ]; then
+      movecam up
+    fi
+    if [ "$TRACK_CENT_Y" -gt "$((TRACK_IMGS_HEIGHT*5/8))" ]; then
+      movecam down
+    fi
+    ;;
+esac
+
+if [ "$LOCKED" = "true" ]; then
+  sleep 2
+  rm -f "$LOCKFILE"
+fi</code></pre>
+        <p></p>
+        <p></p>
+
       </ul>
 
     </ul>
