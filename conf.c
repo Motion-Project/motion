@@ -1893,7 +1893,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                     strcmp(dep_config_params[i].name,"saturation") ||
                     strcmp(dep_config_params[i].name,"hue") ||
                     strcmp(dep_config_params[i].name,"power_line_frequency")) {
-                    cnt = dep_config_params[i].copy(cnt, arg1, i);
+                    cnt = copy_vid_ctrl(cnt, arg1, i);
                 } else {
                     cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
                 }
