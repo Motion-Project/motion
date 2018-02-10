@@ -45,6 +45,8 @@ extern struct trackoptions track_template;
 unsigned int track_center(struct context *, int, unsigned int, int, int);
 unsigned int track_move(struct context *, int, struct coord *, struct images *, unsigned int);
 
+enum track_action { TRACK_CENTER, TRACK_MOVE };
+
 /*
  * Some default values:
  */

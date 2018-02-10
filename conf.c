@@ -132,6 +132,7 @@ struct config conf_template = {
     .on_movie_end =                    NULL,
     .on_camera_lost =                  NULL,
     .on_camera_found =                 NULL,
+    .on_camera_move =                  NULL,
     .motionvidpipe =                   NULL,
     .netcam_url =                      NULL,
     .netcam_highres=                   NULL,
@@ -851,6 +852,16 @@ config_param config_params[] = {
     "# NOTE: If motion doesn't properly detect a lost camera, it also won't know it found one.\n",
     0,
     CONF_OFFSET(on_camera_found),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "on_camera_move",
+    "# Command to be executed when a camera has to be moved in tracking mode (default: none)\n"
+    "# NOTE: Several data are provided as environment variables on the form TRACK_xxx.\n",
+    0,
+    CONF_OFFSET(on_camera_move),
     copy_string,
     print_string,
     WEBUI_LEVEL_RESTRICTED

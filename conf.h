@@ -122,6 +122,7 @@ struct config {
     char *on_movie_end;
     char *on_camera_lost;
     char *on_camera_found;
+    char *on_camera_move;
     const char *motionvidpipe;
     const char *netcam_url;
     const char *netcam_highres;
