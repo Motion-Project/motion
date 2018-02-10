@@ -5219,7 +5219,7 @@ fi                           # moving commands.
 
 function movecam() {
   touch $LOCKFILE
-  curl "http://10.42.0.96/cgi-bin/camctrl/camctrl.cgi?move=$1"
+  curl "http://youripaddress/cgi-bin/camctrl/camctrl.cgi?move=$1"
   LOCKED=true
 }
 

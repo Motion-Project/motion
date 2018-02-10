@@ -127,7 +127,7 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
         return iomojo_move(cnt, dev, cent, imgs);
     else if (cnt->track.type == TRACK_TYPE_GENERIC) {
         if (cnt->track.generic_move)
-            generic_move(cnt, TRACK_MOVE, manual, 0, 0, cent, imgs);
+          return generic_move(cnt, TRACK_MOVE, manual, 0, 0, cent, imgs);
         else
           return cnt->track.move_wait; // FIX ME. I chose to return something reasonable.
     }
