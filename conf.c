@@ -1656,6 +1656,16 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "track_generic_move",
+    "# Command to execute to move a camera in generic tracking mode (default: none)\n"
+    "# NOTE: Several data are provided as environment variables on the form TRACK_xxx.\n",
+    0,
+    TRACK_OFFSET(generic_move),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "camera",
     "\n##############################################################\n"
     "# Camera config files - One for each camera.\n"

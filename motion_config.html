@@ -202,9 +202,7 @@
     <ul>
       <p></p>
         SYNOPSIS
-      <pre>
-        motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process_id_file ] [ -l log_file ]
-      </pre>
+      <pre>motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process_id_file ] [ -l log_file ]</pre>
       <p></p>
       <ul>
         <li>-c : Full path and filename of config file.</li>
@@ -1178,6 +1176,12 @@
           <td align="left"><a href="#track_type" >track_type</a></td>
         </tr>
         <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
@@ -1776,6 +1780,7 @@
               <td bgcolor="#edf4f9" ><a href="#track_move_wait" >track_move_wait</a> </td>
               <td bgcolor="#edf4f9" ><a href="#track_speed" >track_speed</a> </td>
               <td bgcolor="#edf4f9" ><a href="#track_stepsize" >track_stepsize</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#track_generic_move" >track_generic_move</a> </td>
             </tr>
           </tbody>
         </table>
@@ -3689,7 +3694,7 @@
         </ul>
         <p></p>
         The full path and file name of the command to be executed when a lost camera is found
-        If motion fails to detect a lost camera, it will also fail to know it found one.
+        <br />If motion fails to detect a lost camera, it will also fail to know it found one.
         <p></p>
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
         and spaces as part of the command.  This can be any type of program or script.
@@ -4423,7 +4428,7 @@
         readfile('http://localhost:8080/2/detection/pause');</pre>
         <p></p>
 
-        </p>
+        <p></p>
         <strong>ALERT!</strong> Security Warning! This feature also means you have to pay attention
         to the following.
         <ul>
@@ -5185,6 +5190,66 @@
         Number of steps to make.
         Only used for stepper motor tracking.
         <p></p>
+        
+        <p></p>
+
+        <h3><a name="track_generic_move"></a> track_generic_move </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: </li>
+        </ul>
+        <p></p>
+        The full path and file name of the command to execute to move a PTZ camera in generic tracking mode
+        <p></p>
+        Several parameters are provided as environment variables:
+        <ul>
+          <li> When called to recenter the camera: TRACK_ACTION=center TRACK_XOFF TRACK_YOFF</li>
+          <li> When called to track a motion: TRACK_ACTION=move TRACK_CENT_X TRACK_CENT_Y TRACK_CENT_WIDTH TRACK_CENT_HEIGHT TRACK_CENT_MINX TRACK_CENT_MAXX TRACK_CENT_MINY TRACK_CENT_MAXY TRACK_IMGS_WIDTH TRACK_IMGS_HEIGHT TRACK_IMGS_MOTIONSIZE</li>
+        </ul>
+        <p></p>
+        For instance, the following script may be called to move a PTZ netcam (Tested with VIVOTEK PZ81X1):
+<pre><code>#!/bin/bash
+
+LOCKFILE=/tmp/track_generic_move_netcam.lock
+if [ -e "$LOCKFILE" ]; then  # Trick to avoid flooding
+  exit 0                     # the netcam of multiple
+fi                           # moving commands.
+
+function movecam() {
+  touch $LOCKFILE
+  curl "http://youripaddress/cgi-bin/camctrl/camctrl.cgi?move=$1"
+  LOCKED=true
+}
+
+case "$TRACK_ACTION" in
+  "center")
+    movecam home
+    ;;
+  "move")
+    if [ "$TRACK_CENT_X" -lt "$((TRACK_IMGS_WIDTH*3/8))" ]; then
+      movecam left
+    fi
+    if [ "$TRACK_CENT_X" -gt "$((TRACK_IMGS_WIDTH*5/8))" ]; then
+      movecam right
+    fi
+    if [ "$TRACK_CENT_Y" -lt "$((TRACK_IMGS_HEIGHT*3/8))" ]; then
+      movecam up
+    fi
+    if [ "$TRACK_CENT_Y" -gt "$((TRACK_IMGS_HEIGHT*5/8))" ]; then
+      movecam down
+    fi
+    ;;
+esac
+
+if [ "$LOCKED" = "true" ]; then
+  sleep 2
+  rm -f "$LOCKFILE"
+fi</code></pre>
+        <p></p>
+        <p></p>
+
       </ul>
 
     </ul>
