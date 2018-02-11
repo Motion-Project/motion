@@ -146,7 +146,7 @@ struct config conf_template = {
     .text_left =                       NULL,
     .text_right =                      DEF_TIMESTAMP,
     .text_event =                      DEF_EVENTSTAMP,
-    .text_double =                     0,
+    .text_scale =                      1,
     .despeckle_filter =                NULL,
     .area_detect =                     NULL,
     .minimum_motion_frames =           1,
@@ -599,12 +599,12 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "text_double",
-    "# Draw characters at twice normal size on images. (default: off)",
+    "text_scale",
+    "# Scale characters on image. Valid range: 1 - 10, default: 1",
     0,
-    CONF_OFFSET(text_double),
-    copy_bool,
-    print_bool,
+    CONF_OFFSET(text_scale),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1762,6 +1762,13 @@ dep_config_param dep_config_params[] = {
     "\"power_line_frequency\" replaced with \"vid_control_params\" option.",
     CONF_OFFSET(vid_control_params),
     copy_vid_ctrl
+    },
+    {
+    "text_double",
+    "4.1.1",
+    "\"text_double\" replaced with \"text_scale\" option.",
+    CONF_OFFSET(text_scale),
+    copy_bool
     },
     { NULL, NULL, NULL, 0, NULL}
 };

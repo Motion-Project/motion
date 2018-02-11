@@ -317,7 +317,10 @@ struct image_data {
  */
 
 /* date/time drawing, draw.c */
-int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor);
+int draw_text(unsigned char *image,
+              unsigned int width, unsigned int height,
+              unsigned int startx, unsigned int starty,
+              const char *text, unsigned int factor);
 int initialize_chars(void);
 
 struct images {
@@ -519,7 +522,6 @@ struct context {
     int minimum_frame_time_downcounter;
     unsigned int get_image;    /* Flag used to signal that we capture new image when we run the loop */
 
-    unsigned int text_size_factor;
     long int required_frame_time, frame_delay;
 
     long int rolling_average_limit;

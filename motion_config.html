@@ -1035,7 +1035,7 @@
           <td height="17" align="left">text_double</td>
           <td align="left">text_double</td>
           <td align="left">text_double</td>
-          <td align="left"><a href="#text_double" >text_double</a></td>
+          <td align="left"><a href="#text_scale" >text_scale</a></td>
         </tr>
         <tr>
           <td height="17" align="left">text_event</td>
@@ -1456,7 +1456,7 @@
               <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#text_double" >text_double</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_scale" >text_scale</a> </td>
               <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
             </tr>
           </tbody>
@@ -3163,17 +3163,24 @@
 
         <p></p>
 
-        <h3><a name="text_double"></a> text_double </h3>
+        <h3><a name="text_scale"></a> text_scale </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 1 - 2147483647</li>
+          <li> Default: 1</li>
         </ul>
         <p></p>
-        Draw characters at twice normal size on images.
-        This option makes the text defined by text_left, text_right and text_changes twice the normal size.
+        The scale at which to draw text over the image.
+        The recommended range is 1 - 10.
+        This option makes the text defined by text_left, text_right and text_changes drawn at n-times the normal size.
         This may be useful when using large picture formats such as 1280 x 720.
+        <p></p>
+        This option replaces the previous configuration options for:
+        <ul>
+          <li> text_double</li>
+        </ul>
+        <p></p>
         <p></p>
         <p></p>
       </ul>
