@@ -1282,15 +1282,15 @@ a unique identifier for each event.
 .RE
 
 .TP
-.B text_double
+.B text_scale
 .RS
 .nf
-Values: on/off
-Default: off
+Values: 1 to 10
+Default: 1
 Description:
 .fi
 .RS
-Draw characters at twice normal size on images.
+The scale at which to draw text over the image.
 .RE
 .RE
 
@@ -1709,6 +1709,19 @@ Description:
 .fi
 .RS
 These options specify the parameters for cameras with tracking capabilities.
+.RE
+.RE
+
+.TP
+.B track_generic_move
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Full path and file name for the script to execute to move a camera in generic tracking mode.
 .RE
 .RE
 

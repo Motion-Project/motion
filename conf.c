@@ -147,7 +147,7 @@ struct config conf_template = {
     .text_left =                       NULL,
     .text_right =                      DEF_TIMESTAMP,
     .text_event =                      DEF_EVENTSTAMP,
-    .text_double =                     0,
+    .text_scale =                      1,
     .despeckle_filter =                NULL,
     .area_detect =                     NULL,
     .minimum_motion_frames =           1,
@@ -601,12 +601,12 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "text_double",
-    "# Draw characters at twice normal size on images. (default: off)",
+    "text_scale",
+    "# Scale characters on image. Valid range: 1 - 10, default: 1",
     0,
-    CONF_OFFSET(text_double),
-    copy_bool,
-    print_bool,
+    CONF_OFFSET(text_scale),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1668,6 +1668,16 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "track_generic_move",
+    "# Command to execute to move a camera in generic tracking mode (default: none)\n"
+    "# NOTE: Several data are provided as environment variables on the form TRACK_xxx.\n",
+    0,
+    TRACK_OFFSET(generic_move),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "camera",
     "\n##############################################################\n"
     "# Camera config files - One for each camera.\n"
@@ -1764,6 +1774,13 @@ dep_config_param dep_config_params[] = {
     "\"power_line_frequency\" replaced with \"vid_control_params\" option.",
     CONF_OFFSET(vid_control_params),
     copy_vid_ctrl
+    },
+    {
+    "text_double",
+    "4.1.1",
+    "\"text_double\" replaced with \"text_scale\" option.",
+    CONF_OFFSET(text_scale),
+    copy_bool
     },
     { NULL, NULL, NULL, 0, NULL}
 };
@@ -1905,7 +1922,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
                     strcmp(dep_config_params[i].name,"saturation") ||
                     strcmp(dep_config_params[i].name,"hue") ||
                     strcmp(dep_config_params[i].name,"power_line_frequency")) {
-                    cnt = dep_config_params[i].copy(cnt, arg1, i);
+                    cnt = copy_vid_ctrl(cnt, arg1, i);
                 } else {
                     cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
                 }

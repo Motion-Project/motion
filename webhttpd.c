@@ -186,7 +186,7 @@ static const char *not_found_response_valid_command =
 
 static const char *not_found_response_valid_command_raw =
     "HTTP/1.0 404 Not Valid Command\r\n"
-    "Content-type: text/plain\n\n"
+    "Content-type: text/plain\r\n\r\n"
     "Not Valid Command\n";
 
 static const char *bad_method_response_template =
@@ -207,7 +207,7 @@ static const char *bad_method_response_template_raw =
 
 static const char *request_auth_response_template=
     "HTTP/1.0 401 Authorization Required\r\n"
-    "WWW-Authenticate: Basic realm=\"Motion Security Access\"\r\n";
+    "WWW-Authenticate: Basic realm=\"Motion Security Access\"\r\n\r\n";
 
 /**
  * write_nonblock
