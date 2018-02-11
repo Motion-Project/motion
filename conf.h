@@ -74,6 +74,7 @@ struct config {
     int stream_localhost;
     int stream_limit;
     int stream_auth_method;
+    const char *stream_cors_header;
     const char *stream_authentication;
     int stream_preview_scale;
     int stream_preview_newline;
@@ -183,6 +184,7 @@ extern dep_config_param dep_config_params[];
 
 struct context **conf_load(struct context **);
 struct context **copy_string(struct context **, const char *, int);
+struct context **copy_uri(struct context **, const char *, int);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
 void conf_output_parms(struct context **cnt);
 const char *config_type(config_param *);

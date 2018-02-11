@@ -1513,6 +1513,22 @@ The authentication method to use for viewing the stream.
 .RE
 
 .TP
+.B stream_cors_header
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The Access-Control-Allow-Origin header value to be sent with the stream.
+If unspecified, no Access-Control-Allow-Origin header is sent.
+The header allows browsers to access the stream via cross-origin resource sharing (CORS).
+For example, * allows access from browser client code served from any domain.
+.RE
+.RE
+
+.TP
 .B stream_authentication
 .RS
 .nf

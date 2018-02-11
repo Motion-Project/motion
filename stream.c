@@ -908,6 +908,7 @@ static void stream_flush(struct stream *list, int *stream_count, int lim)
                 if (--client->tmpbuffer->ref <= 0) {
                     free(client->tmpbuffer->ptr);
                     free(client->tmpbuffer);
+                    if (client->cors_header != NULL) free(client->cors_header);
                 }
 
                 /* Mark this client's buffer as empty. */
@@ -969,6 +970,16 @@ static struct stream_buffer *stream_tmpbuffer(int size)
     return tmpbuffer;
 }
 
+const char *base_header = "HTTP/1.0 200 OK\r\n"
+                          "Server: Motion/"VERSION"\r\n"
+                          "Connection: close\r\n"
+                          "Max-Age: 0\r\n"
+                          "Expires: 0\r\n"
+                          "Cache-Control: no-cache, private\r\n"
+                          "Pragma: no-cache\r\n"
+                          "Content-Type: multipart/x-mixed-replace; "
+                          "boundary=BoundaryString\r\n\r\n";
+#define BASE_HEADER_LEN strlen(base_header)
 /**
  * stream_add_client
  *
@@ -977,24 +988,41 @@ static struct stream_buffer *stream_tmpbuffer(int size)
 static void stream_add_client(struct stream *list, int sc)
 {
     struct stream *new = mymalloc(sizeof(struct stream));
-    static const char header[] = "HTTP/1.0 200 OK\r\n"
-                                 "Server: Motion/"VERSION"\r\n"
-                                 "Connection: close\r\n"
-                                 "Max-Age: 0\r\n"
-                                 "Expires: 0\r\n"
-                                 "Cache-Control: no-cache, private\r\n"
-                                 "Pragma: no-cache\r\n"
-                                 "Content-Type: multipart/x-mixed-replace; "
-                                 "boundary=BoundaryString\r\n\r\n";
-
     memset(new, 0, sizeof(struct stream));
     new->socket = sc;
 
-    if ((new->tmpbuffer = stream_tmpbuffer(sizeof(header))) == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
+    // Copy the HTTP headers into tmpbuffer.
+
+    if (list->cors_header == NULL) {
+
+        new->tmpbuffer = stream_tmpbuffer(BASE_HEADER_LEN);
+        if (new->tmpbuffer == NULL) {
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
+        } else {
+            memcpy(new->tmpbuffer->ptr, base_header, BASE_HEADER_LEN);
+            new->tmpbuffer->size = BASE_HEADER_LEN;
+        }
+
     } else {
-        memcpy(new->tmpbuffer->ptr, header, sizeof(header)-1);
-        new->tmpbuffer->size = sizeof(header)-1;
+
+        const char *cors_header_key = "Access-Control-Allow-Origin: ";
+        size_t cors_header_key_len = strlen(cors_header_key);
+        size_t cors_header_len = strlen(list->cors_header);
+        size_t size = BASE_HEADER_LEN-2 + cors_header_key_len + cors_header_len + 4;
+
+        new->tmpbuffer = stream_tmpbuffer(size);
+        if (new->tmpbuffer == NULL) {
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error creating tmpbuffer in stream_add_client");
+        } else {
+            // Basically copy over the base headers (without the second \r\n),
+            // and then the CORS header key, value, and \r\n\r\n.
+            memcpy(new->tmpbuffer->ptr, base_header, BASE_HEADER_LEN-2);
+            memcpy(&new->tmpbuffer->ptr[BASE_HEADER_LEN-2], cors_header_key, cors_header_key_len);
+            memcpy(&new->tmpbuffer->ptr[BASE_HEADER_LEN-2 + cors_header_key_len], list->cors_header, cors_header_len);
+            memcpy(&new->tmpbuffer->ptr[BASE_HEADER_LEN-2 + cors_header_key_len + cors_header_len], "\r\n\r\n", 4);
+            new->tmpbuffer->size = size;
+        }
+
     }
 
     new->prev = list;
@@ -1066,11 +1094,28 @@ static int stream_check_write(struct stream *list)
  *
  * Returns: stream socket descriptor.
  */
-int stream_init(struct stream *stm, int stream_port, int stream_localhost, int ipv6_enabled)
+int stream_init(struct stream *stm,
+                int port,
+                int localhost,
+                int ipv6_enabled,
+                const char *cors_header)
 {
-    stm->socket = http_bindsock(stream_port, stream_localhost, ipv6_enabled);
+    stm->socket = http_bindsock(port, localhost, ipv6_enabled);
     stm->next = NULL;
     stm->prev = NULL;
+    stm->cors_header = NULL;
+
+    if (cors_header != NULL) {
+
+        size_t size = strlen(cors_header) + 1;
+        stm->cors_header = mymalloc(size);
+        if (stm->cors_header == NULL) {
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error allocated cors_header in stream_init");
+            return stm->socket;
+        }
+        memcpy(stm->cors_header, cors_header, size);
+
+    }
 
     return stm->socket;
 }
@@ -1091,6 +1136,7 @@ void stream_stop(struct stream *stm)
 
     close(stm->socket);
     stm->socket = -1;
+    free(stm->cors_header);
 
     while (next) {
         list = next;
@@ -1099,6 +1145,7 @@ void stream_stop(struct stream *stm)
         if (list->tmpbuffer) {
             free(list->tmpbuffer->ptr);
             free(list->tmpbuffer);
+            if (list->cors_header != NULL) free(list->cors_header);
         }
 
         close(list->socket);

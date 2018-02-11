@@ -85,6 +85,7 @@ struct config conf_template = {
     .stream_localhost =                1,
     .stream_limit =                    0,
     .stream_auth_method =              0,
+    .stream_cors_header =              NULL,
     .stream_authentication =           NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          0,
@@ -1271,6 +1272,16 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
+    "stream_cors_header",
+    "# Set the cross-origin resource sharing (CORS) header\n"
+    "# Default: not defined (Disabled)",
+    0,
+    CONF_OFFSET(stream_cors_header),
+    copy_uri,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
     "stream_authentication",
     "# Authentication for the stream. Syntax username:password\n"
     "# Default: not defined (Disabled)",
@@ -2263,6 +2274,7 @@ void conf_output_parms(struct context **cnt)
                 if (!strncmp(name, "netcam_url", 10) ||
                     !strncmp(name, "netcam_userpass", 15) ||
                     !strncmp(name, "netcam_highres", 14) ||
+                    !strncmp(name, "stream_cors_header", 18) ||
                     !strncmp(name, "stream_authentication", 21) ||
                     !strncmp(name, "webcontrol_authentication", 25) ||
                     !strncmp(name, "database_user", 13) ||
@@ -2300,7 +2312,8 @@ void malloc_strings(struct context *cnt)
     unsigned int i = 0;
     char **val;
     while (config_params[i].param_name != NULL) {
-        if (config_params[i].copy == copy_string) { /* if member is a string */
+        if (config_params[i].copy == copy_string ||
+            config_params[i].copy == copy_uri) { /* if member is a string */
             /* val is made to point to a pointer to the current string. */
             val = (char **)((char *)cnt+config_params[i].conf_value);
 
@@ -2505,6 +2518,31 @@ struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int
     return cnt;
 }
 
+struct context **copy_uri(struct context **cnt, const char *str, int val) {
+
+    // Here's a complicated regex I found here: https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
+    // Use it for validating URIs.
+    const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+
+    regex_t regex;
+    if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error compiling regex in copy_uri");
+        return cnt;
+    }
+
+    // A single asterisk is also valid, so check for that.
+    if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid origin for cors_header in copy_uri");
+        regfree(&regex);
+        return cnt;
+    }
+
+    regfree(&regex);
+    cnt = copy_string(cnt, str, val);
+    return cnt;
+
+}
+
 /**
  * mystrcpy
  *      Is used to assign string type fields (e.g. config options)
@@ -2586,6 +2624,8 @@ const char *config_type(config_param *configparam)
         return "int";
     if (configparam->copy == copy_bool)
         return "bool";
+    if (configparam->copy == copy_uri)
+        return "uri";
 
     return "unknown";
 }
