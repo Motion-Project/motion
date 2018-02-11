@@ -167,7 +167,6 @@ static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 static struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
-static struct context **copy_uri(struct context **cnt, const char *str, int val);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -2313,7 +2312,8 @@ void malloc_strings(struct context *cnt)
     unsigned int i = 0;
     char **val;
     while (config_params[i].param_name != NULL) {
-        if (config_params[i].copy == copy_string) { /* if member is a string */
+        if (config_params[i].copy == copy_string ||
+            config_params[i].copy == copy_uri) { /* if member is a string */
             /* val is made to point to a pointer to the current string. */
             val = (char **)((char *)cnt+config_params[i].conf_value);
 
@@ -2518,7 +2518,7 @@ struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int
     return cnt;
 }
 
-static struct context **copy_uri(struct context **cnt, const char *str, int val) {
+struct context **copy_uri(struct context **cnt, const char *str, int val) {
 
     // Here's a complicated regex I found here: https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
     // Use it for validating URIs.
@@ -2624,6 +2624,8 @@ const char *config_type(config_param *configparam)
         return "int";
     if (configparam->copy == copy_bool)
         return "bool";
+    if (configparam->copy == copy_uri)
+        return "uri";
 
     return "unknown";
 }

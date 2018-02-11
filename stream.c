@@ -1136,6 +1136,7 @@ void stream_stop(struct stream *stm)
 
     close(stm->socket);
     stm->socket = -1;
+    free(stm->cors_header);
 
     while (next) {
         list = next;

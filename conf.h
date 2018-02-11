@@ -184,6 +184,7 @@ extern dep_config_param dep_config_params[];
 
 struct context **conf_load(struct context **);
 struct context **copy_string(struct context **, const char *, int);
+struct context **copy_uri(struct context **, const char *, int);
 struct context **conf_cmdparse(struct context **, const char *, const char *);
 void conf_output_parms(struct context **cnt);
 const char *config_type(config_param *);
