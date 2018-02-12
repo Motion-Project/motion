@@ -353,9 +353,8 @@ text_changes off
 # a unique identifier for each event.
 text_event %Y%m%d%H%M%S
 
-# Draw characters at twice normal size on images. (default: off)
-text_double off
-
+# Scale characters on image. Valid range: 1 - 10, default: 1
+text_scale 1
 
 # Text to include in a JPEG EXIF comment
 # May be any text, including conversion specifiers.
