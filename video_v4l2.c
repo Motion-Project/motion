@@ -444,7 +444,7 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
             if (target == -1){
                 target = (int) ((devitem->ctrl_maximum - devitem->ctrl_minimum)/2);
             }
-        } else if ((method == 2) &&
+        } else if ((method == 3) &&
             (devitem->ctrl_id == V4L2_CID_EXPOSURE_ABSOLUTE)) {
             device_value = devitem->ctrl_currval;
             parm_max = devitem->ctrl_maximum;
@@ -505,7 +505,7 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
             if ((method == 1) &&
                 (devitem->ctrl_id == V4L2_CID_BRIGHTNESS)) {
                 devitem->ctrl_newval = device_value;
-            } else if ((method == 1) &&
+            } else if ((method == 2) &&
                 (devitem->ctrl_id == V4L2_CID_EXPOSURE)) {
                 devitem->ctrl_newval = device_value;
             } else if ((method == 3) &&
