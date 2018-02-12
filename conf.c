@@ -167,6 +167,7 @@ static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 static struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
+static struct context **copy_text_double(struct context **, const char *, int);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -1779,7 +1780,7 @@ dep_config_param dep_config_params[] = {
     "4.1.1",
     "\"text_double\" replaced with \"text_scale\" option.",
     CONF_OFFSET(text_scale),
-    copy_bool
+    copy_text_double
     },
     { NULL, NULL, NULL, 0, NULL}
 };
@@ -2517,6 +2518,34 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
     }
 
     free(parmname_new);
+
+    return cnt;
+}
+
+/**
+ * copy_text_double
+ *      Converts the bool of text_double to a 1 or 2 in text_scale
+ *
+ * Returns context struct.
+ */
+static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr)
+{
+    void *tmp;
+    int i;
+
+    i = -1;
+    while (cnt[++i]) {
+        tmp = (char *)cnt[i]+(int)val_ptr;
+
+        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+            *((int *)tmp) = 2;
+        } else {
+            *((int *)tmp) = 1;
+        }
+
+        if (cnt[0]->threadnr)
+            return cnt;
+    }
 
     return cnt;
 }
