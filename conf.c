@@ -167,6 +167,7 @@ static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
 static struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
+static struct context **copy_text_double(struct context **, const char *, int);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -1779,7 +1780,7 @@ dep_config_param dep_config_params[] = {
     "4.1.1",
     "\"text_double\" replaced with \"text_scale\" option.",
     CONF_OFFSET(text_scale),
-    copy_bool
+    copy_text_double
     },
     { NULL, NULL, NULL, 0, NULL}
 };
@@ -1890,7 +1891,6 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
              * If the option is an int, copy_int is called.
              * If the option is a string, copy_string is called.
              * If the option is camera, config_camera is called.
-             * if the option is a depreciated vid item, copy_vid_ctrl is called
              * The arguments to the function are:
              *  cnt  - a pointer to the context structure.
              *  arg1 - a pointer to the new option value (represented as string).
@@ -1916,11 +1916,14 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
 
             if (dep_config_params[i].copy != NULL){
-                if (strcmp(dep_config_params[i].name,"brightness") ||
-                    strcmp(dep_config_params[i].name,"contrast") ||
-                    strcmp(dep_config_params[i].name,"saturation") ||
-                    strcmp(dep_config_params[i].name,"hue") ||
-                    strcmp(dep_config_params[i].name,"power_line_frequency")) {
+                /* If the depreciated option is a vid item, copy_vid_ctrl is called
+                 * with the array index sent instead of the context structure member pointer.
+                 */
+                if (!strcmp(dep_config_params[i].name,"brightness") ||
+                    !strcmp(dep_config_params[i].name,"contrast") ||
+                    !strcmp(dep_config_params[i].name,"saturation") ||
+                    !strcmp(dep_config_params[i].name,"hue") ||
+                    !strcmp(dep_config_params[i].name,"power_line_frequency")) {
                     cnt = copy_vid_ctrl(cnt, arg1, i);
                 } else {
                     cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
@@ -2456,7 +2459,7 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
  *      Assigns a new string value to a config option.
  * Returns context struct.
  */
-struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int config_indx) {
+static struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int config_indx) {
 
     int i, indx_vid;
     int parmnew_len, parmval;
@@ -2481,7 +2484,8 @@ struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int
     parmval = atoi(config_val);
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
         (parmval == -1)) return cnt;
-    if (parmval == 0) return cnt;
+    if (strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
+        (parmval == 0)) return cnt;
 
     /* Remove underscore from parm name and add quotes*/
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency")) {
@@ -2514,6 +2518,34 @@ struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int
     }
 
     free(parmname_new);
+
+    return cnt;
+}
+
+/**
+ * copy_text_double
+ *      Converts the bool of text_double to a 1 or 2 in text_scale
+ *
+ * Returns context struct.
+ */
+static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr)
+{
+    void *tmp;
+    int i;
+
+    i = -1;
+    while (cnt[++i]) {
+        tmp = (char *)cnt[i]+(int)val_ptr;
+
+        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+            *((int *)tmp) = 2;
+        } else {
+            *((int *)tmp) = 1;
+        }
+
+        if (cnt[0]->threadnr)
+            return cnt;
+    }
 
     return cnt;
 }
