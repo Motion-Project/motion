@@ -337,7 +337,7 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
  *    Success 0, Failure -1
  */
 int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-                     unsigned int width, unsigned int height, unsigned char *img_out)
+                     unsigned int width, unsigned int height, unsigned char *volatile img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
