@@ -66,7 +66,6 @@ struct jpgutl_error_mgr {
     JMETHOD(void, original_emit_message, (j_common_ptr cinfo, int msg_level));
     /* Was a corrupt-data warning seen. */
     int warning_seen;
-    int error_seen;
 };
 
 /*  These huffman tables are required by the old jpeg libs included with 14.04 */
@@ -291,8 +290,6 @@ static void jpgutl_error_exit(j_common_ptr cinfo)
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
 
-    myerr->error_seen++ ;
-
     /* Return control to the setjmp point. */
     longjmp (myerr->setjmp_buffer, 1);
 }
@@ -325,11 +322,6 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
 
 }
 
-static int jpgutl_setjmp_error(struct jpgutl_error_mgr *jerr){
-    /* This is a separate function to isolate the jump */
-    return setjmp (jerr->setjmp_buffer);
-}
-
 /**
  * jpgutl_decode_jpeg
  *  Purpose:  Decompress the jpeg data_in into the img_out buffer.
@@ -345,7 +337,7 @@ static int jpgutl_setjmp_error(struct jpgutl_error_mgr *jerr){
  *    Success 0, Failure -1
  */
 int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-                     unsigned int width, unsigned int height, unsigned char *img_out)
+                     unsigned int width, unsigned int height, unsigned char *volatile img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     unsigned char  *wline;          /* Will point to line[0] */
@@ -363,42 +355,25 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
     jerr.original_emit_message = jerr.pub.emit_message;
     jerr.pub.emit_message = jpgutl_emit_message;
     jerr.warning_seen = 0;
-    jerr.error_seen = 0;
 
     jpeg_create_decompress (&dinfo);
 
     /* Establish the setjmp return context for jpgutl_error_exit to use. */
-    if (jpgutl_setjmp_error(&jerr)) {
+    if (setjmp (jerr.setjmp_buffer)) {
+        /* If we get here, the JPEG code has signaled an error. */
         jpeg_destroy_decompress (&dinfo);
         return -1;
     }
 
     jpgutl_buffer_src (&dinfo, jpeg_data_in, jpeg_data_len);
-    if (jerr.error_seen > 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,"jpgutl_buffer_src returned error");
-        jpeg_destroy_decompress(&dinfo);
-        return -1;
-    }
 
     jpeg_read_header (&dinfo, TRUE);
-    if (jerr.error_seen > 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,"jpeg_read_header returned error");
-        jpeg_destroy_decompress(&dinfo);
-        return -1;
-    }
 
     //420 sampling is the default for YCbCr so no need to override.
     dinfo.out_color_space = JCS_YCbCr;
     dinfo.dct_method = JDCT_DEFAULT;
-
     guarantee_huff_tables(&dinfo);  /* Required by older versions of the jpeg libs */
-
     jpeg_start_decompress (&dinfo);
-    if (jerr.error_seen > 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,"jpeg_start_decompress returned error");
-        jpeg_destroy_decompress(&dinfo);
-        return -1;
-    }
 
     if ((dinfo.output_width == 0) || (dinfo.output_height == 0)) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO,"Invalid JPEG image dimensions");
@@ -427,11 +402,6 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
     while (dinfo.output_scanline < dinfo.output_height) {
         jpeg_read_scanlines(&dinfo, line, 1);
-        if (jerr.error_seen > 0){
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,"jpeg_read_scanlines returned error");
-            jpeg_destroy_decompress(&dinfo);
-            return -1;
-        }
 
         for (i = 0; i < (dinfo.output_width * 3); i += 3) {
             img_y[i / 3] = wline[i];
@@ -450,12 +420,6 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
     }
 
     jpeg_finish_decompress(&dinfo);
-    if (jerr.error_seen > 0){
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,"jpeg_finish_decompress returned error");
-        jpeg_destroy_decompress(&dinfo);
-        return -1;
-    }
-
     jpeg_destroy_decompress(&dinfo);
 
     /*
