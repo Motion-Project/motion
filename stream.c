@@ -202,8 +202,6 @@ static void* handle_basic_auth(void* param)
         "Pragma: no-cache\r\n"
         "WWW-Authenticate: Basic realm=\""STREAM_REALM"\"\r\n\r\n";
 
-    MOTION_PTHREAD_SETNAME("handle_basic_auth");
-
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;
     pthread_mutex_unlock(&stream_auth_mutex);
@@ -459,8 +457,6 @@ static void* handle_md5_digest(void* param)
         "<h1>500 Internal Server Error</h1>\n"
         "</body>\n"
         "</html>\n";
-
-    MOTION_PTHREAD_SETNAME("handle_md5_digest");
 
     pthread_mutex_lock(&stream_auth_mutex);
     p->thread_count++;

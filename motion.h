@@ -53,7 +53,6 @@ struct image_data;
 #include <pthread.h>
 
 #ifdef __FreeBSD__
-//It is unknown whether it is safe to put this into the if/else below on Apple and BSD
 #include <pthread_np.h>
 #endif
 
@@ -70,18 +69,6 @@ struct image_data;
 #ifdef HAVE_MMAL
 #include "mmalcam.h"
 #endif
-
-
-#ifdef __APPLE__
-#define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(name)
-#elif defined(BSD)
-#define MOTION_PTHREAD_SETNAME(name)  pthread_set_name_np(pthread_self(), name)
-#elif HAVE_PTHREAD_SETNAME_NP
-#define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(pthread_self(), name)
-#else
-#define MOTION_PTHREAD_SETNAME(name)
-#endif
-
 
 
 /**
