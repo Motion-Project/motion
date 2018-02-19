@@ -623,9 +623,9 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                 mystrftime(cnt, tmp, sizeof(tmp), "%H%M%S-%q",
                            &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv, NULL, 0);
                 draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
-                          cnt->imgs.width, cnt->imgs.height, 10, 20, tmp, cnt->conf.text_scale);
+                          cnt->imgs.width, cnt->imgs.height, 10, 20, tmp, cnt->text_scale);
                 draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
-                          cnt->imgs.width, cnt->imgs.height, 10, 30, t, cnt->conf.text_scale);
+                          cnt->imgs.width, cnt->imgs.height, 10, 30, t, cnt->text_scale);
             }
 
             /* Output the picture to jpegs and ffmpeg */
@@ -658,7 +658,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                                        frames);
                             sprintf(tmp, "Fillerframes %d", frames);
                             draw_text(cnt->imgs.image_ring[cnt->imgs.image_ring_out].image_norm,
-                                      cnt->imgs.width, cnt->imgs.height, 10, 40, tmp, cnt->conf.text_scale);
+                                      cnt->imgs.width, cnt->imgs.height, 10, 40, tmp, cnt->text_scale);
                         }
                     }
                     /* Check how many frames it was last sec */
@@ -868,6 +868,34 @@ static void init_mask_privacy(struct context *cnt){
 
 }
 
+static void init_text_scale(struct context *cnt){
+
+    /* Consider that web interface may change conf values at any moment.
+     * The below can put two sections in the image so make sure that after
+     * scaling does not occupy more than 1/4 of image (10 pixels * 2 lines)
+     */
+
+    cnt->text_scale = cnt->conf.text_scale;
+    if (cnt->text_scale <= 0) cnt->text_scale = 1;
+
+    if ((cnt->text_scale * 10 * 2) > (cnt->imgs.width / 4)) {
+        cnt->text_scale = (cnt->imgs.width / (4 * 10 * 2));
+        if (cnt->text_scale <= 0) cnt->text_scale = 1;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Invalid text scale.  Adjusted to %d", cnt->text_scale);
+    }
+
+    if ((cnt->text_scale * 10 * 2) > (cnt->imgs.height / 4)) {
+        cnt->text_scale = (cnt->imgs.height / (4 * 10 * 2));
+        if (cnt->text_scale <= 0) cnt->text_scale = 1;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Invalid text scale.  Adjusted to %d", cnt->text_scale);
+    }
+
+    /* If we had to modify the scale, change conf so we don't get another message */
+    cnt->conf.text_scale = cnt->text_scale;
+
+}
+
+
 /**
  * motion_init
  *
@@ -1014,6 +1042,8 @@ static int motion_init(struct context *cnt)
      */
     rotate_init(cnt); /* rotate_deinit is called in main */
 
+    init_text_scale(cnt);   /*Initialize and validate the text_scale */
+
     /* Capture first image, or we will get an alarm on start */
     if (cnt->video_dev >= 0) {
         int i;
@@ -1027,7 +1057,7 @@ static int motion_init(struct context *cnt)
         if (i >= 5) {
             memset(cnt->imgs.image_virgin.image_norm, 0x80, cnt->imgs.size_norm);       /* initialize to grey */
             draw_text(cnt->imgs.image_virgin.image_norm, cnt->imgs.width, cnt->imgs.height,
-                      10, 20, "Error capturing first image", cnt->conf.text_scale);
+                      10, 20, "Error capturing first image", cnt->text_scale);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error capturing first image");
         }
     }
@@ -1844,8 +1874,7 @@ static int mlp_capture(struct context *cnt){
             memset(cnt->current_image->image_norm, 0x80, cnt->imgs.size_norm);
             mystrftime(cnt, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
             draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
-                      10, 20 * cnt->conf.text_scale,
-                      tmpout, cnt->conf.text_scale);
+                      10, 20 * cnt->text_scale, tmpout, cnt->text_scale);
 
             /* Write error message only once */
             if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
@@ -2055,6 +2084,7 @@ static void mlp_tuning(struct context *cnt){
 static void mlp_overlay(struct context *cnt){
 
     char tmp[PATH_MAX];
+
     /***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
     /*
      * Some overlays on top of the motion image
@@ -2086,8 +2116,7 @@ static void mlp_overlay(struct context *cnt){
             sprintf(tmp, "-");
 
         draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.width - 10, 10,
-                  tmp, cnt->conf.text_scale);
+                  cnt->imgs.width - 10, 10, tmp, cnt->text_scale);
     }
 
     /*
@@ -2098,12 +2127,12 @@ static void mlp_overlay(struct context *cnt){
         sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                 cnt->current_image->total_labels, cnt->noise);
         draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.width - 10, cnt->imgs.height - 30 * cnt->conf.text_scale,
-                  tmp, cnt->conf.text_scale);
+                  cnt->imgs.width - 10, cnt->imgs.height - (30 * cnt->text_scale),
+                  tmp, cnt->text_scale);
         sprintf(tmp, "THREAD %d SETUP", cnt->threadnr);
         draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->conf.text_scale,
-                  tmp, cnt->conf.text_scale);
+                  cnt->imgs.width - 10, cnt->imgs.height - (10 * cnt->text_scale),
+                  tmp, cnt->text_scale);
     }
 
     /* Add text in lower left corner of the pictures */
@@ -2111,8 +2140,7 @@ static void mlp_overlay(struct context *cnt){
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_left,
                    &cnt->current_image->timestamp_tv, NULL, 0);
         draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
-                  10, cnt->imgs.height - 10 * cnt->conf.text_scale,
-                  tmp, cnt->conf.text_scale);
+                  10, cnt->imgs.height - (10 * cnt->text_scale), tmp, cnt->text_scale);
     }
 
     /* Add text in lower right corner of the pictures */
@@ -2120,8 +2148,8 @@ static void mlp_overlay(struct context *cnt){
         mystrftime(cnt, tmp, sizeof(tmp), cnt->conf.text_right,
                    &cnt->current_image->timestamp_tv, NULL, 0);
         draw_text(cnt->current_image->image_norm, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.width - 10, cnt->imgs.height - 10 * cnt->conf.text_scale,
-                  tmp, cnt->conf.text_scale);
+                  cnt->imgs.width - 10, cnt->imgs.height - (10 * cnt->text_scale),
+                  tmp, cnt->text_scale);
     }
 
 }
@@ -2449,11 +2477,15 @@ static void mlp_loopback(struct context *cnt){
 
 }
 
+
 static void mlp_parmsupdate(struct context *cnt){
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
     /* Check for some config parameter changes but only every second */
     if (cnt->shots == 0) {
+
+        init_text_scale(cnt);  /* Initialize and validate text_scale */
+
         if (strcasecmp(cnt->conf.output_pictures, "on") == 0)
             cnt->new_img = NEWIMG_ON;
         else if (strcasecmp(cnt->conf.output_pictures, "first") == 0)
@@ -2516,6 +2548,9 @@ static void mlp_parmsupdate(struct context *cnt){
                         cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
                         cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
 #endif /* defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) */
+
+
+
 
     }
 

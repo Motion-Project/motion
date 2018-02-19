@@ -305,9 +305,9 @@ struct image_data {
 
 /* date/time drawing, draw.c */
 int draw_text(unsigned char *image,
-              unsigned int width, unsigned int height,
-              unsigned int startx, unsigned int starty,
-              const char *text, unsigned int factor);
+              int width, int height,
+              int startx, int starty,
+              const char *text, int factor);
 int initialize_chars(void);
 
 struct images {
@@ -418,6 +418,7 @@ struct context {
     int diffs_last[THRESHOLD_TUNE_LENGTH];
     int smartmask_speed;
 
+
     /* Commands to the motion thread */
     volatile unsigned int snapshot;    /* Make a snapshot */
     volatile unsigned int makemovie;   /* End a movie */
@@ -436,10 +437,10 @@ struct context {
     int prev_event;
     unsigned long long database_event_id;
     unsigned int lightswitch_framecounter;
-    char text_event_string[PATH_MAX];        /* The text for conv. spec. %C -
-                                                we assume PATH_MAX normally 4096 characters is fine */
-    int postcap;                             /* downcounter, frames left to to send post event */
+    char text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
+    int text_scale;
 
+    int postcap;                             /* downcounter, frames left to to send post event */
     int shots;
     unsigned int detecting_motion;
     struct tm *currenttime_tm;
