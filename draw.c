@@ -1145,13 +1145,13 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     /* Adjust the factor if it is out of bounds
      * txtlen at this point is the approx length of longest line
     */
-    if ((txtlen * 10 * factor) > width){
-        factor = (width / (txtlen * 10)) - 1;
+    if ((txtlen * 7 * factor) > width){
+        factor = (width / (txtlen * 7));
         if (factor <= 0) factor = 1;
     }
 
-    if (((num_nl+1) * 10 * factor) > height){
-        factor = (height / ((num_nl+1) * 10)) - 1;
+    if (((num_nl+1) * 8 * factor) > height){
+        factor = (height / ((num_nl+1) * 8));
         if (factor <= 0) factor = 1;
     }
 
