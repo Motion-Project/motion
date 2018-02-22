@@ -1069,10 +1069,10 @@ struct draw_char draw_table[]= {
 /**
  * draw_textn
  */
-static int draw_textn(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, int len, unsigned int factor)
+static int draw_textn(unsigned char *image, int startx,  int starty,  int width, const char *text, int len, int factor)
 {
 
-    unsigned int x, y;
+    int x, y;
     int pos, line_offset, next_char_offs;
     unsigned char *image_ptr, *char_ptr;
 
@@ -1082,10 +1082,10 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
     if (startx + len * 6 * factor >= width)
         len = (width-startx-1)/(6*factor);
 
-    line_offset = width - 7 * factor;
-    next_char_offs = width * 8 * factor - 6 * factor;
+    line_offset = width - (7 * factor);
+    next_char_offs = (width * 8 * factor) - (6 * factor);
 
-    image_ptr = image + startx + starty * width;
+    image_ptr = image + startx + (starty * width);
 
     for (pos = 0; pos < len; pos++) {
         int pos_check = (int)text[pos];
@@ -1126,19 +1126,36 @@ static int draw_textn(unsigned char *image, unsigned int startx, unsigned int st
 /**
  * draw_text
  */
-int draw_text(unsigned char *image, unsigned int width, unsigned int height, unsigned int startx, unsigned int starty, const char *text, unsigned int factor)
+int draw_text(unsigned char *image, int width, int height, int startx, int starty, const char *text, int factor)
 {
     int num_nl = 0;
     const char *end, *begin;
-    const int line_space = factor * 9;
+    int line_space, txtlen;
 
     /* Count the number of newlines in "text" so we scroll it up the image. */
-    end = text;
-
+    begin = end = text;
+    txtlen = 0;
     while ((end = strstr(end, NEWLINE))) {
+        if ((end - begin)>txtlen) txtlen = (end - begin);
         num_nl++;
         end += sizeof(NEWLINE)-1;
     }
+    if (txtlen == 0) txtlen = strlen(text);
+
+    /* Adjust the factor if it is out of bounds
+     * txtlen at this point is the approx length of longest line
+    */
+    if ((txtlen * 7 * factor) > width){
+        factor = (width / (txtlen * 7));
+        if (factor <= 0) factor = 1;
+    }
+
+    if (((num_nl+1) * 8 * factor) > height){
+        factor = (height / ((num_nl+1) * 8));
+        if (factor <= 0) factor = 1;
+    }
+
+    line_space = factor * 9;
 
     starty -= line_space * num_nl;
 
@@ -1146,12 +1163,6 @@ int draw_text(unsigned char *image, unsigned int width, unsigned int height, uns
 
     while ((end = strstr(end, NEWLINE))) {
         int len = end-begin;
-
-        // Check that we won't be writing outside of the image.
-        if (startx < len*8*factor || starty + 7*factor > height) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "Text was too large for image in draw_text");
-            return 1;
-        }
 
         draw_textn(image, startx, starty, width, begin, len, factor);
         end += sizeof(NEWLINE)-1;
