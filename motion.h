@@ -98,25 +98,6 @@ struct image_data;
                 while (nanosleep(&tv, &tv) == -1); \
         }
 
-#define VIDEO_PALETTE_GREY      1       /* Linear greyscale */
-#define VIDEO_PALETTE_HI240     2       /* High 240 cube (BT848) */
-#define VIDEO_PALETTE_RGB565    3       /* 565 16 bit RGB */
-#define VIDEO_PALETTE_RGB24     4       /* 24bit RGB */
-#define VIDEO_PALETTE_RGB32     5       /* 32bit RGB */
-#define VIDEO_PALETTE_RGB555    6       /* 555 15bit RGB */
-#define VIDEO_PALETTE_YUV422    7       /* YUV422 capture */
-#define VIDEO_PALETTE_YUYV      8
-#define VIDEO_PALETTE_UYVY      9       /* The great thing about standards is ... */
-#define VIDEO_PALETTE_YUV420    10
-#define VIDEO_PALETTE_YUV411    11      /* YUV411 capture */
-#define VIDEO_PALETTE_RAW       12      /* RAW capture (BT848) */
-#define VIDEO_PALETTE_YUV422P   13      /* YUV 4:2:2 Planar */
-#define VIDEO_PALETTE_YUV411P   14      /* YUV 4:1:1 Planar */
-#define VIDEO_PALETTE_YUV420P   15      /* YUV 4:2:0 Planar */
-#define VIDEO_PALETTE_YUV410P   16      /* YUV 4:1:0 Planar */
-#define VIDEO_PALETTE_PLANAR    13      /* start of planar entries */
-#define VIDEO_PALETTE_COMPONENT 7       /* start of component entries */
-
 #define DEF_PALETTE             17
 
 /* Default picture settings */

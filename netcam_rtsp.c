@@ -949,7 +949,6 @@ static int netcam_rtsp_set_dimensions (struct context *cnt) {
     cnt->imgs.height = cnt->conf.height;
     cnt->imgs.size_norm = (cnt->conf.width * cnt->conf.height * 3) / 2;
     cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
-    cnt->imgs.type = VIDEO_PALETTE_YUV420P;
 
     return 0;
 }

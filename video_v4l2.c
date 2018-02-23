@@ -922,7 +922,6 @@ static int v4l2_mmap_set(struct video_dev *curdev) {
 static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev) {
     /* Set the items on the imgs */
 
-    cnt->imgs.type = VIDEO_PALETTE_YUV420P; /*FIXME  Remove from all modules this variable*/
     cnt->imgs.width = curdev->width;
     cnt->imgs.height = curdev->height;
     cnt->imgs.motionsize = cnt->imgs.width * cnt->imgs.height;
