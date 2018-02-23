@@ -188,16 +188,24 @@ static void image_ring_destroy(struct context *cnt)
  */
 static void image_save_as_preview(struct context *cnt, struct image_data *img)
 {
-    void * image;
-    /* Save preview image pointer */
-    image = cnt->imgs.preview_image.image_norm;
-    /* Copy all info */
-    memcpy(&cnt->imgs.preview_image.image_norm, img, sizeof(struct image_data));
-    /* restore image pointer */
-    cnt->imgs.preview_image.image_norm = image;
+    void *image_norm, *image_high;
 
-    /* Copy image */
+    /* Save our pointers to our memory locations for images*/
+    image_norm = cnt->imgs.preview_image.image_norm;
+    image_high = cnt->imgs.preview_image.image_high;
+
+    /* Copy over the meta data from the img into preview */
+    memcpy(&cnt->imgs.preview_image, img, sizeof(struct image_data));
+
+    /* Restore the pointers to the memory locations for images*/
+    cnt->imgs.preview_image.image_norm = image_norm;
+    cnt->imgs.preview_image.image_high = image_high;
+
+    /* Copy the actual images for norm and high */
     memcpy(cnt->imgs.preview_image.image_norm, img->image_norm, cnt->imgs.size_norm);
+    if (cnt->imgs.size_high > 0){
+        memcpy(cnt->imgs.preview_image.image_high, img->image_high, cnt->imgs.size_high);
+    }
 
     /*
      * If we set output_all to yes and during the event
@@ -1004,8 +1012,13 @@ static int motion_init(struct context *cnt)
     cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
     cnt->imgs.labels = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.labels));
     cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(*cnt->imgs.labelsize));
+    cnt->imgs.preview_image.image_norm = mymalloc(cnt->imgs.size_norm);
+    cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width * cnt->imgs.height);
 
-    if (cnt->imgs.size_high > 0) cnt->imgs.image_virgin.image_high = mymalloc(cnt->imgs.size_high);
+    if (cnt->imgs.size_high > 0){
+        cnt->imgs.image_virgin.image_high = mymalloc(cnt->imgs.size_high);
+        cnt->imgs.preview_image.image_high = mymalloc(cnt->imgs.size_high);
+    }
 
     /* Set output picture type */
     if (!strcmp(cnt->conf.picture_type, "ppm"))
@@ -1021,15 +1034,6 @@ static int motion_init(struct context *cnt)
     }
     else
         cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
-
-    /* allocate buffer here for preview buffer */
-    cnt->imgs.preview_image.image_norm = mymalloc(cnt->imgs.size_norm);
-
-    /*
-     * Allocate a buffer for temp. usage in some places
-     * Only despeckle & bayer2rgb24() for now for now...
-     */
-    cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width * cnt->imgs.height);
 
     /*
      * Now is a good time to init rotation data. Since vid_start has been
@@ -1416,6 +1420,14 @@ static void motion_cleanup(struct context *cnt)
 
     free(cnt->imgs.preview_image.image_norm);
     cnt->imgs.preview_image.image_norm = NULL;
+
+    if (cnt->imgs.size_high > 0){
+        free(cnt->imgs.image_virgin.image_high);
+        cnt->imgs.image_virgin.image_high = NULL;
+
+        free(cnt->imgs.preview_image.image_high);
+        cnt->imgs.preview_image.image_high = NULL;
+    }
 
     image_ring_destroy(cnt); /* Cleanup the precapture ring buffer */
 
