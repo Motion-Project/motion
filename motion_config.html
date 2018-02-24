@@ -1257,7 +1257,7 @@
           <td height="17" align="left">control_html_output</td>
           <td align="left">webcontrol_html_output</td>
           <td align="left">webcontrol_html_output</td>
-          <td align="left"><a href="#webcontrol_html_output" >webcontrol_html_output</a></td>
+          <td align="left"><a href="#webcontrol_interface" >webcontrol_interface</a></td>
         </tr>
         <tr>
           <td height="17" align="left">control_localhost</td>
@@ -1693,7 +1693,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_html_output" >webcontrol_html_output</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
             </tr>
             <tr>
@@ -4434,7 +4434,7 @@
         the web interface.
         <p></p>
         To control from your own software (for example your own PHP front end) the motion.conf
-        option <a href="#webcontrol_html_output">webcontrol_html_output</a> can be set to <code>off</code> which
+        option <a href="#webcontrol_interface">webcontrol_interface</a> can be set to <code>1</code> which
         will cause Motion to remove the html tags in the responses.
         <p></p>
         Example PHP to pause camera 2
@@ -4696,19 +4696,20 @@
         same machine on which Motion is running.
         <p></p>
 
-        <h3><a name="webcontrol_html_output"></a> webcontrol_html_output </h3>
+        <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+          <li> Type: int</li>
+          <li> Range / Valid values: 0, 1</li>
+          <li> Default: 0</li>
         </ul>
         <p></p>
-        Enable HTML in the answer sent back to a browser connecting to the webcontrol_port.
-        This option must be placed in motion.conf and not in a camera config file.
-        The recommended value for most is "on" which means that you can navigate and control
-        Motion with a normal browser. By setting this option to "off" the replies are in plain
-        text which may be easier to parse for 3rd party programs that control Motion.
+        The type of webcontrol interface to provide.  The value of 0 provides a tradtional
+        web page interface.  The value of 1 provides a text only interface.
+        <p></p>
+        This option must be placed in motion.conf and not in a camera config file. The
+        recommended value for most is "0" which provides a page you can navigate and control
+        Motion with a normal browser.
         <p></p>
 
         <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
@@ -5218,7 +5219,7 @@
         Number of steps to make.
         Only used for stepper motor tracking.
         <p></p>
-        
+
         <p></p>
 
         <h3><a name="track_generic_move"></a> track_generic_move </h3>
