@@ -111,6 +111,35 @@ struct trns_ctx trns_phrases[] = {
     ,{"nl","Restricted Configuration Options","Zeer Beperkte configuratie-opties"}
     ,{"nl","setup_mode","instelmodus"}
 
+/* French */
+    ,{"fr","All Cameras","Toutes les caméras"}
+    ,{"fr","All","Tout"}
+    ,{"fr","Action","Action"}
+    ,{"fr","Make Movie","Faire un film"}
+    ,{"fr","Snapshot","Instantané"}
+    ,{"fr","Cameras","Caméras"}
+    ,{"fr","Camera","Caméra"}
+    ,{"fr","Change Configuration","Modifier la configuration"}
+    ,{"fr","Write Configuration","Ecrire la configuration"}
+    ,{"fr","Tracking","Suivi"}
+    ,{"fr","Pause","Pause"}
+    ,{"fr","Start","Début"}
+    ,{"fr","Restart","Redémarrer"}
+    ,{"fr","Quit","Quitter"}
+    ,{"fr","Help","Aidez-moi"}
+    ,{"fr","pan/tilt","Pivot/Inclinaison"}
+    ,{"fr","pan","pivot"}
+    ,{"fr","tilt","Inclinaison"}
+    ,{"fr","Absolute Change","Changement Absolu"}
+    ,{"fr","Center","Centre"}
+    ,{"fr","save","Sauvegarder"}
+    ,{"fr","select option","sélectionnez option"}
+    ,{"fr","No Configuration Options","Aucune option de configuration"}
+    ,{"fr","Limited Configuration Options","Options de configuration limitées"}
+    ,{"fr","Advanced Configuration Options","Options de configuration avancées"}
+    ,{"fr","Restricted Configuration Options","Options de configuration restreintes"}
+    ,{"fr","setup_mode","Mode de configuration"}
+
 
 /* Next Language */
 

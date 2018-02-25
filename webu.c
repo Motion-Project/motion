@@ -1086,7 +1086,7 @@ static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webu
     } else if (cnt[0]->conf.webcontrol_parms == 2){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
-            ,webu_trans(webui,"Advance Configuration Options",0));
+            ,webu_trans(webui,"Advanced Configuration Options",0));
     } else{
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
