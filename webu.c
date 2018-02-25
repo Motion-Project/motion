@@ -14,13 +14,12 @@
  *    Function scheme:
  *      webu*      - All functions in this module have this prefix.
  *      webu_main  - Main entry point from the motion thread and only function exposed.
- *      webu_disp* - Functions that create the display web page.
+ *      webu_html* - Functions that create the display web page.
  *        webu_html_style*  - The style section of the web page
  *        webu_html_script* - The java scripts of the web page
  *        webu_html_navbar* - The navbar section of the web page
  *      webu_process_action - Performs most items under the action menu
  *      webu_process_config - Saves the parameter values into Motion.
- *      webu_resp   - The responses for OK/Bad/Authentication
  *
  *      Some function names are long and are not expected to contain any
  *      logger message that would display the function name to the user.
@@ -41,18 +40,18 @@
  *      The conf_cmdparse assumes that the pointers to the motion context for each
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
- *      Possible buffer overrun when user tries to set parm to a very long string
- *      Possible buffer overrun when creating page and a parm is a very long string.
+ *      Menu does not close after clicking item (java/css issue..which is not my forte)
  *
  *    Additional functionality considerations:
- *        Match stream authentication methods
- *        Add cors (Cross origin requests)
- *        Notification to user of items that require restart when changed.
- *        Notification to user that item successfully changed.
- *        Responses back to user with any changed values (currently requires refresh page)
- *        Whether there is a need to perpetuate the non-html interface option.
- *        Implement post method to handle large string parameters.
- *        Status pages provided in legacy interface.
+ *      Match stream authentication methods
+ *      Add cors (Cross origin requests)
+ *      Notification to user of items that require restart when changed.
+ *      Notification to user that item successfully changed.
+ *      Whether there is a need to perpetuate the non-html interface option.
+ *      Implement post method to handle large string parameters.
+ *      Status pages provided in legacy interface.
+ *      Translations for other languages
+ *      Translation hints for configuration parms (One sample provided)
  *
  *
  */
@@ -61,8 +60,11 @@
 #include <netdb.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <locale.h>
 #include "motion.h"
 #include "webu.h"
+#include "translate.h"
+
 
 struct webui_ctx {
     pthread_mutex_t webu_mutex;  /* The mutex to lock activity on the pipe*/
@@ -88,8 +90,10 @@ struct webui_ctx {
     char *hostname;              /* Host name provided from header content*/
     int   cam_count;             /* Count of the number of cameras*/
     int   cam_threads;           /* Count of the number of camera threads running*/
-
+    char *lang;
+    char *trans_word[15];        /* The buffer for the translated word or phrase */
 };
+
 
 static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
 
@@ -122,6 +126,11 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     webui->uri_value2  = mymalloc(512);
 
     webui->uri_buffer = mymalloc(1024);
+    webui->lang       = mymalloc(3);
+
+    for (indx=0; indx<=14;indx++){
+        webui->trans_word[indx] = mymalloc(50);
+    }
 
     /* get the number of cameras and threads */
     indx = 0;
@@ -133,10 +142,14 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     if (indx > 1)
         webui->cam_count--;
 
+    snprintf(webui->lang, 3,"%s",setlocale(LC_ALL, ""));
+
     return;
 }
 
 static void webu_context_null(struct webui_ctx *webui) {
+
+    int indx;
 
     webui->auth_parms = NULL;
     webui->method     = NULL;
@@ -152,10 +165,18 @@ static void webu_context_null(struct webui_ctx *webui) {
     webui->uri_value1   = NULL;
     webui->uri_parm2    = NULL;
     webui->uri_value2   = NULL;
+    webui->lang         = NULL;
 
+    for (indx=0; indx<=14;indx++){
+        webui->trans_word[indx] = NULL;
+    }
+
+    return;
 }
 
 static void webu_context_free(struct webui_ctx *webui) {
+
+    int indx;
 
     if (webui->auth_parms != NULL) free(webui->auth_parms);
     if (webui->method     != NULL) free(webui->method);
@@ -171,12 +192,31 @@ static void webu_context_free(struct webui_ctx *webui) {
     if (webui->uri_value1   != NULL) free(webui->uri_value1);
     if (webui->uri_parm2    != NULL) free(webui->uri_parm2);
     if (webui->uri_value2   != NULL) free(webui->uri_value2);
+    if (webui->lang         != NULL) free(webui->lang);
+
+    for (indx=0;indx<=14;indx++){
+        if (webui->trans_word[indx] != NULL) free(webui->trans_word[indx]);
+    }
 
     webu_context_null(webui);
 
     free(webui);
 
     return;
+}
+
+static char *webu_trans(struct webui_ctx *webui, const char *en_word, int buffer_nbr){
+    /* Little helper function to make the code translations "in-line"
+     * this function basically always just returns the webui buffer
+     * we set aside for translated phrases
+     */
+
+    if ((buffer_nbr < 0) || (buffer_nbr >14)) return NULL;
+
+    translate_word(en_word, webui->trans_word[buffer_nbr], 50, webui->lang);
+
+    return webui->trans_word[buffer_nbr];
+
 }
 
 static void webu_clientip(char *buf, int fd) {
@@ -811,19 +851,6 @@ static void webu_html_style_input(struct webui_ctx *webui) {
         "      font-size: 75%;\n"
         "      margin-bottom: 5px;\n"
         "    }\n"
-        "    input[type=button] {\n"
-        "      width: 25%;\n"
-        "      padding: 5px;\n"
-        "      margin: 0;\n"
-        "      display: inline-block;\n"
-        "      border: 1px solid #ccc;\n"
-        "      border-radius: 4px;\n"
-        "      box-sizing: border-box;\n"
-        "      height: 50%;\n"
-        "      font-size: 75%;\n"
-        "      margin-bottom: 5px;\n"
-        "      background-color: lightgray;\n"
-        "    }\n"
         "    .frm-input{\n"
         "      text-align:center;\n"
         "    }\n");
@@ -941,22 +968,26 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
     char response[1024];
     int indx;
 
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "    <div class=\"dropdown\">\n"
-        "      <button class=\"dropbtn\">Cameras</button>\n"
+        "      <button class=\"dropbtn\">%s</button>\n"
         "      <div class=\"dropdown-content\">\n"
-        "        <a onclick=\"camera_click('cam_all');\">All</a>\n");
+        "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
+        ,webu_trans(webui,"Cameras",0)
+        ,webu_trans(webui,"All",1));
     written = webu_write(webui->client_socket, response, strlen(response));
+
     if (webui->cam_threads > 0){
         for (indx=1;indx <= webui->cam_count;indx++){
             if (cnt[indx]->conf.camera_name == NULL){
                 snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%03d');\">Camera %d</a>\n",
-                    indx, indx);
+                    "        <a onclick=\"camera_click('cam_%03d');\">%s %d</a>\n"
+                    , indx, webu_trans(webui,"Camera",0), indx);
             } else {
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%03d');\">%s</a>\n",
-                    indx, cnt[indx]->conf.camera_name);
+                    indx, cnt[indx]->conf.camera_name
+                );
             }
             written = webu_write(webui->client_socket, response, strlen(response));
         }
@@ -976,23 +1007,34 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
     ssize_t written;
     char response[1024];
 
-    snprintf(response, sizeof (response),"%s",
+    /* The translations use the same buffer so we must send separately. */
+    snprintf(response, sizeof (response),
         "    <div class=\"dropdown\">\n"
-        "      <button class=\"dropbtn\">Action\n"
+        "      <button class=\"dropbtn\">%s\n"
         "      <i class=\"fa fa-caret-down\"></i>\n"
         "      </button>\n"
         "      <div class=\"dropdown-content\">\n"
-        "        <a onclick=\"action_click('/action/makemovie');\">Make Movie</a>\n"
-        "        <a onclick=\"action_click('/action/snapshot');\">Snapshot</a>\n"
-        "        <a onclick=\"action_click('config');\">Change Configuration</a>\n"
-        "        <a onclick=\"action_click('/config/write');\">Write Configuration</a>\n"
-        "        <a onclick=\"action_click('track');\">Tracking</a>\n"
-        "        <a onclick=\"action_click('/detection/pause');\">Pause</a>\n"
-        "        <a onclick=\"action_click('/detection/start');\">Start</a>\n"
-        "        <a onclick=\"action_click('/action/restart');\">Restart</a>\n"
-        "        <a onclick=\"action_click('/action/quit');\">Quit</a>\n"
+        "        <a onclick=\"action_click('/action/makemovie');\">%s</a>\n"
+        "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
+        "        <a onclick=\"action_click('config');\">%s</a>\n"
+        "        <a onclick=\"action_click('/config/write');\">%s</a>\n"
+        "        <a onclick=\"action_click('track');\">%s</a>\n"
+        "        <a onclick=\"action_click('/detection/pause');\">%s</a>\n"
+        "        <a onclick=\"action_click('/detection/start');\">%s</a>\n"
+        "        <a onclick=\"action_click('/action/restart');\">%s</a>\n"
+        "        <a onclick=\"action_click('/action/quit');\">%s</a>\n"
         "      </div>\n"
-        "    </div>\n");
+        "    </div>\n"
+        ,webu_trans(webui,"Action",0)
+        ,webu_trans(webui,"Make Movie",1)
+        ,webu_trans(webui,"Snapshot",2)
+        ,webu_trans(webui,"Change Configuration",3)
+        ,webu_trans(webui,"Write Configuration",4)
+        ,webu_trans(webui,"Tracking",5)
+        ,webu_trans(webui,"Pause",6)
+        ,webu_trans(webui,"Start",7)
+        ,webu_trans(webui,"Restart",8)
+        ,webu_trans(webui,"Quit",9));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1012,10 +1054,11 @@ static void webu_html_navbar(struct context **cnt, struct webui_ctx *webui) {
 
     webu_html_navbar_action(webui);
 
-    snprintf(response, sizeof (response),"%s",
-        "    <a href=\"https://motion-project.github.io/motion_guide.html\">Help</a>\n"
+    snprintf(response, sizeof (response),
+        "    <a href=\"https://motion-project.github.io/motion_guide.html\">%s</a>\n"
         "    <p class=\"header-right\">Motion "VERSION"</p>\n"
-        "  </div>\n");
+        "  </div>\n"
+        ,webu_trans(webui,"Help",1));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1028,21 +1071,21 @@ static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webu
     char response[1024];
 
     if (cnt[0]->conf.webcontrol_parms == 0){
-        snprintf(response, sizeof (response),"%s",
-            "    <h4 id='h4_parm' class='header-center'>"
-            "webcontrol_parms = No Configuration Options</h4>\n");
+        snprintf(response, sizeof (response),
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            ,webu_trans(webui,"No Configuration Options",0));
     } else if (cnt[0]->conf.webcontrol_parms == 1){
-        snprintf(response, sizeof (response),"%s",
-            "    <h4 id='h4_parm' class='header-center'>"
-            "webcontrol_parms = Limited Configuration Options</h4>\n");
+        snprintf(response, sizeof (response),
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            ,webu_trans(webui,"Limited Configuration Options",0));
     } else if (cnt[0]->conf.webcontrol_parms == 2){
-        snprintf(response, sizeof (response),"%s",
-            "    <h4 id='h4_parm' class='header-center'>"
-            "webcontrol_parms = Advance Configuration Options</h4>\n");
+        snprintf(response, sizeof (response),
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            ,webu_trans(webui,"Advance Configuration Options",0));
     } else{
-        snprintf(response, sizeof (response),"%s",
-            "    <h4 id='h4_parm' class='header-center'>"
-            "webcontrol_parms = Restricted Configuration Options</h4>\n");
+        snprintf(response, sizeof (response),
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            ,webu_trans(webui,"Restricted Configuration Options",0));
     }
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1069,11 +1112,12 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
 
     webu_html_config_notice(cnt, webui);
 
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "    <form class=\"frm-input\">\n"
         "      <select id='cfg_parms' name='onames' "
         " autocomplete='off' onchange='config_change();'>\n"
-        "        <option value='default' data-cam_all=\"\" >Select option</option>\n");
+        "        <option value='default' data-cam_all=\"\" >%s</option>\n"
+        ,webu_trans(webui,"Select option",0));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     indx_parm = 0;
@@ -1088,8 +1132,9 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
         val_main = config_params[indx_parm].print(cnt, NULL, indx_parm, 0);
 
         snprintf(response, sizeof (response),
-            "        <option value='%s' data-cam_all=\"",
-            config_params[indx_parm].param_name);
+            "        <option value='%s' data-cam_all=\""
+            , config_params[indx_parm].param_name
+        );
         written = webu_write(webui->client_socket, response, strlen(response));
 
         if (val_main != NULL){
@@ -1124,19 +1169,31 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
             }
         }
         /* Terminate the open quote and option */
-        snprintf(response, sizeof (response),"\" >%s</option>\n",
-            config_params[indx_parm].param_name);
-        written = webu_write(webui->client_socket, response, strlen(response));
+
+        if (!strcasecmp(webui->lang,"en") ||
+            !strcasecmp(config_params[indx_parm].param_name
+                ,webu_trans(webui,config_params[indx_parm].param_name,0))){
+            snprintf(response, sizeof (response),"\" >%s</option>\n",
+                config_params[indx_parm].param_name);
+            written = webu_write(webui->client_socket, response, strlen(response));
+        } else {
+            snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
+                config_params[indx_parm].param_name
+                ,webu_trans(webui,config_params[indx_parm].param_name,0));
+            written = webu_write(webui->client_socket, response, strlen(response));
+
+        }
 
         indx_parm++;
     }
 
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "      </select>\n"
         "      <input type=\"text\"   id=\"cfg_value\" >\n"
-        "      <input type='button' id='cfg_button' value='save' onclick='config_click()'>\n"
+        "      <input type='button' id='cfg_button' value='%s' onclick='config_click()'>\n"
         "    </form>\n"
-        "  </div>\n");
+        "  </div>\n"
+        ,webu_trans(webui,"save",0));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1148,25 +1205,31 @@ static void webu_html_track(struct webui_ctx *webui) {
     ssize_t written;
     char response[1024];
 
-    snprintf(response, sizeof (response),"%s",
-        "    <div id='trk_form' style='display:none'>\n"
-        "      <form class='frm-input'>\n"
-        "        <select id='trk_option' name='trkopt'  autocomplete='off' "
-        " style='width:20%' onchange='track_change();'>\n"
-        "          <option value='pan/tilt' data-trk='pan' >Pan/Tilt</option>\n"
-        "          <option value='absolute' data-trk='abs' >Absolute Change</option>\n"
-        "          <option value='center' data-trk='ctr' >Center</option>\n"
-        "        </select>\n"
-        "        <label id='trk_lblpan' style='color:white; display:inline' >Pan</label>\n"
-        "        <label id='trk_lblx'   style='color:white; display:none' >X</label>\n"
-        "        <input type='text'   id='trk_panx' style='width:10%' >\n"
-        "        <label id='trk_lbltilt' style='color:white; display:inline' >Tilt</label>\n"
-        "        <label id='trk_lbly'   style='color:white; display:none' >Y</label>\n"
-        "        <input type='text'   id='trk_tilty' style='width:10%' >\n"
-        "        <input type='button' id='trk_button' value='save' \n"
-        " style='width:10%' onclick='track_click()'>\n"
-        "      </form>\n"
-        "    </div>\n");
+    snprintf(response, sizeof (response),
+        "  <div id='trk_form' style='display:none'>\n"
+        "    <form class='frm-input'>\n"
+        "      <select id='trk_option' name='trkopt'  autocomplete='off' "
+        " style='width:20%%' onchange='track_change();'>\n"
+        "        <option value='pan/tilt' data-trk='pan' >%s</option>\n"
+        "        <option value='absolute' data-trk='abs' >%s</option>\n"
+        "        <option value='center' data-trk='ctr' >%s</option>\n"
+        "      </select>\n"
+        "      <label id='trk_lblpan' style='color:white; display:inline' >%s</label>\n"
+        "      <label id='trk_lblx'   style='color:white; display:none' >X</label>\n"
+        "      <input type='text'   id='trk_panx' style='width:10%%' >\n"
+        "      <label id='trk_lbltilt' style='color:white; display:inline' >%s</label>\n"
+        "      <label id='trk_lbly'   style='color:white; display:none' >Y</label>\n"
+        "      <input type='text'   id='trk_tilty' style='width:10%%' >\n"
+        "      <input type='button' id='trk_button' value='%s' "
+        " style='width:10%%' onclick='track_click()'>\n"
+        "    </form>\n"
+        "  </div>\n"
+        ,webu_trans(webui,"Pan/Tilt",0)
+        ,webu_trans(webui,"Absolute Change",1)
+        ,webu_trans(webui,"Center",2)
+        ,webu_trans(webui,"Pan",3)
+        ,webu_trans(webui,"Tilt",4)
+        ,webu_trans(webui,"save",5));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1289,13 +1352,21 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
 
         snprintf(response, sizeof (response),
             "        preview=\"<a href=http://%s:%d> "
-            " <img src=http://%s:%d/ border=0 width=99%%></a>\"  \n",
+            " <img src=http://%s:%d/ border=0></a>\"  \n",
             webui->hostname, cnt[indx]->conf.stream_port, webui->hostname, strm_port);
         written = webu_write(webui->client_socket, response, strlen(response));
 
-        snprintf(response, sizeof (response),
-            "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-            " class='header-center' >Camera %d</h3>\"\n",indx);
+        if (cnt[indx]->conf.camera_name == NULL){
+            snprintf(response, sizeof (response),
+                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
+                " class='header-center' >%s %d</h3>\"\n"
+                ,webu_trans(webui,"Camera",0), indx);
+        } else {
+            snprintf(response, sizeof (response),
+                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
+                " class='header-center' >%s</h3>\"\n"
+                , cnt[indx]->conf.camera_name);
+        }
         written = webu_write(webui->client_socket, response, strlen(response));
 
         snprintf(response, sizeof (response),"%s","      }\n");
@@ -1329,9 +1400,10 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
         written = webu_write(webui->client_socket, response, strlen(response));
 
     }
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-        " class='header-center' >Camera All</h3>\"\n");
+        " class='header-center' >%s</h3>\"\n"
+        ,webu_trans(webui,"All Cameras",0));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     snprintf(response, sizeof (response),
@@ -1382,6 +1454,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
         "      }\n"
         "      http.send(null);\n"
         "      document.getElementById('cfg_value').value = \"\";\n"
+        "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,optval);\n"
         "      opts.value = 'default';\n"
         "    }\n");
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -1486,7 +1559,7 @@ static void webu_html_script_trkclk(struct context **cnt, struct webui_ctx *webu
         "      http.open(\"GET\", url, true);\n"
         "      http.onreadystatechange = function() {\n"
         "        if(http.readyState == 4 && http.status == 200) {\n"
-        "        }\n"
+        "         }\n"
         "      }\n"
         "      http.send(null);\n"
         "    }\n\n");
@@ -1533,10 +1606,11 @@ static void webu_html_body(struct context **cnt, struct webui_ctx *webui) {
 
     webu_html_navbar(cnt, webui);
 
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "  <div id=\"id_header\">\n"
-        "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>All Cameras</h3>\n"
-        "  </div>\n");
+        "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s</h3>\n"
+        "  </div>\n"
+        ,webu_trans(webui,"All Cameras",0));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     webu_html_config(cnt, webui);
