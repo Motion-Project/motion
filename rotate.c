@@ -251,12 +251,6 @@ void rotate_init(struct context *cnt){
      */
     if (cnt->rotate_data.degrees == 0) return;
 
-    if (cnt->imgs.type != VIDEO_PALETTE_YUV420P ) {
-        cnt->rotate_data.degrees = 0;
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unsupported palette (%d), rotation is disabled", cnt->imgs.type);
-        return;
-    }
-
     /*
      * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).

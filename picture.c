@@ -220,11 +220,11 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
     into->data_offset += 8;
 }
 
-/* 
+/*
  * prepare_exif() is a comon function used to prepare
  * exif data to be inserted into jpeg or webp files
  *
- */ 
+ */
 static unsigned prepare_exif(unsigned char **exif,
               const struct context *cnt,
               const struct timeval *tv1,
@@ -438,7 +438,7 @@ static void put_webp_exif(WebPMux* webp_mux,
         /* EXIF in WEBP does not need the EXIF marker signature (6 bytes) that are needed by jpeg */
         webp_exif.bytes = exif + 6;
         webp_exif.size = exif_len - 6;
-        
+
         WebPMuxError err = WebPMuxSetChunk(webp_mux, "EXIF", &webp_exif, 1);
         if (err != WEBP_MUX_OK) {
             MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "Unable to set set EXIF to webp chunk");
@@ -652,18 +652,18 @@ static void put_webp_yuv420p_file(FILE *fp,
     WebPData webp_bitstream;
     webp_bitstream.bytes = webp_writer.mem;
     webp_bitstream.size = webp_writer.size;
-    
+
     /* Create a mux from the prepared image data */
     WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
     put_webp_exif(webp_mux, cnt, tv1, box);
-    
+
     /* Add Exif data to the webp image data */
     WebPData webp_output;
     WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
     if (err != WEBP_MUX_OK) {
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to assemble webp image");
     }
-    
+
     /* Write the webp final bitstream to the file */
     if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to save webp image to file");
@@ -1026,7 +1026,7 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
  *      Is used for the webcam feature. Depending on the image type
  *      (colour YUV420P or greyscale) the corresponding put_jpeg_X_memory function is called.
  * Inputs:
- * - cnt is the global context struct and only cnt->imgs.type is used.
+ * - cnt is the thread context struct
  * - image_size is the size of the input image buffer
  * - *image points to the image buffer that contains the YUV420P or Grayscale image about to be put
  * - quality is the jpeg quality setting from the config file.
@@ -1040,16 +1040,20 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
 int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
         int quality, int width, int height)
 {
-    switch (cnt->imgs.type) {
-    case VIDEO_PALETTE_YUV420P:
+    /* The application currently has functionality to process grey images into JPGs that
+     * we want to keep for future enhancements.  To avoid a unused function compiler warning
+     * we put in this dummy check so it appears we use the functionality.  Once the enhancement
+     * is implemented, we can remove this condition and just process the jpg_yuv420.
+     */
+    int dummy = 1;
+
+    if (dummy == 1){
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
                                        width, height, quality, cnt
                                        , &(cnt->current_image->timestamp_tv)
                                        , &(cnt->current_image->location));
-    case VIDEO_PALETTE_GREY:
+    } else {
         return put_jpeg_grey_memory(dest_image, image_size, image, width, height, quality);
-    default:
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d", cnt->imgs.type);
     }
 
     return 0;
@@ -1058,6 +1062,9 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
 static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype){
     int width, height;
     int passthrough;
+    int dummy = 1;
+
+    /* See comment in put_picture_memory regarding dummy*/
 
     passthrough = util_check_passthrough(cnt);
     if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -1071,21 +1078,16 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
     if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
         put_ppm_bgr24_file(picture, image, width, height);
     } else {
-        switch (cnt->imgs.type) {
-        case VIDEO_PALETTE_YUV420P:
+        if (dummy == 1){
             #ifdef HAVE_WEBP
             if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
                 put_webp_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
             #endif /* HAVE_WEBP */
             if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
                 put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
-            break;
-        case VIDEO_PALETTE_GREY:
+        } else {
             put_jpeg_grey_file(picture, image, width, height, quality);
-            break;
-        default:
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Unknown image type %d", cnt->imgs.type);
-        }
+       }
     }
 }
 

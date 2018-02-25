@@ -291,7 +291,6 @@ int mmalcam_start(struct context *cnt)
     cnt->imgs.height = mmalcam->height;
     cnt->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
     cnt->imgs.motionsize = mmalcam->width * mmalcam->height;
-    cnt->imgs.type = VIDEO_PALETTE_YUV420P;
 
     int retval = create_camera_component(mmalcam, cnt->conf.mmalcam_name);
 

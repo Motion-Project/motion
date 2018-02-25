@@ -841,7 +841,6 @@ int bktr_start(struct context *cnt) {
                            " imgs.size_norm and imgs.motionsize");
             cnt->imgs.motionsize = width * height;
             cnt->imgs.size_norm = (width * height * 3) / 2;
-            cnt->imgs.type = VIDEO_PALETTE_YUV420P;
 
             pthread_mutex_unlock(&bktr_mutex);
             return dev->fd_device; // FIXME return bktr_fdtuner ?!
@@ -912,7 +911,6 @@ int bktr_start(struct context *cnt) {
         return -1;
     }
 
-    cnt->imgs.type = VIDEO_PALETTE_YUV420P;
     cnt->imgs.size_norm = (width * height * 3) / 2;
     cnt->imgs.motionsize = width * height;
 

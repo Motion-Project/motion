@@ -780,7 +780,6 @@ int netcam_start(struct context *cnt){
     cnt->imgs.height = netcam->height;
     cnt->imgs.size_norm = (netcam->width * netcam->height * 3) / 2;
     cnt->imgs.motionsize = netcam->width * netcam->height;
-    cnt->imgs.type = VIDEO_PALETTE_YUV420P;
 
     cnt->imgs.width_high  = 0;
     cnt->imgs.height_high = 0;
