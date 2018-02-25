@@ -18,6 +18,7 @@
  *        webu_html_style*  - The style section of the web page
  *        webu_html_script* - The java scripts of the web page
  *        webu_html_navbar* - The navbar section of the web page
+ *      webu_text* - Functions that create the text interface.
  *      webu_process_action - Performs most items under the action menu
  *      webu_process_config - Saves the parameter values into Motion.
  *
@@ -40,7 +41,10 @@
  *      The conf_cmdparse assumes that the pointers to the motion context for each
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
- *      Menu does not close after clicking item (java/css issue..which is not my forte)
+ *    Known HTML Issues:
+ *      Menu does not close after clicking item
+ *      Single and double quotes are not consistently used.
+ *      HTML ids do not follow any naming convention.
  *
  *    Additional functionality considerations:
  *      Match stream authentication methods
@@ -52,6 +56,8 @@
  *      Status pages provided in legacy interface.
  *      Translations for other languages
  *      Translation hints for configuration parms (One sample provided)
+ *      Display the abbreviated help for parms that is specified in conf.c somewhere?
+ *
  *
  *
  */
@@ -90,7 +96,8 @@ struct webui_ctx {
     char *hostname;              /* Host name provided from header content*/
     int   cam_count;             /* Count of the number of cameras*/
     int   cam_threads;           /* Count of the number of camera threads running*/
-    char *lang;
+    char *lang;                  /* Two character abbreviation for locale language*/
+    char *lang_full;             /* Five character abbreviation for language-country*/
     char *trans_word[15];        /* The buffer for the translated word or phrase */
 };
 
@@ -127,6 +134,7 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
 
     webui->uri_buffer = mymalloc(1024);
     webui->lang       = mymalloc(3);
+    webui->lang_full  = mymalloc(6);
 
     for (indx=0; indx<=14;indx++){
         webui->trans_word[indx] = mymalloc(50);
@@ -142,7 +150,8 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     if (indx > 1)
         webui->cam_count--;
 
-    snprintf(webui->lang, 3,"%s",setlocale(LC_ALL, ""));
+    snprintf(webui->lang_full, 6,"%s",setlocale(LC_ALL, ""));
+    snprintf(webui->lang, 3,"%s",webui->lang_full);
 
     return;
 }
@@ -166,6 +175,7 @@ static void webu_context_null(struct webui_ctx *webui) {
     webui->uri_parm2    = NULL;
     webui->uri_value2   = NULL;
     webui->lang         = NULL;
+    webui->lang_full    = NULL;
 
     for (indx=0; indx<=14;indx++){
         webui->trans_word[indx] = NULL;
@@ -193,6 +203,7 @@ static void webu_context_free(struct webui_ctx *webui) {
     if (webui->uri_parm2    != NULL) free(webui->uri_parm2);
     if (webui->uri_value2   != NULL) free(webui->uri_value2);
     if (webui->lang         != NULL) free(webui->lang);
+    if (webui->lang_full    != NULL) free(webui->lang_full);
 
     for (indx=0;indx<=14;indx++){
         if (webui->trans_word[indx] != NULL) free(webui->trans_word[indx]);
@@ -944,19 +955,16 @@ static void webu_html_head(struct webui_ctx *webui) {
     ssize_t written;
     char response[1024];
 
-    snprintf(response, sizeof (response),"%s",
-        "<head>\n"
+    snprintf(response, sizeof (response),"%s","<head>\n"
         "  <meta charset=\"UTF-8\">\n"
         "  <title>Motion</title>\n"
         "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
-    if (written > 0) webu_html_style(webui);
+    webu_html_style(webui);
 
-    if (written > 0){
-        snprintf(response, sizeof (response),"%s", "</head>\n");
-        written = webu_write(webui->client_socket, response, strlen(response));
-    }
+    snprintf(response, sizeof (response),"%s", "</head>\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
 
@@ -1007,12 +1015,9 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
     ssize_t written;
     char response[1024];
 
-    /* The translations use the same buffer so we must send separately. */
     snprintf(response, sizeof (response),
         "    <div class=\"dropdown\">\n"
-        "      <button class=\"dropbtn\">%s\n"
-        "      <i class=\"fa fa-caret-down\"></i>\n"
-        "      </button>\n"
+        "      <button class=\"dropbtn\">%s</button>\n"
         "      <div class=\"dropdown-content\">\n"
         "        <a onclick=\"action_click('/action/makemovie');\">%s</a>\n"
         "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
@@ -1133,8 +1138,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
 
         snprintf(response, sizeof (response),
             "        <option value='%s' data-cam_all=\""
-            , config_params[indx_parm].param_name
-        );
+            , config_params[indx_parm].param_name);
         written = webu_write(webui->client_socket, response, strlen(response));
 
         if (val_main != NULL){
@@ -1168,8 +1172,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
                 }
             }
         }
-        /* Terminate the open quote and option */
-
+        /* Terminate the open quote and option.  For foreign language put hint in ()  */
         if (!strcasecmp(webui->lang,"en") ||
             !strcasecmp(config_params[indx_parm].param_name
                 ,webu_trans(webui,config_params[indx_parm].param_name,0))){
@@ -1181,7 +1184,6 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
                 config_params[indx_parm].param_name
                 ,webu_trans(webui,config_params[indx_parm].param_name,0));
             written = webu_write(webui->client_socket, response, strlen(response));
-
         }
 
         indx_parm++;
@@ -1193,7 +1195,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
         "      <input type='button' id='cfg_button' value='%s' onclick='config_click()'>\n"
         "    </form>\n"
         "  </div>\n"
-        ,webu_trans(webui,"save",0));
+        ,webu_trans(webui,"Save",0));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1229,7 +1231,7 @@ static void webu_html_track(struct webui_ctx *webui) {
         ,webu_trans(webui,"Center",2)
         ,webu_trans(webui,"Pan",3)
         ,webu_trans(webui,"Tilt",4)
-        ,webu_trans(webui,"save",5));
+        ,webu_trans(webui,"Save",5));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1238,8 +1240,8 @@ static void webu_html_track(struct webui_ctx *webui) {
 
 static void webu_html_preview(struct context **cnt, struct webui_ctx *webui) {
 
-    /* Write the initial version of the preview section */
-    /* javascript will can this section when user selects a different camera*/
+    /* Write the initial version of the preview section.  The javascript
+     * will change this section when user selects a different camera */
     ssize_t written;
     char response[1024];
     int indx, indx_st, strm_port;
@@ -1279,7 +1281,10 @@ static void webu_html_preview(struct context **cnt, struct webui_ctx *webui) {
 }
 
 static void webu_html_script_action(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript action_change() function */
+    /* Write the javascript action_click() function.
+     * We do not have a good notification section on the page so the successful
+     * submission and response is currently a empty if block for the future
+     * enhancement to somehow notify the user everything worked */
     ssize_t written;
     char response[1024];
 
@@ -1326,8 +1331,8 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
 
 }
 
-static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript camera_change() function */
+static void webu_html_script_camera_thread(struct context **cnt, struct webui_ctx *webui) {
+    /* Write the javascript thread IF conditions of camera_click() function */
     ssize_t written;
     char response[1024];
     int  strm_port;
@@ -1336,12 +1341,7 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
     indx_st = 1;
     if (webui->cam_threads == 1) indx_st = 0;
 
-    snprintf(response, sizeof (response),"%s",
-        "    function camera_click(camid) {\n"
-        "      var preview = \"\";\n"
-        "      var header = \"\";\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
+    written = 1;
     for (indx = indx_st; indx<webui->cam_threads; indx++){
         snprintf(response, sizeof (response),
             "      if (camid == \"cam_%03d\"){\n",indx);
@@ -1374,7 +1374,21 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
 
     }
 
-    /* The cam all preview section */
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+    return;
+}
+
+static void webu_html_script_camera_all(struct context **cnt, struct webui_ctx *webui) {
+    /* Write the javascript "All" IF condition of camera_click() function */
+    ssize_t written;
+    char response[1024];
+    int  strm_port;
+    int indx, indx_st;
+
+    indx_st = 1;
+    if (webui->cam_threads == 1) indx_st = 0;
+
     snprintf(response, sizeof (response), "      if (camid == \"cam_all\"){\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1400,14 +1414,35 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
         written = webu_write(webui->client_socket, response, strlen(response));
 
     }
+
     snprintf(response, sizeof (response),
         "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
         " class='header-center' >%s</h3>\"\n"
+        "      }\n"
         ,webu_trans(webui,"All Cameras",0));
     written = webu_write(webui->client_socket, response, strlen(response));
 
-    snprintf(response, sizeof (response),
-        "      }\n"
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+    return;
+}
+
+static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webui) {
+    /* Write the javascript camera_click() function */
+    ssize_t written;
+    char response[1024];
+
+    snprintf(response, sizeof (response),"%s",
+        "    function camera_click(camid) {\n"
+        "      var preview = \"\";\n"
+        "      var header = \"\";\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    webu_html_script_camera_thread(cnt, webui);
+
+    webu_html_script_camera_all(cnt, webui);
+
+    snprintf(response, sizeof (response),"%s",
         "      document.getElementById(\"id_preview\").innerHTML = preview; \n"
         "      document.getElementById(\"id_header\").innerHTML = header; \n"
         "      document.getElementById('cfg_form').style.display=\"none\"; \n"
@@ -1420,7 +1455,11 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
 }
 
 static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript save function */
+    /* Write the javascript config_click function
+     * We do not have a good notification section on the page so the successful
+     * submission and response is currently a empty if block for the future
+     * enhancement to somehow notify the user everything worked */
+
     ssize_t written;
     char response[1024];
 
@@ -1456,7 +1495,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
         "      document.getElementById('cfg_value').value = \"\";\n"
         "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,optval);\n"
         "      opts.value = 'default';\n"
-        "    }\n");
+        "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
 
@@ -1477,7 +1516,7 @@ static void webu_html_script_cfgchg(struct webui_ctx *webui) {
         "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all');\n"
         "      }\n"
         "      document.getElementById('cfg_value').value = optval;\n"
-        "    }\n");
+        "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1494,29 +1533,29 @@ static void webu_html_script_trkchg(struct webui_ctx *webui) {
         "      if (optval == 'pan'){\n"
         "        document.getElementById('trk_panx').disabled=false;\n"
         "        document.getElementById('trk_tilty').disabled = false;\n"
-        "      	 document.getElementById('trk_lblx').style.display='none';\n"
+        "        document.getElementById('trk_lblx').style.display='none';\n"
         "        document.getElementById('trk_lbly').style.display='none';\n"
-        "      	 document.getElementById('trk_lblpan').style.display='inline';\n"
+        "        document.getElementById('trk_lblpan').style.display='inline';\n"
         "        document.getElementById('trk_lbltilt').style.display='inline';\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
     snprintf(response, sizeof (response),"%s",
         "      } else if (optval =='abs'){\n"
-        "      	document.getElementById('trk_panx').disabled=false;\n"
-        "       document.getElementById('trk_tilty').disabled = false;\n"
-        "      	document.getElementById('trk_lblx').value = 'X';\n"
-        "       document.getElementById('trk_lbly').value = 'Y';\n"
-        "      	document.getElementById('trk_lblpan').style.display='none';\n"
-        "       document.getElementById('trk_lbltilt').style.display='none';\n"
-        "      	document.getElementById('trk_lblx').style.display='inline';\n"
-        "       document.getElementById('trk_lbly').style.display='inline';\n"
-        "      } else {\n");
+        "        document.getElementById('trk_panx').disabled=false;\n"
+        "        document.getElementById('trk_tilty').disabled = false;\n"
+        "        document.getElementById('trk_lblx').value = 'X';\n"
+        "        document.getElementById('trk_lbly').value = 'Y';\n"
+        "        document.getElementById('trk_lblpan').style.display='none';\n"
+        "        document.getElementById('trk_lbltilt').style.display='none';\n"
+        "        document.getElementById('trk_lblx').style.display='inline';\n"
+        "        document.getElementById('trk_lbly').style.display='inline';\n");
    written = webu_write(webui->client_socket, response, strlen(response));
 
    snprintf(response, sizeof (response),"%s",
-        "      	document.getElementById('cfg_form').style.display='none';\n"
-        "      	document.getElementById('trk_panx').disabled=true;\n"
-        "       document.getElementById('trk_tilty').disabled = true;\n"
+        "      } else {\n"
+        "        document.getElementById('cfg_form').style.display='none';\n"
+        "        document.getElementById('trk_panx').disabled=true;\n"
+        "        document.getElementById('trk_tilty').disabled = true;\n"
         "      }\n"
         "    }\n\n");
    written = webu_write(webui->client_socket, response, strlen(response));
@@ -1600,8 +1639,7 @@ static void webu_html_body(struct context **cnt, struct webui_ctx *webui) {
     ssize_t written;
     char response[1024];
 
-    snprintf(response, sizeof (response),"%s",
-        "<body class=\"body\">\n");
+    snprintf(response, sizeof (response),"%s","<body class=\"body\">\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
     webu_html_navbar(cnt, webui);
@@ -1633,9 +1671,9 @@ static void webu_html_page(struct context **cnt, struct webui_ctx *webui) {
     ssize_t written;
     char response[1024];
 
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "<!DOCTYPE html>\n"
-        "<html lang=\"en-us\">\n");
+        "<html lang=\"%s\">\n",webui->lang);
     written = webu_write(webui->client_socket, response, strlen(response));
 
     webu_html_head(webui);
@@ -1689,7 +1727,7 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                 "httpd is going to restart thread %d",thread_nbr);
             if (cnt[thread_nbr]->running) {
-                cnt[thread_nbr]->makemovie = 1; /*how strange this one is..*/
+                cnt[thread_nbr]->makemovie = 1;
                 cnt[thread_nbr]->finish = 1;
             }
             cnt[thread_nbr]->restart = 1;
@@ -1704,7 +1742,7 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                 "httpd quits thread %d",thread_nbr);
             cnt[thread_nbr]->restart = 0;
-            cnt[thread_nbr]->makemovie = 1;  /*how strange this one is..*/
+            cnt[thread_nbr]->makemovie = 1;
             cnt[thread_nbr]->finish = 1;
             cnt[thread_nbr]->watchdog = WATCHDOG_OFF;
         }
@@ -1777,8 +1815,10 @@ static void webu_process_config(struct context **cnt, struct webui_ctx *webui) {
     if (config_params[indx].param_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
             webu_url_decode(webui->uri_parm1, strlen(webui->uri_parm1));
-            /* how the heck does cnt+thread_nbr work...seems like sketchy logic....*/
+
+            /* This is legacy assumption on the pointers being sequential*/
             conf_cmdparse(cnt + thread_nbr, config_params[indx].param_name, webui->uri_value1);
+
             /*If we are updating vid parms, set the flag to update the device.*/
             if (!strcasecmp(config_params[indx].param_name, "vid_control_params") &&
                 (cnt[thread_nbr]->vdev != NULL)) cnt[thread_nbr]->vdev->update_parms = TRUE;
