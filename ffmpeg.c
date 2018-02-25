@@ -68,6 +68,19 @@
 #endif
 
 /*********************************************/
+#if (LIBAVCODEC_VERSION_MAJOR >= 57)
+
+#define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
+#define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
+
+#else
+
+#define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
+#define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
+
+#endif
+
+/*********************************************/
 AVFrame *my_frame_alloc(void){
     AVFrame *pic;
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
@@ -548,7 +561,7 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
         /* The selection of 8000 is a subjective number based upon viewing output files */
         if (ffmpeg->vbr > 0){
             ffmpeg->vbr =(int)(((100-ffmpeg->vbr)*(100-ffmpeg->vbr)*(100-ffmpeg->vbr) * 8000) / 1000000) + 1;
-            ffmpeg->ctx_codec->flags |= CODEC_FLAG_QSCALE;
+            ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_QSCALE;
             ffmpeg->ctx_codec->global_quality=ffmpeg->vbr;
         }
     }
@@ -673,7 +686,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
       ffmpeg->ctx_codec->strict_std_compliance = -2;
       ffmpeg->ctx_codec->level = 3;
     }
-    ffmpeg->ctx_codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
+    ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
 
     retcd = ffmpeg_set_quality(ffmpeg);
     if (retcd < 0){
@@ -1085,7 +1098,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
             pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
             return -1;
         }
-        ffmpeg->video_st->codec->flags     |= CODEC_FLAG_GLOBAL_HEADER;
+        ffmpeg->video_st->codec->flags     |= MY_CODEC_FLAG_GLOBAL_HEADER;
         ffmpeg->video_st->codec->codec_tag  = 0;
 #else
         /* This is disabled in the util_check_passthrough but we need it here for compiling */
