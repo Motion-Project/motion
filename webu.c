@@ -934,6 +934,7 @@ static void webu_html_style_base(struct webui_ctx *webui) {
         "      text-align: center;\n"
         "      color: white;\n"
         "      margin-top: 10px;\n"
+        "      margin-bottom: 10px;\n"
         "    }\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
