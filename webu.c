@@ -150,6 +150,9 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     if (indx > 1)
         webui->cam_count--;
 
+    /* 1 thread, 1 camera = just motion.conf.
+     * 2 thread, 1 camera, then using motion.conf plus a separate camera file */
+
     snprintf(webui->lang_full, 6,"%s",setlocale(LC_ALL, ""));
     snprintf(webui->lang, 3,"%s",webui->lang_full);
 
@@ -976,16 +979,38 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
     char response[1024];
     int indx;
 
-    snprintf(response, sizeof (response),
-        "    <div class=\"dropdown\">\n"
-        "      <button class=\"dropbtn\">%s</button>\n"
-        "      <div class=\"dropdown-content\">\n"
-        "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
-        ,webu_trans(webui,"Cameras",0)
-        ,webu_trans(webui,"All",1));
-    written = webu_write(webui->client_socket, response, strlen(response));
+    if (webui->cam_threads == 1){
+        /* Only Motion.conf file */
+        if (cnt[0]->conf.camera_name == NULL){
+            snprintf(response, sizeof (response),
+                "    <div class=\"dropdown\">\n"
+                "      <button class=\"dropbtn\">%s</button>\n"
+                "      <div class=\"dropdown-content\">\n"
+                "        <a onclick=\"camera_click('cam_all');\">%s 1</a>\n"
+                ,webu_trans(webui,"Cameras",0)
+                ,webu_trans(webui,"Camera",1));
+            written = webu_write(webui->client_socket, response, strlen(response));
+        } else {
+            snprintf(response, sizeof (response),
+                "    <div class=\"dropdown\">\n"
+                "      <button class=\"dropbtn\">%s</button>\n"
+                "      <div class=\"dropdown-content\">\n"
+                "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
+                ,webu_trans(webui,"Cameras",0)
+                ,cnt[0]->conf.camera_name);
+            written = webu_write(webui->client_socket, response, strlen(response));
+        }
+    } else if (webui->cam_threads > 1){
+        /* Motion.conf + separate camera.conf file */
+        snprintf(response, sizeof (response),
+            "    <div class=\"dropdown\">\n"
+            "      <button class=\"dropbtn\">%s</button>\n"
+            "      <div class=\"dropdown-content\">\n"
+            "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
+            ,webu_trans(webui,"Cameras",0)
+            ,webu_trans(webui,"All",1));
+        written = webu_write(webui->client_socket, response, strlen(response));
 
-    if (webui->cam_threads > 0){
         for (indx=1;indx <= webui->cam_count;indx++){
             if (cnt[indx]->conf.camera_name == NULL){
                 snprintf(response, sizeof (response),
@@ -1146,7 +1171,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
             written = webu_write(webui->client_socket, response, strlen(response));
         }
 
-        if (webui->cam_threads > 0){
+        if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
                 val_thread=config_params[indx_parm].print(cnt, NULL, indx_parm, indx);
                 diff_vals = 0;
@@ -1696,8 +1721,9 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
         return;
     }
 
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr > webui->cam_threads){
+    if (thread_nbr >= webui->cam_threads){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
         return;
     }
@@ -1790,8 +1816,9 @@ static void webu_process_config(struct context **cnt, struct webui_ctx *webui) {
         return;
     }
 
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr > webui->cam_threads){
+    if (thread_nbr >= webui->cam_threads){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
         return;
     }
@@ -1841,8 +1868,9 @@ static void webu_process_track(struct context **cnt, struct webui_ctx *webui) {
         return;
     }
 
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr > webui->cam_threads){
+    if (thread_nbr >= webui->cam_threads){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
         return;
     }
@@ -1938,14 +1966,17 @@ static void webu_text_page(struct webui_ctx *webui) {
     /* Write the main page text */
     ssize_t written;
     char response[1024];
-    int indx;
+    int indx, indx_st;
+
+    indx_st = 1;
+    if (webui->cam_threads == 1) indx_st = 0;
 
     snprintf(response, sizeof (response),
         "Motion "VERSION" Running [%d] Camera%s\n0\n",
         webui->cam_count, (webui->cam_count > 1 ? "s" : ""));
     written = webu_write(webui->client_socket, response, strlen(response));
 
-    for (indx = 1; indx < webui->cam_threads; indx++) {
+    for (indx = indx_st; indx < webui->cam_threads; indx++) {
         snprintf(response, sizeof (response), "%d\n", indx);
         written = webu_write(webui->client_socket, response, strlen(response));
     }
