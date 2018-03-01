@@ -699,7 +699,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     retcd = 0;
 
-    /* MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "url: %s",webui->url); */
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "Sent url: %s",webui->url);
 
     webu_parseurl_reset(webui);
 
@@ -712,6 +712,10 @@ static int webu_parseurl(struct webui_ctx *webui) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url: %s",webui->url);
         return -1;
     }
+
+    webu_url_decode(webui->url, strlen(webui->url));
+
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "Decoded url: %s",webui->url);
 
     /* Home page, nothing else */
     if (strlen(webui->url) == 1) return 0;
@@ -763,6 +767,14 @@ static int webu_parseurl(struct webui_ctx *webui) {
         (strlen(webui->uri_cmd2) > 0)) {
         webu_parseurl_parms(webui, st_pos);
     }
+
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
+       "thread: >%s< cmd1: >%s< cmd2: >%s< parm1:>%s< val1:>%s< parm2:>%s< val2:>%s<"
+               ,webui->uri_thread
+               ,webui->uri_cmd1, webui->uri_cmd2
+               ,webui->uri_parm1, webui->uri_value1
+               ,webui->uri_parm2, webui->uri_value2);
+
 
     return retcd;
 
@@ -1494,7 +1506,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
         "      var camnbr = camstr.substring(4,7);\n"
         "      var opts = document.getElementById('cfg_parms');\n"
         "      var optsel = opts.options[opts.selectedIndex].value;\n"
-        "      var optval = document.getElementById('cfg_value').value;\n"
+        "      var baseval = document.getElementById('cfg_value').value;\n"
         "      var http = new XMLHttpRequest();\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1504,6 +1516,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
     written = webu_write(webui->client_socket, response, strlen(response));
 
     snprintf(response, sizeof (response),"%s",
+        "      var optval=encodeURI(baseval);\n"
         "      if (camnbr == \"all\"){\n"
         "        url = url + \"0\";\n"
         "      } else {\n"
@@ -1518,7 +1531,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
         "      }\n"
         "      http.send(null);\n"
         "      document.getElementById('cfg_value').value = \"\";\n"
-        "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,optval);\n"
+        "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,baseval);\n"
         "      opts.value = 'default';\n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -1802,15 +1815,6 @@ static void webu_process_config(struct context **cnt, struct webui_ctx *webui) {
 
     int thread_nbr, indx;
 
-    /*
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s< parm1:>%s< val1:>%s<"
-               ,webui->uri_thread
-               ,webui->uri_cmd1, webui->uri_cmd2
-               ,webui->uri_parm1, webui->uri_value1);
-
-    */
-
     if (webui->uri_thread == NULL){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
         return;
@@ -1841,8 +1845,6 @@ static void webu_process_config(struct context **cnt, struct webui_ctx *webui) {
     }
     if (config_params[indx].param_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
-            webu_url_decode(webui->uri_parm1, strlen(webui->uri_parm1));
-
             /* This is legacy assumption on the pointers being sequential*/
             conf_cmdparse(cnt + thread_nbr, config_params[indx].param_name, webui->uri_value1);
 
