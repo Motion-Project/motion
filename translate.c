@@ -140,7 +140,34 @@ struct trns_ctx trns_phrases[] = {
     ,{"fr","Restricted Configuration Options","Options de configuration restreintes"}
     ,{"fr","setup_mode","Mode de configuration"}
 
-
+/* Swedish */
+    ,{"sv","All Cameras","Alla kameror"}
+    ,{"sv","All","Alla"}
+    ,{"sv","Action","Åtgärd"}
+    ,{"sv","Make Movie","Gör en film"}
+    ,{"sv","Snapshot","Ögonblicksbild"}
+    ,{"sv","Cameras","Kameror"}
+    ,{"sv","Camera","Kamera"}
+    ,{"sv","Change Configuration","Ändra konfiguration"}
+    ,{"sv","Write Configuration","Skriv konfiguration"}
+    ,{"sv","Tracking","Spårning"}
+    ,{"sv","Pause","Paus"}
+    ,{"sv","Start","Start"}
+    ,{"sv","Restart","Starta om"}
+    ,{"sv","Quit","Avsluta"}
+    ,{"sv","Help","Hjälp"}
+    ,{"sv","pan/tilt","fälla/luta"}
+    ,{"sv","pan","fälla"}
+    ,{"sv","tilt","luta"}
+    ,{"sv","Absolute Change","Absolut ändra"}
+    ,{"sv","Center","Centrera"}
+    ,{"sv","save","spara"}
+    ,{"sv","select option","välj alternativ"}
+    ,{"sv","No Configuration Options","Inga konfigurationsalternativ"}
+    ,{"sv","Limited Configuration Options","Begränsade konfigurationsalternativ"}
+    ,{"sv","Advanced Configuration Options","Avancerade konfigurationsalternativ"}
+    ,{"sv","Restricted Configuration Options","Begränsade konfigurationsalternativ"}
+    ,{"sv","setup_mode","inställningsläge"}
 /* Next Language */
 
 /* Termination Entry */
