@@ -470,8 +470,8 @@ webcontrol_port 8080
 # Restrict control connections to localhost only (default: on)
 webcontrol_localhost on
 
-# Output for http server, select off to choose raw text plain (default: on)
-webcontrol_html_output on
+# Output for http server, 0=css format, 1=text
+webcontrol_interface 0
 
 # Authentication for the http based control. Syntax username:password
 # Default: not defined (Disabled)

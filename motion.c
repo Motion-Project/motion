@@ -17,6 +17,7 @@
 #include "event.h"
 #include "picture.h"
 #include "rotate.h"
+#include "webu.h"
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
@@ -3184,8 +3185,8 @@ int main (int argc, char **argv)
             /* set outside the loop to avoid thread set vs main thread check */
             cnt_list[0]->webcontrol_running = 1;
             pthread_mutex_unlock(&global_lock);
-            if (pthread_create(&thread_id, &thread_attr, &motion_web_control,
-                cnt_list)) {
+
+            if (pthread_create(&thread_id, &thread_attr, &webu_main, cnt_list)) {
                 /* thread create failed, undo running state */
                 pthread_mutex_lock(&global_lock);
                 threads_running--;

@@ -91,7 +91,7 @@ struct config conf_template = {
     .stream_preview_newline =          0,
     .webcontrol_port =                 0,
     .webcontrol_localhost =            1,
-    .webcontrol_html_output =          1,
+    .webcontrol_interface =            0,
     .webcontrol_authentication =       NULL,
     .frequency =                       0,
     .tuner_number =                    0,
@@ -168,6 +168,7 @@ static struct context **config_camera(struct context **cnt, const char *str, int
 static struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
 static struct context **copy_text_double(struct context **, const char *, int);
+static struct context **copy_html_output(struct context **, const char *, int);
 
 static const char *print_bool(struct context **, char **, int, unsigned int);
 static const char *print_int(struct context **, char **, int, unsigned int);
@@ -1332,13 +1333,13 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "webcontrol_html_output",
-    "# Output for http server, select off to choose raw text plain (default: on)",
+    "webcontrol_interface",
+    "# Webcontrol 0 = css, 1 = raw text",
     1,
-    CONF_OFFSET(webcontrol_html_output),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_ADVANCED
+    CONF_OFFSET(webcontrol_interface),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
     },
     {
     "webcontrol_authentication",
@@ -1781,6 +1782,13 @@ dep_config_param dep_config_params[] = {
     "\"text_double\" replaced with \"text_scale\" option.",
     CONF_OFFSET(text_scale),
     copy_text_double
+    },
+    {
+    "webcontrol_html_output",
+    "4.1.1",
+    "\"webcontrol_html_output\" replaced with \"webcontrol_interface\" option.",
+    CONF_OFFSET(webcontrol_interface),
+    copy_html_output
     },
     { NULL, NULL, NULL, 0, NULL}
 };
@@ -2539,6 +2547,34 @@ static struct context **copy_text_double(struct context **cnt, const char *str, 
 
         if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
             *((int *)tmp) = 2;
+        } else {
+            *((int *)tmp) = 1;
+        }
+
+        if (cnt[0]->threadnr)
+            return cnt;
+    }
+
+    return cnt;
+}
+
+/**
+ * copy_html_output
+ *      Converts the webcontrol_html_output to the webcontrol_interface option.
+ *
+ * Returns context struct.
+ */
+static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr)
+{
+    void *tmp;
+    int i;
+
+    i = -1;
+    while (cnt[++i]) {
+        tmp = (char *)cnt[i]+(int)val_ptr;
+
+        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+            *((int *)tmp) = 0;
         } else {
             *((int *)tmp) = 1;
         }

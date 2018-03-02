@@ -59,7 +59,6 @@ struct image_data;
 #include "logger.h"
 #include "conf.h"
 #include "stream.h"
-#include "webhttpd.h"
 
 #include "track.h"
 #include "netcam.h"

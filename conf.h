@@ -80,8 +80,8 @@ struct config {
     int stream_preview_newline;
     int webcontrol_port;
     int webcontrol_localhost;
-    int webcontrol_html_output;
     int webcontrol_parms;
+    int webcontrol_interface;
     const char *webcontrol_authentication;
     unsigned long frequency;
     int tuner_number;
