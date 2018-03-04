@@ -54,33 +54,33 @@ struct trns_ctx trns_phrases[] = {
     ,{"es","setup_mode","modo de configuración"}
 
 /* Lithuanian */
-    ,{"lt","All Cameras","Visi Fotoaparatai "}
+    ,{"lt","All Cameras","Visos kameros"}
     ,{"lt","All","Visi"}
     ,{"lt","Action","Veiksmas"}
-    ,{"lt","Make Movie","Padaryti Filmą"}
-    ,{"lt","Snapshot","Fotografija"}
-    ,{"lt","Cameras","Fotoaparatai"}
-    ,{"lt","Camera","Fotoaparatas"}
-    ,{"lt","Change Configuration","Kkeisti Konfigūraciją"}
-    ,{"lt","Write Configuration","Rašyti Konfigūraciją"}
-    ,{"lt","Tracking","Stebėjimas"}
+    ,{"lt","Make Movie","Įrašyti video"}
+    ,{"lt","Snapshot","Nuotrauka"}
+    ,{"lt","Cameras","Kameros"}
+    ,{"lt","Camera","Kamera"}
+    ,{"lt","Change Configuration","Keisti nustatymus"}
+    ,{"lt","Write Configuration","Išsaugoti nustatymus"}
+    ,{"lt","Tracking","Sekimas"}
     ,{"lt","Pause","Pauzė"}
     ,{"lt","Start","Pradėti"}
     ,{"lt","Restart","Perkrauti"}
-    ,{"lt","Quit","Mesti"}
+    ,{"lt","Quit","Išeiti"}
     ,{"lt","Help","Pagalba"}
-    ,{"lt","pan/tilt","Pasukamas/Pakreipti"}
-    ,{"lt","pan","Pasukamas"}
-    ,{"lt","tilt","Pakreipti"}
-    ,{"lt","Absolute Change","Absoliutus Pakeitimas"}
+    ,{"lt","pan/tilt","Pasukti/Palenkti"}
+    ,{"lt","pan","Pasukti"}
+    ,{"lt","tilt","Palenkti"}
+    ,{"lt","Absolute Change","Absoliutus skirtumas"}
     ,{"lt","Center","Centras"}
-    ,{"lt","save","Sutaupyti"}
-    ,{"lt","select option","Pasirinkite Parinktį"}
-    ,{"lt","No Configuration Options","Nėra konfigūravimo parinkčių"}
-    ,{"lt","Limited Configuration Options","Ribotos konfigūravimo parinktys"}
-    ,{"lt","Advanced Configuration Options","Išplėstinės konfigūracijos galimybės"}
-    ,{"lt","Restricted Configuration Options","Apribotos konfigūravimo parinktys"}
-    ,{"lt","setup_mode","sąrankos režimas"}
+    ,{"lt","save","Išsaugoti"}
+    ,{"lt","select option","Pasirinkite parametrą"}
+    ,{"lt","No Configuration Options","Nėra konfigūracijos parametrų"}
+    ,{"lt","Limited Configuration Options","Riboti konfigūracijos parametrai"}
+    ,{"lt","Advanced Configuration Options","Išplėstiniai konfigūracijos parametrai"}
+    ,{"lt","Restricted Configuration Options","Apriboti konfigūracijos parametrai"}
+    ,{"lt","setup_mode","Konfigūravimo režimas"}
 
 /* Dutch */
     ,{"nl","All Cameras","Alle Cameras"}
