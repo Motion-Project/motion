@@ -44,16 +44,6 @@ static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data){
 
 }
 
-static void netcam_rtsp_set_time(struct timeval *timevar){
-
-    /* We consolidate the calls to get time here so they all use the same basis */
-    /* TODO:  Change to clock_gettime and associated autotool change */
-    if (gettimeofday(timevar, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
-
-}
-
 static void netcam_rtsp_pktarray_free(struct rtsp_context *rtsp_data){
 
     int indx;
@@ -437,7 +427,9 @@ static int netcam_rtsp_interrupt(void *ctx){
     if (rtsp_data->status == RTSP_CONNECTED) {
         return FALSE;
     } else if (rtsp_data->status == RTSP_READINGIMAGE) {
-        netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
+        if (gettimeofday(&rtsp_data->interruptcurrenttime, NULL) < 0) {
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+        }
         if ((rtsp_data->interruptcurrenttime.tv_sec - rtsp_data->interruptstarttime.tv_sec ) > rtsp_data->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Camera reading (%s) timed out"
                        , rtsp_data->cameratype, rtsp_data->camera_name);
@@ -452,7 +444,9 @@ static int netcam_rtsp_interrupt(void *ctx){
          * rtsp_connect function will use the same start time.  Otherwise we
          * would need to reset the time before each call to a ffmpeg function.
         */
-        netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
+        if (gettimeofday(&rtsp_data->interruptcurrenttime, NULL) < 0) {
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+        }
         if ((rtsp_data->interruptcurrenttime.tv_sec - rtsp_data->interruptstarttime.tv_sec ) > rtsp_data->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "%s: Camera (%s) timed out"
                        , rtsp_data->cameratype, rtsp_data->camera_name);
@@ -562,7 +556,9 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
     rtsp_data->packet_recv.size = 0;
 
     rtsp_data->interrupted=FALSE;
-    netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
+    if (gettimeofday(&rtsp_data->interruptstarttime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
     rtsp_data->interruptduration = 10;
 
     rtsp_data->status = RTSP_READINGIMAGE;
@@ -605,7 +601,9 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
             return -1;
         }
     }
-    netcam_rtsp_set_time(&rtsp_data->img_recv->image_time);
+    if (gettimeofday(&rtsp_data->img_recv->image_time, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
 
     /* Skip status change on our first image to keep the "next" function waiting
      * until the handler thread gets going
@@ -617,7 +615,11 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
         if ((rtsp_data->imgsize.width  != rtsp_data->codec_context->width) ||
             (rtsp_data->imgsize.height != rtsp_data->codec_context->height) ||
             (netcam_rtsp_check_pixfmt(rtsp_data) != 0) ){
-            if (netcam_rtsp_resize(rtsp_data) < 0) return -1;
+            if (netcam_rtsp_resize(rtsp_data) < 0){
+                my_packet_unref(rtsp_data->packet_recv);
+                netcam_rtsp_close_context(rtsp_data);
+                return -1;
+            }
         }
     }
 
@@ -907,8 +909,13 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
     sprintf(rtsp_data->threadname, "%s","Unknown");
-    netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
-    netcam_rtsp_set_time(&rtsp_data->interruptcurrenttime);
+
+    if (gettimeofday(&rtsp_data->interruptstarttime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
+    if (gettimeofday(&rtsp_data->interruptcurrenttime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((!rtsp_data->high_resolution) &&
         (cnt->conf.netcam_highres)) {
@@ -1024,7 +1031,10 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
     rtsp_data->format_context->interrupt_callback.opaque = rtsp_data;
     rtsp_data->interrupted = FALSE;
 
-    netcam_rtsp_set_time(&rtsp_data->interruptstarttime);
+    if (gettimeofday(&rtsp_data->interruptstarttime, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
+
     rtsp_data->interruptduration = 20;
 
     if (strncmp(rtsp_data->service, "http", 4) == 0 ){
@@ -1137,7 +1147,6 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
         }
     }
 
-
     pthread_mutex_lock(&rtsp_data->mutex_pktarray);
         /* Validate that the previous steps opened the camera */
         retcd = netcam_rtsp_read_image(rtsp_data);
@@ -1145,6 +1154,7 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
             if (rtsp_data->status == RTSP_NOTCONNECTED){
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "%s: Failed to read first image",rtsp_data->cameratype);
             }
+            pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
             netcam_rtsp_close_context(rtsp_data);
             return -1;
         }
@@ -1386,7 +1396,9 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
     /* This is called from the motion loop thread */
 
     if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
-        (cnt->rtsp->status == RTSP_NOTCONNECTED)) return 1;
+        (cnt->rtsp->status == RTSP_NOTCONNECTED)){
+            return 1;
+        }
 
     pthread_mutex_lock(&cnt->rtsp->mutex);
         netcam_rtsp_pktarray_resize(cnt, FALSE);

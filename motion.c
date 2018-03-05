@@ -1439,6 +1439,9 @@ static void motion_cleanup(struct context *cnt)
         cnt->mpipe = -1;
     }
 
+    if (cnt->rolling_average_data != NULL) free(cnt->rolling_average_data);
+
+
     /* Cleanup the current time structure */
     free(cnt->currenttime_tm);
     cnt->currenttime_tm = NULL;
@@ -1854,8 +1857,11 @@ static int mlp_capture(struct context *cnt){
          * First missed frame - store timestamp
          * Don't reset time when thread restarts
          */
-        if (cnt->connectionlosttime == 0)
+        if (cnt->connectionlosttime == 0){
+            cnt->makemovie = 1;     /* If we lost connection, end the movie event*/
             cnt->connectionlosttime = cnt->currenttime;
+        }
+
 
         /*
          * Increase missing_frame_counter
@@ -2656,7 +2662,6 @@ static void *motion_loop(void *arg)
     }
 
 err:
-    free(cnt->rolling_average_data);
 
     cnt->lost_connection = 1;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Thread exiting");
