@@ -16,7 +16,7 @@
  *      webu_main  - Main entry point from the motion thread and only function exposed.
  *      webu_html* - Functions that create the display web page.
  *        webu_html_style*  - The style section of the web page
- *        webu_html_script* - The java scripts of the web page
+ *        webu_html_script* - The javascripts of the web page
  *        webu_html_navbar* - The navbar section of the web page
  *      webu_text* - Functions that create the text interface.
  *      webu_process_action - Performs most items under the action menu
@@ -1647,7 +1647,7 @@ static void webu_html_script_trkclk(struct context **cnt, struct webui_ctx *webu
 }
 
 static void webu_html_script(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the java scripts */
+    /* Write the javascripts */
     ssize_t written;
     char response[1024];
 
