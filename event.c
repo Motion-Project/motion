@@ -153,6 +153,12 @@ static void on_motion_detected_command(struct context *cnt,
 
 static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 {
+
+    if (strlen(sqlquery) <= 0) {
+        /* don't try to execute empty queries */
+        return;
+    }
+
 #ifdef HAVE_MYSQL
     if (!strcmp(cnt->conf.database_type, "mysql")) {
         if (mysql_query(cnt->database, sqlquery) != 0) {
