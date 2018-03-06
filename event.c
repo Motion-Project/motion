@@ -223,8 +223,9 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
                            cnt->conf.database_dbname);
             }
 
-        } else if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "PGSQL query [%s] failed", sqlquery);
+        } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
+            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "PGSQL query failed: [%s]  %s %s",
+                       sqlquery, PQresStatus(PQresultStatus(res)), PQresultErrorMessage(res));
         }
         if (save_id) {
             //ToDO:  Find the equivalent option for pgsql
