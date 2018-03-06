@@ -1116,7 +1116,6 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
     put_picture_fd(cnt, picture, image, cnt->conf.quality, ftype);
 
     myfclose(picture);
-    event(cnt, EVENT_FILECREATE, NULL, file, (void *)(unsigned long)ftype, NULL);
 }
 
 /**
