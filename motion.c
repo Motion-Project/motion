@@ -1858,7 +1858,6 @@ static int mlp_capture(struct context *cnt){
          * Don't reset time when thread restarts
          */
         if (cnt->connectionlosttime == 0){
-            cnt->makemovie = 1;     /* If we lost connection, end the movie event*/
             cnt->connectionlosttime = cnt->currenttime;
         }
 
@@ -3264,7 +3263,9 @@ int main (int argc, char **argv)
                         if (cnt_list[i]->watchdog == 0) {
                             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Thread %d - Watchdog timeout, trying to do "
                                        "a graceful restart", cnt_list[i]->threadnr);
+                            cnt_list[i]->makemovie = 1; /* Trigger end of event */
                             cnt_list[i]->finish = 1;
+
                         }
 
                         if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
