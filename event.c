@@ -225,12 +225,13 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 
         } else if (PQresultStatus(res) != PGRES_COMMAND_OK) {
             MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "PGSQL query [%s] failed", sqlquery);
-            PQclear(res);
         }
         if (save_id) {
             //ToDO:  Find the equivalent option for pgsql
             cnt->database_event_id = 0;
         }
+
+        PQclear(res);
     }
 #endif /* HAVE_PGSQL */
 
