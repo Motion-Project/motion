@@ -108,6 +108,7 @@ struct config {
     int sql_log_movie;
     int sql_log_timelapse;
     const char *sql_query_start;
+    const char *sql_query_stop;
     const char *sql_query;
     const char *database_type;
     const char *database_dbname;

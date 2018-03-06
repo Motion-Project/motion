@@ -118,6 +118,7 @@ struct config conf_template = {
     .sql_log_movie =                   0,
     .sql_log_timelapse =               0,
     .sql_query_start =                 NULL,
+    .sql_query_stop =                  NULL,
     .sql_query =                       NULL,
     .database_type =                   NULL,
     .database_dbname =                 NULL,
@@ -1406,6 +1407,15 @@ config_param config_params[] = {
     "# SQL query at event start.  See motion_guide.html\n",
     0,
     CONF_OFFSET(sql_query_start),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "sql_query_stop",
+    "# SQL query at event stop.  See motion_guide.html\n",
+    0,
+    CONF_OFFSET(sql_query_stop),
     copy_string,
     print_string,
     WEBUI_LEVEL_ADVANCED

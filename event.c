@@ -295,6 +295,30 @@ static void event_sqlnewfile(struct context *cnt, motion_event type  ATTRIBUTE_U
     }
 }
 
+static void event_sqlfileclose(struct context *cnt, motion_event type  ATTRIBUTE_UNUSED,
+            struct image_data *dummy ATTRIBUTE_UNUSED,
+            char *filename, void *arg, struct timeval *currenttime_tv)
+{
+    int sqltype = (unsigned long)arg;
+
+    /* Only log the file types we want */
+    if (!(cnt->conf.database_type) || (sqltype & cnt->sql_mask) == 0)
+        return;
+
+    /*
+     * We place the code in a block so we only spend time making space in memory
+     * for the sqlquery and timestr when we actually need it.
+     */
+    {
+        char sqlquery[PATH_MAX];
+
+        mystrftime(cnt, sqlquery, sizeof(sqlquery), cnt->conf.sql_query_stop,
+                   currenttime_tv, filename, sqltype);
+
+        do_sql_query(sqlquery, cnt, 0);
+    }
+}
+
 #endif /* defined HAVE_MYSQL || defined HAVE_PGSQL || defined(HAVE_SQLITE3) */
 
 static void on_area_command(struct context *cnt,
@@ -1074,6 +1098,12 @@ struct event_handlers event_handlers[] = {
     EVENT_TIMELAPSEEND,
     event_ffmpeg_timelapseend
     },
+#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+    {
+    EVENT_FILECLOSE,
+    event_sqlfileclose
+    },
+#endif
     {
     EVENT_FILECLOSE,
     on_movie_end_command
