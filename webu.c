@@ -41,6 +41,9 @@
  *      The conf_cmdparse assumes that the pointers to the motion context for each
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
+ *      The original translation method was not appropriate and could not be packaged.
+ *        Existing code still uses translation buffers for possible future use of the
+ *        gettext function.
  *    Known HTML Issues:
  *      Menu does not close after clicking item
  *      Single and double quotes are not consistently used.
@@ -54,8 +57,6 @@
  *      Whether there is a need to perpetuate the non-html interface option.
  *      Implement post method to handle large string parameters.
  *      Status pages provided in legacy interface.
- *      Translations for other languages
- *      Translation hints for configuration parms (One sample provided)
  *      Display the abbreviated help for parms that is specified in conf.c somewhere?
  *
  *
@@ -66,10 +67,8 @@
 #include <netdb.h>
 #include <stddef.h>
 #include <ctype.h>
-#include <locale.h>
 #include "motion.h"
 #include "webu.h"
-#include "translate.h"
 
 
 struct webui_ctx {
@@ -153,8 +152,13 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     /* 1 thread, 1 camera = just motion.conf.
      * 2 thread, 1 camera, then using motion.conf plus a separate camera file */
 
-    snprintf(webui->lang_full, 6,"%s",setlocale(LC_ALL, ""));
-    snprintf(webui->lang, 3,"%s",webui->lang_full);
+    /* See comment above regarding the problem with translation  We set our
+     * locales to english until this is resolved in a way that can be packaged.
+     * snprintf(webui->lang_full, 6,"%s",setlocale(LC_ALL, ""));
+     * snprintf(webui->lang, 3,"%s",webui->lang_full);
+     */
+     snprintf(webui->lang_full, 6,"%s","en_us");
+     snprintf(webui->lang, 3,"%s","en");
 
     return;
 }
@@ -225,9 +229,12 @@ static char *webu_trans(struct webui_ctx *webui, const char *en_word, int buffer
      * we set aside for translated phrases
      */
 
+    /* NOTE:  See packaging issues at top of this file with respect to prior
+     * translation method. This now just passes along the english version
+     */
     if ((buffer_nbr < 0) || (buffer_nbr >14)) return NULL;
 
-    translate_word(en_word, webui->trans_word[buffer_nbr], 50, webui->lang);
+    snprintf(webui->trans_word[buffer_nbr], 50,"%s", en_word);
 
     return webui->trans_word[buffer_nbr];
 
