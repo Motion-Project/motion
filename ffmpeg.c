@@ -833,7 +833,9 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
     int recv_cd = 0;
     char errstr[128];
 
-    if (ffmpeg->passthrough) return 0;
+    if (ffmpeg->passthrough){
+        return 0;
+    }
 
     retcd = 0;
     recv_cd = 0;
@@ -970,7 +972,7 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
 
     if ((ffmpeg->rtsp_data->status == RTSP_NOTCONNECTED  ) ||
         (ffmpeg->rtsp_data->status == RTSP_RECONNECTING  ) ){
-        return -1;
+        return 0;
     }
 
     if (ffmpeg->high_resolution){
@@ -1270,13 +1272,14 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
         if (ffmpeg_flush_codec(ffmpeg) < 0){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Error flushing codec");
         }
-
-        if (ffmpeg->tlapse != TIMELAPSE_APPEND) {
-            av_write_trailer(ffmpeg->oc);
-        }
-        if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
+        if (ffmpeg->oc->pb != NULL){
             if (ffmpeg->tlapse != TIMELAPSE_APPEND) {
-                avio_close(ffmpeg->oc->pb);
+                av_write_trailer(ffmpeg->oc);
+            }
+            if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
+                if (ffmpeg->tlapse != TIMELAPSE_APPEND) {
+                    avio_close(ffmpeg->oc->pb);
+                }
             }
         }
         ffmpeg_free_context(ffmpeg);

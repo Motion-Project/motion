@@ -1439,6 +1439,9 @@ static void motion_cleanup(struct context *cnt)
         cnt->mpipe = -1;
     }
 
+    if (cnt->rolling_average_data != NULL) free(cnt->rolling_average_data);
+
+
     /* Cleanup the current time structure */
     free(cnt->currenttime_tm);
     cnt->currenttime_tm = NULL;
@@ -1854,8 +1857,10 @@ static int mlp_capture(struct context *cnt){
          * First missed frame - store timestamp
          * Don't reset time when thread restarts
          */
-        if (cnt->connectionlosttime == 0)
+        if (cnt->connectionlosttime == 0){
             cnt->connectionlosttime = cnt->currenttime;
+        }
+
 
         /*
          * Increase missing_frame_counter
@@ -2656,7 +2661,6 @@ static void *motion_loop(void *arg)
     }
 
 err:
-    free(cnt->rolling_average_data);
 
     cnt->lost_connection = 1;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Thread exiting");
@@ -3259,7 +3263,9 @@ int main (int argc, char **argv)
                         if (cnt_list[i]->watchdog == 0) {
                             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Thread %d - Watchdog timeout, trying to do "
                                        "a graceful restart", cnt_list[i]->threadnr);
+                            cnt_list[i]->makemovie = 1; /* Trigger end of event */
                             cnt_list[i]->finish = 1;
+
                         }
 
                         if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
