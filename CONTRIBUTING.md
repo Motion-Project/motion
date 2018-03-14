@@ -21,13 +21,13 @@ by searching through the issue log.
 
 Next, we must be provided the following in order to replicate and ultimately resolve the issue:
 
-  * A complete Motion log for a single run from startup to shutdown at the NTC/6 log level.
-  * The motion.conf file as well as well as any associated camera.conf files.  
+  * A complete Motion log for a single run from startup to shutdown at the INF/7 log level.
   * The expected versus actual result
 
-The preferred method of providing these files is by posting them on [gist](https://gist.github.com/).  Only provide 
-the link to the gist files within the issue.  It is recommended that any IP addresses and/or usernames and passwords included in 
-either file be masked to preserve your privacy.  Don't forget database IDs and that the log file may be reporting these things as well.
+The preferred method of providing the log file is by posting it on [gist](https://gist.github.com/).  Only provide
+the link to the gist file within the issue. The full configuration will be printed out to the log at the INF/7 level
+with the most common, sensitive information (URLs, usernames/passwords, etc) masked. It is recommended that you
+double check before posting the log file.
 For more information please read [privacy wiki article](https://github.com/Motion-Project/motion/wiki/Privacy)
 
 Note that the developers do not use any front-end application to use Motion and we need the actual logs from the Motion
