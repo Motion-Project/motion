@@ -26,12 +26,17 @@ datadir     = @datadir@
 datarootdir = @datarootdir@
 docdir      = $(datadir)/doc/@PACKAGE_NAME@
 examplesdir = $(datadir)/@PACKAGE_NAME@/examples
+localedir   = @localedir@
 
 ################################################################################
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
-CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
+CFLAGS       = @CFLAGS@ -Wall \
+	 -DVERSION=\"@PACKAGE_VERSION@\" \
+	 -Dsysconfdir=\"$(sysconfdir)\"  \
+	 -DLOCALEDIR=\"$(localedir)\"    \
+	 @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
@@ -50,7 +55,7 @@ EXAMPLES     = *.conf motion.service
 EXAMPLES_BIN = motion.init-Debian motion.init-FreeBSD.sh
 PROGS        = motion
 DEPEND_FILE  = .depend
-
+LANGCDS      = @LANGCDS@
 
 ################################################################################
 # ALL and PROGS build Motion and, possibly, Motion-control.                    #
@@ -63,7 +68,22 @@ else
 endif
 	@echo
 
-progs: pre-build-info $(PROGS)
+progs: pre-build-info $(PROGS) convert-po
+
+################################################################################
+# Convert the po translation files into mo files                               #
+################################################################################
+convert-po:
+ifeq ("@INTL@","yes")
+	@echo Performing the conversion of .po to .mo files
+	@for lng in $(LANGCDS); \
+	do \
+	  msgfmt @top_srcdir@/po/$$lng.po -o @top_srcdir@/po/$$lng.mo  ;   \
+	done
+else
+	@echo Skipping translations
+endif
+	@echo
 
 ################################################################################
 # PRE-BUILD-INFO outputs some general info before the build process starts.    #
@@ -189,10 +209,21 @@ install:
 	$(INSTALL_DATA) camera2-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	$(INSTALL_DATA) camera3-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	$(INSTALL_DATA) camera4-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	for prog in $(PROGS); \
+	@for prog in $(PROGS); \
 	do \
 	($(INSTALL) $$prog $(DESTDIR)$(bindir) ); \
 	done
+ifeq ("@INTL@","yes")
+	@echo Installing translation files
+	@for lng in $(LANGCDS); \
+	do \
+      mkdir -p $(DESTDIR)$(localedir)/$$lng"/LC_MESSAGES/";    \
+	  $(INSTALL_DATA) @top_srcdir@/po/$$lng.mo                \
+	  $(DESTDIR)$(localedir)/$$lng"/LC_MESSAGES/motion.mo"  ;  \
+	done
+else
+	@echo Skipping translations
+endif
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Install complete! The default configuration file, motion-dist.conf, has been"
 	@echo "installed to $(sysconfdir)/motion. You need to rename/copy it to motion.conf"
@@ -218,6 +249,13 @@ uninstall remove: pre-build-info
 	rm -f $(sysconfdir)/motion/camera4-dist.conf
 	rm -rf $(docdir)
 	rm -rf $(examplesdir)
+ifeq ("@INTL@","yes")
+	@echo Removing translation files files
+	@for lng in $(LANGCDS); \
+	do \
+      rm -f $(DESTDIR)$(localedir)/$$lng"/LC_MESSAGES/motion.mo"  ;  \
+	done
+endif
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Uninstall complete!"
 	@echo
@@ -229,6 +267,7 @@ uninstall remove: pre-build-info
 clean: pre-build-info
 	@echo "Removing compiled files and binaries..."
 	@rm -f *~ *.o $(PROGS) combine $(DEPEND_FILE)
+	@rm -f ./po/*.mo
 
 ################################################################################
 # DIST restores the directory to distribution state.                           #
@@ -250,4 +289,4 @@ distclean: clean
 	@echo "You will need to re-run configure if you want to build Motion."
 	@echo
 
-
+.PHONY: INSTALL
