@@ -810,20 +810,26 @@
          Motion now supports limited translations of message printed to the log or displayed on the web control
          page using the <code>gettext</code> application.
         <p></p>
-        The following is an abbreviated description of the processes:
+        Translations should appear automatically based upon the LANG environment variable set on the
+        machine running Motion.  To see the LANG code for your machine, open a terminal and type
+        <code>locale</code>.  If the log and web control still display in English, then this means
+        that translations have not been completed for that language.  The Motion developers rely on
+        the community to provide these translations to the project.  Even those that do not how to
+        program can assist in this process.  The following is an abbreviated description of the
+        processes to update translations:
         <p></p>
         A .pot file is the base set of phrases and words to translate.  To create a .pot file for Motion,
         first clone the Motion git to a local directory and in a terminal window type
         <code>xgettext --keyword=_ -o po/motion.pot *.c</code>
         This program scans all the files which end in <code>.c</code> looking for the keyword
-        <code>_</code>(underscore) which is the macro in the code to identify a item to
+        <code>_</code>(an underscore) which is the macro in the code to identify a item to
         translate.  The application then outputs a file into the po directory called
         motion.pot.  The motion.pot file is a text file which is a template of all
-        the phrases to be translated.  Translators can add translations to that file and
-        then save it with the particular language code and po extension.
+        the phrases that can be translated.  Translators can add translations to that file and
+        then save it with the particular language code and po extension.  e.g. es.po for Spanish
         <p></p>
         A alternative is to use a common gui translation tool called poedit that is available
-        on most distributions. This is a program is designed to work with pot / po files.  It allows
+        on most distributions. This is a program that is designed to work with pot / po files.  It allows
         users to open po and pot files and create/edit/merge translations.
         <p></p>
         It has been observed that it may be easiest to create the motion.pot file (as described above) and then
@@ -834,8 +840,10 @@
         <p></p>
         <p></p>
         <p></p>
-        If it is observed that a particular phrase in the log is not being translated, the process of getting
-        it listed for translation is:
+        The above process describes the items that have already been tagged within the code for
+        translation.  If a particular phrase is reported in the log in English and that phrase is not
+        listed in the motion.pot file, then this means that the phrase needs to be tagged in the code.  The
+        process to get the phrase tagging:
         <p></p>
         1.  Find the module in the source code that is printing the message.
         <p></p>
@@ -843,42 +851,9 @@
         <p></p>
         3.  Find the particular phrase and surround it with a <code>_()</code>
         <p></p>
-        Then re-create the motion.pot file.
+        Save the file and then re-create the motion.pot file.
         <p></p>
         <p></p>
-        <p></p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <p></p>
       </ul>
 
