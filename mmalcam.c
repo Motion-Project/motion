@@ -21,6 +21,7 @@
 #include "interface/mmal/util/mmal_connection.h"
 #include "raspicam/RaspiCamControl.h"
 
+#include "translate.h"
 #include "motion.h"
 #include "rotate.h"
 
@@ -63,8 +64,8 @@ static void check_disable_port(MMAL_PORT_T *port)
 static void camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
     if (buffer->cmd != MMAL_EVENT_PARAMETER_CHANGED) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Received unexpected camera control callback event, 0x%08x",
-                buffer->cmd);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Received unexpected camera control callback event, 0x%08x"), buffer->cmd);
     }
 
     mmal_buffer_header_release(buffer);
@@ -104,12 +105,14 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
     status = mmal_component_create(mmalcam_name, &camera_component);
 
     if (status != MMAL_SUCCESS) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Failed to create MMAL camera component %s", mmalcam_name);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Failed to create MMAL camera component %s"), mmalcam_name);
         goto error;
     }
 
     if (camera_component->output_num == 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL camera %s doesn't have output ports", mmalcam_name);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("MMAL camera %s doesn't have output ports"), mmalcam_name);
         goto error;
     }
 
@@ -118,7 +121,8 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
     status = mmal_port_enable(camera_component->control, camera_control_callback);
 
     if (status) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to enable control port : error %d", status);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Unable to enable control port : error %d"), status);
         goto error;
     }
 
@@ -147,13 +151,13 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
 
     if (mmal_port_parameter_set_boolean(video_port, MMAL_PARAMETER_NO_IMAGE_PADDING, 1)
             != MMAL_SUCCESS) {
-        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, "MMAL no-padding setup failed");
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO, _("MMAL no-padding setup failed"));
     }
 
     status = mmal_port_format_commit(video_port);
 
     if (status) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "camera video format couldn't be set");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("camera video format couldn't be set"));
         goto error;
     }
 
@@ -165,7 +169,7 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
     status = mmal_component_enable(camera_component);
 
     if (status) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "camera component couldn't be enabled");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("camera component couldn't be enabled"));
         goto error;
     }
 
@@ -173,7 +177,7 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
     mmalcam->camera_component = camera_component;
     mmalcam->camera_capture_port = video_port;
     mmalcam->camera_capture_port->userdata = (struct MMAL_PORT_USERDATA_T*) mmalcam;
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "MMAL camera component created");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL camera component created"));
     return MMALCAM_OK;
 
     error: if (mmalcam->camera_component != NULL ) {
@@ -197,13 +201,13 @@ static int create_camera_buffer_structures(mmalcam_context_ptr mmalcam)
     mmalcam->camera_buffer_pool = mmal_pool_create(mmalcam->camera_capture_port->buffer_num,
             mmalcam->camera_capture_port->buffer_size);
     if (mmalcam->camera_buffer_pool == NULL ) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL camera buffer pool creation failed");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera buffer pool creation failed"));
         return MMALCAM_ERROR;
     }
 
     mmalcam->camera_buffer_queue = mmal_queue_create();
     if (mmalcam->camera_buffer_queue == NULL ) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL camera buffer queue creation failed");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera buffer queue creation failed"));
         return MMALCAM_ERROR;
     }
 
@@ -218,12 +222,13 @@ static int send_pooled_buffers_to_port(MMAL_POOL_T *pool, MMAL_PORT_T *port)
         MMAL_BUFFER_HEADER_T *buffer = mmal_queue_get(pool->queue);
 
         if (!buffer) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to get a required buffer %d from pool queue", i);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Unable to get a required buffer %d from pool queue"), i);
             return MMALCAM_ERROR;
         }
 
         if (mmal_port_send_buffer(port, buffer) != MMAL_SUCCESS) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to send a buffer to port (%d)", i);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("Unable to send a buffer to port (%d)"), i);
             return MMALCAM_ERROR;
         }
     }
@@ -268,13 +273,13 @@ int mmalcam_start(struct context *cnt)
     mmalcam = cnt->mmalcam;
     mmalcam->cnt = cnt;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-            "MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps",
-            cnt->conf.mmalcam_name, cnt->conf.width, cnt->conf.height, cnt->conf.frame_limit);
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        ,_("MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps")
+        ,cnt->conf.mmalcam_name, cnt->conf.width, cnt->conf.height, cnt->conf.frame_limit);
 
     mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
     if (mmalcam->camera_parameters == NULL) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "camera params couldn't be allocated");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("camera params couldn't be allocated"));
         return MMALCAM_ERROR;
     }
 
@@ -300,7 +305,7 @@ int mmalcam_start(struct context *cnt)
 
     if (retval == 0) {
         if (mmal_port_enable(mmalcam->camera_capture_port, camera_buffer_callback)) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL camera capture port enabling failed");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera capture port enabling failed"));
             retval = MMALCAM_ERROR;
         }
     }
@@ -308,7 +313,7 @@ int mmalcam_start(struct context *cnt)
     if (retval == 0) {
         if (mmal_port_parameter_set_boolean(mmalcam->camera_capture_port, MMAL_PARAMETER_CAPTURE, 1)
                 != MMAL_SUCCESS) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL camera capture start failed");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera capture start failed"));
             retval = MMALCAM_ERROR;
         }
     }
@@ -338,7 +343,7 @@ int mmalcam_start(struct context *cnt)
  */
 void mmalcam_cleanup(struct mmalcam_context *mmalcam)
 {
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "MMAL Camera cleanup");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL Camera cleanup"));
 
     if (mmalcam != NULL ) {
         if (mmalcam->camera_component) {
@@ -386,9 +391,10 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
         memcpy(img_data->image_norm, camera_buffer->data, cnt->imgs.size_norm);
         mmal_buffer_header_mem_unlock(camera_buffer);
     } else {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "cmd %d flags %08x size %d/%d at %08x, img_size=%d",
-                camera_buffer->cmd, camera_buffer->flags, camera_buffer->length,
-                camera_buffer->alloc_size, camera_buffer->data, cnt->imgs.size_norm);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("cmd %d flags %08x size %d/%d at %08x, img_size=%d")
+            ,camera_buffer->cmd, camera_buffer->flags, camera_buffer->length
+            ,camera_buffer->alloc_size, camera_buffer->data, cnt->imgs.size_norm);
     }
 
     mmal_buffer_header_release(camera_buffer);
@@ -402,7 +408,8 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
         }
 
         if (!new_buffer || status != MMAL_SUCCESS)
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to return a buffer to the camera video port");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("Unable to return a buffer to the camera video port"));
     }
 
     rotate_map(cnt,img_data);

@@ -29,6 +29,7 @@
  *                       - speed optimization, including bswap
  *      v1 (28-Aug-2004) - initial version
  */
+#include "translate.h"
 #include "rotate.h"
 #include <stdint.h>
 #if defined(__APPLE__)
@@ -198,8 +199,9 @@ void rotate_init(struct context *cnt){
      * we have a value that is safe from changes caused by motion-control.
      */
     if ((cnt->conf.rotate_deg % 90) > 0) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Config option \"rotate\" not a multiple of 90: %d",
-                   cnt->conf.rotate_deg);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Config option \"rotate\" not a multiple of 90: %d")
+            ,cnt->conf.rotate_deg);
         cnt->conf.rotate_deg = 0;     /* Disable rotation. */
         cnt->rotate_data.degrees = 0; /* Force return below. */
     } else {

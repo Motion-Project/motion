@@ -8,6 +8,7 @@
  *    See also the file 'COPYING'.
  *
  */
+#include "translate.h"
 #include "motion.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))
@@ -29,7 +30,7 @@ static int vlp_open_vidpipe(void)
     int len,min;
 
     if ((dir = opendir(prefix)) == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO, "Failed to open '%s'", prefix);
+        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Failed to open '%s'"), prefix);
         return -1;
     }
 
@@ -38,14 +39,14 @@ static int vlp_open_vidpipe(void)
             strncpy(buffer, prefix, sizeof(buffer));
             strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
             strncat(buffer, "/name", sizeof(buffer) - strlen(buffer));
-            MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO, "Opening buffer: %s",buffer);
+            MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Opening buffer: %s"),buffer);
             if ((fd = open(buffer, O_RDONLY)) >= 0) {
                 if ((len = read(fd, buffer, sizeof(buffer)-1)) < 0) {
                     close(fd);
                     continue;
                 }
                 buffer[len]=0;
-                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO, "Read buffer: %s",buffer);
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Read buffer: %s"),buffer);
                 if (strncmp(buffer, "Loopback video device",21)) { /* weird stuff after minor */
                     close(fd);
                     continue;
@@ -53,7 +54,7 @@ static int vlp_open_vidpipe(void)
                 min = atoi(&buffer[21]);
                 strcpy(buffer, "/dev/");
                 strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "found video device '%s' %d", buffer,min);
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("found video device '%s' %d"), buffer,min);
                 if ((tfd = open(buffer, O_RDWR)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
                     if (pipe_fd >= 0) close(pipe_fd);
@@ -68,7 +69,7 @@ static int vlp_open_vidpipe(void)
     closedir(dir);
 
     if (pipe_fd >= 0)
-      MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opened %s as pipe output", pipepath);
+      MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), pipepath);
 
     return pipe_fd;
 }
@@ -143,11 +144,11 @@ int vlp_startpipe(const char *dev_name, int width, int height)
         dev = vlp_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR);
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opened %s as pipe output", dev_name);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), dev_name);
     }
 
     if (dev < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "Opening %s as pipe output failed", dev_name);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("Opening %s as pipe output failed"), dev_name);
         return -1;
     }
 
@@ -166,7 +167,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_G_FMT)");
         return -1;
     }
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Original pipe specifications");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Original pipe specifications"));
     vlp_show_vfmt(&v);
 
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
@@ -177,7 +178,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     v.fmt.pix.bytesperline = width;
     v.fmt.pix.field = V4L2_FIELD_NONE;
     v.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Proposed pipe specifications");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Proposed pipe specifications"));
     vlp_show_vfmt(&v);
 
     if (ioctl(dev,VIDIOC_S_FMT, &v) == -1) {
@@ -185,7 +186,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
         return -1;
     }
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Final pipe specifications");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Final pipe specifications"));
     vlp_show_vfmt(&v);
 
     return dev;

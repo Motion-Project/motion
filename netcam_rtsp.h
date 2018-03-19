@@ -67,7 +67,7 @@ struct rtsp_context {
     char                     *path;             /* The connection string to use for the camera */
     char                      service[5];       /* String specifying the type of camera http, rtsp, v4l2 */
     const char               *camera_name;      /* The name of the camera as provided in the config file */
-    char                      cameratype[20];   /* String specifying Normal or High for use in logging */
+    char                      cameratype[30];   /* String specifying Normal or High for use in logging */
     struct imgsize_context    imgsize;          /* The image size parameters */
 
     int                       rtsp_uses_tcp;    /* Flag from config for whether to use tcp transport */

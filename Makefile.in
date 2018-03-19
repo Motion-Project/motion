@@ -35,7 +35,8 @@ localedir   = @localedir@
 CFLAGS       = @CFLAGS@ -Wall \
 	 -DVERSION=\"@PACKAGE_VERSION@\" \
 	 -Dsysconfdir=\"$(sysconfdir)\"  \
-	 -DLOCALEDIR=\"$(localedir)\"    \
+	 -DLOCALEDIR=\"$(DESTDIR)$(localedir)\"    \
+	 -DMOTIONDOCDIR=\"$(DESTDIR)$(docdir)\"    \
 	 @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
@@ -153,7 +154,6 @@ $(DEPEND_FILE): *.h $(SRC)
 # DEP, DEPEND and FASTDEP generate the dependency file.                        #
 ################################################################################
 dep depend fastdep: $(DEPEND_FILE)
-
 
 ################################################################################
 # DEV, BUILD with developer flags                                              #
@@ -289,4 +289,4 @@ distclean: clean
 	@echo "You will need to re-run configure if you want to build Motion."
 	@echo
 
-.PHONY: INSTALL
+.PHONY: install

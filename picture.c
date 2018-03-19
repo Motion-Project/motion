@@ -8,7 +8,7 @@
  *    See also the file 'COPYING'.
  *
  */
-
+#include "translate.h"
 #include "picture.h"
 #include "event.h"
 
@@ -441,7 +441,8 @@ static void put_webp_exif(WebPMux* webp_mux,
 
         WebPMuxError err = WebPMuxSetChunk(webp_mux, "EXIF", &webp_exif, 1);
         if (err != WEBP_MUX_OK) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "Unable to set set EXIF to webp chunk");
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO
+                , _("Unable to set set EXIF to webp chunk"));
         }
         free(exif);
     }
@@ -614,14 +615,14 @@ static void put_webp_yuv420p_file(FILE *fp,
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
     if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "libwebp version error");
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
         return;
     }
 
     /* Create the input data structure and check for compatible library version */
     WebPPicture webp_image;
     if (!WebPPictureInit(&webp_image)){
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "libwebp version error");
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
         return;
     }
 
@@ -629,7 +630,7 @@ static void put_webp_yuv420p_file(FILE *fp,
     webp_image.width = width;
     webp_image.height = height;
     if (!WebPPictureAlloc(&webp_image)){
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "libwebp image buffer allocation error");
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
         return;
     }
 
@@ -646,7 +647,7 @@ static void put_webp_yuv420p_file(FILE *fp,
 
     /* Encode the YUV image as webp */
     if (!WebPEncode(&webp_config, &webp_image))
-        MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO, "libwebp image compression error");
+        MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
 
     /* A bitstream object is needed for the muxing proces */
     WebPData webp_bitstream;
@@ -661,12 +662,12 @@ static void put_webp_yuv420p_file(FILE *fp,
     WebPData webp_output;
     WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
     if (err != WEBP_MUX_OK) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to assemble webp image");
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
     }
 
     /* Write the webp final bitstream to the file */
     if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, "unable to save webp image to file");
+        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
 
 #if WEBP_ENCODER_ABI_VERSION > 0x0202
     /* writer.mem must be freed by calling WebPMemoryWriterClear */
@@ -1100,15 +1101,16 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
-                       "Can't write picture to file %s - check access rights to target directory\n"
-                       "Thread is going to finish due to this fatal error", file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("Can't write picture to file %s - check access rights to target directory\n"
+                "Thread is going to finish due to this fatal error"), file);
             cnt->finish = 1;
             cnt->restart = 0;
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Can't write picture to file %s", file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("Can't write picture to file %s"), file);
             return;
         }
     }
@@ -1133,13 +1135,13 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     line[255] = 0;
 
     if (!fgets(line, 255, picture)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Could not read from pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,_("Could not read from pgm file"));
         return NULL;
     }
 
     if (strncmp(line, "P5", 2)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "This is not a pgm file, starts with '%s'",
-                   line);
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("This is not a pgm file, starts with '%s'"), line);
         return NULL;
     }
 
@@ -1151,7 +1153,8 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading size in pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Failed reading size in pgm file"));
         return NULL;
     }
 
@@ -1162,7 +1165,8 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
             return NULL;
 
     if (sscanf(line, "%d", &maxval) != 1) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading maximum value in pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Failed reading maximum value in pgm file"));
         return NULL;
     }
 
@@ -1184,9 +1188,11 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
 
     /* Resize mask if required */
     if (mask_width != width || mask_height != height) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "The mask file specified is not the same size as image from camera.");
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO, "Attempting to resize mask image from %dx%d to %dx%d",
-                   mask_width, mask_height, width, height);
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("The mask file specified is not the same size as image from camera."));
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Attempting to resize mask image from %dx%d to %dx%d")
+            ,mask_width, mask_height, width, height);
 
         resized_image = mymalloc((width * height * 3) / 2);
 
@@ -1221,12 +1227,13 @@ void put_fixed_mask(struct context *cnt, const char *file)
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,
-                       "can't write mask file %s - check access rights to target directory",
-                       file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("can't write mask file %s - check access rights to target directory")
+                ,file);
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "can't write mask file %s", file);
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("can't write mask file %s"), file);
         }
         return;
     }
@@ -1239,14 +1246,16 @@ void put_fixed_mask(struct context *cnt, const char *file)
 
     /* Write pgm image data at once. */
     if ((int)fwrite(cnt->imgs.img_motion.image_norm, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed writing default mask as pgm file");
+        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            ,_("Failed writing default mask as pgm file"));
         return;
     }
 
     myfclose(picture);
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Creating empty mask %s\nPlease edit this file and "
-               "re-run motion to enable mask feature", cnt->conf.mask_file);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        ,_("Creating empty mask %s\nPlease edit this file and "
+        "re-run motion to enable mask feature"), cnt->conf.mask_file);
 }
 
 /**
@@ -1300,7 +1309,8 @@ void preview_save(struct context *cnt)
              * Save best preview-shot also when no movies are recorded or imagepath
              * is used. Filename has to be generated - nothing available to reuse!
              */
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "different filename or picture only!");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("different filename or picture only!"));
             /*
              * conf.imagepath would normally be defined but if someone deleted it by
              * control interface it is better to revert to the default than fail.

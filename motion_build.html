@@ -38,6 +38,7 @@
     <a href="#Un_Install"> Un-install </a>
     <a href="#Additional_Make_Options"> Additional Make Options </a>
     <a href="#Upgrading_From_Older_Version"> Upgrading From Older Version </a>
+    <a href="#Translations"> Native Language Support(Translations)</a>
   </section>
 
   <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
@@ -803,6 +804,84 @@
         <p></p>
         <p></p>
       </ul>
+
+    <h3><a name="Translations"></a> Native Language Support(Translations)</h3>
+    <ul>
+         Motion now supports limited translations of message printed to the log or displayed on the web control
+         page using the <code>gettext</code> application.
+        <p></p>
+        The following is an abbreviated description of the processes:
+        <p></p>
+        A .pot file is the base set of phrases and words to translate.  To create a .pot file for Motion,
+        first clone the Motion git to a local directory and in a terminal window type
+        <code>xgettext --keyword=_ -o po/motion.pot *.c</code>
+        This program scans all the files which end in <code>.c</code> looking for the keyword
+        <code>_</code>(underscore) which is the macro in the code to identify a item to
+        translate.  The application then outputs a file into the po directory called
+        motion.pot.  The motion.pot file is a text file which is a template of all
+        the phrases to be translated.  Translators can add translations to that file and
+        then save it with the particular language code and po extension.
+        <p></p>
+        A alternative is to use a common gui translation tool called poedit that is available
+        on most distributions. This is a program is designed to work with pot / po files.  It allows
+        users to open po and pot files and create/edit/merge translations.
+        <p></p>
+        It has been observed that it may be easiest to create the motion.pot file (as described above) and then
+        use that file in the poedit application.
+        <p></p>
+        Note that in order to simply revise an existing translation, users can edit the po file directly without
+        creating a motion.pot file.
+        <p></p>
+        <p></p>
+        <p></p>
+        If it is observed that a particular phrase in the log is not being translated, the process of getting
+        it listed for translation is:
+        <p></p>
+        1.  Find the module in the source code that is printing the message.
+        <p></p>
+        2.  Validate that the header file "translate.h" is included at the top of the module.
+        <p></p>
+        3.  Find the particular phrase and surround it with a <code>_()</code>
+        <p></p>
+        Then re-create the motion.pot file.
+        <p></p>
+        <p></p>
+        <p></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <p></p>
+      </ul>
+
 
   </ul>
 
