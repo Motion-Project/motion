@@ -415,7 +415,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     retcd = avcodec_encode_video2(ffmpeg->ctx_codec, &ffmpeg->pkt, ffmpeg->picture, &got_packet_ptr);
     if (retcd < 0 ){
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s",errstr));
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s"),errstr);
         //Packet is freed upon failure of encoding
         return -1;
     }
