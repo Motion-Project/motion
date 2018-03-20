@@ -1311,6 +1311,7 @@ static void webu_html_preview(struct context **cnt, struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),"%s",
         "      </p>\n"
+        "      <br>\n"
         "    </section>\n"
         "  </div>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
