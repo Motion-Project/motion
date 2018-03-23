@@ -1003,7 +1003,7 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
         if (cnt[0]->conf.camera_name == NULL){
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' class=\"dropbtn\">%s</button>\n"
+                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
                 "        <a onclick=\"camera_click('cam_all');\">%s 1</a>\n"
                 ,webu_trans(webui,"Cameras",0)
@@ -1012,7 +1012,7 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
         } else {
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' class=\"dropbtn\">%s</button>\n"
+                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
                 "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
                 ,webu_trans(webui,"Cameras",0)
@@ -1023,7 +1023,7 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
         /* Motion.conf + separate camera.conf file */
         snprintf(response, sizeof (response),
             "    <div class=\"dropdown\">\n"
-            "      <button onclick='display_cameras()' class=\"dropbtn\">%s</button>\n"
+            "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
             "      <div id='cam_btn' class=\"dropdown-content\">\n"
             "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
             ,webu_trans(webui,"Cameras",0)
@@ -1061,7 +1061,7 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),
         "    <div class=\"dropdown\">\n"
-        "      <button onclick='display_actions()' class=\"dropbtn\">%s</button>\n"
+        "      <button onclick='display_actions()' id=\"act_drop\" class=\"dropbtn\">%s</button>\n"
         "      <div id='act_btn' class=\"dropdown-content\">\n"
         "        <a onclick=\"action_click('/action/makemovie');\">%s</a>\n"
         "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
@@ -1542,6 +1542,25 @@ static void webu_html_script_menuact(struct webui_ctx *webui) {
 
 }
 
+static void webu_html_script_evtclk(struct webui_ctx *webui) {
+    /* Write the javascript 'click' EventListener */
+    ssize_t written;
+    char response[1024];
+
+    snprintf(response, sizeof (response),"%s",
+        "    document.addEventListener('click', function(event) {\n"
+        "      const dropCam = document.getElementById('cam_drop');\n"
+        "      const dropAct = document.getElementById('act_drop');\n"
+        "      if (!dropCam.contains(event.target) && !dropAct.contains(event.target)) {\n"
+        "        document.getElementById('cam_btn').style.display = 'none';\n"
+        "        document.getElementById('act_btn').style.display = 'none';\n"
+        "      }\n"
+        "    });\n\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error writing");
+}
+
 static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webui) {
     /* Write the javascript config_click function
      * We do not have a good notification section on the page so the successful
@@ -1720,6 +1739,8 @@ static void webu_html_script(struct context **cnt, struct webui_ctx *webui) {
     webu_html_script_menucam(webui);
 
     webu_html_script_menuact(webui);
+
+    webu_html_script_evtclk(webui);
 
     snprintf(response, sizeof (response),"%s", "  </script>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
