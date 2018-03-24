@@ -847,9 +847,6 @@ static void webu_html_style_dropdown(struct webui_ctx *webui) {
         "    .dropdown-content a:hover {\n"
         "      background-color: lightgray;\n"
         "    }\n"
-        "    .dropdown:hover .dropdown-content {\n"
-        "      display: block;\n"
-        "    }\n"
         "    .dropdown:hover .dropbtn {\n"
         "      background-color: darkgray;\n"
         "    }\n");
@@ -904,6 +901,12 @@ static void webu_html_style_base(struct webui_ctx *webui) {
         "      background-image: linear-gradient(120deg, #155799, #159957);\n"
         "      margin-left:0.5% ;\n"
         "      margin-right:0.5% ;\n"
+        "      width: device-width ;\n"
+        "    }\n"
+        "    img {\n"
+        "      max-width: 100%;\n"
+        "      max-height: 100%;\n"
+        "      height: auto;\n"
         "    }\n"
         "    .page-header {\n"
         "      color: #fff;\n"
@@ -911,7 +914,10 @@ static void webu_html_style_base(struct webui_ctx *webui) {
         "      margin-top: 0rem;\n"
         "      margin-bottom: 0rem;\n"
         "      font-weight: normal;\n"
-        "    }\n"
+        "    }\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    snprintf(response, sizeof (response),"%s",
         "    .page-header h4 {\n"
         "      height: 2px;\n"
         "      padding: 0;\n"
@@ -934,6 +940,7 @@ static void webu_html_style_base(struct webui_ctx *webui) {
         "      text-align: center;\n"
         "      color: white;\n"
         "      margin-top: 10px;\n"
+        "      margin-bottom: 10px;\n"
         "    }\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -996,8 +1003,8 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
         if (cnt[0]->conf.camera_name == NULL){
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
-                "      <button class=\"dropbtn\">%s</button>\n"
-                "      <div class=\"dropdown-content\">\n"
+                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
+                "      <div id='cam_btn' class=\"dropdown-content\">\n"
                 "        <a onclick=\"camera_click('cam_all');\">%s 1</a>\n"
                 ,webu_trans(webui,"Cameras",0)
                 ,webu_trans(webui,"Camera",1));
@@ -1005,8 +1012,8 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
         } else {
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
-                "      <button class=\"dropbtn\">%s</button>\n"
-                "      <div class=\"dropdown-content\">\n"
+                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
+                "      <div id='cam_btn' class=\"dropdown-content\">\n"
                 "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
                 ,webu_trans(webui,"Cameras",0)
                 ,cnt[0]->conf.camera_name);
@@ -1016,8 +1023,8 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
         /* Motion.conf + separate camera.conf file */
         snprintf(response, sizeof (response),
             "    <div class=\"dropdown\">\n"
-            "      <button class=\"dropbtn\">%s</button>\n"
-            "      <div class=\"dropdown-content\">\n"
+            "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
+            "      <div id='cam_btn' class=\"dropdown-content\">\n"
             "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
             ,webu_trans(webui,"Cameras",0)
             ,webu_trans(webui,"All",1));
@@ -1054,8 +1061,8 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),
         "    <div class=\"dropdown\">\n"
-        "      <button class=\"dropbtn\">%s</button>\n"
-        "      <div class=\"dropdown-content\">\n"
+        "      <button onclick='display_actions()' id=\"act_drop\" class=\"dropbtn\">%s</button>\n"
+        "      <div id='act_btn' class=\"dropdown-content\">\n"
         "        <a onclick=\"action_click('/action/makemovie');\">%s</a>\n"
         "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
         "        <a onclick=\"action_click('config');\">%s</a>\n"
@@ -1097,7 +1104,8 @@ static void webu_html_navbar(struct context **cnt, struct webui_ctx *webui) {
     webu_html_navbar_action(webui);
 
     snprintf(response, sizeof (response),
-        "    <a href=\"https://motion-project.github.io/motion_guide.html\">%s</a>\n"
+        "    <a href=\"https://motion-project.github.io/motion_guide.html\" "
+        " target=\"_blank\">%s</a>\n"
         "    <p class=\"header-right\">Motion "VERSION"</p>\n"
         "  </div>\n"
         ,webu_trans(webui,"Help",1));
@@ -1309,6 +1317,7 @@ static void webu_html_preview(struct context **cnt, struct webui_ctx *webui) {
 
     snprintf(response, sizeof (response),"%s",
         "      </p>\n"
+        "      <br>\n"
         "    </section>\n"
         "  </div>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -1361,6 +1370,7 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
         "        }\n"
         "        http.send(null);\n"
         "      }\n"
+        "      document.getElementById('act_btn').style.display=\"none\"; \n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1484,11 +1494,71 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
         "      document.getElementById(\"id_header\").innerHTML = header; \n"
         "      document.getElementById('cfg_form').style.display=\"none\"; \n"
         "      document.getElementById('trk_form').style.display=\"none\"; \n"
+        "      document.getElementById('cam_btn').style.display=\"none\"; \n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
 
+}
+
+static void webu_html_script_menucam(struct webui_ctx *webui) {
+    /* Write the javascript display_cameras() function */
+    ssize_t written;
+    char response[1024];
+
+    snprintf(response, sizeof (response),"%s",
+        "    function display_cameras() {\n"
+        "      document.getElementById('act_btn').style.display = 'none';\n"
+        "      if (document.getElementById('cam_btn').style.display == 'block'){\n"
+        "        document.getElementById('cam_btn').style.display = 'none';\n"
+        "      } else {\n"
+        "        document.getElementById('cam_btn').style.display = 'block';\n"
+        "      }\n"
+        "    }\n\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_html_script_menuact(struct webui_ctx *webui) {
+    /* Write the javascript display_actions() function */
+    ssize_t written;
+    char response[1024];
+
+    snprintf(response, sizeof (response),"%s",
+        "    function display_actions() {\n"
+        "      document.getElementById('cam_btn').style.display = 'none';\n"
+        "      if (document.getElementById('act_btn').style.display == 'block'){\n"
+        "        document.getElementById('act_btn').style.display = 'none';\n"
+        "      } else {\n"
+        "        document.getElementById('act_btn').style.display = 'block';\n"
+        "      }\n"
+        "    }\n\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_html_script_evtclk(struct webui_ctx *webui) {
+    /* Write the javascript 'click' EventListener */
+    ssize_t written;
+    char response[1024];
+
+    snprintf(response, sizeof (response),"%s",
+        "    document.addEventListener('click', function(event) {\n"
+        "      const dropCam = document.getElementById('cam_drop');\n"
+        "      const dropAct = document.getElementById('act_drop');\n"
+        "      if (!dropCam.contains(event.target) && !dropAct.contains(event.target)) {\n"
+        "        document.getElementById('cam_btn').style.display = 'none';\n"
+        "        document.getElementById('act_btn').style.display = 'none';\n"
+        "      }\n"
+        "    });\n\n");
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error writing");
 }
 
 static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webui) {
@@ -1665,6 +1735,12 @@ static void webu_html_script(struct context **cnt, struct webui_ctx *webui) {
     webu_html_script_trkclk(cnt, webui);
 
     webu_html_script_trkchg(webui);
+
+    webu_html_script_menucam(webui);
+
+    webu_html_script_menuact(webui);
+
+    webu_html_script_evtclk(webui);
 
     snprintf(response, sizeof (response),"%s", "  </script>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
