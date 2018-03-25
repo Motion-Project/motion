@@ -3126,6 +3126,8 @@ int main (int argc, char **argv)
 
     ffmpeg_global_init();
 
+    translate_init();
+
 #ifdef HAVE_MYSQL
     if (mysql_library_init(0, NULL, NULL)) {
         fprintf(stderr, "could not initialize MySQL library\n");
