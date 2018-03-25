@@ -26,7 +26,7 @@
 
 #include <dirent.h>
 #include <string.h>
-
+#include "translate.h"
 #include "motion.h"
 
 #define EXTENSION ".conf"
@@ -1929,8 +1929,9 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     i = 0;
     while (dep_config_params[i].name != NULL) {
         if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Deprecated config option \"%s\" since after version %s:",
-                       cmd, dep_config_params[i].last_version);
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+                ,_("Deprecated config option \"%s\" since after version %s:")
+                ,cmd, dep_config_params[i].last_version);
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
 
             if (dep_config_params[i].copy != NULL){
@@ -1953,7 +1954,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     }
 
     /* If we get here, it's unknown to us. */
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unknown config option \"%s\"", cmd);
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
     return cnt;
 }
 
@@ -2052,8 +2053,9 @@ void conf_print(struct context **cnt)
     FILE *conffile;
 
     for (thread = 0; cnt[thread]; thread++) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Writing config file to %s",
-                   cnt[thread]->conf_filename);
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Writing config file to %s")
+            ,cnt[thread]->conf_filename);
 
         conffile = myfopen(cnt[thread]->conf_filename, "w");
 
@@ -2197,11 +2199,12 @@ struct context **conf_load(struct context **cnt)
         char path[PATH_MAX];
 
         if (cnt[0]->conf_filename[0])
-            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Configfile %s not found - trying defaults.",
-                       filename);
+            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+                ,_("Configfile %s not found - trying defaults.")
+                ,filename);
 
         if (getcwd(path, sizeof(path)) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Error getcwd");
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error getcwd"));
             exit(-1);
         }
 
@@ -2218,8 +2221,9 @@ struct context **conf_load(struct context **cnt)
             fp = fopen(filename, "r");
 
             if (!fp) /* There is no config file.... use defaults. */
-                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "could not open configfile %s",
-                           filename);
+                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+                    ,_("could not open configfile %s")
+                    ,filename);
         }
     }
 
@@ -2227,12 +2231,13 @@ struct context **conf_load(struct context **cnt)
     if (fp) {
       strncpy(cnt[0]->conf_filename, filename, sizeof(cnt[0]->conf_filename) - 1);
       cnt[0]->conf_filename[sizeof(cnt[0]->conf_filename) - 1] = '\0';
-      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Processing thread 0 - config file %s",
-         filename);
+      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Processing thread 0 - config file %s"), filename);
       cnt = conf_process(cnt, fp);
       myfclose(fp);
     } else {
-        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO, "No config file to process, using default values");
+        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO
+            ,_("No config file to process, using default values"));
     }
 
 
@@ -2285,9 +2290,11 @@ void conf_output_parms(struct context **cnt)
 
     while(cnt[++t]);
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Writing configuration parameters from all files (%d):", t);
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("Writing configuration parameters from all files (%d):"), t);
     for (t = 0; cnt[t]; t++) {
-        motion_log(INF, TYPE_ALL, NO_ERRNO, "Thread %d - Config file: %s", t, cnt[t]->conf_filename);
+        motion_log(INF, TYPE_ALL, NO_ERRNO
+            ,_("Thread %d - Config file: %s"), t, cnt[t]->conf_filename);
         i = 0;
         while (config_params[i].param_name != NULL) {
             name=config_params[i].param_name;
@@ -2301,7 +2308,8 @@ void conf_output_parms(struct context **cnt)
                     !strncmp(name, "database_user", 13) ||
                     !strncmp(name, "database_password", 17))
                 {
-                    motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s <redacted>", name);
+                    motion_log(INF, TYPE_ALL, NO_ERRNO
+                        ,_("%-25s <redacted>"), name);
                 } else {
                     if (strncmp(name, "text", 4) || strncmp(value, " ", 1))
                         motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s %s", name, value);
@@ -2490,12 +2498,14 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
     }
 
     if (strcmp(config_params[indx_vid].param_name,"vid_control_params")){
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "Unable to locate vid_control_params");
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("Unable to locate vid_control_params"));
         return cnt;
     }
 
     if (config_val == NULL){
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "No value provided to put into vid_control_params");
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("No value provided to put into vid_control_params"));
     }
 
     /* If the depreciated option is the default, then just return */
@@ -2604,13 +2614,15 @@ struct context **copy_uri(struct context **cnt, const char *str, int val) {
 
     regex_t regex;
     if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error compiling regex in copy_uri");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Error compiling regex in copy_uri"));
         return cnt;
     }
 
     // A single asterisk is also valid, so check for that.
     if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid origin for cors_header in copy_uri");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Invalid origin for cors_header in copy_uri"));
         regfree(&regex);
         return cnt;
     }
@@ -2848,8 +2860,8 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
                 memset(conf_file, '\0', sizeof(conf_file));
                 snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
                             str, ep->d_name);
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
-                    "Processing config file %s", conf_file );
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    ,_("Processing config file %s"), conf_file );
                 cnt = config_camera(cnt, conf_file, 0);
                 /* The last context thread would be ours,
                  * set it as created from conf directory.
@@ -2863,8 +2875,8 @@ static struct context **read_camera_dir(struct context **cnt, const char *str,
     }
     else
     {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Camera directory config "
-                    "%s not found", str);
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+            ,_("Camera directory config %s not found"), str);
     }
 
     /* Store the given config value to allow writing it out */
@@ -2897,8 +2909,8 @@ static struct context **config_camera(struct context **cnt, const char *str,
     fp = fopen(str, "r");
 
     if (!fp) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO, "Camera config file %s not found",
-                   str);
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+            ,_("Camera config file %s not found"), str);
         return cnt;
     }
 
@@ -2935,8 +2947,8 @@ static struct context **config_camera(struct context **cnt, const char *str,
 
     /* Process the camera's config file and notify user on console. */
     strcpy(cnt[i]->conf_filename, str);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Processing camera config file %s",
-               str);
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Processing camera config file %s"), str);
     conf_process(cnt + i, fp);
 
     /* Finally we close the camera config file. */

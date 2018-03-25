@@ -1,0 +1,128 @@
+# Motion Application
+# Copyright (2018) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-12 01:53-0600\n"
+"PO-Revision-Date: 2018-03-11 18:51+0100\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Language: English"
+msgstr "Sprache: Deutsch"
+
+#: src/webu.c:972 src/webu.c:981 src/webu.c:992
+msgid "Cameras"
+msgstr "Kameras"
+
+#: src/webu.c:973 src/webu.c:1000 src/webu.c:1370
+msgid "Camera"
+msgstr "Kameras"
+
+#: src/webu.c:993
+msgid "All"
+msgstr "Alle"
+
+#: src/webu.c:1040
+msgid "Action"
+msgstr "Aktion"
+
+#: src/webu.c:1041
+msgid "Make Movie"
+msgstr "Mache einen Film"
+
+#: src/webu.c:1042
+msgid "Snapshot"
+msgstr "Schnappschuss"
+
+#: src/webu.c:1043
+msgid "Change Configuration"
+msgstr "Konfiguration ändern"
+
+#: src/webu.c:1044
+msgid "Write Configuration"
+msgstr "Schreiben Sie die Konfiguration"
+
+#: src/webu.c:1045
+msgid "Tracking"
+msgstr "Verfolgung"
+
+#: src/webu.c:1046
+msgid "Pause"
+msgstr "Pause"
+
+#: src/webu.c:1047
+msgid "Start"
+msgstr "Anfang"
+
+#: src/webu.c:1048
+msgid "Restart"
+msgstr "Neustart"
+
+#: src/webu.c:1049
+msgid "Quit"
+msgstr "Verlassen"
+
+#: src/webu.c:1073
+msgid "Help"
+msgstr "Hilfe"
+
+#: src/webu.c:1088
+msgid "No Configuration Options"
+msgstr "Keine Konfigurationsoptionen"
+
+#: src/webu.c:1092
+msgid "Limited Configuration Options"
+msgstr "Begrenzte Konfigurationsoptionen"
+
+#: src/webu.c:1096
+msgid "Advanced Configuration Options"
+msgstr "Erweiterte Konfigurationsoptionen"
+
+#: src/webu.c:1100
+msgid "Restricted Configuration Options"
+msgstr "Eingeschränkte Konfigurationsoptionen"
+
+#: src/webu.c:1132
+msgid "Select option"
+msgstr "Wähle eine Option"
+
+#: src/webu.c:1205 src/webu.c:1241
+msgid "Save"
+msgstr "Sparen"
+
+#: src/webu.c:1236
+msgid "Pan/Tilt"
+msgstr "Schwenken/Neigen"
+
+#: src/webu.c:1237
+msgid "Absolute Change"
+msgstr "Absolute Veränderung"
+
+#: src/webu.c:1238
+msgid "Center"
+msgstr "Center"
+
+#: src/webu.c:1239
+msgid "Pan"
+msgstr "Schwenken"
+
+#: src/webu.c:1240
+msgid "Tilt"
+msgstr "Neigen"
+
+#: src/webu.c:1429 src/webu.c:1659
+msgid "All Cameras"
+msgstr "Alle Kameras"
+
+# Configuration Option Hints
+msgid "setup_mode"
+msgstr "Konfigurations-Modus"
+

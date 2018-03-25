@@ -176,6 +176,59 @@ AC_LINK_IFELSE(
 CFLAGS="$HOLD_CFLAGS"
 
 ##############################################################################
+###  Check for full gettext support (lib and required programs)
+##############################################################################
+LANGCDS=""
+AC_CHECK_HEADERS(libintl.h,[INTL="yes"],[INTL="no"])
+if (test "x${INTL}"  = "xyes"); then
+    HOLD_CFLAGS=$CFLAGS
+    HOLD_LIBS=$LIBS
+    # Check without a lib
+    CFLAGS=""
+    LIBS=""
+    AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include <libintl.h>], [bindtextdomain ("motion", "/")])],
+    [INTL="yes"],[INTL="no"])
+
+    # If it has flipped to no after our test, try it with a lib
+    if (test "x${INTL}"  = "xno"); then
+        LIBS=" -lintl"
+        AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM([#include <libintl.h>], [bindtextdomain ("motion", "/")])],
+        [INTL="yes"],[INTL="no"])
+        # If it now a yes, then we needed the lib, add it to temp_libs
+        # HAVE_INTL still may turn off based upon below so the lib May not be needed.
+        if (test "x${INTL}"  = "xyes"); then
+            TEMP_LIBS="$TEMP_LIBS -lintl"
+        fi
+    fi
+    CFLAGS=$HOLD_CFLAGS
+    LIBS=$HOLD_LIBS
+fi
+MSGFMT=`msgfmt --version  2>/dev/null`
+GETTXT=`gettext --version 2>/dev/null`
+# Get the langs from what po files exist
+for f in ./po/*.po; do
+    TMP=`basename $f`
+    TMP=`echo $TMP | sed -e 's/\.po$//'`
+    if test "x$TMP" != "x*.po"; then
+        LANGCDS=$LANGCDS" "$TMP
+    fi
+done
+if (test "x${INTL}"  = "xyes" &&
+    test "x${MSGFMT}"  != "x" &&
+    test "x${GETTXT}"  != "x" &&
+    test "x${LANGCDS}" != "x" ); then
+    AC_DEFINE([HAVE_INTL], 1, [Define to 1 if libintl is around])
+else
+    INTL="no"
+fi
+AC_MSG_CHECKING(Native language support)
+AC_MSG_RESULT($INTL)
+AC_SUBST(INTL)
+AC_SUBST(LANGCDS)
+
+##############################################################################
 ###  Check for JPG
 ##############################################################################
 AC_CHECK_HEADERS(setjmp.h jerror.h jpeglib.h,[JPGS="yes"],[JPGS="no"])

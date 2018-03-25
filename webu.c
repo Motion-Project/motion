@@ -66,7 +66,6 @@
 #include <netdb.h>
 #include <stddef.h>
 #include <ctype.h>
-#include <locale.h>
 #include "motion.h"
 #include "webu.h"
 #include "translate.h"
@@ -98,7 +97,7 @@ struct webui_ctx {
     int   cam_threads;           /* Count of the number of camera threads running*/
     char *lang;                  /* Two character abbreviation for locale language*/
     char *lang_full;             /* Five character abbreviation for language-country*/
-    char *trans_word[15];        /* The buffer for the translated word or phrase */
+
 };
 
 
@@ -136,10 +135,6 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     webui->lang       = mymalloc(3);
     webui->lang_full  = mymalloc(6);
 
-    for (indx=0; indx<=14;indx++){
-        webui->trans_word[indx] = mymalloc(50);
-    }
-
     /* get the number of cameras and threads */
     indx = 0;
     while (cnt[++indx]);
@@ -153,15 +148,13 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     /* 1 thread, 1 camera = just motion.conf.
      * 2 thread, 1 camera, then using motion.conf plus a separate camera file */
 
-    snprintf(webui->lang_full, 6,"%s",setlocale(LC_ALL, ""));
+    snprintf(webui->lang_full, 6,"%s", getenv("LANGUAGE"));
     snprintf(webui->lang, 3,"%s",webui->lang_full);
 
     return;
 }
 
 static void webu_context_null(struct webui_ctx *webui) {
-
-    int indx;
 
     webui->auth_parms = NULL;
     webui->method     = NULL;
@@ -180,16 +173,10 @@ static void webu_context_null(struct webui_ctx *webui) {
     webui->lang         = NULL;
     webui->lang_full    = NULL;
 
-    for (indx=0; indx<=14;indx++){
-        webui->trans_word[indx] = NULL;
-    }
-
     return;
 }
 
 static void webu_context_free(struct webui_ctx *webui) {
-
-    int indx;
 
     if (webui->auth_parms != NULL) free(webui->auth_parms);
     if (webui->method     != NULL) free(webui->method);
@@ -208,29 +195,11 @@ static void webu_context_free(struct webui_ctx *webui) {
     if (webui->lang         != NULL) free(webui->lang);
     if (webui->lang_full    != NULL) free(webui->lang_full);
 
-    for (indx=0;indx<=14;indx++){
-        if (webui->trans_word[indx] != NULL) free(webui->trans_word[indx]);
-    }
-
     webu_context_null(webui);
 
     free(webui);
 
     return;
-}
-
-static char *webu_trans(struct webui_ctx *webui, const char *en_word, int buffer_nbr){
-    /* Little helper function to make the code translations "in-line"
-     * this function basically always just returns the webui buffer
-     * we set aside for translated phrases
-     */
-
-    if ((buffer_nbr < 0) || (buffer_nbr >14)) return NULL;
-
-    translate_word(en_word, webui->trans_word[buffer_nbr], 50, webui->lang);
-
-    return webui->trans_word[buffer_nbr];
-
 }
 
 static void webu_clientip(char *buf, int fd) {
@@ -1006,8 +975,8 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
                 "        <a onclick=\"camera_click('cam_all');\">%s 1</a>\n"
-                ,webu_trans(webui,"Cameras",0)
-                ,webu_trans(webui,"Camera",1));
+                ,_("Cameras")
+                ,_("Camera"));
             written = webu_write(webui->client_socket, response, strlen(response));
         } else {
             snprintf(response, sizeof (response),
@@ -1015,7 +984,7 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
                 "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
-                ,webu_trans(webui,"Cameras",0)
+                ,_("Cameras")
                 ,cnt[0]->conf.camera_name);
             written = webu_write(webui->client_socket, response, strlen(response));
         }
@@ -1026,15 +995,15 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
             "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
             "      <div id='cam_btn' class=\"dropdown-content\">\n"
             "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
-            ,webu_trans(webui,"Cameras",0)
-            ,webu_trans(webui,"All",1));
+            ,_("Cameras")
+            ,_("All"));
         written = webu_write(webui->client_socket, response, strlen(response));
 
         for (indx=1;indx <= webui->cam_count;indx++){
             if (cnt[indx]->conf.camera_name == NULL){
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%03d');\">%s %d</a>\n"
-                    , indx, webu_trans(webui,"Camera",0), indx);
+                    , indx, _("Camera"), indx);
             } else {
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%03d');\">%s</a>\n",
@@ -1074,16 +1043,16 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         "        <a onclick=\"action_click('/action/quit');\">%s</a>\n"
         "      </div>\n"
         "    </div>\n"
-        ,webu_trans(webui,"Action",0)
-        ,webu_trans(webui,"Make Movie",1)
-        ,webu_trans(webui,"Snapshot",2)
-        ,webu_trans(webui,"Change Configuration",3)
-        ,webu_trans(webui,"Write Configuration",4)
-        ,webu_trans(webui,"Tracking",5)
-        ,webu_trans(webui,"Pause",6)
-        ,webu_trans(webui,"Start",7)
-        ,webu_trans(webui,"Restart",8)
-        ,webu_trans(webui,"Quit",9));
+        ,_("Action")
+        ,_("Make Movie")
+        ,_("Snapshot")
+        ,_("Change Configuration")
+        ,_("Write Configuration")
+        ,_("Tracking")
+        ,_("Pause")
+        ,_("Start")
+        ,_("Restart")
+        ,_("Quit"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1108,7 +1077,7 @@ static void webu_html_navbar(struct context **cnt, struct webui_ctx *webui) {
         " target=\"_blank\">%s</a>\n"
         "    <p class=\"header-right\">Motion "VERSION"</p>\n"
         "  </div>\n"
-        ,webu_trans(webui,"Help",1));
+        ,_("Help"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1123,19 +1092,19 @@ static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webu
     if (cnt[0]->conf.webcontrol_parms == 0){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
-            ,webu_trans(webui,"No Configuration Options",0));
+            ,_("No Configuration Options"));
     } else if (cnt[0]->conf.webcontrol_parms == 1){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
-            ,webu_trans(webui,"Limited Configuration Options",0));
+            ,_("Limited Configuration Options"));
     } else if (cnt[0]->conf.webcontrol_parms == 2){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
-            ,webu_trans(webui,"Advanced Configuration Options",0));
+            ,_("Advanced Configuration Options"));
     } else{
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
-            ,webu_trans(webui,"Restricted Configuration Options",0));
+            ,_("Restricted Configuration Options"));
     }
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1167,7 +1136,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
         "      <select id='cfg_parms' name='onames' "
         " autocomplete='off' onchange='config_change();'>\n"
         "        <option value='default' data-cam_all=\"\" >%s</option>\n"
-        ,webu_trans(webui,"Select option",0));
+        ,_("Select option"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     indx_parm = 0;
@@ -1220,14 +1189,14 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
         /* Terminate the open quote and option.  For foreign language put hint in ()  */
         if (!strcasecmp(webui->lang,"en") ||
             !strcasecmp(config_params[indx_parm].param_name
-                ,webu_trans(webui,config_params[indx_parm].param_name,0))){
+                ,_(config_params[indx_parm].param_name))){
             snprintf(response, sizeof (response),"\" >%s</option>\n",
                 config_params[indx_parm].param_name);
             written = webu_write(webui->client_socket, response, strlen(response));
         } else {
             snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
                 config_params[indx_parm].param_name
-                ,webu_trans(webui,config_params[indx_parm].param_name,0));
+                ,_(config_params[indx_parm].param_name));
             written = webu_write(webui->client_socket, response, strlen(response));
         }
 
@@ -1240,7 +1209,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
         "      <input type='button' id='cfg_button' value='%s' onclick='config_click()'>\n"
         "    </form>\n"
         "  </div>\n"
-        ,webu_trans(webui,"Save",0));
+        ,_("Save"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1271,12 +1240,12 @@ static void webu_html_track(struct webui_ctx *webui) {
         " style='width:10%%' onclick='track_click()'>\n"
         "    </form>\n"
         "  </div>\n"
-        ,webu_trans(webui,"Pan/Tilt",0)
-        ,webu_trans(webui,"Absolute Change",1)
-        ,webu_trans(webui,"Center",2)
-        ,webu_trans(webui,"Pan",3)
-        ,webu_trans(webui,"Tilt",4)
-        ,webu_trans(webui,"Save",5));
+        ,_("Pan/Tilt")
+        ,_("Absolute Change")
+        ,_("Center")
+        ,_("Pan")
+        ,_("Tilt")
+        ,_("Save"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1407,7 +1376,7 @@ static void webu_html_script_camera_thread(struct context **cnt, struct webui_ct
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s %d</h3>\"\n"
-                ,webu_trans(webui,"Camera",0), indx);
+                ,_("Camera"), indx);
         } else {
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
@@ -1466,7 +1435,7 @@ static void webu_html_script_camera_all(struct context **cnt, struct webui_ctx *
         "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
         " class='header-center' >%s</h3>\"\n"
         "      }\n"
-        ,webu_trans(webui,"All Cameras",0));
+        ,_("All Cameras"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
@@ -1762,7 +1731,7 @@ static void webu_html_body(struct context **cnt, struct webui_ctx *webui) {
         "  <div id=\"id_header\">\n"
         "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s</h3>\n"
         "  </div>\n"
-        ,webu_trans(webui,"All Cameras",0));
+        ,_("All Cameras"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
     webu_html_config(cnt, webui);
@@ -1927,6 +1896,12 @@ static void webu_process_config(struct context **cnt, struct webui_ctx *webui) {
             /*If we are updating vid parms, set the flag to update the device.*/
             if (!strcasecmp(config_params[indx].param_name, "vid_control_params") &&
                 (cnt[thread_nbr]->vdev != NULL)) cnt[thread_nbr]->vdev->update_parms = TRUE;
+
+            /* If changing language, do it now */
+            if (!strcasecmp(config_params[indx].param_name, "motion_lang")){
+                translate_locale_chg(webui->uri_value1);
+            }
+
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"set the value to null/zero");
         }

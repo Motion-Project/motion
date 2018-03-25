@@ -11,6 +11,7 @@
  *      Version 2.  See also the file 'COPYING'.
  ***********************************************************/
 
+#include "translate.h"
 #include "motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
 #include "netcam_http.h"
 
@@ -97,11 +98,11 @@ static long netcam_check_content_length(char *header)
          * number we might as well try to use it.
          */
         if (length > 0)
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "malformed token"
-                       " Content-Length but value %ld", length);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                ,_("malformed token Content-Length but value %ld"), length);
     }
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Content-Length %ld", length);
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Content-Length %ld"), length);
 
     return length;
 }
@@ -188,7 +189,7 @@ static int netcam_check_content_type(char *header)
     if (!header_process(header, "Content-type", http_process_type, &content_type))
         return -1;
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Content-type %s", content_type);
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Content-type %s"), content_type);
 
     if (!strcmp(content_type, "image/jpeg")) {
         ret = 1;
@@ -247,13 +248,13 @@ int netcam_read_next_header(netcam_context_ptr netcam)
             if (retval != HG_OK) {
                 /* Header reported as not-OK, check to see if it's null. */
                 if (strlen(header) == 0) {
-                    MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "Error reading image header, "
-                               "streaming mode (1). Null header.");
+                    MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                        ,_("Error reading image header, streaming mode (1). Null header."));
                 } else {
                     /* Header is not null. Output it in case it's a new camera with unknown headers. */
-                    MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "Error reading image header, "
-                               "streaming mode (1). Unknown header '%s'",
-                               header);
+                    MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                        ,_("Error reading image header, streaming mode (1). Unknown header '%s'")
+                        ,header);
                  }
 
                 free(header);
@@ -272,7 +273,7 @@ int netcam_read_next_header(netcam_context_ptr netcam)
         retval = header_get(netcam, &header, HG_NONE);
 
         if (retval != HG_OK) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Error reading image header (2)");
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Error reading image header (2)"));
             free(header);
             return -1;
         }
@@ -282,7 +283,7 @@ int netcam_read_next_header(netcam_context_ptr netcam)
 
         if ((retval = netcam_check_content_type(header)) >= 0) {
             if (retval != 1) {
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Header not JPEG");
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Header not JPEG"));
                 free(header);
                 return -1;
             }
@@ -294,7 +295,7 @@ int netcam_read_next_header(netcam_context_ptr netcam)
                 netcam->receiving->content_length = retval;
             } else {
                 netcam->receiving->content_length = 0;
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Content-Length 0");
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Content-Length 0"));
                 free(header);
                 return -1;
             }
@@ -303,7 +304,7 @@ int netcam_read_next_header(netcam_context_ptr netcam)
         free(header);
     }
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Found image header record");
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Found image header record"));
 
     free(header);
     return 0;
@@ -344,8 +345,8 @@ int netcam_read_first_header(netcam_context_ptr netcam)
     /* Send the initial command to the camera. */
     if (send(netcam->sock, netcam->connect_request,
              strlen(netcam->connect_request), 0) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "Error sending"
-                   " 'connect' request");
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO
+            ,_("Error sending 'connect' request"));
         return -1;
     }
 
@@ -374,18 +375,18 @@ int netcam_read_first_header(netcam_context_ptr netcam)
     while (1) {     /* 'Do forever' */
         ret = header_get(netcam, &header, HG_NONE);
 
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Received first header ('%s')", header);
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Received first header ('%s')"), header);
 
         if (ret != HG_OK) {
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "Error reading first header (%s)",
-                       header);
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                ,_("Error reading first header (%s)"), header);
             free(header);
             return -1;
         }
 
         if (firstflag) {
             if ((ret = http_result_code(header)) != 200) {
-                MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "HTTP Result code %d", ret);
+                MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("HTTP Result code %d"), ret);
 
                 free(header);
                 if (netcam->connect_keepalive) {
@@ -398,8 +399,9 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                     netcam->connect_keepalive = FALSE;
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off");
-                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Removed netcam Keep-Alive flag"
-                               "due to apparent closed HTTP connection.");
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                        ,_("Removed netcam Keep-Alive flag "
+                        "due to apparent closed HTTP connection."));
                 }
                 return ret;
             }
@@ -424,17 +426,17 @@ int netcam_read_first_header(netcam_context_ptr netcam)
             switch (ret) {
             case 1:         /* Not streaming */
                 if (netcam->connect_keepalive)
-                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Non-streaming camera "
-                               "(keep-alive set)");
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                        ,_("Non-streaming camera (keep-alive set)"));
                 else
-                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Non-streaming camera "
-                               "(keep-alive not set)");
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                        ,_("Non-streaming camera (keep-alive not set)"));
 
                 netcam->caps.streaming = NCS_UNSUPPORTED;
                 break;
 
             case 2:         /* Streaming */
-                MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Streaming camera");
+                MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Streaming camera"));
 
                 netcam->caps.streaming = NCS_MULTIPART;
 
@@ -452,34 +454,37 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                      check_quote(netcam->boundary);
                      netcam->boundary_length = strlen(netcam->boundary);
 
-                     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Boundary string [%s]", netcam->boundary);
+                     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                        ,_("Boundary string [%s]"), netcam->boundary);
                 } else {
-                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Boundary string not found in header");
+                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                        ,_("Boundary string not found in header"));
                     free(header);
                     return -1;
                 }
                 break;
             case 3:  /* MJPG-Block style streaming. */
-                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Streaming camera probably using MJPG-blocks,"
-                           " consider using mjpg:// netcam_url.");
+                MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                    ,_("Streaming camera probably using MJPG-blocks,"
+                    " consider using mjpg:// netcam_url."));
                 break;
 
             default:
                 /* Error */
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Unrecognized content type");
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Unrecognized content type"));
                 free(header);
                 return -1;
 
             }
         } else if ((ret = (int) netcam_check_content_length(header)) >= 0) {
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Content-length present");
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO,_("Content-length present"));
 
             if (ret > 0) {
                 netcam->caps.content_length = 1;     /* Set flag */
                 netcam->receiving->content_length = ret;
             } else {
                 netcam->receiving->content_length = 0;
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Content-length 0");
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Content-length 0"));
                 retval = -2;
             }
         } else if (netcam_check_keepalive(header) == TRUE) {
@@ -497,8 +502,8 @@ int netcam_read_first_header(netcam_context_ptr netcam)
              * This flag is acted upon below.
              * Changed criterion and moved up from below to catch headers that cause returns.
              */
-             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Found Conn: close header ('%s')",
-                        header);
+             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("Found Conn: close header ('%s')"), header);
         }
         free(header);
     }
@@ -513,8 +518,9 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                 netcam->warning_count++;
                 if (netcam->warning_count > 3) {
                     netcam->warning_count = 0;
-                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Both 'Connection: Keep-Alive' and "
-                               "'Connection: close' header received. Motion removes keepalive.");
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("Both 'Connection: Keep-Alive' and "
+                        "'Connection: close' header received. Motion removes keepalive."));
                     netcam->connect_keepalive = FALSE;
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off");
@@ -524,8 +530,9 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                     * did not see a Keep-Alive field returned from netcam and a Close field.
                     * Not quite sure what the correct course of action is here. In for testing.
                     */
-                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Both 'Connection: Keep-Alive' and "
-                               "'Connection: close' header received. Motion continues unchanged.");
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("Both 'Connection: Keep-Alive' and "
+                        "'Connection: close' header received. Motion continues unchanged."));
                 }
             } else {
                /*
@@ -536,8 +543,8 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                 * No action, as this is the normal case. In debug we print a notification.
                 */
 
-                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Received a Keep-Alive field in this"
-                           "set of headers.");
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("Received a Keep-Alive field in this set of headers."));
             }
         } else { /* !aliveflag */
             if (!closeflag) {
@@ -545,8 +552,9 @@ int netcam_read_first_header(netcam_context_ptr netcam)
 
                 if (netcam->warning_count > 3) {
                     netcam->warning_count = 0;
-                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "No 'Connection: Keep-Alive' nor 'Connection: close'"
-                               " header received.\n Motion removes keepalive.");
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("No 'Connection: Keep-Alive' nor 'Connection: close'"
+                        " header received.\n Motion removes keepalive."));
                     netcam->connect_keepalive = FALSE;
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off");
@@ -556,8 +564,9 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                     * did not see a Keep-Alive field returned from netcam nor a Close field.
                     * Not quite sure what the correct course of action is here. In for testing.
                     */
-                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "No 'Connection: Keep-Alive' nor 'Connection: close'"
-                               " header received.\n Motion continues unchanged.");
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("No 'Connection: Keep-Alive' nor 'Connection: close'"
+                        " header received.\n Motion continues unchanged."));
                 }
             } else {
                 /*
@@ -586,13 +595,15 @@ int netcam_read_first_header(netcam_context_ptr netcam)
                     netcam->connect_keepalive = FALSE;    /* No further attempts at keep-alive */
                     free((void *)netcam->cnt->conf.netcam_keepalive);
                     netcam->cnt->conf.netcam_keepalive = strdup("off");
-                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Removed netcam Keep-Alive flag because"
-                               " 'Connection: close' header received.\n Netcam does not support "
-                               "Keep-Alive. Motion continues in non-Keep-Alive.");
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("Removed netcam Keep-Alive flag because"
+                        " 'Connection: close' header received.\n Netcam does not support "
+                        "Keep-Alive. Motion continues in non-Keep-Alive."));
                 } else {
                     netcam->keepalive_timeup = TRUE;    /* We will close and re-open keep-alive */
-                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Keep-Alive has reached end of valid period.\n"
-                               "Motion will close netcam, then resume Keep-Alive with a new socket.");
+                    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                        ,_("Keep-Alive has reached end of valid period.\n"
+                        "Motion will close netcam, then resume Keep-Alive with a new socket."));
                 }
             }
         }
@@ -617,7 +628,7 @@ void netcam_disconnect(netcam_context_ptr netcam)
 {
     if (netcam->sock > 0) {
         if (close(netcam->sock) < 0)
-            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "netcam_disconnect");
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, _("disconnect"));
 
         netcam->sock = -1;
     }
@@ -658,10 +669,11 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
     /* Lookup the hostname given in the netcam URL. */
     if ((ret = getaddrinfo(netcam->connect_host, port, NULL, &ai)) != 0) {
         if (!err_flag)
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "getaddrinfo() failed (%s): %s",
-                       netcam->connect_host, gai_strerror(ret));
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("getaddrinfo() failed (%s): %s")
+                ,netcam->connect_host, gai_strerror(ret));
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "disconnecting netcam (1)");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("disconnecting netcam (1)"));
 
         netcam_disconnect(netcam);
         return -1;
@@ -669,32 +681,34 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
 
     /* Assure any previous connection has been closed - IF we are not in keepalive. */
     if (!netcam->connect_keepalive) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "disconnecting netcam "
-                   "since keep-alive not set.");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("disconnecting netcam since keep-alive not set."));
 
         netcam_disconnect(netcam);
 
         /* Create a new socket. */
         if ((netcam->sock = socket(ai->ai_family, SOCK_STREAM, 0)) < 0) {
-            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, " with no keepalive, attempt "
-                       "to create socket failed.");
+            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO
+                ,_("with no keepalive, attempt to create socket failed."));
             return -1;
         }
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "with no keepalive, "
-                   "new socket created fd %d", netcam->sock);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("with no keepalive, new socket created fd %d"), netcam->sock);
 
     } else if (netcam->sock == -1) {   /* We are in keepalive mode, check for invalid socket. */
         /* Must be first time, or closed, create a new socket. */
         if ((netcam->sock = socket(ai->ai_family, SOCK_STREAM, 0)) < 0) {
-            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO, "with keepalive set, invalid socket."
-                       "This could be the first time. Creating a new one failed.");
+            MOTION_LOG(WRN, TYPE_NETCAM, SHOW_ERRNO
+                ,_("with keepalive set, invalid socket."
+                "This could be the first time. Creating a new one failed."));
             return -1;
         }
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "with keepalive set, invalid socket."
-                   "This could be first time, created a new one with fd %d",
-                    netcam->sock);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("with keepalive set, invalid socket."
+            "This could be first time, created a new one with fd %d")
+            ,netcam->sock);
 
         /* Record that this connection has not yet received a Keep-Alive header. */
         netcam->keepalive_thisconn = FALSE;
@@ -705,8 +719,9 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
             return -1;
         }
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "SO_KEEPALIVE is %s",
-                   optval ? "ON":"OFF");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("SO_KEEPALIVE is %s")
+            ,optval ? _("ON"):_("OFF"));
 
         /* Set the option active. */
         optval = 1;
@@ -717,11 +732,11 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
             return -1;
         }
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "SO_KEEPALIVE set on socket.");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("SO_KEEPALIVE set on socket."));
     }
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "re-using socket %d since keepalive is set.",
-               netcam->sock);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("re-using socket %d since keepalive is set."), netcam->sock);
 
     /*
      * We set the socket non-blocking and then use a 'select'
@@ -729,14 +744,14 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
      */
 
     if ((saveflags = fcntl(netcam->sock, F_GETFL, 0)) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "fcntl(1) on socket");
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, _("fcntl(1) on socket"));
         netcam_disconnect(netcam);
         return -1;
     }
 
     /* Set the socket non-blocking. */
     if (fcntl(netcam->sock, F_SETFL, saveflags | O_NONBLOCK) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "fcntl(2) on socket");
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO,_("fcntl(2) on socket"));
         netcam_disconnect(netcam);
         return -1;
     }
@@ -750,10 +765,10 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
     /* If the connect failed with anything except EINPROGRESS, error. */
     if ((ret < 0) && (back_err != EINPROGRESS)) {
         if (!err_flag)
-            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "connect() failed (%d)",
-                       back_err);
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO
+                ,_("connect() failed (%d)"), back_err);
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "disconnecting netcam (4)");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("disconnecting netcam (4)"));
 
         netcam_disconnect(netcam);
         return -1;
@@ -768,9 +783,9 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
 
     if (ret == 0) {            /* 0 means timeout. */
         if (!err_flag)
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "timeout on connect()");
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("timeout on connect()"));
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "disconnecting netcam (2)");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("disconnecting netcam (2)"));
 
         netcam_disconnect(netcam);
         return -1;
@@ -784,7 +799,7 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
     len = sizeof(ret);
 
     if (getsockopt(netcam->sock, SOL_SOCKET, SO_ERROR, &ret, &len) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "getsockopt after connect");
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("getsockopt after connect"));
         netcam_disconnect(netcam);
         return -1;
     }
@@ -792,9 +807,9 @@ int netcam_connect(netcam_context_ptr netcam, int err_flag)
     /* If the return code is anything except 0, error on connect. */
     if (ret) {
         if (!err_flag)
-            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "connect returned error");
+            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, _("connect returned error"));
 
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "disconnecting netcam (3)");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("disconnecting netcam (3)"));
 
         netcam_disconnect(netcam);
         return -1;
@@ -823,9 +838,10 @@ void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 
     new_size = buff->size + real_alloc;
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "expanding buffer from [%d/%d] to [%d/%d] bytes.",
-               (int) buff->used, (int) buff->size,
-               (int) buff->used, new_size);
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+        ,_("expanding buffer from [%d/%d] to [%d/%d] bytes.")
+        ,(int) buff->used, (int) buff->size
+        ,(int) buff->used, new_size);
 
     buff->ptr = myrealloc(buff->ptr, new_size,
                           "netcam_check_buf_size");
@@ -1079,11 +1095,10 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                      * module netcam_wget.c to do this job!
                      */
 
-                    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,
-                               "Potential split boundary - "
-                               "%d chars flushed, %d "
-                               "re-positioned", ix,
-                               (int) netcam->response->buffer_left);
+                    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                        ,_("Potential split boundary - "
+                        "%d chars flushed, %d re-positioned")
+                        , ix, (int) netcam->response->buffer_left);
 
                     memmove(netcam->response->buffer, ptr,
                             netcam->response->buffer_left);
@@ -1095,7 +1110,8 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
                                      netcam->response->buffer_left);
 
                 if (retval <= 0) { /* This is a fatal error. */
-                    MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "recv() fail after boundary string");
+                    MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO
+                        ,_("recv() fail after boundary string"));
                     return -1;
                 }
 
@@ -1134,12 +1150,11 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
 
     if (netcam->caps.streaming == NCS_UNSUPPORTED) {
         if (!netcam->connect_keepalive) {
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "disconnecting "
-                       "netcam since keep-alive not set.");
-
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("disconnecting netcam since keep-alive not set."));
             netcam_disconnect(netcam);
         }
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "leaving netcam connected.");
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("leaving netcam connected."));
     }
 
     return 0;
@@ -1179,11 +1194,12 @@ static int netcam_http_request(netcam_context_ptr netcam)
          * safe to include it as part of this loop
          * (Not always true now Keep-Alive is implemented).
          */
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "about to try to connect, time #%d", ix);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("about to try to connect, time #%d"), ix);
 
         if (netcam_connect(netcam, 0) != 0) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Failed to open camera - check your config "
-                       "and that netcamera is online");
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("Failed to open camera - check your config and that netcamera is online"));
 
             /* Fatal error on startup */
             ix = MAX_HEADER_RETRIES;
@@ -1193,12 +1209,12 @@ static int netcam_http_request(netcam_context_ptr netcam)
         if (netcam_read_first_header(netcam) >= 0)
             break;
 
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Error reading first header - re-trying");
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Error reading first header - re-trying"));
     }
 
     if (ix == MAX_HEADER_RETRIES) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Failed to read first camera header "
-                   "- giving up for now");
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("Failed to read first camera header - giving up for now"));
         return -1;
     }
 
@@ -1232,10 +1248,11 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
     /* First the http context structure. */
     netcam->response = mymalloc(sizeof(struct rbuf));
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Netcam has flags:"
-               " HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.",
-               netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0",
-               netcam->connect_keepalive ? "ON":"OFF");
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("Netcam has flags:"
+        " HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.")
+        ,netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0"
+        ,netcam->connect_keepalive ? "ON":"OFF");
 
     /*
      * The network camera may require a username and password.  If
@@ -1316,9 +1333,9 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
         free((void *)netcam->cnt->conf.netcam_keepalive);
         netcam->cnt->conf.netcam_keepalive = strdup("off");
 
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, ""
-                   "Removed netcam_keepalive flag due to proxy set."
-                   "Proxy is incompatible with Keep-Alive.");
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("Removed netcam_keepalive flag due to proxy set."
+            "Proxy is incompatible with Keep-Alive."));
     } else {
         /* If no proxy, set as netcam_url path. */
         ptr = url->path;
@@ -1432,15 +1449,14 @@ int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url)
      */
     if (netcam->caps.streaming == NCS_MULTIPART) {
         if (netcam_read_next_header(netcam) < 0) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Failed "
-                       "to read first stream header - "
-                       "giving up for now");
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("Failed to read first stream header - giving up for now"));
             return -1;
         }
     }
 
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "connected,"
-               " going on to read image.");
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        ,_("connected, going on to read image."));
 
     netcam->get_image = netcam_read_html_jpeg;
     return 0;
@@ -1469,11 +1485,12 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
     while (1) {
         retval = rbuf_read_bufferful(netcam);
         if (retval <= 0) { /* If we got 0, we timeoutted. */
-            MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO, "Read error,"
-                       " trying to reconnect..");
+            MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO
+                ,_("Read error, trying to reconnect.."));
             /* We may have lost the connexion */
             if (netcam_http_request(netcam) < 0) {
-                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "lost the cam.");
+                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                    ,_("lost the cam."));
                 return -1; /* We REALLY lost the cam... bail out for now. */
             }
         }
@@ -1485,8 +1502,8 @@ static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
     netcam->response->buffer_left = retval;
     netcam->response->buffer_pos = netcam->response->buffer;
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Refilled buffer with [%d]"
-               " bytes from the network.", retval);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("Refilled buffer with [%d] bytes from the network."), retval);
 
     return retval;
 }
@@ -1553,8 +1570,8 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
 
             read_bytes += retval;
 
-            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Read [%d/%d] header bytes.",
-                       read_bytes, sizeof(mh));
+            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                ,_("Read [%d/%d] header bytes."), read_bytes, sizeof(mh));
 
             /* If we don't have received a full header, refill our buffer. */
             if (read_bytes < sizeof(mh)) {
@@ -1565,8 +1582,8 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
 
         /* Now check the validity of our header. */
         if (strncmp(mh.mh_magic, MJPG_MH_MAGIC, MJPG_MH_MAGIC_SIZE)) {
-            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "Invalid header received,"
-                       " reconnecting");
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                ,_("Invalid header received, reconnecting"));
             /*
              * We shall reconnect to restart the stream, and get a chance
              * to resync.
@@ -1586,9 +1603,10 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
             retval = rbuf_flush(netcam, buffer->ptr + buffer->used + read_bytes,
                                 mh.mh_chunksize - read_bytes);
             read_bytes += retval;
-            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Read [%d/%d] chunk bytes,"
-                       " [%d/%d] total", read_bytes, mh.mh_chunksize,
-                       buffer->used + read_bytes, mh.mh_framesize);
+            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                ,_("Read [%d/%d] chunk bytes, [%d/%d] total")
+                ,read_bytes, mh.mh_chunksize
+                ,buffer->used + read_bytes, mh.mh_framesize);
 
             if (retval < (int) (mh.mh_chunksize - read_bytes)) {
                 /* MOTION_LOG(EMG, TYPE_NETCAM, NO_ERRNO, "Chunk incomplete, going to refill."); */
@@ -1599,13 +1617,13 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
         }
         buffer->used += read_bytes;
 
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Chunk complete,"
-                   " buffer used [%d] bytes.", buffer->used);
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            ,_("Chunk complete, buffer used [%d] bytes."), buffer->used);
 
         /* Is our JPG image complete ? */
         if (mh.mh_framesize == buffer->used) {
-            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Image complete,"
-                       " buffer used [%d] bytes.", buffer->used);
+            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                ,_("Image complete, buffer used [%d] bytes."), buffer->used);
             break;
         }
         /* MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Rlen now at [%d] bytes", rlen); */
@@ -1631,7 +1649,7 @@ static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
  */
 int netcam_setup_mjpg(netcam_context_ptr netcam, struct url_t *url)
 {
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "now calling netcam_setup_mjpg()");
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_mjpg()"));
 
     netcam->timeout.tv_sec = READ_TIMEOUT;
 
@@ -1655,8 +1673,8 @@ int netcam_setup_mjpg(netcam_context_ptr netcam, struct url_t *url)
      * We are positionned right just at the start of the first MJPG
      * header, so don't move anymore, initialization complete.
      */
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "connected,"
-               " going on to read and decode MJPG chunks.");
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        ,_("connected, going on to read and decode MJPG chunks."));
 
     netcam->get_image = netcam_read_mjpg_jpeg;
 
@@ -1675,7 +1693,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 {
     int loop_counter = 0;
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Begin");
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Begin"));
 
     netcam_buff_ptr buffer;
     int len;
@@ -1688,24 +1706,24 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
     /*int fstat(int filedes, struct stat *buf);*/
     do {
         if (stat(netcam->file->path, &statbuf)) {
-            MOTION_LOG(CRT, TYPE_NETCAM, SHOW_ERRNO, "stat(%s) error",
-                       netcam->file->path);
+            MOTION_LOG(CRT, TYPE_NETCAM, SHOW_ERRNO
+                ,_("stat(%s) error"), netcam->file->path);
             return -1;
         }
 
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "statbuf.st_mtime[%d]"
-                   " != last_st_mtime[%d]", statbuf.st_mtime,
-                   netcam->file->last_st_mtime);
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            ,_("statbuf.st_mtime[%d] != last_st_mtime[%d]")
+            , statbuf.st_mtime, netcam->file->last_st_mtime);
 
         /* its waits POLLING_TIMEOUT */
         if (loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000))) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "waiting new file image"
-                       " timeout");
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("waiting new file image timeout"));
             return -1;
         }
 
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "delay waiting new"
-                   " file image ");
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            ,_("delay waiting new file image "));
 
         //its waits 5seconds - READ_TIMEOUT
         //SLEEP(netcam->timeout.tv_sec, netcam->timeout.tv_usec*1000);
@@ -1717,8 +1735,8 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
     netcam->file->last_st_mtime = statbuf.st_mtime;
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "processing new file image -"
-               " st_mtime %d", netcam->file->last_st_mtime);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("processing new file image - st_mtime %d"), netcam->file->last_st_mtime);
 
     /* Assure there's enough room in the buffer. */
     while (buffer->size < (size_t)statbuf.st_size)
@@ -1728,15 +1746,16 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
     /* Do the read */
     netcam->file->control_file_desc = open(netcam->file->path, O_RDONLY);
     if (netcam->file->control_file_desc < 0) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "open(%s) error: %d",
-                   netcam->file->path, netcam->file->control_file_desc);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("open(%s) error: %d")
+            ,netcam->file->path, netcam->file->control_file_desc);
         return -1;
     }
 
     if ((len = read(netcam->file->control_file_desc,
                     buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "read(%s) error: %d",
-                   netcam->file->control_file_desc, len);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("read(%s) error: %d"), netcam->file->control_file_desc, len);
         return -1;
     }
 
@@ -1745,7 +1764,7 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
     netcam_image_read_complete(netcam);
 
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "End");
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("End"));
 
     return 0;
 }
@@ -1780,8 +1799,8 @@ int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url)
     netcam->file->path = url->path;
     url->path = NULL;
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "netcam->file->path %s",
-               netcam->file->path);
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("netcam->file->path %s"), netcam->file->path);
 
     netcam->get_image = netcam_read_file_jpeg;
 

@@ -4,6 +4,8 @@
  *      Module of common routines for handling network cameras.
  *
  */
+
+#include "translate.h"
 #include "motion.h"
 
 #include <regex.h>                    /* For parsing of the URL */
@@ -69,7 +71,7 @@ static char *netcam_url_match(regmatch_t m, const char *input)
 
 static void netcam_url_invalid(struct url_t *parse_url){
 
-    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Invalid URL.  Can not parse values.");
+    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Invalid URL.  Can not parse values."));
 
     parse_url->host = malloc(5);
     parse_url->service = malloc(5);
@@ -173,7 +175,7 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
             parse_url->port = 1935;
         else if (!strcmp(parse_url->service, "rtsp"))
             parse_url->port = 554;
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Using port number %d",parse_url->port);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Using port number %d"),parse_url->port);
     }
 
     regfree(&pattbuf);
@@ -232,7 +234,8 @@ static void *netcam_handler_loop(void *arg)
      */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cnt->threadnr));
 
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Camera handler thread [%d] started", netcam->threadnr);
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        ,_("Camera handler thread [%d] started"), netcam->threadnr);
     /*
      * The logic of our loop is very simple.  If this is a non-
      * streaming camera, we re-establish connection with the camera
@@ -252,9 +255,9 @@ static void *netcam_handler_loop(void *arg)
                     (netcam->connect_keepalive && netcam->keepalive_timeup)) {
                     /* If keepalive flag set but time up, time to close this socket. */
                     if (netcam->connect_keepalive && netcam->keepalive_timeup) {
-                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "Closing netcam socket"
-                                   " as Keep-Alive time is up (camera sent Close field). A reconnect"
-                                   " should happen.");
+                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                            ,_("Closing netcam socket as Keep-Alive time is up "
+                            "(camera sent Close field). A reconnect should happen."));
                         netcam_disconnect(netcam);
                         netcam->keepalive_timeup = FALSE;
                     }
@@ -262,8 +265,8 @@ static void *netcam_handler_loop(void *arg)
                     /* And the netcam_connect call below will open a new one. */
                     if (netcam_connect(netcam, open_error) < 0) {
                         if (!open_error) { /* Log first error. */
-                            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO,
-                                       "re-opening camera (non-streaming)");
+                            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                                ,_("re-opening camera (non-streaming)"));
                             open_error = 1;
                         }
                         /* Need to have a dynamic delay here. */
@@ -272,19 +275,19 @@ static void *netcam_handler_loop(void *arg)
                     }
 
                     if (open_error) {          /* Log re-connection */
-                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO,
-                                   "camera re-connected");
+                        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                            ,_("camera re-connected"));
                         open_error = 0;
                     }
                 }
                 /* Send our request and look at the response. */
                 if ((retval = netcam_read_first_header(netcam)) != 1) {
                     if (retval > 0) {
-                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Unrecognized image"
-                                   " header (%d)", retval);
+                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                            ,_("Unrecognized image header (%d)"), retval);
                     } else if (retval != -1) {
-                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Error in header (%d)",
-                                   retval);
+                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                            ,_("Error in header (%d)"), retval);
                     }
                     /* Need to have a dynamic delay here. */
                     continue;
@@ -293,8 +296,8 @@ static void *netcam_handler_loop(void *arg)
                 if (netcam_read_next_header(netcam) < 0) {
                     if (netcam_connect(netcam, open_error) < 0) {
                         if (!open_error) { /* Log first error */
-                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,
-                                       "re-opening camera (streaming)");
+                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                                ,_("re-opening camera (streaming)"));
                             open_error = 1;
                         }
                         SLEEP(5, 0);
@@ -303,20 +306,19 @@ static void *netcam_handler_loop(void *arg)
 
                     if ((retval = netcam_read_first_header(netcam) != 2)) {
                         if (retval > 0) {
-                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,
-                                      "Unrecognized image header (%d)",
-                                      retval);
+                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                                ,_("Unrecognized image header (%d)"), retval);
                         } else if (retval != -1) {
-                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,
-                                       "Error in header (%d)", retval);
+                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                                ,_("Error in header (%d)"), retval);
                         }
                         /* FIXME need some limit. */
                         continue;
                     }
                 }
                 if (open_error) {          /* Log re-connection */
-                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,
-                               "camera re-connected");
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                        ,_("camera re-connected"));
                     open_error = 0;
                 }
             } else if (netcam->caps.streaming == NCS_BLOCK) { /* MJPG-Block streaming */
@@ -329,12 +331,12 @@ static void *netcam_handler_loop(void *arg)
 
 
         if (netcam->get_image(netcam) < 0) {
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Error getting jpeg image");
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Error getting jpeg image"));
             /* If FTP connection, attempt to re-connect to server. */
             if (netcam->ftp) {
                 close(netcam->ftp->control_file_desc);
                 if (ftp_connect(netcam) < 0)
-                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "Trying to re-connect");
+                    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Trying to re-connect"));
             }
             continue;
         }
@@ -383,7 +385,8 @@ static void *netcam_handler_loop(void *arg)
     pthread_mutex_unlock(&global_lock);
 
     /* Log out a termination message. */
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "netcam camera handler: finish set, exiting");
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        ,_("netcam camera handler: finish set, exiting"));
 
     /* Setting netcam->thread_id to zero shows netcam_cleanup we're done. */
     netcam->thread_id = 0;
@@ -485,8 +488,8 @@ void netcam_cleanup(netcam_context_ptr netcam, int init_retry_flag){
          * Although this shouldn't happen, if it *does* happen we will
          * log it (just for the programmer's information).
          */
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, "No response from camera "
-                   "handler - it must have already died");
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("No response from camera handler - it must have already died"));
         pthread_mutex_lock(&global_lock);
         threads_running--;
         pthread_mutex_unlock(&global_lock);
@@ -559,7 +562,7 @@ int netcam_next(struct context *cnt, struct image_data *img_data){
     netcam = cnt->netcam;
 
     if (!netcam->latest->used) {
-        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO, "called with no data in buffer");
+        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO,_("called with no data in buffer"));
         return NETCAM_NOTHING_NEW_ERROR;
     }
 
@@ -639,20 +642,23 @@ int netcam_start(struct context *cnt){
     /* Initialize the average frame time to the user's value. */
     netcam->av_frame_time = 1000000.0 / cnt->conf.frame_limit;
 
-    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Network Camera starting for camera (%s)", cnt->conf.camera_name);
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        ,_("Network Camera starting for camera (%s)"), cnt->conf.camera_name);
 
     /* If a proxy has been specified, parse that URL. */
     if (cnt->conf.netcam_proxy) {
         netcam_url_parse(&url, cnt->conf.netcam_proxy);
 
         if (!url.host) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Invalid netcam_proxy (%s)", cnt->conf.netcam_proxy);
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Invalid netcam_proxy (%s)"), cnt->conf.netcam_proxy);
             netcam_url_free(&url);
             return -1;
         }
 
         if (url.userpass) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Username/password not allowed on a proxy URL");
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Username/password not allowed on a proxy URL"));
             netcam_url_free(&url);
             return -1;
         }
@@ -673,13 +679,15 @@ int netcam_start(struct context *cnt){
 
     if (!url.service) {
         snprintf(err_service,5,"%s",cnt->conf.netcam_url);
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Invalid netcam service '%s' ", err_service);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Invalid netcam service '%s' "), err_service);
         netcam_url_free(&url);
         return -1;
     }
 
     if (!url.host) {
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Invalid netcam_url for camera (%s)", cnt->conf.camera_name);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("Invalid netcam_url for camera (%s)"), cnt->conf.camera_name);
         netcam_url_free(&url);
         return -1;
     }
@@ -712,30 +720,31 @@ int netcam_start(struct context *cnt){
             netcam->connect_keepalive = TRUE; /* HTTP 1.1 has keepalive by default. */
     }
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "Netcam_http parameter '%s'"
-               " converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.",
-               cnt->conf.netcam_keepalive,
-               netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0",
-               netcam->connect_keepalive ? "ON":"OFF");
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("Netcam_http parameter '%s' converts to flags: HTTP/1.0: %s HTTP/1.1: %s Keep-Alive %s.")
+        ,cnt->conf.netcam_keepalive
+        ,netcam->connect_http_10 ? "1":"0", netcam->connect_http_11 ? "1":"0"
+        ,netcam->connect_keepalive ? "ON":"OFF");
 
 
     /* Initialise the netcam socket to -1 to trigger a connection by the keep-alive logic. */
     netcam->sock = -1;
 
     if ((url.service) && (!strcmp(url.service, "http"))) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "now calling netcam_setup_html()");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_html()"));
         retval = netcam_setup_html(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "ftp"))) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "now calling netcam_setup_ftp");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_ftp"));
         retval = netcam_setup_ftp(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "file"))) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, "now calling netcam_setup_file()");
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_file()"));
         retval = netcam_setup_file(netcam, &url);
     } else if ((url.service) && (!strcmp(url.service, "mjpg"))) {
         retval = netcam_setup_mjpg(netcam, &url);
     } else {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Invalid netcam service '%s' - "
-                   "must be http, ftp, mjpg, mjpeg, v4l2 or file.", url.service);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or file.")
+            , url.service);
         retval = -1;
     }
 
@@ -750,7 +759,8 @@ int netcam_start(struct context *cnt){
      * these to set the required image buffer(s) in our netcam_struct.
      */
     if ((retval = netcam->get_image(netcam)) != 0) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Failed trying to read first image - retval:%d", retval);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Failed trying to read first image - retval:%d"), retval);
         return -1;
     }
 
@@ -760,8 +770,8 @@ int netcam_start(struct context *cnt){
     * occurs during startup, we will just abandon this attempt.
     */
     if (setjmp(netcam->setjmp_buffer)) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "libjpeg decompression failure "
-                   "on first frame - giving up!");
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("libjpeg decompression failure on first frame - giving up!"));
         return -1;
     }
 
@@ -771,7 +781,9 @@ int netcam_start(struct context *cnt){
 
     /* Validate image sizes are multiple of 8 */
     if ((netcam->width % 8) || (netcam->height % 8) ) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO, "Width/height(%dx%d) must be multiples of 8", netcam->width, netcam->height);
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Width/height(%dx%d) must be multiples of 8")
+            ,netcam->width, netcam->height);
         return -2;
     }
 
@@ -793,7 +805,8 @@ int netcam_start(struct context *cnt){
 
     retval = pthread_create(&netcam->thread_id, &handler_attribute,&netcam_handler_loop, netcam);
     if (retval < 0) {
-        MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO, "Error starting camera handler thread [%d]", netcam->threadnr);
+        MOTION_LOG(ALR, TYPE_NETCAM, SHOW_ERRNO
+            ,_("Error starting camera handler thread [%d]"), netcam->threadnr);
         return -1;
     }
 
