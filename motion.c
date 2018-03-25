@@ -2332,7 +2332,7 @@ static void mlp_actions(struct context *cnt){
 
             /* Save preview_shot here at the end of event */
             if (cnt->imgs.preview_image.diffs) {
-                preview_save(cnt);
+                event(cnt, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cnt->current_image->timestamp_tv);
                 cnt->imgs.preview_image.diffs = 0;
             }
 

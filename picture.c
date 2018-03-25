@@ -1118,7 +1118,6 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
     put_picture_fd(cnt, picture, image, cnt->conf.quality, ftype);
 
     myfclose(picture);
-    event(cnt, EVENT_FILECREATE, NULL, file, (void *)(unsigned long)ftype, NULL);
 }
 
 /**
@@ -1256,84 +1255,6 @@ void put_fixed_mask(struct context *cnt, const char *file)
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         ,_("Creating empty mask %s\nPlease edit this file and "
         "re-run motion to enable mask feature"), cnt->conf.mask_file);
-}
-
-/**
- * preview_save
- *      save preview_shot
- *
- * Returns nothing.
- */
-void preview_save(struct context *cnt)
-{
-    int use_imagepath;
-    int basename_len;
-    const char *imagepath;
-    char previewname[PATH_MAX];
-    char filename[PATH_MAX];
-    struct image_data *saved_current_image;
-    int passthrough;
-
-    if (cnt->imgs.preview_image.diffs) {
-        /* Save current global context. */
-        saved_current_image = cnt->current_image;
-        /* Set global context to the image we are processing. */
-        cnt->current_image = &cnt->imgs.preview_image;
-
-        /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
-        use_imagepath = strcmp(cnt->conf.imagepath, "preview");
-
-        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) && !use_imagepath) {
-            if (cnt->conf.useextpipe && cnt->extpipe) {
-                basename_len = strlen(cnt->extpipefilename) + 1;
-                strncpy(previewname, cnt->extpipefilename, basename_len);
-                previewname[basename_len - 1] = '.';
-            } else {
-                /* Replace avi/mpg with jpg/ppm and keep the rest of the filename. */
-                basename_len = strlen(cnt->newfilename) - 3;
-                strncpy(previewname, cnt->newfilename, basename_len);
-            }
-
-            previewname[basename_len] = '\0';
-            strcat(previewname, imageext(cnt));
-
-            passthrough = util_check_passthrough(cnt);
-            if ((cnt->imgs.size_high > 0) && (!passthrough)) {
-                put_picture(cnt, previewname, cnt->imgs.preview_image.image_high , FTYPE_IMAGE);
-            } else {
-                put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm , FTYPE_IMAGE);
-            }
-
-        } else {
-            /*
-             * Save best preview-shot also when no movies are recorded or imagepath
-             * is used. Filename has to be generated - nothing available to reuse!
-             */
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("different filename or picture only!"));
-            /*
-             * conf.imagepath would normally be defined but if someone deleted it by
-             * control interface it is better to revert to the default than fail.
-             */
-            if (cnt->conf.imagepath)
-                imagepath = cnt->conf.imagepath;
-            else
-                imagepath = (char *)DEF_IMAGEPATH;
-
-            mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0);
-            snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
-
-            passthrough = util_check_passthrough(cnt);
-            if ((cnt->imgs.size_high > 0) && (!passthrough)) {
-                put_picture(cnt, previewname, cnt->imgs.preview_image.image_high , FTYPE_IMAGE);
-            } else {
-                put_picture(cnt, previewname, cnt->imgs.preview_image.image_norm, FTYPE_IMAGE);
-            }
-        }
-
-        /* Restore global context values. */
-        cnt->current_image = saved_current_image;
-    }
 }
 
 /**
