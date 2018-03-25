@@ -948,6 +948,12 @@
           <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
         </tr>
         <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#sql_query_stop" >sql_query_stop</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left"><br /></td>
           <td align="left">stream_auth_method</td>
           <td align="left">stream_auth_method</td>
@@ -1728,6 +1734,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_query_stop" >sql_query_stop</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
             </tr>
@@ -4872,6 +4879,27 @@
         Sample Query
         <p></p>
         insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
+        <p></p>
+        <p></p>
+
+        <h3><a name="sql_query_stop"></a> sql_query_stop </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not Defined</li>
+        </ul>
+        <p></p>
+        SQL query that executes on a event where a file is closed after a event of motion.
+        This can be used to for example update the events table with an end timestamp for the recordings.
+        <p></p>
+        <p></p>
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.
+        <p></p>
+        <p></p>
+        Sample Query
+        <p></p>
+        update security_events set event_end_time_stamp='%Y-%m-%d %T' where filename='%f'
         <p></p>
         <p></p>
 
