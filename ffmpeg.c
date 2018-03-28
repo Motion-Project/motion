@@ -197,7 +197,7 @@ static int ffmpeg_timelapse_exists(const char *fname){
 static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
     FILE *file;
 
-    file = fopen(ffmpeg->oc->filename, "a");
+    file = fopen(ffmpeg->filename, "a");
     if (!file) return -1;
 
     fwrite(pkt.data,1,pkt.size,file);
@@ -207,6 +207,10 @@ static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
     return 0;
 }
 
+#if (LIBAVFORMAT_VERSION_MAJOR < 58)
+/* TODO Determine if this is even needed for old versions. Per
+ * documentation for version 58, 'av_lockmgr_register This function does nothing'
+ */
 static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op){
     pthread_mutex_t *mutex = *arg;
     int err;
@@ -241,6 +245,7 @@ static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op){
     }
     return 1;
 }
+#endif
 
 static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
 
@@ -789,7 +794,12 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
     int retcd;
     char errstr[128];
 
+#if (LIBAVFORMAT_VERSION_MAJOR >= 58)
+    sprintf(ffmpeg->oc->url, "%s", ffmpeg->filename);
+#else
     snprintf(ffmpeg->oc->filename, sizeof(ffmpeg->oc->filename), "%s", ffmpeg->filename);
+#endif
+
     /* Open the output file, if needed. */
     if ((ffmpeg_timelapse_exists(ffmpeg->filename) == 0) || (ffmpeg->tlapse != TIMELAPSE_APPEND)) {
         if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
@@ -1176,7 +1186,7 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
 
 void ffmpeg_global_init(void){
 #ifdef HAVE_FFMPEG
-    int ret;
+
 
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
         ,_("ffmpeg libavcodec version %d.%d.%d"
@@ -1184,18 +1194,27 @@ void ffmpeg_global_init(void){
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 
+#if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    /* TODO: Determine if this is even needed for older versions */
     av_register_all();
     avcodec_register_all();
+#endif
+
+
     avformat_network_init();
     avdevice_register_all();
     av_log_set_callback((void *)ffmpeg_avcodec_log);
 
+#if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    /* TODO: Determine if this is even needed for older versions */
+    int ret;
     ret = av_lockmgr_register(ffmpeg_lockmgr_cb);
     if (ret < 0)
     {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("av_lockmgr_register failed (%d)"), ret);
         exit(1);
     }
+#endif
 
 #else /* No FFMPEG */
 
@@ -1208,11 +1227,16 @@ void ffmpeg_global_deinit(void) {
 #ifdef HAVE_FFMPEG
 
     avformat_network_deinit();
+
+#if (LIBAVFORMAT_VERSION_MAJOR < 58)
+    /* TODO Determine if this is even needed for old versions */
     if (av_lockmgr_register(NULL) < 0)
     {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
             ,_("av_lockmgr_register reset failed on cleanup"));
     }
+#endif
+
 
 #else /* No FFMPEG */
 
