@@ -42,21 +42,19 @@
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
  *    Known HTML Issues:
- *      Menu does not close after clicking item
  *      Single and double quotes are not consistently used.
  *      HTML ids do not follow any naming convention.
+ *      After clicking restart/quit, do something..close page? Try to connect again?
  *
  *    Additional functionality considerations:
  *      Match stream authentication methods
  *      Add cors (Cross origin requests)
  *      Notification to user of items that require restart when changed.
- *      Notification to user that item successfully changed.
+ *      Notification to user that item successfully implemented (config change/tracking)
  *      Whether there is a need to perpetuate the non-html interface option.
- *      Implement post method to handle large string parameters.
- *      Status pages provided in legacy interface.
- *      Translations for other languages
- *      Translation hints for configuration parms (One sample provided)
- *      Display the abbreviated help for parms that is specified in conf.c somewhere?
+ *      Implement post method to handle larger string parameters.
+ *      Provide status pages provided in legacy interface.
+ *      List motion parms somewhere so they can be found by xgettext
  *
  *
  *
@@ -70,6 +68,13 @@
 #include "webu.h"
 #include "translate.h"
 
+/* Some defines of lengths for our buffers */
+#define WEBUI_LEN_PARM 512          /* Parameters specified */
+#define WEBUI_LEN_BUFF 1024         /* Buffer from the header */
+#define WEBUI_LEN_RESP 1024         /* Our responses.  (Break up response if more space needed) */
+#define WEBUI_LEN_SPRM 10           /* Shorter parameter buffer (method/protocol) */
+#define WEBUI_LEN_URLI 512          /* Maximum URL permitted */
+#define WEBUI_LEN_THRD 6            /* Maximum length for thread number e.g. 99999 */
 
 struct webui_ctx {
     pthread_mutex_t webu_mutex;  /* The mutex to lock activity on the pipe*/
@@ -114,26 +119,26 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     webui->hostname      = NULL;
 
     /* These will be re-used for multiple calls
-     * so we reserve 512 bytes which should be
+     * so we reserve WEBUI_LEN_PARM bytes which should be
      * plenty (too much?) space and we
      * don't have into overrun problems
      */
 
-    webui->method      = mymalloc(10);
-    webui->url         = mymalloc(512);
-    webui->protocol    = mymalloc(10);
+    webui->method      = mymalloc(WEBUI_LEN_SPRM);
+    webui->url         = mymalloc(WEBUI_LEN_URLI);
+    webui->protocol    = mymalloc(WEBUI_LEN_SPRM);
 
-    webui->uri_thread  = mymalloc(6);
-    webui->uri_cmd1    = mymalloc(512);
-    webui->uri_cmd2    = mymalloc(512);
-    webui->uri_parm1   = mymalloc(512);
-    webui->uri_value1  = mymalloc(512);
-    webui->uri_parm2   = mymalloc(512);
-    webui->uri_value2  = mymalloc(512);
+    webui->uri_thread  = mymalloc(WEBUI_LEN_THRD);
+    webui->uri_cmd1    = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_cmd2    = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_parm1   = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_value1  = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_parm2   = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_value2  = mymalloc(WEBUI_LEN_PARM);
 
-    webui->uri_buffer = mymalloc(1024);
-    webui->lang       = mymalloc(3);
-    webui->lang_full  = mymalloc(6);
+    webui->uri_buffer = mymalloc(WEBUI_LEN_BUFF);
+    webui->lang       = mymalloc(3);    /* Two digit lang code plus null terminator */
+    webui->lang_full  = mymalloc(6);    /* lang code, underscore, country plus null terminator */
 
     /* get the number of cameras and threads */
     indx = 0;
@@ -271,7 +276,7 @@ static ssize_t webu_write(int fd, const void *buf, size_t buffer_size) {
 static void webu_html_ok(struct webui_ctx *webui){
     /* Send message that everything is OK */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "HTTP/1.1 200 OK\r\n"
@@ -292,7 +297,7 @@ static void webu_html_ok(struct webui_ctx *webui){
 static void webu_html_badreq(struct webui_ctx *webui) {
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "HTTP/1.0 400 Bad Request\r\n"
@@ -316,7 +321,7 @@ static void webu_html_badreq(struct webui_ctx *webui) {
 static void webu_text_ok(struct webui_ctx *webui){
     /* Send message that everything is OK */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "HTTP/1.1 200 OK\r\n"
@@ -337,7 +342,7 @@ static void webu_text_ok(struct webui_ctx *webui){
 static void webu_text_badreq(struct webui_ctx *webui) {
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "HTTP/1.0 400 Bad Request\r\n"
@@ -354,7 +359,7 @@ static void webu_text_badreq(struct webui_ctx *webui) {
 static void webu_resp_auth(struct webui_ctx *webui) {
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response), "%s",
         "HTTP/1.0 401 Authorization Required\r\n"
@@ -435,9 +440,10 @@ static void webu_url_decode(char *urlencoded, size_t length) {
 
 static int webu_header_read(struct webui_ctx *webui) {
 
-    int parms_found;
     ssize_t bytes_read = 0, readb = -1;
-    int uri_length=1023;
+    int uri_length=WEBUI_LEN_BUFF - 1;
+    int parm_len;
+    char *st_pos, *en_pos;
 
     bytes_read = webu_read(webui->client_socket, webui->uri_buffer, uri_length);
     if (bytes_read <= 0) {
@@ -447,12 +453,44 @@ static int webu_header_read(struct webui_ctx *webui) {
 
     webui->uri_buffer[bytes_read] = '\0';
 
-    parms_found = sscanf(webui->uri_buffer, "%9s %511s %9s", webui->method, webui->url, webui->protocol);
-    if (parms_found != 3) {
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Error getting method/protocol");
-        webu_html_badreq(webui);
-        return -1;
+    parm_len = 0;
+    /* Get the method from the header */
+    st_pos = webui->uri_buffer;
+    en_pos = strstr(st_pos," ");
+    if (en_pos != NULL){
+        parm_len = en_pos - st_pos + 1;
+        if (parm_len >= WEBUI_LEN_SPRM){
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid method.  Buffer:>%s<",webui->uri_buffer);
+            return -1;
+        }
+        snprintf(webui->method, parm_len,"%s", st_pos);
     }
+
+    /* Get the url name */
+    st_pos = st_pos + parm_len; /* Move past the method */
+    en_pos = strstr(st_pos," ");
+    if (en_pos != NULL){
+        parm_len = en_pos - st_pos + 1;
+        if (parm_len >= WEBUI_LEN_URLI){
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url.  Buffer:>%s<",webui->uri_buffer);
+            return -1;
+        }
+        snprintf(webui->url, parm_len,"%s", st_pos);
+    }
+
+    /* Get the protocol name */
+    st_pos = st_pos + parm_len; /* Move past the url */
+    en_pos = strstr(st_pos,"\r");
+    if (en_pos != NULL){
+        parm_len = en_pos - st_pos + 1;
+        if (parm_len >= WEBUI_LEN_SPRM){
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid protocol.  Buffer:>%s< %d"
+                ,webui->uri_buffer,parm_len);
+            return -1;
+        }
+        snprintf(webui->protocol, parm_len,"%s", st_pos);
+    }
+
     /* Read remaining header requests until crlf crlf */
     while ((strstr(webui->uri_buffer, "\r\n\r\n") == NULL) &&
            (bytes_read != 0) &&
@@ -563,9 +601,9 @@ static int webu_header_hostname(struct webui_ctx *webui) {
 
     if (webui->hostname == NULL){
         /* Set the host that is running Motion */
-        webui->hostname = mymalloc(1024);
-        memset(webui->hostname,'\0',1024);
-        gethostname(webui->hostname, 1023);
+        webui->hostname = mymalloc(WEBUI_LEN_PARM);
+        memset(webui->hostname,'\0',WEBUI_LEN_PARM);
+        gethostname(webui->hostname, WEBUI_LEN_PARM - 1);
     }
     return 0;
 }
@@ -584,7 +622,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
     en_pos = strstr(st_pos,"?");
     if (en_pos != NULL){
         parm_len = en_pos - st_pos + 1;
-        if (parm_len > 511) return;
+        if (parm_len >= WEBUI_LEN_PARM) return;
         snprintf(webui->uri_cmd2, parm_len,"%s", st_pos);
 
         /* Get the parameter name */
@@ -596,7 +634,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
         } else {
             parm_len = en_pos - st_pos + 1;
         }
-        if (parm_len > 511) return;
+        if (parm_len >= WEBUI_LEN_PARM) return;
         snprintf(webui->uri_parm1, parm_len,"%s", st_pos);
 
         if (!last_parm){
@@ -609,7 +647,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
-            if (parm_len > 511) return;
+            if (parm_len >= WEBUI_LEN_PARM) return;
             snprintf(webui->uri_value1, parm_len,"%s", st_pos);
         }
 
@@ -623,7 +661,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
-            if (parm_len > 511) return;
+            if (parm_len >= WEBUI_LEN_PARM) return;
             snprintf(webui->uri_parm2, parm_len,"%s", st_pos);
         }
 
@@ -637,7 +675,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
-            if (parm_len > 511) return;
+            if (parm_len >= WEBUI_LEN_PARM) return;
             snprintf(webui->uri_value2, parm_len,"%s", st_pos);
         }
 
@@ -651,13 +689,13 @@ static void webu_parseurl_reset(struct webui_ctx *webui) {
      * are re-used across calls.  These are allocated
      * larger sizes to allow for multiple variable types.
      */
-    memset(webui->uri_thread,'\0',6);
-    memset(webui->uri_cmd1,'\0',512);
-    memset(webui->uri_cmd2,'\0',512);
-    memset(webui->uri_parm1,'\0',512);
-    memset(webui->uri_value1,'\0',512);
-    memset(webui->uri_parm2,'\0',512);
-    memset(webui->uri_value2,'\0',512);
+    memset(webui->uri_thread,'\0',WEBUI_LEN_THRD);
+    memset(webui->uri_cmd1,'\0',WEBUI_LEN_PARM);
+    memset(webui->uri_cmd2,'\0',WEBUI_LEN_PARM);
+    memset(webui->uri_parm1,'\0',WEBUI_LEN_PARM);
+    memset(webui->uri_value1,'\0',WEBUI_LEN_PARM);
+    memset(webui->uri_parm2,'\0',WEBUI_LEN_PARM);
+    memset(webui->uri_value2,'\0',WEBUI_LEN_PARM);
 
 }
 
@@ -700,7 +738,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
     } else {
         parm_len = en_pos - st_pos + 1;
     }
-    if (parm_len > 5) return -1; /* var was malloc'd to 6 */
+    if (parm_len >= WEBUI_LEN_THRD) return -1; /* var was malloc'd to WEBUI_LEN_THRD */
     snprintf(webui->uri_thread, parm_len,"%s", st_pos);
 
     if (!last_slash){
@@ -713,7 +751,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
         } else {
             parm_len = en_pos - st_pos + 1;
         }
-        if (parm_len > 511) return -1; /* var was malloc'd to 512 */
+        if (parm_len >= WEBUI_LEN_PARM) return -1; /* var was malloc'd to WEBUI_LEN_PARM */
         snprintf(webui->uri_cmd1, parm_len,"%s", st_pos);
     }
 
@@ -727,7 +765,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
         } else {
             parm_len = en_pos - st_pos + 1;
         }
-        if (parm_len > 511) return -1; /* var was malloc'd to 512 */
+        if (parm_len >= WEBUI_LEN_PARM) return -1; /* var was malloc'd to WEBUI_LEN_PARM */
         snprintf(webui->uri_cmd2, parm_len,"%s", st_pos);
     }
 
@@ -752,7 +790,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
 static void webu_html_style_navbar(struct webui_ctx *webui) {
     /* Write out the style section of the web page */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    .navbar {\n"
@@ -780,7 +818,7 @@ static void webu_html_style_navbar(struct webui_ctx *webui) {
 static void webu_html_style_dropdown(struct webui_ctx *webui) {
     /* Write out the style section of the web page */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    .dropdown {\n"
@@ -828,7 +866,7 @@ static void webu_html_style_dropdown(struct webui_ctx *webui) {
 static void webu_html_style_input(struct webui_ctx *webui) {
     /* Write out the style section of the web page */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    input , select  {\n"
@@ -855,7 +893,7 @@ static void webu_html_style_input(struct webui_ctx *webui) {
 static void webu_html_style_base(struct webui_ctx *webui) {
     /* Write out the style section of the web page */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    * {margin: 0; padding: 0; }\n"
@@ -920,7 +958,7 @@ static void webu_html_style_base(struct webui_ctx *webui) {
 static void webu_html_style(struct webui_ctx *webui) {
     /* Write out the style section of the web page */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s", "  <style>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -936,7 +974,6 @@ static void webu_html_style(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),"%s", "  </style>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
-
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
 
 }
@@ -944,7 +981,7 @@ static void webu_html_style(struct webui_ctx *webui) {
 static void webu_html_head(struct webui_ctx *webui) {
     /* Write out the header section of the web page */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s","<head>\n"
         "  <meta charset=\"UTF-8\">\n"
@@ -964,7 +1001,7 @@ static void webu_html_head(struct webui_ctx *webui) {
 static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webui) {
     /*Write out the options included in the camera dropdown */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int indx;
 
     if (webui->cam_threads == 1){
@@ -1026,7 +1063,7 @@ static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webu
 static void webu_html_navbar_action(struct webui_ctx *webui) {
     /* Write out the options included in the actions dropdown*/
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),
         "    <div class=\"dropdown\">\n"
@@ -1062,7 +1099,7 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
 static void webu_html_navbar(struct context **cnt, struct webui_ctx *webui) {
     /* Write the navbar section*/
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "  <div class=\"navbar\">\n");
@@ -1087,7 +1124,7 @@ static void webu_html_navbar(struct context **cnt, struct webui_ctx *webui) {
 static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webui) {
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     if (cnt[0]->conf.webcontrol_parms == 0){
         snprintf(response, sizeof (response),
@@ -1121,7 +1158,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
      */
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int indx_parm, indx, diff_vals;
     const char *val_main, *val_thread;
 
@@ -1219,7 +1256,7 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
 static void webu_html_track(struct webui_ctx *webui) {
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),
         "  <div id='trk_form' style='display:none'>\n"
@@ -1257,7 +1294,7 @@ static void webu_html_preview(struct context **cnt, struct webui_ctx *webui) {
     /* Write the initial version of the preview section.  The javascript
      * will change this section when user selects a different camera */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int indx, indx_st, strm_port;
 
     snprintf(response, sizeof (response),"%s",
@@ -1301,7 +1338,7 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
      * submission and response is currently a empty if block for the future
      * enhancement to somehow notify the user everything worked */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function action_click(actval) {\n"
@@ -1350,7 +1387,7 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
 static void webu_html_script_camera_thread(struct context **cnt, struct webui_ctx *webui) {
     /* Write the javascript thread IF conditions of camera_click() function */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int  strm_port;
     int indx, indx_st;
 
@@ -1398,7 +1435,7 @@ static void webu_html_script_camera_thread(struct context **cnt, struct webui_ct
 static void webu_html_script_camera_all(struct context **cnt, struct webui_ctx *webui) {
     /* Write the javascript "All" IF condition of camera_click() function */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int  strm_port;
     int indx, indx_st;
 
@@ -1446,7 +1483,7 @@ static void webu_html_script_camera_all(struct context **cnt, struct webui_ctx *
 static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webui) {
     /* Write the javascript camera_click() function */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function camera_click(camid) {\n"
@@ -1474,7 +1511,7 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
 static void webu_html_script_menucam(struct webui_ctx *webui) {
     /* Write the javascript display_cameras() function */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function display_cameras() {\n"
@@ -1494,7 +1531,7 @@ static void webu_html_script_menucam(struct webui_ctx *webui) {
 static void webu_html_script_menuact(struct webui_ctx *webui) {
     /* Write the javascript display_actions() function */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function display_actions() {\n"
@@ -1514,7 +1551,7 @@ static void webu_html_script_menuact(struct webui_ctx *webui) {
 static void webu_html_script_evtclk(struct webui_ctx *webui) {
     /* Write the javascript 'click' EventListener */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    document.addEventListener('click', function(event) {\n"
@@ -1537,7 +1574,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
      * enhancement to somehow notify the user everything worked */
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function config_click() {\n"
@@ -1582,7 +1619,7 @@ static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webu
 static void webu_html_script_cfgchg(struct webui_ctx *webui) {
     /* Write the javascript option_change function */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function config_change() {\n"
@@ -1601,7 +1638,7 @@ static void webu_html_script_cfgchg(struct webui_ctx *webui) {
 
 static void webu_html_script_trkchg(struct webui_ctx *webui) {
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
         "    function track_change() {\n"
@@ -1642,7 +1679,7 @@ static void webu_html_script_trkchg(struct webui_ctx *webui) {
 
 static void webu_html_script_trkclk(struct context **cnt, struct webui_ctx *webui) {
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     snprintf(response, sizeof (response),"%s",
         "    function track_click() {\n"
         "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
@@ -1688,7 +1725,7 @@ static void webu_html_script_trkclk(struct context **cnt, struct webui_ctx *webu
 static void webu_html_script(struct context **cnt, struct webui_ctx *webui) {
     /* Write the javascripts */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s", "  <script>\n");
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -1720,7 +1757,7 @@ static void webu_html_script(struct context **cnt, struct webui_ctx *webui) {
 static void webu_html_body(struct context **cnt, struct webui_ctx *webui) {
     /* Write the body section of the form */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s","<body class=\"body\">\n");
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -1752,7 +1789,7 @@ static void webu_html_body(struct context **cnt, struct webui_ctx *webui) {
 static void webu_html_page(struct context **cnt, struct webui_ctx *webui) {
     /* Write the main page html */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),
         "<!DOCTYPE html>\n"
@@ -2018,7 +2055,7 @@ static int webu_html_main(struct context **cnt, struct webui_ctx *webui) {
 static void webu_text_page(struct webui_ctx *webui) {
     /* Write the main page text */
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int indx, indx_st;
 
     indx_st = 1;
@@ -2041,7 +2078,7 @@ static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
     /* Write out the options and values */
 
     ssize_t written;
-    char response[1024];
+    char response[WEBUI_LEN_RESP];
     int indx_parm;
 
     indx_parm = 0;
