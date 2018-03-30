@@ -615,7 +615,13 @@
           <td height="17" align="left">lightswitch</td>
           <td align="left">lightswitch</td>
           <td align="left">lightswitch</td>
-          <td align="left"><a href="#lightswitch" >lightswitch</a></td>
+          <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
+        </tr>
+        <tr>
+            <td height="17" align="left"></td>
+            <td align="left"></td>
+            <td align="left"></td>
+            <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
         </tr>
         <tr>
           <td height="17" align="left">locate</td>
@@ -1503,7 +1509,8 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#lightswitch" >lightswitch</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
             </tr>
@@ -3437,7 +3444,7 @@
 
         <p></p>
 
-        <h3><a name="lightswitch"></a> lightswitch </h3>
+        <h3><a name="lightswitch_percent"></a> lightswitch_percent </h3>
         <p></p>
         <ul>
           <li> Type: Integer</li>
@@ -3447,8 +3454,19 @@
         <p></p>
         Ignore sudden massive light intensity changes given as a percentage of the picture area that changed intensity.
         The value defines the picture areas in percent that will trigger the lightswitch condition. When lightswitch is
-        detected motion detection is disabled for 5 picture frames. This is to avoid false detection when light conditions
-        change and when a camera changes sensitivity at low light.
+        detected motion detection is disabled for a configured number of frames. This is to avoid false detection when
+        light conditions change and when a camera changes sensitivity at low light.
+        <p></p>
+
+        <h3><a name="lightswitch_frames"></a> lightswitch_frames </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 1 - 1000</li>
+          <li> Default: 5</li>
+        </ul>
+        <p></p>
+        The number of frames to ignore when the lightswitch condition is triggered (see above).
         <p></p>
 
         <h3><a name="minimum_motion_frames"></a> minimum_motion_frames </h3>

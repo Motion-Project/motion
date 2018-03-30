@@ -51,7 +51,8 @@ struct config {
     int noise;
     int noise_tune;
     int minimum_frame_time;
-    int lightswitch;
+    int lightswitch_percent;
+    int lightswitch_frames;
     int autobright;
     char *vid_control_params;
     int roundrobin_frames;

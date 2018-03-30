@@ -1258,13 +1258,13 @@ int alg_lightswitch(struct context *cnt, int diffs)
 {
     struct images *imgs = &cnt->imgs;
 
-    if (cnt->conf.lightswitch < 0)
-        cnt->conf.lightswitch = 0;
-    if (cnt->conf.lightswitch > 100)
-        cnt->conf.lightswitch = 100;
+    if (cnt->conf.lightswitch_percent < 0)
+        cnt->conf.lightswitch_percent = 0;
+    if (cnt->conf.lightswitch_percent > 100)
+        cnt->conf.lightswitch_percent = 100;
 
     /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cnt->conf.lightswitch / 100))
+    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100))
         return 1;
 
     return 0;
