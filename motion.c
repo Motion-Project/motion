@@ -290,7 +290,8 @@ static void context_destroy(struct context *cnt)
     /* Free memory allocated for config parameters */
     for (j = 0; config_params[j].param_name != NULL; j++) {
         if (config_params[j].copy == copy_string ||
-            config_params[j].copy == copy_uri) {
+            config_params[j].copy == copy_uri ||
+            config_params[j].copy == read_camera_dir) {
             void **val;
             val = (void *)((char *)cnt+(int)config_params[j].conf_value);
             if (*val) {

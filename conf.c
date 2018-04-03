@@ -166,7 +166,6 @@ static void malloc_strings(struct context *);
 static struct context **copy_bool(struct context **, const char *, int);
 static struct context **copy_int(struct context **, const char *, int);
 static struct context **config_camera(struct context **cnt, const char *str, int val);
-static struct context **read_camera_dir(struct context **cnt, const char *str, int val);
 static struct context **copy_vid_ctrl(struct context **, const char *, int);
 static struct context **copy_text_double(struct context **, const char *, int);
 static struct context **copy_html_output(struct context **, const char *, int);
@@ -2834,8 +2833,7 @@ static const char *print_camera(struct context **cnt, char **str,
  *     When found calls config_camera
  */
 
-static struct context **read_camera_dir(struct context **cnt, const char *str,
-                                            int val)
+struct context **read_camera_dir(struct context **cnt, const char *str, int val)
 {
     DIR *dp;
     struct dirent *ep;
