@@ -183,8 +183,13 @@ noise_level 32
 smart_mask_speed 0
 
 # Ignore sudden massive light intensity changes given as a percentage of the picture
-# area that changed intensity. Valid range: 0 - 100 , default: 0 = disabled
-lightswitch 0
+# area that changed intensity. If set to 1, motion will do some kind of
+# auto-lightswitch. Valid range: 0 - 100 , default: 0 = disabled
+lightswitch_percent 0
+
+# When lightswitch is detected, ignore this many frames
+# Valid range: 1 - 1000 , default: 5"
+lightswitch_frames 5
 
 # Picture frames must contain motion at least the specified number of frames
 # in a row before they are detected as true motion. At the default of 1, all

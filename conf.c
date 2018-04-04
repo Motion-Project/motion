@@ -59,7 +59,8 @@ struct config conf_template = {
     .noise =                           DEF_NOISELEVEL,
     .noise_tune =                      1,
     .minimum_frame_time =              0,
-    .lightswitch =                     0,
+    .lightswitch_percent =             0,
+    .lightswitch_frames =              5,
     .autobright =                      0,
     .vid_control_params =              NULL,
     .roundrobin_frames =               1,
@@ -711,12 +712,22 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "lightswitch",
+    "lightswitch_percent",
     "# Ignore sudden massive light intensity changes given as a percentage of the picture\n"
     "# area that changed intensity. If set to 1, motion will do some kind of\n"
     "# auto-lightswitch. Valid range: 0 - 100 , default: 0 = disabled",
     0,
-    CONF_OFFSET(lightswitch),
+    CONF_OFFSET(lightswitch_percent),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "lightswitch_frames",
+    "# When lightswitch is detected, ignore this many frames\n"
+    "# Valid range: 1 - 1000 , default: 5",
+    0,
+    CONF_OFFSET(lightswitch_frames),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
@@ -1799,6 +1810,13 @@ dep_config_param dep_config_params[] = {
     "\"webcontrol_html_output\" replaced with \"webcontrol_interface\" option.",
     CONF_OFFSET(webcontrol_interface),
     copy_html_output
+    },
+    {
+     "lightswitch",
+    "4.1.1",
+    "\"lightswitch\" replaced with \"lightswitch_percent\" and \"lightswitch_frames\" options.",
+    CONF_OFFSET(lightswitch_percent),
+    copy_int
     },
     { NULL, NULL, NULL, 0, NULL}
 };

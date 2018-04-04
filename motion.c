@@ -1983,15 +1983,20 @@ static void mlp_detection(struct context *cnt){
             /* Lightswitch feature - has light intensity changed?
              * This can happen due to change of light conditions or due to a sudden change of the camera
              * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
-             * 5 frames to allow the camera to settle.
+             * 'lightswitch_frames' frames to allow the camera to settle.
              * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
              */
-            if (cnt->conf.lightswitch > 1 && !cnt->lost_connection) {
+            if (cnt->conf.lightswitch_percent > 1 && !cnt->lost_connection) {
                 if (alg_lightswitch(cnt, cnt->current_image->diffs)) {
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
 
-                    if (cnt->moved < 5)
-                        cnt->moved = 5;
+                    if (cnt->conf.lightswitch_frames < 1)
+                        cnt->conf.lightswitch_frames = 1;
+                    else if (cnt->conf.lightswitch_frames > 1000)
+                        cnt->conf.lightswitch_frames = 1000;
+
+                    if (cnt->moved < (unsigned int)cnt->conf.lightswitch_frames)
+                        cnt->moved = (unsigned int)cnt->conf.lightswitch_frames;
 
                     cnt->current_image->diffs = 0;
                     alg_update_reference_frame(cnt, RESET_REF_FRAME);
@@ -2112,7 +2117,7 @@ static void mlp_tuning(struct context *cnt){
          * at a constant level.
          */
 
-        if ((cnt->current_image->diffs > cnt->threshold) && (cnt->conf.lightswitch == 1) &&
+        if ((cnt->current_image->diffs > cnt->threshold) && (cnt->conf.lightswitch_percent == 1) &&
             (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
             /* number of changed pixels almost the same in two consecutive frames and */
             ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
