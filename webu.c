@@ -1388,6 +1388,8 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
         "        http.send(null);\n"
         "      }\n"
         "      document.getElementById('act_btn').style.display=\"none\"; \n"
+        "      document.getElementById('cfg_value').value = '';\n"
+        "      document.getElementById('cfg_parms').value = 'default';\n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1512,6 +1514,8 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
         "      document.getElementById('cfg_form').style.display=\"none\"; \n"
         "      document.getElementById('trk_form').style.display=\"none\"; \n"
         "      document.getElementById('cam_btn').style.display=\"none\"; \n"
+        "      document.getElementById('cfg_value').value = '';\n"
+        "      document.getElementById('cfg_parms').value = 'default';\n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
