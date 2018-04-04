@@ -900,7 +900,7 @@ static void webu_html_style_base(struct webui_ctx *webui) {
         "    body {\n"
         "      padding: 0;\n"
         "      margin: 0;\n"
-        "      font-family: \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n"
+        "      font-family: Arial, Helvetica, sans-serif;\n"
         "      font-size: 16px;\n"
         "      line-height: 1;\n"
         "      color: #606c71;\n"
