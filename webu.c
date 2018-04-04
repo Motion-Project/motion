@@ -1128,19 +1128,19 @@ static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webu
 
     if (cnt[0]->conf.webcontrol_parms == 0){
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
             ,_("No Configuration Options"));
     } else if (cnt[0]->conf.webcontrol_parms == 1){
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
             ,_("Limited Configuration Options"));
     } else if (cnt[0]->conf.webcontrol_parms == 2){
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
             ,_("Advanced Configuration Options"));
     } else{
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 3 (%s)</h4>\n"
             ,_("Restricted Configuration Options"));
     }
     written = webu_write(webui->client_socket, response, strlen(response));
