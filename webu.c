@@ -900,7 +900,7 @@ static void webu_html_style_base(struct webui_ctx *webui) {
         "    body {\n"
         "      padding: 0;\n"
         "      margin: 0;\n"
-        "      font-family: \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n"
+        "      font-family: Arial, Helvetica, sans-serif;\n"
         "      font-size: 16px;\n"
         "      line-height: 1;\n"
         "      color: #606c71;\n"
@@ -1128,19 +1128,19 @@ static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webu
 
     if (cnt[0]->conf.webcontrol_parms == 0){
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
             ,_("No Configuration Options"));
     } else if (cnt[0]->conf.webcontrol_parms == 1){
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
             ,_("Limited Configuration Options"));
     } else if (cnt[0]->conf.webcontrol_parms == 2){
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
             ,_("Advanced Configuration Options"));
     } else{
         snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = %s</h4>\n"
+            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 3 (%s)</h4>\n"
             ,_("Restricted Configuration Options"));
     }
     written = webu_write(webui->client_socket, response, strlen(response));
@@ -1161,6 +1161,8 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
     char response[WEBUI_LEN_RESP];
     int indx_parm, indx, diff_vals;
     const char *val_main, *val_thread;
+    char *val_temp;
+
 
     snprintf(response, sizeof (response),"%s",
         "  <div id='cfg_form' style=\"display:none\">\n");
@@ -1176,6 +1178,11 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
         ,_("Select option"));
     written = webu_write(webui->client_socket, response, strlen(response));
 
+    /* The config_params[indx_parm].print reuses the buffer so create a
+     * temporary variable for storing our parameter from main to compare
+     * to the thread specific value
+     */
+    val_temp=malloc(PATH_MAX);
     indx_parm = 0;
     while (config_params[indx_parm].param_name != NULL){
 
@@ -1192,22 +1199,24 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
             , config_params[indx_parm].param_name);
         written = webu_write(webui->client_socket, response, strlen(response));
 
+        memset(val_temp,'\0',PATH_MAX);
         if (val_main != NULL){
             snprintf(response, sizeof (response),"%s", val_main);
             written = webu_write(webui->client_socket, response, strlen(response));
+            snprintf(val_temp, PATH_MAX,"%s", val_main);
         }
 
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
                 val_thread=config_params[indx_parm].print(cnt, NULL, indx_parm, indx);
                 diff_vals = 0;
-                if (((val_main == NULL) && (val_thread == NULL)) ||
-                    ((val_main != NULL) && (val_thread == NULL))) {
+                if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
+                    ((strlen(val_temp) != 0) && (val_thread == NULL))) {
                     diff_vals = 0;
-                } else if (((val_main == NULL) && (val_thread != NULL)) ) {
+                } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
                     diff_vals = 1;
                 } else {
-                    if (strcasecmp(val_main, val_thread)) diff_vals = 1;
+                    if (strcasecmp(val_temp, val_thread)) diff_vals = 1;
                 }
                 if (diff_vals){
                     snprintf(response, sizeof (response),"%s","\" \\ \n");
@@ -1239,6 +1248,8 @@ static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
 
         indx_parm++;
     }
+
+    free(val_temp);
 
     snprintf(response, sizeof (response),
         "      </select>\n"
@@ -1377,6 +1388,8 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
         "        http.send(null);\n"
         "      }\n"
         "      document.getElementById('act_btn').style.display=\"none\"; \n"
+        "      document.getElementById('cfg_value').value = '';\n"
+        "      document.getElementById('cfg_parms').value = 'default';\n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -1501,6 +1514,8 @@ static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webu
         "      document.getElementById('cfg_form').style.display=\"none\"; \n"
         "      document.getElementById('trk_form').style.display=\"none\"; \n"
         "      document.getElementById('cam_btn').style.display=\"none\"; \n"
+        "      document.getElementById('cfg_value').value = '';\n"
+        "      document.getElementById('cfg_parms').value = 'default';\n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
