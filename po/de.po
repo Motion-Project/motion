@@ -48,11 +48,11 @@ msgstr "Konfiguration ändern"
 
 #: src/webu.c:1044
 msgid "Write Configuration"
-msgstr "Schreiben Sie die Konfiguration"
+msgstr "Speichern Sie die Konfiguration"
 
 #: src/webu.c:1045
 msgid "Tracking"
-msgstr "Verfolgung"
+msgstr "Verfolgen"
 
 #: src/webu.c:1046
 msgid "Pause"
@@ -96,7 +96,7 @@ msgstr "Wähle eine Option"
 
 #: src/webu.c:1205 src/webu.c:1241
 msgid "Save"
-msgstr "Sparen"
+msgstr "Speichern"
 
 #: src/webu.c:1236
 msgid "Pan/Tilt"
