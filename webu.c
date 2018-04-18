@@ -731,6 +731,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     /* Get thread number */
     st_pos = webui->url + 1; /* Move past the first "/" */
+    if (*st_pos == '-') return -1; /* Never allow a negative thread number */
     en_pos = strstr(st_pos,"/");
     if (en_pos == NULL){
         parm_len = strlen(webui->url);
@@ -2094,7 +2095,19 @@ static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
 
     ssize_t written;
     char response[WEBUI_LEN_RESP];
-    int indx_parm;
+    int thread_nbr, indx_parm;
+
+    if (webui->uri_thread == NULL){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        return;
+    }
+
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
+    thread_nbr = atoi(webui->uri_thread);
+    if (thread_nbr >= webui->cam_threads){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        return;
+    }
 
     indx_parm = 0;
     written = 1;
@@ -2108,7 +2121,7 @@ static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
 
         snprintf(response, sizeof (response),"  %s = %s \n",
              config_params[indx_parm].param_name,
-             config_params[indx_parm].print(cnt, NULL, indx_parm, 0));
+             config_params[indx_parm].print(cnt, NULL, indx_parm, thread_nbr));
         written = webu_write(webui->client_socket, response, strlen(response));
 
         indx_parm++;
