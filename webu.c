@@ -731,6 +731,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     /* Get thread number */
     st_pos = webui->url + 1; /* Move past the first "/" */
+    if (*st_pos == '-') return -1; /* Never allow a negative thread number */
     en_pos = strstr(st_pos,"/");
     if (en_pos == NULL){
         parm_len = strlen(webui->url);
