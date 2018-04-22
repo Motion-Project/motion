@@ -1354,6 +1354,13 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
+        "    function event_reloadpage() {\n"
+        "      window.location.reload();\n"
+        "    }\n\n"
+    );
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    snprintf(response, sizeof (response),"%s",
         "    function action_click(actval) {\n"
         "      if (actval == \"config\"){\n"
         "        document.getElementById('trk_form').style.display=\"none\";\n"
@@ -1366,7 +1373,11 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
         "        document.getElementById('trk_form').style.display=\"none\";\n"
         "        var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
         "        var camnbr = camstr.substring(4,7);\n"
-        "        var http = new XMLHttpRequest();\n");
+        "        var http = new XMLHttpRequest();\n"
+        "        if ((actval == \"/detection/pause\") || (actval == \"/detection/start\")) {\n"
+        "          http.addEventListener('load', event_reloadpage); \n"
+        "        }\n"
+    );
     written = webu_write(webui->client_socket, response, strlen(response));
 
     snprintf(response, sizeof (response),
@@ -1392,9 +1403,6 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
         "      document.getElementById('act_btn').style.display=\"none\"; \n"
         "      document.getElementById('cfg_value').value = '';\n"
         "      document.getElementById('cfg_parms').value = 'default';\n"
-        "      if ((actval == \"/detection/pause\") || (actval == \"/detection/start\")) {\n"
-        "        window.location.reload(); "
-        "      }\n"
         "    }\n\n");
     written = webu_write(webui->client_socket, response, strlen(response));
 
