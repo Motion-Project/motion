@@ -1221,7 +1221,7 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev) {
     curdev->fd_device = -1;
     fd_device = -1;
 
-    fd_device = open(curdev->video_device, O_RDWR);
+    fd_device = open(curdev->video_device, O_RDWR|O_CLOEXEC);
     if (fd_device > 0) {
         curdev->fd_device = fd_device;
         src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;

@@ -756,7 +756,7 @@ Error:
  */
 int http_bindsock(int port, int local, int ipv6_enabled)
 {
-    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM|SOCK_CLOEXEC, IPPROTO_TCP);
 
     if (sd == -1)
     {

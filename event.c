@@ -724,7 +724,7 @@ static void event_create_extpipe(struct context *cnt,
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cnt->moviefps: %d", cnt->movie_fps);
 
         event(cnt, EVENT_FILECREATE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, currenttime_tv);
-        cnt->extpipe = popen(stamp, "w");
+        cnt->extpipe = popen(stamp, "we");
 
         if (cnt->extpipe == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("popen failed"));
