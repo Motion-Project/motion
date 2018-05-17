@@ -41,6 +41,9 @@
  *      The conf_cmdparse assumes that the pointers to the motion context for each
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
+ *      Need to investigate use of 'if (webui->uri_thread == NULL){'  The pointer should
+ *        never be null until we exit.  We memset the memory pointed to with '\0'
+ *      Should store the thread number as a number in the context
  *    Known HTML Issues:
  *      Single and double quotes are not consistently used.
  *      HTML ids do not follow any naming convention.
@@ -51,9 +54,7 @@
  *      Add cors (Cross origin requests)
  *      Notification to user of items that require restart when changed.
  *      Notification to user that item successfully implemented (config change/tracking)
- *      Whether there is a need to perpetuate the non-html interface option.
  *      Implement post method to handle larger string parameters.
- *      Provide status pages provided in legacy interface.
  *      List motion parms somewhere so they can be found by xgettext
  *
  *
@@ -1353,6 +1354,13 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),"%s",
+        "    function event_reloadpage() {\n"
+        "      window.location.reload();\n"
+        "    }\n\n"
+    );
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    snprintf(response, sizeof (response),"%s",
         "    function action_click(actval) {\n"
         "      if (actval == \"config\"){\n"
         "        document.getElementById('trk_form').style.display=\"none\";\n"
@@ -1365,7 +1373,11 @@ static void webu_html_script_action(struct context **cnt, struct webui_ctx *webu
         "        document.getElementById('trk_form').style.display=\"none\";\n"
         "        var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
         "        var camnbr = camstr.substring(4,7);\n"
-        "        var http = new XMLHttpRequest();\n");
+        "        var http = new XMLHttpRequest();\n"
+        "        if ((actval == \"/detection/pause\") || (actval == \"/detection/start\")) {\n"
+        "          http.addEventListener('load', event_reloadpage); \n"
+        "        }\n"
+    );
     written = webu_write(webui->client_socket, response, strlen(response));
 
     snprintf(response, sizeof (response),
@@ -1426,13 +1438,22 @@ static void webu_html_script_camera_thread(struct context **cnt, struct webui_ct
         if (cnt[indx]->conf.camera_name == NULL){
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s %d</h3>\"\n"
-                ,_("Camera"), indx);
+                " class='header-center' >%s %d (%s)</h3>\"\n"
+                ,_("Camera")
+                , indx
+                ,(!cnt[indx]->running)? _("Not running") :
+                 (cnt[indx]->lost_connection)? _("Lost connection"):
+                 (cnt[indx]->pause)? _("Paused"):_("Active")
+             );
         } else {
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s</h3>\"\n"
-                , cnt[indx]->conf.camera_name);
+                " class='header-center' >%s (%s)</h3>\"\n"
+                , cnt[indx]->conf.camera_name
+                ,(!cnt[indx]->running)? _("Not running") :
+                 (cnt[indx]->lost_connection)? _("Lost connection"):
+                 (cnt[indx]->pause)? _("Paused"):_("Active")
+                );
         }
         written = webu_write(webui->client_socket, response, strlen(response));
 
@@ -2096,6 +2117,7 @@ static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
     ssize_t written;
     char response[WEBUI_LEN_RESP];
     int thread_nbr, indx_parm;
+    const char *val_parm;
 
     if (webui->uri_thread == NULL){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
@@ -2114,14 +2136,19 @@ static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
     while (config_params[indx_parm].param_name != NULL){
 
         if ((config_params[indx_parm].webui_level > cnt[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
+            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            ((thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        snprintf(response, sizeof (response),"  %s = %s \n",
-             config_params[indx_parm].param_name,
-             config_params[indx_parm].print(cnt, NULL, indx_parm, thread_nbr));
+        val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, thread_nbr);
+        if (val_parm == NULL){
+            val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, 0);
+        }
+        snprintf(response, sizeof (response),"  %s = %s \n"
+            ,config_params[indx_parm].param_name
+            ,val_parm);
         written = webu_write(webui->client_socket, response, strlen(response));
 
         indx_parm++;
@@ -2130,6 +2157,244 @@ static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
     if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
 
 }
+
+static void webu_text_get(struct context **cnt, struct webui_ctx *webui) {
+    /* Write out the option value for one parm */
+
+    ssize_t written;
+    char response[WEBUI_LEN_RESP];
+    int indx_parm, thread_nbr;
+    const char *val_parm;
+
+    if (webui->uri_thread == NULL){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        return;
+    }
+
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
+    thread_nbr = atoi(webui->uri_thread);
+    if (thread_nbr >= webui->cam_threads){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        return;
+    }
+
+    indx_parm = 0;
+    written = 1;
+    while (config_params[indx_parm].param_name != NULL){
+
+        if ((config_params[indx_parm].webui_level > cnt[0]->conf.webcontrol_parms) ||
+            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            strcmp(webui->uri_parm1,"query") ||
+            strcmp(webui->uri_value1, config_params[indx_parm].param_name)){
+            indx_parm++;
+            continue;
+        }
+
+        val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, thread_nbr);
+        if (val_parm == NULL){
+            val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, 0);
+        }
+
+        snprintf(response, sizeof (response),"%s = %s \nDone\n"
+            ,config_params[indx_parm].param_name
+            ,val_parm);
+        written = webu_write(webui->client_socket, response, strlen(response));
+
+        break;
+    }
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_text_status(struct context **cnt, struct webui_ctx *webui) {
+    /* Write out the pause/active status */
+
+    ssize_t written;
+    char response[WEBUI_LEN_RESP];
+    int indx, indx_st, thread_nbr;
+
+    indx_st = 1;
+    if (webui->cam_threads == 1) indx_st = 0;
+
+    written = 0;
+    if (webui->uri_thread == NULL){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        return;
+    }
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
+    thread_nbr = atoi(webui->uri_thread);
+    if (thread_nbr >= webui->cam_threads){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        return;
+    }
+
+    if (thread_nbr == 0){
+        for (indx = indx_st; indx < webui->cam_threads; indx++) {
+        snprintf(response, sizeof(response),
+            "Camera %d Detection status %s\n"
+            ,cnt[indx]->conf.camera_id
+            ,(!cnt[indx]->running)? "NOT RUNNING":
+            (cnt[indx]->pause)? "PAUSE":"ACTIVE");
+            written = webu_write(webui->client_socket, response, strlen(response));
+        }
+    } else {
+        snprintf(response, sizeof(response),
+            "Camera %d Detection status %s\n"
+            ,cnt[thread_nbr]->conf.camera_id
+            ,(!cnt[thread_nbr]->running)? "NOT RUNNING":
+            (cnt[thread_nbr]->pause)? "PAUSE":"ACTIVE");
+        written = webu_write(webui->client_socket, response, strlen(response));
+    }
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_text_connection(struct context **cnt, struct webui_ctx *webui) {
+    /* Write out the connection status */
+
+    ssize_t written;
+    char response[WEBUI_LEN_RESP];
+    int indx, indx_st, thread_nbr;
+
+    indx_st = 1;
+    if (webui->cam_threads == 1) indx_st = 0;
+
+    written = 0;
+    if (webui->uri_thread == NULL){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        return;
+    }
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
+    thread_nbr = atoi(webui->uri_thread);
+    if (thread_nbr >= webui->cam_threads){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        return;
+    }
+
+    if (thread_nbr == 0){
+        for (indx = indx_st; indx < webui->cam_threads; indx++) {
+        snprintf(response,sizeof(response)
+            , "Camera %d%s%s %s\n"
+            ,cnt[indx]->conf.camera_id
+            ,cnt[indx]->conf.camera_name ? " -- " : ""
+            ,cnt[indx]->conf.camera_name ? cnt[indx]->conf.camera_name : ""
+            ,(!cnt[indx]->running)? "NOT RUNNING" :
+             (cnt[indx]->lost_connection)? "Lost connection": "Connection OK");
+        written = webu_write(webui->client_socket, response, strlen(response));
+        }
+    } else {
+        snprintf(response,sizeof(response)
+            , "Camera %d%s%s %s\n"
+            ,cnt[thread_nbr]->conf.camera_id
+            ,cnt[thread_nbr]->conf.camera_name ? " -- " : ""
+            ,cnt[thread_nbr]->conf.camera_name ? cnt[thread_nbr]->conf.camera_name : ""
+            ,(!cnt[thread_nbr]->running)? "NOT RUNNING" :
+             (cnt[thread_nbr]->lost_connection)? "Lost connection": "Connection OK");
+        written = webu_write(webui->client_socket, response, strlen(response));
+    }
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_text_set(struct context **cnt, struct webui_ctx *webui) {
+    /* Write out the connection status */
+
+    ssize_t written;
+    char response[WEBUI_LEN_RESP];
+
+    webu_process_config(cnt, webui);
+
+    snprintf(response,sizeof(response)
+        , "%s = %s\nDone \n"
+        ,webui->uri_parm1
+        ,webui->uri_value1
+    );
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_text_action(struct context **cnt, struct webui_ctx *webui) {
+    /* Call the start */
+
+    ssize_t written;
+    char response[WEBUI_LEN_RESP];
+
+    webu_process_action(cnt, webui);
+
+    written = 0;
+    /* Send response message for action */
+    if (!strcmp(webui->uri_cmd2,"makemovie")){
+        snprintf(response,sizeof(response)
+            ,"makemovie for thread %s \nDone\n"
+            ,webui->uri_thread
+        );
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else if (!strcmp(webui->uri_cmd2,"snapshot")){
+        snprintf(response,sizeof(response)
+            ,"Snapshot for thread %s \nDone\n"
+            ,webui->uri_thread
+        );
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else if (!strcmp(webui->uri_cmd2,"restart")){
+        snprintf(response,sizeof(response)
+            ,"Restart in progress ...\nDone\n");
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else if (!strcmp(webui->uri_cmd2,"quit")){
+        snprintf(response,sizeof(response)
+            ,"quit in progress ... bye \nDone\n");
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else if (!strcmp(webui->uri_cmd2,"start")){
+        snprintf(response,sizeof(response)
+            ,"Camera %s Detection resumed\nDone \n"
+            ,webui->uri_thread
+        );
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else if (!strcmp(webui->uri_cmd2,"pause")){
+        snprintf(response,sizeof(response)
+            ,"Camera %s Detection paused\nDone \n"
+            ,webui->uri_thread
+        );
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else if ((!strcmp(webui->uri_cmd2,"write")) ||
+               (!strcmp(webui->uri_cmd2,"writeyes"))){
+        snprintf(response,sizeof(response)
+            ,"Camera %s write\nDone \n"
+            ,webui->uri_thread
+        );
+        written = webu_write(webui->client_socket, response, strlen(response));
+    } else {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
+            "Invalid action requested: %s",webui->uri_cmd2);
+        return;
+    }
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
+static void webu_text_track(struct context **cnt, struct webui_ctx *webui) {
+    /* Call the start */
+
+    ssize_t written;
+    char response[WEBUI_LEN_RESP];
+
+    webu_process_track(cnt, webui);
+    snprintf(response,sizeof(response)
+        ,"Camera %s \nTrack set %s\nDone \n"
+        ,webui->uri_thread
+        ,webui->uri_cmd2
+    );
+    written = webu_write(webui->client_socket, response, strlen(response));
+
+    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+
+}
+
 
 static int webu_text_main(struct context **cnt, struct webui_ctx *webui) {
 
@@ -2154,29 +2419,50 @@ static int webu_text_main(struct context **cnt, struct webui_ctx *webui) {
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"set"))) {
         webu_text_ok(webui);
-        webu_process_config(cnt, webui);
+        webu_text_set(cnt,webui);
 
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"write"))) {
         webu_text_ok(webui);
-        webu_process_action(cnt, webui);
+        webu_text_action(cnt,webui);
 
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"list"))) {
         webu_text_ok(webui);
         webu_text_list(cnt, webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"action")){
+    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
+               (!strcmp(webui->uri_cmd2,"get"))) {
         webu_text_ok(webui);
-        webu_process_action(cnt, webui);
+        webu_text_get(cnt, webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"detection")){
+    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
+               (!strcmp(webui->uri_cmd2,"status"))) {
         webu_text_ok(webui);
-        webu_process_action(cnt, webui);
+        webu_text_status(cnt, webui);
+
+    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
+               (!strcmp(webui->uri_cmd2,"connection"))) {
+        webu_text_ok(webui);
+        webu_text_connection(cnt, webui);
+
+    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
+               (!strcmp(webui->uri_cmd2,"start"))) {
+        webu_text_ok(webui);
+        webu_text_action(cnt,webui);
+
+    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
+               (!strcmp(webui->uri_cmd2,"pause"))) {
+        webu_text_ok(webui);
+        webu_text_action(cnt,webui);
+
+    } else if (!strcmp(webui->uri_cmd1,"action")) {
+        webu_text_ok(webui);
+        webu_text_action(cnt, webui);
 
     } else if (!strcmp(webui->uri_cmd1,"track")){
         webu_text_ok(webui);
-        webu_process_track(cnt, webui);
+        webu_text_track(cnt, webui);
 
     } else{
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid action requested");
