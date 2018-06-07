@@ -707,7 +707,13 @@
           <td align="left">movie_filename</td>
           <td align="left"><a href="#movie_filename" >movie_filename</a></td>
         </tr>
-          <tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#native_language" >native_language</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left"></td>
           <td align="left"></td>
           <td align="left">netcam_highres</td>
@@ -1347,6 +1353,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#camera_name" >camera_name</a> </td>
               <td bgcolor="#edf4f9" ><a href="#camera_dir" >camera_dir</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1512,8 +1519,11 @@
               <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
             </tr>
+
           </tbody>
         </table>
 
@@ -1743,15 +1753,15 @@
               <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_query_stop" >sql_query_stop</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
               <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
             </tr>
            </tbody>
@@ -2093,6 +2103,23 @@
         <br />Users can disable a camera (config file) by renaming it so it does not end with '.conf'.
         <p></p>
 
+        <h3><a name="native_language"></a> native_language</h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: on</li>
+        </ul>
+        <p></p>
+        Enable native language for Motion webcontrol and log messages.
+        <p></p>
+        Motion will use the locale variable LANGUAGE for determining the webcontrol and log messages.  If
+        messages or the webcontrol still display in English, then the messages / words have not yet been translated.
+        <p></p>
+        Please consider helping the developers by submitting pull requests to add new translations and correcting
+        any inaccurate translations.
+        <p></p>
+        When this option is specified as 'off', the webcontrol and log messages will be provided in English.
         <p></p>
       </ul>
 

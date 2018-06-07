@@ -158,6 +158,7 @@ struct config conf_template = {
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type_str =                    NULL,
+    .native_language =                 1,
     .camera_dir =                      NULL
 };
 
@@ -244,6 +245,15 @@ config_param config_params[] = {
     CONF_OFFSET(log_type_str),
     copy_string,
     print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "native_language",
+    "# Native language support. (default: on)",
+    1,
+    CONF_OFFSET(native_language),
+    copy_bool,
+    print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
