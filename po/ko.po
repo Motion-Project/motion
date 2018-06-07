@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "카메라"
+
+msgid "Camera"
+msgstr "카메라"
+
+msgid "All  "
+msgstr "전체"
+
+msgid "Action"
+msgstr "동작"
+
+msgid "Make Movie"
+msgstr "영화 만들기"
+
+msgid "Snapshot"
+msgstr "스냅 샷"
+
+msgid "Change Configuration"
+msgstr "구성 변경"
+
+msgid "Write Configuration"
+msgstr "쓰기 구성"
+
+msgid "Tracking"
+msgstr "추적"
+
+msgid "Pause"
+msgstr "일시 중지"
+
+msgid "Start"
+msgstr "시작"
+
+msgid "Restart"
+msgstr "재시작"
+
+msgid "Quit"
+msgstr "종료"
+
+msgid "Help"
+msgstr "도움말"
+
+msgid "No Configuration Options"
+msgstr "구성 옵션 없음"
+
+msgid "Limited Configuration Options"
+msgstr "제한된 구성 옵션"
+
+msgid "Advanced Configuration Options"
+msgstr "고급 구성 옵션"
+
+msgid "Restricted Configuration Options"
+msgstr "제한된 구성 옵션"
+
+msgid "Select option"
+msgstr "옵션 선택"
+
+msgid "Save"
+msgstr "저장"
+
+msgid "Pan/Tilt"
+msgstr "회전 / 틸트"
+
+msgid "Absolute Change"
+msgstr "절대 변경"
+
+msgid "Center"
+msgstr "센터"
+
+msgid "Pan"
+msgstr "회전"
+
+msgid "Tilt"
+msgstr "틸트"
+
+msgid "All Cameras"
+msgstr "모든 카메라"
+

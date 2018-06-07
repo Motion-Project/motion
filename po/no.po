@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: no\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "Kameraer"
+
+msgid "Camera"
+msgstr "Kamera"
+
+msgid "All  "
+msgstr "Alle "
+
+msgid "Action"
+msgstr "Handling"
+
+msgid "Make Movie"
+msgstr "Lag film"
+
+msgid "Snapshot"
+msgstr "Stillbilde"
+
+msgid "Change Configuration"
+msgstr "Endre konfigurasjon"
+
+msgid "Write Configuration"
+msgstr "Skriv konfigurasjon"
+
+msgid "Tracking"
+msgstr "Sporing"
+
+msgid "Pause"
+msgstr "Pause"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Restart"
+msgstr "Omstart"
+
+msgid "Quit"
+msgstr "Slutte"
+
+msgid "Help"
+msgstr "Hjelp"
+
+msgid "No Configuration Options"
+msgstr "Ingen konfigurasjonsalternativer"
+
+msgid "Limited Configuration Options"
+msgstr "Begrensede konfigurasjonsalternativer"
+
+msgid "Advanced Configuration Options"
+msgstr "Avanserte konfigurasjonsalternativer"
+
+msgid "Restricted Configuration Options"
+msgstr "Begrensede konfigurasjonsalternativer"
+
+msgid "Select option"
+msgstr "Velg alternativ"
+
+msgid "Save"
+msgstr "Lagre"
+
+msgid "Pan/Tilt"
+msgstr "Dreiebenk / Tilt"
+
+msgid "Absolute Change"
+msgstr "Absolutt Endring"
+
+msgid "Center"
+msgstr "Senter"
+
+msgid "Pan"
+msgstr "Svivel"
+
+msgid "Tilt"
+msgstr "Tilt"
+
+msgid "All Cameras"
+msgstr "Alle kameraer"
+

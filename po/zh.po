@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "相"
+
+msgid "Camera"
+msgstr "相"
+
+msgid "All  "
+msgstr "所"
+
+msgid "Action"
+msgstr "行"
+
+msgid "Make Movie"
+msgstr "制作电"
+
+msgid "Snapshot"
+msgstr "快"
+
+msgid "Change Configuration"
+msgstr "更改配"
+
+msgid "Write Configuration"
+msgstr "写配"
+
+msgid "Tracking"
+msgstr "跟"
+
+msgid "Pause"
+msgstr "暂"
+
+msgid "Start"
+msgstr "开"
+
+msgid "Restart"
+msgstr "重新开始"
+
+msgid "Quit"
+msgstr "放弃"
+
+msgid "Help"
+msgstr "帮帮我"
+
+msgid "No Configuration Options"
+msgstr "没有配置选"
+
+msgid "Limited Configuration Options"
+msgstr "有限的配置选"
+
+msgid "Advanced Configuration Options"
+msgstr "高级配置选"
+
+msgid "Restricted Configuration Options"
+msgstr "受限配置选"
+
+msgid "Select option"
+msgstr "选择选"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Pan/Tilt"
+msgstr "旋转/倾"
+
+msgid "Absolute Change"
+msgstr "绝对变"
+
+msgid "Center"
+msgstr "中央"
+
+msgid "Pan"
+msgstr "旋"
+
+msgid "Tilt"
+msgstr "倾"
+
+msgid "All Cameras"
+msgstr "所有相"
+

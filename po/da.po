@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "Kameraer"
+
+msgid "Camera"
+msgstr "Kamera"
+
+msgid "All  "
+msgstr "Alle "
+
+msgid "Action"
+msgstr "Handling"
+
+msgid "Make Movie"
+msgstr "Lav film"
+
+msgid "Snapshot"
+msgstr "Øjebliksbillede"
+
+msgid "Change Configuration"
+msgstr "Skift konfiguration"
+
+msgid "Write Configuration"
+msgstr "Skriv konfiguration"
+
+msgid "Tracking"
+msgstr "Sporing"
+
+msgid "Pause"
+msgstr "Pause"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Restart"
+msgstr "Genstart"
+
+msgid "Quit"
+msgstr "Afslut"
+
+msgid "Help"
+msgstr "Hjælp"
+
+msgid "No Configuration Options"
+msgstr "Ingen konfigurationsindstillinger"
+
+msgid "Limited Configuration Options"
+msgstr "Begrænsede konfigurationsindstillinger"
+
+msgid "Advanced Configuration Options"
+msgstr "Avancerede konfigurationsindstillinger"
+
+msgid "Restricted Configuration Options"
+msgstr "Begrænsede konfigurationsindstillinger"
+
+msgid "Select option"
+msgstr "Vælg indstilling"
+
+msgid "Save"
+msgstr "Gemme"
+
+msgid "Pan/Tilt"
+msgstr "Dreje / Tilt"
+
+msgid "Absolute Change"
+msgstr "Absolut ændring"
+
+msgid "Center"
+msgstr "Center"
+
+msgid "Pan"
+msgstr "Drejning"
+
+msgid "Tilt"
+msgstr "Tilt"
+
+msgid "All Cameras"
+msgstr "Alle kameraer"
+

@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "Macchine fotografiche"
+
+msgid "Camera"
+msgstr "Telecamera"
+
+msgid "All  "
+msgstr "Tutti "
+
+msgid "Action"
+msgstr "Azione"
+
+msgid "Make Movie"
+msgstr "Crea film"
+
+msgid "Snapshot"
+msgstr "Istantanea"
+
+msgid "Change Configuration"
+msgstr "Cambia configurazione"
+
+msgid "Write Configuration"
+msgstr "Scrivi configurazione"
+
+msgid "Tracking"
+msgstr "Tracciamento"
+
+msgid "Pause"
+msgstr "Pausa"
+
+msgid "Start"
+msgstr "Inizio"
+
+msgid "Restart"
+msgstr "Ricomincia"
+
+msgid "Quit"
+msgstr "Smettere"
+
+msgid "Help"
+msgstr "Aiuto"
+
+msgid "No Configuration Options"
+msgstr "Nessuna opzione di configurazione"
+
+msgid "Limited Configuration Options"
+msgstr "Opzioni di configurazione limitate"
+
+msgid "Advanced Configuration Options"
+msgstr "Opzioni di configurazione avanzate"
+
+msgid "Restricted Configuration Options"
+msgstr "Opzioni di configurazione limitate"
+
+msgid "Select option"
+msgstr "Selezionare l'opzione"
+
+msgid "Save"
+msgstr "Salva"
+
+msgid "Pan/Tilt"
+msgstr "Rotazione / inclinazione"
+
+msgid "Absolute Change"
+msgstr "Cambiamento assoluto"
+
+msgid "Center"
+msgstr "Centro"
+
+msgid "Pan"
+msgstr "Girevole"
+
+msgid "Tilt"
+msgstr "Inclinazione"
+
+msgid "All Cameras"
+msgstr "Tutte le fotocamere"
+

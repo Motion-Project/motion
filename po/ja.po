@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "カメ"
+
+msgid "Camera"
+msgstr "カメ"
+
+msgid "All  "
+msgstr "すべて "
+
+msgid "Action"
+msgstr "アクショ"
+
+msgid "Make Movie"
+msgstr "映画を作"
+
+msgid "Snapshot"
+msgstr "スナップショッ"
+
+msgid "Change Configuration"
+msgstr "設定の変"
+
+msgid "Write Configuration"
+msgstr "書き込み設"
+
+msgid "Tracking"
+msgstr "追跡"
+
+msgid "Pause"
+msgstr "一時停"
+
+msgid "Start"
+msgstr "スター"
+
+msgid "Restart"
+msgstr "再起動"
+
+msgid "Quit"
+msgstr "終了する"
+
+msgid "Help"
+msgstr "助けて"
+
+msgid "No Configuration Options"
+msgstr "設定オプションな"
+
+msgid "Limited Configuration Options"
+msgstr "制限付き構成オプショ"
+
+msgid "Advanced Configuration Options"
+msgstr "高度な設定オプショ"
+
+msgid "Restricted Configuration Options"
+msgstr "制限付き設定オプショ"
+
+msgid "Select option"
+msgstr "オプションを選"
+
+msgid "Save"
+msgstr "セーブ"
+
+msgid "Pan/Tilt"
+msgstr "スイベル/チル"
+
+msgid "Absolute Change"
+msgstr "絶対変"
+
+msgid "Center"
+msgstr "センタ"
+
+msgid "Pan"
+msgstr "スイベ"
+
+msgid "Tilt"
+msgstr "傾"
+
+msgid "All Cameras"
+msgstr "すべてのカメ"
+

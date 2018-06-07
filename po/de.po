@@ -1,6 +1,6 @@
 # Motion Application
-# Copyright (2018) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
 #
 msgid ""
 msgstr ""

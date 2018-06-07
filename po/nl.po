@@ -1,0 +1,95 @@
+# Motion Application
+# Copyright (2018)
+# This file is distributed under the same license as the Motion package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-06 01:53-0600\n"
+"PO-Revision-Date: 2018-06-06\n"
+"Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
+"Language-Team: MrDave <MotionMrDave@gmail.com>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cameras"
+msgstr "Camera's"
+
+msgid "Camera"
+msgstr "Camera"
+
+msgid "All  "
+msgstr "Alle "
+
+msgid "Action"
+msgstr "Actie"
+
+msgid "Make Movie"
+msgstr "Film maken"
+
+msgid "Snapshot"
+msgstr "Snapshot"
+
+msgid "Change Configuration"
+msgstr "Configuratie wijzigen"
+
+msgid "Write Configuration"
+msgstr "Schrijfconfiguratie"
+
+msgid "Tracking"
+msgstr "Tracking"
+
+msgid "Pause"
+msgstr "Pauze"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Restart"
+msgstr "Herstarten"
+
+msgid "Quit"
+msgstr "Sluit"
+
+msgid "Help"
+msgstr "Helpen"
+
+msgid "No Configuration Options"
+msgstr "Geen configuratie-opties"
+
+msgid "Limited Configuration Options"
+msgstr "Beperkte configuratie-opties"
+
+msgid "Advanced Configuration Options"
+msgstr "Geavanceerde configuratie-opties"
+
+msgid "Restricted Configuration Options"
+msgstr "Beperkte configuratie-opties"
+
+msgid "Select option"
+msgstr "Selecteer optie"
+
+msgid "Save"
+msgstr "Opslaan"
+
+msgid "Pan/Tilt"
+msgstr "Zwenken / kantelen"
+
+msgid "Absolute Change"
+msgstr "Absolute verandering"
+
+msgid "Center"
+msgstr "Center"
+
+msgid "Pan"
+msgstr "Swivel"
+
+msgid "Tilt"
+msgstr "Kantelen"
+
+msgid "All Cameras"
+msgstr "Alle camera's"
+
