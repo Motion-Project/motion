@@ -35,6 +35,11 @@ matrix:
     language: c
     compiler: gcc
   - os: linux
+    env:  DOCKER_IMAGE=ubuntu:18.04
+    services:  docker
+    language: c
+    compiler: gcc
+  - os: linux
     env:  DOCKER_IMAGE=alpine:latest
     services:  docker
     language: c
