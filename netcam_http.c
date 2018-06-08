@@ -1744,14 +1744,13 @@ static int netcam_read_file_jpeg(netcam_context_ptr netcam)
 
 
     /* Do the read */
-    netcam->file->control_file_desc = open(netcam->file->path, O_RDONLY);
+    netcam->file->control_file_desc = open(netcam->file->path, O_RDONLY|O_CLOEXEC);
     if (netcam->file->control_file_desc < 0) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
             ,_("open(%s) error: %d")
             ,netcam->file->path, netcam->file->control_file_desc);
         return -1;
     }
-
     if ((len = read(netcam->file->control_file_desc,
                     buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO

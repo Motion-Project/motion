@@ -187,7 +187,7 @@ static unsigned int stepper_center(struct context *cnt, int x_offset, int y_offs
         MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
             ,_("Try to open serial device %s"), cnt->track.port);
 
-        if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
+        if ((cnt->track.dev = open(cnt->track.port, O_RDWR|O_CLOEXEC | O_NOCTTY)) < 0) {
             MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
                 ,_("Unable to open serial device %s"), cnt->track.port);
             return 0;
@@ -309,7 +309,7 @@ static int servo_open(struct context *cnt)
 {
     struct termios adtio;
 
-    if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
+    if ((cnt->track.dev = open(cnt->track.port, O_RDWR|O_CLOEXEC | O_NOCTTY)) < 0) {
         MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
             ,_("Unable to open serial device %s"),cnt->track.port);
         return 0;
@@ -690,7 +690,7 @@ static unsigned int iomojo_center(struct context *cnt, int x_offset, int y_offse
     char command[5], direction = 0;
 
     if (cnt->track.dev < 0) {
-        if ((cnt->track.dev = open(cnt->track.port, O_RDWR | O_NOCTTY)) < 0) {
+        if ((cnt->track.dev = open(cnt->track.port, O_RDWR|O_CLOEXEC | O_NOCTTY)) < 0) {
             MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
                 ,_("Unable to open serial device %s"), cnt->track.port);
             return 0;

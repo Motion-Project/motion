@@ -859,7 +859,7 @@ int bktr_start(struct context *cnt) {
 
     dev = mymalloc(sizeof(struct video_dev));
 
-    fd_device = open(conf->video_device, O_RDWR);
+    fd_device = open(conf->video_device, O_RDWR|O_CLOEXEC);
 
     if (fd_device < 0) {
         MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open video device %s"),
@@ -869,10 +869,9 @@ int bktr_start(struct context *cnt) {
         return -1;
     }
 
-
     /* Only open tuner if conf->tuner_device has set , freq and input is 1. */
     if ((conf->tuner_device != NULL) && (frequency > 0) && (input == BKTR_IN_TV)) {
-        bktr_fdtuner = open(conf->tuner_device, O_RDWR);
+        bktr_fdtuner = open(conf->tuner_device, O_RDWR|O_CLOEXEC);
         if (bktr_fdtuner < 0) {
             MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("open tuner device %s"),
                        conf->tuner_device);
