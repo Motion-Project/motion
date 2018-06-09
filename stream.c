@@ -758,11 +758,14 @@ int http_bindsock(int port, int local, int ipv6_enabled)
 {
     int sd = socket(ipv6_enabled?AF_INET6:AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (sd == -1)
-    {
+    if (sd == -1){
         MOTION_LOG(CRT, TYPE_STREAM, SHOW_ERRNO,_("error creating socket"));
         return -1;
     }
+    /* We can not do a SOCK_CLOEXEC on open since it is not supported on all platforms*/
+    if (fcntl(sd, F_SETFD, FD_CLOEXEC) == -1){
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Unable to set FD_CLOEXEC"));
+    };
 
     int yes = 1, no = 0;
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != 0)

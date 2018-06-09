@@ -40,7 +40,7 @@ static int vlp_open_vidpipe(void)
             strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
             strncat(buffer, "/name", sizeof(buffer) - strlen(buffer));
             MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Opening buffer: %s"),buffer);
-            if ((fd = open(buffer, O_RDONLY)) >= 0) {
+            if ((fd = open(buffer, O_RDONLY|O_CLOEXEC)) >= 0) {
                 if ((len = read(fd, buffer, sizeof(buffer)-1)) < 0) {
                     close(fd);
                     continue;
@@ -55,7 +55,7 @@ static int vlp_open_vidpipe(void)
                 strcpy(buffer, "/dev/");
                 strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("found video device '%s' %d"), buffer,min);
-                if ((tfd = open(buffer, O_RDWR)) >= 0) {
+                if ((tfd = open(buffer, O_RDWR|O_CLOEXEC)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
                     if (pipe_fd >= 0) close(pipe_fd);
                     pipe_fd = tfd;
@@ -143,7 +143,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     if (!strcmp(dev_name, "-")) {
         dev = vlp_open_vidpipe();
     } else {
-        dev = open(dev_name, O_RDWR);
+        dev = open(dev_name, O_RDWR|O_CLOEXEC);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opened %s as pipe output"), dev_name);
     }
 
@@ -151,6 +151,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("Opening %s as pipe output failed"), dev_name);
         return -1;
     }
+
 
     if (ioctl(dev, VIDIOC_QUERYCAP, &vc) == -1) {
         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_QUERYCAP)");

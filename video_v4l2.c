@@ -1221,7 +1221,7 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev) {
     curdev->fd_device = -1;
     fd_device = -1;
 
-    fd_device = open(curdev->video_device, O_RDWR);
+    fd_device = open(curdev->video_device, O_RDWR|O_CLOEXEC);
     if (fd_device > 0) {
         curdev->fd_device = fd_device;
         src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -1557,7 +1557,7 @@ int v4l2_palette_valid(char *video_device, int v4l2_palette) {
     v4l2_palette_init(palette_array);
 
     vid_source = calloc(sizeof(src_v4l2_t), 1);
-    vid_source->fd_device = open(video_device, O_RDWR);
+    vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
     if (vid_source->fd_device < 0) {
         MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Failed to open video device %s"),video_device);
@@ -1643,7 +1643,7 @@ int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l
     v4l2_palette_init(palette_array);
 
     vid_source = calloc(sizeof(src_v4l2_t), 1);
-    vid_source->fd_device = open(video_device, O_RDWR);
+    vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
     if (vid_source->fd_device < 0) {
         MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
             ,_("Failed to open video device %s"),video_device);
