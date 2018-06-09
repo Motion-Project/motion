@@ -158,6 +158,7 @@ struct config conf_template = {
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type_str =                    NULL,
+    .native_language =                 1,
     .camera_dir =                      NULL
 };
 
@@ -244,6 +245,15 @@ config_param config_params[] = {
     CONF_OFFSET(log_type_str),
     copy_string,
     print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "native_language",
+    "# Native language support. (default: on)",
+    1,
+    CONF_OFFSET(native_language),
+    copy_bool,
+    print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -2310,7 +2320,7 @@ void conf_output_parms(struct context **cnt)
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Writing configuration parameters from all files (%d):"), t);
     for (t = 0; cnt[t]; t++) {
-        motion_log(INF, TYPE_ALL, NO_ERRNO
+        motion_log(INF, TYPE_ALL, NO_ERRNO,0
             ,_("Thread %d - Config file: %s"), t, cnt[t]->conf_filename);
         i = 0;
         while (config_params[i].param_name != NULL) {
@@ -2325,16 +2335,16 @@ void conf_output_parms(struct context **cnt)
                     !strncmp(name, "database_user", 13) ||
                     !strncmp(name, "database_password", 17))
                 {
-                    motion_log(INF, TYPE_ALL, NO_ERRNO
+                    motion_log(INF, TYPE_ALL, NO_ERRNO,0
                         ,_("%-25s <redacted>"), name);
                 } else {
                     if (strncmp(name, "text", 4) || strncmp(value, " ", 1))
-                        motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s %s", name, value);
+                        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s", name, value);
                     else
-                        motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s \"%s\"", name, value);
+                        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s \"%s\"", name, value);
                 }
             } else {
-                if (t == 0) motion_log(INF, TYPE_ALL, NO_ERRNO, "%-25s ", name);
+                if (t == 0) motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s ", name);
             }
             i++;
         }

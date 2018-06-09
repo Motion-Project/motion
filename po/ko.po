@@ -6,11 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-08 08:50-0600\n"
-"PO-Revision-Date: 2018-06-08 08:50-0600\n"
+"POT-Creation-Date: 2018-06-08 08:48-0600\n"
+"PO-Revision-Date: 2018-06-08 08:49-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
-"Language: sv\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -2607,7 +2607,7 @@ msgstr ""
 
 #: translate.c:43
 msgid "Language: English"
-msgstr "Språk: Svenska"
+msgstr ""
 
 #: video_bktr.c:65
 #, c-format
@@ -3194,103 +3194,103 @@ msgstr ""
 
 #: webu.c:1017 webu.c:1026 webu.c:1037
 msgid "Cameras"
-msgstr "Kameror"
+msgstr "카메라"
 
 #: webu.c:1018 webu.c:1045 webu.c:1442
 msgid "Camera"
-msgstr "Kamera"
+msgstr "카메라"
 
 #: webu.c:1038
 msgid "All"
-msgstr "Alla"
+msgstr ""
 
 #: webu.c:1085
 msgid "Action"
-msgstr "Åtgärd"
+msgstr "동작"
 
 #: webu.c:1086
 msgid "Make Movie"
-msgstr "Gör en film"
+msgstr "영화 만들기"
 
 #: webu.c:1087
 msgid "Snapshot"
-msgstr "Ögonblicksbild"
+msgstr "스냅 샷"
 
 #: webu.c:1088
 msgid "Change Configuration"
-msgstr "Ändra konfiguration"
+msgstr "구성 변경"
 
 #: webu.c:1089
 msgid "Write Configuration"
-msgstr "Skriv konfiguration"
+msgstr "쓰기 구성"
 
 #: webu.c:1090
 msgid "Tracking"
-msgstr "Spårning"
+msgstr "추적"
 
 #: webu.c:1091
 msgid "Pause"
-msgstr "Paus"
+msgstr "일시 중지"
 
 #: webu.c:1092
 msgid "Start"
-msgstr "Start"
+msgstr "시작"
 
 #: webu.c:1093
 msgid "Restart"
-msgstr "Starta om"
+msgstr "재시작"
 
 #: webu.c:1094
 msgid "Quit"
-msgstr "Avsluta"
+msgstr "종료"
 
 #: webu.c:1119
 msgid "Help"
-msgstr "Hjälp"
+msgstr "도움말"
 
 #: webu.c:1134
 msgid "No Configuration Options"
-msgstr "Inga konfigurationsalternativ"
+msgstr "구성 옵션 없음"
 
 #: webu.c:1138
 msgid "Limited Configuration Options"
-msgstr "Reducerade konfigurationsalternativ"
+msgstr "제한된 구성 옵션"
 
 #: webu.c:1142
 msgid "Advanced Configuration Options"
-msgstr "Avancerade konfigurationsalternativ"
+msgstr "고급 구성 옵션"
 
 #: webu.c:1146
 msgid "Restricted Configuration Options"
-msgstr "Begränsade konfigurationsalternativ"
+msgstr "제한된 구성 옵션"
 
 #: webu.c:1180
 msgid "Select option"
-msgstr "välj alternativ"
+msgstr "옵션 선택"
 
 #: webu.c:1262 webu.c:1298
 msgid "Save"
-msgstr "spara"
+msgstr "저장"
 
 #: webu.c:1293
 msgid "Pan/Tilt"
-msgstr "panorera/luta"
+msgstr "회전 / 틸트"
 
 #: webu.c:1294
 msgid "Absolute Change"
-msgstr "Absolut ändring"
+msgstr "절대 변경"
 
 #: webu.c:1295
 msgid "Center"
-msgstr "Centrera"
+msgstr "센터"
 
 #: webu.c:1296
 msgid "Pan"
-msgstr "panorera"
+msgstr "회전"
 
 #: webu.c:1297
 msgid "Tilt"
-msgstr "luta"
+msgstr "틸트"
 
 #: webu.c:1444 webu.c:1453
 msgid "Not running"
@@ -3309,13 +3309,12 @@ msgid "Active"
 msgstr ""
 
 #: webu.c:1510 webu.c:1808
-#, fuzzy
 msgid "All Cameras"
-msgstr "Kameror"
+msgstr "모든 카메라"
 
 #: webu.c:1978
 msgid "Native Language : on"
 msgstr ""
 
-#~ msgid "setup_mode"
-#~ msgstr "inställningsläge"
+#~ msgid "All  "
+#~ msgstr "전체"

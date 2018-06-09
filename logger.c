@@ -167,10 +167,11 @@ static char *str_time(void)
  * Returns:
  *                     Nothing
  */
-void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, ...)
-{
+void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...){
     int errno_save, n;
     char buf[1024];
+    char usrfmt[1024];
+
 /* GNU-specific strerror_r() */
 #if (!defined(XSI_STRERROR_R))
     char msg_buf[100];
@@ -223,9 +224,16 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
                      threadnr, threadname, get_log_level_str(level), get_log_type_str(type));
     }
 
+    /* Prepend the format specifier for the function name */
+    if (fncname){
+        snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
+    } else {
+        snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
+    }
+
     /* Next add the user's message. */
     va_start(ap, fmt);
-    n += vsnprintf(buf + n, sizeof(buf) - n, fmt, ap);
+    n += vsnprintf(buf + n, sizeof(buf) - n, usrfmt, ap);
     va_end(ap);
     buf[1023] = '\0';
 

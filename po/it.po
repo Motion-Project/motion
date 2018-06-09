@@ -6,11 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-08 08:50-0600\n"
-"PO-Revision-Date: 2018-06-08 08:50-0600\n"
+"POT-Creation-Date: 2018-06-08 08:48-0600\n"
+"PO-Revision-Date: 2018-06-08 08:48-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
-"Language: sv\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -2607,7 +2607,7 @@ msgstr ""
 
 #: translate.c:43
 msgid "Language: English"
-msgstr "Språk: Svenska"
+msgstr ""
 
 #: video_bktr.c:65
 #, c-format
@@ -3194,103 +3194,103 @@ msgstr ""
 
 #: webu.c:1017 webu.c:1026 webu.c:1037
 msgid "Cameras"
-msgstr "Kameror"
+msgstr "Macchine fotografiche"
 
 #: webu.c:1018 webu.c:1045 webu.c:1442
 msgid "Camera"
-msgstr "Kamera"
+msgstr "Telecamera"
 
 #: webu.c:1038
 msgid "All"
-msgstr "Alla"
+msgstr ""
 
 #: webu.c:1085
 msgid "Action"
-msgstr "Åtgärd"
+msgstr "Azione"
 
 #: webu.c:1086
 msgid "Make Movie"
-msgstr "Gör en film"
+msgstr "Crea film"
 
 #: webu.c:1087
 msgid "Snapshot"
-msgstr "Ögonblicksbild"
+msgstr "Istantanea"
 
 #: webu.c:1088
 msgid "Change Configuration"
-msgstr "Ändra konfiguration"
+msgstr "Cambia configurazione"
 
 #: webu.c:1089
 msgid "Write Configuration"
-msgstr "Skriv konfiguration"
+msgstr "Scrivi configurazione"
 
 #: webu.c:1090
 msgid "Tracking"
-msgstr "Spårning"
+msgstr "Tracciamento"
 
 #: webu.c:1091
 msgid "Pause"
-msgstr "Paus"
+msgstr "Pausa"
 
 #: webu.c:1092
 msgid "Start"
-msgstr "Start"
+msgstr "Inizio"
 
 #: webu.c:1093
 msgid "Restart"
-msgstr "Starta om"
+msgstr "Ricomincia"
 
 #: webu.c:1094
 msgid "Quit"
-msgstr "Avsluta"
+msgstr "Smettere"
 
 #: webu.c:1119
 msgid "Help"
-msgstr "Hjälp"
+msgstr "Aiuto"
 
 #: webu.c:1134
 msgid "No Configuration Options"
-msgstr "Inga konfigurationsalternativ"
+msgstr "Nessuna opzione di configurazione"
 
 #: webu.c:1138
 msgid "Limited Configuration Options"
-msgstr "Reducerade konfigurationsalternativ"
+msgstr "Opzioni di configurazione limitate"
 
 #: webu.c:1142
 msgid "Advanced Configuration Options"
-msgstr "Avancerade konfigurationsalternativ"
+msgstr "Opzioni di configurazione avanzate"
 
 #: webu.c:1146
 msgid "Restricted Configuration Options"
-msgstr "Begränsade konfigurationsalternativ"
+msgstr "Opzioni di configurazione limitate"
 
 #: webu.c:1180
 msgid "Select option"
-msgstr "välj alternativ"
+msgstr "Selezionare l'opzione"
 
 #: webu.c:1262 webu.c:1298
 msgid "Save"
-msgstr "spara"
+msgstr "Salva"
 
 #: webu.c:1293
 msgid "Pan/Tilt"
-msgstr "panorera/luta"
+msgstr "Rotazione / inclinazione"
 
 #: webu.c:1294
 msgid "Absolute Change"
-msgstr "Absolut ändring"
+msgstr "Cambiamento assoluto"
 
 #: webu.c:1295
 msgid "Center"
-msgstr "Centrera"
+msgstr "Centro"
 
 #: webu.c:1296
 msgid "Pan"
-msgstr "panorera"
+msgstr "Girevole"
 
 #: webu.c:1297
 msgid "Tilt"
-msgstr "luta"
+msgstr "Inclinazione"
 
 #: webu.c:1444 webu.c:1453
 msgid "Not running"
@@ -3309,13 +3309,12 @@ msgid "Active"
 msgstr ""
 
 #: webu.c:1510 webu.c:1808
-#, fuzzy
 msgid "All Cameras"
-msgstr "Kameror"
+msgstr "Tutte le fotocamere"
 
 #: webu.c:1978
 msgid "Native Language : on"
 msgstr ""
 
-#~ msgid "setup_mode"
-#~ msgstr "inställningsläge"
+#~ msgid "All  "
+#~ msgstr "Tutti "

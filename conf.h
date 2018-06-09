@@ -23,6 +23,7 @@ struct config {
     unsigned int log_level;
     char *log_type_str;
     char *log_file;
+    int native_language;
     int setup_mode;
     int width;
     int height;
