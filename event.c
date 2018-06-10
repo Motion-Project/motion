@@ -7,10 +7,10 @@
     This software is distributed under the GNU Public License Version 2
     see also the file 'COPYING'.
 */
+#include "picture.h"   /* already includes motion.h */
 #include "translate.h"
 #include "netcam_rtsp.h"
 #include "ffmpeg.h"
-#include "picture.h"   /* already includes motion.h */
 #include "event.h"
 #include "video_loopback.h"
 #include "video_common.h"
