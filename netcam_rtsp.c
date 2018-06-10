@@ -1461,7 +1461,6 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
         (cnt->rtsp->status == RTSP_NOTCONNECTED)){
             return 1;
         }
-
     pthread_mutex_lock(&cnt->rtsp->mutex);
         netcam_rtsp_pktarray_resize(cnt, FALSE);
         memcpy(img_data->image_norm
@@ -1539,9 +1538,10 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
             if (!rtsp_data->handler_finished) {
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                     ,_("%s: No response from handler thread."),rtsp_data->cameratype);
-                /* Last resort.  Kill the thread. Not safe for posix.  Uncomment if we must later...*/
+                /* Last resort.  Kill the thread. Not safe for posix but if no response, what to do...*/
                 /* pthread_kill(rtsp_data->thread_id); */
                 pthread_cancel(rtsp_data->thread_id);
+                pthread_kill(rtsp_data->thread_id, SIGVTALRM); /* This allows the cancel to be processed */
                 if (!init_retry_flag){
                     pthread_mutex_lock(&global_lock);
                         threads_running--;
