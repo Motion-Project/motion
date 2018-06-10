@@ -87,7 +87,7 @@ struct rtsp_context {
 
 struct rtsp_context {
     int                   dummy;
-    int                   thread_id;
+    pthread_t             thread_id;
     int                   handler_finished;
 };
 
