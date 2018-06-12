@@ -554,7 +554,9 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
  *
  * Returns buffer size of jpeg image.
  */
-static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsigned char *input_image, int width, int height, int quality)
+static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size,
+                   unsigned char *input_image, int width, int height, int quality,
+                   struct context *cnt, struct timeval *tv1, struct coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];
@@ -576,7 +578,7 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size, unsig
 
     jpeg_start_compress (&cjpeg, TRUE);
 
-    put_jpeg_exif(&cjpeg, NULL, NULL, NULL);
+    put_jpeg_exif(&cjpeg, cnt, tv1, box);
 
     row_ptr[0] = input_image;
 
@@ -1046,15 +1048,17 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
      * we put in this dummy check so it appears we use the functionality.  Once the enhancement
      * is implemented, we can remove this condition and just process the jpg_yuv420.
      */
-    int dummy = 1;
 
-    if (dummy == 1){
+    if (!cnt->conf.stream_grey){
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
                                        width, height, quality, cnt
                                        , &(cnt->current_image->timestamp_tv)
                                        , &(cnt->current_image->location));
     } else {
-        return put_jpeg_grey_memory(dest_image, image_size, image, width, height, quality);
+        return put_jpeg_grey_memory(dest_image, image_size, image,
+                                       width, height, quality, cnt
+                                       , &(cnt->current_image->timestamp_tv)
+                                       , &(cnt->current_image->location));
     }
 
     return 0;
