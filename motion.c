@@ -269,6 +269,10 @@ static void context_init(struct context *cnt)
     cnt->mpipe = -1;
 
     cnt->vdev = NULL;    /*Init to NULL to check loading parms vs web updates*/
+    cnt->netcam = NULL;
+    cnt->rtsp = NULL;
+    cnt->rtsp_high = NULL;
+
 }
 
 /**
@@ -400,63 +404,50 @@ static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
 
 /**
  * setup_signals
- *
  *   Attaches handlers to a number of signals that Motion need to catch.
- *
- * Parameters: sigaction structs for signals in general and SIGCHLD.
- *
- * Returns:    nothing
  */
-static void setup_signals(struct sigaction *sig_handler_action, struct sigaction *sigchild_action)
-{
-#ifdef SA_NOCLDWAIT
-    sigchild_action->sa_flags = SA_NOCLDWAIT;
-#else
-    sigchild_action->sa_flags = 0;
-#endif
-    sigchild_action->sa_handler = sigchild_handler;
-    sigemptyset(&sigchild_action->sa_mask);
-#ifdef SA_RESTART
-    sig_handler_action->sa_flags = SA_RESTART;
-#else
-    sig_handler_action->sa_flags = 0;
-#endif
-    sig_handler_action->sa_handler = sig_handler;
-    sigemptyset(&sig_handler_action->sa_mask);
-
-    /* Enable automatic zombie reaping */
-    sigaction(SIGCHLD, sigchild_action, NULL);
-    sigaction(SIGPIPE, sigchild_action, NULL);
-    sigaction(SIGALRM, sig_handler_action, NULL);
-    sigaction(SIGHUP, sig_handler_action, NULL);
-    sigaction(SIGINT, sig_handler_action, NULL);
-    sigaction(SIGQUIT, sig_handler_action, NULL);
-    sigaction(SIGTERM, sig_handler_action, NULL);
-    sigaction(SIGUSR1, sig_handler_action, NULL);
-
-    /* use SIGVTALRM as a way to break out of the ioctl, don't restart */
-    sig_handler_action->sa_flags = 0;
-    sigaction(SIGVTALRM, sig_handler_action, NULL);
-}
-
-static void setup_signals_BSD(struct context *cnt){
-#ifdef __OpenBSD__
+static void setup_signals(void){
     /*
-     * FIXMARK
-     * Fixes zombie issue on OpenBSD 4.6
+     * Setup signals and do some initialization. 1 in the call to
+     * 'motion_startup' means that Motion will become a daemon if so has been
+     * requested, and argc and argc are necessary for reading the command
+     * line options.
      */
     struct sigaction sig_handler_action;
     struct sigaction sigchild_action;
-    setup_signals(&sig_handler_action, &sigchild_action);
+
+#ifdef SA_NOCLDWAIT
+    sigchild_action.sa_flags = SA_NOCLDWAIT;
 #else
-    /* Kill compiler warnings */
-    cnt->log_level = cnt->log_level;
+    sigchild_action.sa_flags = 0;
 #endif
+    sigchild_action.sa_handler = sigchild_handler;
+    sigemptyset(&sigchild_action.sa_mask);
+#ifdef SA_RESTART
+    sig_handler_action.sa_flags = SA_RESTART;
+#else
+    sig_handler_action.sa_flags = 0;
+#endif
+    sig_handler_action.sa_handler = sig_handler;
+    sigemptyset(&sig_handler_action.sa_mask);
+
+    /* Enable automatic zombie reaping */
+    sigaction(SIGCHLD, &sigchild_action, NULL);
+    sigaction(SIGPIPE, &sigchild_action, NULL);
+    sigaction(SIGALRM, &sig_handler_action, NULL);
+    sigaction(SIGHUP, &sig_handler_action, NULL);
+    sigaction(SIGINT, &sig_handler_action, NULL);
+    sigaction(SIGQUIT, &sig_handler_action, NULL);
+    sigaction(SIGTERM, &sig_handler_action, NULL);
+    sigaction(SIGUSR1, &sig_handler_action, NULL);
+
+    /* use SIGVTALRM as a way to break out of the ioctl, don't restart */
+    sig_handler_action.sa_flags = 0;
+    sigaction(SIGVTALRM, &sig_handler_action, NULL);
 }
 
 /**
  * motion_remove_pid
- *
  *   This function remove the process id file ( pid file ) before motion exit.
  */
 static void motion_remove_pid(void)
@@ -1326,8 +1317,6 @@ static int motion_init(struct context *cnt)
 
     if (cnt->track.type)
         cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
-
-    setup_signals_BSD(cnt);
 
     /* Initialize area detection */
     cnt->area_minx[0] = cnt->area_minx[3] = cnt->area_minx[6] = 0;
@@ -2687,28 +2676,26 @@ static void *motion_loop(void *arg)
 {
     struct context *cnt = arg;
 
-    if (motion_init(cnt) < 0)  goto err;
-
-    while (!cnt->finish || cnt->makemovie) {
-        mlp_prepare(cnt);
-        if (cnt->get_image) {
-            mlp_resetimages(cnt);
-            if (mlp_retry(cnt) == 1)  break;
-            if (mlp_capture(cnt) == 1)  break;
-            mlp_detection(cnt);
-            mlp_tuning(cnt);
-            mlp_overlay(cnt);
-            mlp_actions(cnt);
-            mlp_setupmode(cnt);
+    if (motion_init(cnt) == 0){
+        while (!cnt->finish || cnt->makemovie) {
+            mlp_prepare(cnt);
+            if (cnt->get_image) {
+                mlp_resetimages(cnt);
+                if (mlp_retry(cnt) == 1)  break;
+                if (mlp_capture(cnt) == 1)  break;
+                mlp_detection(cnt);
+                mlp_tuning(cnt);
+                mlp_overlay(cnt);
+                mlp_actions(cnt);
+                mlp_setupmode(cnt);
+            }
+            mlp_snapshot(cnt);
+            mlp_timelapse(cnt);
+            mlp_loopback(cnt);
+            mlp_parmsupdate(cnt);
+            mlp_frametiming(cnt);
         }
-        mlp_snapshot(cnt);
-        mlp_timelapse(cnt);
-        mlp_loopback(cnt);
-        mlp_parmsupdate(cnt);
-        mlp_frametiming(cnt);
     }
-
-err:
 
     cnt->lost_connection = 1;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Thread exiting"));
@@ -2716,11 +2703,8 @@ err:
     motion_cleanup(cnt);
 
     pthread_mutex_lock(&global_lock);
-    threads_running--;
+        threads_running--;
     pthread_mutex_unlock(&global_lock);
-
-    if (!cnt->restart)
-        cnt->watchdog = WATCHDOG_OFF;
 
     cnt->running = 0;
     cnt->finish = 0;
@@ -2833,21 +2817,7 @@ static void become_daemon(void)
     sigaction(SIGTSTP, &sig_ign_action, NULL);
 }
 
-/**
- * cntlist_create
- *
- *   Sets up the 'cnt_list' variable by allocating room for (and actually
- *   allocating) one context struct. Also loads the configuration from
- *   the config file(s).
- *
- * Parameters:
- *   argc - size of argv
- *   argv - command-line options, passed initially from 'main'
- *
- * Returns: nothing
- */
-static void cntlist_create(int argc, char *argv[])
-{
+static void cntlist_create(int argc, char *argv[]){
     /*
      * cnt_list is an array of pointers to the context structures cnt for each thread.
      * First we reserve room for a pointer to thread 0's context structure
@@ -2879,19 +2849,66 @@ static void cntlist_create(int argc, char *argv[])
     cnt_list = conf_load(cnt_list);
 }
 
-/**
- * motion_shutdown
- *
- *   Responsible for performing cleanup when Motion is shut down or restarted,
- *   including freeing memory for all the context structs as well as for the
- *   context struct list itself.
- *
- * Parameters: none
- *
- * Returns:    nothing
- */
-static void motion_shutdown(void)
-{
+static void dbse_global_deinit(void){
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
+#ifdef HAVE_MYSQL
+    mysql_library_end();
+#endif /* HAVE_MYSQL */
+}
+
+static void dbse_global_init(void){
+
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
+   /* Initialize all the database items */
+#ifdef HAVE_MYSQL
+    if (mysql_library_init(0, NULL, NULL)) {
+        fprintf(stderr, "could not initialize MySQL library\n");
+        exit(1);
+    }
+#endif /* HAVE_MYSQL */
+
+#ifdef HAVE_SQLITE3
+    int indx;
+    /* database_sqlite3 == NULL if not changed causes each thread to create their own
+     * sqlite3 connection this will only happens when using a non-threaded sqlite version */
+    cnt_list[0]->database_sqlite3=NULL;
+    if (cnt_list[0]->conf.database_type && ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.database_dbname)) {
+        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
+            ,_("SQLite3 Database filename %s")
+            ,cnt_list[0]->conf.database_dbname);
+
+        int thread_safe = sqlite3_threadsafe();
+        if (thread_safe > 0) {
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 serialized %s")
+                ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
+            if (sqlite3_open( cnt_list[0]->conf.database_dbname, &cnt_list[0]->database_sqlite3) != SQLITE_OK) {
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                    ,_("Can't open database %s : %s")
+                    ,cnt_list[0]->conf.database_dbname
+                    ,sqlite3_errmsg( cnt_list[0]->database_sqlite3));
+                sqlite3_close( cnt_list[0]->database_sqlite3);
+                exit(1);
+            }
+            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("database_busy_timeout %d msec"),
+                    cnt_list[0]->conf.database_busy_timeout);
+            if (sqlite3_busy_timeout( cnt_list[0]->database_sqlite3,  cnt_list[0]->conf.database_busy_timeout) != SQLITE_OK)
+                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
+                    ,sqlite3_errmsg( cnt_list[0]->database_sqlite3));
+        }
+    }
+    /* Cascade to all threads */
+    indx = 1;
+    while (cnt_list[indx] != NULL) {
+        cnt_list[indx]->database_sqlite3 = cnt_list[0]->database_sqlite3;
+        indx++;
+    }
+
+#endif /* HAVE_SQLITE3 */
+
+}
+
+static void motion_shutdown(void){
     int i = -1;
 
     motion_remove_pid();
@@ -2903,7 +2920,6 @@ static void motion_shutdown(void)
     cnt_list = NULL;
 
     vid_mutex_destroy();
-
 }
 
 /**
@@ -2964,7 +2980,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion "VERSION" Started");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
 
     if ((cnt_list[0]->conf.log_type_str == NULL) ||
         !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
@@ -2995,11 +3011,15 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         }
     }
 
+    if (cnt_list[0]->conf.setup_mode)
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
+
     vid_mutex_init();
+
 }
 
 /**
- * start_motion_thread
+ * motion_start_thread
  *
  *   Called from main when start a motion thread
  *
@@ -3010,9 +3030,27 @@ static void motion_startup(int daemonize, int argc, char *argv[])
  *
  * Returns: nothing
  */
-static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr)
-{
+static void motion_start_thread(struct context *cnt){
     int i;
+    char service[6];
+    pthread_attr_t thread_attr;
+
+    if (strcmp(cnt->conf_filename, "")){
+        cnt->conf_filename[sizeof(cnt->conf_filename) - 1] = '\0';
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera ID: %d is from %s")
+            ,cnt->conf.camera_id, cnt->conf_filename);
+    }
+
+    if (cnt->conf.netcam_url){
+        snprintf(service,6,"%s",cnt->conf.netcam_url);
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Service: %s")
+            ,cnt->conf.camera_id, cnt->conf.camera_name,service);
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Stream port %d"),
+            cnt->conf.stream_port);
+    } else {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Device: %s")
+            ,cnt->conf.camera_id, cnt->conf.camera_name,cnt->conf.video_device);
+    }
 
     /*
      * Check the stream port number for conflicts.
@@ -3033,11 +3071,9 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
                 ,cnt->threadnr);
             cnt->conf.stream_port = 0;
         }
-
         /* Compare against stream ports of other threads. */
         for (i = 1; cnt_list[i]; i++) {
-            if (cnt_list[i] == cnt)
-                continue;
+            if (cnt_list[i] == cnt) continue;
 
             if (cnt_list[i]->conf.stream_port == cnt->conf.stream_port) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -3071,16 +3107,194 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
      * start another thread for this device. */
     cnt->running = 1;
 
-    /*
-     * Create the actual thread. Use 'motion_loop' as the thread
-     * function.
-     */
-    if (pthread_create(&cnt->thread_id, thread_attr, &motion_loop, cnt)) {
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+
+    if (pthread_create(&cnt->thread_id, &thread_attr, &motion_loop, cnt)) {
         /* thread create failed, undo running state */
         cnt->running = 0;
         pthread_mutex_lock(&global_lock);
         threads_running--;
         pthread_mutex_unlock(&global_lock);
+    }
+    pthread_attr_destroy(&thread_attr);
+
+}
+
+static void motion_restart(int argc, char **argv){
+    /*
+    * Handle the restart situation. Currently the approach is to
+    * cleanup everything, and then initialize everything again
+    * (including re-reading the config file(s)).
+    */
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting motion."));
+    motion_shutdown();
+
+    SLEEP(2, 0);
+
+    motion_startup(0, argc, argv); /* 0 = skip daemon init */
+    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Motion restarted"));
+
+    restart = 0;
+}
+
+static void motion_webcontrol_start(void){
+
+  /* Create a thread for the web control interface if requested. */
+
+    pthread_attr_t thread_attr;
+    pthread_t thread_id;
+
+    if (cnt_list[0]->conf.webcontrol_port) {
+        pthread_mutex_lock(&global_lock);
+            threads_running++;
+            cnt_list[0]->webcontrol_running = 1;
+        pthread_mutex_unlock(&global_lock);
+
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+
+        if (pthread_create(&thread_id, &thread_attr, &webu_main, cnt_list)) {
+            /* thread create failed, undo running state */
+            pthread_mutex_lock(&global_lock);
+                threads_running--;
+                cnt_list[0]->webcontrol_running = 0;
+            pthread_mutex_unlock(&global_lock);
+        }
+        pthread_attr_destroy(&thread_attr);
+    }
+}
+
+static void motion_watchdog(int indx){
+
+    /* Notes:
+     * To test scenarios, just double lock a mutex in a spawned thread.
+     * We use detached threads because pthread_join would lock the main thread
+     * If we only call the first pthread_cancel when we reach the watchdog_kill
+     *   it does not break us out of the mutex lock.
+     * We keep sending VTAlarms so the pthread_cancel queued can be caught.
+     * The calls to pthread_kill 'may' not work or cause crashes
+     *   The cancel could finish and then the pthread_kill could be called
+     *   on the invalid thread_id which could cause undefined results
+     * Even if the cancel finishes it is not clean since memory is not cleaned.
+     * The other option instead of cancel would be to exit(1) and terminate everything
+     * Best to just not get into a watchdog situation...
+     */
+
+    cnt_list[indx]->watchdog--;
+    if (cnt_list[indx]->watchdog == 0) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Thread %d - Watchdog timeout. Trying to do a graceful restart")
+            , cnt_list[indx]->threadnr);
+        cnt_list[indx]->makemovie = 1; /* Trigger end of event */
+        cnt_list[indx]->finish = 1;
+    }
+
+    if (cnt_list[indx]->watchdog == WATCHDOG_KILL) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
+            , cnt_list[indx]->threadnr);
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
+            (cnt_list[indx]->rtsp != NULL)){
+            pthread_cancel(cnt_list[indx]->rtsp->thread_id);
+        }
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
+            (cnt_list[indx]->rtsp_high != NULL)){
+            pthread_cancel(cnt_list[indx]->rtsp_high->thread_id);
+        }
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->netcam != NULL)){
+            pthread_cancel(cnt_list[indx]->netcam->thread_id);
+        }
+        pthread_cancel(cnt_list[indx]->thread_id);
+    }
+
+    if (cnt_list[indx]->watchdog < WATCHDOG_KILL) {
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->rtsp != NULL)){
+            if (!cnt_list[indx]->rtsp->handler_finished &&
+                pthread_kill(cnt_list[indx]->rtsp->thread_id, 0) == ESRCH) {
+                cnt_list[indx]->rtsp->handler_finished = TRUE;
+                pthread_mutex_lock(&global_lock);
+                    threads_running--;
+                pthread_mutex_unlock(&global_lock);
+                netcam_rtsp_cleanup(cnt_list[indx],FALSE);
+            } else {
+                pthread_kill(cnt_list[indx]->rtsp->thread_id, SIGVTALRM);
+            }
+        }
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->rtsp_high != NULL)){
+            if (!cnt_list[indx]->rtsp_high->handler_finished &&
+                pthread_kill(cnt_list[indx]->rtsp_high->thread_id, 0) == ESRCH) {
+                cnt_list[indx]->rtsp_high->handler_finished = TRUE;
+                pthread_mutex_lock(&global_lock);
+                    threads_running--;
+                pthread_mutex_unlock(&global_lock);
+                netcam_rtsp_cleanup(cnt_list[indx],FALSE);
+            } else {
+                pthread_kill(cnt_list[indx]->rtsp_high->thread_id, SIGVTALRM);
+            }
+        }
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->netcam != NULL)){
+            if (!cnt_list[indx]->netcam->handler_finished &&
+                pthread_kill(cnt_list[indx]->netcam->thread_id, 0) == ESRCH) {
+                pthread_mutex_lock(&global_lock);
+                    threads_running--;
+                pthread_mutex_unlock(&global_lock);
+                cnt_list[indx]->netcam->handler_finished = TRUE;
+                cnt_list[indx]->netcam->finish = FALSE;
+            } else {
+                pthread_kill(cnt_list[indx]->netcam->thread_id, SIGVTALRM);
+            }
+        }
+        if (cnt_list[indx]->running &&
+            pthread_kill(cnt_list[indx]->thread_id, 0) == ESRCH){
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                ,_("Thread %d - Cleaning thread.")
+                , cnt_list[indx]->threadnr);
+            pthread_mutex_lock(&global_lock);
+                threads_running--;
+            pthread_mutex_unlock(&global_lock);
+            motion_cleanup(cnt_list[indx]);
+            cnt_list[indx]->running = 0;
+            cnt_list[indx]->finish = 0;
+        } else {
+            pthread_kill(cnt_list[indx]->thread_id,SIGVTALRM);
+        }
+    }
+}
+
+static int motion_check_threadcount(void){
+    /* Return 1 if we should break out of loop */
+
+    /* It has been observed that this is not counting every
+     * thread running.  The netcams spawn handler threads which are not
+     * counted here.  This is only counting context threads and when they
+     * all get to zero, then we are done.
+     */
+
+    int motion_threads_running, indx;
+
+    motion_threads_running = 0;
+
+    for (indx = (cnt_list[1] != NULL ? 1 : 0); cnt_list[indx]; indx++) {
+        if (cnt_list[indx]->running || cnt_list[indx]->restart)
+            motion_threads_running++;
+    }
+    if (cnt_list[0]->conf.webcontrol_port &&
+        cnt_list[0]->webcontrol_running)
+        motion_threads_running++;
+
+    if (((motion_threads_running == 0) && finish) ||
+        ((motion_threads_running == 0) && (threads_running == 0))) {
+        MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO
+            ,_("DEBUG-1 threads_running %d motion_threads_running %d , finish %d")
+            ,threads_running, motion_threads_running, finish);
+        return 1;
+    } else {
+        return 0;
     }
 }
 
@@ -3100,282 +3314,72 @@ static void start_motion_thread(struct context *cnt, pthread_attr_t *thread_attr
 int main (int argc, char **argv)
 {
     int i;
-    pthread_attr_t thread_attr;
-    pthread_t thread_id;
-    char service[6];
-
-    /*
-     * Setup signals and do some initialization. 1 in the call to
-     * 'motion_startup' means that Motion will become a daemon if so has been
-     * requested, and argc and argc are necessary for reading the command
-     * line options.
-     */
-    struct sigaction sig_handler_action;
-    struct sigaction sigchild_action;
-
-
-    setup_signals(&sig_handler_action, &sigchild_action);
-
-    /*
-     * Create and a thread attribute for the threads we spawn later on.
-     * PTHREAD_CREATE_DETACHED means to create threads detached, i.e.
-     * their termination cannot be synchronized through 'pthread_join'.
-     */
-    pthread_attr_init(&thread_attr);
-    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
     /* Create the TLS key for thread number. */
     pthread_key_create(&tls_key_threadnr, NULL);
     pthread_setspecific(tls_key_threadnr, (void *)(0));
 
+    setup_signals();
+
     motion_startup(1, argc, argv);
 
     ffmpeg_global_init();
 
+    dbse_global_init();
+
     translate_init();
 
-#ifdef HAVE_MYSQL
-    if (mysql_library_init(0, NULL, NULL)) {
-        fprintf(stderr, "could not initialize MySQL library\n");
-        exit(1);
-    }
-#endif /* HAVE_MYSQL */
-#ifdef HAVE_SQLITE3
-    /* database_sqlite3 == NULL if not changed causes each thread to creat their own
-     * sqlite3 connection this will only happens when using a non-threaded sqlite version */
-    cnt_list[0]->database_sqlite3=NULL;
-    if (cnt_list[0]->conf.database_type && ((!strcmp(cnt_list[0]->conf.database_type, "sqlite3")) && cnt_list[0]->conf.database_dbname)) {
-        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-            ,_("SQLite3 Database filename %s")
-            ,cnt_list[0]->conf.database_dbname);
-
-        int thread_safe = sqlite3_threadsafe();
-        if (thread_safe > 0) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 serialized %s")
-                ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
-            if (sqlite3_open( cnt_list[0]->conf.database_dbname, &cnt_list[0]->database_sqlite3) != SQLITE_OK) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Can't open database %s : %s")
-                    ,cnt_list[0]->conf.database_dbname
-                    ,sqlite3_errmsg( cnt_list[0]->database_sqlite3));
-                sqlite3_close( cnt_list[0]->database_sqlite3);
-                exit(1);
-            }
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("database_busy_timeout %d msec"),
-                    cnt_list[0]->conf.database_busy_timeout);
-            if (sqlite3_busy_timeout( cnt_list[0]->database_sqlite3,  cnt_list[0]->conf.database_busy_timeout) != SQLITE_OK)
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
-                    ,sqlite3_errmsg( cnt_list[0]->database_sqlite3));
-        }
-
-    }
-#endif /* HAVE_SQLITE3 */
-
-    /*
-     * In setup mode, Motion is very communicative towards the user, which
-     * allows the user to experiment with the config parameters in order to
-     * optimize motion detection and stuff.
-     */
-    if (cnt_list[0]->conf.setup_mode)
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
-
-
     do {
-        if (restart) {
-            /*
-             * Handle the restart situation. Currently the approach is to
-             * cleanup everything, and then initialize everything again
-             * (including re-reading the config file(s)).
-             */
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Restarting motion."));
-            motion_shutdown();
-            restart = 0; /* only one reset for now */
+        if (restart) motion_restart(argc, argv);
 
-            SLEEP(5, 0); // maybe some cameras needs less time
-
-            motion_startup(0, argc, argv); /* 0 = skip daemon init */
-            MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Motion restarted"));
-        }
-
-        /*
-         * Start the motion threads. First 'cnt_list' item is global if 'thread'
-         * option is used, so start at 1 then and 0 otherwise.
-         */
         for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
-            /* If i is 0 it means no thread files and we then set the thread number to 1 */
             cnt_list[i]->threadnr = i ? i : 1;
-            /* camera_id is not defined in the config, then the camera id needs to be generated.
-             * the load order will generate a # that will become the camera_id
-             */
             cnt_list[i]->conf.camera_id = cnt_list[i]->conf.camera_id ? cnt_list[i]->conf.camera_id: i;
-
-            if (strcmp(cnt_list[i]->conf_filename, ""))
-            {
-                cnt_list[i]->conf_filename[sizeof(cnt_list[i]->conf_filename) - 1] = '\0';
-
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera ID: %d is from %s")
-                    ,cnt_list[i]->conf.camera_id, cnt_list[i]->conf_filename);
-            }
-
-            if (cnt_list[i]->conf.netcam_url){
-                snprintf(service,6,"%s",cnt_list[i]->conf.netcam_url);
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Service: %s")
-                       ,cnt_list[i]->conf.camera_id, cnt_list[i]->conf.camera_name,service);
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Stream port %d"),
-                       cnt_list[i]->conf.stream_port);
-            } else {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Device: %s")
-                       ,cnt_list[i]->conf.camera_id, cnt_list[i]->conf.camera_name,cnt_list[i]->conf.video_device);
-            }
-
-#ifdef HAVE_SQLITE
-            /* this is done to share the seralized handle
-             * and supress creation of new handles in the threads */
-            cnt_list[i]->database_sqlite3=cnt_list[0]->database_sqlite3;
-#endif
-            start_motion_thread(cnt_list[i], &thread_attr);
+            motion_start_thread(cnt_list[i]);
         }
 
-        /*
-         * Create a thread for the control interface if requested. Create it
-         * detached and with 'motion_web_control' as the thread function.
-         */
-
-        if (cnt_list[0]->conf.webcontrol_port) {
-            pthread_mutex_lock(&global_lock);
-            threads_running++;
-            /* set outside the loop to avoid thread set vs main thread check */
-            cnt_list[0]->webcontrol_running = 1;
-            pthread_mutex_unlock(&global_lock);
-
-            if (pthread_create(&thread_id, &thread_attr, &webu_main, cnt_list)) {
-                /* thread create failed, undo running state */
-                pthread_mutex_lock(&global_lock);
-                threads_running--;
-                cnt_list[0]->webcontrol_running = 0;
-                pthread_mutex_unlock(&global_lock);
-            }
-        }
+        motion_webcontrol_start();
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Waiting for threads to finish, pid: %d"), getpid());
 
-        /*
-         * Crude way of waiting for all threads to finish - check the thread
-         * counter (because we cannot do join on the detached threads).
-         */
         while (1) {
             SLEEP(1, 0);
-
-            /*
-             * Calculate how many threads are running or wants to run
-             * if zero and we want to finish, break out
-             */
-            int motion_threads_running = 0;
-
-            for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
-                if (cnt_list[i]->running || cnt_list[i]->restart)
-                    motion_threads_running++;
-            }
-            if (cnt_list[0]->conf.webcontrol_port &&
-                cnt_list[0]->webcontrol_running)
-                motion_threads_running++;
-
-            if (((motion_threads_running == 0) && finish) ||
-                ((motion_threads_running == 0) && (threads_running == 0))) {
-                MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO
-                    ,_("DEBUG-1 threads_running %d motion_threads_running %d , finish %d")
-                    ,threads_running, motion_threads_running, finish);
-                break;
-            }
+            if (motion_check_threadcount()) break;
 
             for (i = (cnt_list[1] != NULL ? 1 : 0); cnt_list[i]; i++) {
                 /* Check if threads wants to be restarted */
                 if ((!cnt_list[i]->running) && (cnt_list[i]->restart)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                         ,_("Motion thread %d restart"), cnt_list[i]->threadnr);
-                    start_motion_thread(cnt_list[i], &thread_attr);
+                    motion_start_thread(cnt_list[i]);
                 }
-
-                if (cnt_list[i]->watchdog > WATCHDOG_OFF) {
-                    if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
-                        /* if 0 then it finally did clean up (and will restart without any further action here)
-                         * kill(, 0) == ESRCH means the thread is no longer running
-                         * if it is no longer running with running set, then cleanup here so it can restart
-                         */
-                        if(cnt_list[i]->running && pthread_kill(cnt_list[i]->thread_id, 0) == ESRCH) {
-                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                                ,_("cleaning Thread %d"), cnt_list[i]->threadnr);
-                            pthread_mutex_lock(&global_lock);
-                            threads_running--;
-                            pthread_mutex_unlock(&global_lock);
-                            motion_cleanup(cnt_list[i]);
-                            cnt_list[i]->running = 0;
-                            cnt_list[i]->finish = 0;
-                        } else {
-                            /* keep sending signals so it doesn't get stuck in a blocking call */
-                            pthread_kill(cnt_list[i]->thread_id, SIGVTALRM);
-                        }
-                    } else {
-                        cnt_list[i]->watchdog--;
-
-
-                        if (cnt_list[i]->watchdog == 0) {
-                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                                ,_("Thread %d - Watchdog timeout, trying to do "
-                                "a graceful restart"), cnt_list[i]->threadnr);
-                            cnt_list[i]->makemovie = 1; /* Trigger end of event */
-                            cnt_list[i]->finish = 1;
-
-                        }
-
-                        if (cnt_list[i]->watchdog == WATCHDOG_KILL) {
-                            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                                ,_("Thread %d - Watchdog timeout, did NOT restart graceful, "
-                                "killing it!"), cnt_list[i]->threadnr);
-                            /* The problem is pthread_cancel might just wake up the thread so it runs to completion
-                             * or it might not.  In either case don't rip the carpet out under it by
-                             * doing motion_cleanup until it no longer is running.
-                             */
-                            pthread_cancel(cnt_list[i]->thread_id);
-                        }
-                    }
-                }
+                motion_watchdog(i);
             }
-
-            MOTION_LOG(ALL, TYPE_ALL, NO_ERRNO
-                ,_("DEBUG-2 threads_running %d motion_threads_running %d finish %d")
-                ,threads_running, motion_threads_running, finish);
         }
+
         /* Reset end main loop flag */
         finish = 0;
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Threads finished"));
 
         /* Rest for a while if we're supposed to restart. */
-        if (restart)
-            SLEEP(2, 0);
+        if (restart) SLEEP(1, 0);
 
     } while (restart); /* loop if we're supposed to restart */
 
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion terminating"));
+
     ffmpeg_global_deinit();
 
-#ifdef HAVE_MYSQL
-    /* We started it up at the beginning of this function so we now need to clean up */
-    mysql_library_end();
-#endif /* HAVE_MYSQL */
+    dbse_global_deinit();
 
-    // Be sure that http control exits fine
-    cnt_list[0]->webcontrol_finish = 1;
-    SLEEP(1, 0);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion terminating"));
+    motion_shutdown();
 
     /* Perform final cleanup. */
     pthread_key_delete(tls_key_threadnr);
-    pthread_attr_destroy(&thread_attr);
     pthread_mutex_destroy(&global_lock);
-    motion_shutdown();
 
     return 0;
 }

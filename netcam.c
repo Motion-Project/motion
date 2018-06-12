@@ -227,6 +227,8 @@ static void *netcam_handler_loop(void *arg)
     netcam_context_ptr netcam = arg;
     struct context *cnt = netcam->cnt; /* Needed for the SETUP macro :-( */
 
+    netcam->handler_finished = FALSE;
+
     util_threadname_set("nc",netcam->threadnr,netcam->cnt->conf.camera_name);
 
     /* Store the corresponding motion thread number in TLS also for this
@@ -388,8 +390,7 @@ static void *netcam_handler_loop(void *arg)
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("netcam camera handler: finish set, exiting"));
 
-    /* Setting netcam->thread_id to zero shows netcam_cleanup we're done. */
-    netcam->thread_id = 0;
+    netcam->handler_finished = TRUE;
 
     /* Signal netcam_cleanup that we're all done. */
     pthread_mutex_lock(&netcam->mutex);

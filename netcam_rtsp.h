@@ -87,6 +87,8 @@ struct rtsp_context {
 
 struct rtsp_context {
     int                   dummy;
+    pthread_t             thread_id;
+    int                   handler_finished;
 };
 
 #endif /* end HAVE_FFMPEG  */

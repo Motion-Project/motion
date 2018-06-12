@@ -215,8 +215,9 @@ typedef struct netcam_context {
     struct jpeg_error_mgr jerr;
     jmp_buf setjmp_buffer;
 
-    int jpeg_error;             /* flag to show error or warning
-                                   occurred during decompression*/
+    int jpeg_error;             /* flag to show error or warning occurred during decompression*/
+
+    int handler_finished;
 
 } netcam_context;
 

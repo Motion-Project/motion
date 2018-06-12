@@ -1902,7 +1902,6 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
             cnt[thread_nbr]->restart = 0;
             cnt[thread_nbr]->makemovie = 1;
             cnt[thread_nbr]->finish = 1;
-            cnt[thread_nbr]->watchdog = WATCHDOG_OFF;
         }
     } else if (!strcmp(webui->uri_cmd2,"start")){
         if (thread_nbr == 0) {
