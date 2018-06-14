@@ -90,6 +90,7 @@ struct config conf_template = {
     .stream_authentication =           NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          0,
+    .stream_grey =                     0,
     .webcontrol_port =                 0,
     .webcontrol_localhost =            1,
     .webcontrol_interface =            0,
@@ -1328,6 +1329,15 @@ config_param config_params[] = {
     "# Have stream preview image start on a new line (default: no)",
     0,
     CONF_OFFSET(stream_preview_newline),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_grey",
+    "# Send stream in black and white (default: off)",
+    0,
+    CONF_OFFSET(stream_grey),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
