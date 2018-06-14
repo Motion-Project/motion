@@ -3236,7 +3236,7 @@ msgstr "Pause"
 
 #: webu.c:1092
 msgid "Start"
-msgstr "Début"
+msgstr "Démarrer"
 
 #: webu.c:1093
 msgid "Restart"
