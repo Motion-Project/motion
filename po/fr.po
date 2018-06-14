@@ -48,21 +48,21 @@ msgstr "Ne peut pas ouvrir le fichier de configuration %s"
 #: conf.c:2262
 #, c-format
 msgid "Processing thread 0 - config file %s"
-msgstr ""
+msgstr "Traitement tread 0 - fichier de configuration %s"
 
 #: conf.c:2267
 msgid "No config file to process, using default values"
-msgstr ""
+msgstr "Pas de fichier de configuration à traiter, utilisation des valeurs par défault"
 
 #: conf.c:2321
 #, c-format
 msgid "Writing configuration parameters from all files (%d):"
-msgstr ""
+msgstr "Ecriture des paramètres de configuration depuis tous les fichiers (%d):"
 
 #: conf.c:2324
 #, c-format
 msgid "Thread %d - Config file: %s"
-msgstr ""
+msgstr "Thread %d - Fichier de configuration: %s"
 
 #: conf.c:2339
 #, c-format
@@ -71,11 +71,11 @@ msgstr ""
 
 #: conf.c:2529
 msgid "Unable to locate vid_control_params"
-msgstr ""
+msgstr "Impossible de trouver vid_control_params"
 
 #: conf.c:2535
 msgid "No value provided to put into vid_control_params"
-msgstr ""
+msgstr "Aucune valeur fournie pour intégrer à vid_control_params"
 
 #: conf.c:2645
 msgid "Error compiling regex in copy_uri"
