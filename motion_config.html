@@ -973,15 +973,21 @@
         </tr>
         <tr>
           <td height="17" align="left"><br /></td>
+          <td align="left">stream_authentication</td>
+          <td align="left">stream_authentication</td>
+          <td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#stream_cors_header" >stream_cors_header</a></td>
         </tr>
         <tr>
           <td height="17" align="left"><br /></td>
-          <td align="left">stream_authentication</td>
-          <td align="left">stream_authentication</td>
-          <td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#stream_grey" >stream_grey</a></td>
         </tr>
         <tr>
           <td height="17" align="left">webcam_limit</td>
@@ -1714,14 +1720,15 @@
               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
             </tr>
            </tbody>
         </table>
@@ -4676,6 +4683,17 @@
         If unspecified, no Access-Control-Allow-Origin header is sent.
         The header allows browsers to access the stream via cross-origin resource sharing (CORS).
         For example, * allows access from browser client code served from any origin.
+        <p></p>
+
+        <h3><a name="stream_grey"></a> stream_grey </h3>
+        <p></p>
+        <ul>
+          <li> Type: boolean</li>
+          <li> Range / Valid values: on/off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        Send the live stream in grey (black and white) rather than color.  Useful for limiting bandwidth.
         <p></p>
 
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
