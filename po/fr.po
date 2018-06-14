@@ -88,42 +88,42 @@ msgstr ""
 #: conf.c:2890
 #, c-format
 msgid "Processing config file %s"
-msgstr ""
+msgstr "Traitement du fichier de configuration %s"
 
 #: conf.c:2905
 #, c-format
 msgid "Camera directory config %s not found"
-msgstr ""
+msgstr "Répertoire de configuration des cameras non trouvé"
 
 #: conf.c:2939
 #, c-format
 msgid "Camera config file %s not found"
-msgstr ""
+msgstr "Fichier de configuration de camera non trouvé"
 
 #: conf.c:2977
 #, c-format
 msgid "Processing camera config file %s"
-msgstr ""
+msgstr "Traitement du fichier de configuration camera %s"
 
 #: event.c:89 track.c:1349
 #, c-format
 msgid "Unable to start external command '%s'"
-msgstr ""
+msgstr "Impossible d'exécuter la commande externe '%s'"
 
 #: event.c:95 track.c:1356
 #, c-format
 msgid "Executing external command '%s'"
-msgstr ""
+msgstr "Exécution de la commande externe '%s'"
 
 #: event.c:108
 #, c-format
 msgid "File of type %ld saved to: %s"
-msgstr ""
+msgstr "Fichier de type %ld enregistré vers: %s"
 
 #: event.c:171
 #, c-format
 msgid "Mysql query failed %s error code %d"
-msgstr ""
+msgstr "Echec de la requête Mysql %s, code d'erreur %d"
 
 #: event.c:185
 #, c-format
@@ -135,7 +135,7 @@ msgstr ""
 #: event.c:192
 #, c-format
 msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr ""
+msgstr "Succès de la reconnexion à la base Mysql '%s'"
 
 #: event.c:197
 #, c-format
