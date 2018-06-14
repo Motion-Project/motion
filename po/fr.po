@@ -3151,52 +3151,52 @@ msgstr ""
 
 #: video_v4l2.c:1183 video_v4l2.c:1204
 msgid "Errors occurred during device select"
-msgstr ""
+msgstr "Des erreurs se sont produites lors de la sélection de l'appareil"
 
 #: video_v4l2.c:1217
 #, c-format
 msgid "Using videodevice %s and input %d"
-msgstr ""
+msgstr "Utilise l'appareil vidéo %s et l'entrée %d"
 
 #: video_v4l2.c:1233 video_v4l2.c:1563 video_v4l2.c:1649
 #, c-format
 msgid "Failed to open video device %s"
-msgstr ""
+msgstr "Impossible d'ouvrir l'appareil vidéo %s"
 
 #: video_v4l2.c:1295
 msgid "Not a V4L2 device?"
-msgstr ""
+msgstr "Pas un appareil V4L2 ?"
 
 #: video_v4l2.c:1332
 msgid "Device does not support capturing."
-msgstr ""
+msgstr "L'appareil ne gère pas la capture."
 
 #: video_v4l2.c:1345 video_v4l2.c:1353
 msgid "V4L2 is not enabled"
-msgstr ""
+msgstr "V4L2 n'est pas activé"
 
 #: video_v4l2.c:1426 video_v4l2.c:1493 video_v4l2.c:1536
 msgid "V4L2 is not enabled."
-msgstr ""
+msgstr "V4L2 n'est pas activé."
 
 #: video_v4l2.c:1661
 #, c-format
 msgid "Testing palette %s (%c%c%c%c)"
-msgstr ""
+msgstr "Test de la palette %s (%c%c%c%c)"
 
 #: video_v4l2.c:1673
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr ""
+msgstr "  Largeur: %d, Hauteur %d"
 
 #: video_v4l2.c:1684
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr ""
+msgstr "    Fréquence d'images %d/%d"
 
 #: webu.c:1017 webu.c:1026 webu.c:1037
 msgid "Cameras"
-msgstr "Appareils photo"
+msgstr "Caméras"
 
 #: webu.c:1018 webu.c:1045 webu.c:1442
 msgid "Camera"
@@ -3204,7 +3204,7 @@ msgstr "Caméra"
 
 #: webu.c:1038
 msgid "All"
-msgstr ""
+msgstr "Toutes"
 
 #: webu.c:1085
 msgid "Action"
@@ -3248,7 +3248,7 @@ msgstr "Quitter"
 
 #: webu.c:1119
 msgid "Help"
-msgstr "Aidez-moi"
+msgstr "Aide"
 
 #: webu.c:1134
 msgid "No Configuration Options"
@@ -3268,15 +3268,15 @@ msgstr "Options de configuration restreintes"
 
 #: webu.c:1180
 msgid "Select option"
-msgstr "Sélectionnez l'option"
+msgstr "Sélectionnez une option"
 
 #: webu.c:1262 webu.c:1298
 msgid "Save"
-msgstr "Sauvegarder"
+msgstr "Enregistrer"
 
 #: webu.c:1293
 msgid "Pan/Tilt"
-msgstr "Pivotant / inclinaison"
+msgstr "Rotation / inclinaison"
 
 #: webu.c:1294
 msgid "Absolute Change"
@@ -3284,11 +3284,11 @@ msgstr "Changement absolu"
 
 #: webu.c:1295
 msgid "Center"
-msgstr "Centre"
+msgstr "Centrer"
 
 #: webu.c:1296
 msgid "Pan"
-msgstr "Pivotant"
+msgstr "Rotation"
 
 #: webu.c:1297
 msgid "Tilt"
@@ -3296,19 +3296,19 @@ msgstr "Inclinaison"
 
 #: webu.c:1444 webu.c:1453
 msgid "Not running"
-msgstr ""
+msgstr "Hors ligne"
 
 #: webu.c:1445 webu.c:1454
 msgid "Lost connection"
-msgstr ""
+msgstr "Connexion perdue"
 
 #: webu.c:1446 webu.c:1455
 msgid "Paused"
-msgstr ""
+msgstr "En pause"
 
 #: webu.c:1446 webu.c:1455
 msgid "Active"
-msgstr ""
+msgstr "Active"
 
 #: webu.c:1510 webu.c:1808
 msgid "All Cameras"
@@ -3316,7 +3316,7 @@ msgstr "Toutes les caméras"
 
 #: webu.c:1978
 msgid "Native Language : on"
-msgstr ""
+msgstr "Langage natif : marche"
 
 #~ msgid "All  "
 #~ msgstr "Tout "
