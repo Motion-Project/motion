@@ -19,31 +19,31 @@ msgstr ""
 #: conf.c:1960
 #, c-format
 msgid "Deprecated config option \"%s\" since after version %s:"
-msgstr ""
+msgstr "L\'option de configuration \"%s\" est dépréciée depuis la version %s:"
 
 #: conf.c:1984
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr ""
+msgstr "Option de configuration \"%s\" inconnue"
 
 #: conf.c:2084
 #, c-format
 msgid "Writing config file to %s"
-msgstr ""
+msgstr "Ecriture du fichier de configuration sur %s"
 
 #: conf.c:2230
 #, c-format
 msgid "Configfile %s not found - trying defaults."
-msgstr ""
+msgstr "Fichier de configuration %s non trouvé - essaie les valeurs par défault."
 
 #: conf.c:2234
 msgid "Error getcwd"
-msgstr ""
+msgstr "Erreur getcwd"
 
 #: conf.c:2252
 #, c-format
 msgid "could not open configfile %s"
-msgstr ""
+msgstr "Ne peut pas ouvrir le fichier de configuration %s"
 
 #: conf.c:2262
 #, c-format
