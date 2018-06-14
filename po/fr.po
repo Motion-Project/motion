@@ -135,7 +135,7 @@ msgstr ""
 #: event.c:192
 #, c-format
 msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr "Succès de la reconnexion à la base Mysql '%s'"
+msgstr "Succès de la reconnexion à la base de données Mysql '%s'"
 
 #: event.c:197
 #, c-format
@@ -145,31 +145,31 @@ msgstr ""
 #: event.c:219 motion.c:1195
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
+msgstr "La connexion à la base de données PostgreSQL '%s' à échouée : %s"
 
 #: event.c:228
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
+msgstr "La reconnexion à la base de données PostgreSQL '%s' à échouée : %s"
 
 #: event.c:232
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-msgstr ""
+msgstr "Succès de la reconnexion à la base de données PostgreSQL '%s'"
 
 #: event.c:255
 #, c-format
 msgid "SQLite error was %s"
-msgstr ""
+msgstr "L'erreur SQLite était \"%s\""
 
 #: event.c:406
 msgid "Failed to put image into video pipe"
-msgstr ""
+msgstr "Impossible de mettre l'image dans le conduit video"
 
 #: event.c:530
 #, c-format
 msgid "Could not create symbolic link [%s]"
-msgstr ""
+msgstr "Ne peut pas créer le lien symbolique [%s]"
 
 #: event.c:665
 #, c-format
@@ -184,17 +184,17 @@ msgstr ""
 #: event.c:700
 #, c-format
 msgid "no write access to target directory %s"
-msgstr ""
+msgstr "pas de droit d'écriture dans le dossier cible %s"
 
 #: event.c:705
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr ""
+msgstr "chemin non trouvé, essaye de le créer %s ..."
 
 #: event.c:711
 #, c-format
 msgid "error accesing path %s"
-msgstr ""
+msgstr "erreur lors de l'accès au chemin %s"
 
 #: event.c:722
 #, c-format
@@ -203,21 +203,21 @@ msgstr ""
 
 #: event.c:730
 msgid "popen failed"
-msgstr ""
+msgstr "échec de popen"
 
 #: event.c:748
 msgid "Using extpipe"
-msgstr ""
+msgstr "Utilise extpipe"
 
 #: event.c:755 event.c:759
 #, c-format
 msgid "Error writing in pipe , state error %d"
-msgstr ""
+msgstr "Erreur lors de l'écriture dans le pipe, erreur %d"
 
 #: event.c:763
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr ""
+msgstr "pipe %s non créé ou déjà fermé"
 
 #: event.c:778
 #, c-format
@@ -240,15 +240,15 @@ msgstr ""
 
 #: event.c:1013
 msgid "Timelapse using mpg codec."
-msgstr ""
+msgstr "Timelapse utilise le codec mpg."
 
 #: event.c:1014
 msgid "Events will be appended to file"
-msgstr ""
+msgstr "Les évènements seront ajouté au fichier"
 
 #: event.c:1020
 msgid "Timelapse using mpeg4 codec."
-msgstr ""
+msgstr "Timelapse utilise le codec mpeg4."
 
 #: event.c:1021
 msgid "Events will be trigger new files"
@@ -257,35 +257,37 @@ msgstr ""
 #: event.c:1030
 #, c-format
 msgid "ffopen_open error creating (timelapse) file [%s]"
-msgstr ""
+msgstr "erreur ffopen_open lors de la création du fichier (timelapse) [%s]"
 
 #: event.c:1039 event.c:1051 event.c:1056
 msgid "Error encoding image"
-msgstr ""
+msgstr "Erreur lors de l'encodage de l'image"
 
 #: ffmpeg.c:276
 msgid "Failed to allocate memory for codec name"
-msgstr ""
+msgstr "Impossible d'allouer de la mémoire pour le nom du codec"
 
 #: ffmpeg.c:288
 msgid ""
 "The frame rate specified is too high for the ffmpeg movie type specified. "
 "Choose a different ffmpeg container or lower framerate."
 msgstr ""
+""
+"Choisissez un conteneur ffmpeg différent ou une fréquence d'image plus basse."
 
 #: ffmpeg.c:301
 #, c-format
 msgid "ffmpeg_video_codec option value %s is not supported"
-msgstr ""
+msgstr "la valeur %s pour l'option ffmpeg_video_codec n'est pas supportée"
 
 #: ffmpeg.c:364
 #, c-format
 msgid "codec option value %s is not supported"
-msgstr ""
+msgstr "la valeur %s pour l'option codec n'est pas supportée"
 
 #: ffmpeg.c:371
 msgid "Could not get the codec"
-msgstr ""
+msgstr "Impossible de récupérer le codec"
 
 #: ffmpeg.c:392
 #, c-format
