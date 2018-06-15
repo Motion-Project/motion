@@ -19,50 +19,50 @@ msgstr ""
 #: conf.c:1960
 #, c-format
 msgid "Deprecated config option \"%s\" since after version %s:"
-msgstr ""
+msgstr "L\'option de configuration \"%s\" est dépréciée depuis la version %s:"
 
 #: conf.c:1984
 #, c-format
 msgid "Unknown config option \"%s\""
-msgstr ""
+msgstr "Option de configuration \"%s\" inconnue"
 
 #: conf.c:2084
 #, c-format
 msgid "Writing config file to %s"
-msgstr ""
+msgstr "Ecriture du fichier de configuration sur %s"
 
 #: conf.c:2230
 #, c-format
 msgid "Configfile %s not found - trying defaults."
-msgstr ""
+msgstr "Fichier de configuration %s non trouvé - essaie les valeurs par défault."
 
 #: conf.c:2234
 msgid "Error getcwd"
-msgstr ""
+msgstr "Erreur getcwd"
 
 #: conf.c:2252
 #, c-format
 msgid "could not open configfile %s"
-msgstr ""
+msgstr "Ne peut pas ouvrir le fichier de configuration %s"
 
 #: conf.c:2262
 #, c-format
 msgid "Processing thread 0 - config file %s"
-msgstr ""
+msgstr "Traitement tread 0 - fichier de configuration %s"
 
 #: conf.c:2267
 msgid "No config file to process, using default values"
-msgstr ""
+msgstr "Pas de fichier de configuration à traiter, utilisation des valeurs par défault"
 
 #: conf.c:2321
 #, c-format
 msgid "Writing configuration parameters from all files (%d):"
-msgstr ""
+msgstr "Ecriture des paramètres de configuration depuis tous les fichiers (%d):"
 
 #: conf.c:2324
 #, c-format
 msgid "Thread %d - Config file: %s"
-msgstr ""
+msgstr "Thread %d - Fichier de configuration: %s"
 
 #: conf.c:2339
 #, c-format
@@ -71,11 +71,11 @@ msgstr ""
 
 #: conf.c:2529
 msgid "Unable to locate vid_control_params"
-msgstr ""
+msgstr "Impossible de trouver vid_control_params"
 
 #: conf.c:2535
 msgid "No value provided to put into vid_control_params"
-msgstr ""
+msgstr "Aucune valeur fournie pour intégrer à vid_control_params"
 
 #: conf.c:2645
 msgid "Error compiling regex in copy_uri"
@@ -88,42 +88,42 @@ msgstr ""
 #: conf.c:2890
 #, c-format
 msgid "Processing config file %s"
-msgstr ""
+msgstr "Traitement du fichier de configuration %s"
 
 #: conf.c:2905
 #, c-format
 msgid "Camera directory config %s not found"
-msgstr ""
+msgstr "Répertoire de configuration des cameras non trouvé"
 
 #: conf.c:2939
 #, c-format
 msgid "Camera config file %s not found"
-msgstr ""
+msgstr "Fichier de configuration de camera non trouvé"
 
 #: conf.c:2977
 #, c-format
 msgid "Processing camera config file %s"
-msgstr ""
+msgstr "Traitement du fichier de configuration camera %s"
 
 #: event.c:89 track.c:1349
 #, c-format
 msgid "Unable to start external command '%s'"
-msgstr ""
+msgstr "Impossible d'exécuter la commande externe '%s'"
 
 #: event.c:95 track.c:1356
 #, c-format
 msgid "Executing external command '%s'"
-msgstr ""
+msgstr "Exécution de la commande externe '%s'"
 
 #: event.c:108
 #, c-format
 msgid "File of type %ld saved to: %s"
-msgstr ""
+msgstr "Fichier de type %ld enregistré vers: %s"
 
 #: event.c:171
 #, c-format
 msgid "Mysql query failed %s error code %d"
-msgstr ""
+msgstr "Echec de la requête Mysql %s, code d'erreur %d"
 
 #: event.c:185
 #, c-format
@@ -135,7 +135,7 @@ msgstr ""
 #: event.c:192
 #, c-format
 msgid "Re-Connection to Mysql database '%s' Succeed"
-msgstr ""
+msgstr "Succès de la reconnexion à la base de données Mysql '%s'"
 
 #: event.c:197
 #, c-format
@@ -145,31 +145,31 @@ msgstr ""
 #: event.c:219 motion.c:1195
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
+msgstr "La connexion à la base de données PostgreSQL '%s' à échouée : %s"
 
 #: event.c:228
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
-msgstr ""
+msgstr "La reconnexion à la base de données PostgreSQL '%s' à échouée : %s"
 
 #: event.c:232
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
-msgstr ""
+msgstr "Succès de la reconnexion à la base de données PostgreSQL '%s'"
 
 #: event.c:255
 #, c-format
 msgid "SQLite error was %s"
-msgstr ""
+msgstr "L'erreur SQLite était \"%s\""
 
 #: event.c:406
 msgid "Failed to put image into video pipe"
-msgstr ""
+msgstr "Impossible de mettre l'image dans le conduit video"
 
 #: event.c:530
 #, c-format
 msgid "Could not create symbolic link [%s]"
-msgstr ""
+msgstr "Ne peut pas créer le lien symbolique [%s]"
 
 #: event.c:665
 #, c-format
@@ -184,17 +184,17 @@ msgstr ""
 #: event.c:700
 #, c-format
 msgid "no write access to target directory %s"
-msgstr ""
+msgstr "pas de droit d'écriture dans le dossier cible %s"
 
 #: event.c:705
 #, c-format
 msgid "path not found, trying to create it %s ..."
-msgstr ""
+msgstr "chemin non trouvé, essaye de le créer %s ..."
 
 #: event.c:711
 #, c-format
 msgid "error accesing path %s"
-msgstr ""
+msgstr "erreur lors de l'accès au chemin %s"
 
 #: event.c:722
 #, c-format
@@ -203,21 +203,21 @@ msgstr ""
 
 #: event.c:730
 msgid "popen failed"
-msgstr ""
+msgstr "échec de popen"
 
 #: event.c:748
 msgid "Using extpipe"
-msgstr ""
+msgstr "Utilise extpipe"
 
 #: event.c:755 event.c:759
 #, c-format
 msgid "Error writing in pipe , state error %d"
-msgstr ""
+msgstr "Erreur lors de l'écriture dans le pipe, erreur %d"
 
 #: event.c:763
 #, c-format
 msgid "pipe %s not created or closed already "
-msgstr ""
+msgstr "pipe %s non créé ou déjà fermé"
 
 #: event.c:778
 #, c-format
@@ -240,15 +240,15 @@ msgstr ""
 
 #: event.c:1013
 msgid "Timelapse using mpg codec."
-msgstr ""
+msgstr "Timelapse utilise le codec mpg."
 
 #: event.c:1014
 msgid "Events will be appended to file"
-msgstr ""
+msgstr "Les évènements seront ajouté au fichier"
 
 #: event.c:1020
 msgid "Timelapse using mpeg4 codec."
-msgstr ""
+msgstr "Timelapse utilise le codec mpeg4."
 
 #: event.c:1021
 msgid "Events will be trigger new files"
@@ -257,35 +257,37 @@ msgstr ""
 #: event.c:1030
 #, c-format
 msgid "ffopen_open error creating (timelapse) file [%s]"
-msgstr ""
+msgstr "erreur ffopen_open lors de la création du fichier (timelapse) [%s]"
 
 #: event.c:1039 event.c:1051 event.c:1056
 msgid "Error encoding image"
-msgstr ""
+msgstr "Erreur lors de l'encodage de l'image"
 
 #: ffmpeg.c:276
 msgid "Failed to allocate memory for codec name"
-msgstr ""
+msgstr "Impossible d'allouer de la mémoire pour le nom du codec"
 
 #: ffmpeg.c:288
 msgid ""
 "The frame rate specified is too high for the ffmpeg movie type specified. "
 "Choose a different ffmpeg container or lower framerate."
 msgstr ""
+""
+"Choisissez un conteneur ffmpeg différent ou une fréquence d'image plus basse."
 
 #: ffmpeg.c:301
 #, c-format
 msgid "ffmpeg_video_codec option value %s is not supported"
-msgstr ""
+msgstr "la valeur %s pour l'option ffmpeg_video_codec n'est pas supportée"
 
 #: ffmpeg.c:364
 #, c-format
 msgid "codec option value %s is not supported"
-msgstr ""
+msgstr "la valeur %s pour l'option codec n'est pas supportée"
 
 #: ffmpeg.c:371
 msgid "Could not get the codec"
-msgstr ""
+msgstr "Impossible de récupérer le codec"
 
 #: ffmpeg.c:392
 #, c-format
@@ -3149,52 +3151,52 @@ msgstr ""
 
 #: video_v4l2.c:1183 video_v4l2.c:1204
 msgid "Errors occurred during device select"
-msgstr ""
+msgstr "Des erreurs se sont produites lors de la sélection de l'appareil"
 
 #: video_v4l2.c:1217
 #, c-format
 msgid "Using videodevice %s and input %d"
-msgstr ""
+msgstr "Utilise l'appareil vidéo %s et l'entrée %d"
 
 #: video_v4l2.c:1233 video_v4l2.c:1563 video_v4l2.c:1649
 #, c-format
 msgid "Failed to open video device %s"
-msgstr ""
+msgstr "Impossible d'ouvrir l'appareil vidéo %s"
 
 #: video_v4l2.c:1295
 msgid "Not a V4L2 device?"
-msgstr ""
+msgstr "Pas un appareil V4L2 ?"
 
 #: video_v4l2.c:1332
 msgid "Device does not support capturing."
-msgstr ""
+msgstr "L'appareil ne gère pas la capture."
 
 #: video_v4l2.c:1345 video_v4l2.c:1353
 msgid "V4L2 is not enabled"
-msgstr ""
+msgstr "V4L2 n'est pas activé"
 
 #: video_v4l2.c:1426 video_v4l2.c:1493 video_v4l2.c:1536
 msgid "V4L2 is not enabled."
-msgstr ""
+msgstr "V4L2 n'est pas activé."
 
 #: video_v4l2.c:1661
 #, c-format
 msgid "Testing palette %s (%c%c%c%c)"
-msgstr ""
+msgstr "Test de la palette %s (%c%c%c%c)"
 
 #: video_v4l2.c:1673
 #, c-format
 msgid "  Width: %d, Height %d"
-msgstr ""
+msgstr "  Largeur: %d, Hauteur %d"
 
 #: video_v4l2.c:1684
 #, c-format
 msgid "    Framerate %d/%d"
-msgstr ""
+msgstr "    Fréquence d'images %d/%d"
 
 #: webu.c:1017 webu.c:1026 webu.c:1037
 msgid "Cameras"
-msgstr "Appareils photo"
+msgstr "Caméras"
 
 #: webu.c:1018 webu.c:1045 webu.c:1442
 msgid "Camera"
@@ -3202,7 +3204,7 @@ msgstr "Caméra"
 
 #: webu.c:1038
 msgid "All"
-msgstr ""
+msgstr "Toutes"
 
 #: webu.c:1085
 msgid "Action"
@@ -3234,7 +3236,7 @@ msgstr "Pause"
 
 #: webu.c:1092
 msgid "Start"
-msgstr "Début"
+msgstr "Démarrer"
 
 #: webu.c:1093
 msgid "Restart"
@@ -3246,7 +3248,7 @@ msgstr "Quitter"
 
 #: webu.c:1119
 msgid "Help"
-msgstr "Aidez-moi"
+msgstr "Aide"
 
 #: webu.c:1134
 msgid "No Configuration Options"
@@ -3266,15 +3268,15 @@ msgstr "Options de configuration restreintes"
 
 #: webu.c:1180
 msgid "Select option"
-msgstr "Sélectionnez l'option"
+msgstr "Sélectionnez une option"
 
 #: webu.c:1262 webu.c:1298
 msgid "Save"
-msgstr "Sauvegarder"
+msgstr "Enregistrer"
 
 #: webu.c:1293
 msgid "Pan/Tilt"
-msgstr "Pivotant / inclinaison"
+msgstr "Rotation / inclinaison"
 
 #: webu.c:1294
 msgid "Absolute Change"
@@ -3282,11 +3284,11 @@ msgstr "Changement absolu"
 
 #: webu.c:1295
 msgid "Center"
-msgstr "Centre"
+msgstr "Centrer"
 
 #: webu.c:1296
 msgid "Pan"
-msgstr "Pivotant"
+msgstr "Rotation"
 
 #: webu.c:1297
 msgid "Tilt"
@@ -3294,19 +3296,19 @@ msgstr "Inclinaison"
 
 #: webu.c:1444 webu.c:1453
 msgid "Not running"
-msgstr ""
+msgstr "Hors ligne"
 
 #: webu.c:1445 webu.c:1454
 msgid "Lost connection"
-msgstr ""
+msgstr "Connexion perdue"
 
 #: webu.c:1446 webu.c:1455
 msgid "Paused"
-msgstr ""
+msgstr "En pause"
 
 #: webu.c:1446 webu.c:1455
 msgid "Active"
-msgstr ""
+msgstr "Active"
 
 #: webu.c:1510 webu.c:1808
 msgid "All Cameras"
@@ -3314,7 +3316,7 @@ msgstr "Toutes les caméras"
 
 #: webu.c:1978
 msgid "Native Language : on"
-msgstr ""
+msgstr "Langage natif : marche"
 
 #~ msgid "All  "
 #~ msgstr "Tout "
