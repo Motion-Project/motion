@@ -19,7 +19,7 @@ msgstr ""
 #: conf.c:1960
 #, c-format
 msgid "Deprecated config option \"%s\" since after version %s:"
-msgstr "L\'option de configuration \"%s\" est dépréciée depuis la version %s:"
+msgstr "L'option de configuration \"%s\" est dépréciée depuis la version %s:"
 
 #: conf.c:1984
 #, c-format
