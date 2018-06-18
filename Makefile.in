@@ -80,6 +80,7 @@ ifeq ("@INTL@","yes")
 	@for lng in $(LANGCDS); \
 	do \
 	  msgfmt @top_srcdir@/po/$$lng.po -o @top_srcdir@/po/$$lng.mo  ;   \
+	  if [ $$? -ne 0 ]; then exit 1; fi; \
 	done
 else
 	@echo Skipping translations
