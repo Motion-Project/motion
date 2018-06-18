@@ -1153,6 +1153,7 @@ static int netcam_read_html_jpeg(netcam_context_ptr netcam)
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("disconnecting netcam since keep-alive not set."));
             netcam_disconnect(netcam);
+            return 0;
         }
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("leaving netcam connected."));
     }
