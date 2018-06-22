@@ -1862,14 +1862,14 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
 
     indx = 0;
     if (!strcmp(webui->uri_cmd2,"makemovie")){
-        if (thread_nbr == 0) {
+        if (thread_nbr == 0 && webui->cam_threads > 1) {
             while (cnt[++indx])
             cnt[indx]->makemovie = 1;
         } else {
             cnt[thread_nbr]->makemovie = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"snapshot")){
-        if (thread_nbr == 0) {
+        if (thread_nbr == 0 && webui->cam_threads > 1) {
             while (cnt[++indx])
             cnt[indx]->snapshot = 1;
         } else {
@@ -1904,7 +1904,7 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
             cnt[thread_nbr]->finish = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"start")){
-        if (thread_nbr == 0) {
+        if (thread_nbr == 0 && webui->cam_threads > 1) {
             do {
                 cnt[indx]->pause = 0;
             } while (cnt[++indx]);
@@ -1912,7 +1912,7 @@ static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
             cnt[thread_nbr]->pause = 0;
         }
     } else if (!strcmp(webui->uri_cmd2,"pause")){
-        if (thread_nbr == 0) {
+        if (thread_nbr == 0 && webui->cam_threads > 1) {
             do {
                 cnt[indx]->pause = 1;
             } while (cnt[++indx]);
