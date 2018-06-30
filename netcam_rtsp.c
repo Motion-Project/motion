@@ -170,41 +170,45 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data){
 
     if (rtsp_data->pktarray_size == 0) return;
 
-    /* Recall pktarray_size is one based but pktarray is zero based */
-    if (rtsp_data->pktarray_index == (rtsp_data->pktarray_size-1) ){
-        indx_next = 0;
-    } else {
-        indx_next = rtsp_data->pktarray_index + 1;
-    }
+    pthread_mutex_lock(&rtsp_data->mutex_pktarray);
 
-    rtsp_data->pktarray[indx_next].idnbr = rtsp_data->idnbr;
+        /* Recall pktarray_size is one based but pktarray is zero based */
+        if (rtsp_data->pktarray_index == (rtsp_data->pktarray_size-1) ){
+            indx_next = 0;
+        } else {
+            indx_next = rtsp_data->pktarray_index + 1;
+        }
 
-    my_packet_unref(rtsp_data->pktarray[indx_next].packet);
-    av_init_packet(&rtsp_data->pktarray[indx_next].packet);
-    rtsp_data->pktarray[indx_next].packet.data = NULL;
-    rtsp_data->pktarray[indx_next].packet.size = 0;
+        rtsp_data->pktarray[indx_next].idnbr = rtsp_data->idnbr;
 
-    retcd = my_copy_packet(&rtsp_data->pktarray[indx_next].packet, &rtsp_data->packet_recv);
-    if ((rtsp_data->interrupted) || (retcd < 0)) {
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: av_copy_packet: %s ,Interrupt: %s")
-            ,rtsp_data->cameratype
-            ,errstr, rtsp_data->interrupted ? _("True"):_("False"));
         my_packet_unref(rtsp_data->pktarray[indx_next].packet);
+        av_init_packet(&rtsp_data->pktarray[indx_next].packet);
         rtsp_data->pktarray[indx_next].packet.data = NULL;
         rtsp_data->pktarray[indx_next].packet.size = 0;
-    }
 
-    if (rtsp_data->pktarray[indx_next].packet.flags & AV_PKT_FLAG_KEY) {
-        rtsp_data->pktarray[indx_next].iskey = TRUE;
-    } else {
-        rtsp_data->pktarray[indx_next].iskey = FALSE;
-    }
-    rtsp_data->pktarray[indx_next].iswritten = FALSE;
-    rtsp_data->pktarray[indx_next].timestamp_tv.tv_sec = rtsp_data->img_recv->image_time.tv_sec;
-    rtsp_data->pktarray[indx_next].timestamp_tv.tv_usec = rtsp_data->img_recv->image_time.tv_usec;
-    rtsp_data->pktarray_index = indx_next;
+        retcd = my_copy_packet(&rtsp_data->pktarray[indx_next].packet, &rtsp_data->packet_recv);
+        if ((rtsp_data->interrupted) || (retcd < 0)) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: av_copy_packet: %s ,Interrupt: %s")
+                ,rtsp_data->cameratype
+                ,errstr, rtsp_data->interrupted ? _("True"):_("False"));
+            my_packet_unref(rtsp_data->pktarray[indx_next].packet);
+            rtsp_data->pktarray[indx_next].packet.data = NULL;
+            rtsp_data->pktarray[indx_next].packet.size = 0;
+        }
+
+        if (rtsp_data->pktarray[indx_next].packet.flags & AV_PKT_FLAG_KEY) {
+            rtsp_data->pktarray[indx_next].iskey = TRUE;
+        } else {
+            rtsp_data->pktarray[indx_next].iskey = FALSE;
+        }
+        rtsp_data->pktarray[indx_next].iswritten = FALSE;
+        rtsp_data->pktarray[indx_next].timestamp_tv.tv_sec = rtsp_data->img_recv->image_time.tv_sec;
+        rtsp_data->pktarray[indx_next].timestamp_tv.tv_usec = rtsp_data->img_recv->image_time.tv_usec;
+        rtsp_data->pktarray_index = indx_next;
+    pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
+
 }
 
 
@@ -1197,19 +1201,16 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
         }
     }
 
-    pthread_mutex_lock(&rtsp_data->mutex_pktarray);
-        /* Validate that the previous steps opened the camera */
-        retcd = netcam_rtsp_read_image(rtsp_data);
-        if ((retcd < 0) || (rtsp_data->interrupted)){
-            if (rtsp_data->status == RTSP_NOTCONNECTED){
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: Failed to read first image"),rtsp_data->cameratype);
-            }
-            pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
-            netcam_rtsp_close_context(rtsp_data);
-            return -1;
+    /* Validate that the previous steps opened the camera */
+    retcd = netcam_rtsp_read_image(rtsp_data);
+    if ((retcd < 0) || (rtsp_data->interrupted)){
+        if (rtsp_data->status == RTSP_NOTCONNECTED){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Failed to read first image"),rtsp_data->cameratype);
         }
-    pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
+        netcam_rtsp_close_context(rtsp_data);
+        return -1;
+    }
 
     return 0;
 
