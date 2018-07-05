@@ -794,9 +794,7 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
     int retcd;
     char errstr[128];
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58)
-    sprintf(ffmpeg->oc->url, "%s", ffmpeg->filename);
-#else
+#if (LIBAVFORMAT_VERSION_MAJOR < 58)
     snprintf(ffmpeg->oc->filename, sizeof(ffmpeg->oc->filename), "%s", ffmpeg->filename);
 #endif
 
