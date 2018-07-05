@@ -139,7 +139,7 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
     webui->stream_imgsub = NULL;    /*We allocate once we get an image */
     webui->stream_resp   = NULL;    /*We allocate once we get an image */
     webui->stream_img_size  = 0;
-    webui->stream_resp_size   = 0;
+    webui->stream_resp_size = 0;
 
     /* get the number of cameras and threads */
     indx = 0;
@@ -988,12 +988,28 @@ static void webu_html_preview(struct webui_ctx *webui) {
             snprintf(response, sizeof (response),"%s","<br>");
             webu_write(webui, response);
         }
-        snprintf(response, sizeof (response),
-            "      <a href=http://%s:%d/%d/stream> "
-            " <img src=http://%s:%d/%d/stream border=0 width=%d%%></a>\n"
-            ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
-            ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
-            ,webui->cnt[indx]->conf.stream_preview_scale);
+        if (webui->cnt[0]->conf.stream_preview_method == 1) {
+            snprintf(response, sizeof (response),
+                "      <a href=http://%s:%d/%d/stream> "
+                " <img src=http://%s:%d/%d/substream border=0 width=%d%%></a>\n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->cnt[indx]->conf.stream_preview_scale);
+        } else if (webui->cnt[0]->conf.stream_preview_method == 2) {
+            snprintf(response, sizeof (response),
+                "      <a href=http://%s:%d/%d/current> "
+                " <img src=http://%s:%d/%d/current border=0 width=%d%%></a>\n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->cnt[indx]->conf.stream_preview_scale);
+        } else {
+            snprintf(response, sizeof (response),
+                "      <a href=http://%s:%d/%d/stream> "
+                " <img src=http://%s:%d/%d/stream border=0 width=%d%%></a>\n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->cnt[indx]->conf.stream_preview_scale);
+        }
         webu_write(webui, response);
     }
 
@@ -1080,11 +1096,25 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             "      if (camid == \"cam_%03d\"){\n",indx);
         webu_write(webui, response);
 
-        snprintf(response, sizeof (response),
-            "        preview=\"<a href=http://%s:%d/%d/stream/> "
-            " <img src=http://%s:%d/%d/stream/ border=0></a>\"  \n"
-            ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
-            ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx);
+        if (webui->cnt[0]->conf.stream_preview_method == 1) {
+            snprintf(response, sizeof (response),
+                "        preview=\"<a href=http://%s:%d/%d/stream/> "
+                " <img src=http://%s:%d/%d/substream/ border=0></a>\"  \n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx);
+        } else if (webui->cnt[0]->conf.stream_preview_method == 2) {
+            snprintf(response, sizeof (response),
+                "        preview=\"<a href=http://%s:%d/%d/current/> "
+                " <img src=http://%s:%d/%d/current/ border=0></a>\"  \n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx);
+        } else {
+            snprintf(response, sizeof (response),
+                "        preview=\"<a href=http://%s:%d/%d/stream/> "
+                " <img src=http://%s:%d/%d/stream/ border=0></a>\"  \n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx);
+        }
         webu_write(webui, response);
 
         if (webui->cnt[indx]->conf.camera_name == NULL){
@@ -1138,13 +1168,28 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
             snprintf(response, sizeof (response),"%s","    preview = preview + \"<br>\"  \n");
             webu_write(webui, response);
         }
-
-        snprintf(response, sizeof (response),
-            "        preview = preview + \"<a href=http://%s:%d/%d/stream/> "
-            " <img src=http://%s:%d/%d/stream/ border=0 width=%d%%></a>\"; \n"
-            ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
-            ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
-            ,webui->cnt[indx]->conf.stream_preview_scale);
+        if (webui->cnt[0]->conf.stream_preview_method == 1) {
+            snprintf(response, sizeof (response),
+                "        preview = preview + \"<a href=http://%s:%d/%d/stream/> "
+                " <img src=http://%s:%d/%d/substream/ border=0 width=%d%%></a>\"; \n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->cnt[indx]->conf.stream_preview_scale);
+        } else if (webui->cnt[0]->conf.stream_preview_method == 2) {
+            snprintf(response, sizeof (response),
+                "        preview = preview + \"<a href=http://%s:%d/%d/current/> "
+                " <img src=http://%s:%d/%d/current/ border=0 width=%d%%></a>\"; \n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->cnt[indx]->conf.stream_preview_scale);
+        } else {
+            snprintf(response, sizeof (response),
+                "        preview = preview + \"<a href=http://%s:%d/%d/stream/> "
+                " <img src=http://%s:%d/%d/stream/ border=0 width=%d%%></a>\"; \n"
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->hostname, webui->cnt[0]->conf.webcontrol_port,indx
+                ,webui->cnt[indx]->conf.stream_preview_scale);
+        }
         webu_write(webui, response);
 
     }
@@ -2353,8 +2398,12 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
     retcd = MHD_digest_auth_check(webui->connection, realm, user, pass, 300);
     free(user);
     free(pass);
+
+    if (retcd == MHD_NO) {
+        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO ,"Failed authentication from %s", webui->clientip);
+    }
+
     if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO ,"Failed authentication from %s",webui->clientip);
         response = MHD_create_response_from_buffer(strlen (denied)
             ,(void *)denied, MHD_RESPMEM_PERSISTENT);
         if (response == NULL){

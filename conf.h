@@ -81,6 +81,7 @@ struct config {
     const char *stream_authentication;
     int stream_preview_scale;
     int stream_preview_newline;
+    int stream_preview_method;
     int webcontrol_port;
     int webcontrol_localhost;
     int webcontrol_parms;

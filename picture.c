@@ -227,7 +227,7 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
  */
 static unsigned prepare_exif(unsigned char **exif,
               const struct context *cnt,
-              const struct timeval *tv1,
+              const struct timeval *tv_in1,
               const struct coord *box)
 {
     /* description, datetime, and subtime are the values that are actually
@@ -236,21 +236,24 @@ static unsigned prepare_exif(unsigned char **exif,
     char *description, *datetime, *subtime;
     char datetime_buf[22];
     struct tm timestamp_tm;
+    struct timeval tv1;
 
-    if (tv1->tv_sec) {
-        localtime_r(&tv1->tv_sec, &timestamp_tm);
-    /* Exif requires this exact format */
-        snprintf(datetime_buf, 21, "%04d:%02d:%02d %02d:%02d:%02d",
-                timestamp_tm.tm_year + 1900,
-                timestamp_tm.tm_mon + 1,
-                timestamp_tm.tm_mday,
-                timestamp_tm.tm_hour,
-                timestamp_tm.tm_min,
-                timestamp_tm.tm_sec);
-        datetime = datetime_buf;
-    } else {
-        datetime = NULL;
+    gettimeofday(&tv1, NULL);
+    if (tv_in1 != NULL) {
+        tv1.tv_sec = tv_in1->tv_sec;
+        tv1.tv_usec = tv_in1->tv_usec;
     }
+
+    localtime_r(&tv1.tv_sec, &timestamp_tm);
+    /* Exif requires this exact format */
+    snprintf(datetime_buf, 21, "%04d:%02d:%02d %02d:%02d:%02d",
+            timestamp_tm.tm_year + 1900,
+            timestamp_tm.tm_mon + 1,
+            timestamp_tm.tm_mday,
+            timestamp_tm.tm_hour,
+            timestamp_tm.tm_min,
+            timestamp_tm.tm_sec);
+    datetime = datetime_buf;
 
     // TODO: Extract subsecond timestamp from somewhere, but only
     // use as much of it as is indicated by conf->frame_limit
@@ -258,7 +261,7 @@ static unsigned prepare_exif(unsigned char **exif,
 
     if (cnt->conf.exif_text) {
         description = malloc(PATH_MAX);
-        mystrftime(cnt, description, PATH_MAX-1, cnt->conf.exif_text, tv1, NULL, 0);
+        mystrftime(cnt, description, PATH_MAX-1, cnt->conf.exif_text, &tv1, NULL, 0);
     } else {
         description = NULL;
     }
@@ -1043,17 +1046,20 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
 int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
         int quality, int width, int height)
 {
+    struct timeval tv1;
+
     /*
-     * Send NULL for time/coordinates since this is for memory and the stream
-     * may be asking for this before the current image has set these values.
+     * Reset the time for the current image since it is not reliable
+     * for putting images to memory.
      */
+    gettimeofday(&tv1, NULL);
 
     if (!cnt->conf.stream_grey){
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       width, height, quality, cnt,NULL,NULL);
+                                       width, height, quality, cnt ,&tv1,NULL);
     } else {
         return put_jpeg_grey_memory(dest_image, image_size, image,
-                                       width, height, quality, cnt,NULL,NULL);
+                                       width, height, quality, cnt,&tv1,NULL);
     }
 
     return 0;
