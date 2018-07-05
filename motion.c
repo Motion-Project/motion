@@ -1021,7 +1021,7 @@ static int motion_init(struct context *cnt)
     cnt->imgs.labelsize = mymalloc((cnt->imgs.motionsize/2+1) * sizeof(*cnt->imgs.labelsize));
     cnt->imgs.preview_image.image_norm = mymalloc(cnt->imgs.size_norm);
     cnt->imgs.common_buffer = mymalloc(3 * cnt->imgs.width * cnt->imgs.height);
-
+    cnt->imgs.image_stream = mymalloc(cnt->imgs.size_norm);
     if (cnt->imgs.size_high > 0){
         cnt->imgs.image_virgin.image_high = mymalloc(cnt->imgs.size_high);
         cnt->imgs.preview_image.image_high = mymalloc(cnt->imgs.size_high);
@@ -1248,6 +1248,8 @@ static int motion_init(struct context *cnt)
     cnt->threshold = cnt->conf.max_changes;
 
     /* Initialize stream server if stream port is specified to not 0 */
+    pthread_mutex_init(&cnt->mutex_stream, NULL);
+
     if (cnt->conf.stream_port) {
         if (stream_init (&(cnt->stream), cnt->conf.stream_port, cnt->conf.stream_localhost,
             cnt->conf.ipv6_enabled, cnt->conf.stream_cors_header) == -1) {
@@ -1449,6 +1451,10 @@ static void motion_cleanup(struct context *cnt)
         free(cnt->imgs.preview_image.image_high);
         cnt->imgs.preview_image.image_high = NULL;
     }
+
+    pthread_mutex_destroy(&cnt->mutex_stream);
+    if (cnt->imgs.image_stream) free(cnt->imgs.image_stream);
+    cnt->imgs.image_stream = NULL;
 
     image_ring_destroy(cnt); /* Cleanup the precapture ring buffer */
 

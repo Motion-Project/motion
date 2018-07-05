@@ -52,7 +52,7 @@ else
     TEMP_LIBS="-L/usr/local/lib"
   fi
 fi
-TEMP_LIBS="-lm ${TEMP_LIBS}"
+TEMP_LIBS="-lm -lmicrohttpd ${TEMP_LIBS}"
 TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
 TEMP_CPPFLAGS="${TEMP_CPPFLAGS} ${CPPFLAGS}"
 TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"

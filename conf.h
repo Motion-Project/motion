@@ -85,6 +85,11 @@ struct config {
     int webcontrol_localhost;
     int webcontrol_parms;
     int webcontrol_interface;
+    int webcontrol_auth_method;
+    int webcontrol_ssl;
+    const char *webcontrol_cert;
+    const char *webcontrol_key;
+    const char *webcontrol_cors_header;
     const char *webcontrol_authentication;
     unsigned long frequency;
     int tuner_number;

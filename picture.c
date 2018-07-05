@@ -1043,22 +1043,17 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
 int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
         int quality, int width, int height)
 {
-    /* The application currently has functionality to process grey images into JPGs that
-     * we want to keep for future enhancements.  To avoid a unused function compiler warning
-     * we put in this dummy check so it appears we use the functionality.  Once the enhancement
-     * is implemented, we can remove this condition and just process the jpg_yuv420.
+    /*
+     * Send NULL for time/coordinates since this is for memory and the stream
+     * may be asking for this before the current image has set these values.
      */
 
     if (!cnt->conf.stream_grey){
         return put_jpeg_yuv420p_memory(dest_image, image_size, image,
-                                       width, height, quality, cnt
-                                       , &(cnt->current_image->timestamp_tv)
-                                       , &(cnt->current_image->location));
+                                       width, height, quality, cnt,NULL,NULL);
     } else {
         return put_jpeg_grey_memory(dest_image, image_size, image,
-                                       width, height, quality, cnt
-                                       , &(cnt->current_image->timestamp_tv)
-                                       , &(cnt->current_image->location));
+                                       width, height, quality, cnt,NULL,NULL);
     }
 
     return 0;
@@ -1288,3 +1283,19 @@ unsigned char *scale_half_yuv420p(int origwidth, int origheight, unsigned char *
     return scaled_img;
 }
 
+void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){
+
+    int i = 0, x, y;
+    for (y = 0; y < height_src; y+=2)
+        for (x = 0; x < width_src; x+=2)
+            img_dst[i++] = img_src[y * width_src + x];
+
+    for (y = 0; y < height_src / 2; y+=2)
+       for (x = 0; x < width_src; x += 4)
+       {
+          img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + x];
+          img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + (x + 1)];
+       }
+
+    return;
+}
