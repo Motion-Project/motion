@@ -1476,15 +1476,15 @@ static void webu_process_action(struct webui_ctx *webui) {
     indx = 0;
     if (!strcmp(webui->uri_cmd2,"makemovie")){
         if (thread_nbr == 0 && webui->cam_threads > 1) {
-            while (cnt[++indx])
-            cnt[indx]->makemovie = 1;
+            while (webui->cnt[++indx])
+            webui->cnt[indx]->makemovie = 1;
         } else {
             webui->cnt[thread_nbr]->makemovie = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"snapshot")){
         if (thread_nbr == 0 && webui->cam_threads > 1) {
-            while (cnt[++indx])
-            cnt[indx]->snapshot = 1;
+            while (webui->cnt[++indx])
+            webui->cnt[indx]->snapshot = 1;
         } else {
             webui->cnt[thread_nbr]->snapshot = 1;
         }
