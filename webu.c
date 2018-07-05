@@ -2587,8 +2587,15 @@ static void webu_mhd_deinit(void *cls
 }
 
 static void webu_mhd_features(struct context **cnt){
-    int retcd;
 
+    /* sample format: 0x01093001 = 1.9.30-1 , 0x00094400 ships with 16.04 */
+#if MHD_VERSION < 0x00094400
+    if (cnt[0]->conf.webcontrol_ssl){
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"libmicrohttpd libary too old SSL disabled");
+        cnt[0]->conf.webcontrol_ssl = 0;
+    }
+#else
+    int retcd;
     retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
     if (retcd == MHD_YES){
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"Basic authentication: enabled");
@@ -2633,6 +2640,7 @@ static void webu_mhd_features(struct context **cnt){
         cnt[0]->conf.webcontrol_ssl = 0;
     }
 
+#endif
 }
 
 static char * webui_mhd_loadfile(const char *fname){

@@ -52,7 +52,7 @@ else
     TEMP_LIBS="-L/usr/local/lib"
   fi
 fi
-TEMP_LIBS="-lm -lmicrohttpd ${TEMP_LIBS}"
+TEMP_LIBS="-lm ${TEMP_LIBS}"
 TEMP_CFLAGS="${TEMP_CFLAGS} ${CFLAGS}"
 TEMP_CPPFLAGS="${TEMP_CPPFLAGS} ${CPPFLAGS}"
 TEMP_LDFLAGS="${TEMP_LDFLAGS} ${LDFLAGS}"
@@ -238,6 +238,18 @@ if test x$JPGS = xyes ; then
   TEMP_LIBS="$TEMP_LIBS -ljpeg"
 else
   AC_MSG_ERROR([Required package libjpeg-dev not found, please check motion_guide.html and install necessary dependencies])
+fi
+
+##############################################################################
+###  Check for libmicrohttpd
+##############################################################################
+AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
+AC_MSG_CHECKING(libmicrohttpd libraries)
+AC_MSG_RESULT($MHTTP)
+if test x$MHTTP = xyes ; then
+  TEMP_LIBS="$TEMP_LIBS -lmicrohttpd "
+else
+  AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
 fi
 
 ##############################################################################
