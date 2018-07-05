@@ -1165,7 +1165,7 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
         }
 
         if (webui->cnt[indx]->conf.stream_preview_newline){
-            snprintf(response, sizeof (response),"%s","    preview = preview + \"<br>\"  \n");
+            snprintf(response, sizeof (response),"%s","    preview = preview + \"<br>\";\n");
             webu_write(webui, response);
         }
         if (webui->cnt[0]->conf.stream_preview_method == 1) {
