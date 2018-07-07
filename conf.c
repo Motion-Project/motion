@@ -90,7 +90,6 @@ struct config conf_template = {
     .stream_authentication =           NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          0,
-    .stream_preview_method =           0,
     .stream_grey =                     0,
     .webcontrol_port =                 0,
     .webcontrol_localhost =            1,
@@ -1337,15 +1336,6 @@ config_param config_params[] = {
     CONF_OFFSET(stream_preview_newline),
     copy_bool,
     print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_preview_method",
-    "# Method for webcontrol preview. full=0, substream=1, manual=2. (default: 0)",
-    0,
-    CONF_OFFSET(stream_preview_method),
-    copy_int,
-    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {

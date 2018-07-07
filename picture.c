@@ -1289,19 +1289,3 @@ unsigned char *scale_half_yuv420p(int origwidth, int origheight, unsigned char *
     return scaled_img;
 }
 
-void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){
-
-    int i = 0, x, y;
-    for (y = 0; y < height_src; y+=2)
-        for (x = 0; x < width_src; x+=2)
-            img_dst[i++] = img_src[y * width_src + x];
-
-    for (y = 0; y < height_src / 2; y+=2)
-       for (x = 0; x < width_src; x += 4)
-       {
-          img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + x];
-          img_dst[i++] = img_src[(width_src * height_src) + (y * width_src) + (x + 1)];
-       }
-
-    return;
-}
