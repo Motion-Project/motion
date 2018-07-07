@@ -621,10 +621,13 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
                 ,&ffmpeg->codec_name[codec_name_len+1]);
         } else {
             ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
-            if (!ffmpeg->codec)
+            if ((ffmpeg->oc->oformat) && (ffmpeg->codec != NULL)) {
+                    ffmpeg->oc->oformat->video_codec = ffmpeg->codec->id;
+            } else if (ffmpeg->codec == NULL) {
                 MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
                     ,_("Preferred codec %s not found")
                     ,&ffmpeg->codec_name[codec_name_len+1]);
+            }
         }
     }
     if (!ffmpeg->codec)
