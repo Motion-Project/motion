@@ -679,7 +679,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_all');\">%s 1</a>\n"
+                "        <a onclick=\"camera_click('cam_000');\">%s 1</a>\n"
                 ,_("Cameras")
                 ,_("Camera"));
             webu_write(webui, response);
@@ -688,7 +688,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
+                "        <a onclick=\"camera_click('cam_000');\">%s</a>\n"
                 ,_("Cameras")
                 ,webui->cnt[0]->conf.camera_name);
             webu_write(webui, response);
@@ -742,7 +742,6 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         "        <a onclick=\"action_click('/detection/pause');\">%s</a>\n"
         "        <a onclick=\"action_click('/detection/start');\">%s</a>\n"
         "        <a onclick=\"action_click('/action/restart');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/quit');\">%s</a>\n"
         "      </div>\n"
         "    </div>\n"
         ,_("Action")
@@ -753,8 +752,7 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         ,_("Tracking")
         ,_("Pause")
         ,_("Start")
-        ,_("Restart")
-        ,_("Quit"));
+        ,_("Restart"));
     webu_write(webui, response);
 }
 
@@ -802,6 +800,31 @@ static void webu_html_config_notice(struct webui_ctx *webui) {
             ,_("Restricted Configuration Options"));
     }
     webu_write(webui, response);
+}
+
+static void webu_html_hdesc(struct webui_ctx *webui) {
+
+    char response[WEBUI_LEN_RESP];
+
+    if (webui->cam_threads == 1){
+        snprintf(response, sizeof (response),
+            "  <div id=\"id_header\">\n"
+            "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s (%s)</h3>\n"
+            "  </div>\n"
+            ,_("All Cameras")
+            ,(!webui->cnt[0]->running)? _("Not running") :
+                (webui->cnt[0]->lost_connection)? _("Lost connection"):
+                (webui->cnt[0]->pause)? _("Paused"):_("Active")
+            );
+        webu_write(webui,response);
+    } else {
+        snprintf(response, sizeof (response),
+            "  <div id=\"id_header\">\n"
+            "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s</h3>\n"
+            "  </div>\n"
+            ,_("All Cameras"));
+        webu_write(webui,response);
+    }
 }
 
 static void webu_html_config(struct webui_ctx *webui) {
@@ -1406,12 +1429,7 @@ static void webu_html_body(struct webui_ctx *webui) {
 
     webu_html_navbar(webui);
 
-    snprintf(response, sizeof (response),
-        "  <div id=\"id_header\">\n"
-        "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s</h3>\n"
-        "  </div>\n"
-        ,_("All Cameras"));
-    webu_write(webui, response);
+    webu_html_hdesc(webui);
 
     webu_html_config(webui);
 
@@ -1489,19 +1507,6 @@ static void webu_process_action(struct webui_ctx *webui) {
                 webui->cnt[thread_nbr]->finish = 1;
             }
             webui->cnt[thread_nbr]->restart = 1;
-        }
-    } else if (!strcmp(webui->uri_cmd2,"quit")){
-        /* This is the legacy method...(we can do better than signals..).*/
-        if (thread_nbr == 0) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd quits");
-            kill(getpid(),SIGQUIT);
-           webui->cnt[0]->webcontrol_finish = TRUE;
-        } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-                "httpd quits thread %d",thread_nbr);
-            webui->cnt[thread_nbr]->restart = 0;
-            webui->cnt[thread_nbr]->makemovie = 1;
-            webui->cnt[thread_nbr]->finish = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"start")){
         if (thread_nbr == 0 && webui->cam_threads > 1) {
@@ -1792,6 +1797,42 @@ static void webu_text_get(struct webui_ctx *webui) {
 
 }
 
+static void webu_text_quit(struct webui_ctx *webui) {
+    /* Write out the option value for one parm */
+    char response[WEBUI_LEN_RESP];
+    int thread_nbr;
+
+    if (webui->uri_thread == NULL){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        return;
+    }
+
+    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
+    thread_nbr = atoi(webui->uri_thread);
+    if (thread_nbr >= webui->cam_threads){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        return;
+    }
+
+    /* This is the legacy method...(we can do better than signals..).*/
+    if (thread_nbr == 0) {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd quits");
+        kill(getpid(),SIGQUIT);
+        webui->cnt[0]->webcontrol_finish = TRUE;
+    } else {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
+            "httpd quits thread %d",thread_nbr);
+        webui->cnt[thread_nbr]->restart = 0;
+        webui->cnt[thread_nbr]->makemovie = 1;
+        webui->cnt[thread_nbr]->finish = 1;
+    }
+
+    snprintf(response,sizeof(response)
+        ,"quit in progress ... bye \nDone\n");
+    webu_write(webui, response);
+
+}
+
 static void webu_text_status(struct webui_ctx *webui) {
     /* Write out the pause/active status */
 
@@ -1914,10 +1955,6 @@ static void webu_text_action(struct webui_ctx *webui) {
         snprintf(response,sizeof(response)
             ,"Restart in progress ...\nDone\n");
         webu_write(webui, response);
-    } else if (!strcmp(webui->uri_cmd2,"quit")){
-        snprintf(response,sizeof(response)
-            ,"quit in progress ... bye \nDone\n");
-        webu_write(webui, response);
     } else if (!strcmp(webui->uri_cmd2,"start")){
         snprintf(response,sizeof(response)
             ,"Camera %s Detection resumed\nDone \n"
@@ -2009,6 +2046,10 @@ static int webu_text_main(struct webui_ctx *webui) {
     } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
                (!strcmp(webui->uri_cmd2,"pause"))) {
         webu_text_action(webui);
+
+    } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
+               (strcmp(webui->uri_cmd2,"quit") == 0)){
+        webu_text_quit(webui);
 
     } else if (!strcmp(webui->uri_cmd1,"action")) {
         webu_text_action(webui);
