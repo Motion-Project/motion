@@ -1016,12 +1016,6 @@
           <td align="left"><a href="#stream_port" >stream_port</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#stream_preview_method" >stream_preview_method</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left"><br /></td>
           <td align="left">stream_preview_newline</td>
           <td align="left">stream_preview_newline</td>
@@ -1749,27 +1743,24 @@
               <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
-            </tr>
-            <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_ssl" >webcontrol_ssl</a> </td>
             </tr>
            </tbody>
@@ -2196,6 +2187,27 @@
         device but has fewer options available. If the <a href="#netcam_url" >netcam_url</a> is used for
         either this alternative method or for a normal network camera, the videodevice option is ignored.
         <p></p>
+        Since the exact device number is set by the kernel upon boot, when there is more than one video device
+        it is possible that the particular cameras that were assigned to /dev/video0 and /dev/video1 may switch. In
+        order to set up Motion so that a particular camera is always assigned the same way, users can set up
+        a symbolic link using udev rules.  To do this a unique attribute must be identified for each camera. The
+        camera attributes can be viewed by using the command
+        <code>udevadm info -a -p $(udevadm info -q path -n /dev/video0) </code> while the camera is attached.  Usually
+        a serial number can be used.  ("Usually" because some cameras have been observed to have the same serial
+        number for different cameras)
+        <p></p>
+        Once a unique attribute has been identified for each camera, edit or create the file
+        <code>/etc/udev/rules.d/99-local.rules</code>.
+        <p></p>
+        Assuming that the unique attribute for the camera was name and was
+        <code>ATTR{name}=="Philips SPC 900NC webcam"</code> you would add the following line to the
+        99-local.rules file:
+        <code> KERNEL=="video[0-9]*", ATTR{name}=="Philips\ SPC\ 900NC*", SYMLINK+="video-webcam0"</code>
+        <p></p>
+        Once the change has been made and saved, reboot the computer and there should now be a "sticky" device called
+        /dev/video-webcam0
+        <p></p>
+
 
         <h3><a name="vid_control_params"></a>vid_control_params</h3>
         <p></p>
@@ -2763,12 +2775,16 @@
         The network camera high resolution URL.  This option can be used in conjunction with the netcam_url for rtsp/rtmp cameras.
         Users may specify the normal resolution url in the netcam_url which will be used for the motion detection and then
         specify the high resolution url for this parameter.  Motion detection on the normal resolution will trigger the saving
-        of images from the high resolution stream.  Note that the ONLY overlay that will be present on the resulting high
+        of images from the high resolution stream. Note that the ONLY overlay that will be present on the resulting high
         resolution pictures and movies is the privacy mask.  The other overlays such as date/time, motion boxes, camera
         name, etc will not be included.  Users wishing to see those overlays on the resulting images and movies will need to
         specify the high resolution url as the netcam_url and not use this option.
         <p></p>
         If the netcam_url is not specified, this option is ignored.
+        <p></p>
+        When this option is used with the <a href="#ffmpeg_passthrough">ffmpeg_passthrough</a> even less processing occurs.  Since
+        the <a href="#ffmpeg_passthrough">ffmpeg_passthrough</a> bypasses decoding the stream, images will be saved only as normal
+        resolution and the privacy mask will not be overlaid on to the high resolution images.
         <p></p>
 
         <h3><a name="netcam_userpass"></a> netcam_userpass </h3>
@@ -3955,6 +3971,9 @@
         <p></p>
         'off' to don't write pictures
         <p></p>
+        When the <a href="#netcam_highres">netcam_highres</a> option is selected along with the
+        <a href="#ffmpeg_passthrough">ffmpeg_passthrough</a> the output pictures will be provided in normal resolution
+        not high resolution.
         <p></p>
 
         <h3><a name="output_debug_pictures"></a> output_debug_pictures </h3>
@@ -4144,6 +4163,8 @@
         resulting movie may also include a few extra frames at the start that would not exist if the movie was created
         without the passthrough option.
         <p></p>
+        Since this option bypasses the decoding of the high resolution images to reduce CPU, when images are saved via
+        the <a href="#output_pictures">output_pictures</a> option, the pictures provided will be from the normal resolution stream.
         <p></p>
 
         <h3><a name="ffmpeg_bps"></a> ffmpeg_bps </h3>
@@ -4204,7 +4225,7 @@
         mkv container can handle virtually any codec.  Motion can optionally take an additional specification with this
         parameter.  By specifying the container (mkv) and then appending a semicolon and the ffmpeg codec name Motion
         will attempt to use the specified codec for the container.  This permits options such as encoding the h265 codec
-        into a mkv container instead of mp4 by specifying the option as <code>mkv:h265</code>
+        into a mkv container instead of mp4 by specifying the option as <code>mkv:libx265</code>
         <p></p>
 
         <h3><a name="ffmpeg_duplicate_frames"></a> ffmpeg_duplicate_frames </h3>
@@ -4450,36 +4471,8 @@
         images fed in this method.  The most straight forward around this limitation is to create a local
         HTML page that references the raw stream(s).
         <p></p>
-        Older versions of Motion required that each camera specify a unique port number.  For the
-        current version of Motion, images are streamed to a URL of the webcontrol port. The URL includes a
-        thread number which will be different for each camera.  If there is only the one motion.conf file and
-        Motion is only running a single camera, the thread number will be 0.  When running multiple cameras,
-        there will be multiple 'camera' files.  The thread number will correspond to each camera file and
-        begin at 1. There will be no stream available on thread 0 in this situation.  For camera, there are
-        three types of image streams provided depending upon the URL specified.
-        <ul>
-          <li><code>stream</code> : Provides a full size stream of normal images.
-            The URL is specified in the following
-            format<code>http://{motion ip}:{webcontrol port}/{thread number}/stream</code></li>
-          <li><code>substream</code> : Provides a low quality stream at half size to save bandwidth
-            The URL is specified in the following
-            format<code>http://{motion ip}:{webcontrol port}/{thread number}/substream</code></li>
-          <li><code>current</code> : Provides a full size static jpg which must be manually refreshed by browser.
-	          The URL is specified in the following
-            format<code>http://{motion ip}:{webcontrol port}/{thread number}/current</code></li>
-        </ul>
-        For transitional purposes, the historical method of specifying a unique port number for each
-        camera will continue for a short while.  Users are encouraged to transition to the URL specification
-        to view the streams of the cameras.
-        <p></p>
-        <p></p>
-        <p></p>
         It may also be possible to view the stream via regular stream players such as VLC, mplayer, ffplay, avplay, etc.
         by specifying the network stream as
-        <code>
-        http://localhost:mywebcontrolportnumber/threadnumber/stream.mjpg
-        </code>
-        or if using the legacy stream method
         <code>
         http://localhost:mystreamportnumber/stream.mjpg
         </code>
@@ -4488,8 +4481,8 @@
 
         <h4><a name="OptDetail_Webcontrol"></a>Web Control</a> </h4>
         <p></p>
-        Motion has a limited web interface to control some parameters while running as well as providing
-        the image streams.  By default, the changing of any parameters via the web interface is disabled
+        Motion has a limited web interface to control some parameters while running.  By default, the
+        changing of any parameters via the web interface is disabled
         via the <a href="#webcontrol_parms">webcontrol_parms</a> configuration option.  This is for
         security purposes.  If the <a href="#webcontrol_parms">webcontrol_parms</a> is enabled, some Motion
         configuration options can be changed while Motion is running.  Other configuration options must be
@@ -4553,13 +4546,15 @@
         <ul>
           <li><code>{IP}</code> The IP address of the computer running Motion</li>
           <li><code>{port}</code> The port specified for the webcontrol</li>
+          <li><code>{thread}</code> The thread number of the camera.</li>
           <li><code>{parm}</code> The Motion configuration parameter requested.</li>
           <li><code>{value1}</code> The first value of the Motion configuration parameter requested.</li>
           <li><code>{value2}</code> The second value of the Motion configuration parameter requested.</li>
-          <li><code>{thread}</code> The thread number of the camera.</li>
         </ul>
         <p></p>
-        The following are the commands available
+        The following are the commands available.  Unless indicated below, these commands are available when
+        using either the HTML/CSS interface or the text interface as specified via the
+        <a href="#webcontrol_interface">webcontrol_interface</a>.
         <p></p>
 	      <ul>
           <li><code>{IP}:{port}/{thread}/config/list</code> Lists all the configuration values for the camera</li>
@@ -4583,7 +4578,11 @@
           <li><code>{IP}:{port}/{thread}/track/set?pan={value1}&tilt={value2}</code> Send command to PTZ camera to
             pan to value1 and tilt to value2</li>
         </ul>
-
+        <p></p>
+        If the item above is available via the HTML/CSS interface, it is also possible to see the exact URL sent
+        to Motion in the log.  Change the log level to debug, then open up the Motion webcontrol interface and
+        perform the action in question.  In the log Motion will report the exact URL sent to Motion that performed
+        the action.
         <p></p>
         <strong>ALERT!</strong> Security Warning! This feature also means you have to pay attention
         to the following.
@@ -4605,9 +4604,6 @@
 
         <h3><a name="ipv6_enabled"></a> ipv6_enabled </h3>
         <p></p>
-	      <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
-        <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
@@ -4619,9 +4615,6 @@
         <p></p>
 
         <h3><a name="stream_port"></a> stream_port </h3>
-        <p></p>
- 	      <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
         <p></p>
         <ul>
           <li> Type: Integer</li>
@@ -4639,9 +4632,6 @@
         <p></p>
 
         <h3><a name="substream_port"></a> substream_port </h3>
-        <p></p>
-        <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
         <p></p>
         <ul>
           <li> Type: Integer</li>
@@ -4706,9 +4696,6 @@
 
         <h3><a name="stream_localhost"></a> stream_localhost </h3>
         <p></p>
-        <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
-        <p></p>
         <ul>
           <li> Type: Boolean</li>
           <li> Range / Valid values: on, off</li>
@@ -4721,9 +4708,6 @@
 
         <h3><a name="stream_limit"></a> stream_limit </h3>
         <p></p>
-        <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
-        <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
@@ -4735,9 +4719,6 @@
         <p></p>
 
         <h3><a name="stream_auth_method"></a> stream_auth_method </h3>
-        <p></p>
-        <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
         <p></p>
         <ul>
           <li> Type: Integer</li>
@@ -4759,9 +4740,6 @@
 
         <h3><a name="stream_authentication"></a> stream_authentication </h3>
         <p></p>
-        <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
-        <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
@@ -4773,9 +4751,6 @@
         <p></p>
 
         <h3><a name="stream_cors_header"></a> stream_cors_header </h3>
-        <p></p>
-        <b>This parameter is depreciated and will be removed in a future version.  Please use the
-               URL provided via the webcontrol port to access images from the camera.</b>
         <p></p>
         <ul>
           <li> Type: String</li>
@@ -4839,23 +4814,6 @@
         <p></p>
         Users that require a more polished and customized preview page are encouraged to create their own
         local HTML page that reference the URL streams.
-        <p></p>
-
-        <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
-        <p></p>
-        <ul>
-          <li> Type: integer</li>
-          <li> Range / Valid values:0 to 2 / off</li>
-          <li> Default: 0</li>
-        </ul>
-        <p></p>
-        Defines the method to use for the preview on the webcontrol page.
-        <ul>
-          <li> 0 = Full images sent and scaling (as required) performed on the client browser.</li>
-          <li> 1 = Substream images sent for display on the webcontrol page.</li>
-          <li> 2 = Static images sent for display on the webcontrol page.  Users must refresh browser to see updated images.</li>
-        </ul>
-        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
@@ -4940,7 +4898,7 @@
           <li> Default: Off</li>
         </ul>
         <p></p>
-        This option specifies whether to enable SSl for the webcontrol port.  If selected, then the
+        This option specifies whether to enable SSL for the webcontrol port.  If selected, then the
         library libmicrohttpd must have been compiled with SSL support.  Also, when this option is
         selected, a certification and key file must also be specified.
         <p></p>
@@ -4954,7 +4912,8 @@
           <li> Default: Not Defined</li>
         </ul>
         <p></p>
-        Full path to the certification file for SSL support.  Only used when webcontrol_ssl is enabled.
+        Full path to the certification file for SSL support.  Only used when
+        <a href="#webcontrol_ssl">webcontrol_ssl</a> is enabled.
         <p></p>
         <p></p>
 
@@ -4966,7 +4925,8 @@
           <li> Default: Not Defined</li>
         </ul>
         <p></p>
-        Full path to the key file for SSL support.  Only used when webcontrol_ssl is enabled.
+        Full path to the key file for SSL support.  Only used when
+        <a href="#webcontrol_ssl">webcontrol_ssl</a> is enabled.
         <p></p>
         <p></p>
 

@@ -1,4 +1,4 @@
-.TH MOTION 1 2017-11-05 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2018-07-07 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -1636,6 +1636,24 @@ Specified the web control interface type.  0=css, 1=text
 .RE
 
 .TP
+.B webcontrol_auth_method
+.RS
+.nf
+Values:
+.RS
+0 = disabled
+1 = Basic authentication
+2 = MD5 digest (the safer authentication)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The authentication method to use for the webcontrol.
+.RE
+.RE
+
+.TP
 .B webcontrol_authentication
 .RS
 .nf
@@ -1645,6 +1663,47 @@ The username and password to use for authentication of the webcontrol.
 The format is Username:Password
 .RE
 .RE
+
+.TP
+.B webcontrol_cert
+.RS
+.nf
+Values:
+.RS
+The full path to the SSL certification file for webcontrol
+.RE
+.RE
+
+.TP
+.B webcontrol_key
+.RS
+.nf
+Values:
+.RS
+The full path to the SSL key file for webcontrol
+.RE
+.RE
+
+.TP
+.B webcontrol_ssl
+.RS
+.nf
+Values:
+.RS
+When specified as on, use SSL for the webcontrol.
+.RE
+.RE
+
+.TP
+.B webcontrol_cors_header
+.RS
+.nf
+Values:
+.RS
+The header to add for cross orgin on the webcontrol
+.RE
+.RE
+
 
 .TP
 .B webcontrol_parms
