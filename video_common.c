@@ -288,6 +288,43 @@ void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int
     }
 }
 
+void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+    unsigned char *src, *dest, *dest2;
+    unsigned char *src_u, *src_u2, *src_v, *src_v2;
+
+    int i, j;
+    /*Planar version of 422 */
+    /* Create the Y plane. */
+    src = cap_map;
+    dest = map;
+    for (i = width * height; i > 0; i--) {
+        *dest++ = *src++;
+    }
+
+    /* Create U and V planes. */
+    dest = map + width * height;
+    dest2 = dest + (width * height) / 4;
+    for (i = 0; i< (height / 2)-2; i++) {
+        src_u = cap_map + (width * height) + ((i*2) * (width/2));
+        src_u2 = src_u  + (width/2);
+        src_v = src_u + (width/2 * height);
+        src_v2 = src_v  + (width/2);
+
+        for (j = 0; j < (width / 2); j++) {
+            *dest = ((int) *src_u + (int) *src_u2) / 2;
+            src_u ++;
+            src_u2++;
+            dest++;
+
+            *dest2 = ((int) *src_v + (int) *src_v2) / 2;
+            src_v ++;
+            src_v2++;
+            dest2++;
+        }
+    }
+}
+
 void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     uint8_t *pY = map;
@@ -329,9 +366,10 @@ void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, i
     unsigned char *r, *g, *b;
     int i, loop;
 
-    b = cap_map;
-    g = b + 1;
-    r = g + 1;
+    r = cap_map;
+    g = r + 1;
+    b = g + 1;
+
     y = map;
     u = y + width * height;
     v = u + (width * height) / 4;

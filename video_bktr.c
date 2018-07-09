@@ -590,10 +590,11 @@ static int bktr_capture(struct video_dev *viddev, unsigned char *map, int width,
         break;
     case METEOR_GEO_YUV_PACKED:
         /*FALLTHROUGH*/
-    case METEOR_GEO_YUV_PLANAR:
-        /*FALLTHROUGH*/
     case METEOR_GEO_YUV_422:
         vid_yuv422to420p(map, cap_map, width, height);
+        break;
+    case METEOR_GEO_YUV_PLANAR:
+        vid_yuv422pto420p(map, cap_map, width, height);
         break;
     case METEOR_GEO_YUV_9:
         /*FALLTHROUGH*/
