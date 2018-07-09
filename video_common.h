@@ -59,6 +59,7 @@ void vid_mutex_init(void);
 int vid_parms_parse(struct context *cnt);
 
 void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
+void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_bayer2rgb24(unsigned char *dst, unsigned char *src, long int width, long int height);

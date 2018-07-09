@@ -1068,9 +1068,10 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
             return 0;
 
         case V4L2_PIX_FMT_YUYV:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_YUV422P:
             vid_yuv422to420p(map, the_buffer->ptr, width, height);
+            return 0;
+        case V4L2_PIX_FMT_YUV422P:
+            vid_yuv422pto420p(map, the_buffer->ptr, width, height);
             return 0;
 
         case V4L2_PIX_FMT_YUV420:
