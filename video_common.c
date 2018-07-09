@@ -366,9 +366,10 @@ void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, i
     unsigned char *r, *g, *b;
     int i, loop;
 
-    b = cap_map;
-    g = b + 1;
-    r = g + 1;
+    r = cap_map;
+    g = r + 1;
+    b = g + 1;
+
     y = map;
     u = y + width * height;
     v = u + (width * height) / 4;
