@@ -236,7 +236,7 @@ static void webu_html_badreq(struct webui_ctx *webui) {
         "<!DOCTYPE html>\n"
         "<html>\n"
         "<body>\n"
-        "<h1>Bad Request</h1>\n"
+        "<p>Bad Request</p>\n"
         "<p>The server did not understand your request.</p>\n"
         "</body>\n"
         "</html>\n");
@@ -1694,21 +1694,19 @@ static int webu_html_main(struct webui_ctx *webui) {
 static void webu_text_page(struct webui_ctx *webui) {
     /* Write the main page text */
     char response[WEBUI_LEN_RESP];
-    int indx, indx_st;
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
+    int indx;
 
     snprintf(response, sizeof (response),
         "Motion "VERSION" Running [%d] Camera%s\n0\n",
         webui->cam_count, (webui->cam_count > 1 ? "s" : ""));
     webu_write(webui, response);
 
-    for (indx = indx_st; indx < webui->cam_threads; indx++) {
-        snprintf(response, sizeof (response), "%d\n", indx);
-        webu_write(webui, response);
+    if (webui->cam_threads > 1){
+        for (indx = 1; indx < webui->cam_threads; indx++) {
+            snprintf(response, sizeof (response), "%d\n", indx);
+            webu_write(webui, response);
+        }
     }
-
 }
 
 static void webu_text_list(struct webui_ctx *webui) {
@@ -2211,7 +2209,7 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
 
     if (strlen(webui->userpass) == 0){
         response = MHD_create_response_from_buffer (strlen (denied),
-						  (void *) denied, MHD_RESPMEM_MUST_COPY);
+						  (void *) denied, MHD_RESPMEM_PERSISTENT);
         if (!response){
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
             retcd = MHD_NO;
@@ -2223,7 +2221,7 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
         if (strcmp(webui->userpass, webui->cnt[0]->conf.webcontrol_authentication) != 0){
             MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO ,"Failed authentication from %s",webui->clientip);
             response = MHD_create_response_from_buffer (strlen (denied),
-						  (void *) denied, MHD_RESPMEM_MUST_COPY);
+						  (void *) denied, MHD_RESPMEM_PERSISTENT);
             if (!response){
                 MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
                 retcd = MHD_NO;
@@ -2253,10 +2251,7 @@ static int webu_mhd_send(struct webui_ctx *webui) {
     struct MHD_Response *response;
 
     response = MHD_create_response_from_buffer (strlen(webui->resp_page)
-        ,(void *)webui->resp_page, MHD_RESPMEM_MUST_COPY);
-        /* Must investigate.  Looks like mhd bug occurs using persistent memory option.
-         * On very first request it puts garbage in first few btyes
-         */
+        ,(void *)webui->resp_page, MHD_RESPMEM_PERSISTENT);
 
     if (!response){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
