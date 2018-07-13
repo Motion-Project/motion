@@ -2913,6 +2913,8 @@ static void motion_shutdown(void){
 
     motion_remove_pid();
 
+    webu_stop(cnt_list);
+
     while (cnt_list[++i])
         context_destroy(cnt_list[i]);
 
@@ -2999,6 +3001,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     conf_output_parms(cnt_list);
 
     initialize_chars();
+
+    webu_start(cnt_list);
 
     if (daemonize) {
         /*
@@ -3138,33 +3142,6 @@ static void motion_restart(int argc, char **argv){
     restart = 0;
 }
 
-static void motion_webcontrol_start(void){
-
-  /* Create a thread for the web control interface if requested. */
-
-    pthread_attr_t thread_attr;
-    pthread_t thread_id;
-
-    if (cnt_list[0]->conf.webcontrol_port) {
-        pthread_mutex_lock(&global_lock);
-            threads_running++;
-            cnt_list[0]->webcontrol_running = 1;
-        pthread_mutex_unlock(&global_lock);
-
-        pthread_attr_init(&thread_attr);
-        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
-
-        if (pthread_create(&thread_id, &thread_attr, &webu_main, cnt_list)) {
-            /* thread create failed, undo running state */
-            pthread_mutex_lock(&global_lock);
-                threads_running--;
-                cnt_list[0]->webcontrol_running = 0;
-            pthread_mutex_unlock(&global_lock);
-        }
-        pthread_attr_destroy(&thread_attr);
-    }
-}
-
 static void motion_watchdog(int indx){
 
     /* Notes:
@@ -3283,9 +3260,6 @@ static int motion_check_threadcount(void){
         if (cnt_list[indx]->running || cnt_list[indx]->restart)
             motion_threads_running++;
     }
-    if (cnt_list[0]->conf.webcontrol_port &&
-        cnt_list[0]->webcontrol_running)
-        motion_threads_running++;
 
     if (((motion_threads_running == 0) && finish) ||
         ((motion_threads_running == 0) && (threads_running == 0))) {
@@ -3337,8 +3311,6 @@ int main (int argc, char **argv)
             cnt_list[i]->conf.camera_id = cnt_list[i]->conf.camera_id ? cnt_list[i]->conf.camera_id: i;
             motion_start_thread(cnt_list[i]);
         }
-
-        motion_webcontrol_start();
 
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Waiting for threads to finish, pid: %d"), getpid());

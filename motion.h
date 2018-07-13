@@ -51,6 +51,7 @@ struct image_data;
 #include <sys/param.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <microhttpd.h>
 
 #ifdef __FreeBSD__
 #include <pthread_np.h>
@@ -506,6 +507,8 @@ struct context {
 
     unsigned int passflag;  //only purpose is to flag first frame vs all others.....
     int rolling_frame;
+
+    struct MHD_Daemon *webcontrol_daemon;
 
 };
 

@@ -62,7 +62,6 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <microhttpd.h>
 
 #include "motion.h"
 #include "webu.h"
@@ -2560,14 +2559,33 @@ static void webu_mhd_setoptions(struct context **cnt
 
 }
 
-static void webu_mhd_run(struct context **cnt) {
-    int mhd_run;
-    struct MHD_Daemon *mhd_daemon;
+void webu_stop(struct context **cnt) {
+
+    if (cnt[0]->webcontrol_daemon != NULL){
+        MHD_stop_daemon (cnt[0]->webcontrol_daemon);
+    }
+
+}
+
+void webu_start(struct context **cnt) {
+
     struct MHD_OptionItem *mhd_ops;
     unsigned int mhd_flags;
     char *ssl_cert, *ssl_key;
+    struct sigaction act;
+
+    cnt[0]->webcontrol_daemon = NULL;
+    if (cnt[0]->conf.webcontrol_port == 0 ) return;
+
+    /* set signal handlers TO IGNORE */
+    memset(&act, 0, sizeof(act));
+    sigemptyset(&act.sa_mask);
+    act.sa_handler = SIG_IGN;
+    sigaction(SIGPIPE, &act, NULL);
+    sigaction(SIGCHLD, &act, NULL);
 
     mhd_ops= malloc(sizeof(struct MHD_OptionItem)*10);
+
 
     ssl_cert = webui_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
     ssl_key  = webui_mhd_loadfile(cnt[0]->conf.webcontrol_key);
@@ -2589,57 +2607,21 @@ static void webu_mhd_run(struct context **cnt) {
                     MHD_USE_SELECT_INTERNALLY;
     }
 
-    mhd_daemon = MHD_start_daemon (mhd_flags
+    cnt[0]->webcontrol_daemon = MHD_start_daemon (mhd_flags
         ,cnt[0]->conf.webcontrol_port
         ,NULL, NULL
         ,&webu_mhd_ans, cnt
         ,MHD_OPTION_ARRAY, mhd_ops
         ,MHD_OPTION_END);
 
-    if (mhd_daemon == NULL){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"Unable to start MHD");
-        return;
-    }
-
-    mhd_run = TRUE;
-    while (mhd_run){
-        SLEEP(1,0);
-        if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Finishing");
-            mhd_run = FALSE;
-        }
-    }
-
-    MHD_stop_daemon (mhd_daemon);
-
     free(mhd_ops);
     if (ssl_cert != NULL) free(ssl_cert);
     if (ssl_key  != NULL) free(ssl_key);
 
-}
-
-void *webu_main(void *arg) {
-    /* This is the entry point for the web control thread*/
-    struct context **cnt = arg;
-    struct sigaction act;
-
-    /* set signal handlers TO IGNORE */
-    memset(&act, 0, sizeof(act));
-    sigemptyset(&act.sa_mask);
-    act.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &act, NULL);
-    sigaction(SIGCHLD, &act, NULL);
-
-    webu_mhd_run(cnt);
-
-    /* Update how many threads we have running. */
-    pthread_mutex_lock(&global_lock);
-        threads_running--;
-        cnt[0]->webcontrol_running = 0;
-    pthread_mutex_unlock(&global_lock);
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Thread exit");
-    pthread_exit(NULL);
+    if (cnt[0]->webcontrol_daemon == NULL){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"Unable to start MHD");
+    }
+    return;
 
 }
 

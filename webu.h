@@ -11,6 +11,7 @@
 #define _INCLUDE_WEBU_H_
 
 
-void *webu_main(void *arg);
+void webu_start(struct context **cnt);
+void webu_stop(struct context **cnt);
 
 #endif
