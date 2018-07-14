@@ -1,4 +1,4 @@
-.TH MOTION 1 2018-07-07 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2018-07-14 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -819,7 +819,7 @@ Speed of mask changes when creating a dynamic mask file.
 .RE
 
 .TP
-.B lightswitch
+.B lightswitch_percent
 .RS
 .nf
 Values: 0 to 100
@@ -829,6 +829,19 @@ Description:
 .RS
 Ignore sudden massive light intensity changes.
 Value is a percentage of the picture area that changed intensity.
+.RE
+.RE
+
+.TP
+.B lightswitch_frames
+.RS
+.nf
+Values: 1 to 1000
+Default: 5
+Description:
+.fi
+.RS
+Number of frames to ignore when lightswitch has been triggered.
 .RE
 .RE
 
