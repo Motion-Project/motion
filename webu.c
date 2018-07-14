@@ -13,7 +13,8 @@
  *
  *    Function scheme:
  *      webu*      - All functions in this module have this prefix.
- *      webu_main  - Main entry point from the motion thread and only function exposed.
+ *      webu_start - Entry point to start the daemon.
+ *      webu_stop  - Entry point to stop the daemon
  *      webu_mhd*  - Functions related to libmicrohttd implementation
  *      webu_html* - Functions that create the display web page.
  *        webu_html_style*  - The style section of the web page
@@ -272,7 +273,7 @@ static void webu_url_decode(char *urlencoded, size_t length) {
             c[2] = 0;
 
             scan_rslt = sscanf(c, "%x", &i);
-            if (scan_rslt < 1) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error decoding");
+            if (scan_rslt < 1) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error decoding"));
 
             if (i < 128) {
                 *urldecoded++ = (char)i;
@@ -394,23 +395,23 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     retcd = 0;
 
-    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "Sent url: %s",webui->url);
+    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url);
 
     webu_parseurl_reset(webui);
 
     if (webui->url == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url: %s",webui->url);
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),webui->url);
         return -1;
     }
 
     if (webui->url[0] != '/'){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url: %s",webui->url);
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),webui->url);
         return -1;
     }
 
     webu_url_decode(webui->url, strlen(webui->url));
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "Decoded url: %s",webui->url);
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
 
     /* Home page, nothing else */
     if (strlen(webui->url) == 1) return 0;
@@ -1466,14 +1467,14 @@ static void webu_process_action(struct webui_ctx *webui) {
     int thread_nbr, indx;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
@@ -1495,12 +1496,12 @@ static void webu_process_action(struct webui_ctx *webui) {
     } else if (!strcmp(webui->uri_cmd2,"restart")){
         /* This is the legacy method...(we can do better than signals..).*/
         if (thread_nbr == 0) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd is going to restart");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("httpd is going to restart"));
             kill(getpid(),SIGHUP);
             webui->cnt[0]->webcontrol_finish = TRUE;
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-                "httpd is going to restart thread %d",thread_nbr);
+                _("httpd is going to restart thread %d"),thread_nbr);
             if (webui->cnt[thread_nbr]->running) {
                 webui->cnt[thread_nbr]->makemovie = 1;
                 webui->cnt[thread_nbr]->finish = 1;
@@ -1528,7 +1529,7 @@ static void webu_process_action(struct webui_ctx *webui) {
         conf_print(webui->cnt);
     } else {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
-            "Invalid action requested: %s",webui->uri_cmd2);
+            _("Invalid action requested: %s"),webui->uri_cmd2);
         return;
     }
 }
@@ -1538,18 +1539,18 @@ static void webu_process_config(struct webui_ctx *webui) {
     int thread_nbr, indx;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
     if (strcmp(webui->uri_cmd2, "set")) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid command request: %s",webui->uri_cmd2);
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid command request: %s"),webui->uri_cmd2);
         return;
     }
 
@@ -1579,11 +1580,11 @@ static void webu_process_config(struct webui_ctx *webui) {
                 if (nls_enabled){
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
                 } else {
-                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,"Native Language : off");
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : off"));
                 }
             }
         } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"set the value to null/zero");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,_("Set the value to null/zero"));
         }
     }
 
@@ -1597,14 +1598,14 @@ static void webu_process_track(struct webui_ctx *webui) {
     struct coord cent;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
@@ -1683,7 +1684,7 @@ static int webu_html_main(struct webui_ctx *webui) {
         webu_process_track(webui);
 
     } else{
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid action requested");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid action requested"));
         retcd = -1;
     }
 
@@ -1715,14 +1716,14 @@ static void webu_text_list(struct webui_ctx *webui) {
     const char *val_parm;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
@@ -1757,14 +1758,14 @@ static void webu_text_get(struct webui_ctx *webui) {
     const char *val_parm;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
@@ -1800,25 +1801,25 @@ static void webu_text_quit(struct webui_ctx *webui) {
     int thread_nbr;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
     /* This is the legacy method...(we can do better than signals..).*/
     if (thread_nbr == 0) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd quits");
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("httpd quits"));
         kill(getpid(),SIGQUIT);
         webui->cnt[0]->webcontrol_finish = TRUE;
     } else {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-            "httpd quits thread %d",thread_nbr);
+            _("httpd quits thread %d"),thread_nbr);
         webui->cnt[thread_nbr]->restart = 0;
         webui->cnt[thread_nbr]->makemovie = 1;
         webui->cnt[thread_nbr]->finish = 1;
@@ -1840,13 +1841,13 @@ static void webu_text_status(struct webui_ctx *webui) {
     if (webui->cam_threads == 1) indx_st = 0;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
@@ -1879,13 +1880,13 @@ static void webu_text_connection(struct webui_ctx *webui) {
     if (webui->cam_threads == 1) indx_st = 0;
 
     if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("NULL thread detected"));
         return;
     }
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
     thread_nbr = atoi(webui->uri_thread);
     if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid thread specified"));
         return;
     }
 
@@ -1973,7 +1974,7 @@ static void webu_text_action(struct webui_ctx *webui) {
         webu_write(webui, response);
     } else {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
-            "Invalid action requested: %s",webui->uri_cmd2);
+            _("Invalid action requested: %s"),webui->uri_cmd2);
         return;
     }
 
@@ -2055,7 +2056,7 @@ static int webu_text_main(struct webui_ctx *webui) {
         webu_text_track(webui);
 
     } else{
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid action requested");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid action requested"));
         retcd = -1;
     }
 
@@ -2083,7 +2084,7 @@ static void webu_mhd_clientip(struct webui_ctx *webui) {
         }
     }
 
-    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, "Connection from: %s",webui->clientip);
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip);
 
 }
 
@@ -2129,7 +2130,7 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
         len_userpass = strlen(webui->cnt[0]->conf.webcontrol_authentication);
     }
     if (len_userpass == 0){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"No user:pass provided");
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No user:pass provided"));
         snprintf(webui->userpass, webui->userpass_size,"%s","digest");
         return MHD_YES;
     }
@@ -2163,7 +2164,8 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
     free(pass);
 
     if (retcd == MHD_NO) {
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO ,"Failed authentication from %s", webui->clientip);
+        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("Failed authentication from %s"), webui->clientip);
     }
 
     if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
@@ -2210,7 +2212,7 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
         response = MHD_create_response_from_buffer (strlen (denied),
 						  (void *) denied, MHD_RESPMEM_PERSISTENT);
         if (!response){
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
             retcd = MHD_NO;
         } else {
             retcd = MHD_queue_basic_auth_fail_response (webui->connection,"Motion",response);
@@ -2218,11 +2220,12 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
         }
     } else {
         if (strcmp(webui->userpass, webui->cnt[0]->conf.webcontrol_authentication) != 0){
-            MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO ,"Failed authentication from %s",webui->clientip);
+            MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+                ,_("Failed authentication from %s"),webui->clientip);
             response = MHD_create_response_from_buffer (strlen (denied),
 						  (void *) denied, MHD_RESPMEM_PERSISTENT);
             if (!response){
-                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
+                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
                 retcd = MHD_NO;
             } else {
                 retcd = MHD_queue_basic_auth_fail_response (webui->connection,"Motion",response);
@@ -2237,7 +2240,8 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
     if (user != NULL) free(user);
 
     if (retcd == MHD_NO){
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "Failed authentication from %s",webui->clientip);
+        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("Failed authentication from %s"),webui->clientip);
     }
 
     return retcd;
@@ -2253,7 +2257,7 @@ static int webu_mhd_send(struct webui_ctx *webui) {
         ,(void *)webui->resp_page, MHD_RESPMEM_PERSISTENT);
 
     if (!response){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
@@ -2299,7 +2303,7 @@ static int webu_mhd_ans(void *cls
     }
 
     if (strcmp (method, "GET") != 0){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"Invalid Method requested: %s",method);
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }
 
@@ -2332,7 +2336,7 @@ static int webu_mhd_ans(void *cls
     }
 
     if (retcd == MHD_NO){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"send page failed %d",retcd);
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
     }
     return retcd;
 
@@ -2385,59 +2389,59 @@ static void webu_mhd_features(struct context **cnt){
     /* sample format: 0x01093001 = 1.9.30-1 , 0x00094400 ships with 16.04 */
 #if MHD_VERSION < 0x00094400
     if (cnt[0]->conf.webcontrol_ssl){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"libmicrohttpd libary too old SSL disabled");
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL disabled"));
         cnt[0]->conf.webcontrol_ssl = 0;
     }
 #else
     int retcd;
     retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
     if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"Basic authentication: enabled");
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: enabled"));
     } else {
         if (cnt[0]->conf.webcontrol_auth_method == 1){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"Basic authentication: disabled");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             cnt[0]->conf.webcontrol_auth_method = 0;
         } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"Basic authentication: disabled");
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
         }
     }
 
     retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
     if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"Digest authentication: enabled");
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: enabled"));
     } else {
         if (cnt[0]->conf.webcontrol_auth_method == 2){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"Digest authentication: disabled");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             cnt[0]->conf.webcontrol_auth_method = 0;
         } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"Digest authentication: disabled");
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
         }
     }
 
     retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
     if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"IPV6: enabled");
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: enabled"));
     } else {
         if (cnt[0]->conf.ipv6_enabled){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"IPV6: disabled");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
             cnt[0]->conf.ipv6_enabled = FALSE;
         } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"IPV6: disabled");
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
         }
     }
 
     retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
     if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"SSL: enabled");
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL: enabled"));
     } else {
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,"SSL: disabled");
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL: disabled"));
         cnt[0]->conf.webcontrol_ssl = 0;
     }
 
 #endif
 }
 
-static char * webui_mhd_loadfile(const char *fname){
+static char * webu_mhd_loadfile(const char *fname){
     FILE *infile;
     size_t file_size, read_size;
     char * file_char;
@@ -2458,7 +2462,7 @@ static char * webui_mhd_loadfile(const char *fname){
                 free(file_char);
                 file_char = NULL;
                 MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                    ,"Error reading file for SSL support.");
+                    ,_("Error reading file for SSL support."));
             }
         } else {
             file_char = NULL;
@@ -2473,12 +2477,12 @@ static void webu_mhd_checkssl(struct context **cnt, char *ssl_cert, char *ssl_ke
     if (cnt[0]->conf.webcontrol_ssl){
         if ((cnt[0]->conf.webcontrol_cert == NULL) || (ssl_cert == NULL)) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                ,"SSL requested but no cert file provided.  SSL disabled");
+                ,_("SSL requested but no cert file provided.  SSL disabled"));
             cnt[0]->conf.webcontrol_ssl = 0;
         }
         if ((cnt[0]->conf.webcontrol_key == NULL) || (ssl_key == NULL)) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                ,"SSL requested but no key file provided.  SSL disabled");
+                ,_("SSL requested but no key file provided.  SSL disabled"));
             cnt[0]->conf.webcontrol_ssl = 0;
         }
     }
@@ -2587,8 +2591,8 @@ void webu_start(struct context **cnt) {
     mhd_ops= malloc(sizeof(struct MHD_OptionItem)*10);
 
 
-    ssl_cert = webui_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
-    ssl_key  = webui_mhd_loadfile(cnt[0]->conf.webcontrol_key);
+    ssl_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
+    ssl_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
 
     webu_mhd_features(cnt);
 
@@ -2619,7 +2623,7 @@ void webu_start(struct context **cnt) {
     if (ssl_key  != NULL) free(ssl_key);
 
     if (cnt[0]->webcontrol_daemon == NULL){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,"Unable to start MHD");
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
     }
     return;
 
