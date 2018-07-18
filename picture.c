@@ -1279,11 +1279,11 @@ unsigned char *scale_half_yuv420p(int origwidth, int origheight, unsigned char *
             scaled_img[i++] = img[y * origwidth + x];
 
     for (y = 0; y < origheight / 2; y+=2)
-       for (x = 0; x < origwidth; x += 4)
-       {
-          scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
-          scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
-       }
+        for (x = 0; x < origwidth; x += 4)
+        {
+            scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
+            scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
+        }
 
     return scaled_img;
 }
