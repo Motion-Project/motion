@@ -305,7 +305,7 @@ void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, in
     /* Create U and V planes. */
     dest = map + width * height;
     dest2 = dest + (width * height) / 4;
-    for (i = 0; i< (height / 2)-2; i++) {
+    for (i = 0; i< (height / 2); i++) {
         src_u = cap_map + (width * height) + ((i*2) * (width/2));
         src_u2 = src_u  + (width/2);
         src_v = src_u + (width/2 * height);
