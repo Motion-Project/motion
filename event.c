@@ -368,19 +368,6 @@ static void on_event_end_command(struct context *cnt,
         exec_command(cnt, cnt->conf.on_event_end, NULL, 0);
 }
 
-static void event_stop_stream(struct context *cnt,
-            motion_event type ATTRIBUTE_UNUSED,
-            struct image_data *dummy1 ATTRIBUTE_UNUSED,
-            char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
-            struct timeval *tv1 ATTRIBUTE_UNUSED)
-{
-    if ((cnt->conf.stream_port) && (cnt->stream.socket != -1))
-        stream_stop(&cnt->stream);
-
-    if ((cnt->conf.substream_port) && (cnt->substream.socket != -1))
-        stream_stop(&cnt->substream);
-}
-
 static void event_stream_put(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             struct image_data *img_data, char *dummy1 ATTRIBUTE_UNUSED,
@@ -392,6 +379,11 @@ static void event_stream_put(struct context *cnt,
     if (cnt->conf.substream_port)
         stream_put(cnt, &cnt->substream, &cnt->substream_count, img_data->image_norm, 1);
 
+    pthread_mutex_lock(&cnt->mutex_stream);
+        if (img_data->image_norm != NULL){
+            memcpy(cnt->imgs.image_stream,img_data->image_norm,cnt->imgs.size_norm);
+        }
+    pthread_mutex_unlock(&cnt->mutex_stream);
 
 }
 
@@ -1240,10 +1232,6 @@ struct event_handlers event_handlers[] = {
     {
     EVENT_CAMERA_FOUND,
     event_camera_found
-    },
-    {
-    EVENT_STOP,
-    event_stop_stream
     },
     {0, NULL}
 };

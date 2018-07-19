@@ -305,6 +305,7 @@ struct images {
     unsigned char *smartmask;
     unsigned char *smartmask_final;
     unsigned char *common_buffer;
+    unsigned char *image_stream;      /* Copy of the image to use for web stream*/
 
     unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
     unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
@@ -509,6 +510,9 @@ struct context {
     int rolling_frame;
 
     struct MHD_Daemon *webcontrol_daemon;
+    struct MHD_Daemon *webstream_daemon;
+
+    pthread_mutex_t mutex_stream;
 
 };
 

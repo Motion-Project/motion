@@ -90,7 +90,9 @@ struct config conf_template = {
     .stream_authentication =           NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          0,
+    .stream_preview_method =           0,
     .stream_grey =                     0,
+    .stream_ssl =                      0,
     .webcontrol_port =                 0,
     .webcontrol_localhost =            1,
     .webcontrol_interface =            0,
@@ -1339,6 +1341,15 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "stream_preview_method",
+    "# Method for webcontrol preview. full=0, substream=1, manual=2. (default: 0)",
+    0,
+    CONF_OFFSET(stream_preview_method),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "stream_grey",
     "# Send stream in black and white (default: off)",
     0,
@@ -1346,6 +1357,15 @@ config_param config_params[] = {
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_ssl",
+    "# Use ssl for stream (default: off)",
+    0,
+    CONF_OFFSET(stream_ssl),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_RESTRICTED
     },
     {
     "webcontrol_port",

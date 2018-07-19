@@ -77,10 +77,12 @@ struct config {
     int stream_limit;
     int stream_auth_method;
     int stream_grey;
+    int stream_ssl;
     const char *stream_cors_header;
     const char *stream_authentication;
     int stream_preview_scale;
     int stream_preview_newline;
+    int stream_preview_method;
     int webcontrol_port;
     int webcontrol_localhost;
     int webcontrol_parms;
