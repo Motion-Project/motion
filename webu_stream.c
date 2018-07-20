@@ -53,7 +53,7 @@ static void webu_stream_checkbuffers(struct webui_ctx *webui) {
 
 static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
 
-    long jpeg_size;
+    int jpeg_size;
     char resp_size[20];
     int  resp_len, height, width, subsize;
     const char resp_head[] = "\r\n--BoundaryString\r\n"
@@ -103,7 +103,7 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
             ,width,height);
     }
 
-    resp_len = snprintf(resp_size, 20, "%9ld\r\n\r\n", jpeg_size);
+    resp_len = snprintf(resp_size, 20, "%9ld\r\n\r\n", (long)jpeg_size);
     memcpy(webui->resp_page + strlen(resp_head) - resp_len, resp_size, resp_len);
     memcpy(webui->resp_page + strlen(resp_head) + jpeg_size + 2,"\r\n",2);
     webui->resp_used = strlen(resp_head) + jpeg_size + 2;
@@ -276,7 +276,7 @@ int webu_stream_static(struct webui_ctx *webui) {
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg;");
-    snprintf(resp_size, 20, "%9ld\r\n\r\n",webui->resp_size);
+    snprintf(resp_size, 20, "%9ld\r\n\r\n",(long)webui->resp_size);
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_LENGTH, resp_size);
 
     retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);

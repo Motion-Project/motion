@@ -63,6 +63,7 @@ struct mhdstart_ctx {
     struct MHD_OptionItem   *mhd_ops;
     int                     mhd_opt_nbr;
     unsigned int            mhd_flags;
+    int                     ipv6;
 };
 
 
@@ -197,10 +198,23 @@ void webu_write(struct webui_ctx *webui, const char *buf) {
     return;
 }
 
-static void webu_url_decode(char *urlencoded, size_t length) {
+static int webu_url_decode(char *urlencoded, size_t length) {
     char *data = urlencoded;
     char *urldecoded = urlencoded;
     int scan_rslt;
+    size_t origlen;
+
+    origlen = length;
+
+    if (urlencoded == NULL) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: NULL"));
+        return -1;
+    }
+
+    if (urlencoded[0] != '/'){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),urlencoded);
+        return -1;
+    }
 
     while (length > 0) {
         if (*data == '%') {
@@ -214,7 +228,11 @@ static void webu_url_decode(char *urlencoded, size_t length) {
             c[2] = 0;
 
             scan_rslt = sscanf(c, "%x", &i);
-            if (scan_rslt < 1) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error decoding"));
+            if (scan_rslt < 1){
+                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error decoding url"));
+                memset(urlencoded,'\0',origlen);
+                return -1;
+            }
 
             if (i < 128) {
                 *urldecoded++ = (char)i;
@@ -234,6 +252,9 @@ static void webu_url_decode(char *urlencoded, size_t length) {
         length--;
     }
     *urldecoded = '\0';
+
+    return 0;
+
 }
 
 static void webu_parms_edit(struct webui_ctx *webui) {
@@ -266,10 +287,14 @@ static void webu_parms_edit(struct webui_ctx *webui) {
         if (webui->thread_nbr < 0){
             webui->cnt = webui->cntlst[0];
         } else {
-            webui->cnt = webui->cntlst[webui->thread_nbr];
+            if ((webui->thread_nbr < webui->cam_threads) &&
+                (webui->thread_nbr > 0)){
+                webui->cnt = webui->cntlst[webui->thread_nbr];
+            } else {
+                webui->cnt = NULL;
+            }
         }
     }
-
 }
 
 static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
@@ -376,21 +401,12 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     webu_parseurl_reset(webui);
 
-    if (webui->url == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),webui->url);
-        return -1;
-    }
+    retcd = webu_url_decode(webui->url, strlen(webui->url));
+    if (retcd != 0) return retcd;
 
-    if (webui->url[0] != '/'){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),webui->url);
-        return -1;
-    }
+    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
 
-    webu_url_decode(webui->url, strlen(webui->url));
-
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
-
-    /* Home page, nothing else */
+    /* Home page */
     if (strlen(webui->url) == 1) return 0;
 
     last_slash = 0;
@@ -878,22 +894,24 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
         return MHD_NO;
     }
 
-    if (ctrl){
-        if (webui->cnt->conf.webcontrol_cors_header != NULL){
-            MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                , webui->cnt->conf.webcontrol_cors_header);
-        }
-        if (webui->cnt->conf.webcontrol_interface == 1){
-            MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
+    if (webui->cnt != NULL){
+        if (ctrl){
+            if (webui->cnt->conf.webcontrol_cors_header != NULL){
+                MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
+                    , webui->cnt->conf.webcontrol_cors_header);
+            }
+            if (webui->cnt->conf.webcontrol_interface == 1){
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
+            } else {
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+            }
         } else {
+            if (webui->cnt->conf.stream_cors_header != NULL){
+                MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
+                    , webui->cnt->conf.stream_cors_header);
+            }
             MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
         }
-    } else {
-        if (webui->cnt->conf.stream_cors_header != NULL){
-            MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                , webui->cnt->conf.stream_cors_header);
-        }
-        MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
     }
 
     retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
@@ -936,6 +954,14 @@ static int webu_ans_ctrl(void *cls
     util_threadname_set("wu", 0,NULL);
 
     webui->connection = connection;
+
+    /* Throw bad URLS back to user*/
+    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
+        webu_html_badreq(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+        return retcd;
+    }
+
     if (strlen(webui->clientip) == 0){
         webu_mhd_clientip(webui);
     }
@@ -997,6 +1023,14 @@ static int webu_ans_strm(void *cls
     util_threadname_set("st", 0,NULL);
 
     webui->connection = connection;
+
+    /* Throw bad URLS back to user*/
+    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
+        webu_html_badreq(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+        return retcd;
+    }
+
     if (strlen(webui->clientip) == 0){
         webu_mhd_clientip(webui);
     }
@@ -1040,6 +1074,7 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
 
     struct context **cnt = cls;
     struct webui_ctx *webui;
+    int retcd;
 
     (void)connection;
 
@@ -1050,7 +1085,11 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
 
     snprintf(webui->url,WEBUI_LEN_URLI,"%s",uri);
 
-    webu_parseurl(webui);
+    retcd = webu_parseurl(webui);
+    if (retcd != 0){
+        webu_parseurl_reset(webui);
+        memset(webui->url,'\0',WEBUI_LEN_URLI);
+    }
 
     webu_parms_edit(webui);
 
@@ -1065,6 +1104,7 @@ static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection
 
     struct context *cnt = cls;
     struct webui_ctx *webui;
+    int retcd;
 
     (void)connection;
 
@@ -1075,7 +1115,11 @@ static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection
 
     snprintf(webui->url,WEBUI_LEN_URLI,"%s",uri);
 
-    webu_parseurl(webui);
+    retcd = webu_parseurl(webui);
+    if (retcd != 0){
+        webu_parseurl_reset(webui);
+        memset(webui->url,'\0',WEBUI_LEN_URLI);
+    }
 
     webu_parms_edit(webui);
 
@@ -1147,14 +1191,20 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
 #endif
 }
 
-static void webu_mhd_features_ipv6(void){
-#if MHD_VERSION >= 0x00094400
+static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst){
+#if MHD_VERSION < 0x00094400
+    if (mhdst->ipv6){
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
+        if (mhdst->ipv6) mhdst->ipv6 = 0;
+    }
+#else
     int retcd;
     retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
     if (retcd == MHD_YES){
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: enabled"));
     } else {
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+        if (mhdst->ipv6) mhdst->ipv6 = 0;
     }
 #endif
 }
@@ -1194,7 +1244,7 @@ static void webu_mhd_features(struct mhdstart_ctx *mhdst){
 
     webu_mhd_features_digest(mhdst);
 
-    webu_mhd_features_ipv6();
+    webu_mhd_features_ipv6(mhdst);
 
     webu_mhd_features_ssl(mhdst);
 
@@ -1391,33 +1441,14 @@ static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
 
 static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
 
+    mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION | MHD_USE_POLL| MHD_USE_SELECT_INTERNALLY;
 
-    if (mhdst->ctrl){
-        if (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl){
-            mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION |
-                MHD_USE_POLL|
-                MHD_USE_DUAL_STACK |
-                MHD_USE_SELECT_INTERNALLY|
-                MHD_USE_SSL;
-        } else {
-            mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION |
-                MHD_USE_POLL|
-                MHD_USE_DUAL_STACK |
-                MHD_USE_SELECT_INTERNALLY;
-        }
-    } else {
-        if (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl){
-            mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION |
-                MHD_USE_POLL|
-                MHD_USE_DUAL_STACK |
-                MHD_USE_SELECT_INTERNALLY|
-                MHD_USE_SSL;
-        } else {
-            mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION |
-                MHD_USE_POLL|
-                MHD_USE_DUAL_STACK |
-                MHD_USE_SELECT_INTERNALLY;
-        }
+    if (mhdst->ipv6) mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
+
+    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl)){
+        mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
+    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl)){
+        mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
     }
 
 }
@@ -1431,6 +1462,7 @@ static void webu_start_ctrl(struct context **cnt){
     mhdst.ctrl = TRUE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
+    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
 
     cnt[0]->webcontrol_daemon = NULL;
     if (cnt[0]->conf.webcontrol_port != 0 ){
@@ -1465,8 +1497,8 @@ static void webu_start_strm(struct context **cnt){
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
+    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
 
-    mhdst.indxthrd = 0;
     while (cnt[mhdst.indxthrd] != NULL){
         cnt[mhdst.indxthrd]->webstream_daemon = NULL;
         if (cnt[mhdst.indxthrd]->conf.stream_port != 0 ){
