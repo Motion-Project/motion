@@ -57,8 +57,7 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
     int jpeg_size;
     char resp_size[20];
     int  resp_len, height, width, subsize;
-    const char resp_head[] = "\r\n--BoundaryString\r\n"
-                             "Content-type: image/jpeg\r\n"
+    const char resp_head[] = "Content-type: image/jpeg\r\n"
                              "Content-Length:                 ";
 
     webui->resp_size = 0;
@@ -106,8 +105,8 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
 
     resp_len = snprintf(resp_size, 20, "%9ld\r\n\r\n", (long)jpeg_size);
     memcpy(webui->resp_page + strlen(resp_head) - resp_len, resp_size, resp_len);
-    memcpy(webui->resp_page + strlen(resp_head) + jpeg_size + 2,"\r\n",2);
-    webui->resp_used = strlen(resp_head) + jpeg_size + 2;
+    memcpy(webui->resp_page + strlen(resp_head) + jpeg_size,"\r\n--BoundaryString\r\n",20);
+    webui->resp_used = strlen(resp_head) + jpeg_size + 20;
 
 }
 
@@ -154,7 +153,7 @@ static ssize_t webu_stream_response (void *cls, uint64_t pos, char *buf, size_t 
 
     memcpy(buf, webui->resp_page + stream_pos, sent_bytes);
 
-    stream_pos = stream_pos + sent_bytes + 1 ;
+    stream_pos = stream_pos + sent_bytes;
     if (stream_pos >= webui->resp_used){
         stream_pos = 0;
     }
