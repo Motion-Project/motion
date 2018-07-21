@@ -6,6 +6,16 @@
  *    This software is distributed under the GNU Public License Version 2
  *    See also the file 'COPYING'.
  *
+ *    This module processes the requests associated with the text inferface
+ *    of the webcontrol.  This interface is intended to be used by programs
+ *    and does not have any user interface to navigate.  The same actions
+ *    are available as the HTML as well as a few more.
+ *      Additional functions not directly available via HTML
+ *          get:    Returns the value of a parameter.
+ *          quit:   Terminates motion
+ *          list:   Lists all the configuration parameters and values
+ *          status  Whether the camera is in pause mode.
+ *          connection  Whether the camera connection is working
  *
  */
 

@@ -92,13 +92,13 @@ struct config conf_template = {
     .stream_preview_newline =          0,
     .stream_preview_method =           0,
     .stream_grey =                     0,
-    .stream_ssl =                      0,
+    .stream_tls =                      0,
     .webcontrol_port =                 0,
     .webcontrol_localhost =            1,
     .webcontrol_interface =            0,
     .webcontrol_auth_method =          0,
     .webcontrol_authentication =       NULL,
-    .webcontrol_ssl =                  0,
+    .webcontrol_tls =                  0,
     .webcontrol_cert =                 NULL,
     .webcontrol_key =                  NULL,
     .webcontrol_cors_header =          NULL,
@@ -1359,10 +1359,10 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "stream_ssl",
-    "# Use ssl for stream (default: off)",
+    "stream_tls",
+    "# Use ssl / tls for stream (default: off)",
     0,
-    CONF_OFFSET(stream_ssl),
+    CONF_OFFSET(stream_tls),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_RESTRICTED
@@ -1437,17 +1437,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "webcontrol_ssl",
-    "# Use ssl for webcontrol (default: off)",
+    "webcontrol_tls",
+    "# Use ssl / tls for webcontrol (default: off)",
     0,
-    CONF_OFFSET(webcontrol_ssl),
+    CONF_OFFSET(webcontrol_tls),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_RESTRICTED
     },
     {
     "webcontrol_key",
-    "# Key file name for ssl",
+    "# Key file name for tls",
     1,
     CONF_OFFSET(webcontrol_key),
     copy_string,
@@ -1456,7 +1456,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_cert",
-    "# Certificate file name for ssl",
+    "# Certificate file name for tls",
     1,
     CONF_OFFSET(webcontrol_cert),
     copy_string,

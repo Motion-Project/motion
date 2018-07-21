@@ -16,6 +16,7 @@
 #include "picture.h"
 
 static void webu_stream_checksize(struct webui_ctx *webui) {
+    /* Determine whether a substream size if valid */
     if ((webui->cnt->imgs.width / 2) % 8 == 0  &&
         (webui->cnt->imgs.height / 2) % 8 == 0){
         webui->valid_subsize = TRUE;
@@ -25,7 +26,7 @@ static void webu_stream_checksize(struct webui_ctx *webui) {
 }
 
 static void webu_stream_checkbuffers(struct webui_ctx *webui) {
-
+    /* Allocate buffers for the images if needed */
     int subsize;
 
     subsize=(((webui->cnt->imgs.width/2) * (webui->cnt->imgs.height/2) * 3)/2);
@@ -52,7 +53,7 @@ static void webu_stream_checkbuffers(struct webui_ctx *webui) {
 }
 
 static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
-
+    /* Get the image from the motion context and compress it into a JPG*/
     int jpeg_size;
     char resp_size[20];
     int  resp_len, height, width, subsize;
@@ -111,6 +112,13 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
 }
 
 static ssize_t webu_stream_response (void *cls, uint64_t pos, char *buf, size_t max){
+    /* This is the callback response function for MHD streams.  It is kept "open" and
+     * in process during the entire time that the user has the stream open in the web
+     * browser.  We sleep the requested amount of time between fetching images to match
+     * the user configuration parameters.  This function may be called multiple times for
+     * a single image so we write what we can to the buffer and pick up remaining bytes
+     * to send based upon the static variable of stream position
+     */
     struct webui_ctx *webui = cls;
     static uint64_t stream_pos;
     size_t sent_bytes;
@@ -143,9 +151,10 @@ static ssize_t webu_stream_response (void *cls, uint64_t pos, char *buf, size_t 
     } else {
         sent_bytes = webui->resp_used - stream_pos;
     }
+
     memcpy(buf, webui->resp_page + stream_pos, sent_bytes);
 
-    stream_pos = stream_pos + sent_bytes ;
+    stream_pos = stream_pos + sent_bytes + 1 ;
     if (stream_pos >= webui->resp_used){
         stream_pos = 0;
     }
@@ -155,7 +164,9 @@ static ssize_t webu_stream_response (void *cls, uint64_t pos, char *buf, size_t 
 }
 
 static void webu_stream_static_getimg(struct webui_ctx *webui) {
-
+    /* Obtain the current image, compress it to a JPG and put into webui->resp_page
+     * for MHD to send back to user
+     */
     webui->resp_used = 0;
 
     if (webui->resp_size < (size_t)webui->cnt->imgs.size_norm){
@@ -187,7 +198,9 @@ static void webu_stream_static_getimg(struct webui_ctx *webui) {
 }
 
 static int webu_stream_checks(struct webui_ctx *webui) {
-
+    /* Perform edits to determine whether the user specified a valid URL
+     * for the particular port
+     */
     if ((webui->cntlst != NULL) && (webui->thread_nbr >= webui->cam_threads)){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             , _("Invalid thread specified: %s"),webui->url);
@@ -226,7 +239,7 @@ static int webu_stream_checks(struct webui_ctx *webui) {
 }
 
 int webu_stream_mjpeg(struct webui_ctx *webui) {
-
+    /* Create the stream for the motion jpeg */
     int retcd;
     struct MHD_Response *response;
 
@@ -254,7 +267,7 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
 }
 
 int webu_stream_static(struct webui_ctx *webui) {
-
+    /* Create the response for the static image request*/
     int retcd;
     struct MHD_Response *response;
     char resp_size[20];

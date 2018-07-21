@@ -77,7 +77,7 @@ struct config {
     int stream_limit;
     int stream_auth_method;
     int stream_grey;
-    int stream_ssl;
+    int stream_tls;
     const char *stream_cors_header;
     const char *stream_authentication;
     int stream_preview_scale;
@@ -88,7 +88,7 @@ struct config {
     int webcontrol_parms;
     int webcontrol_interface;
     int webcontrol_auth_method;
-    int webcontrol_ssl;
+    int webcontrol_tls;
     const char *webcontrol_cert;
     const char *webcontrol_key;
     const char *webcontrol_cors_header;

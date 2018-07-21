@@ -31,15 +31,6 @@
  *      The conf_cmdparse assumes that the pointers to the motion context for each
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
- *    Known HTML Issues:
- *      Single and double quotes are not consistently used.
- *      HTML ids do not follow any naming convention.
- *      After clicking restart/quit, do something..close page? Try to connect again?
- *
- *    Additional functionality considerations:
- *      Notification to user of items that require restart when changed.
- *      Notification to user that item successfully implemented (config change/tracking)
- *      List motion parms somewhere so they can be found by xgettext
  */
 
 #include <netinet/in.h>
@@ -56,8 +47,8 @@
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {
     struct context          **cnt;
-    char                    *ssl_cert;
-    char                    *ssl_key;
+    char                    *tls_cert;
+    char                    *tls_key;
     int                     ctrl;
     int                     indxthrd;
     struct MHD_OptionItem   *mhd_ops;
@@ -82,27 +73,26 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->clientip    = mymalloc(WEBUI_LEN_URLI);
     webui->hostname    = mymalloc(WEBUI_LEN_PARM);
 
-    webui->lang          = mymalloc(3);    /* Two digit lang code plus null terminator */
-    webui->lang_full     = mymalloc(6);    /* lang code, underscore, country plus null terminator */
-    webui->resp_size     = WEBUI_LEN_RESP * 10;
-    webui->resp_used     = 0;
-    webui->resp_page     = mymalloc(webui->resp_size);
-    webui->userpass_size = WEBUI_LEN_PARM;
-    webui->userpass      = mymalloc(webui->userpass_size);
-    webui->auth_config   = NULL;    /*We allocate when we assign it */
-    webui->stream_img    = NULL;    /*We allocate once we get an image */
-    webui->stream_imgsub = NULL;    /*We allocate once we get an image */
-    webui->stream_img_size  = 0;
-    webui->valid_subsize = FALSE;
-    webui->cntlst = cntlst;
-    webui->cnt    = cnt;
+    webui->lang          = mymalloc(3);         /* Two digit lang code plus null terminator */
+    webui->lang_full     = mymalloc(6);         /* lang code, e.g US_en */
+    webui->resp_size     = WEBUI_LEN_RESP * 10; /* The size of the resp_page buffer.  May get adjusted */
+    webui->resp_used     = 0;                   /* How many bytes used so far in resp_page*/
+    webui->resp_page     = mymalloc(webui->resp_size);      /* The response being constructed */
+    webui->userpass_size = WEBUI_LEN_PARM;                  /* Initial size reserved for the userpass*/
+    webui->userpass      = mymalloc(webui->userpass_size);  /* Buffer to hold the userpass*/
+    webui->auth_config   = NULL;    /*Userpass from config. We allocate when we assign it */
+    webui->stream_img    = NULL;    /*JPG'd full size image. We allocate once we get an image */
+    webui->stream_imgsub = NULL;    /*JPG'd substream image. We allocate once we get an image */
+    webui->stream_img_size  = 0;    /* Buffer size for full and substream JPG'd images*/
+    webui->valid_subsize = FALSE;   /* Boolean for whether substream size is modulo 8 */
+    webui->cntlst = cntlst;         /* The list of context's for all cameras */
+    webui->cnt    = cnt;            /* The context pointer for a single camera */
 
     /* get the number of cameras and threads */
     indx = 0;
     if (webui->cntlst != NULL){
         while (webui->cntlst[++indx]);
     }
-
     webui->cam_threads = indx;
 
     webui->cam_count = indx;
@@ -118,7 +108,7 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
 }
 
 static void webu_context_null(struct webui_ctx *webui) {
-
+    /* Null out all the pointers in our webui context */
     webui->url           = NULL;
     webui->hostname      = NULL;
     webui->uri_thread    = NULL;
@@ -169,7 +159,10 @@ static void webu_context_free(struct webui_ctx *webui) {
 }
 
 void webu_write(struct webui_ctx *webui, const char *buf) {
-
+    /* Copy the buf data to our response buffer.  If
+     * the response buffer is not large enough to accept
+     * our new data coming in, then expand it in chunks of 10
+     */
     int      resp_len;
     char    *temp_resp;
     size_t   temp_size;
@@ -199,6 +192,11 @@ void webu_write(struct webui_ctx *webui, const char *buf) {
 }
 
 static int webu_url_decode(char *urlencoded, size_t length) {
+    /* We are sent a URI encoded string and this decodes it to characters
+     * If the sent URL that isn't valid, then we clear out the URL
+     * so it is not processed in further functions.  The "answer" functions
+     * look for empty urls and answer with bad request
+     */
     char *data = urlencoded;
     char *urldecoded = urlencoded;
     int scan_rslt;
@@ -206,13 +204,9 @@ static int webu_url_decode(char *urlencoded, size_t length) {
 
     origlen = length;
 
-    if (urlencoded == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: NULL"));
-        return -1;
-    }
-
     if (urlencoded[0] != '/'){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),urlencoded);
+        memset(urlencoded,'\0',origlen);
         return -1;
     }
 
@@ -282,7 +276,14 @@ static void webu_parms_edit(struct webui_ctx *webui) {
         webui->thread_nbr = -1;
     }
 
-    /* Set the single context pointer to thread we are answering*/
+    /* Set the single context pointer to thread we are answering
+     * If the connection is for a single stream (legacy method of a port
+     * per stream), then the cntlist will be null and the camera context
+     * will already be assigned into webui->cnt.  This is part of the
+     * init function which is called for MHD and it has the different
+     * variations depending upon how the port and cameras were specified.
+    */
+
     if (webui->cntlst != NULL){
         if (webui->thread_nbr < 0){
             webui->cnt = webui->cntlst[0];
@@ -306,8 +307,10 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
      * from the uri and put them into the cmd2.
      * st_pos is at the beginning of the command
      * If there is no ? then we are done parsing
+     * Note that each section is looking for a different
+     * delimitter.  (?, =, &, =, &)
      */
-    last_parm = 0;
+    last_parm = FALSE;
     en_pos = strstr(st_pos,"?");
     if (en_pos != NULL){
         parm_len = en_pos - st_pos + 1;
@@ -319,7 +322,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
         en_pos = strstr(st_pos,"=");
         if (en_pos == NULL){
             parm_len = strlen(webui->url) - parm_len;
-            last_parm = 1;
+            last_parm = TRUE;
         } else {
             parm_len = en_pos - st_pos + 1;
         }
@@ -332,7 +335,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
             en_pos = strstr(st_pos,"&");
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
-                last_parm = 1;
+                last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
@@ -342,11 +345,11 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
         if (!last_parm){
             /* Get the next parameter name */
-            st_pos = st_pos + parm_len; /* Move past the command */
+            st_pos = st_pos + parm_len; /* Move past the previous command */
             en_pos = strstr(st_pos,"=");
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
-                last_parm = 1;
+                last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
@@ -356,11 +359,11 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
         if (!last_parm){
             /* Get the next parameter value */
-            st_pos = st_pos + parm_len; /* Move past the equals sign */
+            st_pos = st_pos + parm_len;     /* Move past the equals sign */
             en_pos = strstr(st_pos,"&");
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
-                last_parm = 1;
+                last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
@@ -389,8 +392,11 @@ static void webu_parseurl_reset(struct webui_ctx *webui) {
 }
 
 static int webu_parseurl(struct webui_ctx *webui) {
-
-    /* Sample: http://localhost:8080/0/config/set?log_level=6 */
+    /* Parse the sent URI into the commands and parameters
+     * so we can check the resulting strings in later functions
+     * and determine what actions to take.
+     * Sample: http://localhost:8080/0/config/set?log_level=6
+     */
 
     int retcd, parm_len, last_slash;
     char *st_pos, *en_pos;
@@ -411,7 +417,11 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     last_slash = 0;
 
-    /* Get thread number */
+    /* Get the thread number
+     * Note that sometimes this will contain an action if the user
+     * is setting the port for a particular camera and requests the
+     * stream by using http://localhost:port/stream
+     */
     st_pos = webui->url + 1; /* Move past the first "/" */
     if (*st_pos == '-') return -1; /* Never allow a negative thread number */
     en_pos = strstr(st_pos,"/");
@@ -471,7 +481,10 @@ static int webu_parseurl(struct webui_ctx *webui) {
 }
 
 void webu_process_action(struct webui_ctx *webui) {
-
+    /* Process the actions from the webcontrol that the user requested.  This is used
+     * for both the html and text interface.  The text interface just adds a additional
+     * response whereas the html just performs the action
+     */
     int indx;
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
@@ -537,7 +550,9 @@ void webu_process_action(struct webui_ctx *webui) {
 }
 
 void webu_process_config(struct webui_ctx *webui) {
-
+    /* Process the request to change the configuration parameters.  Used
+     * both the html and text interfaces
+     */
     int indx;
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
@@ -551,6 +566,9 @@ void webu_process_config(struct webui_ctx *webui) {
         return;
     }
 
+    /* Ignore any request to change an option that is designated above the
+     * webcontrol_parms level.
+     */
     indx=0;
     while (config_params[indx].param_name != NULL) {
         if (((webui->thread_nbr != 0) && (config_params[indx].main_thread)) ||
@@ -562,6 +580,9 @@ void webu_process_config(struct webui_ctx *webui) {
         if (!strcmp(webui->uri_parm1, config_params[indx].param_name)) break;
         indx++;
     }
+    /* If we found the parm, assign it.  If the loop above did not find the parm
+     * then we ignore the request
+     */
     if (config_params[indx].param_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
             /* This is legacy assumption on the pointers being sequential*/
@@ -593,7 +614,7 @@ void webu_process_config(struct webui_ctx *webui) {
 }
 
 void webu_process_track(struct webui_ctx *webui) {
-
+    /* Call the tracking move functions as requested */
     struct coord cent;
 
     /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
@@ -634,13 +655,16 @@ void webu_process_track(struct webui_ctx *webui) {
 }
 
 static void webu_mhd_clientip(struct webui_ctx *webui) {
-
+    /* Extract the IP of the client that is connecting.  When the
+     * user specifies Motion to use IPV6 and a IPV4 address comes to us
+     * the IPv4 address is prepended with a ::ffff: We then trim that off
+     * so we don't confuse our users.
+     */
     const union MHD_ConnectionInfo *con_info;
     char client[WEBUI_LEN_URLI];
     const char *ipv6;
     struct sockaddr_in6 *con_socket;
 
-    /* We are using MHD_DUAL_STACK which puts everything in IPV6 */
     con_info = MHD_get_connection_info(webui->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
     con_socket = (struct sockaddr_in6 *)con_info->client_addr;
     ipv6 = inet_ntop(AF_INET6, &con_socket->sin6_addr,client,WEBUI_LEN_URLI);
@@ -683,14 +707,18 @@ static void webu_mhd_hostname(struct webui_ctx *webui, int ctrl) {
         gethostname(webui->hostname, WEBUI_LEN_PARM - 1);
     }
 
+    /* Assign the type of protocol that is associated with the host
+     * so we can use this protocol as we are building the html page or
+     * streams.
+     */
     if (ctrl){
-        if (webui->cnt->conf.webcontrol_ssl){
+        if (webui->cnt->conf.webcontrol_tls){
             snprintf(webui->hostproto,6,"%s","https");
         } else {
             snprintf(webui->hostproto,6,"%s","http");
         }
     } else {
-        if (webui->cnt->conf.stream_ssl){
+        if (webui->cnt->conf.stream_tls){
             snprintf(webui->hostproto,6,"%s","https");
         } else {
             snprintf(webui->hostproto,6,"%s","http");
@@ -701,6 +729,14 @@ static void webu_mhd_hostname(struct webui_ctx *webui, int ctrl) {
 }
 
 static int webu_mhd_digest(struct webui_ctx *webui) {
+    /* Perform the digest authentication.  This function gets called a couple of
+     * times by MHD during the authentication process. The opaque does not have
+     * any meaning and was randomly created.
+     * We use the webui->userpass to determine whether the authentication has
+     * previously been approved.  In the "answer" functions we look to see whether
+     * the length is greater than zero.  If there is anything in webui->userpass
+     * then that means we are authenticated.
+     */
     int retcd,len_userpass;
     char *user, *pass, *col_pos;
     struct MHD_Response *response;
@@ -708,6 +744,7 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
     const char *opaque = "80fb23a1e3760a3d1c91cd060bd07f7a90877334";
     const char *realm = "Motion";
 
+    /* Parse apart the user:pass provided from configuration file*/
     if (webui->auth_config == NULL){
         len_userpass = 0;
     } else {
@@ -771,7 +808,11 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
 }
 
 static int webu_mhd_basic(struct webui_ctx *webui) {
-    /* Basic Authentication */
+    /* Perform Basic Authentication.  Similar to digest, we use the
+     * webui->userpass variable to tell us whether we are authenticated.
+     * when we finally pass authentication,we put something into this variable.
+     * If it is zero length, then we know we are not authenticated
+     */
     int retcd;
     char *user, *pass;
     struct MHD_Response *response;
@@ -838,7 +879,16 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
 }
 
 static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
+    /* Set everything up for calling the authentication functions by copying
+     * into a common variable (webui->auth_config) the userpass that we were
+     * provided for the webcontrol or the stream.  In order to pass the correct
+     * return code back to MHD, we add our own return code (2).  When we return
+     * a 2,then that means we are fully authenticated.  When it is something else
+     * then that needs to be returned to MHD so it knows what to do next in the
+     * authentication process.
+     */
     int retcd;
+
 
     retcd = 2;  /* Motion specific return code to signal we fell through */
     if (ctrl){        /* Authentication for the webcontrol*/
@@ -883,7 +933,15 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 }
 
 static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
-
+    /* Send the response that we created back to the user.  Now if the user
+     * provided a really bad URL, then we couldn't determine which Motion context
+     * they were wanting.  In this situation, we have a webui->cnt = NULL and we
+     * don't know whether it came from a html or text request.  In this situation
+     * we use the MHD defaults and skip adding CORS/Content type.  (There isn't any
+     * Motion context so we can't tell where to look)
+     * The ctrl parameter is a boolean which just says whether the request is for
+     * the webcontrol versus stream
+     */
     int retcd;
     struct MHD_Response *response;
 
@@ -929,7 +987,7 @@ static int webu_ans_ctrl(void *cls
         , size_t     *upload_data_size
         , void **ptr) {
 
-    /* Answer the request for the webcontrol*/
+    /* This function "answers" the request for a webcontrol.*/
     int retcd;
     struct webui_ctx *webui = *ptr;
 
@@ -940,7 +998,7 @@ static int webu_ans_ctrl(void *cls
     (void)upload_data;
     (void)upload_data_size;
 
-    /* Per docs, this is called twice and we should process the second call */
+    /* Per MHD docs, this is called twice and we should process the second call */
     if (webui->mhd_first) {
         webui->mhd_first = FALSE;
         return MHD_YES;
@@ -1071,6 +1129,18 @@ static int webu_ans_strm(void *cls
 }
 
 static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection) {
+    /* This is called at the very start of getting a request before the "answer"
+     * is processed.  There are two variations of this and the difference is how
+     * we call the webu_context_init.  When we are processing for the webcontrol or
+     * the stream port specified in the motion.conf file, we pass into the init function
+     * the full list of all the cameras.  The other version of the init is used when the
+     * user specifies a unique port for each camera.  In this situation, the full list
+     * context is passed in as a null and the context of the camera desired is passed
+     * instead.
+     * When this function is processed, we basically only have the URL that the user requested
+     * so we initialize everything and then parse out the URL to determine what the user is
+     * asking.
+     */
 
     struct context **cnt = cls;
     struct webui_ctx *webui;
@@ -1101,7 +1171,12 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
 }
 
 static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection *connection) {
-
+    /* This function initializes all the webui variables as we are getting a request.  This
+     * variation of the init is the one used when the user has specified a unique port number
+     * for each camera.  The variation is in how the webu_context_init is invoked.  This passes
+     * in a NULL for the full context list (webui->cntlist) and instead assigns the particular
+     * camera context to webui->cnt
+     */
     struct context *cnt = cls;
     struct webui_ctx *webui;
     int retcd;
@@ -1134,7 +1209,7 @@ static void webu_mhd_deinit(void *cls
     , struct MHD_Connection *connection
     , void **con_cls
     , enum MHD_RequestTerminationCode toe) {
-
+    /* This is the function called as the connection is closed so we free our webui variables*/
     struct webui_ctx *webui = *con_cls;
 
     /* Eliminate compiler warnings */
@@ -1148,97 +1223,110 @@ static void webu_mhd_deinit(void *cls
 }
 
 static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst){
-#if MHD_VERSION < 0x00094400
-    (void)mhdst;
-#else
-    int retcd;
-    retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
-    if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: enabled"));
-    } else {
-        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-            mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
-        } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 1)){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-            mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
+    /* Use the MHD function to see what features it supports*/
+    #if MHD_VERSION < 0x00094400
+        (void)mhdst;
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: enabled"));
         } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 1)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
+            } else {
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+            }
         }
-    }
-#endif
+    #endif
 }
 
 static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
-#if MHD_VERSION < 0x00094400
-    (void)mhdst;
-#else
-    int retcd;
-    retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
-    if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: enabled"));
-    } else {
-        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-            mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
-        } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 2)){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-            mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
+    /* Use the MHD function to see what features it supports*/
+    #if MHD_VERSION < 0x00094400
+        (void)mhdst;
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: enabled"));
         } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 2)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
+            } else {
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+            }
         }
-    }
-#endif
+    #endif
 }
 
 static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst){
-#if MHD_VERSION < 0x00094400
-    if (mhdst->ipv6){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
-        if (mhdst->ipv6) mhdst->ipv6 = 0;
-    }
-#else
-    int retcd;
-    retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
-    if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: enabled"));
-    } else {
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
-        if (mhdst->ipv6) mhdst->ipv6 = 0;
-    }
-#endif
+    /* Use the MHD function to see what features it supports
+     * If we have a really old version of MHD, then we will just support
+     * IPv4
+     */
+    #if MHD_VERSION < 0x00094400
+        if (mhdst->ipv6){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
+            if (mhdst->ipv6) mhdst->ipv6 = 0;
+        }
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: enabled"));
+        } else {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+            if (mhdst->ipv6) mhdst->ipv6 = 0;
+        }
+    #endif
 }
 
-static void webu_mhd_features_ssl(struct mhdstart_ctx *mhdst){
-#if MHD_VERSION < 0x00094400
-    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl)){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL disabled"));
-        mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl = 0;
-    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl)) {
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL disabled"));
-        mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl = 0;
-    }
-#else
-    int retcd;
-    retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
-    if (retcd == MHD_YES){
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL: enabled"));
-    } else {
-        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl)){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL: disabled"));
-            mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl = 0;
-        } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl)){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL: disabled"));
-            mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl = 0;
-        } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL: disabled"));
+static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
+    /* Use the MHD function to see what features it supports
+     * If we have a really old version of MHD, then we will will not
+     * support the ssl/tls request.
+     */
+    #if MHD_VERSION < 0x00094400
+        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls = 0;
+        } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
         }
-    }
-#endif
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: enabled"));
+        } else {
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
+            } else {
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+            }
+        }
+    #endif
 }
 
 static void webu_mhd_features(struct mhdstart_ctx *mhdst){
-    /* sample format: 0x01093001 = 1.9.30-1 , 0x00094400 ships with 16.04 */
+    /* This function goes through at least a few of the MHD features
+     * and adjusts the user parameters from the configuration as
+     * needed to reflect what MHD can do
+     */
 
     webu_mhd_features_basic(mhdst);
 
@@ -1246,11 +1334,15 @@ static void webu_mhd_features(struct mhdstart_ctx *mhdst){
 
     webu_mhd_features_ipv6(mhdst);
 
-    webu_mhd_features_ssl(mhdst);
+    webu_mhd_features_tls(mhdst);
 
 }
 
 static char *webu_mhd_loadfile(const char *fname){
+    /* This function loads the requested certificate and key files into memory so we
+     * can use them as needed if the user wants ssl/tls support.  If the user did not
+     * specify a file in the configuration, then we return NULL.
+     */
     FILE *infile;
     size_t file_size, read_size;
     char * file_char;
@@ -1271,7 +1363,7 @@ static char *webu_mhd_loadfile(const char *fname){
                 free(file_char);
                 file_char = NULL;
                 MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                    ,_("Error reading file for SSL support."));
+                    ,_("Error reading file for SSL/TLS support."));
             }
         } else {
             file_char = NULL;
@@ -1281,32 +1373,35 @@ static char *webu_mhd_loadfile(const char *fname){
     return file_char;
 }
 
-static void webu_mhd_checkssl(struct mhdstart_ctx *mhdst){
-
+static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
+    /* This function validates that if the user requested a SSL/TLS connection, then
+     * they also need to provide a certificate and key file.  If those are not provided
+     * then we revise the configuration request for ssl/tls
+     */
     if (mhdst->ctrl){
-        if (mhdst->cnt[0]->conf.webcontrol_ssl){
-            if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->ssl_cert == NULL)) {
+        if (mhdst->cnt[0]->conf.webcontrol_tls){
+            if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                    ,_("SSL requested but no cert file provided.  SSL disabled"));
-                mhdst->cnt[0]->conf.webcontrol_ssl = 0;
+                    ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
+                mhdst->cnt[0]->conf.webcontrol_tls = 0;
             }
-            if ((mhdst->cnt[0]->conf.webcontrol_key == NULL) || (mhdst->ssl_key == NULL)) {
+            if ((mhdst->cnt[0]->conf.webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                    ,_("SSL requested but no key file provided.  SSL disabled"));
-                mhdst->cnt[0]->conf.webcontrol_ssl = 0;
+                    ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
+                mhdst->cnt[0]->conf.webcontrol_tls = 0;
             }
         }
     } else {
-        if (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl){
-            if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->ssl_cert == NULL)) {
+        if (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls){
+            if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                    ,_("SSL requested but no cert file provided.  SSL disabled"));
-                mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl = 0;
+                    ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
             }
-            if ((mhdst->cnt[0]->conf.webcontrol_key == NULL) || (mhdst->ssl_key == NULL)) {
+            if ((mhdst->cnt[0]->conf.webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                    ,_("SSL requested but no key file provided.  SSL disabled"));
-                mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl = 0;
+                    ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
             }
         }
     }
@@ -1314,7 +1409,13 @@ static void webu_mhd_checkssl(struct mhdstart_ctx *mhdst){
 }
 
 static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst){
-
+    /* This function sets the init function to use for the MHD connection.  If
+     * the connection is related to the webcontrol or the stream specified in the
+     * motion.conf file, then we pass in the full context list of all cameras.  If
+     * the MHD connection is only going to be for a single camera (a unique port for
+     * each camera), then we call a different init function which only wants the single
+     * motion context for that particular camera.
+     */
     if ((!mhdst->ctrl) && (mhdst->indxthrd != 0)){
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_URI_LOG_CALLBACK;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_init_one;
@@ -1330,7 +1431,7 @@ static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst){
 }
 
 static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst){
-
+    /* Set the MHD option on the function to call when the connection closes */
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_NOTIFY_COMPLETED;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_deinit;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = NULL;
@@ -1339,7 +1440,9 @@ static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst){
 }
 
 static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
-
+    /* Set the MHD option on the acceptable connections.  This is used to handle the
+     * motion configuation option of localhost only.
+     */
     struct sockaddr_in loopback_addr;
 
     if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_localhost)){
@@ -1368,7 +1471,9 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
 }
 
 static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
-
+    /* Set the MHD option for the type of authentication that we will be using.  This
+     * function is when we are wanting to use digest authentication
+     */
     unsigned int randnbr;
     char randchar[8];
 
@@ -1397,30 +1502,30 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_mhd_opts_ssl(struct mhdstart_ctx *mhdst){
-
-    if ((( mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl)) ||
-        ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl))) {
+static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst){
+    /* Set the MHD options needed when we want TLS connections */
+    if ((( mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)) ||
+        ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls))) {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_CERT;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->ssl_cert;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->tls_cert;
         mhdst->mhd_opt_nbr++;
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_KEY;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->ssl_key;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->tls_key;
         mhdst->mhd_opt_nbr++;
     }
 
 }
 
 static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
-
+    /* Set all the options we need based upon the motion configuration parameters*/
 
     mhdst->mhd_opt_nbr = 0;
 
-    webu_mhd_checkssl(mhdst);
+    webu_mhd_checktls(mhdst);
 
     webu_mhd_opts_deinit(mhdst);
 
@@ -1430,7 +1535,7 @@ static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
 
     webu_mhd_opts_digest(mhdst);
 
-    webu_mhd_opts_ssl(mhdst);
+    webu_mhd_opts_tls(mhdst);
 
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_END;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
@@ -1441,24 +1546,32 @@ static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
 
 static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
 
+    /* This sets the MHD startup flags based upon what user put into configuration */
     mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION | MHD_USE_POLL| MHD_USE_SELECT_INTERNALLY;
 
     if (mhdst->ipv6) mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
 
-    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_ssl)){
+    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
-    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_ssl)){
+    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)){
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
     }
 
 }
 
 static void webu_start_ctrl(struct context **cnt){
+    /* This is the function that actually starts the MHD daemon for handling the webcontrol.
+     * There are many options for MHD and they will vary depending upon what our Motion user
+     * has requested in the configuration.  There are many functions in this module to assign
+     * these options and they are passed in a pointer to the mhdst variable so that they can
+     * assign the correct values for MHD start up. Since this function is doing the webcontrol
+     * we are only using thread 0 values.
+     */
 
     struct mhdstart_ctx mhdst;
 
-    mhdst.ssl_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
-    mhdst.ssl_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
     mhdst.ctrl = TRUE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
@@ -1482,18 +1595,22 @@ static void webu_start_ctrl(struct context **cnt){
         }
     }
 
-    if (mhdst.ssl_cert != NULL) free(mhdst.ssl_cert);
-    if (mhdst.ssl_key  != NULL) free(mhdst.ssl_key);
+    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
+    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
 
     return;
 }
 
 static void webu_start_strm(struct context **cnt){
+    /* This function starts up the daemon for the streams. It loops through
+     * all of the camera context's provided and starts streams as requested.  If
+     * the thread number is zero, then it starts the full list stream context
+     */
 
     struct mhdstart_ctx mhdst;
 
-    mhdst.ssl_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
-    mhdst.ssl_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
@@ -1530,13 +1647,16 @@ static void webu_start_strm(struct context **cnt){
         }
         mhdst.indxthrd++;
     }
-    if (mhdst.ssl_cert != NULL) free(mhdst.ssl_cert);
-    if (mhdst.ssl_key  != NULL) free(mhdst.ssl_key);
+    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
+    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
 
     return;
 }
 
 void webu_stop(struct context **cnt) {
+    /* This function is called from the main Motion loop to shutdown the
+     * various MHD connections
+     */
     int indxthrd;
 
     if (cnt[0]->webcontrol_daemon != NULL){
@@ -1553,7 +1673,10 @@ void webu_stop(struct context **cnt) {
 }
 
 void webu_start(struct context **cnt) {
-
+    /* This function is called from the main motion thread to start up the
+     * webcontrol and streams.  We need to block some signals otherwise MHD
+     * will not function correctly.
+     */
     struct sigaction act;
 
     /* set signal handlers TO IGNORE */

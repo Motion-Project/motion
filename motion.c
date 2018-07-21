@@ -3016,11 +3016,6 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     set_log_level(cnt_list[0]->log_level);
     set_log_type(cnt_list[0]->log_type);
 
-    conf_output_parms(cnt_list);
-
-    initialize_chars();
-
-    webu_start(cnt_list);
 
     if (daemonize) {
         /*
@@ -3035,6 +3030,12 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     if (cnt_list[0]->conf.setup_mode)
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
+
+    conf_output_parms(cnt_list);
+
+    initialize_chars();
+
+    webu_start(cnt_list);
 
     vid_mutex_init();
 

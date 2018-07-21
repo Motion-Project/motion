@@ -15,6 +15,15 @@
  *    To debug, run code, open page, view source and make copy of html
  *    into a local file to revise changes then determine applicable section(s)
  *    in this code to modify to match modified version.
+ *    Known HTML Issues:
+ *      Single and double quotes are not consistently used.
+ *      HTML ids do not follow any naming convention.
+ *      After clicking restart/quit, do something..close page? Try to connect again?
+ *
+ *    Additional functionality considerations:
+ *      Notification to user of items that require restart when changed.
+ *      Notification to user that item successfully implemented (config change/tracking)
+ *      List motion parms somewhere so they can be found by xgettext
  *
  */
 
@@ -23,6 +32,7 @@
 #include "webu_html.h"
 #include "translate.h"
 
+/* struct to save information regarding the links to include in html page */
 struct strminfo_ctx {
     struct context  **cntlst;
     char            lnk_ref[WEBUI_LEN_LNK];
@@ -334,7 +344,9 @@ static void webu_html_navbar(struct webui_ctx *webui) {
 }
 
 static void webu_html_config_notice(struct webui_ctx *webui) {
-
+    /* Print out the header description of which parameters are included based upon the
+     * webcontrol_parms that was specified
+     */
     char response[WEBUI_LEN_RESP];
 
     if (webui->cntlst[0]->conf.webcontrol_parms == 0){
@@ -358,7 +370,7 @@ static void webu_html_config_notice(struct webui_ctx *webui) {
 }
 
 static void webu_html_h3desc(struct webui_ctx *webui) {
-
+    /* Write out the status description for the camera */
     char response[WEBUI_LEN_RESP];
 
     if (webui->cam_threads == 1){
@@ -496,7 +508,7 @@ static void webu_html_config(struct webui_ctx *webui) {
 }
 
 static void webu_html_track(struct webui_ctx *webui) {
-
+    /* Write the section for handling the tracking function */
     char response[WEBUI_LEN_RESP];
 
     snprintf(response, sizeof (response),
@@ -529,8 +541,11 @@ static void webu_html_track(struct webui_ctx *webui) {
 }
 
 static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
-
-    /* Slow construction of the urls to put on the page.
+    /* This determines all the items we need to know to specify links and
+     * stream sources for the page.  The options are 0-3 as of this writing
+     * where 0 = full streams, 1 = substreams, 2 = static images and 3 is
+     * the legacy code for creating streams.  So we need to assign not only
+     * what images are to be sent but also whether we have tls/ssl.
      * There are WAY too many options for this.
     */
     if (strm_info->cntlst[indx]->conf.stream_preview_method == 3){
@@ -547,7 +562,7 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
         if (strm_info->cntlst[0]->conf.stream_port != 0) {
             snprintf(strm_info->lnk_thrd,WEBUI_LEN_LNK,"/%d",indx);
             strm_info->port = strm_info->cntlst[0]->conf.stream_port;
-            if (strm_info->cntlst[0]->conf.stream_ssl) {
+            if (strm_info->cntlst[0]->conf.stream_tls) {
                 snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
             } else {
                 snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
@@ -555,7 +570,7 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
         } else {
             snprintf(strm_info->lnk_thrd,WEBUI_LEN_LNK,"%s","");
             strm_info->port = strm_info->cntlst[indx]->conf.stream_port;
-            if (strm_info->cntlst[indx]->conf.stream_ssl) {
+            if (strm_info->cntlst[indx]->conf.stream_tls) {
                 snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
             } else {
                 snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");

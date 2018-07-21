@@ -373,18 +373,19 @@ static void event_stream_put(struct context *cnt,
             struct image_data *img_data, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.stream_port)
-        stream_put(cnt, &cnt->stream, &cnt->stream_count, img_data->image_norm, 0);
+    if (cnt->conf.stream_preview_method == 3){
+        if (cnt->conf.stream_port)
+            stream_put(cnt, &cnt->stream, &cnt->stream_count, img_data->image_norm, 0);
 
-    if (cnt->conf.substream_port)
-        stream_put(cnt, &cnt->substream, &cnt->substream_count, img_data->image_norm, 1);
-
-    pthread_mutex_lock(&cnt->mutex_stream);
-        if (img_data->image_norm != NULL){
-            memcpy(cnt->imgs.image_stream,img_data->image_norm,cnt->imgs.size_norm);
-        }
-    pthread_mutex_unlock(&cnt->mutex_stream);
-
+        if (cnt->conf.substream_port)
+            stream_put(cnt, &cnt->substream, &cnt->substream_count, img_data->image_norm, 1);
+    } else {
+        pthread_mutex_lock(&cnt->mutex_stream);
+            if (img_data->image_norm != NULL){
+                memcpy(cnt->imgs.image_stream,img_data->image_norm,cnt->imgs.size_norm);
+            }
+        pthread_mutex_unlock(&cnt->mutex_stream);
+    }
 }
 
 
