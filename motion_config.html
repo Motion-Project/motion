@@ -986,12 +986,6 @@
           <td align="left"><a href="#stream_grey" >stream_grey</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_limit</td>
-          <td align="left">stream_limit</td>
-          <td align="left">stream_limit</td>
-          <td align="left"><a href="#stream_limit" >stream_limit</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">webcam_localhost</td>
           <td align="left">stream_localhost</td>
           <td align="left">stream_localhost</td>
@@ -1004,16 +998,16 @@
           <td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_motion</td>
-          <td align="left">stream_motion</td>
-          <td align="left">stream_motion</td>
-          <td align="left"><a href="#stream_motion" >stream_motion</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">webcam_port</td>
           <td align="left">stream_port</td>
           <td align="left">stream_port</td>
           <td align="left"><a href="#stream_port" >stream_port</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#stream_preview_method" >stream_preview_method</a></td>
         </tr>
         <tr>
           <td height="17" align="left"><br /></td>
@@ -1034,10 +1028,10 @@
           <td align="left"><a href="#stream_quality" >stream_quality</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td height="17" align="left"><br /></td>
           <td align="left"></td>
-          <td align="left">substream_port</td>
-          <td align="left"><a href="#substream_port" >substream_port</a></td>
+          <td align="left"></td>
+          <td align="left"><a href="#stream_tls" >stream_tls</a></td>
         </tr>
         <tr>
           <td height="17" align="left">switchfilter</td>
@@ -1325,7 +1319,7 @@
           <td height="17" align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
-          <td align="left"><a href="#webcontrol_ssl" >webcontrol_ssl</a></td>
+          <td align="left"><a href="#webcontrol_tls" >webcontrol_tls</a></td>
         </tr>
         <tr>
           <td height="17" align="left">width</td>
@@ -1344,7 +1338,25 @@
           <td align="left">sdl_threadnr</td>
           <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
-          </tr>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_limit</td>
+          <td align="left">stream_limit</td>
+          <td align="left">stream_limit</td>
+          <td align="left">-Depreciated</td>
+        </tr>
+        <tr>
+          <td height="17" align="left">webcam_motion</td>
+          <td align="left">stream_motion</td>
+          <td align="left">stream_motion</td>
+          <td align="left">-Depreciated</td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left">substream_port</td>
+          <td align="left">-Depreciated</td>
+        </tr>
       </table>
     </ul>
 
@@ -1444,14 +1456,14 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_url" >netcam_url</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_highres" >netcam_highres</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_userpass" >netcam_userpass</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_keepalive" >netcam_keepalive</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
               <td bgcolor="#edf4f9" ><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#netcam_highres" >netcam_highres</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1496,25 +1508,25 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
               <td bgcolor="#edf4f9" ><a href="#width" >width</a> </td>
               <td bgcolor="#edf4f9" ><a href="#height" >height</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_frame_time" >minimum_frame_time</a> </td>
               <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
               <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
               <td bgcolor="#edf4f9" ><a href="#text_left" >text_left</a> </td>
               <td bgcolor="#edf4f9" ><a href="#text_right" >text_right</a> </td>
               <td bgcolor="#edf4f9" ><a href="#text_changes" >text_changes</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
               <td bgcolor="#edf4f9" ><a href="#text_scale" >text_scale</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1673,17 +1685,17 @@
               <td bgcolor="#edf4f9" ><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a> </td>
               <td bgcolor="#edf4f9" ><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a> </td>
               <td bgcolor="#edf4f9" ><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1730,40 +1742,39 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#ipv6_enabled" >ipv6_enabled</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_port" >stream_port</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#substream_port" >substream_port</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_localhost" >stream_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_limit" >stream_limit</a> </td>
-            </tr>
-            <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_tls" >stream_tls</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
             </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_ssl" >webcontrol_ssl</a> </td>
-            </tr>
-           </tbody>
+            </tbody>
         </table>
 
         <p></p>
@@ -4467,18 +4478,49 @@
         Motion has simple webcam server built in. The server can be configured to
         stream both the images as well allow for a very basic http control of Motion parameters.
         <p></p>
-        The streams are generated in "multipart jpeg" format (mjpeg). Some browsers can not display
-        images fed in this method.  The most straight forward around this limitation is to create a local
-        HTML page that references the raw stream(s).
+        The streams are generated in "multipart jpeg" format (mjpeg) which most browsers can display.  If
+        the browser does not directly open the stream, it may be possible to manually create a simple HTML
+        page that references the stream.
         <p></p>
-        It may also be possible to view the stream via regular stream players such as VLC, mplayer, ffplay, avplay, etc.
-        by specifying the network stream as
+        Some regular stream players such as mplayer, ffplay and avplay may open the streams as well by specifying
+        the network stream as
         <code>
-        http://localhost:mystreamportnumber/stream.mjpg
+        http://localhost:mystreamportnumber/
         </code>
         <p></p>
+        While normally the stream players will open after a bit, it may be useful to also provide the format such as
+        <code>
+        ffplay -f mjpeg http://localhost:mystreamportnumber/
+        </code>
         <p></p>
-
+        It has been observed by the author that VLC will not open the stream.  This is not a Motion limitation but
+        instead is related to the general VLC support for MJPG http streams.
+        <p></p>
+        While the above examples indicate the Motion streams can be accessed as
+        <code>
+        http://localhost:mystreamportnumber/
+        </code>
+        Motion does provide other options for accessing the streams and images.  In addition to sub-streams and static
+        images, Motion can also be configured to use just a single port for accessing streams to all cameras.  This
+        is accomplished by specifying a stream port within the motion.conf file and also using separate camera files.  The
+        following examples should clarify the methods by which streams can be accessed:
+        <ul>
+          <li><code>{IP}</code> The IP address of the computer running Motion</li>
+          <li><code>{port0}</code> The port specified for the stream within the motion.conf file.</li>
+          <li><code>{portX}</code> The port specified for the stream within a camera.conf file.</li>
+          <li><code>{thread}</code> The thread number of the camera.</li>
+        </ul>
+        <p></p>
+	      <ul>
+	        <li><code>{IP}:{port0}/{thread}/</code> Primary stream for camera running on {thread}</li>
+          <li><code>{IP}:{port0}/{thread}/stream</code> Primary stream for camera running on {thread}</li>
+          <li><code>{IP}:{port0}/{thread}/substream</code> Sub-stream for camera running on {thread}</li>
+          <li><code>{IP}:{port0}/{thread}/current</code> Static JPG for camera running on {thread}</li>
+          <li><code>{IP}:{portX}/</code> Primary stream for camera running on {thread}</li>
+          <li><code>{IP}:{portX}/stream</code> Primary stream for camera running on {thread}</li>
+          <li><code>{IP}:{portX}/substream</code> Sub-stream for camera running on {thread}</li>
+          <li><code>{IP}:{portX}/current</code> Static JPG for camera running on {thread}</li>
+        </ul>
         <h4><a name="OptDetail_Webcontrol"></a>Web Control</a> </h4>
         <p></p>
         Motion has a limited web interface to control some parameters while running.  By default, the
@@ -4631,26 +4673,6 @@
         one camera, in which case it can be placed in motion.conf).
         <p></p>
 
-        <h3><a name="substream_port"></a> substream_port </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 65535</li>
-          <li> Default: 0 (disabled)</li>
-        </ul>
-        <p></p>
-        TCP Port to use for providing a 50% scaled down "substream".
-        The substream shares all the same settings as main stream and only scales the image
-        down to reduce the required bandwidth.
-        <p></p>
-        Each camera must have its own unique port number and it must
-        also be different from the webcontrol_port number.
-        <p></p>
-        This must be placed in the camera config file (unless you only have
-        one camera, in which case it can be placed in motion.conf).
-        <p></p>
-
-
         <h3><a name="stream_quality"></a> stream_quality </h3>
         <p></p>
         <ul>
@@ -4667,19 +4689,15 @@
         If you set it too high you need a lot of bandwidth to view the stream.
         <p></p>
 
-        <h3><a name="stream_motion"></a> stream_motion </h3>
+        <h3><a name="stream_grey"></a> stream_grey </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
+          <li> Type: boolean</li>
+          <li> Range / Valid values: on/off</li>
           <li> Default: off</li>
         </ul>
         <p></p>
-        When set to 'on', slow down the stream to 1 picture per second when no motion is detected.
-        When motion is detected the stream runs as defined by <a href="#stream_maxrate"></a> stream_maxrate
-        <p></p>
-        When 'off' the stream always runs as defined by <a href="#stream_maxrate"></a> stream_maxrate.
-        Use this option to save bandwidth when there is not anything important to see from the camera anyway.
+        Send the live stream in grey (black and white) rather than color.  Useful for limiting bandwidth.
         <p></p>
 
         <h3><a name="stream_maxrate"></a> stream_maxrate </h3>
@@ -4704,18 +4722,6 @@
         <p></p>
         Limits the access to the stream to the localhost.
         By setting this to on, the stream can only be accessed on the same machine on which Motion is running.
-        <p></p>
-
-        <h3><a name="stream_limit"></a> stream_limit </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        This parameter limits the maximum number of images per connection and is
-        determined by multiplying actual stream rate by desired number of seconds
         <p></p>
 
         <h3><a name="stream_auth_method"></a> stream_auth_method </h3>
@@ -4764,17 +4770,6 @@
         For example, * allows access from browser client code served from any origin.
         <p></p>
 
-        <h3><a name="stream_grey"></a> stream_grey </h3>
-        <p></p>
-        <ul>
-          <li> Type: boolean</li>
-          <li> Range / Valid values: on/off</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        Send the live stream in grey (black and white) rather than color.  Useful for limiting bandwidth.
-        <p></p>
-
         <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
         <p></p>
         <ul>
@@ -4814,6 +4809,39 @@
         <p></p>
         Users that require a more polished and customized preview page are encouraged to create their own
         local HTML page that reference the URL streams.
+        <p></p>
+
+        <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values:0-2</li>
+          <li> Default: 0</li>
+        </ul>
+        <p></p>
+        This option determines the method used for displaying images on the webcontrol page.
+        <ul>
+          <li>0 = Full stream images are sent and scaled by the client to the webcontrol page</li>
+          <li>1 = Substream images are sent by Motion.  This saves bandwidth</li>
+          <li>2 = Static images are sent by Motion and the page must be manually refreshed</li>
+        </ul>
+        <p></p>
+        <p></p>
+
+        <h3><a name="stream_tls"></a> stream_tls </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: On / Off</li>
+          <li> Default: Off</li>
+        </ul>
+        <p></p>
+        This option specifies whether to enable SSL/TLS for the stream port.  For some distributions
+        the library that Motion uses may not have been compiled with SSL/TLS support.  In this situation
+        Motion can not support SSL/TLS connections.  Whether SSL/TLS can be supported will be reported in
+        the log.  In addition to selecting this option, a <a href="#webcontrol_cert">webcontrol_cert</a> and
+        <a href="#webcontrol_key">webcontrol_key</a> file must also be specified.
+        <p></p>
         <p></p>
 
         <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
@@ -4860,6 +4888,32 @@
         Motion with a normal browser.
         <p></p>
 
+        <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 3</li>
+          <li> Default: 0 (disabled)</li>
+        </ul>
+        <p></p>
+        Sets the type of parameters that will be listed on the webcontrol page and available for
+        modification.
+        <ul>
+          <li> 0: None - No configuration parameters will be available.</li>
+          <li> 1: Limited- A limited list of parameters will be available. </li>
+          <li> 2: Advanced - The advanced list of parameters will be available.  These typically require Motion to be restarted to become effective.</li>
+          <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
+        </ul>
+        The default for this parameter is 0 (none) to enhance the security of the web interface.  The setting of the
+        webcontrol_parms is NEVER included on the web interface and this parameter must be specified via the configuration file.
+        <b>EXTREME</b> Care should be exercised when using level restricted level because if the webcontrol is compromised,
+        it may compromise the computer.
+        <p></p>
+        Users are strongly advised to only set this option to something other than zero when initially setting up the
+        cameras.  Once Motion has been configured, it is advised to complete the set up by setting this value back to zero!
+        <p></p>
+
+
         <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
         <p></p>
         <ul>
@@ -4890,47 +4944,6 @@
         <p></p>
         <p></p>
 
-        <h3><a name="webcontrol_ssl"></a> webcontrol_ssl </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: On / Off</li>
-          <li> Default: Off</li>
-        </ul>
-        <p></p>
-        This option specifies whether to enable SSL for the webcontrol port.  If selected, then the
-        library libmicrohttpd must have been compiled with SSL support.  Also, when this option is
-        selected, a certification and key file must also be specified.
-        <p></p>
-        <p></p>
-
-        <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        Full path to the certification file for SSL support.  Only used when
-        <a href="#webcontrol_ssl">webcontrol_ssl</a> is enabled.
-        <p></p>
-        <p></p>
-
-        <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        Full path to the key file for SSL support.  Only used when
-        <a href="#webcontrol_ssl">webcontrol_ssl</a> is enabled.
-        <p></p>
-        <p></p>
-
-
         <h3><a name="webcontrol_cors_header"></a> webcontrol_cors_header </h3>
         <p></p>
         <ul>
@@ -4945,29 +4958,47 @@
         For example, * allows access from browser client code served from any origin.
         <p></p>
 
-        <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
+
+        <h3><a name="webcontrol_tls"></a> webcontrol_tls </h3>
         <p></p>
         <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 3</li>
-          <li> Default: 0 (disabled)</li>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: On / Off</li>
+          <li> Default: Off</li>
         </ul>
         <p></p>
-        Sets the type of parameters that will be listed on the webcontrol page and available for
-        modification.
+        This option specifies whether to enable SSL/TLS for the webcontrol port.  For some distributions
+        the library that Motion uses may not have been compiled with SSL/TLS support.  In this situation
+        Motion can not support SSL/TLS connections.  Whether SSL/TLS can be supported will be reported in
+        the log.  In addition to selecting this option, a <a href="#webcontrol_cert">webcontrol_cert</a> and
+        <a href="#webcontrol_key">webcontrol_key</a> file must also be specified.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
+        <p></p>
         <ul>
-          <li> 0: None - No configuration parameters will be available.</li>
-          <li> 1: Limited- A limited list of parameters will be available. </li>
-          <li> 2: Advanced - The advanced list of parameters will be available.  These typically require Motion to be restarted to become effective.</li>
-          <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not Defined</li>
         </ul>
-        The default for this parameter is 0 (none) to enhance the security of the web interface.  The setting of the
-        webcontrol_parms is NEVER included on the web interface and this parameter must be specified via the configuration file.
-        <b>EXTREME</b> Care should be exercised when using level restricted level because if the webcontrol is compromised,
-        it may compromise the computer.
         <p></p>
-        Users are strongly advised to only set this option to something other than zero when initially setting up the
-        cameras.  Once Motion has been configured, it is advised to complete the set up by setting this value back to zero!
+        Full path to the certification file for SSL/TLS support.  Only used when
+        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not Defined</li>
+        </ul>
+        <p></p>
+        Full path to the key file for SSL/TLS support.  Only used when
+        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
+        <p></p>
         <p></p>
 
       </ul>
