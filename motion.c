@@ -955,7 +955,7 @@ static int motion_init(struct context *cnt)
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
-        cnt->conf.camera_id, cnt->pause ? _("Disabled"):_("Enabled"));
+        cnt->camera_id, cnt->pause ? _("Disabled"):_("Enabled"));
 
     if (!cnt->conf.filepath)
         cnt->conf.filepath = mystrdup(".");
@@ -3061,18 +3061,18 @@ static void motion_start_thread(struct context *cnt){
     if (strcmp(cnt->conf_filename, "")){
         cnt->conf_filename[sizeof(cnt->conf_filename) - 1] = '\0';
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera ID: %d is from %s")
-            ,cnt->conf.camera_id, cnt->conf_filename);
+            ,cnt->camera_id, cnt->conf_filename);
     }
 
     if (cnt->conf.netcam_url){
         snprintf(service,6,"%s",cnt->conf.netcam_url);
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Service: %s")
-            ,cnt->conf.camera_id, cnt->conf.camera_name,service);
+            ,cnt->camera_id, cnt->conf.camera_name,service);
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Stream port %d"),
             cnt->conf.stream_port);
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Device: %s")
-            ,cnt->conf.camera_id, cnt->conf.camera_name,cnt->conf.video_device);
+            ,cnt->camera_id, cnt->conf.camera_name,cnt->conf.video_device);
     }
 
     /*
@@ -3291,6 +3291,44 @@ static int motion_check_threadcount(void){
     }
 }
 
+static void motion_camera_ids(void){
+    /* Set the camera id's on the context.  They must be unique */
+    int indx, indx2, invalid_ids;
+
+    /* Set defaults */
+    indx = 0;
+    while (cnt_list[indx] != NULL){
+        if (cnt_list[indx]->conf.camera_id > 0){
+            cnt_list[indx]->camera_id = cnt_list[indx]->conf.camera_id;
+        } else {
+            cnt_list[indx]->camera_id = indx;
+        }
+        indx++;
+    }
+
+    invalid_ids = FALSE;
+    indx = 0;
+    while (cnt_list[indx] != NULL){
+        if (cnt_list[indx]->camera_id > 32000) invalid_ids = TRUE;
+        indx2 = indx + 1;
+        while (cnt_list[indx2] != NULL){
+            if (cnt_list[indx]->camera_id == cnt_list[indx2]->camera_id) invalid_ids = TRUE;
+
+            indx2++;
+        }
+        indx++;
+    }
+    if (invalid_ids){
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
+        indx = 0;
+        while (cnt_list[indx] != NULL){
+            cnt_list[indx]->camera_id = indx;
+            indx++;
+        }
+    }
+}
+
 /**
  * main
  *
@@ -3325,9 +3363,10 @@ int main (int argc, char **argv)
     do {
         if (restart) motion_restart(argc, argv);
 
+        motion_camera_ids();
+
         for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
             cnt_list[i]->threadnr = i ? i : 1;
-            cnt_list[i]->conf.camera_id = cnt_list[i]->conf.camera_id ? cnt_list[i]->conf.camera_id: i;
             motion_start_thread(cnt_list[i]);
         }
 
@@ -3728,7 +3767,7 @@ size_t mystrftime(const struct context *cnt, char *s, size_t max, const char *us
                 break;
 
             case 't': // camera id
-                sprintf(tempstr, "%*d", width, cnt->conf.camera_id);
+                sprintf(tempstr, "%*d", width, cnt->camera_id);
                 break;
 
             case 'C': // text_event

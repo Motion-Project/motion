@@ -244,8 +244,9 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_000');\">%s 1</a>\n"
+                "        <a onclick=\"camera_click('cam_%05d');\">%s 1</a>\n"
                 ,_("Cameras")
+                ,webui->cntlst[0]->camera_id
                 ,_("Camera"));
             webu_write(webui, response);
         } else {
@@ -253,8 +254,9 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
                 "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_000');\">%s</a>\n"
+                "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
                 ,_("Cameras")
+                ,webui->cntlst[0]->camera_id
                 ,webui->cntlst[0]->conf.camera_name);
             webu_write(webui, response);
         }
@@ -264,7 +266,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
             "    <div class=\"dropdown\">\n"
             "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
             "      <div id='cam_btn' class=\"dropdown-content\">\n"
-            "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
+            "        <a onclick=\"camera_click('cam_all00');\">%s</a>\n"
             ,_("Cameras")
             ,_("All"));
         webu_write(webui, response);
@@ -272,12 +274,14 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
         for (indx=1;indx <= webui->cam_count;indx++){
             if (webui->cntlst[indx]->conf.camera_name == NULL){
                 snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%03d');\">%s %d</a>\n"
-                    , indx, _("Camera"), indx);
+                    "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
+                    ,webui->cntlst[indx]->camera_id
+                    , _("Camera"), webui->cntlst[indx]->camera_id);
             } else {
                 snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%03d');\">%s</a>\n",
-                    indx, webui->cntlst[indx]->conf.camera_name
+                    "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
+                    ,webui->cntlst[indx]->camera_id
+                    ,webui->cntlst[indx]->conf.camera_name
                 );
             }
             webu_write(webui, response);
@@ -376,7 +380,7 @@ static void webu_html_h3desc(struct webui_ctx *webui) {
     if (webui->cam_threads == 1){
         snprintf(response, sizeof (response),
             "  <div id=\"id_header\">\n"
-            "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s (%s)</h3>\n"
+            "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s (%s)</h3>\n"
             "  </div>\n"
             ,_("All Cameras")
             ,(!webui->cntlst[0]->running)? _("Not running") :
@@ -387,7 +391,7 @@ static void webu_html_h3desc(struct webui_ctx *webui) {
     } else {
         snprintf(response, sizeof (response),
             "  <div id=\"id_header\">\n"
-            "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s</h3>\n"
+            "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s</h3>\n"
             "  </div>\n"
             ,_("All Cameras"));
         webu_write(webui,response);
@@ -419,7 +423,7 @@ static void webu_html_config(struct webui_ctx *webui) {
         "    <form class=\"frm-input\">\n"
         "      <select id='cfg_parms' name='onames' "
         " autocomplete='off' onchange='config_change();'>\n"
-        "        <option value='default' data-cam_all=\"\" >%s</option>\n"
+        "        <option value='default' data-cam_all00=\"\" >%s</option>\n"
         ,_("Select option"));
     webu_write(webui, response);
 
@@ -440,7 +444,7 @@ static void webu_html_config(struct webui_ctx *webui) {
         val_main = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
 
         snprintf(response, sizeof (response),
-            "        <option value='%s' data-cam_all=\""
+            "        <option value='%s' data-cam_all00=\""
             , config_params[indx_parm].param_name);
         webu_write(webui, response);
 
@@ -468,7 +472,8 @@ static void webu_html_config(struct webui_ctx *webui) {
                     webu_write(webui, response);
 
                     snprintf(response, sizeof (response),
-                        "           data-cam_%03d=\"",indx);
+                        "           data-cam_%05d=\""
+                        ,webui->cntlst[indx]->camera_id);
                     webu_write(webui, response);
                     if (val_thread != NULL){
                         snprintf(response, sizeof (response),"%s%s", response, val_thread);
@@ -560,7 +565,8 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
     } else {
         /* If using the main port,we need to insert a thread number into url*/
         if (strm_info->cntlst[0]->conf.stream_port != 0) {
-            snprintf(strm_info->lnk_thrd,WEBUI_LEN_LNK,"/%d",indx);
+            snprintf(strm_info->lnk_thrd,WEBUI_LEN_LNK,"/%d"
+                ,strm_info->cntlst[indx]->camera_id);
             strm_info->port = strm_info->cntlst[0]->conf.stream_port;
             if (strm_info->cntlst[0]->conf.stream_tls) {
                 snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
@@ -668,7 +674,7 @@ static void webu_html_script_action(struct webui_ctx *webui) {
         "        document.getElementById('cfg_form').style.display=\"none\";\n"
         "        document.getElementById('trk_form').style.display=\"none\";\n"
         "        var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "        var camnbr = camstr.substring(4,7);\n"
+        "        var camnbr = camstr.substring(4,9);\n"
         "        var http = new XMLHttpRequest();\n"
         "        if ((actval == \"/detection/pause\") || (actval == \"/detection/start\")) {\n"
         "          http.addEventListener('load', event_reloadpage); \n"
@@ -682,17 +688,20 @@ static void webu_html_script_action(struct webui_ctx *webui) {
         ,webui->cntlst[0]->conf.webcontrol_port);
     webu_write(webui, response);
 
-    snprintf(response, sizeof (response),"%s",
-        "        if (camnbr == \"all\"){\n"
-        "          url = url + \"0\";\n"
+    snprintf(response, sizeof (response),
+        "        if (camnbr == \"all00\"){\n"
+        "          url = url + \"%05d\";\n"
         "        } else {\n"
         "          url = url + camnbr;\n"
         "        }\n"
         "        url = url + actval;\n"
+       ,webui->cntlst[0]->camera_id);
+    webu_write(webui, response);
+
+    snprintf(response, sizeof (response),"%s",
         "        http.open(\"GET\", url, true);\n"
         "        http.onreadystatechange = function() {\n"
         "          if(http.readyState == 4 && http.status == 200) {\n"
-
         "          }\n"
         "        }\n"
         "        http.send(null);\n"
@@ -717,7 +726,8 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
 
     for (indx = indx_st; indx<webui->cam_threads; indx++){
         snprintf(response, sizeof (response),
-            "      if (camid == \"cam_%03d\"){\n",indx);
+            "      if (camid == \"cam_%05d\"){\n"
+            ,webui->cntlst[indx]->camera_id);
         webu_write(webui, response);
 
         webu_html_strminfo(&strm_info, indx);
@@ -770,7 +780,7 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
 
     strm_info.cntlst = webui->cntlst;
 
-    snprintf(response, sizeof (response), "      if (camid == \"cam_all\"){\n");
+    snprintf(response, sizeof (response), "      if (camid == \"cam_all00\"){\n");
     webu_write(webui, response);
 
     for (indx = indx_st; indx<webui->cam_threads; indx++){
@@ -895,7 +905,7 @@ static void webu_html_script_cfgclk(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),"%s",
         "    function config_click() {\n"
         "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,7);\n"
+        "      var camnbr = camstr.substring(4,9);\n"
         "      var opts = document.getElementById('cfg_parms');\n"
         "      var optsel = opts.options[opts.selectedIndex].value;\n"
         "      var baseval = document.getElementById('cfg_value').value;\n"
@@ -908,13 +918,17 @@ static void webu_html_script_cfgclk(struct webui_ctx *webui) {
         ,webui->cntlst[0]->conf.webcontrol_port);
     webu_write(webui, response);
 
-    snprintf(response, sizeof (response),"%s",
+    snprintf(response, sizeof (response),
         "      var optval=encodeURI(baseval);\n"
-        "      if (camnbr == \"all\"){\n"
-        "        url = url + \"0\";\n"
+        "      if (camnbr == \"all00\"){\n"
+        "        url = url + \"%05d\";\n"
         "      } else {\n"
         "        url = url + camnbr;\n"
         "      }\n"
+        ,webui->cntlst[0]->camera_id);
+    webu_write(webui, response);
+
+    snprintf(response, sizeof (response),"%s",
         "      url = url + \"/config/set?\" + optsel + \"=\" + optval;\n"
         "      http.open(\"GET\", url, true);\n"
         "      http.onreadystatechange = function() {\n"
@@ -940,7 +954,7 @@ static void webu_html_script_cfgchg(struct webui_ctx *webui) {
         "      var opts = document.getElementById('cfg_parms');\n"
         "      var optval = opts.options[opts.selectedIndex].getAttribute(camSel);\n"
         "      if (optval == null){\n"
-        "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all');\n"
+        "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all00');\n"
         "      }\n"
         "      document.getElementById('cfg_value').value = optval;\n"
         "    }\n\n");
@@ -991,7 +1005,7 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),"%s",
         "    function track_click() {\n"
         "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,7);\n"
+        "      var camnbr = camstr.substring(4,9);\n"
         "      var opts = document.getElementById('trk_option');\n"
         "      var optsel = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
         "      var optval1 = document.getElementById('trk_panx').value;\n"
@@ -1005,12 +1019,17 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
         ,webui->cntlst[0]->conf.webcontrol_port);
     webu_write(webui, response);
 
-    snprintf(response, sizeof (response),"%s",
-        "      if (camnbr == \"all\"){\n"
-        "        url = url + \"0\";\n"
+    snprintf(response, sizeof (response),
+        "      if (camnbr == \"all00\"){\n"
+        "        url = url + \"%05d\";\n"
         "      } else {\n"
         "        url = url + camnbr;\n"
         "      }\n"
+        ,webui->cntlst[0]->camera_id);
+    webu_write(webui, response);
+
+    snprintf(response, sizeof (response),"%s",
+
         "      if (optsel == 'pan'){\n"
         "        url = url + '/track/set?pan=' + optval1 + '&tilt=' + optval2;\n"
         "      } else if (optsel == 'abs') {\n"
@@ -1133,7 +1152,7 @@ int webu_html_main(struct webui_ctx *webui) {
        "thread: >%s< cmd1: >%s< cmd2: >%s<"
        " parm1:>%s< val1:>%s<"
        " parm2:>%s< val2:>%s<"
-       ,webui->uri_thread
+       ,webui->uri_camid
        ,webui->uri_cmd1, webui->uri_cmd2
        ,webui->uri_parm1, webui->uri_value1
        ,webui->uri_parm2, webui->uri_value2);
@@ -1142,7 +1161,7 @@ int webu_html_main(struct webui_ctx *webui) {
 
     retcd = 0;
 
-    if (strlen(webui->uri_thread) == 0){
+    if (strlen(webui->uri_camid) == 0){
         webu_html_page(webui);
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"set"))) {
@@ -1162,7 +1181,8 @@ int webu_html_main(struct webui_ctx *webui) {
         webu_process_track(webui);
 
     } else{
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid action requested"));
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
+            _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
         retcd = -1;
     }
 

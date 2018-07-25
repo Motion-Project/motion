@@ -511,7 +511,9 @@ struct context {
 
     struct MHD_Daemon *webcontrol_daemon;
     struct MHD_Daemon *webstream_daemon;
-
+    char   webcontrol_digest_rand[8];
+    char   webstream_digest_rand[8];
+    int    camera_id;
     pthread_mutex_t mutex_stream;
 
 };

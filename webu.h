@@ -20,7 +20,7 @@
 
 struct webui_ctx {
     char *url;                   /* The URL sent from the client */
-    char *uri_thread;            /* Parsed thread number from the url*/
+    char *uri_camid;            /* Parsed thread number from the url*/
     char *uri_cmd1;              /* Parsed command(action) from the url*/
     char *uri_cmd2;              /* Parsed command (set) from the url*/
     char *uri_parm1;             /* Parameter 1 for the command */
@@ -31,9 +31,13 @@ struct webui_ctx {
     char *hostname;              /* Host name provided from header content*/
     char  hostproto[6];          /* Protocol for host http or https */
     char *clientip;              /* IP of the connecting client */
-    char *auth_config;           /* Userpass from config file */
-    char *userpass;              /* userpass as provided by the client */
-    int   userpass_size;         /* Memory size of the userpass provided */
+    char *auth_denied;          /* Denied access response to user*/
+    char *auth_opaque;          /* Opaque string for digest authentication*/
+    char *auth_realm;           /* Realm string for digest authentication*/
+    char *auth_user;            /* Parsed user from config authentication string*/
+    char *auth_pass;            /* Parsed password from config authentication string*/
+    int  authenticated;         /* Boolean for whether authentication has been passed */
+
     int   cam_count;             /* Count of the number of cameras*/
     int   cam_threads;           /* Count of the number of camera threads running*/
     char *lang;                  /* Two character abbreviation for locale language*/

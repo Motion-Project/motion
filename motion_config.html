@@ -2120,13 +2120,21 @@
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: </li>
+          <li> Range / Valid values: 1 - 32000</li>
           <li> Default: The sequence that the camera file is read</li>
         </ul>
         <p></p>
         This option is useful for situations where there are multiple cameras being
         used by Motion.  This option allows for the assignment of a numeric id number
-        that can be used in database queries as well as format specifiers.
+        that can be used in database queries, format specifiers as well as for the web
+        interface and streams.
+        <p></p>
+        If this option is not specified, the thread number as determined by Motion is used.  The
+        number assigned to each camera must be unique.
+        <p></p>
+        When using multiple cameras, the default for the main thread is 0 (zero) but this can be
+        overridden as needed by specifying a camera_id in the motion.conf file even though there
+        are not any cameras running on this thread.
         <p></p>
 
         <h3><a name="camera_name"></a> camera_name </h3>
@@ -4508,18 +4516,18 @@
           <li><code>{IP}</code> The IP address of the computer running Motion</li>
           <li><code>{port0}</code> The port specified for the stream within the motion.conf file.</li>
           <li><code>{portX}</code> The port specified for the stream within a camera.conf file.</li>
-          <li><code>{thread}</code> The thread number of the camera.</li>
+          <li><code>{camid}</code> The <a href="#camera_id">camera_id</a> of the camera.</li>
         </ul>
         <p></p>
 	      <ul>
-	        <li><code>{IP}:{port0}/{thread}/</code> Primary stream for camera running on {thread}</li>
-          <li><code>{IP}:{port0}/{thread}/stream</code> Primary stream for camera running on {thread}</li>
-          <li><code>{IP}:{port0}/{thread}/substream</code> Sub-stream for camera running on {thread}</li>
-          <li><code>{IP}:{port0}/{thread}/current</code> Static JPG for camera running on {thread}</li>
-          <li><code>{IP}:{portX}/</code> Primary stream for camera running on {thread}</li>
-          <li><code>{IP}:{portX}/stream</code> Primary stream for camera running on {thread}</li>
-          <li><code>{IP}:{portX}/substream</code> Sub-stream for camera running on {thread}</li>
-          <li><code>{IP}:{portX}/current</code> Static JPG for camera running on {thread}</li>
+	        <li><code>{IP}:{port0}/{camid}/</code> Primary stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/stream</code> Primary stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/substream</code> Sub-stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/current</code> Static JPG for the camera</li>
+          <li><code>{IP}:{portX}/</code> Primary stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/stream</code> Primary stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/substream</code> Sub-stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/current</code> Static JPG for the camera running on port {portX}</li>
         </ul>
         <h4><a name="OptDetail_Webcontrol"></a>Web Control</a> </h4>
         <p></p>
@@ -4588,7 +4596,7 @@
         <ul>
           <li><code>{IP}</code> The IP address of the computer running Motion</li>
           <li><code>{port}</code> The port specified for the webcontrol</li>
-          <li><code>{thread}</code> The thread number of the camera.</li>
+          <li><code>{camid}</code> The <a href="#camera_id">camera_id</a> of the camera.</li>
           <li><code>{parm}</code> The Motion configuration parameter requested.</li>
           <li><code>{value1}</code> The first value of the Motion configuration parameter requested.</li>
           <li><code>{value2}</code> The second value of the Motion configuration parameter requested.</li>
@@ -4599,30 +4607,31 @@
         <a href="#webcontrol_interface">webcontrol_interface</a>.
         <p></p>
 	      <ul>
-          <li><code>{IP}:{port}/{thread}/config/list</code> Lists all the configuration values for the camera</li>
-          <li><code>{IP}:{port}/{thread}/config/set?{parm}={value1}</code>Set the value for the requested parameter </li>
-          <li><code>{IP}:{port}/{thread}/config/get?query={parm}</code> Return the value currently set for the parameter. This
+          <li><code>{IP}:{port}/{camid}/config/list</code> Lists all the configuration values for the camera.  This
             command is only available when using the text interface. </li>
-          <li><code>{IP}:{port}/{thread}/config/write</code> Write the current parameters to the file.</li>
-          <li><code>{IP}:{port}/{thread}/detection/status</code> Return the current status of the camera.  This
+          <li><code>{IP}:{port}/{camid}/config/set?{parm}={value1}</code>Set the value for the requested parameter </li>
+          <li><code>{IP}:{port}/{camid}/config/get?query={parm}</code> Return the value currently set for the parameter. This
             command is only available when using the text interface. </li>
-          <li><code>{IP}:{port}/{thread}/detection/connection</code> Return the connection status of the camera.  This
+          <li><code>{IP}:{port}/{camid}/config/write</code> Write the current parameters to the file.</li>
+          <li><code>{IP}:{port}/{camid}/detection/status</code> Return the current status of the camera.  This
             command is only available when using the text interface. </li>
-          <li><code>{IP}:{port}/{thread}/detection/start</code> Start or resume motion detection. </li>
-          <li><code>{IP}:{port}/{thread}/detection/pause</code> Pause the motion detection.</li>
-          <li><code>{IP}:{port}/{thread}/action/makemovie</code> Initiate the creation of a movie.</li>
-          <li><code>{IP}:{port}/{thread}/action/snapshot</code> Create a snapshot</li>
-          <li><code>{IP}:{port}/{thread}/action/restart</code> Shutdown and restart Motion</li>
-          <li><code>{IP}:{port}/{thread}/action/quit</code> Shutdown Motion</li>
-          <li><code>{IP}:{port}/{thread}/track/center</code> Send command to center PTZ camera</li>
-          <li><code>{IP}:{port}/{thread}/track/set?x={value1}&y={value2}</code> Send command to PTZ camera to move
+          <li><code>{IP}:{port}/{camid}/detection/connection</code> Return the connection status of the camera.  This
+            command is only available when using the text interface. </li>
+          <li><code>{IP}:{port}/{camid}/detection/start</code> Start or resume motion detection. </li>
+          <li><code>{IP}:{port}/{camid}/detection/pause</code> Pause the motion detection.</li>
+          <li><code>{IP}:{port}/{camid}/action/makemovie</code> Initiate the creation of a movie.</li>
+          <li><code>{IP}:{port}/{camid}/action/snapshot</code> Create a snapshot</li>
+          <li><code>{IP}:{port}/{camid}/action/restart</code> Shutdown and restart Motion</li>
+          <li><code>{IP}:{port}/{camid}/action/quit</code> Shutdown Motion</li>
+          <li><code>{IP}:{port}/{camid}/track/center</code> Send command to center PTZ camera</li>
+          <li><code>{IP}:{port}/{camid}/track/set?x={value1}&y={value2}</code> Send command to PTZ camera to move
             to location specified by x and y</li>
-          <li><code>{IP}:{port}/{thread}/track/set?pan={value1}&tilt={value2}</code> Send command to PTZ camera to
+          <li><code>{IP}:{port}/{camid}/track/set?pan={value1}&tilt={value2}</code> Send command to PTZ camera to
             pan to value1 and tilt to value2</li>
         </ul>
         <p></p>
         If the item above is available via the HTML/CSS interface, it is also possible to see the exact URL sent
-        to Motion in the log.  Change the log level to debug, then open up the Motion webcontrol interface and
+        to Motion in the log.  Change the log level to 8 (debug), then open up the Motion webcontrol interface and
         perform the action in question.  In the log Motion will report the exact URL sent to Motion that performed
         the action.
         <p></p>
@@ -4635,7 +4644,8 @@
           Anyone can access your control port if you have not either limited access to localhost or limited
           access using firewalls in the server. You should always have a router between a machine running
           Motion with remote control enabled and the Internet and make sure the Motion control port is not
-          accessible from the outside.</li>
+          accessible from the outside.  Also make sure to adjust the
+          <a href="#webcontrol_parms">webcontrol_parms</a> to the lowest level possible.</li>
           <li> If you limit control port to localhost you still need to take care of any user logging
             into the server with any kind of terminal session.</li>
           <li> Run Motion as a harmless user. DO NOT RUN AS ROOT!!</li>
@@ -4648,12 +4658,11 @@
         <p></p>
         <ul>
           <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Range / Valid values: on,off</li>
           <li> Default: </li>
         </ul>
         <p></p>
-        Listen to IPv6 localhost instead of IPv4 (default: off).  This option is only applicable for the stream
-        port.  The webcontrol port always listens on IPv4 and IPv6.
+        Listen for connections from IPv6 and IPV4. (default: off).
         <p></p>
 
         <h3><a name="stream_port"></a> stream_port </h3>
@@ -4665,12 +4674,13 @@
         </ul>
         <p></p>
         The TCP port that Motion will send the main stream.
-        Each camera must have its own unique port number and it must
-        also be different from the webcontrol_port number.
-        A good value to select is 8081 for camera 1, 8082 for camera 2, 8083 for camera 3 etc.
-        <p></p>
-        This must be placed in the camera config file (unless you only have
-        one camera, in which case it can be placed in motion.conf).
+        The stream port must be different than the
+        <a href="#webcontrol_port">webcontrol_port</a>.  If the port is specified
+        within the motion.conf file (as opposed to being specified in the camerax.conf files), then
+        Motion will provide all streams on that single port by specifying a different url.  See the
+        <a href="#OptDetail_Stream">stream</a> section above for further details and
+        examples of how ports can be specified.  If setting a unique port for each camera
+        good value may be to select is 8081 for camera 1, 8082 for camera 2, 8083 for camera 3 etc.
         <p></p>
 
         <h3><a name="stream_quality"></a> stream_quality </h3>
@@ -4693,7 +4703,7 @@
         <p></p>
         <ul>
           <li> Type: boolean</li>
-          <li> Range / Valid values: on/off</li>
+          <li> Range / Valid values: on,off</li>
           <li> Default: off</li>
         </ul>
         <p></p>
@@ -4792,7 +4802,7 @@
         <p></p>
         <ul>
           <li> Type: string</li>
-          <li> Range / Valid values:on / off</li>
+          <li> Range / Valid values:on, off</li>
           <li> Default: on</li>
         </ul>
         <p></p>
@@ -4815,7 +4825,7 @@
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values:0-2</li>
+          <li> Range / Valid values:0 - 2</li>
           <li> Default: 0</li>
         </ul>
         <p></p>
@@ -4832,7 +4842,7 @@
         <p></p>
         <ul>
           <li> Type: Boolean</li>
-          <li> Range / Valid values: On / Off</li>
+          <li> Range / Valid values: on, off</li>
           <li> Default: Off</li>
         </ul>
         <p></p>
@@ -4881,7 +4891,7 @@
         </ul>
         <p></p>
         The type of webcontrol interface to provide.  The value of 0 provides a traditional
-        web page interface.  The value of 1 provides a text only interface.
+        web page interface.  The value of 1 provides a text only interface suitable for programmatic access.
         <p></p>
         This option must be placed in motion.conf and not in a camera config file. The
         recommended value for most is "0" which provides a page you can navigate and control
@@ -4963,7 +4973,7 @@
         <p></p>
         <ul>
           <li> Type: Boolean</li>
-          <li> Range / Valid values: On / Off</li>
+          <li> Range / Valid values: on, off</li>
           <li> Default: Off</li>
         </ul>
         <p></p>

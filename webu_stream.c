@@ -85,7 +85,7 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
     memcpy(webui->resp_page, resp_head, strlen(resp_head));
 
     if (((strcmp(webui->uri_cmd1,"substream") == 0) ||
-        (strcmp(webui->uri_thread,"substream") == 0)) &&
+        (strcmp(webui->uri_camid,"substream") == 0)) &&
         (webui->valid_subsize)){
         pic_scale_img(width, height, webui->stream_img, webui->stream_imgsub);
         jpeg_size = put_picture_memory(webui->cnt
