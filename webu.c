@@ -907,13 +907,16 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl){
 static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
     /* Set everything up for calling the authentication functions */
+    unsigned int rand1,rand2;
 
     snprintf(webui->auth_denied, WEBUI_LEN_RESP, "%s"
         ,"<html><head><title>Access denied</title>"
         "</head><body>Access denied</body></html>");
 
-    snprintf(webui->auth_opaque, WEBUI_LEN_PARM, "%s"
-        ,"80fb23a1e3760a3d1c91cd060bd07f7a90877334");
+    srand(time(NULL));
+    rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    snprintf(webui->auth_opaque, WEBUI_LEN_PARM, "%08x%08x", rand1, rand2);
 
     snprintf(webui->auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
