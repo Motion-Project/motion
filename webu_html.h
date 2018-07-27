@@ -3,6 +3,6 @@
 
 
 void webu_html_badreq(struct webui_ctx *webui);
-int webu_html_main(struct webui_ctx *webui);
+void webu_html_main(struct webui_ctx *webui);
 
 #endif

@@ -62,8 +62,8 @@ struct webui_ctx {
 void webu_start(struct context **cnt);
 void webu_stop(struct context **cnt);
 void webu_process_action(struct webui_ctx *webui);
-void webu_process_config(struct webui_ctx *webui);
-void webu_process_track(struct webui_ctx *webui);
+int webu_process_config(struct webui_ctx *webui);
+int webu_process_track(struct webui_ctx *webui);
 void webu_write(struct webui_ctx *webui, const char *buf);
 
 #endif

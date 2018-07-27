@@ -1138,13 +1138,14 @@ void webu_html_badreq(struct webui_ctx *webui) {
 
 }
 
-int webu_html_main(struct webui_ctx *webui) {
+void webu_html_main(struct webui_ctx *webui) {
 
     /* Note some detection and config requested actions call the
      * action function.  This is because the legacy interface
      * put these into those pages.  We put them together here
      * based upon the structure of the new interface
      */
+
     int retcd;
 
     /*
@@ -1158,14 +1159,13 @@ int webu_html_main(struct webui_ctx *webui) {
        ,webui->uri_parm2, webui->uri_value2);
     */
 
-
     retcd = 0;
 
     if (strlen(webui->uri_camid) == 0){
         webu_html_page(webui);
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"set"))) {
-        webu_process_config(webui);
+        retcd = webu_process_config(webui);
 
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"write"))) {
@@ -1178,7 +1178,7 @@ int webu_html_main(struct webui_ctx *webui) {
         webu_process_action(webui);
 
     } else if (!strcmp(webui->uri_cmd1,"track")){
-        webu_process_track(webui);
+        retcd = webu_process_track(webui);
 
     } else{
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
@@ -1186,5 +1186,7 @@ int webu_html_main(struct webui_ctx *webui) {
         retcd = -1;
     }
 
-    return retcd;
+    if (retcd < 0) webu_html_badreq(webui);
+
+    return;
 }

@@ -24,6 +24,17 @@
 #include "webu_text.h"
 #include "translate.h"
 
+void webu_text_badreq(struct webui_ctx *webui) {
+    char response[WEBUI_LEN_RESP];
+
+    snprintf(response, sizeof (response),"%s",
+        "Bad Request\n"
+        "The server did not understand your request.\n");
+    webu_write(webui, response);
+
+    return;
+}
+
 static void webu_text_page(struct webui_ctx *webui) {
     /* Write the main page text */
     char response[WEBUI_LEN_RESP];
@@ -79,6 +90,7 @@ static void webu_text_get(struct webui_ctx *webui) {
     const char *val_parm;
 
     indx_parm = 0;
+
     while (config_params[indx_parm].param_name != NULL){
 
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
@@ -101,6 +113,8 @@ static void webu_text_get(struct webui_ctx *webui) {
 
         break;
     }
+
+    if (config_params[indx_parm].param_name == NULL) webu_text_badreq(webui);
 
 }
 
@@ -192,15 +206,20 @@ static void webu_text_set(struct webui_ctx *webui) {
     /* Write out the connection status */
 
     char response[WEBUI_LEN_RESP];
+    int retcd;
 
-    webu_process_config(webui);
+    retcd = webu_process_config(webui);
 
-    snprintf(response,sizeof(response)
-        , "%s = %s\nDone \n"
-        ,webui->uri_parm1
-        ,webui->uri_value1
-    );
-    webu_write(webui, response);
+    if (retcd == 0){
+        snprintf(response,sizeof(response)
+            , "%s = %s\nDone \n"
+            ,webui->uri_parm1
+            ,webui->uri_value1
+        );
+        webu_write(webui, response);
+    } else {
+        webu_text_badreq(webui);
+    }
 
 }
 
@@ -208,32 +227,36 @@ static void webu_text_action(struct webui_ctx *webui) {
     /* Call the start */
     char response[WEBUI_LEN_RESP];
 
-    webu_process_action(webui);
-
     /* Send response message for action */
     if (!strcmp(webui->uri_cmd2,"makemovie")){
+        webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"makemovie for camera %d \nDone\n"
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
     } else if (!strcmp(webui->uri_cmd2,"snapshot")){
+        webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"Snapshot for camera %d \nDone\n"
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
     } else if (!strcmp(webui->uri_cmd2,"restart")){
+        webu_process_action(webui);
         snprintf(response,sizeof(response)
-            ,"Restart in progress ...\nDone\n");
+            ,"Restart in progress ...\nDone\n"
+        );
         webu_write(webui, response);
     } else if (!strcmp(webui->uri_cmd2,"start")){
+        webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"Camera %d Detection resumed\nDone \n"
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
     } else if (!strcmp(webui->uri_cmd2,"pause")){
+        webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"Camera %d Detection paused\nDone \n"
             ,webui->cnt->camera_id
@@ -241,12 +264,14 @@ static void webu_text_action(struct webui_ctx *webui) {
         webu_write(webui, response);
     } else if ((!strcmp(webui->uri_cmd2,"write")) ||
                (!strcmp(webui->uri_cmd2,"writeyes"))){
+        webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"Camera %d write\nDone \n"
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
     } else {
+        webu_text_badreq(webui);
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
             _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
         return;
@@ -257,30 +282,24 @@ static void webu_text_action(struct webui_ctx *webui) {
 static void webu_text_track(struct webui_ctx *webui) {
     /* Call the start */
     char response[WEBUI_LEN_RESP];
-
-    webu_process_track(webui);
-    snprintf(response,sizeof(response)
-        ,"Camera %d \nTrack set %s\nDone \n"
-        ,webui->cnt->camera_id
-        ,webui->uri_cmd2
-    );
-    webu_write(webui, response);
-
-}
-
-void webu_text_badreq(struct webui_ctx *webui) {
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "Bad Request\n");
-    webu_write(webui, response);
-
-    return;
-}
-
-int webu_text_main(struct webui_ctx *webui) {
-
     int retcd;
+
+    retcd = webu_process_track(webui);
+    if (retcd == 0){
+        snprintf(response,sizeof(response)
+            ,"Camera %d \nTrack set %s\nDone \n"
+            ,webui->cnt->camera_id
+            ,webui->uri_cmd2
+        );
+        webu_write(webui, response);
+    } else {
+        webu_text_badreq(webui);
+    }
+
+}
+
+
+void webu_text_main(struct webui_ctx *webui) {
 
     /*
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
@@ -293,7 +312,6 @@ int webu_text_main(struct webui_ctx *webui) {
        ,webui->uri_parm2, webui->uri_value2);
     */
 
-    retcd = 0;
     if (strlen(webui->uri_camid) == 0){
         webu_text_page(webui);
 
@@ -342,9 +360,9 @@ int webu_text_main(struct webui_ctx *webui) {
     } else{
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
             _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
-        retcd = -1;
+        webu_text_badreq(webui);
     }
 
-    return retcd;
+    return;
 }
 

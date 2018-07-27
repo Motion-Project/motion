@@ -170,6 +170,19 @@ static void webu_context_free(struct webui_ctx *webui) {
     return;
 }
 
+static void webu_badreq(struct webui_ctx *webui){
+
+    if (webui->cnt == NULL){
+        webu_html_badreq(webui);
+    } else {
+        if (webui->cnt->conf.webcontrol_interface == 1){
+            webu_text_badreq(webui);
+        } else {
+            webu_html_badreq(webui);
+        }
+    }
+}
+
 void webu_write(struct webui_ctx *webui, const char *buf) {
     /* Copy the buf data to our response buffer.  If
      * the response buffer is not large enough to accept
@@ -561,16 +574,11 @@ void webu_process_action(struct webui_ctx *webui) {
     }
 }
 
-void webu_process_config(struct webui_ctx *webui) {
+int webu_process_config(struct webui_ctx *webui) {
     /* Process the request to change the configuration parameters.  Used
      * both the html and text interfaces
      */
-    int indx;
-
-    if (strcmp(webui->uri_cmd2, "set") != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid command request: %s"),webui->uri_cmd2);
-        return;
-    }
+    int indx, retcd;
 
     /* Ignore any request to change an option that is designated above the
      * webcontrol_parms level.
@@ -613,18 +621,23 @@ void webu_process_config(struct webui_ctx *webui) {
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,_("Set the value to null/zero"));
         }
+        retcd = 0;
+    } else {
+        retcd = -1;
     }
 
-    return;
+    return retcd;
 
 }
 
-void webu_process_track(struct webui_ctx *webui) {
+int webu_process_track(struct webui_ctx *webui) {
     /* Call the tracking move functions as requested */
     struct coord cent;
+    int retcd;
 
     if (!strcmp(webui->uri_cmd2, "center")) {
         webui->cntlst[webui->thread_nbr]->moved = track_center(webui->cntlst[webui->thread_nbr], 0, 1, 0, 0);
+        retcd = 0;
     } else if (!strcmp(webui->uri_cmd2, "set")) {
         if (!strcmp(webui->uri_parm1, "pan")) {
             cent.width = webui->cntlst[webui->thread_nbr]->imgs.width;
@@ -642,15 +655,20 @@ void webu_process_track(struct webui_ctx *webui) {
             webui->cntlst[webui->thread_nbr]->moved = track_move(webui->cntlst[webui->thread_nbr]
                 ,webui->cntlst[webui->thread_nbr]->video_dev
                 ,&cent, &webui->cntlst[webui->thread_nbr]->imgs, 1);
-
+            retcd = 0;
         } else if (!strcasecmp(webui->uri_parm1, "x")) {
             webui->cntlst[webui->thread_nbr]->moved = track_center(webui->cntlst[webui->thread_nbr]
                 , webui->cntlst[webui->thread_nbr]->video_dev, 1
                 , atoi(webui->uri_value1), atoi(webui->uri_value2));
+            retcd = 0;
+        } else {
+            retcd = -1;
         }
+    } else {
+        retcd = -1;
     }
 
-    return;
+    return retcd;
 
 }
 
@@ -1045,7 +1063,7 @@ static int webu_answer_ctrl(void *cls
 
     /* Throw bad URLS back to user*/
     if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
-        webu_html_badreq(webui);
+        webu_badreq(webui);
         retcd = webu_mhd_send(webui, FALSE);
         return retcd;
     }
@@ -1061,17 +1079,13 @@ static int webu_answer_ctrl(void *cls
         if (!webui->authenticated) return retcd;
     }
 
-    retcd = 0;
     if (webui->cntlst[0]->conf.webcontrol_interface == 1){
-        if (retcd == 0) retcd = webu_text_main(webui);
-        if (retcd <  0) webu_text_badreq(webui);
-        retcd = webu_mhd_send(webui, TRUE);
+        webu_text_main(webui);
     } else {
-        if (retcd == 0) retcd = webu_html_main(webui);
-        if (retcd <  0) webu_html_badreq(webui);
-        retcd = webu_mhd_send(webui, TRUE);
+        webu_html_main(webui);
     }
 
+    retcd = webu_mhd_send(webui, TRUE);
     if (retcd == MHD_NO){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
     }
@@ -1116,7 +1130,7 @@ static int webu_answer_strm(void *cls
 
     /* Throw bad URLS back to user*/
     if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
-        webu_html_badreq(webui);
+        webu_badreq(webui);
         retcd = webu_mhd_send(webui, FALSE);
         return retcd;
     }
@@ -1140,18 +1154,18 @@ static int webu_answer_strm(void *cls
         (strlen(webui->uri_camid) == 0)){
             retcd = webu_stream_mjpeg(webui);
             if (retcd == MHD_NO){
-                webu_html_badreq(webui);
+                webu_badreq(webui);
                 retcd = webu_mhd_send(webui, FALSE);
             }
     } else if ((strcmp(webui->uri_cmd1,"current") == 0) ||
         (strcmp(webui->uri_camid,"current") == 0)){
             retcd = webu_stream_static(webui);
             if (retcd == MHD_NO){
-                webu_html_badreq(webui);
+                webu_badreq(webui);
                 retcd = webu_mhd_send(webui, FALSE);
             }
     } else {
-        webu_html_badreq(webui);
+        webu_badreq(webui);
         retcd = webu_mhd_send(webui, FALSE);
     }
 
