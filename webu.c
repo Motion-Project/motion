@@ -55,6 +55,8 @@ struct mhdstart_ctx {
     int                     mhd_opt_nbr;
     unsigned int            mhd_flags;
     int                     ipv6;
+    struct sockaddr_in      lpbk_ipv4;
+    struct sockaddr_in6     lpbk_ipv6;
 };
 
 
@@ -1493,29 +1495,52 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
     /* Set the MHD option on the acceptable connections.  This is used to handle the
      * motion configuation option of localhost only.
      */
-    struct sockaddr_in loopback_addr;
 
     if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_localhost)){
-        memset(&loopback_addr, 0, sizeof(loopback_addr));
-        loopback_addr.sin_family = AF_INET;
-        loopback_addr.sin_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_port);
-        loopback_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        if (mhdst->ipv6){
+            memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
+            mhdst->lpbk_ipv6.sin6_family = AF_INET6;
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_port);
+            mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&loopback_addr);
-        mhdst->mhd_opt_nbr++;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sosockaddr *)(&mhdst->lpbk_ipv6);
+            mhdst->mhd_opt_nbr++;
 
+        } else {
+            memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
+            mhdst->lpbk_ipv4.sin_family = AF_INET;
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_port);
+            mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&mhdst->lpbk_ipv4);
+            mhdst->mhd_opt_nbr++;
+        }
     } else if((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_localhost)){
-        memset(&loopback_addr, 0, sizeof(loopback_addr));
-        loopback_addr.sin_family = AF_INET;
-        loopback_addr.sin_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.stream_port);
-        loopback_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        if (mhdst->ipv6){
+            memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
+            mhdst->lpbk_ipv6.sin6_family = AF_INET6;
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.stream_port);
+            mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
-        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&loopback_addr);
-        mhdst->mhd_opt_nbr++;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sosockaddr *)(&mhdst->lpbk_ipv6);
+            mhdst->mhd_opt_nbr++;
+        } else {
+            memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
+            mhdst->lpbk_ipv4.sin_family = AF_INET;
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.stream_port);
+            mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&mhdst->lpbk_ipv4);
+            mhdst->mhd_opt_nbr++;
+        }
     }
 
 }

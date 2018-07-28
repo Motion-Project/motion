@@ -2942,6 +2942,45 @@ static void motion_shutdown(void){
     vid_mutex_destroy();
 }
 
+static void motion_camera_ids(void){
+    /* Set the camera id's on the context.  They must be unique */
+    int indx, indx2, invalid_ids;
+
+    /* Set defaults */
+    indx = 0;
+    while (cnt_list[indx] != NULL){
+        if (cnt_list[indx]->conf.camera_id > 0){
+            cnt_list[indx]->camera_id = cnt_list[indx]->conf.camera_id;
+        } else {
+            cnt_list[indx]->camera_id = indx;
+        }
+        indx++;
+    }
+
+    invalid_ids = FALSE;
+    indx = 0;
+    while (cnt_list[indx] != NULL){
+        if (cnt_list[indx]->camera_id > 32000) invalid_ids = TRUE;
+        indx2 = indx + 1;
+        while (cnt_list[indx2] != NULL){
+            if (cnt_list[indx]->camera_id == cnt_list[indx2]->camera_id) invalid_ids = TRUE;
+
+            indx2++;
+        }
+        indx++;
+    }
+    if (invalid_ids){
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
+        indx = 0;
+        while (cnt_list[indx] != NULL){
+            cnt_list[indx]->camera_id = indx;
+            indx++;
+        }
+    }
+}
+
+
 /**
  * motion_startup
  *
@@ -3032,6 +3071,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
 
     conf_output_parms(cnt_list);
+
+    motion_camera_ids();
 
     initialize_chars();
 
@@ -3291,44 +3332,6 @@ static int motion_check_threadcount(void){
     }
 }
 
-static void motion_camera_ids(void){
-    /* Set the camera id's on the context.  They must be unique */
-    int indx, indx2, invalid_ids;
-
-    /* Set defaults */
-    indx = 0;
-    while (cnt_list[indx] != NULL){
-        if (cnt_list[indx]->conf.camera_id > 0){
-            cnt_list[indx]->camera_id = cnt_list[indx]->conf.camera_id;
-        } else {
-            cnt_list[indx]->camera_id = indx;
-        }
-        indx++;
-    }
-
-    invalid_ids = FALSE;
-    indx = 0;
-    while (cnt_list[indx] != NULL){
-        if (cnt_list[indx]->camera_id > 32000) invalid_ids = TRUE;
-        indx2 = indx + 1;
-        while (cnt_list[indx2] != NULL){
-            if (cnt_list[indx]->camera_id == cnt_list[indx2]->camera_id) invalid_ids = TRUE;
-
-            indx2++;
-        }
-        indx++;
-    }
-    if (invalid_ids){
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Camara IDs are not unique or have values over 32,000.  Falling back to thread numbers"));
-        indx = 0;
-        while (cnt_list[indx] != NULL){
-            cnt_list[indx]->camera_id = indx;
-            indx++;
-        }
-    }
-}
-
 /**
  * main
  *
@@ -3362,8 +3365,6 @@ int main (int argc, char **argv)
 
     do {
         if (restart) motion_restart(argc, argv);
-
-        motion_camera_ids();
 
         for (i = cnt_list[1] != NULL ? 1 : 0; cnt_list[i]; i++) {
             cnt_list[i]->threadnr = i ? i : 1;
