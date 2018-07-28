@@ -790,7 +790,7 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
         }
 
         if (webui->cntlst[indx]->conf.stream_preview_newline){
-            snprintf(response, sizeof (response),"%s","    preview = preview + \"      <br>\";\n ");
+            snprintf(response, sizeof (response),"%s","        preview = preview + \"      <br>\";\n");
             webu_write(webui, response);
         }
 
