@@ -152,12 +152,12 @@ static void webu_text_status(struct webui_ctx *webui) {
         if (webui->cam_threads == 1) indx_st = 0;
 
         for (indx = indx_st; indx < webui->cam_threads; indx++) {
-        snprintf(response, sizeof(response),
-            "Camera %d Detection status %s\n"
-            ,webui->cntlst[indx]->camera_id
-            ,(!webui->cntlst[indx]->running)? "NOT RUNNING":
-            (webui->cntlst[indx]->pause)? "PAUSE":"ACTIVE");
-            webu_write(webui, response);
+            snprintf(response, sizeof(response),
+                "Camera %d Detection status %s\n"
+                ,webui->cntlst[indx]->camera_id
+                ,(!webui->cntlst[indx]->running)? "NOT RUNNING":
+                (webui->cntlst[indx]->pause)? "PAUSE":"ACTIVE");
+                webu_write(webui, response);
         }
     } else {
         snprintf(response, sizeof(response),
@@ -224,7 +224,7 @@ static void webu_text_set(struct webui_ctx *webui) {
 }
 
 static void webu_text_action(struct webui_ctx *webui) {
-    /* Call the start */
+    /* Call the action functions */
     char response[WEBUI_LEN_RESP];
 
     /* Send response message for action */
@@ -280,7 +280,7 @@ static void webu_text_action(struct webui_ctx *webui) {
 }
 
 static void webu_text_track(struct webui_ctx *webui) {
-    /* Call the start */
+    /* Call the track function */
     char response[WEBUI_LEN_RESP];
     int retcd;
 
@@ -297,7 +297,6 @@ static void webu_text_track(struct webui_ctx *webui) {
     }
 
 }
-
 
 void webu_text_main(struct webui_ctx *webui) {
 

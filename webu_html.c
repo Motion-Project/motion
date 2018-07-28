@@ -402,9 +402,9 @@ static void webu_html_config(struct webui_ctx *webui) {
 
     /* Write out the options to put into the config dropdown
      * We use html data attributes to store the values for the options
-     * We always set a cam_all attribute and if the value if different for
-     * any of our cameras, then we also add a cam_xxx which has the config
-     * value for camera xxx  The javascript then decodes these to display
+     * We always set a cam_all00 attribute and if the value if different for
+     * any of our cameras, then we also add a cam_xxxxx which has the config
+     * value for camera xxxxx  The javascript then decodes these to display
      */
 
     char response[WEBUI_LEN_RESP];
@@ -458,14 +458,14 @@ static void webu_html_config(struct webui_ctx *webui) {
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
                 val_thread=config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, indx);
-                diff_vals = 0;
+                diff_vals = FALSE;
                 if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
                     ((strlen(val_temp) != 0) && (val_thread == NULL))) {
-                    diff_vals = 0;
+                    diff_vals = FALSE;
                 } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
-                    diff_vals = 1;
+                    diff_vals = TRUE;
                 } else {
-                    if (strcasecmp(val_temp, val_thread)) diff_vals = 1;
+                    if (strcasecmp(val_temp, val_thread)) diff_vals = TRUE;
                 }
                 if (diff_vals){
                     snprintf(response, sizeof (response),"%s","\" \\ \n");
@@ -745,7 +745,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s %d (%s)</h3>\"\n"
                 ,_("Camera")
-                , indx
+                , webui->cntlst[indx]->camera_id
                 ,(!webui->cntlst[indx]->running)? _("Not running") :
                  (webui->cntlst[indx]->lost_connection)? _("Lost connection"):
                  (webui->cntlst[indx]->pause)? _("Paused"):_("Active")
