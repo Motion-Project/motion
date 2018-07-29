@@ -119,7 +119,7 @@ static void webu_text_get(struct webui_ctx *webui) {
 }
 
 static void webu_text_quit(struct webui_ctx *webui) {
-    /* Write out the option value for one parm */
+    /* Shut down motion or the associated thread */
     char response[WEBUI_LEN_RESP];
 
     /* This is the legacy method...(we can do better than signals..).*/
@@ -203,7 +203,7 @@ static void webu_text_connection(struct webui_ctx *webui) {
 }
 
 static void webu_text_set(struct webui_ctx *webui) {
-    /* Write out the connection status */
+    /* Set a particular configuration parameter to desired value */
 
     char response[WEBUI_LEN_RESP];
     int retcd;
@@ -235,6 +235,7 @@ static void webu_text_action(struct webui_ctx *webui) {
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
+
     } else if (!strcmp(webui->uri_cmd2,"snapshot")){
         webu_process_action(webui);
         snprintf(response,sizeof(response)
@@ -242,12 +243,14 @@ static void webu_text_action(struct webui_ctx *webui) {
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
+
     } else if (!strcmp(webui->uri_cmd2,"restart")){
         webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"Restart in progress ...\nDone\n"
         );
         webu_write(webui, response);
+
     } else if (!strcmp(webui->uri_cmd2,"start")){
         webu_process_action(webui);
         snprintf(response,sizeof(response)
@@ -255,6 +258,7 @@ static void webu_text_action(struct webui_ctx *webui) {
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
+
     } else if (!strcmp(webui->uri_cmd2,"pause")){
         webu_process_action(webui);
         snprintf(response,sizeof(response)
@@ -262,6 +266,7 @@ static void webu_text_action(struct webui_ctx *webui) {
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
+
     } else if ((!strcmp(webui->uri_cmd2,"write")) ||
                (!strcmp(webui->uri_cmd2,"writeyes"))){
         webu_process_action(webui);
@@ -270,6 +275,7 @@ static void webu_text_action(struct webui_ctx *webui) {
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);
+
     } else {
         webu_text_badreq(webui);
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
@@ -300,16 +306,7 @@ static void webu_text_track(struct webui_ctx *webui) {
 
 void webu_text_main(struct webui_ctx *webui) {
 
-    /*
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s<"
-       " parm1:>%s< val1:>%s<"
-       " parm2:>%s< val2:>%s<"
-       ,webui->uri_camid
-       ,webui->uri_cmd1, webui->uri_cmd2
-       ,webui->uri_parm1, webui->uri_value1
-       ,webui->uri_parm2, webui->uri_value2);
-    */
+    /* Main entry point for processing requests for the text interface */
 
     if (strlen(webui->uri_camid) == 0){
         webu_text_page(webui);

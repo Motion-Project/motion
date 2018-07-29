@@ -89,9 +89,8 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->stream_imgsub = NULL;    /*JPG'd substream image. We allocate once we get an image */
     webui->stream_img_size  = 0;    /* Buffer size for full and substream JPG'd images*/
     webui->valid_subsize = FALSE;   /* Boolean for whether substream size is modulo 8 */
-    webui->cntlst = cntlst;         /* The list of context's for all cameras */
-    webui->cnt    = cnt;            /* The context pointer for a single camera */
-
+    webui->cntlst        = cntlst;  /* The list of context's for all cameras */
+    webui->cnt           = cnt;     /* The context pointer for a single camera */
 
     /* get the number of cameras and threads */
     indx = 0;
@@ -173,22 +172,32 @@ static void webu_context_free(struct webui_ctx *webui) {
 }
 
 static void webu_badreq(struct webui_ctx *webui){
-
-    if (webui->cnt == NULL){
-        webu_html_badreq(webui);
-    } else {
+    /* This function is used in this webu module as a central function when there is a bad
+     * request.  Since sometimes we will be unable to determine what camera context (stream
+     * or camera) originated the request and we have NULL for cntlist and cnt, we default the
+     * response to be HTML.  Otherwise, we do know the type and we send back to the user the
+     * bad request response either with or without the HTML tags.
+     */
+    if (webui->cnt != NULL) {
         if (webui->cnt->conf.webcontrol_interface == 1){
             webu_text_badreq(webui);
         } else {
             webu_html_badreq(webui);
         }
+    } else if (webui->cntlst != NULL) {
+        if (webui->cntlst[0]->conf.webcontrol_interface == 1){
+            webu_text_badreq(webui);
+        } else {
+            webu_html_badreq(webui);
+        }
+    } else {
+        webu_html_badreq(webui);
     }
 }
 
 void webu_write(struct webui_ctx *webui, const char *buf) {
-    /* Copy the buf data to our response buffer.  If
-     * the response buffer is not large enough to accept
-     * our new data coming in, then expand it in chunks of 10
+    /* Copy the buf data to our response buffer.  If the response buffer is not large enough to
+     * accept our new data coming in, then expand it in chunks of 10
      */
     int      resp_len;
     char    *temp_resp;
@@ -283,9 +292,9 @@ static void webu_parms_edit(struct webui_ctx *webui) {
     /* Determine the thread number provided.
      * If no thread provided, assign it to -1
      * Samples:
-     * http://localhost:8081/0/stream
-     * http://localhost:8081/stream
-     * http://localhost:8081/
+     * http://localhost:8081/0/stream (cntlist will be populated and this function will set cnt)
+     * http://localhost:8081/stream (cntlist will be null, cnt will be populated)
+     * http://localhost:8081/   (cntlist will be null, cnt will be populated)
      */
     int indx, is_nbr;
 
@@ -333,8 +342,20 @@ static void webu_parms_edit(struct webui_ctx *webui) {
 
 static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
+    /* Parse the parameters of the URI
+     * Earlier functions have assigned the st_pos to the slash after the action and it is
+     * pointing at the set/get when this function is invoked.
+     * Samples (MHD takes off the IP:port)
+     * /{camid}/config/set?{parm}={value1}
+     * /{camid}/config/get?query={parm}
+     * /{camid}/track/set?x={value1}&y={value2}
+     * /{camid}/track/set?pan={value1}&tilt={value2}
+     * /{camid}/{cmd1}/{cmd2}?{parm1}={value1}&{parm2}={value2}
+     */
+
     int parm_len, last_parm;
     char *en_pos;
+
 
     /* First parse out the "set","get","pan","tilt","x","y"
      * from the uri and put them into the cmd2.
@@ -410,10 +431,8 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
 static void webu_parseurl_reset(struct webui_ctx *webui) {
 
-    /* Reset the variable to empty strings since they
-     * are re-used across calls.  These are allocated
-     * larger sizes to allow for multiple variable types.
-     */
+    /* Reset the variables to empty strings*/
+
     memset(webui->uri_camid,'\0',WEBUI_LEN_PARM);
     memset(webui->uri_cmd1,'\0',WEBUI_LEN_PARM);
     memset(webui->uri_cmd2,'\0',WEBUI_LEN_PARM);
@@ -428,7 +447,15 @@ static int webu_parseurl(struct webui_ctx *webui) {
     /* Parse the sent URI into the commands and parameters
      * so we can check the resulting strings in later functions
      * and determine what actions to take.
-     * Sample: http://localhost:8080/0/config/set?log_level=6
+     * Samples
+     * /
+     * /{camid}
+     * /{camid}/config/set?log_level=6
+     * /{camid}/config/set?{parm}={value1}
+     * /{camid}/config/get?query={parm}
+     * /{camid}/track/set?x={value1}&y={value2}
+     * /{camid}/track/set?pan={value1}&tilt={value2}
+     * /{camid}/{cmd1}/{cmd2}?{parm1}={value1}&{parm2}={value2}
      */
 
     int retcd, parm_len, last_slash;
@@ -436,27 +463,26 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     retcd = 0;
 
-    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url);
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url);
 
     webu_parseurl_reset(webui);
 
     retcd = webu_url_decode(webui->url, strlen(webui->url));
     if (retcd != 0) return retcd;
 
-    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
 
     /* Home page */
     if (strlen(webui->url) == 1) return 0;
 
     last_slash = 0;
 
-    /* Get the thread number
-     * Note that sometimes this will contain an action if the user
+    /* Get the camid number and which sometimes this will contain an action if the user
      * is setting the port for a particular camera and requests the
      * stream by using http://localhost:port/stream
      */
     st_pos = webui->url + 1; /* Move past the first "/" */
-    if (*st_pos == '-') return -1; /* Never allow a negative thread number */
+    if (*st_pos == '-') return -1; /* Never allow a negative number */
     en_pos = strstr(st_pos,"/");
     if (en_pos == NULL){
         parm_len = strlen(webui->url);
@@ -469,7 +495,7 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
     if (!last_slash){
         /* Get cmd1 or action */
-        st_pos = st_pos + parm_len; /* Move past the thread number */
+        st_pos = st_pos + parm_len; /* Move past the camid */
         en_pos = strstr(st_pos,"/");
         if (en_pos == NULL){
             parm_len = strlen(webui->url) - parm_len ;
@@ -501,8 +527,8 @@ static int webu_parseurl(struct webui_ctx *webui) {
         webu_parseurl_parms(webui, st_pos);
     }
 
-    MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s< parm1:>%s< val1:>%s< parm2:>%s< val2:>%s<"
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
+       "camid: >%s< cmd1: >%s< cmd2: >%s< parm1:>%s< val1:>%s< parm2:>%s< val2:>%s<"
                ,webui->uri_camid
                ,webui->uri_cmd1, webui->uri_cmd2
                ,webui->uri_parm1, webui->uri_value1
@@ -578,7 +604,9 @@ void webu_process_action(struct webui_ctx *webui) {
 
 int webu_process_config(struct webui_ctx *webui) {
     /* Process the request to change the configuration parameters.  Used
-     * both the html and text interfaces
+     * both the html and text interfaces.  If the parameter was found, then
+     * we return 0 otherwise a -1 to tell the calling function whether it
+     * was a valid parm to change.
      */
     int indx, retcd;
 
@@ -1746,7 +1774,9 @@ static void webu_start_strm(struct context **cnt){
             }
             free(mhdst.mhd_ops);
             if (cnt[mhdst.indxthrd]->webstream_daemon == NULL){
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start stream %d"),mhdst.indxthrd);
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Unable to start stream for camera %d")
+                    ,cnt[mhdst.indxthrd]->camera_id);
             }
         }
         mhdst.indxthrd++;
@@ -1758,7 +1788,10 @@ static void webu_start_strm(struct context **cnt){
 }
 
 static void webu_start_ports(struct context **cnt){
-    /* Perform check for duplicate ports being specified */
+    /* Perform check for duplicate ports being specified.  The config loading will
+     * duplicate ports from the motion.conf file to all the cameras so we do not
+     * log these duplicates to the user and instead just silently set them to zero
+     */
     int indx, indx2;
 
     if (cnt[0]->conf.webcontrol_port != 0){

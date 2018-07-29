@@ -53,9 +53,9 @@ struct webui_ctx {
     size_t           stream_img_size;   /* Size of the image provided from cnt */
     int              valid_subsize;     /* Boolean for whether substream dimensions are valid*/
 
-    struct MHD_Connection  *connection;
-    struct context        **cntlst;
-    struct context         *cnt;
+    struct MHD_Connection  *connection; /* The MHD connection value from the client */
+    struct context        **cntlst;     /* The context list of all cameras */
+    struct context         *cnt;        /* The context information for the camera requested */
 
 };
 

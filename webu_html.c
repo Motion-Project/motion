@@ -6,11 +6,17 @@
  *    This software is distributed under the GNU Public License Version 2
  *    See also the file 'COPYING'.
  *
+ *    Functional naming scheme
  *        webu_html* - Functions that create the display webcontrol page.
- *        webu_html_main    - Entry point from webu_ans_ctrl(in webu.c)
- *        webu_html_style*  - The style section of the web page
- *        webu_html_script* - The javascripts of the web page
- *        webu_html_navbar* - The navbar section of the web page
+ *        webu_html_main        - Entry point from webu_ans_ctrl(in webu.c)
+ *        webu_html_page        - Create the web page
+ *          webu_html_head      - Header section of the page
+ *            webu_html_style*  - The style section of the web page
+ *          webu_html_body      - Calls all the functions to create the body
+ *            webu_html_navbar* - The navbar section of the web page
+ *            webu_html_config* - config parms of page
+ *            webu_html_track*  - Tracking functions
+ *            webu_html_script* - The javascripts of the web page
  *
  *    To debug, run code, open page, view source and make copy of html
  *    into a local file to revise changes then determine applicable section(s)
@@ -18,7 +24,7 @@
  *    Known HTML Issues:
  *      Single and double quotes are not consistently used.
  *      HTML ids do not follow any naming convention.
- *      After clicking restart/quit, do something..close page? Try to connect again?
+ *      After clicking restart, do something...Try to connect again?
  *
  *    Additional functionality considerations:
  *      Notification to user of items that require restart when changed.
@@ -455,6 +461,7 @@ static void webu_html_config(struct webui_ctx *webui) {
             snprintf(val_temp, PATH_MAX,"%s", val_main);
         }
 
+        /* Loop through all the treads and see if any have a different value from motion.conf */
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
                 val_thread=config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, indx);
@@ -1148,21 +1155,10 @@ void webu_html_main(struct webui_ctx *webui) {
 
     int retcd;
 
-    /*
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s<"
-       " parm1:>%s< val1:>%s<"
-       " parm2:>%s< val2:>%s<"
-       ,webui->uri_camid
-       ,webui->uri_cmd1, webui->uri_cmd2
-       ,webui->uri_parm1, webui->uri_value1
-       ,webui->uri_parm2, webui->uri_value2);
-    */
-
     retcd = 0;
-
     if (strlen(webui->uri_camid) == 0){
         webu_html_page(webui);
+
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"set"))) {
         retcd = webu_process_config(webui);

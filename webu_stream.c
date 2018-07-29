@@ -6,7 +6,11 @@
  *    This software is distributed under the GNU Public License Version 2
  *    See also the file 'COPYING'.
  *
- *
+ *    Functional naming scheme
+ *    webu_stream*      - All functions in this module
+ *    webu_stream_mjpeg*    - Create the motion-jpeg stream for the user
+ *    webu_stream_static*   - Create the static jpg image for the user.
+ *    webu_stream_checks    - Edit/validate request from user
  */
 
 #include "motion.h"
@@ -15,7 +19,7 @@
 #include "translate.h"
 #include "picture.h"
 
-static void webu_stream_checksize(struct webui_ctx *webui) {
+static void webu_stream_mjpeg_checksize(struct webui_ctx *webui) {
     /* Determine whether a substream size if valid */
     if ((webui->cnt->imgs.width / 2) % 8 == 0  &&
         (webui->cnt->imgs.height / 2) % 8 == 0){
@@ -25,7 +29,7 @@ static void webu_stream_checksize(struct webui_ctx *webui) {
     }
 }
 
-static void webu_stream_checkbuffers(struct webui_ctx *webui) {
+static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui) {
     /* Allocate buffers for the images if needed */
     int subsize;
 
@@ -57,6 +61,10 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
     int jpeg_size;
     char resp_size[20];
     int  resp_len, height, width, subsize;
+
+    /* Note the extra white space at the end of this header will be filled in
+     * once we copy it into our response buffer at the bottom.  We can only
+     * fill it in after we've compressed the image into a jpg*/
     const char resp_head[] = "Content-type: image/jpeg\r\n"
                              "Content-Length:                 ";
 
@@ -68,10 +76,11 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
     height = webui->cnt->imgs.height;
     subsize=(((width/2) * (height/2) * 3)/2);
 
-    webu_stream_checkbuffers(webui);
+    webu_stream_mjpeg_checkbuffers(webui);
 
-    webu_stream_checksize(webui);
+    webu_stream_mjpeg_checksize(webui);
 
+    /* Copy image from the camera context */
     pthread_mutex_lock(&webui->cnt->mutex_stream);
         if (webui->cnt->imgs.image_stream == NULL) {
             pthread_mutex_unlock(&webui->cnt->mutex_stream);
@@ -82,8 +91,10 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
             ,webui->cnt->imgs.size_norm);
     pthread_mutex_unlock(&webui->cnt->mutex_stream);
 
+    /* Copy the header template into the response page */
     memcpy(webui->resp_page, resp_head, strlen(resp_head));
 
+    /* Compress the image into a JPG */
     if (((strcmp(webui->uri_cmd1,"substream") == 0) ||
         (strcmp(webui->uri_camid,"substream") == 0)) &&
         (webui->valid_subsize)){
@@ -103,19 +114,22 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
             ,width,height);
     }
 
+    /* We can now fill in the size of our jpg into the header area of the html*/
     resp_len = snprintf(resp_size, 20, "%9ld\r\n\r\n", (long)jpeg_size);
     memcpy(webui->resp_page + strlen(resp_head) - resp_len, resp_size, resp_len);
+
+    /* Copy in the boundary string terminator after the jpg data at the end*/
     memcpy(webui->resp_page + strlen(resp_head) + jpeg_size,"\r\n--BoundaryString\r\n",20);
     webui->resp_used = strlen(resp_head) + jpeg_size + 20;
 
 }
 
-static ssize_t webu_stream_response (void *cls, uint64_t pos, char *buf, size_t max){
+static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t max){
     /* This is the callback response function for MHD streams.  It is kept "open" and
      * in process during the entire time that the user has the stream open in the web
      * browser.  We sleep the requested amount of time between fetching images to match
      * the user configuration parameters.  This function may be called multiple times for
-     * a single image so we write what we can to the buffer and pick up remaining bytes
+     * a single image so we can write what we can to the buffer and pick up remaining bytes
      * to send based upon the static variable of stream position
      */
     struct webui_ctx *webui = cls;
@@ -168,6 +182,11 @@ static void webu_stream_static_getimg(struct webui_ctx *webui) {
      */
     webui->resp_used = 0;
 
+    /* Check and resize as needed our buffer sizes.  We do not know
+     * for sure what our compressed jpg size will be but the assumption
+     * is that it will be smaller than the uncompressed image so size_norm
+     * should be big enough.
+     */
     if (webui->resp_size < (size_t)webui->cnt->imgs.size_norm){
         if (webui->resp_page  != NULL) free(webui->resp_page);
         webui->resp_page  = mymalloc(webui->cnt->imgs.size_norm);
@@ -245,7 +264,7 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
     if (webu_stream_checks(webui) == -1) return MHD_NO;
 
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
-        ,&webu_stream_response, webui, NULL);
+        ,&webu_stream_mjpeg_response, webui, NULL);
     if (!response){
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid response");
         return MHD_NO;
