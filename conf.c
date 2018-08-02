@@ -90,11 +90,18 @@ struct config conf_template = {
     .stream_authentication =           NULL,
     .stream_preview_scale =            25,
     .stream_preview_newline =          0,
+    .stream_preview_method =           0,
     .stream_grey =                     0,
+    .stream_tls =                      0,
     .webcontrol_port =                 0,
     .webcontrol_localhost =            1,
     .webcontrol_interface =            0,
+    .webcontrol_auth_method =          0,
     .webcontrol_authentication =       NULL,
+    .webcontrol_tls =                  0,
+    .webcontrol_cert =                 NULL,
+    .webcontrol_key =                  NULL,
+    .webcontrol_cors_header =          NULL,
     .frequency =                       0,
     .tuner_number =                    0,
     .timelapse_interval =              0,
@@ -1334,6 +1341,15 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "stream_preview_method",
+    "# Method for webcontrol preview. full=0, substream=1, manual=2. (default: 0)",
+    0,
+    CONF_OFFSET(stream_preview_method),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "stream_grey",
     "# Send stream in black and white (default: off)",
     0,
@@ -1341,6 +1357,15 @@ config_param config_params[] = {
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_tls",
+    "# Use ssl / tls for stream (default: off)",
+    0,
+    CONF_OFFSET(stream_tls),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_RESTRICTED
     },
     {
     "webcontrol_port",
@@ -1373,6 +1398,25 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "webcontrol_parms",
+    "# Parameters to include on webcontrol.  0=none, 1=limited, 2=advanced, 3=restricted\n"
+    "# Default: 0 (none)",
+    1,
+    CONF_OFFSET(webcontrol_parms),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_NEVER
+    },
+    {
+    "webcontrol_auth_method",
+    "# authentication method 0 - 2 (default: 0)",
+    0,
+    CONF_OFFSET(webcontrol_auth_method),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
     "webcontrol_authentication",
     "# Authentication for the http based control. Syntax username:password\n"
     "# Default: not defined (Disabled)",
@@ -1383,14 +1427,41 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "webcontrol_parms",
-    "# Parameters to include on webcontrol.  0=none, 1=limited, 2=advanced, 3=restricted\n"
-    "# Default: 0 (none)",
+    "webcontrol_cors_header",
+    "# Set the cross-origin resource sharing (CORS) header for webcontrol\n"
+    "# Default: not defined (Disabled)",
+    0,
+    CONF_OFFSET(webcontrol_cors_header),
+    copy_uri,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_tls",
+    "# Use ssl / tls for webcontrol (default: off)",
+    0,
+    CONF_OFFSET(webcontrol_tls),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_key",
+    "# Key file name for tls",
     1,
-    CONF_OFFSET(webcontrol_parms),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_NEVER
+    CONF_OFFSET(webcontrol_key),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_cert",
+    "# Certificate file name for tls",
+    1,
+    CONF_OFFSET(webcontrol_cert),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
     },
     {
     "sql_log_picture",
@@ -2342,6 +2413,9 @@ void conf_output_parms(struct context **cnt)
                     !strncmp(name, "stream_cors_header", 18) ||
                     !strncmp(name, "stream_authentication", 21) ||
                     !strncmp(name, "webcontrol_authentication", 25) ||
+                    !strncmp(name, "webcontrol_cors_header", 22) ||
+                    !strncmp(name, "webcontrol_key", 14) ||
+                    !strncmp(name, "webcontrol_cert", 15) ||
                     !strncmp(name, "database_user", 13) ||
                     !strncmp(name, "database_password", 17))
                 {
@@ -3001,7 +3075,7 @@ static struct context **config_camera(struct context **cnt, const char *str,
  */
 static void usage()
 {
-    printf("motion Version "VERSION", Copyright 2000-2017 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
+    printf("motion Version "VERSION", Copyright 2000-2018 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
     printf("\nHome page :\t https://motion-project.github.io/ \n");
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");

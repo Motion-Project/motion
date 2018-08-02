@@ -1,7 +1,7 @@
 /*
  *    webu.c
  *
- *    Web User control interface control for motion.
+ *    Webcontrol and Streams for motion.
  *
  *    This software is distributed under the GNU Public License Version 2
  *    See also the file 'COPYING'.
@@ -11,29 +11,19 @@
  *
  *    Majority of module written by MrDave.
  *
- *    Function scheme:
+ *    Function naming scheme:
  *      webu*      - All functions in this module have this prefix.
- *      webu_main  - Main entry point from the motion thread and only function exposed.
- *      webu_html* - Functions that create the display web page.
- *        webu_html_style*  - The style section of the web page
- *        webu_html_script* - The javascripts of the web page
- *        webu_html_navbar* - The navbar section of the web page
- *      webu_text* - Functions that create the text interface.
+ *      webu_start - Entry point to start the daemon.
+ *      webu_stop  - Entry point to stop the daemon
+ *      webu_mhd*  - Functions related to libmicrohttd implementation
  *      webu_process_action - Performs most items under the action menu
  *      webu_process_config - Saves the parameter values into Motion.
+ *      webu_process_track  - Performs the tracking functions.
  *
  *      Some function names are long and are not expected to contain any
  *      logger message that would display the function name to the user.
  *
  *      Functions are generally kept to under one page in length
- *
- *    The "written" variable is used extensively with the writes but even
- *    if it fails, we choose to continue.  The user would get a bad page in
- *    this situation and would be expected to hit "refresh"
- *
- *    To debug, run code, open page, view source and make copy of html
- *    into a local file to revise changes then determine applicable section(s)
- *    in this code to modify to match modified version.
  *
  *    Known Issues:
  *      The quit/restart uses signals and this should be reconsidered.
@@ -41,110 +31,72 @@
  *      The conf_cmdparse assumes that the pointers to the motion context for each
  *        camera are always sequential and enforcement of the pointers being sequential
  *        has not been observed in the other modules. (This is a legacy assumption)
- *      Need to investigate use of 'if (webui->uri_thread == NULL){'  The pointer should
- *        never be null until we exit.  We memset the memory pointed to with '\0'
- *      Should store the thread number as a number in the context
- *    Known HTML Issues:
- *      Single and double quotes are not consistently used.
- *      HTML ids do not follow any naming convention.
- *      After clicking restart/quit, do something..close page? Try to connect again?
- *
- *    Additional functionality considerations:
- *      Match stream authentication methods
- *      Add cors (Cross origin requests)
- *      Notification to user of items that require restart when changed.
- *      Notification to user that item successfully implemented (config change/tracking)
- *      Implement post method to handle larger string parameters.
- *      List motion parms somewhere so they can be found by xgettext
- *
- *
- *
  */
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
-#include <stddef.h>
-#include <ctype.h>
+#include <sys/socket.h>
+
 #include "motion.h"
 #include "webu.h"
+#include "webu_html.h"
+#include "webu_text.h"
+#include "webu_stream.h"
 #include "translate.h"
 
-/* Some defines of lengths for our buffers */
-#define WEBUI_LEN_PARM 512          /* Parameters specified */
-#define WEBUI_LEN_BUFF 1024         /* Buffer from the header */
-#define WEBUI_LEN_RESP 1024         /* Our responses.  (Break up response if more space needed) */
-#define WEBUI_LEN_SPRM 10           /* Shorter parameter buffer (method/protocol) */
-#define WEBUI_LEN_URLI 512          /* Maximum URL permitted */
-#define WEBUI_LEN_THRD 6            /* Maximum length for thread number e.g. 99999 */
-
-struct webui_ctx {
-    pthread_mutex_t webu_mutex;  /* The mutex to lock activity on the pipe*/
-
-    int   client_socket;         /* Client socket to the pipe */
-    char *auth;                  /* Authorization provided by user*/
-    char *auth_parms;            /* Authorization parms from config file*/
-
-    char *url;                   /* The URL sent from the client */
-    char *protocol;              /* Protocol provided from the body of request*/
-    char *method;                /* Method provided from the body of the request*/
-
-    char *uri_thread;            /* Parsed thread number from the url*/
-    char *uri_cmd1;              /* Parsed command(action) from the url*/
-    char *uri_cmd2;              /* Parsed command (set) from the url*/
-    char *uri_parm1;             /* Parameter 1 for the command */
-    char *uri_value1;            /* The value for parameter 1*/
-    char *uri_parm2;             /* Parameter 2 for the command */
-    char *uri_value2;            /* The value for parameter 2*/
-
-    char *uri_buffer;            /* Buffer of the header request content */
-
-    char *hostname;              /* Host name provided from header content*/
-    int   cam_count;             /* Count of the number of cameras*/
-    int   cam_threads;           /* Count of the number of camera threads running*/
-    char *lang;                  /* Two character abbreviation for locale language*/
-    char *lang_full;             /* Five character abbreviation for language-country*/
-
+/* Context to pass the parms to functions to start mhd */
+struct mhdstart_ctx {
+    struct context          **cnt;
+    char                    *tls_cert;
+    char                    *tls_key;
+    int                     ctrl;
+    int                     indxthrd;
+    struct MHD_OptionItem   *mhd_ops;
+    int                     mhd_opt_nbr;
+    unsigned int            mhd_flags;
+    int                     ipv6;
+    struct sockaddr_in      lpbk_ipv4;
+    struct sockaddr_in6     lpbk_ipv6;
 };
 
 
-static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
+static void webu_context_init(struct context **cntlst, struct context *cnt, struct webui_ctx *webui) {
 
     int indx;
 
-    webui->auth_parms    = NULL;
-    webui->method        = NULL;
-    webui->url           = NULL;
-    webui->protocol      = NULL;
-    webui->uri_buffer    = NULL;
-    webui->client_socket = -1;
-    webui->hostname      = NULL;
-
-    /* These will be re-used for multiple calls
-     * so we reserve WEBUI_LEN_PARM bytes which should be
-     * plenty (too much?) space and we
-     * don't have into overrun problems
-     */
-
-    webui->method      = mymalloc(WEBUI_LEN_SPRM);
-    webui->url         = mymalloc(WEBUI_LEN_URLI);
-    webui->protocol    = mymalloc(WEBUI_LEN_SPRM);
-
-    webui->uri_thread  = mymalloc(WEBUI_LEN_THRD);
-    webui->uri_cmd1    = mymalloc(WEBUI_LEN_PARM);
-    webui->uri_cmd2    = mymalloc(WEBUI_LEN_PARM);
-    webui->uri_parm1   = mymalloc(WEBUI_LEN_PARM);
-    webui->uri_value1  = mymalloc(WEBUI_LEN_PARM);
-    webui->uri_parm2   = mymalloc(WEBUI_LEN_PARM);
-    webui->uri_value2  = mymalloc(WEBUI_LEN_PARM);
-
-    webui->uri_buffer = mymalloc(WEBUI_LEN_BUFF);
-    webui->lang       = mymalloc(3);    /* Two digit lang code plus null terminator */
-    webui->lang_full  = mymalloc(6);    /* lang code, underscore, country plus null terminator */
+    webui->url           = mymalloc(WEBUI_LEN_URLI);
+    webui->uri_camid     = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_cmd1      = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_cmd2      = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_parm1     = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_value1    = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_parm2     = mymalloc(WEBUI_LEN_PARM);
+    webui->uri_value2    = mymalloc(WEBUI_LEN_PARM);
+    webui->clientip      = mymalloc(WEBUI_LEN_URLI);
+    webui->hostname      = mymalloc(WEBUI_LEN_PARM);
+    webui->auth_denied   = mymalloc(WEBUI_LEN_RESP);
+    webui->auth_opaque   = mymalloc(WEBUI_LEN_PARM);
+    webui->auth_realm    = mymalloc(WEBUI_LEN_PARM);
+    webui->auth_user     = NULL;    /* Buffer to hold the user name*/
+    webui->auth_pass     = NULL;    /* Buffer to hold the password */
+    webui->authenticated = FALSE;   /* boolean for whether we are authenticated*/
+    webui->lang          = mymalloc(3);         /* Two digit lang code plus null terminator */
+    webui->lang_full     = mymalloc(6);         /* lang code, e.g US_en */
+    webui->resp_size     = WEBUI_LEN_RESP * 10; /* The size of the resp_page buffer.  May get adjusted */
+    webui->resp_used     = 0;                   /* How many bytes used so far in resp_page*/
+    webui->resp_page     = mymalloc(webui->resp_size);      /* The response being constructed */
+    webui->stream_img    = NULL;    /*JPG'd full size image. We allocate once we get an image */
+    webui->stream_imgsub = NULL;    /*JPG'd substream image. We allocate once we get an image */
+    webui->stream_img_size  = 0;    /* Buffer size for full and substream JPG'd images*/
+    webui->valid_subsize = FALSE;   /* Boolean for whether substream size is modulo 8 */
+    webui->cntlst        = cntlst;  /* The list of context's for all cameras */
+    webui->cnt           = cnt;     /* The context pointer for a single camera */
 
     /* get the number of cameras and threads */
     indx = 0;
-    while (cnt[++indx]);
-
+    if (webui->cntlst != NULL){
+        while (webui->cntlst[++indx]);
+    }
     webui->cam_threads = indx;
 
     webui->cam_count = indx;
@@ -153,53 +105,64 @@ static void webu_context_init(struct context **cnt, struct webui_ctx *webui) {
 
     /* 1 thread, 1 camera = just motion.conf.
      * 2 thread, 1 camera, then using motion.conf plus a separate camera file */
-
     snprintf(webui->lang_full, 6,"%s", getenv("LANGUAGE"));
     snprintf(webui->lang, 3,"%s",webui->lang_full);
+
+    memset(webui->hostname,'\0',WEBUI_LEN_PARM);
+    memset(webui->resp_page,'\0',webui->resp_size);
 
     return;
 }
 
 static void webu_context_null(struct webui_ctx *webui) {
-
-    webui->auth_parms = NULL;
-    webui->method     = NULL;
-    webui->url        = NULL;
-    webui->protocol   = NULL;
-    webui->uri_buffer = NULL;
-    webui->hostname   = NULL;
-
-    webui->uri_thread   = NULL;
-    webui->uri_cmd1     = NULL;
-    webui->uri_cmd2     = NULL;
-    webui->uri_parm1    = NULL;
-    webui->uri_value1   = NULL;
-    webui->uri_parm2    = NULL;
-    webui->uri_value2   = NULL;
-    webui->lang         = NULL;
-    webui->lang_full    = NULL;
+    /* Null out all the pointers in our webui context */
+    webui->url           = NULL;
+    webui->hostname      = NULL;
+    webui->uri_camid     = NULL;
+    webui->uri_cmd1      = NULL;
+    webui->uri_cmd2      = NULL;
+    webui->uri_parm1     = NULL;
+    webui->uri_value1    = NULL;
+    webui->uri_parm2     = NULL;
+    webui->uri_value2    = NULL;
+    webui->lang          = NULL;
+    webui->lang_full     = NULL;
+    webui->resp_page     = NULL;
+    webui->connection    = NULL;
+    webui->auth_user     = NULL;
+    webui->auth_pass     = NULL;
+    webui->auth_denied   = NULL;
+    webui->auth_opaque   = NULL;
+    webui->auth_realm    = NULL;
+    webui->clientip      = NULL;
+    webui->stream_img    = NULL;
+    webui->stream_imgsub = NULL;
 
     return;
 }
 
 static void webu_context_free(struct webui_ctx *webui) {
 
-    if (webui->auth_parms != NULL) free(webui->auth_parms);
-    if (webui->method     != NULL) free(webui->method);
-    if (webui->url        != NULL) free(webui->url);
-    if (webui->protocol   != NULL) free(webui->protocol);
-    if (webui->uri_buffer != NULL) free(webui->uri_buffer);
-    if (webui->hostname   != NULL) free(webui->hostname);
-
-    if (webui->uri_thread   != NULL) free(webui->uri_thread);
-    if (webui->uri_cmd1     != NULL) free(webui->uri_cmd1);
-    if (webui->uri_cmd2     != NULL) free(webui->uri_cmd2);
-    if (webui->uri_parm1    != NULL) free(webui->uri_parm1);
-    if (webui->uri_value1   != NULL) free(webui->uri_value1);
-    if (webui->uri_parm2    != NULL) free(webui->uri_parm2);
-    if (webui->uri_value2   != NULL) free(webui->uri_value2);
-    if (webui->lang         != NULL) free(webui->lang);
-    if (webui->lang_full    != NULL) free(webui->lang_full);
+    if (webui->hostname      != NULL) free(webui->hostname);
+    if (webui->url           != NULL) free(webui->url);
+    if (webui->uri_camid     != NULL) free(webui->uri_camid);
+    if (webui->uri_cmd1      != NULL) free(webui->uri_cmd1);
+    if (webui->uri_cmd2      != NULL) free(webui->uri_cmd2);
+    if (webui->uri_parm1     != NULL) free(webui->uri_parm1);
+    if (webui->uri_value1    != NULL) free(webui->uri_value1);
+    if (webui->uri_parm2     != NULL) free(webui->uri_parm2);
+    if (webui->uri_value2    != NULL) free(webui->uri_value2);
+    if (webui->lang          != NULL) free(webui->lang);
+    if (webui->lang_full     != NULL) free(webui->lang_full);
+    if (webui->resp_page     != NULL) free(webui->resp_page);
+    if (webui->auth_user     != NULL) free(webui->auth_user);
+    if (webui->auth_pass     != NULL) free(webui->auth_pass);
+    if (webui->auth_denied   != NULL) free(webui->auth_denied);
+    if (webui->auth_opaque   != NULL) free(webui->auth_opaque);
+    if (webui->auth_realm    != NULL) free(webui->auth_realm);
+    if (webui->clientip      != NULL) free(webui->clientip);
+    if (webui->stream_img    != NULL) free(webui->stream_img);
+    if (webui->stream_imgsub != NULL) free(webui->stream_imgsub);
 
     webu_context_null(webui);
 
@@ -208,200 +171,80 @@ static void webu_context_free(struct webui_ctx *webui) {
     return;
 }
 
-static void webu_clientip(char *buf, int fd) {
-    /* Return the IP of the connecting client*/
-    struct sockaddr_in6 client;
-    socklen_t client_len;
-    char host[NI_MAXHOST];
-    int retcd;
-
-    strncpy(buf, "Unknown", NI_MAXHOST - 1);
-
-    client_len = sizeof(client);
-
-    retcd = getpeername(fd, (struct sockaddr *)&client, &client_len);
-    if (retcd != 0) return;
-
-    retcd = getnameinfo((struct sockaddr *)&client, client_len, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
-    if (retcd != 0) return;
-
-    strncpy(buf, host, NI_MAXHOST - 1);
-}
-
-static ssize_t webu_read(int fd ,void *buf, ssize_t size) {
-    /* Reads device and returns number of bytes read*/
-    ssize_t nread = -1;
-    struct timeval tm;
-    fd_set fds;
-
-    tm.tv_sec = 1; /* Timeout in seconds */
-    tm.tv_usec = 0;
-    FD_ZERO(&fds);
-    FD_SET(fd, &fds);
-
-    if (select(fd + 1, &fds, NULL, NULL, &tm) > 0) {
-        if (FD_ISSET(fd, &fds)) {
-            if ((nread = read(fd , buf, size)) < 0) {
-                if (errno != EWOULDBLOCK)
-                    return -1;
-            }
+static void webu_badreq(struct webui_ctx *webui){
+    /* This function is used in this webu module as a central function when there is a bad
+     * request.  Since sometimes we will be unable to determine what camera context (stream
+     * or camera) originated the request and we have NULL for cntlist and cnt, we default the
+     * response to be HTML.  Otherwise, we do know the type and we send back to the user the
+     * bad request response either with or without the HTML tags.
+     */
+    if (webui->cnt != NULL) {
+        if (webui->cnt->conf.webcontrol_interface == 1){
+            webu_text_badreq(webui);
+        } else {
+            webu_html_badreq(webui);
         }
-    }
-
-    return nread;
-}
-
-static ssize_t webu_write(int fd, const void *buf, size_t buffer_size) {
-
-    ssize_t nwrite = -1;
-    struct timeval tm;
-    fd_set fds;
-
-    tm.tv_sec = 1;
-    tm.tv_usec = 0;
-    FD_ZERO(&fds);
-    FD_SET(fd, &fds);
-
-    if (select(fd + 1, NULL, &fds, NULL, &tm) > 0) {
-        if (FD_ISSET(fd, &fds)) {
-            if ((nwrite = write(fd , buf, buffer_size)) < 0) {
-                if (errno != EWOULDBLOCK)
-                    return -1;
-            }
+    } else if (webui->cntlst != NULL) {
+        if (webui->cntlst[0]->conf.webcontrol_interface == 1){
+            webu_text_badreq(webui);
+        } else {
+            webu_html_badreq(webui);
         }
+    } else {
+        webu_html_badreq(webui);
+    }
+}
+
+void webu_write(struct webui_ctx *webui, const char *buf) {
+    /* Copy the buf data to our response buffer.  If the response buffer is not large enough to
+     * accept our new data coming in, then expand it in chunks of 10
+     */
+    int      resp_len;
+    char    *temp_resp;
+    size_t   temp_size;
+
+    resp_len = strlen(buf);
+
+    temp_size = webui->resp_size;
+    while ((resp_len + webui->resp_used) > temp_size){
+        temp_size = temp_size + (WEBUI_LEN_RESP * 10);
     }
 
-    return nwrite;
-}
-
-static void webu_html_ok(struct webui_ctx *webui){
-    /* Send message that everything is OK */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "HTTP/1.1 200 OK\r\n"
-        "Server: Motion /"VERSION"\r\n"
-        "Connection: close\r\n"
-        "Max-Age: 0\r\n"
-        "Expires: 0\r\n"
-        "Cache-Control: no-cache\r\n"
-        "Cache-Control: private\r\n"
-        "Pragma: no-cache\r\n"
-        "Content-type: text/html\r\n\r\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_badreq(struct webui_ctx *webui) {
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "HTTP/1.0 400 Bad Request\r\n"
-        "Content-type: text/html\r\n\r\n"
-        "<!DOCTYPE html>\n"
-        "<html>\n"
-        "<body>\n"
-        "<h1>Bad Request</h1>\n"
-        "<p>The server did not understand your request.</p>\n"
-        "</body>\n"
-        "</html>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-    if (written <= 0){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
+    if (temp_size > webui->resp_size){
+        temp_resp = mymalloc(webui->resp_size);
+        memcpy(temp_resp, webui->resp_page, webui->resp_size);
+        free(webui->resp_page);
+        webui->resp_page = mymalloc(temp_size);
+        memset(webui->resp_page,'\0',temp_size);
+        memcpy(webui->resp_page, temp_resp, webui->resp_size);
+        webui->resp_size = temp_size;
+        free(temp_resp);
     }
 
-    return;
-
-}
-
-static void webu_text_ok(struct webui_ctx *webui){
-    /* Send message that everything is OK */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "HTTP/1.1 200 OK\r\n"
-        "Server: Motion-httpd/"VERSION"\r\n"
-        "Connection: close\r\n"
-        "Max-Age: 0\r\n"
-        "Expires: 0\r\n"
-        "Cache-Control: no-cache\r\n"
-        "Cache-Control: private\r\n"
-        "Pragma: no-cache\r\n"
-        "Content-type: text/plain\r\n\r\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_badreq(struct webui_ctx *webui) {
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "HTTP/1.0 400 Bad Request\r\n"
-        "Content-type: text/plain\r\n\r\n"
-        "Bad Request\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-    if (written <= 0){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-    }
+    memcpy(webui->resp_page + webui->resp_used, buf, resp_len);
+    webui->resp_used = webui->resp_used + resp_len;
 
     return;
 }
 
-static void webu_resp_auth(struct webui_ctx *webui) {
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response), "%s",
-        "HTTP/1.0 401 Authorization Required\r\n"
-        "WWW-Authenticate: Basic realm=\"Motion Security Access\"\r\n\r\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-    if (written <= 0){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-    }
-
-    return;
-}
-
-static int webu_nonblock(int serverfd) {
-
-    int curfd;
-    int timeout = 1;
-    struct sockaddr_in6 client;
-    socklen_t client_len = sizeof(client);
-
-    struct timeval tm;
-    fd_set fds;
-
-    tm.tv_sec = timeout; /* Timeout in seconds */
-    tm.tv_usec = 0;
-    FD_ZERO(&fds);
-    FD_SET(serverfd, &fds);
-
-    if (select(serverfd + 1, &fds, NULL, NULL, &tm) > 0) {
-        if (FD_ISSET(serverfd, &fds)) {
-            if ((curfd = accept(serverfd, (struct sockaddr *)&client, &client_len)) > 0)
-                return curfd;
-        }
-    }
-
-    return -1;
-}
-
-static void webu_url_decode(char *urlencoded, size_t length) {
+static int webu_url_decode(char *urlencoded, size_t length) {
+    /* We are sent a URI encoded string and this decodes it to characters
+     * If the sent URL that isn't valid, then we clear out the URL
+     * so it is not processed in further functions.  The "answer" functions
+     * look for empty urls and answer with bad request
+     */
     char *data = urlencoded;
     char *urldecoded = urlencoded;
     int scan_rslt;
+    size_t origlen;
+
+    origlen = length;
+
+    if (urlencoded[0] != '/'){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid url: %s"),urlencoded);
+        memset(urlencoded,'\0',origlen);
+        return -1;
+    }
 
     while (length > 0) {
         if (*data == '%') {
@@ -415,7 +258,11 @@ static void webu_url_decode(char *urlencoded, size_t length) {
             c[2] = 0;
 
             scan_rslt = sscanf(c, "%x", &i);
-            if (scan_rslt < 1) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error decoding");
+            if (scan_rslt < 1){
+                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error decoding url"));
+                memset(urlencoded,'\0',origlen);
+                return -1;
+            }
 
             if (i < 128) {
                 *urldecoded++ = (char)i;
@@ -436,190 +283,88 @@ static void webu_url_decode(char *urlencoded, size_t length) {
     }
     *urldecoded = '\0';
 
-
-}
-
-static int webu_header_read(struct webui_ctx *webui) {
-
-    ssize_t bytes_read = 0, readb = -1;
-    int uri_length=WEBUI_LEN_BUFF - 1;
-    int parm_len;
-    char *st_pos, *en_pos;
-
-    bytes_read = webu_read(webui->client_socket, webui->uri_buffer, uri_length);
-    if (bytes_read <= 0) {
-        MOTION_LOG(DBG, TYPE_STREAM, SHOW_ERRNO, "First Read Error %d",bytes_read);
-        return -1;
-    }
-
-    webui->uri_buffer[bytes_read] = '\0';
-
-    parm_len = 0;
-    /* Get the method from the header */
-    st_pos = webui->uri_buffer;
-    en_pos = strstr(st_pos," ");
-    if (en_pos != NULL){
-        parm_len = en_pos - st_pos + 1;
-        if (parm_len >= WEBUI_LEN_SPRM){
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid method.  Buffer:>%s<",webui->uri_buffer);
-            return -1;
-        }
-        snprintf(webui->method, parm_len,"%s", st_pos);
-    }
-
-    /* Get the url name */
-    st_pos = st_pos + parm_len; /* Move past the method */
-    en_pos = strstr(st_pos," ");
-    if (en_pos != NULL){
-        parm_len = en_pos - st_pos + 1;
-        if (parm_len >= WEBUI_LEN_URLI){
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url.  Buffer:>%s<",webui->uri_buffer);
-            return -1;
-        }
-        snprintf(webui->url, parm_len,"%s", st_pos);
-    }
-
-    /* Get the protocol name */
-    st_pos = st_pos + parm_len; /* Move past the url */
-    en_pos = strstr(st_pos,"\r");
-    if (en_pos != NULL){
-        parm_len = en_pos - st_pos + 1;
-        if (parm_len >= WEBUI_LEN_SPRM){
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid protocol.  Buffer:>%s< %d"
-                ,webui->uri_buffer,parm_len);
-            return -1;
-        }
-        snprintf(webui->protocol, parm_len,"%s", st_pos);
-    }
-
-    /* Read remaining header requests until crlf crlf */
-    while ((strstr(webui->uri_buffer, "\r\n\r\n") == NULL) &&
-           (bytes_read != 0) &&
-           (bytes_read < uri_length)) {
-
-        readb = webu_read(webui->client_socket
-                              , webui->uri_buffer + bytes_read
-                              , sizeof (webui->uri_buffer) - bytes_read);
-        if (readb == -1) {
-            bytes_read = -1;
-            break;
-        }
-
-        bytes_read += readb;
-        if (bytes_read > uri_length) {
-            MOTION_LOG(WRN, TYPE_STREAM, SHOW_ERRNO, "End of buffer"
-                       " reached waiting for buffer ending");
-            break;
-        }
-        webui->uri_buffer[bytes_read] = '\0';
-    }
-
-    /* Check that last read was OK */
-    if (bytes_read == -1) {
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Invalid last read!");
-        return -1;
-    }
-
-    if (((strcmp(webui->protocol, "HTTP/1.0")) &&
-         (strcmp(webui->protocol, "HTTP/1.1"))) ||
-        (strcmp(webui->method, "GET"))) {
-        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO, "Invalid protocol/method");
-        return -1;
-    }
-
     return 0;
+
 }
 
-static int webu_header_auth(struct webui_ctx *webui) {
+static void webu_parms_edit(struct webui_ctx *webui) {
 
-    char *authentication=NULL;
-    char *end_auth = NULL;
-    char clientip[NI_MAXHOST];
+    /* Determine the thread number provided.
+     * If no thread provided, assign it to -1
+     * Samples:
+     * http://localhost:8081/0/stream (cntlist will be populated and this function will set cnt)
+     * http://localhost:8081/stream (cntlist will be null, cnt will be populated)
+     * http://localhost:8081/   (cntlist will be null, cnt will be populated)
+     */
+    int indx, is_nbr;
 
-    if (webui->auth_parms != NULL) {
-        if ((authentication = strstr(webui->uri_buffer,"Basic"))) {
-            authentication = authentication + 6;
-
-            if ((end_auth  = strstr(authentication,"\r\n"))) {
-                authentication[end_auth - authentication] = '\0';
-            } else {
-                webu_resp_auth(webui);
-                return -1;
-            }
-
-            if (strcmp(webui->auth_parms, authentication)) {
-                webu_resp_auth(webui);
-                webu_clientip(clientip, webui->client_socket);
-                MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO, "Failed auth attempt from %s", clientip);
-                return -1;
-            }
+    if (strlen(webui->uri_camid) > 0){
+        is_nbr = TRUE;
+        for (indx=0; indx < (int)strlen(webui->uri_camid);indx++){
+            if ((webui->uri_camid[indx] > '9') || (webui->uri_camid[indx] < '0')) is_nbr = FALSE;
+        }
+        if (is_nbr){
+            webui->thread_nbr = atoi(webui->uri_camid);
         } else {
-            webu_resp_auth(webui);
-            return -1;
+            webui->thread_nbr = -1;
         }
+    } else {
+        webui->thread_nbr = -1;
     }
-    return 0;
-}
 
-static int webu_header_hostname(struct webui_ctx *webui) {
+    /* Set the single context pointer to thread we are answering
+     * If the connection is for a single stream (legacy method of a port
+     * per stream), then the cntlist will be null and the camera context
+     * will already be assigned into webui->cnt.  This is part of the
+     * init function which is called for MHD and it has the different
+     * variations depending upon how the port and cameras were specified.
+     * Also set/convert the camid into the thread number.
+    */
 
-    /* use the hostname the browser used to connect to us when
-     * constructing links to the stream ports. If available
-     * (which it is in all modern browsers) it is more likely to
-     * work than the result of gethostname(), which is reliant on
-     * the machine we're running on having it's hostname setup
-     * correctly and corresponding DNS in place. */
-
-    char *end_host;
-    char *st_host;
-    char *colon = NULL;
-    char *end_bracket;
-
-    if ((st_host = strstr(webui->uri_buffer,"Host:"))) {
-        st_host += strlen("Host:");
-        end_host = strstr(st_host,"\r\n");
-        if (end_host) {
-            while (st_host < end_host && isspace(st_host[0]))
-                st_host++;
-            while (st_host < end_host && isspace(end_host[-1]))
-                end_host--;
-            /* Strip off any port number and colon */
-            /* hostname is a IPv6 address like "[::1]" */
-            if (st_host[0] == '[') {
-                end_bracket = memchr(st_host, ']', end_host - st_host);
-                // look for the colon after the "]"
-                colon = memchr(end_bracket, ':', end_host-end_bracket);
-            } else {
-                colon = memchr(st_host, ':', end_host - st_host);
+    if (webui->cntlst != NULL){
+        if (webui->thread_nbr < 0){
+            webui->cnt = webui->cntlst[0];
+            webui->thread_nbr = 0;
+        } else {
+            indx = 0;
+            while (webui->cntlst[indx] != NULL){
+                if (webui->cntlst[indx]->camera_id == webui->thread_nbr){
+                    webui->thread_nbr = indx;
+                    break;
+                }
+                indx++;
             }
-            if (colon) end_host = colon;
-
-            if (webui->hostname != NULL) free(webui->hostname);
-            webui->hostname = mymalloc(end_host-st_host+2);
-            snprintf(webui->hostname, end_host-st_host+1, "%s", st_host);
+            /* This may be null, in which case we will not answer the request */
+            webui->cnt = webui->cntlst[indx];
         }
     }
-
-    if (webui->hostname == NULL){
-        /* Set the host that is running Motion */
-        webui->hostname = mymalloc(WEBUI_LEN_PARM);
-        memset(webui->hostname,'\0',WEBUI_LEN_PARM);
-        gethostname(webui->hostname, WEBUI_LEN_PARM - 1);
-    }
-    return 0;
 }
 
 static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
+    /* Parse the parameters of the URI
+     * Earlier functions have assigned the st_pos to the slash after the action and it is
+     * pointing at the set/get when this function is invoked.
+     * Samples (MHD takes off the IP:port)
+     * /{camid}/config/set?{parm}={value1}
+     * /{camid}/config/get?query={parm}
+     * /{camid}/track/set?x={value1}&y={value2}
+     * /{camid}/track/set?pan={value1}&tilt={value2}
+     * /{camid}/{cmd1}/{cmd2}?{parm1}={value1}&{parm2}={value2}
+     */
+
     int parm_len, last_parm;
     char *en_pos;
+
 
     /* First parse out the "set","get","pan","tilt","x","y"
      * from the uri and put them into the cmd2.
      * st_pos is at the beginning of the command
      * If there is no ? then we are done parsing
+     * Note that each section is looking for a different
+     * delimitter.  (?, =, &, =, &)
      */
-    last_parm = 0;
+    last_parm = FALSE;
     en_pos = strstr(st_pos,"?");
     if (en_pos != NULL){
         parm_len = en_pos - st_pos + 1;
@@ -631,7 +376,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
         en_pos = strstr(st_pos,"=");
         if (en_pos == NULL){
             parm_len = strlen(webui->url) - parm_len;
-            last_parm = 1;
+            last_parm = TRUE;
         } else {
             parm_len = en_pos - st_pos + 1;
         }
@@ -644,7 +389,7 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
             en_pos = strstr(st_pos,"&");
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
-                last_parm = 1;
+                last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
@@ -654,11 +399,11 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
         if (!last_parm){
             /* Get the next parameter name */
-            st_pos = st_pos + parm_len; /* Move past the command */
+            st_pos = st_pos + parm_len; /* Move past the previous command */
             en_pos = strstr(st_pos,"=");
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
-                last_parm = 1;
+                last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
@@ -668,11 +413,11 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
         if (!last_parm){
             /* Get the next parameter value */
-            st_pos = st_pos + parm_len; /* Move past the equals sign */
+            st_pos = st_pos + parm_len;     /* Move past the equals sign */
             en_pos = strstr(st_pos,"&");
             if (en_pos == NULL){
                 parm_len = strlen(webui->url) - parm_len;
-                last_parm = 1;
+                last_parm = TRUE;
             } else {
                 parm_len = en_pos - st_pos + 1;
             }
@@ -686,11 +431,9 @@ static void webu_parseurl_parms(struct webui_ctx *webui, char *st_pos) {
 
 static void webu_parseurl_reset(struct webui_ctx *webui) {
 
-    /* Reset the variable to empty strings since they
-     * are re-used across calls.  These are allocated
-     * larger sizes to allow for multiple variable types.
-     */
-    memset(webui->uri_thread,'\0',WEBUI_LEN_THRD);
+    /* Reset the variables to empty strings*/
+
+    memset(webui->uri_camid,'\0',WEBUI_LEN_PARM);
     memset(webui->uri_cmd1,'\0',WEBUI_LEN_PARM);
     memset(webui->uri_cmd2,'\0',WEBUI_LEN_PARM);
     memset(webui->uri_parm1,'\0',WEBUI_LEN_PARM);
@@ -701,38 +444,45 @@ static void webu_parseurl_reset(struct webui_ctx *webui) {
 }
 
 static int webu_parseurl(struct webui_ctx *webui) {
+    /* Parse the sent URI into the commands and parameters
+     * so we can check the resulting strings in later functions
+     * and determine what actions to take.
+     * Samples
+     * /
+     * /{camid}
+     * /{camid}/config/set?log_level=6
+     * /{camid}/config/set?{parm}={value1}
+     * /{camid}/config/get?query={parm}
+     * /{camid}/track/set?x={value1}&y={value2}
+     * /{camid}/track/set?pan={value1}&tilt={value2}
+     * /{camid}/{cmd1}/{cmd2}?{parm1}={value1}&{parm2}={value2}
+     */
 
     int retcd, parm_len, last_slash;
     char *st_pos, *en_pos;
 
     retcd = 0;
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "Sent url: %s",webui->url);
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url);
 
     webu_parseurl_reset(webui);
 
-    if (webui->url == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url: %s",webui->url);
-        return -1;
-    }
+    retcd = webu_url_decode(webui->url, strlen(webui->url));
+    if (retcd != 0) return retcd;
 
-    if (webui->url[0] != '/'){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid url: %s",webui->url);
-        return -1;
-    }
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),webui->url);
 
-    webu_url_decode(webui->url, strlen(webui->url));
-
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "Decoded url: %s",webui->url);
-
-    /* Home page, nothing else */
+    /* Home page */
     if (strlen(webui->url) == 1) return 0;
 
     last_slash = 0;
 
-    /* Get thread number */
+    /* Get the camid number and which sometimes this will contain an action if the user
+     * is setting the port for a particular camera and requests the
+     * stream by using http://localhost:port/stream
+     */
     st_pos = webui->url + 1; /* Move past the first "/" */
-    if (*st_pos == '-') return -1; /* Never allow a negative thread number */
+    if (*st_pos == '-') return -1; /* Never allow a negative number */
     en_pos = strstr(st_pos,"/");
     if (en_pos == NULL){
         parm_len = strlen(webui->url);
@@ -740,12 +490,12 @@ static int webu_parseurl(struct webui_ctx *webui) {
     } else {
         parm_len = en_pos - st_pos + 1;
     }
-    if (parm_len >= WEBUI_LEN_THRD) return -1; /* var was malloc'd to WEBUI_LEN_THRD */
-    snprintf(webui->uri_thread, parm_len,"%s", st_pos);
+    if (parm_len >= WEBUI_LEN_PARM) return -1; /* var was malloc'd to WEBUI_LEN_PARM */
+    snprintf(webui->uri_camid, parm_len,"%s", st_pos);
 
     if (!last_slash){
         /* Get cmd1 or action */
-        st_pos = st_pos + parm_len; /* Move past the thread number */
+        st_pos = st_pos + parm_len; /* Move past the camid */
         en_pos = strstr(st_pos,"/");
         if (en_pos == NULL){
             parm_len = strlen(webui->url) - parm_len ;
@@ -778,8 +528,8 @@ static int webu_parseurl(struct webui_ctx *webui) {
     }
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s< parm1:>%s< val1:>%s< parm2:>%s< val2:>%s<"
-               ,webui->uri_thread
+       "camid: >%s< cmd1: >%s< cmd2: >%s< parm1:>%s< val1:>%s< parm2:>%s< val2:>%s<"
+               ,webui->uri_camid
                ,webui->uri_cmd1, webui->uri_cmd2
                ,webui->uri_parm1, webui->uri_value1
                ,webui->uri_parm2, webui->uri_value2);
@@ -789,1793 +539,1325 @@ static int webu_parseurl(struct webui_ctx *webui) {
 
 }
 
-static void webu_html_style_navbar(struct webui_ctx *webui) {
-    /* Write out the style section of the web page */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    .navbar {\n"
-        "      overflow: hidden;\n"
-        "      background-color: #333;\n"
-        "      font-family: Arial;\n"
-        "    }\n"
-        "    .navbar a {\n"
-        "      float: left;\n"
-        "      font-size: 16px;\n"
-        "      color: white;\n"
-        "      text-align: center;\n"
-        "      padding: 14px 16px;\n"
-        "      text-decoration: none;\n"
-        "    }\n"
-        "    .navbar a:hover, {\n"
-        "      background-color: darkgray;\n"
-        "    }\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_style_dropdown(struct webui_ctx *webui) {
-    /* Write out the style section of the web page */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    .dropdown {\n"
-        "      float: left;\n"
-        "      overflow: hidden;\n"
-        "    }\n"
-        "    .dropdown .dropbtn {\n"
-        "      font-size: 16px;\n"
-        "      border: none;\n"
-        "      outline: none;\n"
-        "      color: white;\n"
-        "      padding: 14px 16px;\n"
-        "      background-color: inherit;\n"
-        "      font-family: inherit;\n"
-        "      margin: 0;\n"
-        "    }\n"
-        "    .dropdown-content {\n"
-        "      display: none;\n"
-        "      position: absolute;\n"
-        "      background-color: #f9f9f9;\n"
-        "      min-width: 160px;\n"
-        "      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);\n"
-        "      z-index: 1;\n"
-        "    }\n"
-        "    .dropdown-content a {\n"
-        "      float: none;\n"
-        "      color: black;\n"
-        "      padding: 12px 16px;\n"
-        "      text-decoration: none;\n"
-        "      display: block;\n"
-        "      text-align: left;\n"
-        "    }\n"
-        "    .dropdown-content a:hover {\n"
-        "      background-color: lightgray;\n"
-        "    }\n"
-        "    .dropdown:hover .dropbtn {\n"
-        "      background-color: darkgray;\n"
-        "    }\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_style_input(struct webui_ctx *webui) {
-    /* Write out the style section of the web page */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    input , select  {\n"
-        "      width: 25%;\n"
-        "      padding: 5px;\n"
-        "      margin: 0;\n"
-        "      display: inline-block;\n"
-        "      border: 1px solid #ccc;\n"
-        "      border-radius: 4px;\n"
-        "      box-sizing: border-box;\n"
-        "      height: 50%;\n"
-        "      font-size: 75%;\n"
-        "      margin-bottom: 5px;\n"
-        "    }\n"
-        "    .frm-input{\n"
-        "      text-align:center;\n"
-        "    }\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_style_base(struct webui_ctx *webui) {
-    /* Write out the style section of the web page */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    * {margin: 0; padding: 0; }\n"
-        "    body {\n"
-        "      padding: 0;\n"
-        "      margin: 0;\n"
-        "      font-family: Arial, Helvetica, sans-serif;\n"
-        "      font-size: 16px;\n"
-        "      line-height: 1;\n"
-        "      color: #606c71;\n"
-        "      background-color: #159957;\n"
-        "      background-image: linear-gradient(120deg, #155799, #159957);\n"
-        "      margin-left:0.5% ;\n"
-        "      margin-right:0.5% ;\n"
-        "      width: device-width ;\n"
-        "    }\n"
-        "    img {\n"
-        "      max-width: 100%;\n"
-        "      max-height: 100%;\n"
-        "      height: auto;\n"
-        "    }\n"
-        "    .page-header {\n"
-        "      color: #fff;\n"
-        "      text-align: center;\n"
-        "      margin-top: 0rem;\n"
-        "      margin-bottom: 0rem;\n"
-        "      font-weight: normal;\n"
-        "    }\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),"%s",
-        "    .page-header h4 {\n"
-        "      height: 2px;\n"
-        "      padding: 0;\n"
-        "      margin: 1rem 0;\n"
-        "      border: 0;\n"
-        "    }\n"
-        "    .main-content {\n"
-        "      background-color: #000000;\n"
-        "      text-align: center;\n"
-        "      margin-top: 0rem;\n"
-        "      margin-bottom: 0rem;\n"
-        "      font-weight: normal;\n"
-        "      font-size: 0.90em;\n"
-        "    }\n"
-        "    .header-right{\n"
-        "      float: right;\n"
-        "      color: white;\n"
-        "    }\n"
-        "    .header-center {\n"
-        "      text-align: center;\n"
-        "      color: white;\n"
-        "      margin-top: 10px;\n"
-        "      margin-bottom: 10px;\n"
-        "    }\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_style(struct webui_ctx *webui) {
-    /* Write out the style section of the web page */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s", "  <style>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_style_base(webui);
-
-    webu_html_style_navbar(webui);
-
-    webu_html_style_input(webui);
-
-    webu_html_style_dropdown(webui);
-
-    snprintf(response, sizeof (response),"%s", "  </style>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_head(struct webui_ctx *webui) {
-    /* Write out the header section of the web page */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s","<head>\n"
-        "  <meta charset=\"UTF-8\">\n"
-        "  <title>Motion</title>\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_style(webui);
-
-    snprintf(response, sizeof (response),"%s", "</head>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_navbar_camera(struct context **cnt, struct webui_ctx *webui) {
-    /*Write out the options included in the camera dropdown */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
+void webu_process_action(struct webui_ctx *webui) {
+    /* Process the actions from the webcontrol that the user requested.  This is used
+     * for both the html and text interface.  The text interface just adds a additional
+     * response whereas the html just performs the action
+     */
     int indx;
-
-    if (webui->cam_threads == 1){
-        /* Only Motion.conf file */
-        if (cnt[0]->conf.camera_name == NULL){
-            snprintf(response, sizeof (response),
-                "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-                "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_all');\">%s 1</a>\n"
-                ,_("Cameras")
-                ,_("Camera"));
-            written = webu_write(webui->client_socket, response, strlen(response));
-        } else {
-            snprintf(response, sizeof (response),
-                "    <div class=\"dropdown\">\n"
-                "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-                "      <div id='cam_btn' class=\"dropdown-content\">\n"
-                "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
-                ,_("Cameras")
-                ,cnt[0]->conf.camera_name);
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-    } else if (webui->cam_threads > 1){
-        /* Motion.conf + separate camera.conf file */
-        snprintf(response, sizeof (response),
-            "    <div class=\"dropdown\">\n"
-            "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
-            "      <div id='cam_btn' class=\"dropdown-content\">\n"
-            "        <a onclick=\"camera_click('cam_all');\">%s</a>\n"
-            ,_("Cameras")
-            ,_("All"));
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        for (indx=1;indx <= webui->cam_count;indx++){
-            if (cnt[indx]->conf.camera_name == NULL){
-                snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%03d');\">%s %d</a>\n"
-                    , indx, _("Camera"), indx);
-            } else {
-                snprintf(response, sizeof (response),
-                    "        <a onclick=\"camera_click('cam_%03d');\">%s</a>\n",
-                    indx, cnt[indx]->conf.camera_name
-                );
-            }
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-    }
-
-    snprintf(response, sizeof (response),"%s",
-        "      </div>\n"
-        "    </div>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_navbar_action(struct webui_ctx *webui) {
-    /* Write out the options included in the actions dropdown*/
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "    <div class=\"dropdown\">\n"
-        "      <button onclick='display_actions()' id=\"act_drop\" class=\"dropbtn\">%s</button>\n"
-        "      <div id='act_btn' class=\"dropdown-content\">\n"
-        "        <a onclick=\"action_click('/action/makemovie');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
-        "        <a onclick=\"action_click('config');\">%s</a>\n"
-        "        <a onclick=\"action_click('/config/write');\">%s</a>\n"
-        "        <a onclick=\"action_click('track');\">%s</a>\n"
-        "        <a onclick=\"action_click('/detection/pause');\">%s</a>\n"
-        "        <a onclick=\"action_click('/detection/start');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/restart');\">%s</a>\n"
-        "        <a onclick=\"action_click('/action/quit');\">%s</a>\n"
-        "      </div>\n"
-        "    </div>\n"
-        ,_("Action")
-        ,_("Make Movie")
-        ,_("Snapshot")
-        ,_("Change Configuration")
-        ,_("Write Configuration")
-        ,_("Tracking")
-        ,_("Pause")
-        ,_("Start")
-        ,_("Restart")
-        ,_("Quit"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_navbar(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the navbar section*/
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div class=\"navbar\">\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_navbar_camera(cnt, webui);
-
-    webu_html_navbar_action(webui);
-
-    snprintf(response, sizeof (response),
-        "    <a href=\"https://motion-project.github.io/motion_guide.html\" "
-        " target=\"_blank\">%s</a>\n"
-        "    <p class=\"header-right\">Motion "VERSION"</p>\n"
-        "  </div>\n"
-        ,_("Help"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_config_notice(struct context **cnt, struct webui_ctx *webui) {
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    if (cnt[0]->conf.webcontrol_parms == 0){
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
-            ,_("No Configuration Options"));
-    } else if (cnt[0]->conf.webcontrol_parms == 1){
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
-            ,_("Limited Configuration Options"));
-    } else if (cnt[0]->conf.webcontrol_parms == 2){
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
-            ,_("Advanced Configuration Options"));
-    } else{
-        snprintf(response, sizeof (response),
-            "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 3 (%s)</h4>\n"
-            ,_("Restricted Configuration Options"));
-    }
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-}
-
-static void webu_html_config(struct context **cnt, struct webui_ctx *webui) {
-
-    /* Write out the options to put into the config dropdown
-     * We use html data attributes to store the values for the options
-     * We always set a cam_all attribute and if the value if different for
-     * any of our cameras, then we also add a cam_xxx which has the config
-     * value for camera xxx  The javascript then decodes these to display
-     */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int indx_parm, indx, diff_vals;
-    const char *val_main, *val_thread;
-    char *val_temp;
-
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div id='cfg_form' style=\"display:none\">\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_config_notice(cnt, webui);
-
-    snprintf(response, sizeof (response),
-        "    <form class=\"frm-input\">\n"
-        "      <select id='cfg_parms' name='onames' "
-        " autocomplete='off' onchange='config_change();'>\n"
-        "        <option value='default' data-cam_all=\"\" >%s</option>\n"
-        ,_("Select option"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    /* The config_params[indx_parm].print reuses the buffer so create a
-     * temporary variable for storing our parameter from main to compare
-     * to the thread specific value
-     */
-    val_temp=malloc(PATH_MAX);
-    indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
-
-        if ((config_params[indx_parm].webui_level > cnt[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
-            indx_parm++;
-            continue;
-        }
-
-        val_main = config_params[indx_parm].print(cnt, NULL, indx_parm, 0);
-
-        snprintf(response, sizeof (response),
-            "        <option value='%s' data-cam_all=\""
-            , config_params[indx_parm].param_name);
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        memset(val_temp,'\0',PATH_MAX);
-        if (val_main != NULL){
-            snprintf(response, sizeof (response),"%s", val_main);
-            written = webu_write(webui->client_socket, response, strlen(response));
-            snprintf(val_temp, PATH_MAX,"%s", val_main);
-        }
-
-        if (webui->cam_threads > 1){
-            for (indx=1;indx <= webui->cam_count;indx++){
-                val_thread=config_params[indx_parm].print(cnt, NULL, indx_parm, indx);
-                diff_vals = 0;
-                if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
-                    ((strlen(val_temp) != 0) && (val_thread == NULL))) {
-                    diff_vals = 0;
-                } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
-                    diff_vals = 1;
-                } else {
-                    if (strcasecmp(val_temp, val_thread)) diff_vals = 1;
-                }
-                if (diff_vals){
-                    snprintf(response, sizeof (response),"%s","\" \\ \n");
-                    written = webu_write(webui->client_socket, response, strlen(response));
-
-                    snprintf(response, sizeof (response),
-                        "           data-cam_%03d=\"",indx);
-                    written = webu_write(webui->client_socket, response, strlen(response));
-                    if (val_thread != NULL){
-                        snprintf(response, sizeof (response),"%s%s", response, val_thread);
-                        written = webu_write(webui->client_socket, response, strlen(response));
-                    }
-                }
-            }
-        }
-        /* Terminate the open quote and option.  For foreign language put hint in ()  */
-        if (!strcasecmp(webui->lang,"en") ||
-            !strcasecmp(config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name))){
-            snprintf(response, sizeof (response),"\" >%s</option>\n",
-                config_params[indx_parm].param_name);
-            written = webu_write(webui->client_socket, response, strlen(response));
-        } else {
-            snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
-                config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name));
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-
-        indx_parm++;
-    }
-
-    free(val_temp);
-
-    snprintf(response, sizeof (response),
-        "      </select>\n"
-        "      <input type=\"text\"   id=\"cfg_value\" >\n"
-        "      <input type='button' id='cfg_button' value='%s' onclick='config_click()'>\n"
-        "    </form>\n"
-        "  </div>\n"
-        ,_("Save"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_track(struct webui_ctx *webui) {
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "  <div id='trk_form' style='display:none'>\n"
-        "    <form class='frm-input'>\n"
-        "      <select id='trk_option' name='trkopt'  autocomplete='off' "
-        " style='width:20%%' onchange='track_change();'>\n"
-        "        <option value='pan/tilt' data-trk='pan' >%s</option>\n"
-        "        <option value='absolute' data-trk='abs' >%s</option>\n"
-        "        <option value='center' data-trk='ctr' >%s</option>\n"
-        "      </select>\n"
-        "      <label id='trk_lblpan' style='color:white; display:inline' >%s</label>\n"
-        "      <label id='trk_lblx'   style='color:white; display:none' >X</label>\n"
-        "      <input type='text'   id='trk_panx' style='width:10%%' >\n"
-        "      <label id='trk_lbltilt' style='color:white; display:inline' >%s</label>\n"
-        "      <label id='trk_lbly'   style='color:white; display:none' >Y</label>\n"
-        "      <input type='text'   id='trk_tilty' style='width:10%%' >\n"
-        "      <input type='button' id='trk_button' value='%s' "
-        " style='width:10%%' onclick='track_click()'>\n"
-        "    </form>\n"
-        "  </div>\n"
-        ,_("Pan/Tilt")
-        ,_("Absolute Change")
-        ,_("Center")
-        ,_("Pan")
-        ,_("Tilt")
-        ,_("Save"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_preview(struct context **cnt, struct webui_ctx *webui) {
-
-    /* Write the initial version of the preview section.  The javascript
-     * will change this section when user selects a different camera */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, strm_port;
-
-    snprintf(response, sizeof (response),"%s",
-        "  <div id=\"liveview\">\n"
-        "    <section class=\"main-content\">\n"
-        "      <br>\n"
-        "      <p id=\"id_preview\">\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (cnt[indx]->conf.stream_preview_newline){
-            snprintf(response, sizeof (response),"%s","<br>");
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-        strm_port = cnt[indx]->conf.stream_port;
-        if (cnt[indx]->conf.substream_port) strm_port = cnt[indx]->conf.substream_port;
-        snprintf(response, sizeof (response),
-            "      <a href=http://%s:%d> <img src=http://%s:%d/ border=0 width=%d%%></a>\n",
-            webui->hostname, cnt[indx]->conf.stream_port,webui->hostname,
-            strm_port, cnt[indx]->conf.stream_preview_scale);
-        written = webu_write(webui->client_socket, response, strlen(response));
-    }
-
-    snprintf(response, sizeof (response),"%s",
-        "      </p>\n"
-        "      <br>\n"
-        "    </section>\n"
-        "  </div>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_script_action(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript action_click() function.
-     * We do not have a good notification section on the page so the successful
-     * submission and response is currently a empty if block for the future
-     * enhancement to somehow notify the user everything worked */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function event_reloadpage() {\n"
-        "      window.location.reload();\n"
-        "    }\n\n"
-    );
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),"%s",
-        "    function action_click(actval) {\n"
-        "      if (actval == \"config\"){\n"
-        "        document.getElementById('trk_form').style.display=\"none\";\n"
-        "        document.getElementById('cfg_form').style.display=\"inline\";\n"
-        "      } else if (actval == \"track\"){\n"
-        "        document.getElementById('cfg_form').style.display=\"none\";\n"
-        "        document.getElementById('trk_form').style.display=\"inline\";\n"
-        "      } else {\n"
-        "        document.getElementById('cfg_form').style.display=\"none\";\n"
-        "        document.getElementById('trk_form').style.display=\"none\";\n"
-        "        var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "        var camnbr = camstr.substring(4,7);\n"
-        "        var http = new XMLHttpRequest();\n"
-        "        if ((actval == \"/detection/pause\") || (actval == \"/detection/start\")) {\n"
-        "          http.addEventListener('load', event_reloadpage); \n"
-        "        }\n"
-    );
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),
-        "        var url = \"http://%s:%d/\"; \n",
-        webui->hostname,cnt[0]->conf.webcontrol_port);
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),"%s",
-        "        if (camnbr == \"all\"){\n"
-        "          url = url + \"0\";\n"
-        "        } else {\n"
-        "          url = url + camnbr;\n"
-        "        }\n"
-        "        url = url + actval;\n"
-        "        http.open(\"GET\", url, true);\n"
-        "        http.onreadystatechange = function() {\n"
-        "          if(http.readyState == 4 && http.status == 200) {\n"
-
-        "          }\n"
-        "        }\n"
-        "        http.send(null);\n"
-        "      }\n"
-        "      document.getElementById('act_btn').style.display=\"none\"; \n"
-        "      document.getElementById('cfg_value').value = '';\n"
-        "      document.getElementById('cfg_parms').value = 'default';\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_script_camera_thread(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript thread IF conditions of camera_click() function */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int  strm_port;
-    int indx, indx_st;
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    written = 1;
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        snprintf(response, sizeof (response),
-            "      if (camid == \"cam_%03d\"){\n",indx);
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        strm_port = cnt[indx]->conf.stream_port;
-        if (cnt[indx]->conf.substream_port) strm_port = cnt[indx]->conf.substream_port;
-
-        snprintf(response, sizeof (response),
-            "        preview=\"<a href=http://%s:%d> "
-            " <img src=http://%s:%d/ border=0></a>\"  \n",
-            webui->hostname, cnt[indx]->conf.stream_port, webui->hostname, strm_port);
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        if (cnt[indx]->conf.camera_name == NULL){
-            snprintf(response, sizeof (response),
-                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s %d (%s)</h3>\"\n"
-                ,_("Camera")
-                , indx
-                ,(!cnt[indx]->running)? _("Not running") :
-                 (cnt[indx]->lost_connection)? _("Lost connection"):
-                 (cnt[indx]->pause)? _("Paused"):_("Active")
-             );
-        } else {
-            snprintf(response, sizeof (response),
-                "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-                " class='header-center' >%s (%s)</h3>\"\n"
-                , cnt[indx]->conf.camera_name
-                ,(!cnt[indx]->running)? _("Not running") :
-                 (cnt[indx]->lost_connection)? _("Lost connection"):
-                 (cnt[indx]->pause)? _("Paused"):_("Active")
-                );
-        }
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        snprintf(response, sizeof (response),"%s","      }\n");
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-    return;
-}
-
-static void webu_html_script_camera_all(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript "All" IF condition of camera_click() function */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int  strm_port;
-    int indx, indx_st;
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    snprintf(response, sizeof (response), "      if (camid == \"cam_all\"){\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (indx == indx_st){
-            snprintf(response, sizeof (response),"%s","        preview = \"\";\n");
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-
-        strm_port = cnt[indx]->conf.stream_port;
-        if (cnt[indx]->conf.substream_port) strm_port = cnt[indx]->conf.substream_port;
-
-        if (cnt[indx]->conf.stream_preview_newline){
-            snprintf(response, sizeof (response),"%s","    preview = preview + \"<br>\" ");
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-
-        snprintf(response, sizeof (response),
-            "        preview = preview + \"<a href=http://%s:%d> "
-            " <img src=http://%s:%d/ border=0 width=%d%%></a>\"; \n",
-            webui->hostname, cnt[indx]->conf.stream_port,
-            webui->hostname, strm_port,cnt[indx]->conf.stream_preview_scale);
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-    }
-
-    snprintf(response, sizeof (response),
-        "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
-        " class='header-center' >%s</h3>\"\n"
-        "      }\n"
-        ,_("All Cameras"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-    return;
-}
-
-static void webu_html_script_camera(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript camera_click() function */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function camera_click(camid) {\n"
-        "      var preview = \"\";\n"
-        "      var header = \"\";\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_script_camera_thread(cnt, webui);
-
-    webu_html_script_camera_all(cnt, webui);
-
-    snprintf(response, sizeof (response),"%s",
-        "      document.getElementById(\"id_preview\").innerHTML = preview; \n"
-        "      document.getElementById(\"id_header\").innerHTML = header; \n"
-        "      document.getElementById('cfg_form').style.display=\"none\"; \n"
-        "      document.getElementById('trk_form').style.display=\"none\"; \n"
-        "      document.getElementById('cam_btn').style.display=\"none\"; \n"
-        "      document.getElementById('cfg_value').value = '';\n"
-        "      document.getElementById('cfg_parms').value = 'default';\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_script_menucam(struct webui_ctx *webui) {
-    /* Write the javascript display_cameras() function */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function display_cameras() {\n"
-        "      document.getElementById('act_btn').style.display = 'none';\n"
-        "      if (document.getElementById('cam_btn').style.display == 'block'){\n"
-        "        document.getElementById('cam_btn').style.display = 'none';\n"
-        "      } else {\n"
-        "        document.getElementById('cam_btn').style.display = 'block';\n"
-        "      }\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_script_menuact(struct webui_ctx *webui) {
-    /* Write the javascript display_actions() function */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function display_actions() {\n"
-        "      document.getElementById('cam_btn').style.display = 'none';\n"
-        "      if (document.getElementById('act_btn').style.display == 'block'){\n"
-        "        document.getElementById('act_btn').style.display = 'none';\n"
-        "      } else {\n"
-        "        document.getElementById('act_btn').style.display = 'block';\n"
-        "      }\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_script_evtclk(struct webui_ctx *webui) {
-    /* Write the javascript 'click' EventListener */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    document.addEventListener('click', function(event) {\n"
-        "      const dropCam = document.getElementById('cam_drop');\n"
-        "      const dropAct = document.getElementById('act_drop');\n"
-        "      if (!dropCam.contains(event.target) && !dropAct.contains(event.target)) {\n"
-        "        document.getElementById('cam_btn').style.display = 'none';\n"
-        "        document.getElementById('act_btn').style.display = 'none';\n"
-        "      }\n"
-        "    });\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Error writing");
-}
-
-static void webu_html_script_cfgclk(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascript config_click function
-     * We do not have a good notification section on the page so the successful
-     * submission and response is currently a empty if block for the future
-     * enhancement to somehow notify the user everything worked */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function config_click() {\n"
-        "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,7);\n"
-        "      var opts = document.getElementById('cfg_parms');\n"
-        "      var optsel = opts.options[opts.selectedIndex].value;\n"
-        "      var baseval = document.getElementById('cfg_value').value;\n"
-        "      var http = new XMLHttpRequest();\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),
-        "      var url = \"http://%s:%d/\"; \n",
-        webui->hostname,cnt[0]->conf.webcontrol_port);
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),"%s",
-        "      var optval=encodeURI(baseval);\n"
-        "      if (camnbr == \"all\"){\n"
-        "        url = url + \"0\";\n"
-        "      } else {\n"
-        "        url = url + camnbr;\n"
-        "      }\n"
-        "      url = url + \"/config/set?\" + optsel + \"=\" + optval;\n"
-        "      http.open(\"GET\", url, true);\n"
-        "      http.onreadystatechange = function() {\n"
-        "        if(http.readyState == 4 && http.status == 200) {\n"
-
-        "        }\n"
-        "      }\n"
-        "      http.send(null);\n"
-        "      document.getElementById('cfg_value').value = \"\";\n"
-        "      opts.options[opts.selectedIndex].setAttribute('data-'+camstr,baseval);\n"
-        "      opts.value = 'default';\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-}
-
-static void webu_html_script_cfgchg(struct webui_ctx *webui) {
-    /* Write the javascript option_change function */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function config_change() {\n"
-        "      var camSel = 'data-'+ document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var opts = document.getElementById('cfg_parms');\n"
-        "      var optval = opts.options[opts.selectedIndex].getAttribute(camSel);\n"
-        "      if (optval == null){\n"
-        "        optval = opts.options[opts.selectedIndex].getAttribute('data-cam_all');\n"
-        "      }\n"
-        "      document.getElementById('cfg_value').value = optval;\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-}
-
-static void webu_html_script_trkchg(struct webui_ctx *webui) {
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s",
-        "    function track_change() {\n"
-        "      var opts = document.getElementById('trk_option');\n"
-        "      var optval = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      if (optval == 'pan'){\n"
-        "        document.getElementById('trk_panx').disabled=false;\n"
-        "        document.getElementById('trk_tilty').disabled = false;\n"
-        "        document.getElementById('trk_lblx').style.display='none';\n"
-        "        document.getElementById('trk_lbly').style.display='none';\n"
-        "        document.getElementById('trk_lblpan').style.display='inline';\n"
-        "        document.getElementById('trk_lbltilt').style.display='inline';\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),"%s",
-        "      } else if (optval =='abs'){\n"
-        "        document.getElementById('trk_panx').disabled=false;\n"
-        "        document.getElementById('trk_tilty').disabled = false;\n"
-        "        document.getElementById('trk_lblx').value = 'X';\n"
-        "        document.getElementById('trk_lbly').value = 'Y';\n"
-        "        document.getElementById('trk_lblpan').style.display='none';\n"
-        "        document.getElementById('trk_lbltilt').style.display='none';\n"
-        "        document.getElementById('trk_lblx').style.display='inline';\n"
-        "        document.getElementById('trk_lbly').style.display='inline';\n");
-   written = webu_write(webui->client_socket, response, strlen(response));
-
-   snprintf(response, sizeof (response),"%s",
-        "      } else {\n"
-        "        document.getElementById('cfg_form').style.display='none';\n"
-        "        document.getElementById('trk_panx').disabled=true;\n"
-        "        document.getElementById('trk_tilty').disabled = true;\n"
-        "      }\n"
-        "    }\n\n");
-   written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-}
-
-static void webu_html_script_trkclk(struct context **cnt, struct webui_ctx *webui) {
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    snprintf(response, sizeof (response),"%s",
-        "    function track_click() {\n"
-        "      var camstr = document.getElementById('h3_cam').getAttribute('data-cam');\n"
-        "      var camnbr = camstr.substring(4,7);\n"
-        "      var opts = document.getElementById('trk_option');\n"
-        "      var optsel = opts.options[opts.selectedIndex].getAttribute('data-trk');\n"
-        "      var optval1 = document.getElementById('trk_panx').value;\n"
-        "      var optval2 = document.getElementById('trk_tilty').value;\n"
-        "      var http = new XMLHttpRequest();\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),
-        "      var url = \"http://%s:%d/\"; \n",
-        webui->hostname,cnt[0]->conf.webcontrol_port);
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    snprintf(response, sizeof (response),"%s",
-        "      if (camnbr == \"all\"){\n"
-        "        url = url + \"0\";\n"
-        "      } else {\n"
-        "        url = url + camnbr;\n"
-        "      }\n"
-        "      if (optsel == 'pan'){\n"
-        "        url = url + '/track/set?pan=' + optval1 + '&tilt=' + optval2;\n"
-        "      } else if (optsel == 'abs') {\n"
-        "        url = url + '/track/set?x=' + optval1 + '&y=' + optval2;\n"
-        "      } else {\n"
-        "        url = url + '/track/center'\n"
-        "      }\n"
-        "      http.open(\"GET\", url, true);\n"
-        "      http.onreadystatechange = function() {\n"
-        "        if(http.readyState == 4 && http.status == 200) {\n"
-        "         }\n"
-        "      }\n"
-        "      http.send(null);\n"
-        "    }\n\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_script(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the javascripts */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s", "  <script>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_script_action(cnt, webui);
-
-    webu_html_script_camera(cnt, webui);
-
-    webu_html_script_cfgclk(cnt, webui);
-
-    webu_html_script_cfgchg(webui);
-
-    webu_html_script_trkclk(cnt, webui);
-
-    webu_html_script_trkchg(webui);
-
-    webu_html_script_menucam(webui);
-
-    webu_html_script_menuact(webui);
-
-    webu_html_script_evtclk(webui);
-
-    snprintf(response, sizeof (response),"%s", "  </script>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-}
-
-static void webu_html_body(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the body section of the form */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),"%s","<body class=\"body\">\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_navbar(cnt, webui);
-
-    snprintf(response, sizeof (response),
-        "  <div id=\"id_header\">\n"
-        "    <h3 id='h3_cam' data-cam=\"cam_all\" class='header-center'>%s</h3>\n"
-        "  </div>\n"
-        ,_("All Cameras"));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_config(cnt, webui);
-
-    webu_html_track(webui);
-
-    webu_html_preview(cnt, webui);
-
-    webu_html_script(cnt, webui);
-
-    snprintf(response, sizeof (response),"%s", "</body>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_html_page(struct context **cnt, struct webui_ctx *webui) {
-    /* Write the main page html */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    snprintf(response, sizeof (response),
-        "<!DOCTYPE html>\n"
-        "<html lang=\"%s\">\n",webui->lang);
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    webu_html_head(webui);
-
-    webu_html_body(cnt, webui);
-
-    snprintf(response, sizeof (response),"%s", "</html>\n");
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_process_action(struct context **cnt, struct webui_ctx *webui) {
-
-    int thread_nbr, indx;
-
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
 
     indx = 0;
     if (!strcmp(webui->uri_cmd2,"makemovie")){
-        if (thread_nbr == 0 && webui->cam_threads > 1) {
-            while (cnt[++indx])
-            cnt[indx]->makemovie = 1;
+        if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
+            while (webui->cntlst[++indx])
+            webui->cntlst[indx]->makemovie = 1;
         } else {
-            cnt[thread_nbr]->makemovie = 1;
+            webui->cnt->makemovie = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"snapshot")){
-        if (thread_nbr == 0 && webui->cam_threads > 1) {
-            while (cnt[++indx])
-            cnt[indx]->snapshot = 1;
+        if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
+            while (webui->cntlst[++indx])
+            webui->cntlst[indx]->snapshot = 1;
         } else {
-            cnt[thread_nbr]->snapshot = 1;
+            webui->cnt->snapshot = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"restart")){
         /* This is the legacy method...(we can do better than signals..).*/
-        if (thread_nbr == 0) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd is going to restart");
+        if (webui->thread_nbr == 0) {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("httpd is going to restart"));
             kill(getpid(),SIGHUP);
-            cnt[0]->webcontrol_finish = TRUE;
+            webui->cntlst[0]->webcontrol_finish = TRUE;
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-                "httpd is going to restart thread %d",thread_nbr);
-            if (cnt[thread_nbr]->running) {
-                cnt[thread_nbr]->makemovie = 1;
-                cnt[thread_nbr]->finish = 1;
+                _("httpd is going to restart thread %d"),webui->thread_nbr);
+            if (webui->cnt->running) {
+                webui->cnt->makemovie = 1;
+                webui->cnt->finish = 1;
             }
-            cnt[thread_nbr]->restart = 1;
-        }
-    } else if (!strcmp(webui->uri_cmd2,"quit")){
-        /* This is the legacy method...(we can do better than signals..).*/
-        if (thread_nbr == 0) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "httpd quits");
-            kill(getpid(),SIGQUIT);
-           cnt[0]->webcontrol_finish = TRUE;
-        } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-                "httpd quits thread %d",thread_nbr);
-            cnt[thread_nbr]->restart = 0;
-            cnt[thread_nbr]->makemovie = 1;
-            cnt[thread_nbr]->finish = 1;
+            webui->cnt->restart = 1;
         }
     } else if (!strcmp(webui->uri_cmd2,"start")){
-        if (thread_nbr == 0 && webui->cam_threads > 1) {
+        if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
-                cnt[indx]->pause = 0;
-            } while (cnt[++indx]);
+                webui->cntlst[indx]->pause = 0;
+            } while (webui->cntlst[++indx]);
         } else {
-            cnt[thread_nbr]->pause = 0;
+            webui->cnt->pause = 0;
         }
     } else if (!strcmp(webui->uri_cmd2,"pause")){
-        if (thread_nbr == 0 && webui->cam_threads > 1) {
+        if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
-                cnt[indx]->pause = 1;
-            } while (cnt[++indx]);
+                webui->cntlst[indx]->pause = 1;
+            } while (webui->cntlst[++indx]);
         } else {
-            cnt[thread_nbr]->pause = 1;
+            webui->cnt->pause = 1;
         }
     } else if ((!strcmp(webui->uri_cmd2,"write")) ||
                (!strcmp(webui->uri_cmd2,"writeyes"))){
-        conf_print(cnt);
+        conf_print(webui->cntlst);
     } else {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
-            "Invalid action requested: %s",webui->uri_cmd2);
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
+            _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
         return;
     }
 }
 
-static void webu_process_config(struct context **cnt, struct webui_ctx *webui) {
+int webu_process_config(struct webui_ctx *webui) {
+    /* Process the request to change the configuration parameters.  Used
+     * both the html and text interfaces.  If the parameter was found, then
+     * we return 0 otherwise a -1 to tell the calling function whether it
+     * was a valid parm to change.
+     */
+    int indx, retcd;
 
-    int thread_nbr, indx;
-
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
-
-    if (strcasecmp(webui->uri_cmd2, "set")) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid command request: %s",webui->uri_cmd2);
-        return;
-    }
-
+    /* Ignore any request to change an option that is designated above the
+     * webcontrol_parms level.
+     */
     indx=0;
     while (config_params[indx].param_name != NULL) {
-        if (((thread_nbr != 0) && (config_params[indx].main_thread)) ||
-            (config_params[indx].webui_level > cnt[0]->conf.webcontrol_parms) ||
+        if (((webui->thread_nbr != 0) && (config_params[indx].main_thread)) ||
+            (config_params[indx].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx].webui_level == WEBUI_LEVEL_NEVER) ) {
             indx++;
             continue;
         }
-        if (!strcasecmp(webui->uri_parm1, config_params[indx].param_name)) break;
+        if (!strcmp(webui->uri_parm1, config_params[indx].param_name)) break;
         indx++;
     }
+    /* If we found the parm, assign it.  If the loop above did not find the parm
+     * then we ignore the request
+     */
     if (config_params[indx].param_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
             /* This is legacy assumption on the pointers being sequential*/
-            conf_cmdparse(cnt + thread_nbr, config_params[indx].param_name, webui->uri_value1);
+            conf_cmdparse(webui->cntlst + webui->thread_nbr
+                , config_params[indx].param_name, webui->uri_value1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
-            if (!strcasecmp(config_params[indx].param_name, "vid_control_params") &&
-                (cnt[thread_nbr]->vdev != NULL)) cnt[thread_nbr]->vdev->update_parms = TRUE;
+            if (!strcmp(config_params[indx].param_name, "vid_control_params") &&
+                (webui->cntlst[webui->thread_nbr]->vdev != NULL)){
+                webui->cntlst[webui->thread_nbr]->vdev->update_parms = TRUE;
+            }
 
             /* If changing language, do it now */
-            if (!strcasecmp(config_params[indx].param_name, "native_language")){
-                nls_enabled = cnt[thread_nbr]->conf.native_language;
+            if (!strcmp(config_params[indx].param_name, "native_language")){
+                nls_enabled = webui->cntlst[webui->thread_nbr]->conf.native_language;
                 if (nls_enabled){
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
                 } else {
-                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,"Native Language : off");
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : off"));
                 }
             }
         } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,"set the value to null/zero");
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,_("Set the value to null/zero"));
         }
+        retcd = 0;
+    } else {
+        retcd = -1;
     }
 
-    return;
+    return retcd;
 
 }
 
-static void webu_process_track(struct context **cnt, struct webui_ctx *webui) {
-
-    int thread_nbr;
+int webu_process_track(struct webui_ctx *webui) {
+    /* Call the tracking move functions as requested */
     struct coord cent;
+    int retcd;
 
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
-
-    if (!strcasecmp(webui->uri_cmd2, "center")) {
-        cnt[thread_nbr]->moved = track_center(cnt[thread_nbr], 0, 1, 0, 0);
-    } else if (!strcasecmp(webui->uri_cmd2, "set")) {
-        if (!strcasecmp(webui->uri_parm1, "pan")) {
-            cent.width = cnt[thread_nbr]->imgs.width;
-            cent.height = cnt[thread_nbr]->imgs.height;
+    if (!strcmp(webui->uri_cmd2, "center")) {
+        webui->cntlst[webui->thread_nbr]->moved = track_center(webui->cntlst[webui->thread_nbr], 0, 1, 0, 0);
+        retcd = 0;
+    } else if (!strcmp(webui->uri_cmd2, "set")) {
+        if (!strcmp(webui->uri_parm1, "pan")) {
+            cent.width = webui->cntlst[webui->thread_nbr]->imgs.width;
+            cent.height = webui->cntlst[webui->thread_nbr]->imgs.height;
             cent.x = atoi(webui->uri_value1);
             cent.y = 0;
-            cnt[thread_nbr]->moved = track_move(cnt[thread_nbr],
-                                            cnt[thread_nbr]->video_dev,
-                                            &cent, &cnt[thread_nbr]->imgs, 1);
+            webui->cntlst[webui->thread_nbr]->moved = track_move(webui->cntlst[webui->thread_nbr]
+                ,webui->cntlst[webui->thread_nbr]->video_dev
+                ,&cent, &webui->cntlst[webui->thread_nbr]->imgs, 1);
 
-            cent.width = cnt[thread_nbr]->imgs.width;
-            cent.height = cnt[thread_nbr]->imgs.height;
+            cent.width = webui->cntlst[webui->thread_nbr]->imgs.width;
+            cent.height = webui->cntlst[webui->thread_nbr]->imgs.height;
             cent.x = 0;
             cent.y = atoi(webui->uri_value2);
-            cnt[thread_nbr]->moved = track_move(cnt[thread_nbr],
-                                            cnt[thread_nbr]->video_dev,
-                                            &cent, &cnt[thread_nbr]->imgs, 1);
-
+            webui->cntlst[webui->thread_nbr]->moved = track_move(webui->cntlst[webui->thread_nbr]
+                ,webui->cntlst[webui->thread_nbr]->video_dev
+                ,&cent, &webui->cntlst[webui->thread_nbr]->imgs, 1);
+            retcd = 0;
         } else if (!strcasecmp(webui->uri_parm1, "x")) {
-            cnt[thread_nbr]->moved = track_center(cnt[thread_nbr]
-                                                  , cnt[thread_nbr]->video_dev, 1
-                                                  , atoi(webui->uri_value1)
-                                                  , atoi(webui->uri_value2));
+            webui->cntlst[webui->thread_nbr]->moved = track_center(webui->cntlst[webui->thread_nbr]
+                , webui->cntlst[webui->thread_nbr]->video_dev, 1
+                , atoi(webui->uri_value1), atoi(webui->uri_value2));
+            retcd = 0;
+        } else {
+            retcd = -1;
+        }
+    } else {
+        retcd = -1;
+    }
+
+    return retcd;
+
+}
+
+static void webu_clientip(struct webui_ctx *webui) {
+    /* Extract the IP of the client that is connecting.  When the
+     * user specifies Motion to use IPV6 and a IPV4 address comes to us
+     * the IPv4 address is prepended with a ::ffff: We then trim that off
+     * so we don't confuse our users.
+     */
+    const union MHD_ConnectionInfo *con_info;
+    char client[WEBUI_LEN_URLI];
+    const char *ip_dst;
+    struct sockaddr_in6 *con_socket6;
+    struct sockaddr_in *con_socket4;
+    int is_ipv6;
+
+    is_ipv6 = FALSE;
+    if (webui->cnt != NULL ){
+        if (webui->cnt->conf.ipv6_enabled) is_ipv6 = TRUE;
+    } else {
+        if (webui->cntlst[0]->conf.ipv6_enabled) is_ipv6 = TRUE;
+    }
+
+    con_info = MHD_get_connection_info(webui->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+    if (is_ipv6){
+        con_socket6 = (struct sockaddr_in6 *)con_info->client_addr;
+        ip_dst = inet_ntop(AF_INET6, &con_socket6->sin6_addr, client, WEBUI_LEN_URLI);
+        if (ip_dst == NULL){
+            snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", "Unknown");
+        } else {
+            if (strncmp(client,"::ffff:",7) == 0){
+                snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", client + 7);
+            } else {
+                snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", client);
+            }
+        }
+    } else {
+        con_socket4 = (struct sockaddr_in *)con_info->client_addr;
+        ip_dst = inet_ntop(AF_INET, &con_socket4->sin_addr, client, WEBUI_LEN_URLI);
+        if (ip_dst == NULL){
+            snprintf(webui->clientip, WEBUI_LEN_URLI, "%s", "Unknown");
+        } else {
+            snprintf(webui->clientip,WEBUI_LEN_URLI,"%s",client);
+        }
+    }
+    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),webui->clientip);
+
+}
+
+static void webu_hostname(struct webui_ctx *webui, int ctrl) {
+
+    /* use the hostname the browser used to connect to us when
+     * constructing links to the stream ports. If available
+     * (which it is in all modern browsers) it is more likely to
+     * work than the result of gethostname(), which is reliant on
+     * the machine we're running on having it's hostname setup
+     * correctly and corresponding DNS in place. */
+
+    const char *hdr;
+    char *en_pos;
+    int host_len;
+
+    hdr = MHD_lookup_connection_value (webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
+    if (hdr != NULL){
+        snprintf(webui->hostname, WEBUI_LEN_PARM, "%s", hdr);
+        en_pos = strstr(webui->hostname, ":");
+        if (en_pos != NULL){
+            host_len = en_pos - webui->hostname + 1;
+            snprintf(webui->hostname, host_len, "%s", hdr);
+        }
+    } else {
+        gethostname(webui->hostname, WEBUI_LEN_PARM - 1);
+    }
+
+    /* Assign the type of protocol that is associated with the host
+     * so we can use this protocol as we are building the html page or
+     * streams.
+     */
+    if (ctrl){
+        if (webui->cnt->conf.webcontrol_tls){
+            snprintf(webui->hostproto,6,"%s","https");
+        } else {
+            snprintf(webui->hostproto,6,"%s","http");
+        }
+    } else {
+        if (webui->cnt->conf.stream_tls){
+            snprintf(webui->hostproto,6,"%s","https");
+        } else {
+            snprintf(webui->hostproto,6,"%s","http");
         }
     }
 
     return;
-
 }
 
-static int webu_html_main(struct context **cnt, struct webui_ctx *webui) {
+static int webu_mhd_digest_fail(struct webui_ctx *webui,int signal_stale) {
+    /* Create a denied response to user*/
+    struct MHD_Response *response;
+    int retcd;
 
-    /* Note some detection and config requested actions call the
-     * action function.  This is because the legacy interface
-     * put these into those pages.  We put them together here
-     * based upon the structure of the new interface
+    webui->authenticated = FALSE;
+
+    response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
+        ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
+
+    if (response == NULL) return MHD_NO;
+
+    retcd = MHD_queue_auth_fail_response(webui->connection, webui->auth_realm
+        ,webui->auth_opaque, response
+        ,(signal_stale == MHD_INVALID_NONCE) ? MHD_YES : MHD_NO);
+
+    MHD_destroy_response(response);
+
+    return retcd;
+}
+
+static int webu_mhd_digest(struct webui_ctx *webui) {
+    /* Perform the digest authentication.  This function gets called a couple of
+     * times by MHD during the authentication process.
      */
     int retcd;
+    char *user;
 
-    /*
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s<"
-       " parm1:>%s< val1:>%s<"
-       " parm2:>%s< val2:>%s<"
-       ,webui->uri_thread
-       ,webui->uri_cmd1, webui->uri_cmd2
-       ,webui->uri_parm1, webui->uri_value1
-       ,webui->uri_parm2, webui->uri_value2);
-    */
-
-    retcd = 0;
-    if (strlen(webui->uri_thread) == 0){
-        webu_html_ok(webui);
-        webu_html_page(cnt, webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set"))) {
-        webu_html_ok(webui);
-        webu_process_config(cnt, webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"write"))) {
-        webu_html_ok(webui);
-        webu_process_action(cnt, webui);
-
-    } else if (!strcmp(webui->uri_cmd1,"action")){
-        webu_html_ok(webui);
-        webu_process_action(cnt, webui);
-
-    } else if (!strcmp(webui->uri_cmd1,"detection")){
-        webu_html_ok(webui);
-        webu_process_action(cnt, webui);
-
-    } else if (!strcmp(webui->uri_cmd1,"track")){
-        webu_html_ok(webui);
-        webu_process_track(cnt, webui);
-
-    } else{
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid action requested");
-        retcd = -1;
+    /*Get username or prompt for a user/pass */
+    user = MHD_digest_auth_get_username(webui->connection);
+    if (user == NULL) {
+        return webu_mhd_digest_fail(webui, MHD_NO);
     }
+
+    /* Check for valid user name */
+    if (strcmp(user, webui->auth_user) != 0){
+        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("Failed authentication from %s"), webui->clientip);
+        if (user != NULL) free(user);
+        return webu_mhd_digest_fail(webui, MHD_NO);
+    }
+    if (user != NULL) free(user);
+
+    /* Check the password as well*/
+    retcd = MHD_digest_auth_check(webui->connection, webui->auth_realm
+        , webui->auth_user, webui->auth_pass, 300);
+
+    if (retcd == MHD_NO) {
+        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("Failed authentication from %s"), webui->clientip);
+    }
+
+    if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
+        return webu_mhd_digest_fail(webui, retcd);
+    }
+
+    webui->authenticated = TRUE;
+    return MHD_YES;
+
+}
+
+static int webu_mhd_basic_fail(struct webui_ctx *webui) {
+    /* Create a denied response to user*/
+    struct MHD_Response *response;
+    int retcd;
+
+    webui->authenticated = FALSE;
+
+    response = MHD_create_response_from_buffer(strlen(webui->auth_denied)
+        ,(void *)webui->auth_denied, MHD_RESPMEM_PERSISTENT);
+
+    if (response == NULL) return MHD_NO;
+
+    retcd = MHD_queue_basic_auth_fail_response (webui->connection, webui->auth_realm, response);
+
+    MHD_destroy_response(response);
+
+    return retcd;
+
+}
+
+static int webu_mhd_basic(struct webui_ctx *webui) {
+    /* Perform Basic Authentication.  */
+    char *user, *pass;
+
+    pass = NULL;
+    user = NULL;
+
+    user = MHD_basic_auth_get_username_password (webui->connection, &pass);
+    if ((user == NULL) || (pass == NULL)){
+        if (user != NULL) free(user);
+        if (pass != NULL) free(pass);
+        return webu_mhd_basic_fail(webui);
+    }
+
+    if ((strcmp(user, webui->auth_user) != 0) || (strcmp(pass, webui->auth_pass) != 0)) {
+        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+            ,_("Failed authentication from %s"),webui->clientip);
+        if (user != NULL) free(user);
+        if (pass != NULL) free(pass);
+
+        return webu_mhd_basic_fail(webui);
+    }
+
+    if (user != NULL) free(user);
+    if (pass != NULL) free(pass);
+
+    webui->authenticated = TRUE;
+    return MHD_YES;
+
+}
+
+static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl){
+    int auth_len;
+    char *col_pos;
+
+    /* Parse apart the user:pass provided*/
+    if (webui->auth_user != NULL) free(webui->auth_user);
+    if (webui->auth_pass != NULL) free(webui->auth_pass);
+    webui->auth_user = NULL;
+    webui->auth_pass = NULL;
+
+    if (ctrl){
+        auth_len = strlen(webui->cnt->conf.webcontrol_authentication);
+        col_pos = strstr(webui->cnt->conf.webcontrol_authentication,":");
+        if (col_pos == NULL){
+            webui->auth_user = mymalloc(auth_len+1);
+            webui->auth_pass = mymalloc(2);
+            snprintf(webui->auth_user, auth_len + 1, "%s"
+                ,webui->cnt->conf.webcontrol_authentication);
+            snprintf(webui->auth_pass, 2, "%s","");
+        } else {
+            webui->auth_user = mymalloc(auth_len - strlen(col_pos) + 1);
+            webui->auth_pass = mymalloc(strlen(col_pos));
+            snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
+                ,webui->cnt->conf.webcontrol_authentication);
+            snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
+        }
+    } else {
+        auth_len = strlen(webui->cnt->conf.stream_authentication);
+        col_pos = strstr(webui->cnt->conf.stream_authentication,":");
+        if (col_pos == NULL){
+            webui->auth_user = mymalloc(auth_len+1);
+            webui->auth_pass = mymalloc(2);
+            snprintf(webui->auth_user, auth_len + 1, "%s"
+                ,webui->cnt->conf.stream_authentication);
+            snprintf(webui->auth_pass, 2, "%s","");
+        } else {
+            webui->auth_user = mymalloc(auth_len - strlen(col_pos) + 1);
+            webui->auth_pass = mymalloc(strlen(col_pos));
+            snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
+                ,webui->cnt->conf.stream_authentication);
+            snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
+        }
+    }
+
+}
+
+static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
+
+    /* Set everything up for calling the authentication functions */
+    unsigned int rand1,rand2;
+
+    snprintf(webui->auth_denied, WEBUI_LEN_RESP, "%s"
+        ,"<html><head><title>Access denied</title>"
+        "</head><body>Access denied</body></html>");
+
+    srand(time(NULL));
+    rand1 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    rand2 = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    snprintf(webui->auth_opaque, WEBUI_LEN_PARM, "%08x%08x", rand1, rand2);
+
+    snprintf(webui->auth_realm, WEBUI_LEN_PARM, "%s","Motion");
+
+    if (ctrl){
+        /* Authentication for the webcontrol*/
+        if (webui->cnt->conf.webcontrol_authentication == NULL){
+            webui->authenticated = TRUE;
+            if (webui->cnt->conf.webcontrol_auth_method != 0){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
+            }
+            return MHD_YES;
+        }
+
+        if (webui->auth_user == NULL) webu_mhd_auth_parse(webui, ctrl);
+
+        if (webui->cnt->conf.webcontrol_auth_method == 1){
+            return webu_mhd_basic(webui);
+        } else if (webui->cnt->conf.webcontrol_auth_method == 2){
+            return webu_mhd_digest(webui);
+        }
+
+    } else {
+        /* Authentication for the streams */
+        if (webui->cnt->conf.stream_authentication == NULL){
+            webui->authenticated = TRUE;
+            if (webui->cnt->conf.stream_auth_method != 0){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No stream user:pass provided"));
+            }
+            return MHD_YES;
+        }
+
+        if (webui->auth_user == NULL) webu_mhd_auth_parse(webui, ctrl);
+
+        if (webui->cnt->conf.stream_auth_method == 1) {
+            return webu_mhd_basic(webui);
+        } else if (webui->cnt->conf.stream_auth_method == 2){
+            return webu_mhd_digest(webui);
+        }
+    }
+
+    webui->authenticated = TRUE;
+    return MHD_YES;
+
+}
+
+static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
+    /* Send the response that we created back to the user.  Now if the user
+     * provided a really bad URL, then we couldn't determine which Motion context
+     * they were wanting.  In this situation, we have a webui->cnt = NULL and we
+     * don't know whether it came from a html or text request.  In this situation
+     * we use the MHD defaults and skip adding CORS/Content type.  (There isn't any
+     * Motion context so we can't tell where to look)
+     * The ctrl parameter is a boolean which just says whether the request is for
+     * the webcontrol versus stream
+     */
+    int retcd;
+    struct MHD_Response *response;
+
+    response = MHD_create_response_from_buffer (strlen(webui->resp_page)
+        ,(void *)webui->resp_page, MHD_RESPMEM_PERSISTENT);
+    if (!response){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        return MHD_NO;
+    }
+
+    if (webui->cnt != NULL){
+        if (ctrl){
+            if (webui->cnt->conf.webcontrol_cors_header != NULL){
+                MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
+                    , webui->cnt->conf.webcontrol_cors_header);
+            }
+            if (webui->cnt->conf.webcontrol_interface == 1){
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
+            } else {
+                MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+            }
+        } else {
+            if (webui->cnt->conf.stream_cors_header != NULL){
+                MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
+                    , webui->cnt->conf.stream_cors_header);
+            }
+            MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+        }
+    }
+
+    retcd = MHD_queue_response (webui->connection, MHD_HTTP_OK, response);
+    MHD_destroy_response (response);
 
     return retcd;
 }
 
-static void webu_text_page(struct webui_ctx *webui) {
-    /* Write the main page text */
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st;
+static int webu_answer_ctrl(void *cls
+        , struct MHD_Connection *connection
+        , const char *url
+        , const char *method
+        , const char *version
+        , const char *upload_data
+        , size_t     *upload_data_size
+        , void **ptr) {
 
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    snprintf(response, sizeof (response),
-        "Motion "VERSION" Running [%d] Camera%s\n0\n",
-        webui->cam_count, (webui->cam_count > 1 ? "s" : ""));
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    for (indx = indx_st; indx < webui->cam_threads; indx++) {
-        snprintf(response, sizeof (response), "%d\n", indx);
-        written = webu_write(webui->client_socket, response, strlen(response));
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-}
-
-static void webu_text_list(struct context **cnt, struct webui_ctx *webui) {
-    /* Write out the options and values */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int thread_nbr, indx_parm;
-    const char *val_parm;
-
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
-
-    indx_parm = 0;
-    written = 1;
-    while (config_params[indx_parm].param_name != NULL){
-
-        if ((config_params[indx_parm].webui_level > cnt[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
-            indx_parm++;
-            continue;
-        }
-
-        val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, thread_nbr);
-        if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, 0);
-        }
-        snprintf(response, sizeof (response),"  %s = %s \n"
-            ,config_params[indx_parm].param_name
-            ,val_parm);
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        indx_parm++;
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_get(struct context **cnt, struct webui_ctx *webui) {
-    /* Write out the option value for one parm */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int indx_parm, thread_nbr;
-    const char *val_parm;
-
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
-
-    indx_parm = 0;
-    written = 1;
-    while (config_params[indx_parm].param_name != NULL){
-
-        if ((config_params[indx_parm].webui_level > cnt[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            strcmp(webui->uri_parm1,"query") ||
-            strcmp(webui->uri_value1, config_params[indx_parm].param_name)){
-            indx_parm++;
-            continue;
-        }
-
-        val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, thread_nbr);
-        if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(cnt, NULL, indx_parm, 0);
-        }
-
-        snprintf(response, sizeof (response),"%s = %s \nDone\n"
-            ,config_params[indx_parm].param_name
-            ,val_parm);
-        written = webu_write(webui->client_socket, response, strlen(response));
-
-        break;
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_status(struct context **cnt, struct webui_ctx *webui) {
-    /* Write out the pause/active status */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, thread_nbr;
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    written = 0;
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
-
-    if (thread_nbr == 0){
-        for (indx = indx_st; indx < webui->cam_threads; indx++) {
-        snprintf(response, sizeof(response),
-            "Camera %d Detection status %s\n"
-            ,cnt[indx]->conf.camera_id
-            ,(!cnt[indx]->running)? "NOT RUNNING":
-            (cnt[indx]->pause)? "PAUSE":"ACTIVE");
-            written = webu_write(webui->client_socket, response, strlen(response));
-        }
-    } else {
-        snprintf(response, sizeof(response),
-            "Camera %d Detection status %s\n"
-            ,cnt[thread_nbr]->conf.camera_id
-            ,(!cnt[thread_nbr]->running)? "NOT RUNNING":
-            (cnt[thread_nbr]->pause)? "PAUSE":"ACTIVE");
-        written = webu_write(webui->client_socket, response, strlen(response));
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_connection(struct context **cnt, struct webui_ctx *webui) {
-    /* Write out the connection status */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-    int indx, indx_st, thread_nbr;
-
-    indx_st = 1;
-    if (webui->cam_threads == 1) indx_st = 0;
-
-    written = 0;
-    if (webui->uri_thread == NULL){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "NULL thread detected");
-        return;
-    }
-    /* webui->cam_threads is a 1 based counter, thread_nbr is zero based */
-    thread_nbr = atoi(webui->uri_thread);
-    if (thread_nbr >= webui->cam_threads){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid thread specified");
-        return;
-    }
-
-    if (thread_nbr == 0){
-        for (indx = indx_st; indx < webui->cam_threads; indx++) {
-        snprintf(response,sizeof(response)
-            , "Camera %d%s%s %s\n"
-            ,cnt[indx]->conf.camera_id
-            ,cnt[indx]->conf.camera_name ? " -- " : ""
-            ,cnt[indx]->conf.camera_name ? cnt[indx]->conf.camera_name : ""
-            ,(!cnt[indx]->running)? "NOT RUNNING" :
-             (cnt[indx]->lost_connection)? "Lost connection": "Connection OK");
-        written = webu_write(webui->client_socket, response, strlen(response));
-        }
-    } else {
-        snprintf(response,sizeof(response)
-            , "Camera %d%s%s %s\n"
-            ,cnt[thread_nbr]->conf.camera_id
-            ,cnt[thread_nbr]->conf.camera_name ? " -- " : ""
-            ,cnt[thread_nbr]->conf.camera_name ? cnt[thread_nbr]->conf.camera_name : ""
-            ,(!cnt[thread_nbr]->running)? "NOT RUNNING" :
-             (cnt[thread_nbr]->lost_connection)? "Lost connection": "Connection OK");
-        written = webu_write(webui->client_socket, response, strlen(response));
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_set(struct context **cnt, struct webui_ctx *webui) {
-    /* Write out the connection status */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    webu_process_config(cnt, webui);
-
-    snprintf(response,sizeof(response)
-        , "%s = %s\nDone \n"
-        ,webui->uri_parm1
-        ,webui->uri_value1
-    );
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_action(struct context **cnt, struct webui_ctx *webui) {
-    /* Call the start */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    webu_process_action(cnt, webui);
-
-    written = 0;
-    /* Send response message for action */
-    if (!strcmp(webui->uri_cmd2,"makemovie")){
-        snprintf(response,sizeof(response)
-            ,"makemovie for thread %s \nDone\n"
-            ,webui->uri_thread
-        );
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else if (!strcmp(webui->uri_cmd2,"snapshot")){
-        snprintf(response,sizeof(response)
-            ,"Snapshot for thread %s \nDone\n"
-            ,webui->uri_thread
-        );
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else if (!strcmp(webui->uri_cmd2,"restart")){
-        snprintf(response,sizeof(response)
-            ,"Restart in progress ...\nDone\n");
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else if (!strcmp(webui->uri_cmd2,"quit")){
-        snprintf(response,sizeof(response)
-            ,"quit in progress ... bye \nDone\n");
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else if (!strcmp(webui->uri_cmd2,"start")){
-        snprintf(response,sizeof(response)
-            ,"Camera %s Detection resumed\nDone \n"
-            ,webui->uri_thread
-        );
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else if (!strcmp(webui->uri_cmd2,"pause")){
-        snprintf(response,sizeof(response)
-            ,"Camera %s Detection paused\nDone \n"
-            ,webui->uri_thread
-        );
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else if ((!strcmp(webui->uri_cmd2,"write")) ||
-               (!strcmp(webui->uri_cmd2,"writeyes"))){
-        snprintf(response,sizeof(response)
-            ,"Camera %s write\nDone \n"
-            ,webui->uri_thread
-        );
-        written = webu_write(webui->client_socket, response, strlen(response));
-    } else {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
-            "Invalid action requested: %s",webui->uri_cmd2);
-        return;
-    }
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-static void webu_text_track(struct context **cnt, struct webui_ctx *webui) {
-    /* Call the start */
-
-    ssize_t written;
-    char response[WEBUI_LEN_RESP];
-
-    webu_process_track(cnt, webui);
-    snprintf(response,sizeof(response)
-        ,"Camera %s \nTrack set %s\nDone \n"
-        ,webui->uri_thread
-        ,webui->uri_cmd2
-    );
-    written = webu_write(webui->client_socket, response, strlen(response));
-
-    if (written <= 0) MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,"Error writing");
-
-}
-
-
-static int webu_text_main(struct context **cnt, struct webui_ctx *webui) {
-
+    /* This function "answers" the request for a webcontrol.*/
     int retcd;
+    struct webui_ctx *webui = *ptr;
 
-    /*
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-       "thread: >%s< cmd1: >%s< cmd2: >%s<"
-       " parm1:>%s< val1:>%s<"
-       " parm2:>%s< val2:>%s<"
-       ,webui->uri_thread
-       ,webui->uri_cmd1, webui->uri_cmd2
-       ,webui->uri_parm1, webui->uri_value1
-       ,webui->uri_parm2, webui->uri_value2);
-    */
+    /* Eliminate compiler warnings */
+    (void)cls;
+    (void)url;
+    (void)version;
+    (void)upload_data;
+    (void)upload_data_size;
 
-    retcd = 0;
-    if (strlen(webui->uri_thread) == 0){
-        webu_text_ok(webui);
-        webu_text_page(webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set"))) {
-        webu_text_ok(webui);
-        webu_text_set(cnt,webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"write"))) {
-        webu_text_ok(webui);
-        webu_text_action(cnt,webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"list"))) {
-        webu_text_ok(webui);
-        webu_text_list(cnt, webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"get"))) {
-        webu_text_ok(webui);
-        webu_text_get(cnt, webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"status"))) {
-        webu_text_ok(webui);
-        webu_text_status(cnt, webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"connection"))) {
-        webu_text_ok(webui);
-        webu_text_connection(cnt, webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"start"))) {
-        webu_text_ok(webui);
-        webu_text_action(cnt,webui);
-
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"pause"))) {
-        webu_text_ok(webui);
-        webu_text_action(cnt,webui);
-
-    } else if (!strcmp(webui->uri_cmd1,"action")) {
-        webu_text_ok(webui);
-        webu_text_action(cnt, webui);
-
-    } else if (!strcmp(webui->uri_cmd1,"track")){
-        webu_text_ok(webui);
-        webu_text_track(cnt, webui);
-
-    } else{
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Invalid action requested");
-        retcd = -1;
+    /* Per MHD docs, this is called twice and we should process the second call */
+    if (webui->mhd_first) {
+        webui->mhd_first = FALSE;
+        return MHD_YES;
     }
 
-    return retcd;
-}
-
-static int webu_read_client(struct context **cnt, struct webui_ctx *webui) {
-
-    int retcd;
-
-    pthread_mutex_lock(&webui->webu_mutex);
-
-        retcd = webu_header_read(webui);
-        if (retcd == 0) retcd = webu_parseurl(webui);
-        if (retcd == 0) retcd = webu_header_hostname(webui);
-        if (retcd == 0) retcd = webu_header_auth(webui);
-        if (cnt[0]->conf.webcontrol_interface == 1){
-            if (retcd == 0) retcd = webu_text_main(cnt, webui);
-            if (retcd <  0) webu_text_badreq(webui);
-        } else {
-            if (retcd == 0) retcd = webu_html_main(cnt, webui);
-            if (retcd <  0) webu_html_badreq(webui);
-        }
-
-    pthread_mutex_unlock(&webui->webu_mutex);
-
-    return 0;
-}
-
-static void webu_auth_parms(struct context **cnt, struct webui_ctx *webui) {
-
-    char *userpass = NULL;
-    size_t auth_size;
-
-    if (cnt[0]->conf.webcontrol_authentication != NULL) {
-        auth_size = strlen(cnt[0]->conf.webcontrol_authentication);
-
-        webui->auth_parms = mymalloc(BASE64_LENGTH(auth_size) + 1);
-        userpass = mymalloc(auth_size + 4);
-        /* motion_base64_encode can read 3 bytes after the end of the string, initialize it */
-        memset(userpass, 0, auth_size + 4);
-        strcpy(userpass, cnt[0]->conf.webcontrol_authentication);
-        motion_base64_encode(userpass, webui->auth_parms, auth_size);
-        free(userpass);
+    if (strcmp (method, "GET") != 0){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
+        return MHD_NO;
     }
-
-    return;
-}
-
-static void webu_httpd_run(struct context **cnt, struct webui_ctx *webui) {
-
-    int closehttpd, socket_desc, retcd;
-    char clientip[NI_MAXHOST];
-
-    socket_desc = http_bindsock(
-                          cnt[0]->conf.webcontrol_port
-                         ,cnt[0]->conf.webcontrol_localhost
-                         ,cnt[0]->conf.ipv6_enabled);
-    if (socket_desc < 0) return;
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-               ,"Started motion-httpd server on port %d (auth %s)"
-               ,cnt[0]->conf.webcontrol_port
-               ,cnt[0]->conf.webcontrol_authentication ? "Enabled":"Disabled");
-
-    webu_auth_parms(cnt, webui);
-
-    closehttpd = FALSE;
-    retcd = 0;
-    while ((retcd == 0) && (!closehttpd)) {
-        webui->client_socket = webu_nonblock(socket_desc);
-        if (webui->client_socket < 0) {
-            if ((!cnt[0]) || (cnt[0]->webcontrol_finish)) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Finishing");
-                closehttpd = TRUE;
-            }
-        } else {
-            /* Get the Client request */
-            retcd = webu_read_client(cnt, webui);
-            if (retcd < 0){
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Error processing web interface");
-            }
-            webu_clientip(clientip, webui->client_socket);
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "Read from client (%s) %d", clientip, retcd);
-            if (webui->client_socket) close(webui->client_socket);
-        }
-    }
-
-    if (webui->client_socket!= -1) close(webui->client_socket);
-    close(socket_desc);
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Closing");
-}
-
-void *webu_main(void *arg) {
-    /* This is the entry point for the web control thread*/
-    struct context **cnt = arg;
-    struct sigaction act;
-    struct webui_ctx *webui;
 
     util_threadname_set("wu", 0,NULL);
 
+    webui->connection = connection;
+
+    /* Throw bad URLS back to user*/
+    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
+        webu_badreq(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+        return retcd;
+    }
+
+    if (strlen(webui->clientip) == 0){
+        webu_clientip(webui);
+    }
+
+    webu_hostname(webui, TRUE);
+
+    if (!webui->authenticated) {
+        retcd = webu_mhd_auth(webui, TRUE);
+        if (!webui->authenticated) return retcd;
+    }
+
+    if (webui->cntlst[0]->conf.webcontrol_interface == 1){
+        webu_text_main(webui);
+    } else {
+        webu_html_main(webui);
+    }
+
+    retcd = webu_mhd_send(webui, TRUE);
+    if (retcd == MHD_NO){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
+    }
+    return retcd;
+
+}
+
+static int webu_answer_strm(void *cls
+        , struct MHD_Connection *connection
+        , const char *url
+        , const char *method
+        , const char *version
+        , const char *upload_data
+        , size_t     *upload_data_size
+        , void **ptr) {
+
+    /* Answer the request for all the streams*/
+    int retcd;
+    struct webui_ctx *webui = *ptr;
+
+    /* Eliminate compiler warnings */
+    (void)cls;
+    (void)url;
+    (void)version;
+    (void)upload_data;
+    (void)upload_data_size;
+
+    /* Per docs, this is called twice and we should process the second call */
+    if (webui->mhd_first) {
+        webui->mhd_first = FALSE;
+        return MHD_YES;
+    }
+
+    if (strcmp (method, "GET") != 0){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
+        return MHD_NO;
+    }
+
+    util_threadname_set("st", 0,NULL);
+
+    webui->connection = connection;
+
+    /* Throw bad URLS back to user*/
+    if ((webui->cnt ==  NULL) || (strlen(webui->url) == 0)){
+        webu_badreq(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+        return retcd;
+    }
+
+    if (strlen(webui->clientip) == 0){
+        webu_clientip(webui);
+    }
+
+    webu_hostname(webui, FALSE);
+
+    if (!webui->authenticated) {
+        retcd = webu_mhd_auth(webui, FALSE);
+        if (!webui->authenticated) return retcd;
+    }
+
+    retcd = 0;
+    if ((strcmp(webui->uri_cmd1,"stream") == 0) ||
+        (strcmp(webui->uri_cmd1,"substream") == 0) ||
+        (strcmp(webui->uri_camid,"stream") == 0) ||
+        (strcmp(webui->uri_camid,"substream") == 0) ||
+        (strlen(webui->uri_camid) == 0)){
+            retcd = webu_stream_mjpeg(webui);
+            if (retcd == MHD_NO){
+                webu_badreq(webui);
+                retcd = webu_mhd_send(webui, FALSE);
+            }
+    } else if ((strcmp(webui->uri_cmd1,"current") == 0) ||
+        (strcmp(webui->uri_camid,"current") == 0)){
+            retcd = webu_stream_static(webui);
+            if (retcd == MHD_NO){
+                webu_badreq(webui);
+                retcd = webu_mhd_send(webui, FALSE);
+            }
+    } else {
+        webu_badreq(webui);
+        retcd = webu_mhd_send(webui, FALSE);
+    }
+
+    if (retcd == MHD_NO){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed %d"),retcd);
+    }
+    return retcd;
+
+}
+
+static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection) {
+    /* This is called at the very start of getting a request before the "answer"
+     * is processed.  There are two variations of this and the difference is how
+     * we call the webu_context_init.  When we are processing for the webcontrol or
+     * the stream port specified in the motion.conf file, we pass into the init function
+     * the full list of all the cameras.  The other version of the init is used when the
+     * user specifies a unique port for each camera.  In this situation, the full list
+     * context is passed in as a null and the context of the camera desired is passed
+     * instead.
+     * When this function is processed, we basically only have the URL that the user requested
+     * so we initialize everything and then parse out the URL to determine what the user is
+     * asking.
+     */
+
+    struct context **cnt = cls;
+    struct webui_ctx *webui;
+    int retcd;
+
+    (void)connection;
+
+    /* Set the thread name to connection until we know whether control or stream answers*/
+    util_threadname_set("cn", 0,NULL);
+
     webui = malloc(sizeof(struct webui_ctx));
 
-    webu_context_init(cnt, webui);
+    webu_context_init(cnt, NULL, webui);
+    webui->mhd_first = TRUE;
 
-    pthread_mutex_init(&webui->webu_mutex, NULL);
+    snprintf(webui->url,WEBUI_LEN_URLI,"%s",uri);
+
+    retcd = webu_parseurl(webui);
+    if (retcd != 0){
+        webu_parseurl_reset(webui);
+        memset(webui->url,'\0',WEBUI_LEN_URLI);
+    }
+
+    webu_parms_edit(webui);
+
+    return webui;
+}
+
+static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection *connection) {
+    /* This function initializes all the webui variables as we are getting a request.  This
+     * variation of the init is the one used when the user has specified a unique port number
+     * for each camera.  The variation is in how the webu_context_init is invoked.  This passes
+     * in a NULL for the full context list (webui->cntlist) and instead assigns the particular
+     * camera context to webui->cnt
+     */
+    struct context *cnt = cls;
+    struct webui_ctx *webui;
+    int retcd;
+
+    (void)connection;
+
+    /* Set the thread name to connection until we know whether control or stream answers*/
+    util_threadname_set("cn", 0,NULL);
+
+    webui = malloc(sizeof(struct webui_ctx));
+
+    webu_context_init(NULL, cnt, webui);
+    webui->mhd_first = TRUE;
+
+    snprintf(webui->url,WEBUI_LEN_URLI,"%s",uri);
+
+    retcd = webu_parseurl(webui);
+    if (retcd != 0){
+        webu_parseurl_reset(webui);
+        memset(webui->url,'\0',WEBUI_LEN_URLI);
+    }
+
+    webu_parms_edit(webui);
+
+    return webui;
+}
+
+static void webu_mhd_deinit(void *cls
+    , struct MHD_Connection *connection
+    , void **con_cls
+    , enum MHD_RequestTerminationCode toe) {
+    /* This is the function called as the connection is closed so we free our webui variables*/
+    struct webui_ctx *webui = *con_cls;
+
+    /* Eliminate compiler warnings */
+    (void)connection;
+    (void)cls;
+    (void)toe;
+
+    webu_context_free(webui);
+
+    return;
+}
+
+static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst){
+    /* Use the MHD function to see what features it supports*/
+    #if MHD_VERSION < 0x00094400
+        (void)mhdst;
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
+        } else {
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 1)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
+            } else {
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+            }
+        }
+    #endif
+}
+
+static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
+    /* Use the MHD function to see what features it supports*/
+    #if MHD_VERSION < 0x00094400
+        (void)mhdst;
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
+        } else {
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 2)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method = 0;
+            } else {
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+            }
+        }
+    #endif
+}
+
+static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst){
+    /* Use the MHD function to see what features it supports
+     * If we have a really old version of MHD, then we will just support
+     * IPv4
+     */
+    #if MHD_VERSION < 0x00094400
+        if (mhdst->ipv6){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
+            if (mhdst->ipv6) mhdst->ipv6 = 0;
+        }
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
+        } else {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+            if (mhdst->ipv6) mhdst->ipv6 = 0;
+        }
+    #endif
+}
+
+static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
+    /* Use the MHD function to see what features it supports
+     * If we have a really old version of MHD, then we will will not
+     * support the ssl/tls request.
+     */
+    #if MHD_VERSION < 0x00094400
+        if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls = 0;
+        } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)) {
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
+        }
+    #else
+        int retcd;
+        retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
+        if (retcd == MHD_YES){
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
+        } else {
+            if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
+            } else {
+                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+            }
+        }
+    #endif
+}
+
+static void webu_mhd_features(struct mhdstart_ctx *mhdst){
+    /* This function goes through at least a few of the MHD features
+     * and adjusts the user parameters from the configuration as
+     * needed to reflect what MHD can do
+     */
+
+    webu_mhd_features_basic(mhdst);
+
+    webu_mhd_features_digest(mhdst);
+
+    webu_mhd_features_ipv6(mhdst);
+
+    webu_mhd_features_tls(mhdst);
+
+}
+
+static char *webu_mhd_loadfile(const char *fname){
+    /* This function loads the requested certificate and key files into memory so we
+     * can use them as needed if the user wants ssl/tls support.  If the user did not
+     * specify a file in the configuration, then we return NULL.
+     */
+    FILE *infile;
+    size_t file_size, read_size;
+    char * file_char;
+
+    if (fname == NULL) {
+        file_char = NULL;
+    } else {
+        infile = fopen(fname, "rb");
+        if (infile != NULL){
+            fseek(infile, 0, SEEK_END);
+            file_size = ftell(infile);
+            if (file_size > 0 ){
+                file_char = mymalloc(file_size +1);
+                fseek(infile, 0, SEEK_SET);
+                read_size = fread(file_char, file_size, 1, infile);
+                if (read_size > 0 ){
+                    file_char[file_size] = 0;
+                } else {
+                    free(file_char);
+                    file_char = NULL;
+                    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                        ,_("Error reading file for SSL/TLS support."));
+                }
+            } else {
+                file_char = NULL;
+            }
+            fclose(infile);
+        } else {
+            file_char = NULL;
+        }
+    }
+    return file_char;
+}
+
+static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
+    /* This function validates that if the user requested a SSL/TLS connection, then
+     * they also need to provide a certificate and key file.  If those are not provided
+     * then we revise the configuration request for ssl/tls
+     */
+    if (mhdst->ctrl){
+        if (mhdst->cnt[0]->conf.webcontrol_tls){
+            if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
+                mhdst->cnt[0]->conf.webcontrol_tls = 0;
+            }
+            if ((mhdst->cnt[0]->conf.webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
+                mhdst->cnt[0]->conf.webcontrol_tls = 0;
+            }
+        }
+    } else {
+        if (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls){
+            if ((mhdst->cnt[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
+            }
+            if ((mhdst->cnt[0]->conf.webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
+                mhdst->cnt[mhdst->indxthrd]->conf.stream_tls = 0;
+            }
+        }
+    }
+
+}
+
+static void webu_mhd_opts_init(struct mhdstart_ctx *mhdst){
+    /* This function sets the init function to use for the MHD connection.  If
+     * the connection is related to the webcontrol or the stream specified in the
+     * motion.conf file, then we pass in the full context list of all cameras.  If
+     * the MHD connection is only going to be for a single camera (a unique port for
+     * each camera), then we call a different init function which only wants the single
+     * motion context for that particular camera.
+     */
+    if ((!mhdst->ctrl) && (mhdst->indxthrd != 0)){
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_URI_LOG_CALLBACK;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_init_one;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->cnt[mhdst->indxthrd];
+        mhdst->mhd_opt_nbr++;
+    } else {
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_URI_LOG_CALLBACK;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_init;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->cnt;
+        mhdst->mhd_opt_nbr++;
+    }
+
+}
+
+static void webu_mhd_opts_deinit(struct mhdstart_ctx *mhdst){
+    /* Set the MHD option on the function to call when the connection closes */
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_NOTIFY_COMPLETED;
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_deinit;
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = NULL;
+    mhdst->mhd_opt_nbr++;
+
+}
+
+static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
+    /* Set the MHD option on the acceptable connections.  This is used to handle the
+     * motion configuation option of localhost only.
+     */
+
+    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_localhost)){
+        if (mhdst->ipv6){
+            memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
+            mhdst->lpbk_ipv6.sin6_family = AF_INET6;
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_port);
+            mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
+
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sosockaddr *)(&mhdst->lpbk_ipv6);
+            mhdst->mhd_opt_nbr++;
+
+        } else {
+            memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
+            mhdst->lpbk_ipv4.sin_family = AF_INET;
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_port);
+            mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&mhdst->lpbk_ipv4);
+            mhdst->mhd_opt_nbr++;
+        }
+    } else if((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_localhost)){
+        if (mhdst->ipv6){
+            memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
+            mhdst->lpbk_ipv6.sin6_family = AF_INET6;
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.stream_port);
+            mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
+
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sosockaddr *)(&mhdst->lpbk_ipv6);
+            mhdst->mhd_opt_nbr++;
+        } else {
+            memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
+            mhdst->lpbk_ipv4.sin_family = AF_INET;
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->cnt[mhdst->indxthrd]->conf.stream_port);
+            mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&mhdst->lpbk_ipv4);
+            mhdst->mhd_opt_nbr++;
+        }
+    }
+
+}
+
+static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
+    /* Set the MHD option for the type of authentication that we will be using.  This
+     * function is when we are wanting to use digest authentication
+     */
+
+    if (((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)) ||
+        ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_auth_method == 2))) {
+
+        if (mhdst->ctrl) {
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->cnt[mhdst->indxthrd]->webcontrol_digest_rand);
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->cnt[mhdst->indxthrd]->webcontrol_digest_rand;
+            mhdst->mhd_opt_nbr++;
+        } else {
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->cnt[mhdst->indxthrd]->webstream_digest_rand);
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->cnt[mhdst->indxthrd]->webstream_digest_rand;
+            mhdst->mhd_opt_nbr++;
+        }
+
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_NONCE_NC_SIZE;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 300;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = NULL;
+        mhdst->mhd_opt_nbr++;
+
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_CONNECTION_TIMEOUT;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (unsigned int) 120;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = NULL;
+        mhdst->mhd_opt_nbr++;
+    }
+
+}
+
+static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst){
+    /* Set the MHD options needed when we want TLS connections */
+    if ((( mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)) ||
+        ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls))) {
+
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_CERT;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->tls_cert;
+        mhdst->mhd_opt_nbr++;
+
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_KEY;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+        mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->tls_key;
+        mhdst->mhd_opt_nbr++;
+    }
+
+}
+
+static void webu_mhd_opts(struct mhdstart_ctx *mhdst){
+    /* Set all the options we need based upon the motion configuration parameters*/
+
+    mhdst->mhd_opt_nbr = 0;
+
+    webu_mhd_checktls(mhdst);
+
+    webu_mhd_opts_deinit(mhdst);
+
+    webu_mhd_opts_init(mhdst);
+
+    webu_mhd_opts_localhost(mhdst);
+
+    webu_mhd_opts_digest(mhdst);
+
+    webu_mhd_opts_tls(mhdst);
+
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_END;
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = NULL;
+    mhdst->mhd_opt_nbr++;
+
+}
+
+static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
+
+    /* This sets the MHD startup flags based upon what user put into configuration */
+    mhdst->mhd_flags = MHD_USE_THREAD_PER_CONNECTION | MHD_USE_POLL| MHD_USE_SELECT_INTERNALLY;
+
+    if (mhdst->ipv6) mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
+
+    if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
+        mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
+    } else if ((!mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.stream_tls)){
+        mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
+    }
+
+}
+
+static void webu_start_ctrl(struct context **cnt){
+    /* This is the function that actually starts the MHD daemon for handling the webcontrol.
+     * There are many options for MHD and they will vary depending upon what our Motion user
+     * has requested in the configuration.  There are many functions in this module to assign
+     * these options and they are passed in a pointer to the mhdst variable so that they can
+     * assign the correct values for MHD start up. Since this function is doing the webcontrol
+     * we are only using thread 0 values.
+     */
+
+    struct mhdstart_ctx mhdst;
+    unsigned int randnbr;
+
+    mhdst.tls_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
+    mhdst.ctrl = TRUE;
+    mhdst.indxthrd = 0;
+    mhdst.cnt = cnt;
+    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
+
+    /* Set the rand number for webcontrol digest if needed */
+    srand(time(NULL));
+    randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    snprintf(cnt[0]->webcontrol_digest_rand
+        ,sizeof(cnt[0]->webcontrol_digest_rand),"%d",randnbr);
+
+    cnt[0]->webcontrol_daemon = NULL;
+    if (cnt[0]->conf.webcontrol_port != 0 ){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            ,_("Starting webcontrol on port %d")
+            ,cnt[0]->conf.webcontrol_port);
+
+        mhdst.mhd_ops = malloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
+        webu_mhd_features(&mhdst);
+        webu_mhd_opts(&mhdst);
+        webu_mhd_flags(&mhdst);
+
+        cnt[0]->webcontrol_daemon = MHD_start_daemon (mhdst.mhd_flags
+            ,cnt[0]->conf.webcontrol_port
+            ,NULL, NULL
+            ,&webu_answer_ctrl, cnt
+            ,MHD_OPTION_ARRAY, mhdst.mhd_ops
+            ,MHD_OPTION_END);
+        free(mhdst.mhd_ops);
+        if (cnt[0]->webcontrol_daemon == NULL){
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
+        }
+    }
+
+    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
+    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
+
+    return;
+}
+
+static void webu_start_strm(struct context **cnt){
+    /* This function starts up the daemon for the streams. It loops through
+     * all of the camera context's provided and starts streams as requested.  If
+     * the thread number is zero, then it starts the full list stream context
+     */
+
+    struct mhdstart_ctx mhdst;
+    unsigned int randnbr;
+
+    mhdst.tls_cert = webu_mhd_loadfile(cnt[0]->conf.webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(cnt[0]->conf.webcontrol_key);
+    mhdst.ctrl = FALSE;
+    mhdst.indxthrd = 0;
+    mhdst.cnt = cnt;
+    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
+
+    /* Set the rand number for webcontrol digest if needed */
+    srand(time(NULL));
+    randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    snprintf(cnt[0]->webstream_digest_rand
+        ,sizeof(cnt[0]->webstream_digest_rand),"%d",randnbr);
+
+    while (cnt[mhdst.indxthrd] != NULL){
+        cnt[mhdst.indxthrd]->webstream_daemon = NULL;
+        if (cnt[mhdst.indxthrd]->conf.stream_port != 0 ){
+            if (mhdst.indxthrd == 0){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Starting all camera streams on port %d")
+                    ,cnt[mhdst.indxthrd]->conf.stream_port);
+            } else {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Starting camera %d stream on port %d")
+                    ,cnt[mhdst.indxthrd]->camera_id
+                    ,cnt[mhdst.indxthrd]->conf.stream_port);
+            }
+
+            mhdst.mhd_ops= malloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
+            webu_mhd_features(&mhdst);
+            webu_mhd_opts(&mhdst);
+            webu_mhd_flags(&mhdst);
+            if (mhdst.indxthrd == 0){
+                cnt[mhdst.indxthrd]->webstream_daemon = MHD_start_daemon (mhdst.mhd_flags
+                    ,cnt[mhdst.indxthrd]->conf.stream_port
+                    ,NULL, NULL
+                    ,&webu_answer_strm, cnt
+                    ,MHD_OPTION_ARRAY, mhdst.mhd_ops
+                    ,MHD_OPTION_END);
+            } else {
+                cnt[mhdst.indxthrd]->webstream_daemon = MHD_start_daemon (mhdst.mhd_flags
+                    ,cnt[mhdst.indxthrd]->conf.stream_port
+                    ,NULL, NULL
+                    ,&webu_answer_strm, cnt[mhdst.indxthrd]
+                    ,MHD_OPTION_ARRAY, mhdst.mhd_ops
+                    ,MHD_OPTION_END);
+            }
+            free(mhdst.mhd_ops);
+            if (cnt[mhdst.indxthrd]->webstream_daemon == NULL){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Unable to start stream for camera %d")
+                    ,cnt[mhdst.indxthrd]->camera_id);
+            }
+        }
+        mhdst.indxthrd++;
+    }
+    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
+    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
+
+    return;
+}
+
+static void webu_start_ports(struct context **cnt){
+    /* Perform check for duplicate ports being specified.  The config loading will
+     * duplicate ports from the motion.conf file to all the cameras so we do not
+     * log these duplicates to the user and instead just silently set them to zero
+     */
+    int indx, indx2;
+
+    if (cnt[0]->conf.webcontrol_port != 0){
+        indx = 0;
+        while (cnt[indx] != NULL){
+            if ((cnt[0]->conf.webcontrol_port == cnt[indx]->conf.webcontrol_port) && (indx > 0)){
+                cnt[indx]->conf.webcontrol_port = 0;
+            }
+
+            if (cnt[0]->conf.webcontrol_port == cnt[indx]->conf.stream_port){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Duplicate port requested %d")
+                    ,cnt[indx]->conf.stream_port);
+                cnt[indx]->conf.stream_port = 0;
+            }
+
+            indx++;
+        }
+    }
+
+    /* Now check on the stream ports */
+    indx = 0;
+    while (cnt[indx] != NULL){
+        if (cnt[indx]->conf.stream_port != 0){
+            indx2 = indx + 1;
+            while (cnt[indx2] != NULL){
+                if (cnt[indx]->conf.stream_port == cnt[indx2]->conf.stream_port){
+                    if (indx != 0){
+                        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                            ,_("Duplicate port requested %d")
+                            ,cnt[indx2]->conf.stream_port);
+                    }
+                    cnt[indx2]->conf.stream_port = 0;
+                }
+                indx2++;
+            }
+        }
+        indx++;
+    }
+}
+
+void webu_stop(struct context **cnt) {
+    /* This function is called from the main Motion loop to shutdown the
+     * various MHD connections
+     */
+    int indxthrd;
+
+    if (cnt[0]->webcontrol_daemon != NULL){
+        MHD_stop_daemon (cnt[0]->webcontrol_daemon);
+    }
+
+    indxthrd = 0;
+    while (cnt[indxthrd] != NULL){
+        if (cnt[indxthrd]->webstream_daemon != NULL){
+            MHD_stop_daemon (cnt[indxthrd]->webstream_daemon);
+        }
+        indxthrd++;
+    }
+}
+
+void webu_start(struct context **cnt) {
+    /* This function is called from the main motion thread to start up the
+     * webcontrol and streams.  We need to block some signals otherwise MHD
+     * will not function correctly.
+     */
+    struct sigaction act;
 
     /* set signal handlers TO IGNORE */
     memset(&act, 0, sizeof(act));
@@ -2584,19 +1866,16 @@ void *webu_main(void *arg) {
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
 
-    webu_httpd_run(cnt, webui);
+    if (cnt[0]->conf.stream_preview_method != 3){
+        webu_start_ports(cnt);
 
-    pthread_mutex_destroy(&webui->webu_mutex);
+        webu_start_strm(cnt);
+    }
 
-    webu_context_free(webui);
+    webu_start_ctrl(cnt);
 
-    /* Update how many threads we have running. */
-    pthread_mutex_lock(&global_lock);
-        threads_running--;
-        cnt[0]->webcontrol_running = 0;
-    pthread_mutex_unlock(&global_lock);
-
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, "Thread exit");
-    pthread_exit(NULL);
+    return;
 
 }
+
+

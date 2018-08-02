@@ -44,7 +44,8 @@ OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
 			   video_loopback.o video_v4l2.o video_common.o video_bktr.o \
 			   netcam.o netcam_http.o netcam_ftp.o netcam_jpeg.o netcam_wget.o \
 			   track.o alg.o event.o picture.o rotate.o translate.o \
-			   webu.o stream.o md5.o netcam_rtsp.o ffmpeg.o \
+			   webu.o webu_html.o webu_text.o webu_stream.o \
+			   stream.o md5.o netcam_rtsp.o ffmpeg.o \
 			   @MMAL_OBJ@ @SQLITE_OBJ@
 SRC          = $(foreach obj,$(OBJ:.o=.c),@top_srcdir@/$(obj))
 DOC          = CHANGELOG COPYING CREDITS README.md  \

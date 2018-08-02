@@ -241,6 +241,18 @@ else
 fi
 
 ##############################################################################
+###  Check for libmicrohttpd
+##############################################################################
+AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
+AC_MSG_CHECKING(libmicrohttpd libraries)
+AC_MSG_RESULT($MHTTP)
+if test x$MHTTP = xyes ; then
+  TEMP_LIBS="$TEMP_LIBS -lmicrohttpd "
+else
+  AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
+fi
+
+##############################################################################
 ###  pkg-config
 ##############################################################################
 AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])

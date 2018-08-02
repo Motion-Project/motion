@@ -23,22 +23,64 @@
   </section>
 
   <section class="vertical-menu">
-    <a href="#Install_Apt"> Installing with apt</a>
-    <a href="#Install_Deb"> Installing with a release deb package</a>
-    <a href="#Abbreviated_Building"> Abbreviated Building Guide</a>
-    <a href="#Preparation_For_Building"> Preparation For Building </a>
-    <a href="#BUILD_DEBIAN">Debian/Ubuntu/Raspbian</a>
-    <a href="#BUILD_OPENSUSE">Open SUSE</a>
-    <a href="#BUILD_FREEBSD">Free BSD</a>
-    <a href="#BUILD_CENTOS">CentOS</a>
-    <a href="#BUILD_MACOSX">MacOSX </a>
-    <a href="#Configure_Script"> Configure Script </a>
-    <a href="#Make"> Make </a>
-    <a href="#Make_Install"> Make Install </a>
-    <a href="#Un_Install"> Un-install </a>
-    <a href="#Additional_Make_Options"> Additional Make Options </a>
-    <a href="#Upgrading_From_Older_Version"> Upgrading From Older Version </a>
-    <a href="#Translations"> Native Language Support(Translations)</a>
+    <button class="accordian">Installing</button>
+      <div class="panel">
+        <a href="#Install_Apt"> Installing with apt</a>
+        <a href="#Install_Deb"> Installing with a release deb package</a>
+
+      </div>
+    <button class="accordian">Abbreviated Building</button>
+      <div class="panel">
+        <a href="#Build_Deb"> Building a deb package</a>
+        <a href="#Abbreviated_Building"> Abbreviated Building Guide</a>
+      </div>
+    <button class="accordian">Distribution specific dependencies</button>
+      <div class="panel">
+        <a href="#Preparation_For_Building"> Preparation For Building </a>
+        <a href="#BUILD_DEBIAN">Debian/Ubuntu/Raspbian</a>
+        <a href="#BUILD_OPENSUSE">Open SUSE</a>
+        <a href="#BUILD_FREEBSD">Free BSD</a>
+        <a href="#BUILD_CENTOS">CentOS</a>
+        <a href="#BUILD_MACOSX">MacOSX </a>
+      </div>
+    <button class="accordian">Configure/Make options</button>
+      <div class="panel">
+        <a href="#Configure_Script"> Configure Script </a>
+        <a href="#Make"> Make </a>
+        <a href="#Make_Install"> Make Install </a>
+        <a href="#Un_Install"> Un-install </a>
+        <a href="#Additional_Make_Options"> Additional Make Options </a>
+      </div>
+    <button class="accordian">Upgrading / Native Language</button>
+      <div class="panel">
+        <a href="#Upgrading_From_Older_Version"> Upgrading From Older Version </a>
+        <a href="#Translations"> Native Language Support(Translations)</a>
+      <div class="panel">
+    <script>
+      var acc = document.getElementsByClassName("accordian");
+      var i;
+      for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+          var fnodes = document.getElementsByClassName("accordian");
+          var indx;
+          for (indx = 0; indx < fnodes.length; indx++){
+            if (this.isSameNode(fnodes[indx])) {
+              this.classList.toggle("active");
+              var panel = this.nextElementSibling;
+              if (panel.style.maxHeight){
+                panel.style.maxHeight = null;
+              } else {
+                panel.style.maxHeight = (panel.scrollHeight+50) + "px";
+              }
+            } else {
+              var panel = fnodes[indx].nextElementSibling;
+              panel.style.maxHeight = null;
+            }
+          }
+        });
+      }
+    </script>
+
   </section>
 
   <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
@@ -78,6 +120,43 @@
       <p></p>
     </ul>
 
+    <h3><a name="Build_Deb"></a> Building a deb package </h3>
+    <ul>
+      Users can also build their own deb package from source.  It is often preferable to build and install a
+      deb package rather than using the build from source options below since it is much easier to upgrade from
+      and un-install Motion.  The script that builds the deb packages released can be used to do this.  Open
+      a terminal window and type:
+      <code><strong>wget https://raw.githubusercontent.com/Motion-Project/motion-packaging/master/builddeb.sh </strong></code>
+      Since this is a script file, once it is downloaded open the file with a text viewer and review
+      the script to see what it does.  Never ever run a script without reviewing what it does!.
+      <p></p>
+      Within the script, you will see that it takes a few parameters which are optional.
+      <code><strong> Username, EmailAddress, branch, install, arch</strong></code>
+      If the parameters are not provided, the script will create defaults.
+      <p></p>
+      The general flow of the script is as follows:
+      <ul>
+        <li>Validate input parameters and set defaults as needed.</li>
+        <li>Validate the required packages are installed and notify which ones are missing.</li>
+        <li>Create temporary directories in /tmp</li>
+        <li>Clone the Motion source code and packaging code to the temporary directories</li>
+        <li>Switch to the branch specified in the parameter (or master if not specified)</li>
+        <li>Build the debian package</li>
+        <li>Clean up temporary directories</li>
+      </ul>
+      Once you have reviewed the script and determined that it is OK to run, close out of the editor and then
+      run the command <code>chmod +x ./builddeb.sh</code> to make the script executable.
+      <p></p>
+      Run the script <code>./builddeb.sh myname, myemail, master, n, any</code>
+      <p></p>
+      The script will validate the dependencies and report any additional dependencies which must be installed or if
+      all the dependencies are installed, it will create a deb package.  Note that this may take a bit of time on
+      slower computers.
+      <p></p>
+      Once the deb file is created, install it via the gdebi tool as described above.
+      <p></p>
+    </ul>
+
     <h3><a name="Abbreviated_Building"></a> Abbreviated Building Guide  </a> </h3>
     <ul>
 
@@ -90,7 +169,8 @@
       Debian / Ubuntu / Raspbian Packages
       <ul>
           <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
-          libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libwebp-dev</strong></code>
+          libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
+          libwebp-dev gettext libmicrohttpd-dev</strong></code>
           <p></p>
           <code><strong>cd ~</strong></code>
           <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -103,7 +183,7 @@
       </ul>
       FreeBSD
       <ul>
-          <code><strong>sudo pkg install autoconf pkgconf automake gmake git ffmpeg</strong></code>
+          <code><strong>sudo pkg install autoconf pkgconf automake gmake git ffmpeg gettext libmicrohttpd </strong></code>
           <p></p>
           <code><strong>cd ~</strong></code>
           <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -116,7 +196,7 @@
       </ul>
       Mac OS X
       <ul>
-          <code><strong>brew install ffmpeg pkg-config libjpeg automake postgresql</strong></code>
+          <code><strong>brew install ffmpeg pkg-config libjpeg automake postgresql gettext libmicrohttpd</strong></code>
           <p></p>
           <code><strong>cd ~</strong></code>
           <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -157,7 +237,8 @@
         <li>Required</li>
         <ul>
           <p></p>
-          <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev libjpeg-dev </strong></code>
+          <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev
+          libjpeg-dev gettext libmicrohttpd-dev</strong></code>
           <p></p>
         </ul>
         <p></p>
@@ -218,7 +299,7 @@
           <p></p>
           <code><strong>sudo zypper install --type pattern devel_basis </strong></code>
           <p></p>
-          <code><strong>sudo zypper install libjpeg8-devel </strong></code>
+          <code><strong>sudo zypper install libjpeg8-devel gettext libmicrohttpd </strong></code>
           <p></p>
           <code><strong>sudo zypper install -t pattern devel_C_C++ </strong></code>
           <p></p>
@@ -274,7 +355,7 @@
         <li>Required packages</li>
           <ul>
             <p></p>
-            <code><strong> sudo pkg install autoconf pkgconf automake gmake git</strong></code>
+            <code><strong> sudo pkg install autoconf pkgconf automake gmake git gettext libmicrohttpd</strong></code>
             <p></p>
           </ul>
         <li>Optional packages</li>
@@ -349,7 +430,7 @@
           <p></p>
           <code><strong>sudo yum groupinstall 'Development Tools'</strong></code>
           <p></p>
-          <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel</strong></code>
+          <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel gettext libmicrohttpd-dev</strong></code>
           <p></p>
           <code><strong>sudo yum install libzip-devel</strong></code>
           <p></p>
@@ -405,13 +486,21 @@
           <p></p>
           <li>Install brew as described on https://brew.sh</li>
           <p></p>
-          <code><strong>brew upgrade ffmpeg pkg-config jpeg automake postgresql</strong></code>
+          <code><strong>brew upgrade ffmpeg pkg-config jpeg automake gettext libmicrohttpd-dev</strong></code>
           <p></p>
-          <code><strong>brew install ffmpeg pkg-config libjpeg automake postgresql</strong></code>
+          <code><strong>brew install ffmpeg pkg-config libjpeg automake </strong></code>
           <p></p>
         </ul>
         <p></p>
         <li>Optional Packages</li>
+        <li>PostgreSQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>brew upgrade postgresql</strong></code>
+            <code><strong>brew install postgresql</strong></code>
+            <p></p>
+          </ul>
+
         <ul>
           <li>None known by author</li>
         </ul>

@@ -51,6 +51,7 @@ struct image_data;
 #include <sys/param.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <microhttpd.h>
 
 #ifdef __FreeBSD__
 #include <pthread_np.h>
@@ -304,6 +305,7 @@ struct images {
     unsigned char *smartmask;
     unsigned char *smartmask_final;
     unsigned char *common_buffer;
+    unsigned char *image_stream;      /* Copy of the image to use for web stream*/
 
     unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
     unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
@@ -506,6 +508,13 @@ struct context {
 
     unsigned int passflag;  //only purpose is to flag first frame vs all others.....
     int rolling_frame;
+
+    struct MHD_Daemon *webcontrol_daemon;
+    struct MHD_Daemon *webstream_daemon;
+    char   webcontrol_digest_rand[8];
+    char   webstream_digest_rand[8];
+    int    camera_id;
+    pthread_mutex_t mutex_stream;
 
 };
 

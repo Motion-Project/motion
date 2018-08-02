@@ -8,7 +8,7 @@ The packages and library names change frequently and vary across base operating 
 Adjust the following lines as required by the base operating system.
 
 Install basic build packages:
-    sudo apt-get install autoconf automake pkgconf libtool libjpeg8-dev build-essential libzip-dev
+    sudo apt-get install autoconf automake pkgconf libtool libjpeg8-dev build-essential libzip-dev gettext libmicrohttpd-dev
 
 Install FFMPEG packages
     sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
