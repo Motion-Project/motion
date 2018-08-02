@@ -1866,11 +1866,13 @@ void webu_start(struct context **cnt) {
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
 
-    webu_start_ports(cnt);
+    if (cnt[0]->conf.stream_preview_method != 3){
+        webu_start_ports(cnt);
+
+        webu_start_strm(cnt);
+    }
 
     webu_start_ctrl(cnt);
-
-    webu_start_strm(cnt);
 
     return;
 
