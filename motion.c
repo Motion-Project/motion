@@ -976,6 +976,22 @@ static int motion_init(struct context *cnt)
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Using default dimensions %dx%d"),cnt->conf.height,cnt->conf.width);
     }
+    if (cnt->conf.width % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image width (%d) requested is not modulo 8."), cnt->conf.width);
+        cnt->conf.width = cnt->conf.width - (cnt->conf.width % 8) + 8;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Adjusting width to next higher multiple of 8 (%d)."), cnt->conf.width);
+    }
+    if (cnt->conf.height % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image height (%d) requested is not modulo 8."), cnt->conf.height);
+        cnt->conf.height = cnt->conf.height - (cnt->conf.height % 8) + 8;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Adjusting height to next higher multiple of 8 (%d)."), cnt->conf.height);
+    }
+    if (cnt->conf.width  < 64) cnt->conf.width  = 64;
+    if (cnt->conf.height < 64) cnt->conf.height = 64;
 
     /* set the device settings */
     cnt->video_dev = vid_start(cnt);
@@ -1001,6 +1017,21 @@ static int motion_init(struct context *cnt)
             ,_("Motion only supports width and height modulo 8"));
         return -3;
     }
+    /* Revalidate we got a valid image size */
+    if ((cnt->imgs.width % 8) || (cnt->imgs.height % 8)) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image width (%d) or height(%d) requested is not modulo 8.")
+            ,cnt->imgs.width, cnt->imgs.height);
+        return -3;
+    }
+
+    if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)){
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
+            ,cnt->imgs.width, cnt->imgs.height);
+            return -3;
+    }
+
     /* We set size_high here so that it can be used in the retry function to determine whether
      * we need to break and reallocate buffers
      */
@@ -1775,6 +1806,21 @@ static int mlp_retry(struct context *cnt){
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
         cnt->video_dev = vid_start(cnt);
+
+        if ((cnt->imgs.width % 8) || (cnt->imgs.height % 8)) {
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Image width (%d) or height(%d) requested is not modulo 8.")
+                ,cnt->imgs.width, cnt->imgs.height);
+            return 1;
+        }
+
+        if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)){
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
+                ,cnt->imgs.width, cnt->imgs.height);
+                return 1;
+        }
+
         /*
          * If the netcam has different dimensions than in the config file
          * we need to restart Motion to re-allocate all the buffers
