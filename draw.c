@@ -1082,6 +1082,8 @@ static int draw_textn(unsigned char *image, int startx,  int starty,  int width,
     if (startx + len * 6 * factor >= width)
         len = (width-startx-1)/(6*factor);
 
+    if ((startx < 1) || (starty < 1) || (len < 1)) return 0;
+
     line_offset = width - (7 * factor);
     next_char_offs = (width * 8 * factor) - (6 * factor);
 
