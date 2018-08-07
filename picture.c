@@ -881,14 +881,14 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
             rgb[2] = r;
 
             l++;
-            if (x & 1) {
+            if (x%2 != 0) {
                 u++;
                 v++;
             }
             /* ppm is rgb not bgr */
             fwrite(rgb, 1, 3, picture);
         }
-        if (y & 1) {
+        if (y%2 == 0) {
             u -= width / 2;
             v -= width / 2;
         }
