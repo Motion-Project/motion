@@ -1,8 +1,8 @@
-.TH MOTION 1 2018-07-21 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2018-08-12 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
-.B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p process_id_file ][ \-l log_file ]
+.B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p pid_file ][ \-l log_file ]
 .SH DESCRIPTION
 .I  Motion
 uses a video4linux device or network camera to detect motion. If motion is detected both normal
@@ -63,19 +63,6 @@ When specified as ON, Motion goes into daemon (background process) mode and rele
 .RE
 
 .TP
-.B process_id_file
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-File to store the process ID, also called pid file.
-.RE
-.RE
-
-.TP
 .B setup_mode
 .RS
 .nf
@@ -89,7 +76,20 @@ Start in Setup-Mode, daemon disabled.
 .RE
 
 .TP
-.B logfile
+.B pid_file
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+File to store the process ID, also called pid file.
+.RE
+.RE
+
+.TP
+.B log_file
 .RS
 .nf
 Values: User specified string
@@ -128,7 +128,33 @@ Filter to log messages by type
 .RE
 
 .TP
-.B camera_dir
+.B quiet
+.RS
+.nf
+Values: on/off
+Default: on
+Description:
+.fi
+.RS
+Do not sound beeps when detecting motion
+.RE
+.RE
+
+.TP
+.B native_language
+.RS
+.nf
+Values: boolean
+Default: on
+Description:
+.fi
+.RS
+Use this option to enable native language on the webcontrol and log message.  Specify off to have messages provided in English.
+.RE
+.RE
+
+.TP
+.B camera_name
 .RS
 .nf
 Values: User specified string
@@ -136,7 +162,22 @@ Default: Not Defined
 Description:
 .fi
 .RS
-This option specifies the optional subdirectory that contains the camera config files.
+User specified string to describe the camera.
+.RE
+.RE
+
+.TP
+.B camera_id
+.RS
+.nf
+Values: Numeric identification number for the camera
+Default: The order in which the camera is opened by Motion
+Description:
+.fi
+.RS
+Use this option to assign a number to each camera that is consistent every time that Motion is started.
+By default Motion will assign a number based upon the sequence in which it reads the configuration and this
+sequence may not be the same every time that Motion starts.
 .RE
 .RE
 
@@ -164,22 +205,7 @@ camera config files.
 .RE
 
 .TP
-.B camera_id
-.RS
-.nf
-Values: Numeric identification number for the camera
-Default: The order in which the camera is opened by Motion
-Description:
-.fi
-.RS
-Use this option to assign a number to each camera that is consistent every time that Motion is started.
-By default Motion will assign a number based upon the sequence in which it reads the configuration and this
-sequence may not be the same every time that Motion starts.
-.RE
-.RE
-
-.TP
-.B camera_name
+.B camera_dir
 .RS
 .nf
 Values: User specified string
@@ -187,20 +213,23 @@ Default: Not Defined
 Description:
 .fi
 .RS
-User specified string to describe the camera.
+This option specifies the optional subdirectory that contains the camera config files.
 .RE
 .RE
 
 .TP
-.B native_language
+.B target_dir
 .RS
 .nf
-Values: boolean
-Default: on
+Values: User specified string
+Default: Not defined
 Description:
 .fi
 .RS
-Use this option to enable native language on the webcontrol and log message.  Specify off to have messages provided in English.
+Target base directory for pictures and films.
+It is recommended to use an absolute path.
+If this option is not defined, the current working directory is used.
+This option accepts the conversion specifiers included at the end of this manual.
 .RE
 .RE
 
@@ -238,7 +267,7 @@ Motion log reports all the available options for the device.
 .B v4l2_palette
 .RS
 .nf
-Values: 0 to 17
+Values: 0 to 21
 .RS
 V4L2_PIX_FMT_SN9C10X : 0  'S910'
 V4L2_PIX_FMT_SBGGR16 : 1  'BYR2'
@@ -326,14 +355,14 @@ The frequency to set the tuner in kHz when using a TV tuner card.
 .B auto_brightness
 .RS
 .nf
-Values: on/off
-Default: off
+Values: 0 - 3
+Default: 0
 Description:
 .fi
 .RS
-The auto_brightness feature uses the brightness option as its target value.
-If brightness is zero auto_brightness will adjust to average brightness value 128.
-only recommended for cameras without auto brightness.
+The auto_brightness feature uses the device options to adjust the brightness
+Only recommended for cameras without auto brightness.
+0-disabled, 1=Use brightness, 2=Use exposure, 3=Use absolute exposure.
 .RE
 .RE
 
@@ -378,7 +407,7 @@ Number of frames to skip before each roundrobin step
 .RE
 
 .TP
-.B switchfilter
+.B roundrobin_switchfilter
 .RS
 .nf
 Values: on/off
@@ -522,7 +551,7 @@ This can assist with cameras that have poor or buggy firmware.
 .RE
 
 .TP
-.B rtsp_uses_tcp
+.B netcam_use_tcp
 .RS
 .nf
 Values: on/off
@@ -566,39 +595,11 @@ Typical value for the PI camera is -hf
 .RE
 
 .TP
-.B rotate
-.RS
-.nf
-Values: 0, 90, 180, 270
-Default: 0
-Description:
-.fi
-.RS
-Rotate image this number of degrees.
-The rotation affects all saved images as well as movies.
-.RE
-.RE
-
-.TP
-.B flip_axis
-.RS
-.nf
-Values: none, v, h
-Default: none
-Description:
-.fi
-.RS
-Flip the images vertically or horizontally.
-The flip affects all saved images as well as movies.
-.RE
-.RE
-
-.TP
 .B width
 .RS
 .nf
 Values: Dependent upon video device
-Default: 352
+Default: 640
 Description:
 .fi
 .RS
@@ -611,7 +612,7 @@ Image width in pixels for the video device.
 .RS
 .nf
 Values: Dependent upon video device
-Default: off
+Default: 480
 Description:
 .fi
 .RS
@@ -624,7 +625,7 @@ Image height in pixels for the video device
 .RS
 .nf
 Values: 2 - 100
-Default: 100
+Default: 15
 Description:
 .fi
 .RS
@@ -650,23 +651,30 @@ This option is used when you want to capture images at a rate lower than 2 per s
 .RE
 
 .TP
-.B despeckle_filter
+.B rotate
 .RS
 .nf
-Values:
-.RS
-e/E : erode
-d/D : dilate
-l : label
-.RE
-Default: EedDl
+Values: 0, 90, 180, 270
+Default: 0
 Description:
 .fi
 .RS
-Despeckle motion image using (e)rode or (d)ilate or (l)abel.
-The recommended value is EedDl. Any combination (and number of) of E, e, d, and D is valid.
-(l)abeling must only be used once and the 'l' must be the last letter.
-Comment out to disable
+Rotate image this number of degrees.
+The rotation affects all saved images as well as movies.
+.RE
+.RE
+
+.TP
+.B flip_axis
+.RS
+.nf
+Values: none, v, h
+Default: none
+Description:
+.fi
+.RS
+Flip the images vertically or horizontally.
+The flip affects all saved images as well as movies.
 .RE
 .RE
 
@@ -715,28 +723,28 @@ When locate_motion_mode is enable, this option specifies how the motion will be 
 .RE
 
 .TP
-.B text_right
-.RS
-.nf
-Values: User specified string
-Default: %Y-%m-%d\n%T-%q
-Description:
-.fi
-.RS
-Text to place in lower right corner of image.  Format specifiers follow C function strftime(3)
-.RE
-.RE
-
-.TP
 .B text_left
 .RS
 .nf
 Values: User specified string
-Default: CAMERA %t
+Default: Not defined
 Description:
 .fi
 .RS
 Text to place in lower left corner of image.  Format specifiers follow C function strftime(3)
+.RE
+.RE
+
+.TP
+.B text_right
+.RS
+.nf
+Values: User specified string
+Default: %Y-%m-%d\\n%T
+Description:
+.fi
+.RS
+Text to place in lower right corner of image.  Format specifiers follow C function strftime(3)
 .RE
 .RE
 
@@ -756,6 +764,19 @@ The text is placed in upper right corner of the image.
 .RE
 
 .TP
+.B text_scale
+.RS
+.nf
+Values: 1 to 10
+Default: 1
+Description:
+.fi
+.RS
+The scale at which to draw text over the image.
+.RE
+.RE
+
+.TP
 .B text_event
 .RS
 .nf
@@ -769,19 +790,6 @@ The user can use any conversion specifier in this option except %C.
 Date and time values are from the timestamp of the first image in the current event.
 The %C can be used filenames and text_left/right for creating
 a unique identifier for each event.
-.RE
-.RE
-
-.TP
-.B text_scale
-.RS
-.nf
-Values: 1 to 10
-Default: 1
-Description:
-.fi
-.RS
-The scale at which to draw text over the image.
 .RE
 .RE
 
@@ -849,6 +857,28 @@ Description:
 Automatically tune the noise threshold
 .RE
 .RE
+
+.TP
+.B despeckle_filter
+.RS
+.nf
+Values:
+.RS
+e/E : erode
+d/D : dilate
+l : label
+.RE
+Default: Not defined
+Description:
+.fi
+.RS
+Despeckle motion image using (e)rode or (d)ilate or (l)abel.
+The recommended value is EedDl. Any combination (and number of) of E, e, d, and D is valid.
+(l)abeling must only be used once and the 'l' must be the last letter.
+Comment out to disable
+.RE
+.RE
+
 
 .TP
 .B area_detect
@@ -986,41 +1016,6 @@ An event ends right after no more motion is detected and post_capture is over.
 .RE
 
 .TP
-.B Script Options
-.RS
-.nf
-on_event_start, on_event_end, on_picture_save
-on_motion_detected, on_area_detected, on_movie_start
-on_movie_end, on_camera_lost, on_camera_found
-
-.fi
-.RE
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-Specify the full path and file name for the script to execute when the indicated event occurs.
-When a file name is required for the script, append a %f to the script string.
-.RE
-.RE
-
-.TP
-.B quiet
-.RS
-.nf
-Values: on/off
-Default: on
-Description:
-.fi
-.RS
-Do not sound beeps when detecting motion
-.RE
-.RE
-
-.TP
 .B pre_capture
 .RS
 .nf
@@ -1050,27 +1045,34 @@ Number of frames to capture after motion is no longer detected.
 .RE
 
 .TP
-.B target_dir
+.B Script Options
 .RS
 .nf
-Values: User specified string
+on_event_start, on_event_end, on_picture_save
+on_motion_detected, on_area_detected, on_movie_start
+on_movie_end, on_camera_lost, on_camera_found
+
+.fi
+.RE
+.RS
+.nf
+Values: User defined string
 Default: Not defined
 Description:
 .fi
 .RS
-Target base directory for pictures and films.
-It is recommended to use an absolute path.
-If this option is not defined, the current working directory is used.
-This option accepts the conversion specifiers included at the end of this manual.
+Specify the full path and file name for the script to execute when the indicated event occurs.
+When a file name is required for the script, append a %f to the script string.
 .RE
 .RE
 
+
 .TP
-.B output_pictures
+.B  picture_output
 .RS
 .nf
 Values: on, off, first, best, center
-Default: on
+Default: off
 Description:
 .fi
 .RS
@@ -1083,7 +1085,7 @@ Can be used as preview shot for the corresponding movie.
 .RE
 
 .TP
-.B output_debug_pictures
+.B  picture_output_motion
 .RS
 .nf
 Values: on/off
@@ -1092,19 +1094,6 @@ Description:
 .fi
 .RS
 Output pictures with only the pixels moving object (ghost images)
-.RE
-.RE
-
-.TP
-.B quality
-.RS
-.nf
-Values: 1 to 100
-Default: 75
-Description:
-.fi
-.RS
-The quality (in percent) to be used by the jpeg and webp compression
 .RE
 .RE
 
@@ -1118,6 +1107,49 @@ Description:
 .fi
 .RS
 The file type of output images
+.RE
+.RE
+
+.TP
+.B  picture_quality
+.RS
+.nf
+Values: 1 to 100
+Default: 75
+Description:
+.fi
+.RS
+The quality (in percent) to be used by the jpeg and webp compression
+.RE
+.RE
+
+.TP
+.B  picture_exif
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Text to include in a JPEG EXIF comment
+.RE
+.RE
+
+.TP
+.B picture_filename
+.RS
+.nf
+Values: User specified string
+Default: %v-%Y%m%d%H%M%S-%q
+Description:
+.fi
+.RS
+The file path for motion triggered images (jpeg, ppm or webp) relative to target_dir.
+The file extension .jpg, .ppm or .webp is automatically added so do not include this.
+Set to 'preview' together with best-preview feature enables special naming
+convention for preview shots.
+This option accepts the conversion specifiers included at the end of this manual.
 .RE
 .RE
 
@@ -1153,56 +1185,11 @@ This option accepts the conversion specifiers included at the end of this manual
 .RE
 
 .TP
-.B picture_filename
-.RS
-.nf
-Values: User specified string
-Default: %v-%Y%m%d%H%M%S-%q
-Description:
-.fi
-.RS
-The file path for motion triggered images (jpeg, ppm or webp) relative to target_dir.
-The file extension .jpg, .ppm or .webp is automatically added so do not include this.
-Set to 'preview' together with best-preview feature enables special naming
-convention for preview shots.
-This option accepts the conversion specifiers included at the end of this manual.
-.RE
-.RE
-
-.TP
-.B exif_text
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-Text to include in a JPEG EXIF comment
-.RE
-.RE
-
-.TP
-.B max_movie_time
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-Maximum length in seconds of a movie.
-When value is exceeded a new movie file is created.
-The value of 0 means that there is no limit.
-.RE
-.RE
-
-.TP
-.B ffmpeg_output_movies
+.B movie_output
 .RS
 .nf
 Values: on/off
-Default: off
+Default: on
 Description:
 .fi
 .RS
@@ -1211,7 +1198,7 @@ Use ffmpeg to encode movies of the motion.
 .RE
 
 .TP
-.B ffmpeg_output_debug_movies
+.B movie_output_motion
 .RS
 .nf
 Values: on/off
@@ -1224,7 +1211,22 @@ Use ffmpeg to encode movies with only the pixels moving object (ghost images)
 .RE
 
 .TP
-.B ffmpeg_bps
+.B  movie_max_time
+.RS
+.nf
+Values: 0 to unlimited
+Default: 120
+Description:
+.fi
+.RS
+Maximum length in seconds of a movie.
+When value is exceeded a new movie file is created.
+The value of 0 means that there is no limit.
+.RE
+.RE
+
+.TP
+.B  movie_bps
 .RS
 .nf
 Values: 0 to unlimited
@@ -1233,29 +1235,29 @@ Description:
 .fi
 .RS
 Bitrate to be used by the ffmpeg encoder.
-This option is ignored if ffmpeg_variable_bitrate is not 0.
+This option is ignored if movie_quality is not 0.
 .RE
 .RE
 
 .TP
-.B ffmpeg_variable_bitrate
+.B  movie_quality
 .RS
 .nf
 Values: 0 to 100
-Default: 0
+Default: 60
 Description:
 .fi
 .RS
 Enable and define the variable bitrate for the ffmpeg encoder.
-ffmpeg_bps is ignored if variable bitrate is enabled.
-When specified as 0, use the fixed bitrate defined by ffmpeg_bps.
+movie_bps is ignored if variable bitrate is enabled.
+When specified as 0, use the fixed bitrate defined by movie_bps.
 When defined as 1 - 100 varies the quality of the movie.
 A value of 1 is worst quality versus a value of 100 is best quality.
 .RE
 .RE
 
 .TP
-.B ffmpeg_video_codec
+.B  movie_codec
 .RS
 .nf
 Values:
@@ -1273,7 +1275,7 @@ mkv - Matroska H264 encoding
 hevc - H.265 / HEVC (High Efficiency Video Coding)
 .RE
 .RE
-Default: mpeg4
+Default: mkv
 Description:
 .fi
 .RS
@@ -1282,7 +1284,7 @@ For regular motion videos, the container/codec must be available in the ffmpeg i
 .RE
 
 .TP
-.B ffmpeg_duplicate_frames
+.B movie_duplicate_frames
 .RS
 .nf
 Values: on/off
@@ -1295,7 +1297,7 @@ When creating videos, should frames be duplicated in order to keep up with the r
 .RE
 
 .TP
-.B ffmpeg_passthrough
+.B  movie_passthrough
 .RS
 .nf
 Values: on/off
@@ -1323,17 +1325,31 @@ This option accepts the conversion specifiers included at the end of this manual
 .RE
 
 .TP
-.B timelapse_filename
+.B  movie_extpipe_use
 .RS
 .nf
-Values: User specified string
-Default: %Y%m%d-timelapse
+Values: on/off
+Default: off
 Description:
 .fi
 .RS
-File path for timelapse movies relative to target_dir.
-The file extensions(.mpg .avi) are automatically added so do not include them
-This option accepts the conversion specifiers included at the end of this manual.
+Use the external pipe in order to encode videos.
+This is a replacement option for the FFMPEG builtin encoder for movie_output only.
+The options movie_filename and timelapse_filename are also used from the ffmpeg feature
+.RE
+.RE
+
+.TP
+.B  movie_extpipe
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Command line string to receive and process a pipe of images to encode.
+Generally, use '-' for STDIN
 .RE
 .RE
 
@@ -1378,6 +1394,19 @@ File rollover mode for the timelapse video.
 .RE
 
 .TP
+.B timelapse_fps
+.RS
+.nf
+Values: 0 to unlimited
+Default: 30
+Description:
+.fi
+.RS
+Frames per second used for playback of the timelapse video.
+.RE
+.RE
+
+.TP
 .B timelapse_codec
 .RS
 .nf
@@ -1398,15 +1427,17 @@ new file with the name indicated for timelapse.
 .RE
 
 .TP
-.B timelapse_fps
+.B timelapse_filename
 .RS
 .nf
-Values: 0 to unlimited
-Default: 30
+Values: User specified string
+Default: %Y%m%d-timelapse
 Description:
 .fi
 .RS
-Frames per second used for playback of the timelapse video.
+File path for timelapse movies relative to target_dir.
+The file extensions(.mpg .avi) are automatically added so do not include them
+This option accepts the conversion specifiers included at the end of this manual.
 .RE
 .RE
 
@@ -1424,7 +1455,7 @@ Output images to a video4linux loopback device.
 .RE
 
 .TP
-.B motion_video_pipe
+.B  video_pipe_motion
 .RS
 .nf
 Values: User specified string
@@ -1437,7 +1468,20 @@ Output motion images to a video4linux loopback device.
 .RE
 
 .TP
-.B use_extpipe
+.B webcontrol_port
+.RS
+.nf
+Values: 0 to maximum port number
+Default: 0
+Description:
+.fi
+.RS
+Port number for the web control / preview page.
+.RE
+.RE
+
+.TP
+.B  webcontrol_ipv6
 .RS
 .nf
 Values: on/off
@@ -1445,14 +1489,76 @@ Default: off
 Description:
 .fi
 .RS
-Use the external pipe in order to encode videos.
-This is a replacement option for the FFMPEG builtin encoder for ffmpeg_output_movies only.
-The options movie_filename and timelapse_filename are also used from the ffmpeg feature
+Listen to IPv6 localhost instead of IPv4.  This option is also applicable for all streams.
 .RE
 .RE
 
 .TP
-.B extpipe
+.B webcontrol_localhost
+.RS
+.nf
+Values: on/off
+Default: on
+Description:
+.fi
+.RS
+Restrict control connections to localhost only
+.RE
+.RE
+
+.TP
+.B webcontrol_parms
+.RS
+.nf
+Values:
+.RS
+0 = No parameters available to change on web control
+1 = Limited list of parameters available to change
+2 = Advanced list of parameters (usually requires restart to become effective)
+3 = Restricted list of parameters (User IDs, passwords, commands to execute, etc)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The type of parameters that are able to be modified via the web interface.  This parameter can never be modified
+via the web interface and must be specified directly in the configuration file.
+.RE
+.RE
+
+.TP
+.B webcontrol_interface
+.RS
+.nf
+Values: 0-1
+Default: 0
+Description:
+.fi
+.RS
+Specified the web control interface type.  0=css, 1=text
+.RE
+.RE
+
+.TP
+.B webcontrol_auth_method
+.RS
+.nf
+Values:
+.RS
+0 = disabled
+1 = Basic authentication
+2 = MD5 digest (the safer authentication)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The authentication method to use for the webcontrol.
+.RE
+.RE
+
+.TP
+.B webcontrol_authentication
 .RS
 .nf
 Values: User specified string
@@ -1460,13 +1566,13 @@ Default: Not defined
 Description:
 .fi
 .RS
-Command line string to receive and process a pipe of images to encode.
-Generally, use '-' for STDIN
+The username and password to use for authentication of the webcontrol.
+The format is Username:Password
 .RE
 .RE
 
 .TP
-.B ipv6_enabled
+.B webcontrol_tls
 .RS
 .nf
 Values: on/off
@@ -1474,7 +1580,46 @@ Default: off
 Description:
 .fi
 .RS
-Listen to IPv6 localhost instead of IPv4
+When specified as on, use SSL/TLS for the webcontrol.
+.RE
+.RE
+
+.TP
+.B webcontrol_cert
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The full path to the SSL certification file for webcontrol
+.RE
+.RE
+
+.TP
+.B webcontrol_key
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The full path to the SSL key file for webcontrol
+.RE
+.RE
+
+.TP
+.B webcontrol_cors_header
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The header to add for cross orgin on the webcontrol
 .RE
 .RE
 
@@ -1488,6 +1633,121 @@ Description:
 .fi
 .RS
 This option is the port number that the mini-http server listens on for streams of the pictures.
+.RE
+.RE
+
+.TP
+.B stream_localhost
+.RS
+.nf
+Values: on/off
+Default: on
+Description:
+.fi
+.RS
+Restrict stream connections to localhost only
+.RE
+.RE
+
+.TP
+.B stream_auth_method
+.RS
+.nf
+Values:
+.RS
+0 = disabled
+1 = Basic authentication
+2 = MD5 digest (the safer authentication)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The authentication method to use for viewing the stream.
+.RE
+.RE
+
+.TP
+.B stream_authentication
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The username and password to use for authentication of the stream.
+The format is Username:Password
+.RE
+.RE
+
+.TP
+.B stream_tls
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+When specified as on, use SSL/TLS for the stream port.
+.RE
+.RE
+
+.TP
+.B stream_cors_header
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The Access-Control-Allow-Origin header value to be sent with the stream.
+If unspecified, no Access-Control-Allow-Origin header is sent.
+The header allows browsers to access the stream via cross-origin resource sharing (CORS).
+For example, * allows access from browser client code served from any domain.
+.RE
+.RE
+
+.TP
+.B stream_preview_scale
+.RS
+.nf
+Values: 1 to 100
+Default: 25
+Description:
+.fi
+.RS
+This defines what percentage the stream image should be scaled to for the preview page
+.RE
+.RE
+
+.TP
+.B stream_preview_newline
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+When the image is put on the preview page, should the image start on a new line.
+This option allows the user to specify whether the preview images should be side by side
+or stacked on the page.
+.RE
+.RE
+
+.TP
+.B stream_preview_method
+.RS
+.nf
+Values: 0 to 2
+Default: 0
+Description:
+.fi
+.RS
+Method to display images on webcontrol page.  0=Full, 1=Substream, 2=Static
 .RE
 .RE
 
@@ -1531,242 +1791,95 @@ Maximum frame rate to send to stream
 .RE
 
 .TP
-.B stream_localhost
+.B database_type
 .RS
 .nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Restrict stream connections to localhost only
-.RE
-.RE
-
-.TP
-.B stream_auth_method
-.RS
-.nf
-Values:
-.RS
-0 = disabled
-1 = Basic authentication
-2 = MD5 digest (the safer authentication)
-.RE
-Default: 0
-Description:
-.fi
-.RS
-The authentication method to use for viewing the stream.
-.RE
-.RE
-
-.TP
-.B stream_authentication
-.RS
-.nf
-Values: User specified string
+Values: mysql, postgresql, sqlite3
 Default: Not defined
 Description:
 .fi
 .RS
-The username and password to use for authentication of the stream.
-The format is Username:Password
+The type of database being used.
 .RE
 .RE
 
 .TP
-.B stream_cors_header
+.B database_dbname
 .RS
 .nf
-Values: User specified string
+Values: User defined string
 Default: Not defined
 Description:
 .fi
 .RS
-The Access-Control-Allow-Origin header value to be sent with the stream.
-If unspecified, no Access-Control-Allow-Origin header is sent.
-The header allows browsers to access the stream via cross-origin resource sharing (CORS).
-For example, * allows access from browser client code served from any domain.
+The name of the database being used (dbname).  For Sqlite3, the full path to the database.
 .RE
 .RE
 
 .TP
-.B stream_preview_scale
+.B database_host
 .RS
 .nf
-Values: 1 to 100
-Default: 25
+Values: User defined string
+Default: localhost
 Description:
 .fi
 .RS
-This defines what percentage the stream image should be scaled to for the preview page
+The name of the host on which the database is running.
 .RE
 .RE
 
 .TP
-.B stream_preview_method
-.RS
-.nf
-Values: 0 to 2
-Default: 0
-Description:
-.fi
-.RS
-Method to display images on webcontrol page.  0=Full, 1=Substream, 2=Static
-.RE
-.RE
-
-.TP
-.B stream_preview_newline
-.RS
-.nf
-Values: yes/no
-Default: no
-Description:
-.fi
-.RS
-When the image is put on the preview page, should the image start on a new line.
-This option allows the user to specify whether the preview images should be side by side
-or stacked on the page.
-.RE
-.RE
-
-.TP
-.B stream_tls
-.RS
-.nf
-Values:
-.RS
-When specified as on, use SSL/TLS for the stream port.
-.RE
-.RE
-
-.TP
-.B webcontrol_port
+.B database_port
 .RS
 .nf
 Values: 0 to maximum port number
+Default: Not defined
+Description:
+.fi
+.RS
+The port to use in order to access the database.
+Default ports: mysql 3306 , postgresql 5432
+.RE
+.RE
+
+
+.TP
+.B database_user
+.RS
+.nf
+Values: User defined string
+Default: Not Defined
+Description:
+.fi
+.RS
+The username to access the database
+.RE
+.RE
+
+.TP
+.B database_password
+.RS
+.nf
+Values: User defined string
+Default: Not Defined
+Description:
+.fi
+.RS
+The database password for the user to access the database.
+.RE
+.RE
+
+.TP
+.B database_busy_timeout
+.RS
+.nf
+Values: 0 to unlimited
 Default: 0
 Description:
 .fi
 .RS
-Port number for the web control / preview page.
-.RE
-.RE
-
-.TP
-.B webcontrol_localhost
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Restrict control connections to localhost only
-.RE
-.RE
-
-.TP
-.B webcontrol_interface
-.RS
-.nf
-Values: 0-1
-Default: 0
-Description:
-.fi
-.RS
-Specified the web control interface type.  0=css, 1=text
-.RE
-.RE
-
-.TP
-.B webcontrol_parms
-.RS
-.nf
-Values:
-.RS
-0 = No parameters available to change on web control
-1 = Limited list of parameters available to change
-2 = Advanced list of parameters (usually requires restart to become effective)
-3 = Restricted list of parameters (User IDs, passwords, commands to execute, etc)
-.RE
-Default: 0
-Description:
-.fi
-.RS
-The type of parameters that are able to be modified via the web interface.  This parameter can never be modified
-via the web interface and must be specified directly in the configuration file.
-.RE
-.RE
-
-.TP
-.B webcontrol_auth_method
-.RS
-.nf
-Values:
-.RS
-0 = disabled
-1 = Basic authentication
-2 = MD5 digest (the safer authentication)
-.RE
-Default: 0
-Description:
-.fi
-.RS
-The authentication method to use for the webcontrol.
-.RE
-.RE
-
-.TP
-.B webcontrol_authentication
-.RS
-.nf
-Values:
-.RS
-The username and password to use for authentication of the webcontrol.
-The format is Username:Password
-.RE
-.RE
-
-.TP
-.B webcontrol_cors_header
-.RS
-.nf
-Values:
-.RS
-The header to add for cross orgin on the webcontrol
-.RE
-.RE
-
-.TP
-.B webcontrol_tls
-.RS
-.nf
-Values:
-.RS
-When specified as on, use SSL/TLS for the webcontrol.
-.RE
-.RE
-
-.TP
-.B webcontrol_cert
-.RS
-.nf
-Values:
-.RS
-The full path to the SSL certification file for webcontrol
-.RE
-.RE
-
-.TP
-.B webcontrol_key
-.RS
-.nf
-Values:
-.RS
-The full path to the SSL key file for webcontrol
+Database wait time in milliseconds for locked database to be unlocked before returning database locked error
 .RE
 .RE
 
@@ -1775,7 +1888,7 @@ The full path to the SSL key file for webcontrol
 .RS
 .nf
 Values: on/off
-Default: on
+Default: off
 Description:
 .fi
 .RS
@@ -1788,7 +1901,7 @@ Log to the database when creating motion triggered picture file
 .RS
 .nf
 Values: on/off
-Default: on
+Default: off
 Description:
 .fi
 .RS
@@ -1823,36 +1936,6 @@ Log to the database when creating timelapse movies file
 .RE
 
 .TP
-.B sql_query
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-SQL statement to execute when a event occurs.
-Use same conversion specifiers as for text features
-Additional special conversion specifiers are
-.RS
-%n = the number representing the file_type
-%f = filename with full path
-.RE
-Sample table set up (not sql_query):
-.RS
-Mysql:  CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
-.RE
-.RS
-Postgresql: CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
-.RE
-Sample sql_query
-.RS
-insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-.RE
-.RE
-.RE
-
-.TP
 .B sql_query_start
 .RS
 .nf
@@ -1883,20 +1966,7 @@ SQL statement to execute at the end of a event.
 .RE
 
 .TP
-.B database_type
-.RS
-.nf
-Values: mysql, postgresql, sqlite3
-Default: Not defined
-Description:
-.fi
-.RS
-The type of database being used.
-.RE
-.RE
-
-.TP
-.B database_dbname
+.B sql_query
 .RS
 .nf
 Values: User defined string
@@ -1904,73 +1974,24 @@ Default: Not defined
 Description:
 .fi
 .RS
-The name of the database being used (dbname).  For Sqlite3, the full path to the database.
-.RE
-.RE
-
-.TP
-.B database_host
+SQL statement to execute when a event occurs.
+Use same conversion specifiers as for text features
+Additional special conversion specifiers are
 .RS
-.nf
-Values: User defined string
-Default: Not Defined
-Description:
-.fi
-.RS
-The name of the host on which the database is running.
+%n = the number representing the file_type
+%f = filename with full path
 .RE
+Sample table set up (not sql_query):
+.RS
+Mysql:  CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
 .RE
-
-.TP
-.B database_user
 .RS
-.nf
-Values: User defined string
-Default: Not Defined
-Description:
-.fi
-.RS
-The username to access the database
+Postgresql: CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
 .RE
+Sample sql_query
+.RS
+insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
 .RE
-
-.TP
-.B database_password
-.RS
-.nf
-Values: User defined string
-Default: Not Defined
-Description:
-.fi
-.RS
-The database password for the user to access the database.
-.RE
-.RE
-
-.TP
-.B database_port
-.RS
-.nf
-Values: 0 to maximum port number
-Default: Not defined
-Description:
-.fi
-.RS
-The port to use in order to access the database.
-Default ports: mysql 3306 , postgresql 5432
-.RE
-.RE
-
-.TP
-.B database_busy_timeout
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-Database wait time in milliseconds for locked database to be unlocked before returning database locked error
 .RE
 .RE
 

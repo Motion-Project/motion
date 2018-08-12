@@ -40,7 +40,7 @@ struct config conf_template = {
     .pid_file =                        NULL,
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
-    .log_type =                        "ALL",
+    .log_type =                        NULL,
     .quiet =                           1,
     .native_language =                 1,
     .camera_name =                     NULL,
@@ -145,7 +145,7 @@ struct config conf_template = {
     .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
     .timelapse_fps =                   30,
-    .timelapse_codec =                 "mpeg4",
+    .timelapse_codec =                 "mpg",
     .timelapse_filename =              DEF_TIMEPATH,
 
     /* Loopback device configuration parameters */
