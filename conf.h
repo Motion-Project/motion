@@ -19,18 +19,18 @@
  * More parameters may be added later.
  */
 struct config {
-    const char *camera_name;
-    unsigned int log_level;
-    char *log_type_str;
-    char *log_file;
-    int native_language;
-    int setup_mode;
-    int camera_id;
-    int quiet;
-
-    const char *filepath;
-    const char *camera_dir;
-    char *pid_file;
+    /* daemon is directly cast into the cnt context rather than conf */
+    int             setup_mode;
+    char            *pid_file;
+    char            *log_file;
+    unsigned int    log_level;
+    char            *log_type;
+    int             quiet;
+    int             native_language;
+    const char      *camera_name;
+    int             camera_id;
+    const char      *camera_dir;
+    const char      *target_dir;
 
     const char      *video_device;
     char            *vid_control_params;

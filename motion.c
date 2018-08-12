@@ -957,8 +957,8 @@ static int motion_init(struct context *cnt)
         ,_("Camera %d started: motion detection %s"),
         cnt->camera_id, cnt->pause ? _("Disabled"):_("Enabled"));
 
-    if (!cnt->conf.filepath)
-        cnt->conf.filepath = mystrdup(".");
+    if (!cnt->conf.target_dir)
+        cnt->conf.target_dir = mystrdup(".");
 
     if (init_camera_type(cnt) != 0 ) return -3;
 
@@ -3087,10 +3087,10 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
 
-    if ((cnt_list[0]->conf.log_type_str == NULL) ||
-        !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type_str))) {
+    if ((cnt_list[0]->conf.log_type == NULL) ||
+        !(cnt_list[0]->log_type = get_log_type(cnt_list[0]->conf.log_type))) {
         cnt_list[0]->log_type = TYPE_DEFAULT;
-        cnt_list[0]->conf.log_type_str = mystrcpy(cnt_list[0]->conf.log_type_str, "ALL");
+        cnt_list[0]->conf.log_type = mystrcpy(cnt_list[0]->conf.log_type, "ALL");
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Using default log type (%s)"),
                    get_log_type_str(cnt_list[0]->log_type));
     }

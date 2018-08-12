@@ -34,28 +34,30 @@
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
-    .camera_name =                     NULL,
-    .camera_id =                       0,
-    .input =                           DEF_INPUT,
-    .norm =                            0,
-    .quiet =                           1,
-    .lightswitch_percent =             0,
-    .lightswitch_frames =              5,
-    .auto_brightness =                 0,
-    .vid_control_params =              NULL,
-    .roundrobin_frames =               1,
-    .roundrobin_skip =                 1,
-    .roundrobin_switchfilter =         0,
-    .frequency =                       0,
-    .tuner_device =                    NULL,
-    .video_device =                    DEF_VIDEO_DEVICE,
-    .v4l2_palette =                    DEF_PALETTE,
-    .filepath =                        NULL,
+    /* daemon is directly cast into the cnt context rather than conf */
+    .setup_mode =                      0,
     .pid_file =                        NULL,
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
-    .log_type_str =                    NULL,
+    .log_type =                        NULL,
+    .quiet =                           1,
     .native_language =                 1,
+    .camera_name =                     NULL,
+    .camera_id =                       0,
+    .camera_dir =                      NULL,
+    .target_dir =                      NULL,
+
+    .video_device =                    DEF_VIDEO_DEVICE,
+    .vid_control_params =              NULL,
+    .v4l2_palette =                    DEF_PALETTE,
+    .input =                           DEF_INPUT,
+    .norm =                            0,
+    .frequency =                       0,
+    .auto_brightness =                 0,
+    .tuner_device =                    NULL,
+    .roundrobin_frames =               1,
+    .roundrobin_skip =                 1,
+    .roundrobin_switchfilter =         0,
 
     .netcam_url =                      NULL,
     .netcam_highres=                   NULL,
@@ -92,6 +94,8 @@ struct config conf_template = {
     .mask_file =                       NULL,
     .mask_privacy =                    NULL,
     .smart_mask_speed =                0,
+    .lightswitch_percent =             0,
+    .lightswitch_frames =              5,
     .minimum_motion_frames =           1,
     .event_gap =                       DEF_EVENT_GAP,
     .pre_capture =                     0,
@@ -179,9 +183,8 @@ struct config conf_template = {
     .database_user =                   NULL,
     .database_password =               NULL,
     .database_port =                   0,
-    .database_busy_timeout =           0,
+    .database_busy_timeout =           0
 
-    .camera_dir =                      NULL
 };
 
 
@@ -222,7 +225,7 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "process_id_file",
+    "pid_file",
     "# File to store the process ID, also called pid file. (default: not defined)",
     1,
     CONF_OFFSET(pid_file),
@@ -243,7 +246,7 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "logfile",
+    "log_file",
     "# Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)",
     1,
     CONF_OFFSET(log_file),
@@ -264,7 +267,7 @@ config_param config_params[] = {
     "log_type",
     "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",
     1,
-    CONF_OFFSET(log_type_str),
+    CONF_OFFSET(log_type),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -930,7 +933,7 @@ config_param config_params[] = {
     "# Target base directory for pictures and films\n"
     "# Recommended to use absolute path. (Default: current working directory)",
     0,
-    CONF_OFFSET(filepath),
+    CONF_OFFSET(target_dir),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -2047,6 +2050,20 @@ dep_config_param dep_config_params[] = {
     CONF_OFFSET(roundrobin_switchfilter),
     copy_bool
     },
+    {
+    "logfile",
+    "4.1.1",
+    "\"logfile\" replaced with \"log_file\" option.",
+    CONF_OFFSET(log_file),
+    copy_string
+    },
+    {
+    "process_id_file",
+    "4.1.1",
+    "\"process_id_file\" replaced with \"pid_file\" option.",
+    CONF_OFFSET(log_file),
+    copy_string
+    },
     { NULL, NULL, NULL, 0, NULL}
 };
 
@@ -2512,7 +2529,7 @@ struct context **conf_load(struct context **cnt)
 
     /* If log type string was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_type_str[0])
-        cnt[0]->conf.log_type_str = mystrcpy(cnt[0]->conf.log_type_str, cnt[0]->log_type_str);
+        cnt[0]->conf.log_type = mystrcpy(cnt[0]->conf.log_type, cnt[0]->log_type_str);
 
     /* if log level was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_level != -1)

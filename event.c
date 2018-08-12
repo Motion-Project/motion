@@ -436,7 +436,7 @@ static void event_image_detect(struct context *cnt,
             imagepath = DEF_IMAGEPATH;
 
         mystrftime(cnt, filename, sizeof(filename), imagepath, currenttime_tv, NULL, 0);
-        snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
+        snprintf(fullfilename, PATH_MAX, "%s/%s.%s", cnt->conf.target_dir, filename, imageext(cnt));
 
         passthrough = util_check_passthrough(cnt);
         if ((cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -474,7 +474,7 @@ static void event_imagem_detect(struct context *cnt,
 
         /* motion images gets same name as normal images plus an appended 'm' */
         snprintf(filenamem, PATH_MAX, "%sm", filename);
-        snprintf(fullfilenamem, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filenamem, imageext(cnt));
+        snprintf(fullfilenamem, PATH_MAX, "%s/%s.%s", cnt->conf.target_dir, filenamem, imageext(cnt));
 
         put_picture(cnt, fullfilenamem, cnt->imgs.img_motion.image_norm, FTYPE_IMAGE_MOTION);
         event(cnt, EVENT_FILECREATE, NULL, fullfilenamem, (void *)FTYPE_IMAGE, currenttime_tv);
@@ -509,7 +509,7 @@ static void event_image_snapshot(struct context *cnt,
 
         mystrftime(cnt, filepath, sizeof(filepath), snappath, currenttime_tv, NULL, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
-        snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
+        snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.target_dir, filename);
         put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, currenttime_tv);
 
@@ -517,7 +517,7 @@ static void event_image_snapshot(struct context *cnt,
          *  Update symbolic link *after* image has been written so that
          *  the link always points to a valid file.
          */
-        snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cnt->conf.filepath, imageext(cnt));
+        snprintf(linkpath, PATH_MAX, "%s/lastsnap.%s", cnt->conf.target_dir, imageext(cnt));
         remove(linkpath);
 
         if (symlink(filename, linkpath)) {
@@ -528,7 +528,7 @@ static void event_image_snapshot(struct context *cnt,
     } else {
         mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snapshot_filename, currenttime_tv, NULL, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
-        snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
+        snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.target_dir, filename);
         remove(fullfilename);
         put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, currenttime_tv);
@@ -602,7 +602,7 @@ static void event_image_preview(struct context *cnt,
                 imagepath = (char *)DEF_IMAGEPATH;
 
             mystrftime(cnt, filename, sizeof(filename), imagepath, &cnt->imgs.preview_image.timestamp_tv, NULL, 0);
-            snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.filepath, filename, imageext(cnt));
+            snprintf(previewname, PATH_MAX, "%s/%s.%s", cnt->conf.target_dir, filename, imageext(cnt));
 
             passthrough = util_check_passthrough(cnt);
             if ((cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -686,24 +686,24 @@ static void event_create_extpipe(struct context *cnt,
         }
 
         mystrftime(cnt, stamp, sizeof(stamp), moviepath, currenttime_tv, NULL, 0);
-        snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
+        snprintf(cnt->extpipefilename, PATH_MAX - 4, "%s/%s", cnt->conf.target_dir, stamp);
 
-        if (access(cnt->conf.filepath, W_OK)!= 0) {
+        if (access(cnt->conf.target_dir, W_OK)!= 0) {
             /* Permission denied */
             if (errno ==  EACCES) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    ,_("no write access to target directory %s"), cnt->conf.filepath);
+                    ,_("no write access to target directory %s"), cnt->conf.target_dir);
                 return ;
             /* Path not found - create it */
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    ,_("path not found, trying to create it %s ..."), cnt->conf.filepath);
+                    ,_("path not found, trying to create it %s ..."), cnt->conf.target_dir);
                 if (create_path(cnt->extpipefilename) == -1)
                     return ;
             }
             else {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
-                    ,_("error accesing path %s"), cnt->conf.filepath);
+                    ,_("error accesing path %s"), cnt->conf.target_dir);
                 return ;
             }
         }
@@ -858,11 +858,11 @@ static void event_ffmpeg_newfile(struct context *cnt,
             codec = "msmpeg4";
             break;
         }
-        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%s_%sm", cnt->conf.filepath, codec, stamp);
-        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s_%s", cnt->conf.filepath, codec, stamp);
+        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%s_%sm", cnt->conf.target_dir, codec, stamp);
+        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s_%s", cnt->conf.target_dir, codec, stamp);
     } else {
-        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
-        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
+        snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.target_dir, stamp);
+        snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.target_dir, stamp);
     }
     if (cnt->conf.movie_output) {
         cnt->ffmpeg_output = mymalloc(sizeof(struct ffmpeg));
@@ -971,7 +971,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         mystrftime(cnt, tmp, sizeof(tmp), timepath, currenttime_tv, NULL, 0);
 
         /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
-        snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, tmp);
+        snprintf(cnt->timelapsefilename, PATH_MAX - 4, "%s/%s", cnt->conf.target_dir, tmp);
         passthrough = util_check_passthrough(cnt);
         cnt->ffmpeg_timelapse = mymalloc(sizeof(struct ffmpeg));
         if ((cnt->imgs.size_high > 0) && (!passthrough)){
