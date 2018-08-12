@@ -1112,12 +1112,12 @@ static int motion_init(struct context *cnt)
 
 #if defined(HAVE_V4L2) && !defined(__FreeBSD__)
     /* open video loopback devices if enabled */
-    if (cnt->conf.vidpipe) {
+    if (cnt->conf.video_pipe) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Opening video loopback device for normal pictures"));
 
         /* vid_startpipe should get the output dimensions */
-        cnt->pipe = vlp_startpipe(cnt->conf.vidpipe, cnt->imgs.width, cnt->imgs.height);
+        cnt->pipe = vlp_startpipe(cnt->conf.video_pipe, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->pipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -1126,12 +1126,12 @@ static int motion_init(struct context *cnt)
         }
     }
 
-    if (cnt->conf.motionvidpipe) {
+    if (cnt->conf.video_pipe_debug) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Opening video loopback device for motion pictures"));
 
         /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vlp_startpipe(cnt->conf.motionvidpipe, cnt->imgs.width, cnt->imgs.height);
+        cnt->mpipe = vlp_startpipe(cnt->conf.video_pipe_debug, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->mpipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO

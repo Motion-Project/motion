@@ -83,7 +83,6 @@ struct config {
     const char *tuner_device;
     const char *video_device;
     int v4l2_palette;
-    const char *vidpipe;
     const char *filepath;
     char *on_event_start;
     char *on_event_end;
@@ -111,7 +110,6 @@ struct config {
     char *on_movie_end;
     char *on_camera_lost;
     char *on_camera_found;
-    const char *motionvidpipe;
     const char *netcam_url;
     const char *netcam_highres;
     const char *netcam_userpass;
@@ -159,6 +157,9 @@ struct config {
     int             timelapse_fps;
     const char      *timelapse_codec;
     const char      *timelapse_filename;
+
+    const char      *video_pipe;
+    const char      *video_pipe_debug;
 
     int argc;
     char **argv;

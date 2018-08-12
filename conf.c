@@ -92,7 +92,7 @@ struct config conf_template = {
     .tuner_device =                    NULL,
     .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
-    .vidpipe =                         NULL,
+    //.vidpipe =                         NULL,
     .filepath =                        NULL,
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
@@ -120,7 +120,7 @@ struct config conf_template = {
     .on_movie_end =                    NULL,
     .on_camera_lost =                  NULL,
     .on_camera_found =                 NULL,
-    .motionvidpipe =                   NULL,
+    //.motionvidpipe =                   NULL,
     .netcam_url =                      NULL,
     .netcam_highres=                   NULL,
     .netcam_userpass =                 NULL,
@@ -166,12 +166,14 @@ struct config conf_template = {
     .movie_extpipe_use =               0,
     .movie_extpipe =                   NULL,
 
-
     .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
     .timelapse_fps =                   30,
     .timelapse_codec =                 "mpeg4",
     .timelapse_filename =              DEF_TIMEPATH,
+
+    .video_pipe =                      NULL,
+    .video_pipe_debug =                NULL,
 
     .camera_dir =                      NULL
 };
@@ -1174,17 +1176,17 @@ config_param config_params[] = {
     "# Output images to a video4linux loopback device\n"
     "# The value '-' means next available (default: not defined)",
     0,
-    CONF_OFFSET(vidpipe),
+    CONF_OFFSET(video_pipe),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "motion_video_pipe",
+    "video_pipe_debug",
     "# Output motion images to a video4linux loopback device\n"
     "# The value '-' means next available (default: not defined)",
     0,
-    CONF_OFFSET(motionvidpipe),
+    CONF_OFFSET(video_pipe_debug),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -2009,6 +2011,13 @@ dep_config_param dep_config_params[] = {
     "4.1.1",
     "\"exif_text\" replaced with \"picture_exif\" option.",
     CONF_OFFSET(picture_exif),
+    copy_string
+    },
+    {
+    "motion_video_pipe",
+    "4.1.1",
+    "\"motion_video_pipe\" replaced with \"video_pipe_debug\" option.",
+    CONF_OFFSET(video_pipe_debug),
     copy_string
     },
 
