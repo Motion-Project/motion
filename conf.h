@@ -23,7 +23,7 @@ struct config {
     int             setup_mode;
     char            *pid_file;
     char            *log_file;
-    unsigned int    log_level;
+    int             log_level;
     char            *log_type;
     int             quiet;
     int             native_language;
@@ -49,15 +49,15 @@ struct config {
     const char      *netcam_userpass;
     const char      *netcam_keepalive;
     const char      *netcam_proxy;
-    unsigned int    netcam_tolerant_check;
-    unsigned int    netcam_use_tcp;
+    int             netcam_tolerant_check;
+    int             netcam_use_tcp;
 
     const char      *mmalcam_name;
     const char      *mmalcam_control_params;
 
     int             width;
     int             height;
-    int             frame_limit;
+    int             framerate;
     int             minimum_frame_time;
     int             rotate;
     const char      *flip_axis;
@@ -72,7 +72,7 @@ struct config {
     int             emulate_motion;
     int             threshold;
     int             threshold_tune;
-    int             noise;
+    int             noise_level;
     int             noise_tune;
     const char      *despeckle_filter;
     const char      *area_detect;
@@ -155,7 +155,7 @@ struct config {
     const char      *webcontrol_cors_header;
     const char      *webcontrol_authentication;
 
-    int             sql_log_image;
+    int             sql_log_picture;
     int             sql_log_snapshot;
     int             sql_log_movie;
     int             sql_log_timelapse;

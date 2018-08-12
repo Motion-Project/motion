@@ -1151,7 +1151,7 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
 
     curdev->v4l2_private = vid_source;
     vid_source->fd_device = curdev->fd_device;
-    vid_source->fps = cnt->conf.frame_limit;
+    vid_source->fps = cnt->conf.framerate;
     vid_source->pframe = -1;
     vid_source->finish = &cnt->finish;
     vid_source->buffers = NULL;

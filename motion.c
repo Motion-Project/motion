@@ -552,7 +552,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     }
 
     /* Limit framerate */
-    if (img->shot < conf->frame_limit) {
+    if (img->shot < conf->framerate) {
         /*
          * If config option stream_motion is enabled, send the latest motion detected image
          * to the stream but only if it is not the first shot within a second. This is to
@@ -607,7 +607,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
         /* Set inte global context that we are working with this image */
         cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_out];
 
-        if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot < cnt->conf.frame_limit) {
+        if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot < cnt->conf.framerate) {
             if (cnt->log_level >= DBG) {
                 char tmp[32];
                 const char *t;
@@ -1226,7 +1226,7 @@ static int motion_init(struct context *cnt)
 
         /* Set the sql mask file according to the SQL config options*/
 
-        cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
+        cnt->sql_mask = cnt->conf.sql_log_picture * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
                         cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
                         cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
                         cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
@@ -1275,7 +1275,7 @@ static int motion_init(struct context *cnt)
     memset(cnt->imgs.smartmask_buffer, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
 
     /* Set noise level */
-    cnt->noise = cnt->conf.noise;
+    cnt->noise = cnt->conf.noise_level;
 
     /* Set threshold value */
     cnt->threshold = cnt->conf.threshold;
@@ -1331,13 +1331,13 @@ static int motion_init(struct context *cnt)
     cnt->moved = 8;
 
     /* Work out expected frame rate based on config setting */
-    if (cnt->conf.frame_limit < 2)
-        cnt->conf.frame_limit = 2;
+    if (cnt->conf.framerate < 2)
+        cnt->conf.framerate = 2;
 
     /* 2 sec startup delay so FPS is calculated correct */
-    cnt->startup_frames = (cnt->conf.frame_limit * 2) + cnt->conf.pre_capture + cnt->conf.minimum_motion_frames;
+    cnt->startup_frames = (cnt->conf.framerate * 2) + cnt->conf.pre_capture + cnt->conf.minimum_motion_frames;
 
-    cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
+    cnt->required_frame_time = 1000000L / cnt->conf.framerate;
 
     cnt->frame_delay = cnt->required_frame_time;
 
@@ -1346,7 +1346,7 @@ static int motion_init(struct context *cnt)
      * if there is any problem on the allocation, mymalloc does not return.
      */
     cnt->rolling_average_data = NULL;
-    cnt->rolling_average_limit = 10 * cnt->conf.frame_limit;
+    cnt->rolling_average_limit = 10 * cnt->conf.framerate;
     cnt->rolling_average_data = mymalloc(sizeof(cnt->rolling_average_data) * cnt->rolling_average_limit);
 
     /* Preset history buffer with expected frame rate */
@@ -1877,7 +1877,7 @@ static int mlp_capture(struct context *cnt){
         cnt->connectionlosttime = 0;
 
         /* If all is well reset missing_frame_counter */
-        if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
+        if (cnt->missing_frame_counter >= MISSING_FRAMES_TIMEOUT * cnt->conf.framerate) {
             /* If we previously logged starting a grey image, now log video re-start */
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Video signal re-acquired"));
             // event for re-acquired video signal can be called here
@@ -1921,7 +1921,7 @@ static int mlp_capture(struct context *cnt){
     *        flag on lost_connection if :
     *               vid_return_code == NETCAM_RESTART_ERROR
     *        cnt->video_dev < 0
-    *        cnt->missing_frame_counter > (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)
+    *        cnt->missing_frame_counter > (MISSING_FRAMES_TIMEOUT * cnt->conf.framerate)
     */
     } else {
 
@@ -1965,7 +1965,7 @@ static int mlp_capture(struct context *cnt){
         ++cnt->missing_frame_counter;
 
         if (cnt->video_dev >= 0 &&
-            cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit)) {
+            cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.framerate)) {
             memcpy(cnt->current_image->image_norm, cnt->imgs.image_virgin.image_norm, cnt->imgs.size_norm);
         } else {
             cnt->lost_connection = 1;
@@ -1983,7 +1983,7 @@ static int mlp_capture(struct context *cnt){
                       10, 20 * cnt->text_scale, tmpout, cnt->text_scale);
 
             /* Write error message only once */
-            if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.frame_limit) {
+            if (cnt->missing_frame_counter == MISSING_FRAMES_TIMEOUT * cnt->conf.framerate) {
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 // Event for lost video signal can be called from here
@@ -1995,7 +1995,7 @@ static int mlp_capture(struct context *cnt){
              * Only try this when a device is open
              */
             if ((cnt->video_dev > 0) &&
-                (cnt->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cnt->conf.frame_limit)) {
+                (cnt->missing_frame_counter == (MISSING_FRAMES_TIMEOUT * 4) * cnt->conf.framerate)) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Video signal still lost - "
                     "Trying to close video device"));
@@ -2143,7 +2143,7 @@ static void mlp_tuning(struct context *cnt){
      */
     if (cnt->process_thisframe) {
         if (!cnt->conf.noise_tune)
-            cnt->noise = cnt->conf.noise;
+            cnt->noise = cnt->conf.noise_level;
 
         /*
          * threshold tuning if enabled
@@ -2657,7 +2657,7 @@ static void mlp_parmsupdate(struct context *cnt){
          * We update it for every frame in case the config was updated
          * via remote control.
          */
-        cnt->sql_mask = cnt->conf.sql_log_image * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
+        cnt->sql_mask = cnt->conf.sql_log_picture * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
                         cnt->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
                         cnt->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
                         cnt->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
@@ -2682,8 +2682,8 @@ static void mlp_frametiming(struct context *cnt){
      * Work out expected frame rate based on config setting which may
      * have changed from http-control
      */
-    if (cnt->conf.frame_limit)
-        cnt->required_frame_time = 1000000L / cnt->conf.frame_limit;
+    if (cnt->conf.framerate)
+        cnt->required_frame_time = 1000000L / cnt->conf.framerate;
     else
         cnt->required_frame_time = 0;
 

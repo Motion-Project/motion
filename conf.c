@@ -72,7 +72,7 @@ struct config conf_template = {
 
     .width =                           DEF_WIDTH,
     .height =                          DEF_HEIGHT,
-    .frame_limit =                     DEF_MAXFRAMERATE,
+    .framerate =                       DEF_MAXFRAMERATE,
     .minimum_frame_time =              0,
     .rotate =                          0,
     .flip_axis =                       "none",
@@ -87,7 +87,7 @@ struct config conf_template = {
     .emulate_motion =                  0,
     .threshold =                       DEF_CHANGES,
     .threshold_tune =                  0,
-    .noise =                           DEF_NOISELEVEL,
+    .noise_level =                           DEF_NOISELEVEL,
     .noise_tune =                      1,
     .despeckle_filter =                NULL,
     .area_detect =                     NULL,
@@ -169,7 +169,7 @@ struct config conf_template = {
     .webcontrol_key =                  NULL,
     .webcontrol_cors_header =          NULL,
 
-    .sql_log_image =                   1,
+    .sql_log_picture =                 1,
     .sql_log_snapshot =                1,
     .sql_log_movie =                   0,
     .sql_log_timelapse =               0,
@@ -536,7 +536,7 @@ config_param config_params[] = {
     "# Maximum number of frames to be captured per second.\n"
     "# Valid range: 2-100. Default: 100 (almost no limit).",
     0,
-    CONF_OFFSET(frame_limit),
+    CONF_OFFSET(framerate),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
@@ -688,7 +688,7 @@ config_param config_params[] = {
     "noise_level",
     "# Noise threshold for the motion detection (default: 32)",
     0,
-    CONF_OFFSET(noise),
+    CONF_OFFSET(noise_level),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
@@ -1487,7 +1487,7 @@ config_param config_params[] = {
     "############################################################\n\n"
     "# Log to the database when creating motion triggered image file  (default: on)",
     0,
-    CONF_OFFSET(sql_log_image),
+    CONF_OFFSET(sql_log_picture),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED

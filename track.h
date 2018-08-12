@@ -28,7 +28,7 @@ struct trackoptions {
     unsigned int homex;
     unsigned int homey;
     unsigned int iomojo_id;
-    unsigned int active;
+    unsigned int active;            /* This is the track_auto but 'auto' is defined word so use active*/
     unsigned int motorx_reverse;
     unsigned int motory_reverse;
     unsigned int minmaxfound;
