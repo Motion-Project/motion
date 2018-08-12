@@ -19,6 +19,7 @@
  * More parameters may be added later.
  */
 struct config {
+    /* Overall system configuration parameters */
     /* daemon is directly cast into the cnt context rather than conf */
     int             setup_mode;
     char            *pid_file;
@@ -32,6 +33,7 @@ struct config {
     const char      *camera_dir;
     const char      *target_dir;
 
+    /* Capture device configuration parameters */
     const char      *video_device;
     char            *vid_control_params;
     int             v4l2_palette;
@@ -55,6 +57,7 @@ struct config {
     const char      *mmalcam_name;
     const char      *mmalcam_control_params;
 
+    /* Image processing configuration parameters */
     int             width;
     int             height;
     int             framerate;
@@ -69,6 +72,7 @@ struct config {
     int             text_scale;
     const char      *text_event;
 
+    /* Motion detection configuration parameters */
     int             emulate_motion;
     int             threshold;
     int             threshold_tune;
@@ -86,6 +90,7 @@ struct config {
     int             pre_capture;
     int             post_capture;
 
+    /* Script execution configuration parameters */
     char            *on_event_start;
     char            *on_event_end;
     char            *on_picture_save;
@@ -96,6 +101,7 @@ struct config {
     char            *on_camera_lost;
     char            *on_camera_found;
 
+    /* Picture output configuration parameters */
     const char      *picture_output;
     int             picture_output_motion;
     const char      *picture_type;
@@ -103,9 +109,11 @@ struct config {
     const char      *picture_exif;
     const char      *picture_filename;
 
+    /* Snapshot configuration parameters */
     int             snapshot_interval;
     const char      *snapshot_filename;
 
+    /* Movie output configuration parameters */
     int             movie_output;
     int             movie_output_motion;
     int             movie_max_time;
@@ -115,18 +123,21 @@ struct config {
     int             movie_duplicate_frames;
     int             movie_passthrough;
     const char      *movie_filename;
-    int             movie_extpipe_use;      /* ext_pipe on or off */
-    const char      *movie_extpipe;         /* full Command-line for extpipe */
+    int             movie_extpipe_use;
+    const char      *movie_extpipe;
 
+    /* Timelapse movie configuration parameters */
     int             timelapse_interval;
     const char      *timelapse_mode;
     int             timelapse_fps;
     const char      *timelapse_codec;
     const char      *timelapse_filename;
 
+    /* Loopback device configuration parameters */
     const char      *video_pipe;
     const char      *video_pipe_motion;
 
+    /* Webcontrol configuration parameters */
     int             webcontrol_port;
     int             webcontrol_ipv6;
     int             webcontrol_localhost;
@@ -139,6 +150,7 @@ struct config {
     const char      *webcontrol_key;
     const char      *webcontrol_cors_header;
 
+    /* Live stream configuration parameters */
     int             stream_port;
     int             substream_port;
     int             stream_localhost;
@@ -155,6 +167,7 @@ struct config {
     int             stream_maxrate;
     int             stream_limit;
 
+    /* Database and SQL configuration parameters */
     const char      *database_type;
     const char      *database_dbname;
     const char      *database_host;
@@ -171,6 +184,7 @@ struct config {
     const char      *sql_query_stop;
     const char      *sql_query;
 
+    /* Command line parameters */
     int             argc;
     char            **argv;
 };
@@ -185,13 +199,13 @@ typedef const char *(* conf_print_func)(struct context **, char **, int, unsigne
  * description for parameters in the config file
  */
 typedef struct {
-    const char *param_name;           /* name for this parameter                  */
-    const char *param_help;           /* short explanation for parameter          */
-    unsigned int main_thread;         /* belong only to main thread when value>0  */
-    int conf_value;                   /* pointer to a field in struct context     */
+    const char      *param_name;      /* name for this parameter                  */
+    const char      *param_help;      /* short explanation for parameter          */
+    unsigned int    main_thread;      /* belong only to main thread when value>0  */
+    int             conf_value;       /* pointer to a field in struct context     */
     conf_copy_func  copy;             /* a function to set the value in 'config'  */
     conf_print_func print;            /* a function to output the value to a file */
-    int  webui_level;                 /* Enum to display in webui: 0,1,2,3,99(always to never)*/
+    int             webui_level;      /* Enum to display in webui: 0,1,2,3,99(always to never)*/
 } config_param;
 
 extern config_param config_params[];
@@ -200,12 +214,12 @@ extern config_param config_params[];
  * description for deprecated parameters in the config file
  */
 typedef struct {
-    const char *name;           /* Name of the deprecated option */
-    const char *last_version;   /* Last version this option was used in */
-    const char *info;           /* Short text on why it was deprecated (removed, replaced with, etc) */
-    int conf_value;             /* Pointer to the replacement field in struct context */
-    const char *newname;        /* Name of the new parameter */
-    conf_copy_func copy;        /* Function to set the replacement value */
+    const char      *name;          /* Name of the deprecated option */
+    const char      *last_version;  /* Last version this option was used in */
+    const char      *info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
+    int             conf_value;     /* Pointer to the replacement field in struct context */
+    const char      *newname;       /* Name of the new parameter */
+    conf_copy_func  copy;           /* Function to set the replacement value */
 } dep_config_param;
 
 extern dep_config_param dep_config_params[];

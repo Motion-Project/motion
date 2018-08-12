@@ -34,6 +34,7 @@
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
+    /* Overall system configuration parameters */
     /* daemon is directly cast into the cnt context rather than conf */
     .setup_mode =                      0,
     .pid_file =                        NULL,
@@ -47,6 +48,7 @@ struct config conf_template = {
     .camera_dir =                      NULL,
     .target_dir =                      NULL,
 
+    /* Capture device configuration parameters */
     .video_device =                    DEF_VIDEO_DEVICE,
     .vid_control_params =              NULL,
     .v4l2_palette =                    DEF_PALETTE,
@@ -70,6 +72,7 @@ struct config conf_template = {
     .mmalcam_name =                    NULL,
     .mmalcam_control_params =          NULL,
 
+    /* Image processing configuration parameters */
     .width =                           DEF_WIDTH,
     .height =                          DEF_HEIGHT,
     .framerate =                       DEF_MAXFRAMERATE,
@@ -84,10 +87,11 @@ struct config conf_template = {
     .text_scale =                      1,
     .text_event =                      DEF_EVENTSTAMP,
 
+    /* Motion detection configuration parameters */
     .emulate_motion =                  0,
     .threshold =                       DEF_CHANGES,
     .threshold_tune =                  0,
-    .noise_level =                           DEF_NOISELEVEL,
+    .noise_level =                     DEF_NOISELEVEL,
     .noise_tune =                      1,
     .despeckle_filter =                NULL,
     .area_detect =                     NULL,
@@ -101,6 +105,7 @@ struct config conf_template = {
     .pre_capture =                     0,
     .post_capture =                    0,
 
+    /* Script execution configuration parameters */
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
     .on_picture_save =                 NULL,
@@ -111,6 +116,7 @@ struct config conf_template = {
     .on_camera_lost =                  NULL,
     .on_camera_found =                 NULL,
 
+    /* Picture output configuration parameters */
     .picture_output =                  "on",
     .picture_output_motion =           0,
     .picture_type =                    "jpeg",
@@ -118,9 +124,11 @@ struct config conf_template = {
     .picture_exif =                    NULL,
     .picture_filename =                DEF_IMAGEPATH,
 
+    /* Snapshot configuration parameters */
     .snapshot_interval =               0,
     .snapshot_filename =               DEF_SNAPPATH,
 
+    /* Movie output configuration parameters */
     .movie_output =                    1,
     .movie_output_motion =             0,
     .movie_max_time =                  120,
@@ -133,15 +141,18 @@ struct config conf_template = {
     .movie_extpipe_use =               0,
     .movie_extpipe =                   NULL,
 
+    /* Timelapse movie configuration parameters */
     .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
     .timelapse_fps =                   30,
     .timelapse_codec =                 "mpeg4",
     .timelapse_filename =              DEF_TIMEPATH,
 
+    /* Loopback device configuration parameters */
     .video_pipe =                      NULL,
     .video_pipe_motion =               NULL,
 
+    /* Webcontrol configuration parameters */
     .webcontrol_port =                 0,
     .webcontrol_ipv6 =                 0,
     .webcontrol_localhost =            1,
@@ -154,6 +165,7 @@ struct config conf_template = {
     .webcontrol_key =                  NULL,
     .webcontrol_cors_header =          NULL,
 
+    /* Live stream configuration parameters */
     .stream_port =                     0,
     .substream_port =                  0,
     .stream_localhost =                1,
@@ -170,6 +182,7 @@ struct config conf_template = {
     .stream_maxrate =                  1,
     .stream_limit =                    0,
 
+    /* Database and SQL configuration parameters */
     .database_type =                   NULL,
     .database_dbname =                 NULL,
     .database_host =                   "localhost",
@@ -185,8 +198,6 @@ struct config conf_template = {
     .sql_query_start =                 NULL,
     .sql_query_stop =                  NULL,
     .sql_query =                       NULL
-
-
 
 };
 
@@ -213,7 +224,12 @@ static void usage(void);
 #define CONF_OFFSET(varname) ((long)&((struct context *)NULL)->conf.varname)
 #define TRACK_OFFSET(varname) ((long)&((struct context *)NULL)->track.varname)
 
-/* The sequence of these within here determines how they are presented to user*/
+/* The sequence of these within here determines how they are presented to user
+ * Note daemon goes directly to cnt context rather than conf.
+ * Descriptions are limited to one line and few to no references to values since
+ * the motion_guide.html is our single source of documentation and historically
+ * these descriptions were not updated with revisions.
+ */
 config_param config_params[] = {
     {
     "daemon",
@@ -482,7 +498,7 @@ config_param config_params[] = {
     },
     {
     "mmalcam_name",
-    "# Name of mmal camera.  Use vc.ril.camera for pi camera.",
+    "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0,
     CONF_OFFSET(mmalcam_name),
     copy_string,
@@ -539,7 +555,7 @@ config_param config_params[] = {
     },
     {
     "rotate",
-    "# Number of degrees to rotate image. 0, 90, 180 and 270.",
+    "# Number of degrees to rotate image.",
     0,
     CONF_OFFSET(rotate),
     copy_int,
@@ -548,7 +564,7 @@ config_param config_params[] = {
     },
     {
     "flip_axis",
-    "# Flip image over a given axis (none, v=vertical, h=horizontal)",
+    "# Flip image over a given axis",
     0,
     CONF_OFFSET(flip_axis),
     copy_string,
@@ -602,7 +618,7 @@ config_param config_params[] = {
     },
     {
     "text_scale",
-    "# Scale factor for text overlayed on images. (1 - 10)",
+    "# Scale factor for text overlayed on images.",
     0,
     CONF_OFFSET(text_scale),
     copy_int,
@@ -854,7 +870,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Picture output configuration parameters\n"
     "############################################################\n\n"
-    "# Output pictures when motion is detected (on, off, first, best, center)",
+    "# Output pictures when motion is detected",
     0,
     CONF_OFFSET(picture_output),
     copy_string,
@@ -899,7 +915,7 @@ config_param config_params[] = {
     },
     {
     "picture_filename",
-    "# File name for saved pictures relative to target directory (do not include file extension)",
+    "# File name(without extension) for pictures relative to target directory",
     0,
     CONF_OFFSET(picture_filename),
     copy_string,
@@ -920,7 +936,7 @@ config_param config_params[] = {
     },
     {
     "snapshot_filename",
-    "# File name for snapshots relative to target directory (do not include file extension)",
+    "# File name(without extension) for snapshots relative to target directory",
     0,
     CONF_OFFSET(snapshot_filename),
     copy_string,
@@ -959,7 +975,7 @@ config_param config_params[] = {
     },
     {
     "movie_bps",
-    "# The fixed bitrate to be used by the movie encoder",
+    "# The fixed bitrate to be used by the movie encoder. Ignore quality setting",
     0,
     CONF_OFFSET(movie_bps),
     copy_int,
@@ -1004,7 +1020,7 @@ config_param config_params[] = {
     },
     {
     "movie_filename",
-    "# File name for movies relative to target directory (do not include file extension)",
+    "# File name(without extension) for movies relative to target directory",
     0,
     CONF_OFFSET(movie_filename),
     copy_string,
@@ -1061,7 +1077,7 @@ config_param config_params[] = {
     },
     {
     "timelapse_codec",
-    "# Container/Codec for timelapse movie. Valid values: mpg or mpeg4",
+    "# Container/Codec for timelapse movie.",
     0,
     CONF_OFFSET(timelapse_codec),
     copy_string,
@@ -1070,7 +1086,7 @@ config_param config_params[] = {
     },
     {
     "timelapse_filename",
-    "# File name for timelapse movies relative to target directory (do not include file extension)",
+    "# File name(without extension) for timelapse movies relative to target directory",
     0,
     CONF_OFFSET(timelapse_filename),
     copy_string,
@@ -1139,7 +1155,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_interface",
-    "# Type of webcontrol to provide (0=html, 1=raw text/programmatic)",
+    "# Method that webcontrol to use for interface with user.",
     1,
     CONF_OFFSET(webcontrol_interface),
     copy_int,
@@ -1148,7 +1164,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_auth_method",
-    "# The authentication method for the webcontrol (0=none, 1=basic, 2=digest)",
+    "# The authentication method for the webcontrol",
     0,
     CONF_OFFSET(webcontrol_auth_method),
     copy_int,
@@ -1233,7 +1249,7 @@ config_param config_params[] = {
     },
     {
     "stream_auth_method",
-    "# Authentication method for live stream (0=none, 1=basic, 2=digest)",
+    "# Authentication method for live stream.",
     0,
     CONF_OFFSET(stream_auth_method),
     copy_int,
@@ -1287,7 +1303,7 @@ config_param config_params[] = {
     },
     {
     "stream_preview_method",
-    "# Method for showing stream on webcontrol. full=0, substream=1, manual=2.",
+    "# Method for showing stream on webcontrol.",
     0,
     CONF_OFFSET(stream_preview_method),
     copy_int,
@@ -1344,7 +1360,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Database and SQL Configuration parameters\n"
     "############################################################\n\n"
-    "# The type of database being used if any. (mysql, postgresql, sqlite3)",
+    "# The type of database being used if any.",
     0,
     CONF_OFFSET(database_type),
     copy_string,
