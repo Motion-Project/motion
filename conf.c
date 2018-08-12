@@ -220,7 +220,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# System control configuration parameters\n"
     "############################################################\n\n"
-    "# Start in daemon (background) mode and release terminal (default: off)",
+    "# Start in daemon (background) mode and release terminal.",
     1,
     CNT_OFFSET(daemon),
     copy_bool,
@@ -229,10 +229,7 @@ config_param config_params[] = {
     },
     {
     "setup_mode",
-    "############################################################\n"
-    "# Basic Setup Mode\n"
-    "############################################################\n\n"
-    "# Start in Setup-Mode, daemon disabled. (default: off)",
+    "# Start in Setup-Mode, daemon disabled.",
     0,
     CONF_OFFSET(setup_mode),
     copy_bool,
@@ -241,7 +238,7 @@ config_param config_params[] = {
     },
     {
     "pid_file",
-    "# File to store the process ID, also called pid file. (default: not defined)",
+    "# File to store the process ID.",
     1,
     CONF_OFFSET(pid_file),
     copy_string,
@@ -250,7 +247,7 @@ config_param config_params[] = {
     },
     {
     "log_file",
-    "# Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)",
+    "# File to write logs messages into.  If not defined stderr and syslog is used.",
     1,
     CONF_OFFSET(log_file),
     copy_string,
@@ -259,7 +256,7 @@ config_param config_params[] = {
     },
     {
     "log_level",
-    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)",
+    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL).",
     1,
     CONF_OFFSET(log_level),
     copy_int,
@@ -268,7 +265,7 @@ config_param config_params[] = {
     },
     {
     "log_type",
-    "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",
+    "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL).",
     1,
     CONF_OFFSET(log_type),
     copy_string,
@@ -277,9 +274,7 @@ config_param config_params[] = {
     },
     {
     "quiet",
-    "\n############################################################\n"
-    "# Do not sound beeps when detecting motion (default: on)\n"
-    "# Note: Motion never beeps when running in daemon mode.",
+    "# Do not sound beeps when detecting motion",
     0,
     CONF_OFFSET(quiet),
     copy_bool,
@@ -288,7 +283,7 @@ config_param config_params[] = {
     },
     {
     "native_language",
-    "# Native language support. (default: on)",
+    "# Native language support.",
     1,
     CONF_OFFSET(native_language),
     copy_bool,
@@ -297,8 +292,7 @@ config_param config_params[] = {
     },
     {
     "camera_name",
-    "# Name given to a camera. Shown in web interface and may be used with the specifier %$ .\n"
-    "# Default: not defined",
+    "# User defined name for the camera.",
     0,
     CONF_OFFSET(camera_name),
     copy_string,
@@ -307,7 +301,7 @@ config_param config_params[] = {
     },
     {
     "camera_id",
-    "# Id used to label the camera to ensure it is always consistent",
+    "# Numeric identifier for the camera.",
     0,
     CONF_OFFSET(camera_id),
     copy_int,
@@ -317,21 +311,7 @@ config_param config_params[] = {
     /* camera and camera_dir must be last in this list */
     {
     "target_dir",
-    "\n############################################################\n"
-    "# Target Directories and filenames For Images And Films\n"
-    "# For the options snapshot_, picture_, movie_ and timelapse_filename\n"
-    "# you can use conversion specifiers\n"
-    "# %Y = year, %m = month, %d = date,\n"
-    "# %H = hour, %M = minute, %S = second,\n"
-    "# %v = event, %q = frame number, %t = camera id,\n"
-    "# %D = changed pixels, %N = noise level,\n"
-    "# %i and %J = width and height of motion area,\n"
-    "# %K and %L = X and Y coordinates of motion center\n"
-    "# %C = value defined by text_event\n"
-    "# Quotation marks round string are allowed.\n"
-    "############################################################\n\n"
-    "# Target base directory for pictures and films\n"
-    "# Recommended to use absolute path. (Default: current working directory)",
+    "# Target directory for pictures, snapshots and movies",
     0,
     CONF_OFFSET(target_dir),
     copy_string,
@@ -340,11 +320,7 @@ config_param config_params[] = {
     },
     {
     "videodevice",
-    "############################################################\n"
-    "# Capture devices configuration parameters\n"
-    "############################################################\n\n"
-    "# Videodevice to be used for capturing  (default /dev/video0)\n"
-    "# for FreeBSD default is /dev/bktr0",
+    "# Video device (e.g. /dev/video0) to be used for capturing.",
     0,
     CONF_OFFSET(video_device),
     copy_string,
@@ -353,8 +329,7 @@ config_param config_params[] = {
     },
     {
     "vid_control_params",
-    "# video control parameters (device specific control parameters)\n"
-    "# Default: Not defined",
+    "# Parameters to control video device.  See motion_guide.html",
     0,
     CONF_OFFSET(vid_control_params),
     copy_string,
@@ -363,9 +338,7 @@ config_param config_params[] = {
     },
     {
     "v4l2_palette",
-    "# v4l2_palette allows one to choose preferable palette to be use by motion\n"
-    "# See motion_guide.html for the valid options and values.  (default: 17)\n"
-    "#",
+    "# Preferred color palette to be used for the video device",
     0,
     CONF_OFFSET(v4l2_palette),
     copy_int,
@@ -374,8 +347,7 @@ config_param config_params[] = {
     },
     {
     "input",
-    "# The video input to be used (default: -1)\n"
-    "# Should normally be set to 0 or 1 for video/TV cards, and -1 for USB cameras",
+    "# The input number to be used on the video device.",
     0,
     CONF_OFFSET(input),
     copy_int,
@@ -384,8 +356,7 @@ config_param config_params[] = {
     },
     {
     "norm",
-    "# The video norm to use (only for video capture and TV tuner cards)\n"
-    "# Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)",
+    "# The video norm to use for video capture and TV tuner cards.",
     0,
     CONF_OFFSET(norm),
     copy_int,
@@ -394,7 +365,7 @@ config_param config_params[] = {
     },
     {
     "frequency",
-    "# The frequency to set the tuner to (kHz) (only for TV tuner cards) (default: 0)",
+    "# The frequency to set the tuner to (kHz) for TV tuner cards",
     0,
     CONF_OFFSET(frequency),
     copy_int,
@@ -403,8 +374,7 @@ config_param config_params[] = {
     },
     {
     "auto_brightness",
-    "# Use the Motion methods to change brightness/exposure of a video device (default: off).\n"
-    "# Only recommended for cameras without auto brightness/exposure",
+    "# The Motion method to use to change the brightness/exposure on video device.",
     0,
     CONF_OFFSET(auto_brightness),
     copy_int,
@@ -413,7 +383,7 @@ config_param config_params[] = {
     },
     {
     "tunerdevice",
-    "# BSD tuner device to be used for capturing using tuner as source (default /dev/tuner0)\n",
+    "# Device name (e.g. /dev/tuner0) to be used for capturing when using tuner as source",
     0,
     CONF_OFFSET(tuner_device),
     copy_string,
@@ -422,7 +392,7 @@ config_param config_params[] = {
     },
     {
     "roundrobin_frames",
-    "# Number of frames to capture in each roundrobin step (default: 1)",
+    "# Number of frames to capture in each roundrobin step",
     0,
     CONF_OFFSET(roundrobin_frames),
     copy_int,
@@ -431,7 +401,7 @@ config_param config_params[] = {
     },
     {
     "roundrobin_skip",
-    "# Number of frames to skip before each roundrobin step (default: 1)",
+    "# Number of frames to skip before each roundrobin step",
     0,
     CONF_OFFSET(roundrobin_skip),
     copy_int,
@@ -440,7 +410,7 @@ config_param config_params[] = {
     },
     {
     "roundrobin_switchfilter",
-    "# Try to filter out noise generated by roundrobin (default: off)",
+    "# Try to filter out noise generated by roundrobin",
     0,
     CONF_OFFSET(roundrobin_switchfilter),
     copy_bool,
@@ -449,11 +419,7 @@ config_param config_params[] = {
     },
     {
     "netcam_url",
-    "# URL to use if you are using a network camera, size will"
-    "# be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)\n"
-    "# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. "
-    "# A trailing slash may be required for some cameras.\n"
-    "# Default: Not defined",
+    "# The full URL of the network camera stream.",
     0,
     CONF_OFFSET(netcam_url),
     copy_string,
@@ -462,7 +428,7 @@ config_param config_params[] = {
     },
     {
     "netcam_highres",
-    "# High resolution URL for rtsp/rtmp cameras only.  Same format as netcam_url.",
+    "# Optional high resolution URL for rtsp/rtmp cameras only.",
     0,
     CONF_OFFSET(netcam_highres),
     copy_string,
@@ -471,8 +437,7 @@ config_param config_params[] = {
     },
     {
     "netcam_userpass",
-    "# Username and password for network camera (only if required). Default: not defined\n"
-    "# Syntax is user:password",
+    "# Username and password for network camera. Syntax username:password",
     0,
     CONF_OFFSET(netcam_userpass),
     copy_string,
@@ -481,11 +446,7 @@ config_param config_params[] = {
     },
     {
     "netcam_keepalive",
-    "# The setting for keep-alive of network socket, should improve performance on compatible net cameras.\n"
-    "# off:   The historical implementation using HTTP/1.0, closing the socket after each http request.\n"
-    "# force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
-    "# on:    Use HTTP/1.1 requests that support keep alive as default.\n"
-    "# Default: off",
+    "# The method for keep-alive of network socket for mjpeg streams.",
     0,
     CONF_OFFSET(netcam_keepalive),
     copy_string,
@@ -494,9 +455,7 @@ config_param config_params[] = {
     },
     {
     "netcam_proxy",
-    "# URL to use for a netcam proxy server, if required, e.g. \"http://myproxy\".\n"
-    "# If a port number other than 80 is needed, use \"http://myproxy:1234\".\n"
-    "# Default: not defined",
+    "# The URL to use for a netcam proxy server.",
     0,
     CONF_OFFSET(netcam_proxy),
     copy_string,
@@ -505,8 +464,7 @@ config_param config_params[] = {
     },
     {
     "netcam_tolerant_check",
-    "# Set less strict jpeg checks for network cameras with a poor/buggy firmware.\n"
-    "# Default: off",
+    "# Use less strict jpeg checks for network cameras.",
     0,
     CONF_OFFSET(netcam_tolerant_check),
     copy_bool,
@@ -515,8 +473,7 @@ config_param config_params[] = {
     },
     {
     "netcam_use_tcp",
-    "# RTSP connection uses TCP to communicate to the camera. Can prevent image corruption.\n"
-    "# Default: on",
+    "# Use TCP transport for RTSP/RTMP connections to camera.",
     1,
     CONF_OFFSET(netcam_use_tcp),
     copy_bool,
@@ -525,9 +482,7 @@ config_param config_params[] = {
     },
     {
     "mmalcam_name",
-    "# Name of camera to use if you are using a camera accessed through OpenMax/MMAL\n"
-    "# For the raspberry pi official camera, use vc.ril.camera"
-    "# Default: Not defined",
+    "# Name of mmal camera.  Use vc.ril.camera for pi camera.",
     0,
     CONF_OFFSET(mmalcam_name),
     copy_string,
@@ -536,8 +491,7 @@ config_param config_params[] = {
     },
     {
     "mmalcam_control_params",
-    "# Camera control parameters (see raspivid/raspistill tool documentation)\n"
-    "# Default: Not defined",
+    "# Camera control parameters (see raspivid/raspistill tool documentation)",
     0,
     CONF_OFFSET(mmalcam_control_params),
     copy_string,
@@ -549,7 +503,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Image Processing configuration parameters\n"
     "############################################################\n\n"
-    "# Image width (pixels). Valid range: Camera dependent, default: 352",
+    "# Image width in pixels.",
     0,
     CONF_OFFSET(width),
     copy_int,
@@ -558,7 +512,7 @@ config_param config_params[] = {
     },
     {
     "height",
-    "# Image height (pixels). Valid range: Camera dependent, default: 288",
+    "# Image height in pixels.",
     0,
     CONF_OFFSET(height),
     copy_int,
@@ -567,8 +521,7 @@ config_param config_params[] = {
     },
     {
     "framerate",
-    "# Maximum number of frames to be captured per second.\n"
-    "# Valid range: 2-100. Default: 100 (almost no limit).",
+    "# Maximum number of frames to be captured per second.",
     0,
     CONF_OFFSET(framerate),
     copy_int,
@@ -577,9 +530,7 @@ config_param config_params[] = {
     },
     {
     "minimum_frame_time",
-    "# Minimum time in seconds between capturing picture frames from the camera.\n"
-    "# Default: 0 = disabled - the capture rate is given by the camera framerate.\n"
-    "# This option is used when you want to capture images at a rate lower than 2 per second.",
+    "# Minimum time in seconds between capturing picture frames from the camera.",
     0,
     CONF_OFFSET(minimum_frame_time),
     copy_int,
@@ -588,8 +539,7 @@ config_param config_params[] = {
     },
     {
     "rotate",
-    "# Rotate image this number of degrees. The rotation affects all saved images as\n"
-    "# well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.",
+    "# Number of degrees to rotate image. 0, 90, 180 and 270.",
     0,
     CONF_OFFSET(rotate),
     copy_int,
@@ -598,8 +548,7 @@ config_param config_params[] = {
     },
     {
     "flip_axis",
-    "# Flip image over a given axis (vertical or horizontal), vertical means from left to right,\n"
-    "# horizontal means top to bottom. Valid values: none, v and h.",
+    "# Flip image over a given axis (none, v=vertical, h=horizontal)",
     0,
     CONF_OFFSET(flip_axis),
     copy_string,
@@ -608,10 +557,7 @@ config_param config_params[] = {
     },
     {
     "locate_motion_mode",
-    "\n############################################################\n"
-    "# Locate and draw a box around the moving object.\n"
-    "# Valid values: on, off, preview (default: off)\n"
-    "# Set to 'preview' will only draw a box in preview_shot pictures.",
+    "# Draw a locate box around the moving object.",
     0,
     CONF_OFFSET(locate_motion_mode),
     copy_string,
@@ -620,12 +566,7 @@ config_param config_params[] = {
     },
     {
     "locate_motion_style",
-    "# Set the look and style of the locate box if enabled.\n"
-    "# Valid values: box, redbox, cross, redcross (default: box)\n"
-    "# Set to 'box' will draw the traditional box.\n"
-    "# Set to 'redbox' will draw a red box.\n"
-    "# Set to 'cross' will draw a little cross to mark center.\n"
-    "# Set to 'redcross' will draw a little red cross to mark center.",
+    "# Set the look and style of the locate box.",
     0,
     CONF_OFFSET(locate_motion_style),
     copy_string,
@@ -634,9 +575,7 @@ config_param config_params[] = {
     },
     {
     "text_left",
-    "# Draw a user defined text on the images using same options as C function strftime(3)\n"
-    "# Default: Not defined = no text\n"
-    "# Text is placed in lower left corner",
+    "# Text to be overlayed in the lower left corner of images",
     0,
     CONF_OFFSET(text_left),
     copy_string,
@@ -645,9 +584,7 @@ config_param config_params[] = {
     },
     {
     "text_right",
-    "# Draws the timestamp using same options as C function strftime(3)\n"
-    "# Default: %Y-%m-%d\\n%T = date in ISO format and time in 24 hour clock\n"
-    "# Text is placed in lower right corner",
+    "# Text to be overlayed in the lower right corner of images.",
     0,
     CONF_OFFSET(text_right),
     copy_string,
@@ -656,9 +593,7 @@ config_param config_params[] = {
     },
     {
     "text_changes",
-    "# Draw the number of changed pixed on the images (default: off)\n"
-    "# Will normally be set to off except when you setup and adjust the motion settings\n"
-    "# Text is placed in upper right corner",
+    "# Overlay number of changed pixels in upper right corner of images.",
     0,
     CONF_OFFSET(text_changes),
     copy_bool,
@@ -667,7 +602,7 @@ config_param config_params[] = {
     },
     {
     "text_scale",
-    "# Scale characters on image. Valid range: 1 - 10, default: 1",
+    "# Scale factor for text overlayed on images. (1 - 10)",
     0,
     CONF_OFFSET(text_scale),
     copy_int,
@@ -676,12 +611,7 @@ config_param config_params[] = {
     },
     {
     "text_event",
-    "# This option defines the value of the special event conversion specifier %C\n"
-    "# You can use any conversion specifier in this option except %C. Date and time\n"
-    "# values are from the timestamp of the first image in the current event.\n"
-    "# Default: %Y%m%d%H%M%S\n"
-    "# The idea is that %C can be used filenames and text_left/right for creating\n"
-    "# a unique identifier for each event.",
+    "# The special event conversion specifier %C",
     0,
     CONF_OFFSET(text_event),
     copy_string,
@@ -693,7 +623,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Motion detection configuration parameters\n"
     "############################################################\n\n"
-    "# Always save images even if there was no motion (default: off)",
+    "# Always save pictures and movies even if there was no motion.",
     0,
     CONF_OFFSET(emulate_motion),
     copy_bool,
@@ -702,8 +632,7 @@ config_param config_params[] = {
     },
     {
     "threshold",
-    "# Threshold for number of changed pixels in an image that\n"
-    "# triggers motion detection (default: 1500)",
+    "# Threshold for number of changed pixels that triggers motion.",
     0,
     CONF_OFFSET(threshold),
     copy_int,
@@ -712,7 +641,7 @@ config_param config_params[] = {
     },
     {
     "threshold_tune",
-    "# Automatically tune the threshold down if possible (default: off)",
+    "# Enable tuning of the threshold down if possible.",
     0,
     CONF_OFFSET(threshold_tune),
     copy_bool,
@@ -721,7 +650,7 @@ config_param config_params[] = {
     },
     {
     "noise_level",
-    "# Noise threshold for the motion detection (default: 32)",
+    "# Noise threshold for the motion detection.",
     0,
     CONF_OFFSET(noise_level),
     copy_int,
@@ -730,7 +659,7 @@ config_param config_params[] = {
     },
     {
     "noise_tune",
-    "# Automatically tune the noise threshold (default: on)",
+    "# Automatically tune the noise threshold",
     0,
     CONF_OFFSET(noise_tune),
     copy_bool,
@@ -739,10 +668,7 @@ config_param config_params[] = {
     },
     {
     "despeckle_filter",
-    "# Despeckle motion image using (e)rode or (d)ilate or (l)abel (Default: not defined)\n"
-    "# Recommended value is EedDl. Any combination (and number of) of E, e, d, and D is valid.\n"
-    "# (l)abeling must only be used once and the 'l' must be the last letter.\n"
-    "# Comment out to disable",
+    "# Despeckle the image using (E/e)rode or (D/d)ilate or (l)abel.",
     0,
     CONF_OFFSET(despeckle_filter),
     copy_string,
@@ -751,11 +677,7 @@ config_param config_params[] = {
     },
     {
     "area_detect",
-    "# Detect motion in predefined areas (1 - 9). Areas are numbered like that:  1 2 3\n"
-    "# A script (on_area_detected) is started immediately when motion is         4 5 6\n"
-    "# detected in one of the given areas, but only once during an event.        7 8 9\n"
-    "# One or more areas can be specified with this option. Take care: This option\n"
-    "# does NOT restrict detection to these areas! (Default: not defined)",
+    "# Area number used to trigger the on_area_detected script.",
     0,
     CONF_OFFSET(area_detect),
     copy_string,
@@ -764,8 +686,7 @@ config_param config_params[] = {
     },
     {
     "mask_file",
-    "# PGM file to use as a sensitivity mask.\n"
-    "# Full path name to. (Default: not defined)",
+    "# Full path and file name for motion detection mask PGM file.",
     0,
     CONF_OFFSET(mask_file),
     copy_string,
@@ -774,8 +695,7 @@ config_param config_params[] = {
     },
     {
     "mask_privacy",
-    "# PGM file to completely mask out an area of the image.\n"
-    "# Full path name to. (Default: not defined)",
+    "# Full path and file name for privacy mask PGM file.",
     0,
     CONF_OFFSET(mask_privacy),
     copy_string,
@@ -784,8 +704,7 @@ config_param config_params[] = {
     },
     {
     "smart_mask_speed",
-    "# Dynamically create a mask file during operation (default: 0)\n"
-    "# Adjust speed of mask changes from 0 (off) to 10 (fast)",
+    "# The value defining how slow or fast the smart motion mask created and used.",
     0,
     CONF_OFFSET(smart_mask_speed),
     copy_int,
@@ -794,9 +713,7 @@ config_param config_params[] = {
     },
     {
     "lightswitch_percent",
-    "# Ignore sudden massive light intensity changes given as a percentage of the picture\n"
-    "# area that changed intensity. If set to 1, motion will do some kind of\n"
-    "# auto-lightswitch. Valid range: 0 - 100 , default: 0 = disabled",
+    "# Percentage of image that triggers a lightswitch detected.",
     0,
     CONF_OFFSET(lightswitch_percent),
     copy_int,
@@ -805,8 +722,7 @@ config_param config_params[] = {
     },
     {
     "lightswitch_frames",
-    "# When lightswitch is detected, ignore this many frames\n"
-    "# Valid range: 1 - 1000 , default: 5",
+    "# When lightswitch is detected, ignore this many frames",
     0,
     CONF_OFFSET(lightswitch_frames),
     copy_int,
@@ -815,9 +731,7 @@ config_param config_params[] = {
     },
     {
     "minimum_motion_frames",
-    "# Picture frames must contain motion at least the specified number of frames\n"
-    "# in a row before they are detected as true motion. At the default of 1, all\n"
-    "# motion is detected. Valid range: 1 to thousands, recommended 1-5",
+    "# Number of images that must contain motion to trigger an event.",
     0,
     CONF_OFFSET(minimum_motion_frames),
     copy_int,
@@ -826,12 +740,7 @@ config_param config_params[] = {
     },
     {
     "event_gap",
-    "# Event Gap is the seconds of no motion detection that triggers the end of an event.\n"
-    "# An event is defined as a series of motion images taken within a short timeframe.\n"
-    "# Recommended value is 60 seconds (Default). The value -1 is allowed and disables\n"
-    "# events causing all Motion to be written to one single movie file and no pre_capture.\n"
-    "# If set to 0, motion is running in gapless mode. Movies don't have gaps anymore. An\n"
-    "# event ends right after no more motion is detected and post_capture is over.",
+    "# Gap in seconds of no motion detected that triggers the end of an event.",
     0,
     CONF_OFFSET(event_gap),
     copy_int,
@@ -840,11 +749,7 @@ config_param config_params[] = {
     },
     {
     "pre_capture",
-    "# Specifies the number of pre-captured (buffered) pictures from before motion\n"
-    "# was detected that will be output at motion detection.\n"
-    "# Recommended range: 0 to 5 (default: 0)\n"
-    "# Do not use large values! Large values will cause Motion to skip video frames and\n"
-    "# cause unsmooth movies. To smooth movies use larger values of post_capture instead.",
+    "# The number of pre-captured (buffered) pictures from before motion.",
     0,
     CONF_OFFSET(pre_capture),
     copy_int,
@@ -853,7 +758,7 @@ config_param config_params[] = {
     },
     {
     "post_capture",
-    "# Number of frames to capture after motion is no longer detected (default: 0)",
+    "# Number of frames to capture after motion is no longer detected.",
     0,
     CONF_OFFSET(post_capture),
     copy_int,
@@ -865,8 +770,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Script execution configuration parameters\n"
     "############################################################\n\n"
-    "# Command to be executed when an event starts. (default: none)\n"
-    "# An event starts at first motion detected after a period of no motion defined by event_gap",
+    "# Command to be executed when an event starts.",
     0,
     CONF_OFFSET(on_event_start),
     copy_string,
@@ -875,8 +779,7 @@ config_param config_params[] = {
     },
     {
     "on_event_end",
-    "# Command to be executed when an event ends after a period of no motion\n"
-    "# (default: none). The period of no motion is defined by option event_gap.",
+    "# Command to be executed when an event ends.",
     0,
     CONF_OFFSET(on_event_end),
     copy_string,
@@ -885,8 +788,7 @@ config_param config_params[] = {
     },
     {
     "on_picture_save",
-    "# Command to be executed when a picture (.ppm|.jpg|.webp) is saved (default: none)\n"
-    "# To give the filename as an argument to a command append it with %f",
+    "# Command to be executed when a picture is saved.",
     0,
     CONF_OFFSET(on_picture_save),
     copy_string,
@@ -895,8 +797,7 @@ config_param config_params[] = {
     },
     {
     "on_area_detected",
-    "# Command to be executed when motion in a predefined area is detected\n"
-    "# Check option 'area_detect'. (default: none)",
+    "# Command to be executed when motion in a predefined area is detected",
     0,
     CONF_OFFSET(on_area_detected),
     copy_string,
@@ -905,7 +806,7 @@ config_param config_params[] = {
     },
     {
     "on_motion_detected",
-    "# Command to be executed when a motion frame is detected (default: none)",
+    "# Command to be executed when motion is detected",
     0,
     CONF_OFFSET(on_motion_detected),
     copy_string,
@@ -914,8 +815,7 @@ config_param config_params[] = {
     },
     {
     "on_movie_start",
-    "# Command to be executed when a movie file (.mpg|.avi) is created. (default: none)\n"
-    "# To give the filename as an argument to a command append it with %f",
+    "# Command to be executed when a movie file is created.",
     0,
     CONF_OFFSET(on_movie_start),
     copy_string,
@@ -924,8 +824,7 @@ config_param config_params[] = {
     },
     {
     "on_movie_end",
-    "# Command to be executed when a movie file (.mpg|.avi) is closed. (default: none)\n"
-    "# To give the filename as an argument to a command append it with %f",
+    "# Command to be executed when a movie file is closed.",
     0,
     CONF_OFFSET(on_movie_end),
     copy_string,
@@ -934,10 +833,7 @@ config_param config_params[] = {
     },
     {
     "on_camera_lost",
-    "# Command to be executed when a camera can't be opened or if it is lost\n"
-    "# NOTE: There is situations when motion don't detect a lost camera!\n"
-    "# It depends on the driver, some drivers don't detect a lost camera at all\n"
-    "# Some hangs the motion thread. Some even hangs the PC! (default: none)",
+    "# Command to be executed when a camera can't be opened or if it is lost",
     0,
     CONF_OFFSET(on_camera_lost),
     copy_string,
@@ -946,8 +842,7 @@ config_param config_params[] = {
     },
     {
     "on_camera_found",
-    "# Command to be executed when a camera that was lost has been found (default: none)\n"
-    "# NOTE: If motion doesn't properly detect a lost camera, it also won't know it found one.\n",
+    "# Command to be executed when a camera that was lost has been found.",
     0,
     CONF_OFFSET(on_camera_found),
     copy_string,
@@ -959,12 +854,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Picture output configuration parameters\n"
     "############################################################\n\n"
-    "# Output 'normal' pictures when motion is detected (default: on)\n"
-    "# Valid values: on, off, first, best, center\n"
-    "# When set to 'first', only the first picture of an event is saved.\n"
-    "# Picture with most motion of an event is saved when set to 'best'.\n"
-    "# Picture with motion nearest center of picture is saved when set to 'center'.\n"
-    "# Can be used as preview shot for the corresponding movie.",
+    "# Output pictures when motion is detected (on, off, first, best, center)",
     0,
     CONF_OFFSET(picture_output),
     copy_string,
@@ -973,7 +863,7 @@ config_param config_params[] = {
     },
     {
     "picture_output_motion",
-    "# Output pictures with only the pixels moving object (ghost images) (default: off)",
+    "# Output pictures with only the pixels moving object (ghost images)",
     0,
     CONF_OFFSET(picture_output_motion),
     copy_bool,
@@ -982,8 +872,7 @@ config_param config_params[] = {
     },
     {
     "picture_type",
-    "# Type of output images\n"
-    "# Valid values: jpeg, ppm or webp (default: jpeg)",
+    "# Format for the output pictures.",
     0,
     CONF_OFFSET(picture_type),
     copy_string,
@@ -992,7 +881,7 @@ config_param config_params[] = {
     },
     {
     "picture_quality",
-    "# The quality (in percent) to be used by the jpeg and webp compression (default: 75)",
+    "# The quality (in percent) to be used in the picture compression",
     0,
     CONF_OFFSET(picture_quality),
     copy_int,
@@ -1001,9 +890,7 @@ config_param config_params[] = {
     },
     {
     "picture_exif",
-    "# Text to include in a JPEG EXIF comment\n"
-    "# May be any text, including conversion specifiers.\n"
-    "# The EXIF timestamp is included independent of this text.",
+    "# Text to include in a JPEG EXIF comment",
     0,
     CONF_OFFSET(picture_exif),
     copy_string,
@@ -1012,11 +899,7 @@ config_param config_params[] = {
     },
     {
     "picture_filename",
-    "# File path for motion triggered images (jpeg, ppm or webp) relative to target_dir\n"
-    "# Default: "DEF_IMAGEPATH"\n"
-    "# File extension .jpg, .ppm or .webp is automatically added so do not include this\n"
-    "# Set to 'preview' together with best-preview feature enables special naming\n"
-    "# convention for preview shots. See motion guide for details",
+    "# File name for saved pictures relative to target directory (do not include file extension)",
     0,
     CONF_OFFSET(picture_filename),
     copy_string,
@@ -1028,7 +911,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Snapshot output configuration parameters\n"
     "############################################################\n\n"
-    "# Make automated snapshot every N seconds (default: 0 = disabled)",
+    "# Make automated snapshot every N seconds",
     0,
     CONF_OFFSET(snapshot_interval),
     copy_int,
@@ -1037,11 +920,7 @@ config_param config_params[] = {
     },
     {
     "snapshot_filename",
-    "# File path for snapshots (jpeg, ppm or webp) relative to target_dir\n"
-    "# Default: "DEF_SNAPPATH"\n"
-    "# File extension .jpg, .ppm or .webp is automatically added so do not include this.\n"
-    "# Note: A symbolic link called lastsnap.jpg created in the target_dir will always\n"
-    "# point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'",
+    "# File name for snapshots relative to target directory (do not include file extension)",
     0,
     CONF_OFFSET(snapshot_filename),
     copy_string,
@@ -1053,7 +932,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Movie output configuration parameters\n"
     "############################################################\n\n"
-    "# Use ffmpeg to encode movies",
+    "# Create movies of motion events.",
     0,
     CONF_OFFSET(movie_output),
     copy_bool,
@@ -1062,8 +941,7 @@ config_param config_params[] = {
     },
     {
     "movie_output_motion",
-    "# Use ffmpeg to make movies with only the moving pixels\n"
-    "# (ghost images) (default: off)",
+    "# Create movies of moving pixels of motion events.",
     0,
     CONF_OFFSET(movie_output_motion),
     copy_bool,
@@ -1072,8 +950,7 @@ config_param config_params[] = {
     },
     {
     "movie_max_time",
-    "# Maximum length in seconds of a movie\n"
-    "# When value is exceeded a new movie file is created. (Default: 0 = infinite)",
+    "# Maximum length of movie in seconds.",
     0,
     CONF_OFFSET(movie_max_time),
     copy_int,
@@ -1082,8 +959,7 @@ config_param config_params[] = {
     },
     {
     "movie_bps",
-    "# Bitrate to be used by the ffmpeg encoder (default: 400000)\n"
-    "# This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)",
+    "# The fixed bitrate to be used by the movie encoder",
     0,
     CONF_OFFSET(movie_bps),
     copy_int,
@@ -1092,10 +968,7 @@ config_param config_params[] = {
     },
     {
     "movie_quality",
-    "# Enables and defines variable bitrate for the ffmpeg encoder.\n"
-    "# ffmpeg_bps is ignored if variable bitrate is enabled.\n"
-    "# Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps,\n"
-    "# or the range 1 - 100 where 1 means worst quality and 100 is best.",
+    "# The encoding quality of the movie. (0=use bitrate. 1=worst quality, 100=best)",
     0,
     CONF_OFFSET(movie_quality),
     copy_int,
@@ -1104,17 +977,7 @@ config_param config_params[] = {
     },
     {
     "movie_codec",
-    "# Container/Codec to used by ffmpeg for the video compression.\n"
-    "# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
-    "# msmpeg4 is recommended for use with Windows Media Player because\n"
-    "# it requires no installation of codec on the Windows client.\n"
-    "# swf - gives you a flash film with extension .swf\n"
-    "# flv - gives you a flash video with extension .flv\n"
-    "# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )\n"
-    "# mov - QuickTime ( testing )\n"
-    "# mp4 - MPEG-4 Part 14 H264 encoding\n"
-    "# mkv - Matroska H264 encoding\n"
-    "# hevc - H.265 / HEVC (High Efficiency Video Coding)",
+    "# Container/Codec to used for the movie. See motion_guide.html",
     0,
     CONF_OFFSET(movie_codec),
     copy_string,
@@ -1123,8 +986,7 @@ config_param config_params[] = {
     },
     {
     "movie_duplicate_frames",
-    "# Duplicate frames to achieve \"framerate\" fps. \n"
-    "# The resulting movie will appear to freeze for the duplicated frames.",
+    "# Duplicate frames to achieve \"framerate\" fps.",
     0,
     CONF_OFFSET(movie_duplicate_frames),
     copy_bool,
@@ -1133,8 +995,7 @@ config_param config_params[] = {
     },
     {
     "movie_passthrough",
-    "# Pass through the packet without decode/encoding(default: off)"
-    "# Only valid for rtsp/rtmp cameras",
+    "# Pass through from the camera to the movie without decode/encoding.",
     0,
     CONF_OFFSET(movie_passthrough),
     copy_bool,
@@ -1143,9 +1004,7 @@ config_param config_params[] = {
     },
     {
     "movie_filename",
-    "# File path for motion triggered ffmpeg films (movies) relative to target_dir\n"
-    "# File extension is automatically added so do not include this\n"
-    "# This option was previously called ffmpeg_filename",
+    "# File name for movies relative to target directory (do not include file extension)",
     0,
     CONF_OFFSET(movie_filename),
     copy_string,
@@ -1154,10 +1013,7 @@ config_param config_params[] = {
     },
     {
     "movie_extpipe_use",
-    "\n############################################################\n"
-    "# External pipe to video encoder\n"
-    "############################################################\n\n"
-    "# Bool to enable or disable extpipe (default: off)",
+    "# Use pipe and external encoder for creating movies.",
     0,
     CONF_OFFSET(movie_extpipe_use),
     copy_bool,
@@ -1166,8 +1022,7 @@ config_param config_params[] = {
     },
     {
     "movie_extpipe",
-    "# External program (full path and opts) to pipe raw video to\n"
-    "# Generally, use '-' for STDIN...",
+    "# Full path and options for external encoder of movies from raw images",
     0,
     CONF_OFFSET(movie_extpipe),
     copy_string,
@@ -1179,7 +1034,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Timelapse output configuration parameters\n"
     "############################################################\n\n"
-    "# Interval in seconds between timelapse captures.  Default: 0 = off",
+    "# Interval in seconds between timelapse captures.",
     0,
     CONF_OFFSET(timelapse_interval),
     copy_int,
@@ -1206,7 +1061,7 @@ config_param config_params[] = {
     },
     {
     "timelapse_codec",
-    "# Container/Codec for timelapse video. Valid values: mpg or mpeg4",
+    "# Container/Codec for timelapse movie. Valid values: mpg or mpeg4",
     0,
     CONF_OFFSET(timelapse_codec),
     copy_string,
@@ -1215,9 +1070,7 @@ config_param config_params[] = {
     },
     {
     "timelapse_filename",
-    "# File path for timelapse movies relative to target_dir\n"
-    "# Default: "DEF_TIMEPATH"\n"
-    "# File extension is automatically added so do not include this",
+    "# File name for timelapse movies relative to target directory (do not include file extension)",
     0,
     CONF_OFFSET(timelapse_filename),
     copy_string,
@@ -1229,8 +1082,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Loopback pipe configuration parameters\n"
     "############################################################\n\n"
-    "# Output images to a video4linux loopback device\n"
-    "# The value '-' means next available (default: not defined)",
+    "# v4l2 loopback device to receive normal images",
     0,
     CONF_OFFSET(video_pipe),
     copy_string,
@@ -1239,8 +1091,7 @@ config_param config_params[] = {
     },
     {
     "video_pipe_motion",
-    "# Output motion images to a video4linux loopback device\n"
-    "# The value '-' means next available (default: not defined)",
+    "# v4l2 loopback device to receive motion images",
     0,
     CONF_OFFSET(video_pipe_motion),
     copy_string,
@@ -1252,7 +1103,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Webcontrol configuration parameters\n"
     "############################################################\n\n"
-    "# TCP/IP port for the http server to listen on (default: 0 = disabled)",
+    "# Port number used for the webcontrol.",
     1,
     CONF_OFFSET(webcontrol_port),
     copy_int,
@@ -1261,7 +1112,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_ipv6",
-    "# Enable IPv6 (default: off)",
+    "# Enable IPv6 addresses.",
     0,
     CONF_OFFSET(webcontrol_ipv6),
     copy_bool,
@@ -1270,7 +1121,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_localhost",
-    "# Restrict control connections to localhost only (default: on)",
+    "# Restrict webcontrol connections to the localhost.",
     1,
     CONF_OFFSET(webcontrol_localhost),
     copy_bool,
@@ -1279,8 +1130,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_parms",
-    "# Parameters to include on webcontrol.  0=none, 1=limited, 2=advanced, 3=restricted\n"
-    "# Default: 0 (none)",
+    "# Type of configuration options to allow via the webcontrol.",
     1,
     CONF_OFFSET(webcontrol_parms),
     copy_int,
@@ -1289,7 +1139,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_interface",
-    "# Webcontrol 0 = css, 1 = raw text",
+    "# Type of webcontrol to provide (0=html, 1=raw text/programmatic)",
     1,
     CONF_OFFSET(webcontrol_interface),
     copy_int,
@@ -1298,7 +1148,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_auth_method",
-    "# authentication method 0 - 2 (default: 0)",
+    "# The authentication method for the webcontrol (0=none, 1=basic, 2=digest)",
     0,
     CONF_OFFSET(webcontrol_auth_method),
     copy_int,
@@ -1307,8 +1157,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_authentication",
-    "# Authentication for the http based control. Syntax username:password\n"
-    "# Default: not defined (Disabled)",
+    "# Authentication string for the webcontrol. Syntax username:password",
     1,
     CONF_OFFSET(webcontrol_authentication),
     copy_string,
@@ -1317,7 +1166,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_tls",
-    "# Use ssl / tls for webcontrol (default: off)",
+    "# Use ssl / tls for the webcontrol",
     0,
     CONF_OFFSET(webcontrol_tls),
     copy_bool,
@@ -1326,7 +1175,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_cert",
-    "# Certificate file name for tls",
+    "# Full path and file name of the certificate file for tls",
     1,
     CONF_OFFSET(webcontrol_cert),
     copy_string,
@@ -1335,7 +1184,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_key",
-    "# Key file name for tls",
+    "# Full path and file name of the key file for tls",
     1,
     CONF_OFFSET(webcontrol_key),
     copy_string,
@@ -1344,8 +1193,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_cors_header",
-    "# Set the cross-origin resource sharing (CORS) header for webcontrol\n"
-    "# Default: not defined (Disabled)",
+    "# The cross-origin resource sharing (CORS) header for webcontrol",
     0,
     CONF_OFFSET(webcontrol_cors_header),
     copy_uri,
@@ -1358,7 +1206,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Live stream configuration parameters\n"
     "############################################################\n\n"
-    "# The mini-http server listens to this port for requests (default: 0 = disabled)",
+    "# The port number for the live stream.",
     0,
     CONF_OFFSET(stream_port),
     copy_int,
@@ -1367,10 +1215,7 @@ config_param config_params[] = {
     },
     {
     "substream_port",
-    "\n############################################################\n"
-    "# Live Substream Server\n"
-    "############################################################\n\n"
-    "# The mini-http server listens to this port for requests (default: 0 = disabled)",
+    "# The port number for the live substream",
     0,
     CONF_OFFSET(substream_port),
     copy_int,
@@ -1379,7 +1224,7 @@ config_param config_params[] = {
     },
     {
     "stream_localhost",
-    "# Restrict stream connections to localhost only (default: on)",
+    "# Restrict stream connections to the localhost.",
     0,
     CONF_OFFSET(stream_localhost),
     copy_bool,
@@ -1388,10 +1233,7 @@ config_param config_params[] = {
     },
     {
     "stream_auth_method",
-    "# Set the authentication method (default: 0)\n"
-    "# 0 = disabled\n"
-    "# 1 = Basic authentication\n"
-    "# 2 = MD5 digest (the safer authentication)",
+    "# Authentication method for live stream (0=none, 1=basic, 2=digest)",
     0,
     CONF_OFFSET(stream_auth_method),
     copy_int,
@@ -1400,8 +1242,7 @@ config_param config_params[] = {
     },
     {
     "stream_authentication",
-    "# Authentication for the stream. Syntax username:password\n"
-    "# Default: not defined (Disabled)",
+    "# The authentication string for the stream. Syntax username:password",
     1,
     CONF_OFFSET(stream_authentication),
     copy_string,
@@ -1410,7 +1251,7 @@ config_param config_params[] = {
     },
     {
     "stream_tls",
-    "# Use ssl / tls for stream (default: off)",
+    "# Use ssl / tls for stream.",
     0,
     CONF_OFFSET(stream_tls),
     copy_bool,
@@ -1419,8 +1260,7 @@ config_param config_params[] = {
     },
     {
     "stream_cors_header",
-    "# Set the cross-origin resource sharing (CORS) header\n"
-    "# Default: not defined (Disabled)",
+    "# The cross-origin resource sharing (CORS) header for the stream",
     0,
     CONF_OFFSET(stream_cors_header),
     copy_uri,
@@ -1429,7 +1269,7 @@ config_param config_params[] = {
     },
     {
     "stream_preview_scale",
-    "# Percentage to scale the preview stream image (default: 25)",
+    "# Percentage to scale the stream image on the webcontrol.",
     0,
     CONF_OFFSET(stream_preview_scale),
     copy_int,
@@ -1438,7 +1278,7 @@ config_param config_params[] = {
     },
     {
     "stream_preview_newline",
-    "# Have stream preview image start on a new line (default: no)",
+    "# Have the stream image start on a new line of the webcontrol",
     0,
     CONF_OFFSET(stream_preview_newline),
     copy_bool,
@@ -1447,7 +1287,7 @@ config_param config_params[] = {
     },
     {
     "stream_preview_method",
-    "# Method for webcontrol preview. full=0, substream=1, manual=2. (default: 0)",
+    "# Method for showing stream on webcontrol. full=0, substream=1, manual=2.",
     0,
     CONF_OFFSET(stream_preview_method),
     copy_int,
@@ -1456,7 +1296,7 @@ config_param config_params[] = {
     },
     {
     "stream_quality",
-    "# Quality of the jpeg (in percent) images produced (default: 50)",
+    "# Quality of the jpeg images produced for stream.",
     0,
     CONF_OFFSET(stream_quality),
     copy_int,
@@ -1465,7 +1305,7 @@ config_param config_params[] = {
     },
     {
     "stream_grey",
-    "# Send stream in black and white (default: off)",
+    "# Provide the stream images in black and white",
     0,
     CONF_OFFSET(stream_grey),
     copy_bool,
@@ -1474,8 +1314,7 @@ config_param config_params[] = {
     },
     {
     "stream_motion",
-    "# Output frames at 1 fps when no motion is detected and increase to the\n"
-    "# rate given by stream_maxrate when motion is detected (default: off)",
+    "# Output frames at 1 fps when no motion is detected.",
     0,
     CONF_OFFSET(stream_motion),
     copy_bool,
@@ -1484,7 +1323,7 @@ config_param config_params[] = {
     },
     {
     "stream_maxrate",
-    "# Maximum framerate for streams (default: 1)",
+    "# Maximum framerate of images provided for stream",
     0,
     CONF_OFFSET(stream_maxrate),
     copy_int,
@@ -1493,9 +1332,7 @@ config_param config_params[] = {
     },
     {
     "stream_limit",
-    "# Limits the number of images per connection (default: 0 = unlimited)\n"
-    "# Number can be defined by multiplying actual stream rate by desired number of seconds\n"
-    "# Actual stream rate is the smallest of the numbers framerate and stream_maxrate",
+    "# Limit the number of images per connection",
     0,
     CONF_OFFSET(stream_limit),
     copy_int,
@@ -1507,7 +1344,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Database and SQL Configuration parameters\n"
     "############################################################\n\n"
-    "# database type : mysql, postgresql, sqlite3 (default : not defined)",
+    "# The type of database being used if any. (mysql, postgresql, sqlite3)",
     0,
     CONF_OFFSET(database_type),
     copy_string,
@@ -1516,8 +1353,7 @@ config_param config_params[] = {
     },
     {
     "database_dbname",
-    "# database to log to (default: not defined)\n"
-    "# for sqlite3, the full path and name for the database",
+    "# Database name to use. For sqlite3, the full path and name.",
     0,
     CONF_OFFSET(database_dbname),
     copy_string,
@@ -1526,7 +1362,7 @@ config_param config_params[] = {
     },
     {
     "database_host",
-    "# The host on which the database is located (default: localhost)",
+    "# The host on which the database is located",
     0,
     CONF_OFFSET(database_host),
     copy_string,
@@ -1535,8 +1371,7 @@ config_param config_params[] = {
     },
     {
     "database_port",
-    "# Port on which the database is located\n"
-    "# mysql 3306 , postgresql 5432 (default: not defined)",
+    "# Port used by the database.",
     0,
     CONF_OFFSET(database_port),
     copy_int,
@@ -1545,7 +1380,7 @@ config_param config_params[] = {
     },
     {
     "database_user",
-    "# User account name for database (default: not defined)",
+    "# User account name for database.",
     0,
     CONF_OFFSET(database_user),
     copy_string,
@@ -1554,7 +1389,7 @@ config_param config_params[] = {
     },
     {
     "database_password",
-    "# User password for database (default: not defined)",
+    "# User password for database.",
     0,
     CONF_OFFSET(database_password),
     copy_string,
@@ -1563,7 +1398,7 @@ config_param config_params[] = {
     },
     {
     "database_busy_timeout",
-    "# Database wait for unlock time (default: 0)",
+    "# Database wait for unlock time",
     0,
     CONF_OFFSET(database_busy_timeout),
     copy_int,
@@ -1572,7 +1407,7 @@ config_param config_params[] = {
     },
     {
     "sql_log_picture",
-    "# Log to the database when creating motion triggered image file  (default: on)",
+    "# Log to the database when creating motion triggered image file",
     0,
     CONF_OFFSET(sql_log_picture),
     copy_bool,
@@ -1581,7 +1416,7 @@ config_param config_params[] = {
     },
     {
     "sql_log_snapshot",
-    "# Log to the database when creating a snapshot image file (default: on)",
+    "# Log to the database when creating a snapshot image file",
     0,
     CONF_OFFSET(sql_log_snapshot),
     copy_bool,
@@ -1590,7 +1425,7 @@ config_param config_params[] = {
     },
     {
     "sql_log_movie",
-    "# Log to the database when creating motion triggered movie file (default: off)",
+    "# Log to the database when creating motion triggered movie file",
     0,
     CONF_OFFSET(sql_log_movie),
     copy_bool,
@@ -1599,7 +1434,7 @@ config_param config_params[] = {
     },
     {
     "sql_log_timelapse",
-    "# Log to the database when creating timelapse movie file (default: off)",
+    "# Log to the database when creating timelapse movie file",
     0,
     CONF_OFFSET(sql_log_timelapse),
     copy_bool,
@@ -1608,7 +1443,7 @@ config_param config_params[] = {
     },
     {
     "sql_query_start",
-    "# SQL query at event start.  See motion_guide.html\n",
+    "# SQL query at event start.  See motion_guide.html",
     0,
     CONF_OFFSET(sql_query_start),
     copy_string,
@@ -1617,7 +1452,7 @@ config_param config_params[] = {
     },
     {
     "sql_query_stop",
-    "# SQL query at event stop.  See motion_guide.html\n",
+    "# SQL query at event stop.  See motion_guide.html",
     0,
     CONF_OFFSET(sql_query_stop),
     copy_string,
@@ -1626,7 +1461,7 @@ config_param config_params[] = {
     },
     {
     "sql_query",
-    "# SQL query string that is sent to the database.  See motion_guide.html\n",
+    "# SQL query string that is sent to the database.  See motion_guide.html",
     0,
     CONF_OFFSET(sql_query),
     copy_string,
@@ -1638,9 +1473,7 @@ config_param config_params[] = {
     "############################################################\n"
     "# Tracking configuration parameters\n"
     "############################################################\n\n"
-    "# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo, 6=servo)\n"
-    "# The generic type enables the definition of motion center and motion size to\n"
-    "# be used with the conversion specifiers for options like on_motion_detected",
+    "# Method used by tracking camera. See motion_guide.html",
     0,
     TRACK_OFFSET(type),
     copy_int,
@@ -1649,7 +1482,7 @@ config_param config_params[] = {
     },
     {
     "track_auto",
-    "# Enable auto tracking (default: off)",
+    "# Enable auto tracking",
     0,
     TRACK_OFFSET(active),
     copy_bool,
@@ -1658,7 +1491,7 @@ config_param config_params[] = {
     },
     {
     "track_port",
-    "# Serial port of motor (default: none)",
+    "# Serial port of motor",
     0,
     TRACK_OFFSET(port),
     copy_string,
@@ -1667,7 +1500,7 @@ config_param config_params[] = {
     },
     {
     "track_motorx",
-    "# Motor number for x-axis (default: 0)",
+    "# Motor number for x-axis",
     0,
     TRACK_OFFSET(motorx),
     copy_int,
@@ -1676,7 +1509,7 @@ config_param config_params[] = {
     },
     {
     "track_motorx_reverse",
-    "# Set motorx reverse (default: off)",
+    "# Set motorx reverse",
     0,
     TRACK_OFFSET(motorx_reverse),
     copy_bool,
@@ -1685,7 +1518,7 @@ config_param config_params[] = {
     },
     {
     "track_motory",
-    "# Motor number for y-axis (default: 0)",
+    "# Motor number for y-axis",
     0,
     TRACK_OFFSET(motory),
     copy_int,
@@ -1694,7 +1527,7 @@ config_param config_params[] = {
     },
     {
     "track_motory_reverse",
-    "# Set motory reverse (default: off)",
+    "# Set motory reverse",
     0,
     TRACK_OFFSET(motory_reverse),
     copy_bool,
@@ -1703,7 +1536,7 @@ config_param config_params[] = {
     },
     {
     "track_maxx",
-    "# Maximum value on x-axis (default: 0)",
+    "# Maximum value on x-axis",
     0,
     TRACK_OFFSET(maxx),
     copy_int,
@@ -1712,7 +1545,7 @@ config_param config_params[] = {
     },
     {
     "track_minx",
-    "# Minimum value on x-axis (default: 0)",
+    "# Minimum value on x-axis",
     0,
     TRACK_OFFSET(minx),
     copy_int,
@@ -1721,7 +1554,7 @@ config_param config_params[] = {
     },
     {
     "track_maxy",
-    "# Maximum value on y-axis (default: 0)",
+    "# Maximum value on y-axis",
     0,
     TRACK_OFFSET(maxy),
     copy_int,
@@ -1730,7 +1563,7 @@ config_param config_params[] = {
     },
     {
     "track_miny",
-    "# Minimum value on y-axis (default: 0)",
+    "# Minimum value on y-axis",
     0,
     TRACK_OFFSET(miny),
     copy_int,
@@ -1739,7 +1572,7 @@ config_param config_params[] = {
     },
     {
     "track_homex",
-    "# Center value on x-axis (default: 0)",
+    "# Center value on x-axis",
     0,
     TRACK_OFFSET(homex),
     copy_int,
@@ -1748,7 +1581,7 @@ config_param config_params[] = {
     },
     {
     "track_homey",
-    "# Center value on y-axis (default: 0)",
+    "# Center value on y-axis",
     0,
     TRACK_OFFSET(homey),
     copy_int,
@@ -1757,7 +1590,7 @@ config_param config_params[] = {
     },
     {
     "track_iomojo_id",
-    "# ID of an iomojo camera if used (default: 0)",
+    "# ID of an iomojo camera if used",
     0,
     TRACK_OFFSET(iomojo_id),
     copy_int,
@@ -1766,9 +1599,7 @@ config_param config_params[] = {
     },
     {
     "track_step_angle_x",
-    "# Angle in degrees the camera moves per step on the X-axis\n"
-    "# with auto-track (default: 10)\n"
-    "# Currently only used with pwc type cameras",
+    "# Angle in degrees the camera moves per step on the X-axis with auto-track",
     0,
     TRACK_OFFSET(step_angle_x),
     copy_int,
@@ -1777,9 +1608,7 @@ config_param config_params[] = {
     },
     {
     "track_step_angle_y",
-    "# Angle in degrees the camera moves per step on the Y-axis\n"
-    "# with auto-track (default: 10)\n"
-    "# Currently only used with pwc type cameras",
+    "# Angle in degrees the camera moves per step on the Y-axis with auto-track.",
     0,
     TRACK_OFFSET(step_angle_y),
     copy_int,
@@ -1788,8 +1617,7 @@ config_param config_params[] = {
     },
     {
     "track_move_wait",
-    "# Delay to wait for after tracking movement as number\n"
-    "# of picture frames (default: 10)",
+    "# Delay to wait for after tracking movement as number of picture frames.",
     0,
     TRACK_OFFSET(move_wait),
     copy_int,
@@ -1798,7 +1626,7 @@ config_param config_params[] = {
     },
     {
     "track_speed",
-    "# Speed to set the motor to (stepper motor option) (default: 255)",
+    "# Speed to set the motor to (stepper motor option)",
     0,
     TRACK_OFFSET(speed),
     copy_int,
@@ -1807,7 +1635,7 @@ config_param config_params[] = {
     },
     {
     "track_stepsize",
-    "# Number of steps to make (stepper motor option) (default: 40)",
+    "# Number of steps to make (stepper motor option)",
     0,
     TRACK_OFFSET(stepsize),
     copy_int,
@@ -1816,8 +1644,7 @@ config_param config_params[] = {
     },
     {
     "track_generic_move",
-    "# Command to execute to move a camera in generic tracking mode (default: none)\n"
-    "# NOTE: Several data are provided as environment variables on the form TRACK_xxx.\n",
+    "# Command to execute to move a camera in generic tracking mode",
     0,
     TRACK_OFFSET(generic_move),
     copy_string,
@@ -1826,12 +1653,9 @@ config_param config_params[] = {
     },
     {
     "camera",
-    "\n##############################################################\n"
+    "##############################################################\n"
     "# Camera config files - One for each camera.\n"
-    "# Except if only one camera - You only need this config file.\n"
-    "# If you have more than one camera you MUST define one camera\n"
-    "# config file for each camera in addition to this config file.\n"
-    "##############################################################\n",
+    "##############################################################",
     1,
     0,
     config_camera,
@@ -1841,11 +1665,9 @@ config_param config_params[] = {
     /* using a conf.d style camera addition */
     {
     "camera_dir",
-    "\n##############################################################\n"
-    "# Camera config directory\n"
-    "# Any files ending in '.conf' in this directory will be read\n"
-    "# as a camera config file.\n"
-    "##############################################################\n",
+    "##############################################################\n"
+    "# Directory to read '.conf' files for cameras.\n"
+    "##############################################################",
     1,
     CONF_OFFSET(camera_dir),
     read_camera_dir,
