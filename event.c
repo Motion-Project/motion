@@ -458,7 +458,7 @@ static void event_imagem_detect(struct context *cnt,
     char filename[PATH_MAX];
     char filenamem[PATH_MAX];
 
-    if (conf->picture_output_debug) {
+    if (conf->picture_output_motion) {
         const char *imagepath;
 
         /*
@@ -790,7 +790,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
     long codenbr;
     int retcd;
 
-    if (!cnt->conf.movie_output && !cnt->conf.movie_output_debug)
+    if (!cnt->conf.movie_output && !cnt->conf.movie_output_motion)
         return;
 
     /*
@@ -908,38 +908,38 @@ static void event_ffmpeg_newfile(struct context *cnt,
         event(cnt, EVENT_FILECREATE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, currenttime_tv);
     }
 
-    if (cnt->conf.movie_output_debug) {
-        cnt->ffmpeg_output_debug = mymalloc(sizeof(struct ffmpeg));
-        cnt->ffmpeg_output_debug->width  = cnt->imgs.width;
-        cnt->ffmpeg_output_debug->height = cnt->imgs.height;
-        cnt->ffmpeg_output_debug->rtsp_data = NULL;
-        cnt->ffmpeg_output_debug->tlapse = TIMELAPSE_NONE;
-        cnt->ffmpeg_output_debug->fps = cnt->movie_fps;
-        cnt->ffmpeg_output_debug->bps = cnt->conf.movie_bps;
-        cnt->ffmpeg_output_debug->filename = cnt->motionfilename;
-        cnt->ffmpeg_output_debug->quality = cnt->conf.movie_quality;
-        cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
-        cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_output_debug->last_pts = -1;
-        cnt->ffmpeg_output_debug->base_pts = 0;
-        cnt->ffmpeg_output_debug->gop_cnt = 0;
-        cnt->ffmpeg_output_debug->codec_name = codec;
+    if (cnt->conf.movie_output_motion) {
+        cnt->ffmpeg_output_motion = mymalloc(sizeof(struct ffmpeg));
+        cnt->ffmpeg_output_motion->width  = cnt->imgs.width;
+        cnt->ffmpeg_output_motion->height = cnt->imgs.height;
+        cnt->ffmpeg_output_motion->rtsp_data = NULL;
+        cnt->ffmpeg_output_motion->tlapse = TIMELAPSE_NONE;
+        cnt->ffmpeg_output_motion->fps = cnt->movie_fps;
+        cnt->ffmpeg_output_motion->bps = cnt->conf.movie_bps;
+        cnt->ffmpeg_output_motion->filename = cnt->motionfilename;
+        cnt->ffmpeg_output_motion->quality = cnt->conf.movie_quality;
+        cnt->ffmpeg_output_motion->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->ffmpeg_output_motion->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->ffmpeg_output_motion->last_pts = -1;
+        cnt->ffmpeg_output_motion->base_pts = 0;
+        cnt->ffmpeg_output_motion->gop_cnt = 0;
+        cnt->ffmpeg_output_motion->codec_name = codec;
         if (strcmp(cnt->conf.movie_codec, "test") == 0) {
-            cnt->ffmpeg_output_debug->test_mode = TRUE;
+            cnt->ffmpeg_output_motion->test_mode = TRUE;
         } else {
-            cnt->ffmpeg_output_debug->test_mode = FALSE;
+            cnt->ffmpeg_output_motion->test_mode = FALSE;
         }
-        cnt->ffmpeg_output_debug->motion_images = TRUE;
-        cnt->ffmpeg_output_debug->passthrough = FALSE;
-        cnt->ffmpeg_output_debug->high_resolution = FALSE;
-        cnt->ffmpeg_output_debug->rtsp_data = NULL;
+        cnt->ffmpeg_output_motion->motion_images = TRUE;
+        cnt->ffmpeg_output_motion->passthrough = FALSE;
+        cnt->ffmpeg_output_motion->high_resolution = FALSE;
+        cnt->ffmpeg_output_motion->rtsp_data = NULL;
 
-        retcd = ffmpeg_open(cnt->ffmpeg_output_debug);
+        retcd = ffmpeg_open(cnt->ffmpeg_output_motion);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("ffopen_open error creating (motion) file [%s]"), cnt->motionfilename);
-            free(cnt->ffmpeg_output_debug);
-            cnt->ffmpeg_output_debug = NULL;
+            free(cnt->ffmpeg_output_motion);
+            cnt->ffmpeg_output_motion = NULL;
             return;
         }
     }
@@ -1046,8 +1046,8 @@ static void event_ffmpeg_put(struct context *cnt,
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
-    if (cnt->ffmpeg_output_debug) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output_debug, &cnt->imgs.img_motion, currenttime_tv) == -1) {
+    if (cnt->ffmpeg_output_motion) {
+        if (ffmpeg_put_image(cnt->ffmpeg_output_motion, &cnt->imgs.img_motion, currenttime_tv) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
@@ -1067,10 +1067,10 @@ static void event_ffmpeg_closefile(struct context *cnt,
         event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, currenttime_tv);
     }
 
-    if (cnt->ffmpeg_output_debug) {
-        ffmpeg_close(cnt->ffmpeg_output_debug);
-        free(cnt->ffmpeg_output_debug);
-        cnt->ffmpeg_output_debug = NULL;
+    if (cnt->ffmpeg_output_motion) {
+        ffmpeg_close(cnt->ffmpeg_output_motion);
+        free(cnt->ffmpeg_output_motion);
+        cnt->ffmpeg_output_motion = NULL;
         event(cnt, EVENT_FILECLOSE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, currenttime_tv);
     }
 

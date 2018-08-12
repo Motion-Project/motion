@@ -470,7 +470,7 @@ struct context {
     int movie_last_shot;
 
     struct ffmpeg *ffmpeg_output;
-    struct ffmpeg *ffmpeg_output_debug;
+    struct ffmpeg *ffmpeg_output_motion;
     struct ffmpeg *ffmpeg_timelapse;
 
     char timelapsefilename[PATH_MAX];

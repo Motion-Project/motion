@@ -113,7 +113,7 @@ struct config conf_template = {
 
     .picture_type =                    "jpeg",
     .picture_output =                  "on",
-    .picture_output_debug =            0,
+    .picture_output_motion =           0,
     .picture_quality =                 75,
     .picture_exif =                    NULL,
     .picture_filename =                DEF_IMAGEPATH,
@@ -122,7 +122,7 @@ struct config conf_template = {
     .snapshot_filename =               DEF_SNAPPATH,
 
     .movie_output =                    1,
-    .movie_output_debug =              0,
+    .movie_output_motion =             0,
     .movie_max_time =                  120,
     .movie_bps =                       400000,
     .movie_quality =                   60,
@@ -140,7 +140,7 @@ struct config conf_template = {
     .timelapse_filename =              DEF_TIMEPATH,
 
     .video_pipe =                      NULL,
-    .video_pipe_debug =                NULL,
+    .video_pipe_motion =               NULL,
 
     .stream_port =                     0,
     .substream_port =                  0,
@@ -956,10 +956,10 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "picture_output_debug",
+    "picture_output_motion",
     "# Output pictures with only the pixels moving object (ghost images) (default: off)",
     0,
-    CONF_OFFSET(picture_output_debug),
+    CONF_OFFSET(picture_output_motion),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
@@ -1042,11 +1042,11 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "movie_output_debug",
+    "movie_output_motion",
     "# Use ffmpeg to make movies with only the moving pixels\n"
     "# (ghost images) (default: off)",
     0,
-    CONF_OFFSET(movie_output_debug),
+    CONF_OFFSET(movie_output_motion),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
@@ -1191,11 +1191,11 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "video_pipe_debug",
+    "video_pipe_motion",
     "# Output motion images to a video4linux loopback device\n"
     "# The value '-' means next available (default: not defined)",
     0,
-    CONF_OFFSET(video_pipe_debug),
+    CONF_OFFSET(video_pipe_motion),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -1946,9 +1946,9 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_output_debug_movies",
     "4.1.1",
-    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_debug\" option.",
-    CONF_OFFSET(movie_output_debug),
-    "movie_output_debug",
+    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_motion\" option.",
+    CONF_OFFSET(movie_output_motion),
+    "movie_output_motion",
     copy_bool
     },
     {
@@ -2026,9 +2026,9 @@ dep_config_param dep_config_params[] = {
     {
     "output_debug_pictures",
     "4.1.1",
-    "\"output_debug_pictures\" replaced with \"picture_output_debug\" option.",
-    CONF_OFFSET(picture_output_debug),
-    "picture_output_debug",
+    "\"output_debug_pictures\" replaced with \"picture_output_motion\" option.",
+    CONF_OFFSET(picture_output_motion),
+    "picture_output_motion",
     copy_bool
     },
     {
@@ -2050,9 +2050,9 @@ dep_config_param dep_config_params[] = {
     {
     "motion_video_pipe",
     "4.1.1",
-    "\"motion_video_pipe\" replaced with \"video_pipe_debug\" option.",
-    CONF_OFFSET(video_pipe_debug),
-    "video_pipe_debug",
+    "\"motion_video_pipe\" replaced with \"video_pipe_motion\" option.",
+    CONF_OFFSET(video_pipe_motion),
+    "video_pipe_motion",
     copy_string
     },
     {

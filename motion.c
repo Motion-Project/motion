@@ -566,7 +566,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
          * Save motion jpeg, if configured
          * Output the image_out (motion) picture.
          */
-        if (conf->picture_output_debug)
+        if (conf->picture_output_motion)
             event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tv);
     }
 
@@ -1126,12 +1126,12 @@ static int motion_init(struct context *cnt)
         }
     }
 
-    if (cnt->conf.video_pipe_debug) {
+    if (cnt->conf.video_pipe_motion) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Opening video loopback device for motion pictures"));
 
         /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vlp_startpipe(cnt->conf.video_pipe_debug, cnt->imgs.width, cnt->imgs.height);
+        cnt->mpipe = vlp_startpipe(cnt->conf.video_pipe_motion, cnt->imgs.width, cnt->imgs.height);
 
         if (cnt->mpipe < 0) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -2207,17 +2207,17 @@ static void mlp_overlay(struct context *cnt){
      */
 
     /* Smartmask overlay */
-    if (cnt->smartmask_speed && (cnt->conf.picture_output_debug || cnt->conf.movie_output_debug ||
+    if (cnt->smartmask_speed && (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
         cnt->conf.setup_mode))
         overlay_smartmask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Largest labels overlay */
-    if (cnt->imgs.largest_label && (cnt->conf.picture_output_debug || cnt->conf.movie_output_debug ||
+    if (cnt->imgs.largest_label && (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
         cnt->conf.setup_mode))
         overlay_largest_label(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Fixed mask overlay */
-    if (cnt->imgs.mask && (cnt->conf.picture_output_debug || cnt->conf.movie_output_debug ||
+    if (cnt->imgs.mask && (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
         cnt->conf.setup_mode))
         overlay_fixed_mask(cnt, cnt->imgs.img_motion.image_norm);
 

@@ -98,7 +98,7 @@ struct config {
 
     const char      *picture_type;
     const char      *picture_output;
-    int             picture_output_debug;
+    int             picture_output_motion;
     int             picture_quality;
     const char      *picture_exif;
     const char      *picture_filename;
@@ -107,7 +107,7 @@ struct config {
     const char      *snapshot_filename;
 
     int             movie_output;
-    int             movie_output_debug;
+    int             movie_output_motion;
     int             movie_max_time;
     int             movie_bps;
     int             movie_quality;
@@ -125,7 +125,7 @@ struct config {
     const char      *timelapse_filename;
 
     const char      *video_pipe;
-    const char      *video_pipe_debug;
+    const char      *video_pipe_motion;
 
     int             stream_port;
     int             substream_port;
