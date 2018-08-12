@@ -4965,12 +4965,8 @@
           <li> Default: 50</li>
         </ul>
         <p></p>
-        Quality setting in percent for the mjpeg picture frames transferred over the webcam connection.
-        Keep it low to restrict needed bandwidth.
-        <br />The mjpeg stream consists of a header followed by jpeg frames separated by content-length
-        and the boundary string.
-        <br />The quality level defines the size of the individual jpeg pictures in the mjpeg stream.
-        If you set it too high you need a lot of bandwidth to view the stream.
+        Quality setting in percent for the jpeg picture frames transferred over the live stream connection.
+        When it is set to a low number, it will lower the bandwidth required to stream the images.
         <p></p>
 
         <h3><a name="stream_grey"></a> stream_grey </h3>
@@ -5228,8 +5224,6 @@
 
       <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
       <ul>
-        <p></p>
-        This is <strike>still</strike> permanently at the experimental stage.
         <p></p>
         Motion can move the camera to a fixed position given in degrees pan (left-right) and tilt (down-up).
         Movement can be set with absolute coordinates or relative to current position. There is also an auto tracking
