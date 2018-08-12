@@ -40,7 +40,7 @@ struct config conf_template = {
     .pid_file =                        NULL,
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
-    .log_type =                        NULL,
+    .log_type =                        "ALL",
     .quiet =                           1,
     .native_language =                 1,
     .camera_name =                     NULL,
@@ -117,7 +117,7 @@ struct config conf_template = {
     .on_camera_found =                 NULL,
 
     /* Picture output configuration parameters */
-    .picture_output =                  "on",
+    .picture_output =                  "off",
     .picture_output_motion =           0,
     .picture_type =                    "jpeg",
     .picture_quality =                 75,
@@ -191,8 +191,8 @@ struct config conf_template = {
     .database_password =               NULL,
     .database_busy_timeout =           0,
 
-    .sql_log_picture =                 1,
-    .sql_log_snapshot =                1,
+    .sql_log_picture =                 0,
+    .sql_log_snapshot =                0,
     .sql_log_movie =                   0,
     .sql_log_timelapse =               0,
     .sql_query_start =                 NULL,
@@ -1857,9 +1857,9 @@ dep_config_param dep_config_params[] = {
     copy_bool
     },
     {
-    "useextpipe",
+    "use_extpipe",
     "4.1.1",
-    "\"useextpipe\" replaced with \"movie_extpipe_use\" option.",
+    "\"use_extpipe\" replaced with \"movie_extpipe_use\" option.",
     CONF_OFFSET(movie_extpipe_use),
     "movie_extpipe_use",
     copy_bool
