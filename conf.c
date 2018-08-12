@@ -47,7 +47,6 @@ struct config conf_template = {
     .motion_img =                      0,
     .emulate_motion =                  0,
     .event_gap =                       DEF_EVENT_GAP,
-    .max_movie_time =                  DEF_MAXMOVIETIME,
     .snapshot_interval =               0,
     .locate_motion_mode =              "off",
     .locate_motion_style =             "box",
@@ -68,15 +67,6 @@ struct config conf_template = {
     .pre_capture =                     0,
     .post_capture =                    0,
     .switchfilter =                    0,
-    .ffmpeg_output =                   0,
-    .extpipe =                         NULL,
-    .useextpipe =                      0,
-    .ffmpeg_output_debug =             0,
-    .ffmpeg_bps =                      DEF_FFMPEG_BPS,
-    .ffmpeg_vbr =                      DEF_FFMPEG_VBR,
-    .ffmpeg_video_codec =              DEF_FFMPEG_CODEC,
-    .ffmpeg_passthrough =              0,
-    .ffmpeg_duplicate_frames =         0,
     .ipv6_enabled =                    0,
     .stream_port =                     0,
     .substream_port =                  0,
@@ -107,14 +97,13 @@ struct config conf_template = {
     .timelapse_interval =              0,
     .timelapse_mode =                  DEF_TIMELAPSE_MODE,
     .timelapse_fps =                   30,
-    .timelapse_codec =                 DEF_FFMPEG_CODEC,
+    .timelapse_codec =                 "mpeg4",
     .tuner_device =                    NULL,
     .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
     .vidpipe =                         NULL,
     .filepath =                        NULL,
     .imagepath =                       DEF_IMAGEPATH,
-    .moviepath =                       DEF_MOVIEPATH,
     .snappath =                        DEF_SNAPPATH,
     .timepath =                        DEF_TIMEPATH,
     .on_event_start =                  NULL,
@@ -167,6 +156,19 @@ struct config conf_template = {
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type_str =                    NULL,
     .native_language =                 1,
+
+    .movie_output =                    1,
+    .movie_output_debug =              0,
+    .movie_max_time =                  120,
+    .movie_bps =                       400000,
+    .movie_quality =                   60,
+    .movie_codec =                     "mkv",
+    .movie_duplicate_frames =          0,
+    .movie_passthrough =               0,
+    .movie_filename =                  DEF_MOVIEPATH,
+    .movie_extpipe_use =               0,
+    .movie_extpipe =                   NULL,
+
     .camera_dir =                      NULL
 };
 
@@ -1016,58 +1018,58 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_output_movies",
+    "movie_output",
     "# Use ffmpeg to encode movies",
     0,
-    CONF_OFFSET(ffmpeg_output),
+    CONF_OFFSET(movie_output),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_output_debug_movies",
+    "movie_output_debug",
     "# Use ffmpeg to make movies with only the moving pixels\n"
     "# (ghost images) (default: off)",
     0,
-    CONF_OFFSET(ffmpeg_output_debug),
+    CONF_OFFSET(movie_output_debug),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "max_movie_time",
+    "movie_max_time",
     "# Maximum length in seconds of a movie\n"
     "# When value is exceeded a new movie file is created. (Default: 0 = infinite)",
     0,
-    CONF_OFFSET(max_movie_time),
+    CONF_OFFSET(movie_max_time),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_bps",
+    "movie_bps",
     "# Bitrate to be used by the ffmpeg encoder (default: 400000)\n"
     "# This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)",
     0,
-    CONF_OFFSET(ffmpeg_bps),
+    CONF_OFFSET(movie_bps),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_variable_bitrate",
+    "movie_quality",
     "# Enables and defines variable bitrate for the ffmpeg encoder.\n"
     "# ffmpeg_bps is ignored if variable bitrate is enabled.\n"
     "# Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps,\n"
     "# or the range 1 - 100 where 1 means worst quality and 100 is best.",
     0,
-    CONF_OFFSET(ffmpeg_vbr),
+    CONF_OFFSET(movie_quality),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_video_codec",
+    "movie_codec",
     "# Container/Codec to used by ffmpeg for the video compression.\n"
     "# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
     "# msmpeg4 is recommended for use with Windows Media Player because\n"
@@ -1080,17 +1082,17 @@ config_param config_params[] = {
     "# mkv - Matroska H264 encoding\n"
     "# hevc - H.265 / HEVC (High Efficiency Video Coding)",
     0,
-    CONF_OFFSET(ffmpeg_video_codec),
+    CONF_OFFSET(movie_codec),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_duplicate_frames",
+    "movie_duplicate_frames",
     "# Duplicate frames to achieve \"framerate\" fps. \n"
     "# The resulting movie will appear to freeze for the duplicated frames.",
     0,
-    CONF_OFFSET(ffmpeg_duplicate_frames),
+    CONF_OFFSET(movie_duplicate_frames),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
@@ -1098,11 +1100,10 @@ config_param config_params[] = {
     {
     "movie_filename",
     "# File path for motion triggered ffmpeg films (movies) relative to target_dir\n"
-    "# Default: "DEF_MOVIEPATH"\n"
     "# File extension is automatically added so do not include this\n"
     "# This option was previously called ffmpeg_filename",
     0,
-    CONF_OFFSET(moviepath),
+    CONF_OFFSET(movie_filename),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -1155,11 +1156,11 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_passthrough",
+    "movie_passthrough",
     "# Pass through the packet without decode/encoding(default: off)"
     "# Only valid for rtsp/rtmp cameras",
     0,
-    CONF_OFFSET(ffmpeg_passthrough),
+    CONF_OFFSET(movie_passthrough),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_ADVANCED
@@ -1185,23 +1186,23 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "use_extpipe",
+    "movie_extpipe_use",
     "\n############################################################\n"
     "# External pipe to video encoder\n"
     "############################################################\n\n"
     "# Bool to enable or disable extpipe (default: off)",
     0,
-    CONF_OFFSET(useextpipe),
+    CONF_OFFSET(movie_extpipe_use),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "extpipe",
+    "movie_extpipe",
     "# External program (full path and opts) to pipe raw video to\n"
     "# Generally, use '-' for STDIN...",
     0,
-    CONF_OFFSET(extpipe),
+    CONF_OFFSET(movie_extpipe),
     copy_string,
     print_string,
     WEBUI_LEVEL_RESTRICTED
@@ -1908,6 +1909,77 @@ dep_config_param dep_config_params[] = {
     CONF_OFFSET(lightswitch_percent),
     copy_int
     },
+    {
+    "ffmpeg_output_movies",
+    "4.1.1",
+    "\"ffmpeg_output_movies\" replaced with \"movie_output\" option.",
+    CONF_OFFSET(movie_output),
+    copy_bool
+    },
+    {
+    "ffmpeg_output_debug_movies",
+    "4.1.1",
+    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_debug\" option.",
+    CONF_OFFSET(movie_output_debug),
+    copy_bool
+    },
+    {
+    "max_movie_time",
+    "4.1.1",
+    "\"max_movie_time\" replaced with \"movie_max_time\" option.",
+    CONF_OFFSET(movie_max_time),
+    copy_int
+    },
+    {
+    "ffmpeg_bps",
+    "4.1.1",
+    "\"ffmpeg_bps\" replaced with \"movie_bps\" option.",
+    CONF_OFFSET(movie_bps),
+    copy_int
+    },
+    {
+    "ffmpeg_variable_bitrate",
+    "4.1.1",
+    "\"ffmpeg_variable_bitrate\" replaced with \"movie_quality\" option.",
+    CONF_OFFSET(movie_quality),
+    copy_int
+    },
+    {
+    "ffmpeg_video_codec",
+    "4.1.1",
+    "\"ffmpeg_video_codec\" replaced with \"movie_codec\" option.",
+    CONF_OFFSET(movie_codec),
+    copy_string
+    },
+    {
+    "ffmpeg_duplicate_frames",
+    "4.1.1",
+    "\"ffmpeg_duplicate_frames\" replaced with \"movie_duplicate_frames\" option.",
+    CONF_OFFSET(movie_duplicate_frames),
+    copy_bool
+    },
+    {
+    "ffmpeg_passthrough",
+    "4.1.1",
+    "\"ffmpeg_passthrough\" replaced with \"movie_passthrough\" option.",
+    CONF_OFFSET(movie_passthrough),
+    copy_bool
+    },
+    {
+    "useextpipe",
+    "4.1.1",
+    "\"useextpipe\" replaced with \"movie_extpipe_use\" option.",
+    CONF_OFFSET(movie_extpipe_use),
+    copy_bool
+    },
+    {
+    "extpipe",
+    "4.1.1",
+    "\"extpipe\" replaced with \"movie_extpipe\" option.",
+    CONF_OFFSET(movie_extpipe),
+    copy_string
+    },
+
     { NULL, NULL, NULL, 0, NULL}
 };
 

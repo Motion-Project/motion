@@ -565,8 +565,8 @@ static void event_image_preview(struct context *cnt,
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cnt->conf.imagepath, "preview");
 
-        if ((cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe)) && !use_imagepath) {
-            if (cnt->conf.useextpipe && cnt->extpipe) {
+        if ((cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
+            if (cnt->conf.movie_extpipe_use && cnt->extpipe) {
                 basename_len = strlen(cnt->extpipefilename) + 1;
                 strncpy(previewname, cnt->extpipefilename, basename_len);
                 previewname[basename_len - 1] = '.';
@@ -670,7 +670,7 @@ static void event_create_extpipe(struct context *cnt,
             struct image_data *dummy ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
-    if ((cnt->conf.useextpipe) && (cnt->conf.extpipe)) {
+    if ((cnt->conf.movie_extpipe_use) && (cnt->conf.movie_extpipe)) {
         char stamp[PATH_MAX] = "";
         const char *moviepath;
 
@@ -678,8 +678,8 @@ static void event_create_extpipe(struct context *cnt,
          *  conf.mpegpath would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.moviepath) {
-            moviepath = cnt->conf.moviepath;
+        if (cnt->conf.movie_filename) {
+            moviepath = cnt->conf.movie_filename;
         } else {
             moviepath = DEF_MOVIEPATH;
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("moviepath: %s"), moviepath);
@@ -712,7 +712,7 @@ static void event_create_extpipe(struct context *cnt,
         if (create_path(cnt->extpipefilename) == -1)
             return ;
 
-        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.extpipe, currenttime_tv, cnt->extpipefilename, 0);
+        mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), stamp);
 
@@ -739,7 +739,7 @@ static void event_extpipe_put(struct context *cnt,
     int passthrough;
 
     /* Check use_extpipe enabled and ext_pipe not NULL */
-    if ((cnt->conf.useextpipe) && (cnt->extpipe != NULL)) {
+    if ((cnt->conf.movie_extpipe_use) && (cnt->extpipe != NULL)) {
         MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
         passthrough = util_check_passthrough(cnt);
         /* Check that is open */
@@ -755,7 +755,7 @@ static void event_extpipe_put(struct context *cnt,
            }
         } else {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("pipe %s not created or closed already "), cnt->conf.extpipe);
+                ,_("pipe %s not created or closed already "), cnt->conf.movie_extpipe);
         }
     }
 }
@@ -790,15 +790,15 @@ static void event_ffmpeg_newfile(struct context *cnt,
     long codenbr;
     int retcd;
 
-    if (!cnt->conf.ffmpeg_output && !cnt->conf.ffmpeg_output_debug)
+    if (!cnt->conf.movie_output && !cnt->conf.movie_output_debug)
         return;
 
     /*
      *  conf.mpegpath would normally be defined but if someone deleted it by control interface
      *  it is better to revert to the default than fail
      */
-    if (cnt->conf.moviepath)
-        moviepath = cnt->conf.moviepath;
+    if (cnt->conf.movie_filename)
+        moviepath = cnt->conf.movie_filename;
     else
         moviepath = DEF_MOVIEPATH;
 
@@ -818,7 +818,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
       * specify a maximum movie time and let Motion run for days creating all the
       * different types of movies checking for crashes, warnings, etc.
      */
-    codec = cnt->conf.ffmpeg_video_codec;
+    codec = cnt->conf.movie_codec;
     if (strcmp(codec, "ogg") == 0) {
         MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
         codec = "mpeg4";
@@ -864,7 +864,7 @@ static void event_ffmpeg_newfile(struct context *cnt,
         snprintf(cnt->motionfilename, PATH_MAX - 4, "%s/%sm", cnt->conf.filepath, stamp);
         snprintf(cnt->newfilename, PATH_MAX - 4, "%s/%s", cnt->conf.filepath, stamp);
     }
-    if (cnt->conf.ffmpeg_output) {
+    if (cnt->conf.movie_output) {
         cnt->ffmpeg_output = mymalloc(sizeof(struct ffmpeg));
         if (cnt->imgs.size_high > 0){
             cnt->ffmpeg_output->width  = cnt->imgs.width_high;
@@ -879,16 +879,16 @@ static void event_ffmpeg_newfile(struct context *cnt,
         }
         cnt->ffmpeg_output->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output->fps = cnt->movie_fps;
-        cnt->ffmpeg_output->bps = cnt->conf.ffmpeg_bps;
+        cnt->ffmpeg_output->bps = cnt->conf.movie_bps;
         cnt->ffmpeg_output->filename = cnt->newfilename;
-        cnt->ffmpeg_output->vbr = cnt->conf.ffmpeg_vbr;
+        cnt->ffmpeg_output->quality = cnt->conf.movie_quality;
         cnt->ffmpeg_output->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_output->last_pts = -1;
         cnt->ffmpeg_output->base_pts = 0;
         cnt->ffmpeg_output->gop_cnt = 0;
         cnt->ffmpeg_output->codec_name = codec;
-        if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
+        if (strcmp(cnt->conf.movie_codec, "test") == 0) {
             cnt->ffmpeg_output->test_mode = 1;
         } else {
             cnt->ffmpeg_output->test_mode = 0;
@@ -908,23 +908,23 @@ static void event_ffmpeg_newfile(struct context *cnt,
         event(cnt, EVENT_FILECREATE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, currenttime_tv);
     }
 
-    if (cnt->conf.ffmpeg_output_debug) {
+    if (cnt->conf.movie_output_debug) {
         cnt->ffmpeg_output_debug = mymalloc(sizeof(struct ffmpeg));
         cnt->ffmpeg_output_debug->width  = cnt->imgs.width;
         cnt->ffmpeg_output_debug->height = cnt->imgs.height;
         cnt->ffmpeg_output_debug->rtsp_data = NULL;
         cnt->ffmpeg_output_debug->tlapse = TIMELAPSE_NONE;
         cnt->ffmpeg_output_debug->fps = cnt->movie_fps;
-        cnt->ffmpeg_output_debug->bps = cnt->conf.ffmpeg_bps;
+        cnt->ffmpeg_output_debug->bps = cnt->conf.movie_bps;
         cnt->ffmpeg_output_debug->filename = cnt->motionfilename;
-        cnt->ffmpeg_output_debug->vbr = cnt->conf.ffmpeg_vbr;
+        cnt->ffmpeg_output_debug->quality = cnt->conf.movie_quality;
         cnt->ffmpeg_output_debug->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_output_debug->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_output_debug->last_pts = -1;
         cnt->ffmpeg_output_debug->base_pts = 0;
         cnt->ffmpeg_output_debug->gop_cnt = 0;
         cnt->ffmpeg_output_debug->codec_name = codec;
-        if (strcmp(cnt->conf.ffmpeg_video_codec, "test") == 0) {
+        if (strcmp(cnt->conf.movie_codec, "test") == 0) {
             cnt->ffmpeg_output_debug->test_mode = TRUE;
         } else {
             cnt->ffmpeg_output_debug->test_mode = FALSE;
@@ -984,9 +984,9 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             cnt->ffmpeg_timelapse->high_resolution = FALSE;
         }
         cnt->ffmpeg_timelapse->fps = cnt->conf.timelapse_fps;
-        cnt->ffmpeg_timelapse->bps = cnt->conf.ffmpeg_bps;
+        cnt->ffmpeg_timelapse->bps = cnt->conf.movie_bps;
         cnt->ffmpeg_timelapse->filename = cnt->timelapsefilename;
-        cnt->ffmpeg_timelapse->vbr = cnt->conf.ffmpeg_vbr;
+        cnt->ffmpeg_timelapse->quality = cnt->conf.movie_quality;
         cnt->ffmpeg_timelapse->start_time.tv_sec = currenttime_tv->tv_sec;
         cnt->ffmpeg_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
         cnt->ffmpeg_timelapse->last_pts = -1;

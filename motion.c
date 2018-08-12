@@ -644,10 +644,10 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
              * many duplicated frames, say 10 fps, 5 duplicated, the video will
              * look like it is frozen every second for half a second.
              */
-            if (!cnt->conf.ffmpeg_duplicate_frames) {
+            if (!cnt->conf.movie_duplicate_frames) {
                 /* don't duplicate frames */
             } else if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
-                (cnt->ffmpeg_output || (cnt->conf.useextpipe && cnt->extpipe))) {
+                (cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe))) {
                 /*
                  * movie_last_shoot is -1 when file is created,
                  * we don't know how many frames there is in first sec
@@ -963,9 +963,9 @@ static int motion_init(struct context *cnt)
     if (init_camera_type(cnt) != 0 ) return -3;
 
     if ((cnt->camera_type != CAMERA_TYPE_RTSP) &&
-        (cnt->conf.ffmpeg_passthrough)) {
+        (cnt->conf.movie_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
-        cnt->conf.ffmpeg_passthrough = 0;
+        cnt->conf.movie_passthrough = 0;
     }
 
     if ((cnt->conf.height == 0) || (cnt->conf.width == 0)) {
@@ -2207,17 +2207,17 @@ static void mlp_overlay(struct context *cnt){
      */
 
     /* Smartmask overlay */
-    if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
+    if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.movie_output_debug ||
         cnt->conf.setup_mode))
         overlay_smartmask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Largest labels overlay */
-    if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
+    if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.movie_output_debug ||
         cnt->conf.setup_mode))
         overlay_largest_label(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Fixed mask overlay */
-    if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.ffmpeg_output_debug ||
+    if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.movie_output_debug ||
         cnt->conf.setup_mode))
         overlay_fixed_mask(cnt, cnt->imgs.img_motion.image_norm);
 
@@ -2372,10 +2372,10 @@ static void mlp_actions(struct context *cnt){
 
     /*
      * Is the movie too long? Then make movies
-     * First test for max_movie_time
+     * First test for movie_max_time
      */
-    if ((cnt->conf.max_movie_time && cnt->event_nr == cnt->prev_event) &&
-        (cnt->currenttime - cnt->eventtime >= cnt->conf.max_movie_time))
+    if ((cnt->conf.movie_max_time && cnt->event_nr == cnt->prev_event) &&
+        (cnt->currenttime - cnt->eventtime >= cnt->conf.movie_max_time))
         cnt->makemovie = 1;
 
     /*
@@ -3940,12 +3940,12 @@ void util_threadname_get(char *threadname){
 }
 int util_check_passthrough(struct context *cnt){
 #if (HAVE_FFMPEG && LIBAVFORMAT_VERSION_MAJOR < 55)
-    if (cnt->conf.ffmpeg_passthrough)
+    if (cnt->conf.movie_passthrough)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("FFMPEG version too old. Disabling pass-through processing."));
     return 0;
 #else
-    if (cnt->conf.ffmpeg_passthrough){
+    if (cnt->conf.movie_passthrough){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("pass-through is enabled but is still experimental."));
         return 1;

@@ -34,11 +34,9 @@ struct config {
     int max_changes;
     int threshold_tune;
     const char *output_pictures;
-    int ffmpeg_duplicate_frames;
     int motion_img;
     int emulate_motion;
     int event_gap;
-    int max_movie_time;
     int snapshot_interval;
     const char *locate_motion_mode;
     const char *locate_motion_style;
@@ -46,8 +44,6 @@ struct config {
     int norm;
     int frame_limit;
     int quiet;
-    int useextpipe; /* ext_pipe on or off */
-    const char *extpipe; /* full Command-line for pipe -- must accept YUV420P images  */
     const char *picture_type;
     int noise;
     int noise_tune;
@@ -61,12 +57,6 @@ struct config {
     int pre_capture;
     int post_capture;
     int switchfilter;
-    int ffmpeg_output;
-    int ffmpeg_output_debug;
-    int ffmpeg_bps;
-    int ffmpeg_vbr;
-    int ffmpeg_passthrough;
-    const char *ffmpeg_video_codec;
     int ipv6_enabled;
     int stream_port;
     int substream_port;
@@ -105,7 +95,6 @@ struct config {
     const char *vidpipe;
     const char *filepath;
     const char *imagepath;
-    const char *moviepath;
     const char *snappath;
     const char *timepath;
     char *on_event_start;
@@ -155,6 +144,19 @@ struct config {
     int minimum_motion_frames;
     const char *exif_text;
     char *pid_file;
+
+    int             movie_output;
+    int             movie_output_debug;
+    int             movie_max_time;
+    int             movie_bps;
+    int             movie_quality;
+    const char      *movie_codec;
+    int             movie_duplicate_frames;
+    int             movie_passthrough;
+    const char      *movie_filename;
+    int             movie_extpipe_use;      /* ext_pipe on or off */
+    const char      *movie_extpipe;         /* full Command-line for extpipe */
+
     int argc;
     char **argv;
 };
