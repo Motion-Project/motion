@@ -96,9 +96,9 @@ struct config {
     char            *on_camera_lost;
     char            *on_camera_found;
 
-    const char      *picture_type;
     const char      *picture_output;
     int             picture_output_motion;
+    const char      *picture_type;
     int             picture_quality;
     const char      *picture_exif;
     const char      *picture_filename;
@@ -127,33 +127,41 @@ struct config {
     const char      *video_pipe;
     const char      *video_pipe_motion;
 
-    int             stream_port;
-    int             substream_port;
-    int             stream_quality;
-    int             stream_motion;
-    int             stream_maxrate;
-    int             stream_localhost;
-    int             stream_limit;
-    int             stream_auth_method;
-    int             stream_grey;
-    int             stream_tls;
-    const char      *stream_cors_header;
-    const char      *stream_authentication;
-    int             stream_preview_scale;
-    int             stream_preview_newline;
-    int             stream_preview_method;
-
     int             webcontrol_port;
     int             webcontrol_ipv6;
     int             webcontrol_localhost;
     int             webcontrol_parms;
     int             webcontrol_interface;
     int             webcontrol_auth_method;
+    const char      *webcontrol_authentication;
     int             webcontrol_tls;
     const char      *webcontrol_cert;
     const char      *webcontrol_key;
     const char      *webcontrol_cors_header;
-    const char      *webcontrol_authentication;
+
+    int             stream_port;
+    int             substream_port;
+    int             stream_localhost;
+    int             stream_auth_method;
+    const char      *stream_authentication;
+    int             stream_tls;
+    const char      *stream_cors_header;
+    int             stream_preview_scale;
+    int             stream_preview_newline;
+    int             stream_preview_method;
+    int             stream_quality;
+    int             stream_grey;
+    int             stream_motion;
+    int             stream_maxrate;
+    int             stream_limit;
+
+    const char      *database_type;
+    const char      *database_dbname;
+    const char      *database_host;
+    int             database_port;
+    const char      *database_user;
+    const char      *database_password;
+    int             database_busy_timeout;
 
     int             sql_log_picture;
     int             sql_log_snapshot;
@@ -162,14 +170,6 @@ struct config {
     const char      *sql_query_start;
     const char      *sql_query_stop;
     const char      *sql_query;
-
-    const char      *database_type;
-    const char      *database_dbname;
-    const char      *database_host;
-    const char      *database_user;
-    const char      *database_password;
-    int             database_busy_timeout;
-    int             database_port;
 
     int             argc;
     char            **argv;
