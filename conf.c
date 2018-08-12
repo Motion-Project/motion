@@ -1155,7 +1155,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_interface",
-    "# Method that webcontrol to use for interface with user.",
+    "# Method that webcontrol should use for interface with user.",
     1,
     CONF_OFFSET(webcontrol_interface),
     copy_int,
