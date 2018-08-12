@@ -58,18 +58,9 @@ struct config {
     const char *video_device;
     int v4l2_palette;
     const char *filepath;
-    char *on_event_start;
-    char *on_event_end;
     const char *mask_file;
     const char *mask_privacy;
     int smart_mask_speed;
-    char *on_picture_save;
-    char *on_area_detected;
-    char *on_motion_detected;
-    char *on_movie_start;
-    char *on_movie_end;
-    char *on_camera_lost;
-    char *on_camera_found;
     const char *netcam_url;
     const char *netcam_highres;
     const char *netcam_userpass;
@@ -89,6 +80,16 @@ struct config {
     const char *camera_dir;
     int minimum_motion_frames;
     char *pid_file;
+
+    char            *on_event_start;
+    char            *on_event_end;
+    char            *on_picture_save;
+    char            *on_area_detected;
+    char            *on_motion_detected;
+    char            *on_movie_start;
+    char            *on_movie_end;
+    char            *on_camera_lost;
+    char            *on_camera_found;
 
     const char      *picture_type;
     const char      *picture_output;
@@ -149,24 +150,24 @@ struct config {
     const char      *webcontrol_cors_header;
     const char      *webcontrol_authentication;
 
-    int sql_log_image;
-    int sql_log_snapshot;
-    int sql_log_movie;
-    int sql_log_timelapse;
-    const char *sql_query_start;
-    const char *sql_query_stop;
-    const char *sql_query;
+    int             sql_log_image;
+    int             sql_log_snapshot;
+    int             sql_log_movie;
+    int             sql_log_timelapse;
+    const char      *sql_query_start;
+    const char      *sql_query_stop;
+    const char      *sql_query;
 
-    const char *database_type;
-    const char *database_dbname;
-    const char *database_host;
-    const char *database_user;
-    const char *database_password;
-    int database_busy_timeout;
-    int database_port;
+    const char      *database_type;
+    const char      *database_dbname;
+    const char      *database_host;
+    const char      *database_user;
+    const char      *database_password;
+    int             database_busy_timeout;
+    int             database_port;
 
-    int argc;
-    char **argv;
+    int             argc;
+    char            **argv;
 };
 
 /**
