@@ -62,37 +62,11 @@ struct config conf_template = {
     .pre_capture =                     0,
     .post_capture =                    0,
     .switchfilter =                    0,
-    .ipv6_enabled =                    0,
-    .stream_port =                     0,
-    .substream_port =                  0,
-    .stream_quality =                  50,
-    .stream_motion =                   0,
-    .stream_maxrate =                  1,
-    .stream_localhost =                1,
-    .stream_limit =                    0,
-    .stream_auth_method =              0,
-    .stream_cors_header =              NULL,
-    .stream_authentication =           NULL,
-    .stream_preview_scale =            25,
-    .stream_preview_newline =          0,
-    .stream_preview_method =           0,
-    .stream_grey =                     0,
-    .stream_tls =                      0,
-    .webcontrol_port =                 0,
-    .webcontrol_localhost =            1,
-    .webcontrol_interface =            0,
-    .webcontrol_auth_method =          0,
-    .webcontrol_authentication =       NULL,
-    .webcontrol_tls =                  0,
-    .webcontrol_cert =                 NULL,
-    .webcontrol_key =                  NULL,
-    .webcontrol_cors_header =          NULL,
     .frequency =                       0,
     .tuner_number =                    0,
     .tuner_device =                    NULL,
     .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
-    //.vidpipe =                         NULL,
     .filepath =                        NULL,
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
@@ -120,7 +94,6 @@ struct config conf_template = {
     .on_movie_end =                    NULL,
     .on_camera_lost =                  NULL,
     .on_camera_found =                 NULL,
-    //.motionvidpipe =                   NULL,
     .netcam_url =                      NULL,
     .netcam_highres=                   NULL,
     .netcam_userpass =                 NULL,
@@ -174,6 +147,33 @@ struct config conf_template = {
 
     .video_pipe =                      NULL,
     .video_pipe_debug =                NULL,
+
+    .stream_port =                     0,
+    .substream_port =                  0,
+    .stream_quality =                  50,
+    .stream_motion =                   0,
+    .stream_maxrate =                  1,
+    .stream_localhost =                1,
+    .stream_limit =                    0,
+    .stream_auth_method =              0,
+    .stream_grey =                     0,
+    .stream_tls =                      0,
+    .stream_cors_header =              NULL,
+    .stream_authentication =           NULL,
+    .stream_preview_scale =            25,
+    .stream_preview_newline =          0,
+    .stream_preview_method =           0,
+
+    .webcontrol_ipv6 =                 0,
+    .webcontrol_port =                 0,
+    .webcontrol_localhost =            1,
+    .webcontrol_interface =            0,
+    .webcontrol_auth_method =          0,
+    .webcontrol_authentication =       NULL,
+    .webcontrol_tls =                  0,
+    .webcontrol_cert =                 NULL,
+    .webcontrol_key =                  NULL,
+    .webcontrol_cors_header =          NULL,
 
     .camera_dir =                      NULL
 };
@@ -1214,13 +1214,13 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "ipv6_enabled",
+    "webcontrol_ipv6",
     "\n############################################################\n"
     "# Global Network Options\n"
     "############################################################\n\n"
     "# Enable IPv6 (default: off)",
     0,
-    CONF_OFFSET(ipv6_enabled),
+    CONF_OFFSET(webcontrol_ipv6),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_ADVANCED
@@ -2019,6 +2019,13 @@ dep_config_param dep_config_params[] = {
     "\"motion_video_pipe\" replaced with \"video_pipe_debug\" option.",
     CONF_OFFSET(video_pipe_debug),
     copy_string
+    },
+    {
+    "ipv6_enabled",
+    "4.1.1",
+    "\"ipv6_enabled\" replaced with \"webcontrol_ipv6\" option.",
+    CONF_OFFSET(webcontrol_ipv6),
+    copy_bool
     },
 
     { NULL, NULL, NULL, 0, NULL}

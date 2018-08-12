@@ -717,9 +717,9 @@ static void webu_clientip(struct webui_ctx *webui) {
 
     is_ipv6 = FALSE;
     if (webui->cnt != NULL ){
-        if (webui->cnt->conf.ipv6_enabled) is_ipv6 = TRUE;
+        if (webui->cnt->conf.webcontrol_ipv6) is_ipv6 = TRUE;
     } else {
-        if (webui->cntlst[0]->conf.ipv6_enabled) is_ipv6 = TRUE;
+        if (webui->cntlst[0]->conf.webcontrol_ipv6) is_ipv6 = TRUE;
     }
 
     con_info = MHD_get_connection_info(webui->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
@@ -1680,7 +1680,7 @@ static void webu_start_ctrl(struct context **cnt){
     mhdst.ctrl = TRUE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
-    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
+    mhdst.ipv6 = cnt[0]->conf.webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
@@ -1731,7 +1731,7 @@ static void webu_start_strm(struct context **cnt){
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
-    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
+    mhdst.ipv6 = cnt[0]->conf.webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));

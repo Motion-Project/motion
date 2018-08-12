@@ -52,32 +52,6 @@ struct config {
     int pre_capture;
     int post_capture;
     int switchfilter;
-    int ipv6_enabled;
-    int stream_port;
-    int substream_port;
-    int stream_quality;
-    int stream_motion;
-    int stream_maxrate;
-    int stream_localhost;
-    int stream_limit;
-    int stream_auth_method;
-    int stream_grey;
-    int stream_tls;
-    const char *stream_cors_header;
-    const char *stream_authentication;
-    int stream_preview_scale;
-    int stream_preview_newline;
-    int stream_preview_method;
-    int webcontrol_port;
-    int webcontrol_localhost;
-    int webcontrol_parms;
-    int webcontrol_interface;
-    int webcontrol_auth_method;
-    int webcontrol_tls;
-    const char *webcontrol_cert;
-    const char *webcontrol_key;
-    const char *webcontrol_cors_header;
-    const char *webcontrol_authentication;
     unsigned long frequency;
     int tuner_number;
     const char *tuner_device;
@@ -160,6 +134,34 @@ struct config {
 
     const char      *video_pipe;
     const char      *video_pipe_debug;
+
+    int             stream_port;
+    int             substream_port;
+    int             stream_quality;
+    int             stream_motion;
+    int             stream_maxrate;
+    int             stream_localhost;
+    int             stream_limit;
+    int             stream_auth_method;
+    int             stream_grey;
+    int             stream_tls;
+    const char      *stream_cors_header;
+    const char      *stream_authentication;
+    int             stream_preview_scale;
+    int             stream_preview_newline;
+    int             stream_preview_method;
+
+    int             webcontrol_port;
+    int             webcontrol_ipv6;
+    int             webcontrol_localhost;
+    int             webcontrol_parms;
+    int             webcontrol_interface;
+    int             webcontrol_auth_method;
+    int             webcontrol_tls;
+    const char      *webcontrol_cert;
+    const char      *webcontrol_key;
+    const char      *webcontrol_cors_header;
+    const char      *webcontrol_authentication;
 
     int argc;
     char **argv;

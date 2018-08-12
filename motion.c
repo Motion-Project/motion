@@ -1287,7 +1287,7 @@ static int motion_init(struct context *cnt)
 
         if (cnt->conf.stream_port) {
             if (stream_init (&(cnt->stream), cnt->conf.stream_port, cnt->conf.stream_localhost,
-                cnt->conf.ipv6_enabled, cnt->conf.stream_cors_header) == -1) {
+                cnt->conf.webcontrol_ipv6, cnt->conf.stream_cors_header) == -1) {
                 MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                     ,_("Problem enabling motion-stream server in port %d")
                     ,cnt->conf.stream_port);
@@ -1306,7 +1306,7 @@ static int motion_init(struct context *cnt)
         if (cnt->conf.substream_port){
             if ((cnt->conf.width / 2) % 8 == 0  && (cnt->conf.height / 2) % 8 == 0){
                 if (stream_init (&(cnt->substream), cnt->conf.substream_port, cnt->conf.stream_localhost,
-                    cnt->conf.ipv6_enabled, cnt->conf.stream_cors_header) == -1) {
+                    cnt->conf.webcontrol_ipv6, cnt->conf.stream_cors_header) == -1) {
                     MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                         ,_("Problem enabling motion-substream server in port %d")
                         ,cnt->conf.substream_port);
