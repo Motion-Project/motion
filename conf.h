@@ -63,20 +63,6 @@ struct config {
     const char *mask_file;
     const char *mask_privacy;
     int smart_mask_speed;
-    int sql_log_image;
-    int sql_log_snapshot;
-    int sql_log_movie;
-    int sql_log_timelapse;
-    const char *sql_query_start;
-    const char *sql_query_stop;
-    const char *sql_query;
-    const char *database_type;
-    const char *database_dbname;
-    const char *database_host;
-    const char *database_user;
-    const char *database_password;
-    int database_busy_timeout;
-    int database_port;
     char *on_picture_save;
     char *on_area_detected;
     char *on_motion_detected;
@@ -162,6 +148,22 @@ struct config {
     const char      *webcontrol_key;
     const char      *webcontrol_cors_header;
     const char      *webcontrol_authentication;
+
+    int sql_log_image;
+    int sql_log_snapshot;
+    int sql_log_movie;
+    int sql_log_timelapse;
+    const char *sql_query_start;
+    const char *sql_query_stop;
+    const char *sql_query;
+
+    const char *database_type;
+    const char *database_dbname;
+    const char *database_host;
+    const char *database_user;
+    const char *database_password;
+    int database_busy_timeout;
+    int database_port;
 
     int argc;
     char **argv;
