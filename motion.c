@@ -2066,7 +2066,7 @@ static void mlp_detection(struct context *cnt){
              * We do not suspend motion detection like we did for lightswitch
              * because with Round Robin this is controlled by roundrobin_skip.
              */
-            if (cnt->conf.switchfilter && cnt->current_image->diffs > cnt->threshold) {
+            if (cnt->conf.roundrobin_switchfilter && cnt->current_image->diffs > cnt->threshold) {
                 cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs,
                                                              cnt->current_image->image_norm);
 

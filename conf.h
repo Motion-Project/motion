@@ -26,31 +26,34 @@ struct config {
     int native_language;
     int setup_mode;
     int camera_id;
-    int input;
-    int norm;
     int quiet;
-    int autobright;
-    char *vid_control_params;
-    int roundrobin_frames;
-    int roundrobin_skip;
-    int switchfilter;
-    unsigned long frequency;
-    int tuner_number;
-    const char *tuner_device;
-    const char *video_device;
-    int v4l2_palette;
+
     const char *filepath;
-    const char *netcam_url;
-    const char *netcam_highres;
-    const char *netcam_userpass;
-    const char *netcam_keepalive;
-    const char *netcam_proxy;
-    unsigned int netcam_tolerant_check;
-    unsigned int rtsp_uses_tcp;
-    const char *mmalcam_name;
-    const char *mmalcam_control_params;
     const char *camera_dir;
     char *pid_file;
+
+    const char      *video_device;
+    char            *vid_control_params;
+    int             v4l2_palette;
+    int             input;
+    int             norm;
+    unsigned long   frequency;
+    int             auto_brightness;
+    const char      *tuner_device;
+    int             roundrobin_frames;
+    int             roundrobin_skip;
+    int             roundrobin_switchfilter;
+
+    const char      *netcam_url;
+    const char      *netcam_highres;
+    const char      *netcam_userpass;
+    const char      *netcam_keepalive;
+    const char      *netcam_proxy;
+    unsigned int    netcam_tolerant_check;
+    unsigned int    netcam_use_tcp;
+
+    const char      *mmalcam_name;
+    const char      *mmalcam_control_params;
 
     int             width;
     int             height;

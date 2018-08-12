@@ -936,7 +936,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
 
     util_check_passthrough(cnt); /* In case it was turned on via webcontrol */
     rtsp_data->status = RTSP_NOTCONNECTED;
-    rtsp_data->rtsp_uses_tcp =cnt->conf.rtsp_uses_tcp;
+    rtsp_data->rtsp_uses_tcp =cnt->conf.netcam_use_tcp;
     rtsp_data->v4l2_palette = cnt->conf.v4l2_palette;
     rtsp_data->frame_limit = cnt->conf.frame_limit;
     rtsp_data->camera_name = cnt->conf.camera_name;
