@@ -89,16 +89,11 @@ struct config conf_template = {
     .webcontrol_cors_header =          NULL,
     .frequency =                       0,
     .tuner_number =                    0,
-    .timelapse_interval =              0,
-    .timelapse_mode =                  DEF_TIMELAPSE_MODE,
-    .timelapse_fps =                   30,
-    .timelapse_codec =                 "mpeg4",
     .tuner_device =                    NULL,
     .video_device =                    DEF_VIDEO_DEVICE,
     .v4l2_palette =                    DEF_PALETTE,
     .vidpipe =                         NULL,
     .filepath =                        NULL,
-    .timepath =                        DEF_TIMEPATH,
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
     .mask_file =                       NULL,
@@ -170,6 +165,13 @@ struct config conf_template = {
     .movie_filename =                  DEF_MOVIEPATH,
     .movie_extpipe_use =               0,
     .movie_extpipe =                   NULL,
+
+
+    .timelapse_interval =              0,
+    .timelapse_mode =                  DEF_TIMELAPSE_MODE,
+    .timelapse_fps =                   30,
+    .timelapse_codec =                 "mpeg4",
+    .timelapse_filename =              DEF_TIMEPATH,
 
     .camera_dir =                      NULL
 };
@@ -1152,7 +1154,7 @@ config_param config_params[] = {
     "# Default: "DEF_TIMEPATH"\n"
     "# File extension is automatically added so do not include this",
     0,
-    CONF_OFFSET(timepath),
+    CONF_OFFSET(timelapse_filename),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED

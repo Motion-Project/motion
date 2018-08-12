@@ -960,11 +960,11 @@ static void event_ffmpeg_timelapse(struct context *cnt,
         const char *codec_mpeg = "mpeg4";
 
         /*
-         *  conf.timepath would normally be defined but if someone deleted it by control interface
+         *  conf.timelapse_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.timepath)
-            timepath = cnt->conf.timepath;
+        if (cnt->conf.timelapse_filename)
+            timepath = cnt->conf.timelapse_filename;
         else
             timepath = DEF_TIMEPATH;
 

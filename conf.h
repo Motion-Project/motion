@@ -80,16 +80,11 @@ struct config {
     const char *webcontrol_authentication;
     unsigned long frequency;
     int tuner_number;
-    int         timelapse_interval;
-    int         timelapse_fps;
-    const char *timelapse_mode;
-    const char *timelapse_codec;
     const char *tuner_device;
     const char *video_device;
     int v4l2_palette;
     const char *vidpipe;
     const char *filepath;
-    const char *timepath;
     char *on_event_start;
     char *on_event_end;
     const char *mask_file;
@@ -158,6 +153,12 @@ struct config {
     const char      *movie_filename;
     int             movie_extpipe_use;      /* ext_pipe on or off */
     const char      *movie_extpipe;         /* full Command-line for extpipe */
+
+    int             timelapse_interval;
+    const char      *timelapse_mode;
+    int             timelapse_fps;
+    const char      *timelapse_codec;
+    const char      *timelapse_filename;
 
     int argc;
     char **argv;
