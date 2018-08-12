@@ -204,6 +204,7 @@ typedef struct {
     const char *last_version;   /* Last version this option was used in */
     const char *info;           /* Short text on why it was deprecated (removed, replaced with, etc) */
     int conf_value;             /* Pointer to the replacement field in struct context */
+    const char *newname;        /* Name of the new parameter */
     conf_copy_func copy;        /* Function to set the replacement value */
 } dep_config_param;
 

@@ -1178,7 +1178,8 @@ void webu_html_main(struct webui_ctx *webui) {
 
     } else{
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-            _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
+            _("Invalid action requested: >%s< >%s< >%s<")
+            ,webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
         retcd = -1;
     }
 
