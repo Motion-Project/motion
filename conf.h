@@ -30,21 +30,13 @@ struct config {
     int camera_id;
     const char *flip_axis;
     int rotate_deg;
-    int max_changes;
-    int threshold_tune;
-    int emulate_motion;
-    int event_gap;
     const char *locate_motion_mode;
     const char *locate_motion_style;
     int input;
     int norm;
     int frame_limit;
     int quiet;
-    int noise;
-    int noise_tune;
     int minimum_frame_time;
-    int lightswitch_percent;
-    int lightswitch_frames;
     int autobright;
     char *vid_control_params;
     int roundrobin_frames;
@@ -58,9 +50,6 @@ struct config {
     const char *video_device;
     int v4l2_palette;
     const char *filepath;
-    const char *mask_file;
-    const char *mask_privacy;
-    int smart_mask_speed;
     const char *netcam_url;
     const char *netcam_highres;
     const char *netcam_userpass;
@@ -75,11 +64,23 @@ struct config {
     const char *text_right;
     const char *text_event;
     int text_scale;
-    const char *despeckle_filter;
-    const char *area_detect;
     const char *camera_dir;
-    int minimum_motion_frames;
     char *pid_file;
+
+    int             emulate_motion;
+    int             threshold;
+    int             threshold_tune;
+    int             noise;
+    int             noise_tune;
+    const char      *despeckle_filter;
+    const char      *area_detect;
+    const char      *mask_file;
+    const char      *mask_privacy;
+    int             smart_mask_speed;
+    int             lightswitch_percent;
+    int             lightswitch_frames;
+    int             minimum_motion_frames;
+    int             event_gap;
 
     char            *on_event_start;
     char            *on_event_end;

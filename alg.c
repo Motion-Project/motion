@@ -425,7 +425,7 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
     if (sum < top * 2)
         sum = top * 2;
 
-    if (sum < cnt->conf.max_changes)
+    if (sum < cnt->conf.threshold)
         cnt->threshold = (cnt->threshold + sum) / 2;
 }
 
@@ -1242,7 +1242,7 @@ int alg_diff(struct context *cnt, unsigned char *new)
 {
     int diffs = 0;
 
-    if (alg_diff_fast(cnt, cnt->conf.max_changes / 2, new))
+    if (alg_diff_fast(cnt, cnt->conf.threshold / 2, new))
         diffs = alg_diff_standard(cnt, new);
 
     return diffs;

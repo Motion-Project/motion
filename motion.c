@@ -1278,7 +1278,7 @@ static int motion_init(struct context *cnt)
     cnt->noise = cnt->conf.noise;
 
     /* Set threshold value */
-    cnt->threshold = cnt->conf.max_changes;
+    cnt->threshold = cnt->conf.threshold;
 
     if (cnt->conf.stream_preview_method == 3){
         /* This is the depreciated Stop stream process */
@@ -2153,7 +2153,7 @@ static void mlp_tuning(struct context *cnt){
         if (cnt->conf.threshold_tune)
             alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
         else
-            cnt->threshold = cnt->conf.max_changes;
+            cnt->threshold = cnt->conf.threshold;
 
         /*
          * If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
