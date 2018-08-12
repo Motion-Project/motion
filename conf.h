@@ -25,24 +25,14 @@ struct config {
     char *log_file;
     int native_language;
     int setup_mode;
-    int width;
-    int height;
     int camera_id;
-    const char *flip_axis;
-    int rotate_deg;
-    const char *locate_motion_mode;
-    const char *locate_motion_style;
     int input;
     int norm;
-    int frame_limit;
     int quiet;
-    int minimum_frame_time;
     int autobright;
     char *vid_control_params;
     int roundrobin_frames;
     int roundrobin_skip;
-    int pre_capture;
-    int post_capture;
     int switchfilter;
     unsigned long frequency;
     int tuner_number;
@@ -59,13 +49,22 @@ struct config {
     unsigned int rtsp_uses_tcp;
     const char *mmalcam_name;
     const char *mmalcam_control_params;
-    int text_changes;
-    const char *text_left;
-    const char *text_right;
-    const char *text_event;
-    int text_scale;
     const char *camera_dir;
     char *pid_file;
+
+    int             width;
+    int             height;
+    int             frame_limit;
+    int             minimum_frame_time;
+    int             rotate;
+    const char      *flip_axis;
+    const char      *locate_motion_mode;
+    const char      *locate_motion_style;
+    const char      *text_left;
+    const char      *text_right;
+    int             text_changes;
+    int             text_scale;
+    const char      *text_event;
 
     int             emulate_motion;
     int             threshold;
@@ -81,6 +80,8 @@ struct config {
     int             lightswitch_frames;
     int             minimum_motion_frames;
     int             event_gap;
+    int             pre_capture;
+    int             post_capture;
 
     char            *on_event_start;
     char            *on_event_end;
