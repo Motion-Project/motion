@@ -566,7 +566,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
          * Save motion jpeg, if configured
          * Output the image_out (motion) picture.
          */
-        if (conf->motion_img)
+        if (conf->picture_output_debug)
             event(cnt, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tv);
     }
 
@@ -693,13 +693,13 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
 
         /* Store it as a preview image, only if it has motion */
         if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].flags & IMAGE_MOTION) {
-            /* Check for most significant preview-shot when output_pictures=best */
+            /* Check for most significant preview-shot when picture_output=best */
             if (cnt->new_img & NEWIMG_BEST) {
                 if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].diffs > cnt->imgs.preview_image.diffs) {
                     image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
                 }
             }
-            /* Check for most significant preview-shot when output_pictures=center */
+            /* Check for most significant preview-shot when picture_output=center */
             if (cnt->new_img & NEWIMG_CENTER) {
                 if (cnt->imgs.image_ring[cnt->imgs.image_ring_out].cent_dist < cnt->imgs.preview_image.cent_dist) {
                     image_save_as_preview(cnt, &cnt->imgs.image_ring[cnt->imgs.image_ring_out]);
@@ -2207,17 +2207,17 @@ static void mlp_overlay(struct context *cnt){
      */
 
     /* Smartmask overlay */
-    if (cnt->smartmask_speed && (cnt->conf.motion_img || cnt->conf.movie_output_debug ||
+    if (cnt->smartmask_speed && (cnt->conf.picture_output_debug || cnt->conf.movie_output_debug ||
         cnt->conf.setup_mode))
         overlay_smartmask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Largest labels overlay */
-    if (cnt->imgs.largest_label && (cnt->conf.motion_img || cnt->conf.movie_output_debug ||
+    if (cnt->imgs.largest_label && (cnt->conf.picture_output_debug || cnt->conf.movie_output_debug ||
         cnt->conf.setup_mode))
         overlay_largest_label(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Fixed mask overlay */
-    if (cnt->imgs.mask && (cnt->conf.motion_img || cnt->conf.movie_output_debug ||
+    if (cnt->imgs.mask && (cnt->conf.picture_output_debug || cnt->conf.movie_output_debug ||
         cnt->conf.setup_mode))
         overlay_fixed_mask(cnt, cnt->imgs.img_motion.image_norm);
 
@@ -2600,13 +2600,13 @@ static void mlp_parmsupdate(struct context *cnt){
 
         init_text_scale(cnt);  /* Initialize and validate text_scale */
 
-        if (strcasecmp(cnt->conf.output_pictures, "on") == 0)
+        if (strcasecmp(cnt->conf.picture_output, "on") == 0)
             cnt->new_img = NEWIMG_ON;
-        else if (strcasecmp(cnt->conf.output_pictures, "first") == 0)
+        else if (strcasecmp(cnt->conf.picture_output, "first") == 0)
             cnt->new_img = NEWIMG_FIRST;
-        else if (strcasecmp(cnt->conf.output_pictures, "best") == 0)
+        else if (strcasecmp(cnt->conf.picture_output, "best") == 0)
             cnt->new_img = NEWIMG_BEST;
-        else if (strcasecmp(cnt->conf.output_pictures, "center") == 0)
+        else if (strcasecmp(cnt->conf.picture_output, "center") == 0)
             cnt->new_img = NEWIMG_CENTER;
         else
             cnt->new_img = NEWIMG_OFF;

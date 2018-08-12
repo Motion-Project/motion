@@ -430,8 +430,8 @@ static void event_image_detect(struct context *cnt,
          *  conf.imagepath would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.imagepath)
-            imagepath = cnt->conf.imagepath;
+        if (cnt->conf.picture_filename)
+            imagepath = cnt->conf.picture_filename;
         else
             imagepath = DEF_IMAGEPATH;
 
@@ -458,15 +458,15 @@ static void event_imagem_detect(struct context *cnt,
     char filename[PATH_MAX];
     char filenamem[PATH_MAX];
 
-    if (conf->motion_img) {
+    if (conf->picture_output_debug) {
         const char *imagepath;
 
         /*
-         *  conf.imagepath would normally be defined but if someone deleted it by control interface
+         *  conf.picture_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.imagepath)
-            imagepath = cnt->conf.imagepath;
+        if (cnt->conf.picture_filename)
+            imagepath = cnt->conf.picture_filename;
         else
             imagepath = DEF_IMAGEPATH;
 
@@ -490,20 +490,20 @@ static void event_image_snapshot(struct context *cnt,
     char filename[PATH_MAX];
     char filepath[PATH_MAX];
     int offset = 0;
-    int len = strlen(cnt->conf.snappath);
+    int len = strlen(cnt->conf.snapshot_filename);
 
     if (len >= 9)
         offset = len - 8;
 
-    if (strcmp(cnt->conf.snappath+offset, "lastsnap")) {
+    if (strcmp(cnt->conf.snapshot_filename+offset, "lastsnap")) {
         char linkpath[PATH_MAX];
         const char *snappath;
         /*
-         *  conf.snappath would normally be defined but if someone deleted it by control interface
+         *  conf.snapshot_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail
          */
-        if (cnt->conf.snappath)
-            snappath = cnt->conf.snappath;
+        if (cnt->conf.snapshot_filename)
+            snappath = cnt->conf.snapshot_filename;
         else
             snappath = DEF_SNAPPATH;
 
@@ -526,7 +526,7 @@ static void event_image_snapshot(struct context *cnt,
             return;
         }
     } else {
-        mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snappath, currenttime_tv, NULL, 0);
+        mystrftime(cnt, filepath, sizeof(filepath), cnt->conf.snapshot_filename, currenttime_tv, NULL, 0);
         snprintf(filename, PATH_MAX, "%s.%s", filepath, imageext(cnt));
         snprintf(fullfilename, PATH_MAX, "%s/%s", cnt->conf.filepath, filename);
         remove(fullfilename);
@@ -563,7 +563,7 @@ static void event_image_preview(struct context *cnt,
         cnt->current_image = &cnt->imgs.preview_image;
 
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
-        use_imagepath = strcmp(cnt->conf.imagepath, "preview");
+        use_imagepath = strcmp(cnt->conf.picture_filename, "preview");
 
         if ((cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
             if (cnt->conf.movie_extpipe_use && cnt->extpipe) {
@@ -593,11 +593,11 @@ static void event_image_preview(struct context *cnt,
              */
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "different filename or picture only!");
             /*
-             * conf.imagepath would normally be defined but if someone deleted it by
+             * conf.picture_filename would normally be defined but if someone deleted it by
              * control interface it is better to revert to the default than fail.
              */
-            if (cnt->conf.imagepath)
-                imagepath = cnt->conf.imagepath;
+            if (cnt->conf.picture_filename)
+                imagepath = cnt->conf.picture_filename;
             else
                 imagepath = (char *)DEF_IMAGEPATH;
 

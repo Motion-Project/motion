@@ -28,23 +28,18 @@ struct config {
     int width;
     int height;
     int camera_id;
-    int quality;
     const char *flip_axis;
     int rotate_deg;
     int max_changes;
     int threshold_tune;
-    const char *output_pictures;
-    int motion_img;
     int emulate_motion;
     int event_gap;
-    int snapshot_interval;
     const char *locate_motion_mode;
     const char *locate_motion_style;
     int input;
     int norm;
     int frame_limit;
     int quiet;
-    const char *picture_type;
     int noise;
     int noise_tune;
     int minimum_frame_time;
@@ -94,8 +89,6 @@ struct config {
     int v4l2_palette;
     const char *vidpipe;
     const char *filepath;
-    const char *imagepath;
-    const char *snappath;
     const char *timepath;
     char *on_event_start;
     char *on_event_end;
@@ -142,8 +135,17 @@ struct config {
     const char *area_detect;
     const char *camera_dir;
     int minimum_motion_frames;
-    const char *exif_text;
     char *pid_file;
+
+    const char      *picture_type;
+    const char      *picture_output;
+    int             picture_output_debug;
+    int             picture_quality;
+    const char      *picture_exif;
+    const char      *picture_filename;
+
+    int             snapshot_interval;
+    const char      *snapshot_filename;
 
     int             movie_output;
     int             movie_output_debug;

@@ -37,24 +37,19 @@ struct config conf_template = {
     .camera_name =                     NULL,
     .width =                           DEF_WIDTH,
     .height =                          DEF_HEIGHT,
-    .quality =                         DEF_QUALITY,
     .camera_id =                       0,
     .flip_axis =                       "none",
     .rotate_deg =                      0,
     .max_changes =                     DEF_CHANGES,
     .threshold_tune =                  0,
-    .output_pictures =                 "on",
-    .motion_img =                      0,
     .emulate_motion =                  0,
     .event_gap =                       DEF_EVENT_GAP,
-    .snapshot_interval =               0,
     .locate_motion_mode =              "off",
     .locate_motion_style =             "box",
     .input =                           DEF_INPUT,
     .norm =                            0,
     .frame_limit =                     DEF_MAXFRAMERATE,
     .quiet =                           1,
-    .picture_type =                    "jpeg",
     .noise =                           DEF_NOISELEVEL,
     .noise_tune =                      1,
     .minimum_frame_time =              0,
@@ -103,8 +98,6 @@ struct config conf_template = {
     .v4l2_palette =                    DEF_PALETTE,
     .vidpipe =                         NULL,
     .filepath =                        NULL,
-    .imagepath =                       DEF_IMAGEPATH,
-    .snappath =                        DEF_SNAPPATH,
     .timepath =                        DEF_TIMEPATH,
     .on_event_start =                  NULL,
     .on_event_end =                    NULL,
@@ -150,12 +143,21 @@ struct config conf_template = {
     .despeckle_filter =                NULL,
     .area_detect =                     NULL,
     .minimum_motion_frames =           1,
-    .exif_text =                       NULL,
     .pid_file =                        NULL,
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type_str =                    NULL,
     .native_language =                 1,
+
+    .picture_type =                    "jpeg",
+    .picture_output =                  "on",
+    .picture_output_debug =            0,
+    .picture_quality =                 75,
+    .picture_exif =                    NULL,
+    .picture_filename =                DEF_IMAGEPATH,
+
+    .snapshot_interval =               0,
+    .snapshot_filename =               DEF_SNAPPATH,
 
     .movie_output =                    1,
     .movie_output_debug =              0,
@@ -924,7 +926,7 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "output_pictures",
+    "picture_output",
     "\n############################################################\n"
     "# Image File Output\n"
     "############################################################\n\n"
@@ -935,25 +937,25 @@ config_param config_params[] = {
     "# Picture with motion nearest center of picture is saved when set to 'center'.\n"
     "# Can be used as preview shot for the corresponding movie.",
     0,
-    CONF_OFFSET(output_pictures),
+    CONF_OFFSET(picture_output),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "output_debug_pictures",
+    "picture_output_debug",
     "# Output pictures with only the pixels moving object (ghost images) (default: off)",
     0,
-    CONF_OFFSET(motion_img),
+    CONF_OFFSET(picture_output_debug),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "quality",
+    "picture_quality",
     "# The quality (in percent) to be used by the jpeg and webp compression (default: 75)",
     0,
-    CONF_OFFSET(quality),
+    CONF_OFFSET(picture_quality),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
@@ -988,7 +990,7 @@ config_param config_params[] = {
     "# Note: A symbolic link called lastsnap.jpg created in the target_dir will always\n"
     "# point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'",
     0,
-    CONF_OFFSET(snappath),
+    CONF_OFFSET(snapshot_filename),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -1001,18 +1003,18 @@ config_param config_params[] = {
     "# Set to 'preview' together with best-preview feature enables special naming\n"
     "# convention for preview shots. See motion guide for details",
     0,
-    CONF_OFFSET(imagepath),
+    CONF_OFFSET(picture_filename),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "exif_text",
+    "picture_exif",
     "# Text to include in a JPEG EXIF comment\n"
     "# May be any text, including conversion specifiers.\n"
     "# The EXIF timestamp is included independent of this text.",
     0,
-    CONF_OFFSET(exif_text),
+    CONF_OFFSET(picture_exif),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
@@ -1977,6 +1979,34 @@ dep_config_param dep_config_params[] = {
     "4.1.1",
     "\"extpipe\" replaced with \"movie_extpipe\" option.",
     CONF_OFFSET(movie_extpipe),
+    copy_string
+    },
+    {
+    "output_pictures",
+    "4.1.1",
+    "\"output_pictures\" replaced with \"picture_output\" option.",
+    CONF_OFFSET(picture_output),
+    copy_string
+    },
+    {
+    "output_debug_pictures",
+    "4.1.1",
+    "\"output_debug_pictures\" replaced with \"picture_output_debug\" option.",
+    CONF_OFFSET(picture_output_debug),
+    copy_bool
+    },
+    {
+    "quality",
+    "4.1.1",
+    "\"quality\" replaced with \"picture_quality\" option.",
+    CONF_OFFSET(picture_quality),
+    copy_int
+    },
+    {
+    "exif_text",
+    "4.1.1",
+    "\"exif_text\" replaced with \"picture_exif\" option.",
+    CONF_OFFSET(picture_exif),
     copy_string
     },
 
