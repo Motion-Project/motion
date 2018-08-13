@@ -19,7 +19,7 @@
  *  it actually handles more camera types than just rtsp.
  *  Within its current construct, it could be set up to handle
  *  whatever types of capture devices that ffmpeg can use.
- *  As of this writing it includes rtsp, http and v4l2.
+ *  As of this writing it includes rtsp, http, files and v4l2.
  *
  ***********************************************************/
 
@@ -664,7 +664,7 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
     return 0;
 }
 
-static int netcam_rtsp_resize_ntc(struct rtsp_context *rtsp_data){
+static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
 
     if ((rtsp_data->finish) || (!rtsp_data->first_image)) return 0;
 
@@ -672,7 +672,7 @@ static int netcam_rtsp_resize_ntc(struct rtsp_context *rtsp_data){
         (rtsp_data->imgsize.height != rtsp_data->codec_context->height) ||
         (netcam_rtsp_check_pixfmt(rtsp_data) != 0) ){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "****************************************************************");
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "******************************************************");
         if ((rtsp_data->imgsize.width  != rtsp_data->codec_context->width) ||
             (rtsp_data->imgsize.height != rtsp_data->codec_context->height)) {
             if (netcam_rtsp_check_pixfmt(rtsp_data) != 0) {
@@ -699,7 +699,7 @@ static int netcam_rtsp_resize_ntc(struct rtsp_context *rtsp_data){
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("trancoded to YUV420P.  If possible change netcam "));
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("picture format to YUV420P to possibly lower CPU usage."));
         }
-        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "****************************************************************");
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "******************************************************");
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "");
     }
 
@@ -792,6 +792,18 @@ static void netcam_rtsp_set_rtsp(struct rtsp_context *rtsp_data){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Setting rtsp transport to udp"),rtsp_data->cameratype);
     }
+}
+
+static void netcam_rtsp_set_file(struct rtsp_context *rtsp_data){
+
+    /* This is a place holder for the moment.  We will add into
+     * this function any options that must be set for ffmpeg to
+     * read a particular file.  To date, it does not need any
+     * additional options and works fine with defaults.
+     */
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("%s: Setting attributes to read file"),rtsp_data->cameratype);
+
 }
 
 static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
@@ -890,6 +902,11 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up v4l2 via ffmpeg netcam"));
+    } else if (strcmp(url.service, "file") == 0) {
+        rtsp_data->path = mymalloc(strlen(url.path));
+        sprintf(rtsp_data->path, "%s",url.path);
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("Setting up file via ffmpeg netcam"));
     } else {
         if (!strcmp(url.service, "mjpeg")) {
             sprintf(url.service, "%s","http");
@@ -948,6 +965,8 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->pktarray_index = -1;
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
+    rtsp_data->capture_frame = TRUE;
+
     snprintf(rtsp_data->threadname, 15, "%s",_("Unknown"));
 
     if (gettimeofday(&rtsp_data->interruptstarttime, NULL) < 0) {
@@ -1090,6 +1109,8 @@ static int netcam_rtsp_open_context(struct rtsp_context *rtsp_data){
         netcam_rtsp_set_rtsp(rtsp_data);
     } else if (strncmp(rtsp_data->service, "v4l2", 4) == 0 ){
         netcam_rtsp_set_v4l2(rtsp_data);
+    } else if (strncmp(rtsp_data->service, "file", 4) == 0 ){
+        netcam_rtsp_set_file(rtsp_data);
     } else {
         av_dict_free(&rtsp_data->opts);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1220,7 +1241,7 @@ static int netcam_rtsp_connect(struct rtsp_context *rtsp_data){
 
     if (netcam_rtsp_open_context(rtsp_data) < 0) return -1;
 
-    if (netcam_rtsp_resize_ntc(rtsp_data) < 0 ) return -1;
+    if (netcam_rtsp_ntc(rtsp_data) < 0 ) return -1;
 
     if (netcam_rtsp_read_image(rtsp_data) < 0) return -1;
 
@@ -1265,12 +1286,28 @@ static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data){
 static void *netcam_rtsp_handler(void *arg){
 
     struct rtsp_context *rtsp_data = arg;
+    int capture_reset;
 
     rtsp_data->handler_finished = FALSE;
 
     util_threadname_set("nc",rtsp_data->threadnbr, rtsp_data->camera_name);
 
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)rtsp_data->threadnbr));
+
+    /* The rtsp_data->capture_frame is set to TRUE in the netcam_rtsp_next
+     * function that is running on the motion loop thread.  When processing
+     * a file, we need to slow down this loop to only capture a new image
+     * after the motion loop has grabbed the picture.  Once this loop has
+     * captured the picture, we set the capture_frame to FALSE.  When processing
+     * other input sources, we let this loop run normally and continually set the
+     * capture_frame to TRUE. Note that if we slowed this loop for regular rtsp/rtmp
+     * cameras, the resulting images are corrupted.
+     */
+    if (strncmp(rtsp_data->service, "file", 4) == 0 ){
+        capture_reset = FALSE;
+    } else {
+        capture_reset = TRUE;
+    }
 
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Camera handler thread [%d] started")
@@ -1287,19 +1324,28 @@ static void *netcam_rtsp_handler(void *arg){
             netcam_rtsp_connect(rtsp_data);
             continue;
         } else {            /* We think we are connected...*/
-            if (netcam_rtsp_read_image(rtsp_data) < 0) {
-                if (!rtsp_data->finish) {
-                    /* Nope.  We are not or got bad image.  Reconnect*/
-                    if ((rtsp_data->status == RTSP_CONNECTED) ||
-                        (rtsp_data->status == RTSP_READINGIMAGE)){
-                        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                            ,_("%s: Bad image.  Reconnecting with camera....")
-                            ,rtsp_data->cameratype);
+            pthread_mutex_lock(&rtsp_data->mutex);
+            if (rtsp_data->capture_frame){
+                pthread_mutex_unlock(&rtsp_data->mutex);
+                if (netcam_rtsp_read_image(rtsp_data) < 0) {
+                    if (!rtsp_data->finish) {
+                        /* Nope.  We are not or got bad image.  Reconnect*/
+                        if ((rtsp_data->status == RTSP_CONNECTED) ||
+                            (rtsp_data->status == RTSP_READINGIMAGE)){
+                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                                ,_("%s: Bad image.  Reconnecting with camera....")
+                                ,rtsp_data->cameratype);
+                        }
+                        rtsp_data->status = RTSP_RECONNECTING;
+                        netcam_rtsp_connect(rtsp_data);
                     }
-                    rtsp_data->status = RTSP_RECONNECTING;
-                    netcam_rtsp_connect(rtsp_data);
+                    continue;
                 }
-                continue;
+                pthread_mutex_lock(&rtsp_data->mutex);
+                    rtsp_data->capture_frame = capture_reset;
+                pthread_mutex_unlock(&rtsp_data->mutex);
+            } else {
+                pthread_mutex_unlock(&rtsp_data->mutex);
             }
         }
     }
@@ -1468,6 +1514,7 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
                , cnt->rtsp->img_latest->ptr
                , cnt->rtsp->img_latest->used);
         img_data->idnbr_norm = cnt->rtsp->idnbr;
+        cnt->rtsp->capture_frame = TRUE;
     pthread_mutex_unlock(&cnt->rtsp->mutex);
 
     if (cnt->rtsp_high){

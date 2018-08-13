@@ -182,8 +182,14 @@
       <p></p>
 
       <a name="Basic_Setup_Static"></a>
-      <strong>Static files</strong> can also be processed with a bit of additional setup via a v4l2loopback device.
-      Install the loopback software as described in the
+      <strong>Static files</strong> can also be processed by Motion in one of two ways.  The first method
+      is by using the <a href="#netcam_url" >netcam_url</a> option and using a prefix of file:\\.  With
+      this method, Motion will process the file at the speed specified by
+      <a href="#framerate" >framerate</a>.  This allows the user to either speed up or slow down the video
+      processing to suit the particular need.
+      <p></p>
+      The second option for processing a static file requires a bit of additional setup and uses a
+      v4l2loopback device.  To set this up, first install the loopback software as described in the
       <code><strong><a href="#OptDetail_Pipe" >Output - Pipe Options</a> </code></strong>
       section of this guide to create a /dev/videoX device and then use software such as ffmpeg to stream
       the static file into the v4l2 device.  e.g.
@@ -2784,12 +2790,15 @@
 
         <i>file://</i>
         <ul>
-            This option allows for the processing of a static image.  A process outside of Motion is required to
-            replace the image.
+            This option allows for the processing of a existing movie file.  Motion will open the file and
+            process the file at the framerate specified in the Motion configuration file.  Note that since the
+            file may have been created using a different framerate than specified in the Motion config file,
+            the file may be processed at either a faster or slower rate than real time.
             <p></p>
-            A scenario for this would be processing a large number of previously saved images.  The file
-            option would point to a single location such as <code>/home/user/test/currentimage.jpg</code>  and a script
-            running external to Motion would loop through all the images and copy them into <code>currentimage.jpg</code>.
+            A sample format for the netcam_url would be <code>netcam_url file:///home/user/cam1/cam1_20180817084027.mkv</code>
+            <p></p>
+            This option may be useful for "reprocessing" a movie created by Motion to fine tune the detection options.
+
         </ul>
         <p></p>
 
