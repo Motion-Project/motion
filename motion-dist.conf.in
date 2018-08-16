@@ -78,7 +78,7 @@ threshold 1500
 ; noise_level 32
 
 # Despeckle the image using (E/e)rode or (D/d)ilate or (l)abel.
-; despeckle_filter EedDl
+despeckle_filter EedDl
 
 # Number of images that must contain motion to trigger an event.
 minimum_motion_frames 1
