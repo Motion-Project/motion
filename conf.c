@@ -1707,7 +1707,7 @@ dep_config_param dep_config_params[] = {
     {
     "thread",
     "3.4.1",
-    "The \"thread\" option has been replaced by the \"camera\" option.",
+    "The \"thread\" option has been replaced by the \"camera\"",
     0,
     "camera",
     config_camera
@@ -1715,7 +1715,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_timelapse",
     "4.0.1",
-    "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\" option.",
+    "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\"",
     CONF_OFFSET(timelapse_interval),
     "timelapse_interval",
     copy_int
@@ -1723,7 +1723,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_timelapse_mode",
     "4.0.1",
-    "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\" option.",
+    "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\"",
     CONF_OFFSET(timelapse_mode),
     "timelapse_mode",
     copy_string
@@ -1731,7 +1731,7 @@ dep_config_param dep_config_params[] = {
     {
     "brightness",
     "4.1.1",
-    "\"brightness\" replaced with \"vid_control_params\" option.",
+    "\"brightness\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
     copy_vid_ctrl
@@ -1739,7 +1739,7 @@ dep_config_param dep_config_params[] = {
     {
     "contrast",
     "4.1.1",
-    "\"contrast\" replaced with \"vid_control_params\" option.",
+    "\"contrast\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
     copy_vid_ctrl
@@ -1747,7 +1747,7 @@ dep_config_param dep_config_params[] = {
     {
     "saturation",
     "4.1.1",
-    "\"saturation\" replaced with \"vid_control_params\" option.",
+    "\"saturation\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
     copy_vid_ctrl
@@ -1755,7 +1755,7 @@ dep_config_param dep_config_params[] = {
     {
     "hue",
     "4.1.1",
-    "\"hue\" replaced with \"vid_control_params\" option.",
+    "\"hue\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
     copy_vid_ctrl
@@ -1763,7 +1763,7 @@ dep_config_param dep_config_params[] = {
     {
     "power_line_frequency",
     "4.1.1",
-    "\"power_line_frequency\" replaced with \"vid_control_params\" option.",
+    "\"power_line_frequency\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
     copy_vid_ctrl
@@ -1771,7 +1771,7 @@ dep_config_param dep_config_params[] = {
     {
     "text_double",
     "4.1.1",
-    "\"text_double\" replaced with \"text_scale\" option.",
+    "\"text_double\" replaced with \"text_scale\"",
     CONF_OFFSET(text_scale),
     "text_scale",
     copy_text_double
@@ -1779,7 +1779,7 @@ dep_config_param dep_config_params[] = {
     {
     "webcontrol_html_output",
     "4.1.1",
-    "\"webcontrol_html_output\" replaced with \"webcontrol_interface\" option.",
+    "\"webcontrol_html_output\" replaced with \"webcontrol_interface\"",
     CONF_OFFSET(webcontrol_interface),
     "webcontrol_interface",
     copy_html_output
@@ -1787,7 +1787,7 @@ dep_config_param dep_config_params[] = {
     {
      "lightswitch",
     "4.1.1",
-    "\"lightswitch\" replaced with \"lightswitch_percent\" and \"lightswitch_frames\" options.",
+    "\"lightswitch\" replaced with \"lightswitch_percent\"",
     CONF_OFFSET(lightswitch_percent),
     "lightswitch_percent",
     copy_int
@@ -1795,7 +1795,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_output_movies",
     "4.1.1",
-    "\"ffmpeg_output_movies\" replaced with \"movie_output\" option.",
+    "\"ffmpeg_output_movies\" replaced with \"movie_output\"",
     CONF_OFFSET(movie_output),
     "movie_output",
     copy_bool
@@ -1803,7 +1803,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_output_debug_movies",
     "4.1.1",
-    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_motion\" option.",
+    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_motion\"",
     CONF_OFFSET(movie_output_motion),
     "movie_output_motion",
     copy_bool
@@ -1811,7 +1811,7 @@ dep_config_param dep_config_params[] = {
     {
     "max_movie_time",
     "4.1.1",
-    "\"max_movie_time\" replaced with \"movie_max_time\" option.",
+    "\"max_movie_time\" replaced with \"movie_max_time\"",
     CONF_OFFSET(movie_max_time),
     "movie_max_time",
     copy_int
@@ -1819,7 +1819,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_bps",
     "4.1.1",
-    "\"ffmpeg_bps\" replaced with \"movie_bps\" option.",
+    "\"ffmpeg_bps\" replaced with \"movie_bps\"",
     CONF_OFFSET(movie_bps),
     "movie_bps",
     copy_int
@@ -1827,7 +1827,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_variable_bitrate",
     "4.1.1",
-    "\"ffmpeg_variable_bitrate\" replaced with \"movie_quality\" option.",
+    "\"ffmpeg_variable_bitrate\" replaced with \"movie_quality\"",
     CONF_OFFSET(movie_quality),
     "movie_quality",
     copy_int
@@ -1835,7 +1835,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_video_codec",
     "4.1.1",
-    "\"ffmpeg_video_codec\" replaced with \"movie_codec\" option.",
+    "\"ffmpeg_video_codec\" replaced with \"movie_codec\"",
     CONF_OFFSET(movie_codec),
     "movie_codec",
     copy_string
@@ -1843,7 +1843,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_duplicate_frames",
     "4.1.1",
-    "\"ffmpeg_duplicate_frames\" replaced with \"movie_duplicate_frames\" option.",
+    "\"ffmpeg_duplicate_frames\" replaced with \"movie_duplicate_frames\"",
     CONF_OFFSET(movie_duplicate_frames),
     "movie_duplicate_frames",
     copy_bool
@@ -1851,7 +1851,7 @@ dep_config_param dep_config_params[] = {
     {
     "ffmpeg_passthrough",
     "4.1.1",
-    "\"ffmpeg_passthrough\" replaced with \"movie_passthrough\" option.",
+    "\"ffmpeg_passthrough\" replaced with \"movie_passthrough\"",
     CONF_OFFSET(movie_passthrough),
     "movie_passthrough",
     copy_bool
@@ -1859,7 +1859,7 @@ dep_config_param dep_config_params[] = {
     {
     "use_extpipe",
     "4.1.1",
-    "\"use_extpipe\" replaced with \"movie_extpipe_use\" option.",
+    "\"use_extpipe\" replaced with \"movie_extpipe_use\"",
     CONF_OFFSET(movie_extpipe_use),
     "movie_extpipe_use",
     copy_bool
@@ -1867,7 +1867,7 @@ dep_config_param dep_config_params[] = {
     {
     "extpipe",
     "4.1.1",
-    "\"extpipe\" replaced with \"movie_extpipe\" option.",
+    "\"extpipe\" replaced with \"movie_extpipe\"",
     CONF_OFFSET(movie_extpipe),
     "movie_extpipe",
     copy_string
@@ -1875,7 +1875,7 @@ dep_config_param dep_config_params[] = {
     {
     "output_pictures",
     "4.1.1",
-    "\"output_pictures\" replaced with \"picture_output\" option.",
+    "\"output_pictures\" replaced with \"picture_output\"",
     CONF_OFFSET(picture_output),
     "picture_output",
     copy_string
@@ -1883,7 +1883,7 @@ dep_config_param dep_config_params[] = {
     {
     "output_debug_pictures",
     "4.1.1",
-    "\"output_debug_pictures\" replaced with \"picture_output_motion\" option.",
+    "\"output_debug_pictures\" replaced with \"picture_output_motion\"",
     CONF_OFFSET(picture_output_motion),
     "picture_output_motion",
     copy_bool
@@ -1891,7 +1891,7 @@ dep_config_param dep_config_params[] = {
     {
     "quality",
     "4.1.1",
-    "\"quality\" replaced with \"picture_quality\" option.",
+    "\"quality\" replaced with \"picture_quality\"",
     CONF_OFFSET(picture_quality),
     "picture_quality",
     copy_int
@@ -1899,7 +1899,7 @@ dep_config_param dep_config_params[] = {
     {
     "exif_text",
     "4.1.1",
-    "\"exif_text\" replaced with \"picture_exif\" option.",
+    "\"exif_text\" replaced with \"picture_exif\"",
     CONF_OFFSET(picture_exif),
     "picture_exif",
     copy_string
@@ -1907,7 +1907,7 @@ dep_config_param dep_config_params[] = {
     {
     "motion_video_pipe",
     "4.1.1",
-    "\"motion_video_pipe\" replaced with \"video_pipe_motion\" option.",
+    "\"motion_video_pipe\" replaced with \"video_pipe_motion\"",
     CONF_OFFSET(video_pipe_motion),
     "video_pipe_motion",
     copy_string
@@ -1915,7 +1915,7 @@ dep_config_param dep_config_params[] = {
     {
     "ipv6_enabled",
     "4.1.1",
-    "\"ipv6_enabled\" replaced with \"webcontrol_ipv6\" option.",
+    "\"ipv6_enabled\" replaced with \"webcontrol_ipv6\"",
     CONF_OFFSET(webcontrol_ipv6),
     "webcontrol_ipv6",
     copy_bool
@@ -1923,7 +1923,7 @@ dep_config_param dep_config_params[] = {
     {
     "rtsp_uses_tcp",
     "4.1.1",
-    "\"rtsp_uses_tcp\" replaced with \"netcam_use_tcp\" option.",
+    "\"rtsp_uses_tcp\" replaced with \"netcam_use_tcp\"",
     CONF_OFFSET(netcam_use_tcp),
     "netcam_use_tcp",
     copy_bool
@@ -1931,7 +1931,7 @@ dep_config_param dep_config_params[] = {
     {
     "switchfilter",
     "4.1.1",
-    "\"switchfilter\" replaced with \"roundrobin_switchfilter\" option.",
+    "\"switchfilter\" replaced with \"roundrobin_switchfilter\"",
     CONF_OFFSET(roundrobin_switchfilter),
     "roundrobin_switchfilter",
     copy_bool
@@ -1939,7 +1939,7 @@ dep_config_param dep_config_params[] = {
     {
     "logfile",
     "4.1.1",
-    "\"logfile\" replaced with \"log_file\" option.",
+    "\"logfile\" replaced with \"log_file\"",
     CONF_OFFSET(log_file),
     "log_file",
     copy_string
@@ -1947,7 +1947,7 @@ dep_config_param dep_config_params[] = {
     {
     "process_id_file",
     "4.1.1",
-    "\"process_id_file\" replaced with \"pid_file\" option.",
+    "\"process_id_file\" replaced with \"pid_file\"",
     CONF_OFFSET(pid_file),
     "pid_file",
     copy_string
@@ -2081,10 +2081,11 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     i = 0;
     while (dep_config_params[i].name != NULL) {
         if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-                ,_("Deprecated config option \"%s\" since after version %s:")
-                ,cmd, dep_config_params[i].last_version);
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
+            //MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            //    ,_("Deprecated config option \"%s\" since after version %s:")
+            //    ,cmd, dep_config_params[i].last_version);
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
+                , dep_config_params[i].info, dep_config_params[i].last_version);
 
             if (dep_config_params[i].copy != NULL){
                 /* If the depreciated option is a vid item, copy_vid_ctrl is called
