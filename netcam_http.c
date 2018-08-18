@@ -17,8 +17,6 @@
 
 #define CONNECT_TIMEOUT        10     /* Timeout on remote connection attempt */
 #define READ_TIMEOUT            5     /* Default timeout on recv requests */
-#define POLLING_TIMEOUT  READ_TIMEOUT /* File polling timeout [s] */
-#define POLLING_TIME  500*1000*1000   /* File polling time quantum [ns] (500ms) */
 #define MAX_HEADER_RETRIES      5     /* Max tries to find a header record */
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 
@@ -38,10 +36,6 @@ static const char *connect_req_close = "Connection: close\r\n";
 static const char *connect_req_keepalive = "Connection: Keep-Alive\r\n";
 
 static const char *connect_auth_req = "Authorization: Basic %s\r\n";
-
-
-tfile_context *file_new_context(void);
-void file_free_context(tfile_context* ctxt);
 
 
 /**
@@ -1678,131 +1672,6 @@ int netcam_setup_mjpg(netcam_context_ptr netcam, struct url_t *url)
         ,_("connected, going on to read and decode MJPG chunks."));
 
     netcam->get_image = netcam_read_mjpg_jpeg;
-
-    return 0;
-}
-
-/**
- * netcam_read_file_jpeg
- *
- *      This routine reads local image file. ( netcam_url file:///path/image.jpg )
- *      The current implementation is still a little experimental,
- *      and needs some additional code for error detection and
- *      recovery.
- */
-static int netcam_read_file_jpeg(netcam_context_ptr netcam)
-{
-    int loop_counter = 0;
-
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Begin"));
-
-    netcam_buff_ptr buffer;
-    int len;
-    struct stat statbuf;
-
-    /* Point to our working buffer. */
-    buffer = netcam->receiving;
-    buffer->used = 0;
-
-    /*int fstat(int filedes, struct stat *buf);*/
-    do {
-        if (stat(netcam->file->path, &statbuf)) {
-            MOTION_LOG(CRT, TYPE_NETCAM, SHOW_ERRNO
-                ,_("stat(%s) error"), netcam->file->path);
-            return -1;
-        }
-
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
-            ,_("statbuf.st_mtime[%d] != last_st_mtime[%d]")
-            , statbuf.st_mtime, netcam->file->last_st_mtime);
-
-        /* its waits POLLING_TIMEOUT */
-        if (loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000))) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("waiting new file image timeout"));
-            return -1;
-        }
-
-        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
-            ,_("delay waiting new file image "));
-
-        //its waits 5seconds - READ_TIMEOUT
-        //SLEEP(netcam->timeout.tv_sec, netcam->timeout.tv_usec*1000);
-        SLEEP(0, POLLING_TIME); // its waits 500ms
-        /*return -1;*/
-        loop_counter++;
-
-    } while (statbuf.st_mtime == netcam->file->last_st_mtime);
-
-    netcam->file->last_st_mtime = statbuf.st_mtime;
-
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("processing new file image - st_mtime %d"), netcam->file->last_st_mtime);
-
-    /* Assure there's enough room in the buffer. */
-    while (buffer->size < (size_t)statbuf.st_size)
-        netcam_check_buffsize(buffer, statbuf.st_size);
-
-
-    /* Do the read */
-    netcam->file->control_file_desc = open(netcam->file->path, O_RDONLY|O_CLOEXEC);
-    if (netcam->file->control_file_desc < 0) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("open(%s) error: %d")
-            ,netcam->file->path, netcam->file->control_file_desc);
-        return -1;
-    }
-    if ((len = read(netcam->file->control_file_desc,
-                    buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("read(%s) error: %d"), netcam->file->control_file_desc, len);
-        return -1;
-    }
-
-    buffer->used += len;
-    close(netcam->file->control_file_desc);
-
-    netcam_image_read_complete(netcam);
-
-    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("End"));
-
-    return 0;
-}
-
-tfile_context *file_new_context(void)
-{
-    /* Note that mymalloc will exit on any problem. */
-    return mymalloc(sizeof(tfile_context));
-}
-
-void file_free_context(tfile_context* ctxt)
-{
-    if (ctxt == NULL)
-        return;
-
-    free(ctxt->path);
-    free(ctxt);
-}
-
-int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url)
-{
-
-    if ((netcam->file = file_new_context()) == NULL)
-        return -1;
-
-    /*
-     * We copy the strings out of the url structure into the ftp_context
-     * structure.  By setting url->{string} to NULL we effectively "take
-     * ownership" of the string away from the URL (i.e. it won't be freed
-     * when we cleanup the url structure later).
-     */
-    netcam->file->path = url->path;
-    url->path = NULL;
-
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-        ,_("netcam->file->path %s"), netcam->file->path);
-
-    netcam->get_image = netcam_read_file_jpeg;
 
     return 0;
 }

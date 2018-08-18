@@ -180,7 +180,6 @@ typedef struct netcam_context {
                                    buffer for the HTTP data */
 
     struct ftp_context  *ftp;        /* this structure contains the context for FTP connection */
-    struct file_context *file;       /* this structure contains the context for FILE connection */
 
     int (*get_image)(netcam_context_ptr);
                                 /* Function to fetch the image from

@@ -9,11 +9,12 @@
 #define MJPG_MH_MAGIC          "MJPG"
 #define MJPG_MH_MAGIC_SIZE          4
 
-typedef struct file_context {
-    char      *path;               /* the path within the URL */
-    int       control_file_desc;   /* file descriptor for the control socket */
-    time_t    last_st_mtime;       /* time this image was modified */
-} tfile_context;
+
+//typedef struct file_context {
+//    char      *path;               /* the path within the URL */
+//    int       control_file_desc;   /* file descriptor for the control socket */
+//    time_t    last_st_mtime;       /* time this image was modified */
+//} tfile_context;
 
 
 /*
