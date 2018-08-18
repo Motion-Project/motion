@@ -36,13 +36,13 @@
 struct config conf_template = {
     /* Overall system configuration parameters */
     /* daemon is directly cast into the cnt context rather than conf */
-    .setup_mode =                      0,
+    .setup_mode =                      FALSE,
     .pid_file =                        NULL,
     .log_file =                        NULL,
     .log_level =                       LEVEL_DEFAULT+10,
     .log_type =                        NULL,
-    .quiet =                           1,
-    .native_language =                 1,
+    .quiet =                           TRUE,
+    .native_language =                 TRUE,
     .camera_name =                     NULL,
     .camera_id =                       0,
     .camera_dir =                      NULL,
@@ -59,15 +59,15 @@ struct config conf_template = {
     .tuner_device =                    NULL,
     .roundrobin_frames =               1,
     .roundrobin_skip =                 1,
-    .roundrobin_switchfilter =         0,
+    .roundrobin_switchfilter =         FALSE,
 
     .netcam_url =                      NULL,
     .netcam_highres=                   NULL,
     .netcam_userpass =                 NULL,
     .netcam_keepalive =                "off",
     .netcam_proxy =                    NULL,
-    .netcam_tolerant_check =           0,
-    .netcam_use_tcp =                  1,
+    .netcam_tolerant_check =           FALSE,
+    .netcam_use_tcp =                  TRUE,
 
     .mmalcam_name =                    NULL,
     .mmalcam_control_params =          NULL,
@@ -83,16 +83,16 @@ struct config conf_template = {
     .locate_motion_style =             "box",
     .text_left =                       NULL,
     .text_right =                      DEF_TIMESTAMP,
-    .text_changes =                    0,
+    .text_changes =                    FALSE,
     .text_scale =                      1,
     .text_event =                      DEF_EVENTSTAMP,
 
     /* Motion detection configuration parameters */
-    .emulate_motion =                  0,
+    .emulate_motion =                  FALSE,
     .threshold =                       DEF_CHANGES,
-    .threshold_tune =                  0,
+    .threshold_tune =                  FALSE,
     .noise_level =                     DEF_NOISELEVEL,
-    .noise_tune =                      1,
+    .noise_tune =                      TRUE,
     .despeckle_filter =                NULL,
     .area_detect =                     NULL,
     .mask_file =                       NULL,
@@ -118,7 +118,7 @@ struct config conf_template = {
 
     /* Picture output configuration parameters */
     .picture_output =                  "off",
-    .picture_output_motion =           0,
+    .picture_output_motion =           FALSE,
     .picture_type =                    "jpeg",
     .picture_quality =                 75,
     .picture_exif =                    NULL,
@@ -129,16 +129,16 @@ struct config conf_template = {
     .snapshot_filename =               DEF_SNAPPATH,
 
     /* Movie output configuration parameters */
-    .movie_output =                    1,
-    .movie_output_motion =             0,
+    .movie_output =                    TRUE,
+    .movie_output_motion =             FALSE,
     .movie_max_time =                  120,
     .movie_bps =                       400000,
     .movie_quality =                   60,
     .movie_codec =                     "mkv",
-    .movie_duplicate_frames =          0,
-    .movie_passthrough =               0,
+    .movie_duplicate_frames =          FALSE,
+    .movie_passthrough =               FALSE,
     .movie_filename =                  DEF_MOVIEPATH,
-    .movie_extpipe_use =               0,
+    .movie_extpipe_use =               FALSE,
     .movie_extpipe =                   NULL,
 
     /* Timelapse movie configuration parameters */
@@ -154,13 +154,13 @@ struct config conf_template = {
 
     /* Webcontrol configuration parameters */
     .webcontrol_port =                 0,
-    .webcontrol_ipv6 =                 0,
-    .webcontrol_localhost =            1,
+    .webcontrol_ipv6 =                 FALSE,
+    .webcontrol_localhost =            TRUE,
     .webcontrol_parms =                0,
     .webcontrol_interface =            0,
     .webcontrol_auth_method =          0,
     .webcontrol_authentication =       NULL,
-    .webcontrol_tls =                  0,
+    .webcontrol_tls =                  FALSE,
     .webcontrol_cert =                 NULL,
     .webcontrol_key =                  NULL,
     .webcontrol_cors_header =          NULL,
@@ -168,17 +168,17 @@ struct config conf_template = {
     /* Live stream configuration parameters */
     .stream_port =                     0,
     .substream_port =                  0,
-    .stream_localhost =                1,
+    .stream_localhost =                TRUE,
     .stream_auth_method =              0,
     .stream_authentication =           NULL,
-    .stream_tls =                      0,
+    .stream_tls =                      FALSE,
     .stream_cors_header =              NULL,
     .stream_preview_scale =            25,
-    .stream_preview_newline =          0,
+    .stream_preview_newline =          FALSE,
     .stream_preview_method =           0,
     .stream_quality =                  50,
-    .stream_grey =                     0,
-    .stream_motion =                   0,
+    .stream_grey =                     FALSE,
+    .stream_motion =                   FALSE,
     .stream_maxrate =                  1,
     .stream_limit =                    0,
 
@@ -191,10 +191,10 @@ struct config conf_template = {
     .database_password =               NULL,
     .database_busy_timeout =           0,
 
-    .sql_log_picture =                 0,
-    .sql_log_snapshot =                0,
-    .sql_log_movie =                   0,
-    .sql_log_timelapse =               0,
+    .sql_log_picture =                 FALSE,
+    .sql_log_snapshot =                FALSE,
+    .sql_log_movie =                   FALSE,
+    .sql_log_timelapse =               FALSE,
     .sql_query_start =                 NULL,
     .sql_query_stop =                  NULL,
     .sql_query =                       NULL
@@ -2081,9 +2081,6 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     i = 0;
     while (dep_config_params[i].name != NULL) {
         if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
-            //MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            //    ,_("Deprecated config option \"%s\" since after version %s:")
-            //    ,cmd, dep_config_params[i].last_version);
             MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
                 , dep_config_params[i].info, dep_config_params[i].last_version);
 
