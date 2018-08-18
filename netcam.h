@@ -63,7 +63,6 @@ typedef struct netcam_context *netcam_context_ptr;
 
 #define NCS_UNSUPPORTED         0  /* streaming is not supported */
 #define NCS_MULTIPART           1  /* streaming is done via multipart */
-#define NCS_BLOCK               2  /* streaming is done via MJPG-block */
 
 /*
  * struct url_t is used when parsing the user-supplied URL, as well as
