@@ -639,7 +639,7 @@ int netcam_start(struct context *cnt){
     pthread_cond_init(&netcam->exiting, NULL);
 
     /* Initialize the average frame time to the user's value. */
-    netcam->av_frame_time = 1000000.0 / cnt->conf.frame_limit;
+    netcam->av_frame_time = 1000000.0 / cnt->conf.framerate;
 
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("Network Camera starting for camera (%s)"), cnt->conf.camera_name);

@@ -826,10 +826,10 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
     if (strcmp(optfmt,"default") != 0) {
         if (v4l2_parms_valid(rtsp_data->path
                              ,rtsp_data->v4l2_palette
-                             ,rtsp_data->frame_limit
+                             ,rtsp_data->framerate
                              ,rtsp_data->imgsize.width
                              ,rtsp_data->imgsize.height)) {
-            sprintf(optfps, "%d",rtsp_data->frame_limit);
+            sprintf(optfps, "%d",rtsp_data->framerate);
             av_dict_set(&rtsp_data->opts, "framerate", optfps, 0);
 
             sprintf(optsize, "%dx%d",rtsp_data->imgsize.width,rtsp_data->imgsize.height);
@@ -936,9 +936,9 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
 
     util_check_passthrough(cnt); /* In case it was turned on via webcontrol */
     rtsp_data->status = RTSP_NOTCONNECTED;
-    rtsp_data->rtsp_uses_tcp =cnt->conf.rtsp_uses_tcp;
+    rtsp_data->rtsp_uses_tcp =cnt->conf.netcam_use_tcp;
     rtsp_data->v4l2_palette = cnt->conf.v4l2_palette;
-    rtsp_data->frame_limit = cnt->conf.frame_limit;
+    rtsp_data->framerate = cnt->conf.framerate;
     rtsp_data->camera_name = cnt->conf.camera_name;
     rtsp_data->img_recv = mymalloc(sizeof(netcam_buff));
     rtsp_data->img_recv->ptr = mymalloc(NETCAM_BUFFSIZE);

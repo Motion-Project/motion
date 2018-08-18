@@ -51,7 +51,7 @@ struct ffmpeg {
     int fps;
     int bps;
     char *filename;
-    int vbr;
+    int quality;
     const char *codec_name;
     int64_t last_pts;
     int64_t base_pts;
@@ -71,7 +71,7 @@ struct ffmpeg {
     int fps;
     int bps;
     char *filename;
-    int vbr;
+    int quality;
     const char *codec_name;
     int64_t last_pts;
     int64_t base_pts;

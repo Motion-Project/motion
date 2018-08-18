@@ -34,108 +34,80 @@
 #define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
 
 struct config conf_template = {
+    /* Overall system configuration parameters */
+    /* daemon is directly cast into the cnt context rather than conf */
+    .setup_mode =                      FALSE,
+    .pid_file =                        NULL,
+    .log_file =                        NULL,
+    .log_level =                       LEVEL_DEFAULT+10,
+    .log_type =                        NULL,
+    .quiet =                           TRUE,
+    .native_language =                 TRUE,
     .camera_name =                     NULL,
-    .width =                           DEF_WIDTH,
-    .height =                          DEF_HEIGHT,
-    .quality =                         DEF_QUALITY,
     .camera_id =                       0,
-    .flip_axis =                       "none",
-    .rotate_deg =                      0,
-    .max_changes =                     DEF_CHANGES,
-    .threshold_tune =                  0,
-    .output_pictures =                 "on",
-    .motion_img =                      0,
-    .emulate_motion =                  0,
-    .event_gap =                       DEF_EVENT_GAP,
-    .max_movie_time =                  DEF_MAXMOVIETIME,
-    .snapshot_interval =               0,
-    .locate_motion_mode =              "off",
-    .locate_motion_style =             "box",
+    .camera_dir =                      NULL,
+    .target_dir =                      NULL,
+
+    /* Capture device configuration parameters */
+    .video_device =                    DEF_VIDEO_DEVICE,
+    .vid_control_params =              NULL,
+    .v4l2_palette =                    DEF_PALETTE,
     .input =                           DEF_INPUT,
     .norm =                            0,
-    .frame_limit =                     DEF_MAXFRAMERATE,
-    .quiet =                           1,
-    .picture_type =                    "jpeg",
-    .noise =                           DEF_NOISELEVEL,
-    .noise_tune =                      1,
-    .minimum_frame_time =              0,
-    .lightswitch_percent =             0,
-    .lightswitch_frames =              5,
-    .autobright =                      0,
-    .vid_control_params =              NULL,
+    .frequency =                       0,
+    .auto_brightness =                 0,
+    .tuner_device =                    NULL,
     .roundrobin_frames =               1,
     .roundrobin_skip =                 1,
-    .pre_capture =                     0,
-    .post_capture =                    0,
-    .switchfilter =                    0,
-    .ffmpeg_output =                   0,
-    .extpipe =                         NULL,
-    .useextpipe =                      0,
-    .ffmpeg_output_debug =             0,
-    .ffmpeg_bps =                      DEF_FFMPEG_BPS,
-    .ffmpeg_vbr =                      DEF_FFMPEG_VBR,
-    .ffmpeg_video_codec =              DEF_FFMPEG_CODEC,
-    .ffmpeg_passthrough =              0,
-    .ffmpeg_duplicate_frames =         0,
-    .ipv6_enabled =                    0,
-    .stream_port =                     0,
-    .substream_port =                  0,
-    .stream_quality =                  50,
-    .stream_motion =                   0,
-    .stream_maxrate =                  1,
-    .stream_localhost =                1,
-    .stream_limit =                    0,
-    .stream_auth_method =              0,
-    .stream_cors_header =              NULL,
-    .stream_authentication =           NULL,
-    .stream_preview_scale =            25,
-    .stream_preview_newline =          0,
-    .stream_preview_method =           0,
-    .stream_grey =                     0,
-    .stream_tls =                      0,
-    .webcontrol_port =                 0,
-    .webcontrol_localhost =            1,
-    .webcontrol_interface =            0,
-    .webcontrol_auth_method =          0,
-    .webcontrol_authentication =       NULL,
-    .webcontrol_tls =                  0,
-    .webcontrol_cert =                 NULL,
-    .webcontrol_key =                  NULL,
-    .webcontrol_cors_header =          NULL,
-    .frequency =                       0,
-    .tuner_number =                    0,
-    .timelapse_interval =              0,
-    .timelapse_mode =                  DEF_TIMELAPSE_MODE,
-    .timelapse_fps =                   30,
-    .timelapse_codec =                 DEF_FFMPEG_CODEC,
-    .tuner_device =                    NULL,
-    .video_device =                    DEF_VIDEO_DEVICE,
-    .v4l2_palette =                    DEF_PALETTE,
-    .vidpipe =                         NULL,
-    .filepath =                        NULL,
-    .imagepath =                       DEF_IMAGEPATH,
-    .moviepath =                       DEF_MOVIEPATH,
-    .snappath =                        DEF_SNAPPATH,
-    .timepath =                        DEF_TIMEPATH,
-    .on_event_start =                  NULL,
-    .on_event_end =                    NULL,
+    .roundrobin_switchfilter =         FALSE,
+
+    .netcam_url =                      NULL,
+    .netcam_highres=                   NULL,
+    .netcam_userpass =                 NULL,
+    .netcam_keepalive =                "off",
+    .netcam_proxy =                    NULL,
+    .netcam_tolerant_check =           FALSE,
+    .netcam_use_tcp =                  TRUE,
+
+    .mmalcam_name =                    NULL,
+    .mmalcam_control_params =          NULL,
+
+    /* Image processing configuration parameters */
+    .width =                           DEF_WIDTH,
+    .height =                          DEF_HEIGHT,
+    .framerate =                       DEF_MAXFRAMERATE,
+    .minimum_frame_time =              0,
+    .rotate =                          0,
+    .flip_axis =                       "none",
+    .locate_motion_mode =              "off",
+    .locate_motion_style =             "box",
+    .text_left =                       NULL,
+    .text_right =                      DEF_TIMESTAMP,
+    .text_changes =                    FALSE,
+    .text_scale =                      1,
+    .text_event =                      DEF_EVENTSTAMP,
+
+    /* Motion detection configuration parameters */
+    .emulate_motion =                  FALSE,
+    .threshold =                       DEF_CHANGES,
+    .threshold_tune =                  FALSE,
+    .noise_level =                     DEF_NOISELEVEL,
+    .noise_tune =                      TRUE,
+    .despeckle_filter =                NULL,
+    .area_detect =                     NULL,
     .mask_file =                       NULL,
     .mask_privacy =                    NULL,
     .smart_mask_speed =                0,
-    .sql_log_image =                   1,
-    .sql_log_snapshot =                1,
-    .sql_log_movie =                   0,
-    .sql_log_timelapse =               0,
-    .sql_query_start =                 NULL,
-    .sql_query_stop =                  NULL,
-    .sql_query =                       NULL,
-    .database_type =                   NULL,
-    .database_dbname =                 NULL,
-    .database_host =                   "localhost",
-    .database_user =                   NULL,
-    .database_password =               NULL,
-    .database_port =                   0,
-    .database_busy_timeout =           0,
+    .lightswitch_percent =             0,
+    .lightswitch_frames =              5,
+    .minimum_motion_frames =           1,
+    .event_gap =                       DEF_EVENT_GAP,
+    .pre_capture =                     0,
+    .post_capture =                    0,
+
+    /* Script execution configuration parameters */
+    .on_event_start =                  NULL,
+    .on_event_end =                    NULL,
     .on_picture_save =                 NULL,
     .on_motion_detected =              NULL,
     .on_area_detected =                NULL,
@@ -143,31 +115,90 @@ struct config conf_template = {
     .on_movie_end =                    NULL,
     .on_camera_lost =                  NULL,
     .on_camera_found =                 NULL,
-    .motionvidpipe =                   NULL,
-    .netcam_url =                      NULL,
-    .netcam_highres=                   NULL,
-    .netcam_userpass =                 NULL,
-    .netcam_keepalive =                "off",
-    .netcam_proxy =                    NULL,
-    .netcam_tolerant_check =           0,
-    .rtsp_uses_tcp =                   1,
-    .mmalcam_name =                    NULL,
-    .mmalcam_control_params =          NULL,
-    .text_changes =                    0,
-    .text_left =                       NULL,
-    .text_right =                      DEF_TIMESTAMP,
-    .text_event =                      DEF_EVENTSTAMP,
-    .text_scale =                      1,
-    .despeckle_filter =                NULL,
-    .area_detect =                     NULL,
-    .minimum_motion_frames =           1,
-    .exif_text =                       NULL,
-    .pid_file =                        NULL,
-    .log_file =                        NULL,
-    .log_level =                       LEVEL_DEFAULT+10,
-    .log_type_str =                    NULL,
-    .native_language =                 1,
-    .camera_dir =                      NULL
+
+    /* Picture output configuration parameters */
+    .picture_output =                  "off",
+    .picture_output_motion =           FALSE,
+    .picture_type =                    "jpeg",
+    .picture_quality =                 75,
+    .picture_exif =                    NULL,
+    .picture_filename =                DEF_IMAGEPATH,
+
+    /* Snapshot configuration parameters */
+    .snapshot_interval =               0,
+    .snapshot_filename =               DEF_SNAPPATH,
+
+    /* Movie output configuration parameters */
+    .movie_output =                    TRUE,
+    .movie_output_motion =             FALSE,
+    .movie_max_time =                  120,
+    .movie_bps =                       400000,
+    .movie_quality =                   60,
+    .movie_codec =                     "mkv",
+    .movie_duplicate_frames =          FALSE,
+    .movie_passthrough =               FALSE,
+    .movie_filename =                  DEF_MOVIEPATH,
+    .movie_extpipe_use =               FALSE,
+    .movie_extpipe =                   NULL,
+
+    /* Timelapse movie configuration parameters */
+    .timelapse_interval =              0,
+    .timelapse_mode =                  DEF_TIMELAPSE_MODE,
+    .timelapse_fps =                   30,
+    .timelapse_codec =                 "mpg",
+    .timelapse_filename =              DEF_TIMEPATH,
+
+    /* Loopback device configuration parameters */
+    .video_pipe =                      NULL,
+    .video_pipe_motion =               NULL,
+
+    /* Webcontrol configuration parameters */
+    .webcontrol_port =                 0,
+    .webcontrol_ipv6 =                 FALSE,
+    .webcontrol_localhost =            TRUE,
+    .webcontrol_parms =                0,
+    .webcontrol_interface =            0,
+    .webcontrol_auth_method =          0,
+    .webcontrol_authentication =       NULL,
+    .webcontrol_tls =                  FALSE,
+    .webcontrol_cert =                 NULL,
+    .webcontrol_key =                  NULL,
+    .webcontrol_cors_header =          NULL,
+
+    /* Live stream configuration parameters */
+    .stream_port =                     0,
+    .substream_port =                  0,
+    .stream_localhost =                TRUE,
+    .stream_auth_method =              0,
+    .stream_authentication =           NULL,
+    .stream_tls =                      FALSE,
+    .stream_cors_header =              NULL,
+    .stream_preview_scale =            25,
+    .stream_preview_newline =          FALSE,
+    .stream_preview_method =           0,
+    .stream_quality =                  50,
+    .stream_grey =                     FALSE,
+    .stream_motion =                   FALSE,
+    .stream_maxrate =                  1,
+    .stream_limit =                    0,
+
+    /* Database and SQL configuration parameters */
+    .database_type =                   NULL,
+    .database_dbname =                 NULL,
+    .database_host =                   "localhost",
+    .database_port =                   0,
+    .database_user =                   NULL,
+    .database_password =               NULL,
+    .database_busy_timeout =           0,
+
+    .sql_log_picture =                 FALSE,
+    .sql_log_snapshot =                FALSE,
+    .sql_log_movie =                   FALSE,
+    .sql_log_timelapse =               FALSE,
+    .sql_query_start =                 NULL,
+    .sql_query_stop =                  NULL,
+    .sql_query =                       NULL
+
 };
 
 
@@ -193,14 +224,19 @@ static void usage(void);
 #define CONF_OFFSET(varname) ((long)&((struct context *)NULL)->conf.varname)
 #define TRACK_OFFSET(varname) ((long)&((struct context *)NULL)->track.varname)
 
-/* The sequence of these within here determines how they are presented to user*/
+/* The sequence of these within here determines how they are presented to user
+ * Note daemon goes directly to cnt context rather than conf.
+ * Descriptions are limited to one line and few to no references to values since
+ * the motion_guide.html is our single source of documentation and historically
+ * these descriptions were not updated with revisions.
+ */
 config_param config_params[] = {
     {
     "daemon",
     "############################################################\n"
-    "# Daemon\n"
+    "# System control configuration parameters\n"
     "############################################################\n\n"
-    "# Start in daemon (background) mode and release terminal (default: off)",
+    "# Start in daemon (background) mode and release terminal.",
     1,
     CNT_OFFSET(daemon),
     copy_bool,
@@ -208,20 +244,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "process_id_file",
-    "# File to store the process ID, also called pid file. (default: not defined)",
-    1,
-    CONF_OFFSET(pid_file),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
     "setup_mode",
-    "############################################################\n"
-    "# Basic Setup Mode\n"
-    "############################################################\n\n"
-    "# Start in Setup-Mode, daemon disabled. (default: off)",
+    "# Start in Setup-Mode, daemon disabled.",
     0,
     CONF_OFFSET(setup_mode),
     copy_bool,
@@ -229,8 +253,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "logfile",
-    "# Use a file to save logs messages, if not defined stderr and syslog is used. (default: not defined)",
+    "pid_file",
+    "# File to store the process ID.",
+    1,
+    CONF_OFFSET(pid_file),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "log_file",
+    "# File to write logs messages into.  If not defined stderr and syslog is used.",
     1,
     CONF_OFFSET(log_file),
     copy_string,
@@ -239,7 +272,7 @@ config_param config_params[] = {
     },
     {
     "log_level",
-    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). (default: 6 / NTC)",
+    "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL).",
     1,
     CONF_OFFSET(log_level),
     copy_int,
@@ -248,16 +281,25 @@ config_param config_params[] = {
     },
     {
     "log_type",
-    "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). (default: ALL)",
+    "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL).",
     1,
-    CONF_OFFSET(log_type_str),
+    CONF_OFFSET(log_type),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
+    "quiet",
+    "# Do not sound beeps when detecting motion",
+    0,
+    CONF_OFFSET(quiet),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "native_language",
-    "# Native language support. (default: on)",
+    "# Native language support.",
     1,
     CONF_OFFSET(native_language),
     copy_bool,
@@ -265,18 +307,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "camera_id",
-    "# Id used to label the camera to ensure it is always consistent",
-    0,
-    CONF_OFFSET(camera_id),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
     "camera_name",
-    "# Name given to a camera. Shown in web interface and may be used with the specifier %$ .\n"
-    "# Default: not defined",
+    "# User defined name for the camera.",
     0,
     CONF_OFFSET(camera_name),
     copy_string,
@@ -284,9 +316,27 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
+    "camera_id",
+    "# Numeric identifier for the camera.",
+    0,
+    CONF_OFFSET(camera_id),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_ADVANCED
+    },
+    /* camera and camera_dir must be last in this list */
+    {
+    "target_dir",
+    "# Target directory for pictures, snapshots and movies",
+    0,
+    CONF_OFFSET(target_dir),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "videodevice",
-    "# Videodevice to be used for capturing  (default /dev/video0)\n"
-    "# for FreeBSD default is /dev/bktr0",
+    "# Video device (e.g. /dev/video0) to be used for capturing.",
     0,
     CONF_OFFSET(video_device),
     copy_string,
@@ -295,8 +345,7 @@ config_param config_params[] = {
     },
     {
     "vid_control_params",
-    "# video control parameters (device specific control parameters)\n"
-    "# Default: Not defined",
+    "# Parameters to control video device.  See motion_guide.html",
     0,
     CONF_OFFSET(vid_control_params),
     copy_string,
@@ -305,9 +354,7 @@ config_param config_params[] = {
     },
     {
     "v4l2_palette",
-    "# v4l2_palette allows one to choose preferable palette to be use by motion\n"
-    "# See motion_guide.html for the valid options and values.  (default: 17)\n"
-    "#",
+    "# Preferred color palette to be used for the video device",
     0,
     CONF_OFFSET(v4l2_palette),
     copy_int,
@@ -316,8 +363,7 @@ config_param config_params[] = {
     },
     {
     "input",
-    "# The video input to be used (default: -1)\n"
-    "# Should normally be set to 0 or 1 for video/TV cards, and -1 for USB cameras",
+    "# The input number to be used on the video device.",
     0,
     CONF_OFFSET(input),
     copy_int,
@@ -326,8 +372,7 @@ config_param config_params[] = {
     },
     {
     "norm",
-    "# The video norm to use (only for video capture and TV tuner cards)\n"
-    "# Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default: 0 (PAL)",
+    "# The video norm to use for video capture and TV tuner cards.",
     0,
     CONF_OFFSET(norm),
     copy_int,
@@ -336,7 +381,7 @@ config_param config_params[] = {
     },
     {
     "frequency",
-    "# The frequency to set the tuner to (kHz) (only for TV tuner cards) (default: 0)",
+    "# The frequency to set the tuner to (kHz) for TV tuner cards",
     0,
     CONF_OFFSET(frequency),
     copy_int,
@@ -345,17 +390,16 @@ config_param config_params[] = {
     },
     {
     "auto_brightness",
-    "# Use the Motion methods to change brightness/exposure of a video device (default: off).\n"
-    "# Only recommended for cameras without auto brightness/exposure",
+    "# The Motion method to use to change the brightness/exposure on video device.",
     0,
-    CONF_OFFSET(autobright),
+    CONF_OFFSET(auto_brightness),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
     "tunerdevice",
-    "# BSD tuner device to be used for capturing using tuner as source (default /dev/tuner0)\n",
+    "# Device name (e.g. /dev/tuner0) to be used for capturing when using tuner as source",
     0,
     CONF_OFFSET(tuner_device),
     copy_string,
@@ -364,7 +408,7 @@ config_param config_params[] = {
     },
     {
     "roundrobin_frames",
-    "# Number of frames to capture in each roundrobin step (default: 1)",
+    "# Number of frames to capture in each roundrobin step",
     0,
     CONF_OFFSET(roundrobin_frames),
     copy_int,
@@ -373,7 +417,7 @@ config_param config_params[] = {
     },
     {
     "roundrobin_skip",
-    "# Number of frames to skip before each roundrobin step (default: 1)",
+    "# Number of frames to skip before each roundrobin step",
     0,
     CONF_OFFSET(roundrobin_skip),
     copy_int,
@@ -381,21 +425,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "switchfilter",
-    "# Try to filter out noise generated by roundrobin (default: off)",
+    "roundrobin_switchfilter",
+    "# Try to filter out noise generated by roundrobin",
     0,
-    CONF_OFFSET(switchfilter),
+    CONF_OFFSET(roundrobin_switchfilter),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
     "netcam_url",
-    "# URL to use if you are using a network camera, size will"
-    "# be autodetected (incl http:// ftp:// mjpg:// rtsp:// mjpeg:// or file:///)\n"
-    "# Must be a URL that returns single jpeg pictures or a raw mjpeg stream. "
-    "# A trailing slash may be required for some cameras.\n"
-    "# Default: Not defined",
+    "# The full URL of the network camera stream.",
     0,
     CONF_OFFSET(netcam_url),
     copy_string,
@@ -404,7 +444,7 @@ config_param config_params[] = {
     },
     {
     "netcam_highres",
-    "# High resolution URL for rtsp/rtmp cameras only.  Same format as netcam_url.",
+    "# Optional high resolution URL for rtsp/rtmp cameras only.",
     0,
     CONF_OFFSET(netcam_highres),
     copy_string,
@@ -413,8 +453,7 @@ config_param config_params[] = {
     },
     {
     "netcam_userpass",
-    "# Username and password for network camera (only if required). Default: not defined\n"
-    "# Syntax is user:password",
+    "# Username and password for network camera. Syntax username:password",
     0,
     CONF_OFFSET(netcam_userpass),
     copy_string,
@@ -423,11 +462,7 @@ config_param config_params[] = {
     },
     {
     "netcam_keepalive",
-    "# The setting for keep-alive of network socket, should improve performance on compatible net cameras.\n"
-    "# off:   The historical implementation using HTTP/1.0, closing the socket after each http request.\n"
-    "# force: Use HTTP/1.0 requests with keep alive header to reuse the same connection.\n"
-    "# on:    Use HTTP/1.1 requests that support keep alive as default.\n"
-    "# Default: off",
+    "# The method for keep-alive of network socket for mjpeg streams.",
     0,
     CONF_OFFSET(netcam_keepalive),
     copy_string,
@@ -436,9 +471,7 @@ config_param config_params[] = {
     },
     {
     "netcam_proxy",
-    "# URL to use for a netcam proxy server, if required, e.g. \"http://myproxy\".\n"
-    "# If a port number other than 80 is needed, use \"http://myproxy:1234\".\n"
-    "# Default: not defined",
+    "# The URL to use for a netcam proxy server.",
     0,
     CONF_OFFSET(netcam_proxy),
     copy_string,
@@ -447,8 +480,7 @@ config_param config_params[] = {
     },
     {
     "netcam_tolerant_check",
-    "# Set less strict jpeg checks for network cameras with a poor/buggy firmware.\n"
-    "# Default: off",
+    "# Use less strict jpeg checks for network cameras.",
     0,
     CONF_OFFSET(netcam_tolerant_check),
     copy_bool,
@@ -456,20 +488,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "rtsp_uses_tcp",
-    "# RTSP connection uses TCP to communicate to the camera. Can prevent image corruption.\n"
-    "# Default: on",
+    "netcam_use_tcp",
+    "# Use TCP transport for RTSP/RTMP connections to camera.",
     1,
-    CONF_OFFSET(rtsp_uses_tcp),
+    CONF_OFFSET(netcam_use_tcp),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_ADVANCED
     },
     {
     "mmalcam_name",
-    "# Name of camera to use if you are using a camera accessed through OpenMax/MMAL\n"
-    "# For the raspberry pi official camera, use vc.ril.camera"
-    "# Default: Not defined",
+    "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0,
     CONF_OFFSET(mmalcam_name),
     copy_string,
@@ -478,8 +507,7 @@ config_param config_params[] = {
     },
     {
     "mmalcam_control_params",
-    "# Camera control parameters (see raspivid/raspistill tool documentation)\n"
-    "# Default: Not defined",
+    "# Camera control parameters (see raspivid/raspistill tool documentation)",
     0,
     CONF_OFFSET(mmalcam_control_params),
     copy_string,
@@ -487,18 +515,11 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "rotate",
-    "# Rotate image this number of degrees. The rotation affects all saved images as\n"
-    "# well as movies. Valid values: 0 (default = no rotation), 90, 180 and 270.",
-    0,
-    CONF_OFFSET(rotate_deg),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "width",
-    "# Image width (pixels). Valid range: Camera dependent, default: 352",
+    "############################################################\n"
+    "# Image Processing configuration parameters\n"
+    "############################################################\n\n"
+    "# Image width in pixels.",
     0,
     CONF_OFFSET(width),
     copy_int,
@@ -507,7 +528,7 @@ config_param config_params[] = {
     },
     {
     "height",
-    "# Image height (pixels). Valid range: Camera dependent, default: 288",
+    "# Image height in pixels.",
     0,
     CONF_OFFSET(height),
     copy_int,
@@ -516,19 +537,16 @@ config_param config_params[] = {
     },
     {
     "framerate",
-    "# Maximum number of frames to be captured per second.\n"
-    "# Valid range: 2-100. Default: 100 (almost no limit).",
+    "# Maximum number of frames to be captured per second.",
     0,
-    CONF_OFFSET(frame_limit),
+    CONF_OFFSET(framerate),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
     "minimum_frame_time",
-    "# Minimum time in seconds between capturing picture frames from the camera.\n"
-    "# Default: 0 = disabled - the capture rate is given by the camera framerate.\n"
-    "# This option is used when you want to capture images at a rate lower than 2 per second.",
+    "# Minimum time in seconds between capturing picture frames from the camera.",
     0,
     CONF_OFFSET(minimum_frame_time),
     copy_int,
@@ -536,23 +554,26 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "despeckle_filter",
-    "# Despeckle motion image using (e)rode or (d)ilate or (l)abel (Default: not defined)\n"
-    "# Recommended value is EedDl. Any combination (and number of) of E, e, d, and D is valid.\n"
-    "# (l)abeling must only be used once and the 'l' must be the last letter.\n"
-    "# Comment out to disable",
+    "rotate",
+    "# Number of degrees to rotate image.",
     0,
-    CONF_OFFSET(despeckle_filter),
+    CONF_OFFSET(rotate),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "flip_axis",
+    "# Flip image over a given axis",
+    0,
+    CONF_OFFSET(flip_axis),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
     "locate_motion_mode",
-    "\n############################################################\n"
-    "# Locate and draw a box around the moving object.\n"
-    "# Valid values: on, off, preview (default: off)\n"
-    "# Set to 'preview' will only draw a box in preview_shot pictures.",
+    "# Draw a locate box around the moving object.",
     0,
     CONF_OFFSET(locate_motion_mode),
     copy_string,
@@ -561,12 +582,7 @@ config_param config_params[] = {
     },
     {
     "locate_motion_style",
-    "# Set the look and style of the locate box if enabled.\n"
-    "# Valid values: box, redbox, cross, redcross (default: box)\n"
-    "# Set to 'box' will draw the traditional box.\n"
-    "# Set to 'redbox' will draw a red box.\n"
-    "# Set to 'cross' will draw a little cross to mark center.\n"
-    "# Set to 'redcross' will draw a little red cross to mark center.",
+    "# Set the look and style of the locate box.",
     0,
     CONF_OFFSET(locate_motion_style),
     copy_string,
@@ -574,21 +590,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "text_right",
-    "# Draws the timestamp using same options as C function strftime(3)\n"
-    "# Default: %Y-%m-%d\\n%T = date in ISO format and time in 24 hour clock\n"
-    "# Text is placed in lower right corner",
-    0,
-    CONF_OFFSET(text_right),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "text_left",
-    "# Draw a user defined text on the images using same options as C function strftime(3)\n"
-    "# Default: Not defined = no text\n"
-    "# Text is placed in lower left corner",
+    "# Text to be overlayed in the lower left corner of images",
     0,
     CONF_OFFSET(text_left),
     copy_string,
@@ -596,10 +599,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "text_right",
+    "# Text to be overlayed in the lower right corner of images.",
+    0,
+    CONF_OFFSET(text_right),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "text_changes",
-    "# Draw the number of changed pixed on the images (default: off)\n"
-    "# Will normally be set to off except when you setup and adjust the motion settings\n"
-    "# Text is placed in upper right corner",
+    "# Overlay number of changed pixels in upper right corner of images.",
     0,
     CONF_OFFSET(text_changes),
     copy_bool,
@@ -607,22 +617,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "text_event",
-    "# This option defines the value of the special event conversion specifier %C\n"
-    "# You can use any conversion specifier in this option except %C. Date and time\n"
-    "# values are from the timestamp of the first image in the current event.\n"
-    "# Default: %Y%m%d%H%M%S\n"
-    "# The idea is that %C can be used filenames and text_left/right for creating\n"
-    "# a unique identifier for each event.",
-    0,
-    CONF_OFFSET(text_event),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "text_scale",
-    "# Scale characters on image. Valid range: 1 - 10, default: 1",
+    "# Scale factor for text overlayed on images.",
     0,
     CONF_OFFSET(text_scale),
     copy_int,
@@ -630,18 +626,20 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "flip_axis",
-    "# Flip image over a given axis (vertical or horizontal), vertical means from left to right,\n"
-    "# horizontal means top to bottom. Valid values: none, v and h.",
+    "text_event",
+    "# The special event conversion specifier %C",
     0,
-    CONF_OFFSET(flip_axis),
+    CONF_OFFSET(text_event),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
     "emulate_motion",
-    "# Always save images even if there was no motion (default: off)",
+    "############################################################\n"
+    "# Motion detection configuration parameters\n"
+    "############################################################\n\n"
+    "# Always save pictures and movies even if there was no motion.",
     0,
     CONF_OFFSET(emulate_motion),
     copy_bool,
@@ -650,17 +648,16 @@ config_param config_params[] = {
     },
     {
     "threshold",
-    "# Threshold for number of changed pixels in an image that\n"
-    "# triggers motion detection (default: 1500)",
+    "# Threshold for number of changed pixels that triggers motion.",
     0,
-    CONF_OFFSET(max_changes),
+    CONF_OFFSET(threshold),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
     "threshold_tune",
-    "# Automatically tune the threshold down if possible (default: off)",
+    "# Enable tuning of the threshold down if possible.",
     0,
     CONF_OFFSET(threshold_tune),
     copy_bool,
@@ -669,16 +666,16 @@ config_param config_params[] = {
     },
     {
     "noise_level",
-    "# Noise threshold for the motion detection (default: 32)",
+    "# Noise threshold for the motion detection.",
     0,
-    CONF_OFFSET(noise),
+    CONF_OFFSET(noise_level),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
     "noise_tune",
-    "# Automatically tune the noise threshold (default: on)",
+    "# Automatically tune the noise threshold",
     0,
     CONF_OFFSET(noise_tune),
     copy_bool,
@@ -686,12 +683,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "despeckle_filter",
+    "# Despeckle the image using (E/e)rode or (D/d)ilate or (l)abel.",
+    0,
+    CONF_OFFSET(despeckle_filter),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "area_detect",
-    "# Detect motion in predefined areas (1 - 9). Areas are numbered like that:  1 2 3\n"
-    "# A script (on_area_detected) is started immediately when motion is         4 5 6\n"
-    "# detected in one of the given areas, but only once during an event.        7 8 9\n"
-    "# One or more areas can be specified with this option. Take care: This option\n"
-    "# does NOT restrict detection to these areas! (Default: not defined)",
+    "# Area number used to trigger the on_area_detected script.",
     0,
     CONF_OFFSET(area_detect),
     copy_string,
@@ -700,8 +702,7 @@ config_param config_params[] = {
     },
     {
     "mask_file",
-    "# PGM file to use as a sensitivity mask.\n"
-    "# Full path name to. (Default: not defined)",
+    "# Full path and file name for motion detection mask PGM file.",
     0,
     CONF_OFFSET(mask_file),
     copy_string,
@@ -710,8 +711,7 @@ config_param config_params[] = {
     },
     {
     "mask_privacy",
-    "# PGM file to completely mask out an area of the image.\n"
-    "# Full path name to. (Default: not defined)",
+    "# Full path and file name for privacy mask PGM file.",
     0,
     CONF_OFFSET(mask_privacy),
     copy_string,
@@ -720,8 +720,7 @@ config_param config_params[] = {
     },
     {
     "smart_mask_speed",
-    "# Dynamically create a mask file during operation (default: 0)\n"
-    "# Adjust speed of mask changes from 0 (off) to 10 (fast)",
+    "# The value defining how slow or fast the smart motion mask created and used.",
     0,
     CONF_OFFSET(smart_mask_speed),
     copy_int,
@@ -730,9 +729,7 @@ config_param config_params[] = {
     },
     {
     "lightswitch_percent",
-    "# Ignore sudden massive light intensity changes given as a percentage of the picture\n"
-    "# area that changed intensity. If set to 1, motion will do some kind of\n"
-    "# auto-lightswitch. Valid range: 0 - 100 , default: 0 = disabled",
+    "# Percentage of image that triggers a lightswitch detected.",
     0,
     CONF_OFFSET(lightswitch_percent),
     copy_int,
@@ -741,8 +738,7 @@ config_param config_params[] = {
     },
     {
     "lightswitch_frames",
-    "# When lightswitch is detected, ignore this many frames\n"
-    "# Valid range: 1 - 1000 , default: 5",
+    "# When lightswitch is detected, ignore this many frames",
     0,
     CONF_OFFSET(lightswitch_frames),
     copy_int,
@@ -751,9 +747,7 @@ config_param config_params[] = {
     },
     {
     "minimum_motion_frames",
-    "# Picture frames must contain motion at least the specified number of frames\n"
-    "# in a row before they are detected as true motion. At the default of 1, all\n"
-    "# motion is detected. Valid range: 1 to thousands, recommended 1-5",
+    "# Number of images that must contain motion to trigger an event.",
     0,
     CONF_OFFSET(minimum_motion_frames),
     copy_int,
@@ -762,12 +756,7 @@ config_param config_params[] = {
     },
     {
     "event_gap",
-    "# Event Gap is the seconds of no motion detection that triggers the end of an event.\n"
-    "# An event is defined as a series of motion images taken within a short timeframe.\n"
-    "# Recommended value is 60 seconds (Default). The value -1 is allowed and disables\n"
-    "# events causing all Motion to be written to one single movie file and no pre_capture.\n"
-    "# If set to 0, motion is running in gapless mode. Movies don't have gaps anymore. An\n"
-    "# event ends right after no more motion is detected and post_capture is over.",
+    "# Gap in seconds of no motion detected that triggers the end of an event.",
     0,
     CONF_OFFSET(event_gap),
     copy_int,
@@ -776,11 +765,7 @@ config_param config_params[] = {
     },
     {
     "pre_capture",
-    "# Specifies the number of pre-captured (buffered) pictures from before motion\n"
-    "# was detected that will be output at motion detection.\n"
-    "# Recommended range: 0 to 5 (default: 0)\n"
-    "# Do not use large values! Large values will cause Motion to skip video frames and\n"
-    "# cause unsmooth movies. To smooth movies use larger values of post_capture instead.",
+    "# The number of pre-captured (buffered) pictures from before motion.",
     0,
     CONF_OFFSET(pre_capture),
     copy_int,
@@ -789,7 +774,7 @@ config_param config_params[] = {
     },
     {
     "post_capture",
-    "# Number of frames to capture after motion is no longer detected (default: 0)",
+    "# Number of frames to capture after motion is no longer detected.",
     0,
     CONF_OFFSET(post_capture),
     copy_int,
@@ -798,8 +783,10 @@ config_param config_params[] = {
     },
     {
     "on_event_start",
-    "# Command to be executed when an event starts. (default: none)\n"
-    "# An event starts at first motion detected after a period of no motion defined by event_gap",
+    "############################################################\n"
+    "# Script execution configuration parameters\n"
+    "############################################################\n\n"
+    "# Command to be executed when an event starts.",
     0,
     CONF_OFFSET(on_event_start),
     copy_string,
@@ -808,8 +795,7 @@ config_param config_params[] = {
     },
     {
     "on_event_end",
-    "# Command to be executed when an event ends after a period of no motion\n"
-    "# (default: none). The period of no motion is defined by option event_gap.",
+    "# Command to be executed when an event ends.",
     0,
     CONF_OFFSET(on_event_end),
     copy_string,
@@ -818,8 +804,7 @@ config_param config_params[] = {
     },
     {
     "on_picture_save",
-    "# Command to be executed when a picture (.ppm|.jpg|.webp) is saved (default: none)\n"
-    "# To give the filename as an argument to a command append it with %f",
+    "# Command to be executed when a picture is saved.",
     0,
     CONF_OFFSET(on_picture_save),
     copy_string,
@@ -827,18 +812,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "on_motion_detected",
-    "# Command to be executed when a motion frame is detected (default: none)",
-    0,
-    CONF_OFFSET(on_motion_detected),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
     "on_area_detected",
-    "# Command to be executed when motion in a predefined area is detected\n"
-    "# Check option 'area_detect'. (default: none)",
+    "# Command to be executed when motion in a predefined area is detected",
     0,
     CONF_OFFSET(on_area_detected),
     copy_string,
@@ -846,9 +821,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
+    "on_motion_detected",
+    "# Command to be executed when motion is detected",
+    0,
+    CONF_OFFSET(on_motion_detected),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
     "on_movie_start",
-    "# Command to be executed when a movie file (.mpg|.avi) is created. (default: none)\n"
-    "# To give the filename as an argument to a command append it with %f",
+    "# Command to be executed when a movie file is created.",
     0,
     CONF_OFFSET(on_movie_start),
     copy_string,
@@ -857,8 +840,7 @@ config_param config_params[] = {
     },
     {
     "on_movie_end",
-    "# Command to be executed when a movie file (.mpg|.avi) is closed. (default: none)\n"
-    "# To give the filename as an argument to a command append it with %f",
+    "# Command to be executed when a movie file is closed.",
     0,
     CONF_OFFSET(on_movie_end),
     copy_string,
@@ -867,10 +849,7 @@ config_param config_params[] = {
     },
     {
     "on_camera_lost",
-    "# Command to be executed when a camera can't be opened or if it is lost\n"
-    "# NOTE: There is situations when motion don't detect a lost camera!\n"
-    "# It depends on the driver, some drivers don't detect a lost camera at all\n"
-    "# Some hangs the motion thread. Some even hangs the PC! (default: none)",
+    "# Command to be executed when a camera can't be opened or if it is lost",
     0,
     CONF_OFFSET(on_camera_lost),
     copy_string,
@@ -879,8 +858,7 @@ config_param config_params[] = {
     },
     {
     "on_camera_found",
-    "# Command to be executed when a camera that was lost has been found (default: none)\n"
-    "# NOTE: If motion doesn't properly detect a lost camera, it also won't know it found one.\n",
+    "# Command to be executed when a camera that was lost has been found.",
     0,
     CONF_OFFSET(on_camera_found),
     copy_string,
@@ -888,78 +866,29 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "quiet",
-    "\n############################################################\n"
-    "# Do not sound beeps when detecting motion (default: on)\n"
-    "# Note: Motion never beeps when running in daemon mode.",
-    0,
-    CONF_OFFSET(quiet),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "target_dir",
-    "\n############################################################\n"
-    "# Target Directories and filenames For Images And Films\n"
-    "# For the options snapshot_, picture_, movie_ and timelapse_filename\n"
-    "# you can use conversion specifiers\n"
-    "# %Y = year, %m = month, %d = date,\n"
-    "# %H = hour, %M = minute, %S = second,\n"
-    "# %v = event, %q = frame number, %t = camera id,\n"
-    "# %D = changed pixels, %N = noise level,\n"
-    "# %i and %J = width and height of motion area,\n"
-    "# %K and %L = X and Y coordinates of motion center\n"
-    "# %C = value defined by text_event\n"
-    "# Quotation marks round string are allowed.\n"
+    "picture_output",
+    "############################################################\n"
+    "# Picture output configuration parameters\n"
     "############################################################\n\n"
-    "# Target base directory for pictures and films\n"
-    "# Recommended to use absolute path. (Default: current working directory)",
+    "# Output pictures when motion is detected",
     0,
-    CONF_OFFSET(filepath),
+    CONF_OFFSET(picture_output),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "output_pictures",
-    "\n############################################################\n"
-    "# Image File Output\n"
-    "############################################################\n\n"
-    "# Output 'normal' pictures when motion is detected (default: on)\n"
-    "# Valid values: on, off, first, best, center\n"
-    "# When set to 'first', only the first picture of an event is saved.\n"
-    "# Picture with most motion of an event is saved when set to 'best'.\n"
-    "# Picture with motion nearest center of picture is saved when set to 'center'.\n"
-    "# Can be used as preview shot for the corresponding movie.",
+    "picture_output_motion",
+    "# Output pictures with only the pixels moving object (ghost images)",
     0,
-    CONF_OFFSET(output_pictures),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "output_debug_pictures",
-    "# Output pictures with only the pixels moving object (ghost images) (default: off)",
-    0,
-    CONF_OFFSET(motion_img),
+    CONF_OFFSET(picture_output_motion),
     copy_bool,
     print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "quality",
-    "# The quality (in percent) to be used by the jpeg and webp compression (default: 75)",
-    0,
-    CONF_OFFSET(quality),
-    copy_int,
-    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
     "picture_type",
-    "# Type of output images\n"
-    "# Valid values: jpeg, ppm or webp (default: jpeg)",
+    "# Format for the output pictures.",
     0,
     CONF_OFFSET(picture_type),
     copy_string,
@@ -967,11 +896,38 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
+    "picture_quality",
+    "# The quality (in percent) to be used in the picture compression",
+    0,
+    CONF_OFFSET(picture_quality),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "picture_exif",
+    "# Text to include in a JPEG EXIF comment",
+    0,
+    CONF_OFFSET(picture_exif),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "picture_filename",
+    "# File name(without extension) for pictures relative to target directory",
+    0,
+    CONF_OFFSET(picture_filename),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "snapshot_interval",
-    "\n############################################################\n"
-    "# Snapshots (Traditional Periodic Webcam File Output)\n"
+    "############################################################\n"
+    "# Snapshot output configuration parameters\n"
     "############################################################\n\n"
-    "# Make automated snapshot every N seconds (default: 0 = disabled)",
+    "# Make automated snapshot every N seconds",
     0,
     CONF_OFFSET(snapshot_interval),
     copy_int,
@@ -980,136 +936,121 @@ config_param config_params[] = {
     },
     {
     "snapshot_filename",
-    "# File path for snapshots (jpeg, ppm or webp) relative to target_dir\n"
-    "# Default: "DEF_SNAPPATH"\n"
-    "# File extension .jpg, .ppm or .webp is automatically added so do not include this.\n"
-    "# Note: A symbolic link called lastsnap.jpg created in the target_dir will always\n"
-    "# point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'",
+    "# File name(without extension) for snapshots relative to target directory",
     0,
-    CONF_OFFSET(snappath),
+    CONF_OFFSET(snapshot_filename),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "picture_filename",
-    "# File path for motion triggered images (jpeg, ppm or webp) relative to target_dir\n"
-    "# Default: "DEF_IMAGEPATH"\n"
-    "# File extension .jpg, .ppm or .webp is automatically added so do not include this\n"
-    "# Set to 'preview' together with best-preview feature enables special naming\n"
-    "# convention for preview shots. See motion guide for details",
+    "movie_output",
+    "############################################################\n"
+    "# Movie output configuration parameters\n"
+    "############################################################\n\n"
+    "# Create movies of motion events.",
     0,
-    CONF_OFFSET(imagepath),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "exif_text",
-    "# Text to include in a JPEG EXIF comment\n"
-    "# May be any text, including conversion specifiers.\n"
-    "# The EXIF timestamp is included independent of this text.",
-    0,
-    CONF_OFFSET(exif_text),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "ffmpeg_output_movies",
-    "# Use ffmpeg to encode movies",
-    0,
-    CONF_OFFSET(ffmpeg_output),
+    CONF_OFFSET(movie_output),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_output_debug_movies",
-    "# Use ffmpeg to make movies with only the moving pixels\n"
-    "# (ghost images) (default: off)",
+    "movie_output_motion",
+    "# Create movies of moving pixels of motion events.",
     0,
-    CONF_OFFSET(ffmpeg_output_debug),
+    CONF_OFFSET(movie_output_motion),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "max_movie_time",
-    "# Maximum length in seconds of a movie\n"
-    "# When value is exceeded a new movie file is created. (Default: 0 = infinite)",
+    "movie_max_time",
+    "# Maximum length of movie in seconds.",
     0,
-    CONF_OFFSET(max_movie_time),
+    CONF_OFFSET(movie_max_time),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_bps",
-    "# Bitrate to be used by the ffmpeg encoder (default: 400000)\n"
-    "# This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled)",
+    "movie_bps",
+    "# The fixed bitrate to be used by the movie encoder. Ignore quality setting",
     0,
-    CONF_OFFSET(ffmpeg_bps),
+    CONF_OFFSET(movie_bps),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_variable_bitrate",
-    "# Enables and defines variable bitrate for the ffmpeg encoder.\n"
-    "# ffmpeg_bps is ignored if variable bitrate is enabled.\n"
-    "# Valid values: 0 (default) = fixed bitrate defined by ffmpeg_bps,\n"
-    "# or the range 1 - 100 where 1 means worst quality and 100 is best.",
+    "movie_quality",
+    "# The encoding quality of the movie. (0=use bitrate. 1=worst quality, 100=best)",
     0,
-    CONF_OFFSET(ffmpeg_vbr),
+    CONF_OFFSET(movie_quality),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_video_codec",
-    "# Container/Codec to used by ffmpeg for the video compression.\n"
-    "# mpeg4 or msmpeg4 - gives you files with extension .avi\n"
-    "# msmpeg4 is recommended for use with Windows Media Player because\n"
-    "# it requires no installation of codec on the Windows client.\n"
-    "# swf - gives you a flash film with extension .swf\n"
-    "# flv - gives you a flash video with extension .flv\n"
-    "# ffv1 - FF video codec 1 for Lossless Encoding ( experimental )\n"
-    "# mov - QuickTime ( testing )\n"
-    "# mp4 - MPEG-4 Part 14 H264 encoding\n"
-    "# mkv - Matroska H264 encoding\n"
-    "# hevc - H.265 / HEVC (High Efficiency Video Coding)",
+    "movie_codec",
+    "# Container/Codec to used for the movie. See motion_guide.html",
     0,
-    CONF_OFFSET(ffmpeg_video_codec),
+    CONF_OFFSET(movie_codec),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_duplicate_frames",
-    "# Duplicate frames to achieve \"framerate\" fps. \n"
-    "# The resulting movie will appear to freeze for the duplicated frames.",
+    "movie_duplicate_frames",
+    "# Duplicate frames to achieve \"framerate\" fps.",
     0,
-    CONF_OFFSET(ffmpeg_duplicate_frames),
+    CONF_OFFSET(movie_duplicate_frames),
     copy_bool,
     print_bool,
     WEBUI_LEVEL_LIMITED
+    },
+    {
+    "movie_passthrough",
+    "# Pass through from the camera to the movie without decode/encoding.",
+    0,
+    CONF_OFFSET(movie_passthrough),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_ADVANCED
     },
     {
     "movie_filename",
-    "# File path for motion triggered ffmpeg films (movies) relative to target_dir\n"
-    "# Default: "DEF_MOVIEPATH"\n"
-    "# File extension is automatically added so do not include this\n"
-    "# This option was previously called ffmpeg_filename",
+    "# File name(without extension) for movies relative to target directory",
     0,
-    CONF_OFFSET(moviepath),
+    CONF_OFFSET(movie_filename),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
+    "movie_extpipe_use",
+    "# Use pipe and external encoder for creating movies.",
+    0,
+    CONF_OFFSET(movie_extpipe_use),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "movie_extpipe",
+    "# Full path and options for external encoder of movies from raw images",
+    0,
+    CONF_OFFSET(movie_extpipe),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
     "timelapse_interval",
-    "# Interval in seconds between timelapse captures.  Default: 0 = off",
+    "############################################################\n"
+    "# Timelapse output configuration parameters\n"
+    "############################################################\n\n"
+    "# Interval in seconds between timelapse captures.",
     0,
     CONF_OFFSET(timelapse_interval),
     copy_int,
@@ -1126,15 +1067,6 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "timelapse_codec",
-    "# Container/Codec for timelapse video. Valid values: mpg or mpeg4",
-    0,
-    CONF_OFFSET(timelapse_codec),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "timelapse_fps",
     "# Frame rate for timelapse playback",
     0,
@@ -1144,235 +1076,50 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "timelapse_filename",
-    "# File path for timelapse movies relative to target_dir\n"
-    "# Default: "DEF_TIMEPATH"\n"
-    "# File extension is automatically added so do not include this",
+    "timelapse_codec",
+    "# Container/Codec for timelapse movie.",
     0,
-    CONF_OFFSET(timepath),
+    CONF_OFFSET(timelapse_codec),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "ffmpeg_passthrough",
-    "# Pass through the packet without decode/encoding(default: off)"
-    "# Only valid for rtsp/rtmp cameras",
+    "timelapse_filename",
+    "# File name(without extension) for timelapse movies relative to target directory",
     0,
-    CONF_OFFSET(ffmpeg_passthrough),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_ADVANCED
+    CONF_OFFSET(timelapse_filename),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
     },
     {
     "video_pipe",
-    "# Output images to a video4linux loopback device\n"
-    "# The value '-' means next available (default: not defined)",
+    "############################################################\n"
+    "# Loopback pipe configuration parameters\n"
+    "############################################################\n\n"
+    "# v4l2 loopback device to receive normal images",
     0,
-    CONF_OFFSET(vidpipe),
+    CONF_OFFSET(video_pipe),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
     },
     {
-    "motion_video_pipe",
-    "# Output motion images to a video4linux loopback device\n"
-    "# The value '-' means next available (default: not defined)",
+    "video_pipe_motion",
+    "# v4l2 loopback device to receive motion images",
     0,
-    CONF_OFFSET(motionvidpipe),
+    CONF_OFFSET(video_pipe_motion),
     copy_string,
     print_string,
     WEBUI_LEVEL_LIMITED
-    },
-    {
-    "use_extpipe",
-    "\n############################################################\n"
-    "# External pipe to video encoder\n"
-    "############################################################\n\n"
-    "# Bool to enable or disable extpipe (default: off)",
-    0,
-    CONF_OFFSET(useextpipe),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "extpipe",
-    "# External program (full path and opts) to pipe raw video to\n"
-    "# Generally, use '-' for STDIN...",
-    0,
-    CONF_OFFSET(extpipe),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
-    "ipv6_enabled",
-    "\n############################################################\n"
-    "# Global Network Options\n"
-    "############################################################\n\n"
-    "# Enable IPv6 (default: off)",
-    0,
-    CONF_OFFSET(ipv6_enabled),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "stream_port",
-    "\n############################################################\n"
-    "# Live Stream Server\n"
-    "############################################################\n\n"
-    "# The mini-http server listens to this port for requests (default: 0 = disabled)",
-    0,
-    CONF_OFFSET(stream_port),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "substream_port",
-    "\n############################################################\n"
-    "# Live Substream Server\n"
-    "############################################################\n\n"
-    "# The mini-http server listens to this port for requests (default: 0 = disabled)",
-    0,
-    CONF_OFFSET(substream_port),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "stream_quality",
-    "# Quality of the jpeg (in percent) images produced (default: 50)",
-    0,
-    CONF_OFFSET(stream_quality),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_motion",
-    "# Output frames at 1 fps when no motion is detected and increase to the\n"
-    "# rate given by stream_maxrate when motion is detected (default: off)",
-    0,
-    CONF_OFFSET(stream_motion),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_maxrate",
-    "# Maximum framerate for streams (default: 1)",
-    0,
-    CONF_OFFSET(stream_maxrate),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_localhost",
-    "# Restrict stream connections to localhost only (default: on)",
-    0,
-    CONF_OFFSET(stream_localhost),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "stream_limit",
-    "# Limits the number of images per connection (default: 0 = unlimited)\n"
-    "# Number can be defined by multiplying actual stream rate by desired number of seconds\n"
-    "# Actual stream rate is the smallest of the numbers framerate and stream_maxrate",
-    0,
-    CONF_OFFSET(stream_limit),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_auth_method",
-    "# Set the authentication method (default: 0)\n"
-    "# 0 = disabled\n"
-    "# 1 = Basic authentication\n"
-    "# 2 = MD5 digest (the safer authentication)",
-    0,
-    CONF_OFFSET(stream_auth_method),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
-    "stream_cors_header",
-    "# Set the cross-origin resource sharing (CORS) header\n"
-    "# Default: not defined (Disabled)",
-    0,
-    CONF_OFFSET(stream_cors_header),
-    copy_uri,
-    print_string,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
-    "stream_authentication",
-    "# Authentication for the stream. Syntax username:password\n"
-    "# Default: not defined (Disabled)",
-    1,
-    CONF_OFFSET(stream_authentication),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
-    "stream_preview_scale",
-    "# Percentage to scale the preview stream image (default: 25)",
-    0,
-    CONF_OFFSET(stream_preview_scale),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_preview_newline",
-    "# Have stream preview image start on a new line (default: no)",
-    0,
-    CONF_OFFSET(stream_preview_newline),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_preview_method",
-    "# Method for webcontrol preview. full=0, substream=1, manual=2. (default: 0)",
-    0,
-    CONF_OFFSET(stream_preview_method),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_grey",
-    "# Send stream in black and white (default: off)",
-    0,
-    CONF_OFFSET(stream_grey),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "stream_tls",
-    "# Use ssl / tls for stream (default: off)",
-    0,
-    CONF_OFFSET(stream_tls),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_RESTRICTED
     },
     {
     "webcontrol_port",
-    "\n############################################################\n"
-    "# HTTP Based Control\n"
+    "############################################################\n"
+    "# Webcontrol configuration parameters\n"
     "############################################################\n\n"
-    "# TCP/IP port for the http server to listen on (default: 0 = disabled)",
+    "# Port number used for the webcontrol.",
     1,
     CONF_OFFSET(webcontrol_port),
     copy_int,
@@ -1380,8 +1127,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
+    "webcontrol_ipv6",
+    "# Enable IPv6 addresses.",
+    0,
+    CONF_OFFSET(webcontrol_ipv6),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
     "webcontrol_localhost",
-    "# Restrict control connections to localhost only (default: on)",
+    "# Restrict webcontrol connections to the localhost.",
     1,
     CONF_OFFSET(webcontrol_localhost),
     copy_bool,
@@ -1389,18 +1145,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "webcontrol_interface",
-    "# Webcontrol 0 = css, 1 = raw text",
-    1,
-    CONF_OFFSET(webcontrol_interface),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "webcontrol_parms",
-    "# Parameters to include on webcontrol.  0=none, 1=limited, 2=advanced, 3=restricted\n"
-    "# Default: 0 (none)",
+    "# Type of configuration options to allow via the webcontrol.",
     1,
     CONF_OFFSET(webcontrol_parms),
     copy_int,
@@ -1408,8 +1154,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_NEVER
     },
     {
+    "webcontrol_interface",
+    "# Method that webcontrol should use for interface with user.",
+    1,
+    CONF_OFFSET(webcontrol_interface),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
     "webcontrol_auth_method",
-    "# authentication method 0 - 2 (default: 0)",
+    "# The authentication method for the webcontrol",
     0,
     CONF_OFFSET(webcontrol_auth_method),
     copy_int,
@@ -1418,8 +1173,7 @@ config_param config_params[] = {
     },
     {
     "webcontrol_authentication",
-    "# Authentication for the http based control. Syntax username:password\n"
-    "# Default: not defined (Disabled)",
+    "# Authentication string for the webcontrol. Syntax username:password",
     1,
     CONF_OFFSET(webcontrol_authentication),
     copy_string,
@@ -1427,18 +1181,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "webcontrol_cors_header",
-    "# Set the cross-origin resource sharing (CORS) header for webcontrol\n"
-    "# Default: not defined (Disabled)",
-    0,
-    CONF_OFFSET(webcontrol_cors_header),
-    copy_uri,
-    print_string,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
     "webcontrol_tls",
-    "# Use ssl / tls for webcontrol (default: off)",
+    "# Use ssl / tls for the webcontrol",
     0,
     CONF_OFFSET(webcontrol_tls),
     copy_bool,
@@ -1446,17 +1190,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "webcontrol_key",
-    "# Key file name for tls",
-    1,
-    CONF_OFFSET(webcontrol_key),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_RESTRICTED
-    },
-    {
     "webcontrol_cert",
-    "# Certificate file name for tls",
+    "# Full path and file name of the certificate file for tls",
     1,
     CONF_OFFSET(webcontrol_cert),
     copy_string,
@@ -1464,78 +1199,168 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "sql_log_picture",
-    "\n############################################################\n"
-    "# Common Options for database features.\n"
-    "# Options require the database options to be active also.\n"
+    "webcontrol_key",
+    "# Full path and file name of the key file for tls",
+    1,
+    CONF_OFFSET(webcontrol_key),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "webcontrol_cors_header",
+    "# The cross-origin resource sharing (CORS) header for webcontrol",
+    0,
+    CONF_OFFSET(webcontrol_cors_header),
+    copy_uri,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+
+    {
+    "stream_port",
+    "############################################################\n"
+    "# Live stream configuration parameters\n"
     "############################################################\n\n"
-    "# Log to the database when creating motion triggered image file  (default: on)",
+    "# The port number for the live stream.",
     0,
-    CONF_OFFSET(sql_log_image),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "sql_log_snapshot",
-    "# Log to the database when creating a snapshot image file (default: on)",
-    0,
-    CONF_OFFSET(sql_log_snapshot),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "sql_log_movie",
-    "# Log to the database when creating motion triggered movie file (default: off)",
-    0,
-    CONF_OFFSET(sql_log_movie),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "sql_log_timelapse",
-    "# Log to the database when creating timelapse movie file (default: off)",
-    0,
-    CONF_OFFSET(sql_log_timelapse),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "sql_query_start",
-    "# SQL query at event start.  See motion_guide.html\n",
-    0,
-    CONF_OFFSET(sql_query_start),
-    copy_string,
-    print_string,
+    CONF_OFFSET(stream_port),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "sql_query_stop",
-    "# SQL query at event stop.  See motion_guide.html\n",
+    "substream_port",
+    "# The port number for the live substream",
     0,
-    CONF_OFFSET(sql_query_stop),
-    copy_string,
-    print_string,
+    CONF_OFFSET(substream_port),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_ADVANCED
     },
     {
-    "sql_query",
-    "# SQL query string that is sent to the database.  See motion_guide.html\n",
+    "stream_localhost",
+    "# Restrict stream connections to the localhost.",
     0,
-    CONF_OFFSET(sql_query),
+    CONF_OFFSET(stream_localhost),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "stream_auth_method",
+    "# Authentication method for live stream.",
+    0,
+    CONF_OFFSET(stream_auth_method),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "stream_authentication",
+    "# The authentication string for the stream. Syntax username:password",
+    1,
+    CONF_OFFSET(stream_authentication),
     copy_string,
     print_string,
-    WEBUI_LEVEL_ADVANCED
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "stream_tls",
+    "# Use ssl / tls for stream.",
+    0,
+    CONF_OFFSET(stream_tls),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "stream_cors_header",
+    "# The cross-origin resource sharing (CORS) header for the stream",
+    0,
+    CONF_OFFSET(stream_cors_header),
+    copy_uri,
+    print_string,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "stream_preview_scale",
+    "# Percentage to scale the stream image on the webcontrol.",
+    0,
+    CONF_OFFSET(stream_preview_scale),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_preview_newline",
+    "# Have the stream image start on a new line of the webcontrol",
+    0,
+    CONF_OFFSET(stream_preview_newline),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_preview_method",
+    "# Method for showing stream on webcontrol.",
+    0,
+    CONF_OFFSET(stream_preview_method),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_quality",
+    "# Quality of the jpeg images produced for stream.",
+    0,
+    CONF_OFFSET(stream_quality),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_grey",
+    "# Provide the stream images in black and white",
+    0,
+    CONF_OFFSET(stream_grey),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_motion",
+    "# Output frames at 1 fps when no motion is detected.",
+    0,
+    CONF_OFFSET(stream_motion),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_maxrate",
+    "# Maximum framerate of images provided for stream",
+    0,
+    CONF_OFFSET(stream_maxrate),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "stream_limit",
+    "# Limit the number of images per connection",
+    0,
+    CONF_OFFSET(stream_limit),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
     },
     {
     "database_type",
-    "\n############################################################\n"
-    "# Database Options\n"
+    "############################################################\n"
+    "# Database and SQL Configuration parameters\n"
     "############################################################\n\n"
-    "# database type : mysql, postgresql, sqlite3 (default : not defined)",
+    "# The type of database being used if any.",
     0,
     CONF_OFFSET(database_type),
     copy_string,
@@ -1544,8 +1369,7 @@ config_param config_params[] = {
     },
     {
     "database_dbname",
-    "# database to log to (default: not defined)\n"
-    "# for sqlite3, the full path and name for the database",
+    "# Database name to use. For sqlite3, the full path and name.",
     0,
     CONF_OFFSET(database_dbname),
     copy_string,
@@ -1554,7 +1378,7 @@ config_param config_params[] = {
     },
     {
     "database_host",
-    "# The host on which the database is located (default: localhost)",
+    "# The host on which the database is located",
     0,
     CONF_OFFSET(database_host),
     copy_string,
@@ -1562,8 +1386,17 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
+    "database_port",
+    "# Port used by the database.",
+    0,
+    CONF_OFFSET(database_port),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
     "database_user",
-    "# User account name for database (default: not defined)",
+    "# User account name for database.",
     0,
     CONF_OFFSET(database_user),
     copy_string,
@@ -1572,7 +1405,7 @@ config_param config_params[] = {
     },
     {
     "database_password",
-    "# User password for database (default: not defined)",
+    "# User password for database.",
     0,
     CONF_OFFSET(database_password),
     copy_string,
@@ -1580,18 +1413,8 @@ config_param config_params[] = {
     WEBUI_LEVEL_RESTRICTED
     },
     {
-    "database_port",
-    "# Port on which the database is located\n"
-    "# mysql 3306 , postgresql 5432 (default: not defined)",
-    0,
-    CONF_OFFSET(database_port),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
     "database_busy_timeout",
-    "# Database wait for unlock time (default: 0)",
+    "# Database wait for unlock time",
     0,
     CONF_OFFSET(database_busy_timeout),
     copy_int,
@@ -1599,13 +1422,74 @@ config_param config_params[] = {
     WEBUI_LEVEL_ADVANCED
     },
     {
+    "sql_log_picture",
+    "# Log to the database when creating motion triggered image file",
+    0,
+    CONF_OFFSET(sql_log_picture),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "sql_log_snapshot",
+    "# Log to the database when creating a snapshot image file",
+    0,
+    CONF_OFFSET(sql_log_snapshot),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "sql_log_movie",
+    "# Log to the database when creating motion triggered movie file",
+    0,
+    CONF_OFFSET(sql_log_movie),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "sql_log_timelapse",
+    "# Log to the database when creating timelapse movie file",
+    0,
+    CONF_OFFSET(sql_log_timelapse),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "sql_query_start",
+    "# SQL query at event start.  See motion_guide.html",
+    0,
+    CONF_OFFSET(sql_query_start),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "sql_query_stop",
+    "# SQL query at event stop.  See motion_guide.html",
+    0,
+    CONF_OFFSET(sql_query_stop),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "sql_query",
+    "# SQL query string that is sent to the database.  See motion_guide.html",
+    0,
+    CONF_OFFSET(sql_query),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
     "track_type",
-    "\n############################################################\n"
-    "# Tracking (Pan/Tilt)\n"
+    "############################################################\n"
+    "# Tracking configuration parameters\n"
     "############################################################\n\n"
-    "# Type of tracker (0=none (default), 1=stepper, 2=iomojo, 3=pwc, 4=generic, 5=uvcvideo, 6=servo)\n"
-    "# The generic type enables the definition of motion center and motion size to\n"
-    "# be used with the conversion specifiers for options like on_motion_detected",
+    "# Method used by tracking camera. See motion_guide.html",
     0,
     TRACK_OFFSET(type),
     copy_int,
@@ -1614,7 +1498,7 @@ config_param config_params[] = {
     },
     {
     "track_auto",
-    "# Enable auto tracking (default: off)",
+    "# Enable auto tracking",
     0,
     TRACK_OFFSET(active),
     copy_bool,
@@ -1623,7 +1507,7 @@ config_param config_params[] = {
     },
     {
     "track_port",
-    "# Serial port of motor (default: none)",
+    "# Serial port of motor",
     0,
     TRACK_OFFSET(port),
     copy_string,
@@ -1632,7 +1516,7 @@ config_param config_params[] = {
     },
     {
     "track_motorx",
-    "# Motor number for x-axis (default: 0)",
+    "# Motor number for x-axis",
     0,
     TRACK_OFFSET(motorx),
     copy_int,
@@ -1641,7 +1525,7 @@ config_param config_params[] = {
     },
     {
     "track_motorx_reverse",
-    "# Set motorx reverse (default: off)",
+    "# Set motorx reverse",
     0,
     TRACK_OFFSET(motorx_reverse),
     copy_bool,
@@ -1650,7 +1534,7 @@ config_param config_params[] = {
     },
     {
     "track_motory",
-    "# Motor number for y-axis (default: 0)",
+    "# Motor number for y-axis",
     0,
     TRACK_OFFSET(motory),
     copy_int,
@@ -1659,7 +1543,7 @@ config_param config_params[] = {
     },
     {
     "track_motory_reverse",
-    "# Set motory reverse (default: off)",
+    "# Set motory reverse",
     0,
     TRACK_OFFSET(motory_reverse),
     copy_bool,
@@ -1668,7 +1552,7 @@ config_param config_params[] = {
     },
     {
     "track_maxx",
-    "# Maximum value on x-axis (default: 0)",
+    "# Maximum value on x-axis",
     0,
     TRACK_OFFSET(maxx),
     copy_int,
@@ -1677,7 +1561,7 @@ config_param config_params[] = {
     },
     {
     "track_minx",
-    "# Minimum value on x-axis (default: 0)",
+    "# Minimum value on x-axis",
     0,
     TRACK_OFFSET(minx),
     copy_int,
@@ -1686,7 +1570,7 @@ config_param config_params[] = {
     },
     {
     "track_maxy",
-    "# Maximum value on y-axis (default: 0)",
+    "# Maximum value on y-axis",
     0,
     TRACK_OFFSET(maxy),
     copy_int,
@@ -1695,7 +1579,7 @@ config_param config_params[] = {
     },
     {
     "track_miny",
-    "# Minimum value on y-axis (default: 0)",
+    "# Minimum value on y-axis",
     0,
     TRACK_OFFSET(miny),
     copy_int,
@@ -1704,7 +1588,7 @@ config_param config_params[] = {
     },
     {
     "track_homex",
-    "# Center value on x-axis (default: 0)",
+    "# Center value on x-axis",
     0,
     TRACK_OFFSET(homex),
     copy_int,
@@ -1713,7 +1597,7 @@ config_param config_params[] = {
     },
     {
     "track_homey",
-    "# Center value on y-axis (default: 0)",
+    "# Center value on y-axis",
     0,
     TRACK_OFFSET(homey),
     copy_int,
@@ -1722,7 +1606,7 @@ config_param config_params[] = {
     },
     {
     "track_iomojo_id",
-    "# ID of an iomojo camera if used (default: 0)",
+    "# ID of an iomojo camera if used",
     0,
     TRACK_OFFSET(iomojo_id),
     copy_int,
@@ -1731,9 +1615,7 @@ config_param config_params[] = {
     },
     {
     "track_step_angle_x",
-    "# Angle in degrees the camera moves per step on the X-axis\n"
-    "# with auto-track (default: 10)\n"
-    "# Currently only used with pwc type cameras",
+    "# Angle in degrees the camera moves per step on the X-axis with auto-track",
     0,
     TRACK_OFFSET(step_angle_x),
     copy_int,
@@ -1742,9 +1624,7 @@ config_param config_params[] = {
     },
     {
     "track_step_angle_y",
-    "# Angle in degrees the camera moves per step on the Y-axis\n"
-    "# with auto-track (default: 10)\n"
-    "# Currently only used with pwc type cameras",
+    "# Angle in degrees the camera moves per step on the Y-axis with auto-track.",
     0,
     TRACK_OFFSET(step_angle_y),
     copy_int,
@@ -1753,8 +1633,7 @@ config_param config_params[] = {
     },
     {
     "track_move_wait",
-    "# Delay to wait for after tracking movement as number\n"
-    "# of picture frames (default: 10)",
+    "# Delay to wait for after tracking movement as number of picture frames.",
     0,
     TRACK_OFFSET(move_wait),
     copy_int,
@@ -1763,7 +1642,7 @@ config_param config_params[] = {
     },
     {
     "track_speed",
-    "# Speed to set the motor to (stepper motor option) (default: 255)",
+    "# Speed to set the motor to (stepper motor option)",
     0,
     TRACK_OFFSET(speed),
     copy_int,
@@ -1772,7 +1651,7 @@ config_param config_params[] = {
     },
     {
     "track_stepsize",
-    "# Number of steps to make (stepper motor option) (default: 40)",
+    "# Number of steps to make (stepper motor option)",
     0,
     TRACK_OFFSET(stepsize),
     copy_int,
@@ -1781,8 +1660,7 @@ config_param config_params[] = {
     },
     {
     "track_generic_move",
-    "# Command to execute to move a camera in generic tracking mode (default: none)\n"
-    "# NOTE: Several data are provided as environment variables on the form TRACK_xxx.\n",
+    "# Command to execute to move a camera in generic tracking mode",
     0,
     TRACK_OFFSET(generic_move),
     copy_string,
@@ -1791,12 +1669,9 @@ config_param config_params[] = {
     },
     {
     "camera",
-    "\n##############################################################\n"
+    "##############################################################\n"
     "# Camera config files - One for each camera.\n"
-    "# Except if only one camera - You only need this config file.\n"
-    "# If you have more than one camera you MUST define one camera\n"
-    "# config file for each camera in addition to this config file.\n"
-    "##############################################################\n",
+    "##############################################################",
     1,
     0,
     config_camera,
@@ -1806,11 +1681,9 @@ config_param config_params[] = {
     /* using a conf.d style camera addition */
     {
     "camera_dir",
-    "\n##############################################################\n"
-    "# Camera config directory\n"
-    "# Any files ending in '.conf' in this directory will be read\n"
-    "# as a camera config file.\n"
-    "##############################################################\n",
+    "##############################################################\n"
+    "# Directory to read '.conf' files for cameras.\n"
+    "##############################################################",
     1,
     CONF_OFFSET(camera_dir),
     read_camera_dir,
@@ -1834,81 +1707,252 @@ dep_config_param dep_config_params[] = {
     {
     "thread",
     "3.4.1",
-    "The \"thread\" option has been replaced by the \"camera\" option.",
+    "The \"thread\" option has been replaced by the \"camera\"",
     0,
+    "camera",
     config_camera
     },
     {
     "ffmpeg_timelapse",
     "4.0.1",
-    "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\" option.",
+    "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\"",
     CONF_OFFSET(timelapse_interval),
+    "timelapse_interval",
     copy_int
     },
     {
     "ffmpeg_timelapse_mode",
     "4.0.1",
-    "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\" option.",
+    "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\"",
     CONF_OFFSET(timelapse_mode),
+    "timelapse_mode",
     copy_string
     },
     {
     "brightness",
     "4.1.1",
-    "\"brightness\" replaced with \"vid_control_params\" option.",
+    "\"brightness\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
+    "vid_control_params",
     copy_vid_ctrl
     },
     {
     "contrast",
     "4.1.1",
-    "\"contrast\" replaced with \"vid_control_params\" option.",
+    "\"contrast\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
+    "vid_control_params",
     copy_vid_ctrl
     },
     {
     "saturation",
     "4.1.1",
-    "\"saturation\" replaced with \"vid_control_params\" option.",
+    "\"saturation\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
+    "vid_control_params",
     copy_vid_ctrl
     },
     {
     "hue",
     "4.1.1",
-    "\"hue\" replaced with \"vid_control_params\" option.",
+    "\"hue\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
+    "vid_control_params",
     copy_vid_ctrl
     },
     {
     "power_line_frequency",
     "4.1.1",
-    "\"power_line_frequency\" replaced with \"vid_control_params\" option.",
+    "\"power_line_frequency\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
+    "vid_control_params",
     copy_vid_ctrl
     },
     {
     "text_double",
     "4.1.1",
-    "\"text_double\" replaced with \"text_scale\" option.",
+    "\"text_double\" replaced with \"text_scale\"",
     CONF_OFFSET(text_scale),
+    "text_scale",
     copy_text_double
     },
     {
     "webcontrol_html_output",
     "4.1.1",
-    "\"webcontrol_html_output\" replaced with \"webcontrol_interface\" option.",
+    "\"webcontrol_html_output\" replaced with \"webcontrol_interface\"",
     CONF_OFFSET(webcontrol_interface),
+    "webcontrol_interface",
     copy_html_output
     },
     {
      "lightswitch",
     "4.1.1",
-    "\"lightswitch\" replaced with \"lightswitch_percent\" and \"lightswitch_frames\" options.",
+    "\"lightswitch\" replaced with \"lightswitch_percent\"",
     CONF_OFFSET(lightswitch_percent),
+    "lightswitch_percent",
     copy_int
     },
-    { NULL, NULL, NULL, 0, NULL}
+    {
+    "ffmpeg_output_movies",
+    "4.1.1",
+    "\"ffmpeg_output_movies\" replaced with \"movie_output\"",
+    CONF_OFFSET(movie_output),
+    "movie_output",
+    copy_bool
+    },
+    {
+    "ffmpeg_output_debug_movies",
+    "4.1.1",
+    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_motion\"",
+    CONF_OFFSET(movie_output_motion),
+    "movie_output_motion",
+    copy_bool
+    },
+    {
+    "max_movie_time",
+    "4.1.1",
+    "\"max_movie_time\" replaced with \"movie_max_time\"",
+    CONF_OFFSET(movie_max_time),
+    "movie_max_time",
+    copy_int
+    },
+    {
+    "ffmpeg_bps",
+    "4.1.1",
+    "\"ffmpeg_bps\" replaced with \"movie_bps\"",
+    CONF_OFFSET(movie_bps),
+    "movie_bps",
+    copy_int
+    },
+    {
+    "ffmpeg_variable_bitrate",
+    "4.1.1",
+    "\"ffmpeg_variable_bitrate\" replaced with \"movie_quality\"",
+    CONF_OFFSET(movie_quality),
+    "movie_quality",
+    copy_int
+    },
+    {
+    "ffmpeg_video_codec",
+    "4.1.1",
+    "\"ffmpeg_video_codec\" replaced with \"movie_codec\"",
+    CONF_OFFSET(movie_codec),
+    "movie_codec",
+    copy_string
+    },
+    {
+    "ffmpeg_duplicate_frames",
+    "4.1.1",
+    "\"ffmpeg_duplicate_frames\" replaced with \"movie_duplicate_frames\"",
+    CONF_OFFSET(movie_duplicate_frames),
+    "movie_duplicate_frames",
+    copy_bool
+    },
+    {
+    "ffmpeg_passthrough",
+    "4.1.1",
+    "\"ffmpeg_passthrough\" replaced with \"movie_passthrough\"",
+    CONF_OFFSET(movie_passthrough),
+    "movie_passthrough",
+    copy_bool
+    },
+    {
+    "use_extpipe",
+    "4.1.1",
+    "\"use_extpipe\" replaced with \"movie_extpipe_use\"",
+    CONF_OFFSET(movie_extpipe_use),
+    "movie_extpipe_use",
+    copy_bool
+    },
+    {
+    "extpipe",
+    "4.1.1",
+    "\"extpipe\" replaced with \"movie_extpipe\"",
+    CONF_OFFSET(movie_extpipe),
+    "movie_extpipe",
+    copy_string
+    },
+    {
+    "output_pictures",
+    "4.1.1",
+    "\"output_pictures\" replaced with \"picture_output\"",
+    CONF_OFFSET(picture_output),
+    "picture_output",
+    copy_string
+    },
+    {
+    "output_debug_pictures",
+    "4.1.1",
+    "\"output_debug_pictures\" replaced with \"picture_output_motion\"",
+    CONF_OFFSET(picture_output_motion),
+    "picture_output_motion",
+    copy_bool
+    },
+    {
+    "quality",
+    "4.1.1",
+    "\"quality\" replaced with \"picture_quality\"",
+    CONF_OFFSET(picture_quality),
+    "picture_quality",
+    copy_int
+    },
+    {
+    "exif_text",
+    "4.1.1",
+    "\"exif_text\" replaced with \"picture_exif\"",
+    CONF_OFFSET(picture_exif),
+    "picture_exif",
+    copy_string
+    },
+    {
+    "motion_video_pipe",
+    "4.1.1",
+    "\"motion_video_pipe\" replaced with \"video_pipe_motion\"",
+    CONF_OFFSET(video_pipe_motion),
+    "video_pipe_motion",
+    copy_string
+    },
+    {
+    "ipv6_enabled",
+    "4.1.1",
+    "\"ipv6_enabled\" replaced with \"webcontrol_ipv6\"",
+    CONF_OFFSET(webcontrol_ipv6),
+    "webcontrol_ipv6",
+    copy_bool
+    },
+    {
+    "rtsp_uses_tcp",
+    "4.1.1",
+    "\"rtsp_uses_tcp\" replaced with \"netcam_use_tcp\"",
+    CONF_OFFSET(netcam_use_tcp),
+    "netcam_use_tcp",
+    copy_bool
+    },
+    {
+    "switchfilter",
+    "4.1.1",
+    "\"switchfilter\" replaced with \"roundrobin_switchfilter\"",
+    CONF_OFFSET(roundrobin_switchfilter),
+    "roundrobin_switchfilter",
+    copy_bool
+    },
+    {
+    "logfile",
+    "4.1.1",
+    "\"logfile\" replaced with \"log_file\"",
+    CONF_OFFSET(log_file),
+    "log_file",
+    copy_string
+    },
+    {
+    "process_id_file",
+    "4.1.1",
+    "\"process_id_file\" replaced with \"pid_file\"",
+    CONF_OFFSET(pid_file),
+    "pid_file",
+    copy_string
+    },
+    { NULL, NULL, NULL, 0, NULL, NULL}
 };
 
 /**
@@ -2037,10 +2081,8 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
     i = 0;
     while (dep_config_params[i].name != NULL) {
         if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-                ,_("Deprecated config option \"%s\" since after version %s:")
-                ,cmd, dep_config_params[i].last_version);
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s", dep_config_params[i].info);
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
+                , dep_config_params[i].info, dep_config_params[i].last_version);
 
             if (dep_config_params[i].copy != NULL){
                 /* If the depreciated option is a vid item, copy_vid_ctrl is called
@@ -2373,7 +2415,7 @@ struct context **conf_load(struct context **cnt)
 
     /* If log type string was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_type_str[0])
-        cnt[0]->conf.log_type_str = mystrcpy(cnt[0]->conf.log_type_str, cnt[0]->log_type_str);
+        cnt[0]->conf.log_type = mystrcpy(cnt[0]->conf.log_type, cnt[0]->log_type_str);
 
     /* if log level was passed from Command-line copy to main thread conf struct. */
     if (cnt[0]->log_level != -1)

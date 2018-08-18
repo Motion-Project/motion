@@ -548,39 +548,39 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
 
     ffmpeg->opts = 0;
-    if (ffmpeg->vbr > 100) ffmpeg->vbr = 100;
+    if (ffmpeg->quality > 100) ffmpeg->quality = 100;
     if (ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_H264 ||
         ffmpeg->ctx_codec->codec_id == MY_CODEC_ID_HEVC){
-        if (ffmpeg->vbr <= 0)
-            ffmpeg->vbr = 45; // default to 45% quality
+        if (ffmpeg->quality <= 0)
+            ffmpeg->quality = 45; // default to 45% quality
         av_dict_set(&ffmpeg->opts, "preset", "ultrafast", 0);
         av_dict_set(&ffmpeg->opts, "tune", "zerolatency", 0);
         if ((strcmp(ffmpeg->codec->name, "h264_omx") == 0) || (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0)) {
             // H264 OMX encoder quality can only be controlled via bit_rate
             // bit_rate = ffmpeg->width * ffmpeg->height * ffmpeg->fps * quality_factor
-            ffmpeg->vbr = (ffmpeg->width * ffmpeg->height * ffmpeg->fps * ffmpeg->vbr) >> 7;
+            ffmpeg->quality = (ffmpeg->width * ffmpeg->height * ffmpeg->fps * ffmpeg->quality) >> 7;
             // Clip bit rate to min
-            if (ffmpeg->vbr < 4000) // magic number
-                ffmpeg->vbr = 4000;
+            if (ffmpeg->quality < 4000) // magic number
+                ffmpeg->quality = 4000;
             ffmpeg->ctx_codec->profile = FF_PROFILE_H264_HIGH;
-            ffmpeg->ctx_codec->bit_rate = ffmpeg->vbr;
+            ffmpeg->ctx_codec->bit_rate = ffmpeg->quality;
         } else {
             // Control other H264 encoders quality via CRF
             char crf[10];
-            ffmpeg->vbr = (int)(( (100-ffmpeg->vbr) * 51)/100);
-            snprintf(crf, 10, "%d", ffmpeg->vbr);
+            ffmpeg->quality = (int)(( (100-ffmpeg->quality) * 51)/100);
+            snprintf(crf, 10, "%d", ffmpeg->quality);
             av_dict_set(&ffmpeg->opts, "crf", crf, 0);
         }
     } else {
         /* The selection of 8000 is a subjective number based upon viewing output files */
-        if (ffmpeg->vbr > 0){
-            ffmpeg->vbr =(int)(((100-ffmpeg->vbr)*(100-ffmpeg->vbr)*(100-ffmpeg->vbr) * 8000) / 1000000) + 1;
+        if (ffmpeg->quality > 0){
+            ffmpeg->quality =(int)(((100-ffmpeg->quality)*(100-ffmpeg->quality)*(100-ffmpeg->quality) * 8000) / 1000000) + 1;
             ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_QSCALE;
-            ffmpeg->ctx_codec->global_quality=ffmpeg->vbr;
+            ffmpeg->ctx_codec->global_quality=ffmpeg->quality;
         }
     }
     MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
-        ,_("%s codec vbr/crf/bit_rate: %d"), ffmpeg->codec->name, ffmpeg->vbr);
+        ,_("%s codec vbr/crf/bit_rate: %d"), ffmpeg->codec->name, ffmpeg->quality);
 
     return 0;
 }
@@ -777,8 +777,8 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
     }
 
     /* Take care of variable bitrate setting. */
-    if (ffmpeg->vbr)
-        ffmpeg->picture->quality = ffmpeg->vbr;
+    if (ffmpeg->quality)
+        ffmpeg->picture->quality = ffmpeg->quality;
 
     ffmpeg->picture->linesize[0] = ffmpeg->ctx_codec->width;
     ffmpeg->picture->linesize[1] = ffmpeg->ctx_codec->width / 2;

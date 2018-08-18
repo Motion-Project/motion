@@ -1151,7 +1151,7 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
 
     curdev->v4l2_private = vid_source;
     vid_source->fd_device = curdev->fd_device;
-    vid_source->fps = cnt->conf.frame_limit;
+    vid_source->fps = cnt->conf.framerate;
     vid_source->pframe = -1;
     vid_source->finish = &cnt->finish;
     vid_source->buffers = NULL;
@@ -1177,7 +1177,7 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
         if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
         if (retcd == 0) retcd = vid_parms_parse(cnt);
         if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_autobright(cnt, curdev, cnt->conf.autobright);
+        if (retcd == 0) retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ){
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1198,7 +1198,7 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
         /* No round robin - we only adjust picture controls */
         retcd = vid_parms_parse(cnt);
         if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_autobright(cnt, curdev, cnt->conf.autobright);
+        if (retcd == 0) retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO

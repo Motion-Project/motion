@@ -59,14 +59,14 @@
       </div>
     <button class="accordian">Options-Output</a></button>
       <div class="panel">
-        <a href="#OptTopic_Output_General">General</a>
         <a href="#OptTopic_Pictures">Pictures</a>
         <a href="#OptTopic_Movies">Movies</a>
       </div>
     <button class="accordian">Options-Pipe/Steams</a></button>
       <div class="panel">
         <a href="#OptTopic_Pipe">Pipe Output</a>
-        <a href="#OptTopic_Stream_Webcontrol">Stream/Webcontrol</a>
+        <a href="#OptTopic_Webcontrol">Webcontrol</a>
+        <a href="#OptTopic_Stream">Live Stream</a>
       </div>
     <button class="accordian">Options-Database/Tracking</a></button>
       <div class="panel">
@@ -202,7 +202,7 @@
     <ul>
       <p></p>
         SYNOPSIS
-      <pre>motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p process_id_file ] [ -l log_file ]</pre>
+      <pre>motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p pid_file ] [ -l log_file ]</pre>
       <p></p>
       <ul>
         <li>-c : Full path and filename of config file.</li>
@@ -518,60 +518,6 @@
           <td align="left"><a href="#event_gap" >event_gap</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">exif_text</td>
-          <td align="left">exif_text</td>
-          <td align="left"><a href="#exif_text" >exif_text</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">extpipe</td>
-          <td align="left">extpipe</td>
-          <td align="left"><a href="#extpipe" >extpipe</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">ffmpeg_bps</td>
-          <td align="left">ffmpeg_bps</td>
-          <td align="left">ffmpeg_bps</td>
-          <td align="left"><a href="#ffmpeg_bps" >ffmpeg_bps</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">ffmpeg_duplicate_frames</td>
-          <td align="left">ffmpeg_duplicate_frames</td>
-          <td align="left"><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">ffmpeg_cap_motion</td>
-          <td align="left">ffmpeg_output_debug_movies</td>
-          <td align="left">ffmpeg_output_debug_movies</td>
-          <td align="left"><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">ffmpeg_cap_new</td>
-          <td align="left">ffmpeg_output_movies</td>
-          <td align="left">ffmpeg_output_movies</td>
-          <td align="left"><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left"></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">ffmpeg_variable_bitrate</td>
-          <td align="left">ffmpeg_variable_bitrate</td>
-          <td align="left">ffmpeg_variable_bitrate</td>
-          <td align="left"><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">ffmpeg_video_codec</td>
-          <td align="left">ffmpeg_video_codec</td>
-          <td align="left">ffmpeg_video_codec</td>
-          <td align="left"><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left"></td>
           <td align="left"></td>
           <td align="left">flip_axis</td>
@@ -602,22 +548,16 @@
           <td align="left"><a href="#input" >input</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">ipv6_enabled</td>
-          <td align="left">ipv6_enabled</td>
-          <td align="left"><a href="#ipv6_enabled" >ipv6_enabled</a></td>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
         </tr>
         <tr>
           <td height="17" align="left">lightswitch</td>
           <td align="left">lightswitch</td>
           <td align="left">lightswitch</td>
           <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
-        </tr>
-        <tr>
-            <td height="17" align="left"></td>
-            <td align="left"></td>
-            <td align="left"></td>
-            <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
         </tr>
         <tr>
           <td height="17" align="left">locate</td>
@@ -633,6 +573,12 @@
         </tr>
         <tr>
           <td height="17" align="left"><br /></td>
+          <td align="left">logfile</td>
+          <td align="left">logfile</td>
+          <td align="left"><a href="#log_file" >log_file</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
           <td align="left">log_level</td>
           <td align="left">log_level</td>
           <td align="left"><a href="#log_level" >log_level</a></td>
@@ -642,12 +588,6 @@
           <td align="left">log_type</td>
           <td align="left">log_type</td>
           <td align="left"><a href="#log_type" >log_type</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">logfile</td>
-          <td align="left">logfile</td>
-          <td align="left"><a href="#logfile" >logfile</a></td>
         </tr>
         <tr>
           <td height="17" align="left">mask_file</td>
@@ -660,12 +600,6 @@
           <td align="left"></td>
           <td align="left">mask_privacy</td>
           <td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">max_mpeg_time</td>
-          <td align="left">max_movie_time</td>
-          <td align="left">max_movie_time</td>
-          <td align="left"><a href="#max_movie_time" >max_movie_time</a></td>
         </tr>
         <tr>
           <td height="17" align="left">minimum_frame_time</td>
@@ -692,16 +626,70 @@
           <td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">motion_video_pipe</td>
-          <td align="left">motion_video_pipe</td>
-          <td align="left">motion_video_pipe</td>
-          <td align="left"><a href="#motion_video_pipe" >motion_video_pipe</a></td>
+          <td height="17" align="left">ffmpeg_bps</td>
+          <td align="left">ffmpeg_bps</td>
+          <td align="left">ffmpeg_bps</td>
+          <td align="left"><a href="#movie_bps" >movie_bps</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
+          <td align="left"><a href="#movie_codec" >movie_codec</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">ffmpeg_duplicate_frames</td>
+          <td align="left">ffmpeg_duplicate_frames</td>
+          <td align="left"><a href="#movie_duplicate_frames" >movie_duplicate_frames</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">extpipe</td>
+          <td align="left">extpipe</td>
+          <td align="left"><a href="#movie_extpipe" >movie_extpipe</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">use_extpipe</td>
+          <td align="left">use_extpipe</td>
+          <td align="left"><a href="#movie_extpipe_use" >movie_extpipe_use</a></td>
         </tr>
         <tr>
           <td height="17" align="left">movie_filename</td>
           <td align="left">movie_filename</td>
           <td align="left">movie_filename</td>
           <td align="left"><a href="#movie_filename" >movie_filename</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">max_mpeg_time</td>
+          <td align="left">max_movie_time</td>
+          <td align="left">max_movie_time</td>
+          <td align="left"><a href="#movie_max_time" >movie_max_time</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_cap_new</td>
+          <td align="left">ffmpeg_output_movies</td>
+          <td align="left">ffmpeg_output_movies</td>
+          <td align="left"><a href="#movie_output" >movie_output</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_cap_motion</td>
+          <td align="left">ffmpeg_output_debug_movies</td>
+          <td align="left">ffmpeg_output_debug_movies</td>
+          <td align="left"><a href="#movie_output_motion" >movie_output_motion</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#movie_passthrough" >movie_passthrough</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">ffmpeg_variable_bitrate</td>
+          <td align="left"><a href="#movie_quality" >movie_quality</a></td>
         </tr>
         <tr>
           <td height="17" align="left"></td>
@@ -740,6 +728,12 @@
           <td align="left"><a href="#netcam_url" >netcam_url</a></td>
         </tr>
         <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">rtsp_uses_tcp</td>
+          <td align="left">rtsp_uses_tcp</td>
+          <td align="left"><a href="#netcam_use_tcp" >netcam_use_tcp</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">netcam_userpass</td>
           <td align="left">netcam_userpass</td>
           <td align="left">netcam_userpass</td>
@@ -770,16 +764,16 @@
           <td align="left"><a href="#on_area_detected" >on_area_detected</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_camera_lost</td>
-          <td align="left">on_camera_lost</td>
-          <td align="left">on_camera_lost</td>
-          <td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left"></td>
           <td align="left"></td>
           <td align="left">on_camera_found</td>
           <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">on_camera_lost</td>
+          <td align="left">on_camera_lost</td>
+          <td align="left">on_camera_lost</td>
+          <td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
         </tr>
         <tr>
           <td height="17" align="left">on_event_end</td>
@@ -818,16 +812,22 @@
           <td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">output_motion</td>
-          <td align="left">output_debug_pictures</td>
-          <td align="left">output_debug_pictures</td>
-          <td align="left"><a href="#output_debug_pictures" >output_debug_pictures</a></td>
+          <td height="17" align="left"><br /></td>
+          <td align="left">exif_text</td>
+          <td align="left">exif_text</td>
+          <td align="left"><a href="#picture_exif" >picture_exif</a></td>
         </tr>
         <tr>
           <td height="17" align="left">output_normal</td>
           <td align="left">output_pictures</td>
           <td align="left">output_pictures</td>
-          <td align="left"><a href="#output_pictures" >output_pictures</a></td>
+          <td align="left"><a href="#picture_output" >picture_output</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">output_motion</td>
+          <td align="left">output_debug_pictures</td>
+          <td align="left">output_debug_pictures</td>
+          <td align="left"><a href="#picture_output_motion" >picture_output_motion</a></td>
         </tr>
         <tr>
           <td height="17" align="left">jpeg_filename</td>
@@ -842,6 +842,18 @@
           <td align="left"><a href="#picture_type" >picture_type</a></td>
         </tr>
         <tr>
+          <td height="17" align="left">quality</td>
+          <td align="left">quality</td>
+          <td align="left">quality</td>
+          <td align="left"><a href="#picture_quality" >picture_quality</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">process_id_file</td>
+          <td align="left">process_id_file</td>
+          <td align="left">process_id_file</td>
+          <td align="left"><a href="#pid_file" >pid_file</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">post_capture</td>
           <td align="left">post_capture</td>
           <td align="left">post_capture</td>
@@ -852,18 +864,6 @@
           <td align="left">pre_capture</td>
           <td align="left">pre_capture</td>
           <td align="left"><a href="#pre_capture" >pre_capture</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">process_id_file</td>
-          <td align="left">process_id_file</td>
-          <td align="left">process_id_file</td>
-          <td align="left"><a href="#process_id_file" >process_id_file</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">quality</td>
-          <td align="left">quality</td>
-          <td align="left">quality</td>
-          <td align="left"><a href="#quality" >quality</a></td>
         </tr>
         <tr>
           <td height="17" align="left">quiet</td>
@@ -890,10 +890,10 @@
           <td align="left"><a href="#roundrobin_skip" >roundrobin_skip</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">rtsp_uses_tcp</td>
-          <td align="left">rtsp_uses_tcp</td>
-          <td align="left"><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a></td>
+          <td height="17" align="left">switchfilter</td>
+          <td align="left">switchfilter</td>
+          <td align="left">switchfilter</td>
+          <td align="left"><a href="#roundrobin_switchfilter" >roundrobin_switchfilter</a></td>
         </tr>
         <tr>
           <td height="17" align="left">setup_mode</td>
@@ -1034,12 +1034,6 @@
           <td align="left"><a href="#stream_tls" >stream_tls</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">switchfilter</td>
-          <td align="left">switchfilter</td>
-          <td align="left">switchfilter</td>
-          <td align="left"><a href="#switchfilter" >switchfilter</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">target_dir</td>
           <td align="left">target_dir</td>
           <td align="left">target_dir</td>
@@ -1050,12 +1044,6 @@
           <td align="left">text_changes</td>
           <td align="left">text_changes</td>
           <td align="left"><a href="#text_changes" >text_changes</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left">text_double</td>
-          <td align="left">text_double</td>
-          <td align="left">text_double</td>
-          <td align="left"><a href="#text_scale" >text_scale</a></td>
         </tr>
         <tr>
           <td height="17" align="left">text_event</td>
@@ -1074,6 +1062,12 @@
           <td align="left">text_right</td>
           <td align="left">text_right</td>
           <td align="left"><a href="#text_right" >text_right</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left">text_double</td>
+          <td align="left">text_double</td>
+          <td align="left">text_double</td>
+          <td align="left"><a href="#text_scale" >text_scale</a></td>
         </tr>
         <tr>
           <td height="17" align="left">threshold</td>
@@ -1122,6 +1116,12 @@
           <td align="left">track_auto</td>
           <td align="left">track_auto</td>
           <td align="left"><a href="#track_auto" >track_auto</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
         </tr>
         <tr>
           <td height="17" align="left">track_iomojo_id</td>
@@ -1196,22 +1196,10 @@
           <td align="left"><a href="#track_type" >track_type</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
-          <td align="left"></td>
-          <td align="left"></td>
-          <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
-        </tr>
-        <tr>
           <td height="17" align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left"><a href="#tunerdevice" >tunerdevice</a></td>
-        </tr>
-        <tr>
-          <td height="17" align="left"><br /></td>
-          <td align="left">use_extpipe</td>
-          <td align="left">use_extpipe</td>
-          <td align="left"><a href="#use_extpipe" >use_extpipe</a></td>
         </tr>
         <tr>
           <td height="17" align="left">v4l2_palette</td>
@@ -1256,6 +1244,12 @@
           <td align="left"><a href="#video_pipe" >video_pipe</a></td>
         </tr>
         <tr>
+          <td height="17" align="left">motion_video_pipe</td>
+          <td align="left">motion_video_pipe</td>
+          <td align="left">motion_video_pipe</td>
+          <td align="left"><a href="#video_pipe_motion" >video_pipe_motion</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">videodevice</td>
           <td align="left">videodevice</td>
           <td align="left">videodevice</td>
@@ -1290,6 +1284,12 @@
           <td align="left">webcontrol_html_output</td>
           <td align="left">webcontrol_html_output</td>
           <td align="left"><a href="#webcontrol_interface" >webcontrol_interface</a></td>
+        </tr>
+        <tr>
+          <td height="17" align="left"><br /></td>
+          <td align="left">ipv6_enabled</td>
+          <td align="left">ipv6_enabled</td>
+          <td align="left"><a href="#webcontrol_ipv6" >webcontrol_ipv6</a></td>
         </tr>
         <tr>
           <td height="17" align="left"></td>
@@ -1384,20 +1384,24 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#daemon" >daemon</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#process_id_file" >process_id_file</a> </td>
               <td bgcolor="#edf4f9" ><a href="#setup_mode" >setup_mode</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#logfile" >logfile</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pid_file" >pid_file</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#log_file" >log_file</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#log_level" >log_level</a> </td>
               <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#camera_id" >camera_id</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#quiet" >quiet</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#camera_name" >camera_name</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera_id" >camera_id</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#camera" >camera</a> </td>
               <td bgcolor="#edf4f9" ><a href="#camera_dir" >camera_dir</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
+            </tr>
+              <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
+            <tr>
             </tr>
           </tbody>
         </table>
@@ -1409,7 +1413,6 @@
       <a name="OptTopic_Video4Linux_Devices" ></a>
       <a href="#OptDetail_Video4Linux_Devices" >Video4Linux Devices-General Info</a>
       <ul>
-
         <table border="1" class="fixed" >
           <colgroup>
             <col width="250px">
@@ -1433,7 +1436,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#roundrobin_frames" >roundrobin_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#roundrobin_skip" >roundrobin_skip</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#switchfilter" >switchfilter</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#roundrobin_switchfilter" >roundrobin_switchfilter</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1445,7 +1448,6 @@
       <a name="OptTopic_Network_Cameras" ></a>
       <a href="#OptDetail_Network_Cameras" >Network Cameras-General Info</a>
       <ul>
-
         <table border="1" class="fixed" >
           <colgroup>
             <col width="250px">
@@ -1463,7 +1465,7 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#netcam_proxy" >netcam_proxy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#netcam_tolerant_check" >netcam_tolerant_check</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#rtsp_uses_tcp" >rtsp_uses_tcp</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#netcam_use_tcp" >netcam_use_tcp</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1475,7 +1477,6 @@
       <a name="OptTopic_Raspi_Cameras" ></a>
       <a href="#OptDetail_Raspi_Cameras" >Raspberry Pi Camera-General Info</a>
       <ul>
-
         <table border="1" class="fixed" >
           <colgroup>
             <col width="250px">
@@ -1507,26 +1508,25 @@
           </colgroup>
           <tbody>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
               <td bgcolor="#edf4f9" ><a href="#width" >width</a> </td>
               <td bgcolor="#edf4f9" ><a href="#height" >height</a> </td>
-            </tr>
-            <tr>
               <td bgcolor="#edf4f9" ><a href="#framerate" >framerate</a> </td>
               <td bgcolor="#edf4f9" ><a href="#minimum_frame_time" >minimum_frame_time</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#rotate" >rotate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#flip_axis" >flip_axis</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#locate_motion_mode" >locate_motion_mode</a> </td>
               <td bgcolor="#edf4f9" ><a href="#locate_motion_style" >locate_motion_style</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#text_left" >text_left</a> </td>
               <td bgcolor="#edf4f9" ><a href="#text_right" >text_right</a> </td>
               <td bgcolor="#edf4f9" ><a href="#text_changes" >text_changes</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#text_scale" >text_scale</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#text_event" >text_event</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#text_scale" >text_scale</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1554,18 +1554,21 @@
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
               <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
               <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
             </tr>
             <tr>
+             <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
             </tr>
 
           </tbody>
@@ -1609,30 +1612,6 @@
         <p></p>
       </ul>
 
-      <a name="OptTopic_Output_General" ></a>
-      <a href="#OptDetail_Output_General" >Output-General Info</a>
-      <ul>
-        <table border="1" class="fixed" >
-          <colgroup>
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-            <col width="250px">
-          </colgroup>
-          <tbody>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#quiet" >quiet</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
-            </tr>
-          </tbody>
-        </table>
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
       <a name="OptTopic_Pictures" ></a>
       <a href="#OptDetail_Pictures" >Pictures-General Info</a>
       <ul>
@@ -1645,16 +1624,16 @@
           </colgroup>
           <tbody>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#output_pictures" >output_pictures</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#output_debug_pictures" >output_debug_pictures</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#quality" >quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_output" >picture_output</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_output_motion" >picture_output_motion</a> </td>
               <td bgcolor="#edf4f9" ><a href="#picture_type" >picture_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_quality" >picture_quality</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#picture_exif" >picture_exif</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#picture_filename" >picture_filename</a> </td>
               <td bgcolor="#edf4f9" ><a href="#snapshot_interval" >snapshot_interval</a> </td>
               <td bgcolor="#edf4f9" ><a href="#snapshot_filename" >snapshot_filename</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#picture_filename" >picture_filename</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#exif_text" >exif_text</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1676,24 +1655,26 @@
           </colgroup>
           <tbody>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#max_movie_time" >max_movie_time</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_movies" >ffmpeg_output_movies</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_output_debug_movies" >ffmpeg_output_debug_movies</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_bps" >ffmpeg_bps</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_output" >movie_output</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_output_motion" >movie_output_motion</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_max_time" >movie_max_time</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_bps" >movie_bps</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_variable_bitrate" >ffmpeg_variable_bitrate</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_video_codec" >ffmpeg_video_codec</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_duplicate_frames" >ffmpeg_duplicate_frames</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#ffmpeg_passthrough" >ffmpeg_passthrough</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_quality" >movie_quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_codec" >movie_codec</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_duplicate_frames" >movie_duplicate_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_passthrough" >movie_passthrough</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_extpipe_use" >movie_extpipe_use</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_extpipe" >movie_extpipe</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_interval" >timelapse_interval</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#timelapse_mode" >timelapse_mode</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_codec" >timelapse_codec</a> </td>
               <td bgcolor="#edf4f9" ><a href="#timelapse_fps" >timelapse_fps</a> </td>
             </tr>
@@ -1717,9 +1698,7 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#video_pipe" >video_pipe</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#motion_video_pipe" >motion_video_pipe</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#use_extpipe" >use_extpipe</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#extpipe" >extpipe</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#video_pipe_motion" >video_pipe_motion</a> </td>
             </tr>
           </tbody>
         </table>
@@ -1728,8 +1707,8 @@
         <p></p>
       </ul>
 
-      <a name="OptTopic_Stream_Webcontrol" ></a>
-      <a href="#OptDetail_Stream_Webcontrol" >Stream and Webcontrol-General Info</a>
+      <a name="OptTopic_Webcontrol" ></a>
+      <a href="#OptDetail_Webcontrol" >Webcontrol-General Info</a>
       <ul>
         <table border="1" class="fixed" >
           <colgroup>
@@ -1740,39 +1719,59 @@
           </colgroup>
           <tbody>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#ipv6_enabled" >ipv6_enabled</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_port" >stream_port</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_ipv6" >webcontrol_ipv6</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
+
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+      <a name="OptTopic_Stream" ></a>
+      <a href="#OptDetail_Stream" >Live Stream-General Info</a>
+      <ul>
+        <table border="1" class="fixed" >
+          <colgroup>
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+            <col width="250px">
+          </colgroup>
+          <tbody>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_port" >stream_port</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_localhost" >stream_localhost</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_auth_method" >stream_auth_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_authentication" >stream_authentication</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_tls" >stream_tls</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_cors_header" >stream_cors_header</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#stream_tls" >stream_tls</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_cors_header" >webcontrol_cors_header</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
             </tr>
             </tbody>
         </table>
@@ -1794,26 +1793,26 @@
           </colgroup>
           <tbody>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
+            </tr>
+            <tr>
+              <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_log_picture" >sql_log_picture</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#sql_log_snapshot" >sql_log_snapshot</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_log_movie" >sql_log_movie</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_log_timelapse" >sql_log_timelapse</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#sql_query" >sql_query</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_query_start" >sql_query_start</a> </td>
               <td bgcolor="#edf4f9" ><a href="#sql_query_stop" >sql_query_stop</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_type" >database_type</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#database_dbname" >database_dbname</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_host" >database_host</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_user" >database_user</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_password" >database_password</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#database_port" >database_port</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#database_busy_timeout" >database_busy_timeout</a> </td>
             </tr>
            </tbody>
         </table>
@@ -1993,17 +1992,6 @@
         When Motion is started, immediately go to daemon mode and release the terminal.
         <p></p>
 
-        <h3><a name="process_id_file"></a> process_id_file </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: </li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        Specify the full path and file name in order to store the pid for processing.
-        <p></p>
-
         <h3><a name="setup_mode"></a> setup_mode </h3>
         <p></p>
         <ul>
@@ -2049,12 +2037,23 @@
         (motion.conf and camera config files).
         <p></p>
 
-        <h3><a name="logfile"></a> logfile </h3>
+        <h3><a name="pid_file"></a> pid_file </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        Specify the full path and file name in order to store the pid for processing.
+        <p></p>
+
+        <h3><a name="log_file"></a> log_file </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         Use this option to specify the full path and filename to use
@@ -2098,22 +2097,47 @@
 
         <p></p>
 
-        <h3><a name="camera"></a> camera </h3>
+        <h3><a name="quiet"></a> quiet </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: on</li>
+        </ul>
+        <p></p>
+        Be quiet, don't output beeps when detecting motion.
+        Only works in non-daemon mode.
+        <p></p>
+
+        <h3><a name="native_language"></a> native_language</h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: on</li>
+        </ul>
+        <p></p>
+        Enable native language for Motion webcontrol and log messages.
+        <p></p>
+        Motion will use the locale variable LANGUAGE for determining the webcontrol and log messages.  If
+        messages or the webcontrol still display in English, then the messages / words have not yet been translated.
+        <p></p>
+        Please consider helping the developers by submitting pull requests to add new translations and correcting
+        any inaccurate translations.
+        <p></p>
+        When this option is specified as 'off', the webcontrol and log messages will be provided in English.
+        <p></p>
+
+        <h3><a name="camera_name"></a> camera_name </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The full path and file name for the camera file.
-        Motion allows for this line to be listed in the motion.conf file multiple
-        times.  These specifications should be the LAST lines in the
-        motion.conf file.
-        See the <a href="#The_Config_Files">Configuration Files</a> section within
-        this guide for a complete discussion of what to put into the
-        camera0.conf, camera1.conf, cameraX.conf files that would be specified
-        in this option.
+        This option specifies a camera name to be used in the format
+        specifiers as well as on the web interface.
         <p></p>
 
         <h3><a name="camera_id"></a> camera_id </h3>
@@ -2137,16 +2161,22 @@
         are not any cameras running on this thread.
         <p></p>
 
-        <h3><a name="camera_name"></a> camera_name </h3>
+        <h3><a name="camera"></a> camera </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        This option specifies a camera name to be used in the format
-        specifiers as well as on the web interface.
+        The full path and file name for the camera file.
+        Motion allows for this line to be listed in the motion.conf file multiple
+        times.  These specifications should be the LAST lines in the
+        motion.conf file.
+        See the <a href="#The_Config_Files">Configuration Files</a> section within
+        this guide for a complete discussion of what to put into the
+        camera0.conf, camera1.conf, cameraX.conf files that would be specified
+        in this option.
         <p></p>
 
         <h3><a name="camera_dir"></a> camera_dir </h3>
@@ -2154,7 +2184,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         This option specifies a directory to contain the individual camera configuration files.
@@ -2162,24 +2192,24 @@
         <br />Users can disable a camera (config file) by renaming it so it does not end with '.conf'.
         <p></p>
 
-        <h3><a name="native_language"></a> native_language</h3>
+        <h3><a name="target_dir"></a> target_dir </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined = current directory</li>
         </ul>
         <p></p>
-        Enable native language for Motion webcontrol and log messages.
+        The full path for the target directory for picture and movie files to be saved.
+        The default is the current directory. This is the target directory for all snapshots,
+        picture files and movie files.
+        You will normally always want to specify this parameter as an absolute path.
         <p></p>
-        Motion will use the locale variable LANGUAGE for determining the webcontrol and log messages.  If
-        messages or the webcontrol still display in English, then the messages / words have not yet been translated.
+        Note that the file name options are all saved relative to this target_dir
+        This means in principle that you can specify target_dir as '/' and be 100% flexible. But this is
+        NOT recommended.  It is recommended that this directory be specified as deep as possible.
         <p></p>
-        Please consider helping the developers by submitting pull requests to add new translations and correcting
-        any inaccurate translations.
-        <p></p>
-        When this option is specified as 'off', the webcontrol and log messages will be provided in English.
-        <p></p>
+
       </ul>
 
       <h3><a name="OptDetail_Video4Linux_Devices"></a>Video4Linux Device</h3>
@@ -2233,7 +2263,7 @@
         <ul>
          <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default:  </li>
+          <li> Default:  Not defined</li>
          </ul>
         <p></p>
         For v4l2 and bktr devices, most of the configuration options are automatic.  However most devices also allow
@@ -2344,9 +2374,9 @@
         <h3><a name="v4l2_palette"></a> v4l2_palette </h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
+          <li> Type: Integer</li>
           <li> Range / Valid values: 0 - 21</li>
-          <li> Default: </li>
+          <li> Default: 17</li>
         </ul>
         <p></p>
         The v4l2_palette allows the user to choose a palette to be use by Motion.  This
@@ -2501,25 +2531,12 @@
         default of V4L2_PIX_FMT_YUV420 (17)
         <p></p>
 
-        <h3><a name="tunerdevice"></a> tunerdevice </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: /dev/tuner0 </li>
-        </ul>
-        <p></p>
-        The tuner device used for controlling the tuner in a tuner card. This option is only used when Motion is compiled
-        for FreeBSD with the bktr option.
-        See the <a href="#Basic_Setup">Basic Setup</a> section of this guide for a additional discussion of this option.
-        <p></p>
-
         <h3><a name="input"></a> input </h3>
         <p></p>
         <ul>
           <li> Type: Integer</li>
           <li> Range / Valid values: -1, 0 - 7</li>
-          <li> Default: 1 (Disabled) </li>
+          <li> Default: -1 </li>
         </ul>
         <p></p>
         Input channel to use expressed as an integer number starting from 0.
@@ -2535,7 +2552,7 @@
         <h3><a name="norm"></a> norm </h3>
         <p></p>
         <ul>
-          <li> Type: Discrete Strings</li>
+          <li> Type: Integer</li>
           <li> Range / Valid values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour)</li>
           <li> Default: 0 (PAL) </li>
         </ul>
@@ -2560,9 +2577,9 @@
         <h3><a name="auto_brightness"></a> auto_brightness </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: integer, on, off</li>
-          <li> Default: off </li>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 3</li>
+          <li> Default: 0 </li>
         </ul>
         <p></p>
         Let motion regulate the brightness of a video device. Only recommended for cameras without auto brightness
@@ -2583,6 +2600,19 @@
         <li> 2: Use the exposure control to regulate the brightness</li>
         <li> 3: Use the exposure absolute control to regulate the brightness</li>
         </ul>
+        <p></p>
+
+        <h3><a name="tunerdevice"></a> tunerdevice </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: /dev/tuner0 </li>
+        </ul>
+        <p></p>
+        The tuner device used for controlling the tuner in a tuner card. This option is only used when Motion is compiled
+        for FreeBSD with the bktr option.
+        See the <a href="#Basic_Setup">Basic Setup</a> section of this guide for a additional discussion of this option.
         <p></p>
 
         <h3><a name="roundrobin_frames"></a> roundrobin_frames </h3>
@@ -2615,13 +2645,11 @@
         before having to share the device with the other cameras.
         When another camera wants to watch another input or frequency or size the first
         <code><a href="#roundrobin_skip">roundrobin_skip</a> </code> number of frames are skipped to allow the
-        device to settle.  The last option <code><a href="#switchfilter">switchfilter</a></code> is supposed
+        device to settle.  The last option <code><a href="#roundrobin_switchfilter">roundrobin_switchfilter</a></code> is supposed
         to prevent the change of camera from being detected
         as Motion. Its function is not perfect and sometimes prevents detection of real motion. You should start
         with having the option disabled and then try with the option enabled to see if you can skip less frames
         without loosing the detection of the type of motion you normally want to detect.
-
-
         <p></p>
 
         <h3><a name="roundrobin_skip"></a> roundrobin_skip </h3>
@@ -2639,7 +2667,7 @@
         skip number of frames are skipped to allow the device to settle.
         <p></p>
 
-        <h3><a name="switchfilter"></a> switchfilter </h3>
+        <h3><a name="roundrobin_switchfilter"></a> roundrobin_switchfilter </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
@@ -2773,7 +2801,7 @@
             is equivalent to running the following from the command line <code>ffplay -f v4l2 /dev/video0</code>
             <p></p>
             Since this is not the preferred method of specifying a v4l2 device, many of the usual v4l2 controls such as
-            hue, brightness, etc as well as other netcam options are ignored.
+            <a href="#vid_control_params">vid_control_params</a> are ignored.
             The options <a href="#width">width</a>, <a href="#height">height</a> as well as two of
             the <a href="#v4l2_palette">v4l2_palette</a> can be used.  The two options
             for <a href="#v4l2_palette">v4l2_palette</a> which can be used are option 8 (V4L2_PIX_FMT_MJPEG) and
@@ -2801,8 +2829,8 @@
         <p></p>
         If the netcam_url is not specified, this option is ignored.
         <p></p>
-        When this option is used with the <a href="#ffmpeg_passthrough">ffmpeg_passthrough</a> even less processing occurs.  Since
-        the <a href="#ffmpeg_passthrough">ffmpeg_passthrough</a> bypasses decoding the stream, images will be saved only as normal
+        When this option is used with the <a href="#movie_passthrough">movie_passthrough</a> even less processing occurs.  Since
+        the <a href="#movie_passthrough">movie_passthrough</a> bypasses decoding the stream, images will be saved only as normal
         resolution and the privacy mask will not be overlaid on to the high resolution images.
         <p></p>
 
@@ -2824,7 +2852,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: off</li>
         </ul>
         <p></p>
         The setting for keep-alive of network socket, should improve performance on compatible net cameras.
@@ -2858,9 +2886,9 @@
         <h3><a name="netcam_tolerant_check"></a> netcam_tolerant_check </h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
         </ul>
         <p></p>
         Use less strict jpeg checks for network cameras
@@ -2868,11 +2896,11 @@
             Motion will ignore this option for rtsp/rtmp cameras.
         <p></p>
 
-        <h3><a name="rtsp_uses_tcp"></a> rtsp_uses_tcp </h3>
+        <h3><a name="netcam_use_tcp"></a> netcam_use_tcp </h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: on off</li>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
           <li> Default: on</li>
         </ul>
         <p></p>
@@ -2939,40 +2967,12 @@
       <h3><a name="OptDetail_Image_Processing"></a> Image Processing</h3>
       <ul>
         <p></p>
-        <h3><a name="rotate"></a> rotate </h3>
-        <p></p>
-        <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: 0, 90, 180, 270</li>
-          <li> Default: 0 (not rotated)</li>
-        </ul>
-        <p></p>
-        Rotate image the given number of degrees. The rotation affects all saved images as well as movies.
-        The rotation feature is used when the camera is hanging upside down (180 degrees) or if you choose a picture
-        format in portrait instead of the normal landscape (90 or 270 degrees).
-        Note that the CPU load increases when using this feature with a value other than 0. Also note that
-        Motion automatically swaps width and height if you rotate 90 or 270 degrees, so you don't have to touch these options.
-        <p></p>
-
-        <h3><a name="flip_axis"></a> flip_axis </h3>
-        <p></p>
-        <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: none, v, h</li>
-          <li> Default: none (no change)</li>
-        </ul>
-        <p></p>
-        Flip the image according to specified axis. The flip affects all saved images as well as movies.
-        The flip feature is used when the camera is pointed towards a mirror or provides itself a mirrored image (as found in some cars).
-        Note that the CPU load increases when using this feature with a value other than none.
-        <p></p>
-
         <h3><a name="width"></a> width </h3>
         <p></p>
         <ul>
           <li> Type: Integer</li>
           <li> Range / Valid values: Device Dependent</li>
-          <li> Default: 352</li>
+          <li> Default: 640</li>
         </ul>
         <p></p>
         The width in pixels of each frame. Valid range is camera dependent.
@@ -3005,7 +3005,7 @@
         <ul>
           <li> Type: Integer</li>
           <li> Range / Valid values: Device Dependent</li>
-          <li> Default: 288</li>
+          <li> Default: 480</li>
         </ul>
         <p></p>
         The height in pixels of each frame. Valid range is camera dependent.
@@ -3030,7 +3030,6 @@
         makes the driver create an image of the nearest smaller size and create a gray band around the image to fit
         the size given by motion. Note that it is the driver and not motion that generates the gray band. Motion will
         try to detect motion in the entire image including the gray band.
-
         <p></p>
 
         <h3><a name="framerate"></a> framerate </h3>
@@ -3038,7 +3037,7 @@
         <ul>
           <li> Type: Integer</li>
           <li> Range / Valid values: 2 - 100</li>
-          <li> Default: 100 (no limit)</li>
+          <li> Default: 15 </li>
         </ul>
         <p></p>
         Maximum number of frames to be captured from the camera per second.
@@ -3063,49 +3062,40 @@
         This option is used when you want to capture images at a rate lower than 2 per second.
         When this is enabled the framerate option is used only to set the pace the Motion service the
         webcam port etc.
-
         <p></p>
 
-        <h3><a name="despeckle_filter"></a> despeckle_filter </h3>
+        <h3><a name="rotate"></a> rotate </h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: EedDl</li>
-          <li> Default: Not defined </li>
+          <li> Type: Discrete Integers</li>
+          <li> Range / Valid values: 0, 90, 180, 270</li>
+          <li> Default: 0 (not rotated)</li>
         </ul>
         <p></p>
-        Despeckle motion image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
-        A way of tuning (by removing or enhancing) noise in the motion image. Options for the despeckle feature are
-        any of 'e', 'E', 'd' or 'D'. This can be combined by a trailing 'l' (letter l) which enables the labeling
-        feature.
+        Rotate image the given number of degrees. The rotation affects all saved images as well as movies.
+        The rotation feature is used when the camera is hanging upside down (180 degrees) or if you choose a picture
+        format in portrait instead of the normal landscape (90 or 270 degrees).
+        Note that the CPU load increases when using this feature with a value other than 0. Also note that
+        Motion automatically swaps width and height if you rotate 90 or 270 degrees, so you don't have to touch these options.
         <p></p>
-        Wind blowing grass and trees around or poor light conditions can cause a lot of dots (or noise) to appear in the
-        motion image (See the section on Tuning Motion). This feature removes (or enhances!) this noise and so improves
-        the reliability of motion.
-        <p></p>
-        The 'e' option removes diamonds, 'E' removes squares and alternating eE will remove circles. Each e/E you add will
-        shrink the noise by a pixel all the way around. So 'despeckle Ee' will remove circles of radius 2. However, this
-        will also shrink the detection by 2 and will affect the threshold. So to remove noise and then restore the detected
-        motion to its original size try 'despeckle EedD'.
-        After the despeckle feature is done you can let the labeling feature search for areas of connected pixels and "label"
-        each area. The program will now trigger motion based on the number of changed pixels in the largest area. In other words,
-        the largest labeled area has to be above the threshold to trigger a motion detected.
-        The value EedDl is a good starting point. The possible combinations are endless and it requires many experiments to
-        find the best combination. Just remember that the labeling feature only works as intended if it runs after the
-        despeckle feature. Ie. the letter 'l' must be the last letter and only one 'l'.
-        If you have very few problems with false detections leave this option either blank or at EedD which will remove
-        most of the single pixel noise.
-        <p></p>
-        A very detailed technical explanation of the despeckle part can be found at the webpage of the author of this
-        feature <a href="http://emit.demon.co.uk/motion/" rel="nofollow" target="_top">Ian McConnell's Webcam: Motion
-        Web Page</a>
 
+        <h3><a name="flip_axis"></a> flip_axis </h3>
+        <p></p>
+        <ul>
+          <li> Type: Discrete Strings</li>
+          <li> Range / Valid values: none, v, h</li>
+          <li> Default: none (no change)</li>
+        </ul>
+        <p></p>
+        Flip the image according to specified axis. The flip affects all saved images as well as movies.
+        The flip feature is used when the camera is pointed towards a mirror or provides itself a mirrored image (as found in some cars).
+        Note that the CPU load increases when using this feature with a value other than none.
         <p></p>
 
         <h3><a name="locate_motion_mode"></a> locate_motion_mode </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
+          <li> Type: Discrete Strings</li>
           <li> Range / Valid values: on, off, preview</li>
           <li> Default: off</li>
         </ul>
@@ -3117,9 +3107,9 @@
         <h3><a name="locate_motion_style"></a> locate_motion_style </h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
+          <li> Type: Discrete Strings</li>
           <li> Range / Valid values: box, redbox, cross, redcross</li>
-          <li> Default: </li>
+          <li> Default: box</li>
         </ul>
         <p></p>
          Set the look and style of the locate box if enabled.
@@ -3131,7 +3121,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         User defined text overlaid on each in the lower left corner.
         Use A-Z, a-z, 0-9, " / ( ) @ ~ # &lt; &gt; \ , . : - + _ \n and conversion specifiers
@@ -3182,7 +3172,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %Y-%m-%d\n%T</li>
+          <li> Default: %Y-%m-%d\\n%T</li>
         </ul>
         <p></p>
         User defined text overlaid on each in the lower right corner.
@@ -3272,12 +3262,26 @@
         </table>
         <p></p>
 
+        <h3><a name="text_scale"></a> text_scale </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 1 - 10</li>
+          <li> Default: 1</li>
+        </ul>
+        <p></p>
+        The scale at which to draw text over the image.
+        The recommended range is 1 - 10.
+        This option makes the text defined by text_left, text_right and text_changes drawn at n-times the normal size.
+        This may be useful when using large picture formats such as 1280 x 720.
+        <p></p>
+
         <h3><a name="text_event"></a> text_event </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Default: %Y%m%d%H%M%S</li>
+          <li> Default: %Y%m%d%H%M%S</li>
         </ul>
         <p></p>
         This option is special in that it defines the conversion specifier %C which can be used both for text
@@ -3292,27 +3296,8 @@
 
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a> to define this field (except for
         this option itself)
-
         <p></p>
 
-        <h3><a name="text_scale"></a> text_scale </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 2147483647</li>
-          <li> Default: 1</li>
-        </ul>
-        <p></p>
-        The scale at which to draw text over the image.
-        The recommended range is 1 - 10.
-        This option makes the text defined by text_left, text_right and text_changes drawn at n-times the normal size.
-        This may be useful when using large picture formats such as 1280 x 720.
-        <p></p>
-        This option replaces the previous configuration options for:
-        <ul>
-          <li> text_double</li>
-        </ul>
-        <p></p>
         <p></p>
         <p></p>
       </ul>
@@ -3323,7 +3308,7 @@
         <h3><a name="emulate_motion"></a> emulate_motion </h3>
         <p></p>
         <ul>
-          <li> Type: String</li>
+          <li> Type: Boolean</li>
           <li> Range / Valid values: on off</li>
           <li> Default: off</li>
         </ul>
@@ -3402,12 +3387,47 @@
         It may give different results depending on camera and light conditions.
         <p></p>
 
+        <h3><a name="despeckle_filter"></a> despeckle_filter </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Combinations of E,e,D,d and l</li>
+          <li> Default: Not defined </li>
+        </ul>
+        <p></p>
+        Despeckle motion image using combinations of (E/e)rode or (D/d)ilate. And ending with optional (l)abeling.
+        A way of tuning (by removing or enhancing) noise in the motion image. Options for the despeckle feature are
+        any of 'e', 'E', 'd' or 'D'. This can be combined by a trailing 'l' (letter l) which enables the labeling
+        feature.
+        <p></p>
+        Wind blowing grass and trees around or poor light conditions can cause a lot of dots (or noise) to appear in the
+        motion image (See the section on Tuning Motion). This feature removes (or enhances!) this noise and so improves
+        the reliability of motion.
+        <p></p>
+        The 'e' option removes diamonds, 'E' removes squares and alternating eE will remove circles. Each e/E you add will
+        shrink the noise by a pixel all the way around. So 'despeckle Ee' will remove circles of radius 2. However, this
+        will also shrink the detection by 2 and will affect the threshold. So to remove noise and then restore the detected
+        motion to its original size try 'despeckle EedD'.
+        After the despeckle feature is done you can let the labeling feature search for areas of connected pixels and "label"
+        each area. The program will now trigger motion based on the number of changed pixels in the largest area. In other words,
+        the largest labeled area has to be above the threshold to trigger a motion detected.
+        The value EedDl is a good starting point. The possible combinations are endless and it requires many experiments to
+        find the best combination. Just remember that the labeling feature only works as intended if it runs after the
+        despeckle feature. Ie. the letter 'l' must be the last letter and only one 'l'.
+        If you have very few problems with false detections leave this option either blank or at EedD which will remove
+        most of the single pixel noise.
+        <p></p>
+        A very detailed technical explanation of the despeckle part can be found at the webpage of the author of this
+        feature <a href="http://emit.demon.co.uk/motion/" rel="nofollow" target="_top">Ian McConnell's Webcam: Motion
+        Web Page</a>
+        <p></p>
+
         <h3><a name="area_detect"></a> area_detect </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         Detect motion in predefined areas (1 - 9) and when Motion is detected in the area, execute the script.  All of
@@ -3650,6 +3670,65 @@
 
         Note that 'event_gap' and 'minimum_gap' have nothing to do with each other.
         <p></p>
+
+        <h3><a name="pre_capture"></a> pre_capture </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 100s</li>
+          <li> Default: 0 (disabled)</li>
+        </ul>
+        <p></p>
+        Specifies the number of pre-captured (buffered) pictures from before motion
+        was detected that will be output at motion detection.
+        The recommended range is 0 to 5.  It is not recommended to use large values.
+        Large values will cause Motion to skip video frames and cause unsmooth movies.
+        <p></p>
+        This is because Motion is processing all the buffered images including saving jpegs,
+        encoding the movie, writing to databases and executing external programs immediately
+        after the first image is detected as Motion.
+        <p></p>
+        Motion will not grab another image until this is done. This means that even moderate values for pre_capture combined
+        with high framerates will mean that you will probably miss many frames of Motion.
+        <p></p>
+        To create smooth movies use larger values of <a href="#post_capture">post_capture</a> instead.
+        <p></p>
+        Motion buffers the number of picture frames defined by 'pre_capture'. When motion is detected the pictures in the
+        buffer are included in the movie.  The effect is that it seems the program knew in advance
+        that the event was going to take place and started the recording before it actually happened.
+        This is a nice feature that give more complete video clips of an event.
+        <p></p>
+        If pre_capture is set to 0 the feature is disabled. The recommended value would be approx 0.5 second of
+        video so the value should be defined so it fits the framerate and the desired pre-capture time.
+        You can in theory have up to 100s of pre-captured frames but naturally this makes motion leave a larger footprint in
+        the memory of the computer.
+        <p></p>
+        It is therefore recommended to use relatively small values for pre_capture.
+        Depending on your chosen framerate and depending on the features enabled values from 1-5 are sensible.
+        <p></p>
+        To get a smooth movie use a large value for <a href="#post_capture">post_capture</a> which does not cost any performance hit or RAM
+        space.
+        <p></p>
+        <p></p>
+
+        <h3><a name="post_capture"></a> post_capture </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 2147483647</li>
+          <li> Default: 0 (disabled)</li>
+        </ul>
+        <p></p>
+        Specifies the number of frames to be captured after motion has been detected.
+        The purpose of this is mainly to create smooth video clips each time motion is detected. Use it to you personal
+        taste (and disk space)..
+        This option is the preferred way to create continuous movies. Post_capture does not consume extra RAM and it
+        does not create pauses in the movie even with large values.
+        If you only store movies and do not have output_normal on, then the recommended post_capture value is what is
+        equivalent to 1-5 seconds (Don't forget to multiply the seconds desired by the framerate for this parameter)
+        <p></p>
+
+
         <p></p>
       </ul>
 
@@ -3686,7 +3765,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Default: Not defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         The full path and file name of the program/script to be executed at the start of an event.
@@ -3759,7 +3838,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         The full path and file name of the program/script to be executed when motion is
@@ -3818,7 +3897,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         The full path and file name of the command to be executed when a camera can't be opened or if it is lost.
@@ -3840,7 +3919,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         The full path and file name of the command to be executed when a lost camera is found
@@ -3850,101 +3929,6 @@
         and spaces as part of the command.  This can be any type of program or script.
         Remember to set the execution bit in the ACL and if it is a script type program such as perl or bash
         also remember the shebang line (e.g. #!/user/bin/perl) as the first line of the script.
-        <p></p>
-        <p></p>
-
-      </ul>
-
-      <h3><a name="OptDetail_Output_General"></a>Output - General Options</h3>
-      <ul>
-        <p></p>
-        <h3><a name="quiet"></a> quiet </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        Be quiet, don't output beeps when detecting motion.
-        Only works in non-daemon mode.
-        <p></p>
-        <p></p>
-
-        <h3><a name="pre_capture"></a> pre_capture </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 100s</li>
-          <li> Default: 0 (disabled)</li>
-        </ul>
-        <p></p>
-        Specifies the number of pre-captured (buffered) pictures from before motion
-        was detected that will be output at motion detection.
-        The recommended range is 0 to 5.  It is not recommended to use large values.
-        Large values will cause Motion to skip video frames and cause unsmooth movies.
-        <p></p>
-        This is because Motion is processing all the buffered images including saving jpegs,
-        encoding the movie, writing to databases and executing external programs immediately
-        after the first image is detected as Motion.
-        <p></p>
-        Motion will not grab another image until this is done. This means that even moderate values for pre_capture combined
-        with high framerates will mean that you will probably miss many frames of Motion.
-        <p></p>
-        To create smooth movies use larger values of <a href="#post_capture">post_capture</a> instead.
-        <p></p>
-        Motion buffers the number of picture frames defined by 'pre_capture'. When motion is detected the pictures in the
-        buffer are included in the movie.  The effect is that it seems the program knew in advance
-        that the event was going to take place and started the recording before it actually happened.
-        This is a nice feature that give more complete video clips of an event.
-        <p></p>
-        If pre_capture is set to 0 the feature is disabled. The recommended value would be approx 0.5 second of
-        video so the value should be defined so it fits the framerate and the desired pre-capture time.
-        You can in theory have up to 100s of pre-captured frames but naturally this makes motion leave a larger footprint in
-        the memory of the computer.
-        <p></p>
-        It is therefore recommended to use relatively small values for pre_capture.
-        Depending on your chosen framerate and depending on the features enabled values from 1-5 are sensible.
-        <p></p>
-        To get a smooth movie use a large value for <a href="#post_capture">post_capture</a> which does not cost any performance hit or RAM
-        space.
-        <p></p>
-        <p></p>
-
-        <h3><a name="post_capture"></a> post_capture </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 2147483647</li>
-          <li> Default: 0 (disabled)</li>
-        </ul>
-        <p></p>
-        Specifies the number of frames to be captured after motion has been detected.
-        The purpose of this is mainly to create smooth video clips each time motion is detected. Use it to you personal
-        taste (and disk space)..
-        This option is the preferred way to create continuous movies. Post_capture does not consume extra RAM and it
-        does not create pauses in the movie even with large values.
-        If you only store movies and do not have output_normal on, then the recommended post_capture value is what is
-        equivalent to 1-5 seconds (Don't forget to multiply the seconds desired by the framerate for this parameter)
-        <p></p>
-        <p></p>
-
-        <h3><a name="target_dir"></a> target_dir </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not defined = current working directory</li>
-        </ul>
-        <p></p>
-        The full path for the target directory for picture and movie files to be saved.
-        The default is the current working directory. This is the target directory for all snapshots,
-        images files and movie files.
-        You will normally always want to specify this parameter as an absolute path.
-        <p></p>
-        Note that the file name options are all saved relative to this target_dir
-        This means in principle that you can specify target_dir as '/' and be 100% flexible. But this is
-        NOT recommended.  It is recommended that this directory be specified as deep as possible.
         <p></p>
         <p></p>
 
@@ -3969,7 +3953,7 @@
         <p></p>
 
 
-        <h3><a name="output_pictures"></a> output_pictures </h3>
+        <h3><a name="picture_output"></a> picture_output </h3>
         <p></p>
         <ul>
           <li> Type: Discrete Strings</li>
@@ -3991,11 +3975,11 @@
         'off' to don't write pictures
         <p></p>
         When the <a href="#netcam_highres">netcam_highres</a> option is selected along with the
-        <a href="#ffmpeg_passthrough">ffmpeg_passthrough</a> the output pictures will be provided in normal resolution
+        <a href="#movie_passthrough">movie_passthrough</a> the output pictures will be provided in normal resolution
         not high resolution.
         <p></p>
 
-        <h3><a name="output_debug_pictures"></a> output_debug_pictures </h3>
+        <h3><a name="picture_output_motion"></a> picture_output_motion </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
@@ -4018,7 +4002,20 @@
         <p></p>
         <p></p>
 
-        <h3><a name="quality"></a> quality </h3>
+        <h3><a name="picture_type"></a> picture_type </h3>
+        <p></p>
+        <ul>
+          <li> Type: Discrete Strings</li>
+          <li> Range / Valid values: jpeg, webp, ppm</li>
+          <li> Default: jpeg</li>
+        </ul>
+        <p></p>
+        This option specifies the type of picture file to output.  The recommendation is to always use jpeg except
+        if you have a specific need to store high quality pictures without any quality loss.
+        <p></p>
+        <p></p>
+
+        <h3><a name="picture_quality"></a> picture_quality </h3>
         <p></p>
         <ul>
           <li> Type: Integer</li>
@@ -4032,16 +4029,34 @@
         <p></p>
         <p></p>
 
-        <h3><a name="picture_type"></a> picture_type </h3>
+        <h3><a name="picture_exif"></a> picture_exif </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        This option specifies the type of picture file to output.  The recommendation is to always use jpg except
-        if you have a specific need to store high quality pictures without any quality loss.
+        Use this option to specify the text to include in a JPEG EXIF comment
+        The EXIF timestamp is included independent of this text.
+        <p></p>
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
+        <p></p>
+        <p></p>
+
+        <h3><a name="picture_filename"></a> picture_filename </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: %v-%Y%m%d%H%M%S-%q</li>
+        </ul>
+        <p></p>
+        This option indicates the file name and optionally the path for the pictures relative to target_dir.
+        <p></p>
+        The file extension .jpg, webp or .ppm is automatically added.
+        <p></p>
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
         <p></p>
         <p></p>
 
@@ -4065,70 +4080,29 @@
           <li> Default: %v-%Y%m%d%H%M%S-snapshot</li>
         </ul>
         <p></p>
-        This option indicates the file name and optionally the path for the snapshots (jpeg or ppm) relative to target_dir.
+        This option indicates the file name and optionally the path for the snapshots relative to target_dir.
         <p></p>
-        The file extension .jpg or .ppm is automatically added.
+        The file extension .jpg, webp or .ppm is automatically added.
         <p></p>
-        A symbolic link called lastsnap.jpg (or lastsnap.ppm) is created in the target_dir and will always
+        A symbolic link called lastsnap.jpg is created in the target_dir and will always
         point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
         <p></p>
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
         <p></p>
         <p></p>
 
-        <h3><a name="picture_filename"></a> picture_filename </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %v-%Y%m%d%H%M%S-%q</li>
-        </ul>
-        <p></p>
-        This option indicates the file name and optionally the path for the pictures (jpeg or ppm) relative to target_dir.
-        <p></p>
-        The file extension .jpg or .ppm is automatically added.
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
-        <p></p>
-        <p></p>
-
-        <h3><a name="exif_text"></a> exif_text </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        Use this option to specify the text to include in a JPEG EXIF comment
-        The EXIF timestamp is included independent of this text.
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
-        <p></p>
-        <p></p>
       </ul>
 
       <h3><a name="OptDetail_Movies"></a>Output - Movie Options</h3>
       <ul>
         <p></p>
-        <h3><a name="max_movie_time"></a> max_movie_time </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 (infinite) - 2147483647</li>
-          <li> Default: 3600</li>
-        </ul>
-        <p></p>
-        The maximum length of a movie in seconds. Set this to zero for unlimited length.
-        <p></p>
-        <p></p>
 
-        <h3><a name="ffmpeg_output_movies"></a> ffmpeg_output_movies </h3>
+        <h3><a name="movie_output"></a>movie_output </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
           <li> Range / Valid values: on, off</li>
-          <li> Default: off</li>
+          <li> Default: on</li>
         </ul>
         <p></p>
         Use ffmpeg libraries to encode movies of the motion.  This option
@@ -4139,7 +4113,7 @@
         <p></p>
         <p></p>
 
-        <h3><a name="ffmpeg_output_debug_movies"></a> ffmpeg_output_debug_movies </h3>
+        <h3><a name="movie_output_motion"></a>movie_output_motion</h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
@@ -4148,7 +4122,7 @@
         </ul>
         <p></p>
         Use ffmpeg libraries to encode motion type movies where you only see the pixels that changes.
-        Works like ffmpeg_output_movies but outputs motion pixel type pictures instead.
+        Works like movie_output but outputs motion pixel type pictures instead.
         This feature generates the special motion type movie where you only see the pixels
         that changes as a graytone image. If labeling is enabled you see the largest area in blue.
         Smartmask is shown in red. The filename given is the same as the normal movies except they
@@ -4156,7 +4130,95 @@
         <p></p>
         <p></p>
 
-        <h3><a name="ffmpeg_passthrough"></a> ffmpeg_passthrough </h3>
+        <h3><a name="movie_max_time"></a> movie_max_time </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 (infinite) - 2147483647</li>
+          <li> Default: 120</li>
+        </ul>
+        <p></p>
+        The maximum length of a movie in seconds. Set this to zero for unlimited length.
+        <p></p>
+        <p></p>
+
+        <h3><a name="movie_bps"></a> movie_bps </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 9999999</li>
+          <li> Default: 400000</li>
+        </ul>
+        <p></p>
+        Bitrate of movies produced by ffmpeg. Bitrate is bits per second.
+        A higher value means better quality and larger files if the camera is on a fixed bitrate setting.
+        Experiment to get the desired quality. The better quality the bigger files.
+        This option is ignored if movie_quality is not 0 (disabled).
+        <p></p>
+        <p></p>
+
+        <h3><a name="movie_quality"></a> movie_quality </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 100</li>
+          <li> Default: 60</li>
+        </ul>
+        <p></p>
+        Enables and defines a variable bitrate for the ffmpeg encoder.
+        The option of movie_bps is ignored if variable bitrate is enabled.
+        A value of 0 disables this option while values 1 - 100 varies the quality
+        of the movie.  The value of 1 means worst quality and 100 is the best quality.
+        <p></p>
+        Experiment for the value that gives you the desired compromise between size and quality.
+        <p></p>
+        <p></p>
+
+        <h3><a name="movie_codec"></a> movie_codec </h3>
+        <p></p>
+        <ul>
+          <li> Type: Discrete Strings</li>
+          <li> Range / Valid values: mpeg4, msmpeg4, swf, flv, ffv1, mov, ogg, mp4, mkv, hevc</li>
+          <li> Default: mkv</li>
+        </ul>
+        <p></p>
+        Container/Codec to be used for the video.
+        <p></p>
+        <ul>
+        <li>mpeg4 or msmpeg4 - gives you files with extension .avi</li>
+        <li>swf - gives you a flash film with extension .swf</li>
+        <li>flv - gives you a flash video with extension .flv </li>
+        <li>ffv1 - FF video codec 1 for Lossless Encoding </li>
+        <li>mov - QuickTime </li>
+        <li>mp4 - MPEG-4 Part 14 H264 encoding</li>
+        <li>mkv - Matroska container with H264 encoding</li>
+        <li>hevc -MP4 container with H.265 / HEVC (High Efficiency Video Coding)</li>
+        </ul>
+
+        <p></p>
+        Note that certain containers can handle different codecs than the defaults indicated above.  For example, the
+        mkv container can handle virtually any codec.  Motion can optionally take an additional specification with this
+        parameter.  By specifying the container (mkv) and then appending a semicolon and the ffmpeg codec name Motion
+        will attempt to use the specified codec for the container.  This permits options such as encoding the h265 codec
+        into a mkv container instead of mp4 by specifying the option as <code>mkv:libx265</code>
+        <p></p>
+
+        <h3><a name="movie_duplicate_frames"></a> movie_duplicate_frames </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        When specified, if the CPU can not keep up with the requested frame rate for the movies,
+        frames will be duplicated in order to keep up with the frame rate.  Use this option with care
+        since the resulting movies will have the same frame sent multiple times and therefore the
+        movie may appear to "stall" and look terrible.
+        <p></p>
+        <p></p>
+
+        <h3><a name="movie_passthrough"></a> movie_passthrough </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
@@ -4183,83 +4245,7 @@
         without the passthrough option.
         <p></p>
         Since this option bypasses the decoding of the high resolution images to reduce CPU, when images are saved via
-        the <a href="#output_pictures">output_pictures</a> option, the pictures provided will be from the normal resolution stream.
-        <p></p>
-
-        <h3><a name="ffmpeg_bps"></a> ffmpeg_bps </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 9999999</li>
-          <li> Default: 400000</li>
-        </ul>
-        <p></p>
-        Bitrate of movies produced by ffmpeg. Bitrate is bits per second.
-        A higher value means better quality and larger files if the camera is on a fixed bitrate setting.
-        Experiment to get the desired quality. The better quality the bigger files.
-        This option is ignored if ffmpeg_variable_bitrate is not 0 (disabled).
-        <p></p>
-        <p></p>
-
-        <h3><a name="ffmpeg_variable_bitrate"></a> ffmpeg_variable_bitrate </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 100</li>
-          <li> Default: 0 (disabled)</li>
-        </ul>
-        <p></p>
-        Enables and defines a variable bitrate for the ffmpeg encoder.
-        The option of ffmpeg_bps is ignored if variable bitrate is enabled.
-        A value of 0 disables this option while values 1 - 100 varies the quality
-        of the movie.  The value of 1 means worst quality and 100 is the best quality.
-        <p></p>
-        Experiment for the value that gives you the desired compromise between size and quality.
-        <p></p>
-        <p></p>
-
-        <h3><a name="ffmpeg_video_codec"></a> ffmpeg_video_codec </h3>
-        <p></p>
-        <ul>
-          <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: mpeg4, msmpeg4, swf, flv, ffv1, mov, ogg, mp4, mkv, hevc</li>
-          <li> Default: mpeg4</li>
-        </ul>
-        <p></p>
-        Container/Codec to be used for the video.
-        <p></p>
-        <ul>
-        <li>mpeg4 or msmpeg4 - gives you files with extension .avi</li>
-        <li>swf - gives you a flash film with extension .swf</li>
-        <li>flv - gives you a flash video with extension .flv </li>
-        <li>ffv1 - FF video codec 1 for Lossless Encoding </li>
-        <li>mov - QuickTime </li>
-        <li>mp4 - MPEG-4 Part 14 H264 encoding</li>
-        <li>mkv - Matroska container with H264 encoding</li>
-        <li>hevc -MP4 container with H.265 / HEVC (High Efficiency Video Coding)</li>
-        </ul>
-
-        <p></p>
-        Note that certain containers can handle different codecs than the defaults indicated above.  For example, the
-        mkv container can handle virtually any codec.  Motion can optionally take an additional specification with this
-        parameter.  By specifying the container (mkv) and then appending a semicolon and the ffmpeg codec name Motion
-        will attempt to use the specified codec for the container.  This permits options such as encoding the h265 codec
-        into a mkv container instead of mp4 by specifying the option as <code>mkv:libx265</code>
-        <p></p>
-
-        <h3><a name="ffmpeg_duplicate_frames"></a> ffmpeg_duplicate_frames </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: on/off</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        When specified, if the CPU can not keep up with the requested frame rate for the movies,
-        frames will be duplicated in order to keep up with the frame rate.  Use this option with care
-        since the resulting movies will have the same frame sent multiple times and therefore the
-        movie may appear to "stall" and look terrible.
-        <p></p>
+        the <a href="#picture_output">picture_output</a> option, the pictures provided will be from the normal resolution stream.
         <p></p>
 
         <h3><a name="movie_filename"></a> movie_filename </h3>
@@ -4277,25 +4263,56 @@
         <p></p>
         <p></p>
 
-        <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
+        <h3><a name="movie_extpipe_use"></a> movie_extpipe_use </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        This option specifies whether to send the output to a
+        pipe for external encoding into a movie.
+        <p></p>
+        Piping raw video to stdout has some advantages comparing to using built-in ffmpeg encoder.
+        <br />First, you can use any encoder that supports RAW frames from stdin so you are not limited to the formats
+        that are currently implemented in motion. See examples in <a href="#movie_extpipe">movie_extpipe</a>
+        <br />Second, external encoders utilize separate cpu core(s) on multi-core systems so movie encoding
+        is offloaded from main motion thread to separate core(s) giving noticeable performance boost
+        <p></p>
+        Note that this option does not require the install or configure of the videoloopback software.
+        <p></p>
+        <p></p>
+
+        <h3><a name="movie_extpipe"></a> movie_extpipe </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: %v-%Y%m%d-timelapse</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        File path for the timelapse videos relative to target_dir. Note that the file
-        extension is automatically added to the name based upon the codec selected.
+        This option specifies the program name and options for the
+        program that will receive and process the images during a movie event.
         <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
+        Note that this option does not require the install or configure of the videoloopback software.
+        <p></p>
+        Sample:
+        <p></p>
+        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
+        <p></p>
+        movie_extpipe x264 - --input-res %wx%h --fps %fps --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
+        <p></p>
+        movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%fps -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %fps
+        <p></p>
+        movie_extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
         <p></p>
         <p></p>
 
         <h3><a name="timelapse_interval"></a> timelapse_interval </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
+          <li> Type: Integer</li>
           <li> Range / Valid values: 0 - 2147483647</li>
           <li> Default: 0 (disabled)</li>
         </ul>
@@ -4326,6 +4343,18 @@
         <p></p>
         <p></p>
 
+        <h3><a name="timelapse_fps"></a> timelapse_fps </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 100's</li>
+          <li> Default: 30</li>
+        </ul>
+        <p></p>
+        The frame per second rate to use in the playback of the timelapse video.
+        <p></p>
+        <p></p>
+
         <h3><a name="timelapse_codec"></a> timelapse_codec </h3>
         <p></p>
         <ul>
@@ -4349,23 +4378,28 @@
         files and use ffmpeg to encode those jpgs into a movie.
         <p></p>
 
-        <h3><a name="timelapse_fps"></a> timelapse_fps </h3>
+	      <h3><a name="timelapse_filename"></a> timelapse_filename </h3>
         <p></p>
         <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: 0 - 2147483647</li>
-          <li> Default: 30</li>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: %Y%m%d-timelapse</li>
         </ul>
         <p></p>
-        The frame per second rate to use in the playback of the timelapse video.
+        File path for the timelapse videos relative to target_dir. Note that the file
+        extension is automatically added to the name based upon the codec selected.
+        <p></p>
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a> in this option.
         <p></p>
         <p></p>
+
+
       </ul>
 
       <h3><a name="OptDetail_Pipe"></a>Output - Pipe Options</h3>
       <ul>
         <p></p>
-        There are two pipe variations available with Motion.  The first option is a v4l2loopback device.
+        Motion provides two pipe variations.  The first option is a v4l2loopback device with normal images.
         Using this pipe option, the video that is captured from the v4l2 device is piped into a new
         v4l2 device using the v4l2loopback software.  This piping is desired when the user wishes to
         use the video device at the same time as Motion is using the same device.  By default, only
@@ -4391,145 +4425,46 @@
         To activate the vloopback device in Motion set the 'video_pipe' option in the motion.conf file to the
         device name associated with the one created by v4l2loopback.
         <br />You can also view the special motion pictures where you see the changed pixels by setting the option
-        'motion_video_pipe' in motion.conf. When setting the video_pipe and/or motion_video_pipe options
+        'video_pipe_motion' in motion.conf. When setting the video_pipe and/or video_pipe_motion options
         specify the input device as e.g. /dev/video1.
         <p></p>
         De-activating should be done with this command
         <p></p>
         <code>sudo modprobe -r v4l2loopback</code>
         <p></p>
-        The second type of pipe available in Motion is the extpipe.  This option sets up a pipe to which it sends
-        images which can then be picked up by external recording applications.
+        The second option for pipe is the same as the above except motion images are sent to the loopback device.
         <p></p>
-
-
 
         <h3><a name="video_pipe"></a> video_pipe </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        Default: not set
         The video4linux video loopback device for normal images. The device would be specified
         in the format like /dev/video1
         <p></p>
         <p></p>
 
-        <h3><a name="motion_video_pipe"></a> motion_video_pipe </h3>
-        <p></p> <ul>
-        <li> Type: String
-        </li> <li> Range / Valid values: Max 4095 characters
-        </li> <li> Default: Not defined
-        </li></ul>
+        <h3><a name="video_pipe_motion"></a> video_pipe_motion </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
         <p></p>
         The video4linux video loopback device for motion images. The device would be specified
         in the format like /dev/video1
         <p></p>
         <p></p>
 
-        <h3><a name="use_extpipe"></a> use_extpipe </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        This option specifies whether to send the output to a
-        pipe for external encoding into a movie.
-        <p></p>
-        Piping raw video to stdout has some advantages comparing to using built-in ffmpeg encoder.
-        <br />First, you can use any encoder that supports RAW frames from stdin so you are not limited to the formats
-        that are currently implemented in motion. See examples in <a href="#extpipe">extpipe</a>
-        <br />Second, external encoders utilize separate cpu core(s) on multi-core systems so movie encoding
-        is offloaded from main motion thread to separate core(s) giving noticeable performance boost
-        <p></p>
-        Note that this option does not require the install or configure of the videoloopback software.
-        <p></p>
-        <p></p>
-
-
-        <h3><a name="extpipe"></a> extpipe </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        This option specifies the program name and options for the
-        program that will receive and process the images during a movie event.
-        <p></p>
-        Note that this option does not require the install or configure of the videoloopback software.
-        <p></p>
-        Sample:
-        <p></p>
-        extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
-        <p></p>
-        extpipe x264 - --input-res %wx%h --fps %fps --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
-        <p></p>
-        extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%fps -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %fps
-        <p></p>
-        extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
-        <p></p>
-        <p></p>
-
-
       </ul>
 
-      <h3><a name="OptDetail_Stream_Webcontrol"></a> Stream and Webcontrol</a> </h3>
+      <h3><a name="OptDetail_Webcontrol"></a>Web Control</a> </h3>
       <ul>
-        <h4><a name="OptDetail_Stream"></a> Stream</a> </h4>
-        Motion has simple webcam server built in. The server can be configured to
-        stream both the images as well allow for a very basic http control of Motion parameters.
-        <p></p>
-        The streams are generated in "multipart jpeg" format (mjpeg) which most browsers can display.  If
-        the browser does not directly open the stream, it may be possible to manually create a simple HTML
-        page that references the stream.
-        <p></p>
-        Some regular stream players such as mplayer, ffplay and avplay may open the streams as well by specifying
-        the network stream as
-        <code>
-        http://localhost:mystreamportnumber/
-        </code>
-        <p></p>
-        While normally the stream players will open after a bit, it may be useful to also provide the format such as
-        <code>
-        ffplay -f mjpeg http://localhost:mystreamportnumber/
-        </code>
-        <p></p>
-        It has been observed by the author that VLC will not open the stream.  This is not a Motion limitation but
-        instead is related to the general VLC support for MJPG http streams.
-        <p></p>
-        While the above examples indicate the Motion streams can be accessed as
-        <code>
-        http://localhost:mystreamportnumber/
-        </code>
-        Motion does provide other options for accessing the streams and images.  In addition to sub-streams and static
-        images, Motion can also be configured to use just a single port for accessing streams to all cameras.  This
-        is accomplished by specifying a stream port within the motion.conf file and also using separate camera files.  The
-        following examples should clarify the methods by which streams can be accessed:
-        <ul>
-          <li><code>{IP}</code> The IP address of the computer running Motion</li>
-          <li><code>{port0}</code> The port specified for the stream within the motion.conf file.</li>
-          <li><code>{portX}</code> The port specified for the stream within a camera.conf file.</li>
-          <li><code>{camid}</code> The <a href="#camera_id">camera_id</a> of the camera.</li>
-        </ul>
-        <p></p>
-	      <ul>
-	        <li><code>{IP}:{port0}/{camid}/</code> Primary stream for the camera</li>
-          <li><code>{IP}:{port0}/{camid}/stream</code> Primary stream for the camera</li>
-          <li><code>{IP}:{port0}/{camid}/substream</code> Sub-stream for the camera</li>
-          <li><code>{IP}:{port0}/{camid}/current</code> Static JPG for the camera</li>
-          <li><code>{IP}:{portX}/</code> Primary stream for the camera running on port {portX}</li>
-          <li><code>{IP}:{portX}/stream</code> Primary stream for the camera running on port {portX}</li>
-          <li><code>{IP}:{portX}/substream</code> Sub-stream for the camera running on port {portX}</li>
-          <li><code>{IP}:{portX}/current</code> Static JPG for the camera running on port {portX}</li>
-        </ul>
-        <h4><a name="OptDetail_Webcontrol"></a>Web Control</a> </h4>
         <p></p>
         Motion has a limited web interface to control some parameters while running.  By default, the
         changing of any parameters via the web interface is disabled
@@ -4654,16 +4589,223 @@
         <p></p>
         <p></p>
 
-        <h3><a name="ipv6_enabled"></a> ipv6_enabled </h3>
+        <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 65535</li>
+          <li> Default: 0 (disabled)</li>
+        </ul>
+        <p></p>
+        Sets the port number for the http based control of the Motion parameters.
+        This option must be placed in the motion.conf file and not in a camera config file.
+        Port numbers below 1024 normally require that you have root privileges.
+        The port 8080 is the typical selection of the port for this purpose.
+        <p></p>
+
+        <h3><a name="webcontrol_ipv6"></a> webcontrol_ipv6 </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        Listen for connections from IPv6 and IPV4.
+        <p></p>
+
+        <h3><a name="webcontrol_localhost"></a> webcontrol_localhost </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: on</li>
+        </ul>
+        <p></p>
+        This option restricts the control of the Motion parameters to the localhost.
+        This option must be placed in motion.conf and not in a camera config file.
+        By setting this to on, the control using http (browser) can only be accessed on the
+        same machine on which Motion is running.
+        <p></p>
+
+        <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 3</li>
+          <li> Default: 0 </li>
+        </ul>
+        <p></p>
+        Sets the type of parameters that will be listed on the webcontrol page and available for
+        modification.
+        <ul>
+          <li> 0: None - No configuration parameters will be available.</li>
+          <li> 1: Limited- A limited list of parameters will be available. </li>
+          <li> 2: Advanced - The advanced list of parameters will be available.  These typically require Motion to be restarted to become effective.</li>
+          <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
+        </ul>
+        The default for this parameter is 0 (none) to enhance the security of the web interface.  The setting of the
+        webcontrol_parms is NEVER included on the web interface and this parameter must be specified via the configuration file.
+        <b>EXTREME</b> Care should be exercised when using level restricted level because if the webcontrol is compromised,
+        it may compromise the computer.
+        <p></p>
+        Users are strongly advised to only set this option to something other than zero when initially setting up the
+        cameras.  Once Motion has been configured, it is advised to complete the set up by setting this value back to zero!
+        <p></p>
+
+        <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0, 1</li>
+          <li> Default: 0</li>
+        </ul>
+        <p></p>
+        The type of webcontrol interface to provide.  The value of 0 provides a traditional
+        web page interface.  The value of 1 provides a text only interface suitable for programmatic access.
+        <p></p>
+        This option must be placed in motion.conf and not in a camera config file. The
+        recommended value for most is "0" which provides a page you can navigate and control
+        Motion with a normal browser.
+        <p></p>
+
+        <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values:0, 1, 2 </li>
+          <li> Default: 0</li>
+        </ul>
+        <p></p>
+        Authentication method to use for the webcontrol port
+        <ul>
+          <li>0 = disabled  </li>
+          <li>1 = Basic authentication </li>
+          <li>2 = Digest authentication </li>
+        </ul>
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
-          <li> Range / Valid values: on,off</li>
-          <li> Default: </li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        Listen for connections from IPv6 and IPV4. (default: off).
+        This parameter establishes the username and password to use for the stream.
+        The syntax is username:password
         <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_tls"></a> webcontrol_tls </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        This option specifies whether to enable SSL/TLS for the webcontrol port.  For some distributions
+        the library that Motion uses may not have been compiled with SSL/TLS support.  In this situation
+        Motion can not support SSL/TLS connections.  Whether SSL/TLS can be supported will be reported in
+        the log.  In addition to selecting this option, a <a href="#webcontrol_cert">webcontrol_cert</a> and
+        <a href="#webcontrol_key">webcontrol_key</a> file must also be specified.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        Full path to the certification file for SSL/TLS support.  Only used when
+        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        Full path to the key file for SSL/TLS support.  Only used when
+        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
+        <p></p>
+        <p></p>
+
+        <h3><a name="webcontrol_cors_header"></a> webcontrol_cors_header </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: * or a valid URI</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The Access-Control-Allow-Origin header value to be sent with the webcontrol.
+        If unspecified, no Access-Control-Allow-Origin header is sent.
+        The header allows browsers to access the webcontrol via cross-origin resource sharing (CORS).
+        For example, * allows access from browser client code served from any origin.
+        <p></p>
+
+
+      </ul>
+
+      <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>
+      <ul>
+        Motion has simple webcam server built in. The server can be configured to
+        stream both the images as well allow for a very basic http control of Motion parameters.
+        <p></p>
+        The streams are generated in "multipart jpeg" format (mjpeg) which most browsers can display.  If
+        the browser does not directly open the stream, it may be possible to manually create a simple HTML
+        page that references the stream.
+        <p></p>
+        Some regular stream players such as mplayer, ffplay and avplay may open the streams as well by specifying
+        the network stream as
+        <code>
+        http://localhost:mystreamportnumber/
+        </code>
+        <p></p>
+        While normally the stream players will open after a bit, it may be useful to also provide the format such as
+        <code>
+        ffplay -f mjpeg http://localhost:mystreamportnumber/
+        </code>
+        <p></p>
+        It has been observed by the author that VLC will not open the stream.  This is not a Motion limitation but
+        instead is related to the general VLC support for MJPG http streams.
+        <p></p>
+        While the above examples indicate the Motion streams can be accessed as
+        <code>
+        http://localhost:mystreamportnumber/
+        </code>
+        Motion does provide other options for accessing the streams and images.  In addition to sub-streams and static
+        images, Motion can also be configured to use just a single port for accessing streams to all cameras.  This
+        is accomplished by specifying a stream port within the motion.conf file and also using separate camera files.  The
+        following examples should clarify the methods by which streams can be accessed:
+        <ul>
+          <li><code>{IP}</code> The IP address of the computer running Motion</li>
+          <li><code>{port0}</code> The port specified for the stream within the motion.conf file.</li>
+          <li><code>{portX}</code> The port specified for the stream within a camera.conf file.</li>
+          <li><code>{camid}</code> The <a href="#camera_id">camera_id</a> of the camera.</li>
+        </ul>
+        <p></p>
+	      <ul>
+	        <li><code>{IP}:{port0}/{camid}/</code> Primary stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/stream</code> Primary stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/substream</code> Sub-stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/current</code> Static JPG for the camera</li>
+          <li><code>{IP}:{portX}/</code> Primary stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/stream</code> Primary stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/substream</code> Sub-stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/current</code> Static JPG for the camera running on port {portX}</li>
+        </ul>
 
         <h3><a name="stream_port"></a> stream_port </h3>
         <p></p>
@@ -4683,45 +4825,6 @@
         good value may be to select is 8081 for camera 1, 8082 for camera 2, 8083 for camera 3 etc.
         <p></p>
 
-        <h3><a name="stream_quality"></a> stream_quality </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 100</li>
-          <li> Default: 50</li>
-        </ul>
-        <p></p>
-        Quality setting in percent for the mjpeg picture frames transferred over the webcam connection.
-        Keep it low to restrict needed bandwidth.
-        <br />The mjpeg stream consists of a header followed by jpeg frames separated by content-length
-        and the boundary string.
-        <br />The quality level defines the size of the individual jpeg pictures in the mjpeg stream.
-        If you set it too high you need a lot of bandwidth to view the stream.
-        <p></p>
-
-        <h3><a name="stream_grey"></a> stream_grey </h3>
-        <p></p>
-        <ul>
-          <li> Type: boolean</li>
-          <li> Range / Valid values: on,off</li>
-          <li> Default: off</li>
-        </ul>
-        <p></p>
-        Send the live stream in grey (black and white) rather than color.  Useful for limiting bandwidth.
-        <p></p>
-
-        <h3><a name="stream_maxrate"></a> stream_maxrate </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 1 - 100</li>
-          <li> Default: 1</li>
-        </ul>
-        <p></p>
-        Limit the framerate of the stream in frames per second. Set the value to 100 for practically unlimited.
-        Don't set this parameter too high unless you only use it on the localhost or on an internal LAN.
-        <p></p>
-
         <h3><a name="stream_localhost"></a> stream_localhost </h3>
         <p></p>
         <ul>
@@ -4738,7 +4841,7 @@
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: 0 to 2</li>
+          <li> Range / Valid values: 0, 1, 2</li>
           <li> Default: 0</li>
         </ul>
         <p></p>
@@ -4759,11 +4862,27 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         This parameter establishes the username and password to use for the stream.
         The syntax is username:password
+        <p></p>
+
+        <h3><a name="stream_tls"></a> stream_tls </h3>
+        <p></p>
+        <ul>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        This option specifies whether to enable SSL/TLS for the stream port.  For some distributions
+        the library that Motion uses may not have been compiled with SSL/TLS support.  In this situation
+        Motion can not support SSL/TLS connections.  Whether SSL/TLS can be supported will be reported in
+        the log.  In addition to selecting this option, a <a href="#webcontrol_cert">webcontrol_cert</a> and
+        <a href="#webcontrol_key">webcontrol_key</a> file must also be specified.
+        <p></p>
         <p></p>
 
         <h3><a name="stream_cors_header"></a> stream_cors_header </h3>
@@ -4771,7 +4890,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: * or a valid URI</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         The Access-Control-Allow-Origin header value to be sent with the stream.
@@ -4784,7 +4903,7 @@
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values:</li>
+          <li> Range / Valid values: 1 to 100s</li>
           <li> Default: 25</li>
         </ul>
         <p></p>
@@ -4801,9 +4920,9 @@
         <h3><a name="stream_preview_newline"></a> stream_preview_newline </h3>
         <p></p>
         <ul>
-          <li> Type: string</li>
-          <li> Range / Valid values:on, off</li>
-          <li> Default: on</li>
+          <li> Type: Boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
         </ul>
         <p></p>
         If the webcontrol page has HTML enabled, Motion displays all images of the streams on the home webcontrol page
@@ -4825,7 +4944,7 @@
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values:0 - 2</li>
+          <li> Range / Valid values: 0, 1, 2</li>
           <li> Default: 0</li>
         </ul>
         <p></p>
@@ -4838,180 +4957,43 @@
         <p></p>
         <p></p>
 
-        <h3><a name="stream_tls"></a> stream_tls </h3>
+        <h3><a name="stream_quality"></a> stream_quality </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 1 - 100</li>
+          <li> Default: 50</li>
+        </ul>
+        <p></p>
+        Quality setting in percent for the jpeg picture frames transferred over the live stream connection.
+        When it is set to a low number, it will lower the bandwidth required to stream the images.
+        <p></p>
+
+        <h3><a name="stream_grey"></a> stream_grey </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
           <li> Range / Valid values: on, off</li>
-          <li> Default: Off</li>
+          <li> Default: off</li>
         </ul>
         <p></p>
-        This option specifies whether to enable SSL/TLS for the stream port.  For some distributions
-        the library that Motion uses may not have been compiled with SSL/TLS support.  In this situation
-        Motion can not support SSL/TLS connections.  Whether SSL/TLS can be supported will be reported in
-        the log.  In addition to selecting this option, a <a href="#webcontrol_cert">webcontrol_cert</a> and
-        <a href="#webcontrol_key">webcontrol_key</a> file must also be specified.
-        <p></p>
+        Send the live stream in grey (black and white) rather than color.  Useful for limiting bandwidth.
         <p></p>
 
-        <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
+        <h3><a name="stream_maxrate"></a> stream_maxrate </h3>
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 65535</li>
-          <li> Default: 0 (disabled)</li>
+          <li> Range / Valid values: 1 - 100</li>
+          <li> Default: 1</li>
         </ul>
         <p></p>
-        Sets the port number for the http based control of the Motion parameters.
-        This option must be placed in the motion.conf file and not in a camera config file.
-        Port numbers below 1024 normally require that you have root privileges.
-        The port 8080 is the typical selection of the port for this purpose.
-        <p></p>
-
-        <h3><a name="webcontrol_localhost"></a> webcontrol_localhost </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
-        </ul>
-        <p></p>
-        This option restricts the control of the Motion parameters to the localhost.
-        This option must be placed in motion.conf and not in a camera config file.
-        By setting this to on, the control using http (browser) can only be accessed on the
-        same machine on which Motion is running.
-        <p></p>
-
-        <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0, 1</li>
-          <li> Default: 0</li>
-        </ul>
-        <p></p>
-        The type of webcontrol interface to provide.  The value of 0 provides a traditional
-        web page interface.  The value of 1 provides a text only interface suitable for programmatic access.
-        <p></p>
-        This option must be placed in motion.conf and not in a camera config file. The
-        recommended value for most is "0" which provides a page you can navigate and control
-        Motion with a normal browser.
-        <p></p>
-
-        <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: 0 - 3</li>
-          <li> Default: 0 (disabled)</li>
-        </ul>
-        <p></p>
-        Sets the type of parameters that will be listed on the webcontrol page and available for
-        modification.
-        <ul>
-          <li> 0: None - No configuration parameters will be available.</li>
-          <li> 1: Limited- A limited list of parameters will be available. </li>
-          <li> 2: Advanced - The advanced list of parameters will be available.  These typically require Motion to be restarted to become effective.</li>
-          <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
-        </ul>
-        The default for this parameter is 0 (none) to enhance the security of the web interface.  The setting of the
-        webcontrol_parms is NEVER included on the web interface and this parameter must be specified via the configuration file.
-        <b>EXTREME</b> Care should be exercised when using level restricted level because if the webcontrol is compromised,
-        it may compromise the computer.
-        <p></p>
-        Users are strongly advised to only set this option to something other than zero when initially setting up the
-        cameras.  Once Motion has been configured, it is advised to complete the set up by setting this value back to zero!
-        <p></p>
-
-
-        <h3><a name="webcontrol_auth_method"></a> webcontrol_auth_method </h3>
-        <p></p>
-        <ul>
-          <li> Type: integer</li>
-          <li> Range / Valid values:0, 1, 2 / off</li>
-          <li> Default: 0</li>
-        </ul>
-        <p></p>
-        Authentication method to use for the webcontrol port
-        <ul>
-          <li>0 = disabled  </li>
-          <li>1 = Basic authentication </li>
-          <li>2 = Digest authentication </li>
-        </ul>
-        <p></p>
-        <p></p>
-
-        <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        This parameter establishes the username and password to use for the stream.
-        The syntax is username:password
-        <p></p>
-        <p></p>
-
-        <h3><a name="webcontrol_cors_header"></a> webcontrol_cors_header </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: * or a valid URI</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        The Access-Control-Allow-Origin header value to be sent with the webcontrol.
-        If unspecified, no Access-Control-Allow-Origin header is sent.
-        The header allows browsers to access the webcontrol via cross-origin resource sharing (CORS).
-        For example, * allows access from browser client code served from any origin.
-        <p></p>
-
-
-        <h3><a name="webcontrol_tls"></a> webcontrol_tls </h3>
-        <p></p>
-        <ul>
-          <li> Type: Boolean</li>
-          <li> Range / Valid values: on, off</li>
-          <li> Default: Off</li>
-        </ul>
-        <p></p>
-        This option specifies whether to enable SSL/TLS for the webcontrol port.  For some distributions
-        the library that Motion uses may not have been compiled with SSL/TLS support.  In this situation
-        Motion can not support SSL/TLS connections.  Whether SSL/TLS can be supported will be reported in
-        the log.  In addition to selecting this option, a <a href="#webcontrol_cert">webcontrol_cert</a> and
-        <a href="#webcontrol_key">webcontrol_key</a> file must also be specified.
-        <p></p>
-        <p></p>
-
-        <h3><a name="webcontrol_cert"></a> webcontrol_cert </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        Full path to the certification file for SSL/TLS support.  Only used when
-        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
-        <p></p>
-        <p></p>
-
-        <h3><a name="webcontrol_key"></a> webcontrol_key </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        Full path to the key file for SSL/TLS support.  Only used when
-        <a href="#webcontrol_tls">webcontrol_tls</a> is enabled.
-        <p></p>
+        Limit the framerate of the stream in frames per second. Set the value to 100 for practically unlimited.
+        Don't set this parameter too high unless you only use it on the localhost or on an internal LAN.
         <p></p>
 
       </ul>
+
 
       <h3><a name="OptDetail_Database"></a>Database</h3>
       <ul>
@@ -5040,13 +5022,92 @@
         <p></p>
 
 
+        <h3><a name="database_type"></a> database_type </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: mysql, postgresql, sqlite3</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        This option specifies the database type.
+        <p></p>
+
+        <h3><a name="database_dbname"></a> database_dbname </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The name of the database.  For Sqlite3, the full path and name to the database.
+        <p></p>
+
+        <h3><a name="database_host"></a> database_host </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: localhost</li>
+        </ul>
+        <p></p>
+        The host on which the database is located
+        <p></p>
+
+        <h3><a name="database_port"></a> database_port </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 65535</li>
+          <li> Default: 0</li>
+        </ul>
+        <p></p>
+        The port number that is used for the database.  Typical values are: mysql=3306 and postgresql=5432
+        <p></p>
+
+        <h3><a name="database_user"></a> database_user </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The user account name for database
+        <p></p>
+
+        <h3><a name="database_password"></a> database_password </h3>
+        <p></p>
+        <ul>
+          <li> Type: String</li>
+          <li> Range / Valid values: Max 4095 characters</li>
+          <li> Default: Not defined</li>
+        </ul>
+        <p></p>
+        The user password for database
+        <p></p>
+
+        <h3><a name="database_busy_timeout"></a> database_busy_timeout </h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0 - 1000's</li>
+          <li> Default: 0</li>
+        </ul>
+        <p></p>
+        If the database is busy when the request is issued, this parameter indicates the time to
+        wait before issuing a timeout message.
+        <p></p>
+        <p></p>
+
         <p></p>
         <h3><a name="sql_log_picture"></a> sql_log_picture </h3>
         <p></p>
         <ul>
           <li> Type: Boolean</li>
           <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+          <li> Default: off</li>
         </ul>
         <p></p>
         Log to the database when Motion triggers a image file to be saved.
@@ -5057,7 +5118,7 @@
         <ul>
           <li> Type: Boolean</li>
           <li> Range / Valid values: on, off</li>
-          <li> Default: on</li>
+          <li> Default: off</li>
         </ul>
         <p></p>
         Log to the database when creating a snapshot image file.
@@ -5085,35 +5146,12 @@
         Log to the database when creating timelapse movie file
         <p></p>
 
-        <h3><a name="sql_query"></a> sql_query </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        SQL query string that is sent to the database when the sql_log_* item is triggered.
-        <p></p>
-        <p></p>
-        You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
-        within the query.
-        <p></p>
-        <p></p>
-        Sample Queries (depend upon the table created)
-        <p></p>
-        <br />insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-        <br />insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
-        <br />insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
-        <p></p>
-        <p></p>
-
         <h3><a name="sql_query_start"></a> sql_query_start </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         SQL query that executes against the event table which tracks the unique events of motion.
@@ -5143,7 +5181,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         SQL query that executes on a event where a file is closed after a event of motion.
@@ -5159,91 +5197,33 @@
         <p></p>
         <p></p>
 
-        <h3><a name="database_type"></a> database_type </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: mysql, postgresql, sqlite3</li>
-          <li> Default: Not Defined</li>
-        </ul>
-        <p></p>
-        This option specifies the database type.
-        <p></p>
-
-        <h3><a name="database_dbname"></a> database_dbname </h3>
+        <h3><a name="sql_query"></a> sql_query </h3>
         <p></p>
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: Not Defined</li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
-        The name of the database.  For Sqlite3, the full path and name to the database.
+        SQL query string that is sent to the database when the sql_log_* item is triggered.
+        <p></p>
+        <p></p>
+        You can use <a href="#conversion_specifiers">Conversion Specifiers</a>
+        within the query.
+        <p></p>
+        <p></p>
+        Sample Queries (depend upon the table created)
+        <p></p>
+        <br />insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
+        <br />insert or ignore into images (camera_nbr, file_name, year, month, day, hour, minute) values (8, '%f', '%Y','%m','%d','%H','%M')
+        <br />insert into security_file(camera, event_id, filename, frame, file_type, time_stamp) values('%t', '%{dbeventid}', '%f', '%q', '%n', '%Y-%m-%d %T')"
+        <p></p>
         <p></p>
 
-        <h3><a name="database_host"></a> database_host </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: localhost</li>
-        </ul>
-        <p></p>
-        The host on which the database is located
-        <p></p>
-
-        <h3><a name="database_user"></a> database_user </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The user account name for database
-        <p></p>
-
-        <h3><a name="database_password"></a> database_password </h3>
-        <p></p>
-        <ul>
-          <li> Type: String</li>
-          <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The user password for database
-        <p></p>
-
-        <h3><a name="database_port"></a> database_port </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: </li>
-          <li> Default: </li>
-        </ul>
-        <p></p>
-        The port number that is used for the database.  Typical values are: mysql=3306 and postgresql=5432
-        <p></p>
-
-
-        <h3><a name="database_busy_timeout"></a> database_busy_timeout </h3>
-        <p></p>
-        <ul>
-          <li> Type: Integer</li>
-          <li> Range / Valid values: </li>
-          <li> Default: 0</li>
-        </ul>
-        <p></p>
-        If the database is busy when the request is issued, this parameter indicates the time to
-        wait before issuing a timeout message.
-        <p></p>
-        <p></p>
       </ul>
 
       <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
       <ul>
-        <p></p>
-        This is <strike>still</strike> permanently at the experimental stage.
         <p></p>
         Motion can move the camera to a fixed position given in degrees pan (left-right) and tilt (down-up).
         Movement can be set with absolute coordinates or relative to current position. There is also an auto tracking
@@ -5252,7 +5232,6 @@
         so it is unlikely that tracking features will be developed in any way.  (We have no way to test anything!)
         <p></p>
         <p></p>
-
 
         <p></p>
         <h3><a name="track_type"></a> track_type </h3>
@@ -5304,7 +5283,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         This is the device name of the serial port to which the stepper motor interface is connected.
@@ -5511,7 +5490,7 @@
         <ul>
           <li> Type: String</li>
           <li> Range / Valid values: Max 4095 characters</li>
-          <li> Default: </li>
+          <li> Default: Not defined</li>
         </ul>
         <p></p>
         The full path and file name of the command to execute to move a PTZ camera in generic tracking mode

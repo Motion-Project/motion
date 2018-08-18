@@ -101,21 +101,16 @@ struct image_data;
 #define DEF_PALETTE             17
 
 /* Default picture settings */
-#define DEF_WIDTH              352
-#define DEF_HEIGHT             288
+#define DEF_WIDTH              640
+#define DEF_HEIGHT             480
 #define DEF_QUALITY             75
 #define DEF_CHANGES           1500
 
-#define DEF_MAXFRAMERATE       100
+#define DEF_MAXFRAMERATE        15
 #define DEF_NOISELEVEL          32
 
 /* Minimum time between two 'actions' (email, sms, external) */
 #define DEF_EVENT_GAP            60  /* 1 minutes */
-#define DEF_MAXMOVIETIME       3600  /* 60 minutes */
-
-#define DEF_FFMPEG_BPS      400000
-#define DEF_FFMPEG_VBR           0
-#define DEF_FFMPEG_CODEC   "mpeg4"
 
 #define DEF_INPUT               -1
 #define DEF_VIDEO_DEVICE         "/dev/video0"
@@ -475,7 +470,7 @@ struct context {
     int movie_last_shot;
 
     struct ffmpeg *ffmpeg_output;
-    struct ffmpeg *ffmpeg_output_debug;
+    struct ffmpeg *ffmpeg_output_motion;
     struct ffmpeg *ffmpeg_timelapse;
 
     char timelapsefilename[PATH_MAX];

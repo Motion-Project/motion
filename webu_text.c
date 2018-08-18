@@ -47,7 +47,7 @@ static void webu_text_page(struct webui_ctx *webui) {
 
     if (webui->cam_threads > 1){
         for (indx = 1; indx < webui->cam_threads; indx++) {
-            snprintf(response, sizeof (response), "%d\n", indx);
+            snprintf(response, sizeof (response), "%d\n", webui->cntlst[indx]->camera_id);
             webu_write(webui, response);
         }
     }
@@ -88,6 +88,20 @@ static void webu_text_get(struct webui_ctx *webui) {
     char response[WEBUI_LEN_RESP];
     int indx_parm;
     const char *val_parm;
+    char temp_name[WEBUI_LEN_PARM];
+
+    /* Search through the depreciated parms and if applicable,
+     * get the new parameter name so we can check its webcontrol_parms level
+     */
+    snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_value1);
+    indx_parm=0;
+    while (dep_config_params[indx_parm].name != NULL) {
+        if (strcmp(dep_config_params[indx_parm].name, webui->uri_value1) == 0){
+            snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx_parm].newname);
+            break;
+        }
+        indx_parm++;
+    }
 
     indx_parm = 0;
 
@@ -96,7 +110,7 @@ static void webu_text_get(struct webui_ctx *webui) {
         if ((config_params[indx_parm].webui_level > webui->cntlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             strcmp(webui->uri_parm1,"query") ||
-            strcmp(webui->uri_value1, config_params[indx_parm].param_name)){
+            strcmp(temp_name, config_params[indx_parm].param_name)){
             indx_parm++;
             continue;
         }
@@ -104,6 +118,12 @@ static void webu_text_get(struct webui_ctx *webui) {
         val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, webui->thread_nbr);
         if (val_parm == NULL){
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
+        }
+
+        if (strcmp(webui->uri_value1, config_params[indx_parm].param_name) != 0){
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("'%s' option is depreciated.  New option name is `%s'")
+            ,webui->uri_value1, config_params[indx_parm].param_name);
         }
 
         snprintf(response, sizeof (response),"%s = %s \nDone\n"
@@ -279,7 +299,8 @@ static void webu_text_action(struct webui_ctx *webui) {
     } else {
         webu_text_badreq(webui);
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-            _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
+            _("Invalid action requested: >%s< >%s< >%s<")
+            ,webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
         return;
     }
 
@@ -355,7 +376,8 @@ void webu_text_main(struct webui_ctx *webui) {
 
     } else{
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-            _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
+            _("Invalid action requested: >%s< >%s< >%s<")
+            ,webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
         webu_text_badreq(webui);
     }
 

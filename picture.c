@@ -259,9 +259,9 @@ static unsigned prepare_exif(unsigned char **exif,
     // use as much of it as is indicated by conf->frame_limit
     subtime = NULL;
 
-    if (cnt->conf.exif_text) {
+    if (cnt->conf.picture_exif) {
         description = malloc(PATH_MAX);
-        mystrftime(cnt, description, PATH_MAX-1, cnt->conf.exif_text, &tv1, NULL, 0);
+        mystrftime(cnt, description, PATH_MAX-1, cnt->conf.picture_exif, &tv1, NULL, 0);
     } else {
         description = NULL;
     }
@@ -1120,7 +1120,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
         }
     }
 
-    put_picture_fd(cnt, picture, image, cnt->conf.quality, ftype);
+    put_picture_fd(cnt, picture, image, cnt->conf.picture_quality, ftype);
 
     myfclose(picture);
 }

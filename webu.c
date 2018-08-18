@@ -597,7 +597,8 @@ void webu_process_action(struct webui_ctx *webui) {
         conf_print(webui->cntlst);
     } else {
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
-            _("Invalid action requested: >%s< >%s<"), webui->uri_cmd1, webui->uri_cmd2);
+            _("Invalid action requested: >%s< >%s< >%s<")
+            , webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
         return;
     }
 }
@@ -609,7 +610,20 @@ int webu_process_config(struct webui_ctx *webui) {
      * was a valid parm to change.
      */
     int indx, retcd;
+    char temp_name[WEBUI_LEN_PARM];
 
+    /* Search through the depreciated parms and if applicable,
+     * get the new parameter name so we can check its webcontrol_parms level
+     */
+    snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_parm1);
+    indx=0;
+    while (dep_config_params[indx].name != NULL) {
+        if (strcmp(dep_config_params[indx].name,webui->uri_parm1) == 0){
+            snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx].newname);
+            break;
+        }
+        indx++;
+    }
     /* Ignore any request to change an option that is designated above the
      * webcontrol_parms level.
      */
@@ -621,7 +635,7 @@ int webu_process_config(struct webui_ctx *webui) {
             indx++;
             continue;
         }
-        if (!strcmp(webui->uri_parm1, config_params[indx].param_name)) break;
+        if (!strcmp(temp_name, config_params[indx].param_name)) break;
         indx++;
     }
     /* If we found the parm, assign it.  If the loop above did not find the parm
@@ -629,9 +643,12 @@ int webu_process_config(struct webui_ctx *webui) {
      */
     if (config_params[indx].param_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
-            /* This is legacy assumption on the pointers being sequential*/
+            /* This is legacy assumption on the pointers being sequential
+             * We send in the original parm name so it will trigger the depreciated warnings
+             * and perform any required transformations from old parm to new parm
+             */
             conf_cmdparse(webui->cntlst + webui->thread_nbr
-                , config_params[indx].param_name, webui->uri_value1);
+                , webui->uri_parm1, webui->uri_value1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
             if (!strcmp(config_params[indx].param_name, "vid_control_params") &&
@@ -717,9 +734,9 @@ static void webu_clientip(struct webui_ctx *webui) {
 
     is_ipv6 = FALSE;
     if (webui->cnt != NULL ){
-        if (webui->cnt->conf.ipv6_enabled) is_ipv6 = TRUE;
+        if (webui->cnt->conf.webcontrol_ipv6) is_ipv6 = TRUE;
     } else {
-        if (webui->cntlst[0]->conf.ipv6_enabled) is_ipv6 = TRUE;
+        if (webui->cntlst[0]->conf.webcontrol_ipv6) is_ipv6 = TRUE;
     }
 
     con_info = MHD_get_connection_info(webui->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
@@ -1680,7 +1697,7 @@ static void webu_start_ctrl(struct context **cnt){
     mhdst.ctrl = TRUE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
-    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
+    mhdst.ipv6 = cnt[0]->conf.webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
@@ -1731,7 +1748,7 @@ static void webu_start_strm(struct context **cnt){
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
     mhdst.cnt = cnt;
-    mhdst.ipv6 = cnt[0]->conf.ipv6_enabled;
+    mhdst.ipv6 = cnt[0]->conf.webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));

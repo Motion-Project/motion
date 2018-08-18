@@ -195,17 +195,17 @@ void rotate_init(struct context *cnt){
     cnt->rotate_data.buffer_high = NULL;
 
     /*
-     * Assign the value in conf.rotate_deg to rotate_data.degrees. This way,
+     * Assign the value in conf.rotate to rotate_data.degrees. This way,
      * we have a value that is safe from changes caused by motion-control.
      */
-    if ((cnt->conf.rotate_deg % 90) > 0) {
+    if ((cnt->conf.rotate % 90) > 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
-            ,cnt->conf.rotate_deg);
-        cnt->conf.rotate_deg = 0;     /* Disable rotation. */
+            ,cnt->conf.rotate);
+        cnt->conf.rotate = 0;     /* Disable rotation. */
         cnt->rotate_data.degrees = 0; /* Force return below. */
     } else {
-        cnt->rotate_data.degrees = cnt->conf.rotate_deg % 360; /* Range: 0..359 */
+        cnt->rotate_data.degrees = cnt->conf.rotate % 360; /* Range: 0..359 */
     }
 
     if (cnt->conf.flip_axis[0]=='h') {
