@@ -898,12 +898,12 @@ static void netcam_rtsp_set_path (struct context *cnt, struct rtsp_context *rtsp
     }
 
     if (strcmp(url.service, "v4l2") == 0) {
-        rtsp_data->path = mymalloc(strlen(url.path));
+        rtsp_data->path = mymalloc(strlen(url.path) + 1);
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up v4l2 via ffmpeg netcam"));
     } else if (strcmp(url.service, "file") == 0) {
-        rtsp_data->path = mymalloc(strlen(url.path));
+        rtsp_data->path = mymalloc(strlen(url.path) + 1);
         sprintf(rtsp_data->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up file via ffmpeg netcam"));
