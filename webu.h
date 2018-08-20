@@ -18,6 +18,16 @@
 #define WEBUI_MHD_OPTS 10           /* Maximum number of options permitted for MHD */
 #define WEBUI_LEN_LNK  15           /* Maximum length for chars in strminfo */
 
+enum WEBUI_CNCT{
+  WEBUI_CNCT_CONTROL     = 0,
+  WEBUI_CNCT_FULL        = 1,
+  WEBUI_CNCT_SUB         = 2,
+  WEBUI_CNCT_MOTION      = 3,
+  WEBUI_CNCT_SOURCE      = 4,
+  WEBUI_CNCT_STATIC      = 5,
+  WEBUI_CNCT_UNKNOWN     = 99
+};
+
 struct webui_ctx {
     char *url;                   /* The URL sent from the client */
     char *uri_camid;            /* Parsed thread number from the url*/
@@ -38,20 +48,17 @@ struct webui_ctx {
     char *auth_pass;            /* Parsed password from config authentication string*/
     int  authenticated;         /* Boolean for whether authentication has been passed */
 
-    int   cam_count;             /* Count of the number of cameras*/
-    int   cam_threads;           /* Count of the number of camera threads running*/
-    char *lang;                  /* Two character abbreviation for locale language*/
-    char *lang_full;             /* Five character abbreviation for language-country*/
-    int   thread_nbr;            /* Thread number provided from the uri */
+    int   cam_count;            /* Count of the number of cameras*/
+    int   cam_threads;          /* Count of the number of camera threads running*/
+    char *lang;                 /* Two character abbreviation for locale language*/
+    char *lang_full;            /* Five character abbreviation for language-country*/
+    int   thread_nbr;           /* Thread number provided from the uri */
+    enum WEBUI_CNCT cnct_type;  /* Type of connection we are processing */
 
-    char            *resp_page;         /* The response that will be sent */
-    size_t           resp_size;         /* The allocated size of the response */
-    size_t           resp_used;         /* The amount of the response page used */
-    int              mhd_first;         /* Boolean for whether it is the first connection*/
-    unsigned char   *stream_img;        /* Copy of the image to stream from cnt*/
-    unsigned char   *stream_imgsub;     /* Substream image */
-    size_t           stream_img_size;   /* Size of the image provided from cnt */
-    int              valid_subsize;     /* Boolean for whether substream dimensions are valid*/
+    char            *resp_page;        /* The response that will be sent */
+    size_t          resp_size;         /* The allocated size of the response */
+    size_t          resp_used;         /* The amount of the response page used */
+    int             mhd_first;         /* Boolean for whether it is the first connection*/
 
     struct MHD_Connection  *connection; /* The MHD connection value from the client */
     struct context        **cntlst;     /* The context list of all cameras */

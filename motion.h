@@ -252,6 +252,12 @@ struct image_data {
 
 };
 
+struct stream_data {
+    unsigned char   *jpeg_data; /* Image compressed as JPG */
+    long            jpeg_size;  /* The number of bytes for jpg */
+    int             cnct_count; /* Counter of the number of connections */
+};
+
 /*
  * DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
  * (and the corresponding height values, of course)
@@ -300,7 +306,7 @@ struct images {
     unsigned char *smartmask;
     unsigned char *smartmask_final;
     unsigned char *common_buffer;
-    unsigned char *image_stream;      /* Copy of the image to use for web stream*/
+    unsigned char *substream_image;
 
     unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
     unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
@@ -504,12 +510,19 @@ struct context {
     unsigned int passflag;  //only purpose is to flag first frame vs all others.....
     int rolling_frame;
 
-    struct MHD_Daemon *webcontrol_daemon;
-    struct MHD_Daemon *webstream_daemon;
-    char   webcontrol_digest_rand[8];
-    char   webstream_digest_rand[8];
-    int    camera_id;
-    pthread_mutex_t mutex_stream;
+    struct MHD_Daemon   *webcontrol_daemon;
+    struct MHD_Daemon   *webstream_daemon;
+    char                webcontrol_digest_rand[8];
+    char                webstream_digest_rand[8];
+    int                 camera_id;
+
+    pthread_mutex_t     mutex_stream;
+
+    struct stream_data  stream_norm;    /* Copy of the image to use for web stream*/
+    struct stream_data  stream_sub;     /* Copy of the image to use for web stream*/
+    struct stream_data  stream_motion;  /* Copy of the image to use for web stream*/
+    struct stream_data  stream_source;  /* Copy of the image to use for web stream*/
+
 
 };
 

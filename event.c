@@ -373,7 +373,9 @@ static void event_stream_put(struct context *cnt,
             struct image_data *img_data, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *tv1 ATTRIBUTE_UNUSED)
 {
-    if (cnt->conf.stream_preview_method == 3){
+    int subsize;
+
+    if (cnt->conf.stream_preview_method == 99){
         if (cnt->conf.stream_port)
             stream_put(cnt, &cnt->stream, &cnt->stream_count, img_data->image_norm, 0);
 
@@ -381,8 +383,90 @@ static void event_stream_put(struct context *cnt,
             stream_put(cnt, &cnt->substream, &cnt->substream_count, img_data->image_norm, 1);
     } else {
         pthread_mutex_lock(&cnt->mutex_stream);
-            if (img_data->image_norm != NULL){
-                memcpy(cnt->imgs.image_stream,img_data->image_norm,cnt->imgs.size_norm);
+            /* Normal stream processing */
+            if (cnt->stream_norm.cnct_count > 0){
+                if (cnt->stream_norm.jpeg_data == NULL){
+                    cnt->stream_norm.jpeg_data = mymalloc(cnt->imgs.size_norm);
+                }
+                if (img_data->image_norm != NULL){
+                    cnt->stream_norm.jpeg_size = put_picture_memory(cnt
+                        ,cnt->stream_norm.jpeg_data
+                        ,cnt->imgs.size_norm
+                        ,img_data->image_norm
+                        ,cnt->conf.stream_quality
+                        ,cnt->imgs.width
+                        ,cnt->imgs.height);
+                }
+            }
+
+            /* Substream processing */
+            if (cnt->stream_sub.cnct_count > 0){
+                if (cnt->stream_sub.jpeg_data == NULL){
+                    cnt->stream_sub.jpeg_data = mymalloc(cnt->imgs.size_norm);
+                }
+                if (img_data->image_norm != NULL){
+                    /* Resulting substream image must be multiple of 8 */
+                    if (((cnt->imgs.width  % 16) == 0)  &&
+                        ((cnt->imgs.height % 16) == 0)) {
+
+                        subsize = ((cnt->imgs.width / 2) * (cnt->imgs.height / 2) * 3 / 2);
+                        if (cnt->imgs.substream_image == NULL){
+                            cnt->imgs.substream_image = mymalloc(subsize);
+                        }
+                        pic_scale_img(cnt->imgs.width
+                            ,cnt->imgs.height
+                            ,img_data->image_norm
+                            ,cnt->imgs.substream_image);
+                        cnt->stream_sub.jpeg_size = put_picture_memory(cnt
+                            ,cnt->stream_sub.jpeg_data
+                            ,subsize
+                            ,cnt->imgs.substream_image
+                            ,cnt->conf.stream_quality
+                            ,(cnt->imgs.width / 2)
+                            ,(cnt->imgs.height / 2));
+                    } else {
+                        /* Substream was not multiple of 8 so send full image*/
+                        cnt->stream_norm.jpeg_size = put_picture_memory(cnt
+                            ,cnt->stream_norm.jpeg_data
+                            ,cnt->imgs.size_norm
+                            ,img_data->image_norm
+                            ,cnt->conf.stream_quality
+                            ,cnt->imgs.width
+                            ,cnt->imgs.height);
+                    }
+                }
+            }
+
+            /* Motion stream processing */
+            if (cnt->stream_motion.cnct_count > 0){
+                if (cnt->stream_motion.jpeg_data == NULL){
+                    cnt->stream_motion.jpeg_data = mymalloc(cnt->imgs.size_norm);
+                }
+                if (cnt->imgs.img_motion.image_norm != NULL){
+                    cnt->stream_motion.jpeg_size = put_picture_memory(cnt
+                        ,cnt->stream_motion.jpeg_data
+                        ,cnt->imgs.size_norm
+                        ,cnt->imgs.img_motion.image_norm
+                        ,cnt->conf.stream_quality
+                        ,cnt->imgs.width
+                        ,cnt->imgs.height);
+                }
+            }
+
+            /* Source stream processing */
+            if (cnt->stream_source.cnct_count > 0){
+                if (cnt->stream_source.jpeg_data == NULL){
+                    cnt->stream_source.jpeg_data = mymalloc(cnt->imgs.size_norm);
+                }
+                if (cnt->imgs.image_virgin.image_norm != NULL){
+                    cnt->stream_source.jpeg_size = put_picture_memory(cnt
+                        ,cnt->stream_source.jpeg_data
+                        ,cnt->imgs.size_norm
+                        ,cnt->imgs.image_virgin.image_norm
+                        ,cnt->conf.stream_quality
+                        ,cnt->imgs.width
+                        ,cnt->imgs.height);
+                }
             }
         pthread_mutex_unlock(&cnt->mutex_stream);
     }
