@@ -280,7 +280,7 @@ int mmalcam_start(struct context *cnt)
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps")
-        ,cnt->conf.mmalcam_name, cnt->conf.width, cnt->conf.height, cnt->conf.frame_limit);
+        ,cnt->conf.mmalcam_name, cnt->conf.width, cnt->conf.height, cnt->conf.framerate);
 
     mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
     if (mmalcam->camera_parameters == NULL) {
@@ -291,7 +291,7 @@ int mmalcam_start(struct context *cnt)
     raspicamcontrol_set_defaults(mmalcam->camera_parameters);
     mmalcam->width = cnt->conf.width;
     mmalcam->height = cnt->conf.height;
-    mmalcam->framerate = cnt->conf.frame_limit;
+    mmalcam->framerate = cnt->conf.framerate;
 
     if (cnt->conf.mmalcam_control_params) {
         parse_camera_control_params(cnt->conf.mmalcam_control_params, mmalcam->camera_parameters);
