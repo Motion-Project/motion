@@ -4800,10 +4800,14 @@
 	        <li><code>{IP}:{port0}/{camid}/</code> Primary stream for the camera</li>
           <li><code>{IP}:{port0}/{camid}/stream</code> Primary stream for the camera</li>
           <li><code>{IP}:{port0}/{camid}/substream</code> Sub-stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/motion</code> Motion image stream for the camera</li>
+          <li><code>{IP}:{port0}/{camid}/source</code> Source image from the camera</li>
           <li><code>{IP}:{port0}/{camid}/current</code> Static JPG for the camera</li>
           <li><code>{IP}:{portX}/</code> Primary stream for the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/stream</code> Primary stream for the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/substream</code> Sub-stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/motion</code> Motion image stream for the camera running on port {portX}</li>
+          <li><code>{IP}:{portX}/source</code> Source image from the camera running on port {portX}</li>
           <li><code>{IP}:{portX}/current</code> Static JPG for the camera running on port {portX}</li>
         </ul>
 
@@ -4944,7 +4948,7 @@
         <p></p>
         <ul>
           <li> Type: Integer</li>
-          <li> Range / Valid values: 0, 1, 2</li>
+          <li> Range / Valid values: 0 - 4</li>
           <li> Default: 0</li>
         </ul>
         <p></p>
@@ -4953,6 +4957,8 @@
           <li>0 = Full stream images are sent and scaled by the client to the webcontrol page</li>
           <li>1 = Substream images are sent by Motion.  This saves bandwidth</li>
           <li>2 = Static images are sent by Motion and the page must be manually refreshed</li>
+          <li>3 = Full stream images and motion images side by side to assist setup of detection</li>
+          <li>4 = The source image provided by camera without privacy or other Motion overlays</li>
         </ul>
         <p></p>
         <p></p>

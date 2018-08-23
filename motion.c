@@ -358,15 +358,16 @@ static void sig_handler(int signo)
         /*FALLTHROUGH*/
     case SIGTERM:
         /*
-         * Somebody wants us to quit! We should better finish the actual
+         * Somebody wants us to quit! We should finish the actual
          * movie and end up!
          */
+
         if (cnt_list) {
             i = -1;
             while (cnt_list[++i]) {
+                cnt_list[i]->webcontrol_finish = 1;
                 cnt_list[i]->makemovie = 1;
                 cnt_list[i]->finish = 1;
-                cnt_list[i]->webcontrol_finish = 1;
                 /*
                  * Don't restart thread when it ends,
                  * all threads restarts if global restart is set
@@ -905,6 +906,65 @@ static void init_text_scale(struct context *cnt){
 
 }
 
+static void mot_stream_init(struct context *cnt){
+
+    /* The image buffers are allocated in event_stream_put if needed*/
+    pthread_mutex_init(&cnt->mutex_stream, NULL);
+
+    cnt->imgs.substream_image = NULL;
+
+    cnt->stream_norm.jpeg_size = 0;
+    cnt->stream_norm.jpeg_data = NULL;
+    cnt->stream_norm.cnct_count = 0;
+
+    cnt->stream_sub.jpeg_size = 0;
+    cnt->stream_sub.jpeg_data = NULL;
+    cnt->stream_sub.cnct_count = 0;
+
+    cnt->stream_motion.jpeg_size = 0;
+    cnt->stream_motion.jpeg_data = NULL;
+    cnt->stream_motion.cnct_count = 0;
+
+    cnt->stream_source.jpeg_size = 0;
+    cnt->stream_source.jpeg_data = NULL;
+    cnt->stream_source.cnct_count = 0;
+
+}
+
+static void mot_stream_deinit(struct context *cnt){
+
+    /* Need to check whether buffers were allocated since init
+     * function defers the allocations to event_stream_put
+    */
+
+    pthread_mutex_destroy(&cnt->mutex_stream);
+
+    if (cnt->imgs.substream_image != NULL){
+        free(cnt->imgs.substream_image);
+        cnt->imgs.substream_image = NULL;
+    }
+
+    if (cnt->stream_norm.jpeg_data != NULL){
+        free(cnt->stream_norm.jpeg_data);
+        cnt->stream_norm.jpeg_data = NULL;
+    }
+
+    if (cnt->stream_sub.jpeg_data != NULL){
+        free(cnt->stream_sub.jpeg_data);
+        cnt->stream_sub.jpeg_data = NULL;
+    }
+
+    if (cnt->stream_motion.jpeg_data != NULL){
+        free(cnt->stream_motion.jpeg_data);
+        cnt->stream_motion.jpeg_data = NULL;
+    }
+
+    if (cnt->stream_source.jpeg_data != NULL){
+        free(cnt->stream_source.jpeg_data);
+        cnt->stream_source.jpeg_data = NULL;
+    }
+
+}
 
 /**
  * motion_init
@@ -1058,8 +1118,7 @@ static int motion_init(struct context *cnt)
         cnt->imgs.preview_image.image_high = mymalloc(cnt->imgs.size_high);
     }
 
-    pthread_mutex_init(&cnt->mutex_stream, NULL);
-    cnt->imgs.image_stream = mymalloc(cnt->imgs.size_norm);
+    mot_stream_init(cnt);
 
     /* Set output picture type */
     if (!strcmp(cnt->conf.picture_type, "ppm"))
@@ -1281,7 +1340,7 @@ static int motion_init(struct context *cnt)
     /* Set threshold value */
     cnt->threshold = cnt->conf.threshold;
 
-    if (cnt->conf.stream_preview_method == 3){
+    if (cnt->conf.stream_preview_method == 99){
         /* This is the depreciated Stop stream process */
 
         /* Initialize stream server if stream port is specified to not 0 */
@@ -1423,7 +1482,7 @@ static int motion_init(struct context *cnt)
  */
 static void motion_cleanup(struct context *cnt) {
 
-    if (cnt->conf.stream_preview_method == 3){
+    if (cnt->conf.stream_preview_method == 99){
         /* This is the depreciated Stop stream process */
         if ((cnt->conf.stream_port) && (cnt->stream.socket != -1))
             stream_stop(&cnt->stream);
@@ -1435,9 +1494,7 @@ static void motion_cleanup(struct context *cnt) {
     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
 
-    pthread_mutex_destroy(&cnt->mutex_stream);
-    if (cnt->imgs.image_stream) free(cnt->imgs.image_stream);
-    cnt->imgs.image_stream = NULL;
+    mot_stream_deinit(cnt);
 
     if (cnt->video_dev >= 0) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from motion_cleanup"));
@@ -2208,18 +2265,19 @@ static void mlp_overlay(struct context *cnt){
      */
 
     /* Smartmask overlay */
-    if (cnt->smartmask_speed && (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
-        cnt->conf.setup_mode))
+    if (cnt->smartmask_speed &&
+        (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
+         cnt->conf.setup_mode || (cnt->stream_motion.cnct_count > 0)))
         overlay_smartmask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Largest labels overlay */
     if (cnt->imgs.largest_label && (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
-        cnt->conf.setup_mode))
+        cnt->conf.setup_mode || (cnt->stream_motion.cnct_count > 0)))
         overlay_largest_label(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Fixed mask overlay */
     if (cnt->imgs.mask && (cnt->conf.picture_output_motion || cnt->conf.movie_output_motion ||
-        cnt->conf.setup_mode))
+        cnt->conf.setup_mode || (cnt->stream_motion.cnct_count > 0)))
         overlay_fixed_mask(cnt, cnt->imgs.img_motion.image_norm);
 
     /* Add changed pixels in upper right corner of the pictures */
@@ -2237,7 +2295,7 @@ static void mlp_overlay(struct context *cnt){
      * Add changed pixels to motion-images (for stream) in setup_mode
      * and always overlay smartmask (not only when motion is detected)
      */
-    if (cnt->conf.setup_mode) {
+    if (cnt->conf.setup_mode || (cnt->stream_motion.cnct_count > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cnt->current_image->diffs,
                 cnt->current_image->total_labels, cnt->noise);
         draw_text(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height,

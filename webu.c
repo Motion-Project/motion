@@ -85,12 +85,9 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->resp_size     = WEBUI_LEN_RESP * 10; /* The size of the resp_page buffer.  May get adjusted */
     webui->resp_used     = 0;                   /* How many bytes used so far in resp_page*/
     webui->resp_page     = mymalloc(webui->resp_size);      /* The response being constructed */
-    webui->stream_img    = NULL;    /*JPG'd full size image. We allocate once we get an image */
-    webui->stream_imgsub = NULL;    /*JPG'd substream image. We allocate once we get an image */
-    webui->stream_img_size  = 0;    /* Buffer size for full and substream JPG'd images*/
-    webui->valid_subsize = FALSE;   /* Boolean for whether substream size is modulo 8 */
     webui->cntlst        = cntlst;  /* The list of context's for all cameras */
     webui->cnt           = cnt;     /* The context pointer for a single camera */
+    webui->cnct_type     = WEBUI_CNCT_UNKNOWN;
 
     /* get the number of cameras and threads */
     indx = 0;
@@ -135,8 +132,6 @@ static void webu_context_null(struct webui_ctx *webui) {
     webui->auth_opaque   = NULL;
     webui->auth_realm    = NULL;
     webui->clientip      = NULL;
-    webui->stream_img    = NULL;
-    webui->stream_imgsub = NULL;
 
     return;
 }
@@ -161,8 +156,6 @@ static void webu_context_free(struct webui_ctx *webui) {
     if (webui->auth_opaque   != NULL) free(webui->auth_opaque);
     if (webui->auth_realm    != NULL) free(webui->auth_realm);
     if (webui->clientip      != NULL) free(webui->clientip);
-    if (webui->stream_img    != NULL) free(webui->stream_img);
-    if (webui->stream_imgsub != NULL) free(webui->stream_imgsub);
 
     webu_context_null(webui);
 
@@ -466,6 +459,8 @@ static int webu_parseurl(struct webui_ctx *webui) {
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),webui->url);
 
     webu_parseurl_reset(webui);
+
+    if (strlen(webui->url) == 0) return -1;
 
     retcd = webu_url_decode(webui->url, strlen(webui->url));
     if (retcd != 0) return retcd;
@@ -1073,6 +1068,36 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
     return retcd;
 }
 
+static void webu_answer_strm_type(struct webui_ctx *webui) {
+    /* Assign the type of stream that is being answered*/
+
+    if ((strcmp(webui->uri_cmd1,"stream") == 0) ||
+        (strcmp(webui->uri_camid,"stream") == 0) ||
+        (strlen(webui->uri_camid) == 0)) {
+        webui->cnct_type = WEBUI_CNCT_FULL;
+
+    } else if ((strcmp(webui->uri_cmd1,"substream") == 0) ||
+        (strcmp(webui->uri_camid,"substream") == 0)){
+        webui->cnct_type = WEBUI_CNCT_SUB;
+
+    } else if ((strcmp(webui->uri_cmd1,"motion") == 0) ||
+        (strcmp(webui->uri_camid,"motion") == 0)){
+        webui->cnct_type = WEBUI_CNCT_MOTION;
+
+    } else if ((strcmp(webui->uri_cmd1,"source") == 0) ||
+        (strcmp(webui->uri_camid,"source") == 0)){
+        webui->cnct_type = WEBUI_CNCT_SOURCE;
+
+    } else if ((strcmp(webui->uri_cmd1,"current") == 0) ||
+        (strcmp(webui->uri_camid,"current") == 0)){
+        webui->cnct_type = WEBUI_CNCT_STATIC;
+
+    } else {
+        webui->cnct_type = WEBUI_CNCT_UNKNOWN;
+    }
+
+}
+
 static int webu_answer_ctrl(void *cls
         , struct MHD_Connection *connection
         , const char *url
@@ -1104,6 +1129,8 @@ static int webu_answer_ctrl(void *cls
         return MHD_NO;
     }
 
+    webui->cnct_type = WEBUI_CNCT_CONTROL;
+
     util_threadname_set("wu", 0,NULL);
 
     webui->connection = connection;
@@ -1114,6 +1141,8 @@ static int webu_answer_ctrl(void *cls
         retcd = webu_mhd_send(webui, FALSE);
         return retcd;
     }
+
+    if (webui->cnt->webcontrol_finish) return MHD_NO;
 
     if (strlen(webui->clientip) == 0){
         webu_clientip(webui);
@@ -1182,6 +1211,8 @@ static int webu_answer_strm(void *cls
         return retcd;
     }
 
+    if (webui->cnt->webcontrol_finish) return MHD_NO;
+
     if (strlen(webui->clientip) == 0){
         webu_clientip(webui);
     }
@@ -1193,24 +1224,21 @@ static int webu_answer_strm(void *cls
         if (!webui->authenticated) return retcd;
     }
 
+    webu_answer_strm_type(webui);
+
     retcd = 0;
-    if ((strcmp(webui->uri_cmd1,"stream") == 0) ||
-        (strcmp(webui->uri_cmd1,"substream") == 0) ||
-        (strcmp(webui->uri_camid,"stream") == 0) ||
-        (strcmp(webui->uri_camid,"substream") == 0) ||
-        (strlen(webui->uri_camid) == 0)){
-            retcd = webu_stream_mjpeg(webui);
-            if (retcd == MHD_NO){
-                webu_badreq(webui);
-                retcd = webu_mhd_send(webui, FALSE);
-            }
-    } else if ((strcmp(webui->uri_cmd1,"current") == 0) ||
-        (strcmp(webui->uri_camid,"current") == 0)){
-            retcd = webu_stream_static(webui);
-            if (retcd == MHD_NO){
-                webu_badreq(webui);
-                retcd = webu_mhd_send(webui, FALSE);
-            }
+    if (webui->cnct_type == WEBUI_CNCT_STATIC){
+        retcd = webu_stream_static(webui);
+        if (retcd == MHD_NO){
+            webu_badreq(webui);
+            retcd = webu_mhd_send(webui, FALSE);
+        }
+    } else if (webui->cnct_type != WEBUI_CNCT_UNKNOWN) {
+        retcd = webu_stream_mjpeg(webui);
+        if (retcd == MHD_NO){
+            webu_badreq(webui);
+            retcd = webu_mhd_send(webui, FALSE);
+        }
     } else {
         webu_badreq(webui);
         retcd = webu_mhd_send(webui, FALSE);
@@ -1309,6 +1337,33 @@ static void webu_mhd_deinit(void *cls
     (void)connection;
     (void)cls;
     (void)toe;
+
+    if (webui->cnct_type == WEBUI_CNCT_FULL ){
+        pthread_mutex_lock(&webui->cnt->mutex_stream);
+            webui->cnt->stream_norm.cnct_count--;
+        pthread_mutex_unlock(&webui->cnt->mutex_stream);
+
+    } else if (webui->cnct_type == WEBUI_CNCT_SUB ){
+        pthread_mutex_lock(&webui->cnt->mutex_stream);
+            webui->cnt->stream_sub.cnct_count--;
+        pthread_mutex_unlock(&webui->cnt->mutex_stream);
+
+    } else if (webui->cnct_type == WEBUI_CNCT_MOTION ){
+        pthread_mutex_lock(&webui->cnt->mutex_stream);
+            webui->cnt->stream_motion.cnct_count--;
+        pthread_mutex_unlock(&webui->cnt->mutex_stream);
+
+    } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ){
+        pthread_mutex_lock(&webui->cnt->mutex_stream);
+            webui->cnt->stream_source.cnct_count--;
+        pthread_mutex_unlock(&webui->cnt->mutex_stream);
+
+    } else if (webui->cnct_type == WEBUI_CNCT_STATIC ){
+        pthread_mutex_lock(&webui->cnt->mutex_stream);
+            webui->cnt->stream_norm.cnct_count--;
+        pthread_mutex_unlock(&webui->cnt->mutex_stream);
+
+    }
 
     webu_context_free(webui);
 
@@ -1857,12 +1912,14 @@ void webu_stop(struct context **cnt) {
     int indxthrd;
 
     if (cnt[0]->webcontrol_daemon != NULL){
+        cnt[0]->webcontrol_finish = 1;
         MHD_stop_daemon (cnt[0]->webcontrol_daemon);
     }
 
     indxthrd = 0;
     while (cnt[indxthrd] != NULL){
         if (cnt[indxthrd]->webstream_daemon != NULL){
+            cnt[indxthrd]->webcontrol_finish = 1;
             MHD_stop_daemon (cnt[indxthrd]->webstream_daemon);
         }
         indxthrd++;
@@ -1883,7 +1940,7 @@ void webu_start(struct context **cnt) {
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
 
-    if (cnt[0]->conf.stream_preview_method != 3){
+    if (cnt[0]->conf.stream_preview_method != 99){
         webu_start_ports(cnt);
 
         webu_start_strm(cnt);
