@@ -1330,7 +1330,7 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
          */
         if (framerate < rtsp_data->src_fps) framerate = rtsp_data->src_fps;
 
-        usec_maxrate = (1000000L / (framerate + 1)) + rtsp_data->cnct_delay;
+        usec_maxrate = (1000000L / (framerate + 3)) + rtsp_data->cnct_delay;
     }
 
     if (gettimeofday(&rtsp_data->frame_curr_tm, NULL) < 0) {
@@ -1369,9 +1369,9 @@ static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
         if ((rtsp_data->frame_prev_tm.tv_sec -
             rtsp_data->frame_curr_tm.tv_sec) < 3600){
             rtsp_data->cnct_delay -= 50000;
-            usec_maxrate = (1000000L / (framerate+1)) + rtsp_data->cnct_delay;
+            usec_maxrate = (1000000L / (framerate+3)) + rtsp_data->cnct_delay;
             if (usec_maxrate < 1000){
-                rtsp_data->cnct_delay = 1000 - (1000000L / (framerate+1));
+                rtsp_data->cnct_delay = 1000 - (1000000L / (framerate+3));
             }
         }
     }
