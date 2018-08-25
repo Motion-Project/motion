@@ -452,10 +452,7 @@ struct context {
 
     char hostname[PATH_MAX];
 
-
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     int sql_mask;
-#endif
 
 #ifdef HAVE_SQLITE3
     sqlite3 *database_sqlite3;
@@ -463,7 +460,6 @@ struct context {
 
 #ifdef HAVE_MYSQL
     MYSQL *database;
-
 #endif
 
 #ifdef HAVE_PGSQL
