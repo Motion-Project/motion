@@ -73,7 +73,12 @@ struct rtsp_context {
     int                       rtsp_uses_tcp;    /* Flag from config for whether to use tcp transport */
     int                       v4l2_palette;     /* Palette from config for v4l2 devices */
     int                       framerate;        /* Frames per second from configuration file */
-    int                       capture_frame;    /* Bool for to tell file processing to capture a frame*/
+    long                      cnct_delay;       /* Delay offset to prevent handler being too slow*/
+    int                       src_fps;          /* The fps provided from source*/
+
+    struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
+    struct timeval            frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
+    struct config            *conf;             /* Pointer to conf parms of parent cnt*/
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */
