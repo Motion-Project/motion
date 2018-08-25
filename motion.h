@@ -376,6 +376,8 @@ struct context {
     struct config conf;
     struct images imgs;
     struct trackoptions track;
+    int                 track_posx;
+    int                 track_posy;
 
     enum CAMERA_TYPE      camera_type;
     struct netcam_context *netcam;

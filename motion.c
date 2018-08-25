@@ -265,6 +265,7 @@ static void context_init(struct context *cnt)
     cnt->lastrate = 25;
 
     memcpy(&cnt->track, &track_template, sizeof(struct trackoptions));
+
     cnt->pipe = -1;
     cnt->mpipe = -1;
 
@@ -1545,6 +1546,8 @@ static int motion_init(struct context *cnt)
         cnt->rolling_average_data[indx] = cnt->required_frame_time;
 
 
+    cnt->track_posx = 0;
+    cnt->track_posy = 0;
     if (cnt->track.type)
         cnt->moved = track_center(cnt, cnt->video_dev, 0, 0, 0);
 
