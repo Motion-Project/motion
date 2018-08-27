@@ -661,6 +661,13 @@ static int netcam_rtsp_read_image(struct rtsp_context *rtsp_data){
 
     my_packet_unref(rtsp_data->packet_recv);
 
+    if (rtsp_data->format_context->streams[rtsp_data->video_stream_index]->avg_frame_rate.den > 0){
+        rtsp_data->src_fps = (
+            (rtsp_data->format_context->streams[rtsp_data->video_stream_index]->avg_frame_rate.num /
+            rtsp_data->format_context->streams[rtsp_data->video_stream_index]->avg_frame_rate.den) +
+            0.5);
+    }
+
     return 0;
 }
 
@@ -956,6 +963,8 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->rtsp_uses_tcp =cnt->conf.netcam_use_tcp;
     rtsp_data->v4l2_palette = cnt->conf.v4l2_palette;
     rtsp_data->framerate = cnt->conf.framerate;
+    rtsp_data->src_fps =  cnt->conf.framerate; /* Default to conf fps */
+    rtsp_data->conf = &cnt->conf;
     rtsp_data->camera_name = cnt->conf.camera_name;
     rtsp_data->img_recv = mymalloc(sizeof(netcam_buff));
     rtsp_data->img_recv->ptr = mymalloc(NETCAM_BUFFSIZE);
@@ -965,7 +974,6 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->pktarray_index = -1;
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
-    rtsp_data->capture_frame = TRUE;
 
     snprintf(rtsp_data->threadname, 15, "%s",_("Unknown"));
 
@@ -984,6 +992,19 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     }
     rtsp_data->interruptduration = 5;
     rtsp_data->interrupted = FALSE;
+
+    if (gettimeofday(&rtsp_data->frame_curr_tm, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
+    if (gettimeofday(&rtsp_data->frame_prev_tm, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
+    /* Upon startup, we close context and let the handler start it again.  Since
+     * this is a "planned" reconnection, we set our initial connection delay to be
+     * equal to the offset that the reconnect will add.
+     */
+    rtsp_data->cnct_delay = 50000;
+
     netcam_rtsp_set_path(cnt, rtsp_data);
 
 }
@@ -1283,10 +1304,86 @@ static void netcam_rtsp_shutdown(struct rtsp_context *rtsp_data){
 
 }
 
+static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
+    /* This function slows down the handler loop to try to
+     * get in sync with the main motion loop in the capturing
+     * of images while also trying to not go so slow that the
+     * connection to the  network camera is lost and we end up
+     * with lots of reconnects or fragmented images
+     */
+
+    int framerate;
+    long usec_maxrate, usec_delay;
+
+    framerate = rtsp_data->conf->framerate;
+    if (framerate < 2) framerate = 2;
+
+    if (strcmp(rtsp_data->service,"file") == 0) {
+        /* For file processing, we try to match exactly the motion loop rate */
+        usec_maxrate = (1000000L / framerate);
+    } else {
+        /* We set the capture rate to be a bit faster than the frame rate.  This
+         * should provide the motion loop with a picture whenever it wants one.
+         * Now, if the user set the framerate really low, then the handler will
+         * lose connection to the camera. Each time we lose the connection we
+         * adjust the cnct_delay to shorten the sleep and speed up the captures
+         */
+        if (framerate < rtsp_data->src_fps) framerate = rtsp_data->src_fps;
+
+        usec_maxrate = (1000000L / (framerate + 3)) + rtsp_data->cnct_delay;
+    }
+
+    if (gettimeofday(&rtsp_data->frame_curr_tm, NULL) < 0) {
+        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
+    }
+
+    usec_delay = usec_maxrate -
+        ((rtsp_data->frame_curr_tm.tv_sec - rtsp_data->frame_prev_tm.tv_sec) * 1000000L) -
+        (rtsp_data->frame_curr_tm.tv_usec - rtsp_data->frame_prev_tm.tv_usec);
+    if ((usec_delay > 0) && (usec_delay < 1000000L)){
+        SLEEP(0, usec_delay * 1000)
+    }
+
+}
+
+static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
+
+    long usec_maxrate;
+    int framerate;
+
+    if ((rtsp_data->status == RTSP_CONNECTED) ||
+        (rtsp_data->status == RTSP_READINGIMAGE)){
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Reconnecting with camera...."),rtsp_data->cameratype);
+    }
+
+    if (strcmp(rtsp_data->service,"file") != 0) {
+        /* Note that this works in reverse on the times.  The last time curr_tm was set
+        * was when we had a good image in netcam_rtsp_handler_wait.  The prev_time was
+        * set immediately before we called this function.
+        */
+        framerate = rtsp_data->conf->framerate;
+        if (framerate < 2) framerate = 2;
+        if (framerate < rtsp_data->src_fps) framerate = rtsp_data->src_fps;
+
+        if ((rtsp_data->frame_prev_tm.tv_sec -
+            rtsp_data->frame_curr_tm.tv_sec) < 3600){
+            rtsp_data->cnct_delay -= 50000;
+            usec_maxrate = (1000000L / (framerate+3)) + rtsp_data->cnct_delay;
+            if (usec_maxrate < 1000){
+                rtsp_data->cnct_delay = 1000 - (1000000L / (framerate+3));
+            }
+        }
+    }
+
+    rtsp_data->status = RTSP_RECONNECTING;
+    netcam_rtsp_connect(rtsp_data);
+
+}
+
 static void *netcam_rtsp_handler(void *arg){
 
     struct rtsp_context *rtsp_data = arg;
-    int capture_reset;
 
     rtsp_data->handler_finished = FALSE;
 
@@ -1294,59 +1391,28 @@ static void *netcam_rtsp_handler(void *arg){
 
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)rtsp_data->threadnbr));
 
-    /* The rtsp_data->capture_frame is set to TRUE in the netcam_rtsp_next
-     * function that is running on the motion loop thread.  When processing
-     * a file, we need to slow down this loop to only capture a new image
-     * after the motion loop has grabbed the picture.  Once this loop has
-     * captured the picture, we set the capture_frame to FALSE.  When processing
-     * other input sources, we let this loop run normally and continually set the
-     * capture_frame to TRUE. Note that if we slowed this loop for regular rtsp/rtmp
-     * cameras, the resulting images are corrupted.
-     */
-    if (strncmp(rtsp_data->service, "file", 4) == 0 ){
-        capture_reset = FALSE;
-    } else {
-        capture_reset = TRUE;
-    }
-
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
         ,_("%s: Camera handler thread [%d] started")
         ,rtsp_data->cameratype, rtsp_data->threadnbr);
 
     while (!rtsp_data->finish) {
         if (!rtsp_data->format_context) {      /* We must have disconnected.  Try to reconnect */
-            if ((rtsp_data->status == RTSP_CONNECTED) ||
-                (rtsp_data->status == RTSP_READINGIMAGE)){
-                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: Reconnecting with camera...."),rtsp_data->cameratype);
+            if (gettimeofday(&rtsp_data->frame_prev_tm, NULL) < 0) {
+                MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
             }
-            rtsp_data->status = RTSP_RECONNECTING;
-            netcam_rtsp_connect(rtsp_data);
+            netcam_rtsp_handler_reconnect(rtsp_data);
             continue;
         } else {            /* We think we are connected...*/
-            pthread_mutex_lock(&rtsp_data->mutex);
-            if (rtsp_data->capture_frame){
-                pthread_mutex_unlock(&rtsp_data->mutex);
-                if (netcam_rtsp_read_image(rtsp_data) < 0) {
-                    if (!rtsp_data->finish) {
-                        /* Nope.  We are not or got bad image.  Reconnect*/
-                        if ((rtsp_data->status == RTSP_CONNECTED) ||
-                            (rtsp_data->status == RTSP_READINGIMAGE)){
-                            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                                ,_("%s: Bad image.  Reconnecting with camera....")
-                                ,rtsp_data->cameratype);
-                        }
-                        rtsp_data->status = RTSP_RECONNECTING;
-                        netcam_rtsp_connect(rtsp_data);
-                    }
-                    continue;
-                }
-                pthread_mutex_lock(&rtsp_data->mutex);
-                    rtsp_data->capture_frame = capture_reset;
-                pthread_mutex_unlock(&rtsp_data->mutex);
-            } else {
-                pthread_mutex_unlock(&rtsp_data->mutex);
+            if (gettimeofday(&rtsp_data->frame_prev_tm, NULL) < 0) {
+                MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
             }
+            if (netcam_rtsp_read_image(rtsp_data) < 0) {
+                if (!rtsp_data->finish) {   /* Nope.  We are not or got bad image.  Reconnect*/
+                    netcam_rtsp_handler_reconnect(rtsp_data);
+                }
+                continue;
+            }
+            netcam_rtsp_handler_wait(rtsp_data);
         }
     }
 
@@ -1514,7 +1580,6 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
                , cnt->rtsp->img_latest->ptr
                , cnt->rtsp->img_latest->used);
         img_data->idnbr_norm = cnt->rtsp->idnbr;
-        cnt->rtsp->capture_frame = TRUE;
     pthread_mutex_unlock(&cnt->rtsp->mutex);
 
     if (cnt->rtsp_high){
