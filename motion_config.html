@@ -5263,8 +5263,10 @@
         Value 3 is for pwc type USB tracking cameras such as the Logitech Quickcam Sphere/Orbit which is driven
         by the pwc (Philips WebCam) driver. To use this camera your version of pwc must be at least 8.12.
         <p></p>
-        Value 4 is the generic track type. Currently it has no other function than enabling some of the
-        internal Motion features related to tracking.
+        Value 4 is the generic track type. This option executes the
+        <a href="#track_generic_move">track_generic_move</a> script.  Users can write their own script
+        to move the camera based upon the <a href="#conversion_specifiers">Conversion Specifiers</a> passed to the
+        script and/or based upon the environment variables set by Motion.
         <p></p>
         Value 5 is for uvcvideo type USB tracking cameras such as the Logitech Quickcam Sphere/Orbit MP which is driven
         by the uvcvideo driver.
@@ -5280,8 +5282,8 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        Enable auto tracking
-        Requires a tracking camera type supported by Motion.
+        Enable auto tracking of the motion.  Requires a tracking camera or custom script as specified in the
+        <a href="#track_type">track_type</a> above.
         <p></p>
 
         <h3><a name="track_port"></a> track_port </h3>
@@ -5501,13 +5503,21 @@
         <p></p>
         The full path and file name of the command to execute to move a PTZ camera in generic tracking mode
         <p></p>
-        Several parameters are provided as environment variables:
+        Users have the option of using the <a href="#conversion_specifiers">Conversion Specifiers</a>
+        and including the parameters as part of command line options to the script and/or to obtain the
+        values from system environment variables as indicated below.
+        <p></p>
+        The following are the parameters provided as environment variables:
         <ul>
           <li> When called to recenter the camera: TRACK_ACTION=center TRACK_XOFF TRACK_YOFF</li>
           <li> When called to track a motion: TRACK_ACTION=move TRACK_CENT_X TRACK_CENT_Y TRACK_CENT_WIDTH TRACK_CENT_HEIGHT TRACK_CENT_MINX TRACK_CENT_MAXX TRACK_CENT_MINY TRACK_CENT_MAXY TRACK_IMGS_WIDTH TRACK_IMGS_HEIGHT TRACK_IMGS_MOTIONSIZE</li>
         </ul>
         <p></p>
-        For instance, the following script may be called to move a PTZ netcam (Tested with VIVOTEK PZ81X1):
+        <p></p>
+        The following is a sample script that moves a PTZ netcam based upon the system environment
+        variables.  The 3/8 and 5/8 are illustrative only and set based upon testing with a VIVOTEK PZ81X1 camera.  The
+        values and methods applicable to any other camera would need to be established by the user.
+        <p></p>
 <pre><code>#!/bin/bash
 
 LOCKFILE=/tmp/track_generic_move_netcam.lock
