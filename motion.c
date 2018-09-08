@@ -1980,6 +1980,10 @@ static int mlp_retry(struct context *cnt){
             ,_("Retrying until successful connection with camera"));
         cnt->video_dev = vid_start(cnt);
 
+        if (cnt->video_dev < 0) {
+            return 1;
+        }
+
         if ((cnt->imgs.width % 8) || (cnt->imgs.height % 8)) {
             MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
                 ,_("Image width (%d) or height(%d) requested is not modulo 8.")
