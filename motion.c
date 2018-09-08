@@ -336,14 +336,12 @@ static void sig_handler(int signo)
         }
         break;
     case SIGUSR1:
-        /*
-         * Ouch! We have been hit from the outside! Someone wants us to
-         * make a movie!
-         */
+        /* Trigger the end of a event */
         if (cnt_list) {
             i = -1;
-            while (cnt_list[++i])
-                cnt_list[i]->makemovie = 1;
+            while (cnt_list[++i]){
+                cnt_list[i]->event_stop = TRUE;
+            }
         }
         break;
     case SIGHUP:
@@ -367,7 +365,7 @@ static void sig_handler(int signo)
             i = -1;
             while (cnt_list[++i]) {
                 cnt_list[i]->webcontrol_finish = 1;
-                cnt_list[i]->makemovie = 1;
+                cnt_list[i]->event_stop = TRUE;
                 cnt_list[i]->finish = 1;
                 /*
                  * Don't restart thread when it ends,
@@ -731,12 +729,12 @@ static int init_camera_type(struct context *cnt){
 
     cnt->camera_type = CAMERA_TYPE_UNKNOWN;
 
-#ifdef HAVE_MMAL
-    if (cnt->conf.mmalcam_name) {
-        cnt->camera_type = CAMERA_TYPE_MMAL;
-        return 0;
-    }
-#endif // HAVE_MMAL
+    #ifdef HAVE_MMAL
+        if (cnt->conf.mmalcam_name) {
+            cnt->camera_type = CAMERA_TYPE_MMAL;
+            return 0;
+        }
+    #endif // HAVE_MMAL
 
     if (cnt->conf.netcam_url) {
         if ((strncmp(cnt->conf.netcam_url,"mjpeg",5) == 0) ||
@@ -751,19 +749,19 @@ static int init_camera_type(struct context *cnt){
         return 0;
     }
 
-#ifdef HAVE_BKTR
-    if (strncmp(cnt->conf.video_device,"/dev/bktr",9) == 0) {
-        cnt->camera_type = CAMERA_TYPE_BKTR;
-        return 0;
-    }
-#endif // HAVE_BKTR
+    #ifdef HAVE_BKTR
+        if (strncmp(cnt->conf.video_device,"/dev/bktr",9) == 0) {
+            cnt->camera_type = CAMERA_TYPE_BKTR;
+            return 0;
+        }
+    #endif // HAVE_BKTR
 
-#ifdef HAVE_V4L2
-    if (cnt->conf.video_device) {
-        cnt->camera_type = CAMERA_TYPE_V4L2;
-        return 0;
-    }
-#endif // HAVE_V4L2
+    #ifdef HAVE_V4L2
+        if (cnt->conf.video_device) {
+            cnt->camera_type = CAMERA_TYPE_V4L2;
+            return 0;
+        }
+    #endif // HAVE_V4L2
 
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -1229,7 +1227,8 @@ static int motion_init(struct context *cnt)
     cnt->prev_event = 0;
     cnt->lightswitch_framecounter = 0;
     cnt->detecting_motion = 0;
-    cnt->makemovie = 0;
+    cnt->event_user = FALSE;
+    cnt->event_stop = FALSE;
 
     /* Make sure to default the high res to zero */
     cnt->imgs.width_high = 0;
@@ -1346,14 +1345,14 @@ static int motion_init(struct context *cnt)
     if (!strcmp(cnt->conf.picture_type, "ppm"))
         cnt->imgs.picture_type = IMAGE_TYPE_PPM;
     else if (!strcmp(cnt->conf.picture_type, "webp")) {
-#ifdef HAVE_WEBP
-        cnt->imgs.picture_type = IMAGE_TYPE_WEBP;
-#else
-        /* Fallback to jpeg if webp was selected in the config file, but the support for it was not compiled in */
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        ,_("webp image format is not available, failing back to jpeg"));
-        cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
-#endif /* HAVE_WEBP */
+        #ifdef HAVE_WEBP
+                cnt->imgs.picture_type = IMAGE_TYPE_WEBP;
+        #else
+                /* Fallback to jpeg if webp was selected in the config file, but the support for it was not compiled in */
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                ,_("webp image format is not available, failing back to jpeg"));
+                cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
+        #endif /* HAVE_WEBP */
     }
     else
         cnt->imgs.picture_type = IMAGE_TYPE_JPEG;
@@ -1392,36 +1391,36 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-#if defined(HAVE_V4L2) && !defined(__FreeBSD__)
-    /* open video loopback devices if enabled */
-    if (cnt->conf.video_pipe) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Opening video loopback device for normal pictures"));
+    #if defined(HAVE_V4L2) && !defined(__FreeBSD__)
+        /* open video loopback devices if enabled */
+        if (cnt->conf.video_pipe) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Opening video loopback device for normal pictures"));
 
-        /* vid_startpipe should get the output dimensions */
-        cnt->pipe = vlp_startpipe(cnt->conf.video_pipe, cnt->imgs.width, cnt->imgs.height);
+            /* vid_startpipe should get the output dimensions */
+            cnt->pipe = vlp_startpipe(cnt->conf.video_pipe, cnt->imgs.width, cnt->imgs.height);
 
-        if (cnt->pipe < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Failed to open video loopback for normal pictures"));
-            return -1;
+            if (cnt->pipe < 0) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Failed to open video loopback for normal pictures"));
+                return -1;
+            }
         }
-    }
 
-    if (cnt->conf.video_pipe_motion) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Opening video loopback device for motion pictures"));
+        if (cnt->conf.video_pipe_motion) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Opening video loopback device for motion pictures"));
 
-        /* vid_startpipe should get the output dimensions */
-        cnt->mpipe = vlp_startpipe(cnt->conf.video_pipe_motion, cnt->imgs.width, cnt->imgs.height);
+            /* vid_startpipe should get the output dimensions */
+            cnt->mpipe = vlp_startpipe(cnt->conf.video_pipe_motion, cnt->imgs.width, cnt->imgs.height);
 
-        if (cnt->mpipe < 0) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Failed to open video loopback for motion pictures"));
-            return -1;
+            if (cnt->mpipe < 0) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Failed to open video loopback for motion pictures"));
+                return -1;
+            }
         }
-    }
-#endif /* HAVE_V4L2 && !__FreeBSD__ */
+    #endif /* HAVE_V4L2 && !__FreeBSD__ */
 
     retcd = dbse_init(cnt);
     if (retcd != 0) return retcd;
@@ -2462,7 +2461,7 @@ static void mlp_actions(struct context *cnt){
      * If post_capture is enabled we also take care of this in the this
      * code section.
      */
-    if (cnt->conf.emulate_motion && (cnt->startup_frames == 0)) {
+    if ((cnt->conf.emulate_motion || cnt->event_user) && (cnt->startup_frames == 0)) {
         cnt->detecting_motion = 1;
         if (cnt->conf.post_capture > 0) {
             /* Setup the postcap counter */
@@ -2533,7 +2532,7 @@ static void mlp_actions(struct context *cnt){
         cnt->current_image->flags |= IMAGE_PRECAP;
         /* gapless movie feature */
         if ((cnt->conf.event_gap == 0) && (cnt->detecting_motion == 1))
-            cnt->makemovie = 1;
+            cnt->event_stop = TRUE;
         cnt->detecting_motion = 0;
     }
 
@@ -2550,15 +2549,15 @@ static void mlp_actions(struct context *cnt){
      */
     if ((cnt->conf.movie_max_time && cnt->event_nr == cnt->prev_event) &&
         (cnt->currenttime - cnt->eventtime >= cnt->conf.movie_max_time))
-        cnt->makemovie = 1;
+        cnt->event_stop = TRUE;
 
     /*
      * Now test for quiet longer than 'gap' OR make movie as decided in
      * previous statement.
      */
     if (((cnt->currenttime - cnt->lasttime >= cnt->conf.event_gap) && cnt->conf.event_gap > 0) ||
-          cnt->makemovie) {
-        if (cnt->event_nr == cnt->prev_event || cnt->makemovie) {
+          cnt->event_stop) {
+        if (cnt->event_nr == cnt->prev_event || cnt->event_stop) {
 
             /* Flush image buffer */
             process_image_ring(cnt, IMAGE_BUFFER_FLUSH);
@@ -2580,7 +2579,9 @@ static void mlp_actions(struct context *cnt){
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cnt->event_nr);
 
-            cnt->makemovie = 0;
+            cnt->event_stop = FALSE;
+            cnt->event_user = FALSE;
+
             /* Reset post capture */
             cnt->postcap = 0;
 
@@ -2603,7 +2604,7 @@ static void mlp_actions(struct context *cnt){
 }
 
 static void mlp_setupmode(struct context *cnt){
-/***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
+    /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
     /* If CAMERA_VERBOSE enabled output some numbers to console */
     if (cnt->conf.setup_mode) {
@@ -2765,7 +2766,6 @@ static void mlp_loopback(struct context *cnt){
 
 }
 
-
 static void mlp_parmsupdate(struct context *cnt){
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
@@ -2901,7 +2901,7 @@ static void *motion_loop(void *arg)
     struct context *cnt = arg;
 
     if (motion_init(cnt) == 0){
-        while (!cnt->finish || cnt->makemovie) {
+        while (!cnt->finish || cnt->event_stop) {
             mlp_prepare(cnt);
             if (cnt->get_image) {
                 mlp_resetimages(cnt);
@@ -3370,7 +3370,7 @@ static void motion_watchdog(int indx){
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Thread %d - Watchdog timeout. Trying to do a graceful restart")
             , cnt_list[indx]->threadnr);
-        cnt_list[indx]->makemovie = 1; /* Trigger end of event */
+        cnt_list[indx]->event_stop = TRUE; /* Trigger end of event */
         cnt_list[indx]->finish = 1;
     }
 

@@ -315,7 +315,8 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         "    <div class=\"dropdown\">\n"
         "      <button onclick='display_actions()' id=\"act_drop\" class=\"dropbtn\">%s</button>\n"
         "      <div id='act_btn' class=\"dropdown-content\">\n"
-        "        <a onclick=\"action_click('/action/makemovie');\">%s</a>\n"
+        "        <a onclick=\"action_click('/action/eventstart');\">%s</a>\n"
+        "        <a onclick=\"action_click('/action/eventend');\">%s</a>\n"
         "        <a onclick=\"action_click('/action/snapshot');\">%s</a>\n"
         "        <a onclick=\"action_click('config');\">%s</a>\n"
         "        <a onclick=\"action_click('/config/write');\">%s</a>\n"
@@ -326,7 +327,8 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         "      </div>\n"
         "    </div>\n"
         ,_("Action")
-        ,_("Make Movie")
+        ,_("Start Event")
+        ,_("End Event")
         ,_("Snapshot")
         ,_("Change Configuration")
         ,_("Write Configuration")

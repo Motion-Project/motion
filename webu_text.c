@@ -151,7 +151,7 @@ static void webu_text_quit(struct webui_ctx *webui) {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
             _("httpd quits thread %d"),webui->thread_nbr);
         webui->cnt->restart = 0;
-        webui->cnt->makemovie = 1;
+        webui->cnt->event_stop = TRUE;
         webui->cnt->finish = 1;
     }
 
@@ -252,6 +252,22 @@ static void webu_text_action(struct webui_ctx *webui) {
         webu_process_action(webui);
         snprintf(response,sizeof(response)
             ,"makemovie for camera %d \nDone\n"
+            ,webui->cnt->camera_id
+        );
+        webu_write(webui, response);
+
+    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0){
+        webu_process_action(webui);
+        snprintf(response,sizeof(response)
+            ,"Start event for camera %d \nDone\n"
+            ,webui->cnt->camera_id
+        );
+        webu_write(webui, response);
+
+    } else if (!strcmp(webui->uri_cmd2,"eventend")){
+        webu_process_action(webui);
+        snprintf(response,sizeof(response)
+            ,"End event for camera %d \nDone\n"
             ,webui->cnt->camera_id
         );
         webu_write(webui, response);

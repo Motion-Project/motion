@@ -405,7 +405,8 @@ struct context {
 
     /* Commands to the motion thread */
     volatile unsigned int snapshot;    /* Make a snapshot */
-    volatile unsigned int makemovie;   /* End a movie */
+    volatile unsigned int event_stop;  /* Boolean for whether to stop a event */
+    volatile unsigned int event_user;  /* Boolean for whether to user triggered an event */
     volatile unsigned int finish;      /* End the thread */
     volatile unsigned int restart;     /* Restart the thread when it ends */
     /* Is the motion thread running */
