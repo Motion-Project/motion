@@ -1303,8 +1303,11 @@ static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
 static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual,
                                  int xoff, int yoff, struct coord *cent, struct images *imgs)
 {
+    char fmtcmd[PATH_MAX];
     cnt->track_posx += cent->x;
     cnt->track_posy += cent->y;
+
+    mystrftime(cnt, fmtcmd, sizeof(fmtcmd), cnt->track.generic_move, &cnt->current_image->timestamp_tv, NULL, 0);
 
     if (!fork()) {
         int i;
@@ -1348,7 +1351,7 @@ static unsigned int generic_move(struct context *cnt, enum track_action action, 
         for (i = getdtablesize() - 1; i > 2; i--)
             close(i);
 
-        execl("/bin/sh", "sh", "-c", cnt->track.generic_move, " &", NULL);
+        execl("/bin/sh", "sh", "-c", fmtcmd, " &", NULL);
 
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
@@ -1360,7 +1363,7 @@ static unsigned int generic_move(struct context *cnt, enum track_action action, 
 
     MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
         ,_("Executing external command '%s'")
-        , cnt->track.generic_move);
+        , fmtcmd);
 
     return cnt->track.move_wait;
 }
