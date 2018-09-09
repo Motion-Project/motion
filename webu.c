@@ -542,13 +542,25 @@ void webu_process_action(struct webui_ctx *webui) {
     int indx;
 
     indx = 0;
-    if (!strcmp(webui->uri_cmd2,"makemovie")){
+    if ((strcmp(webui->uri_cmd2,"makemovie") == 0) ||
+        (strcmp(webui->uri_cmd2,"eventend") == 0)) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
-            while (webui->cntlst[++indx])
-            webui->cntlst[indx]->makemovie = 1;
+            while (webui->cntlst[++indx]){
+                webui->cntlst[indx]->event_stop = TRUE;
+            }
         } else {
-            webui->cnt->makemovie = 1;
+            webui->cnt->event_stop = TRUE;
         }
+
+    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0){
+        if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
+            while (webui->cntlst[++indx]){
+                webui->cntlst[indx]->event_user = TRUE;
+            }
+        } else {
+            webui->cnt->event_user = TRUE;
+        }
+
     } else if (!strcmp(webui->uri_cmd2,"snapshot")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             while (webui->cntlst[++indx])
@@ -556,6 +568,8 @@ void webu_process_action(struct webui_ctx *webui) {
         } else {
             webui->cnt->snapshot = 1;
         }
+
+
     } else if (!strcmp(webui->uri_cmd2,"restart")){
         /* This is the legacy method...(we can do better than signals..).*/
         if (webui->thread_nbr == 0) {
@@ -566,7 +580,7 @@ void webu_process_action(struct webui_ctx *webui) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                 _("httpd is going to restart thread %d"),webui->thread_nbr);
             if (webui->cnt->running) {
-                webui->cnt->makemovie = 1;
+                webui->cnt->event_stop = TRUE;
                 webui->cnt->finish = 1;
             }
             webui->cnt->restart = 1;
