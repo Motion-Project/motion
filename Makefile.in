@@ -39,7 +39,7 @@ CFLAGS       = @CFLAGS@ -Wall \
 	 -DMOTIONDOCDIR=\"$(DESTDIR)$(docdir)\"    \
 	 @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
-LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
+LIBS         = @LIBS@ @FFMPEG_LIBS@ @MMAL_LIBS@ -ldrm
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
 			   video_loopback.o video_v4l2.o video_common.o video_bktr.o \
 			   netcam.o netcam_http.o netcam_ftp.o netcam_jpeg.o netcam_wget.o \
