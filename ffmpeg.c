@@ -676,6 +676,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
         } else {
             ffmpeg->ctx_codec->gop_size = (ffmpeg->fps / 2);
         }
+        ffmpeg->gop_cnt = ffmpeg->ctx_codec->gop_size - 1;
     }
 
     /*  For certain containers, setting the fps to very low numbers results in
