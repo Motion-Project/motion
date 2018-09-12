@@ -1470,6 +1470,11 @@ static int motion_init(struct context *cnt)
 
     /* Set threshold value */
     cnt->threshold = cnt->conf.threshold;
+    if (cnt->conf.threshold_maximum > cnt->conf.threshold ){
+        cnt->threshold_maximum = cnt->conf.threshold_maximum;
+    } else {
+        cnt->threshold_maximum = (cnt->imgs.height * cnt->imgs.width * 3) / 2;
+    }
 
     if (cnt->conf.stream_preview_method == 99){
         /* This is the depreciated Stop stream process */
@@ -2246,9 +2251,10 @@ static void mlp_detection(struct context *cnt){
                 cnt->current_image->diffs = alg_switchfilter(cnt, cnt->current_image->diffs,
                                                              cnt->current_image->image_norm);
 
-                if (cnt->current_image->diffs <= cnt->threshold) {
-                    cnt->current_image->diffs = 0;
+                if ((cnt->current_image->diffs <= cnt->threshold) ||
+                    (cnt->current_image->diffs > cnt->threshold_maximum)) {
 
+                    cnt->current_image->diffs = 0;
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
                 }
             }
@@ -2318,26 +2324,28 @@ static void mlp_tuning(struct context *cnt){
      * changes of noise_level are used.
      */
     if (cnt->process_thisframe) {
-        if (!cnt->conf.noise_tune)
-            cnt->noise = cnt->conf.noise_level;
-
         /*
          * threshold tuning if enabled
          * if we are not threshold tuning lets make sure that remote controlled
          * changes of threshold are used.
          */
-        if (cnt->conf.threshold_tune)
+        if (cnt->conf.threshold_tune){
             alg_threshold_tune(cnt, cnt->current_image->diffs, cnt->detecting_motion);
-        else
-            cnt->threshold = cnt->conf.threshold;
+        }
 
         /*
          * If motion is detected (cnt->current_image->diffs > cnt->threshold) and before we add text to the pictures
          * we find the center and size coordinates of the motion to be used for text overlays and later
          * for adding the locate rectangle
          */
-        if (cnt->current_image->diffs > cnt->threshold)
-            alg_locate_center_size(&cnt->imgs, cnt->imgs.width, cnt->imgs.height, &cnt->current_image->location);
+        if ((cnt->current_image->diffs > cnt->threshold) &&
+            (cnt->current_image->diffs < cnt->threshold_maximum)){
+
+            alg_locate_center_size(&cnt->imgs
+                , cnt->imgs.width
+                , cnt->imgs.height
+                , &cnt->current_image->location);
+            }
 
         /*
          * Update reference frame.
@@ -2347,7 +2355,9 @@ static void mlp_tuning(struct context *cnt){
          * at a constant level.
          */
 
-        if ((cnt->current_image->diffs > cnt->threshold) && (cnt->conf.lightswitch_percent == 1) &&
+        if ((cnt->current_image->diffs > cnt->threshold) &&
+            (cnt->current_image->diffs < cnt->threshold_maximum) &&
+            (cnt->conf.lightswitch_percent >= 1) &&
             (cnt->lightswitch_framecounter < (cnt->lastrate * 2)) && /* two seconds window only */
             /* number of changed pixels almost the same in two consecutive frames and */
             ((abs(cnt->previous_diffs - cnt->current_image->diffs)) < (cnt->previous_diffs / 15)) &&
@@ -2450,7 +2460,8 @@ static void mlp_actions(struct context *cnt){
 
     /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
-    if (cnt->current_image->diffs > cnt->threshold) {
+    if ((cnt->current_image->diffs > cnt->threshold) &&
+        (cnt->current_image->diffs < cnt->threshold_maximum)) {
         /* flag this image, it have motion */
         cnt->current_image->flags |= IMAGE_MOTION;
         cnt->lightswitch_framecounter++; /* micro lightswitch */
@@ -2774,62 +2785,71 @@ static void mlp_parmsupdate(struct context *cnt){
     /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
     /* Check for some config parameter changes but only every second */
-    if (cnt->shots == 0) {
+    if (cnt->shots != 0) return;
 
-        init_text_scale(cnt);  /* Initialize and validate text_scale */
+    init_text_scale(cnt);  /* Initialize and validate text_scale */
 
-        if (strcasecmp(cnt->conf.picture_output, "on") == 0)
-            cnt->new_img = NEWIMG_ON;
-        else if (strcasecmp(cnt->conf.picture_output, "first") == 0)
-            cnt->new_img = NEWIMG_FIRST;
-        else if (strcasecmp(cnt->conf.picture_output, "best") == 0)
-            cnt->new_img = NEWIMG_BEST;
-        else if (strcasecmp(cnt->conf.picture_output, "center") == 0)
-            cnt->new_img = NEWIMG_CENTER;
-        else
-            cnt->new_img = NEWIMG_OFF;
+    if (strcasecmp(cnt->conf.picture_output, "on") == 0)
+        cnt->new_img = NEWIMG_ON;
+    else if (strcasecmp(cnt->conf.picture_output, "first") == 0)
+        cnt->new_img = NEWIMG_FIRST;
+    else if (strcasecmp(cnt->conf.picture_output, "best") == 0)
+        cnt->new_img = NEWIMG_BEST;
+    else if (strcasecmp(cnt->conf.picture_output, "center") == 0)
+        cnt->new_img = NEWIMG_CENTER;
+    else
+        cnt->new_img = NEWIMG_OFF;
 
-        if (strcasecmp(cnt->conf.locate_motion_mode, "on") == 0)
-            cnt->locate_motion_mode = LOCATE_ON;
-        else if (strcasecmp(cnt->conf.locate_motion_mode, "preview") == 0)
-            cnt->locate_motion_mode = LOCATE_PREVIEW;
-        else
-            cnt->locate_motion_mode = LOCATE_OFF;
+    if (strcasecmp(cnt->conf.locate_motion_mode, "on") == 0)
+        cnt->locate_motion_mode = LOCATE_ON;
+    else if (strcasecmp(cnt->conf.locate_motion_mode, "preview") == 0)
+        cnt->locate_motion_mode = LOCATE_PREVIEW;
+    else
+        cnt->locate_motion_mode = LOCATE_OFF;
 
-        if (strcasecmp(cnt->conf.locate_motion_style, "box") == 0)
-            cnt->locate_motion_style = LOCATE_BOX;
-        else if (strcasecmp(cnt->conf.locate_motion_style, "redbox") == 0)
-            cnt->locate_motion_style = LOCATE_REDBOX;
-        else if (strcasecmp(cnt->conf.locate_motion_style, "cross") == 0)
-            cnt->locate_motion_style = LOCATE_CROSS;
-        else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0)
-            cnt->locate_motion_style = LOCATE_REDCROSS;
-        else
-            cnt->locate_motion_style = LOCATE_BOX;
+    if (strcasecmp(cnt->conf.locate_motion_style, "box") == 0)
+        cnt->locate_motion_style = LOCATE_BOX;
+    else if (strcasecmp(cnt->conf.locate_motion_style, "redbox") == 0)
+        cnt->locate_motion_style = LOCATE_REDBOX;
+    else if (strcasecmp(cnt->conf.locate_motion_style, "cross") == 0)
+        cnt->locate_motion_style = LOCATE_CROSS;
+    else if (strcasecmp(cnt->conf.locate_motion_style, "redcross") == 0)
+        cnt->locate_motion_style = LOCATE_REDCROSS;
+    else
+        cnt->locate_motion_style = LOCATE_BOX;
 
-        /* Sanity check for smart_mask_speed, silly value disables smart mask */
-        if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
-            cnt->conf.smart_mask_speed = 0;
+    /* Sanity check for smart_mask_speed, silly value disables smart mask */
+    if (cnt->conf.smart_mask_speed < 0 || cnt->conf.smart_mask_speed > 10)
+        cnt->conf.smart_mask_speed = 0;
 
-        /* Has someone changed smart_mask_speed or framerate? */
-        if (cnt->conf.smart_mask_speed != cnt->smartmask_speed ||
-            cnt->smartmask_lastrate != cnt->lastrate) {
-            if (cnt->conf.smart_mask_speed == 0) {
-                memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
-                memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
-            }
-
-            cnt->smartmask_lastrate = cnt->lastrate;
-            cnt->smartmask_speed = cnt->conf.smart_mask_speed;
-            /*
-             * Decay delay - based on smart_mask_speed (framerate independent)
-             * This is always 5*smartmask_speed seconds
-             */
-            cnt->smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
+    /* Has someone changed smart_mask_speed or framerate? */
+    if (cnt->conf.smart_mask_speed != cnt->smartmask_speed ||
+        cnt->smartmask_lastrate != cnt->lastrate) {
+        if (cnt->conf.smart_mask_speed == 0) {
+            memset(cnt->imgs.smartmask, 0, cnt->imgs.motionsize);
+            memset(cnt->imgs.smartmask_final, 255, cnt->imgs.motionsize);
         }
 
-        dbse_sqlmask_update(cnt);
+        cnt->smartmask_lastrate = cnt->lastrate;
+        cnt->smartmask_speed = cnt->conf.smart_mask_speed;
+        /*
+            * Decay delay - based on smart_mask_speed (framerate independent)
+            * This is always 5*smartmask_speed seconds
+            */
+        cnt->smartmask_ratio = 5 * cnt->lastrate * (11 - cnt->smartmask_speed);
+    }
 
+    dbse_sqlmask_update(cnt);
+
+    cnt->threshold = cnt->conf.threshold;
+    if (cnt->conf.threshold_maximum > cnt->conf.threshold ){
+        cnt->threshold_maximum = cnt->conf.threshold_maximum;
+    } else {
+        cnt->threshold_maximum = (cnt->imgs.height * cnt->imgs.width * 3) / 2;
+    }
+
+    if (!cnt->conf.noise_tune){
+        cnt->noise = cnt->conf.noise_level;
     }
 
 }

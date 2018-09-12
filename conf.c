@@ -90,6 +90,7 @@ struct config conf_template = {
     /* Motion detection configuration parameters */
     .emulate_motion =                  FALSE,
     .threshold =                       DEF_CHANGES,
+    .threshold_maximum =               0,
     .threshold_tune =                  FALSE,
     .noise_level =                     DEF_NOISELEVEL,
     .noise_tune =                      TRUE,
@@ -651,6 +652,15 @@ config_param config_params[] = {
     "# Threshold for number of changed pixels that triggers motion.",
     0,
     CONF_OFFSET(threshold),
+    copy_int,
+    print_int,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "threshold_maximum",
+    "# The maximum threshold for number of changed pixels that triggers motion.",
+    0,
+    CONF_OFFSET(threshold_maximum),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED

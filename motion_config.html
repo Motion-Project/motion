@@ -1082,6 +1082,12 @@
           <td align="left"><a href="#threshold" >threshold</a></td>
         </tr>
         <tr>
+          <td height="17" align="left"></td>
+          <td align="left"></td>
+          <td align="left"></td>
+          <td align="left"><a href="#threshold_maximum" >threshold_maximum</a></td>
+        </tr>
+        <tr>
           <td height="17" align="left">threshold_tune</td>
           <td align="left">threshold_tune</td>
           <td align="left">threshold_tune</td>
@@ -1555,28 +1561,30 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#emulate_motion" >emulate_motion</a> </td>
               <td bgcolor="#edf4f9" ><a href="#threshold" >threshold</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#threshold_maximum" >threshold_maximum</a> </td>
               <td bgcolor="#edf4f9" ><a href="#threshold_tune" >threshold_tune</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#noise_level" >noise_level</a> </td>
               <td bgcolor="#edf4f9" ><a href="#noise_tune" >noise_tune</a> </td>
               <td bgcolor="#edf4f9" ><a href="#despeckle_filter" >despeckle_filter</a> </td>
               <td bgcolor="#edf4f9" ><a href="#area_detect" >area_detect</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#mask_file" >mask_file</a> </td>
               <td bgcolor="#edf4f9" ><a href="#mask_privacy" >mask_privacy</a> </td>
               <td bgcolor="#edf4f9" ><a href="#smart_mask_speed" >smart_mask_speed</a> </td>
               <td bgcolor="#edf4f9" ><a href="#lightswitch_percent" >lightswitch_percent</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
             </tr>
             <tr>
-             <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#lightswitch_frames" >lightswitch_frames</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#minimum_motion_frames" >minimum_motion_frames</a> </td>
               <td bgcolor="#edf4f9" ><a href="#event_gap" >event_gap</a> </td>
               <td bgcolor="#edf4f9" ><a href="#pre_capture" >pre_capture</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#post_capture" >post_capture</a> </td>
             </tr>
-
           </tbody>
         </table>
 
@@ -3338,6 +3346,20 @@
          the value. If motion detects too many birds or moving trees, increase the number. (Unless of course
          you are one of the many many users who use Motion to bird watch!)
          Practical values would be from a few hundred to thousands.
+        <p></p>
+
+        <h3><a name="threshold_maximum"></a> threshold_maximum</h3>
+        <p></p>
+        <ul>
+          <li> Type: Integer</li>
+          <li> Range / Valid values: 0, 1 to unlimited</li>
+          <li> Default: 0 (off)</li>
+        </ul>
+        <p></p>
+        This parameter specifies the maximum number of pixels that will trigger motion.  When the number of
+        changed pixels is above the maximum, it will not trigger an event.  The result is that Motion will
+        only trigger events when the number of pixels changes is above the threshold and less than
+        the threshold_maximum.  A value of zero disables threshold_maximum.
         <p></p>
 
         <h3><a name="threshold_tune"></a> threshold_tune </h3>
