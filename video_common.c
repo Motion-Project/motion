@@ -13,6 +13,7 @@
 #include "video_common.h"
 #include "video_v4l2.h"
 #include "video_bktr.h"
+#include "video_uvc.h"
 #include "jpegutils.h"
 
 typedef unsigned char uint8_t;
@@ -719,6 +720,12 @@ void vid_close(struct context *cnt) {
         return;
     }
 
+    if (cnt->camera_type == CAMERA_TYPE_UVC) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Cleaning up UVC device"));
+        uvc_cleanup(cnt);
+        return;
+    }
+
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"));
     return;
 
@@ -801,6 +808,15 @@ int vid_start(struct context *cnt) {
         return dev;
     }
 
+    if (cnt->camera_type == CAMERA_TYPE_UVC) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening UVC device"));
+        dev = uvc_start(cnt);
+        if (dev < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("UVC device failed to open"));
+        }
+        return dev;
+    }
+
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
         ,_("No Camera device specified (MMAL, Netcam, V4L2, BKTR)"));
     return dev;
@@ -858,6 +874,10 @@ int vid_next(struct context *cnt, struct image_data *img_data){
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
         return bktr_next(cnt, img_data);
+    }
+
+    if (cnt->camera_type == CAMERA_TYPE_UVC) {
+        return uvc_next(cnt, img_data);
     }
 
     return -2;

@@ -763,6 +763,9 @@ static int init_camera_type(struct context *cnt){
         }
     #endif // HAVE_V4L2
 
+            cnt->camera_type = CAMERA_TYPE_UVC;
+            return 0;
+
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         , _("Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"));

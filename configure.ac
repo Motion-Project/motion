@@ -116,6 +116,8 @@ if test "x${BKTR}" = "xyes"; then
   AC_DEFINE([HAVE_BKTR], 1, [Define to 1 if BKTR is around])
 fi
 
+AC_CHECK_HEADERS(libusb.h,[UVC="yes"],[UVC="no"])
+
 ##############################################################################
 ###  Check for threading
 ##############################################################################
@@ -228,6 +230,10 @@ AC_MSG_RESULT($INTL)
 AC_SUBST(INTL)
 AC_SUBST(LANGCDS)
 
+if test x$UVC = xyes ; then
+  TEMP_LIBS="$TEMP_LIBS -lusb"
+fi
+
 ##############################################################################
 ###  Check for JPG
 ##############################################################################
@@ -255,9 +261,9 @@ fi
 ##############################################################################
 ###  pkg-config
 ##############################################################################
-AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
-AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
-AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
+#AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
+#AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
+#AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
 
 ##############################################################################
 ###  Webp Image Format
@@ -761,6 +767,12 @@ if test "${BKTR}" = "yes"; then
     echo "BKTR support:        Yes"
 else
     echo "BKTR support:        No"
+fi
+
+if test "${UVC}" = "yes"; then
+    echo "UVC support:         Yes"
+else
+    echo "UVC support:         No"
 fi
 
 if test "${HAVE_MMAL}" = "yes"; then

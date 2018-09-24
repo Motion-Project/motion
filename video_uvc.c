@@ -4,27 +4,29 @@
  *
  * A sample program for LibUSB isochronous transfer using UVC cam.
  *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
- * Compiling and Running
- *
- *   (Mac OS)
- *
- *     $ cc -Wall -I/opt/local/include/libusb-1.0 -L/opt/local/lib -lusb-1.0
- *         -o ex41 ex41.c 
- *
- *   (FreeBSD)
- *
- *     $ cc -Wall -lusb -o ex41 ex41.c
- *
- *   (Run)
- *
- *     $ ./ex41 bFrameIndex [file]
- *     $ ./ex41 1 | mplayer - -demuxer rawvideo -rawvideo w=640:h=480:yuy2
- *     $ ./ex41 1 | ffmpeg -f rawvideo  -s 1280x720 -i - tmp.avi
- *
- *     show all frame indexes and sizes.
- *
- *     $ ./ex41 0
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  *
  * Reference
  *
@@ -42,8 +44,12 @@
  *
  *     USB 2.0 Specification Universal Serial Bus Revision 2.0 specification,
  *     (usb_20.pdf), <http://www.USB.org/developers/>.
+ *
  */
 
+#include "translate.h"
+#include "rotate.h"     /* Already includes motion.h */
+#include "video_common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,7 +111,6 @@ uvc_device uvc_device_list[] =
 
 uvc_device uvc;
 
-
 int width;
 int height;
 int XferType;                   /* isochronous / bulk */
@@ -115,6 +120,9 @@ int FrameBufferSize;            /* FrameSize * BitPerPixel */
 uint8_t *padding;               /* padding data */
 uint32_t PKT_LEN;               /* dwMaxPayloadTransferSize 0xc00, 0xa80,... */
 int finish;
+
+static pthread_mutex_t uvc_mutex;
+
 #define PKTS_PER_XFER  0x40
 #define NUM_TRANSFER   2
 
@@ -136,7 +144,7 @@ int totalFrame = 0;
 #define TRUE  1
 #define FALSE 0
 
-
+#if 0
 void
 signal_callback_handler(int signum)
 {
@@ -280,6 +288,7 @@ signal_callback_handler(int signum)
                 break;
         }
 }
+#endif
 
 
 static void cb(struct libusb_transfer *xfer)
@@ -287,7 +296,6 @@ static void cb(struct libusb_transfer *xfer)
         uint8_t *p;
         int plen;
         int i;
-	int stop = 0;
 
         p = xfer->buffer;
 
@@ -320,6 +328,7 @@ static void cb(struct libusb_transfer *xfer)
 //                write(fd, p + p[0], plen);
 
                 /* update padding data */
+		if (finish == 0)
                 memcpy(padding + total, p + p[0], plen);
 
                 total += plen;
@@ -337,13 +346,14 @@ static void cb(struct libusb_transfer *xfer)
 //                                write(fd, padding + total,
 //                                      FrameBufferSize - total);
                                 fprintf(stderr, "insufficient frame data.\n");
+				// retry
+				total = 0;
                         }
 
 			if(total == FrameBufferSize) {
-			stop = 1;
-			for (i=0; i<NUM_TRANSFER; i++)
-			libusb_cancel_transfer(xfers[i]);
-			finish = 1;
+				for (i=0; i<NUM_TRANSFER; i++)
+					libusb_cancel_transfer(xfers[i]);
+				finish = 1;
 			}
 
                         total = 0;
@@ -352,15 +362,37 @@ static void cb(struct libusb_transfer *xfer)
         }
 
         /* re-submit a transfer before returning. */
-        if (stop == 0 && libusb_submit_transfer(xfer) != 0)
+        if (finish == 0 && libusb_submit_transfer(xfer) != 0)
         {
                 fprintf(stderr, "submit transfer failed.\n");
         }
 }
 
-int frameIndex;
+int frameIndex = 3;   /* 640x480 */
 
-int uvc_start()
+void uvc_mutex_init(void) {
+#ifdef HAVE_BKTR
+    pthread_mutex_init(&uvc_mutex, NULL);
+#else
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+#endif
+}
+
+void uvc_mutex_destroy(void) {
+#ifdef HAVE_BKTR
+    pthread_mutex_destroy(&uvc_mutex);
+#else
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
+#endif
+}
+
+void uvc_cleanup(struct context *cnt)
+{
+
+        libusb_exit(ctx);
+}
+
+int uvc_start(struct context *cnt)
 {
         libusb_device **devs;
         libusb_device *dev;
@@ -578,10 +610,22 @@ FOUND:
         if (libusb_claim_interface(handle, 0) != 0)
                 fprintf(stderr, "claim interface failed.\n");
 
-	return 0;
+        cnt->imgs.width = width;
+        cnt->imgs.height = height;
+
+        cnt->vdev = mymalloc(sizeof(struct vdev_context));
+        memset(cnt->vdev, 0, sizeof(struct vdev_context));
+        cnt->vdev->usrctrl_array = NULL;
+	cnt->vdev->usrctrl_count = 0;
+	cnt->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
+
+        cnt->imgs.size_norm = (width * height * 3) / 2;
+        cnt->imgs.motionsize = width * height;
+
+	return 1;
 }
 
-int ucv_next()
+int uvc_next(struct context *cnt,  struct image_data *img_data)
 {
 	int i;
         uint8_t *buf = (void *)malloc(1024);
@@ -686,14 +730,15 @@ int ucv_next()
          * do an isochronous / bulk transfer
          */
 
+	uint8_t *data[NUM_TRANSFER];
         for (i=0; i<NUM_TRANSFER; i++)
         {
                 xfers[i] = libusb_alloc_transfer(PKTS_PER_XFER);
-                uint8_t *data = malloc(PKT_LEN*PKTS_PER_XFER);
+                data[i] = malloc(PKT_LEN*PKTS_PER_XFER);
 
                 libusb_fill_iso_transfer(
                         xfers[i], handle, uvc.Endpoint,
-                        data, PKT_LEN*PKTS_PER_XFER, PKTS_PER_XFER,
+                        data[i], PKT_LEN*PKTS_PER_XFER, PKTS_PER_XFER,
                         cb, NULL, 0);
 
                 libusb_set_iso_packet_lengths(xfers[i], PKT_LEN);
@@ -703,14 +748,20 @@ int ucv_next()
                 if (libusb_submit_transfer(xfers[i]) != 0)
                         fprintf(stderr, "submit xfer failed.\n");
 
+	total = 0;
 	finish = 0;
         while (finish == 0)
                 libusb_handle_events(ctx);
 
-        for (i=0; i<NUM_TRANSFER; i++)
+        for (i=0; i<NUM_TRANSFER; i++) {
                 libusb_free_transfer(xfers[i]);
+		free(data[i]);
+	}
 
         libusb_set_interface_alt_setting(handle, 1, 0);
+
+	vid_yuv422to420p(img_data->image_norm, padding, width, height);
+//	vid_yuv422to420p(img_data->image_norm, padding+width*2*height/2, width, height/2);
 
 	return 0;
 }
