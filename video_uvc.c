@@ -369,7 +369,7 @@ static void cb(struct libusb_transfer *xfer)
         }
 }
 
-int frameIndex = 3;   /* 640x480 */
+int frameIndex;
 
 void uvc_mutex_init(void) {
 #ifdef HAVE_BKTR
@@ -508,6 +508,7 @@ FOUND:
 //                        if (buf[i+3] == frameIndex)
                         if (cnt->conf.width == width && cnt->conf.height)
                         {
+				frameIndex = buf[i+3];
                                 foundIt = TRUE;
                                 break;
                         }
