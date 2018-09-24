@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2018 Hiroki Mori
  * Copyright (c) 2012-2014 SAITOU Toshihide
  * All rights reserved.
  *
@@ -310,6 +311,8 @@ static void cb(struct libusb_transfer *xfer)
                 /* packet only contains an acknowledge? */
                 if (plen < 2)
                         continue;
+                if (finish == 1)
+                        break;
 
                 /* error packet */
                 if (p[1] & UVC_STREAM_ERR) /* bmHeaderInfo */
@@ -329,7 +332,6 @@ static void cb(struct libusb_transfer *xfer)
 //                write(fd, p + p[0], plen);
 
                 /* update padding data */
-		if (finish == 0)
                 memcpy(padding + total, p + p[0], plen);
 
                 total += plen;
@@ -337,7 +339,6 @@ static void cb(struct libusb_transfer *xfer)
                 /* this is the EOF data. */
                 if (p[1] & UVC_STREAM_EOF)
                 {
-                        fprintf(stderr, "%d\n", total);
                         if (total < FrameBufferSize)
                         {
                                 /*
@@ -358,7 +359,6 @@ static void cb(struct libusb_transfer *xfer)
 			}
 
                         total = 0;
-                        fprintf(stderr, "%d\n", ++totalFrame);
                 }
         }
 
@@ -444,7 +444,7 @@ FOUND:
         if (!foundIt)
         {
                 fprintf(stderr, "device not found.\n");
-                exit(1);
+                return -1;
         }
 
         libusb_open(dev, &handle);
@@ -494,7 +494,7 @@ FOUND:
         if (!foundIt)
         {
                 fprintf(stderr, "no SC_VIDEOSTREAMING.\n");
-                exit(1);
+                return -1;
         }
 
         for (i = 0; i < intfDesc->extra_length;)
@@ -505,7 +505,8 @@ FOUND:
                         width = (buf[i+6]<<8) | buf[i+5];
                         height = (buf[i+8]<<8) | buf[i+7];
                         fprintf(stderr, "%d: %dx%d\n", buf[i+3], width, height);
-                        if (buf[i+3] == frameIndex)
+//                        if (buf[i+3] == frameIndex)
+                        if (cnt->conf.width == width && cnt->conf.height)
                         {
                                 foundIt = TRUE;
                                 break;
@@ -517,7 +518,7 @@ FOUND:
         if (!foundIt)
         {
                 fprintf(stderr, "Can't find the frame index.\n");
-                exit(1);
+                return -1;
         }
 
 
@@ -541,7 +542,7 @@ FOUND:
         if (!foundIt)
         {
                 fprintf(stderr, "no VS_FORMAT_UNCOMPRESSED.\n");
-                exit(1);
+		return -1;
         }
 
 
@@ -580,7 +581,7 @@ FOUND:
         if (!foundIt)
         {
                 fprintf(stderr, "Can't find the appropriate endpoint.\n");
-                exit(1);
+		return -1;
         }
 
         if (uvc.AltSetting == 0)
@@ -767,7 +768,6 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
         libusb_set_interface_alt_setting(handle, 1, 0);
 
 	vid_yuv422to420p(img_data->image_norm, padding, width, height);
-//	vid_yuv422to420p(img_data->image_norm, padding+width*2*height/2, width, height/2);
 #endif
 
 	return 0;

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2018 Hiroki Mori
  * Copyright (c) 2012-2014 SAITOU Toshihide
  * All rights reserved.
  *
