@@ -53,13 +53,7 @@
 #include "rotate.h"     /* Already includes motion.h */
 #include "video_common.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
 #include <libusb.h>
-#include <fcntl.h>
 
 #include "video_uvc.h"
 
@@ -134,162 +128,105 @@ struct libusb_transfer * xfers[NUM_TRANSFER];
 int total = 0;
 int16_t brightness;
 
-/* for debug */
-struct timeval tv1;
-struct timeval tv2;
-struct timezone tz;
-int totalFrame = 0;
-
 /* boolean */
 #define TRUE  1
 #define FALSE 0
 
-#if 0
-void
-signal_callback_handler(int signum)
+static void
+uvc_ctrl()
 {
         uint8_t buf[2];
-        int i;
 
-        switch (signum)
-        {
-        case SIGUSR1:
+        /* 
+         * BSW20K07HWH
+         *   min: 0xff81, max: 0x0080, res: 0x0001
+         * UCAM-DLY300TA
+         *   min: 0x000a, max: 0xfff6, res: 0x0001
+         */
 
-                /* 
-                 * BSW20K07HWH
-                 *   min: 0xff81, max: 0x0080, res: 0x0001
-                 * UCAM-DLY300TA
-                 *   min: 0x000a, max: 0xfff6, res: 0x0001
-                 * 前者は cur を段階的に設定できたが後者は 2 値のみ受け付けた．
-                 * 別の設定と連動しているかあるいは何れかの値がおかしい．
-                 *
-                 * いずれも VC_PROCESSING_UNIT の bUnitID が 2 であり
-                 * 下記の通りこの値が固定かつ同一のコーディングとなっている．
-                 */
+        /* 
+         * PU_BRIGHTNESS_CONTROL(0x02), GET_MIN(0x82) [UVC1.5, p. 160,
+         * 158, 96]
+         */
+        libusb_control_transfer(
+                handle, 0xa1, 0x82, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "brightness min: %02x%02x\n", buf[1], buf[0]);
 
-                /* 
-                 * PU_BRIGHTNESS_CONTROL(0x02), GET_MIN(0x82) [UVC1.5, p. 160,
-                 * 158, 96]
-                 */
-                libusb_control_transfer(
-                        handle, 0xa1, 0x82, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
-                fprintf(stderr, "brightness min: %02x%02x\n", buf[1], buf[0]);
+        /*
+         * PU_BRIGHTNESS_CONTROL(0x02), GET_MAX(0x83) [UVC1.5, p. 160,
+         * 158, 96]
+         */
+        libusb_control_transfer(
+                handle, 0xa1, 0x83, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "brightness max: %02x%02x\n", buf[1], buf[0]);
 
-                /*
-                 * PU_BRIGHTNESS_CONTROL(0x02), GET_MAX(0x83) [UVC1.5, p. 160,
-                 * 158, 96]
-                 */
-                libusb_control_transfer(
-                        handle, 0xa1, 0x83, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
-                fprintf(stderr, "brightness max: %02x%02x\n", buf[1], buf[0]);
+        /*
+         * PU_BRIGHTNESS_CONTROL(0x02), GET_RES(0x84) [UVC1.5, p. 160,
+         * 158, 96]
+         */
+        libusb_control_transfer(
+                handle, 0xa1, 0x84, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "brightness res: %02x%02x\n", buf[1], buf[0]);
 
-                /*
-                 * PU_BRIGHTNESS_CONTROL(0x02), GET_RES(0x84) [UVC1.5, p. 160,
-                 * 158, 96]
-                 */
-                libusb_control_transfer(
-                        handle, 0xa1, 0x84, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
-                fprintf(stderr, "brightness res: %02x%02x\n", buf[1], buf[0]);
+        /*
+         * PU_BRIGHTNESS_CONTROL(0x02), GET_CUR(0x81) [UVC1.5, p. 160,
+         * 158, 96]
+         */
+        libusb_control_transfer(
+                handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "brightness cur: %02x%02x\n", buf[1], buf[0]);
 
-                /*
-                 * PU_BRIGHTNESS_CONTROL(0x02), GET_CUR(0x81) [UVC1.5, p. 160,
-                 * 158, 96]
-                 */
-                libusb_control_transfer(
-                        handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
-                fprintf(stderr, "brightness cur: %02x%02x\n", buf[1], buf[0]);
+        /* change brightness */
+        brightness = buf[1]<<8 | buf[0];
+//      brightness += 30;
+        brightness += 1;
+        buf[1] = brightness<<8;
+        buf[0] = brightness & 0xff;
 
-                /* change brightness */
-                brightness = buf[1]<<8 | buf[0];
-//                brightness += 30;
-                brightness += 1;
-                buf[1] = brightness<<8;
-                buf[0] = brightness & 0xff;
+        /*
+         * PU_BRIGHTNESS_CONTROL(0x02), SET_CUR(0x01) [UVC1.5, p. 160,
+         * 158, 96]
+         */
+        libusb_control_transfer(
+                handle, 0x21, 0x01, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
 
-                /*
-                 * PU_BRIGHTNESS_CONTROL(0x02), SET_CUR(0x01) [UVC1.5, p. 160,
-                 * 158, 96]
-                 */
-                libusb_control_transfer(
-                        handle, 0x21, 0x01, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
-
-                /*
-                 * PU_BRIGHTNESS_CONTROL(0x02), GET_CUR(0x81) [UVC1.5, p. 160,
-                 * 158, 96]
-                 */
-                libusb_control_transfer(
-                        handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
-                fprintf(stderr, "brightness: %02x%02x\n", buf[1], buf[0]);
-
-                /*
-                 * こんだけコマンドを一度に送信するとデータが乱れる．
-                 */
-
-                break;
-
-        case SIGUSR2:
-
-                /*
-                 * <UCAM-DLY300TA Elecom Corp.> では，パッケージにオート・フォー
-                 * カス対応とあり CT_FOCUS_AUTO_CONTROL で機能を制御できた．
-                 */
-
-                /*
-                 * CT_FOCUS_AUTO_CONTROL(0x08), GET_CUR(0x81) [UVC1.5, p. 160,
-                 * 159, 86]
-                 */
-                libusb_control_transfer(
-                        handle, 0xa1, 0x81, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
-                buf[0] = !buf[0];
-
-                /*
-                 * CT_FOCUS_AUTO_CONTROL(0x08), SET_CUR(0x01) [UVC1.5, p. 160,
-                 * 159, 86]
-                 */
-                libusb_control_transfer(
-                        handle, 0x21, 0x01, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
-                fprintf(stderr, "auto focus control: %02x\n", buf[0]);
-
-                break;
-
-        case SIGINT:
-        case SIGPIPE:
-
-                gettimeofday(&tv2, &tz);
-                fprintf(stderr, "time lapse: %ld\n", 
-                        ((tv2.tv_sec - tv1.tv_sec) * 1000000)
-                        + tv2.tv_usec - tv1.tv_usec);
-                fprintf(stderr, "fps: %d\n", 
-                        (int) ((1000000*totalFrame) /
-                               (long)(((tv2.tv_sec - tv1.tv_sec) * 1000000)
-                                      + tv2.tv_usec - tv1.tv_usec)) );
-
-                for (i=0; i<NUM_TRANSFER; i++)
-                {
-                        if (libusb_cancel_transfer(xfers[i]))
-                                fprintf(stderr, "cancel transfer 0 failed\n");
-                        libusb_free_transfer(xfers[i]);
-                }
-
-                /*
-                 * このインタフェースと代替設定は存在しないので失敗するがこれに
-                 * より NOT STREAMING 状態への遷移には成功する．
-                 */
-                libusb_set_interface_alt_setting(handle, 1, 0);
-
-                //libusb_reset_device(handle);
-                //libusb_close(handle);
-                libusb_exit(ctx);
-
-
-                exit(signum);
-
-        default:
-                break;
-        }
+        /*
+         * PU_BRIGHTNESS_CONTROL(0x02), GET_CUR(0x81) [UVC1.5, p. 160,
+         * 158, 96]
+         */
+        libusb_control_transfer(
+                handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "brightness: %02x%02x\n", buf[1], buf[0]);
 }
-#endif
 
+static void
+uvc_forcus()
+{
+        uint8_t buf[2];
+
+        /*
+         * CT_FOCUS_AUTO_CONTROL(0x08), GET_CUR(0x81) [UVC1.5, p. 160,
+         * 159, 86]
+         */
+        libusb_control_transfer(
+                handle, 0xa1, 0x81, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
+        buf[0] = !buf[0];
+
+        /*
+         * CT_FOCUS_AUTO_CONTROL(0x08), SET_CUR(0x01) [UVC1.5, p. 160,
+         * 159, 86]
+         */
+        libusb_control_transfer(
+                handle, 0x21, 0x01, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "auto focus control: %02x\n", buf[0]);
+
+}
 
 static void cb(struct libusb_transfer *xfer)
 {
@@ -323,7 +260,8 @@ static void cb(struct libusb_transfer *xfer)
                 if (plen + total > FrameBufferSize)
                 {
 #if DEBUG
-                        fprintf(stderr, "truncate the excess payload length.\n");
+                        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                                "truncate the excess payload length.\n");
 #endif
                         plen = FrameBufferSize - total;
                 }
@@ -345,7 +283,8 @@ static void cb(struct libusb_transfer *xfer)
                                  */
 //                                write(fd, padding + total,
 //                                      FrameBufferSize - total);
-                                fprintf(stderr, "insufficient frame data.\n");
+                                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                                        "insufficient frame data.\n");
 				// retry
 				total = 0;
                         }
@@ -363,7 +302,8 @@ static void cb(struct libusb_transfer *xfer)
         /* re-submit a transfer before returning. */
         if (finish == 0 && libusb_submit_transfer(xfer) != 0)
         {
-                fprintf(stderr, "submit transfer failed.\n");
+                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                        "submit transfer failed.\n");
         }
 }
 
@@ -425,7 +365,8 @@ int uvc_start(struct context *cnt)
 FOUND:
         if (!foundIt)
         {
-                fprintf(stderr, "device not found.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "device not found.\n");
                 return -1;
         }
 
@@ -442,12 +383,13 @@ FOUND:
         {
                 if (libusb_kernel_driver_active(handle, i) == 1)
                 {
-                        fprintf(stderr,
+                        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                                 "detaching kernel driver for interface %d.\n", i);
 
                         if (libusb_detach_kernel_driver(handle, i) != 0)
                         {
-                                fprintf(stderr, "detach failed.\n");
+                                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                                        "detach failed.\n");
                         }
                 }
         }
@@ -475,7 +417,8 @@ FOUND:
 
         if (!foundIt)
         {
-                fprintf(stderr, "no SC_VIDEOSTREAMING.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "no SC_VIDEOSTREAMING.\n");
                 return -1;
         }
 
@@ -486,8 +429,8 @@ FOUND:
                 {
                         width = (buf[i+6]<<8) | buf[i+5];
                         height = (buf[i+8]<<8) | buf[i+7];
-                        fprintf(stderr, "%d: %dx%d\n", buf[i+3], width, height);
-//                        if (buf[i+3] == frameIndex)
+                        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                                "%d: %dx%d\n", buf[i+3], width, height);
                         if (cnt->conf.width == width && cnt->conf.height)
                         {
 				frameIndex = buf[i+3];
@@ -500,7 +443,8 @@ FOUND:
 
         if (!foundIt)
         {
-                fprintf(stderr, "Can't find the frame index.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "Can't find the frame index.\n");
                 return -1;
         }
 
@@ -523,8 +467,9 @@ FOUND:
         }
 
         if (!foundIt)
-        {
-                fprintf(stderr, "no VS_FORMAT_UNCOMPRESSED.\n");
+        { 
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "no VS_FORMAT_UNCOMPRESSED.\n");
 		return -1;
         }
 
@@ -563,7 +508,8 @@ FOUND:
 
         if (!foundIt)
         {
-                fprintf(stderr, "Can't find the appropriate endpoint.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "Can't find the appropriate endpoint.\n");
 		return -1;
         }
 
@@ -574,8 +520,8 @@ FOUND:
                 XferType = LIBUSB_TRANSFER_TYPE_ISOCHRONOUS;
         else
                 XferType = LIBUSB_TRANSFER_TYPE_BULK;
-        fprintf(stderr, "XferType: %x\n", XferType);
-
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "XferType: %x\n", XferType);
 
         uvc.FrameIndex = frameIndex;
         FrameSize = width * height;
@@ -592,11 +538,13 @@ FOUND:
 
         /* set the active configuration */
         if (libusb_set_configuration(handle, uvc.ConfVal) != 0)
-                fprintf(stderr, "set configuration failed.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "set configuration failed.\n");
 
         /* claim an interface in a given libusb_handle. */
         if (libusb_claim_interface(handle, 0) != 0)
-                fprintf(stderr, "claim interface failed.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "claim interface failed.\n");
 
         cnt->imgs.width = width;
         cnt->imgs.height = height;
@@ -707,13 +655,15 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
 
         /* claim an interface in a given libusb_handle. */
         if (libusb_claim_interface(handle, uvc.IfNum) != 0)
-                fprintf(stderr, "claim interface failed.\n");
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "claim interface failed.\n");
 
         /* activate an alternate setting for an interface. */
         if (uvc.AltSetting != 0)
                 if (libusb_set_interface_alt_setting(
-                            handle, uvc.IfNum, uvc.AltSetting) != 0)
-                        fprintf(stderr, "activate an alternate setting failed.\n");
+                        handle, uvc.IfNum, uvc.AltSetting) != 0)
+                        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                                "activate an alternate setting failed.\n");
 
 
         /*
@@ -736,7 +686,8 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
 
         for (i=0; i<NUM_TRANSFER; i++)
                 if (libusb_submit_transfer(xfers[i]) != 0)
-                        fprintf(stderr, "submit xfer failed.\n");
+                        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                                "submit xfer failed.\n");
 
 	total = 0;
 	finish = 0;
