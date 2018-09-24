@@ -123,8 +123,6 @@ uint8_t *padding;               /* padding data */
 uint32_t PKT_LEN;               /* dwMaxPayloadTransferSize 0xc00, 0xa80,... */
 int finish;
 
-static pthread_mutex_t uvc_mutex;
-
 #define PKTS_PER_XFER  0x40
 #define NUM_TRANSFER   2
 
@@ -370,22 +368,6 @@ static void cb(struct libusb_transfer *xfer)
 }
 
 int frameIndex;
-
-void uvc_mutex_init(void) {
-#ifdef HAVE_BKTR
-    pthread_mutex_init(&uvc_mutex, NULL);
-#else
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-#endif
-}
-
-void uvc_mutex_destroy(void) {
-#ifdef HAVE_BKTR
-    pthread_mutex_destroy(&uvc_mutex);
-#else
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("BKTR is not enabled."));
-#endif
-}
 
 void uvc_cleanup(struct context *cnt)
 {
