@@ -53,12 +53,11 @@
 #include "rotate.h"     /* Already includes motion.h */
 #include "video_common.h"
 
+#include "video_uvc.h"
+
 #if HAVE_UVC
 
 #include <libusb.h>
-
-#include "video_uvc.h"
-
 
 typedef struct uvc_device
 {
