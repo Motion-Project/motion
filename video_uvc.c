@@ -53,6 +53,8 @@
 #include "rotate.h"     /* Already includes motion.h */
 #include "video_common.h"
 
+#if HAVE_UVC
+
 #include <libusb.h>
 
 #include "video_uvc.h"
@@ -307,6 +309,7 @@ static void cb(struct libusb_transfer *xfer)
                         "submit transfer failed.\n");
         }
 }
+#endif
 
 void uvc_cleanup(struct context *cnt)
 {
