@@ -116,7 +116,19 @@ if test "x${BKTR}" = "xyes"; then
   AC_DEFINE([HAVE_BKTR], 1, [Define to 1 if BKTR is around])
 fi
 
-AC_CHECK_HEADERS(libusb.h,[UVC="yes"],[UVC="no"])
+UVC="yes"
+AC_ARG_WITH(uvc,
+  AS_HELP_STRING([--without-uvc],
+    [Exclude to use uvc subsystem]),
+  UVC="$withval")
+
+if test "x${UVC}" = "xyes"; then
+  AC_CHECK_HEADERS(libusb.h,[UVC="yes"],[UVC="no"])
+fi
+
+if test "x${UVC}" = "xyes"; then
+  AC_DEFINE([HAVE_UVC], 1, [Define to 1 if UVC is around])
+fi
 
 ##############################################################################
 ###  Check for threading

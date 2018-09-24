@@ -2,6 +2,7 @@
  * Copyright (c) 2012-2014 SAITOU Toshihide
  * All rights reserved.
  *
+ * This code based on ex41.c.
  * A sample program for LibUSB isochronous transfer using UVC cam.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -388,12 +389,15 @@ void uvc_mutex_destroy(void) {
 
 void uvc_cleanup(struct context *cnt)
 {
+#if HAVE_UVC
 
         libusb_exit(ctx);
+#endif
 }
 
 int uvc_start(struct context *cnt)
 {
+#if HAVE_UVC
         libusb_device **devs;
         libusb_device *dev;
         const struct libusb_interface *intf;
@@ -621,12 +625,14 @@ FOUND:
 
         cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;
+#endif
 
 	return 1;
 }
 
 int uvc_next(struct context *cnt,  struct image_data *img_data)
 {
+#if HAVE_UVC
 	int i;
         uint8_t *buf = (void *)malloc(1024);
         /*
@@ -762,43 +768,7 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
 
 	vid_yuv422to420p(img_data->image_norm, padding, width, height);
 //	vid_yuv422to420p(img_data->image_norm, padding+width*2*height/2, width, height/2);
-
-	return 0;
-}
-
-#if 0
-int main( int argc, char **argv)
-{
-
-        /*
-         * handle the command argument.
-         */
-
-        if (argc < 2 || argc > 3)
-        {
-                fprintf(stderr, "Usage: ex41 bFrameIndex [file]\n");
-                exit(1);
-        }
-
-        frameIndex = strtol( argv[1], NULL, 0 );
-
-        /*
-         * regsiter the signal callback.
-         */
-
-        signal(SIGINT, signal_callback_handler);
-        signal(SIGPIPE, signal_callback_handler);
-        signal(SIGUSR1, signal_callback_handler);
-        signal(SIGUSR2, signal_callback_handler);
-
-	uvc_start();
-
-	int j;
-	for (j = 0; j < 10; ++j)
-		ucv_next();
-
-        libusb_exit(ctx);
-
-	return 0;
-}
 #endif
+
+	return 0;
+}
