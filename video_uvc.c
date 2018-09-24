@@ -316,6 +316,8 @@ void uvc_cleanup(struct context *cnt)
 #if HAVE_UVC
 
         libusb_exit(ctx);
+#else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
 }
 
@@ -563,6 +565,9 @@ FOUND:
 
         cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;
+
+#else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
 
 	return 1;
@@ -708,6 +713,9 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
         libusb_set_interface_alt_setting(handle, 1, 0);
 
 	vid_yuv422to420p(img_data->image_norm, padding, width, height);
+
+#else
+        if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
 
 	return 0;
