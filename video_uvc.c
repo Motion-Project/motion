@@ -127,6 +127,7 @@ libusb_device_handle *handle;
 struct libusb_transfer * xfers[NUM_TRANSFER];
 int total = 0;
 int16_t brightness;
+int frameIndex;
 
 /* boolean */
 #define TRUE  1
@@ -307,8 +308,6 @@ static void cb(struct libusb_transfer *xfer)
         }
 }
 
-int frameIndex;
-
 void uvc_cleanup(struct context *cnt)
 {
 #if HAVE_UVC
@@ -473,6 +472,13 @@ FOUND:
 		return -1;
         }
 
+        if (BitPerPixel != 16)
+        { 
+                MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
+                        "only support 16 bit yuv \n");
+		return -1;
+        }
+
 
         /*
          * search payload transfer endpoint.
@@ -526,10 +532,7 @@ FOUND:
         uvc.FrameIndex = frameIndex;
         FrameSize = width * height;
 
-        if (BitPerPixel == 16)
-                FrameBufferSize = 2*FrameSize;
-        else if (BitPerPixel == 8)
-                FrameBufferSize = 1*FrameSize;
+        FrameBufferSize = 2*FrameSize;
 
         padding = (void *) malloc(FrameBufferSize); 
 
