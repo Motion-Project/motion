@@ -91,6 +91,9 @@ uvc_device uvc_device_list[] =
         /* C920: Logitech Inc., LOGICOOL HD Webcam C920 */
         { 0x046d, 0x082d, 0, 1, 1, 10, 0x81, 1, 0x0300, 0x0100 },
 
+	/* Logitech HD Webcam C270 */
+        { 0x046d, 0x0825, 0, 1, 1, 10, 0x81, 1, 0x0300, 0x0100 },
+
         /* UCAM-MS130: Etron Technology, Inc., UCAM-MS130SV */
         { 0x056e, 0x7012, 0, 1, 1,  0, 0x81, 2, 0x0300, 0x0100 },
 
