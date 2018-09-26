@@ -584,9 +584,6 @@ FOUND:
         cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;
 
-#else
-        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
-#endif
 
         /*
          * negotiate the streaming parameters
@@ -716,6 +713,9 @@ FOUND:
 
         pthread_create(&thread, NULL, thread_func, NULL);
 
+#else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
+#endif
 	return 1;
 }
 
