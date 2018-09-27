@@ -125,7 +125,7 @@ uvc_device uvc;
 
 uint8_t *padding;               /* padding data */
 int finish;
-int CaptStat;                   /* Capture 0 = no, 1 = now, 2 = done, 3 = end */
+int CaptStat;                   /* Capture 0 = no, 1 = next, 2 = now, 3 = done, 4 = end */
 pthread_t thread;
 
 libusb_context *ctx = NULL;
@@ -270,7 +270,7 @@ static void cb(struct libusb_transfer *xfer)
 //                write(fd, p + p[0], plen);
 
                 /* update padding data */
-		if (CaptStat == 1)
+		if (CaptStat == 2)
                         memcpy(padding + total, p + p[0], plen);
 
                 total += plen;
@@ -290,8 +290,11 @@ static void cb(struct libusb_transfer *xfer)
                                         "insufficient frame data.\n");
                         }
 
-			if(total == uvc.FrameBufferSize && CaptStat == 1) {
+			if (CaptStat == 1) {
                                 CaptStat = 2;
+			} else if(CaptStat == 2) {
+			        if(total == uvc.FrameBufferSize)
+                                        CaptStat = 3;
 			}
 
                         total = 0;
@@ -308,7 +311,7 @@ static void cb(struct libusb_transfer *xfer)
 
 void *thread_func(void *param)
 {
-        while (CaptStat != 3)
+        while (CaptStat != 4)
                 libusb_handle_events(ctx);
 }
 
@@ -322,7 +325,7 @@ void uvc_cleanup(struct context *cnt)
                 libusb_free_transfer(xfers[i]);
 	}
 
-	CaptStat = 3;
+	CaptStat = 4;
 	pthread_join(thread, NULL);
 
         libusb_set_interface_alt_setting(handle, 1, 0);
@@ -724,9 +727,10 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
 #if HAVE_UVC
 
 	CaptStat = 1;
-        while (CaptStat != 2) 
+        while (CaptStat != 3) 
                 SLEEP(0,500000000L);
 
+	CaptStat = 0;
 	vid_yuv422to420p(img_data->image_norm, padding,
                 cnt->imgs.width, cnt->imgs.height);
 
