@@ -153,7 +153,7 @@ uvc_ctrl()
         libusb_control_transfer(
                 handle, 0xa1, 0x82, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "brightness min: %02x%02x\n", buf[1], buf[0]);
+                "brightness min: %02x%02x", buf[1], buf[0]);
 
         /*
          * PU_BRIGHTNESS_CONTROL(0x02), GET_MAX(0x83) [UVC1.5, p. 160,
@@ -162,7 +162,7 @@ uvc_ctrl()
         libusb_control_transfer(
                 handle, 0xa1, 0x83, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "brightness max: %02x%02x\n", buf[1], buf[0]);
+                "brightness max: %02x%02x", buf[1], buf[0]);
 
         /*
          * PU_BRIGHTNESS_CONTROL(0x02), GET_RES(0x84) [UVC1.5, p. 160,
@@ -171,7 +171,7 @@ uvc_ctrl()
         libusb_control_transfer(
                 handle, 0xa1, 0x84, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "brightness res: %02x%02x\n", buf[1], buf[0]);
+                "brightness res: %02x%02x", buf[1], buf[0]);
 
         /*
          * PU_BRIGHTNESS_CONTROL(0x02), GET_CUR(0x81) [UVC1.5, p. 160,
@@ -180,7 +180,7 @@ uvc_ctrl()
         libusb_control_transfer(
                 handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "brightness cur: %02x%02x\n", buf[1], buf[0]);
+                "brightness cur: %02x%02x", buf[1], buf[0]);
 
         /* change brightness */
         brightness = buf[1]<<8 | buf[0];
@@ -203,7 +203,7 @@ uvc_ctrl()
         libusb_control_transfer(
                 handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "brightness: %02x%02x\n", buf[1], buf[0]);
+                "brightness: %02x%02x", buf[1], buf[0]);
 }
 
 static void
@@ -226,7 +226,7 @@ uvc_forcus()
         libusb_control_transfer(
                 handle, 0x21, 0x01, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "auto focus control: %02x\n", buf[0]);
+                "auto focus control: %02x", buf[0]);
 
 }
 
@@ -263,7 +263,7 @@ static void cb(struct libusb_transfer *xfer)
                 {
 #if DEBUG
                         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                                "truncate the excess payload length.\n");
+                                "truncate the excess payload length.");
 #endif
                         plen = uvc.FrameBufferSize - total;
                 }
@@ -287,7 +287,7 @@ static void cb(struct libusb_transfer *xfer)
 //                                write(fd, padding + total,
 //                                      uvc.FrameBufferSize - total);
                                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                                        "insufficient frame data.\n");
+                                        "insufficient frame data.");
                         }
 
 			if (CaptStat == 1) {
@@ -305,7 +305,7 @@ static void cb(struct libusb_transfer *xfer)
         if (libusb_submit_transfer(xfer) != 0)
         {
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                        "submit transfer failed.\n");
+                        "submit transfer failed.");
         }
 }
 
@@ -391,7 +391,7 @@ FOUND:
         if (!foundIt)
         {
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "device not found.\n");
+                        "device not found.");
                 return -1;
         }
 
@@ -409,12 +409,12 @@ FOUND:
                 if (libusb_kernel_driver_active(handle, i) == 1)
                 {
                         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                                "detaching kernel driver for interface %d.\n", i);
+                                "detaching kernel driver for interface %d.", i);
 
                         if (libusb_detach_kernel_driver(handle, i) != 0)
                         {
                                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                                        "detach failed.\n");
+                                        "detach failed.");
                         }
                 }
         }
@@ -443,7 +443,7 @@ FOUND:
         if (!foundIt)
         {
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "no SC_VIDEOSTREAMING.\n");
+                        "no SC_VIDEOSTREAMING.");
                 return -1;
         }
 
@@ -455,7 +455,7 @@ FOUND:
                         width = (buf[i+6]<<8) | buf[i+5];
                         height = (buf[i+8]<<8) | buf[i+7];
                         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                                "%d: %dx%d\n", buf[i+3], width, height);
+                                "%d: %dx%d", buf[i+3], width, height);
                         if (cnt->conf.width == width && cnt->conf.height)
                         {
 				frameIndex = buf[i+3];
@@ -469,7 +469,7 @@ FOUND:
         if (!foundIt)
         {
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "Can't find the frame index.\n");
+                        "Can't find the frame index.");
                 return -1;
         }
 
@@ -494,14 +494,14 @@ FOUND:
         if (!foundIt)
         { 
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "no VS_FORMAT_UNCOMPRESSED.\n");
+                        "no VS_FORMAT_UNCOMPRESSED.");
 		return -1;
         }
 
         if (BitPerPixel != 16)
         { 
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "only support 16 bit yuv \n");
+                        "only support 16 bit yuv ");
 		return -1;
         }
 
@@ -541,7 +541,7 @@ FOUND:
         if (!foundIt)
         {
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "Can't find the appropriate endpoint.\n");
+                        "Can't find the appropriate endpoint.");
 		return -1;
         }
 
@@ -553,7 +553,7 @@ FOUND:
         else
                 XferType = LIBUSB_TRANSFER_TYPE_BULK;
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "XferType: %x\n", XferType);
+                "XferType: %x", XferType);
 
         uvc.FrameIndex = frameIndex;
         FrameSize = width * height;
@@ -568,12 +568,12 @@ FOUND:
         /* set the active configuration */
         if (libusb_set_configuration(handle, uvc.ConfVal) != 0)
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "set configuration failed.\n");
+                        "set configuration failed.");
 
         /* claim an interface in a given libusb_handle. */
         if (libusb_claim_interface(handle, 0) != 0)
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "claim interface failed.\n");
+                        "claim interface failed.");
 
         cnt->imgs.width = width;
         cnt->imgs.height = height;
@@ -668,7 +668,8 @@ FOUND:
 
         /* uvc.PktLen */
         uvc.PktLen = (buf[25]<<24 | buf[24]<<16 | buf[23]<<8 | buf[22]);
-//        fprintf(stderr, "dwMaxPayloadTransferSize: %08x\n", uvc.PktLen);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "dwMaxPayloadTransferSize: %08x", uvc.PktLen);
 
         /*
          * set interface, set alt interface [USB2.0, p. 250]
@@ -677,14 +678,14 @@ FOUND:
         /* claim an interface in a given libusb_handle. */
         if (libusb_claim_interface(handle, uvc.IfNum) != 0)
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                        "claim interface failed.\n");
+                        "claim interface failed.");
 
         /* activate an alternate setting for an interface. */
         if (uvc.AltSetting != 0)
                 if (libusb_set_interface_alt_setting(
                         handle, uvc.IfNum, uvc.AltSetting) != 0)
                         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                                "activate an alternate setting failed.\n");
+                                "activate an alternate setting failed.");
 
 
         /*
@@ -708,7 +709,7 @@ FOUND:
         for (i=0; i<NUM_TRANSFER; i++)
                 if (libusb_submit_transfer(xfers[i]) != 0)
                         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
-                                "submit xfer failed.\n");
+                                "submit xfer failed.");
 
         CaptStat = 0;
 
