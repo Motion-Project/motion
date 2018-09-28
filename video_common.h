@@ -33,6 +33,7 @@ struct video_dev {
     pthread_mutex_t          mutex;
     pthread_mutexattr_t      attr;
     void                    *v4l2_private;
+    void                    *uvc_private;
     struct vid_devctrl_ctx  *devctrl_array;     /*Array of all the controls in the device*/
     int                      devctrl_count;     /*Count of the controls in the device*/
     int                      starting;          /*Bool for whether the device is just starting*/

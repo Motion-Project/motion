@@ -59,6 +59,15 @@
 
 #include <libusb.h>
 
+#define PKTS_PER_XFER  0x40
+#define NUM_TRANSFER   2
+
+#define TIMEOUT 500             /* 500 ms */
+
+/* boolean */
+#define TRUE  1
+#define FALSE 0
+
 typedef struct uvc_device
 {
         uint16_t VID;
@@ -73,6 +82,14 @@ typedef struct uvc_device
         uint16_t TermId;        /* VC_INPUT_TERMINAL, bTerminalID<<8 */
 	int FrameBufferSize;    /* FrameSize * BitPerPixel */
         uint32_t PktLen;        /* dwMaxPayloadTransferSize 0xc00, 0xa80,... */
+        uint8_t *padding;       /* padding data */
+        int CaptStat;           /* Capture 0=no, 1=next, 2=now, 3=done, 4=end */
+        pthread_t thread;
+
+        libusb_context *ctx;
+        libusb_device_handle *handle;
+        struct libusb_transfer *xfers[NUM_TRANSFER];
+	int total;
 } uvc_device;
 
 uvc_device uvc_device_list[] =
@@ -111,27 +128,9 @@ uvc_device uvc_device_list[] =
         { 0, 0, 0, 0, 0, 0, 0 }
 };
 
-
-#define PKTS_PER_XFER  0x40
-#define NUM_TRANSFER   2
-
-#define TIMEOUT 500             /* 500 ms */
-
-/* boolean */
-#define TRUE  1
-#define FALSE 0
+static struct video_dev *viddevs = NULL;
 
 uvc_device uvc;
-
-uint8_t *padding;               /* padding data */
-int finish;
-int CaptStat;                   /* Capture 0 = no, 1 = next, 2 = now, 3 = done, 4 = end */
-pthread_t thread;
-
-libusb_context *ctx = NULL;
-libusb_device_handle *handle;
-struct libusb_transfer *xfers[NUM_TRANSFER];
-int total;
 
 static void
 uvc_ctrl()
@@ -151,7 +150,7 @@ uvc_ctrl()
          * 158, 96]
          */
         libusb_control_transfer(
-                handle, 0xa1, 0x82, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+                uvc.handle, 0xa1, 0x82, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                 "brightness min: %02x%02x", buf[1], buf[0]);
 
@@ -160,7 +159,7 @@ uvc_ctrl()
          * 158, 96]
          */
         libusb_control_transfer(
-                handle, 0xa1, 0x83, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+                uvc.handle, 0xa1, 0x83, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                 "brightness max: %02x%02x", buf[1], buf[0]);
 
@@ -169,7 +168,7 @@ uvc_ctrl()
          * 158, 96]
          */
         libusb_control_transfer(
-                handle, 0xa1, 0x84, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+                uvc.handle, 0xa1, 0x84, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                 "brightness res: %02x%02x", buf[1], buf[0]);
 
@@ -178,7 +177,7 @@ uvc_ctrl()
          * 158, 96]
          */
         libusb_control_transfer(
-                handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+                uvc.handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                 "brightness cur: %02x%02x", buf[1], buf[0]);
 
@@ -194,14 +193,14 @@ uvc_ctrl()
          * 158, 96]
          */
         libusb_control_transfer(
-                handle, 0x21, 0x01, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+                uvc.handle, 0x21, 0x01, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
 
         /*
          * PU_BRIGHTNESS_CONTROL(0x02), GET_CUR(0x81) [UVC1.5, p. 160,
          * 158, 96]
          */
         libusb_control_transfer(
-                handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
+                uvc.handle, 0xa1, 0x81, 0x0200, uvc.PuId, buf, 2, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                 "brightness: %02x%02x", buf[1], buf[0]);
 }
@@ -216,7 +215,7 @@ uvc_forcus()
          * 159, 86]
          */
         libusb_control_transfer(
-                handle, 0xa1, 0x81, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
+                uvc.handle, 0xa1, 0x81, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
         buf[0] = !buf[0];
 
         /*
@@ -224,7 +223,7 @@ uvc_forcus()
          * 159, 86]
          */
         libusb_control_transfer(
-                handle, 0x21, 0x01, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
+                uvc.handle, 0x21, 0x01, 0x0800, uvc.TermId, buf, 1, TIMEOUT);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                 "auto focus control: %02x", buf[0]);
 
@@ -248,8 +247,6 @@ static void cb(struct libusb_transfer *xfer)
                 /* packet only contains an acknowledge? */
                 if (plen < 2)
                         continue;
-                if (finish == 1)
-                        break;
 
                 /* error packet */
                 if (p[1] & UVC_STREAM_ERR) /* bmHeaderInfo */
@@ -259,45 +256,45 @@ static void cb(struct libusb_transfer *xfer)
                 plen -= p[0];
 
                 /* check the data size before write */
-                if (plen + total > uvc.FrameBufferSize)
+                if (plen + uvc.total > uvc.FrameBufferSize)
                 {
 #if DEBUG
                         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                                 "truncate the excess payload length.");
 #endif
-                        plen = uvc.FrameBufferSize - total;
+                        plen = uvc.FrameBufferSize - uvc.total;
                 }
 //                write(fd, p + p[0], plen);
 
                 /* update padding data */
-		if (CaptStat == 2)
-                        memcpy(padding + total, p + p[0], plen);
+		if (uvc.CaptStat == 2)
+                        memcpy(uvc.padding + uvc.total, p + p[0], plen);
 
-                total += plen;
+                uvc.total += plen;
 
                 /* this is the EOF data. */
                 if (p[1] & UVC_STREAM_EOF)
                 {
-                        if (total < uvc.FrameBufferSize)
+                        if (uvc.total < uvc.FrameBufferSize)
                         {
                                 /*
                                  * insufficient frame data, so pad with the
                                  * previous frame data.
                                  */
-//                                write(fd, padding + total,
-//                                      uvc.FrameBufferSize - total);
+//                                write(fd, uvc.padding + uvc.total,
+//                                      uvc.FrameBufferSize - uvc.total);
                                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
                                         "insufficient frame data.");
                         }
 
-			if (CaptStat == 1) {
-                                CaptStat = 2;
-			} else if(CaptStat == 2) {
-			        if(total == uvc.FrameBufferSize)
-                                        CaptStat = 3;
+			if (uvc.CaptStat == 1) {
+                                uvc.CaptStat = 2;
+			} else if(uvc.CaptStat == 2) {
+			        if(uvc.total == uvc.FrameBufferSize)
+                                        uvc.CaptStat = 3;
 			}
 
-                        total = 0;
+                        uvc.total = 0;
                 }
         }
 
@@ -311,8 +308,8 @@ static void cb(struct libusb_transfer *xfer)
 
 void *thread_func(void *param)
 {
-        while (CaptStat != 4)
-                libusb_handle_events(ctx);
+        while (uvc.CaptStat != 4)
+                libusb_handle_events(uvc.ctx);
 }
 
 #endif
@@ -322,15 +319,15 @@ void uvc_cleanup(struct context *cnt)
 #if HAVE_UVC
         int i;
         for (i=0; i<NUM_TRANSFER; i++) {
-                libusb_free_transfer(xfers[i]);
+                libusb_free_transfer(uvc.xfers[i]);
 	}
 
-	CaptStat = 4;
-	pthread_join(thread, NULL);
+	uvc.CaptStat = 4;
+	pthread_join(uvc.thread, NULL);
 
-        libusb_set_interface_alt_setting(handle, 1, 0);
+        libusb_set_interface_alt_setting(uvc.handle, 1, 0);
 
-        libusb_exit(ctx);
+        libusb_exit(uvc.ctx);
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
@@ -361,26 +358,34 @@ int uvc_start(struct context *cnt)
         int BitPerPixel;                /* 8: 1 byte/pixel, 16: 2 byte/pxel */
         int FrameSize;
 
+        struct video_dev *vdev;
+        char devname[64];
+        uint8_t bus, addr;
+
         /*
          * get cam device.
          */
 
-        libusb_init(&ctx);
+        libusb_init(&uvc.ctx);
 #if DEBUG
-        libusb_set_debug(ctx, 1);
+        libusb_set_debug(uvc.ctx, 1);
 #endif
-        libusb_get_device_list(ctx, &devs);
+        libusb_get_device_list(uvc.ctx, &devs);
 
         foundIt = FALSE;
         i = 0;
         while ((dev = devs[i++]) != NULL)
         {
+                bus = libusb_get_bus_number(dev);
+                addr = libusb_get_device_address(dev);
+                snprintf(devname, sizeof(devname), "/dev/ugen%u.%u", bus, addr);
                 libusb_get_device_descriptor(dev, &desc);
                 for (j = 0; uvc_device_list[j].VID != 0; j++)
                 {
                         uvc = uvc_device_list[j];
                         if (uvc.VID == desc.idVendor &&
-                            uvc.PID == desc.idProduct)
+                            uvc.PID == desc.idProduct &&
+                            !strcmp(cnt->conf.video_device, devname))
                         {
                                 foundIt = TRUE;
                                 goto FOUND;
@@ -395,9 +400,22 @@ FOUND:
                 return -1;
         }
 
-        libusb_open(dev, &handle);
-        libusb_free_device_list(devs, 1);
+        vdev = viddevs;
+        while (vdev) {
+                if (!strcmp(cnt->conf.video_device, vdev->video_device)) {
+                }
+                vdev = vdev->next;
+        }
+        vdev = mymalloc(sizeof(struct video_dev));
+        vdev->video_device = mymalloc(strlen(devname) + 1);
+        strcpy(vdev->video_device, devname);
+        vdev->uvc_private = mymalloc(sizeof(struct uvc_device));
+uvc_device uvc;
+uvc_device *uvc_private;
+        uvc_private = vdev->uvc_private;
 
+        libusb_open(dev, &uvc.handle);
+        libusb_free_device_list(devs, 1);
 
         /*
          * if the kernel driver is active, detach it.
@@ -406,12 +424,12 @@ FOUND:
         libusb_get_config_descriptor(dev, uvc.ConfIdx, &confDesc);
         for (i=0; i<confDesc->bNumInterfaces; i++)
         {
-                if (libusb_kernel_driver_active(handle, i) == 1)
+                if (libusb_kernel_driver_active(uvc.handle, i) == 1)
                 {
                         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                                 "detaching kernel driver for interface %d.", i);
 
-                        if (libusb_detach_kernel_driver(handle, i) != 0)
+                        if (libusb_detach_kernel_driver(uvc.handle, i) != 0)
                         {
                                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                                         "detach failed.");
@@ -560,18 +578,18 @@ FOUND:
 
         uvc.FrameBufferSize = 2*FrameSize;
 
-        padding = (void *) malloc(uvc.FrameBufferSize); 
+        uvc.padding = (void *) malloc(uvc.FrameBufferSize); 
 
         libusb_free_config_descriptor(confDesc);
 
 
         /* set the active configuration */
-        if (libusb_set_configuration(handle, uvc.ConfVal) != 0)
+        if (libusb_set_configuration(uvc.handle, uvc.ConfVal) != 0)
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                         "set configuration failed.");
 
-        /* claim an interface in a given libusb_handle. */
-        if (libusb_claim_interface(handle, 0) != 0)
+        /* claim an interface in a given libusb_uvc.handle. */
+        if (libusb_claim_interface(uvc.handle, 0) != 0)
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                         "claim interface failed.");
 
@@ -586,7 +604,6 @@ FOUND:
 
         cnt->imgs.size_norm = (width * height * 3) / 2;
         cnt->imgs.motionsize = width * height;
-
 
         /*
          * negotiate the streaming parameters
@@ -650,15 +667,15 @@ FOUND:
 
         /* VS_PROBE_CONTROL(0x01), SET_CUR(0x01)  [UVC1.5, p. 161, 158] */
         libusb_control_transfer(
-                handle, 0x21, 0x01, 0x0100, 0x0001, buf, 26, TIMEOUT);
+                uvc.handle, 0x21, 0x01, 0x0100, 0x0001, buf, 26, TIMEOUT);
 
         /* VS_PROBE_CONTROL(0x01), GET_MIN(0x82)  [UVC1.5, p. 161, 158] */
         libusb_control_transfer(
-                handle, 0xa1, 0x82, 0x0100, 0x0001, buf, 26, TIMEOUT);
+                uvc.handle, 0xa1, 0x82, 0x0100, 0x0001, buf, 26, TIMEOUT);
 
         /* VS_COMMIT_CONTROL(0x02), SET_CUR(0x01) [UVC1.5, p. 161, 158] */
         libusb_control_transfer(
-                handle, 0x21, 0x01, 0x0200, 0x0001, buf, 26, TIMEOUT);
+                uvc.handle, 0x21, 0x01, 0x0200, 0x0001, buf, 26, TIMEOUT);
 
 #if DEBUG
         for (i = 0; i < 26; i++)
@@ -675,15 +692,15 @@ FOUND:
          * set interface, set alt interface [USB2.0, p. 250]
          */
 
-        /* claim an interface in a given libusb_handle. */
-        if (libusb_claim_interface(handle, uvc.IfNum) != 0)
+        /* claim an interface in a given libusb_uvc.handle. */
+        if (libusb_claim_interface(uvc.handle, uvc.IfNum) != 0)
                 MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                         "claim interface failed.");
 
         /* activate an alternate setting for an interface. */
         if (uvc.AltSetting != 0)
                 if (libusb_set_interface_alt_setting(
-                        handle, uvc.IfNum, uvc.AltSetting) != 0)
+                        uvc.handle, uvc.IfNum, uvc.AltSetting) != 0)
                         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                                 "activate an alternate setting failed.");
 
@@ -695,27 +712,27 @@ FOUND:
 	uint8_t *data[NUM_TRANSFER];
         for (i=0; i<NUM_TRANSFER; i++)
         {
-                xfers[i] = libusb_alloc_transfer(PKTS_PER_XFER);
+                uvc.xfers[i] = libusb_alloc_transfer(PKTS_PER_XFER);
                 data[i] = malloc(uvc.PktLen*PKTS_PER_XFER);
 
                 libusb_fill_iso_transfer(
-                        xfers[i], handle, uvc.Endpoint,
+                        uvc.xfers[i], uvc.handle, uvc.Endpoint,
                         data[i], uvc.PktLen*PKTS_PER_XFER, PKTS_PER_XFER,
                         cb, NULL, 0);
 
-                libusb_set_iso_packet_lengths(xfers[i], uvc.PktLen);
+                libusb_set_iso_packet_lengths(uvc.xfers[i], uvc.PktLen);
         }
 
         for (i=0; i<NUM_TRANSFER; i++)
-                if (libusb_submit_transfer(xfers[i]) != 0)
+                if (libusb_submit_transfer(uvc.xfers[i]) != 0)
                         MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,
                                 "submit xfer failed.");
 
-        CaptStat = 0;
+        uvc.CaptStat = 0;
 
-	total = 0;
+	uvc.total = 0;
 
-        pthread_create(&thread, NULL, thread_func, NULL);
+        pthread_create(&uvc.thread, NULL, thread_func, NULL);
 
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
@@ -727,12 +744,12 @@ int uvc_next(struct context *cnt,  struct image_data *img_data)
 {
 #if HAVE_UVC
 
-	CaptStat = 1;
-        while (CaptStat != 3) 
+	uvc.CaptStat = 1;
+        while (uvc.CaptStat != 3) 
                 SLEEP(0,500000000L);
 
-	CaptStat = 0;
-	vid_yuv422to420p(img_data->image_norm, padding,
+	uvc.CaptStat = 0;
+	vid_yuv422to420p(img_data->image_norm, uvc.padding,
                 cnt->imgs.width, cnt->imgs.height);
 
 #else

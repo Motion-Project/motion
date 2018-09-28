@@ -273,9 +273,9 @@ fi
 ##############################################################################
 ###  pkg-config
 ##############################################################################
-AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
-AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
-AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
+#AC_CHECK_PROG([PKGCONFIG],[pkg-config],[yes],[no])
+#AM_CONDITIONAL([FOUND_PKGCONFIG], [test "x$PKGCONFIG" = xyes])
+#AM_COND_IF([FOUND_PKGCONFIG],,[AC_MSG_ERROR([Required package 'pkg-config' not found, please check motion_guide.html and install necessary dependencies.])])
 
 ##############################################################################
 ###  Webp Image Format
