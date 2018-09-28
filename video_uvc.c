@@ -120,9 +120,12 @@ uvc_device uvc_device_list[] =
 };
 
 static struct video_dev *viddevs = NULL;
+int numcam = 0;
+libusb_context *ctx;
 
 typedef struct uvc_data
 {
+	int no;
 	uvc_device *uvc;
         
 	int FrameBufferSize;    /* FrameSize * BitPerPixel */
@@ -131,7 +134,6 @@ typedef struct uvc_data
         int CaptStat;           /* Capture 0=no,1=next,2=now,3=done,4=end */
         pthread_t thread;
 
-        libusb_context *ctx;
         libusb_device_handle *handle;
         struct libusb_transfer *xfers[NUM_TRANSFER];
 	int total;
@@ -320,7 +322,7 @@ void *thread_func(void *param)
 	uvc_private = param;
 
         while (uvc_private->CaptStat != 4)
-                libusb_handle_events(uvc_private->ctx);
+                libusb_handle_events(ctx);
 }
 
 #endif
@@ -350,7 +352,9 @@ void uvc_cleanup(struct context *cnt)
 
         libusb_set_interface_alt_setting(uvc_private->handle, 1, 0);
 
-        libusb_exit(uvc_private->ctx);
+        /* last one */
+	if (uvc_private->no == numcam - 1)
+                libusb_exit(ctx);
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
@@ -390,11 +394,13 @@ int uvc_start(struct context *cnt)
          * get cam device.
          */
 
-        libusb_init(&uvc_private->ctx);
+        /* first one */
+        if (numcam == 0)
+                libusb_init(&ctx);
 #if DEBUG
-        libusb_set_debug(uvc_private->ctx, 1);
+        libusb_set_debug(ctx, 1);
 #endif
-        libusb_get_device_list(uvc_private->ctx, &devs);
+        libusb_get_device_list(ctx, &devs);
 
         foundIt = FALSE;
         i = 0;
@@ -757,7 +763,10 @@ FOUND:
 
 	uvc_private->total = 0;
 
-        pthread_create(&uvc_private->thread, NULL, thread_func, uvc_private);
+	uvc_private->no = numcam;
+	++numcam;
+	if (numcam == 1)
+                pthread_create(&uvc_private->thread, NULL, thread_func, uvc_private);
 
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
