@@ -386,6 +386,7 @@ int uvc_start(struct context *cnt)
         int FrameSize;
 
         struct video_dev *vdev;
+        struct video_dev *pdev;
         char devname[64];
         uint8_t bus, addr;
         uvc_data *uvc_private;
@@ -434,6 +435,8 @@ FOUND:
         vdev = viddevs;
         while (vdev) {
                 if (!strcmp(cnt->conf.video_device, vdev->video_device)) {
+                        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("multiple open"));
+                        return -1;
                 }
                 vdev = vdev->next;
         }
@@ -443,7 +446,6 @@ FOUND:
         vdev->uvc_private = mymalloc(sizeof(struct uvc_data));
         uvc_private = vdev->uvc_private;
         uvc_private->uvc = &uvc_device_list[j];
-        viddevs = vdev;
 
         libusb_open(dev, &uvc_private->handle);
         libusb_free_device_list(devs, 1);
@@ -765,8 +767,16 @@ FOUND:
 
 	uvc_private->no = numcam;
 	++numcam;
-	if (numcam == 1)
+	if (numcam == 1) {
+                viddevs = vdev;
                 pthread_create(&uvc_private->thread, NULL, thread_func, uvc_private);
+        } else {
+                pdev = viddevs;
+                while (pdev) {
+                        pdev = vdev->next;
+                }
+                pdev->next = vdev;
+         }
 
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
