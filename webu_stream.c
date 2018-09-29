@@ -32,7 +32,7 @@ static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui) {
 
 static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
     long jpeg_size;
-    char resp_head[60];
+    char resp_head[80];
     int  header_len;
     struct stream_data *local_stream;
 
@@ -62,17 +62,18 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
             return;
         }
         jpeg_size = local_stream->jpeg_size;
-        header_len = snprintf(resp_head, 60
-            ,"Content-type: image/jpeg\r\n"
+        header_len = snprintf(resp_head, 80
+            ,"--BoundaryString\r\n"
+            "Content-type: image/jpeg\r\n"
             "Content-Length: %9ld\r\n\r\n"
             ,jpeg_size);
         memcpy(webui->resp_page, resp_head, header_len);
         memcpy(webui->resp_page + header_len
             ,local_stream->jpeg_data
             ,jpeg_size);
-        /* Copy in the boundary string terminator after the jpg data at the end*/
-        memcpy(webui->resp_page + header_len + jpeg_size,"\r\n--BoundaryString\r\n",20);
-        webui->resp_used = header_len + jpeg_size + 20;
+        /* Copy in the terminator after the jpg data at the end*/
+        memcpy(webui->resp_page + header_len + jpeg_size,"\r\n",2);
+        webui->resp_used = header_len + jpeg_size + 2;
     pthread_mutex_unlock(&webui->cnt->mutex_stream);
 
 }
@@ -97,9 +98,11 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
     /* We use indx_start to send a few extra images when the stream starts*/
     if ((stream_pos == 0) || (webui->resp_used == 0)){
-        if (webui->resp_used == 0) indx_start = 1;
-        if (indx_start > 3) {
-            indx_start = 3;
+        if (webui->resp_used == 0){
+            indx_start = 1;
+        } else if (indx_start < 4) {
+            indx_start++;
+        } else {
             if (webui->cnt->conf.stream_maxrate > 1){
                 stream_rate =  (1000000000 / webui->cnt->conf.stream_maxrate);
                 SLEEP(0,stream_rate);
@@ -107,7 +110,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
                 SLEEP(1,0);
             }
         }
-        indx_start++;
+
         stream_pos = 0;
         webui->resp_used = 0;
 
