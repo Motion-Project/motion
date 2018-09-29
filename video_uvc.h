@@ -80,6 +80,9 @@ typedef struct videoFrameDescriptor {
         uint8_t bFrameIntervalType;
 } videoFrameDescriptor __attribute__((aligned(sizeof(void *))));
 
+void uvc_mutex_init(void);
+void uvc_mutex_destroy(void);
+
 int uvc_start(struct context *cnt);
 int uvc_next(struct context *cnt,  struct image_data *img_data);
 void uvc_cleanup(struct context *cnt);

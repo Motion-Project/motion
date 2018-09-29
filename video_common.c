@@ -675,12 +675,14 @@ void vid_mutex_init(void)
 {
     v4l2_mutex_init();
     bktr_mutex_init();
+    uvc_mutex_init();
 }
 
 void vid_mutex_destroy(void)
 {
     v4l2_mutex_destroy();
     bktr_mutex_destroy();
+    uvc_mutex_destroy();
 }
 
 void vid_close(struct context *cnt) {

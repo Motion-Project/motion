@@ -122,6 +122,7 @@ uvc_device uvc_device_list[] =
 static struct video_dev *viddevs = NULL;
 int numcam = 0;
 libusb_context *ctx;
+static pthread_mutex_t uvc_mutex;
 
 typedef struct uvc_data
 {
@@ -327,12 +328,30 @@ void *thread_func(void *param)
 
 #endif
 
+void uvc_mutex_init(void) {
+#ifdef HAVE_UVC
+        pthread_mutex_init(&uvc_mutex, NULL);
+#else
+         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
+#endif
+}
+    
+void uvc_mutex_destroy(void) {
+#ifdef HAVE_UVC
+        pthread_mutex_destroy(&uvc_mutex);
+#else   
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
+#endif
+}
+
 void uvc_cleanup(struct context *cnt)
 {
 #if HAVE_UVC
         uvc_data *uvc_private;
         struct video_dev *vdev;
         int i;
+
+        pthread_mutex_lock(&uvc_mutex);
 
         vdev = viddevs;
         while (vdev) {
@@ -352,9 +371,12 @@ void uvc_cleanup(struct context *cnt)
 
         libusb_set_interface_alt_setting(uvc_private->handle, 1, 0);
 
+        --numcam;
         /* last one */
-	if (uvc_private->no == numcam - 1)
+	if (uvc_private->no == 0)
                 libusb_exit(ctx);
+
+        pthread_mutex_unlock(&uvc_mutex);
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
@@ -394,6 +416,8 @@ int uvc_start(struct context *cnt)
         /*
          * get cam device.
          */
+
+        pthread_mutex_lock(&uvc_mutex);
 
         /* first one */
         if (numcam == 0)
@@ -778,6 +802,7 @@ FOUND:
                 pdev->next = vdev;
          }
 
+        pthread_mutex_unlock(&uvc_mutex);
 #else
         if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("UVC is not enabled."));
 #endif
