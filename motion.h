@@ -450,9 +450,6 @@ struct context {
     struct stream stream;
     int stream_count;
 
-    struct stream substream;
-    int substream_count;
-
     char hostname[PATH_MAX];
 
     int sql_mask;

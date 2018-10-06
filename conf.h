@@ -152,7 +152,6 @@ struct config {
 
     /* Live stream configuration parameters */
     int             stream_port;
-    int             substream_port;
     int             stream_localhost;
     int             stream_auth_method;
     const char      *stream_authentication;
