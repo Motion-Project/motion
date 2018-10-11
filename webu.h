@@ -53,6 +53,7 @@ struct webui_ctx {
     char *lang;                 /* Two character abbreviation for locale language*/
     char *lang_full;            /* Five character abbreviation for language-country*/
     int   thread_nbr;           /* Thread number provided from the uri */
+    char *text_eol;             /* End of line for text interface either <br> or "" */
     enum WEBUI_CNCT cnct_type;  /* Type of connection we are processing */
 
     char            *resp_page;        /* The response that will be sent */
