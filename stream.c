@@ -1242,22 +1242,6 @@ void stream_put(struct context *cnt, struct stream *stm, int *stream_count, unsi
     if (*stream_count <= 0)
         return;
 
-    /* substream put - scale image down and update pointer to the scaled buffer */
-    if (do_scale_down) {
-        /* TODO for now just scale 50%, better resize image to a config predefined size */
-
-        int origwidth = cnt->imgs.width, origheight = cnt->imgs.height;
-        int subwidth = origwidth/2, subheight = origheight/2;
-        int subsize = subwidth * subheight * 3 / 2;
-
-        /* allocate new buffer and scale image */
-        img = scale_half_yuv420p (origwidth, origheight, img);
-
-        image_width = subwidth;
-        image_height = subheight;
-        image_size = subsize;
-    }
-
     /* Lock the mutex */
     if (cnt->conf.stream_auth_method != 0)
         pthread_mutex_lock(&stream_auth_mutex);

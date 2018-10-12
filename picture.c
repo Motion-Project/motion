@@ -1262,33 +1262,6 @@ void put_fixed_mask(struct context *cnt, const char *file)
         "re-run motion to enable mask feature"), cnt->conf.mask_file);
 }
 
-/**
- * scale_half_yuv420p
- *      scale down by half yuv420p
- *
- * Returns pointer to scaled image
- */
-
-unsigned char *scale_half_yuv420p(int origwidth, int origheight, unsigned char *img)
-{
-    /* allocate buffer for resized image */
-    unsigned char *scaled_img = mymalloc ((origwidth/2 * origheight/2) * 3 / 2);
-
-    int i = 0, x, y;
-    for (y = 0; y < origheight; y+=2)
-        for (x = 0; x < origwidth; x+=2)
-            scaled_img[i++] = img[y * origwidth + x];
-
-    for (y = 0; y < origheight / 2; y+=2)
-        for (x = 0; x < origwidth; x += 4)
-        {
-            scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + x];
-            scaled_img[i++] = img[(origwidth * origheight) + (y * origwidth) + (x + 1)];
-        }
-
-    return scaled_img;
-}
-
 void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){
 
     int i = 0, x, y;

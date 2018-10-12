@@ -378,9 +378,6 @@ static void event_stream_put(struct context *cnt,
     if (cnt->conf.stream_preview_method == 99){
         if (cnt->conf.stream_port)
             stream_put(cnt, &cnt->stream, &cnt->stream_count, img_data->image_norm, 0);
-
-        if (cnt->conf.substream_port)
-            stream_put(cnt, &cnt->substream, &cnt->substream_count, img_data->image_norm, 1);
     } else {
         pthread_mutex_lock(&cnt->mutex_stream);
             /* Normal stream processing */

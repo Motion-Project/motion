@@ -1492,29 +1492,6 @@ static int motion_init(struct context *cnt)
             }
         }
 
-        /* Initialize 50% scaled substream server if substream port is specified to not 0
-        But only if dimensions are 8-modulo after scaling. Otherwise disable substream */
-        if (cnt->conf.substream_port){
-            if ((cnt->conf.width / 2) % 8 == 0  && (cnt->conf.height / 2) % 8 == 0){
-                if (stream_init (&(cnt->substream), cnt->conf.substream_port, cnt->conf.stream_localhost,
-                    cnt->conf.webcontrol_ipv6, cnt->conf.stream_cors_header) == -1) {
-                    MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                        ,_("Problem enabling motion-substream server in port %d")
-                        ,cnt->conf.substream_port);
-                    cnt->conf.substream_port = 0;
-                    cnt->finish = 1;
-                } else {
-                    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        ,_("Started motion-substream server on port %d (auth %s)")
-                        ,cnt->conf.substream_port
-                        ,cnt->conf.stream_auth_method ? _("Enabled"):_("Disabled"));
-                }
-            } else {
-                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-                    ,_("Original resolution must be modulo of 16 for substream"));
-                cnt->conf.substream_port = 0;
-            }
-        }
     } /* End of legacy stream methods*/
 
 
@@ -1619,9 +1596,6 @@ static void motion_cleanup(struct context *cnt) {
         /* This is the depreciated Stop stream process */
         if ((cnt->conf.stream_port) && (cnt->stream.socket != -1))
             stream_stop(&cnt->stream);
-
-        if ((cnt->conf.substream_port) && (cnt->substream.socket != -1))
-            stream_stop(&cnt->substream);
     }
 
     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
