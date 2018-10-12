@@ -110,6 +110,9 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     if (!strncmp(text_url, "file", 4))
         re = "(file)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
 
+    if (!strncmp(text_url, "jpeg", 4))
+        re = "(jpeg)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+
     if (!strncmp(text_url, "v4l2", 4))
         re = "(v4l2)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
 
@@ -321,6 +324,11 @@ static void *netcam_handler_loop(void *arg)
                         ,_("camera re-connected"));
                     open_error = 0;
                 }
+            } else if (netcam->caps.streaming == NCS_BLOCK) { /* MJPG-Block streaming */
+                /*
+                 * Since we cannot move in the stream here, because we will read past the
+                 * MJPG-block-header, error handling is done while reading MJPG blocks.
+                 */
             }
         }
 
@@ -730,9 +738,14 @@ int netcam_start(struct context *cnt){
     } else if ((url.service) && (!strcmp(url.service, "ftp"))) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_ftp"));
         retval = netcam_setup_ftp(netcam, &url);
+    } else if ((url.service) && (!strcmp(url.service, "jpeg"))) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_file()"));
+        retval = netcam_setup_file(netcam, &url);
+    } else if ((url.service) && (!strcmp(url.service, "mjpg"))) {
+        retval = netcam_setup_mjpg(netcam, &url);
     } else {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Invalid netcam service '%s' - must be http or ftp")
+            ,_("Invalid netcam service '%s' - must be http, ftp, mjpg, mjpeg, v4l2 or jpeg.")
             , url.service);
         retval = -1;
     }

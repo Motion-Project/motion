@@ -17,6 +17,8 @@
 
 #define CONNECT_TIMEOUT        10     /* Timeout on remote connection attempt */
 #define READ_TIMEOUT            5     /* Default timeout on recv requests */
+#define POLLING_TIMEOUT  READ_TIMEOUT /* File polling timeout [s] */
+#define POLLING_TIME  500*1000*1000   /* File polling time quantum [ns] (500ms) */
 #define MAX_HEADER_RETRIES      5     /* Max tries to find a header record */
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 
@@ -36,6 +38,10 @@ static const char *connect_req_close = "Connection: close\r\n";
 static const char *connect_req_keepalive = "Connection: Keep-Alive\r\n";
 
 static const char *connect_auth_req = "Authorization: Basic %s\r\n";
+
+
+tfile_context *file_new_context(void);
+void file_free_context(tfile_context* ctxt);
 
 
 /**
@@ -1457,6 +1463,349 @@ int netcam_setup_html(netcam_context_ptr netcam, struct url_t *url)
     return 0;
 }
 
+/**
+ * netcam_mjpg_buffer_refill
+ *
+ * This routing reads content from the MJPG-camera until the response
+ * buffer of the specified netcam_context is full. If the connection is
+ * lost during this operation, it tries to re-connect.
+ *
+ * Parameters:
+ *      netcam          Pointer to a netcam_context structure
+ *
+ * Returns:             The number of read bytes,
+ *                      or -1 if an fatal connection error occurs.
+ */
+static int netcam_mjpg_buffer_refill(netcam_context_ptr netcam)
+{
+    int retval;
+
+    if (netcam->response->buffer_left > 0)
+        return netcam->response->buffer_left;
+
+    while (1) {
+        retval = rbuf_read_bufferful(netcam);
+        if (retval <= 0) { /* If we got 0, we timeoutted. */
+            MOTION_LOG(ALR, TYPE_NETCAM, NO_ERRNO
+                ,_("Read error, trying to reconnect.."));
+            /* We may have lost the connexion */
+            if (netcam_http_request(netcam) < 0) {
+                MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                    ,_("lost the cam."));
+                return -1; /* We REALLY lost the cam... bail out for now. */
+            }
+        }
+
+        if (retval > 0)
+            break;
+    }
+
+    netcam->response->buffer_left = retval;
+    netcam->response->buffer_pos = netcam->response->buffer;
+
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("Refilled buffer with [%d] bytes from the network."), retval);
+
+    return retval;
+}
+
+
+/**
+ * netcam_read_mjpg_jpeg
+ *
+ *     This routine reads from a netcam using a MJPG-chunk based
+ *     protocol, used by Linksys WVC200 for example.
+ *     This implementation has been made by reverse-engineering
+ *     the protocol, so it may contain bugs and should be considered as
+ *     experimental.
+ *
+ * Protocol explanation:
+ *
+ *     The stream consists of JPG pictures, spanned across multiple
+ *     MJPG chunks (in general 3 chunks, altough that's not guaranteed).
+ *
+ *     Each data chunk can range from 1 to 65535 bytes + a header, altough
+ *     i have not seen anything bigger than 20000 bytes + a header.
+ *
+ *     One MJPG chunk is constituted by a header plus the chunk data.
+ *     The chunk header is of fixed size, and the following data size
+ *     and position in the frame is specified in the chunk header.
+ *
+ *     From what i have seen on WVC200 cameras, the stream always begins
+ *     on JPG frame boundary, so you don't have to worry about beginning
+ *     in the middle of a frame.
+ *
+ *     See netcam.h for the mjpg_header structure and more details.
+ *
+ * Parameters:
+ *      netcam          Pointer to a netcam_context structure
+ *
+ * Returns:             0 if an image was obtained from the camera,
+ *                      or -1 if an error occurred.
+ */
+static int netcam_read_mjpg_jpeg(netcam_context_ptr netcam)
+{
+    netcam_buff_ptr buffer;
+    mjpg_header mh;
+    size_t read_bytes;
+    int retval;
+
+    /*
+     * Initialisation - set our local pointers to the context
+     * information.
+     */
+    buffer = netcam->receiving;
+    /* Assure the target buffer is empty. */
+    buffer->used = 0;
+
+    if (netcam_mjpg_buffer_refill(netcam) < 0)
+        return -1;
+
+    /* Loop until we have a complete JPG. */
+    while (1) {
+        read_bytes = 0;
+        while (read_bytes < sizeof(mh)) {
+
+            /* Transfer what we have in buffer in the header structure. */
+            retval = rbuf_flush(netcam, ((char *)&mh) + read_bytes, sizeof(mh) - read_bytes);
+
+            read_bytes += retval;
+
+            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                ,_("Read [%d/%d] header bytes."), read_bytes, sizeof(mh));
+
+            /* If we don't have received a full header, refill our buffer. */
+            if (read_bytes < sizeof(mh)) {
+                if (netcam_mjpg_buffer_refill(netcam) < 0)
+                    return -1;
+            }
+        }
+
+        /* Now check the validity of our header. */
+        if (strncmp(mh.mh_magic, MJPG_MH_MAGIC, MJPG_MH_MAGIC_SIZE)) {
+            MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
+                ,_("Invalid header received, reconnecting"));
+            /*
+             * We shall reconnect to restart the stream, and get a chance
+             * to resync.
+             */
+            if (netcam_http_request(netcam) < 0)
+                return -1; /* We lost the cam... bail out. */
+            /* Even there, we need to resync. */
+            buffer->used = 0;
+            continue ;
+        }
+
+        /* Make room for the chunk. */
+        netcam_check_buffsize(buffer, (int) mh.mh_chunksize);
+
+        read_bytes = 0;
+        while (read_bytes < mh.mh_chunksize) {
+            retval = rbuf_flush(netcam, buffer->ptr + buffer->used + read_bytes,
+                                mh.mh_chunksize - read_bytes);
+            read_bytes += retval;
+            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                ,_("Read [%d/%d] chunk bytes, [%d/%d] total")
+                ,read_bytes, mh.mh_chunksize
+                ,buffer->used + read_bytes, mh.mh_framesize);
+
+            if (retval < (int) (mh.mh_chunksize - read_bytes)) {
+                /* MOTION_LOG(EMG, TYPE_NETCAM, NO_ERRNO, "Chunk incomplete, going to refill."); */
+                if (netcam_mjpg_buffer_refill(netcam) < 0)
+                    return -1;
+
+            }
+        }
+        buffer->used += read_bytes;
+
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            ,_("Chunk complete, buffer used [%d] bytes."), buffer->used);
+
+        /* Is our JPG image complete ? */
+        if (mh.mh_framesize == buffer->used) {
+            MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+                ,_("Image complete, buffer used [%d] bytes."), buffer->used);
+            break;
+        }
+        /* MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Rlen now at [%d] bytes", rlen); */
+    }
+
+    netcam_image_read_complete(netcam);
+
+    return 0;
+}
+
+/**
+ * netcam_setup_mjpg
+ *      This function will parse the netcam url, connect to the camera,
+ *      set its type to MJPG-Streaming, and the get_image method accordingly.
+ *
+ * Parameters
+ *
+ *      netcam  Pointer to the netcam_context for the camera
+ *      url     Pointer to the url of the camera
+ *
+ * Returns:     0 on success (camera link ok) or -1 if an error occurred.
+ *
+ */
+int netcam_setup_mjpg(netcam_context_ptr netcam, struct url_t *url)
+{
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO,_("now calling netcam_setup_mjpg()"));
+
+    netcam->timeout.tv_sec = READ_TIMEOUT;
+
+    strcpy(url->service, "http"); /* Put back a real URL service. */
+
+    /*
+     * This netcam is http-based, so build the required URL and
+     * structures, like the connection-string and so on.
+     */
+    if (netcam_http_build_url(netcam, url) != 0)
+        return -1;
+
+    /* Then we will send our http request and get headers. */
+    if (netcam_http_request(netcam) < 0)
+        return -1;
+
+    /* We have a special type of streaming camera. */
+    netcam->caps.streaming = NCS_BLOCK;
+
+    /*
+     * We are positionned right just at the start of the first MJPG
+     * header, so don't move anymore, initialization complete.
+     */
+    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+        ,_("connected, going on to read and decode MJPG chunks."));
+
+    netcam->get_image = netcam_read_mjpg_jpeg;
+
+    return 0;
+}
+
+/**
+ * netcam_read_file_jpeg
+ *
+ *      This routine reads local image jpeg. ( netcam_url jpeg:///path/image.jpg )
+ *      The current implementation is still a little experimental,
+ *      and needs some additional code for error detection and
+ *      recovery.
+ */
+static int netcam_read_file_jpeg(netcam_context_ptr netcam)
+{
+    int loop_counter = 0;
+
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Begin"));
+
+    netcam_buff_ptr buffer;
+    int len;
+    struct stat statbuf;
+
+    /* Point to our working buffer. */
+    buffer = netcam->receiving;
+    buffer->used = 0;
+
+    /*int fstat(int filedes, struct stat *buf);*/
+    do {
+        if (stat(netcam->file->path, &statbuf)) {
+            MOTION_LOG(CRT, TYPE_NETCAM, SHOW_ERRNO
+                ,_("stat(%s) error"), netcam->file->path);
+            return -1;
+        }
+
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            ,_("statbuf.st_mtime[%d] != last_st_mtime[%d]")
+            , statbuf.st_mtime, netcam->file->last_st_mtime);
+
+        /* its waits POLLING_TIMEOUT */
+        if (loop_counter>((POLLING_TIMEOUT*1000*1000)/(POLLING_TIME/1000))) {
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("waiting new file image timeout"));
+            return -1;
+        }
+
+        MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+            ,_("delay waiting new file image "));
+
+        //its waits 5seconds - READ_TIMEOUT
+        //SLEEP(netcam->timeout.tv_sec, netcam->timeout.tv_usec*1000);
+        SLEEP(0, POLLING_TIME); // its waits 500ms
+        /*return -1;*/
+        loop_counter++;
+
+    } while (statbuf.st_mtime == netcam->file->last_st_mtime);
+
+    netcam->file->last_st_mtime = statbuf.st_mtime;
+
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("processing new file image - st_mtime %d"), netcam->file->last_st_mtime);
+
+    /* Assure there's enough room in the buffer. */
+    while (buffer->size < (size_t)statbuf.st_size)
+        netcam_check_buffsize(buffer, statbuf.st_size);
+
+
+    /* Do the read */
+    netcam->file->control_file_desc = open(netcam->file->path, O_RDONLY|O_CLOEXEC);
+    if (netcam->file->control_file_desc < 0) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("open(%s) error: %d")
+            ,netcam->file->path, netcam->file->control_file_desc);
+        return -1;
+    }
+    if ((len = read(netcam->file->control_file_desc,
+                    buffer->ptr + buffer->used, statbuf.st_size)) < 0) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("read(%s) error: %d"), netcam->file->control_file_desc, len);
+        return -1;
+    }
+
+    buffer->used += len;
+    close(netcam->file->control_file_desc);
+
+    netcam_image_read_complete(netcam);
+
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("End"));
+
+    return 0;
+}
+
+tfile_context *file_new_context(void)
+{
+    /* Note that mymalloc will exit on any problem. */
+    return mymalloc(sizeof(tfile_context));
+}
+
+void file_free_context(tfile_context* ctxt)
+{
+    if (ctxt == NULL)
+        return;
+
+    free(ctxt->path);
+    free(ctxt);
+}
+
+int netcam_setup_file(netcam_context_ptr netcam, struct url_t *url)
+{
+
+    if ((netcam->file = file_new_context()) == NULL)
+        return -1;
+
+    /*
+     * We copy the strings out of the url structure into the ftp_context
+     * structure.  By setting url->{string} to NULL we effectively "take
+     * ownership" of the string away from the URL (i.e. it won't be freed
+     * when we cleanup the url structure later).
+     */
+    netcam->file->path = url->path;
+    url->path = NULL;
+
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        ,_("netcam->file->path %s"), netcam->file->path);
+
+    netcam->get_image = netcam_read_file_jpeg;
+
+    return 0;
+}
 
 /**
  * netcam_recv
