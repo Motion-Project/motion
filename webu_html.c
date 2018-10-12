@@ -1236,12 +1236,12 @@ void webu_html_main(struct webui_ctx *webui) {
     if (strlen(webui->uri_camid) == 0){
         webu_html_page(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"config")) {
-        retcd = webu_process_config(webui);
-
     } else if ((!strcmp(webui->uri_cmd1,"config")) &&
                (!strcmp(webui->uri_cmd2,"write"))) {
         webu_process_action(webui);
+
+    } else if (!strcmp(webui->uri_cmd1,"config")) {
+        retcd = webu_process_config(webui);
 
     } else if (!strcmp(webui->uri_cmd1,"action")){
         webu_process_action(webui);
