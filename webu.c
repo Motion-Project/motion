@@ -77,6 +77,7 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->auth_denied   = mymalloc(WEBUI_LEN_RESP);
     webui->auth_opaque   = mymalloc(WEBUI_LEN_PARM);
     webui->auth_realm    = mymalloc(WEBUI_LEN_PARM);
+    webui->text_eol      = mymalloc(WEBUI_LEN_PARM);
     webui->auth_user     = NULL;    /* Buffer to hold the user name*/
     webui->auth_pass     = NULL;    /* Buffer to hold the password */
     webui->authenticated = FALSE;   /* boolean for whether we are authenticated*/
@@ -132,6 +133,7 @@ static void webu_context_null(struct webui_ctx *webui) {
     webui->auth_opaque   = NULL;
     webui->auth_realm    = NULL;
     webui->clientip      = NULL;
+    webui->text_eol      = NULL;
 
     return;
 }
@@ -156,6 +158,7 @@ static void webu_context_free(struct webui_ctx *webui) {
     if (webui->auth_opaque   != NULL) free(webui->auth_opaque);
     if (webui->auth_realm    != NULL) free(webui->auth_realm);
     if (webui->clientip      != NULL) free(webui->clientip);
+    if (webui->text_eol      != NULL) free(webui->text_eol);
 
     webu_context_null(webui);
 
@@ -601,9 +604,17 @@ void webu_process_action(struct webui_ctx *webui) {
         } else {
             webui->cnt->pause = 1;
         }
+
+    } else if (!strcmp(webui->uri_cmd2,"connection")){
+        webu_text_connection(webui);
+
+    } else if (!strcmp(webui->uri_cmd2,"status")){
+        webu_text_status(webui);
+
     } else if ((!strcmp(webui->uri_cmd2,"write")) ||
                (!strcmp(webui->uri_cmd2,"writeyes"))){
         conf_print(webui->cntlst);
+
     } else {
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
             _("Invalid action requested: >%s< >%s< >%s<")
@@ -612,7 +623,7 @@ void webu_process_action(struct webui_ctx *webui) {
     }
 }
 
-int webu_process_config(struct webui_ctx *webui) {
+static int webu_process_config_set(struct webui_ctx *webui) {
     /* Process the request to change the configuration parameters.  Used
      * both the html and text interfaces.  If the parameter was found, then
      * we return 0 otherwise a -1 to tell the calling function whether it
@@ -680,6 +691,35 @@ int webu_process_config(struct webui_ctx *webui) {
         retcd = 0;
     } else {
         retcd = -1;
+    }
+
+    return retcd;
+
+}
+
+int webu_process_config(struct webui_ctx *webui) {
+
+    int retcd;
+
+    retcd = 0;
+
+    if ((!strcmp(webui->uri_cmd1,"config")) &&
+        (!strcmp(webui->uri_cmd2,"set"))) {
+        retcd = webu_process_config_set(webui);
+
+    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
+               (!strcmp(webui->uri_cmd2,"get"))) {
+        webu_text_get_query(webui);
+
+    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
+               (!strcmp(webui->uri_cmd2,"list"))) {
+        webu_text_list(webui);
+
+    } else {
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
+            _("Invalid action requested: >%s< >%s< >%s<")
+            , webui->uri_camid, webui->uri_cmd1, webui->uri_cmd2);
+
     }
 
     return retcd;
@@ -1169,7 +1209,8 @@ static int webu_answer_ctrl(void *cls
         if (!webui->authenticated) return retcd;
     }
 
-    if (webui->cntlst[0]->conf.webcontrol_interface == 1){
+    if ((webui->cntlst[0]->conf.webcontrol_interface == 1) ||
+        (webui->cntlst[0]->conf.webcontrol_interface == 2)) {
         webu_text_main(webui);
     } else {
         webu_html_main(webui);
