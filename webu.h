@@ -59,6 +59,8 @@ struct webui_ctx {
     char            *resp_page;        /* The response that will be sent */
     size_t          resp_size;         /* The allocated size of the response */
     size_t          resp_used;         /* The amount of the response page used */
+    uint64_t        stream_pos;        /* Stream position of sent image */
+    struct timeval  time_last;         /* Keep track of processing time for stream thread*/
     int             mhd_first;         /* Boolean for whether it is the first connection*/
 
     struct MHD_Connection  *connection; /* The MHD connection value from the client */
