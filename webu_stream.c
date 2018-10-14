@@ -53,8 +53,8 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
         stream_rate = ( (1000000000 / webui->cnt->conf.stream_maxrate) - stream_delay);
         if ((stream_rate > 0) && (stream_rate < 1000000000)){
             SLEEP(0,stream_rate);
-        } else if ((stream_rate >= 1000000000) && (stream_rate < 2000000000)){
-            SLEEP(1,(stream_rate- 1000000000));
+        } else if (stream_rate == 1000000000) {
+            SLEEP(1,0);
         }
     } else {
         SLEEP(1,0);
