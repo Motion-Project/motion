@@ -85,6 +85,7 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->lang_full     = mymalloc(6);         /* lang code, e.g US_en */
     webui->resp_size     = WEBUI_LEN_RESP * 10; /* The size of the resp_page buffer.  May get adjusted */
     webui->resp_used     = 0;                   /* How many bytes used so far in resp_page*/
+    webui->stream_pos    = 0;                   /* Stream position of image being sent */
     webui->resp_page     = mymalloc(webui->resp_size);      /* The response being constructed */
     webui->cntlst        = cntlst;  /* The list of context's for all cameras */
     webui->cnt           = cnt;     /* The context pointer for a single camera */
