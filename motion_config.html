@@ -16,6 +16,7 @@
     <li class="nav-button"><a href="https://motion-project.github.io/index.html">Home</a></li>
     <li class="nav-button" style="float: left;"> <img src="motion.gif" width="125" height="50"> </li>
   </ul>
+
   <section class="page-header">
     <h1>
       Configuration
@@ -26,11 +27,11 @@
     <button class="accordian">Basic Setup</button>
       <div class="panel">
         <a href="#top">General</a>
-        <a href="#Basic_Setup_V4L2">V4L2 Devices</a>
-        <a href="#Basic_Setup_Network">Network Cameras</a>
-        <a href="#Basic_Setup_PiCam">Pi Camera</a>
-        <a href="#Basic_Setup_Composite">Composite Cards</a>
-        <a href="#Basic_Setup_Static">Static Files</a>
+        <a href="#basic_setup_v4l2">V4L2 Devices</a>
+        <a href="#basic_setup_network">Network Cameras</a>
+        <a href="#basic_setup_picam">Pi Camera</a>
+        <a href="#basic_setup_composite">Composite Cards</a>
+        <a href="#basic_setup_static">Static Files</a>
       </div>
     <button class="accordian">Commands/Files</button>
       <div class="panel">
@@ -38,8 +39,10 @@
         <a href="#The_Config_Files">Configuration Files </a>
         <a href="#Signals_Sent">Signals</a>
       </div>
-    <a href="#Configuration_OptionsAlpha">Options-Alpha</a>
-    <a href="#Configuration_OptionsTopic">Options-Topic</a>
+    <div class="nopanel" style="font-size: 1.20em;">
+      <a href="#Configuration_OptionsAlpha">Options-Alpha</a>
+      <a href="#Configuration_OptionsTopic">Options-Topic</a>
+    </div>
     <button class="accordian">Options-General</a></button>
       <div class="panel">
         <a href="#OptTopic_System_Processing">System Processing</a>
@@ -104,10 +107,74 @@
     <h2><a name="Basic_Setup"></a>  Basic Setup </h2>
     <ul>
       <p></p>
-      Before you can start using Motion you need to know some basics about your camera(s).
+      Motion is able to process images from many different types of cameras.  The following is brief overview
+      of the process to set up the Motion software.
+      <ul>
+        <li>Determine the type of camera
+        <ul>
+          <li> <a href="#basic_setup_v4l2" >v4l2 devices</a> which are most webcams</li>
+          <li> <a href="#basic_setup_composite" >Composite capture cards</a> </li>
+          <li> <a href="#basic_setup_network" >Network or IP cameras</a> </li>
+          <li> <a href="#basic_setup_picam" >The PI camera</a> </li>
+          <li> <a href="#basic_setup_static" >Static movie files</a>.
+        </ul>
+        <li>Specify the camera in the <a href="#The_Config_Files" >configuration files</a>.</li>
+        <li>Start Motion from a terminal via the <a href="#Command_Line_Options" >command line</a></li>
+        <li>Review the messages to ensure camera was found and press cntrl-c to exit</li>
+        <li>Enable the <a href="#OptDetail_Stream" >web stream</a> in the configuration file </li>
+        <ul>
+          <li> Specify a <a href="#stream_port" >stream_port</a></li>
+          <li> Optionally turn off <a href="#stream_localhost" >stream_localhost</a> if you want to view
+               the stream from a different computer</li>
+        </ul>
+        <li>Enable the <a href="#OptDetail_Webcontrol" >web control</a> in the configuration file </li>
+        <ul>
+          <li> Specify a <a href="#webcontrol_port" >webcontrol_port</a></li>
+          <li> Optionally turn off <a href="#webcontrol_localhost" >webcontrol_localhost</a> if you want to view
+               the webcontrol from a different computer</li>
+          <li> Specify which parameters to show on the webcontrol via <a href="#webcontrol_parms" >webcontrol_parms</a></li>
+          <li> Optionally specify a <a href="#stream_preview_method" >stream_preview_method</a></li>
+        </ul>
+      </ul>
+      The above should allow users to get Motion running and being able to view images via the stream.  The
+      next steps refine and finish a basic setup.
+      <ul>
+          <li> Refine how the image is captured with the <a href="#OptTopic_Image_Processing" >image processing</a> parameters</li>
+          <li> Specify the <a href="#OptTopic_Motion_Detection" >motion detection</a> parameters</li>
+          <li>
+            <a href="#OptTopic_Scripts" >Execute scripts</a>, Save
+            <a href="#OptTopic_Pictures" >pictures</a> or
+            <a href="#OptTopic_Movies" >movies</a>.
+          </li>
+      </ul>
+      The most difficult step in the above process will be the motion detection settings and specifying them
+      to minimize the false positives.  To assist this process, Motion provides the
+      <a href="#stream_preview_method" >stream_preview_method</a> option 3 which allows users to see side
+      by side images of where the motion is occurring next to the regular image.
+      <ul>
+        <li> Specify <a href="#stream_preview_method" >stream_preview_method 3</a></li>
+        <li> Specify <a href="#webcontrol_parms" >webcontrol_parms 2</a> </li>
+        <li> Start Motion and in a web browser navigate to the webcontrol port</li>
+        <li> Try adjusting the
+          <a href="#threshold" >threshold</a>,
+          <a href="#noise_level" >noise_level</a>,
+          <a href="#despeckle_filter" >despeckle_filter</a> and
+          <a href="#smart_mask_speed" >smart_mask_speed</a>
+        </li>
+        <li> Make sure to write configuration to file in order to save any changes.</li>
+      </ul>
+      Motion also includes a <a href="#setup_mode" >setup_mode</a> which provides more values reported
+      on the motion images and in the log to assist the setup.
       <p></p>
-      <a name="Basic_Setup_V4L2"></a>
-      For video4linux devices, the camera must be installed per the requirements of the camera.  It is
+      The following are some additional topics which may be of interest during the initial setup.
+      <ul>
+        <li>Run automatically at start (Run as <a href="#basic_setup_service" >service</a>)</li>
+        <li>Remove depreciated parameters warnings (<a href="#config_depreciated" >Remove Depreciated</a>)</li>
+        <li>List/include all possible configuration parameters (<a href="#config_listall" >All parameters</a>)</li>
+      </ul>
+      <p></p>
+      <a name="basic_setup_v4l2"></a>
+      <strong>Video4linux devices</strong> must be installed per the requirements of the camera.  It is
       out of the scope of this document to tell you how to do this and it depends on which type of camera.  Once
       the camera is installed it will have the device name(s) of /dev/video0, /dev/video1, /dev/video2...
       <p></p>
@@ -115,7 +182,7 @@
       devices using a naming scheme of /dev/bktr0, /dev/bktr1, etc.  These device may also need to use the other
       special device for the tuner.  The tuner will need to be specified with the tunerdevice option as /dev/tuner0.
       <p></p>
-      <strong>USB cameras</strong> take a lot of bandwidth. A USB camera connected to a USB2 port or hub consumes virtually
+      USB cameras take a lot of bandwidth. A USB camera connected to a USB2 port or hub consumes virtually
       all the bandwidth that the port can handle. Even with a small framesize and low framerate you should not expect to have
       more than one camera per USB controller. If you need more than one USB camera it is possible to add extra USB PCI cards
       to your computer.  It is also possible that your computer has more than one controller for different USB slots.  For
@@ -129,10 +196,17 @@
       the option <code><a href="#input" >input</a> </code> must be set to the value -1 for USB cameras.
       <p></p>
 
-      <a name="Basic_Setup_Network"></a>
+      <a name="basic_setup_network"></a>
       <strong>Network cameras</strong> are set up via the
       <code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong> parameter.
-      The latest versions of Motion support rtsp format which many cameras now stream.
+      The latest versions of Motion support rtsp format which many cameras now stream.  Some users have requested
+      a list of the network cameras that will work with Motion.  Since Motion can now process RTSP streams, almost
+      all cameras are supported.  Simply review the specifications of the camera and validate that
+      RTSP or RTMP is listed. The cameras that will not work are those specifically sold to be integrated into
+      proprietary software monitoring systems.  When determining cameras, consider carefully before selecting a
+      wireless camera.  Cameras require a solid consistent signal and use a lot of bandwidth.   Inconsistencies in
+      the wireless signal can result in a poor user experience so the use of a hardwired camera is recommended.
+      <p></p>
       The URL connection string to enter is specific to the camera and is
       usually provided by the manufacturer.  The connection string is the same as what would be used by other
       video playing software such as VLC.  If the camera does not stream via RTSP and instead uses a MJPEG, then Motion
@@ -140,7 +214,7 @@
       for additional options.
       <p></p>
 
-      <a name="Basic_Setup_PiCam"></a>
+      <a name="basic_setup_picam"></a>
       <strong>Raspberry Pi cameras</strong> can be set up two different ways.  If Motion is installed by using the
       apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
       a v4l2 device for the camera.  Users will need to install this module using the
@@ -151,7 +225,7 @@
       the bcm2835-v4l2 module.  <strong><code>When Motion is installed via apt, the mmalcam option is not available.</code></strong>
       <p></p>
 
-      <a name="Basic_Setup_Composite"></a>
+      <a name="basic_setup_composite"></a>
       <strong>Composite video cards</strong> are normally made with a chip called BT878 (older cards have a BT848). They
       all use the Linux driver called 'bttv'.
       <p></p>
@@ -181,7 +255,7 @@
       If your camera is a PAL black and white you may get a better result with norm=3 (PAL no colour).
       <p></p>
 
-      <a name="Basic_Setup_Static"></a>
+      <a name="basic_setup_static"></a>
       <strong>Static files</strong> can also be processed by Motion in one of two ways.  The first method
       is by using the <a href="#netcam_url" >netcam_url</a> option and using a prefix of file:\\.  With
       this method, Motion will process the file at the speed specified by
@@ -199,6 +273,54 @@
       <code><strong> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </strong></code>
       This can be helpful as a interim process where ffmpeg supports a particular input but that format is not yet supported
       by Motion.
+
+      <p></p>
+      <a name="basic_setup_service"></a>
+      <strong>Run as Service</strong>
+      <p></p>
+      The following instructions are only applicable to Debian and Ubuntu based systems.  For other distributions, users
+      should consult their distribution documentation and provide pull requests to the Motion developers so that this
+      section can be updated with their distribution.
+      <p></p>
+      Motion can be set up to run as a service which means that it will start automatically whenever the computer
+      is started.  When Motion is installed from apt or from a deb file, default files are installed which can be
+      easily modified so that Motion starts as a service.  If Motion is built directly from source and installed,
+      then these additional files will need to be copied, modified and installed manually from the source and packaging
+      repositories.
+      <p></p>
+      When setting up Motion to run as a service, it should be done only after all the other configuration
+      has been completed.  It is much easier to edit and revise the parameters when Motion is just running
+      in a terminal rather than as a service.
+      <p></p>
+      To set up to run as a service, first edit the file <code>/etc/default/motion</code> and revise the line
+      to indicate <code>start_motion_daemon=yes</code>.
+      Next, edit the main motion.conf file and specify <a href="#daemon" >daemon</a> as <code>on</code>
+      When the computer is restarted, Motion should now be running.  The following commands control
+      the Motion service.
+      <ul>
+        <li>Start the Motion service<code>sudo service motion start</code></li>
+        <li>Stop the Motion service<code>sudo service motion stop</code></li>
+        <li>Restart the Motion service<code>sudo service motion restart</code></li>
+      </ul>
+      <p></p>
+      When running as a service, Motion runs as the user <code>motion</code> and this user is automatically
+      added to the user group of <code>video</code>.  By only be included in this user group, when Motion is
+      run, it will only have limited permissions.  It is NOT recommended that this user get added to the
+      <code>sudo</code> group.  Instead, only add this user to groups that are specifically required.
+      <p></p>
+      On newer distributions, the above method of running a service is depreciated (but still functional) in
+      favor of the systemctl method.  Since this is not available on all the distributions which Motion is
+      deployed, the above method is retained.  Once systemctl is available on all the deployed versions, Motion
+      will transition to systemctl as the service method.  For users that wish to systemctl rather than the above
+      method, a <code>motion.system</code> file is included in the source code.
+      <p></p>
+      For users that are building and installing from source without a deb file, the file <code>motion.init-Debian</code>
+      will need to be copied from the examples directory or from the source directory.  It will need to be renamed and put
+      into <code>/etc/init.d/motion</code>.  Ensure that it is also marked as executable and has root ownership.  Next,
+      create the file <code>/etc/default/motion</code> with the entry as specified above.  Finally, create the
+      <code>motion</code> user as needed.  The scripts that create the groups and users when using
+      the deb packages can be used as a model.  These scripts can be reviewed in the motion-packaging repo, within the
+      debian directory, motion.postinst (e.g. <code>motion-packaging/debian/motion.postinst</code>
 
       <p></p>
       <p></p>
@@ -242,7 +364,7 @@
         <li> Then in a directory called '.motion' in the current users home directory (shell environment
           variable $HOME). E.g. /home/goofy/.motion/motion.conf</li>
         <li> The directory defined by the --sysconfdir=DIR when running .configure during installation of
-          Motion<br />(If this option was not defined the default is /usr/local/etc/motion)</li>
+          Motion<br />(If this option was not defined the default is /etc/motion)</li>
       </ol>
       If you have write access to /usr/local/etc/motion then the editor recommends having only one motion.conf file
       in the default /usr/local/etc/motion directory.
@@ -320,14 +442,41 @@
 
       <p></p>
       If motion is built without specific features such as ffmpeg, mysql etc it will ignore the options that
-      belong to those features and report them as unknown configuration options.
+      belong to those features.
 
       <p></p>
-      If you run the http control command
-      <a href="http://host:port/0/config/writeyes" rel="nofollow" target="_top">http://host:port/0/config/writeyes</a>,
-      motion will overwrite motion.conf and all the camera.conf files by autogenerated config files neatly formatted.  If
-      you later re-build Motion with more features or upgrade to a new version, you can use your old config files, run
-      the motion.conf.write command, and you will have new config files with the new options included all set to their default values.
+      <a name="config_depreciated"></a>
+      <p></p>
+      <strong>Depreciated Parameters</strong>
+      <p></p>
+      Over the years, Motion has added many new configuration parameters and changed the name
+      of a few of them so that there is some consistency to the parameter names.  Since version
+      3.4.1, when a configuration parameter has a new name or additional functionality, Motion will
+      try to interpret the value specified for the old parameter and translate it to the new parameter.
+      These translations will be reported in the log as Motion is started.  To eliminate these warnings,
+      ensure that a <a href="#webcontrol_port" >webcontrol_port</a> is specified and that the
+      <a href="#webcontrol_interface" >webcontrol_interface</a> is specified as 0 (or not listed).  Then start
+      motion, open a browser and navigate to the webcontrol port. When on that page, select
+      <code>write configuration</code>.  This will re-write the configuration files with all the current
+      parameters to Motion.  Note that depending upon where the configuration files are located, Motion
+      may need to be started using <code>sudo</code>.
+
+      <p></p>
+      <a name="config_listall"></a>
+      <p></p>
+      <strong>Parameters in distributed configuration files</strong>
+      <p></p>
+      As of this writing, Motion includes over 150 parameters.  With this volume of parameters, navigating
+      the configuration file with every possible has become onerous.  Starting with version 4.2, the distributed
+      configuration files only include a limited subset of the configuration parameters.  Users can add to the
+      files as needed the parameters that are applicable to their set up.  Users that wish to have every parameter
+      listed and included in the configuration file can follow the process described immediately above in
+      the <a href="#config_depreciated" >Remove Depreciated</a> section.
+      i.e. Use the webcontrol interface to write out the configuration file.
+      <p></p>
+      Extended descriptions / documentation are not included in the configuration file.  This guide
+      should be consulted for documentation of the configuration parameters.
+
       <p></p>
       <p></p>
     </ul>
@@ -2025,17 +2174,19 @@
         labeled area (assuming despeckle is enabled and with the 'l' at the end) is blue. It is
         only the blue areas which is counted as Motion. If smartmask is enabled you see this as red areas.
 
-        Here is a suggestion how to initially setup Motion.
+        Here is a suggestion how to initially setup Motion.  (There are other ways to accomplish this.)
         <p></p>
         <ul>
           <li> Disable despeckle (comment it out in motion.conf).</li>
           <li> Disable smartmask</li>
-          <li> Enable both http control and webcam by setting port numbers. Example 8080 for control and 8081 for webcam.</li>
+          <li> Enable both the webcontrol and streams make sure to specify the webcontrol_parms. The below
+            assumes that the webcontrol is specified as port 8080 and the stream as 8081
+          </li>
           <li> Start Motion in setup mode</li>
-          <li> View the webcam stream. Either with Iceweasel or with Firefox by entering in the address of
+          <li> View the webcam stream via a browser by entering in the address of
           <a href="http://localhost:8081/" rel="nofollow" target="_top">http://localhost:8080/</a>
           </li>
-          <li> Open a new tab and connect to the http interface.
+          <li> Open a new tab and connect to the webcontrol interface.
           <a href="http://localhost:8080/" rel="nofollow" target="_top">http://localhost:8080/</a> .
           You can now control and change almost anything while Motion is running. To disable a feature enter a space.</li>
           <li> Start by experimenting with noise level. Do this both during daylight and during darkness.
@@ -4214,7 +4365,7 @@
         <p></p>
         <ul>
           <li> Type: Discrete Strings</li>
-          <li> Range / Valid values: mpeg4, msmpeg4, swf, flv, ffv1, mov, ogg, mp4, mkv, hevc</li>
+          <li> Range / Valid values: mpeg4, msmpeg4, swf, flv, ffv1, mov, mp4, mkv, hevc</li>
           <li> Default: mkv</li>
         </ul>
         <p></p>
@@ -4795,8 +4946,8 @@
 
       <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>
       <ul>
-        Motion has simple webcam server built in. The server can be configured to
-        stream both the images as well allow for a very basic http control of Motion parameters.
+        Motion has simple webcam server built in which allows for streaming the images from the
+        camera(s).
         <p></p>
         The streams are generated in "multipart jpeg" format (mjpeg) which most browsers can display.  If
         the browser does not directly open the stream, it may be possible to manually create a simple HTML
@@ -4820,10 +4971,11 @@
         <code>
         http://localhost:mystreamportnumber/
         </code>
-        Motion does provide other options for accessing the streams and images.  In addition to sub-streams and static
-        images, Motion can also be configured to use just a single port for accessing streams to all cameras.  This
-        is accomplished by specifying a stream port within the motion.conf file and also using separate camera files.  The
-        following examples should clarify the methods by which streams can be accessed:
+        Motion does provide other options for accessing the streams and images.  In addition to sub-streams,
+        motion image streams and static images, Motion can also be configured to use just a single port for
+        accessing streams to all cameras.  This is accomplished by specifying a stream port within the
+        motion.conf file and also using separate camera files.  The following examples should clarify the
+        methods by which streams can be accessed:
         <ul>
           <li><code>{IP}</code> The IP address of the computer running Motion</li>
           <li><code>{port0}</code> The port specified for the stream within the motion.conf file.</li>
