@@ -53,7 +53,32 @@
 #include "motion.h"
 #include "jpegutils.h"
 #include <setjmp.h>
+
+
+/* This is a workaround regarding these defines.  The config.h file defines
+ * HAVE_STDLIB_H as 1 whereas the jpeglib.h just defines it without a value.
+ * this causes massive warnings/error on mis-matched definitions.  We do not
+ * control either of these so we have to suffer through this workaround hack
+*/
+#if (HAVE_STDLIB_H == 1)
+    #undef HAVE_STDLIB_H
+    #define HAVE_STDLIB_H_ORIG 1
+#endif
+
 #include <jpeglib.h>
+
+#ifdef HAVE_STDLIB_H
+  #ifdef HAVE_STDLIB_H_ORIG
+    #undef HAVE_STDLIB_H
+    #undef HAVE_STDLIB_H_ORIG
+    #define HAVE_STDLIB_H 1
+  #else
+    #undef HAVE_STDLIB_H
+  #endif
+#endif
+
+
+
 #include <jerror.h>
 #include <assert.h>
 
