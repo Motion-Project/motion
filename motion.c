@@ -19,6 +19,7 @@
 #include "picture.h"
 #include "rotate.h"
 #include "webu.h"
+#include "movidius.h"
 
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
@@ -1235,6 +1236,9 @@ static int motion_init(struct context *cnt)
     cnt->imgs.height_high = 0;
     cnt->imgs.size_high = 0;
 
+    if (movidius_init())
+        return -3;
+
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
         cnt->camera_id, cnt->pause ? _("Disabled"):_("Enabled"));
@@ -1696,6 +1700,7 @@ static void motion_cleanup(struct context *cnt) {
 
     dbse_deinit(cnt);
 
+    movidius_close();
 }
 
 static void mlp_mask_privacy(struct context *cnt){
@@ -2166,6 +2171,10 @@ static void mlp_detection(struct context *cnt){
 
 
     /***** MOTION LOOP - MOTION DETECTION SECTION *****/
+
+    movidius_infer_image(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height);
+
+#if 0
     /*
      * The actual motion detection takes place in the following
      * diffs is the number of pixels detected as changed
@@ -2177,6 +2186,7 @@ static void mlp_detection(struct context *cnt){
      * is called.
      */
     if (cnt->process_thisframe) {
+
         if (cnt->threshold && !cnt->pause) {
             /*
              * If we've already detected motion and we want to see if there's
@@ -2277,7 +2287,7 @@ static void mlp_detection(struct context *cnt){
         cnt->moved--;
         cnt->current_image->diffs = 0;
     }
-
+#endif
 }
 
 static void mlp_tuning(struct context *cnt){
@@ -2434,14 +2444,25 @@ static void mlp_actions(struct context *cnt){
 
     /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
-    if ((cnt->current_image->diffs > cnt->threshold) &&
-        (cnt->current_image->diffs < cnt->threshold_maximum)) {
-        /* flag this image, it have motion */
-        cnt->current_image->flags |= IMAGE_MOTION;
-        cnt->lightswitch_framecounter++; /* micro lightswitch */
-    } else {
-        cnt->lightswitch_framecounter = 0;
+    float *resultData = NULL;
+    int numResults = 0;
+    if (movidius_get_results(&resultData, &numResults) == 0)
+    {
+        float probability = movidius_get_person_probability(resultData, numResults);
+        // TODO: flag this image if probability of person is higher than some threshold
+        //cnt->current_image->flags |= IMAGE_MOTION;
+        movidius_free_results(&resultData);
     }
+
+
+    //if ((cnt->current_image->diffs > cnt->threshold) &&
+    //    (cnt->current_image->diffs < cnt->threshold_maximum)) {
+    //    /* flag this image, it have motion */
+    //    cnt->current_image->flags |= IMAGE_MOTION;
+    //    cnt->lightswitch_framecounter++; /* micro lightswitch */
+    //} else {
+    //    cnt->lightswitch_framecounter = 0;
+    //}
 
     /*
      * If motion has been detected we take action and start saving
