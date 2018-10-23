@@ -2172,7 +2172,7 @@ static void mlp_detection(struct context *cnt){
 
     /***** MOTION LOOP - MOTION DETECTION SECTION *****/
 
-    movidius_infer_image(cnt->imgs.img_motion.image_norm, cnt->imgs.width, cnt->imgs.height);
+    movidius_infer_image(cnt->imgs.image_virgin.image_norm, cnt->imgs.width, cnt->imgs.height);
 
 #if 0
     /*

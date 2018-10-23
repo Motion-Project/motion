@@ -34,7 +34,7 @@ static const char *labels[] = {"background",
                                "sheep", "sofa", "train", "tvmonitor"};
 
 
-static float *scale_image(unsigned char *src_img, int width, int height)
+static float *scale_image(unsigned char *src_img, int width, int height, unsigned int *processed_img_len)
 {
 /*
     unsigned char *image;
@@ -58,11 +58,10 @@ static float *scale_image(unsigned char *src_img, int width, int height)
 
 
 
-
-    uint8_t *src_data[4];
-    uint8_t *dst_data[4];
-    int src_linesize[4];
-    int dst_linesize[4];
+    uint8_t *src_data[4] = {0};
+    uint8_t *dst_data[4] = {0};
+    int src_linesize[4] = {0};
+    int dst_linesize[4] = {0};
     int src_w = width;
     int src_h = height;
     int dst_w = 300;
@@ -73,17 +72,17 @@ static float *scale_image(unsigned char *src_img, int width, int height)
     float *processed_img = NULL;
     int i;
 
-    memset(dst_data, 0, sizeof(dst_data[0])*4);
-    memset(src_data, 0, sizeof(src_data[0])*4);
-    memset(dst_linesize, 0, sizeof(dst_linesize[0])*4);
-    memset(src_linesize, 0, sizeof(src_linesize[0])*4);
+    //memset(dst_data, 0, sizeof(dst_data[0])*4);
+    //memset(src_data, 0, sizeof(src_data[0])*4);
+    //memset(dst_linesize, 0, sizeof(dst_linesize[0])*4);
+    //memset(src_linesize, 0, sizeof(src_linesize[0])*4);
 
-    src_data[0] = src_img;
-    src_data[1] = src_img + (src_w * src_h);
-    src_data[2] = src_data[1] + ((src_w * src_h) / 4);
-    src_linesize[0] = width;
-    src_linesize[1] = width / 2;
-    src_linesize[2] = width / 2;
+    //src_data[0] = src_img;
+    //src_data[1] = src_img + (src_w * src_h);
+    //src_data[2] = src_data[1] + ((src_w * src_h) / 4);
+    //src_linesize[0] = src_w;
+    //src_linesize[1] = src_w / 2;
+    //src_linesize[2] = src_w / 2;
     
     // linesize is size in bytes for each picture line.
     // It contains stride(Image Stride) for the i-th plane
@@ -98,7 +97,7 @@ static float *scale_image(unsigned char *src_img, int width, int height)
     // create scaling context
     sws_ctx = sws_getContext(src_w, src_h, src_pix_fmt,
                              dst_w, dst_h, dst_pix_fmt,
-                             SWS_FAST_BILINEAR, NULL, NULL, NULL);
+                             SWS_BILINEAR, NULL, NULL, NULL);
     if (!sws_ctx)
     {
         fprintf(stderr,
@@ -110,20 +109,28 @@ static float *scale_image(unsigned char *src_img, int width, int height)
         goto end;
     }
     
+    int srcNumBytes = av_image_fill_arrays(src_data, src_linesize, src_img,
+                                           src_pix_fmt, src_w, src_h, 16);
+    // TODO: check av_image_fill_arrays return code
+
+    int dst_bufsize;
+
     // buffer is float format, align to float size
-    if (av_image_alloc(dst_data, dst_linesize,
-                       dst_w, dst_h, dst_pix_fmt, 1) < 0)
+    if ((dst_bufsize = av_image_alloc(dst_data, dst_linesize,
+                       dst_w, dst_h, dst_pix_fmt, 1)) < 0)
     {
         fprintf(stderr, "Could not allocate destination image\n");
         goto end;
     }
     //dst_bufsize = ret;
+    //printf("dst_data = 0x%x, dst_linesize = %d\n", (int)dst_data[0], dst_linesize[0]);
 
     // convert to destination format
     sws_scale(sws_ctx, (const uint8_t * const*)src_data,
               src_linesize, 0, src_h, dst_data, dst_linesize);
 
-    processed_img = malloc(dst_w * dst_h * 3 * sizeof(float));
+    *processed_img_len = dst_w * dst_h * 3 * sizeof(float);
+    processed_img = malloc(*processed_img_len);
     if (processed_img == NULL)
     {
         fprintf(stderr, "Failed to allocate memory\n");
@@ -136,6 +143,20 @@ static float *scale_image(unsigned char *src_img, int width, int height)
         processed_img[i] = (value - 127.5) * 0.007843;
     }
 
+    FILE *wrfile;
+    //wrfile = fopen("/tmp/yuv420p.raw", "wb");
+    //fwrite(src_img, 1, srcNumBytes, wrfile);
+    //fclose(wrfile);
+    wrfile = fopen("/tmp/scaled_bgr24.raw", "wb");
+    fwrite(dst_data[0], 1, dst_bufsize, wrfile);
+    fclose(wrfile);
+    // use gnuplot to show scaled image
+    // gnuplot> plot 'scaled_bgr24.raw' binary array=(300,300) flipy format='%uchar%uchar%uchar' using 3:2:1 with rgbimage
+    wrfile = fopen("/tmp/scaled_bgr_float.raw", "wb");
+    fwrite(processed_img, *processed_img_len, 1, wrfile);
+    fclose(wrfile);
+    // gnuplot> plot 'scaled_bgr_float.raw' binary array=(300,300) flipy format='%float%float%float' using ($3*127.5+127.5):($2*127.5+127.5):($1*127.5+127.5) with rgbimage
+
 end:
     av_freep(&dst_data[0]);
     if (sws_ctx)
@@ -147,7 +168,7 @@ end:
 void movidius_infer_image(unsigned char *image, int width, int height)
 {
     float *processed_img = NULL;
-    unsigned int processed_img_len = 300 * 300 * 3 * sizeof(float);
+    unsigned int processed_img_len = 0;
     ncStatus_t retCode;
 
     // check write fifo level == 0 before writing new image
@@ -163,7 +184,8 @@ void movidius_infer_image(unsigned char *image, int width, int height)
     if (writefifolevel > 0)
         return;
 
-    processed_img = scale_image(image, width, height);
+    processed_img = scale_image(image, width, height, &processed_img_len);
+
     // Write the tensor to the input FIFO and queue an inference
     retCode = ncGraphQueueInferenceWithFifoElem(
                 graphHandle, inputFIFO, outputFIFO, processed_img,
