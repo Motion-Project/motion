@@ -12,8 +12,8 @@
 #define MOVIDIUS_H_
 
 void movidius_infer_image(unsigned char *image, int width, int height);
-int movidius_get_results(float **resultData, int *numResults);
-float movidius_get_person_probability(float *resultData, int numResults);
+int movidius_get_results(float **resultData, int *resultDataLength);
+float movidius_get_person_probability(float *resultData, int resultDataLength);
 void movidius_free_results(float **resultData);
 
 int movidius_init(void);

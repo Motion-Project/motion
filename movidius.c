@@ -36,28 +36,6 @@ static const char *labels[] = {"background",
 
 static float *scale_image(unsigned char *src_img, int width, int height, unsigned int *processed_img_len)
 {
-/*
-    unsigned char *image;
-    image = img_data->image_norm;
-    AVFrame *picture;
-    // Setup pointers and line widths.
-    picture->data[0] = image;
-    picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-    picture->data[2] = picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
-
-    //// Allocate the opencv mat and store its stride in a 1-element array
-    //if (image.rows != height || image.cols != width || image.type() != CV_8UC3) image = Mat(height, width, CV_8UC3);
-    //int cvLinesizes[1];
-    //cvLinesizes[0] = image.step1();
-
-    // Convert the colour format and write directly to the opencv matrix
-    SwsContext* conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, PIX_FMT_BGR24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data, cvLinesizes);
-    sws_freeContext(conversion);
-*/
-
-
-
     uint8_t *src_data[4] = {0};
     uint8_t *dst_data[4] = {0};
     int src_linesize[4] = {0};
@@ -72,18 +50,6 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     float *processed_img = NULL;
     int i;
 
-    //memset(dst_data, 0, sizeof(dst_data[0])*4);
-    //memset(src_data, 0, sizeof(src_data[0])*4);
-    //memset(dst_linesize, 0, sizeof(dst_linesize[0])*4);
-    //memset(src_linesize, 0, sizeof(src_linesize[0])*4);
-
-    //src_data[0] = src_img;
-    //src_data[1] = src_img + (src_w * src_h);
-    //src_data[2] = src_data[1] + ((src_w * src_h) / 4);
-    //src_linesize[0] = src_w;
-    //src_linesize[1] = src_w / 2;
-    //src_linesize[2] = src_w / 2;
-    
     // linesize is size in bytes for each picture line.
     // It contains stride(Image Stride) for the i-th plane
     // For example, for frame with 640*480 which has format is YUV420P (planar).
@@ -97,7 +63,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     // create scaling context
     sws_ctx = sws_getContext(src_w, src_h, src_pix_fmt,
                              dst_w, dst_h, dst_pix_fmt,
-                             SWS_BILINEAR, NULL, NULL, NULL);
+                             SWS_BICUBIC, NULL, NULL, NULL);
     if (!sws_ctx)
     {
         fprintf(stderr,
@@ -105,12 +71,11 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
                 "fmt:%s s:%dx%d -> fmt:%s s:%dx%d\n",
                 av_get_pix_fmt_name(src_pix_fmt), src_w, src_h,
                 av_get_pix_fmt_name(dst_pix_fmt), dst_w, dst_h);
-        //ret = AVERROR(EINVAL);
         goto end;
     }
     
     int srcNumBytes = av_image_fill_arrays(src_data, src_linesize, src_img,
-                                           src_pix_fmt, src_w, src_h, 16);
+                                           src_pix_fmt, src_w, src_h, 1);
     // TODO: check av_image_fill_arrays return code
 
     int dst_bufsize;
@@ -122,8 +87,6 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
         fprintf(stderr, "Could not allocate destination image\n");
         goto end;
     }
-    //dst_bufsize = ret;
-    //printf("dst_data = 0x%x, dst_linesize = %d\n", (int)dst_data[0], dst_linesize[0]);
 
     // convert to destination format
     sws_scale(sws_ctx, (const uint8_t * const*)src_data,
@@ -143,19 +106,23 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
         processed_img[i] = (value - 127.5) * 0.007843;
     }
 
-    FILE *wrfile;
+
+    //FILE *wrfile;
+
     //wrfile = fopen("/tmp/yuv420p.raw", "wb");
     //fwrite(src_img, 1, srcNumBytes, wrfile);
     //fclose(wrfile);
-    wrfile = fopen("/tmp/scaled_bgr24.raw", "wb");
-    fwrite(dst_data[0], 1, dst_bufsize, wrfile);
-    fclose(wrfile);
+
     // use gnuplot to show scaled image
     // gnuplot> plot 'scaled_bgr24.raw' binary array=(300,300) flipy format='%uchar%uchar%uchar' using 3:2:1 with rgbimage
-    wrfile = fopen("/tmp/scaled_bgr_float.raw", "wb");
-    fwrite(processed_img, *processed_img_len, 1, wrfile);
-    fclose(wrfile);
+    //wrfile = fopen("/tmp/scaled_bgr24.raw", "wb");
+    //fwrite(dst_data[0], 1, dst_bufsize, wrfile);
+    //fclose(wrfile);
+
     // gnuplot> plot 'scaled_bgr_float.raw' binary array=(300,300) flipy format='%float%float%float' using ($3*127.5+127.5):($2*127.5+127.5):($1*127.5+127.5) with rgbimage
+    //wrfile = fopen("/tmp/scaled_bgr_float.raw", "wb");
+    //fwrite(processed_img, *processed_img_len, 1, wrfile);
+    //fclose(wrfile);
 
 end:
     av_freep(&dst_data[0]);
@@ -203,7 +170,7 @@ void movidius_infer_image(unsigned char *image, int width, int height)
 
 // returns zero if result is available, otherwise negative number.
 // free resultData after use
-int movidius_get_results(float **resultData, int *numResults)
+int movidius_get_results(float **resultData, int *resultDataLength)
 {
     // check read fifo level > 0 first before reading so we don't block
     ncStatus_t retCode;
@@ -245,7 +212,7 @@ int movidius_get_results(float **resultData, int *numResults)
             return -1;
         }
 
-        *numResults = outFifoElemSize / sizeof(float);
+        *resultDataLength = outFifoElemSize;
 
         //printf("*numResults: %d\n", *numResults);
 
@@ -255,21 +222,58 @@ int movidius_get_results(float **resultData, int *numResults)
 }
 
 
-float movidius_get_person_probability(float *resultData, int numResults)
+float movidius_get_person_probability(float *resultData, int resultDataLength)
 {
-    float maxResult = 0.0;
-    int maxIndex = -1;
-    int index;
+    //   a.	First fp16 value holds the number of valid detections = num_valid.
+    //   b.	The next 6 values are unused.
+    //   c.	The next (7 * num_valid) values contain the valid detections data
+    //       Each group of 7 values will describe an object/box These 7 values in order.
+    //       The values are:
+    //         0: image_id (always 0)
+    //         1: class_id (this is an index into labels)
+    //         2: score (this is the probability for the class)
+    //         3: box left location within image as number between 0.0 and 1.0
+    //         4: box top location within image as number between 0.0 and 1.0
+    //         5: box right location within image as number between 0.0 and 1.0
+    //         6: box bottom location within image as number between 0.0 and 1.0
 
-    for (index = 0; index < numResults; index++)
+    if ((resultDataLength > 1) && (resultData))
     {
-        if (resultData[index] > maxResult)
+        int num_valid_detections = (int)resultData[0];
+        int i;
+
+        if (resultDataLength >= num_valid_detections*7*sizeof(float)+7*sizeof(float))
         {
-            maxResult = resultData[index];
-            maxIndex = index;
+            printf("Num valid detections: %d\n", num_valid_detections);
+            for (i = 0; i < num_valid_detections; i++)
+            {
+                int base_index = 7 + i*7;
+                int class_id = (int)resultData[base_index + 1];
+                float score = resultData[base_index + 2]*100;
+                float box_left = resultData[base_index + 3];
+                float box_top = resultData[base_index + 4];
+                float box_right = resultData[base_index + 5];
+                float box_bottom = resultData[base_index + 6];
+                printf("\tclass ID: %d\n", class_id);
+                if (class_id < sizeof(labels)/sizeof(char *))
+                    printf("\t%s : %f%%, (%f, %f, %f, %f)\n", labels[class_id], score, box_left, box_right, box_bottom, box_top);
+            }
         }
     }
-    printf("Index %d: probability %f\n", maxIndex, resultData[maxIndex]);
+
+    //float maxResult = 0.0;
+    //int maxIndex = -1;
+    //int index;
+    //
+    //for (index = 0; index < numResults; index++)
+    //{
+    //    if (resultData[index] > maxResult)
+    //    {
+    //        maxResult = resultData[index];
+    //        maxIndex = index;
+    //    }
+    //}
+    //printf("Index %d: probability %f\n", maxIndex, resultData[maxIndex]);
     return 0; // FIXME: return person's probability
 }
 
@@ -367,6 +371,10 @@ int movidius_init(void)
         ret = -1;
         goto cleanup;
     }
+    //ncStatus_t ncDeviceSetOption(deviceHandle,
+    //                         int option, const void* data,
+    //                         unsigned int dataLength);
+
     // Success !
     if (graph_buffer)
     {

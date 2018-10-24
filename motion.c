@@ -2445,10 +2445,10 @@ static void mlp_actions(struct context *cnt){
     /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
     float *resultData = NULL;
-    int numResults = 0;
-    if (movidius_get_results(&resultData, &numResults) == 0)
+    int resultDataLength = 0;
+    if (movidius_get_results(&resultData, &resultDataLength) == 0)
     {
-        float probability = movidius_get_person_probability(resultData, numResults);
+        float probability = movidius_get_person_probability(resultData, resultDataLength);
         // TODO: flag this image if probability of person is higher than some threshold
         //cnt->current_image->flags |= IMAGE_MOTION;
         movidius_free_results(&resultData);
