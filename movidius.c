@@ -21,17 +21,18 @@
 #include "movidius.h"
 
 
+static const char *MobileNet_labels[] = {"background",
+                                         "aeroplane", "bicycle", "bird", "boat",
+                                         "bottle", "bus", "car", "cat", "chair",
+                                         "cow", "diningtable", "dog", "horse",
+                                         "motorbike", "person", "pottedplant",
+                                         "sheep", "sofa", "train", "tvmonitor"};
+
 // TODO: move this into a struct
 static struct ncDeviceHandle_t* deviceHandle = NULL;
 static struct ncGraphHandle_t* graphHandle = NULL;
 static struct ncFifoHandle_t* inputFIFO = NULL;
 static struct ncFifoHandle_t* outputFIFO = NULL;
-static const char *labels[] = {"background",
-                               "aeroplane", "bicycle", "bird", "boat",
-                               "bottle", "bus", "car", "cat", "chair",
-                               "cow", "diningtable", "dog", "horse",
-                               "motorbike", "person", "pottedplant",
-                               "sheep", "sofa", "train", "tvmonitor"};
 
 
 static float *scale_image(unsigned char *src_img, int width, int height, unsigned int *processed_img_len)
@@ -76,10 +77,13 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     
     int srcNumBytes = av_image_fill_arrays(src_data, src_linesize, src_img,
                                            src_pix_fmt, src_w, src_h, 1);
-    // TODO: check av_image_fill_arrays return code
+    if (srcNumBytes < 0)
+    {
+        fprintf(stderr, "Could not fill image arrays\n");
+        goto end;
+    }
 
     int dst_bufsize;
-
     // buffer is float format, align to float size
     if ((dst_bufsize = av_image_alloc(dst_data, dst_linesize,
                        dst_w, dst_h, dst_pix_fmt, 1)) < 0)
@@ -168,11 +172,18 @@ void movidius_infer_image(unsigned char *image, int width, int height)
 }
 
 
+static unsigned class_id_valid(int class_id)
+{
+    return ((class_id >= 0) && (class_id < sizeof(MobileNet_labels)/sizeof(char *)));
+}
+
+
 // returns zero if result is available, otherwise negative number.
 // free resultData after use
-int movidius_get_results(float **resultData, int *resultDataLength)
+int movidius_get_results(movidius_output **resultData)
 {
     // check read fifo level > 0 first before reading so we don't block
+    float *tensor_output = NULL;
     ncStatus_t retCode;
     int readfifolevel = 0;
     unsigned int optionSize = sizeof(readfifolevel);
@@ -199,22 +210,96 @@ int movidius_get_results(float **resultData, int *resultDataLength)
         //printf("outFifoElemSize: %d\n", outFifoElemSize);
 
         // Get the output tensor
-        *resultData = (float *)malloc(outFifoElemSize);
-        if (*resultData == NULL) {
-            printf("Error: Could not allocate memory for result.\n");
+        tensor_output = (float *)malloc(outFifoElemSize);
+        if (tensor_output == NULL) {
+            printf("Error: Could not allocate memory for tensor output.\n");
             return -1;
         }
         void *userParam;  // this will be set to point to the user-defined data that you passed into ncGraphQueueInferenceWithFifoElem() with this tensor
-        retCode = ncFifoReadElem(outputFIFO, *resultData, &outFifoElemSize, &userParam);
+        retCode = ncFifoReadElem(outputFIFO, tensor_output, &outFifoElemSize, &userParam);
         if (retCode != NC_OK) {
             printf("Error [%d]: Could not read the result from the ouput FIFO.\n", retCode);
-            movidius_free_results(resultData);
+            free(tensor_output);
             return -1;
         }
 
-        *resultDataLength = outFifoElemSize;
+        //   a.	First fp16 value holds the number of valid detections = num_valid.
+        //   b.	The next 6 values are unused.
+        //   c.	The next (7 * num_valid) values contain the valid detections data
+        //       Each group of 7 values will describe an object/box These 7 values in order.
+        //       The values are:
+        //         0: image_id (always 0)
+        //         1: class_id (this is an index into labels)
+        //         2: score (this is the probability for the class)
+        //         3: box left location within image as number between 0.0 and 1.0
+        //         4: box top location within image as number between 0.0 and 1.0
+        //         5: box right location within image as number between 0.0 and 1.0
+        //         6: box bottom location within image as number between 0.0 and 1.0
 
-        //printf("*numResults: %d\n", *numResults);
+        if ((outFifoElemSize > 1) && (tensor_output))
+        {
+            int num_detections = (int)tensor_output[0];
+            int num_valid_detections = 0;
+            int i;
+
+            if (outFifoElemSize >= num_detections*7*sizeof(float)+7*sizeof(float))
+            {
+                for (i = 0; i < num_detections; i++)
+                {
+                    int base_index = 7 + i*7;
+                    int class_id = (int)tensor_output[base_index + 1];
+                    if (class_id_valid(class_id))
+                        num_valid_detections++;
+                }
+                if (num_valid_detections > 0)
+                {
+                    *resultData = (struct movidius_output *)malloc(sizeof(struct movidius_output));
+                    if (*resultData == NULL)
+                    {
+                        printf("Error: Could not allocate memory for result.\n");
+                        free(tensor_output);
+                        return -1;
+                    }
+                    struct movidius_result *obj = (struct movidius_result *)malloc(sizeof(struct movidius_result)*num_valid_detections);
+                    if (obj == NULL)
+                    {
+                        printf("Error: Could not allocate memory for result.\n");
+                        free(*resultData);
+                        *resultData = NULL;
+                        free(tensor_output);
+                        return -1;
+                    }
+                    (*resultData)->object = obj;
+                    (*resultData)->num_objects = num_valid_detections;
+
+                    int obj_index = 0;
+                    //printf("Num detections: %d\n", num_detections);
+                    for (i = 0; i < num_detections; i++)
+                    {
+                        int base_index = 7 + i*7;
+                        int class_id = (int)tensor_output[base_index + 1];
+                        if (class_id_valid(class_id))
+                        {
+                            obj[obj_index].class_id = class_id;
+                            obj[obj_index].score = tensor_output[base_index + 2]*100;
+                            obj[obj_index].box_left = tensor_output[base_index + 3];
+                            obj[obj_index].box_top = tensor_output[base_index + 4];
+                            obj[obj_index].box_right = tensor_output[base_index + 5];
+                            obj[obj_index].box_bottom = tensor_output[base_index + 6];
+
+                            printf("\t%s : %f%%, (%f, %f, %f, %f)\n",
+                                   movidius_get_class_label(obj[obj_index].class_id), obj[obj_index].score,
+                                   obj[obj_index].box_left, obj[obj_index].box_right,
+                                   obj[obj_index].box_bottom, obj[obj_index].box_top);
+
+                            obj_index++;
+                        }
+                    }
+                }
+            }
+        }
+
+        free(tensor_output);
 
         return 0;
     }
@@ -222,66 +307,45 @@ int movidius_get_results(float **resultData, int *resultDataLength)
 }
 
 
-float movidius_get_person_probability(float *resultData, int resultDataLength)
+const char *movidius_get_class_label(int class_id)
 {
-    //   a.	First fp16 value holds the number of valid detections = num_valid.
-    //   b.	The next 6 values are unused.
-    //   c.	The next (7 * num_valid) values contain the valid detections data
-    //       Each group of 7 values will describe an object/box These 7 values in order.
-    //       The values are:
-    //         0: image_id (always 0)
-    //         1: class_id (this is an index into labels)
-    //         2: score (this is the probability for the class)
-    //         3: box left location within image as number between 0.0 and 1.0
-    //         4: box top location within image as number between 0.0 and 1.0
-    //         5: box right location within image as number between 0.0 and 1.0
-    //         6: box bottom location within image as number between 0.0 and 1.0
-
-    if ((resultDataLength > 1) && (resultData))
-    {
-        int num_valid_detections = (int)resultData[0];
-        int i;
-
-        if (resultDataLength >= num_valid_detections*7*sizeof(float)+7*sizeof(float))
-        {
-            printf("Num valid detections: %d\n", num_valid_detections);
-            for (i = 0; i < num_valid_detections; i++)
-            {
-                int base_index = 7 + i*7;
-                int class_id = (int)resultData[base_index + 1];
-                float score = resultData[base_index + 2]*100;
-                float box_left = resultData[base_index + 3];
-                float box_top = resultData[base_index + 4];
-                float box_right = resultData[base_index + 5];
-                float box_bottom = resultData[base_index + 6];
-                printf("\tclass ID: %d\n", class_id);
-                if (class_id < sizeof(labels)/sizeof(char *))
-                    printf("\t%s : %f%%, (%f, %f, %f, %f)\n", labels[class_id], score, box_left, box_right, box_bottom, box_top);
-            }
-        }
-    }
-
-    //float maxResult = 0.0;
-    //int maxIndex = -1;
-    //int index;
-    //
-    //for (index = 0; index < numResults; index++)
-    //{
-    //    if (resultData[index] > maxResult)
-    //    {
-    //        maxResult = resultData[index];
-    //        maxIndex = index;
-    //    }
-    //}
-    //printf("Index %d: probability %f\n", maxIndex, resultData[maxIndex]);
-    return 0; // FIXME: return person's probability
+    if (class_id_valid(class_id))
+        return MobileNet_labels[class_id];
+    return "";
 }
 
 
-void movidius_free_results(float **resultData)
+float movidius_get_highest_person_score(movidius_output *resultData)
+{
+    float maxResult = 0.0;
+    int person_class_id = 15;
+    int i;
+
+    if (resultData)
+    {
+        for (i = 0; i < resultData->num_objects; i++)
+        {
+            if (resultData->object[i].class_id == person_class_id)
+            {
+                if (resultData->object[i].score > maxResult)
+                    maxResult = resultData->object[i].score;
+            }
+        }
+        //printf("Person score: %f%%\n", maxResult);
+    }
+    return maxResult;
+}
+
+
+void movidius_free_results(movidius_output **resultData)
 {
     if (*resultData)
     {
+        if ((*resultData)->object)
+        {
+            free((*resultData)->object);
+            (*resultData)->object = NULL;
+        }
         free(*resultData);
         *resultData = NULL;
     }

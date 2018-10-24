@@ -11,10 +11,29 @@
 #ifndef MOVIDIUS_H_
 #define MOVIDIUS_H_
 
+
+typedef struct movidius_result {
+    int class_id;       // index into MobileNet_labels
+    float score;        // probability in percentage
+    float box_left;     // object location within image, range 0.0 to 1.0
+    float box_top;      // object location within image, range 0.0 to 1.0
+    float box_right;    // object location within image, range 0.0 to 1.0
+    float box_bottom;   // object location within image, range 0.0 to 1.0
+} movidius_result;
+
+
+typedef struct movidius_output {
+    struct movidius_result *object;
+    int num_objects;
+} movidius_output;
+
+
+
 void movidius_infer_image(unsigned char *image, int width, int height);
-int movidius_get_results(float **resultData, int *resultDataLength);
-float movidius_get_person_probability(float *resultData, int resultDataLength);
-void movidius_free_results(float **resultData);
+int movidius_get_results(movidius_output **resultData);
+float movidius_get_highest_person_score(movidius_output *resultData);
+const char *movidius_get_class_label(int class_id);
+void movidius_free_results(movidius_output **resultData);
 
 int movidius_init(void);
 void movidius_close(void);
