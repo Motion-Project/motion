@@ -70,6 +70,8 @@ struct image_data;
 #include "mmalcam.h"
 #endif
 
+#include "movidius.h"
+
 
 /**
  * ATTRIBUTE_UNUSED:
@@ -391,6 +393,8 @@ struct context {
 
     struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
+
+    struct movidius_output *inference_result;
 
     int locate_motion_mode;
     int locate_motion_style;

@@ -17,6 +17,7 @@
 #include <libswscale/swscale.h>
 #include <mvnc.h>
 
+#include "translate.h"
 #include "motion.h"
 #include "movidius.h"
 
@@ -67,11 +68,10 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
                              SWS_BICUBIC, NULL, NULL, NULL);
     if (!sws_ctx)
     {
-        fprintf(stderr,
-                "Impossible to create scale context for the conversion "
-                "fmt:%s s:%dx%d -> fmt:%s s:%dx%d\n",
-                av_get_pix_fmt_name(src_pix_fmt), src_w, src_h,
-                av_get_pix_fmt_name(dst_pix_fmt), dst_w, dst_h);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Impossible to create scale context for image conversion fmt:%s s:%dx%d -> fmt:%s s:%dx%d"),
+            av_get_pix_fmt_name(src_pix_fmt), src_w, src_h,
+            av_get_pix_fmt_name(dst_pix_fmt), dst_w, dst_h);
         goto end;
     }
     
@@ -79,7 +79,9 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
                                            src_pix_fmt, src_w, src_h, 1);
     if (srcNumBytes < 0)
     {
-        fprintf(stderr, "Could not fill image arrays\n");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Failed to fill image arrays: code %d"),
+            srcNumBytes);
         goto end;
     }
 
@@ -88,7 +90,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     if ((dst_bufsize = av_image_alloc(dst_data, dst_linesize,
                        dst_w, dst_h, dst_pix_fmt, 1)) < 0)
     {
-        fprintf(stderr, "Could not allocate destination image\n");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Failed to allocate dst image"));
         goto end;
     }
 
@@ -100,7 +102,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     processed_img = malloc(*processed_img_len);
     if (processed_img == NULL)
     {
-        fprintf(stderr, "Failed to allocate memory\n");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Failed to allocate memory"));
         goto end;
     }
     // scale BGR range from 0-255 to -1.0 to 1.0
@@ -148,7 +150,9 @@ void movidius_infer_image(unsigned char *image, int width, int height)
     retCode = ncFifoGetOption(inputFIFO,  NC_RO_FIFO_WRITE_FILL_LEVEL,
                               &writefifolevel, &optionSize);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not get the input FIFO level.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not get the input FIFO level"),
+                   retCode);
         return;
     }
 
@@ -162,19 +166,28 @@ void movidius_infer_image(unsigned char *image, int width, int height)
                 graphHandle, inputFIFO, outputFIFO, processed_img,
                 &processed_img_len, NULL);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not write to the input FIFO and queue an inference.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not write to the input FIFO and queue an inference"),
+                   retCode);
     }
 
     if (processed_img)
         free(processed_img);
-
-    //printf("Queued image for inference\n");
 }
 
 
 static unsigned class_id_valid(int class_id)
 {
     return ((class_id >= 0) && (class_id < sizeof(MobileNet_labels)/sizeof(char *)));
+}
+
+
+static inline void clip_box_location(float *box_loc)
+{
+    if (*box_loc < 0.0)
+        *box_loc = 0.0;
+    if (*box_loc > 1.0)
+        *box_loc = 1.0;
 }
 
 
@@ -190,35 +203,41 @@ int movidius_get_results(movidius_output **resultData)
     retCode = ncFifoGetOption(outputFIFO,  NC_RO_FIFO_READ_FILL_LEVEL,
                               &readfifolevel, &optionSize);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not get the output FIFO level.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not get the output FIFO level"),
+                   retCode);
         return -1;
     }
 
     if (readfifolevel > 0)
     {
-        //printf("readfifolevel: %d\n", readfifolevel);
+        movidius_free_results(resultData);
+
         // Get the size of the output tensor
         unsigned int outFifoElemSize = 0;
         optionSize = sizeof(outFifoElemSize);
         retCode = ncFifoGetOption(outputFIFO,  NC_RO_FIFO_ELEMENT_DATA_SIZE,
                                   &outFifoElemSize, &optionSize);
         if (retCode != NC_OK) {
-            printf("Error [%d]: Could not get the output FIFO element data size.\n", retCode);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                       _("Error [%d]: Could not get the output FIFO element data size"),
+                       retCode);
             return -1;
         }
-
-        //printf("outFifoElemSize: %d\n", outFifoElemSize);
 
         // Get the output tensor
         tensor_output = (float *)malloc(outFifoElemSize);
         if (tensor_output == NULL) {
-            printf("Error: Could not allocate memory for tensor output.\n");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                       _("Could not allocate memory for tensor output"));
             return -1;
         }
         void *userParam;  // this will be set to point to the user-defined data that you passed into ncGraphQueueInferenceWithFifoElem() with this tensor
         retCode = ncFifoReadElem(outputFIFO, tensor_output, &outFifoElemSize, &userParam);
         if (retCode != NC_OK) {
-            printf("Error [%d]: Could not read the result from the ouput FIFO.\n", retCode);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                       _("Error [%d]: Could not read the result from the ouput FIFO"),
+                       retCode);
             free(tensor_output);
             return -1;
         }
@@ -256,14 +275,16 @@ int movidius_get_results(movidius_output **resultData)
                     *resultData = (struct movidius_output *)malloc(sizeof(struct movidius_output));
                     if (*resultData == NULL)
                     {
-                        printf("Error: Could not allocate memory for result.\n");
+                        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                                   _("Could not allocate memory for result"));
                         free(tensor_output);
                         return -1;
                     }
                     struct movidius_result *obj = (struct movidius_result *)malloc(sizeof(struct movidius_result)*num_valid_detections);
                     if (obj == NULL)
                     {
-                        printf("Error: Could not allocate memory for result.\n");
+                        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                                   _("Could not allocate memory for result"));
                         free(*resultData);
                         *resultData = NULL;
                         free(tensor_output);
@@ -273,7 +294,6 @@ int movidius_get_results(movidius_output **resultData)
                     (*resultData)->num_objects = num_valid_detections;
 
                     int obj_index = 0;
-                    //printf("Num detections: %d\n", num_detections);
                     for (i = 0; i < num_detections; i++)
                     {
                         int base_index = 7 + i*7;
@@ -286,11 +306,21 @@ int movidius_get_results(movidius_output **resultData)
                             obj[obj_index].box_top = tensor_output[base_index + 4];
                             obj[obj_index].box_right = tensor_output[base_index + 5];
                             obj[obj_index].box_bottom = tensor_output[base_index + 6];
+                            clip_box_location(&obj[obj_index].box_left);
+                            clip_box_location(&obj[obj_index].box_top);
+                            clip_box_location(&obj[obj_index].box_right);
+                            clip_box_location(&obj[obj_index].box_bottom);
 
-                            printf("\t%s : %f%%, (%f, %f, %f, %f)\n",
-                                   movidius_get_class_label(obj[obj_index].class_id), obj[obj_index].score,
-                                   obj[obj_index].box_left, obj[obj_index].box_right,
-                                   obj[obj_index].box_bottom, obj[obj_index].box_top);
+                            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                                _("%s : %f%%, (%f, %f, %f, %f)"),
+                                movidius_get_class_label(obj[obj_index].class_id), obj[obj_index].score,
+                                obj[obj_index].box_left, obj[obj_index].box_right,
+                                obj[obj_index].box_bottom, obj[obj_index].box_top);
+
+                            //printf("%s : %f%%, (%f, %f, %f, %f)\n",
+                            //       movidius_get_class_label(obj[obj_index].class_id), obj[obj_index].score,
+                            //       obj[obj_index].box_left, obj[obj_index].box_right,
+                            //       obj[obj_index].box_bottom, obj[obj_index].box_top);
 
                             obj_index++;
                         }
@@ -315,9 +345,8 @@ const char *movidius_get_class_label(int class_id)
 }
 
 
-float movidius_get_highest_person_score(movidius_output *resultData)
+unsigned movidius_person_detected(movidius_output *resultData, float score_threshold)
 {
-    float maxResult = 0.0;
     int person_class_id = 15;
     int i;
 
@@ -327,13 +356,12 @@ float movidius_get_highest_person_score(movidius_output *resultData)
         {
             if (resultData->object[i].class_id == person_class_id)
             {
-                if (resultData->object[i].score > maxResult)
-                    maxResult = resultData->object[i].score;
+                if (resultData->object[i].score > score_threshold)
+                    return 1;
             }
         }
-        //printf("Person score: %f%%\n", maxResult);
     }
-    return maxResult;
+    return 0;
 }
 
 
@@ -361,7 +389,8 @@ static int movidius_read_graph_file(char *graph_path, char **graph_buffer, unsig
     file = fopen(graph_path, "rb");
     if (!file)
     {
-        fprintf(stderr, "Unable to open file %s", graph_path);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Unable to open graph file %s"), graph_path);
         return -1;
     }
 
@@ -374,7 +403,8 @@ static int movidius_read_graph_file(char *graph_path, char **graph_buffer, unsig
     *graph_buffer = (char *)malloc(*graph_length + 1);
     if (*graph_buffer == NULL)
     {
-        fprintf(stderr, "Unable to allocate memory");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Unable to allocate memory"));
         fclose(file);
         return -1;
     }
@@ -397,28 +427,35 @@ int movidius_init(void)
     // Create a device handle for the first device found (index 0)
     retCode = ncDeviceCreate(0, &deviceHandle);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not create a neural compute device handle.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not create a neural compute device handle"),
+                   retCode);
         ret = -1;
         goto cleanup;
     }
     // Boot the device and open communication
     retCode = ncDeviceOpen(deviceHandle);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not open the neural compute device.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not open the neural compute device"),
+                   retCode);
         ret = -1;
         goto cleanup;
     }
     // Load a graph from file
     if (movidius_read_graph_file(graph_path, &graph_buffer, &graph_length))
     {
-        printf("Error: Failed to load graph.\n");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Failed to load graph"));
         ret = -1;
         goto cleanup;
     }
     // Initialize a graph handle
     retCode = ncGraphCreate("MobileNetSSD", &graphHandle);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not create a graph handle.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not create a graph handle"),
+                   retCode);
         ret = -1;
         goto cleanup;
     }
@@ -431,13 +468,12 @@ int movidius_init(void)
     retCode = ncGraphAllocateWithFifos(deviceHandle, graphHandle, graph_buffer,
                                        graph_length, &inputFIFO, &outputFIFO);
     if (retCode != NC_OK) {
-        printf("Error [%d]: Could not allocate graph with FIFOs.\n", retCode);
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                   _("Error [%d]: Could not allocate graph with FIFOs"),
+                   retCode);
         ret = -1;
         goto cleanup;
     }
-    //ncStatus_t ncDeviceSetOption(deviceHandle,
-    //                         int option, const void* data,
-    //                         unsigned int dataLength);
 
     // Success !
     if (graph_buffer)

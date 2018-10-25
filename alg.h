@@ -11,6 +11,7 @@
 #define _INCLUDE_ALG_H
 
 #include "motion.h"
+#include "movidius.h"
 
 struct coord {
     int x;
@@ -31,6 +32,7 @@ struct segment {
     int count;
 };
 
+void alg_inference_box_to_coord(struct movidius_result *result, int width, int height, struct coord *cent);
 void alg_locate_center_size(struct images *, int width, int height, struct coord *);
 void alg_draw_location(struct coord *, struct images *, int width, unsigned char *, int, int, int);
 void alg_draw_red_location(struct coord *, struct images *, int width, unsigned char *, int, int, int);

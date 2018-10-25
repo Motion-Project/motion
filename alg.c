@@ -17,6 +17,27 @@
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
+
+void alg_inference_box_to_coord(struct movidius_result *result, int width, int height, struct coord *cent)
+{
+    cent->minx = result->box_left * width;
+    cent->maxx = result->box_right * width;
+    cent->miny = result->box_top * height;
+    cent->maxy = result->box_bottom * height;
+
+    cent->x = (cent->minx + cent->maxx) / 2;
+    cent->y = (cent->miny + cent->maxy) / 2;
+
+    /* Align for better locate box handling */
+    cent->minx += cent->minx % 2;
+    cent->miny += cent->miny % 2;
+    cent->maxx -= cent->maxx % 2;
+    cent->maxy -= cent->maxy % 2;
+
+    cent->width = cent->maxx - cent->minx;
+    cent->height = cent->maxy - cent->miny;
+}
+
 /**
  * alg_locate_center_size
  *      Locates the center and size of the movement.

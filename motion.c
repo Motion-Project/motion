@@ -491,6 +491,29 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     /* Draw location */
     if (cnt->locate_motion_mode == LOCATE_ON) {
 
+        float max_score = 0;
+        int max_score_index = -1;
+        int person_class_id = 15;
+        int i;
+
+        if (cnt->inference_result)
+        {
+            for (i = 0; i < cnt->inference_result->num_objects; i++)
+            {
+                if (cnt->inference_result->object[i].class_id == person_class_id)
+                {
+                    if (cnt->inference_result->object[i].score > max_score)
+                    {
+                        max_score = cnt->inference_result->object[i].score;
+                        max_score_index = i;
+                    }
+                }
+            }
+            if ((max_score_index >= 0) && (max_score > cnt->threshold))
+                alg_inference_box_to_coord(&(cnt->inference_result->object[max_score_index]),
+                                           imgs->width, imgs->height, location);
+        }
+
         if (cnt->locate_motion_style == LOCATE_BOX) {
             alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
                               LOCATE_BOTH, cnt->process_thisframe);
@@ -1238,6 +1261,7 @@ static int motion_init(struct context *cnt)
 
     if (movidius_init())
         return -3;
+    cnt->inference_result = NULL;
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
@@ -1700,6 +1724,7 @@ static void motion_cleanup(struct context *cnt) {
 
     dbse_deinit(cnt);
 
+    movidius_free_results(&cnt->inference_result);
     movidius_close();
 }
 
@@ -2292,6 +2317,7 @@ static void mlp_detection(struct context *cnt){
 
 static void mlp_tuning(struct context *cnt){
 
+#if 0
     /***** MOTION LOOP - TUNING SECTION *****/
 
     /*
@@ -2361,7 +2387,7 @@ static void mlp_tuning(struct context *cnt){
         cnt->previous_location_y = cnt->current_image->location.y;
     }
 
-
+#endif
 }
 
 static void mlp_overlay(struct context *cnt){
@@ -2444,15 +2470,12 @@ static void mlp_actions(struct context *cnt){
 
     /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
-    struct movidius_output *resultData = NULL;
-    if (movidius_get_results(&resultData) == 0)
+    if (movidius_get_results(&(cnt->inference_result)) == 0)
     {
-        float score = movidius_get_highest_person_score(resultData);
-        // TODO: flag this image if probability of person is higher than some threshold
-        //cnt->current_image->flags |= IMAGE_MOTION;
-        movidius_free_results(&resultData);
+        // flag this image if probability of person is higher than some threshold
+        if (movidius_person_detected(cnt->inference_result, cnt->threshold))
+            cnt->current_image->flags |= IMAGE_MOTION;
     }
-
 
     //if ((cnt->current_image->diffs > cnt->threshold) &&
     //    (cnt->current_image->diffs < cnt->threshold_maximum)) {
