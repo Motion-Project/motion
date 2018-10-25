@@ -335,6 +335,47 @@ if test "${WITHOUT_MMAL}" = "no"; then
 fi
 
 ##############################################################################
+###  Movidius NCS
+##############################################################################
+WITHOUT_MVNC="no"
+AC_ARG_WITH([mvnc],
+  AS_HELP_STRING([--without-mvnc],
+    [Compile without Movidius nc support]),
+  WITHOUT_MVNC="yes",
+  WITHOUT_MVNC="no")
+
+AC_ARG_WITH([mvnc-lib],
+  AS_HELP_STRING([--with-mvnc-lib[=DIR]],
+    [Use this command to tell configure where mvnc libs directory is.]),
+  MVNC_LIBS_DIR="$withval",
+  MVNC_LIBS_DIR="/usr/local/lib/"
+)
+
+AC_ARG_WITH([mvnc-include],
+  AS_HELP_STRING([--with-mvnc-include[=DIR]],
+    [Use this command to tell configure where mvnc include installation root directory is.]),
+  MVNC_HEADERS="$withval",
+  MVNC_HEADERS="/usr/local/include/"
+)
+
+if test "${WITHOUT_MVNC}" = "no"; then
+  HAVE_MVNC=""
+  if test -d ${MVNC_HEADERS}/mvnc2; then
+       HAVE_MVNC="yes"
+  fi
+
+  AS_IF([test "${HAVE_MVNC}" = "yes" ], [
+    AC_SUBST(MVNC_CFLAGS)
+    AC_SUBST(MVNC_OBJ)
+    AC_SUBST(MVNC_LIBS)
+    MVNC_OBJ="movidius.o"
+    MVNC_CFLAGS="-DHAVE_MVNC -I${MVNC_HEADERS}"
+    MVNC_LIBS="-lmvnc"
+    AC_DEFINE([HAVE_MVNC], 1, [Define to 1 if we want MVNC])
+  ])
+fi
+
+##############################################################################
 ###  ffmpeg
 ##############################################################################
 AC_ARG_WITH([ffmpeg],
@@ -773,6 +814,18 @@ elif test "${WITHOUT_MMAL}" = "yes"; then
 else
     echo "MMAL support:        No"
     echo " ... libraspberrypi-dev package not installed"
+fi
+
+if test "${HAVE_MVNC}" = "yes"; then
+    echo "MVNC support:        Yes"
+    echo " ... MVNC_CFLAGS: $MVNC_CFLAGS"
+    echo " ... MVNC_OBJ: $MVNC_OBJ"
+    echo " ... MVNC_LIBS: $MVNC_LIBS"
+elif test "${WITHOUT_MVNC}" = "yes"; then
+    echo "MVNC support:        disabled"
+else
+    echo "MVNC support:        No"
+    echo " ... ncsdk not installed"
 fi
 
 if test "${HAVE_FFMPEG}" = "yes"; then
