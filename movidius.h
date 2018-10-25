@@ -32,6 +32,7 @@ typedef struct movidius_output {
 void movidius_infer_image(unsigned char *image, int width, int height);
 int movidius_get_results(movidius_output **resultData);
 unsigned movidius_person_detected(movidius_output *resultData, float score_threshold);
+int movidius_get_max_person_index(movidius_output *resultData, float score_threshold);
 const char *movidius_get_class_label(int class_id);
 void movidius_free_results(movidius_output **resultData);
 

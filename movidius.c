@@ -365,6 +365,33 @@ unsigned movidius_person_detected(movidius_output *resultData, float score_thres
 }
 
 
+// returns -1 if no result found
+int movidius_get_max_person_index(movidius_output *resultData, float score_threshold)
+{
+    float max_score = 0;
+    int max_score_index = -1;
+    int person_class_id = 15;
+    int i;
+
+    if (resultData)
+    {
+        for (i = 0; i < resultData->num_objects; i++)
+        {
+            if (resultData->object[i].class_id == person_class_id)
+            {
+                if ((resultData->object[i].score > score_threshold) &&
+                    (resultData->object[i].score > max_score))
+                {
+                    max_score = resultData->object[i].score;
+                    max_score_index = i;
+                }
+            }
+        }
+    }
+    return max_score_index;
+}
+
+
 void movidius_free_results(movidius_output **resultData)
 {
     if (*resultData)

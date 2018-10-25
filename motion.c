@@ -491,28 +491,10 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     /* Draw location */
     if (cnt->locate_motion_mode == LOCATE_ON) {
 
-        float max_score = 0;
-        int max_score_index = -1;
-        int person_class_id = 15;
-        int i;
-
-        if (cnt->inference_result)
-        {
-            for (i = 0; i < cnt->inference_result->num_objects; i++)
-            {
-                if (cnt->inference_result->object[i].class_id == person_class_id)
-                {
-                    if (cnt->inference_result->object[i].score > max_score)
-                    {
-                        max_score = cnt->inference_result->object[i].score;
-                        max_score_index = i;
-                    }
-                }
-            }
-            if ((max_score_index >= 0) && (max_score > cnt->threshold))
-                alg_inference_box_to_coord(&(cnt->inference_result->object[max_score_index]),
-                                           imgs->width, imgs->height, location);
-        }
+        int max_score_index = movidius_get_max_person_index(cnt->inference_result, cnt->threshold);
+        if (max_score_index >= 0)
+            alg_inference_box_to_coord(&(cnt->inference_result->object[max_score_index]),
+                                       imgs->width, imgs->height, location);
 
         if (cnt->locate_motion_style == LOCATE_BOX) {
             alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
@@ -2421,7 +2403,14 @@ static void mlp_overlay(struct context *cnt){
     /* Add changed pixels in upper right corner of the pictures */
     if (cnt->conf.text_changes) {
         if (!cnt->pause)
-            sprintf(tmp, "%d", cnt->current_image->diffs);
+        {
+            //sprintf(tmp, "%d", cnt->current_image->diffs);
+            int max_score_index = movidius_get_max_person_index(cnt->inference_result, cnt->threshold);
+            if (max_score_index >= 0)
+                sprintf(tmp, "%d", (int)cnt->inference_result->object[max_score_index].score);
+            else
+                sprintf(tmp, "%d", 0);
+        }
         else
             sprintf(tmp, "-");
 
