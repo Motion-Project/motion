@@ -301,6 +301,7 @@ static void context_destroy(struct context *cnt)
             free(cnt->mvnc_class_ids);
             cnt->mvnc_class_ids = NULL;
         }
+        cnt->num_mvnc_class_ids = 0;
 #endif
         if (config_params[j].copy == copy_string ||
             config_params[j].copy == copy_uri ||

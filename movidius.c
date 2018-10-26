@@ -189,6 +189,7 @@ static inline void clip_box_location(float *box_loc)
 int mvnc_get_results(struct mvnc_device_t *dev)
 {
     // check read fifo level > 0 first before reading so we don't block
+    int num_valid_detections = 0;
     float *tensor_output = NULL;
     ncStatus_t retCode;
     int readfifolevel = 0;
@@ -251,7 +252,6 @@ int mvnc_get_results(struct mvnc_device_t *dev)
         if ((outFifoElemSize > 1) && (tensor_output))
         {
             int num_detections = (int)tensor_output[0];
-            int num_valid_detections = 0;
             int i;
 
             if (outFifoElemSize >= num_detections*7*sizeof(float)+7*sizeof(float))
@@ -311,7 +311,7 @@ int mvnc_get_results(struct mvnc_device_t *dev)
 
         free(tensor_output);
 
-        return dev->num_results;
+        return num_valid_detections;
     }
     return -1;
 }
@@ -546,12 +546,10 @@ void mvnc_close(struct mvnc_device_t *dev)
     }
     if (dev->deviceHandle)
     {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
-            _("Closing mvnc device ..."));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Closing mvnc device ..."));
         ncDeviceClose(dev->deviceHandle);
         ncDeviceDestroy(&dev->deviceHandle);
         dev->deviceHandle = NULL;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
-            _("Closing mvnc device: success"));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Closing mvnc device: success"));
     }
 }
