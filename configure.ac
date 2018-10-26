@@ -394,11 +394,14 @@ AC_ARG_WITH([mvnc-include],
 
 if test "${WITHOUT_MVNC}" = "no"; then
   HAVE_MVNC=""
-  AS_IF([test "${HAVE_FFMPEG}" = "yes" ], [
+  MVNC_MISSING_FFMPEG=""
+  if test "${HAVE_FFMPEG}" = "yes"; then
     if test -d ${MVNC_HEADERS}/mvnc2; then
          HAVE_MVNC="yes"
     fi
-  ])
+  else
+    MVNC_MISSING_FFMPEG="yes"
+  fi
 
   AS_IF([test "${HAVE_MVNC}" = "yes" ], [
     AC_SUBST(MVNC_CFLAGS)
@@ -835,7 +838,11 @@ elif test "${WITHOUT_MVNC}" = "yes"; then
     echo "MVNC support:        disabled"
 else
     echo "MVNC support:        No"
-    echo " ... ncsdk not installed"
+    if test "${MVNC_MISSING_FFMPEG}" = "yes"; then
+      echo " ... ffmpeg dependency not found"
+    else
+      echo " ... ncsdk not installed"
+    fi
 fi
 
 if test "${SQLITE3_SUPPORT}" = "yes"; then
