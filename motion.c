@@ -2207,11 +2207,12 @@ static void mlp_detection(struct context *cnt){
 
 #ifdef HAVE_MVNC
     if (cnt->conf.mvnc_enable)
+    {
         mvnc_infer_image(&cnt->mvnc_dev, cnt->imgs.image_virgin.image_norm, cnt->imgs.width, cnt->imgs.height);
-    else
+        return;
+    }
 #endif
 
-    {
     /*
      * The actual motion detection takes place in the following
      * diffs is the number of pixels detected as changed
@@ -2325,7 +2326,6 @@ static void mlp_detection(struct context *cnt){
         cnt->current_image->diffs = 0;
     }
 
-    }
 }
 
 static void mlp_tuning(struct context *cnt){
@@ -2516,14 +2516,14 @@ static void mlp_actions(struct context *cnt){
     else
 #endif
     {
-
-    if ((cnt->current_image->diffs > cnt->threshold) &&
-        (cnt->current_image->diffs < cnt->threshold_maximum)) {
-        /* flag this image, it have motion */
-        cnt->current_image->flags |= IMAGE_MOTION;
-        cnt->lightswitch_framecounter++; /* micro lightswitch */
-    } else {
-        cnt->lightswitch_framecounter = 0;
+        if ((cnt->current_image->diffs > cnt->threshold) &&
+            (cnt->current_image->diffs < cnt->threshold_maximum)) {
+            /* flag this image, it have motion */
+            cnt->current_image->flags |= IMAGE_MOTION;
+            cnt->lightswitch_framecounter++; /* micro lightswitch */
+        } else {
+            cnt->lightswitch_framecounter = 0;
+        }
     }
 
     /*
@@ -2672,7 +2672,6 @@ static void mlp_actions(struct context *cnt){
     /* Save/send to movie some images */
     process_image_ring(cnt, 2);
 
-    }
 }
 
 static void mlp_setupmode(struct context *cnt){
