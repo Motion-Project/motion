@@ -18,7 +18,8 @@
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
 
-void alg_inference_box_to_coord(struct movidius_result *result, int width, int height, struct coord *cent)
+#ifdef HAVE_MVNC
+void alg_inference_box_to_coord(struct mvnc_result *result, int width, int height, struct coord *cent)
 {
     cent->minx = result->box_left * width;
     cent->maxx = result->box_right * width;
@@ -37,6 +38,7 @@ void alg_inference_box_to_coord(struct movidius_result *result, int width, int h
     cent->width = cent->maxx - cent->minx;
     cent->height = cent->maxy - cent->miny;
 }
+#endif
 
 /**
  * alg_locate_center_size

@@ -15,7 +15,6 @@
 #include <libavutil/imgutils.h>
 #include <libavutil/parseutils.h>
 #include <libswscale/swscale.h>
-#include <mvnc.h>
 
 #include "translate.h"
 #include "motion.h"
@@ -28,12 +27,6 @@ static const char *MobileNet_labels[] = {"background",
                                          "cow", "diningtable", "dog", "horse",
                                          "motorbike", "person", "pottedplant",
                                          "sheep", "sofa", "train", "tvmonitor"};
-
-// TODO: move this into a struct
-static struct ncDeviceHandle_t* deviceHandle = NULL;
-static struct ncGraphHandle_t* graphHandle = NULL;
-static struct ncFifoHandle_t* inputFIFO = NULL;
-static struct ncFifoHandle_t* outputFIFO = NULL;
 
 
 static float *scale_image(unsigned char *src_img, int width, int height, unsigned int *processed_img_len)
@@ -68,7 +61,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
                              SWS_BICUBIC, NULL, NULL, NULL);
     if (!sws_ctx)
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Impossible to create scale context for image conversion fmt:%s s:%dx%d -> fmt:%s s:%dx%d"),
             av_get_pix_fmt_name(src_pix_fmt), src_w, src_h,
             av_get_pix_fmt_name(dst_pix_fmt), dst_w, dst_h);
@@ -79,7 +72,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
                                            src_pix_fmt, src_w, src_h, 1);
     if (srcNumBytes < 0)
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Failed to fill image arrays: code %d"),
             srcNumBytes);
         goto end;
@@ -90,7 +83,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     if ((dst_bufsize = av_image_alloc(dst_data, dst_linesize,
                        dst_w, dst_h, dst_pix_fmt, 1)) < 0)
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Failed to allocate dst image"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to allocate dst image"));
         goto end;
     }
 
@@ -102,7 +95,7 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     processed_img = malloc(*processed_img_len);
     if (processed_img == NULL)
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Failed to allocate memory"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Failed to allocate memory"));
         goto end;
     }
     // scale BGR range from 0-255 to -1.0 to 1.0
@@ -138,7 +131,7 @@ end:
 }
 
 
-void movidius_infer_image(unsigned char *image, int width, int height)
+void mvnc_infer_image(struct mvnc_device_t *dev, unsigned char *image, int width, int height)
 {
     float *processed_img = NULL;
     unsigned int processed_img_len = 0;
@@ -147,10 +140,10 @@ void movidius_infer_image(unsigned char *image, int width, int height)
     // check write fifo level == 0 before writing new image
     int writefifolevel = 0;
     unsigned int optionSize = sizeof(writefifolevel);
-    retCode = ncFifoGetOption(inputFIFO,  NC_RO_FIFO_WRITE_FILL_LEVEL,
+    retCode = ncFifoGetOption(dev->inputFIFO,  NC_RO_FIFO_WRITE_FILL_LEVEL,
                               &writefifolevel, &optionSize);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                    _("Error [%d]: Could not get the input FIFO level"),
                    retCode);
         return;
@@ -163,10 +156,10 @@ void movidius_infer_image(unsigned char *image, int width, int height)
 
     // Write the tensor to the input FIFO and queue an inference
     retCode = ncGraphQueueInferenceWithFifoElem(
-                graphHandle, inputFIFO, outputFIFO, processed_img,
+                dev->graphHandle, dev->inputFIFO, dev->outputFIFO, processed_img,
                 &processed_img_len, NULL);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                    _("Error [%d]: Could not write to the input FIFO and queue an inference"),
                    retCode);
     }
@@ -191,19 +184,19 @@ static inline void clip_box_location(float *box_loc)
 }
 
 
-// returns zero if result is available, otherwise negative number.
-// free resultData after use
-int movidius_get_results(movidius_output **resultData)
+// returns number of results, otherwise negative number if error.
+// free results after use by calling mvnc_free_results
+int mvnc_get_results(struct mvnc_device_t *dev)
 {
     // check read fifo level > 0 first before reading so we don't block
     float *tensor_output = NULL;
     ncStatus_t retCode;
     int readfifolevel = 0;
     unsigned int optionSize = sizeof(readfifolevel);
-    retCode = ncFifoGetOption(outputFIFO,  NC_RO_FIFO_READ_FILL_LEVEL,
+    retCode = ncFifoGetOption(dev->outputFIFO,  NC_RO_FIFO_READ_FILL_LEVEL,
                               &readfifolevel, &optionSize);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                    _("Error [%d]: Could not get the output FIFO level"),
                    retCode);
         return -1;
@@ -211,15 +204,15 @@ int movidius_get_results(movidius_output **resultData)
 
     if (readfifolevel > 0)
     {
-        movidius_free_results(resultData);
+        mvnc_free_results(dev);
 
         // Get the size of the output tensor
         unsigned int outFifoElemSize = 0;
         optionSize = sizeof(outFifoElemSize);
-        retCode = ncFifoGetOption(outputFIFO,  NC_RO_FIFO_ELEMENT_DATA_SIZE,
+        retCode = ncFifoGetOption(dev->outputFIFO,  NC_RO_FIFO_ELEMENT_DATA_SIZE,
                                   &outFifoElemSize, &optionSize);
         if (retCode != NC_OK) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                        _("Error [%d]: Could not get the output FIFO element data size"),
                        retCode);
             return -1;
@@ -228,14 +221,14 @@ int movidius_get_results(movidius_output **resultData)
         // Get the output tensor
         tensor_output = (float *)malloc(outFifoElemSize);
         if (tensor_output == NULL) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                        _("Could not allocate memory for tensor output"));
             return -1;
         }
-        void *userParam;  // this will be set to point to the user-defined data that you passed into ncGraphQueueInferenceWithFifoElem() with this tensor
-        retCode = ncFifoReadElem(outputFIFO, tensor_output, &outFifoElemSize, &userParam);
+        void *userParam;
+        retCode = ncFifoReadElem(dev->outputFIFO, tensor_output, &outFifoElemSize, &userParam);
         if (retCode != NC_OK) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                        _("Error [%d]: Could not read the result from the ouput FIFO"),
                        retCode);
             free(tensor_output);
@@ -272,26 +265,15 @@ int movidius_get_results(movidius_output **resultData)
                 }
                 if (num_valid_detections > 0)
                 {
-                    *resultData = (struct movidius_output *)malloc(sizeof(struct movidius_output));
-                    if (*resultData == NULL)
+                    dev->results = (struct mvnc_result *)malloc(sizeof(struct mvnc_result)*num_valid_detections);
+                    if (dev->results == NULL)
                     {
-                        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                                    _("Could not allocate memory for result"));
                         free(tensor_output);
                         return -1;
                     }
-                    struct movidius_result *obj = (struct movidius_result *)malloc(sizeof(struct movidius_result)*num_valid_detections);
-                    if (obj == NULL)
-                    {
-                        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
-                                   _("Could not allocate memory for result"));
-                        free(*resultData);
-                        *resultData = NULL;
-                        free(tensor_output);
-                        return -1;
-                    }
-                    (*resultData)->object = obj;
-                    (*resultData)->num_objects = num_valid_detections;
+                    dev->num_results = num_valid_detections;
 
                     int obj_index = 0;
                     for (i = 0; i < num_detections; i++)
@@ -300,27 +282,25 @@ int movidius_get_results(movidius_output **resultData)
                         int class_id = (int)tensor_output[base_index + 1];
                         if (class_id_valid(class_id))
                         {
-                            obj[obj_index].class_id = class_id;
-                            obj[obj_index].score = tensor_output[base_index + 2]*100;
-                            obj[obj_index].box_left = tensor_output[base_index + 3];
-                            obj[obj_index].box_top = tensor_output[base_index + 4];
-                            obj[obj_index].box_right = tensor_output[base_index + 5];
-                            obj[obj_index].box_bottom = tensor_output[base_index + 6];
-                            clip_box_location(&obj[obj_index].box_left);
-                            clip_box_location(&obj[obj_index].box_top);
-                            clip_box_location(&obj[obj_index].box_right);
-                            clip_box_location(&obj[obj_index].box_bottom);
+                            dev->results[obj_index].class_id = class_id;
+                            dev->results[obj_index].score = tensor_output[base_index + 2]*100;
+                            dev->results[obj_index].box_left = tensor_output[base_index + 3];
+                            dev->results[obj_index].box_top = tensor_output[base_index + 4];
+                            dev->results[obj_index].box_right = tensor_output[base_index + 5];
+                            dev->results[obj_index].box_bottom = tensor_output[base_index + 6];
+                            clip_box_location(&dev->results[obj_index].box_left);
+                            clip_box_location(&dev->results[obj_index].box_top);
+                            clip_box_location(&dev->results[obj_index].box_right);
+                            clip_box_location(&dev->results[obj_index].box_bottom);
 
-                            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                                 _("%s : %f%%, (%f, %f, %f, %f)"),
-                                movidius_get_class_label(obj[obj_index].class_id), obj[obj_index].score,
-                                obj[obj_index].box_left, obj[obj_index].box_right,
-                                obj[obj_index].box_bottom, obj[obj_index].box_top);
-
-                            //printf("%s : %f%%, (%f, %f, %f, %f)\n",
-                            //       movidius_get_class_label(obj[obj_index].class_id), obj[obj_index].score,
-                            //       obj[obj_index].box_left, obj[obj_index].box_right,
-                            //       obj[obj_index].box_bottom, obj[obj_index].box_top);
+                                mvnc_get_class_label(dev->results[obj_index].class_id),
+                                dev->results[obj_index].score,
+                                dev->results[obj_index].box_left,
+                                dev->results[obj_index].box_right,
+                                dev->results[obj_index].box_bottom,
+                                dev->results[obj_index].box_top);
 
                             obj_index++;
                         }
@@ -331,13 +311,13 @@ int movidius_get_results(movidius_output **resultData)
 
         free(tensor_output);
 
-        return 0;
+        return dev->num_results;
     }
     return -1;
 }
 
 
-const char *movidius_get_class_label(int class_id)
+const char *mvnc_get_class_label(int class_id)
 {
     if (class_id_valid(class_id))
         return MobileNet_labels[class_id];
@@ -345,19 +325,42 @@ const char *movidius_get_class_label(int class_id)
 }
 
 
-unsigned movidius_person_detected(movidius_output *resultData, float score_threshold)
+// return -1 if not found
+int mvnc_get_class_id_from_string(const char *label_string)
 {
-    int person_class_id = 15;
+    int class_id = -1;
     int i;
 
-    if (resultData)
+    for (i = 0; i < sizeof(MobileNet_labels)/sizeof(char *); i++)
     {
-        for (i = 0; i < resultData->num_objects; i++)
+        if (strcmp(label_string, MobileNet_labels[i]) == 0)
         {
-            if (resultData->object[i].class_id == person_class_id)
+            class_id = i;
+            break;
+        }
+    }
+
+    return class_id;
+}
+
+
+unsigned mvnc_objects_detected(struct mvnc_device_t *dev, int *class_ids,
+                               int num_class_ids, float score_threshold)
+{
+    int i;
+    int j;
+
+    if (dev->results)
+    {
+        for (i = 0; i < dev->num_results; i++)
+        {
+            for (j = 0; j < num_class_ids; j++)
             {
-                if (resultData->object[i].score > score_threshold)
-                    return 1;
+                if (dev->results[i].class_id == class_ids[j])
+                {
+                    if (dev->results[i].score > score_threshold)
+                        return 1;
+                }
             }
         }
     }
@@ -366,24 +369,28 @@ unsigned movidius_person_detected(movidius_output *resultData, float score_thres
 
 
 // returns -1 if no result found
-int movidius_get_max_person_index(movidius_output *resultData, float score_threshold)
+int mvnc_get_max_score_index(struct mvnc_device_t *dev, int *class_ids,
+                             int num_class_ids, float score_threshold)
 {
     float max_score = 0;
     int max_score_index = -1;
-    int person_class_id = 15;
     int i;
+    int j;
 
-    if (resultData)
+    if (dev->results)
     {
-        for (i = 0; i < resultData->num_objects; i++)
+        for (i = 0; i < dev->num_results; i++)
         {
-            if (resultData->object[i].class_id == person_class_id)
+            for (j = 0; j < num_class_ids; j++)
             {
-                if ((resultData->object[i].score > score_threshold) &&
-                    (resultData->object[i].score > max_score))
+                if (dev->results[i].class_id == class_ids[j])
                 {
-                    max_score = resultData->object[i].score;
-                    max_score_index = i;
+                    if ((dev->results[i].score > score_threshold) &&
+                        (dev->results[i].score > max_score))
+                    {
+                        max_score = dev->results[i].score;
+                        max_score_index = i;
+                    }
                 }
             }
         }
@@ -392,22 +399,18 @@ int movidius_get_max_person_index(movidius_output *resultData, float score_thres
 }
 
 
-void movidius_free_results(movidius_output **resultData)
+void mvnc_free_results(struct mvnc_device_t *dev)
 {
-    if (*resultData)
+    if (dev->results)
     {
-        if ((*resultData)->object)
-        {
-            free((*resultData)->object);
-            (*resultData)->object = NULL;
-        }
-        free(*resultData);
-        *resultData = NULL;
+        free(dev->results);
+        dev->results = NULL;
     }
+    dev->num_results = 0;
 }
 
 
-static int movidius_read_graph_file(char *graph_path, char **graph_buffer, unsigned int *graph_length)
+static int mvnc_read_graph_file(const char *graph_path, char **graph_buffer, unsigned int *graph_length)
 {
     FILE *file;
     *graph_length = 0;
@@ -416,7 +419,7 @@ static int movidius_read_graph_file(char *graph_path, char **graph_buffer, unsig
     file = fopen(graph_path, "rb");
     if (!file)
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                    _("Unable to open graph file %s"), graph_path);
         return -1;
     }
@@ -430,7 +433,7 @@ static int movidius_read_graph_file(char *graph_path, char **graph_buffer, unsig
     *graph_buffer = (char *)malloc(*graph_length + 1);
     if (*graph_buffer == NULL)
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
                    _("Unable to allocate memory"));
         fclose(file);
         return -1;
@@ -443,66 +446,68 @@ static int movidius_read_graph_file(char *graph_path, char **graph_buffer, unsig
 }
 
 
-int movidius_init(void)
+int mvnc_init(struct mvnc_device_t *dev, int dev_index, const char *graph_path)
 {
-    char *graph_path = "/home/pi/motion/MobileNetSSD.graph";
     char *graph_buffer = NULL;
     unsigned int graph_length = 0;
     int ret = 0;
     ncStatus_t retCode;
 
-    // Create a device handle for the first device found (index 0)
-    retCode = ncDeviceCreate(0, &deviceHandle);
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+        _("Initializing mvnc device at index %d ..."),
+        dev_index);
+
+    // Create a device handle for the device located at dev_index
+    retCode = ncDeviceCreate(dev_index, &dev->deviceHandle);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
-                   _("Error [%d]: Could not create a neural compute device handle"),
-                   retCode);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Error [%d]: Could not create mvnc device handle for device index %d"),
+                   retCode, dev_index);
         ret = -1;
         goto cleanup;
     }
     // Boot the device and open communication
-    retCode = ncDeviceOpen(deviceHandle);
+    retCode = ncDeviceOpen(dev->deviceHandle);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
-                   _("Error [%d]: Could not open the neural compute device"),
-                   retCode);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Error [%d]: Could not open mvnc device at index %d"),
+                   retCode, dev_index);
         ret = -1;
         goto cleanup;
     }
     // Load a graph from file
-    if (movidius_read_graph_file(graph_path, &graph_buffer, &graph_length))
+    if (mvnc_read_graph_file(graph_path, &graph_buffer, &graph_length))
     {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
-                   _("Failed to load graph"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Failed to read graph %s"), graph_path);
         ret = -1;
         goto cleanup;
     }
     // Initialize a graph handle
-    retCode = ncGraphCreate("MobileNetSSD", &graphHandle);
+    retCode = ncGraphCreate("MobileNetSSD", &dev->graphHandle);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
-                   _("Error [%d]: Could not create a graph handle"),
-                   retCode);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Error [%d]: Could not create graph handle for device index %d"),
+                   retCode, dev_index);
         ret = -1;
         goto cleanup;
     }
-
-    //printf("*** deviceHandle 0x%x, graphHandle 0x%x, graph_buffer 0x%x, graph_length %d\n",
-    //       (unsigned int)deviceHandle, (unsigned int)graphHandle,
-    //       (unsigned int)graph_buffer, graph_length);
-
     // Allocate the graph to the device and create input and output FIFOs with default options
-    retCode = ncGraphAllocateWithFifos(deviceHandle, graphHandle, graph_buffer,
-                                       graph_length, &inputFIFO, &outputFIFO);
+    retCode = ncGraphAllocateWithFifos(dev->deviceHandle, dev->graphHandle,
+                                       graph_buffer, graph_length,
+                                       &dev->inputFIFO, &dev->outputFIFO);
     if (retCode != NC_OK) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,
-                   _("Error [%d]: Could not allocate graph with FIFOs"),
-                   retCode);
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Error [%d]: Could not allocate graph with FIFOs for device index %d"),
+                   retCode, dev_index);
         ret = -1;
         goto cleanup;
     }
 
     // Success !
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+        _("Initializing mvnc device at index %d: success"),
+        dev_index);
     if (graph_buffer)
     {
         free(graph_buffer);
@@ -512,7 +517,7 @@ int movidius_init(void)
 
 
 cleanup:
-    movidius_close();
+    mvnc_close(dev);
     if (graph_buffer)
     {
         free(graph_buffer);
@@ -522,27 +527,31 @@ cleanup:
 }
 
 
-void movidius_close(void)
+void mvnc_close(struct mvnc_device_t *dev)
 {
-    if (inputFIFO)
+    if (dev->inputFIFO)
     {
-        ncFifoDestroy(&inputFIFO);
-        inputFIFO = NULL;
+        ncFifoDestroy(&dev->inputFIFO);
+        dev->inputFIFO = NULL;
     }
-    if (outputFIFO)
+    if (dev->outputFIFO)
     {
-        ncFifoDestroy(&outputFIFO);
-        outputFIFO = NULL;
+        ncFifoDestroy(&dev->outputFIFO);
+        dev->outputFIFO = NULL;
     }
-    if (graphHandle)
+    if (dev->graphHandle)
     {
-        ncGraphDestroy(&graphHandle);
-        graphHandle = NULL;
+        ncGraphDestroy(&dev->graphHandle);
+        dev->graphHandle = NULL;
     }
-    if (deviceHandle)
+    if (dev->deviceHandle)
     {
-        ncDeviceClose(deviceHandle);
-        ncDeviceDestroy(&deviceHandle);
-        deviceHandle = NULL;
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+            _("Closing mvnc device ..."));
+        ncDeviceClose(dev->deviceHandle);
+        ncDeviceDestroy(&dev->deviceHandle);
+        dev->deviceHandle = NULL;
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+            _("Closing mvnc device: success"));
     }
 }

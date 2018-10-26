@@ -11,33 +11,41 @@
 #ifndef MOVIDIUS_H_
 #define MOVIDIUS_H_
 
+#include <mvnc.h>
 
-typedef struct movidius_result {
+
+typedef struct mvnc_result {
     int class_id;       // index into MobileNet_labels
     float score;        // probability in percentage
     float box_left;     // object location within image, range 0.0 to 1.0
     float box_top;      // object location within image, range 0.0 to 1.0
     float box_right;    // object location within image, range 0.0 to 1.0
     float box_bottom;   // object location within image, range 0.0 to 1.0
-} movidius_result;
+} mvnc_result;
 
 
-typedef struct movidius_output {
-    struct movidius_result *object;
-    int num_objects;
-} movidius_output;
+typedef struct mvnc_device_t {
+    struct ncDeviceHandle_t* deviceHandle;
+    struct ncGraphHandle_t* graphHandle;
+    struct ncFifoHandle_t* inputFIFO;
+    struct ncFifoHandle_t* outputFIFO;
+    struct mvnc_result *results;
+    int num_results;
+} mvnc_device_t;
 
 
+void mvnc_infer_image(struct mvnc_device_t *dev, unsigned char *image, int width, int height);
+int mvnc_get_results(struct mvnc_device_t *dev);
+unsigned mvnc_objects_detected(struct mvnc_device_t *dev, int *class_ids,
+                               int num_class_ids, float score_threshold);
+int mvnc_get_max_score_index(struct mvnc_device_t *dev, int *class_ids,
+                             int num_class_ids, float score_threshold);
+int mvnc_get_class_id_from_string(const char *label_string);
+const char *mvnc_get_class_label(int class_id);
+void mvnc_free_results(struct mvnc_device_t *dev);
 
-void movidius_infer_image(unsigned char *image, int width, int height);
-int movidius_get_results(movidius_output **resultData);
-unsigned movidius_person_detected(movidius_output *resultData, float score_threshold);
-int movidius_get_max_person_index(movidius_output *resultData, float score_threshold);
-const char *movidius_get_class_label(int class_id);
-void movidius_free_results(movidius_output **resultData);
-
-int movidius_init(void);
-void movidius_close(void);
+int mvnc_init(struct mvnc_device_t *dev, int dev_index, const char *graph_path);
+void mvnc_close(struct mvnc_device_t *dev);
 
 
 #endif /* MOVIDIUS_H_ */

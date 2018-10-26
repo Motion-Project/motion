@@ -89,6 +89,10 @@ struct config conf_template = {
 
     /* Motion detection configuration parameters */
     .emulate_motion =                  FALSE,
+    .mvnc_enable =                     FALSE,
+    .mvnc_graph_path =                 DEF_MVNC_GRAPH_PATH,
+    .mvnc_classification =             "person",
+    .mvnc_threshold =                  DEF_CONFIDENCE,
     .threshold =                       DEF_CHANGES,
     .threshold_maximum =               0,
     .threshold_tune =                  FALSE,
@@ -645,6 +649,42 @@ config_param config_params[] = {
     CONF_OFFSET(emulate_motion),
     copy_bool,
     print_bool,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "mvnc_enable",
+    "# Use Movidius NC with MobileNetSSD to detect object.",
+    0,
+    CONF_OFFSET(mvnc_enable),
+    copy_bool,
+    print_bool,
+    WEBUI_LEVEL_RESTRICTED
+    },
+    {
+    "mvnc_graph_path",
+    "# MobileNetSSD graph path",
+    0,
+    CONF_OFFSET(mvnc_graph_path),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "mvnc_classification",
+    "# Objects to be classified by Movidius, e.g. person,cat,dog.",
+    0,
+    CONF_OFFSET(mvnc_classification),
+    copy_string,
+    print_string,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "mvnc_threshold",
+    "# Threshold for inference confidence in percentage to be considered valid.",
+    0,
+    CONF_OFFSET(mvnc_threshold),
+    copy_int,
+    print_int,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -3194,6 +3234,10 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_event",_("text_event"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mvnc_enable",_("mvnc_enable"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mvnc_graph_path",_("mvnc_graph_path"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mvnc_classification",_("mvnc_classification"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mvnc_threshold",_("mvnc_threshold"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold",_("threshold"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_maximum",_("threshold_maximum"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_tune",_("threshold_tune"));

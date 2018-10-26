@@ -107,6 +107,7 @@ struct image_data;
 #define DEF_HEIGHT             480
 #define DEF_QUALITY             75
 #define DEF_CHANGES           1500
+#define DEF_CONFIDENCE          75
 
 #define DEF_MAXFRAMERATE        15
 #define DEF_NOISELEVEL          32
@@ -141,6 +142,8 @@ struct image_data;
 #define DEF_IMAGEPATH           "%v-%Y%m%d%H%M%S-%q"
 #define DEF_MOVIEPATH           "%v-%Y%m%d%H%M%S"
 #define DEF_TIMEPATH            "%Y%m%d-timelapse"
+
+#define DEF_MVNC_GRAPH_PATH     "MobileNetSSD.graph"
 
 #define DEF_TIMELAPSE_MODE      "daily"
 
@@ -394,7 +397,13 @@ struct context {
     struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
 
-    struct movidius_output *inference_result;
+#ifdef HAVE_MVNC
+    int mvnc_device_index;
+    int mvnc_threshold;
+    int *mvnc_class_ids;
+    int num_mvnc_class_ids;
+    struct mvnc_device_t mvnc_dev;
+#endif
 
     int locate_motion_mode;
     int locate_motion_style;

@@ -74,6 +74,10 @@ struct config {
 
     /* Motion detection configuration parameters */
     int             emulate_motion;
+    int             mvnc_enable;
+    const char      *mvnc_graph_path;
+    const char      *mvnc_classification;
+    int             mvnc_threshold;
     int             threshold;
     int             threshold_maximum;
     int             threshold_tune;

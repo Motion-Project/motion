@@ -19,8 +19,9 @@
 #include "picture.h"
 #include "rotate.h"
 #include "webu.h"
+#ifdef HAVE_MVNC
 #include "movidius.h"
-
+#endif
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
@@ -295,6 +296,12 @@ static void context_destroy(struct context *cnt)
 
     /* Free memory allocated for config parameters */
     for (j = 0; config_params[j].param_name != NULL; j++) {
+#ifdef HAVE_MVNC
+        if (cnt->mvnc_class_ids) {
+            free(cnt->mvnc_class_ids);
+            cnt->mvnc_class_ids = NULL;
+        }
+#endif
         if (config_params[j].copy == copy_string ||
             config_params[j].copy == copy_uri ||
             config_params[j].copy == read_camera_dir) {
@@ -491,10 +498,18 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
     /* Draw location */
     if (cnt->locate_motion_mode == LOCATE_ON) {
 
-        int max_score_index = movidius_get_max_person_index(cnt->inference_result, cnt->threshold);
-        if (max_score_index >= 0)
-            alg_inference_box_to_coord(&(cnt->inference_result->object[max_score_index]),
-                                       imgs->width, imgs->height, location);
+#ifdef HAVE_MVNC
+        if (cnt->conf.mvnc_enable)
+        {
+            int max_score_index = mvnc_get_max_score_index(&cnt->mvnc_dev,
+                                                           cnt->mvnc_class_ids,
+                                                           cnt->num_mvnc_class_ids,
+                                                           cnt->mvnc_threshold);
+            if (max_score_index >= 0)
+                alg_inference_box_to_coord(&(cnt->mvnc_dev.results[max_score_index]),
+                                           imgs->width, imgs->height, location);
+        }
+#endif
 
         if (cnt->locate_motion_style == LOCATE_BOX) {
             alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
@@ -1241,9 +1256,14 @@ static int motion_init(struct context *cnt)
     cnt->imgs.height_high = 0;
     cnt->imgs.size_high = 0;
 
-    if (movidius_init())
-        return -3;
-    cnt->inference_result = NULL;
+#ifdef HAVE_MVNC
+    memset(&cnt->mvnc_dev, 0, sizeof(struct mvnc_device_t));
+    if (cnt->conf.mvnc_enable)
+    {
+        if (mvnc_init(&cnt->mvnc_dev, cnt->mvnc_device_index, cnt->conf.mvnc_graph_path))
+            return -3;
+    }
+#endif
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
@@ -1479,6 +1499,9 @@ static int motion_init(struct context *cnt)
     cnt->noise = cnt->conf.noise_level;
 
     /* Set threshold value */
+#ifdef HAVE_MVNC
+    cnt->mvnc_threshold = cnt->conf.mvnc_threshold;
+#endif
     cnt->threshold = cnt->conf.threshold;
     if (cnt->conf.threshold_maximum > cnt->conf.threshold ){
         cnt->threshold_maximum = cnt->conf.threshold_maximum;
@@ -1706,8 +1729,10 @@ static void motion_cleanup(struct context *cnt) {
 
     dbse_deinit(cnt);
 
-    movidius_free_results(&cnt->inference_result);
-    movidius_close();
+#ifdef HAVE_MVNC
+    mvnc_free_results(&cnt->mvnc_dev);
+    mvnc_close(&cnt->mvnc_dev);
+#endif
 }
 
 static void mlp_mask_privacy(struct context *cnt){
@@ -2179,9 +2204,13 @@ static void mlp_detection(struct context *cnt){
 
     /***** MOTION LOOP - MOTION DETECTION SECTION *****/
 
-    movidius_infer_image(cnt->imgs.image_virgin.image_norm, cnt->imgs.width, cnt->imgs.height);
+#ifdef HAVE_MVNC
+    if (cnt->conf.mvnc_enable)
+        mvnc_infer_image(&cnt->mvnc_dev, cnt->imgs.image_virgin.image_norm, cnt->imgs.width, cnt->imgs.height);
+    else
+#endif
 
-#if 0
+    {
     /*
      * The actual motion detection takes place in the following
      * diffs is the number of pixels detected as changed
@@ -2294,13 +2323,18 @@ static void mlp_detection(struct context *cnt){
         cnt->moved--;
         cnt->current_image->diffs = 0;
     }
-#endif
+
+    }
 }
 
 static void mlp_tuning(struct context *cnt){
 
-#if 0
     /***** MOTION LOOP - TUNING SECTION *****/
+
+#ifdef HAVE_MVNC
+    if (cnt->conf.mvnc_enable)
+        return;
+#endif
 
     /*
      * If noise tuning was selected, do it now. but only when
@@ -2369,7 +2403,6 @@ static void mlp_tuning(struct context *cnt){
         cnt->previous_location_y = cnt->current_image->location.y;
     }
 
-#endif
 }
 
 static void mlp_overlay(struct context *cnt){
@@ -2404,12 +2437,21 @@ static void mlp_overlay(struct context *cnt){
     if (cnt->conf.text_changes) {
         if (!cnt->pause)
         {
-            //sprintf(tmp, "%d", cnt->current_image->diffs);
-            int max_score_index = movidius_get_max_person_index(cnt->inference_result, cnt->threshold);
-            if (max_score_index >= 0)
-                sprintf(tmp, "%d", (int)cnt->inference_result->object[max_score_index].score);
+#ifdef HAVE_MVNC
+            if (cnt->conf.mvnc_enable)
+            {
+                int max_score_index = mvnc_get_max_score_index(&cnt->mvnc_dev,
+                                                               cnt->mvnc_class_ids,
+                                                               cnt->num_mvnc_class_ids,
+                                                               cnt->mvnc_threshold);
+                if (max_score_index >= 0)
+                    sprintf(tmp, "%d", (int)cnt->mvnc_dev.results[max_score_index].score);
+                else
+                    sprintf(tmp, "%d", 0);
+            }
             else
-                sprintf(tmp, "%d", 0);
+#endif
+            sprintf(tmp, "%d", cnt->current_image->diffs);
         }
         else
             sprintf(tmp, "-");
@@ -2459,21 +2501,29 @@ static void mlp_actions(struct context *cnt){
 
     /***** MOTION LOOP - ACTIONS AND EVENT CONTROL SECTION *****/
 
-    if (movidius_get_results(&(cnt->inference_result)) == 0)
+#ifdef HAVE_MVNC
+    if (cnt->conf.mvnc_enable)
     {
-        // flag this image if probability of person is higher than some threshold
-        if (movidius_person_detected(cnt->inference_result, cnt->threshold))
-            cnt->current_image->flags |= IMAGE_MOTION;
+        if (mvnc_get_results(&cnt->mvnc_dev) >= 0)
+        {
+            // flag this image if probability of person is higher than some threshold
+            if (mvnc_objects_detected(&cnt->mvnc_dev, cnt->mvnc_class_ids,
+                                     cnt->num_mvnc_class_ids, cnt->mvnc_threshold))
+                cnt->current_image->flags |= IMAGE_MOTION;
+        }
     }
+    else
+#endif
+    {
 
-    //if ((cnt->current_image->diffs > cnt->threshold) &&
-    //    (cnt->current_image->diffs < cnt->threshold_maximum)) {
-    //    /* flag this image, it have motion */
-    //    cnt->current_image->flags |= IMAGE_MOTION;
-    //    cnt->lightswitch_framecounter++; /* micro lightswitch */
-    //} else {
-    //    cnt->lightswitch_framecounter = 0;
-    //}
+    if ((cnt->current_image->diffs > cnt->threshold) &&
+        (cnt->current_image->diffs < cnt->threshold_maximum)) {
+        /* flag this image, it have motion */
+        cnt->current_image->flags |= IMAGE_MOTION;
+        cnt->lightswitch_framecounter++; /* micro lightswitch */
+    } else {
+        cnt->lightswitch_framecounter = 0;
+    }
 
     /*
      * If motion has been detected we take action and start saving
@@ -2621,7 +2671,7 @@ static void mlp_actions(struct context *cnt){
     /* Save/send to movie some images */
     process_image_ring(cnt, 2);
 
-
+    }
 }
 
 static void mlp_setupmode(struct context *cnt){
@@ -2847,6 +2897,9 @@ static void mlp_parmsupdate(struct context *cnt){
 
     dbse_sqlmask_update(cnt);
 
+#ifdef HAVE_MVNC
+    cnt->mvnc_threshold = cnt->conf.mvnc_threshold;
+#endif
     cnt->threshold = cnt->conf.threshold;
     if (cnt->conf.threshold_maximum > cnt->conf.threshold ){
         cnt->threshold_maximum = cnt->conf.threshold_maximum;
@@ -3157,6 +3210,76 @@ static void motion_camera_ids(void){
     }
 }
 
+static void motion_mvnc_ids(void){
+#ifdef HAVE_MVNC
+    /* Set the mvnc device index on the context.  They must be unique */
+    int mvnc_device_count = 0;
+    int indx;
+
+    indx = 0;
+    while (cnt_list[indx] != NULL)
+    {
+        cnt_list[indx]->mvnc_class_ids = NULL;
+        cnt_list[indx]->num_mvnc_class_ids = 0;
+        if (cnt_list[indx]->conf.mvnc_enable)
+        {
+            // verify that graph file exists
+            struct stat st;
+            if (stat(cnt_list[indx]->conf.mvnc_graph_path, &st) != 0)
+            {
+                MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO, _("Graph file %s does not exist!")
+                    ,cnt_list[indx]->conf.mvnc_graph_path);
+                motion_remove_pid();
+                exit(1);
+            }
+
+            cnt_list[indx]->mvnc_device_index = mvnc_device_count;
+            mvnc_device_count++;
+            // map comma separated classification strings into class IDs
+            const char *start = cnt_list[indx]->conf.mvnc_classification;
+            size_t class_str_len;
+            while ((class_str_len = strcspn(start, ",")) > 0)
+            {
+                char *class_str = strndup(start, class_str_len);
+                if (class_str)
+                {
+                    int class_id = mvnc_get_class_id_from_string(class_str);
+                    if (class_id >= 0)
+                    {
+                        cnt_list[indx]->num_mvnc_class_ids++;
+                        size_t numbytes = cnt_list[indx]->num_mvnc_class_ids * sizeof(int);
+                        if (cnt_list[indx]->mvnc_class_ids)
+                        {
+                            cnt_list[indx]->mvnc_class_ids = myrealloc(cnt_list[indx]->mvnc_class_ids,
+                                                                       numbytes,
+                                                                       "motion_mvnc_ids");
+                        }
+                        else
+                            cnt_list[indx]->mvnc_class_ids = mymalloc(numbytes);
+                        cnt_list[indx]->mvnc_class_ids[cnt_list[indx]->num_mvnc_class_ids - 1] = class_id;
+                        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                            _("%s classification ID: %d"), class_str, class_id);
+                    }
+                    else
+                    {
+                        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                            ,_("%s is not a valid classification input")
+                            ,class_str);
+                    }
+                    free(class_str);
+                }
+                else
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Memory allocation failed"));
+
+                start += class_str_len;
+                while (*start == ',')
+                    start++;
+            }
+        }
+        indx++;
+    }
+#endif
+}
 
 /**
  * motion_startup
@@ -3248,6 +3371,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
 
     conf_output_parms(cnt_list);
+
+    motion_mvnc_ids();
 
     motion_camera_ids();
 
