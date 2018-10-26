@@ -19,9 +19,6 @@
 #include "picture.h"
 #include "rotate.h"
 #include "webu.h"
-#ifdef HAVE_MVNC
-#include "movidius.h"
-#endif
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 

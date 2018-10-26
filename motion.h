@@ -70,7 +70,9 @@ struct image_data;
 #include "mmalcam.h"
 #endif
 
+#ifdef HAVE_MVNC
 #include "movidius.h"
+#endif
 
 
 /**
