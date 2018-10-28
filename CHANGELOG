@@ -1,4 +1,6 @@
 Summary of Changes for version 4.2 are below
+   * html fixes for legacy interface
+   * Fix typo in guide
    * Workaround compiler warnings on system header HAVE_STDLIB_H
    * Update motion guide
    * Revise timing and multiple threads for streams
