@@ -407,9 +407,11 @@ if test "${WITHOUT_MVNC}" = "no"; then
     AC_SUBST(MVNC_CFLAGS)
     AC_SUBST(MVNC_OBJ)
     AC_SUBST(MVNC_LIBS)
+    AC_SUBST(MVNC_GRAPH)
     MVNC_OBJ="movidius.o"
     MVNC_CFLAGS="-DHAVE_MVNC -I${MVNC_HEADERS}"
     MVNC_LIBS="-lmvnc"
+    MVNC_GRAPH="MobileNetSSD.graph"
     AC_DEFINE([HAVE_MVNC], 1, [Define to 1 if we want MVNC])
   ])
 fi
@@ -834,6 +836,7 @@ if test "${HAVE_MVNC}" = "yes"; then
     echo " ... MVNC_CFLAGS: $MVNC_CFLAGS"
     echo " ... MVNC_OBJ: $MVNC_OBJ"
     echo " ... MVNC_LIBS: $MVNC_LIBS"
+    echo " ... MVNC_GRAPH: $MVNC_GRAPH"
 elif test "${WITHOUT_MVNC}" = "yes"; then
     echo "MVNC support:        disabled"
 else
