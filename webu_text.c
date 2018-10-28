@@ -71,9 +71,10 @@ static void webu_text_header(struct webui_ctx *webui) {
 
     if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
         snprintf(response, sizeof (response),"%s",
+            "<!DOCTYPE html>\n"
             "<html>\n"
             "<head><title>Motion "VERSION" </title></head>\n"
-            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=yes\">\n"
             "<body>\n");
         webu_write(webui, response);
     }
@@ -212,6 +213,9 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
 
     webu_text_camera_name(webui);
 
+    snprintf(response,sizeof(response),"%s","<ul>\n");
+    webu_write(webui, response);
+
     indx_parm = 0;
     while (config_params[indx_parm].param_name != NULL){
 
@@ -227,7 +231,7 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
             val_parm = config_params[indx_parm].print(webui->cntlst, NULL, indx_parm, 0);
         }
         snprintf(response, sizeof (response),
-            "<a href=/%s/config/set?%s>%s</a> = %s<br>\n"
+            "  <li><a href=/%s/config/set?%s>%s</a> = %s</li>\n"
             ,webui->uri_camid
             ,config_params[indx_parm].param_name
             ,config_params[indx_parm].param_name
@@ -236,6 +240,10 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
 
         indx_parm++;
     }
+
+    snprintf(response,sizeof(response),"%s","</ul>\n");
+    webu_write(webui, response);
+
     webu_text_trailer(webui);
 
 }
@@ -865,6 +873,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
     const char *val_parm;
     char temp_name[WEBUI_LEN_PARM];
 
+
     /* Search through the depreciated parms and if applicable,
      * get the new parameter name so we can check its webcontrol_parms level
      */
@@ -904,13 +913,25 @@ void webu_text_get_query(struct webui_ctx *webui) {
 
         webu_text_back(webui,"/config");
 
-        snprintf(response, sizeof (response),
-            "%s = %s %s\n"
-            "Done %s\n"
-            ,config_params[indx_parm].param_name
-            ,val_parm
-            ,webui->text_eol, webui->text_eol
-        );
+        webu_text_camera_name(webui);
+
+        if (webui->cntlst[0]->conf.webcontrol_interface == 2) {
+            snprintf(response, sizeof (response),
+                "<ul>\n"
+                "  <li>%s = %s </li>\n"
+                "</ul>\n"
+                ,config_params[indx_parm].param_name
+                ,val_parm
+            );
+        } else {
+            snprintf(response, sizeof (response),
+                "%s = %s %s\n"
+                "Done %s\n"
+                ,config_params[indx_parm].param_name
+                ,val_parm
+                ,webui->text_eol, webui->text_eol
+            );
+        }
         webu_write(webui, response);
         webu_text_trailer(webui);
 
