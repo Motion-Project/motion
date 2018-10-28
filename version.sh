@@ -1,5 +1,5 @@
 #!/bin/sh
-BASE_VERSION="4.1.1"
+BASE_VERSION="4.2"
 if [ -d .git ]; then
     if test "`git diff --name-only`" = "" ; then
         GIT_COMMIT="git"
@@ -13,5 +13,5 @@ if [ -d .git ]; then
 else
     GIT_COMMIT="gitUNKNOWN"
 fi
-#GIT_COMMIT=""
-printf "$BASE_VERSION+$GIT_COMMIT"
+printf "$BASE_VERSION"
+#printf "$BASE_VERSION+$GIT_COMMIT"
