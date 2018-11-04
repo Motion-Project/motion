@@ -7,103 +7,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
 </head>
-<body style="margin-left:15%;">
-  <ul class="nav-button">
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_support.html">Support</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_news.html">News</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_guide.html">Documentation</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_download.html">Download</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/index.html">Home</a></li>
-    <li class="nav-button" style="float: left;"> <img src="motion.gif" width="125" height="50"> </li>
-  </ul>
+
+<script>
+function fnc_topnav() {
+    var x = document.getElementById("id_topnav");
+    if (x.className === "topnav") {
+        x.className += " responsive";
+    } else {
+        x.className = "topnav";
+    }
+}
+</script>
+
+<body>
+  <div class="topnav" id="id_topnav">
+    <img class="logoimg" src="motion.png">
+    <!-- Suffle order for mobile vs desktop -->
+    <a class="nav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+    <a class="nav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="nav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="nav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="nav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+    <a class="nav-m" href="https://motion-project.github.io/index.html">Home</a>
+    <a class="nav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="nav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="nav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="nav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+  </div>
 
   <section class="page-header">
     <h1>
       Configuration
+<!--
+  <div class="dropdown" style="float: right;">
+    <button style="float: right;" class="dropbtn" >Documentation
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content" style="float: right;">
+      <a href="#basic_setup" >Basic Setup</a>
+      <a href="#Command_Line_Options" >Command Line Options</a>
+      <a href="#The_Config_Files" >Configuration Files</a>
+      <a href="#Signals_Sent" >Signals</a>
+      <a href="#Configuration_OptionsAlpha" >Configuration Options-Alpha</a>
+      <a href="#Configuration_OptionsTopic" >Configuration Options-Topic</a>
+      <a href="#Configuration_OptionsDetail" >Configuration Options-Detail</a>
+    </div>
+  </div>
+
+  <div class="dropdown" style="float: right;">
+  <div class="dropdown-content" style="float: right;">
+    <a href="https://motion-project.github.io/motion_support.html" style="float: right;">Support</a>
+    <a href="https://motion-project.github.io/motion_news.html" class="dropdown" style="float: right;" >News</a>
+    <a href="https://motion-project.github.io/motion_guide.html" style="float: right;" >Documentation</a>
+    <a href="https://motion-project.github.io/motion_download.html" style="float: right;" >Download</a>
+    <a href="https://motion-project.github.io/index.html" style="float: right;">Home</a>
+  </div>
+  </div>
+-->
+
     </h1>
   </section>
 
-  <section class="vertical-menu">
-    <button class="accordian">Basic Setup</button>
-      <div class="panel">
-        <a href="#top">General</a>
-        <a href="#basic_setup_v4l2">V4L2 Devices</a>
-        <a href="#basic_setup_network">Network Cameras</a>
-        <a href="#basic_setup_picam">Pi Camera</a>
-        <a href="#basic_setup_composite">Composite Cards</a>
-        <a href="#basic_setup_static">Static Files</a>
-      </div>
-    <button class="accordian">Commands/Files</button>
-      <div class="panel">
-        <a href="#Command_Line_Options">Command Line</a>
-        <a href="#The_Config_Files">Configuration Files </a>
-        <a href="#Signals_Sent">Signals</a>
-      </div>
-    <div class="nopanel" style="font-size: 1.20em;">
-      <a href="#Configuration_OptionsAlpha">Options-Alpha</a>
-      <a href="#Configuration_OptionsTopic">Options-Topic</a>
-    </div>
-    <button class="accordian">Options-General</a></button>
-      <div class="panel">
-        <a href="#OptTopic_System_Processing">System Processing</a>
-        <a href="#conversion_specifiers">Conversion Specifiers</a>
-      </div>
-    <button class="accordian">Options-Cameras</a></button>
-      <div class="panel">
-        <a href="#OptTopic_Video4Linux_Devices">Video4Linux Devices</a>
-        <a href="#OptTopic_Network_Cameras">Network Cameras</a>
-        <a href="#OptTopic_Raspi_Cameras">Pi Cameras</a>
-      </div>
-    <button class="accordian">Options-Processing/Scripts</a></button>
-      <div class="panel">
-        <a href="#OptTopic_Image_Processing">Image Processing</a>
-        <a href="#OptTopic_Motion_Detection">Motion Detection</a>
-        <a href="#OptTopic_Scripts">Script Execution</a>
-      </div>
-    <button class="accordian">Options-Output</a></button>
-      <div class="panel">
-        <a href="#OptTopic_Pictures">Pictures</a>
-        <a href="#OptTopic_Movies">Movies</a>
-      </div>
-    <button class="accordian">Options-Pipe/Steams</a></button>
-      <div class="panel">
-        <a href="#OptTopic_Pipe">Pipe Output</a>
-        <a href="#OptTopic_Webcontrol">Webcontrol</a>
-        <a href="#OptTopic_Stream">Live Stream</a>
-      </div>
-    <button class="accordian">Options-Database/Tracking</a></button>
-      <div class="panel">
-        <a href="#OptTopic_Database">Database Options</a>
-        <a href="#OptTopic_Tracking">Tracking Options</a>
-      </div>
-    <script>
-      var acc = document.getElementsByClassName("accordian");
-      var i;
-      for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function() {
-          var fnodes = document.getElementsByClassName("accordian");
-          var indx;
-          for (indx = 0; indx < fnodes.length; indx++){
-            if (this.isSameNode(fnodes[indx])) {
-              this.classList.toggle("active");
-              var panel = this.nextElementSibling;
-              if (panel.style.maxHeight){
-                panel.style.maxHeight = null;
-              } else {
-                panel.style.maxHeight = (panel.scrollHeight+50) + "px";
-              }
-            } else {
-              var panel = fnodes[indx].nextElementSibling;
-              panel.style.maxHeight = null;
-            }
-          }
-        });
-      }
-    </script>
-  </section>
-
-  <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
-
+  <section class="main-content">
     <h2><a name="Basic_Setup"></a>  Basic Setup </h2>
     <ul>
       <p></p>
