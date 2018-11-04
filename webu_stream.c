@@ -44,8 +44,8 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
      * will occur with the SLEEP function.
      */
-    stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000000) -
-        ((time_curr.tv_sec - webui->time_last.tv_sec)*1000000000);
+    stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000) -
+        ((time_curr.tv_sec - webui->time_last.tv_sec)*1000000);
     if (stream_delay < 0)  stream_delay = 0;
     if (stream_delay > 1000000000 ) stream_delay = 1000000000;
 
