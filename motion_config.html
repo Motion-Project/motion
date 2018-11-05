@@ -6,70 +6,115 @@
   <title>Motion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
-</head>
 
-<script>
-function fnc_topnav() {
-    var x = document.getElementById("id_topnav");
-    if (x.className === "topnav") {
-        x.className += " responsive";
-    } else {
-        x.className = "topnav";
+
+  <script>
+    function fnc_topnav() {
+      var x = document.getElementById("id_topnav");
+      if (x.className === "topnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "topnav";
+      }
     }
-}
-</script>
+    function fnc_subnav() {
+      var x = document.getElementById("id_subnav");
+      if (x.className === "subnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "subnav";
+      }
+
+    }
+  </script>
+
+</head>
 
 <body>
   <div class="topnav" id="id_topnav">
     <img class="logoimg" src="motion.png">
-    <!-- Suffle order for mobile vs desktop -->
-    <a class="nav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
-    <a class="nav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
-    <a class="nav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
-    <a class="nav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
-    <a class="nav-d" href="https://motion-project.github.io/index.html">Home</a>
 
-    <a class="nav-m" href="https://motion-project.github.io/index.html">Home</a>
-    <a class="nav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
-    <a class="nav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
-    <a class="nav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
-    <a class="nav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+    <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
 
     <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
   </div>
 
   <section class="page-header">
     <h1>
-      Configuration
-<!--
-  <div class="dropdown" style="float: right;">
-    <button style="float: right;" class="dropbtn" >Documentation
-      <i class="fa fa-caret-down"></i>
-    </button>
-    <div class="dropdown-content" style="float: right;">
-      <a href="#basic_setup" >Basic Setup</a>
-      <a href="#Command_Line_Options" >Command Line Options</a>
-      <a href="#The_Config_Files" >Configuration Files</a>
-      <a href="#Signals_Sent" >Signals</a>
-      <a href="#Configuration_OptionsAlpha" >Configuration Options-Alpha</a>
-      <a href="#Configuration_OptionsTopic" >Configuration Options-Topic</a>
-      <a href="#Configuration_OptionsDetail" >Configuration Options-Detail</a>
-    </div>
-  </div>
-
-  <div class="dropdown" style="float: right;">
-  <div class="dropdown-content" style="float: right;">
-    <a href="https://motion-project.github.io/motion_support.html" style="float: right;">Support</a>
-    <a href="https://motion-project.github.io/motion_news.html" class="dropdown" style="float: right;" >News</a>
-    <a href="https://motion-project.github.io/motion_guide.html" style="float: right;" >Documentation</a>
-    <a href="https://motion-project.github.io/motion_download.html" style="float: right;" >Download</a>
-    <a href="https://motion-project.github.io/index.html" style="float: right;">Home</a>
-  </div>
-  </div>
--->
-
+    Configuration
     </h1>
   </section>
+
+  <div class="subnav" id="id_subnav">
+    <div class="dropdown">
+      <button class="dropbtn">Basic Setup</button>
+      <div class="dropdown-content">
+        <a href="#top">General</a>
+        <a href="#basic_setup_v4l2">V4L2 Devices</a>
+        <a href="#basic_setup_network">Network Cameras</a>
+        <a href="#basic_setup_picam">Pi Camera</a>
+        <a href="#basic_setup_composite">Composite Cards</a>
+        <a href="#basic_setup_static">Static Files</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Commands/Files</button>
+      <div class="dropdown-content">
+        <a href="#commandlineoptions">Command Line</a>
+        <a href="#configfiles">Configuration Files </a>
+        <a href="#Signals_Sent">Signals</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Options-List</button>
+      <div class="dropdown-content">
+        <a href="#Configuration_OptionsAlpha" >Sorted alphabetically</a>
+        <a href="#Configuration_OptionsTopic" >Sorted by topic</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">General/Cameras</button>
+      <div class="dropdown-content">
+        <a href="#OptTopic_System_Processing">System Processing</a>
+        <a href="#conversion_specifiers">Conversion Specifiers</a>
+        <a href="#OptTopic_Video4Linux_Devices">Video4Linux Devices</a>
+        <a href="#OptTopic_Network_Cameras">Network Cameras</a>
+        <a href="#OptTopic_Raspi_Cameras">Pi Cameras</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Processing/Output</button>
+      <div class="dropdown-content">
+        <a href="#OptTopic_Image_Processing">Image Processing</a>
+        <a href="#OptTopic_Motion_Detection">Motion Detection</a>
+        <a href="#OptTopic_Scripts">Script Execution</a>
+        <a href="#OptTopic_Pictures">Pictures</a>
+        <a href="#OptTopic_Movies">Movies</a>
+        <a href="#OptTopic_Pipe">Pipe Output</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Webcontrol/Streams</button>
+      <div class="dropdown-content">
+        <a href="#OptTopic_Webcontrol">Webcontrol</a>
+        <a href="#OptTopic_Stream">Live Stream</a>
+        <a href="#OptTopic_Database">Database Options</a>
+        <a href="#OptTopic_Tracking">Tracking Options</a>
+      </div>
+    </div>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
+  </div>
 
   <section class="main-content">
     <h2><a name="Basic_Setup"></a>  Basic Setup </h2>
@@ -86,8 +131,8 @@ function fnc_topnav() {
           <li> <a href="#basic_setup_picam" >The PI camera</a> </li>
           <li> <a href="#basic_setup_static" >Static movie files</a>.
         </ul>
-        <li>Specify the camera in the <a href="#The_Config_Files" >configuration files</a>.</li>
-        <li>Start Motion from a terminal via the <a href="#Command_Line_Options" >command line</a></li>
+        <li>Specify the camera in the <a href="#configfiles" >configuration files</a>.</li>
+        <li>Start Motion from a terminal via the <a href="#commandlineoptions" >command line</a></li>
         <li>Review the messages to ensure camera was found and press cntrl-c to exit</li>
         <li>Enable the <a href="#OptDetail_Stream" >web stream</a> in the configuration file </li>
         <ul>
@@ -161,12 +206,12 @@ function fnc_topnav() {
 
       <p></p>
       Motion permits the use of video cards that have discreet input channels.  Since USB cameras do not have input channels,
-      the option <code><a href="#input" >input</a> </code> must be set to the value -1 for USB cameras.
+      the option <a href="#input" >input</a> must be set to the value -1 for USB cameras.
       <p></p>
 
       <a name="basic_setup_network"></a>
       <strong>Network cameras</strong> are set up via the
-      <code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong> parameter.
+      <a href="#netcam_url" >netcam_url</a> parameter.
       The latest versions of Motion support rtsp format which many cameras now stream.  Some users have requested
       a list of the network cameras that will work with Motion.  Since Motion can now process RTSP streams, almost
       all cameras are supported.  Simply review the specifications of the camera and validate that
@@ -178,19 +223,19 @@ function fnc_topnav() {
       The URL connection string to enter is specific to the camera and is
       usually provided by the manufacturer.  The connection string is the same as what would be used by other
       video playing software such as VLC.  If the camera does not stream via RTSP and instead uses a MJPEG, then Motion
-      can also view that format.  See the option <code><strong> <a href="#netcam_url" >netcam_url</a> </code></strong>
-      for additional options.
+      can also view that format.  See the option <a href="#netcam_url" >netcam_url</a> for
+      additional options.
       <p></p>
 
       <a name="basic_setup_picam"></a>
       <strong>Raspberry Pi cameras</strong> can be set up two different ways.  If Motion is installed by using the
       apt packages (e.g. apt-get install motion), then the camera must be set up using the bcm2835-v4l2 module which creates
       a v4l2 device for the camera.  Users will need to install this module using the
-      command <code><strong>sudo modprobe bcm2835-v4l2</strong></code>.  This
+      command <code>sudo modprobe bcm2835-v4l2</code>.  This
       will set up the camera as a normal v4l2 device and it can be accessed via a standard /dev/videoX device.  If Motion is
       built from source or installed via the deb packages on the project release page, then an additional option is to set
-      up the camera using the <code><strong><a href="#mmalcam_name" >mmalcam_name</a> </code></strong> parameter or using
-      the bcm2835-v4l2 module.  <strong><code>When Motion is installed via apt, the mmalcam option is not available.</code></strong>
+      up the camera using the <a href="#mmalcam_name" >mmalcam_name</a> parameter or using
+      the bcm2835-v4l2 module.  <strong>When Motion is installed via apt, the mmalcam option is not available.</strong>
       <p></p>
 
       <a name="basic_setup_composite"></a>
@@ -198,7 +243,7 @@ function fnc_topnav() {
       all use the Linux driver called 'bttv'.
       <p></p>
       There are cards with more then one video input but still only one BT878 chip. They have a video multiplexer which
-      input is selected with the config option <code>input</code>. Input channel numbers start at 0
+      input is selected with the config option <a href="#input" >input</a>. Input channel numbers start at 0
       (which is why the value -1 and not 0 disables input selection). There are video capture cards available
       with 4 or 8 inputs but only one chip. They present themselves as one single video device and
       you select input using the 'input' option. If you define e.g. 4 camera config files with the
@@ -215,10 +260,10 @@ function fnc_topnav() {
       is to experiment with a program such as VLC that can show the video stream.
       <p></p>
       If you use the TV tuner input you also need to set the frequency of the TV channel using the
-      option <code><strong><a href="#frequency" >frequency</a></strong></code>. Otherwise
-      set <code><strong><a href="#frequency" >frequency</a></strong></code> to 0.
+      option <a href="#frequency" >frequency</a>. Otherwise
+      set <a href="#frequency" >frequency</a> to 0.
       <p></p>
-      Finally you need to set the TV <code><strong><a href="#norm" >norm</a></strong></code>.
+      Finally you need to set the TV <a href="#norm" >norm</a>.
       Values: 0 (PAL), 1 (NTSC), 2 (SECAM), 3 (PAL NC no colour). Default is 0 (PAL).
       If your camera is a PAL black and white you may get a better result with norm=3 (PAL no colour).
       <p></p>
@@ -232,13 +277,13 @@ function fnc_topnav() {
       <p></p>
       The second option for processing a static file requires a bit of additional setup and uses a
       v4l2loopback device.  To set this up, first install the loopback software as described in the
-      <code><strong><a href="#OptDetail_Pipe" >Output - Pipe Options</a> </code></strong>
+      <a href="#OptDetail_Pipe" >Output - Pipe Options</a>
       section of this guide to create a /dev/videoX device and then use software such as ffmpeg to stream
       the static file into the v4l2 device.  e.g.
-      <code><strong> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </strong></code>  Then in a separate terminal, start Motion
-      with it set to use the <code><strong>/dev/video0</strong></code> device as input.  This method can can also be used to
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 /dev/video0 </code>  Then in a separate terminal, start Motion
+      with it set to use the <code>/dev/video0</code> device as input.  This method can can also be used to
       reformat the content to a different format.  The following outputs the original movie into a gray pixel format.
-      <code><strong> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </strong></code>
+      <code> ffmpeg -re -i mymovie.mp4 -f v4l2 -pix_fmt gray /dev/video0 </code>
       This can be helpful as a interim process where ffmpeg supports a particular input but that format is not yet supported
       by Motion.
 
@@ -294,11 +339,11 @@ function fnc_topnav() {
       <p></p>
     </ul>
 
-    <h2><a name="Command_Line_Options"></a>  Command Line Options </h2>
+    <h2><a name="commandlineoptions"></a>  Command Line Options </h2>
     <ul>
       <p></p>
         SYNOPSIS
-      <pre>motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p pid_file ] [ -l log_file ]</pre>
+      <code>motion [ -hbnsm ] [ -c config file path ] [ -d level ] [ -k level ] [ -p pid_file ] [ -l log_file ]</code>
       <p></p>
       <ul>
         <li>-c : Full path and filename of config file.</li>
@@ -316,7 +361,7 @@ function fnc_topnav() {
       <p></p>
     </ul>
 
-    <h2><a name="The_Config_Files"></a>  The Configuration Files </h2>
+    <h2><a name="configfiles"></a>  The Configuration Files </h2>
     <ul>
       <p></p>
       If Motion was invoked with command line option <code>-c pathname</code> Motion will expect the config file to
@@ -382,11 +427,11 @@ function fnc_topnav() {
       <p></p>
       <p></p>
         camera0.conf:
-        <br /><code><strong> videodevice /dev/video0</strong></code>
+        <br /><code> videodevice /dev/video0</code>
       <p></p>
       <p></p>
         camera1.conf:
-        <br /><code><strong> videodevice /dev/video1</strong></code>
+        <br /><code> videodevice /dev/video1</code>
       <p></p>
       <p></p>
       <p></p>
@@ -458,14 +503,15 @@ function fnc_topnav() {
         list which is the parent process for the threads.
         Motion responds to the following signals:
       <p></p>
+      <div class="tblsignal">
       <table border="1" class="fixed" >
         <colgroup>
-          <col width="250px">
-          <col width="250px">
-          <col width="250px">
+          <col width="30%">
+          <col width="30%">
+          <col width="30%">
         </colgroup>
-        <thead>
-          <tr>
+        <thead >
+          <tr >
             <th bgcolor="#edf4f9" word-wrap:break-word > Signal </th>
             <th bgcolor="#edf4f9" word-wrap:break-word > Description </th>
             <th bgcolor="#edf4f9" word-wrap:break-word > Editors comment </th>
@@ -489,6 +535,7 @@ function fnc_topnav() {
           </tr>
         </tbody>
       </table>
+      </div>
       <p></p>
       <p></p>
     </ul>
@@ -503,19 +550,28 @@ function fnc_topnav() {
       Some configuration options are only used if Motion is built on a system that has the matching software libraries installed (MySQL, PostgreSQL, SQLite, FFMPEG, etc).
       <p></p>
       <p></p>
+      <style>
+        @media screen and (max-width: 48em) {
+          .tblalpha td:nth-of-type(1):before {content: "v3.2"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(2):before {content: "v4.0"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(3):before {content: "v4.1"; padding-right: 10px;}
+          .tblalpha td:nth-of-type(4):before {content: "Cur."; padding-right: 10px;}
+        }
+      </style>
+      <div class="tblalpha">
       <table cellspacing="0" border="0">
-        <colgroup width="152"></colgroup>
-        <colgroup width="190"></colgroup>
-        <colgroup width="160"></colgroup>
-        <colgroup width="160"></colgroup>
+        <colgroup width="15%"></colgroup>
+        <colgroup width="25%"></colgroup>
+        <colgroup width="25%"></colgroup>
+        <colgroup width="25%"></colgroup>
         <tr>
-          <td height="17" align="left"><b>Version 3.2</b></td>
+          <td align="left"><b>Version 3.2</b></td>
           <td align="left"><b>Version 4.0</b></td>
           <td align="left"><b>Version 4.1</b></td>
           <td align="left"><b>Current Version</b></td>
         </tr>
         <tr>
-          <td height="17" align="left">area_detect</td>
+          <td align="left">area_detect</td>
           <td align="left">area_detect</td>
           <td align="left">area_detect</td>
           <td align="left"><a href="#area_detect" >area_detect</a></td>
@@ -527,966 +583,967 @@ function fnc_topnav() {
           <td align="left"><a href="#auto_brightness" >auto_brightness</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">thread</td>
+          <td align="left">thread</td>
           <td align="left">camera</td>
           <td align="left">camera</td>
           <td align="left"><a href="#camera" >camera</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">camera_dir</td>
           <td align="left">camera_dir</td>
           <td align="left"><a href="#camera_dir" >camera_dir</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">camera_id</td>
           <td align="left">camera_id</td>
           <td align="left"><a href="#camera_id" >camera_id</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">camera_name</td>
           <td align="left">camera_name</td>
           <td align="left"><a href="#camera_name" >camera_name</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">daemon</td>
+          <td align="left">daemon</td>
           <td align="left">daemon</td>
           <td align="left">daemon</td>
           <td align="left"><a href="#daemon" >daemon</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">database_busy_timeout</td>
           <td align="left">database_busy_timeout</td>
           <td align="left"><a href="#database_busy_timeout" >database_busy_timeout</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">mysql_db</td>
+          <td align="left">mysql_db</td>
           <td align="left">database_dbname</td>
           <td align="left">database_dbname</td>
           <td align="left"><a href="#database_dbname" >database_dbname</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">pgsql_db</td>
+          <td align="left">pgsql_db</td>
           <td align="left">database_dbname</td>
           <td align="left">database_dbname</td>
           <td align="left"><a href="#database_dbname" >database_dbname</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">mysql_host</td>
+          <td align="left">mysql_host</td>
           <td align="left">database_host</td>
           <td align="left">database_host</td>
           <td align="left"><a href="#database_host" >database_host</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">pgsql_host</td>
+          <td align="left">pgsql_host</td>
           <td align="left">database_host</td>
           <td align="left">database_host</td>
           <td align="left"><a href="#database_host" >database_host</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">mysql_password</td>
+          <td align="left">mysql_password</td>
           <td align="left">database_password</td>
           <td align="left">database_password</td>
           <td align="left"><a href="#database_password" >database_password</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">pgsql_password</td>
+          <td align="left">pgsql_password</td>
           <td align="left">database_password</td>
           <td align="left">database_password</td>
           <td align="left"><a href="#database_password" >database_password</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">pgsql_port</td>
+          <td align="left">pgsql_port</td>
           <td align="left">database_port</td>
           <td align="left">database_port</td>
           <td align="left"><a href="#database_port" >database_port</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">database_type</td>
           <td align="left">database_type</td>
           <td align="left"><a href="#database_type" >database_type</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">mysql_user</td>
+          <td align="left">mysql_user</td>
           <td align="left">database_user</td>
           <td align="left">database_user</td>
           <td align="left"><a href="#database_user" >database_user</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">pgsql_user</td>
+          <td align="left">pgsql_user</td>
           <td align="left">database_user</td>
           <td align="left">database_user</td>
           <td align="left"><a href="#database_user" >database_user</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">despeckle</td>
+          <td align="left">despeckle</td>
           <td align="left">despeckle_filter</td>
           <td align="left">despeckle_filter</td>
           <td align="left"><a href="#despeckle_filter" >despeckle_filter</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">output_all</td>
+          <td align="left">output_all</td>
           <td align="left">emulate_motion</td>
           <td align="left">emulate_motion</td>
           <td align="left"><a href="#emulate_motion" >emulate_motion</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">gap</td>
+          <td align="left">gap</td>
           <td align="left">event_gap</td>
           <td align="left">event_gap</td>
           <td align="left"><a href="#event_gap" >event_gap</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">flip_axis</td>
           <td align="left"><a href="#flip_axis" >flip_axis</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">framerate</td>
+          <td align="left">framerate</td>
           <td align="left">framerate</td>
           <td align="left">framerate</td>
           <td align="left"><a href="#framerate" >framerate</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">frequency</td>
+          <td align="left">frequency</td>
           <td align="left">frequency</td>
           <td align="left">frequency</td>
           <td align="left"><a href="#frequency" >frequency</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">height</td>
+          <td align="left">height</td>
           <td align="left">height</td>
           <td align="left">height</td>
           <td align="left"><a href="#height" >height</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">input</td>
+          <td align="left">input</td>
           <td align="left">input</td>
           <td align="left">input</td>
           <td align="left"><a href="#input" >input</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#lightswitch_frames" >lightswitch_frames</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">lightswitch</td>
+          <td align="left">lightswitch</td>
           <td align="left">lightswitch</td>
           <td align="left">lightswitch</td>
           <td align="left"><a href="#lightswitch_percent" >lightswitch_percent</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">locate</td>
+          <td align="left">locate</td>
           <td align="left">locate_motion_mode</td>
           <td align="left">locate_motion_mode</td>
           <td align="left"><a href="#locate_motion_mode" >locate_motion_mode</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">locate_motion_style</td>
           <td align="left">locate_motion_style</td>
           <td align="left"><a href="#locate_motion_style" >locate_motion_style</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">logfile</td>
           <td align="left">logfile</td>
           <td align="left"><a href="#log_file" >log_file</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">log_level</td>
           <td align="left">log_level</td>
           <td align="left"><a href="#log_level" >log_level</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">log_type</td>
           <td align="left">log_type</td>
           <td align="left"><a href="#log_type" >log_type</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">mask_file</td>
+          <td align="left">mask_file</td>
           <td align="left">mask_file</td>
           <td align="left">mask_file</td>
           <td align="left"><a href="#mask_file" >mask_file</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">mask_privacy</td>
           <td align="left"><a href="#mask_privacy" >mask_privacy</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">minimum_frame_time</td>
+          <td align="left">minimum_frame_time</td>
           <td align="left">minimum_frame_time</td>
           <td align="left">minimum_frame_time</td>
           <td align="left"><a href="#minimum_frame_time" >minimum_frame_time</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">minimum_motion_frames</td>
+          <td align="left">minimum_motion_frames</td>
           <td align="left">minimum_motion_frames</td>
           <td align="left">minimum_motion_frames</td>
           <td align="left"><a href="#minimum_motion_frames" >minimum_motion_frames</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">mmalcam_control_params</td>
           <td align="left">mmalcam_control_params</td>
           <td align="left"><a href="#mmalcam_control_params" >mmalcam_control_params</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">mmalcam_name</td>
           <td align="left">mmalcam_name</td>
           <td align="left"><a href="#mmalcam_name" >mmalcam_name</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_bps</td>
+          <td align="left">ffmpeg_bps</td>
           <td align="left">ffmpeg_bps</td>
           <td align="left">ffmpeg_bps</td>
           <td align="left"><a href="#movie_bps" >movie_bps</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
           <td align="left">ffmpeg_video_codec</td>
           <td align="left">ffmpeg_video_codec</td>
           <td align="left"><a href="#movie_codec" >movie_codec</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">ffmpeg_duplicate_frames</td>
           <td align="left">ffmpeg_duplicate_frames</td>
           <td align="left"><a href="#movie_duplicate_frames" >movie_duplicate_frames</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">extpipe</td>
           <td align="left">extpipe</td>
           <td align="left"><a href="#movie_extpipe" >movie_extpipe</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">use_extpipe</td>
           <td align="left">use_extpipe</td>
           <td align="left"><a href="#movie_extpipe_use" >movie_extpipe_use</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">movie_filename</td>
+          <td align="left">movie_filename</td>
           <td align="left">movie_filename</td>
           <td align="left">movie_filename</td>
           <td align="left"><a href="#movie_filename" >movie_filename</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">max_mpeg_time</td>
+          <td align="left">max_mpeg_time</td>
           <td align="left">max_movie_time</td>
           <td align="left">max_movie_time</td>
           <td align="left"><a href="#movie_max_time" >movie_max_time</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_cap_new</td>
+          <td align="left">ffmpeg_cap_new</td>
           <td align="left">ffmpeg_output_movies</td>
           <td align="left">ffmpeg_output_movies</td>
           <td align="left"><a href="#movie_output" >movie_output</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_cap_motion</td>
+          <td align="left">ffmpeg_cap_motion</td>
           <td align="left">ffmpeg_output_debug_movies</td>
           <td align="left">ffmpeg_output_debug_movies</td>
           <td align="left"><a href="#movie_output_motion" >movie_output_motion</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#movie_passthrough" >movie_passthrough</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_variable_bitrate</td>
+          <td align="left">ffmpeg_variable_bitrate</td>
           <td align="left">ffmpeg_variable_bitrate</td>
           <td align="left">ffmpeg_variable_bitrate</td>
           <td align="left"><a href="#movie_quality" >movie_quality</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#native_language" >native_language</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">netcam_highres</td>
           <td align="left"><a href="#netcam_highres" >netcam_highres</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">netcam_keepalive</td>
+          <td align="left">netcam_keepalive</td>
           <td align="left">netcam_keepalive</td>
           <td align="left">netcam_keepalive</td>
           <td align="left"><a href="#netcam_keepalive" >netcam_keepalive</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">netcam_proxy</td>
+          <td align="left">netcam_proxy</td>
           <td align="left">netcam_proxy</td>
           <td align="left">netcam_proxy</td>
           <td align="left"><a href="#netcam_proxy" >netcam_proxy</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">netcam_tolerant_check</td>
+          <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
           <td align="left">netcam_tolerant_check</td>
           <td align="left"><a href="#netcam_tolerant_check" >netcam_tolerant_check</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">netcam_url</td>
+          <td align="left">netcam_url</td>
           <td align="left">netcam_url</td>
           <td align="left">netcam_url</td>
           <td align="left"><a href="#netcam_url" >netcam_url</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">rtsp_uses_tcp</td>
           <td align="left">rtsp_uses_tcp</td>
           <td align="left"><a href="#netcam_use_tcp" >netcam_use_tcp</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">netcam_userpass</td>
+          <td align="left">netcam_userpass</td>
           <td align="left">netcam_userpass</td>
           <td align="left">netcam_userpass</td>
           <td align="left"><a href="#netcam_userpass" >netcam_userpass</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">noise_level</td>
+          <td align="left">noise_level</td>
           <td align="left">noise_level</td>
           <td align="left">noise_level</td>
           <td align="left"><a href="#noise_level" >noise_level</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">noise_tune</td>
+          <td align="left">noise_tune</td>
           <td align="left">noise_tune</td>
           <td align="left">noise_tune</td>
           <td align="left"><a href="#noise_tune" >noise_tune</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">norm</td>
+          <td align="left">norm</td>
           <td align="left">norm</td>
           <td align="left">norm</td>
           <td align="left"><a href="#norm" >norm</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_area_detected</td>
+          <td align="left">on_area_detected</td>
           <td align="left">on_area_detected</td>
           <td align="left">on_area_detected</td>
           <td align="left"><a href="#on_area_detected" >on_area_detected</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">on_camera_found</td>
           <td align="left"><a href="#on_camera_found" >on_camera_found</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_camera_lost</td>
+          <td align="left">on_camera_lost</td>
           <td align="left">on_camera_lost</td>
           <td align="left">on_camera_lost</td>
           <td align="left"><a href="#on_camera_lost" >on_camera_lost</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_event_end</td>
+          <td align="left">on_event_end</td>
           <td align="left">on_event_end</td>
           <td align="left">on_event_end</td>
           <td align="left"><a href="#on_event_end" >on_event_end</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_event_start</td>
+          <td align="left">on_event_start</td>
           <td align="left">on_event_start</td>
           <td align="left">on_event_start</td>
           <td align="left"><a href="#on_event_start" >on_event_start</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_motion_detected</td>
+          <td align="left">on_motion_detected</td>
           <td align="left">on_motion_detected</td>
           <td align="left">on_motion_detected</td>
           <td align="left"><a href="#on_motion_detected" >on_motion_detected</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_movie_end</td>
+          <td align="left">on_movie_end</td>
           <td align="left">on_movie_end</td>
           <td align="left">on_movie_end</td>
           <td align="left"><a href="#on_movie_end" >on_movie_end</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_movie_start</td>
+          <td align="left">on_movie_start</td>
           <td align="left">on_movie_start</td>
           <td align="left">on_movie_start</td>
           <td align="left"><a href="#on_movie_start" >on_movie_start</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">on_picture_save</td>
+          <td align="left">on_picture_save</td>
           <td align="left">on_picture_save</td>
           <td align="left">on_picture_save</td>
           <td align="left"><a href="#on_picture_save" >on_picture_save</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">exif_text</td>
           <td align="left">exif_text</td>
           <td align="left"><a href="#picture_exif" >picture_exif</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">output_normal</td>
+          <td align="left">output_normal</td>
           <td align="left">output_pictures</td>
           <td align="left">output_pictures</td>
           <td align="left"><a href="#picture_output" >picture_output</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">output_motion</td>
+          <td align="left">output_motion</td>
           <td align="left">output_debug_pictures</td>
           <td align="left">output_debug_pictures</td>
           <td align="left"><a href="#picture_output_motion" >picture_output_motion</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">jpeg_filename</td>
+          <td align="left">jpeg_filename</td>
           <td align="left">picture_filename</td>
           <td align="left">picture_filename</td>
           <td align="left"><a href="#picture_filename" >picture_filename</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ppm</td>
+          <td align="left">ppm</td>
           <td align="left">picture_type</td>
           <td align="left">picture_type</td>
           <td align="left"><a href="#picture_type" >picture_type</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">quality</td>
+          <td align="left">quality</td>
           <td align="left">quality</td>
           <td align="left">quality</td>
           <td align="left"><a href="#picture_quality" >picture_quality</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">process_id_file</td>
+          <td align="left">process_id_file</td>
           <td align="left">process_id_file</td>
           <td align="left">process_id_file</td>
           <td align="left"><a href="#pid_file" >pid_file</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">post_capture</td>
+          <td align="left">post_capture</td>
           <td align="left">post_capture</td>
           <td align="left">post_capture</td>
           <td align="left"><a href="#post_capture" >post_capture</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">pre_capture</td>
+          <td align="left">pre_capture</td>
           <td align="left">pre_capture</td>
           <td align="left">pre_capture</td>
           <td align="left"><a href="#pre_capture" >pre_capture</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">quiet</td>
+          <td align="left">quiet</td>
           <td align="left">quiet</td>
           <td align="left">quiet</td>
           <td align="left"><a href="#quiet" >quiet</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">rotate</td>
+          <td align="left">rotate</td>
           <td align="left">rotate</td>
           <td align="left">rotate</td>
           <td align="left"><a href="#rotate" >rotate</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">roundrobin_frames</td>
+          <td align="left">roundrobin_frames</td>
           <td align="left">roundrobin_frames</td>
           <td align="left">roundrobin_frames</td>
           <td align="left"><a href="#roundrobin_frames" >roundrobin_frames</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">roundrobin_skip</td>
+          <td align="left">roundrobin_skip</td>
           <td align="left">roundrobin_skip</td>
           <td align="left">roundrobin_skip</td>
           <td align="left"><a href="#roundrobin_skip" >roundrobin_skip</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">switchfilter</td>
+          <td align="left">switchfilter</td>
           <td align="left">switchfilter</td>
           <td align="left">switchfilter</td>
           <td align="left"><a href="#roundrobin_switchfilter" >roundrobin_switchfilter</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">setup_mode</td>
+          <td align="left">setup_mode</td>
           <td align="left">setup_mode</td>
           <td align="left">setup_mode</td>
           <td align="left"><a href="#setup_mode" >setup_mode</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">smart_mask_speed</td>
+          <td align="left">smart_mask_speed</td>
           <td align="left">smart_mask_speed</td>
           <td align="left">smart_mask_speed</td>
           <td align="left"><a href="#smart_mask_speed" >smart_mask_speed</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">snapshot_filename</td>
+          <td align="left">snapshot_filename</td>
           <td align="left">snapshot_filename</td>
           <td align="left">snapshot_filename</td>
           <td align="left"><a href="#snapshot_filename" >snapshot_filename</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">snapshot_interval</td>
+          <td align="left">snapshot_interval</td>
           <td align="left">snapshot_interval</td>
           <td align="left">snapshot_interval</td>
           <td align="left"><a href="#snapshot_interval" >snapshot_interval</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">sql_log_mpeg</td>
+          <td align="left">sql_log_mpeg</td>
           <td align="left">sql_log_movie</td>
           <td align="left">sql_log_movie</td>
           <td align="left"><a href="#sql_log_movie" >sql_log_movie</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">sql_log_image</td>
+          <td align="left">sql_log_image</td>
           <td align="left">sql_log_picture</td>
           <td align="left">sql_log_picture</td>
           <td align="left"><a href="#sql_log_picture" >sql_log_picture</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">sql_log_snapshot</td>
+          <td align="left">sql_log_snapshot</td>
           <td align="left">sql_log_snapshot</td>
           <td align="left">sql_log_snapshot</td>
           <td align="left"><a href="#sql_log_snapshot" >sql_log_snapshot</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">sql_log_timelapse</td>
+          <td align="left">sql_log_timelapse</td>
           <td align="left">sql_log_timelapse</td>
           <td align="left">sql_log_timelapse</td>
           <td align="left"><a href="#sql_log_timelapse" >sql_log_timelapse</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">sql_query</td>
+          <td align="left">sql_query</td>
           <td align="left">sql_query</td>
           <td align="left">sql_query</td>
           <td align="left"><a href="#sql_query" >sql_query</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">sql_query_start</td>
           <td align="left"><a href="#sql_query_start" >sql_query_start</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#sql_query_stop" >sql_query_stop</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">stream_auth_method</td>
           <td align="left">stream_auth_method</td>
           <td align="left"><a href="#stream_auth_method" >stream_auth_method</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">stream_authentication</td>
           <td align="left">stream_authentication</td>
           <td align="left"><a href="#stream_authentication" >stream_authentication</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#stream_cors_header" >stream_cors_header</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#stream_grey" >stream_grey</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_localhost</td>
+          <td align="left">webcam_localhost</td>
           <td align="left">stream_localhost</td>
           <td align="left">stream_localhost</td>
           <td align="left"><a href="#stream_localhost" >stream_localhost</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_maxrate</td>
+          <td align="left">webcam_maxrate</td>
           <td align="left">stream_maxrate</td>
           <td align="left">stream_maxrate</td>
           <td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_port</td>
+          <td align="left">webcam_port</td>
           <td align="left">stream_port</td>
           <td align="left">stream_port</td>
           <td align="left"><a href="#stream_port" >stream_port</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#stream_preview_method" >stream_preview_method</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">stream_preview_newline</td>
           <td align="left">stream_preview_newline</td>
           <td align="left"><a href="#stream_preview_newline" >stream_preview_newline</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">stream_preview_scale</td>
           <td align="left">stream_preview_scale</td>
           <td align="left"><a href="#stream_preview_scale" >stream_preview_scale</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_quality</td>
+          <td align="left">webcam_quality</td>
           <td align="left">stream_quality</td>
           <td align="left">stream_quality</td>
           <td align="left"><a href="#stream_quality" >stream_quality</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#stream_tls" >stream_tls</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">target_dir</td>
+          <td align="left">target_dir</td>
           <td align="left">target_dir</td>
           <td align="left">target_dir</td>
           <td align="left"><a href="#target_dir" >target_dir</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">text_changes</td>
+          <td align="left">text_changes</td>
           <td align="left">text_changes</td>
           <td align="left">text_changes</td>
           <td align="left"><a href="#text_changes" >text_changes</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">text_event</td>
+          <td align="left">text_event</td>
           <td align="left">text_event</td>
           <td align="left">text_event</td>
           <td align="left"><a href="#text_event" >text_event</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">text_left</td>
+          <td align="left">text_left</td>
           <td align="left">text_left</td>
           <td align="left">text_left</td>
           <td align="left"><a href="#text_left" >text_left</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">text_right</td>
+          <td align="left">text_right</td>
           <td align="left">text_right</td>
           <td align="left">text_right</td>
           <td align="left"><a href="#text_right" >text_right</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">text_double</td>
+          <td align="left">text_double</td>
           <td align="left">text_double</td>
           <td align="left">text_double</td>
           <td align="left"><a href="#text_scale" >text_scale</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">threshold</td>
+          <td align="left">threshold</td>
           <td align="left">threshold</td>
           <td align="left">threshold</td>
           <td align="left"><a href="#threshold" >threshold</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#threshold_maximum" >threshold_maximum</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">threshold_tune</td>
+          <td align="left">threshold_tune</td>
           <td align="left">threshold_tune</td>
           <td align="left">threshold_tune</td>
           <td align="left"><a href="#threshold_tune" >threshold_tune</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_video_codec</td>
+          <td align="left">ffmpeg_video_codec</td>
           <td align="left">ffmpeg_video_codec</td>
           <td align="left">timelapse_codec</td>
           <td align="left"><a href="#timelapse_codec" >timelapse_codec</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">timelapse_filename</td>
+          <td align="left">timelapse_filename</td>
           <td align="left">timelapse_filename</td>
           <td align="left">timelapse_filename</td>
           <td align="left"><a href="#timelapse_filename" >timelapse_filename</a></td>
         </tr>
           <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">timelapse_fps</td>
           <td align="left"><a href="#timelapse_fps" >timelapse_fps</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_timelapse</td>
+          <td align="left">ffmpeg_timelapse</td>
           <td align="left">ffmpeg_timelapse</td>
           <td align="left">timelapse_interval</td>
           <td align="left"><a href="#timelapse_interval" >timelapse_interval</a></td>
         </tr>
           <tr>
-          <td height="17" align="left">ffmpeg_timelapse_mode</td>
+          <td align="left">ffmpeg_timelapse_mode</td>
           <td align="left">ffmpeg_timelapse_mode</td>
           <td align="left">ffmpeg_timelapse_mode</td>
           <td align="left"><a href="#timelapse_mode" >timelapse_mode</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_auto</td>
+          <td align="left">track_auto</td>
           <td align="left">track_auto</td>
           <td align="left">track_auto</td>
           <td align="left"><a href="#track_auto" >track_auto</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#track_generic_move" >track_generic_move</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_iomojo_id</td>
+          <td align="left">track_iomojo_id</td>
           <td align="left">track_iomojo_id</td>
           <td align="left">track_iomojo_id</td>
           <td align="left"><a href="#track_iomojo_id" >track_iomojo_id</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_maxx</td>
+          <td align="left">track_maxx</td>
           <td align="left">track_maxx</td>
           <td align="left">track_maxx</td>
           <td align="left"><a href="#track_maxx" >track_maxx</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_maxy</td>
+          <td align="left">track_maxy</td>
           <td align="left">track_maxy</td>
           <td align="left">track_maxy</td>
           <td align="left"><a href="#track_maxy" >track_maxy</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_motorx</td>
+          <td align="left">track_motorx</td>
           <td align="left">track_motorx</td>
           <td align="left">track_motorx</td>
           <td align="left"><a href="#track_motorx" >track_motorx</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_motory</td>
+          <td align="left">track_motory</td>
           <td align="left">track_motory</td>
           <td align="left">track_motory</td>
           <td align="left"><a href="#track_motory" >track_motory</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_move_wait</td>
+          <td align="left">track_move_wait</td>
           <td align="left">track_move_wait</td>
           <td align="left">track_move_wait</td>
           <td align="left"><a href="#track_move_wait" >track_move_wait</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_port</td>
+          <td align="left">track_port</td>
           <td align="left">track_port</td>
           <td align="left">track_port</td>
           <td align="left"><a href="#track_port" >track_port</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_speed</td>
+          <td align="left">track_speed</td>
           <td align="left">track_speed</td>
           <td align="left">track_speed</td>
           <td align="left"><a href="#track_speed" >track_speed</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_step_angle_x</td>
+          <td align="left">track_step_angle_x</td>
           <td align="left">track_step_angle_x</td>
           <td align="left">track_step_angle_x</td>
           <td align="left"><a href="#track_step_angle_x" >track_step_angle_x</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_step_angle_y</td>
+          <td align="left">track_step_angle_y</td>
           <td align="left">track_step_angle_y</td>
           <td align="left">track_step_angle_y</td>
           <td align="left"><a href="#track_step_angle_y" >track_step_angle_y</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_stepsize</td>
+          <td align="left">track_stepsize</td>
           <td align="left">track_stepsize</td>
           <td align="left">track_stepsize</td>
           <td align="left"><a href="#track_stepsize" >track_stepsize</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">track_type</td>
+          <td align="left">track_type</td>
           <td align="left">track_type</td>
           <td align="left">track_type</td>
           <td align="left"><a href="#track_type" >track_type</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">tunerdevice</td>
+          <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left">tunerdevice</td>
           <td align="left"><a href="#tunerdevice" >tunerdevice</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">v4l2_palette</td>
+          <td align="left">v4l2_palette</td>
           <td align="left">v4l2_palette</td>
           <td align="left">v4l2_palette</td>
           <td align="left"><a href="#v4l2_palette" >v4l2_palette</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">brightness</td>
           <td align="left">brightness</td>
           <td align="left">brightness</td>
+          <td align="left">brightness</td>
           <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">contrast</td>
           <td align="left">contrast</td>
           <td align="left">contrast</td>
+          <td align="left">contrast</td>
           <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">hue</td>
+          <td align="left">hue</td>
           <td align="left">hue</td>
           <td align="left">hue</td>
           <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">power_line_frequency</td>
           <td align="left">power_line_frequency</td>
           <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">saturation</td>
+          <td align="left">saturation</td>
           <td align="left">saturation</td>
           <td align="left">saturation</td>
           <td align="left"><a href="#vid_control_params" >vid_control_params</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">video_pipe</td>
+          <td align="left">video_pipe</td>
           <td align="left">video_pipe</td>
           <td align="left">video_pipe</td>
           <td align="left"><a href="#video_pipe" >video_pipe</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">motion_video_pipe</td>
+          <td align="left">motion_video_pipe</td>
           <td align="left">motion_video_pipe</td>
           <td align="left">motion_video_pipe</td>
           <td align="left"><a href="#video_pipe_motion" >video_pipe_motion</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">videodevice</td>
+          <td align="left">videodevice</td>
           <td align="left">videodevice</td>
           <td align="left">videodevice</td>
           <td align="left"><a href="#videodevice" >videodevice</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#webcontrol_auth_method" >webcontrol_auth_method</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">control_authentication</td>
+          <td align="left">control_authentication</td>
           <td align="left">webcontrol_authentication</td>
           <td align="left">webcontrol_authentication</td>
           <td align="left"><a href="#webcontrol_authentication" >webcontrol_authentication</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#webcontrol_cert" >webcontrol_cert</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#webcontrol_cors_header" >webcontrol_cors_header</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">control_html_output</td>
+          <td align="left">control_html_output</td>
           <td align="left">webcontrol_html_output</td>
           <td align="left">webcontrol_html_output</td>
           <td align="left"><a href="#webcontrol_interface" >webcontrol_interface</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"><br /></td>
+          <td align="left"><br /></td>
           <td align="left">ipv6_enabled</td>
           <td align="left">ipv6_enabled</td>
           <td align="left"><a href="#webcontrol_ipv6" >webcontrol_ipv6</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#webcontrol_key" >webcontrol_key</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">control_localhost</td>
+          <td align="left">control_localhost</td>
           <td align="left">webcontrol_localhost</td>
           <td align="left">webcontrol_localhost</td>
           <td align="left"><a href="#webcontrol_localhost" >webcontrol_localhost</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">webcontrol_parms</td>
           <td align="left"><a href="#webcontrol_parms" >webcontrol_parms</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">control_port</td>
+          <td align="left">control_port</td>
           <td align="left">webcontrol_port</td>
           <td align="left">webcontrol_port</td>
           <td align="left"><a href="#webcontrol_port" >webcontrol_port</a></td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left"></td>
           <td align="left"><a href="#webcontrol_tls" >webcontrol_tls</a></td>
         </tr>
         <tr>
-          <td height="17" align="left">width</td>
+          <td align="left">width</td>
           <td align="left">width</td>
           <td align="left">width</td>
           <td align="left"><a href="#width" >width</td>
         </tr>
         <tr>
-          <td height="17" align="left">ffmpeg_deinterlace</td>
+          <td align="left">ffmpeg_deinterlace</td>
           <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
         </tr>
         <tr>
-          <td height="17" align="left"><br></td>
+          <td align="left"><br></td>
           <td align="left">sdl_threadnr</td>
           <td align="left">-Depreciated</td>
           <td align="left">-Depreciated</td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_limit</td>
+          <td align="left">webcam_limit</td>
           <td align="left">stream_limit</td>
           <td align="left">stream_limit</td>
           <td align="left">-Depreciated</td>
         </tr>
         <tr>
-          <td height="17" align="left">webcam_motion</td>
+          <td align="left">webcam_motion</td>
           <td align="left">stream_motion</td>
           <td align="left">stream_motion</td>
           <td align="left">-Depreciated</td>
         </tr>
         <tr>
-          <td height="17" align="left"></td>
+          <td align="left"></td>
           <td align="left"></td>
           <td align="left">substream_port</td>
           <td align="left">-Depreciated</td>
         </tr>
       </table>
+      </div>
     </ul>
 
     <h2><a name="Configuration_OptionsTopic"></a>  Configuration Options-Listed by Topic </h2>
@@ -1503,7 +1560,7 @@ function fnc_topnav() {
       <a name="OptTopic_System_Processing" ></a>
       <a href="#OptDetail_System_Processing" >System Processing-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1542,7 +1599,7 @@ function fnc_topnav() {
       <a name="OptTopic_Video4Linux_Devices" ></a>
       <a href="#OptDetail_Video4Linux_Devices" >Video4Linux Devices-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1577,7 +1634,7 @@ function fnc_topnav() {
       <a name="OptTopic_Network_Cameras" ></a>
       <a href="#OptDetail_Network_Cameras" >Network Cameras-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1606,7 +1663,7 @@ function fnc_topnav() {
       <a name="OptTopic_Raspi_Cameras" ></a>
       <a href="#OptDetail_Raspi_Cameras" >Raspberry Pi Camera-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1628,7 +1685,7 @@ function fnc_topnav() {
       <a name="OptTopic_Image_Processing" ></a>
       <a href="#OptDetail_Image_Processing" >Image Processing-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1667,7 +1724,7 @@ function fnc_topnav() {
       <a name="OptTopic_Motion_Detection" ></a>
       <a href="#OptDetail_Motion_Detection" >Motion Detection-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1713,7 +1770,7 @@ function fnc_topnav() {
       <a name="OptTopic_Scripts" ></a>
       <a href="#OptDetail_Scripts" >Script Execution-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1746,7 +1803,7 @@ function fnc_topnav() {
       <a name="OptTopic_Pictures" ></a>
       <a href="#OptDetail_Pictures" >Pictures-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1777,7 +1834,7 @@ function fnc_topnav() {
       <a name="OptTopic_Movies" ></a>
       <a href="#OptDetail_Movies" >Movies-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1819,7 +1876,7 @@ function fnc_topnav() {
       <a name="OptTopic_Pipe" ></a>
       <a href="#OptDetail_Pipe" >Pipes-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1841,7 +1898,7 @@ function fnc_topnav() {
       <a name="OptTopic_Webcontrol" ></a>
       <a href="#OptDetail_Webcontrol" >Webcontrol-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1878,7 +1935,7 @@ function fnc_topnav() {
       <a name="OptTopic_Stream" ></a>
       <a href="#OptDetail_Stream" >Live Stream-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1915,7 +1972,7 @@ function fnc_topnav() {
       <a name="OptTopic_Database" ></a>
       <a href="#OptDetail_Database" >Database-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -1956,7 +2013,7 @@ function fnc_topnav() {
       <a name="OptTopic_Tracking" ></a>
       <a href="#OptDetail_Tracking" >Tracking-General Info</a>
       <ul>
-        <table border="1" class="fixed" >
+        <table class="tbldetail" border="1" class="fixed" >
           <colgroup>
             <col width="250px">
             <col width="250px">
@@ -2015,6 +2072,7 @@ function fnc_topnav() {
 
       <h3><a name="conversion_specifiers"></a>Conversion Specifiers</h3>
       <ul>
+        <div class="tblconvr">
         <table border="1" class="fixed" >
           <colgroup>
             <col width="50px">
@@ -2103,6 +2161,7 @@ function fnc_topnav() {
              </tr>
             </tbody>
         </table>
+        </div>
         <p></p>
         The use of quotation marks around string is permitted.  In addition to the above, the conversion
         specifiers include the same options as for the C function strftime (3).
@@ -2303,7 +2362,7 @@ function fnc_topnav() {
         Motion allows for this line to be listed in the motion.conf file multiple
         times.  These specifications should be the LAST lines in the
         motion.conf file.
-        See the <a href="#The_Config_Files">Configuration Files</a> section within
+        See the <a href="#configfiles">Configuration Files</a> section within
         this guide for a complete discussion of what to put into the
         camera0.conf, camera1.conf, cameraX.conf files that would be specified
         in this option.
@@ -2522,6 +2581,7 @@ function fnc_topnav() {
         The following are each of the palette options.  For the Motion configuration,
         specify the numeric value as the Motion option.
         <p></p>
+        <div class="tblpaltte">
         <table border="1" class="fixed" >
           <colgroup>
               <col width="250px">
@@ -2646,6 +2706,7 @@ function fnc_topnav() {
             </tr>
           </tbody>
         </table>
+        </div>
         <p></p>
         It is possible that after looping through all of the palette options for the camera, Motion will not
         find a palette that is acceptable for processing.  In this situation, it is possible to use the
@@ -2755,7 +2816,8 @@ function fnc_topnav() {
         <p></p>
         Specifies the number of frames to capture before switching inputs, this way also slow switching (e.g. every second)
         is possible.  The Round Robin feature is automatically activated where multiple cameras are sharing the same video
-        device. Each camera can then set different <code>input</code> or <code>frequency</code> options to change camera.
+        device. Each camera can then set different <a href="#input">input</a> or
+        <a href="#frequency">frequency</a> options to change camera.
         If multiple cameras use the same video device, they each can capture roundrobin_frames number of frames before having
         to share the device with the other cameras.
         <p></p>
@@ -2771,11 +2833,12 @@ function fnc_topnav() {
         per input. If you only need 2 or 3 cameras you can also simply put 2 or 3 cheap TV cards in the computer.
         Linux has no problem working with multiple TV cards. (or better yet, it multiple cheap network cameras)
         If multiple cameras use the same video device, they each can capture
-        <code><a href="#roundrobin_frames">roundrobin_frames</a></code> number of frames
+        <a href="#roundrobin_frames">roundrobin_frames</a> number of frames
         before having to share the device with the other cameras.
         When another camera wants to watch another input or frequency or size the first
-        <code><a href="#roundrobin_skip">roundrobin_skip</a> </code> number of frames are skipped to allow the
-        device to settle.  The last option <code><a href="#roundrobin_switchfilter">roundrobin_switchfilter</a></code> is supposed
+        <a href="#roundrobin_skip">roundrobin_skip</a> number of frames are skipped to allow the
+        device to settle.  The last option
+        <a href="#roundrobin_switchfilter">roundrobin_switchfilter</a> is supposed
         to prevent the change of camera from being detected
         as Motion. Its function is not perfect and sometimes prevents detection of real motion. You should start
         with having the option disabled and then try with the option enabled to see if you can skip less frames
@@ -3281,28 +3344,14 @@ function fnc_topnav() {
         <p></p>
         This is how the overlaid text is located.
         <p></p>
-        <table border="1" width="354">
+        <table border="1" width=100%>
           <tr>
-            <td width="344">
-              <table cellpadding="0" cellspacing="0" width="344">
-                <tr>
-                  <td width="216">
-                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                  </td>
-                  <td width="128">
-                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td width="216">
-                    <p><br /><br />TEXT_LEFT</p>
-                  </td>
-                  <td width="128">
-                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
+            <td width="45"></td>
+            <td width="45" align="right">CHANGES<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td>
+          </tr>
+          <tr>
+            <td width="25%"><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;TEXT_LEFT</td>
+            <td width="25%" align="right"><br>&nbsp;<br>&nbsp;TEXT_RIGHT<br/>YYYY-MM-DD<br/>HH:MM:SS&nbsp;</td>
           </tr>
         </table>
         <p></p>
@@ -3337,30 +3386,17 @@ function fnc_topnav() {
         <p></p>
         This is how the overlaid text is located.
         <p></p>
-        <table border="1" width="354">
+        <table border="1" width=100%>
           <tr>
-            <td width="344">
-              <table cellpadding="0" cellspacing="0" width="344">
-                <tr>
-                  <td width="216">
-                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                  </td>
-                  <td width="128">
-                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td width="216">
-                    <p><br /><br />TEXT_LEFT</p>
-                  </td>
-                  <td width="128">
-                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
+            <td width="45"></td>
+            <td width="45" align="right">CHANGES<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td>
+          </tr>
+          <tr>
+            <td width="25%"><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;TEXT_LEFT</td>
+            <td width="25%" align="right"><br>&nbsp;<br>&nbsp;TEXT_RIGHT<br/>YYYY-MM-DD<br/>HH:MM:SS&nbsp;</td>
           </tr>
         </table>
+
         <p></p>
         <p></p>
 
@@ -3377,28 +3413,14 @@ function fnc_topnav() {
         reference frame is displayed in the upper right corner of the pictures. This is good for calibration and testing.
         This is how the overlaid text is located.
         <p></p>
-        <table border="1" width="354">
+        <table border="1" width=100%>
           <tr>
-            <td width="344">
-              <table cellpadding="0" cellspacing="0" width="344">
-                <tr>
-                  <td width="216">
-                    <p>&nbsp;&nbsp;<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                  </td>
-                  <td width="128">
-                    <p align="right">&nbsp;CHANGES<br /><br /><br /><br /><br /><br />&nbsp;</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td width="216">
-                    <p><br /><br />TEXT_LEFT</p>
-                  </td>
-                  <td width="128">
-                    <p align="right">TEXT_RIGHT<br />YYYY-MM-DD<br />HH:MM:SS&nbsp;</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
+            <td width="45"></td>
+            <td width="45" align="right">CHANGES<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td>
+          </tr>
+          <tr>
+            <td width="25%"><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;TEXT_LEFT</td>
+            <td width="25%" align="right"><br>&nbsp;<br>&nbsp;TEXT_RIGHT<br/>YYYY-MM-DD<br/>HH:MM:SS&nbsp;</td>
           </tr>
         </table>
         <p></p>
@@ -3617,7 +3639,8 @@ function fnc_topnav() {
         You can adjust sensitivity by using gray tones.
         If you do not have a mask file disable this option by not having it in the config file or comment
         it out.
-        If you are using the <code>rotate</code> or <code>flip_axis</code> options, note that the mask is
+        If you are using the <a href="#rotate">rotate</a>
+        or <a href="#flip_axis">flip_axis</a> options, note that the mask is
         applied <em>after</em> the rotation.
         <p></p>
         <strong>Detailed Description</strong>
@@ -3708,11 +3731,11 @@ function fnc_topnav() {
         is constant over all available framerates.
         When smartmask is enabled and motion is also configured to either write motion-images or motion-mpegs,
         the current smartmask is copied as an overlay into the black/white motion-pictures/mpegs in red colour.
-        Same thing happens to the webcam stream when Motion runs in <code><a href="#setup_mode">setup_mode</a></code>.
+        Same thing happens to the webcam stream when Motion runs in <a href="#setup_mode">setup_mode</a>.
         That way you can
         easily adjust smart_mask_speed.
         <p></p>
-        The <code>mask_file</code> option provides a static mask to turn off sensitivity in certain areas.
+        The <a href="#mask_file">mask_file</a> option provides a static mask to turn off sensitivity in certain areas.
         This is very useful to mask a street with cars passing by all day long etc...
         <p></p>
         But imagine a scenario with large bushes and big trees where all the leaves are moving
@@ -4455,13 +4478,21 @@ function fnc_topnav() {
         <p></p>
         Sample:
         <p></p>
+        <code>
         movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:i420 -ovc x264 -x264encopts bframes=4:frameref=1:subq=1:scenecut=-1:nob_adapt:threads=1:keyint=1000:8x8dct:vbv_bufsize=4000:crf=24:partitions=i8x8,i4x4:vbv_maxrate=800:no-chroma-me -vf denoise3d=16:12:48:4,pp=lb -of   avi -o %f.avi - -fps %fps
+        </code>
         <p></p>
+        <code>
         movie_extpipe x264 - --input-res %wx%h --fps %fps --bitrate 2000 --preset ultrafast --quiet -o %f.mp4
+        </code>
         <p></p>
+        <code>
         movie_extpipe mencoder -demuxer rawvideo -rawvideo w=%w:h=%h:fps=%fps -ovc x264 -x264encopts preset=ultrafast -of lavf -o %f.mp4 - -fps %fps
+        </code>
         <p></p>
+        <code>
         movie_extpipe ffmpeg -y -f rawvideo -pix_fmt yuv420p -video_size %wx%h -framerate %fps -i pipe:0 -vcodec libx264 -preset ultrafast -f mp4 %f.mp4
+        </code>
         <p></p>
         <p></p>
 
@@ -4573,7 +4604,7 @@ function fnc_topnav() {
         <p></p>
         The video loopback device can be added installed via apt in many distributions.  The package tested
         with Motion is v4l2loopback-dkms.  Once the package is installed, you just need to run
-        <code><strong>sudo modprobe v4l2loopback</strong></code>.  This will add a new video device that you
+        <code>sudo modprobe v4l2loopback</code>.  This will add a new video device that you
         can use for the loopback.  It is believed that there are additional options associated with the
         v4l2loopback that allows for adding more than one device.  See the documentation of the v4l2loopback
         project for additional details.
@@ -4644,36 +4675,40 @@ function fnc_topnav() {
         <p></p>
         Example to pause motion detection
         <p></p>
-        <pre>
-        lwp-request http://localhost:8080/0/detection/pause</pre>
+        <code>
+        lwp-request http://localhost:8080/0/detection/pause
+        </code>
         <p></p>
         Example to start motion detection
         <p></p>
-        <pre>
-        lwp-request http://localhost:8080/0/detection/start</pre>
+        <code>
+        lwp-request http://localhost:8080/0/detection/start
+        </code>
         <p></p>
         Example script to update the text_left with cpu load (verbose for clarity)
-        <pre>
-          #!/bin/bash
-
-          LOAD=`top -b -n2 | grep "Cpu(s)" | awk '{print $2+$4}' | tail -n1`
-
-          TEXTLEFT=""
-          TEXTLEFT=$TEXTLEFT"System at %{host}"
-          TEXTLEFT=$TEXTLEFT"\nCPU $LOAD "
-          TEXTLEFT=$TEXTLEFT"\nfps: %{fps}"
-          TEXTLEFT=$TEXTLEFT"\nDate: %Y-%m-%d"
-          TEXTLEFT=$TEXTLEFT"\n%T-%q"
-
-          # Replace special chars with needed urlcodes
-          TEXTLEFT="${TEXTLEFT//%/%25}"     #Replace % with %25
-          TEXTLEFT="${TEXTLEFT// /%20}"     #Replace spaces with %20
-          TEXTLEFT="${TEXTLEFT//\{/%7B}"    #Replace { with %7B
-          TEXTLEFT="${TEXTLEFT//\}/%7D}"    #Replace } with %7D
-
-          curl http://localhost:8080/1/config/set?text_left=$TEXTLEFT
-
-          return 0</pre>
+        <p></p>
+        <code>
+          #!/bin/bash<br>
+          <br>
+          LOAD=`top -b -n2 | grep "Cpu(s)" | awk '{print $2+$4}' | tail -n1`<br>
+          <br>
+          TEXTLEFT=""<br>
+          TEXTLEFT=$TEXTLEFT"System at %{host}"<br>
+          TEXTLEFT=$TEXTLEFT"\nCPU $LOAD "<br>
+          TEXTLEFT=$TEXTLEFT"\nfps: %{fps}"<br>
+          TEXTLEFT=$TEXTLEFT"\nDate: %Y-%m-%d"<br>
+          TEXTLEFT=$TEXTLEFT"\n%T-%q"<br>
+          <br>
+          # Replace special chars with needed urlcodes<br>
+          TEXTLEFT="${TEXTLEFT//%/%25}"     #Replace % with %25<br>
+          TEXTLEFT="${TEXTLEFT// /%20}"     #Replace spaces with %20<br>
+          TEXTLEFT="${TEXTLEFT//\{/%7B}"    #Replace { with %7B<br>
+          TEXTLEFT="${TEXTLEFT//\}/%7D}"    #Replace } with %7D<br>
+          <br>
+          curl http://localhost:8080/1/config/set?text_left=$TEXTLEFT<br>
+          <br>
+          return 0<br>
+        </code>
         Note that the replacement of characters with the urlcode values is required whenever updating via
         a script or outside the html/css <a href="#webcontrol_interface">webcontrol_interface</a>
         <p></p>
@@ -5319,13 +5354,13 @@ function fnc_topnav() {
         SQL query that executes against the event table which tracks the unique events of motion.
         <p></p>
         Once the new record is added to this table, the mysql function <code><b>mysql_insert_id</b></code> is then
-        executed to provide the key back into the <code><b>dbeventid</b></code> specifier.
+        executed to provide the key back into the <code>dbeventid</code> specifier.
         <p></p>
-        The <code><b>dbeventid</b></code> specifier can then be used in the <code><b>sql_query</b></code> as a parameter
+        The <code>dbeventid</code> specifier can then be used in the <code>sql_query</code> as a parameter
         to that query for inserting into the table.
         <p></p>
-        Although this query is run for all the different database options, the <code><b>dbeventid</b></code> is
-        only set for mysql databases.  For the other databases, the <code><b>dbeventid</b></code> is always set
+        Although this query is run for all the different database options, the <code>dbeventid</code> is
+        only set for mysql databases.  For the other databases, the <code>dbeventid</code> is always set
         to zero.
         <p></p>
         <p></p>
@@ -5674,43 +5709,45 @@ function fnc_topnav() {
         variables.  The 3/8 and 5/8 are illustrative only and set based upon testing with a VIVOTEK PZ81X1 camera.  The
         values and methods applicable to any other camera would need to be established by the user.
         <p></p>
-<pre><code>#!/bin/bash
-
-LOCKFILE=/tmp/track_generic_move_netcam.lock
-if [ -e "$LOCKFILE" ]; then  # Trick to avoid flooding
-  exit 0                     # the netcam of multiple
-fi                           # moving commands.
-
-function movecam() {
-  touch $LOCKFILE
-  curl "http://youripaddress/cgi-bin/camctrl/camctrl.cgi?move=$1"
-  LOCKED=true
-}
-
-case "$TRACK_ACTION" in
-  "center")
-    movecam home
-    ;;
-  "move")
-    if [ "$TRACK_CENT_X" -lt "$((TRACK_IMGS_WIDTH*3/8))" ]; then
-      movecam left
-    fi
-    if [ "$TRACK_CENT_X" -gt "$((TRACK_IMGS_WIDTH*5/8))" ]; then
-      movecam right
-    fi
-    if [ "$TRACK_CENT_Y" -lt "$((TRACK_IMGS_HEIGHT*3/8))" ]; then
-      movecam up
-    fi
-    if [ "$TRACK_CENT_Y" -gt "$((TRACK_IMGS_HEIGHT*5/8))" ]; then
-      movecam down
-    fi
-    ;;
-esac
-
-if [ "$LOCKED" = "true" ]; then
-  sleep 2
-  rm -f "$LOCKFILE"
-fi</code></pre>
+        <code>
+        #!/bin/bash<br>
+        <br>
+        LOCKFILE=/tmp/track_generic_move_netcam.lock<br>
+        if [ -e "$LOCKFILE" ]; then  # Trick to avoid flooding<br>
+          exit 0                     # the netcam of multiple<br>
+        fi                           # moving commands.<br>
+        <br>
+        function movecam() {<br>
+          touch $LOCKFILE<br>
+          curl "http://youripaddress/cgi-bin/camctrl/camctrl.cgi?move=$1"<br>
+          LOCKED=true<br>
+        }<br>
+        <br>
+        case "$TRACK_ACTION" in<br>
+          "center")<br>
+            movecam home<br>
+            ;;<br>
+          "move")<br>
+            if [ "$TRACK_CENT_X" -lt "$((TRACK_IMGS_WIDTH*3/8))" ]; then<br>
+              movecam left<br>
+            fi<br>
+            if [ "$TRACK_CENT_X" -gt "$((TRACK_IMGS_WIDTH*5/8))" ]; then<br>
+              movecam right<br>
+            fi<br>
+            if [ "$TRACK_CENT_Y" -lt "$((TRACK_IMGS_HEIGHT*3/8))" ]; then<br>
+              movecam up<br>
+            fi<br>
+            if [ "$TRACK_CENT_Y" -gt "$((TRACK_IMGS_HEIGHT*5/8))" ]; then<br>
+              movecam down<br>
+            fi<br>
+            ;;<br>
+        esac<br>
+        <br>
+        if [ "$LOCKED" = "true" ]; then<br>
+          sleep 2<br>
+          rm -f "$LOCKFILE"<br>
+        fi<br>
+        </code>
         <p></p>
         <p></p>
 
