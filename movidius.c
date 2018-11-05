@@ -133,6 +133,13 @@ end:
 
 void mvnc_infer_image(struct mvnc_device_t *dev, unsigned char *image, int width, int height)
 {
+    // Setting min_fifo_level to zero feeds the FIFO only when it is empty,
+    // giving us 5.5 fps throughput.
+    // Setting min_fifo_level to one ensures the NC stick is not starved from
+    // data, giving us 11 fps throughput, but NC stick may overheat. There
+    // should be thermal throttling built into the silicon that puts the device
+    // to sleep for a short time.
+    const int min_fifo_level = 0;
     float *processed_img = NULL;
     unsigned int processed_img_len = 0;
     ncStatus_t retCode;
@@ -149,7 +156,7 @@ void mvnc_infer_image(struct mvnc_device_t *dev, unsigned char *image, int width
         return;
     }
 
-    if (writefifolevel > 0)
+    if (writefifolevel > min_fifo_level)
         return;
 
     processed_img = scale_image(image, width, height, &processed_img_len);
