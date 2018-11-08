@@ -45,16 +45,6 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     float *processed_img = NULL;
     int i;
 
-    // linesize is size in bytes for each picture line.
-    // It contains stride(Image Stride) for the i-th plane
-    // For example, for frame with 640*480 which has format is YUV420P (planar).
-    // It contains pointer to Y plane, data[1] and data[2] contains pointers to
-    // U and V plans.
-    // In this case linesize[0] = 640, linesize[1] = linesize[2] = 640:2 = 320
-    // (because the U and V plane equal a half of Y – what is YUV?).
-    // With RGB24, there is only one plane
-    // data[0] = linesize[0] = width*channels = 640*3(R, G, B).
-
     // create scaling context
     sws_ctx = sws_getContext(src_w, src_h, src_pix_fmt,
                              dst_w, dst_h, dst_pix_fmt,
@@ -79,7 +69,6 @@ static float *scale_image(unsigned char *src_img, int width, int height, unsigne
     }
 
     int dst_bufsize;
-    // buffer is float format, align to float size
     if ((dst_bufsize = av_image_alloc(dst_data, dst_linesize,
                        dst_w, dst_h, dst_pix_fmt, 1)) < 0)
     {
@@ -136,15 +125,15 @@ void mvnc_infer_image(struct mvnc_device_t *dev, unsigned char *image, int width
     // Setting min_fifo_level to zero feeds the FIFO only when it is empty,
     // giving us 5.5 fps throughput.
     // Setting min_fifo_level to one ensures the NC stick is not starved from
-    // data, giving us 11 fps throughput, but NC stick may overheat. There
-    // should be thermal throttling built into the silicon that puts the device
-    // to sleep for a short time.
+    // data, giving us 11 fps throughput, but NC stick overheats quite quickly.
+    // The hardware has thermal throttling that kicks in at 70 degrees Celsius.
+
+    // Set to zero for now as 5.5 fps inference is enough for detecting objects.
     const int min_fifo_level = 0;
     float *processed_img = NULL;
     unsigned int processed_img_len = 0;
     ncStatus_t retCode;
 
-    // check write fifo level == 0 before writing new image
     int writefifolevel = 0;
     unsigned int optionSize = sizeof(writefifolevel);
     retCode = ncFifoGetOption(dev->inputFIFO,  NC_RO_FIFO_WRITE_FILL_LEVEL,
@@ -191,6 +180,38 @@ static inline void clip_box_location(float *box_loc)
 }
 
 
+#ifdef HAVE_MVNC_PROFILE
+static void mvnc_profile_record_ts(struct mvnc_device_t *dev)
+{
+    if (clock_gettime(CLOCK_MONOTONIC, &dev->profile_ts[dev->profile_ts_index]) == 0)
+    {
+        dev->profile_ts_index++;
+        if (dev->profile_ts_index >= MVNC_PROFILE_AVERAGE_LENGTH)
+            dev->profile_ts_index = 0;
+    }
+}
+
+
+// Gets the throughput of the device in frame per second
+// This function is not thread safe
+double mvnc_profile_get_fps(struct mvnc_device_t *dev)
+{
+    struct timespec diff;
+    unsigned int oldest_ts_index = dev->profile_ts_index;
+    unsigned int newest_ts_index = dev->profile_ts_index - 1;
+    if (newest_ts_index >= MVNC_PROFILE_AVERAGE_LENGTH)
+        newest_ts_index = MVNC_PROFILE_AVERAGE_LENGTH - 1;
+    if ((dev->profile_ts[newest_ts_index].tv_sec > 0) && (dev->profile_ts[oldest_ts_index].tv_sec > 0))
+    {
+        diff.tv_sec = dev->profile_ts[newest_ts_index].tv_sec - dev->profile_ts[oldest_ts_index].tv_sec;
+        diff.tv_nsec = dev->profile_ts[newest_ts_index].tv_nsec - dev->profile_ts[oldest_ts_index].tv_nsec;
+        return MVNC_PROFILE_AVERAGE_LENGTH / (diff.tv_sec + (double)diff.tv_nsec/1.0e9);
+    }
+    return 0;
+}
+#endif
+
+
 // returns number of results, otherwise negative number if error.
 // free results after use by calling mvnc_free_results
 int mvnc_get_results(struct mvnc_device_t *dev)
@@ -212,6 +233,10 @@ int mvnc_get_results(struct mvnc_device_t *dev)
 
     if (readfifolevel > 0)
     {
+#ifdef HAVE_MVNC_PROFILE
+        mvnc_profile_record_ts(dev);
+#endif
+
         mvnc_free_results(dev);
 
         // Get the size of the output tensor
@@ -321,6 +346,88 @@ int mvnc_get_results(struct mvnc_device_t *dev)
         return num_valid_detections;
     }
     return -1;
+}
+
+
+// Gets the last 25 seconds worth of temperature reading.
+// returns 0 if success
+// caller must free temperature_log after use
+int mvnc_get_temperature_log(struct mvnc_device_t *dev, float **temperature_log,
+                             unsigned *temperature_log_length)
+{
+    int ret = -1;
+    ncStatus_t retCode;
+
+    *temperature_log_length = 0;
+    *temperature_log = malloc(dev->thermal_buffer_size);
+    if (*temperature_log)
+    {
+        retCode = ncDeviceGetOption(dev->deviceHandle, NC_RO_DEVICE_THERMAL_STATS,
+                                    *temperature_log, &dev->thermal_buffer_size);
+        if (retCode != NC_OK)
+        {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                       _("Error [%d]: Failed to get thermal log"),
+                       retCode);
+            free(*temperature_log);
+            *temperature_log = NULL;
+        }
+        else
+        {
+            *temperature_log_length = dev->thermal_buffer_size/sizeof(float);
+            ret = 0;
+        }
+    }
+    return ret;
+}
+
+
+// Gets the maximum temperature over the last 25 seconds.
+float mvnc_get_max_temperature(struct mvnc_device_t *dev)
+{
+    float max_temp = -99.9;
+    float *temperature_log = NULL;
+    unsigned temperature_log_length = 0;
+    if (mvnc_get_temperature_log(dev, &temperature_log,
+                                 &temperature_log_length) == 0)
+    {
+        int i;
+        for (i = 0; i < temperature_log_length; i++)
+        {
+            if (temperature_log[i] > max_temp)
+                max_temp = temperature_log[i];
+        }
+    }
+    if (temperature_log) {
+        free(temperature_log);
+        temperature_log = NULL;
+    }
+    return max_temp;
+}
+
+
+// Gets the thermal throttle level.
+// return -1 on error, otherwise return the below possible values:
+// 0: No limit reached.
+// 1: Lower guard temperature threshold of chip sensor reached; short throttling
+//    time is in action between inferences to protect the device.
+// 2: Upper guard temperature of chip sensor reached; long throttling time is in
+//    action between inferences to protect the device.
+int mvnc_get_thermal_throttle_level(struct mvnc_device_t *dev)
+{
+    int level = -1;
+    ncStatus_t retCode;
+    unsigned int throttle_size = sizeof(int);
+
+    retCode = ncDeviceGetOption(dev->deviceHandle, NC_RO_DEVICE_THERMAL_THROTTLING_LEVEL,
+                                &level, &throttle_size);
+    if (retCode != NC_OK)
+    {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Error [%d]: Failed to get thermal throttle level"),
+                   retCode);
+    }
+    return level;
 }
 
 
@@ -460,6 +567,11 @@ int mvnc_init(struct mvnc_device_t *dev, int dev_index, const char *graph_path)
     int ret = 0;
     ncStatus_t retCode;
 
+#ifdef HAVE_MVNC_PROFILE
+    memset(dev->profile_ts, 0, sizeof(struct timespec) * MVNC_PROFILE_AVERAGE_LENGTH);
+    dev->profile_ts_index = 0;
+#endif
+
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
         _("Initializing mvnc device at index %d ..."),
         dev_index);
@@ -510,6 +622,19 @@ int mvnc_init(struct mvnc_device_t *dev, int dev_index, const char *graph_path)
         ret = -1;
         goto cleanup;
     }
+
+    dev->thermal_buffer_size = 0;
+    retCode = ncDeviceGetOption(dev->deviceHandle, NC_RO_DEVICE_THERMAL_STATS,
+                                NULL, &dev->thermal_buffer_size);
+    if (retCode != NC_INVALID_DATA_LENGTH)
+    {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,
+                   _("Error [%d]: Failed to get thermal buffer size"),
+                   retCode);
+    }
+    // thermal_buffer_size should now be set to correct size
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+               _("thermal_buffer_size: %d"), dev->thermal_buffer_size);
 
     // Success !
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
