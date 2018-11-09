@@ -20,6 +20,7 @@
 #include "rotate.h"
 #include "webu.h"
 
+
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
 /**
@@ -2221,7 +2222,6 @@ static void mlp_detection(struct context *cnt){
      * is called.
      */
     if (cnt->process_thisframe) {
-
         if (cnt->threshold && !cnt->pause) {
             /*
              * If we've already detected motion and we want to see if there's
