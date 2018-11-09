@@ -58,12 +58,6 @@ EXAMPLES_BIN = motion.init-Debian motion.init-FreeBSD.sh
 PROGS        = motion
 DEPEND_FILE  = .depend
 LANGCDS      = @LANGCDS@
-SSD_MOBILENET_CAFFEMODEL   = MobileNetSSD_deploy.caffemodel
-SSD_MOBILENET_PROTOTXT     = MobileNetSSD_deploy.prototxt
-SSD_MOBILENET_GRAPH        = @MVNC_GRAPH@
-SSD_MOBILENET_PROTOTXT_URL = https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/923b3128f25262b5010cef67e4fb9e4b6728ae7b/voc/MobileNetSSD_deploy.prototxt
-SSD_MOBILENET_CAFFEMODEL_GOOGLEDOC_ID = 0B3gersZ2cHIxRm5PMWRoTkdHdHc
-SSD_MOBILENET_CAFFEMODEL_URL = https://docs.google.com/uc?export=download&id=$(SSD_MOBILENET_CAFFEMODEL_GOOGLEDOC_ID)
 
 ################################################################################
 # ALL and PROGS build Motion and, possibly, Motion-control.                    #
@@ -131,26 +125,6 @@ pre-mobject-info:
 	@echo "--------------------------------------------------------------------------------"
 
 ################################################################################
-# Compile MobileNetSSD.graph for Movidius NCS                                  #
-################################################################################
-$(SSD_MOBILENET_PROTOTXT):
-	@echo "Downloading MobileNet SSD Prototxt file"
-	@wget -P . -O $(SSD_MOBILENET_PROTOTXT) https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/923b3128f25262b5010cef67e4fb9e4b6728ae7b/voc/MobileNetSSD_deploy.prototxt
-
-$(SSD_MOBILENET_CAFFEMODEL):
-	@touch /tmp/cookies.txt
-	@wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate $(SSD_MOBILENET_CAFFEMODEL_URL) -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=$(SSD_MOBILENET_CAFFEMODEL_GOOGLEDOC_ID)" -O ${SSD_MOBILENET_CAFFEMODEL}
-	@rm -f /tmp/cookies.txt
-
-$(SSD_MOBILENET_GRAPH): $(SSD_MOBILENET_CAFFEMODEL) $(SSD_MOBILENET_PROTOTXT)
-	@echo "Compiling the trained MobileNet SSD model..."
-	@echo "--------------------------------------------------------------------------------"
-	@mvNCCompile -w $(SSD_MOBILENET_CAFFEMODEL) -o $(SSD_MOBILENET_GRAPH) -s 12 $(SSD_MOBILENET_PROTOTXT)
-	@echo "--------------------------------------------------------------------------------"
-	@echo "Trained MobileNet SSD model has been compiled."
-	@echo
-
-################################################################################
 # Define the compile command for C files.                                      #
 ################################################################################
 %.o: @top_srcdir@/%.c
@@ -204,7 +178,6 @@ help:
 	@echo "make dev-git            Build motion with dev flags for git"
 	@echo "make build-commit       Build last version of motion and prepare to commit to svn"
 	@echo "make build-commit-git   Build last version of motion and prepare to commit to git"
-	@echo "make $(SSD_MOBILENET_GRAPH) Download and compile MobileNetSSD to graph"
 	@echo "make clean              Clean objects"
 	@echo "make distclean          Clean everything"
 	@echo "make install            Install binary , examples , docs and config files"
@@ -296,7 +269,6 @@ endif
 clean: pre-build-info
 	@echo "Removing compiled files and binaries..."
 	@rm -f *~ *.o $(PROGS) combine $(DEPEND_FILE)
-	@rm -f $(SSD_MOBILENET_GRAPH) $(SSD_MOBILENET_CAFFEMODEL) $(SSD_MOBILENET_PROTOTXT)
 	@rm -f ./po/*.mo
 
 ################################################################################
