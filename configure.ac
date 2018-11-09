@@ -407,7 +407,6 @@ if test "${WITHOUT_MVNC}" = "no"; then
     AC_SUBST(MVNC_CFLAGS)
     AC_SUBST(MVNC_OBJ)
     AC_SUBST(MVNC_LIBS)
-    AC_SUBST(MVNC_GRAPH)
     MVNC_OBJ="movidius.o"
     MVNC_CFLAGS="-DHAVE_MVNC -I${MVNC_HEADERS}"
     MVNC_LIBS="-lmvnc"

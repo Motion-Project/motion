@@ -172,16 +172,16 @@ set-version:
 
 help:
 	@echo "--------------------------------------------------------------------------------"
-	@echo "make                    Build motion from local copy in your computer"
-	@echo "make current            Build last version of motion from svn"
-	@echo "make dev                Build motion with dev flags"
-	@echo "make dev-git            Build motion with dev flags for git"
-	@echo "make build-commit       Build last version of motion and prepare to commit to svn"
-	@echo "make build-commit-git   Build last version of motion and prepare to commit to git"
-	@echo "make clean              Clean objects"
-	@echo "make distclean          Clean everything"
-	@echo "make install            Install binary , examples , docs and config files"
-	@echo "make uninstall          Uninstall all installed files"
+	@echo "make                   Build motion from local copy in your computer"
+	@echo "make current           Build last version of motion from svn"
+	@echo "make dev               Build motion with dev flags"
+	@echo "make dev-git           Build motion with dev flags for git"
+	@echo "make build-commit      Build last version of motion and prepare to commit to svn"
+	@echo "make build-commit-git  Build last version of motion and prepare to commit to git"
+	@echo "make clean             Clean objects"
+	@echo "make distclean         Clean everything"
+	@echo "make install           Install binary , examples , docs and config files"
+	@echo "make uninstall         Uninstall all installed files"
 	@echo "--------------------------------------------------------------------------------"
 	@echo
 

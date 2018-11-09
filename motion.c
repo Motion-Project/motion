@@ -2401,6 +2401,7 @@ static void mlp_tuning(struct context *cnt){
         cnt->previous_location_y = cnt->current_image->location.y;
     }
 
+
 }
 
 static void mlp_overlay(struct context *cnt){
@@ -2668,6 +2669,7 @@ static void mlp_actions(struct context *cnt){
 
     /* Save/send to movie some images */
     process_image_ring(cnt, 2);
+
 
 }
 
