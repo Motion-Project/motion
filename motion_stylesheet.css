@@ -434,17 +434,19 @@ a:hover {
   .tblalpha  table,.tblalpha  thead,.tblalpha  tbody,.tblalpha  th,.tblalpha  td,.tblalpha  tr,
   .tbldetail table,.tbldetail thead,.tbldetail tbody,.tbldetail th,.tbldetail td,.tbldetail tr,
   .tblconvr  table,.tblconvr  thead,.tblconvr  tbody,.tblconvr  th,.tblconvr  td,.tblconvr  tr,
-  .tblpaltte table,.tblpaltte thead,.tblpaltte tbody,.tblpaltte th,.tblpaltte td,.tblpaltte tr
+  .tblpaltte table,.tblpaltte thead,.tblpaltte tbody,.tblpaltte th,.tblpaltte td,.tblpaltte tr,
+  .tblconfig table,.tblconfig thead,.tblconfig tbody,.tblconfig th,.tblconfig td,.tblconfig tr
    {
     display: block;
   }
   .tblsignal thead tr, .tblalpha  thead tr, .tbldetail thead tr, .tblconvr  thead tr,
-  .tblpaltte thead tr  {
+  .tblpaltte thead tr, .tblconfig thead tr  {
     position: absolute;
     top: -9999px;
     left: -9999px;
   }
-  .tblsignal tr, .tblalpha  tr, .tbldetail tr, .tblconvr  tr, .tblpaltte tr {
+  .tblsignal tr, .tblalpha  tr, .tbldetail tr, .tblconvr  tr, 
+  .tblpaltte tr, .tblconfig tr {
     border: 1px solid #ccc;
   }
   .tblsignal td, .tbldetail td, .tblconvr  td, .tblpaltte td {
@@ -454,8 +456,8 @@ a:hover {
     padding-left: 5%;
     height: 2.8em;
   }
-  .tblsignal td:before, .tbldetail td:before,
-  .tblconvr  td:before, .tblpaltte td:before {
+  .tblsignal td:before, .tbldetail td:before, .tblconvr  td:before, 
+  .tblpaltte td:before, .tblconfig td:before {
     position: absolute;
     top: 6px;
     left: 6px;
@@ -471,44 +473,13 @@ a:hover {
     padding-left: 15px;
     height: 2.8em;
   }
-
-
-
-/*
-  .tbltext table {
-    width: 45em;
-  }
-  .tbltext td {
-    width: 14em;
-  }
-
-  .tbltext table, thead, tbody, th, td, tr {
-    display: block;
-  }
-  .tbltext thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-  .tbltext tr {
-    border: 1px solid #ccc;
-  }
-  .tbltext td {
+  .tblconfig td {
     border: none;
     border-bottom: 1px solid #eee;
     position: relative;
     padding-left: 5%;
-    height: 2.5em;
+    min-height: 2.8em;
+    height: auto;
   }
-  .tbltext td:before {
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    width: 65%;
-    padding-right: 10px;
-    white-space: nowrap;
-    padding-left: 85%;
-  }
-*/
 
 }
