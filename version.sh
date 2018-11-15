@@ -13,5 +13,5 @@ if [ -d .git ]; then
 else
     GIT_COMMIT="gitUNKNOWN"
 fi
-printf "$BASE_VERSION"
-#printf "$BASE_VERSION+$GIT_COMMIT"
+#printf "$BASE_VERSION"
+printf "$BASE_VERSION+$GIT_COMMIT"
