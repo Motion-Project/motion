@@ -72,7 +72,6 @@ static void netcam_rtsp_null_context(struct rtsp_context *rtsp_data){
     rtsp_data->frame           = NULL;
     rtsp_data->codec_context   = NULL;
     rtsp_data->format_context  = NULL;
-    rtsp_data->pktarray        = NULL;
     rtsp_data->transfer_format = NULL;
 
 }
@@ -87,7 +86,6 @@ static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data){
     if (rtsp_data->format_context   != NULL) avformat_close_input(&rtsp_data->format_context);
     if (rtsp_data->pktarray     != NULL) netcam_rtsp_pktarray_free(rtsp_data);
     if (rtsp_data->transfer_format != NULL) avformat_close_input(&rtsp_data->transfer_format);
-
     netcam_rtsp_null_context(rtsp_data);
 
 }
@@ -112,13 +110,10 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
 
     int64_t               idnbr_last, idnbr_first;
     int                   indx;
-    int                   resize_pktarray;
     struct rtsp_context  *rtsp_data;
     struct packet_item   *tmp;
     int                   newsize;
 
-
-    resize_pktarray = TRUE;
     if (is_highres){
         idnbr_last = cnt->imgs.image_ring[cnt->imgs.image_ring_out].idnbr_high;
         idnbr_first = cnt->imgs.image_ring[cnt->imgs.image_ring_in].idnbr_high;
@@ -133,32 +128,32 @@ static void netcam_rtsp_pktarray_resize(struct context *cnt, int is_highres){
 
     /* The 30 is arbitrary */
     /* Double the size plus double last diff so we don't catch our tail */
-    newsize =((idnbr_first - idnbr_last) * 2 );
-    newsize = newsize + ((rtsp_data->idnbr - idnbr_last ) * 2);
+    newsize =((idnbr_first - idnbr_last) * 2 ) + ((rtsp_data->idnbr - idnbr_last ) * 2);
     if (newsize < 30) newsize = 30;
-    if (rtsp_data->pktarray_size >= newsize) resize_pktarray = FALSE;
 
-    if ((resize_pktarray) ||  (rtsp_data->pktarray_size < 30)){
-        tmp = mymalloc(newsize * sizeof(struct packet_item));
-        if (rtsp_data->pktarray_size > 0 ){
-            memcpy(tmp, rtsp_data->pktarray, sizeof(struct packet_item) * rtsp_data->pktarray_size);
-        }
-        for(indx = rtsp_data->pktarray_size; indx < newsize; indx++) {
-            av_init_packet(&tmp[indx].packet);
-            tmp[indx].packet.data=NULL;
-            tmp[indx].packet.size=0;
-            tmp[indx].idnbr = 0;
-            tmp[indx].iskey = FALSE;
-            tmp[indx].iswritten = FALSE;
-        }
-        pthread_mutex_lock(&rtsp_data->mutex_pktarray);
+    pthread_mutex_lock(&rtsp_data->mutex_pktarray);
+        if ((rtsp_data->pktarray_size < newsize) ||  (rtsp_data->pktarray_size < 30)){
+            tmp = mymalloc(newsize * sizeof(struct packet_item));
+            if (rtsp_data->pktarray_size > 0 ){
+                memcpy(tmp, rtsp_data->pktarray, sizeof(struct packet_item) * rtsp_data->pktarray_size);
+            }
+            for(indx = rtsp_data->pktarray_size; indx < newsize; indx++) {
+                av_init_packet(&tmp[indx].packet);
+                tmp[indx].packet.data=NULL;
+                tmp[indx].packet.size=0;
+                tmp[indx].idnbr = 0;
+                tmp[indx].iskey = FALSE;
+                tmp[indx].iswritten = FALSE;
+            }
+
             if (rtsp_data->pktarray != NULL) free(rtsp_data->pktarray);
             rtsp_data->pktarray = tmp;
             rtsp_data->pktarray_size = newsize;
-        pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: Resized packet array to %d"), rtsp_data->cameratype,newsize);
-    }
+
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Resized packet array to %d"), rtsp_data->cameratype,newsize);
+        }
+    pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
 
 }
 
@@ -168,9 +163,12 @@ static void netcam_rtsp_pktarray_add(struct rtsp_context *rtsp_data){
     int retcd;
     char errstr[128];
 
-    if (rtsp_data->pktarray_size == 0) return;
-
     pthread_mutex_lock(&rtsp_data->mutex_pktarray);
+
+        if (rtsp_data->pktarray_size == 0){
+            pthread_mutex_unlock(&rtsp_data->mutex_pktarray);
+            return;
+        }
 
         /* Recall pktarray_size is one based but pktarray is zero based */
         if (rtsp_data->pktarray_index == (rtsp_data->pktarray_size-1) ){
@@ -702,7 +700,7 @@ static int netcam_rtsp_ntc(struct rtsp_context *rtsp_data){
             ,rtsp_data->codec_context->width,rtsp_data->codec_context->height
             ,rtsp_data->imgsize.width,rtsp_data->imgsize.height);
         } else {
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("format than YUV420P.  The image sent is being "));
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("The image sent is being "));
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("trancoded to YUV420P.  If possible change netcam "));
             MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, _("picture format to YUV420P to possibly lower CPU usage."));
         }
@@ -972,6 +970,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->img_latest->ptr = mymalloc(NETCAM_BUFFSIZE);
     rtsp_data->pktarray_size = 0;
     rtsp_data->pktarray_index = -1;
+    rtsp_data->pktarray = NULL;
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
 
@@ -1341,7 +1340,7 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
         ((rtsp_data->frame_curr_tm.tv_sec - rtsp_data->frame_prev_tm.tv_sec) * 1000000L) -
         (rtsp_data->frame_curr_tm.tv_usec - rtsp_data->frame_prev_tm.tv_usec);
     if ((usec_delay > 0) && (usec_delay < 1000000L)){
-        SLEEP(0, usec_delay * 1000)
+        SLEEP(0, usec_delay * 1000);
     }
 
 }
