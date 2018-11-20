@@ -1327,6 +1327,7 @@ static int motion_init(struct context *cnt)
     /* contains the moving objects of ref. frame */
     cnt->imgs.ref_dyn = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
     cnt->imgs.image_virgin.image_norm = mymalloc(cnt->imgs.size_norm);
+    cnt->imgs.image_vprvcy.image_norm = mymalloc(cnt->imgs.size_norm);
     cnt->imgs.smartmask = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_final = mymalloc(cnt->imgs.motionsize);
     cnt->imgs.smartmask_buffer = mymalloc(cnt->imgs.motionsize * sizeof(*cnt->imgs.smartmask_buffer));
@@ -1624,6 +1625,9 @@ static void motion_cleanup(struct context *cnt) {
 
     free(cnt->imgs.image_virgin.image_norm);
     cnt->imgs.image_virgin.image_norm = NULL;
+
+    free(cnt->imgs.image_vprvcy.image_norm);
+    cnt->imgs.image_vprvcy.image_norm = NULL;
 
     free(cnt->imgs.labels);
     cnt->imgs.labels = NULL;
@@ -2048,6 +2052,8 @@ static int mlp_capture(struct context *cnt){
 
         mlp_mask_privacy(cnt);
 
+        memcpy(cnt->imgs.image_vprvcy.image_norm, cnt->current_image->image_norm, cnt->imgs.size_norm);
+
         /*
          * If the camera is a netcam we let the camera decide the pace.
          * Otherwise we will keep on adding duplicate frames.
@@ -2121,7 +2127,7 @@ static int mlp_capture(struct context *cnt){
 
         if (cnt->video_dev >= 0 &&
             cnt->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cnt->conf.framerate)) {
-            memcpy(cnt->current_image->image_norm, cnt->imgs.image_virgin.image_norm, cnt->imgs.size_norm);
+            memcpy(cnt->current_image->image_norm, cnt->imgs.image_vprvcy.image_norm, cnt->imgs.size_norm);
         } else {
             cnt->lost_connection = 1;
 
@@ -2185,9 +2191,9 @@ static void mlp_detection(struct context *cnt){
              * anyway
              */
             if (cnt->detecting_motion || cnt->conf.setup_mode)
-                cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_virgin.image_norm);
+                cnt->current_image->diffs = alg_diff_standard(cnt, cnt->imgs.image_vprvcy.image_norm);
             else
-                cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_virgin.image_norm);
+                cnt->current_image->diffs = alg_diff(cnt, cnt->imgs.image_vprvcy.image_norm);
 
             /* Lightswitch feature - has light intensity changed?
              * This can happen due to change of light conditions or due to a sudden change of the camera
@@ -2290,7 +2296,7 @@ static void mlp_tuning(struct context *cnt){
      */
     if ((cnt->conf.noise_tune && cnt->shots == 0) &&
          (!cnt->detecting_motion && (cnt->current_image->diffs <= cnt->threshold)))
-        alg_noise_tune(cnt, cnt->imgs.image_virgin.image_norm);
+        alg_noise_tune(cnt, cnt->imgs.image_vprvcy.image_norm);
 
 
     /*

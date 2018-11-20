@@ -1327,7 +1327,7 @@ void alg_update_reference_frame(struct context *cnt, int action)
     int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
     int *ref_dyn = cnt->imgs.ref_dyn;
-    unsigned char *image_virgin = cnt->imgs.image_virgin.image_norm;
+    unsigned char *image_virgin = cnt->imgs.image_vprvcy.image_norm;
     unsigned char *ref = cnt->imgs.ref;
     unsigned char *smartmask = cnt->imgs.smartmask_final;
     unsigned char *out = cnt->imgs.img_motion.image_norm;
@@ -1367,7 +1367,7 @@ void alg_update_reference_frame(struct context *cnt, int action)
 
     } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
         /* Copy fresh image */
-        memcpy(cnt->imgs.ref, cnt->imgs.image_virgin.image_norm, cnt->imgs.size_norm);
+        memcpy(cnt->imgs.ref, cnt->imgs.image_vprvcy.image_norm, cnt->imgs.size_norm);
         /* Reset static objects */
         memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
     }

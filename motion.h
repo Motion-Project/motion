@@ -301,6 +301,7 @@ struct images {
     struct image_data img_motion;     /* Picture buffer for motion images */
     int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
     struct image_data image_virgin;   /* Last picture frame with no text or locate overlay */
+    struct image_data image_vprvcy;   /* Virgin image with the privacy mask applied */
     struct image_data preview_image;  /* Picture buffer for best image when enables */
     unsigned char *mask;              /* Buffer for the mask file */
     unsigned char *smartmask;
