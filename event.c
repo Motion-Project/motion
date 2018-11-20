@@ -672,7 +672,7 @@ static void event_image_preview(struct context *cnt,
              * Save best preview-shot also when no movies are recorded or imagepath
              * is used. Filename has to be generated - nothing available to reuse!
              */
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "different filename or picture only!");
+
             /*
              * conf.picture_filename would normally be defined but if someone deleted it by
              * control interface it is better to revert to the default than fail.
