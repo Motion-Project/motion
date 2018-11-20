@@ -1234,6 +1234,7 @@ static int motion_init(struct context *cnt)
     cnt->imgs.width_high = 0;
     cnt->imgs.height_high = 0;
     cnt->imgs.size_high = 0;
+    cnt->movie_passthrough = cnt->conf.movie_passthrough;
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Camera %d started: motion detection %s"),
@@ -1245,9 +1246,9 @@ static int motion_init(struct context *cnt)
     if (init_camera_type(cnt) != 0 ) return -3;
 
     if ((cnt->camera_type != CAMERA_TYPE_RTSP) &&
-        (cnt->conf.movie_passthrough)) {
+        (cnt->movie_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
-        cnt->conf.movie_passthrough = 0;
+        cnt->movie_passthrough = FALSE;
     }
 
     if ((cnt->conf.height == 0) || (cnt->conf.width == 0)) {
@@ -4039,12 +4040,12 @@ void util_threadname_get(char *threadname){
 }
 int util_check_passthrough(struct context *cnt){
 #if (HAVE_FFMPEG && LIBAVFORMAT_VERSION_MAJOR < 55)
-    if (cnt->conf.movie_passthrough)
+    if (cnt->movie_passthrough)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("FFMPEG version too old. Disabling pass-through processing."));
     return 0;
 #else
-    if (cnt->conf.movie_passthrough){
+    if (cnt->movie_passthrough){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("pass-through is enabled but is still experimental."));
         return 1;
