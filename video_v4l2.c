@@ -461,7 +461,7 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
 
     avg = 0;
     pixel_count = 0;
-    image = cnt->imgs.image_virgin.image_norm;
+    image = cnt->imgs.image_vprvcy.image_norm;
     for (indx = 0; indx < cnt->imgs.motionsize; indx += 10) {
         avg += image[indx];
         pixel_count++;
