@@ -276,7 +276,7 @@ if test "${WEBP}" = "yes"; then
     AC_MSG_RESULT(found)
     AC_DEFINE([HAVE_WEBP], 1, [Define to 1 if WEBP is around])
     HAVE_WEBP="yes"
-    TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
+    TEMP_LIBS="$TEMP_LIBS -lwebpmux -lwebp"
   else
     AC_MSG_RESULT(not found)
   fi
