@@ -711,66 +711,15 @@ static void put_jpeg_yuv420p_file(FILE *fp,
                   int quality,
                   struct context *cnt, struct timeval *tv1, struct coord *box)
 {
-    int i, j;
+    int sz = 0;
+    int image_size = cnt->imgs.size_norm;
+    unsigned char *buf = mymalloc(image_size);
 
-    JSAMPROW y[16],cb[16],cr[16]; // y[2][5] = color sample of row 2 and pixel column 5; (one plane)
-    JSAMPARRAY data[3]; // t[0][2][5] = color sample 0 of row 2 and column 5
+    sz = put_jpeg_yuv420p_memory(buf, image_size, image, width, height, quality, cnt ,tv1,NULL);
+    fwrite(buf, sz, 1, fp);
 
-    struct jpeg_compress_struct cinfo;
-    struct jpeg_error_mgr jerr;
+    free(buf);
 
-    data[0] = y;
-    data[1] = cb;
-    data[2] = cr;
-
-    cinfo.err = jpeg_std_error(&jerr);  // Errors get written to stderr
-
-    jpeg_create_compress(&cinfo);
-    cinfo.image_width = width;
-    cinfo.image_height = height;
-    cinfo.input_components = 3;
-    jpeg_set_defaults(&cinfo);
-
-    jpeg_set_colorspace(&cinfo, JCS_YCbCr);
-
-    cinfo.raw_data_in = TRUE; // Supply downsampled data
-#if JPEG_LIB_VERSION >= 70
-    cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
-#endif
-    cinfo.comp_info[0].h_samp_factor = 2;
-    cinfo.comp_info[0].v_samp_factor = 2;
-    cinfo.comp_info[1].h_samp_factor = 1;
-    cinfo.comp_info[1].v_samp_factor = 1;
-    cinfo.comp_info[2].h_samp_factor = 1;
-    cinfo.comp_info[2].v_samp_factor = 1;
-
-    jpeg_set_quality(&cinfo, quality, TRUE);
-    cinfo.dct_method = JDCT_FASTEST;
-
-    jpeg_stdio_dest(&cinfo, fp);        // Data written to file
-    jpeg_start_compress(&cinfo, TRUE);
-
-    put_jpeg_exif(&cinfo, cnt, tv1, box);
-
-    for (j = 0; j < height; j += 16) {
-        for (i = 0; i < 16; i++) {
-            if ((width * (i + j)) < (width * height)) {
-                y[i] = image + width * (i + j);
-                if (i % 2 == 0) {
-                    cb[i / 2] = image + width * height + width / 2 * ((i + j) / 2);
-                    cr[i / 2] = image + width * height + width * height / 4 + width / 2 * ((i + j) / 2);
-                }
-            } else {
-                y[i] = 0x00;
-                cb[i] = 0x00;
-                cr[i] = 0x00;
-            }
-        }
-        jpeg_write_raw_data(&cinfo, data, 16);
-    }
-
-    jpeg_finish_compress(&cinfo);
-    jpeg_destroy_compress(&cinfo);
 }
 
 
