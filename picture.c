@@ -645,10 +645,24 @@ static int put_jpeg_grey_memory(unsigned char *dest_image, int image_size,
     int y, dest_image_size;
     JSAMPROW row_ptr[1];
     struct jpeg_compress_struct cjpeg;
-    struct jpeg_error_mgr jerr;
+    struct jpgutl_error_mgr jerr;
 
-    cjpeg.err = jpeg_std_error(&jerr);
+    cjpeg.err = jpeg_std_error (&jerr.pub);
+    jerr.pub.error_exit = jpgutl_error_exit;
+    /* Also hook the emit_message routine to note corrupt-data warnings. */
+    jerr.original_emit_message = jerr.pub.emit_message;
+    jerr.pub.emit_message = jpgutl_emit_message;
+    jerr.warning_seen = 0;
+
     jpeg_create_compress(&cjpeg);
+
+    /* Establish the setjmp return context for jpgutl_error_exit to use. */
+    if (setjmp (jerr.setjmp_buffer)) {
+        /* If we get here, the JPEG code has signaled an error. */
+        jpeg_destroy_compress (&cjpeg);
+        return -1;
+    }
+
     cjpeg.image_width = width;
     cjpeg.image_height = height;
     cjpeg.input_components = 1; /* One colour component */
