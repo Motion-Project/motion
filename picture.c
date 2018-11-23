@@ -737,39 +737,18 @@ static void put_jpeg_yuv420p_file(FILE *fp,
  *
  * Returns nothing
  */
-static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height, int quality)
+static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
+                  int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+
 {
-    int y;
-    JSAMPROW row_ptr[1];
-    struct jpeg_compress_struct cjpeg;
-    struct jpeg_error_mgr jerr;
+    int sz = 0;
+    int image_size = cnt->imgs.size_norm;
+    unsigned char *buf = mymalloc(image_size);
 
-    cjpeg.err = jpeg_std_error(&jerr);
-    jpeg_create_compress(&cjpeg);
-    cjpeg.image_width = width;
-    cjpeg.image_height = height;
-    cjpeg.input_components = 1; /* One colour component */
-    cjpeg.in_color_space = JCS_GRAYSCALE;
+    sz = put_jpeg_grey_memory(buf, image_size, image, width, height, quality, cnt ,tv1,NULL);
+    fwrite(buf, sz, 1, picture);
 
-    jpeg_set_defaults(&cjpeg);
-
-    jpeg_set_quality(&cjpeg, quality, TRUE);
-    cjpeg.dct_method = JDCT_FASTEST;
-    jpeg_stdio_dest(&cjpeg, picture);
-
-    jpeg_start_compress(&cjpeg, TRUE);
-
-    put_jpeg_exif(&cjpeg, NULL, NULL, NULL);
-
-    row_ptr[0] = image;
-
-    for (y = 0; y < height; y++) {
-        jpeg_write_scanlines(&cjpeg, row_ptr, 1);
-        row_ptr[0] += width;
-    }
-
-    jpeg_finish_compress(&cjpeg);
-    jpeg_destroy_compress(&cjpeg);
+    free(buf);
 }
 
 
@@ -1041,7 +1020,7 @@ static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *im
             if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
                 put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
         } else {
-            put_jpeg_grey_file(picture, image, width, height, quality);
+            put_jpeg_grey_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
        }
     }
 }
