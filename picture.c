@@ -22,6 +22,74 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
+struct jpgutl_error_mgr {
+    struct jpeg_error_mgr pub;   /* "public" fields */
+    jmp_buf setjmp_buffer;       /* For return to caller */
+
+    /* Original emit_message method. */
+    JMETHOD(void, original_emit_message, (j_common_ptr cinfo, int msg_level));
+    /* Was a corrupt-data warning seen. */
+    int warning_seen;
+};
+
+/**
+ * jpgutl_error_exit
+ *  Purpose:
+ *    Exit routine for errors thrown by JPEG library.
+ *  Parameters:
+ *    cinfo      The jpeg library compression/decompression information
+ *  Return values:
+ *    None
+ */
+static void jpgutl_error_exit(j_common_ptr cinfo)
+{
+    char buffer[JMSG_LENGTH_MAX];
+
+    /* cinfo->err really points to a jpgutl_error_mgr struct, so coerce pointer. */
+    struct jpgutl_error_mgr *myerr = (struct jpgutl_error_mgr *) cinfo->err;
+
+    /*
+     * Always display the message.
+     * We could postpone this until after returning, if we chose.
+     */
+    (*cinfo->err->format_message) (cinfo, buffer);
+
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
+
+    /* Return control to the setjmp point. */
+    longjmp (myerr->setjmp_buffer, 1);
+}
+
+/**
+ * jpgutl_emit_message
+ *  Purpose:
+ *    Process the messages thrown by the JPEG library
+ *  Parameters:
+ *    cinfo      The jpeg library compression/decompression information
+ *    msg_level  Integer indicating the severity of the message.
+ *  Return values:
+ *    None
+ */
+static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
+{
+    char buffer[JMSG_LENGTH_MAX];
+    /* cinfo->err really points to a jpgutl_error_mgr struct, so coerce pointer. */
+    struct jpgutl_error_mgr *myerr = (struct jpgutl_error_mgr *) cinfo->err;
+    /*
+     *  The JWRN_EXTRANEOUS_DATA is sent a lot without any particular negative effect.
+     *  There are some messages above zero but they are just informational and not something
+     *  that we are interested in.
+    */
+    if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
+        myerr->warning_seen++ ;
+        (*cinfo->err->format_message) (cinfo, buffer);
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
+    }
+
+}
+
+
+
 /*
  * The following declarations and 5 functions are jpeg related
  * functions used by put_jpeg_grey_memory and put_jpeg_yuv420p_memory.
@@ -478,15 +546,29 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     JSAMPARRAY data[3]; // t[0][2][5] = color sample 0 of row 2 and column 5
 
     struct jpeg_compress_struct cinfo;
-    struct jpeg_error_mgr jerr;
+    struct jpgutl_error_mgr jerr;
 
     data[0] = y;
     data[1] = cb;
     data[2] = cr;
 
-    cinfo.err = jpeg_std_error(&jerr);  // Errors get written to stderr
+    cinfo.err = jpeg_std_error (&jerr.pub);
+    jerr.pub.error_exit = jpgutl_error_exit;
+    /* Also hook the emit_message routine to note corrupt-data warnings. */
+    jerr.original_emit_message = jerr.pub.emit_message;
+    jerr.pub.emit_message = jpgutl_emit_message;
+    jerr.warning_seen = 0;
 
     jpeg_create_compress(&cinfo);
+    cinfo.image_width = width;
+
+    /* Establish the setjmp return context for jpgutl_error_exit to use. */
+    if (setjmp (jerr.setjmp_buffer)) {
+        /* If we get here, the JPEG code has signaled an error. */
+        jpeg_destroy_compress (&cinfo);
+        return -1;
+    }
+
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
