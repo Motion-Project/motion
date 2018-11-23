@@ -560,7 +560,6 @@ static int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
     jerr.warning_seen = 0;
 
     jpeg_create_compress(&cinfo);
-    cinfo.image_width = width;
 
     /* Establish the setjmp return context for jpgutl_error_exit to use. */
     if (setjmp (jerr.setjmp_buffer)) {
