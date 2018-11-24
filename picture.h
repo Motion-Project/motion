@@ -22,4 +22,7 @@ unsigned char *get_pgm(FILE *, int, int);
 void preview_save(struct context *);
 void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
 
+int put_jpeg_grey_memory(unsigned char *, int image, unsigned char *, int, int, int, struct context *, struct timeval *, struct coord *);
+int put_jpeg_yuv420p_memory(unsigned char *, int image, unsigned char *, int, int, int, struct context *, struct timeval *, struct coord *);
+
 #endif /* _INCLUDE_PICTURE_H_ */

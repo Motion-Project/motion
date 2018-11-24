@@ -348,6 +348,92 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
 
 }
 
+/*
+ * The following declarations and 5 functions are jpeg related
+ * functions used by put_jpeg_grey_memory and put_jpeg_yuv420p_memory.
+ */
+typedef struct {
+    struct jpeg_destination_mgr pub;
+    JOCTET *buf;
+    size_t bufsize;
+    size_t jpegsize;
+} mem_destination_mgr;
+
+typedef mem_destination_mgr *mem_dest_ptr;
+
+
+METHODDEF(void) init_destination(j_compress_ptr cinfo)
+{
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    dest->pub.next_output_byte = dest->buf;
+    dest->pub.free_in_buffer = dest->bufsize;
+    dest->jpegsize = 0;
+}
+
+METHODDEF(boolean) empty_output_buffer(j_compress_ptr cinfo)
+{
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    dest->pub.next_output_byte = dest->buf;
+    dest->pub.free_in_buffer = dest->bufsize;
+
+    return FALSE;
+    ERREXIT(cinfo, JERR_BUFFER_SIZE);
+}
+
+METHODDEF(void) term_destination(j_compress_ptr cinfo)
+{
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    dest->jpegsize = dest->bufsize - dest->pub.free_in_buffer;
+}
+
+static GLOBAL(void) _jpeg_mem_dest(j_compress_ptr cinfo, JOCTET* buf, size_t bufsize)
+{
+    mem_dest_ptr dest;
+
+    if (cinfo->dest == NULL) {
+        cinfo->dest = (struct jpeg_destination_mgr *)
+                      (*cinfo->mem->alloc_small)((j_common_ptr)cinfo, JPOOL_PERMANENT,
+                       sizeof(mem_destination_mgr));
+    }
+
+    dest = (mem_dest_ptr) cinfo->dest;
+
+    dest->pub.init_destination    = init_destination;
+    dest->pub.empty_output_buffer = empty_output_buffer;
+    dest->pub.term_destination    = term_destination;
+
+    dest->buf      = buf;
+    dest->bufsize  = bufsize;
+    dest->jpegsize = 0;
+}
+
+static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
+{
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    return dest->jpegsize;
+}
+
+/*
+ * put_jpeg_exif writes the EXIF APP1 chunk to the jpeg file.
+ * It must be called after jpeg_start_compress() but before
+ * any image data is written by jpeg_write_scanlines().
+ */
+static void put_jpeg_exif(j_compress_ptr cinfo,
+              const struct context *cnt,
+              const struct timeval *tv1,
+              const struct coord *box)
+{
+    unsigned char *exif = NULL;
+    unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
+
+    if(exif_len > 0) {
+        /* EXIF data lives in a JPEG APP1 marker */
+        jpeg_write_marker(cinfo, JPEG_APP0 + 1, exif, exif_len);
+        free(exif);
+    }
+}
+
+
 /**
  * jpgutl_decode_jpeg
  *  Purpose:  Decompress the jpeg data_in into the img_out buffer.
@@ -458,3 +544,147 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
     return 0;
 
 }
+
+int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
+                   unsigned char *input_image, int width, int height, int quality,
+                   struct context *cnt, struct timeval *tv1, struct coord *box)
+
+{
+    int i, j, jpeg_image_size;
+
+    JSAMPROW y[16],cb[16],cr[16]; // y[2][5] = color sample of row 2 and pixel column 5; (one plane)
+    JSAMPARRAY data[3]; // t[0][2][5] = color sample 0 of row 2 and column 5
+
+    struct jpeg_compress_struct cinfo;
+    struct jpgutl_error_mgr jerr;
+
+    data[0] = y;
+    data[1] = cb;
+    data[2] = cr;
+
+    cinfo.err = jpeg_std_error (&jerr.pub);
+    jerr.pub.error_exit = jpgutl_error_exit;
+    /* Also hook the emit_message routine to note corrupt-data warnings. */
+    jerr.original_emit_message = jerr.pub.emit_message;
+    jerr.pub.emit_message = jpgutl_emit_message;
+    jerr.warning_seen = 0;
+
+    jpeg_create_compress(&cinfo);
+
+    /* Establish the setjmp return context for jpgutl_error_exit to use. */
+    if (setjmp (jerr.setjmp_buffer)) {
+        /* If we get here, the JPEG code has signaled an error. */
+        jpeg_destroy_compress (&cinfo);
+        return -1;
+    }
+
+    cinfo.image_width = width;
+    cinfo.image_height = height;
+    cinfo.input_components = 3;
+    jpeg_set_defaults(&cinfo);
+
+    jpeg_set_colorspace(&cinfo, JCS_YCbCr);
+
+    cinfo.raw_data_in = TRUE; // Supply downsampled data
+#if JPEG_LIB_VERSION >= 70
+    cinfo.do_fancy_downsampling = FALSE;  // Fix segfault with v7
+#endif
+    cinfo.comp_info[0].h_samp_factor = 2;
+    cinfo.comp_info[0].v_samp_factor = 2;
+    cinfo.comp_info[1].h_samp_factor = 1;
+    cinfo.comp_info[1].v_samp_factor = 1;
+    cinfo.comp_info[2].h_samp_factor = 1;
+    cinfo.comp_info[2].v_samp_factor = 1;
+
+    jpeg_set_quality(&cinfo, quality, TRUE);
+    cinfo.dct_method = JDCT_FASTEST;
+
+    _jpeg_mem_dest(&cinfo, dest_image, image_size);  // Data written to mem
+
+
+    jpeg_start_compress(&cinfo, TRUE);
+
+    put_jpeg_exif(&cinfo, cnt, tv1, box);
+
+    /* If the image is not a multiple of 16, this overruns the buffers
+     * we'll just pad those last bytes with zeros
+     */
+    for (j = 0; j < height; j += 16) {
+        for (i = 0; i < 16; i++) {
+            if ((width * (i + j)) < (width * height)) {
+                y[i] = input_image + width * (i + j);
+                if (i % 2 == 0) {
+                    cb[i / 2] = input_image + width * height + width / 2 * ((i + j) /2);
+                    cr[i / 2] = input_image + width * height + width * height / 4 + width / 2 * ((i + j) / 2);
+                }
+            } else {
+                y[i] = 0x00;
+                cb[i] = 0x00;
+                cr[i] = 0x00;
+            }
+        }
+        jpeg_write_raw_data(&cinfo, data, 16);
+    }
+
+    jpeg_finish_compress(&cinfo);
+    jpeg_image_size = _jpeg_mem_size(&cinfo);
+    jpeg_destroy_compress(&cinfo);
+
+    return jpeg_image_size;
+}
+
+
+int put_jpeg_grey_memory(unsigned char *dest_image, int image_size,
+                   unsigned char *input_image, int width, int height, int quality,
+                   struct context *cnt, struct timeval *tv1, struct coord *box)
+{
+    int y, dest_image_size;
+    JSAMPROW row_ptr[1];
+    struct jpeg_compress_struct cjpeg;
+    struct jpgutl_error_mgr jerr;
+
+    cjpeg.err = jpeg_std_error (&jerr.pub);
+    jerr.pub.error_exit = jpgutl_error_exit;
+    /* Also hook the emit_message routine to note corrupt-data warnings. */
+    jerr.original_emit_message = jerr.pub.emit_message;
+    jerr.pub.emit_message = jpgutl_emit_message;
+    jerr.warning_seen = 0;
+
+    jpeg_create_compress(&cjpeg);
+
+    /* Establish the setjmp return context for jpgutl_error_exit to use. */
+    if (setjmp (jerr.setjmp_buffer)) {
+        /* If we get here, the JPEG code has signaled an error. */
+        jpeg_destroy_compress (&cjpeg);
+        return -1;
+    }
+
+    cjpeg.image_width = width;
+    cjpeg.image_height = height;
+    cjpeg.input_components = 1; /* One colour component */
+    cjpeg.in_color_space = JCS_GRAYSCALE;
+
+    jpeg_set_defaults(&cjpeg);
+
+    jpeg_set_quality(&cjpeg, quality, TRUE);
+    cjpeg.dct_method = JDCT_FASTEST;
+    _jpeg_mem_dest(&cjpeg, dest_image, image_size);  // Data written to mem
+
+    jpeg_start_compress (&cjpeg, TRUE);
+
+    put_jpeg_exif(&cjpeg, cnt, tv1, box);
+
+    row_ptr[0] = input_image;
+
+    for (y = 0; y < height; y++) {
+        jpeg_write_scanlines(&cjpeg, row_ptr, 1);
+        row_ptr[0] += width;
+    }
+
+    jpeg_finish_compress(&cjpeg);
+    dest_image_size = _jpeg_mem_size(&cjpeg);
+    jpeg_destroy_compress(&cjpeg);
+
+    return dest_image_size;
+}
+
