@@ -19,23 +19,6 @@
 #include <webp/mux.h>
 #endif /* HAVE_WEBP */
 
-#include <jpeglib.h>
-#include <jerror.h>
-
-
-/*
- * The following declarations and 5 functions are jpeg related
- * functions used by put_jpeg_grey_memory and put_jpeg_yuv420p_memory.
- */
-typedef struct {
-    struct jpeg_destination_mgr pub;
-    JOCTET *buf;
-    size_t bufsize;
-    size_t jpegsize;
-} mem_destination_mgr;
-
-typedef mem_destination_mgr *mem_dest_ptr;
-
 
 /* EXIF image data is always in TIFF format, even if embedded in another
  * file type. This consists of a constant header (TIFF file header,
