@@ -82,9 +82,9 @@ static void netcam_rtsp_close_context(struct rtsp_context *rtsp_data){
     if (rtsp_data->swsframe_in  != NULL) my_frame_free(rtsp_data->swsframe_in);
     if (rtsp_data->swsframe_out != NULL) my_frame_free(rtsp_data->swsframe_out);
     if (rtsp_data->frame        != NULL) my_frame_free(rtsp_data->frame);
+    if (rtsp_data->pktarray     != NULL) netcam_rtsp_pktarray_free(rtsp_data);
     if (rtsp_data->codec_context    != NULL) my_avcodec_close(rtsp_data->codec_context);
     if (rtsp_data->format_context   != NULL) avformat_close_input(&rtsp_data->format_context);
-    if (rtsp_data->pktarray     != NULL) netcam_rtsp_pktarray_free(rtsp_data);
     if (rtsp_data->transfer_format != NULL) avformat_close_input(&rtsp_data->transfer_format);
     netcam_rtsp_null_context(rtsp_data);
 
@@ -855,8 +855,10 @@ static void netcam_rtsp_set_v4l2(struct rtsp_context *rtsp_data){
             sprintf(optfps, "%s","default");
             sprintf(optsize, "%s","default");
         }
+    } else {
+        sprintf(optfps, "%s","default");
+        sprintf(optsize, "%s","default");
     }
-
 
     if (rtsp_data->status == RTSP_NOTCONNECTED){
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
