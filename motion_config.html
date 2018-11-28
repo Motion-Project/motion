@@ -4401,9 +4401,19 @@
           <li> Default: off</li>
         </ul>
         <p></p>
-        When using a RTSP, RTMP or mjpeg camera, create movie files of the motion with the packets obtained directly
-        from the camera.  For mjpeg cameras, the url must be specified using the <code>mjpeg</code> prefix rather than
+        When using a RTSP, RTMP, mjpeg and some V4l2 cameras, create movie files of the motion with the packets
+        obtained directly from the camera.
+        <p></p>
+        For mjpeg cameras, the url must be specified using the <code>mjpeg</code> prefix rather than
         as <code>http</code>
+        <p></p>
+        For v4l2 cameras to use the movie_passthrough, they must be specified using the
+        <a href="#netcam_url">netcam_url</a> parameter and the <code>v4l2</code> prefix.
+        <u>Only</u> webcams that provide mjpeg (<a href="#v4l2_palette">v4l2_palette</a> option 8)
+        or H264 (<a href="#v4l2_palette">v4l2_palette</a> option 21) will work with the
+        <a href="#movie_passthrough">movie_passthrough</a>.
+        <p></p>
+
         <p></p>
         When using only the single <a href="#netcam_url">netcam_url</a> this option will reduce the processing
         required when encoding the images to the resulting movie file.  Decoding of the image will still occur on the
