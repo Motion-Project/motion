@@ -3132,6 +3132,65 @@ static void motion_camera_ids(void){
     }
 }
 
+static void motion_ntc(void){
+
+    #ifdef HAVE_V4L2
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : not available"));
+    #endif
+
+    #ifdef HAVE_BKTR
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("bktr   : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("bktr   : not available"));
+    #endif
+
+    #ifdef HAVE_WEBP
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : not available"));
+    #endif
+
+    #ifdef HAVE_MMAL
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mmal   : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mmal   : not available"));
+    #endif
+
+    #ifdef HAVE_FFMPEG
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("ffmpeg : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("ffmpeg : not available"));
+    #endif
+
+    #ifdef HAVE_MYSQL
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : not available"));
+    #endif
+
+    #ifdef HAVE_SQLITE3
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("sqlite3: available"));
+    #else
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("sqlite3: not available"));
+    #endif
+
+    #ifdef HAVE_PGSQL
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("pgsql  : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("pgsql  : not available"));
+    #endif
+
+    #ifdef HAVE_INTL
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : not available"));
+    #endif
+
+
+}
+
 
 /**
  * motion_startup
@@ -3224,6 +3283,8 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     conf_output_parms(cnt_list);
 
+    motion_ntc();
+
     motion_camera_ids();
 
     initialize_chars();
@@ -3261,8 +3322,6 @@ static void motion_start_thread(struct context *cnt){
         snprintf(service,6,"%s",cnt->conf.netcam_url);
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Service: %s")
             ,cnt->camera_id, cnt->conf.camera_name,service);
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Stream port %d"),
-            cnt->conf.stream_port);
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera ID: %d Camera Name: %s Device: %s")
             ,cnt->camera_id, cnt->conf.camera_name,cnt->conf.video_device);

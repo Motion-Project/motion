@@ -275,9 +275,9 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
         return MHD_NO;
     }
 
-    if (webui->cnt->conf.webcontrol_cors_header != NULL){
+    if (webui->cnt->conf.stream_cors_header != NULL){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cnt->conf.webcontrol_cors_header);
+            , webui->cnt->conf.stream_cors_header);
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE
