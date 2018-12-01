@@ -159,11 +159,13 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 
     if (strlen(sqlquery) <= 0) {
         /* don't try to execute empty queries */
+        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
         return;
     }
 
 #ifdef HAVE_MYSQL
     if (!strcmp(cnt->conf.database_type, "mysql")) {
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
         if (mysql_query(cnt->database, sqlquery) != 0) {
             int error_code = mysql_errno(cnt->database);
 
@@ -209,6 +211,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 
 #ifdef HAVE_PGSQL
     if (!strcmp(cnt->conf.database_type, "postgresql")) {
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
         PGresult *res;
 
         res = PQexec(cnt->database_pg, sqlquery);
@@ -250,6 +253,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
     if ((!strcmp(cnt->conf.database_type, "sqlite3")) && (cnt->conf.database_dbname)) {
         int res;
         char *errmsg = 0;
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing sqlite query");
         res = sqlite3_exec(cnt->database_sqlite3, sqlquery, NULL, 0, &errmsg);
         if (res != SQLITE_OK ) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
