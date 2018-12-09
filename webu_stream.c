@@ -44,20 +44,18 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
      * will occur with the SLEEP function.
      */
-    stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000000) -
+    stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000) +
         ((time_curr.tv_sec - webui->time_last.tv_sec)*1000000000);
     if (stream_delay < 0)  stream_delay = 0;
     if (stream_delay > 1000000000 ) stream_delay = 1000000000;
 
-    if (webui->cnt->conf.stream_maxrate > 1){
+    if (webui->cnt->conf.stream_maxrate >= 1){
         stream_rate = ( (1000000000 / webui->cnt->conf.stream_maxrate) - stream_delay);
         if ((stream_rate > 0) && (stream_rate < 1000000000)){
             SLEEP(0,stream_rate);
         } else if (stream_rate == 1000000000) {
             SLEEP(1,0);
         }
-    } else {
-        SLEEP(1,0);
     }
     gettimeofday(&webui->time_last, NULL);
 
@@ -277,9 +275,9 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
         return MHD_NO;
     }
 
-    if (webui->cnt->conf.webcontrol_cors_header != NULL){
+    if (webui->cnt->conf.stream_cors_header != NULL){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cnt->conf.webcontrol_cors_header);
+            , webui->cnt->conf.stream_cors_header);
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE

@@ -6,36 +6,66 @@
   <title>Motion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
+  <script>
+    function fnc_topnav() {
+      var x = document.getElementById("id_topnav");
+      if (x.className === "topnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "topnav";
+      }
+    }
+    function fnc_subnav() {
+      var x = document.getElementById("id_subnav");
+      if (x.className === "subnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "subnav";
+      }
+    }
+  </script>
 </head>
-<body style="margin-left:15%;">
-  <ul class="nav-button">
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_support.html">Support</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_news.html">News</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_guide.html">Documentation</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/motion_download.html">Download</a></li>
-    <li class="nav-button"><a href="https://motion-project.github.io/index.html">Home</a></li>
-    <li class="nav-button" style="float: left;"> <img src="motion.gif" width="125" height="50"> </li>
-  </ul>
+<body>
+  <div class="topnav" id="id_topnav">
+    <img class="logoimg" src="motion.gif">
+
+    <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+    <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+  </div>
   <section class="page-header">
     <h1>
       Installing and Building from Source
     </h1>
   </section>
-
-  <section class="vertical-menu">
-    <button class="accordian">Installing</button>
-      <div class="panel">
+  <div class="subnav" id="id_subnav">
+    <div class="dropdown">
+      <button class="dropbtn">Installing</button>
+      <div class="dropdown-content">
         <a href="#Install_Apt"> Installing with apt</a>
         <a href="#Install_Deb"> Installing with a release deb package</a>
-
       </div>
-    <button class="accordian">Abbreviated Building</button>
-      <div class="panel">
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Abbreviated Building</button>
+      <div class="dropdown-content">
         <a href="#Build_Deb"> Building a deb package</a>
         <a href="#Abbreviated_Building"> Abbreviated Building Guide</a>
       </div>
-    <button class="accordian">Distribution specific dependencies</button>
-      <div class="panel">
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Distribution Specific Building</button>
+      <div class="dropdown-content">
         <a href="#Preparation_For_Building"> Preparation For Building </a>
         <a href="#BUILD_DEBIAN">Debian/Ubuntu/Raspbian</a>
         <a href="#BUILD_OPENSUSE">Open SUSE</a>
@@ -43,45 +73,27 @@
         <a href="#BUILD_CENTOS">CentOS</a>
         <a href="#BUILD_MACOSX">MacOSX </a>
       </div>
-    <button class="accordian">Configure/Make options</button>
-      <div class="panel">
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Configure/Make Options</button>
+      <div class="dropdown-content">
         <a href="#Configure_Script"> Configure Script </a>
         <a href="#Make"> Make </a>
         <a href="#Make_Install"> Make Install </a>
         <a href="#Un_Install"> Un-install </a>
         <a href="#Additional_Make_Options"> Additional Make Options </a>
       </div>
-    <button class="accordian">Upgrading / Native Language</button>
-      <div class="panel">
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Upgrading/Translations</button>
+      <div class="dropdown-content">
         <a href="#Upgrading_From_Older_Version"> Upgrading From Older Version </a>
         <a href="#Translations"> Native Language Support(Translations)</a>
-      <div class="panel">
-    <script>
-      var acc = document.getElementsByClassName("accordian");
-      var i;
-      for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function() {
-          var fnodes = document.getElementsByClassName("accordian");
-          var indx;
-          for (indx = 0; indx < fnodes.length; indx++){
-            if (this.isSameNode(fnodes[indx])) {
-              this.classList.toggle("active");
-              var panel = this.nextElementSibling;
-              if (panel.style.maxHeight){
-                panel.style.maxHeight = null;
-              } else {
-                panel.style.maxHeight = (panel.scrollHeight+50) + "px";
-              }
-            } else {
-              var panel = fnodes[indx].nextElementSibling;
-              panel.style.maxHeight = null;
-            }
-          }
-        });
-      }
-    </script>
+      </div>
+    </div>
 
-  </section>
+    <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
+  </div>
 
   <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
 
@@ -430,7 +442,7 @@
           <p></p>
           <code><strong>sudo yum groupinstall 'Development Tools'</strong></code>
           <p></p>
-          <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel gettext libmicrohttpd-dev</strong></code>
+          <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel gettext libmicrohttpd-devel</strong></code>
           <p></p>
           <code><strong>sudo yum install libzip-devel</strong></code>
           <p></p>
@@ -561,6 +573,7 @@
       <p></p>
       The following options can be specified with the configure script to customize
       how Motion is built.
+      <div class="tblconfig">
       <table border="1" class="fixed" >
           <colgroup>
           <col width="200px">
@@ -784,6 +797,7 @@
       		</tr>
       	</tbody>
       </table>
+      </div>
       <p></p>
       <p></p>
     </ul>

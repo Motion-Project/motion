@@ -1147,6 +1147,10 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
         (strcmp(webui->uri_camid,"current") == 0)){
         webui->cnct_type = WEBUI_CNCT_STATIC;
 
+    } else if ((strlen(webui->uri_camid) > 0) &&
+        (strlen(webui->uri_cmd1) == 0)){
+        webui->cnct_type = WEBUI_CNCT_FULL;
+
     } else {
         webui->cnct_type = WEBUI_CNCT_UNKNOWN;
     }
@@ -1434,7 +1438,7 @@ static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst){
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
         if (retcd == MHD_YES){
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
             if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
@@ -1457,7 +1461,7 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
         if (retcd == MHD_YES){
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
             if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
@@ -1486,9 +1490,9 @@ static void webu_mhd_features_ipv6(struct mhdstart_ctx *mhdst){
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
         if (retcd == MHD_YES){
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
         } else {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
             if (mhdst->ipv6) mhdst->ipv6 = 0;
         }
     #endif
@@ -1511,7 +1515,7 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
         int retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
         if (retcd == MHD_YES){
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
             if ((mhdst->ctrl) && (mhdst->cnt[mhdst->indxthrd]->conf.webcontrol_tls)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
@@ -1836,6 +1840,10 @@ static void webu_start_ctrl(struct context **cnt){
         free(mhdst.mhd_ops);
         if (cnt[0]->webcontrol_daemon == NULL){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
+        } else {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                ,_("Started webcontrol on port %d")
+                ,cnt[0]->conf.webcontrol_port);
         }
     }
 
@@ -1843,6 +1851,32 @@ static void webu_start_ctrl(struct context **cnt){
     if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
 
     return;
+}
+
+static void webu_strm_ntc(struct context **cnt, int indxthrd){
+    int indx;
+
+    if (indxthrd == 0 ){
+        if (cnt[1] != NULL) {
+            indx = 1;
+            while (cnt[indx] != NULL){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Started camera %d stream on port/camera_id %d/%d")
+                    ,cnt[indx]->camera_id
+                    ,cnt[indxthrd]->conf.stream_port
+                    ,cnt[indx]->camera_id);
+                indx++;
+            }
+        } else {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                ,_("Started camera %d stream on port %d")
+                ,cnt[indxthrd]->camera_id,cnt[indxthrd]->conf.stream_port);
+        }
+    } else {
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            ,_("Started camera %d stream on port %d")
+            ,cnt[indxthrd]->camera_id,cnt[indxthrd]->conf.stream_port);
+    }
 }
 
 static void webu_start_strm(struct context **cnt){
@@ -1905,6 +1939,8 @@ static void webu_start_strm(struct context **cnt){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Unable to start stream for camera %d")
                     ,cnt[mhdst.indxthrd]->camera_id);
+            } else {
+                webu_strm_ntc(cnt,mhdst.indxthrd);
             }
         }
         mhdst.indxthrd++;

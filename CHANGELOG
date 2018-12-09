@@ -1,3 +1,21 @@
+Summary of changes for version 4.2.1 are below
+   * Update version number to 4.2.1 / Changelog
+   * Report to log options included in build
+   * Add log messages on database actions(tosiara)
+   * Revise log messages of port used for stream
+   * Revise log messages when using v4l2 via netcam
+   * Fix null terminator on EXIF of jpgs(tosiara)
+   * Fix build with static libs for webp(Fabrice)
+   * Guide update for initial setup.
+   * Prevent webcontrol update of movie_passthrough
+   * Remove confusing log message
+   * Fix motion detection when using privacy mask
+   * Correct thread locking for movie_passthrough
+   * Revise guide for better mobile viewing
+   * Revise additional stream timing
+   * Fix stream timing(adameat)
+   * Remove obsolete function reference
+   * Change version number to 4.2+git
 Summary of Changes for version 4.2 are below
    * html fixes for legacy interface
    * Fix typo in guide
@@ -89,7 +107,7 @@ Summary of Changes for version 4.2 are below
    * Revise %{host} and add %{ver} (tosiara)
    * Update for passthrough processing of cameras
    * Updated motion_guide.html
-   * Revise webcontrol page to indicate the webcontrol_parms selection   
+   * Revise webcontrol page to indicate the webcontrol_parms selection
    * Validate v4l2 parms when using v4l2 via netcam
    * Capture images at start to prevent immediate events
    * Initialize thread number to eliminate inaccurate log notice.
@@ -101,7 +119,7 @@ Summary of Changes for version 4.2 are below
    * Include EXIF for webp images.
    * Report to log when user specifies invalid URL.
    * Update guide that is installed locally.
-   * Updated version script to include date and dirty vs clean.   
+   * Updated version script to include date and dirty vs clean.
 Version 4.1.1 Changes Below
    * Fix file name for debug movies
    * Fix image saving when using highres option

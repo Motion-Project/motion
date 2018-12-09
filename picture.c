@@ -344,7 +344,7 @@ static unsigned prepare_exif(unsigned char **exif,
     writing.buf += 2;
 
     if (description)
-        put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 0);
+        put_stringentry(&writing, TIFF_TAG_IMAGE_DESCRIPTION, description, 1);
 
     if (datetime)
         put_stringentry(&writing, TIFF_TAG_DATETIME, datetime, 1);
