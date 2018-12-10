@@ -31,6 +31,17 @@ Type=simple
 # systemd.service(5).
 StandardError=null
 ExecReload=@KILL@ -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+# Don't restart if unconfigured / misconfigured  e.g. daemon disabled
+# in defaults file.  See also /usr/include/sysexits.h or sysexits(3)
+RestartPreventExitStatus=78
+# To tune restart behaviour, see systemd.unit(5) and use
+# "systemctl edit motion" to change the following settings:
+#StartLimitBurst=
+#StartLimitIntervalSec=
+#StartLimitAction=
+#FailureAction=
 
 [Install]
 WantedBy=multi-user.target
