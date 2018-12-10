@@ -23,6 +23,7 @@ Documentation=man:motion(1)
 After=local-fs.target network.target
 
 [Service]
+EnvironmentFile=-/etc/default/motion
 ExecStart=@BIN_PATH@/motion -n
 Type=simple
 StandardError=null
