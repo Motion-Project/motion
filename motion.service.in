@@ -29,6 +29,7 @@ Type=simple
 # Keep stderr out of journald by default, because the default motion config
 # logs the same messages to journald via syslog
 StandardError=null
+ExecReload=@KILL@ -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target

@@ -706,6 +706,9 @@ motion.service
 motion.spec
 Makefile
 ])
+
+AC_ARG_VAR([KILL],[the 'kill' program to use to send signals to motion])
+AC_PATH_PROG([KILL],[kill],['/bin/kill'])
 AC_OUTPUT
 
 ##############################################################################
