@@ -26,6 +26,8 @@ After=local-fs.target network.target
 EnvironmentFile=-/etc/default/motion
 ExecStart=@BIN_PATH@/motion -n
 Type=simple
+# Keep stderr out of journald by default, because the default motion config
+# logs the same messages to journald via syslog
 StandardError=null
 
 [Install]
