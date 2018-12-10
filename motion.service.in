@@ -26,6 +26,9 @@ After=local-fs.target network.target
 EnvironmentFile=-/etc/default/motion
 ExecStart=@BIN_PATH@/motion -n
 Type=simple
+# Set StandardError=journal to use journald to log messages from motion.
+# See also the "log_file" config file option in motion(1) and
+# systemd.service(5).
 StandardError=null
 
 [Install]
