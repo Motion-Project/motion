@@ -30,6 +30,14 @@ Type=simple
 # logs the same messages to journald via syslog
 StandardError=null
 ExecReload=@KILL@ -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+# To tune restart behaviour, see systemd.unit(5) and use
+# "systemctl edit motion" to change the following settings:
+#StartLimitBurst=
+#StartLimitIntervalSec=
+#StartLimitAction=
+#FailureAction=
 
 [Install]
 WantedBy=multi-user.target
