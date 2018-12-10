@@ -30,6 +30,7 @@ Type=simple
 # See also the "log_file" config file option in motion(1) and
 # systemd.service(5).
 StandardError=null
+ExecReload=@KILL@ -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target
