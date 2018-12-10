@@ -18,7 +18,8 @@
 #
 
 [Unit]
-Description=Motion daemon
+Description=Motion - detect movement in live video, and/or record video and stills etc.
+Documentation=man:motion(1)
 After=local-fs.target network.target
 
 [Service]
