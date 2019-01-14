@@ -831,10 +831,19 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl) {
     hdr = MHD_lookup_connection_value (webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
     if (hdr != NULL){
         snprintf(webui->hostname, WEBUI_LEN_PARM, "%s", hdr);
-        en_pos = strstr(webui->hostname, ":");
-        if (en_pos != NULL){
-            host_len = en_pos - webui->hostname + 1;
-            snprintf(webui->hostname, host_len, "%s", hdr);
+        /* IPv6 addresses have :'s in them so special case them */
+        if (webui->hostname[0] == '['){
+            en_pos = strstr(webui->hostname, "]");
+            if (en_pos != NULL){
+                host_len = en_pos - webui->hostname + 2;
+                snprintf(webui->hostname, host_len, "%s", hdr);
+            }
+        } else {
+            en_pos = strstr(webui->hostname, ":");
+            if (en_pos != NULL){
+                host_len = en_pos - webui->hostname + 1;
+                snprintf(webui->hostname, host_len, "%s", hdr);
+            }
         }
     } else {
         gethostname(webui->hostname, WEBUI_LEN_PARM - 1);
