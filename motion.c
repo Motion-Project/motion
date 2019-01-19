@@ -1389,6 +1389,7 @@ static int motion_init(struct context *cnt)
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
         }
     }
+    cnt->current_image = &cnt->imgs.image_ring[cnt->imgs.image_ring_in];
 
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
