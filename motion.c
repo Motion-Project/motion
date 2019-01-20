@@ -2467,6 +2467,11 @@ static void mlp_actions(struct context *cnt){
         }
 
         cnt->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+        /* Mark all images in image_ring to be saved */
+        for (indx = 0; indx < cnt->imgs.image_ring_size; indx++){
+            cnt->imgs.image_ring[indx].flags |= IMAGE_SAVE;
+        }
+
         motion_detected(cnt, cnt->video_dev, cnt->current_image);
     } else if ((cnt->current_image->flags & IMAGE_MOTION) && (cnt->startup_frames == 0)) {
         /*
