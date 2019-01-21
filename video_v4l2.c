@@ -26,7 +26,11 @@
 
 #ifdef HAVE_V4L2
 
+#if defined(HAVE_LINUX_VIDEODEV2_H)
 #include <linux/videodev2.h>
+#elif defined(HAVE_SYS_VIDEOIO_H)
+#include <sys/videoio.h>
+#endif
 
 #define u8 unsigned char
 #define u16 unsigned short
