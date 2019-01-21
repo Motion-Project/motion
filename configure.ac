@@ -106,7 +106,7 @@ if test "x${BKTR}" = "xyes"; then
   fi
 fi
 if test "${V4L2}" = "yes"; then
-  AC_CHECK_HEADERS(linux/videodev2.h,[V4L2="yes"],[V4L2="no"])
+  AC_CHECK_HEADERS(linux/videodev2.h sys/videoio.h,[V4L2="yes";break],[V4L2="no"])
 fi
 
 if test "x${V4L2}" = "xyes"; then
