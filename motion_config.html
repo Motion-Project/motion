@@ -1174,6 +1174,12 @@
           <td align="left"><a href="#stream_maxrate" >stream_maxrate</a></td>
         </tr>
         <tr>
+          <td align="left">webcam_motion</td>
+          <td align="left">stream_motion</td>
+          <td align="left">stream_motion</td>
+          <td align="left"><a href="#stream_motion" >stream_motion</a></td>
+        </tr>
+        <tr>
           <td align="left">webcam_port</td>
           <td align="left">stream_port</td>
           <td align="left">stream_port</td>
@@ -1525,12 +1531,6 @@
           <td align="left">webcam_limit</td>
           <td align="left">stream_limit</td>
           <td align="left">stream_limit</td>
-          <td align="left">-Depreciated</td>
-        </tr>
-        <tr>
-          <td align="left">webcam_motion</td>
-          <td align="left">stream_motion</td>
-          <td align="left">stream_motion</td>
           <td align="left">-Depreciated</td>
         </tr>
         <tr>
@@ -1958,7 +1958,10 @@
               <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
             </tr>
-            </tbody>
+           <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
+           </tr>
+           </tbody>
         </table>
 
         <p></p>
@@ -4750,13 +4753,33 @@
           <li><code>{IP}:{port}/{camid}/action/eventend</code> Trigger the end of a event.</li>
           <li><code>{IP}:{port}/{camid}/action/snapshot</code> Create a snapshot</li>
           <li><code>{IP}:{port}/{camid}/action/restart</code> Shutdown and restart Motion</li>
-          <li><code>{IP}:{port}/{camid}/action/quit</code> Shutdown Motion</li>
+          <li><code>{IP}:{port}/{camid}/action/quit</code> Close all connections to the camera</li>
+          <li><code>{IP}:{port}/{camid}/action/end</code> Entirely shutdown the Motion application</li>
           <li><code>{IP}:{port}/{camid}/track/center</code> Send command to center PTZ camera</li>
           <li><code>{IP}:{port}/{camid}/track/set?x={value1}&y={value2}</code> Send command to PTZ camera to move
             to location specified by x and y</li>
           <li><code>{IP}:{port}/{camid}/track/set?pan={value1}&tilt={value2}</code> Send command to PTZ camera to
             pan to value1 and tilt to value2</li>
         </ul>
+        <p></p>
+        As a general rule, when the {camid} references the camera_id in the main motion.conf file, the webcontrol
+        actions referenced above are going to be applied to every camera that is connected to Motion.  This camera_id
+        is usually specified as 0 (zero).  So issuing a command of <code>{IP}:{port}/0/detection/pause</code> is
+        going to pause all the cameras.
+        <p></p>
+        A point of clarification with respect to the differences between <code>pause</code>, <code>quit</code>,
+        and <code>end</code>.  When the action of <code>pause</code> is executed, Motion will stop the motion detection
+        processing and of course all events but will continue to process and decode images from the camera.  This allows
+        for a faster transition when the user executes a <code>start</code>  The <code>quit</code> action conversely not
+        only stops the motion detection but also disconnects from the camera and decoding of images.  To start motion
+        detection after a <code>quit</code>, the user must execute a <code>restart</code> which will reinitialize the
+        connection to the camera.  And since the camera was completely disconnect, it can take more than a few seconds
+        for Motion to fully start and have the camera available for processing or viewing.  Finally, there is an
+        option for <code>end</code>.  This option completely terminates the Motion application.  It closes all connections
+        to all the cameras and terminates the application.  This may be required when running Motion in daemon mode.
+        Note that there is no way to restart the Motion application from the webcontrol interface after processing
+        a <code>end</code> request.
+
         <p></p>
         If the item above is available via the HTML/CSS interface, it is also possible to see the exact URL sent
         to Motion in the log.  Change the log level to 8 (debug), then open up the Motion webcontrol interface and
@@ -5196,6 +5219,18 @@
         Don't set this parameter too high unless you only use it on the localhost or on an internal LAN.
         <p></p>
 
+        <h3><a name="stream_motion"></a> stream_motion </h3>
+        <p></p>
+        <ul>
+          <li> Type: boolean</li>
+          <li> Range / Valid values: on, off</li>
+          <li> Default: off</li>
+        </ul>
+        <p></p>
+        Limit the framerate to 1 frame per second when there is no motion being detected and increase
+        it to the stream_maxrate when there is motion.
+        <p></p>
+
       </ul>
 
 
@@ -5388,8 +5423,8 @@
           <li> Default: Not defined</li>
         </ul>
         <p></p>
-        SQL query that executes on a event where a file is closed after a event of motion.
-        This can be used to for example update the events table with an end timestamp for the recordings.
+        SQL query that executes after a movie has finished.
+        This can be used to for example update the events table with an end timestamp for the recording.
         <p></p>
         <p></p>
         You can use <a href="#conversion_specifiers">Conversion Specifiers</a> within the query.

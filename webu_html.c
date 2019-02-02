@@ -324,6 +324,7 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         "        <a onclick=\"action_click('/detection/pause');\">%s</a>\n"
         "        <a onclick=\"action_click('/detection/start');\">%s</a>\n"
         "        <a onclick=\"action_click('/action/restart');\">%s</a>\n"
+        "        <a onclick=\"action_click('/action/quit');\">%s</a>\n"
         "      </div>\n"
         "    </div>\n"
         ,_("Action")
@@ -335,7 +336,8 @@ static void webu_html_navbar_action(struct webui_ctx *webui) {
         ,_("Tracking")
         ,_("Pause")
         ,_("Start")
-        ,_("Restart"));
+        ,_("Restart")
+        ,_("Quit"));
     webu_write(webui, response);
 }
 
