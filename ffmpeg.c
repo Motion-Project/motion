@@ -989,6 +989,8 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
         return;
     }
 
+    ffmpeg->pkt.stream_index = 0;
+
     retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
     my_packet_unref(ffmpeg->pkt);
     if (retcd < 0) {

@@ -60,6 +60,7 @@ struct webui_ctx {
     size_t          resp_size;         /* The allocated size of the response */
     size_t          resp_used;         /* The amount of the response page used */
     uint64_t        stream_pos;        /* Stream position of sent image */
+    int             stream_fps;        /* Stream rate per second */
     struct timeval  time_last;         /* Keep track of processing time for stream thread*/
     int             mhd_first;         /* Boolean for whether it is the first connection*/
 

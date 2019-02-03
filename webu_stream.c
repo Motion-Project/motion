@@ -49,8 +49,8 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
     if (stream_delay < 0)  stream_delay = 0;
     if (stream_delay > 1000000000 ) stream_delay = 1000000000;
 
-    if (webui->cnt->conf.stream_maxrate >= 1){
-        stream_rate = ( (1000000000 / webui->cnt->conf.stream_maxrate) - stream_delay);
+    if (webui->stream_fps >= 1){
+        stream_rate = ( (1000000000 / webui->stream_fps) - stream_delay);
         if ((stream_rate > 0) && (stream_rate < 1000000000)){
             SLEEP(0,stream_rate);
         } else if (stream_rate == 1000000000) {
@@ -88,6 +88,11 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
 
     /* Copy jpg from the motion loop thread */
     pthread_mutex_lock(&webui->cnt->mutex_stream);
+        if ((!webui->cnt->detecting_motion) && (webui->cnt->conf.stream_motion)){
+            webui->stream_fps = 1;
+        } else {
+            webui->stream_fps = webui->cnt->conf.stream_maxrate;
+        }
         if (local_stream->jpeg_data == NULL) {
             pthread_mutex_unlock(&webui->cnt->mutex_stream);
             return;

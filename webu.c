@@ -86,6 +86,7 @@ static void webu_context_init(struct context **cntlst, struct context *cnt, stru
     webui->resp_size     = WEBUI_LEN_RESP * 10; /* The size of the resp_page buffer.  May get adjusted */
     webui->resp_used     = 0;                   /* How many bytes used so far in resp_page*/
     webui->stream_pos    = 0;                   /* Stream position of image being sent */
+    webui->stream_fps    = 1;                   /* Stream rate */
     webui->resp_page     = mymalloc(webui->resp_size);      /* The response being constructed */
     webui->cntlst        = cntlst;  /* The list of context's for all cameras */
     webui->cnt           = cnt;     /* The context pointer for a single camera */
@@ -575,20 +576,52 @@ void webu_process_action(struct webui_ctx *webui) {
 
 
     } else if (!strcmp(webui->uri_cmd2,"restart")){
-        /* This is the legacy method...(we can do better than signals..).*/
         if (webui->thread_nbr == 0) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("httpd is going to restart"));
-            kill(getpid(),SIGHUP);
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all threads"));
             webui->cntlst[0]->webcontrol_finish = TRUE;
+            kill(getpid(),SIGHUP);
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-                _("httpd is going to restart thread %d"),webui->thread_nbr);
+                _("Restarting thread %d"),webui->thread_nbr);
+            webui->cnt->restart = TRUE;
             if (webui->cnt->running) {
                 webui->cnt->event_stop = TRUE;
-                webui->cnt->finish = 1;
+                webui->cnt->finish = TRUE;
             }
-            webui->cnt->restart = 1;
+
         }
+
+    } else if (!strcmp(webui->uri_cmd2,"quit")){
+        if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
+            while (webui->cntlst[++indx]){
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
+                    _("Quitting thread %d"),webui->thread_nbr);
+                webui->cntlst[indx]->restart = FALSE;
+                webui->cntlst[indx]->event_stop = TRUE;
+                webui->cntlst[indx]->event_user = TRUE;
+                webui->cntlst[indx]->finish = TRUE;
+            }
+        } else {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
+                _("Quitting thread %d"),webui->thread_nbr);
+            webui->cnt->restart = FALSE;
+            webui->cnt->event_stop = TRUE;
+            webui->cnt->event_user = TRUE;
+            webui->cnt->finish = TRUE;
+        }
+
+    } else if (!strcmp(webui->uri_cmd2,"end")){
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Motion terminating"));
+            while (webui->cntlst[indx]){
+                webui->cntlst[indx]->webcontrol_finish = TRUE;
+                webui->cntlst[indx]->restart = FALSE;
+                webui->cntlst[indx]->event_stop = TRUE;
+                webui->cntlst[indx]->event_user = TRUE;
+                webui->cntlst[indx]->finish = TRUE;
+                indx++;
+            }
+
+
     } else if (!strcmp(webui->uri_cmd2,"start")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
@@ -831,10 +864,19 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl) {
     hdr = MHD_lookup_connection_value (webui->connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
     if (hdr != NULL){
         snprintf(webui->hostname, WEBUI_LEN_PARM, "%s", hdr);
-        en_pos = strstr(webui->hostname, ":");
-        if (en_pos != NULL){
-            host_len = en_pos - webui->hostname + 1;
-            snprintf(webui->hostname, host_len, "%s", hdr);
+        /* IPv6 addresses have :'s in them so special case them */
+        if (webui->hostname[0] == '['){
+            en_pos = strstr(webui->hostname, "]");
+            if (en_pos != NULL){
+                host_len = en_pos - webui->hostname + 2;
+                snprintf(webui->hostname, host_len, "%s", hdr);
+            }
+        } else {
+            en_pos = strstr(webui->hostname, ":");
+            if (en_pos != NULL){
+                host_len = en_pos - webui->hostname + 1;
+                snprintf(webui->hostname, host_len, "%s", hdr);
+            }
         }
     } else {
         gethostname(webui->hostname, WEBUI_LEN_PARM - 1);
@@ -1254,6 +1296,9 @@ static int webu_answer_strm(void *cls
         webui->mhd_first = FALSE;
         return MHD_YES;
     }
+
+    /* Do not answer a request until the motion loop has completed at least once */
+    if (webui->cnt->passflag == 0) return MHD_NO;
 
     if (strcmp (method, "GET") != 0){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
@@ -2004,16 +2049,19 @@ void webu_stop(struct context **cnt) {
     int indxthrd;
 
     if (cnt[0]->webcontrol_daemon != NULL){
-        cnt[0]->webcontrol_finish = 1;
+        cnt[0]->webcontrol_finish = TRUE;
         MHD_stop_daemon (cnt[0]->webcontrol_daemon);
     }
+
 
     indxthrd = 0;
     while (cnt[indxthrd] != NULL){
         if (cnt[indxthrd]->webstream_daemon != NULL){
-            cnt[indxthrd]->webcontrol_finish = 1;
+            cnt[indxthrd]->webcontrol_finish = TRUE;
             MHD_stop_daemon (cnt[indxthrd]->webstream_daemon);
         }
+        cnt[indxthrd]->webstream_daemon = NULL;
+        cnt[indxthrd]->webcontrol_daemon = NULL;
         indxthrd++;
     }
 }
@@ -2024,6 +2072,7 @@ void webu_start(struct context **cnt) {
      * will not function correctly.
      */
     struct sigaction act;
+    int indxthrd;
 
     /* set signal handlers TO IGNORE */
     memset(&act, 0, sizeof(act));
@@ -2031,6 +2080,15 @@ void webu_start(struct context **cnt) {
     act.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
+
+
+    indxthrd = 0;
+    while (cnt[indxthrd] != NULL){
+        cnt[indxthrd]->webstream_daemon = NULL;
+        cnt[indxthrd]->webcontrol_daemon = NULL;
+        cnt[indxthrd]->webcontrol_finish = FALSE;
+        indxthrd++;
+    }
 
     if (cnt[0]->conf.stream_preview_method != 99){
         webu_start_ports(cnt);

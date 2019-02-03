@@ -235,6 +235,7 @@ static unsigned prepare_exif(unsigned char **exif,
     */
     char *description, *datetime, *subtime;
     char datetime_buf[22];
+    char tmpbuf[45];
     struct tm timestamp_tm;
     struct timeval tv1;
 
@@ -246,13 +247,19 @@ static unsigned prepare_exif(unsigned char **exif,
 
     localtime_r(&tv1.tv_sec, &timestamp_tm);
     /* Exif requires this exact format */
-    snprintf(datetime_buf, 21, "%04d:%02d:%02d %02d:%02d:%02d",
+    /* The compiler is twitchy on truncating formats and the exif is twitchy
+     * on the length of the whole string.  So we do it in two steps of printing
+     * into a large buffer which compiler wants, then print that into the smaller
+     * buffer that exif wants..TODO  Find better method
+     */
+    snprintf(tmpbuf, 45, "%04d:%02d:%02d %02d:%02d:%02d",
             timestamp_tm.tm_year + 1900,
             timestamp_tm.tm_mon + 1,
             timestamp_tm.tm_mday,
             timestamp_tm.tm_hour,
             timestamp_tm.tm_min,
             timestamp_tm.tm_sec);
+    snprintf(datetime_buf, 22,"%.21s",tmpbuf);
     datetime = datetime_buf;
 
     // TODO: Extract subsecond timestamp from somewhere, but only
