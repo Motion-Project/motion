@@ -2359,7 +2359,9 @@ struct context **conf_load(struct context **cnt)
             exit(-1);
         }
 
-        snprintf(filename, PATH_MAX, "%s/motion.conf", path);
+        snprintf(filename, PATH_MAX, "%.*s/motion.conf"
+            , (int)(PATH_MAX-1-strlen("/motion.conf"))
+            , path);
         fp = fopen (filename, "r");
     }
 
@@ -3120,7 +3122,7 @@ static struct context **config_camera(struct context **cnt, const char *str,
  */
 static void usage()
 {
-    printf("motion Version "VERSION", Copyright 2000-2018 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
+    printf("motion Version "VERSION", Copyright 2000-2019 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
     printf("\nHome page :\t https://motion-project.github.io/ \n");
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");

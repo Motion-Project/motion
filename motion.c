@@ -364,7 +364,7 @@ static void sig_handler(int signo)
         if (cnt_list) {
             i = -1;
             while (cnt_list[++i]) {
-                cnt_list[i]->webcontrol_finish = 1;
+                cnt_list[i]->webcontrol_finish = TRUE;
                 cnt_list[i]->event_stop = TRUE;
                 cnt_list[i]->finish = 1;
                 /*
@@ -3435,6 +3435,8 @@ static void motion_watchdog(int indx){
      * Best to just not get into a watchdog situation...
      */
 
+    if (!cnt_list[indx]->running) return;
+
     cnt_list[indx]->watchdog--;
     if (cnt_list[indx]->watchdog == 0) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -3537,6 +3539,24 @@ static int motion_check_threadcount(void){
         if (cnt_list[indx]->running || cnt_list[indx]->restart)
             motion_threads_running++;
     }
+
+    /* If the web control/streams are in finish/shutdown, we
+     * do not want to count them.  They will be completely closed
+     * by the process outside of loop that is checking the counts
+     * of threads.  If the webcontrol is not in a finish / shutdown
+     * then we want to keep them in the tread count to allow user
+     * to restart the cameras and keep Motion running.
+     */
+    indx = 0;
+    while (cnt_list[indx] != NULL){
+        if ((cnt_list[indx]->webcontrol_finish == FALSE) &&
+            ((cnt_list[indx]->webcontrol_daemon != NULL) ||
+             (cnt_list[indx]->webstream_daemon != NULL))) {
+            motion_threads_running++;
+        }
+        indx++;
+    }
+
 
     if (((motion_threads_running == 0) && finish) ||
         ((motion_threads_running == 0) && (threads_running == 0))) {

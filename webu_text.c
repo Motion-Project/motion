@@ -435,22 +435,13 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
 
 }
 
-static void webu_text_quit(struct webui_ctx *webui) {
+static void webu_text_action_quit(struct webui_ctx *webui) {
     /* Shut down motion or the associated thread */
     char response[WEBUI_LEN_RESP];
 
-    /* This is the legacy method...(we can do better than signals..).*/
-    if (webui->thread_nbr == 0) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("httpd quits"));
-        kill(getpid(),SIGQUIT);
-        webui->cntlst[0]->webcontrol_finish = TRUE;
-    } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
-            _("httpd quits thread %d"),webui->thread_nbr);
-        webui->cnt->restart = 0;
-        webui->cnt->event_stop = TRUE;
-        webui->cnt->finish = 1;
-    }
+    webu_process_action(webui);
+
+    webu_text_back(webui,"/action");
 
     webu_text_header(webui);
     snprintf(response,sizeof(response),
@@ -661,6 +652,10 @@ static void webu_text_action(struct webui_ctx *webui) {
     } else if (!strcmp(webui->uri_cmd2,"pause")){
         webu_text_action_pause(webui);
 
+    } else if ((!strcmp(webui->uri_cmd2,"quit")) ||
+               (!strcmp(webui->uri_cmd2,"end"))){
+        webu_text_action_quit(webui);
+
     } else if ((!strcmp(webui->uri_cmd2,"write")) ||
                (!strcmp(webui->uri_cmd2,"writeyes"))){
         webu_text_action_write(webui);
@@ -789,8 +784,9 @@ static void webu_text_menu_action(struct webui_ctx *webui) {
         "<a href=/%s/action/snapshot>snapshot</a><br>"
         "<a href=/%s/action/restart>restart</a><br>"
         "<a href=/%s/action/quit>quit</a><br>"
+        "<a href=/%s/action/end>end</a><br>"
         ,webui->uri_camid, webui->uri_camid, webui->uri_camid
-        ,webui->uri_camid, webui->uri_camid
+        ,webui->uri_camid, webui->uri_camid, webui->uri_camid
     );
     webu_write(webui, response);
     webu_text_trailer(webui);
@@ -1102,7 +1098,11 @@ void webu_text_main(struct webui_ctx *webui) {
 
     } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
                (strcmp(webui->uri_cmd2,"quit") == 0)){
-        webu_text_quit(webui);
+        webu_text_action(webui);
+
+    } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
+               (strcmp(webui->uri_cmd2,"end") == 0)){
+        webu_text_action(webui);
 
     } else if (!strcmp(webui->uri_cmd1,"action")) {
         webu_text_action(webui);

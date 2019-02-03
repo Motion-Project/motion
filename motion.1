@@ -1,4 +1,4 @@
-.TH MOTION 1 2018-10-20 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2019-02-02 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
@@ -1800,6 +1800,19 @@ Description:
 .fi
 .RS
 Maximum frame rate to send to stream
+.RE
+.RE
+
+.TP
+.B stream_motion
+.RS
+.nf
+Values: on,off
+Default: off
+Description:
+.fi
+.RS
+Limit stream to 1 fps when no motion is being detected.
 .RE
 .RE
 
