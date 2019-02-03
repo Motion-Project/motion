@@ -493,7 +493,7 @@ static void webu_html_config(struct webui_ctx *webui) {
                         ,webui->cntlst[indx]->camera_id);
                     webu_write(webui, response);
                     if (val_thread != NULL){
-                        snprintf(response, sizeof (response),"%s%s", response, val_thread);
+                        snprintf(response, sizeof (response),"%s", val_thread);
                         webu_write(webui, response);
                     }
                 }

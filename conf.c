@@ -2359,7 +2359,9 @@ struct context **conf_load(struct context **cnt)
             exit(-1);
         }
 
-        snprintf(filename, PATH_MAX, "%s/motion.conf", path);
+        snprintf(filename, PATH_MAX, "%.*s/motion.conf"
+            , (int)(PATH_MAX-1-strlen("/motion.conf"))
+            , path);
         fp = fopen (filename, "r");
     }
 
