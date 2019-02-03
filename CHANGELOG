@@ -1,3 +1,15 @@
+Summary of changes for version 4.2.2 are below
+   * Update version number to 4.2.2/Changelog
+   * Resolve compile problem for OpenBSD
+   * Resolve compiler warnings for 18.10
+   * Guide/Manual updates
+   * Add the quit/end webcontrol actions to interface 0
+   * Set the stream index on passthrough
+   * Revise the webcontrol stream rate
+   * Answer webcontrol stream only after completing first loop
+   * Save the preview images when triggering emulate
+   * Fix startup problem when using track_type 4
+   * Fix hostname for webcontrol when using IPV6
 Summary of changes for version 4.2.1 are below
    * Update version number to 4.2.1 / Changelog
    * Report to log options included in build
