@@ -25,7 +25,10 @@ After=local-fs.target network.target
 [Service]
 User=motion
 EnvironmentFile=-/etc/default/motion
-ExecStart=@BIN_PATH@/motion -n
+# The the sleep on the following line is needed with systemd version
+# 232, otherwise the error message that we echo doesn't hit 'systemctl
+# status'.
+ExecStart=/bin/sh -c '([ -r "/etc/default/motion" ] && [ "x$start_motion_daemon" != "xyes" ]) && echo "Not starting motion because start_motion_daemon=$start_motion_daemon - check /etc/default/motion" && sleep 1 && exit 78 ; exec @BIN_PATH@/motion -n'
 Type=simple
 # Set StandardError=journal to use journald to log messages from motion.
 # See also the "log_file" config file option in motion(1) and
