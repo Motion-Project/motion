@@ -46,6 +46,24 @@ RestartPreventExitStatus=78
 #StartLimitIntervalSec=
 #StartLimitAction=
 #FailureAction=
+# The following can be used to increase the security of the
+# installation, by mitigating risk from attacks on motion and the
+# binaries, libraries and scripts which it relies on.  They are disabled
+# by default in case they break existing installations, e.g. those which
+# call site-local scripts which would inherit the same restrictions.
+#
+# See systemd.exec(5) and
+# http://0pointer.net/public/systemd-nluug-2014.pdf for more details
+# of these and other related options.
+#
+# Use "systemctl edit motion" to change these settings.
+#PrivateTmp=true
+#NoNewPrivileges=yes
+#PrivateNetwork=yes
+#ProtectHome=yes
+#DeviceAllow=/dev/video0
+#MountFlags=slave
+#SystemCallFilter=
 
 [Install]
 WantedBy=multi-user.target
