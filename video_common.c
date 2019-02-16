@@ -8,7 +8,7 @@
  *      See also the file 'COPYING'.
  *
  */
-
+#include "translate.h"
 #include "motion.h"
 #include "video_common.h"
 #include "video_v4l2.h"
@@ -20,29 +20,6 @@ typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 
 #define CLAMP(x)  ((x) < 0 ? 0 : ((x) > 255) ? 255 : (x))
-#define MAX2(x, y) ((x) > (y) ? (x) : (y))
-#define MIN2(x, y) ((x) < (y) ? (x) : (y))
-
-/* Constants used by auto brightness feature
- * Defined as constant to make it easier for people to tweak code for a
- * difficult camera.
- * The experience gained from people could help improving the feature without
- * adding too many new options.
- * AUTOBRIGHT_HYSTERESIS sets the minimum the light intensity must change before
- * we adjust brigtness.
- * AUTOBRIGHTS_DAMPER damps the speed with which we adjust the brightness
- * When the brightness changes a lot we step in large steps and as we approach the
- * target value we slow down to avoid overshoot and oscillations. If the camera
- * adjusts too slowly decrease the DAMPER value. If the camera oscillates try
- * increasing the DAMPER value. DAMPER must be minimum 1.
- * MAX and MIN are the max and min values of brightness setting we will send to
- * the camera device.
- */
-#define AUTOBRIGHT_HYSTERESIS 10
-#define AUTOBRIGHT_DAMPER 5
-#define AUTOBRIGHT_MAX 255
-#define AUTOBRIGHT_MIN 0
-
 
 typedef struct {
     int is_abs;
@@ -311,13 +288,50 @@ void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int
     }
 }
 
-void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, unsigned int width, unsigned int height)
+void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
+{
+    unsigned char *src, *dest, *dest2;
+    unsigned char *src_u, *src_u2, *src_v, *src_v2;
+
+    int i, j;
+    /*Planar version of 422 */
+    /* Create the Y plane. */
+    src = cap_map;
+    dest = map;
+    for (i = width * height; i > 0; i--) {
+        *dest++ = *src++;
+    }
+
+    /* Create U and V planes. */
+    dest = map + width * height;
+    dest2 = dest + (width * height) / 4;
+    for (i = 0; i< (height / 2); i++) {
+        src_u = cap_map + (width * height) + ((i*2) * (width/2));
+        src_u2 = src_u  + (width/2);
+        src_v = src_u + (width/2 * height);
+        src_v2 = src_v  + (width/2);
+
+        for (j = 0; j < (width / 2); j++) {
+            *dest = ((int) *src_u + (int) *src_u2) / 2;
+            src_u ++;
+            src_u2++;
+            dest++;
+
+            *dest2 = ((int) *src_v + (int) *src_v2) / 2;
+            src_v ++;
+            src_v2++;
+            dest2++;
+        }
+    }
+}
+
+void vid_uyvyto420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
     uint8_t *pY = map;
     uint8_t *pU = pY + (width * height);
     uint8_t *pV = pU + (width * height) / 4;
     uint32_t uv_offset = width * 2 * sizeof(uint8_t);
-    uint32_t ix, jx;
+    int ix, jx;
 
     for (ix = 0; ix < height; ix++) {
         for (jx = 0; jx < width; jx += 2) {
@@ -352,9 +366,10 @@ void vid_rgb24toyuv420p(unsigned char *map, unsigned char *cap_map, int width, i
     unsigned char *r, *g, *b;
     int i, loop;
 
-    b = cap_map;
-    g = b + 1;
-    r = g + 1;
+    r = cap_map;
+    g = r + 1;
+    b = g + 1;
+
     y = map;
     u = y + width * height;
     v = u + (width * height) / 4;
@@ -403,7 +418,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
     ptr_buffer = memmem(cap_map, size, "\xff\xd8", 2);
     if (ptr_buffer == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "Corrupt image ... continue");
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         return 1;
     }
     /**
@@ -416,7 +431,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
     }
 
     if (soi_pos != 0){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "SOI position adjusted by %d bytes.", soi_pos);
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("SOI position adjusted by %d bytes."), soi_pos);
     }
 
     memmove(cap_map, cap_map + soi_pos, size - soi_pos);
@@ -425,7 +440,7 @@ int vid_mjpegtoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
     ret = jpgutl_decode_jpeg(cap_map,size, width, height, map);
 
     if (ret == -1) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, "Corrupt image ... continue");
+        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO,_("Corrupt image ... continue"));
         ret = 1;
     }
     return ret;
@@ -462,91 +477,163 @@ void vid_y10torgb24(unsigned char *map, unsigned char *cap_map, int width, int h
 
 void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, int height)
 {
-    /* This is a adaptation of the rgb to yuv.
-     * For grey, we use just a single color
-    */
 
-    unsigned char *y, *u, *v;
-    unsigned char *r;
-    int i, loop;
-
-    r = cap_map;
-
-    y = map;
-    u = y + width * height;
-    v = u + (width * height) / 4;
-    memset(u, 0, width * height / 4);
-    memset(v, 0, width * height / 4);
-
-    for (loop = 0; loop < height; loop++) {
-        for (i = 0; i < width; i += 2) {
-            *y++ = (9796 **  r + 19235 ** r + 3736 **  r) >> 15;
-            *u += ((-4784 ** r - 9437 **  r + 14221 ** r) >> 17) + 32;
-            *v += ((20218 ** r - 16941 ** r - 3277 **  r) >> 17) + 32;
-            r++;
-
-            *y++ = (9796 **  r + 19235 ** r + 3736 **  r) >> 15;
-            *u += ((-4784 ** r - 9437 **  r + 14221 ** r) >> 17) + 32;
-            *v += ((20218 ** r - 16941 ** r - 3277 **  r) >> 17) + 32;
-            r ++;
-
-            u++;
-            v++;
-        }
-
-        if ((loop & 1) == 0) {
-            u -= width / 2;
-            v -= width / 2;
-        }
-    }
-
+    memcpy(map, cap_map, (width*height));
+    memset(map+(width*height), 128, (width * height) / 2);
 
 }
 
-int vid_do_autobright(struct context *cnt, struct video_dev *viddev)
-{
+static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char *config_val){
 
-    int brightness_window_high;
-    int brightness_window_low;
-    int brightness_target;
-    int i, j = 0, avg = 0, step = 0;
-    unsigned char *image = cnt->imgs.image_virgin; /* Or cnt->current_image ? */
+    /* Add the parameter and value to our user control array*/
+    struct vdev_usrctrl_ctx *tmp;
+    int indx;
 
-    int make_change = 0;
-
-    if (cnt->conf.brightness)
-        brightness_target = cnt->conf.brightness;
-    else
-        brightness_target = 128;
-
-    brightness_window_high = MIN2(brightness_target + AUTOBRIGHT_HYSTERESIS, 255);
-    brightness_window_low = MAX2(brightness_target - AUTOBRIGHT_HYSTERESIS, 1);
-
-    for (i = 0; i < cnt->imgs.motionsize; i += 101) {
-        avg += image[i];
-        j++;
+    tmp = mymalloc(sizeof(struct vdev_usrctrl_ctx)*(vdevctx->usrctrl_count+1));
+    for (indx=0;indx<vdevctx->usrctrl_count;indx++){
+        tmp[indx].ctrl_name = mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
+        sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
+        free(vdevctx->usrctrl_array[indx].ctrl_name);
+        vdevctx->usrctrl_array[indx].ctrl_name=NULL;
+        tmp[indx].ctrl_value = vdevctx->usrctrl_array[indx].ctrl_value;
     }
-    avg = avg / j;
-
-    /* Average is above window - turn down brightness - go for the target. */
-    if (avg > brightness_window_high) {
-        step = MIN2((avg - brightness_target) / AUTOBRIGHT_DAMPER + 1, viddev->brightness - AUTOBRIGHT_MIN);
-
-        if (viddev->brightness > step + 1 - AUTOBRIGHT_MIN) {
-            viddev->brightness -= step;
-            make_change = 1;
-        }
-    } else if (avg < brightness_window_low) {
-        /* Average is below window - turn up brightness - go for the target. */
-        step = MIN2((brightness_target - avg) / AUTOBRIGHT_DAMPER + 1, AUTOBRIGHT_MAX - viddev->brightness);
-
-        if (viddev->brightness < AUTOBRIGHT_MAX - step) {
-            viddev->brightness += step;
-            make_change = 1;
-        }
+    if (vdevctx->usrctrl_array != NULL){
+      free(vdevctx->usrctrl_array);
+      vdevctx->usrctrl_array =  NULL;
     }
 
-    return make_change;
+    vdevctx->usrctrl_array = tmp;
+    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name = mymalloc(strlen(config_name)+1);
+    sprintf(vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_name,"%s",config_name);
+    vdevctx->usrctrl_array[vdevctx->usrctrl_count].ctrl_value=atoi(config_val);
+    vdevctx->usrctrl_count++;
+
+}
+
+int vid_parms_parse(struct context *cnt){
+
+    /* Parse through the configuration option to get values
+     * The values are separated by commas but may also have
+     * double quotes around the names which include a comma.
+     * Examples:
+     * vid_control_parms ID01234= 1, ID23456=2
+     * vid_control_parms "Brightness, auto" = 1, ID23456=2
+     * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
+     */
+    int indx_parm;
+    int parmval_st , parmval_len;
+    int parmdesc_st, parmdesc_len;
+    int qte_open;
+    struct vdev_context *vdevctx;
+    char tst;
+    char *parmdesc, *parmval;
+
+    if (!cnt->vdev->update_parms) return 0;
+
+    vdevctx = cnt->vdev;
+
+    for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
+        free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
+        vdevctx->usrctrl_array[indx_parm].ctrl_name=NULL;
+    }
+    if (vdevctx->usrctrl_array != NULL){
+      free(vdevctx->usrctrl_array);
+      vdevctx->usrctrl_array = NULL;
+    }
+    vdevctx->usrctrl_count = 0;
+
+    if (cnt->conf.vid_control_params != NULL){
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cnt->conf.vid_control_params);
+
+        indx_parm = 0;
+        parmdesc_st  = parmval_st  = -1;
+        parmdesc_len = parmval_len = 0;
+        qte_open = FALSE;
+        parmdesc = parmval = NULL;
+        tst = cnt->conf.vid_control_params[indx_parm];
+        while (tst != '\0') {
+            if (!qte_open) {
+                if (tst == '\"') {                    /* This is the opening quotation */
+                    qte_open = TRUE;
+                    parmdesc_st = indx_parm + 1;
+                    parmval_st  = -1;
+                    parmdesc_len = parmval_len = 0;
+                    if (parmdesc != NULL) free(parmdesc);
+                    if (parmval  != NULL) free(parmval);
+                    parmdesc = parmval = NULL;
+                } else if (tst == ','){               /* Designator for next parm*/
+                    if ((parmval_st >= 0) && (parmval_len > 0)){
+                        if (parmval  != NULL) free(parmval);
+                        parmval = mymalloc(parmval_len);
+                        snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
+                    }
+                    parmdesc_st  = indx_parm + 1;
+                    parmval_st  = -1;
+                    parmdesc_len = parmval_len = 0;
+                } else if (tst == '='){               /* Designator for end of desc and start of value*/
+                    if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
+                        if (parmdesc != NULL) free(parmdesc);
+                        parmdesc = mymalloc(parmdesc_len);
+                        snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
+                    }
+                    parmdesc_st = -1;
+                    parmval_st = indx_parm + 1;
+                    parmdesc_len = parmval_len = 0;
+                    if (parmval != NULL) free(parmval);
+                    parmval = NULL;
+                } else if (tst == ' '){               /* Skip leading spaces */
+                    if (indx_parm == parmdesc_st) parmdesc_st++;
+                    if (indx_parm == parmval_st) parmval_st++;
+                } else if (tst != ' '){               /* Revise the length making sure it is not a space*/
+                    parmdesc_len = indx_parm - parmdesc_st + 2;
+                    parmval_len = indx_parm - parmval_st + 2;
+                    if (parmdesc_st == -1) parmdesc_st = indx_parm;
+                }
+            } else if (tst == '\"') {                /* This is the closing quotation */
+                parmdesc_len = indx_parm - parmdesc_st + 1;
+                if (parmdesc_len > 0 ){
+                    if (parmdesc != NULL) free(parmdesc);
+                    parmdesc = mymalloc(parmdesc_len);
+                    snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
+                }
+                parmdesc_st = -1;
+                parmval_st = indx_parm + 1;
+                parmdesc_len = parmval_len = 0;
+                if (parmval != NULL) free(parmval);
+                parmval = NULL;
+                qte_open = FALSE;   /* Reset the open/close on quotation */
+            }
+            if ((parmdesc != NULL) && (parmval  != NULL)){
+                vid_parms_add(vdevctx, parmdesc, parmval);
+                free(parmdesc);
+                free(parmval);
+                parmdesc = parmval = NULL;
+            }
+
+            indx_parm++;
+            tst = cnt->conf.vid_control_params[indx_parm];
+        }
+        /* Process the last parameter */
+        if ((parmval_st >= 0) && (parmval_len > 0)){
+            if (parmval  != NULL) free(parmval);
+            parmval = mymalloc(parmval_len+1);
+            snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
+        }
+        if ((parmdesc != NULL) && (parmval  != NULL)){
+            vid_parms_add(vdevctx, parmdesc, parmval);
+            free(parmdesc);
+            free(parmval);
+            parmdesc = parmval = NULL;
+        }
+
+        if (parmdesc != NULL) free(parmdesc);
+        if (parmval  != NULL) free(parmval);
+    }
+
+    cnt->vdev->update_parms = FALSE;
+
+    return 0;
+
 }
 
 void vid_mutex_init(void)
@@ -561,12 +648,11 @@ void vid_mutex_destroy(void)
     bktr_mutex_destroy();
 }
 
-void vid_close(struct context *cnt)
-{
+void vid_close(struct context *cnt) {
 
 #ifdef HAVE_MMAL
     if (cnt->mmalcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "calling mmalcam_cleanup");
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
         mmalcam_cleanup(cnt->mmalcam);
         cnt->mmalcam = NULL;
         return;
@@ -574,27 +660,33 @@ void vid_close(struct context *cnt)
 #endif
 
     if (cnt->netcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "calling netcam_cleanup");
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_cleanup"));
         netcam_cleanup(cnt->netcam, 0);
         cnt->netcam = NULL;
         return;
     }
 
+    if (cnt->rtsp) {
+        /* This also cleans up high resolution */
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_rtsp_cleanup"));
+        netcam_rtsp_cleanup(cnt, 0);
+        return;
+    }
+
     if (cnt->camera_type == CAMERA_TYPE_V4L2) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Cleaning up V4L2 device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Cleaning up V4L2 device"));
         v4l2_cleanup(cnt);
         return;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Cleaning up BKTR device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Cleaning up BKTR device"));
         bktr_cleanup(cnt);
         return;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)");
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"));
     return;
-
 
 }
 
@@ -620,53 +712,63 @@ void vid_close(struct context *cnt)
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 8
  */
-int vid_start(struct context *cnt)
-{
+int vid_start(struct context *cnt) {
     int dev = -1;
 
 #ifdef HAVE_MMAL
     if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening MMAL cam");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
         dev = mmalcam_start(cnt);
         if (dev < 0) {
             mmalcam_cleanup(cnt->mmalcam);
             cnt->mmalcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "MMAL cam failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
         }
         return dev;
     }
 #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening Netcam");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
         dev = netcam_start(cnt);
         if (dev < 0) {
             netcam_cleanup(cnt->netcam, 1);
             cnt->netcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Netcam failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam failed to open"));
+        }
+        return dev;
+    }
+
+    if (cnt->camera_type == CAMERA_TYPE_RTSP) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam RTSP"));
+        dev = netcam_rtsp_setup(cnt);
+        if (dev < 0) {
+            netcam_rtsp_cleanup(cnt, 1);
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam RTSP failed to open"));
         }
         return dev;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_V4L2) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening V4L2 device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
         dev = v4l2_start(cnt);
         if (dev < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "V4L2 device failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
         }
         return dev;
     }
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Opening BKTR device");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening BKTR device"));
         dev = bktr_start(cnt);
         if (dev < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "BKTR device failed to open");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("BKTR device failed to open"));
         }
         return dev;
     }
 
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "No Camera device specified (MMAL, Netcam, V4L2, BKTR)");
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+        ,_("No Camera device specified (MMAL, Netcam, V4L2, BKTR)"));
     return dev;
 
 }
@@ -691,15 +793,14 @@ int vid_start(struct context *cnt)
  *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
-int vid_next(struct context *cnt, unsigned char *map)
-{
+int vid_next(struct context *cnt, struct image_data *img_data){
 
 #ifdef HAVE_MMAL
      if (cnt->camera_type == CAMERA_TYPE_MMAL) {
         if (cnt->mmalcam == NULL) {
             return NETCAM_GENERAL_ERROR;
         }
-        return mmalcam_next(cnt, map);
+        return mmalcam_next(cnt, img_data);
     }
 #endif
 
@@ -707,15 +808,22 @@ int vid_next(struct context *cnt, unsigned char *map)
         if (cnt->video_dev == -1)
             return NETCAM_GENERAL_ERROR;
 
-        return netcam_next(cnt, map);
+        return netcam_next(cnt, img_data);
+    }
+
+    if (cnt->camera_type == CAMERA_TYPE_RTSP) {
+        if (cnt->video_dev == -1)
+            return NETCAM_GENERAL_ERROR;
+
+        return netcam_rtsp_next(cnt, img_data);
     }
 
     if (cnt->camera_type == CAMERA_TYPE_V4L2) {
-        return v4l2_next(cnt, map);
+        return v4l2_next(cnt, img_data);
    }
 
     if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        return bktr_next(cnt, map);
+        return bktr_next(cnt, img_data);
     }
 
     return -2;

@@ -41,7 +41,7 @@ void rotate_deinit(struct context *cnt);
 /**
  * rotate_map
  *
- *  Rotates the image stored in map according to the rotation data
+ *  Rotates the image stored in img according to the rotation data
  *  available in cnt. Rotation is performed clockwise. Supports 90,
  *  180 and 270 degrees rotation. 180 degrees rotation is performed
  *  in-place by simply reversing the image data, which is a very
@@ -54,7 +54,7 @@ void rotate_deinit(struct context *cnt);
  *
  * Parameters:
  *
- *   map - the image map/data to rotate
+ *   img_data - the image data to rotate
  *   cnt - current thread's context structure
  *
  * Returns:
@@ -62,6 +62,6 @@ void rotate_deinit(struct context *cnt);
  *   0  - success
  *   -1 - failure (rare, shouldn't happen)
  */
-int rotate_map(struct context *cnt, unsigned char *map);
+int rotate_map(struct context *cnt, struct image_data *img_data);
 
 #endif

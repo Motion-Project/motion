@@ -50,7 +50,7 @@
 #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
 #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
 
-#define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, "%s: " format, __FUNCTION__, ##args)
+#define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, 1, format, __FUNCTION__, ##args)
 
 int get_log_type(const char* type);
 const char* get_log_type_str(unsigned int type);
@@ -59,6 +59,6 @@ const char* get_log_level_str(unsigned int level);
 void set_log_level(unsigned int level);
 void set_log_mode(int mode);
 FILE * set_logfile(const char *logfile_name);
-void motion_log(int, unsigned int, int, const char *, ...);
+void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...);
 
 #endif

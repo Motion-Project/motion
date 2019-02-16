@@ -23,7 +23,7 @@
  */
 void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
 {
-    unsigned char *out = imgs->out;
+    unsigned char *out = imgs->img_motion.image_norm;
     int *labels = imgs->labels;
     int x, y, centc = 0, xdist = 0, ydist = 0;
 
@@ -71,7 +71,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
     /* First reset pointers back to initial value. */
     centc = 0;
     labels = imgs->labels;
-    out = imgs->out;
+    out = imgs->img_motion.image_norm;
 
     /* If Labeling then we find the area around largest labelgroup instead. */
     if (imgs->labelsize_max) {
@@ -172,10 +172,10 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
 void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
                        int style, int mode, int process_thisframe)
 {
-    unsigned char *out = imgs->out;
+    unsigned char *out = imgs->img_motion.image_norm;
     int x, y;
 
-    out = imgs->out;
+    out = imgs->img_motion.image_norm;
 
     /* Debug image always gets a 'normal' box. */
     if ((mode == LOCATE_BOTH) && process_thisframe) {
@@ -240,7 +240,7 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
 void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
                            int style, int mode, int process_thisframe)
 {
-    unsigned char *out = imgs->out;
+    unsigned char *out = imgs->img_motion.image_norm;
     unsigned char *new_u, *new_v;
     int x, y, v, cwidth, cblock;
 
@@ -248,7 +248,7 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
     cblock = imgs->motionsize / 4;
     x = imgs->motionsize;
     v = x + cblock;
-    out = imgs->out;
+    out = imgs->img_motion.image_norm;
     new_u = new + x;
     new_v = new + v;
 
@@ -425,7 +425,7 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
     if (sum < top * 2)
         sum = top * 2;
 
-    if (sum < cnt->conf.max_changes)
+    if (sum < cnt->conf.threshold)
         cnt->threshold = (cnt->threshold + sum) / 2;
 }
 
@@ -519,7 +519,7 @@ static int iflood(int x, int y, int width, int height,
 static int alg_labeling(struct context *cnt)
 {
     struct images *imgs = &cnt->imgs;
-    unsigned char *out = imgs->out;
+    unsigned char *out = imgs->img_motion.image_norm;
     int *labels = imgs->labels;
     int ix, iy, pixelpos;
     int width = imgs->width;
@@ -554,9 +554,9 @@ static int alg_labeling(struct context *cnt)
             labelsize = iflood(ix, iy, width, height, out, labels, current_label, 0);
 
             if (labelsize > 0) {
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Label: %i (%i) Size: %i (%i,%i)",
-                            current_label, cnt->current_image->total_labels,
-                           labelsize, ix, iy);
+                //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Label: %i (%i) Size: %i (%i,%i)",
+                //            current_label, cnt->current_image->total_labels,
+                //           labelsize, ix, iy);
 
                 /* Label above threshold? Mark it again (add 32768 to labelnumber). */
                 if (labelsize > cnt->threshold) {
@@ -578,9 +578,9 @@ static int alg_labeling(struct context *cnt)
         pixelpos++; /* Compensate for ix < width - 1 */
     }
 
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%i Labels found. Largest connected Area: %i Pixel(s). "
-               "Largest Label: %i", imgs->largest_label, imgs->labelsize_max,
-               cnt->current_image->total_labels);
+    //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%i Labels found. Largest connected Area: %i Pixel(s). "
+    //           "Largest Label: %i", imgs->largest_label, imgs->labelsize_max,
+    //           cnt->current_image->total_labels);
 
     /* Return group of significant labels or if that's none, the next largest
      * group (which is under the threshold, but especially for setup gives an
@@ -838,7 +838,7 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 int alg_despeckle(struct context *cnt, int olddiffs)
 {
     int diffs = 0;
-    unsigned char *out = cnt->imgs.out;
+    unsigned char *out = cnt->imgs.img_motion.image_norm;
     int width = cnt->imgs.width;
     int height = cnt->imgs.height;
     int done = 0, i, len = strlen(cnt->conf.despeckle_filter);
@@ -939,7 +939,7 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
     int noise = cnt->noise;
     int smartmask_speed = cnt->smartmask_speed;
     unsigned char *ref = imgs->ref;
-    unsigned char *out = imgs->out;
+    unsigned char *out = imgs->img_motion.image_norm;
     unsigned char *mask = imgs->mask;
     unsigned char *smartmask_final = imgs->smartmask_final;
     int *smartmask_buffer = imgs->smartmask_buffer;
@@ -1242,7 +1242,7 @@ int alg_diff(struct context *cnt, unsigned char *new)
 {
     int diffs = 0;
 
-    if (alg_diff_fast(cnt, cnt->conf.max_changes / 2, new))
+    if (alg_diff_fast(cnt, cnt->conf.threshold / 2, new))
         diffs = alg_diff_standard(cnt, new);
 
     return diffs;
@@ -1258,13 +1258,13 @@ int alg_lightswitch(struct context *cnt, int diffs)
 {
     struct images *imgs = &cnt->imgs;
 
-    if (cnt->conf.lightswitch < 0)
-        cnt->conf.lightswitch = 0;
-    if (cnt->conf.lightswitch > 100)
-        cnt->conf.lightswitch = 100;
+    if (cnt->conf.lightswitch_percent < 0)
+        cnt->conf.lightswitch_percent = 0;
+    if (cnt->conf.lightswitch_percent > 100)
+        cnt->conf.lightswitch_percent = 100;
 
     /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cnt->conf.lightswitch / 100))
+    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100))
         return 1;
 
     return 0;
@@ -1277,7 +1277,7 @@ int alg_lightswitch(struct context *cnt, int diffs)
 int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
 {
     int linediff = diffs / cnt->imgs.height;
-    unsigned char *out = cnt->imgs.out;
+    unsigned char *out = cnt->imgs.img_motion.image_norm;
     int y, x, line;
     int lines = 0, vertlines = 0;
 
@@ -1300,7 +1300,7 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
         if (cnt->conf.text_changes) {
             char tmp[80];
             sprintf(tmp, "%d %d", lines, vertlines);
-            draw_text(newimg, cnt->imgs.width - 10, 20, cnt->imgs.width, tmp, cnt->conf.text_double);
+            draw_text(newimg, cnt->imgs.width, cnt->imgs.height, cnt->imgs.width - 10, 20, tmp, cnt->conf.text_scale);
         }
         return diffs;
     }
@@ -1327,10 +1327,10 @@ void alg_update_reference_frame(struct context *cnt, int action)
     int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
     int *ref_dyn = cnt->imgs.ref_dyn;
-    unsigned char *image_virgin = cnt->imgs.image_virgin;
+    unsigned char *image_virgin = cnt->imgs.image_vprvcy.image_norm;
     unsigned char *ref = cnt->imgs.ref;
     unsigned char *smartmask = cnt->imgs.smartmask_final;
-    unsigned char *out = cnt->imgs.out;
+    unsigned char *out = cnt->imgs.img_motion.image_norm;
 
     if (cnt->lastrate > 5)  /* Match rate limit */
         accept_timer /= (cnt->lastrate / 3);
@@ -1367,7 +1367,7 @@ void alg_update_reference_frame(struct context *cnt, int action)
 
     } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
         /* Copy fresh image */
-        memcpy(cnt->imgs.ref, cnt->imgs.image_virgin, cnt->imgs.size);
+        memcpy(cnt->imgs.ref, cnt->imgs.image_vprvcy.image_norm, cnt->imgs.size_norm);
         /* Reset static objects */
         memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
     }

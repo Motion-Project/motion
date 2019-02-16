@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="UTF-8">
+  <link href="motion.png" rel="icon" type="image/png">
+  <title>Motion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
+  <script>
+    function fnc_topnav() {
+      var x = document.getElementById("id_topnav");
+      if (x.className === "topnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "topnav";
+      }
+    }
+    function fnc_subnav() {
+      var x = document.getElementById("id_subnav");
+      if (x.className === "subnav") {
+          x.className += " responsive";
+      } else {
+          x.className = "subnav";
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="topnav" id="id_topnav">
+    <img class="logoimg" src="motion.gif">
+
+    <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+    <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+    <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+  </div>
+  <section class="page-header">
+    <h1>
+      Installing and Building from Source
+    </h1>
+  </section>
+  <div class="subnav" id="id_subnav">
+    <div class="dropdown">
+      <button class="dropbtn">Installing</button>
+      <div class="dropdown-content">
+        <a href="#Install_Apt"> Installing with apt</a>
+        <a href="#Install_Deb"> Installing with a release deb package</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Abbreviated Building</button>
+      <div class="dropdown-content">
+        <a href="#Build_Deb"> Building a deb package</a>
+        <a href="#Abbreviated_Building"> Abbreviated Building Guide</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Distribution Specific Building</button>
+      <div class="dropdown-content">
+        <a href="#Preparation_For_Building"> Preparation For Building </a>
+        <a href="#BUILD_DEBIAN">Debian/Ubuntu/Raspbian</a>
+        <a href="#BUILD_OPENSUSE">Open SUSE</a>
+        <a href="#BUILD_FREEBSD">Free BSD</a>
+        <a href="#BUILD_CENTOS">CentOS</a>
+        <a href="#BUILD_MACOSX">MacOSX </a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Configure/Make Options</button>
+      <div class="dropdown-content">
+        <a href="#Configure_Script"> Configure Script </a>
+        <a href="#Make"> Make </a>
+        <a href="#Make_Install"> Make Install </a>
+        <a href="#Un_Install"> Un-install </a>
+        <a href="#Additional_Make_Options"> Additional Make Options </a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">Upgrading/Translations</button>
+      <div class="dropdown-content">
+        <a href="#Upgrading_From_Older_Version"> Upgrading From Older Version </a>
+        <a href="#Translations"> Native Language Support(Translations)</a>
+      </div>
+    </div>
+
+    <a href="javascript:void(0);" class="icon" onclick="fnc_subnav()">menu&#8659;&nbsp&nbsp  </a>
+  </div>
+
+  <section class="main-content" style="padding:0.5em 0.1em;height:1000px;font-size: 0.90em;">
+
+    <h3><a name="Install_Apt"></a> Installing with apt </h3>
+    <ul>
+      <p></p>
+      Motion is part of the Debian, Ubuntu and Raspbian repositories and can be installed with the apt tool.  The
+      version included with apt will be the version that was available when the distribution version
+      was initially deployed and therefore may not represent the latest release.
+      <p></p>
+      To install via apt, open up a terminal window and type: <code><strong>sudo apt-get install motion</strong></code>
+      <p></p>
+    </ul>
+
+    <h3><a name="Install_Deb"></a> Installing with a release deb package </h3>
+    <ul>
+      Motion can also be installed from the release deb files which may provide a more recent version than what
+      is available via apt.
+      <p></p>
+      Determine the deb file name that is appropriate for the distribution and platform from
+      the <a href="https://github.com/Motion-Project/motion/releases">Releases</a> page
+      and open up a terminal window and type:
+      <p></p>
+      <ul>
+        <code><strong>wget https://github.com/Motion-Project/motion/releases/{deb package name} </strong></code>
+      </ul>
+      <p></p>
+      Next, install the retrieved deb package.  Below is a sample method to install that
+      uses the gdebi tool.
+      <p></p>
+      <ul>
+        <code><strong>sudo apt-get install gdebi-core</strong></code>
+        <p></p>
+        <code><strong>sudo gdebi {deb package name}</strong></code>
+      </ul>
+      <p></p>
+    </ul>
+
+    <h3><a name="Build_Deb"></a> Building a deb package </h3>
+    <ul>
+      Users can also build their own deb package from source.  It is often preferable to build and install a
+      deb package rather than using the build from source options below since it is much easier to upgrade from
+      and un-install Motion.  The script that builds the deb packages released can be used to do this.  Open
+      a terminal window and type:
+      <code><strong>wget https://raw.githubusercontent.com/Motion-Project/motion-packaging/master/builddeb.sh </strong></code>
+      Since this is a script file, once it is downloaded open the file with a text viewer and review
+      the script to see what it does.  Never ever run a script without reviewing what it does!.
+      <p></p>
+      Within the script, you will see that it takes a few parameters which are optional.
+      <code><strong> Username, EmailAddress, branch, install, arch</strong></code>
+      If the parameters are not provided, the script will create defaults.
+      <p></p>
+      The general flow of the script is as follows:
+      <ul>
+        <li>Validate input parameters and set defaults as needed.</li>
+        <li>Validate the required packages are installed and notify which ones are missing.</li>
+        <li>Create temporary directories in /tmp</li>
+        <li>Clone the Motion source code and packaging code to the temporary directories</li>
+        <li>Switch to the branch specified in the parameter (or master if not specified)</li>
+        <li>Build the debian package</li>
+        <li>Clean up temporary directories</li>
+      </ul>
+      Once you have reviewed the script and determined that it is OK to run, close out of the editor and then
+      run the command <code>chmod +x ./builddeb.sh</code> to make the script executable.
+      <p></p>
+      Run the script <code>./builddeb.sh myname, myemail, master, n, any</code>
+      <p></p>
+      The script will validate the dependencies and report any additional dependencies which must be installed or if
+      all the dependencies are installed, it will create a deb package.  Note that this may take a bit of time on
+      slower computers.
+      <p></p>
+      Once the deb file is created, install it via the gdebi tool as described above.
+      <p></p>
+    </ul>
+
+    <h3><a name="Abbreviated_Building"></a> Abbreviated Building Guide  </a> </h3>
+    <ul>
+
+    <p></p>
+      <p></p>
+      If you are familiar with the building of applications, then the following is a basic build / install
+      script.  If errors occur during the process or you wish to customize the build, please
+      review the extended building instructions further below.
+      <p></p>
+      Debian / Ubuntu / Raspbian Packages
+      <ul>
+          <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
+          libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
+          libwebp-dev gettext libmicrohttpd-dev</strong></code>
+          <p></p>
+          <code><strong>cd ~</strong></code>
+          <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+          <br /><code><strong>cd motion</strong></code>
+          <br /><code><strong>autoreconf -fiv</strong></code>
+          <br /><code><strong>./configure</strong></code>
+          <br /><code><strong>make</strong></code>
+          <br /><code><strong>make install</strong></code>
+          <p></p>
+      </ul>
+      FreeBSD
+      <ul>
+          <code><strong>sudo pkg install autoconf pkgconf automake gmake git ffmpeg gettext libmicrohttpd </strong></code>
+          <p></p>
+          <code><strong>cd ~</strong></code>
+          <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+          <br /><code><strong>cd motion</strong></code>
+          <br /><code><strong>autoreconf -fiv</strong></code>
+          <br /><code><strong>./configure</strong></code>
+          <br /><code><strong>gmake</strong></code>
+          <br /><code><strong>gmake install</strong></code>
+          <p></p>
+      </ul>
+      Mac OS X
+      <ul>
+          <code><strong>brew install ffmpeg pkg-config libjpeg automake postgresql gettext libmicrohttpd</strong></code>
+          <p></p>
+          <code><strong>cd ~</strong></code>
+          <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
+          <br /><code><strong>cd motion</strong></code>
+          <br /><code><strong>autoreconf -fiv</strong></code>
+          <br /><code><strong>./configure</strong></code>
+          <br /><code><strong>make</strong></code>
+          <br /><code><strong>make install</strong></code>
+          <p></p>
+      </ul>
+      <p></p>
+      <p></p>
+
+    </ul>
+
+    <h3><a name="Preparation_For_Building"></a> Preparation For Building</a> </h3>
+    <ul>
+      <p></p>
+      <p></p>
+      In order to build Motion from source many shared libraries must be installed.
+      The particular libraries needed will vary depending upon the features desired.
+      <p></p>
+      When you install software using pre-compiled binaries (Redhat type RPMs, Debian debs etc)
+      you normally only get what is needed to run the programs themselves. In order to compile programs
+      from source that use these libraries you also need to install the development packages.
+      These are normally called the same name as the package suffixed by -devel or -dev. These development
+      packages contain the header files (xxx.h) that Motion needs to build.  If
+      you build a library from sources you already have these header files. It is recommended to simply
+      install the pre-compiled binary packages and their development brothers.
+      <p></p>
+      Open a terminal and run the following commands to install the packages.
+      <p></p>
+      <p></p>
+      <p></p>
+
+      <h4><a name="BUILD_DEBIAN"></a>Debian/Ubuntu/Raspbian</a> </h4>
+      <ul>
+        <li>Required</li>
+        <ul>
+          <p></p>
+          <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev
+          libjpeg-dev gettext libmicrohttpd-dev</strong></code>
+          <p></p>
+        </ul>
+        <p></p>
+        <li>Optional Packages</li>
+        <ul>
+          <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.)</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev</strong></code>
+            <p></p>
+          </ul>
+          <li>MySQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install mysql-server libmysqlclient-dev</strong></code>
+            <p></p>
+            or (depends upon your distribution and version)
+            <p></p>
+            <code><strong>sudo apt-get install default-libmysqlclient-dev</strong></code>
+            <p></p>
+          </ul>
+          <li>PostgreSQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install libpq-dev</strong></code>
+            <p></p>
+          </ul>
+          <li>SQLite3 database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install libsqlite3-dev</strong></code>
+            <p></p>
+          </ul>
+          <li>JPEG Turbo</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install libjpeg-turbo8 libjpeg-turbo8-dev</strong></code>
+            <p></p>
+          </ul>
+          <li>Webp Image Support</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install libwebp-dev</strong></code>
+            <p></p>
+          </ul>
+
+        </ul>
+      </ul>
+      <p></p>
+      <p></p>
+
+      <h4><a name="BUILD_OPENSUSE"></a>openSUSE</a> </h4>
+      <ul>
+        <li>Required</li>
+        <ul>
+          <p></p>
+          <code><strong>sudo zypper install autoconf automake libtool git </strong></code>
+          <p></p>
+          <code><strong>sudo zypper install --type pattern devel_basis </strong></code>
+          <p></p>
+          <code><strong>sudo zypper install libjpeg8-devel gettext libmicrohttpd </strong></code>
+          <p></p>
+          <code><strong>sudo zypper install -t pattern devel_C_C++ </strong></code>
+          <p></p>
+        </ul>
+        <p></p>
+        <li>Optional Packages</li>
+        <ul>
+          <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo zypper ar -f -n packman-essentials http://packman.inode.at/suse/openSUSE_13.1/Essentials/ packman-essentials</strong></code>
+            <p></p>
+            <code><strong>sudo zypper ar -f -n packman-multimedia http://packman.inode.at/suse/openSUSE_13.1/Multimedia/ packman-multimedia</strong></code>
+            <p></p>
+            <code><strong>sudo zypper install libffmpeg-devel</strong></code>
+            <p></p>
+          </ul>
+          <li>MySQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+          <li>PostgreSQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+          <li>SQLite3 database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+          <li>Webp Image Support</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo zypper install libwebp-devel </strong></code>
+            <p></p>
+          </ul>
+        </ul>
+        Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
+        change in the future.  Validate that the repository is still valid when doing the install on openSUSE systems.
+        The default for the configure is to require that ffmpeg is installed.  Use the configure option to
+        compile without the ffmpeg functionality.
+      </ul>
+      <p></p>
+      <p></p>
+
+      <h4><a name="BUILD_FREEBSD"></a>FreeBSD</a> </h4>
+      <ul>
+        <li>Required packages</li>
+          <ul>
+            <p></p>
+            <code><strong> sudo pkg install autoconf pkgconf automake gmake git gettext libmicrohttpd</strong></code>
+            <p></p>
+          </ul>
+        <li>Optional packages</li>
+        <ul>
+          <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.)</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo pkg install ffmpeg</strong></code>
+            <p></p>
+          </ul>
+          <li>MySQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo pkg install mysql57-client openssl</strong></code>
+            <p></p>
+          </ul>
+          <li>PostgreSQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo pkg install postgresql95-contrib</strong></code>
+            <p></p>
+          </ul>
+          <li>SQLite3 database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo pkg install sqlite3</strong></code>
+            <p></p>
+          </ul>
+          <li>Webcam Support</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo pkg install v4l_compat webcamd</strong></code>
+            <p></p>
+            <li>Add cuse_load="YES" in /boot/loader.conf</li>
+            <li>Add webcamd_enable="YES" in the /etc/rc.conf</li>
+            <li>chmod 666 /dev/video0</li>
+            <p></p>
+          </ul>
+         <li>Webp Image Support</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo pkg install libwebp</strong></code>
+            <p></p>
+          </ul>
+         <li>Temorary bktr Support</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo kldload bktr_mem.ko</strong></code><p></p>
+            <code><strong>sudo kldload bktr.ko</strong></code><p></p>
+            <code><strong>sudo sysctl hw.bt848.card=1</strong></code> ( Miro pctv )<p></p>
+            <code><strong>sudo sysctl hw.bt848.tuner=10</strong></code> ( PHILIPS_FR1216_PAL )<p></p>
+            <code><strong>sudo sysctl hw.bt848.format=0</strong></code> ( PAL )<p></p>
+            <p></p>
+          </ul>
+         <li>Persistent bktr Support</li>
+          <ul>
+            <li>Add <code><strong>bktr_mem_load="YES"</strong></code> in /boot/loader.conf</li>
+            <li>Add <code><strong>bktr_load="YES"</strong></code> in /boot/loader.conf</li>
+            <li>Add <code><strong>hw.bt848.card=1</strong></code> in /etc/sysctl.conf</li>
+            <li>Add <code><strong>hw.bt848.tuner=10</strong></code> in /etc/sysctl.conf</li>
+            <li>Add <code><strong>hw.bt848.format=0</strong></code> in /etc/sysctl.conf</li>
+          </ul>
+        </ul>
+      </ul>
+      <p></p>
+      <p></p>
+
+      <h4><a name="BUILD_CENTOS"></a>CentOS 7</a> </h4>
+      <ul>
+        <li>Required</li>
+        <ul>
+          <p></p>
+          <code><strong>sudo yum groupinstall 'Development Tools'</strong></code>
+          <p></p>
+          <code><strong>sudo yum install libjpeg-turbo libjpeg-turbo-devel gettext libmicrohttpd-devel</strong></code>
+          <p></p>
+          <code><strong>sudo yum install libzip-devel</strong></code>
+          <p></p>
+        </ul>
+        <p></p>
+        <li>Optional Packages</li>
+        <ul>
+          <li>FFMpeg Functionality(Required for creating movies, using network cameras, etc.  SEE NOTE BELOW!)</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm</strong></code>
+            <p></p>
+            <code><strong>sudo yum install ffmpeg ffmpeg-devel</strong></code>
+            <p></p>
+          </ul>
+          <li>MySQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+          <li>PostgreSQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+          <li>SQLite3 database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo yum install sqlite-devel</strong></code>
+            <p></p>
+          </ul>
+          <li>Webp Image Support</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+        </ul>
+        Important ffmpeg note:  The ffmpeg libraries indicated above are provided by a external repository.  This may
+        change in the future.  Validate that the repository is still valid when doing the install on CentOS systems.
+        The default for the configure is to require that ffmpeg is installed.  Use the configure option to
+        compile without the ffmpeg functionality.
+      </ul>
+      <p></p>
+      <p></p>
+
+      <h4><a name="BUILD_MACOSX"></a>MacOSX</a> </h4>
+      <ul>
+        <li>Required</li>
+        <ul>
+          <p></p>
+          <li>Install brew as described on https://brew.sh</li>
+          <p></p>
+          <code><strong>brew upgrade ffmpeg pkg-config jpeg automake gettext libmicrohttpd-dev</strong></code>
+          <p></p>
+          <code><strong>brew install ffmpeg pkg-config libjpeg automake </strong></code>
+          <p></p>
+        </ul>
+        <p></p>
+        <li>Optional Packages</li>
+        <li>PostgreSQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>brew upgrade postgresql</strong></code>
+            <code><strong>brew install postgresql</strong></code>
+            <p></p>
+          </ul>
+
+        <ul>
+          <li>None known by author</li>
+        </ul>
+      </ul>
+      <p></p>
+      <p></p>
+
+    </ul>
+
+    <h3><a name="Configure_Script"></a>  Configure Script</a> </h3>
+    <ul>
+      Motion uses a set tools called the "autotools" in order to generate the required scripts in order to
+      compile and install Motion.  The next step after installing all of the required and desired libraries is to
+      have the autotools create a configure script.  To do this open a terminal and change to the directory with
+      the source code and type
+      <p></p>
+      <code><strong>autoreconf </strong></code>
+      <p></p>
+      If the 'configure' file exists and contains a valid script, the tool will return immediately since no additional work
+      needs to be completed.  If the script needs updating, then it will take a moment to return.  Once it has been executed,
+      a file called 'configure' will exist in the directory.  Note that if the command is run as
+      <p></p>
+      <code><strong>autoreconf -f</strong></code>
+      <p></p>
+      The -f parameter instructs it to force a new configure file to be created.  This can be preferable in certain
+      situations so that the configure script gets updated with the correct version number.
+      Once the 'configure' file is created, we can execute it.  What the script does is interrogate the system and look
+      for all the needed items in order to compile Motion.  In this process it looks to determine which optional components
+      have been installed on the system and if found sets flags to indicate for them to be included.  If a particular library
+      is required by Motion and is not found, the configure script will issue an error.  The error means that the library was
+      not found because it was either not installed or that it was installed into a location that the script could not find.
+      With the Motion configure script, once it has ended it also lists out all of the optional components that were located.
+      Note that if you KNOW that a particular component is installed yet the configure script reports it as not installed, then
+      it may be necessary to use one or more of the configure options described below to tell the script where to find
+      the particular component.
+
+      <p></p>
+      To run the configure your current directory must be the motion directory. You type
+      <p></p>
+      <code>./configure</code>
+      <p></p>
+      You can add the parameter <code>./configure --help</code> to get help on the different switches.
+      <p></p>
+      When the configure script finishes you should validate that the options desired
+      were correctly identified by the configure.  In particular, the ffmpeg option is occasionally not
+      found even if it is actually installed.  Various users have indicated this to be a particular
+      problem with the PI.  If using a PI and have this issue, you can use the following option
+      <p></p>
+      <code>./configure --with-ffmpeg=/usr/lib/arm-linux-gnueabihf</code>
+      <p></p>
+      For a long term option, you can edit the file
+      <code>$HOME/.bashrc</code>
+      and within it place the following two lines at the end
+      <code>PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf:$PKG_CONFIG_PATH</code>
+      <code>export PKG_CONFIG_PATH</code> This option will however only become
+      effective the next time you open the terminal shell.
+      <p></p>
+      <p></p>
+      The following options can be specified with the configure script to customize
+      how Motion is built.
+      <div class="tblconfig">
+      <table border="1" class="fixed" >
+          <colgroup>
+          <col width="200px">
+          <col width="500px">
+          <col width="700px">
+        </colgroup>
+        <tbody>
+        	  <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Options</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Description <br /> Defaults for the options are specified in brackets [ ]</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Editors comment </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > -h, --help </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > display this help and exit</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --help=short</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > display options specific to this package </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > This command shows the options special to Motion.</td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --help=recursive </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > display the short help of all the included packages </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word >-V, --version  </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > display version information and exit</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Provides the version number of the source code and autotools </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > -q, --quiet, --silent </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > do not print `checking...' messages </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Illustrates only the results of the script. </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --cache-file=FILE </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > cache test results in FILE. [disabled] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > No function</td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > -C, --config-cach  </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > alias for `--cache-file=config.cache'  </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > No function </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > -n, --no-create</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > do not create output files </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Used for testing if other switches produce error - without writing anything to the disk </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --srcdir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > find the sources in DIR. [configure dir or `..'] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > DIR is a directory path. </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Installation directories:</td>
+             <th bgcolor="#edf4f9" word-wrap:break-word >  </th>
+             <th bgcolor="#edf4f9" word-wrap:break-word >  </th>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --prefix=PREFIX </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > install architecture-independent files in PREFIX <br /> [/usr/local]</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > The default /usr/local means that
+             <br /><br />The executable binary "motion" is installed in /usr/local/bin
+             <br /> The manual page in /usr/local/man/man1
+             <br />The document files in /usr/local/docs/motion
+             <br />The configuration file in /usr/local/etc/motion
+             <br />The example config files in /usr/local/motion/examples
+             <br /><br />If you are experimenting with many parallel versions it may be desirable to set the PREFIX to e.g. /usr/local/motion and then add /usr/local/motion/bin to your search path (or simply cd /usr/local/motion/bin before execution).
+             <br /><br />This way you can change version just by changing the symbolic link in /usr/local/motion.
+             <br /><br />If you are installing the software on a machine where you do not have access to the /usr/local but have write access to a home directory, then you should change this to point to a directory within your home tree.
+             <br /><br />Example: --prefix=$HOME </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --exec-prefix=EPREFIX </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > install architecture-dependent files in EPREFIX <br /> [PREFIX] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > This defines an alternative installation directory for the executable binary. <br /> Note: The executable binary will be placed in a directory "bin" below the directory specified by this option <br /> Author recommends leaving this as default (i.e. not setting it). </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --bindir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > user executables [EPREFIX/bin] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > With this option you can control exactly which directory the executable binary is installed. The previous option automatically adds the bin directory. Here you are in full control of the directory. </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --sbindir=DIR </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > System admin executables [EPREFIX/sbin] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion. </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --libexecdir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > program executables [EPREFIX/libexec] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion. </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --datadir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > read-only architecture-independent data [PREFIX/share] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion. </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --sysconfdir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > read-only single-machine data [PREFIX/etc] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word >
+               This is where Motion both installs the default configuration file and also where it will later search for it. <br />
+               Motion searches for the configuration file "motion.conf" in the following order:
+               <br />
+               <UL>  <br />1. Current directory from where Motion was invoked
+                     <br />2. $HOME/.motion
+                     <br />3. The motion subdirectory inside the sysconfig directory set by this switch. If not defined the default is /usr/local/etc/ <br />
+               </UL> <br /> Editor recommends leaving this at default. Be careful if you run "make install" again.
+               This will overwrite the motion-dist.conf file that you may have edited.
+             </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --sharedstatedir=DIR </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > modifiable architecture-independent data [PREFIX/com] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --localstatedir=DIR </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > modifiable single-machine data [PREFIX/var] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --libdir=DIR </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > object code libraries [EPREFIX/lib]</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --includedir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > C header files [PREFIX/include] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --oldincludedir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > C header files for non-gcc [/usr/include] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --infodir=DIR </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > info documentation [PREFIX/info] </td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Not used by Motion.  </td>
+           </tr>
+           <tr>
+             <td bgcolor="#edf4f9" word-wrap:break-word > --mandir=DIR</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > man documentation [PREFIX/man]</td>
+             <td bgcolor="#edf4f9" word-wrap:break-word > Editor recommends the default.</td>
+           </tr>
+      	  <tr>
+      			<th bgcolor="#edf4f9" word-wrap:break-word > Optional Packages: </th>
+      			<th bgcolor="#edf4f9" word-wrap:break-word >  </th>
+      			<th bgcolor="#edf4f9" word-wrap:break-word >  </th>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-bktr </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude bktr video subsystem devices </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > ONLY used in *BSD </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-v4l2 </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude using v4l2 (video4linux2) subsystem. Makes Motion so it only supports network cameras. </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Can be used if you do not need support or lack some of the libraries for it. </td>
+      		</tr>
+      		<tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-webp </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Compile without webp image support</td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word >  </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --with-ffmpeg=DIR </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Specify the path for the directory prefix in which the
+      			library and headers are installed.
+      			<br /> If not specified configure will search in /usr/ and /usr/local/ </td>
+
+      			<td bgcolor="#edf4f9" word-wrap:break-word > DIR is the directory PREFIX in which
+      			the ffmpeg shared libraries and their headers are installed.
+      			<br /> If you install ffmpeg from sources and use the default directories or
+      			if ffmpeg is installed as a binary package (RPM or deb) you may not need to specify the directory prefix.
+      			Configure should find the libraries automatically.
+      			<br />If you installed ffmpeg from sources and specified a different --prefix when building f
+      			fmpeg you must use the same value for the DIR ( --with-ffmpeg=DIR)
+      			or export that location to be included in the PKG_CONFIG_PATH
+      			<br />The option of --with-ffmpeg is the default for Motion.  If the required libraries are not located, the
+      			configure script will stop at the ffmpeg section and report which libraries need to be installed.
+      			Once the required libraries are installed, run the script again.  As noted previously, make sure
+      			to install the -dev versions.
+      			<br />For more information on FFmpeg see the documentation for the FFmpeg project.
+      			</td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-ffmpeg </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with ffmpeg </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to compile with ffmpeg. If ffmpeg is not installed you must specify this option for Motion to build without ffmpeg. </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-mysql </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MySQL support </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MySQL support in the package. <br /> This can also be useful if you get compilation errors related to MySQL and you actually do not need the feature anyway. </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-pgsql </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with PostgreSQL support </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include PostgreSQL support in the package. <br /> This can also be useful if you get compilation errors related to PostgreSQL and you actually do not need the feature anyway. </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-sqlite3 </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Disable sqlite3 support in motion. </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include SQLite3 support in the package. <br /> This can also be useful if you get compilation errors related to SQLite3 and you actually do not need the feature anyway. </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --without-optimizecpu </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Exclude autodetecting platform and cpu type. This will disable the compilation of gcc optimizing code by platform and cpu. </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if the optimization causes problems. Not typically needed. </td>
+      		</tr>
+      		<tr>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
+      			<td bgcolor="#edf4f9" word-wrap:break-word > This option is for developers only. It checks to ensure that the code is robust. </td>
+      		</tr>
+      	</tbody>
+      </table>
+      </div>
+      <p></p>
+      <p></p>
+    </ul>
+
+    <h3><a name="Make"></a>  Make </h3>
+    <ul>
+      Once the configure script has successfully finished and indicates all options desired, a 'makefile' is created.
+      The makefile builds the Motion program and links in all of the required libraries. To run the makefile on most
+      distributions, type: <code>make</code>  For FreeBSD distributions use <code>gmake</code>
+      <p></p>
+      The makefile will go through each of the files and compile them.  Depending upon the source code obtained, there may be
+      warnings or usually none.
+      <p></p>
+      If the notifications indicate undefined references, then it is most likely that
+      an additional library needs to be added in via the configure switches.  Many of these additional missing libraries
+      issues may be related to the version of ffmpeg and how it was built or installed.  The following is a sample of some
+      of the extra ffmpeg libraries that may need to be added to pkg-config <strong><code>.pc</code></strong> files that are
+      located in the ffmpeg /lib/pkgconfig directory.
+      <p></p>
+      <code>
+      -lavformat -lswscale -lavcodec -lavutil -lfdk-aac -lswresample -lm -lopus -lz -lva -lvpx -lx264 -lmp3lame -lbz2 -ldl -lvorbisenc -lvorbis -ltheoraenc -ltheoradec
+      </code>
+      <p></p>
+
+      <p></p>
+      Once the makefile has completed correctly, it will report 'build complete'.
+      <p></p>
+      If you have run <code>make</code> before, you should run a <code>make clean</code> before
+      running <code>make</code> again. This cleans out all the object files that were
+      generated the previous time you ran <code>make</code>. If you do not run <code>make clean</code> first
+      before you rebuild Motion you may not get the additional feature included.
+      For example: If you built Motion without ffmpeg support and then add it later and rebuild Motion
+      without running <code>make clean</code> first the ffmpeg feature does not get compiled into the Motion binary.
+      <p></p>
+      The first time you build Motion run <code>./configure</code>, <code>make</code>, <code>make install</code>.
+      If you need to build it again (to run with different configure options) run <code>./configure</code>,
+      <code>make clean</code>, <code>make</code>, <code>make install</code>.
+      <p></p>
+    </ul>
+
+    <h3><a name="Make_Install"></a>  Make Install </h3>
+    <ul>
+      For most distributions type <code>make install</code> to install the files.  For FreeBSD systems, use
+      <code>gmake install</code>
+      <p></p>
+      These commands create the required directories and copy the files into the following locations. (default directories):
+      <ul>
+      <li>/usr/local/bin</li>
+      <li>usr/local/man/man1</li>
+      <li>/usr/local/etc/motion</li>
+      <li>/usr/local/share/doc/motion</li>
+      <li>/usr/local/share/motion/examples</li>
+      </ul>
+      <p></p>
+      The contents of what gets copied into each directory is as follows:
+      (assuming the default PREFIX /usr/local was used when running configure.  Otherwise adjust to the actual directory specified during the configure step.)
+      <ul>
+        <li> Executable binary "motion" to /usr/local/bin</li>
+        <li> Manual page "motion.1" to /usr/local/man/man1</li>
+        <li> Document files "CHANGELOG, COPYING, CREDITS, motion_guide.html, and README.md to /usr/local/share/doc/motion</li>
+        <li> Example configuration files "*.conf" to /usr/local/share/motion/examples</li>
+        <li> Configuration file "motion-dist.conf" to /usr/local/etc/motion</li>
+      </ul>
+
+      Note that any existing files are overwritten. The default configuration file motion-dist.conf is named like
+      this so that you do not get your working motion.conf file overwritten when you upgrade Motion.
+
+      <p></p>
+    </ul>
+
+    <h3><a name="Un_Install"></a>  Un-install </h3>
+    <ul>
+      From the Motion base installation directory run <code>make uninstall</code>
+      <p></p>
+      And delete the base installation directory in /usr/local and any link pointing to it. If you have forgotten where
+      you installed it or someone else did it for you, simply search for the files and directories starting with Motion.
+      If the filenames and the directories match the names described in the "Make Install" section of this document, you
+      can safely delete them.
+      <p></p>
+    </ul>
+
+    <h3><a name="Additional_Make_Options"></a>  Additional Make Options </h3>
+    <ul>
+      The make command can be run with several options.
+      <code>make</code>,
+      <code>make install</code> and
+      <code>make uninstall</code> has already been described above.
+      <p></p>
+      <dl>
+        <dt> <strong>make clean</strong> </dt>
+        <dd> deletes all the binary files (object files) and the motion binary generated by make. It also deletes temporary files and any jpg files that motion has saved in the motion source directory. It is very important to always run <code>make clean</code> before you run <code>make</code> if you change the configuration (like adding features such as ffmpeg) and rebuild motion.</dd>
+      </dl>
+      <p></p>
+       <dl>
+        <dt> <strong>make distclean</strong> </dt>
+        <dd> deletes the files: config.status, config.log, config.cache, Makefile, and motion.spec.</dd>
+      </dl>
+      <p></p>
+      <p></p>
+    </ul>
+
+    <h3><a name="Upgrading_From_Older_Version"></a>  Upgrading From Older Version </h3>
+    <ul>
+         If you are upgrading from an older version of Motion many options have been renamed, added or removed.
+         The author recommends that you start by copying the configuration files from the older version to a safe
+         location for reference only.  Then start with a clean copy of the new motion-dist.conf installed and make changes to it.
+        <p></p>
+        <p></p>
+      </ul>
+
+    <h3><a name="Translations"></a> Native Language Support(Translations)</h3>
+    <ul>
+         Motion now supports limited translations of message printed to the log or displayed on the web control
+         page using the <code>gettext</code> application.
+        <p></p>
+        Translations should appear automatically based upon the LANG environment variable set on the
+        machine running Motion.  To see the LANG code for your machine, open a terminal and type
+        <code>locale</code>.  If the log and web control still display in English, then this means
+        that translations have not been completed for that language.  The Motion developers rely on
+        the community to provide these translations to the project.  Even those that do not how to
+        program can assist in this process.  The following is an abbreviated description of the
+        processes to update translations:
+        <p></p>
+        A .pot file is the base set of phrases and words to translate.  To create a .pot file for Motion,
+        first clone the Motion git to a local directory and in a terminal window type
+        <code>xgettext --keyword=_ -o po/motion.pot *.c</code>
+        This program scans all the files which end in <code>.c</code> looking for the keyword
+        <code>_</code>(an underscore) which is the macro in the code to identify a item to
+        translate.  The application then outputs a file into the po directory called
+        motion.pot.  The motion.pot file is a text file which is a template of all
+        the phrases that can be translated.  Translators can add translations to that file and
+        then save it with the particular language code and po extension.  e.g. es.po for Spanish
+        <p></p>
+        A alternative is to use a common gui translation tool called poedit that is available
+        on most distributions. This is a program that is designed to work with pot / po files.  It allows
+        users to open po and pot files and create/edit/merge translations.
+        <p></p>
+        It has been observed that it may be easiest to create the motion.pot file (as described above) and then
+        use that file in the poedit application.
+        <p></p>
+        Note that in order to simply revise an existing translation, users can edit the po file directly without
+        creating a motion.pot file.
+        <p></p>
+        <p></p>
+        <p></p>
+        The above process describes the items that have already been tagged within the code for
+        translation.  If a particular phrase is reported in the log in English and that phrase is not
+        listed in the motion.pot file, then this means that the phrase needs to be tagged in the code.  The
+        process to get the phrase tagging:
+        <p></p>
+        1.  Find the module in the source code that is printing the message.
+        <p></p>
+        2.  Validate that the header file "translate.h" is included at the top of the module.
+        <p></p>
+        3.  Find the particular phrase and surround it with a <code>_()</code>
+        <p></p>
+        Save the file and then re-create the motion.pot file.
+        <p></p>
+        <p></p>
+        <p></p>
+      </ul>
+
+
+  </ul>
+
+  </section>
+</body>

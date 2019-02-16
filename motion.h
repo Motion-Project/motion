@@ -10,6 +10,10 @@
 #ifndef _INCLUDE_MOTION_H
 #define _INCLUDE_MOTION_H
 
+/* Forward declarations, used in functional definitions of headers */
+struct images;
+struct image_data;
+
 #include "config.h"
 
 /* Includes */
@@ -47,26 +51,25 @@
 #include <sys/param.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <microhttpd.h>
 
-#ifdef __FreeBSD__
-//It is unknown whether it is safe to put this into the if/else below on Apple and BSD
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <pthread_np.h>
 #endif
 
 #include "logger.h"
 #include "conf.h"
 #include "stream.h"
-#include "webhttpd.h"
 
-#ifdef __APPLE__
-#define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(name)
-#elif defined(BSD)
-#define MOTION_PTHREAD_SETNAME(name)  pthread_set_name_np(pthread_self(), name)
-#elif HAVE_PTHREAD_SETNAME_NP
-#define MOTION_PTHREAD_SETNAME(name)  pthread_setname_np(pthread_self(), name)
-#else
-#define MOTION_PTHREAD_SETNAME(name)
+#include "track.h"
+#include "netcam.h"
+#include "netcam_rtsp.h"
+#include "ffmpeg.h"
+
+#ifdef HAVE_MMAL
+#include "mmalcam.h"
 #endif
+
 
 /**
  * ATTRIBUTE_UNUSED:
@@ -84,12 +87,6 @@
 #define ATTRIBUTE_UNUSED
 #endif
 
-/* strerror_r() XSI vs GNU */
-#if (defined(BSD)) || ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
-#define XSI_STRERROR_R
-#endif
-
-
 /*
  *  The macro below defines a version of sleep using nanosleep
  * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping
@@ -101,45 +98,19 @@
                 while (nanosleep(&tv, &tv) == -1); \
         }
 
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
-
-#define VIDEO_PALETTE_GREY      1       /* Linear greyscale */
-#define VIDEO_PALETTE_HI240     2       /* High 240 cube (BT848) */
-#define VIDEO_PALETTE_RGB565    3       /* 565 16 bit RGB */
-#define VIDEO_PALETTE_RGB24     4       /* 24bit RGB */
-#define VIDEO_PALETTE_RGB32     5       /* 32bit RGB */
-#define VIDEO_PALETTE_RGB555    6       /* 555 15bit RGB */
-#define VIDEO_PALETTE_YUV422    7       /* YUV422 capture */
-#define VIDEO_PALETTE_YUYV      8
-#define VIDEO_PALETTE_UYVY      9       /* The great thing about standards is ... */
-#define VIDEO_PALETTE_YUV420    10
-#define VIDEO_PALETTE_YUV411    11      /* YUV411 capture */
-#define VIDEO_PALETTE_RAW       12      /* RAW capture (BT848) */
-#define VIDEO_PALETTE_YUV422P   13      /* YUV 4:2:2 Planar */
-#define VIDEO_PALETTE_YUV411P   14      /* YUV 4:1:1 Planar */
-#define VIDEO_PALETTE_YUV420P   15      /* YUV 4:2:0 Planar */
-#define VIDEO_PALETTE_YUV410P   16      /* YUV 4:1:0 Planar */
-#define VIDEO_PALETTE_PLANAR    13      /* start of planar entries */
-#define VIDEO_PALETTE_COMPONENT 7       /* start of component entries */
-
 #define DEF_PALETTE             17
 
 /* Default picture settings */
-#define DEF_WIDTH              352
-#define DEF_HEIGHT             288
+#define DEF_WIDTH              640
+#define DEF_HEIGHT             480
 #define DEF_QUALITY             75
 #define DEF_CHANGES           1500
 
-#define DEF_MAXFRAMERATE       100
+#define DEF_MAXFRAMERATE        15
 #define DEF_NOISELEVEL          32
 
 /* Minimum time between two 'actions' (email, sms, external) */
 #define DEF_EVENT_GAP            60  /* 1 minutes */
-#define DEF_MAXMOVIETIME       3600  /* 60 minutes */
-
-#define DEF_FFMPEG_BPS      400000
-#define DEF_FFMPEG_VBR           0
-#define DEF_FFMPEG_CODEC   "mpeg4"
 
 #define DEF_INPUT               -1
 #define DEF_VIDEO_DEVICE         "/dev/video0"
@@ -153,8 +124,7 @@
                                      */
 
 #define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
-#define WATCHDOG_KILL          -60   /* -60 sec grace period before calling thread cancel */
-#define WATCHDOG_OFF          -127   /* Turn off watchdog, used when we wants to quit a thread */
+#define WATCHDOG_KILL          -10   /* 10 sec grace period before calling thread cancel */
 
 #define CONNECTION_KO           "Lost connection"
 #define CONNECTION_OK           "Connection OK"
@@ -171,10 +141,6 @@
 #define DEF_TIMEPATH            "%Y%m%d-timelapse"
 
 #define DEF_TIMELAPSE_MODE      "daily"
-
-/* Do not break this line into two or more. Must be ONE line */
-#define DEF_SQL_QUERY_START "sql_query_start insert into security_events(camera, event_time_stamp) values('%t', '%Y-%m-%d %T')"
-#define DEF_SQL_QUERY       "sql_query insert into security_file(camera, filename, frame, file_type, time_stamp) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T')"
 
 /* OUTPUT Image types */
 #define IMAGE_TYPE_JPEG        0
@@ -213,15 +179,6 @@
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
 
-/* Forward declaration, used in track.h */
-struct images;
-
-#include "track.h"
-#include "netcam.h"
-
-#ifdef HAVE_MMAL
-#include "mmalcam.h"
-#endif
 
 /*
  * Structure to hold images information
@@ -244,12 +201,40 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_V4L2,
     CAMERA_TYPE_BKTR,
     CAMERA_TYPE_MMAL,
+    CAMERA_TYPE_RTSP,
     CAMERA_TYPE_NETCAM
 };
 
+enum WEBUI_LEVEL{
+  WEBUI_LEVEL_ALWAYS     = 0,
+  WEBUI_LEVEL_LIMITED    = 1,
+  WEBUI_LEVEL_ADVANCED   = 2,
+  WEBUI_LEVEL_RESTRICTED = 3,
+  WEBUI_LEVEL_NEVER      = 99
+};
+
+struct vdev_usrctrl_ctx {
+    char          *ctrl_name;       /* The name or description of the ID as requested by user*/
+    int            ctrl_value;      /* The value that the user wants the control set to*/
+};
+
+struct vdev_context {
+    /* As v4l2 and bktr get rewritten, put thread specific items here
+     * Rather than use conf options directly, copy from conf to here
+     * to handle cross thread webui changes which could cause problems
+     */
+    struct vdev_usrctrl_ctx *usrctrl_array;     /*Array of the controls the user specified*/
+    int usrctrl_count;                          /*Count of the controls the user specified*/
+    int update_parms;                           /*Bool for whether to update the parameters on the device*/
+};
+
+
 struct image_data {
-    unsigned char *image;
+    unsigned char *image_norm;
+    unsigned char *image_high;
     int diffs;
+    int64_t        idnbr_norm;
+    int64_t        idnbr_high;
     struct timeval timestamp_tv;
     int shot;                   /* Sub second timestamp count */
 
@@ -264,6 +249,13 @@ struct image_data {
     struct coord location;      /* coordinates for center and size of last motion detection*/
 
     int total_labels;
+
+};
+
+struct stream_data {
+    unsigned char   *jpeg_data; /* Image compressed as JPG */
+    long            jpeg_size;  /* The number of bytes for jpg */
+    int             cnct_count; /* Counter of the number of connections */
 };
 
 /*
@@ -293,7 +285,10 @@ struct image_data {
  */
 
 /* date/time drawing, draw.c */
-int draw_text(unsigned char *image, unsigned int startx, unsigned int starty, unsigned int width, const char *text, unsigned int factor);
+int draw_text(unsigned char *image,
+              int width, int height,
+              int startx, int starty,
+              const char *text, int factor);
 int initialize_chars(void);
 
 struct images {
@@ -303,17 +298,22 @@ struct images {
     int image_ring_out;               /* Index in image ring buffer we want to process next time */
 
     unsigned char *ref;               /* The reference frame */
-    unsigned char *out;               /* Picture buffer for motion images */
+    struct image_data img_motion;     /* Picture buffer for motion images */
     int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
-    unsigned char *image_virgin;      /* Last picture frame with no text or locate overlay */
+    struct image_data image_virgin;   /* Last picture frame with no text or locate overlay */
+    struct image_data image_vprvcy;   /* Virgin image with the privacy mask applied */
     struct image_data preview_image;  /* Picture buffer for best image when enables */
     unsigned char *mask;              /* Buffer for the mask file */
     unsigned char *smartmask;
     unsigned char *smartmask_final;
     unsigned char *common_buffer;
+    unsigned char *substream_image;
 
     unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
     unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
+
+    unsigned char *mask_privacy_high;      /* Buffer for the privacy mask values */
+    unsigned char *mask_privacy_high_uv;   /* Buffer for the privacy U&V values */
 
     int *smartmask_buffer;
     int *labels;
@@ -322,7 +322,12 @@ struct images {
     int height;
     int type;
     int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */
-    int size;
+    int size_norm;                    /* Number of bytes for normal size image */
+
+    int width_high;
+    int height_high;
+    int size_high;                 /* Number of bytes for high resolution image */
+
     int motionsize;
     int labelgroup_max;
     int labels_above;
@@ -338,28 +343,18 @@ enum FLIP_TYPE {
 
 /* Contains data for image rotation, see rotate.c. */
 struct rotdata {
-    /* Temporary buffer for 90 and 270 degrees rotation. */
-    unsigned char *temp_buf;
-    /*
-     * Degrees to rotate; copied from conf.rotate_deg. This is the value
-     * that is actually used. The value of conf.rotate_deg cannot be used
-     * because it can be changed by motion-control, and changing rotation
-     * while Motion is running just causes problems.
-     */
-    int degrees;
 
-    /*
-     * Rotate image over the Horizontal or Vertical axis.
-     * As with degrees, this is the value actually used, and value of conf.flip_axis
-     * cannot be used.
-     */
-    enum FLIP_TYPE axis;
-    /*
-     * Capture width and height - different from output width and height if
-     * rotating 90 or 270 degrees.
-     */
-    int cap_width;
-    int cap_height;
+    unsigned char *buffer_norm;  /* Temporary buffer for 90 and 270 degrees rotation of normal resolution image. */
+    unsigned char *buffer_high;  /* Temporary buffer for 90 and 270 degrees rotation of high resolution image. */
+    int degrees;              /* Degrees to rotate; copied from conf.rotate_deg. */
+    enum FLIP_TYPE axis;      /* Rotate image over the Horizontal or Vertical axis. */
+
+    int capture_width_norm;            /* Capture width of normal resolution image */
+    int capture_height_norm;           /* Capture height of normal resolution image */
+
+    int capture_width_high;            /* Capture width of high resolution image */
+    int capture_height_high;           /* Capture height of high resolution image */
+
 };
 
 /*
@@ -382,14 +377,20 @@ struct context {
     struct config conf;
     struct images imgs;
     struct trackoptions track;
+    int                 track_posx;
+    int                 track_posy;
 
     enum CAMERA_TYPE      camera_type;
     struct netcam_context *netcam;
 #ifdef HAVE_MMAL
     struct mmalcam_context *mmalcam;
 #endif
+    struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
+    struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
 
-    struct image_data *current_image;        /* Pointer to a structure where the image, diffs etc is stored */
+    struct vdev_context *vdev;              /* Structure for v4l2 and bktr device information */
+
+    struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
 
     int locate_motion_mode;
@@ -399,12 +400,15 @@ struct context {
 
     int noise;
     int threshold;
+    int threshold_maximum;
     int diffs_last[THRESHOLD_TUNE_LENGTH];
     int smartmask_speed;
 
+
     /* Commands to the motion thread */
     volatile unsigned int snapshot;    /* Make a snapshot */
-    volatile unsigned int makemovie;   /* End a movie */
+    volatile unsigned int event_stop;  /* Boolean for whether to stop a event */
+    volatile unsigned int event_user;  /* Boolean for whether to user triggered an event */
     volatile unsigned int finish;      /* End the thread */
     volatile unsigned int restart;     /* Restart the thread when it ends */
     /* Is the motion thread running */
@@ -420,10 +424,10 @@ struct context {
     int prev_event;
     unsigned long long database_event_id;
     unsigned int lightswitch_framecounter;
-    char text_event_string[PATH_MAX];        /* The text for conv. spec. %C -
-                                                we assume PATH_MAX normally 4096 characters is fine */
-    int postcap;                             /* downcounter, frames left to to send post event */
+    char text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
+    int text_scale;
 
+    int postcap;                             /* downcounter, frames left to to send post event */
     int shots;
     unsigned int detecting_motion;
     struct tm *currenttime_tm;
@@ -448,9 +452,9 @@ struct context {
     struct stream stream;
     int stream_count;
 
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+    char hostname[PATH_MAX];
+
     int sql_mask;
-#endif
 
 #ifdef HAVE_SQLITE3
     sqlite3 *database_sqlite3;
@@ -458,7 +462,6 @@ struct context {
 
 #ifdef HAVE_MYSQL
     MYSQL *database;
-
 #endif
 
 #ifdef HAVE_PGSQL
@@ -470,10 +473,11 @@ struct context {
     char extpipefilename[PATH_MAX];
     int movie_last_shot;
 
-    struct ffmpeg *ffmpeg_output;
-    struct ffmpeg *ffmpeg_output_debug;
-    struct ffmpeg *ffmpeg_timelapse;
-    struct ffmpeg *ffmpeg_smartmask;
+    struct ffmpeg   *ffmpeg_output;
+    struct ffmpeg   *ffmpeg_output_motion;
+    struct ffmpeg   *ffmpeg_timelapse;
+    int             movie_passthrough;
+
     char timelapsefilename[PATH_MAX];
     char motionfilename[PATH_MAX];
 
@@ -487,7 +491,6 @@ struct context {
     int minimum_frame_time_downcounter;
     unsigned int get_image;    /* Flag used to signal that we capture new image when we run the loop */
 
-    unsigned int text_size_factor;
     long int required_frame_time, frame_delay;
 
     long int rolling_average_limit;
@@ -506,6 +509,20 @@ struct context {
     unsigned int passflag;  //only purpose is to flag first frame vs all others.....
     int rolling_frame;
 
+    struct MHD_Daemon   *webcontrol_daemon;
+    struct MHD_Daemon   *webstream_daemon;
+    char                webcontrol_digest_rand[8];
+    char                webstream_digest_rand[8];
+    int                 camera_id;
+
+    pthread_mutex_t     mutex_stream;
+
+    struct stream_data  stream_norm;    /* Copy of the image to use for web stream*/
+    struct stream_data  stream_sub;     /* Copy of the image to use for web stream*/
+    struct stream_data  stream_motion;  /* Copy of the image to use for web stream*/
+    struct stream_data  stream_source;  /* Copy of the image to use for web stream*/
+
+
 };
 
 extern pthread_mutex_t global_lock;
@@ -522,4 +539,9 @@ FILE * myfopen(const char *, const char *);
 int myfclose(FILE *);
 size_t mystrftime(const struct context *, char *, size_t, const char *, const struct timeval *, const char *, int);
 int create_path(const char *);
+
+void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
+void util_threadname_get(char *threadname);
+int util_check_passthrough(struct context *cnt);
+
 #endif /* _INCLUDE_MOTION_H */

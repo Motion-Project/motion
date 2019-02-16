@@ -20,3 +20,6 @@ aclocal.m4
 config.status
 configure
 config.h.in
+
+po/*.mo
+.vscode/

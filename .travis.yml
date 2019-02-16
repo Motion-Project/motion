@@ -1,10 +1,12 @@
-before_script:
-  - autoreconf -fiv
-script: ./configure && make
+sudo: required
 
 matrix:
   include:
+  - os: osx
+    language: c
+    compiler: gcc
   - os: linux
+    env:  BUILD_IMAGE=14.04
     language: c
     compiler: gcc
     addons:
@@ -17,20 +19,94 @@ matrix:
         - libavdevice-dev
         - libjpeg8-dev
         - libzip-dev
+        - libsqlite3-dev
+        - libpq-dev
+        - libmysqlclient-dev
+        - libwebp-dev
+        - libmicrohttpd-dev
+        - gettext
   - os: linux
+    env:  DOCKER_IMAGE=ubuntu:16.04
+    services:  docker
     language: c
     compiler: gcc
-    dist: trusty
-    addons:
-      apt:
-        sources:
-        - sourceline: 'ppa:mc3man/trusty-media'
-        packages:
-        - libavformat-dev
-        - libavcodec-dev
-        - libavutil-dev
-        - libswscale-dev
-        - libavdevice-dev
-        - libjpeg8-dev
-        - libzip-dev
+  - os: linux
+    env:  DOCKER_IMAGE=ubuntu:17.10
+    services:  docker
+    language: c
+    compiler: gcc
+  - os: linux
+    env:  DOCKER_IMAGE=ubuntu:18.04
+    services:  docker
+    language: c
+    compiler: gcc
+  - os: linux
+    env:  DOCKER_IMAGE=debian:jessie
+    services:  docker
+    language: c
+    compiler: gcc
+  - os: linux
+    env:  DOCKER_IMAGE=debian:stretch
+    services:  docker
+    language: c
+    compiler: gcc
+  - os: linux
+    env:  DOCKER_IMAGE=alpine:latest
+    services:  docker
+    language: c
+    compiler: gcc
 
+before_install:
+  - if [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
+      echo $DOCKER_IMAGE;
+      docker pull $DOCKER_IMAGE;
+      docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/sh -c 'while true; do sleep 1; done';
+    elif [ "x$DOCKER_IMAGE" != "x" ]; then
+      echo $DOCKER_IMAGE;
+      docker pull $DOCKER_IMAGE;
+      docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
+    fi;
+
+before_script:
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+      brew upgrade ffmpeg pkg-config jpeg libmicrohttpd;
+      brew install ffmpeg pkg-config libjpeg libmicrohttpd;
+      autoreconf -fiv;
+    elif [ "$BUILD_IMAGE" = "14.04" ]; then
+      autoreconf -fiv;
+    elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
+      docker exec $(docker ps -aq) /bin/sh -c 'apk update';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add alpine-sdk autoconf automake pkgconf libtool';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add libjpeg-turbo-dev libzip-dev ffmpeg-dev';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add libmicrohttpd-dev gettext-dev';
+      docker exec $(docker ps -aq) /bin/sh -c 'autoreconf -fiv';
+    elif [ "$DOCKER_IMAGE" = "debian:stretch" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev default-libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
+      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
+    elif [ "$DOCKER_IMAGE" = "debian:jessie" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
+      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
+    elif [ "x$DOCKER_IMAGE" != "x" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
+      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
+    fi;
+
+script:
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+      ./configure --with-developer-flags && make;
+    elif [ "$BUILD_IMAGE" = "14.04" ]; then
+      ./test_builds.sh;
+    elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
+      docker exec $(docker ps -aq) /bin/sh -c './test_builds.sh';
+    elif [ "x$DOCKER_IMAGE" != "x" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c './test_builds.sh';
+    fi;

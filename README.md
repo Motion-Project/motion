@@ -14,10 +14,10 @@ words, it can detect motion.
 
 The documentation for Motion is contained within the file motion_guide.html.
 
-The offline version of this file is available in the **doc/motion** directory.  The 
-online version of the motion_guide.html file is within the master branch and can be viewed [here](http://htmlpreview.github.com/?https://github.com/Motion-Project/motion/blob/master/motion_guide.html)
+The offline version of this file is available in the **doc/motion** directory.  The
+online version of the motion_guide.html file can be viewed [here](https://motion-project.github.io/motion_guide.html)
 
-In addition to the detailed building instructions included within the guide, the 
+In addition to the detailed building instructions included within the guide, the
 INSTALL file contains abbreviated building instructions.
 
 ## Resources

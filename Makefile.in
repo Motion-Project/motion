@@ -26,26 +26,38 @@ datadir     = @datadir@
 datarootdir = @datarootdir@
 docdir      = $(datadir)/doc/@PACKAGE_NAME@
 examplesdir = $(datadir)/@PACKAGE_NAME@/examples
+localedir   = @localedir@
 
 ################################################################################
 # These variables contain compiler flags, object files to build and files to   #
 # install.                                                                     #
 ################################################################################
-CFLAGS       = @CFLAGS@ -Wall -DVERSION=\"@PACKAGE_VERSION@\" -Dsysconfdir=\"$(sysconfdir)\" @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
+CFLAGS       = @CFLAGS@ -Wall \
+	 -DVERSION=\"@PACKAGE_VERSION@\" \
+	 -Dsysconfdir=\"$(sysconfdir)\"  \
+	 -DLOCALEDIR=\"$(DESTDIR)$(localedir)\"    \
+	 -DMOTIONDOCDIR=\"$(DESTDIR)$(docdir)\"    \
+	 @FFMPEG_CFLAGS@ @MMAL_CFLAGS@
 LDFLAGS      = @LDFLAGS@
 LIBS         = @LIBS@  @MMAL_LIBS@ @FFMPEG_LIBS@
 OBJ          = motion.o logger.o conf.o draw.o jpegutils.o \
 			   video_loopback.o video_v4l2.o video_common.o video_bktr.o \
-			   netcam.o netcam_ftp.o netcam_jpeg.o netcam_wget.o track.o \
-			   alg.o event.o picture.o rotate.o webhttpd.o \
+			   netcam.o netcam_http.o netcam_ftp.o netcam_jpeg.o netcam_wget.o \
+			   track.o alg.o event.o picture.o rotate.o translate.o \
+			   webu.o webu_html.o webu_text.o webu_stream.o \
 			   stream.o md5.o netcam_rtsp.o ffmpeg.o \
 			   @MMAL_OBJ@ @SQLITE_OBJ@
-SRC          = $(OBJ:.o=.c)
-DOC          = CHANGELOG COPYING CREDITS README.md motion_guide.html mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
+SRC          = $(foreach obj,$(OBJ:.o=.c),@top_srcdir@/$(obj))
+DOC          = CHANGELOG COPYING CREDITS README.md  \
+			   motion_guide.html motion_stylesheet.css \
+			   motion_config.html motion_build.html \
+			   mask1.png normal.jpg outputmotion1.jpg outputnormal1.jpg
+DOC_FILES    = $(foreach doc,$(DOC),@top_srcdir@/$(doc))
 EXAMPLES     = *.conf motion.service
 EXAMPLES_BIN = motion.init-Debian motion.init-FreeBSD.sh
 PROGS        = motion
 DEPEND_FILE  = .depend
+LANGCDS      = @LANGCDS@
 
 ################################################################################
 # ALL and PROGS build Motion and, possibly, Motion-control.                    #
@@ -58,7 +70,23 @@ else
 endif
 	@echo
 
-progs: pre-build-info $(PROGS)
+progs: pre-build-info $(PROGS) convert-po
+
+################################################################################
+# Convert the po translation files into mo files                               #
+################################################################################
+convert-po:
+ifeq ("@INTL@","yes")
+	@echo Performing the conversion of .po to .mo files
+	@for lng in $(LANGCDS); \
+	do \
+	  msgfmt @top_srcdir@/po/$$lng.po -o @top_srcdir@/po/$$lng.mo  ;   \
+	  if [ $$? -ne 0 ]; then exit 1; fi; \
+	done
+else
+	@echo Skipping translations
+endif
+	@echo
 
 ################################################################################
 # PRE-BUILD-INFO outputs some general info before the build process starts.    #
@@ -99,9 +127,9 @@ pre-mobject-info:
 ################################################################################
 # Define the compile command for C files.                                      #
 ################################################################################
-#%.o: %.c
-#	@echo -e "\tCompiling $< into $@..."
-#	@$(CC) -c $(CFLAGS) $< -o $@
+%.o: @top_srcdir@/%.c
+	@echo -e "\tCompiling $< into $@..."
+	@$(CC) -c $(CFLAGS) -I@top_builddir@ $< -o $@
 
 ################################################################################
 # Include the dependency file if it exists.                                    #
@@ -120,7 +148,7 @@ endif
 ################################################################################
 $(DEPEND_FILE): *.h $(SRC)
 	@echo "Generating dependencies, please wait..."
-	@$(CC) $(CFLAGS) -M $(SRC) > .tmp
+	@$(CC) $(CFLAGS) -I@top_builddir@ -M $(SRC) > .tmp
 	@mv -f .tmp $(DEPEND_FILE)
 	@echo
 
@@ -128,7 +156,6 @@ $(DEPEND_FILE): *.h $(SRC)
 # DEP, DEPEND and FASTDEP generate the dependency file.                        #
 ################################################################################
 dep depend fastdep: $(DEPEND_FILE)
-
 
 ################################################################################
 # DEV, BUILD with developer flags                                              #
@@ -175,8 +202,8 @@ install:
 	@sed -e 's|$${prefix}|$(prefix)|' camera2-dist.conf > camera2-dist.conf.tmp && mv -f camera2-dist.conf.tmp camera2-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' camera3-dist.conf > camera3-dist.conf.tmp && mv -f camera3-dist.conf.tmp camera3-dist.conf
 	@sed -e 's|$${prefix}|$(prefix)|' camera4-dist.conf > camera4-dist.conf.tmp && mv -f camera4-dist.conf.tmp camera4-dist.conf
-	$(INSTALL_DATA) motion.1 $(DESTDIR)$(mandir)/man1
-	$(INSTALL_DATA) $(DOC) $(DESTDIR)$(docdir)
+	$(INSTALL_DATA) @top_srcdir@/motion.1 $(DESTDIR)$(mandir)/man1
+	$(INSTALL_DATA) $(DOC_FILES) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $(EXAMPLES) $(DESTDIR)$(examplesdir)
 	$(INSTALL) $(EXAMPLES_BIN) $(DESTDIR)$(examplesdir)
 	$(INSTALL_DATA) motion-dist.conf $(DESTDIR)$(sysconfdir)/motion
@@ -184,10 +211,21 @@ install:
 	$(INSTALL_DATA) camera2-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	$(INSTALL_DATA) camera3-dist.conf $(DESTDIR)$(sysconfdir)/motion
 	$(INSTALL_DATA) camera4-dist.conf $(DESTDIR)$(sysconfdir)/motion
-	for prog in $(PROGS); \
+	@for prog in $(PROGS); \
 	do \
 	($(INSTALL) $$prog $(DESTDIR)$(bindir) ); \
 	done
+ifeq ("@INTL@","yes")
+	@echo Installing translation files
+	@for lng in $(LANGCDS); \
+	do \
+      mkdir -p $(DESTDIR)$(localedir)/$$lng"/LC_MESSAGES/";    \
+	  $(INSTALL_DATA) @top_srcdir@/po/$$lng.mo                \
+	  $(DESTDIR)$(localedir)/$$lng"/LC_MESSAGES/motion.mo"  ;  \
+	done
+else
+	@echo Skipping translations
+endif
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Install complete! The default configuration file, motion-dist.conf, has been"
 	@echo "installed to $(sysconfdir)/motion. You need to rename/copy it to motion.conf"
@@ -213,6 +251,13 @@ uninstall remove: pre-build-info
 	rm -f $(sysconfdir)/motion/camera4-dist.conf
 	rm -rf $(docdir)
 	rm -rf $(examplesdir)
+ifeq ("@INTL@","yes")
+	@echo Removing translation files files
+	@for lng in $(LANGCDS); \
+	do \
+      rm -f $(DESTDIR)$(localedir)/$$lng"/LC_MESSAGES/motion.mo"  ;  \
+	done
+endif
 	@echo "--------------------------------------------------------------------------------"
 	@echo "Uninstall complete!"
 	@echo
@@ -224,6 +269,7 @@ uninstall remove: pre-build-info
 clean: pre-build-info
 	@echo "Removing compiled files and binaries..."
 	@rm -f *~ *.o $(PROGS) combine $(DEPEND_FILE)
+	@rm -f ./po/*.mo
 
 ################################################################################
 # DIST restores the directory to distribution state.                           #
@@ -245,4 +291,4 @@ distclean: clean
 	@echo "You will need to re-run configure if you want to build Motion."
 	@echo
 
-
+.PHONY: install

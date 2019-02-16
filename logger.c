@@ -167,16 +167,22 @@ static char *str_time(void)
  * Returns:
  *                     Nothing
  */
-void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, ...)
-{
+void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...){
     int errno_save, n;
     char buf[1024];
+    char usrfmt[1024];
+
 /* GNU-specific strerror_r() */
 #if (!defined(XSI_STRERROR_R))
     char msg_buf[100];
 #endif
     va_list ap;
     int threadnr;
+
+    static int flood_cnt = 0;
+    static char flood_msg[1024];
+    char flood_repeats[1024];
+
 
     /* Exit if level is greater than log_level */
     if ((unsigned int)level > log_level)
@@ -188,11 +194,6 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 
     //printf("log_type %d, type %d level %d\n", log_type, type, level);
 
-    /*
-     * If pthread_getspecific fails (e.g., because the thread's TLS doesn't
-     * contain anything for thread number, it returns NULL which casts to zero,
-     * which is nice because that's what we want in that case.
-     */
     threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
 
     /*
@@ -201,10 +202,8 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
      */
     errno_save = errno;
 
-    char threadname[32] = "unknown";
-#if ((!defined(BSD) && HAVE_PTHREAD_SETNAME_NP) || defined(__APPLE__))
-    pthread_getname_np(pthread_self(), threadname, sizeof(threadname));
-#endif
+    char threadname[32];
+    util_threadname_get(threadname);
 
     /*
      * Prefix the message with the thread number and name,
@@ -225,9 +224,16 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
                      threadnr, threadname, get_log_level_str(level), get_log_type_str(type));
     }
 
+    /* Prepend the format specifier for the function name */
+    if (fncname){
+        snprintf(usrfmt, sizeof (usrfmt),"%s: %s", "%s", fmt);
+    } else {
+        snprintf(usrfmt, sizeof (usrfmt),"%s",fmt);
+    }
+
     /* Next add the user's message. */
     va_start(ap, fmt);
-    n += vsnprintf(buf + n, sizeof(buf) - n, fmt, ap);
+    n += vsnprintf(buf + n, sizeof(buf) - n, usrfmt, ap);
     va_end(ap);
     buf[1023] = '\0';
 
@@ -257,19 +263,45 @@ void motion_log(int level, unsigned int type, int errno_flag, const char *fmt, .
 #endif
     }
 
-    switch (log_mode) {
-    case LOGMODE_FILE:
-        strncat(buf, "\n", 1024 - strlen(buf));
-        fputs(buf, logfile);
-        fflush(logfile);
-        break;
+    if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)){
+        flood_cnt++;
+    } else {
+        if (flood_cnt > 1){
+            snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
+                     threadnr, threadname, get_log_level_str(level)
+                     , get_log_type_str(type), flood_cnt-1);
+            switch (log_mode) {
+            case LOGMODE_FILE:
+                strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
+                fputs(flood_repeats, logfile);
+                fflush(logfile);
+                break;
 
-    case LOGMODE_SYSLOG:
-        syslog(level, "%s", buf);
-        strncat(buf, "\n", 1024 - strlen(buf));
-        fputs(buf, stderr);
-        fflush(stderr);
-        break;
+            case LOGMODE_SYSLOG:
+                syslog(level, "%s", flood_repeats);
+                strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
+                fputs(flood_repeats, stderr);
+                fflush(stderr);
+                break;
+            }
+        }
+        flood_cnt = 1;
+        snprintf(flood_msg,1024,"%s",buf);
+        switch (log_mode) {
+        case LOGMODE_FILE:
+            strncat(buf, "\n", 1024 - strlen(buf));
+            fputs(buf, logfile);
+            fflush(logfile);
+            break;
+
+        case LOGMODE_SYSLOG:
+            syslog(level, "%s", buf);
+            strncat(buf, "\n", 1024 - strlen(buf));
+            fputs(buf, stderr);
+            fflush(stderr);
+            break;
+        }
     }
+
 }
 

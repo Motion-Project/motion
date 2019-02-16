@@ -16,7 +16,6 @@ typedef enum {
     EVENT_MOTION,
     EVENT_FIRSTMOTION,
     EVENT_ENDMOTION,
-    EVENT_STOP,
     EVENT_TIMELAPSE,
     EVENT_TIMELAPSEEND,
     EVENT_STREAM,
@@ -25,6 +24,7 @@ typedef enum {
     EVENT_IMAGE_SNAPSHOT,
     EVENT_IMAGE,
     EVENT_IMAGEM,
+    EVENT_IMAGE_PREVIEW,
     EVENT_FILECLOSE,
     EVENT_DEBUG,
     EVENT_CRITICAL,
@@ -35,10 +35,10 @@ typedef enum {
     EVENT_LAST,
 } motion_event;
 
-typedef void(* event_handler)(struct context *, motion_event, unsigned char *,
+typedef void(* event_handler)(struct context *, motion_event, struct image_data *,
              char *, void *, struct timeval *);
 
-void event(struct context *, motion_event, unsigned char *, char *, void *, struct timeval *);
+void event(struct context *, motion_event, struct image_data *img_data, char *, void *, struct timeval *);
 const char * imageext(struct context *);
 
 #endif /* _INCLUDE_EVENT_H_ */

@@ -28,7 +28,7 @@ struct trackoptions {
     unsigned int homex;
     unsigned int homey;
     unsigned int iomojo_id;
-    unsigned int active;
+    unsigned int active;            /* This is the track_auto but 'auto' is defined word so use active*/
     unsigned int motorx_reverse;
     unsigned int motory_reverse;
     unsigned int minmaxfound;
@@ -38,12 +38,15 @@ struct trackoptions {
     /* UVC */
     int pan_angle; // degrees
     int tilt_angle; // degrees
+    char *generic_move;
 };
 
 extern struct trackoptions track_template;
 
 unsigned int track_center(struct context *, int, unsigned int, int, int);
 unsigned int track_move(struct context *, int, struct coord *, struct images *, unsigned int);
+
+enum track_action { TRACK_CENTER, TRACK_MOVE };
 
 /*
  * Some default values:

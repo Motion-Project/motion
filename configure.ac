@@ -128,17 +128,105 @@ fi
 if test x$THREADS = xyes; then
   TEMP_LIBS="$TEMP_LIBS -pthread"
   TEMP_CFLAGS="${TEMP_CFLAGS} -D_THREAD_SAFE"
-fi
 
 ##############################################################################
 ###  Check for pthread_setname_np (nonstandard GNU extension)
 ##############################################################################
-AC_MSG_CHECKING([for pthread_setname_np])
-AC_COMPILE_IFELSE(
+  AC_MSG_CHECKING([for pthread_setname_np])
+  HOLD_LIBS="$LIBS"
+  LIBS="$TEMP_LIBS"
+  AC_LINK_IFELSE(
     [AC_LANG_PROGRAM([#include <pthread.h>], [pthread_setname_np(pthread_self(), "name")])],
     [AC_DEFINE([HAVE_PTHREAD_SETNAME_NP], [1], [Define if you have pthread_setname_np function.])
     AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])] )
+
+##############################################################################
+###  Check for pthread_getname_np (nonstandard GNU extension)
+##############################################################################
+  AC_MSG_CHECKING([for pthread_getname_np])
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include <pthread.h>], [pthread_getname_np(pthread_self(), NULL, 0)])],
+    [AC_DEFINE([HAVE_PTHREAD_GETNAME_NP], [1], [Define if you have pthread_getname_np function.])
+    AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])] )
+
+  LIBS="$HOLD_LIBS"
+fi
+
+##############################################################################
+###  Check for XSI strerror_r
+##############################################################################
+AC_MSG_CHECKING([for XSI strerror_r])
+HOLD_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
+AC_LINK_IFELSE(
+  [AC_LANG_SOURCE[
+    #include <string.h>
+    #include <errno.h>
+    int main(int argc, char** argv) {
+      char buf[1024];
+      int ret = strerror_r(ENOMEM, buf, sizeof(buf));
+      return ret;
+    }
+  ]],
+  [AC_DEFINE([XSI_STRERROR_R], [1], [Define if you have XSI strerror_r function.])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])] )
+CFLAGS="$HOLD_CFLAGS"
+
+##############################################################################
+###  Check for full gettext support (lib and required programs)
+##############################################################################
+LANGCDS=""
+AC_CHECK_HEADERS(libintl.h,[INTL="yes"],[INTL="no"])
+if (test "x${INTL}"  = "xyes"); then
+    HOLD_CFLAGS=$CFLAGS
+    HOLD_LIBS=$LIBS
+    # Check without a lib
+    CFLAGS=""
+    LIBS=""
+    AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include <libintl.h>], [bindtextdomain ("motion", "/")])],
+    [INTL="yes"],[INTL="no"])
+
+    # If it has flipped to no after our test, try it with a lib
+    if (test "x${INTL}"  = "xno"); then
+        LIBS=" -lintl"
+        AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM([#include <libintl.h>], [bindtextdomain ("motion", "/")])],
+        [INTL="yes"],[INTL="no"])
+        # If it now a yes, then we needed the lib, add it to temp_libs
+        # HAVE_INTL still may turn off based upon below so the lib May not be needed.
+        if (test "x${INTL}"  = "xyes"); then
+            TEMP_LIBS="$TEMP_LIBS -lintl"
+        fi
+    fi
+    CFLAGS=$HOLD_CFLAGS
+    LIBS=$HOLD_LIBS
+fi
+MSGFMT=`msgfmt --version  2>/dev/null`
+GETTXT=`gettext --version 2>/dev/null`
+# Get the langs from what po files exist
+for f in ./po/*.po; do
+    TMP=`basename $f`
+    TMP=`echo $TMP | sed -e 's/\.po$//'`
+    if test "x$TMP" != "x*.po"; then
+        LANGCDS=$LANGCDS" "$TMP
+    fi
+done
+if (test "x${INTL}"  = "xyes" &&
+    test "x${MSGFMT}"  != "x" &&
+    test "x${GETTXT}"  != "x" &&
+    test "x${LANGCDS}" != "x" ); then
+    AC_DEFINE([HAVE_INTL], 1, [Define to 1 if libintl is around])
+else
+    INTL="no"
+fi
+AC_MSG_CHECKING(Native language support)
+AC_MSG_RESULT($INTL)
+AC_SUBST(INTL)
+AC_SUBST(LANGCDS)
 
 ##############################################################################
 ###  Check for JPG
@@ -150,6 +238,18 @@ if test x$JPGS = xyes ; then
   TEMP_LIBS="$TEMP_LIBS -ljpeg"
 else
   AC_MSG_ERROR([Required package libjpeg-dev not found, please check motion_guide.html and install necessary dependencies])
+fi
+
+##############################################################################
+###  Check for libmicrohttpd
+##############################################################################
+AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
+AC_MSG_CHECKING(libmicrohttpd libraries)
+AC_MSG_RESULT($MHTTP)
+if test x$MHTTP = xyes ; then
+  TEMP_LIBS="$TEMP_LIBS -lmicrohttpd "
+else
+  AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
 fi
 
 ##############################################################################
@@ -166,7 +266,7 @@ AC_ARG_WITH([webp],
     AS_HELP_STRING([--with-webp],
       [Compile with Webp image support]),
     WEBP="$withval",
-    WEBP="no")
+    WEBP="yes")
 
 HAVE_WEBP=""
 if test "${WEBP}" = "yes"; then
@@ -176,10 +276,9 @@ if test "${WEBP}" = "yes"; then
     AC_MSG_RESULT(found)
     AC_DEFINE([HAVE_WEBP], 1, [Define to 1 if WEBP is around])
     HAVE_WEBP="yes"
-    TEMP_LIBS="$TEMP_LIBS -lwebp -lwebpmux"
+    TEMP_LIBS="$TEMP_LIBS -lwebpmux -lwebp"
   else
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR([Required package 'libwebp-dev' not found. Please check motion_guide.html and install necessary dependencies or use the '--without-webp' configuration option.])
   fi
 fi
 
@@ -254,6 +353,9 @@ AS_IF([test "x$with_ffmpeg" != "xno"], [
        if pkg-config $FFMPEG_DEPS; then
                FFMPEG_CFLAGS=`pkg-config --cflags $FFMPEG_DEPS`
                FFMPEG_LIBS=`pkg-config --libs $FFMPEG_DEPS`
+               FFMPEG_VER=`pkg-config --modversion libavformat`
+               AC_MSG_CHECKING(for libavformat)
+               AC_MSG_RESULT(yes $FFMPEG_VER)
                HAVE_FFMPEG="yes"
        else
               AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev libavdevice-dev' were not found.  Please check motion_guide.html and install necessary dependencies or use the '--without-ffmpeg' configuration option.])
@@ -564,7 +666,7 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=no])
 
 if test "${DEVELOPER_FLAGS}" = "yes"; then
-    TEMP_CFLAGS="${TEMP_CFLAGS} -W -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CFLAGS="${TEMP_CFLAGS} -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
 fi
 
 CFLAGS="${TEMP_CFLAGS} $CPU_OPTIONS"

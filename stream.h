@@ -31,6 +31,7 @@ struct stream {
     int socket;
     FILE *fwrite;
     struct stream_buffer *tmpbuffer;
+    char *cors_header;
     long filepos;
     int nr;
     unsigned long int last;
@@ -38,8 +39,12 @@ struct stream {
     struct stream *next;
 };
 
-int stream_init(struct context *);
-void stream_put(struct context *, unsigned char *);
-void stream_stop(struct context *);
+int stream_init(struct stream *stm,
+                int port,
+                int localhost,
+                int ipv6_enabled,
+                const char *cors_header);
+void stream_put(struct context *, struct stream *, int *, unsigned char *, int);
+void stream_stop(struct stream *);
 
 #endif /* _INCLUDE_STREAM_H_ */

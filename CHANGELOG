@@ -1,8 +1,173 @@
-Summary of Changes
-
+Summary of changes for version 4.2.2 are below
+   * Update version number to 4.2.2/Changelog
+   * Resolve compile problem for OpenBSD
+   * Resolve compiler warnings for 18.10
+   * Guide/Manual updates
+   * Add the quit/end webcontrol actions to interface 0
+   * Set the stream index on passthrough
+   * Revise the webcontrol stream rate
+   * Answer webcontrol stream only after completing first loop
+   * Save the preview images when triggering emulate
+   * Fix startup problem when using track_type 4
+   * Fix hostname for webcontrol when using IPV6
+Summary of changes for version 4.2.1 are below
+   * Update version number to 4.2.1 / Changelog
+   * Report to log options included in build
+   * Add log messages on database actions(tosiara)
+   * Revise log messages of port used for stream
+   * Revise log messages when using v4l2 via netcam
+   * Fix null terminator on EXIF of jpgs(tosiara)
+   * Fix build with static libs for webp(Fabrice)
+   * Guide update for initial setup.
+   * Prevent webcontrol update of movie_passthrough
+   * Remove confusing log message
+   * Fix motion detection when using privacy mask
+   * Correct thread locking for movie_passthrough
+   * Revise guide for better mobile viewing
+   * Revise additional stream timing
+   * Fix stream timing(adameat)
+   * Remove obsolete function reference
+   * Change version number to 4.2+git
+Summary of Changes for version 4.2 are below
+   * html fixes for legacy interface
+   * Fix typo in guide
+   * Workaround compiler warnings on system header HAVE_STDLIB_H
+   * Update motion guide
+   * Revise timing and multiple threads for streams
+   * Update translations
+   * Add debian for travis tests
+   * Regression for configuration write
+   * Add threshold_maximum configuration option
+   * Add legacy webcontrol interface
+   * Remove legacy substream option
+   * Revert mjpg and static jpg as sources
+   * Fix boundary string placement in the streams
+   * Eliminate log message on invalid frame type with movies
+   * Add event_start, event_end as webcontrol actions.
+   * Correct message on failed camera connection retry
+   * Allow conversion specifiers for track_generic
+   * Add wait for netcam handler loop
+   * Maintain history of generic tracking moves for 'center' requests
+   * Resolve sqlite3 = NULL after Watchdog timeout
+   * Add additional stream preview options to web interface
+   * Regression fix for mmal camera framerate
+   * Add static movie file processing via netcam_url
+   * Depreciate mjpg format for netcam_url
+   * Revise configuration option names and which are included in templates.
+   * Fix corrupted images for ppm output formats (tosiara)
+   * Edit and validate height/width provided from config parameters.
+   * Whitespace revisions.
+   * Implement libmicrohttpd to provide streams and webcontrol
+   * Additional fix for 422p format conversion.(tosiara)
+   * Image conversion from 422p format
+   * Fix preferred codec selection in ffmpeg.
+   * Check for invalid camera dimensions
+   * Revision to handle ffmpeg version 4.0
+   * Revise packet locking for ffmpeg passthrough
+   * Guide update for default on output_pictures(Perelandric)
+   * Fix webcontrol for single camera via motion.conf (Matt Schatz)
+   * Add error return when msgfmt fails.
+   * Fix translation error (Perelandric)
+   * Fix logging messages (Perelandric)
+   * Add some french translations.(Sébastien VACHER)
+   * Fix the regex for v4l2 via netcam.
+   * Add config option for stream_grey
+   * Refactor main() to call functions instead and watchdog the netcam threads
+   * Update travis testing for 18.04
+   * Add native_language option and additional languages
+   * Add close on exec for files(tosiara)
+   * Revise status and get webcontrol for text interface.
+   * ffmpeg 4.0 depreciation warnings.
+   * Webcontrol edit checks on thread number (Matt Schatz)
+   * Update german translations.(Uatschitchun)
+   * Fix memory leak when using camera_dir(genius3000)
+   * Report to log a warning when using high framerates with mmal
+   * Revise the webcontrol interface fonts.
+   * Add config options for lightswitch_frames (genius3000)
+   * Use a #DEFINE for specifying sizes of memory of webcontrol variables
+   * Initiate translations
+   * Implement translations via gettext
+   * Relocate the preview_save to the event module
+   * Add sql_query_stop configuration option. (sander1234567890)
+   * Corrections to webcontrol html interface (genius3000)
+   * Corrections to the contributing templates (genius3000)
+   * Revise watchdog and time function in netcam_rtsp.c
+   * Additional code comments for webu.c (tosiara)
+   * Updated lithuanian translations(tosiara)
+   * Add swedish translations.(Jony)
+   * Replace webhttpd module with new webcontrol interface and modules
+   * Fix build errors with ffmpeg 4.0 (James Cowgill)
+   * Remove checks in code for v4l1 pixel format.
+   * Revise output_picture best for high resolution
+   * Validate text_scale is a valid value
+   * Depreciate macro for assigning pthread name
+   * Regression fix for long jump in jpegutils.c (void-user)
+   * Fix parameter criteria for autobrightness
+   * Regression fixes for vid_control_params (genius3000)
+   * Add config option for user to provide CORS header for streams.(jackxbritton)
+   * Add text_scale option (jackxbritton)
+   * Add track_generic_move for track_generic option (christophe-lohr)
+   * Copy depreciated parameters for v4l2 devices
+   * Revise webhttpd html header(Andrea Cioni)
+   * Updated build instructions for MacOSX (Alistair McMillan)
+   * Resolve segfault with netcam_highres startup.
+   * Update guide with correct conversion specifiers.
+   * Refactor video_v4l2/bktr and add config option vid_control_params
+   * Remove 17.04 from travis tests
+   * Manual update for typo (Christian G. Warden)
+   * Update documentation for %{ver} and %{host} specifier
+   * Revise %{host} and add %{ver} (tosiara)
+   * Update for passthrough processing of cameras
+   * Updated motion_guide.html
+   * Revise webcontrol page to indicate the webcontrol_parms selection
+   * Validate v4l2 parms when using v4l2 via netcam
+   * Capture images at start to prevent immediate events
+   * Initialize thread number to eliminate inaccurate log notice.
+   * Allow URLS with underscores
+   * Fix message when selecting UDP transport
+   * Add passthrough recording for rtsp cameras.
+   * Remove default SQL (which was specific to Maria)
+   * Default webp image type to be included in builds.
+   * Include EXIF for webp images.
+   * Report to log when user specifies invalid URL.
+   * Update guide that is installed locally.
+   * Updated version script to include date and dirty vs clean.
+Version 4.1.1 Changes Below
+   * Fix file name for debug movies
+   * Fix image saving when using highres option
+   * Add error checking of jpeg decompression.
+   * Fix version script for old distributions.
+   * Fix building on musl based systems.
+Version 4.1 Changes Below
+   * Add flip_axis option
+   * Add mask_privacy option
+   * Add netcam_highres option
+   * Add on_camera_found option
+   * Add substream_port option
+   * Add webcontrol_parms option
+   * Rename ffmpeg_timelapse to timelapse_interval
+   * Rename ffmpeg_timelapse_mode to timelapse_mode
+   * Add timelapse_fps option
+   * Add timelapse_codec option
+   * Remove sdl_threadnr option
+   * Remove v4l1 functionality
+   * Add support for RTMP and additional v4l2 palette options
+   * Add support for network cameras on macOSX
+   * Add additional conversion specifiers
+   * Add flood control for Motion log
+   * Demote the ffmpeg log messages to INF level.
+   * Additional reporting of configuration parms at the INF log level.
+   * Remove debug messages at every frame
+   * Report to log the IP of failed authentication attempts
+   * Add option for output of images in WEBP format(via build option)
+   * Added webcam on FreeBSD functionality/instructions.
+   * Added functionality for v4l2 devices via the netcam modules
+   * Refactoring of code for v4l2, netcam_rtsp, motion_loop, ffmpeg, configure.ac to assist future development.
+   * Fix movie playback issues with timestamps.
+   * Updated motion_guide.html, motion.1 documentation
 Version 4.0 Changes Below
    * PI Cam Support
-   * Web Interface fixes for preview, IPV6, HTML 
+   * Web Interface fixes for preview, IPV6, HTML
    * Allow for resize of mask file to match image
    * FFMPEG Revisions (3.0, reporting of messages, FPS, timelapse)
    * Fix image corruptions across threads
@@ -30,10 +195,10 @@ Version 3.4.1 Changes Below
    * Revise PIX_FMT to be able to use older ffmpeg versions.
    * Revise PIX_FMT for newer ffmpeg(Rex Feany)
    * Add patch for ports on proxy netcams from GVautier (issue 144906)
-   * Add patch from JonGuess(issue 151452) for treatment of partial netcam images. 
+   * Add patch from JonGuess(issue 151452) for treatment of partial netcam images.
    * Consolidate the Sqlite3 options into the code standard.
    * Draft revised motion_guide.html with new options.
-   * Revise manual to have current options. 
+   * Revise manual to have current options.
    * Tab/Space cleanup and validation security issue addressed. (issue 071831)
    * Add preview to webcontrol page(issue 172526)
    * Additional container fixes(requests/bugs 201900,110304,001656,050731)
@@ -45,7 +210,7 @@ Version 3.4.1 Changes Below
    * Handle MJPEG streams from some Logitech webcams which send AVI1 instead of JFIF.
    * Fix missing header for some builds(Jim Dodgen)
    * Sqlite3 revisions (Jim Dodgen)
-   * Add new config options to the motion-dist.conf 
+   * Add new config options to the motion-dist.conf
    * Allow text format specifiers to take a width like printf would.  (David Fries)
    * Allow text format specifiers to take a width like printf would.  (David Fries)
    * Add power_line_frequency configuration item to improve image quality.  (David Fries)
@@ -83,46 +248,46 @@ Summary of Changes that were proposed to maintainer for a version 3.4
 
 Features
    * Insert Blanking frames http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x12x16x132522 (Dag Erlandsson)
-   * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6 
-     (Jeroen Massar & Angel Carpintero) 
-   * Experimental approach for MJPEG streams (Motion JPEG) for network cameras 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LinksysWVC200SupportPatch ( ... )  
+   * IPV6 for http-control and webcam stream not netcam yet http://www.lavrsen.dk/twiki/bin/view/Motion/IPv6
+     (Jeroen Massar & Angel Carpintero)
+   * Experimental approach for MJPEG streams (Motion JPEG) for network cameras
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinksysWVC200SupportPatch ( ... )
    * Add draw a RED box around the movement as default (Joerg Weber)
-   * Add write/read nonblock functions in webhttpd( timeout on read/write). (Angel Carpintero) 
+   * Add write/read nonblock functions in webhttpd( timeout on read/write). (Angel Carpintero)
    * More changes in option names from http://www.lavrsen.dk/twiki/bin/view/Motion/IntuitiveOptionNamesDiscussion
      (Angel Carpintero)
    * motion_locate new parameter names : red , center , redcross  instead of only on, off. (Angel Carpintero)
-   * External pipe to allow external video encoders 
+   * External pipe to allow external video encoders
      http://www.lavrsen.dk/twiki/bin/view/Motion/DarkwindHackeronMotionPatching (Bill Payne, Angel Carpintero)
    * Split locate_motion into separate 'mode' and 'style' option to allow all
      possible combinations. (Joerg Weber)
    * Implement 'gapless' event mode to allow for recording of movies without 'holes'. (Joerg Weber)
    * Limit detection rate to 3fps at framerates above 5fps, to reduce CPU load. (Joerg Weber)
-   * Fix warning for syslog() , Added support for some new bayer palettes introduced in kernel 2.6.27. 
+   * Fix warning for syslog() , Added support for some new bayer palettes introduced in kernel 2.6.27.
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2008x10x15x130110
      Increased buffer in ffmpeg to allow encoding at 1600x1200 (Angel Carpintero)
    * Sqlite3 support http://www.lavrsen.dk/twiki/bin/view/Motion/SQLite3Patch (Giacomo Graziosi)
    * New RPM SPEC file and startup scripts compliant with Fedora 10 guidelines and above (Steven Moix)
-   * Increase write buffer size for writing image files and ffmpegs 
+   * Increase write buffer size for writing image files and ffmpegs
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionWriteBuffersPatch (Craig West)
    * Fixed mask overlay in setup mode is now green instead of white (Joerg Weber)
    * Add new config option 'ipv6_enabled' to enable/disable IPV6 (Angel Carpintero)
-   * Remove VIDIOC_S_JPEGCOMP support is deprecated. (Angel Carpintero) 
+   * Remove VIDIOC_S_JPEGCOMP support is deprecated. (Angel Carpintero)
    * Use static memory allocation in ffmpeg_deinterlace() (Peter Holik)
-     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegDeinterlaceStatic 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FfmpegDeinterlaceStatic
    * Atom optimizacion in configure.in (Peter Holik)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/AtomOptimizations
    * Allow to change Standard method ( PAL / NECAM / SECAM ) (Angel Carpintero)
-   * Add authentication  methods 'Basic Authentication' and 'Digest Authentication' 
+   * Add authentication  methods 'Basic Authentication' and 'Digest Authentication'
      to the "Live Stream Server". (Michael Finsterbusch)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionStreamAuthPatch
-   * Implemented new logging system 
+   * Implemented new logging system
      http://www.lavrsen.dk/foswiki/bin/view/Motion/MotionLog (Angel Carpintero)
    * Added a macro MOTION_LOG , no need to add __FUNCTION__ anymore. (Angel Carpintero)
    * Added EXIF feature for jpeg images , http://www.lavrsen.dk/foswiki/bin/view/Motion/ExifTaggingPatch (Wim Lewis)
    * Improve detection of av_register_protocol() for ffmpeg (Angel Carpintero).
-   * Added support for libjpeg-turbo 
-     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2010x04x14x082244 (Angel Carpintero)     
+   * Added support for libjpeg-turbo
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/FeatureRequest2010x04x14x082244 (Angel Carpintero)
    * Added new log type COR , to filter messages from CORE. (Angel Carpintero)
    * Added a new starting option -m to disable motion detection. (Angel Carpintero)
    * Allow image dimension not 4:3 changing a check of modulo 16 by modulo 8. (Jeroen Massar)
@@ -173,9 +338,9 @@ Bugfixes
    * V4L2 fourcc GRBG not supported, updated default value for v4l2_palette 17. (Isaac Richter)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2009x10x29x222753
    * Exit when image dimension are not modulo 16. (Angel Carpintero)
-   * Avoid logs flooding using some options of netcam_keepalive and try to discard images with 
+   * Avoid logs flooding using some options of netcam_keepalive and try to discard images with
      weird header Content-Lenght 0. (Angel Carpintero)
-   * Only use post capture when we setup to record videos with external pipe or ffmpeg. (Angel Carpintero)   
+   * Only use post capture when we setup to record videos with external pipe or ffmpeg. (Angel Carpintero)
    * Fix introduced bug for Content-Lenght = 0 in svn r476. (Angel Carpintero)
    * Avoid segfault when motion cannot create a logfile. (Angel Carpintero)
    * No mysql_close
@@ -183,7 +348,7 @@ Bugfixes
    * No PQfinish() (Angel Carpintero)
    * Input for webcams has to be set to -1
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x01x21x162309
-   * Added a conditional check for avformat_alloc_context , av_avformat_alloc_context to fix 
+   * Added a conditional check for avformat_alloc_context , av_avformat_alloc_context to fix
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x10x05x071936 (Angel Carpintero)
    * Fix issue with JPEG , adding dinfo.do_fancy_upsampling = FALSE;
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2011x08x20x194659
@@ -196,7 +361,7 @@ Bugfixes
    * Free file descriptor buffers on exit.
    * Avoid segfault when text_left or text_right uses non supported chars.
    * Fixed leak in vloopback.
-   * Fixed a build of motion for some kernel version with not good videodev.h 
+   * Fixed a build of motion for some kernel version with not good videodev.h
    * Netcam Modulo 8
 
 3.2.12 Summary of Changes
@@ -205,9 +370,9 @@ Bugfixes
    * Fixed name space clash with libjpeg8 (Kenneth Lavrsen)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x01x22x084753
    * Fixed FFV1 codec encode with ffmpeg (Angel Carpintero)
-     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553 
+     http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x13x032553
    * Fix conv_uyvyto420p segfault ( William M Brack )
-   * Enhancing the palette selection ( William M Brack )  
+   * Enhancing the palette selection ( William M Brack )
    * Fix zombies on OpenBSD. (Mark Feenstra)
      http://www.lavrsen.dk/foswiki/bin/view/Motion/BugReport2010x04x28x054348
 
@@ -264,24 +429,24 @@ Features
    * Added the pre_capture buffer redesign to throttle load and enhance pre_capture feature.
      http://www.lavrsen.dk/twiki/bin/view/Motion/PreCaptureRedesign (Dag Erlandsson).
    * Added preview center feature.
-     http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter (Dag Erlandsson).	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/PreviewCenter (Dag Erlandsson).
    * Removed low_cpu feature, as it is not really compatible with pre_capture and a lot of other
      features rely on the pre_capture buffer behind the scenes. (Joerg Weber)
    * Removed night_compensate feature. This functionality is covered by noise_tune. (Joerg Weber)
    * Implemented a new reference frame algorithm to improve object recognition and location. (Joerg Weber)
    * Improved smartmask feature: real moving objects don't trigger the mask anymore. (Joerg Weber)
    * Added area_detect feature. New config options: area_detect, on_area_detected. (Joerg Weber)
-   * Added help in http control 
+   * Added help in http control
      http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x181541 (Angel Carpintero)
    * Added Choose V4L2 palette http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x11x19x032318
-     (Angel Carpintero)  
-   * Improved http control ( 'back' link, select box, show current values when are going to be changed ). 
+     (Angel Carpintero)
+   * Improved http control ( 'back' link, select box, show current values when are going to be changed ).
      (Angel Carpintero)
    * Improved thread handling, single threads can be stopped/restarted (Dag Erlandsson)
    * Watchdog, restart hang threads (Dag Erlandsson)
    * Added ON_CAMERA_LOST event (Dag Erlandsson)
    * Motion start if a camera isn't there at start, retries to connect if lost (Dag Erlandsson)
-   * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542 
+   * Netcam Keepalive and HTTP/1.1 http://www.lavrsen.dk/twiki/bin/view/Motion/FeatureRequest2007x01x22x231542
     (Simon Walls)
    * Added mov , Quicktime file format (Andrew Hamilton).
    * Added to configure.in --with-pwcbsd to allow compile motion in freebsd with webcam support instead of bktr
@@ -294,20 +459,20 @@ Bugfixes
    * Fix process_id_file when is passed from command line (Angel Carpintero)
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x10x27x150419 (Angel Carpintero)
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x25x102808 (Angel Carpintero)
-   * Avoid random errors , initialising some structs for V4L1 
+   * Avoid random errors , initialising some structs for V4L1
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x11x26x010755 (Jason Sharpee & Angel Carpintero)
-   * Fix motion segfault because ffmpeg API change 
+   * Fix motion segfault because ffmpeg API change
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2007x12x29x175530 (Angel Carpintero)
    * Little fix in ffmpeg.c comparing version of LIBAVFORMAT_BUILD, since ffmpeg svn -r4486 LIBAVFORMAT_BUILD and
      LIBAVCODEC_BUILD uses LIBAVFORMAT_VERSION_INT ((49<<16)+(0<<8)+0) and LIBAVCODEC_VERSION_INT ((49<<16)+(0<<8)+0)
-     (Angel Carpintero)	
+     (Angel Carpintero)
    * Fix choose v4l2 palette , http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x01x21x043812	(Onakra)
-   * Get current directory to allow write motion.conf properly 
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray) 
-   * Fix broken PostgreSQL detection for custom location, 
+   * Get current directory to allow write motion.conf properly
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x013419 (John Bray)
+   * Fix broken PostgreSQL detection for custom location,
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x25x025134 ( Angel Carpintero )
    * Fixed stepper when is used track_auto on ( Angel Carpintero ).
-   * Better debug in netcam for "Error reading image header" 
+   * Better debug in netcam for "Error reading image header"
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2008x02x27x092849 (Simon Walls)
 
 
@@ -352,7 +517,7 @@ Features
      V4L2_PIX_FMT_MJPEG and V4L2_PIX_FMT_UYVY (Angel Carpintero).
    * ucvideo track pan/tilt support ( Michal Licko ,Dirk Wesenberg and
      Angel Carpintero )
-     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/LinuxUvcTrackingPatch
    * Added a FreeBSD directory to allow people from BSD to get a daily version
      and create a port. (Angel Carpintero).
    * Removed mysql dependency from debian package and added a note to setup
@@ -361,7 +526,7 @@ Features
      to configure --without-mysql to disable support, --with-mysql-include
      directory of mysql.h and --with-mysql-lib directory of libmysqlclient.a or
      libmysqlclient.so (Angel Carpintero).
-   * Added MYSQL_OPT_RECONNECT flag for mysql connection (MYSQL 5.x only) and 
+   * Added MYSQL_OPT_RECONNECT flag for mysql connection (MYSQL 5.x only) and
      changed default value for mysql_host (Angel Carpintero).
 
 Bugfixes
@@ -370,7 +535,7 @@ Bugfixes
    * Fix http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x10x10x081903,
      reconnect to mysql if connection dropped (Angel Carpintero).
    * Fix memory management in ffmpeg.c  (Rafis Khayrullin).
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x19x062432
    * Fix of ffmpeg_avcodec_log code (Alain Guidez).
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x25x074612
    * Fix a segfault adding correct size to be used for bayer2rgb24()
@@ -378,7 +543,7 @@ Bugfixes
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x03x30x175913
    * Fix an error in FreeBSD, the use of capture even fields depends on height
      value. (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x12x03x073610
    * Fixed autodetection for VIA cpu, no needed to use --without-optimizecpu.
      Added many others (Angel Carpintero)
    * Fix, don't remove pid file when motion reload config file( HUP signal )
@@ -387,14 +552,14 @@ Bugfixes
    * Fixed the thread number assignment which could goof up if netcams started
      very quickly before all thread were created at startup. (Kenneth Lavrsen)
    * Fix RoundRobin v4l2 buffers in driver when switching input,
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x07x07x182605 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x07x07x182605
      (Dag Erlandsson and Angel Carpintero).
-   * Check EIO for VIDIOC_DQBUF to workaround saa7134 problem. 
+   * Check EIO for VIDIOC_DQBUF to workaround saa7134 problem.
      (Dag Erlandsson and Angel Carpintero).
    * Change bayer2rgb24() to fix a problem with sn9c102 driver
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x06x05x012249 
-     (Jared D and Angel Carpintero).	
-	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2007x06x05x012249
+     (Jared D and Angel Carpintero).
+
 3.2.7 Formal Release - Summary of Changes
 
 Features
@@ -438,7 +603,7 @@ Bugfixes
    * Fixed segfault when netcam_url has no service ( http , ftp ) (Angel Carpintero)
    * Fixed interlace issue with METEOR_GEO_EVEN_ONLY in FreeBSD (Angel Carpintero)
    * Fixed possible syntax error in configure related to MySQL (Angel Carpintero)
-   * Avoid open file descriptor when connecting to network cameras fails (Peter Holik) 
+   * Avoid open file descriptor when connecting to network cameras fails (Peter Holik)
      http://www.lavrsen.dk/twiki/bin/view/Motion/AvoidOpenfiledescriptors
    * Fixed http pause feature so that pausing thread 0 now pauses all threads.
      (GunnarSkjold)
@@ -497,15 +662,15 @@ Bugfixes
      to write release notes (Kenneth Lavrsen)
    * Changed CREDITS to same bullet format as CHANGELOG (Kenneth Lavrsen)
    * Fixed sql_mask not initialised correctly (Angel Carpintero)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603 
-   * Fixed the management of strings from http remote control , setting to NULL 
-     when they are set to "blank" and fixes a problem with despeckle , that didn't 
+     http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x09x175603
+   * Fixed the management of strings from http remote control , setting to NULL
+     when they are set to "blank" and fixes a problem with despeckle , that didn't
      allow to remove labeling action from http remote control. (Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/FixStringsAndDisableLabeling
-   * Fix many typos in comments ( i ran aspell against the code ). Also there's a 
+   * Fix many typos in comments ( i ran aspell against the code ). Also there's a
      fix to free cnt->eventtime_tm when motion exits. (Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/FixTypoInComments
-   * Fix the problem that happens in FreeBSD and Debian Sarge because 
+   * Fix the problem that happens in FreeBSD and Debian Sarge because
      version of ffmpeg is LIBAVFORMAT_BUILD < 4629. ( Pete Shipley and Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x01x12x120335
    * Updated motion.spec. Changing D_FORTIFY_SOURCE=2 by D_FORTIFY_SOURCE=1 to fix
@@ -520,7 +685,7 @@ Bugfixes
      Or maybe a combined option that sets more constant based on an algorithm.
      (Kenneth Lavrsen)
      http://www.lavrsen.dk/twiki/bin/view/Motion/BugReport2006x02x07x212816
-   * Fixed a syntax error in picture.c get_pgm() which caused the program to segfault 
+   * Fixed a syntax error in picture.c get_pgm() which caused the program to segfault
      when a mask file size did not match the picture size. Now the program
      correctly gives an error message and continues without the mask. (Kenneth
      Lavrsen).
@@ -531,7 +696,7 @@ Bugfixes
    * Fixed mysql configure auto-detection for x64 systems. ( Angel Carpintero)
      http://www.lavrsen.dk/twiki/bin/view/Motion/SupportQuestion2006x03x02x152208
    * Added the ffmpeg_deinterlace feature (Andrew Hamilton)
-     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionffmpegDeinterlace 	
+     http://www.lavrsen.dk/twiki/bin/view/Motion/MotionffmpegDeinterlace
 
 3.2.4   Formal Release. Summary of changes
 
@@ -1960,7 +2125,7 @@ Release
    * Redone pre_capture completely.
 
 3.1.12
-rc1  
+rc1
    * added pre-record. with configparameter n_prerecord one can set
      the number of frames that should be recorded *before* the
      motion starts. for this feature to work, you need to set

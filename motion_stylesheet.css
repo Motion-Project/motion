@@ -1,0 +1,485 @@
+* {
+  box-sizing: border-box;}
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+  word-wrap: break-word;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #606c71; }
+a {
+  color: #1e6bb8;
+  text-decoration: none;}
+a:hover {
+    text-decoration: underline; }
+.btn {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0.3rem;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
+.btn + .btn {
+    margin-left: 1rem; }
+.btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3); }
+.page-header {
+  color: #fff;
+  text-align: center;
+  background-color: #159957;
+  background-image: linear-gradient(120deg, #155799, #159957); }
+.page-header h1 {
+  margin-bottom: 0.1em;
+  margin-top: 0.1em;}
+.project-name {
+  margin-top: 0;
+  margin-bottom: 0.1rem; }
+.project-tagline {
+  margin-bottom: 2rem;
+  font-weight: normal;
+  opacity: 0.7; }
+.main-content :first-child {
+  margin-top: 0; }
+.main-content img {
+  max-width: 100%; }
+.main-content h1, .main-content h2, .main-content h3, .main-content h4, .main-content h5, .main-content h6 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-weight: normal;
+  color: #159957;}
+.main-content p {
+  margin-bottom: 1em; }
+.main-content code {
+  padding: 2px 4px;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  color: #383e41;
+  background-color: #f3f6fa;
+  border-radius: 0.3rem;}
+.main-content pre {
+  padding: 0.8rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font: 1rem Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  color: #567482;
+  background-color: #f3f6fa;
+  border: solid 1px #dce6f0;
+  border-radius: 0.3rem;}
+.main-content pre > code {
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #567482;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;}
+.main-content .highlight {
+  margin-bottom: 1rem; }
+.main-content .highlight pre {
+  margin-bottom: 0;
+  word-break: normal; }
+.main-content .highlight pre, .main-content pre {
+  padding: 0.8rem;
+  overflow: auto;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  border-radius: 0.3rem;}
+.main-content pre code, .main-content pre tt {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  overflow: scroll;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0; }
+.main-content pre code:before, .main-content pre code:after, .main-content pre tt:before, .main-content pre tt:after {
+  content: normal; }
+.main-content ul, .main-content ol {
+  margin-top: 0; }
+.main-content blockquote {
+  padding: 0 1rem;
+  margin-left: 0;
+  color: #819198;
+  border-left: 0.3rem solid #dce6f0; }
+.main-content blockquote > :first-child {
+  margin-top: 0; }
+.main-content blockquote > :last-child {
+  margin-bottom: 0; }
+/*
+.main-content table {
+  display: block;
+  overflow: auto;
+  word-break: normal;
+  }
+.main-content table th {
+  font-weight: bold; }
+.main-content table th, .main-content table td {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e9ebec;}
+*/
+.main-content dl {
+  padding: 0; }
+.main-content dl dt {
+  padding: 0;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;}
+.main-content dl dd {
+  padding: 0;
+  margin-bottom: 1rem;}
+.main-content hr {
+  height: 2px;
+  padding: 0;
+  margin: 1rem 0;
+  background-color: #eff0f1;
+  border: 0;}
+
+.site-footer {
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: solid 1px #eff0f1;}
+.site-footer-owner {
+  display: block;
+  font-weight: bold; }
+.site-footer-credits {
+  color: #819198;}
+
+.topnav-d, .topnav-m  {
+  color: #1e6bb8;
+  text-decoration: none;
+}
+.topnav {
+    background-color: #333;
+    overflow: hidden;
+}
+.topnav a, .topnav-m, .topnav-d  {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+.topnav .icon {
+    display: none;
+}
+.topnav a:hover{
+    background-color: #555;
+    color: white;
+}
+@media screen and (min-width: 48em) {
+  .topnav a {
+    float: right;
+   }
+
+   .topnav .topnav-d {
+    float: right;
+    display: block;
+   }
+
+   .topnav .topnav-m {
+    float: right;
+    display: none;
+   }
+
+  .topnav .logoimg {
+    width:auto;
+    height:3.0em;}
+
+}
+@media screen and (max-width: 48em) {
+
+  .topnav a:not(:first-child) {
+    display: none;
+  }
+
+  .topnav .topnav-d{
+    display: none;
+  }
+
+  .topnav .topnav-m:not(:first-child) {
+    display: none;
+  }
+
+  .topnav a.icon {
+    float: right;
+    display: block;
+  }
+
+  .topnav.responsive {position: relative;}
+  .topnav.responsive a.icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .topnav.responsive a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+
+  .topnav.responsive .topnav-d {
+    float: none;
+    display: none;
+    text-align: left;
+  }
+
+  .topnav.responsive .topnav-m {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+
+  .topnav.responsive .dropdown {float: none;}
+  .topnav.responsive .dropdown-content {position: relative;}
+  .topnav.responsive .dropdown .dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+
+}
+
+
+.subnav {
+    overflow: hidden;
+    background-color: #159957;
+    background-image: linear-gradient(120deg, #155799, #159957);
+    border-top: 2px solid black;
+}
+.subnav a {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 5px;
+    text-decoration: none;
+    font-size: 12px;
+}
+.subnav .icon {
+    display: none;
+}
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+.dropdown .dropbtn {
+    font-size: 12px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 14px 16px;
+    background-color: inherit;
+    font-family: inherit;
+    margin: 0;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+.dropdown-content a {
+    float: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+.subnav a:hover, .dropdown:hover .dropbtn {
+    background-color: #555;
+    color: white;
+}
+.dropdown-content a:hover {
+  background-color: #ddd
+  color: black;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+@media screen and (min-width: 48em) {
+  .subnav a {
+    float: left;
+   }
+}
+@media screen and (max-width: 48em) {
+  .subnav a:not(:first-child), .dropdown .dropbtn  {
+    display: none;
+  }
+  .subnav a.icon {
+    float: right;
+    display: block;
+  }
+  .subnav.responsive {position: relative;}
+  .subnav.responsive a.icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .subnav.responsive a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+  .subnav.responsive .dropdown {float: none;}
+  .subnav.responsive .dropdown-content {position: relative;}
+  .subnav.responsive .dropdown .dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+.panel {
+  padding: 0.5em 1.4em 0.4em 1.6em;
+  background-color: white;
+  max-height: 0;
+  overflow: scroll;
+  overflow-x: hidden;
+  transition: max-height 0.2s ease-out;
+}
+.active {
+    background-color: #4CAF50;
+    color: white;
+}
+.logoimg {
+  width:auto;
+  height:3.0em;
+}
+
+
+
+@media screen and (min-width: 48em) {
+  .nav-vertical    { font-size: 1em; }
+  .accordian       { font-size: 1em; }
+  .nav-button {
+    font-size: 1em;
+    height: 2.5em;}
+  .vertical-menu   { font-size: 1em; }
+  .panel           { font-size: 1em; }
+  .site-footer     { font-size: 1em; }
+  .project-tagline { font-size: 1.25em; }
+  .project-name    { font-size: 3.25em; }
+  .page-header     {
+    padding: 0.1rem 0.1rem;
+    font-size: 1rem;
+  }
+  .btn {
+    padding: 0.75em 1em; }
+  .main-content  {
+    padding: 0.5em 0.5em;
+    font-size: 1.1rem; }
+
+  .tblalpha td {
+    height: 17px;
+  }
+
+}
+
+@media screen and (max-width: 48em) {
+  .logoimg {
+     width:auto;
+     height:3em;
+  }
+  .nav-vertical { font-size: 0.5rem; }
+  .nav-button {
+    font-size: 0.6em;
+    height: 3em;
+  }
+
+  .vertical-menu   { font-size: 0.9rem; }
+  .vertical-menu a  { font-size: 0.7rem; }
+  .accordian       { font-size: 0.5rem; }
+  .panel           { font-size: 0.5rem; }
+  .site-footer     { font-size: 0.5rem;}
+  .project-tagline { font-size: 1rem; }
+  .project-name    { font-size: 1.75rem; }
+  .page-header{
+    font-size: 1rem;
+    padding: 0.1rem 0.1rem;
+  }
+  .btn {
+    display: block;
+    padding: 0.75rem;
+    font-size: 0.9rem; }
+  .btn + .btn {
+      margin-top: 1rem;
+      margin-left: 0; }
+  .main-content {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.7rem;}
+  .main-content {
+    table-layout: auto;
+  }
+}
+
+@media screen and (max-width: 48em) {
+
+
+  .tblsignal table,.tblsignal thead,.tblsignal tbody,.tblsignal th,.tblsignal td,.tblsignal tr,
+  .tblalpha  table,.tblalpha  thead,.tblalpha  tbody,.tblalpha  th,.tblalpha  td,.tblalpha  tr,
+  .tbldetail table,.tbldetail thead,.tbldetail tbody,.tbldetail th,.tbldetail td,.tbldetail tr,
+  .tblconvr  table,.tblconvr  thead,.tblconvr  tbody,.tblconvr  th,.tblconvr  td,.tblconvr  tr,
+  .tblpaltte table,.tblpaltte thead,.tblpaltte tbody,.tblpaltte th,.tblpaltte td,.tblpaltte tr,
+  .tblconfig table,.tblconfig thead,.tblconfig tbody,.tblconfig th,.tblconfig td,.tblconfig tr
+   {
+    display: block;
+  }
+  .tblsignal thead tr, .tblalpha  thead tr, .tbldetail thead tr, .tblconvr  thead tr,
+  .tblpaltte thead tr, .tblconfig thead tr  {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  .tblsignal tr, .tblalpha  tr, .tbldetail tr, .tblconvr  tr, 
+  .tblpaltte tr, .tblconfig tr {
+    border: 1px solid #ccc;
+  }
+  .tblsignal td, .tbldetail td, .tblconvr  td, .tblpaltte td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 5%;
+    height: 2.8em;
+  }
+  .tblsignal td:before, .tbldetail td:before, .tblconvr  td:before, 
+  .tblpaltte td:before, .tblconfig td:before {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 65%;
+    padding-top: 10px;
+    white-space: nowrap;
+    padding-left: 5%;
+  }
+  .tblalpha  td{
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 15px;
+    height: 2.8em;
+  }
+  .tblconfig td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 5%;
+    min-height: 2.8em;
+    height: auto;
+  }
+
+}

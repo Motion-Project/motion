@@ -1,8 +1,8 @@
-.TH MOTION 1 2016-09-28 "Motion" "Motion Options and Config Files"
+.TH MOTION 1 2019-02-02 "Motion" "Motion Options and Config Files"
 .SH NAME
 motion \-   Detect motion using a video4linux device or network camera
 .SH SYNOPSIS
-.B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p process_id_file ][ \-l log_file ]
+.B motion [ \-hbnsm ] [ \-c config file path ] [ \-d level ] [ \-k level ] [ \-p pid_file ][ \-l log_file ]
 .SH DESCRIPTION
 .I  Motion
 uses a video4linux device or network camera to detect motion. If motion is detected both normal
@@ -26,22 +26,22 @@ Run in daemon mode.
 Run in non-daemon mode.
 .TP
 .B \-s
-Run in setup mode. Also forces non-daemon mode
+Run in setup mode. Also forces non-daemon mode.
 .TP
 .B \-d
 Run with message log level 1-9.
 .TP
 .B \-k
-Run with message log type 1-9
+Run with message log type 1-9.
 .TP
 .B \-l
-Full path and file name for the log file
+Full path and file name for the log file.
 .TP
 .B \-p
 Full path and filename for process id file (pid file). E.g /var/run/motion.pid. Default is not defined. Pid file is only created when Motion is started in daemon mode.
 .TP
 .B \-m
-Start in pause mode
+Start in pause mode.
 .TP
 .SH "CONFIG FILE OPTIONS"
 These are the options that can be used in the config file.
@@ -63,19 +63,6 @@ When specified as ON, Motion goes into daemon (background process) mode and rele
 .RE
 
 .TP
-.B process_id_file
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-File to store the process ID, also called pid file.
-.RE
-.RE
-
-.TP
 .B setup_mode
 .RS
 .nf
@@ -89,7 +76,20 @@ Start in Setup-Mode, daemon disabled.
 .RE
 
 .TP
-.B logfile
+.B pid_file
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+File to store the process ID, also called pid file.
+.RE
+.RE
+
+.TP
+.B log_file
 .RS
 .nf
 Values: User specified string
@@ -128,6 +128,45 @@ Filter to log messages by type
 .RE
 
 .TP
+.B quiet
+.RS
+.nf
+Values: on/off
+Default: on
+Description:
+.fi
+.RS
+Do not sound beeps when detecting motion
+.RE
+.RE
+
+.TP
+.B native_language
+.RS
+.nf
+Values: boolean
+Default: on
+Description:
+.fi
+.RS
+Use this option to enable native language on the webcontrol and log message.  Specify off to have messages provided in English.
+.RE
+.RE
+
+.TP
+.B camera_name
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+User specified string to describe the camera.
+.RE
+.RE
+
+.TP
 .B camera_id
 .RS
 .nf
@@ -143,7 +182,7 @@ sequence may not be the same every time that Motion starts.
 .RE
 
 .TP
-.B camera_name
+.B camera
 .RS
 .nf
 Values: User specified string
@@ -151,7 +190,46 @@ Default: Not Defined
 Description:
 .fi
 .RS
-User specified string to describe the camera.
+This option specifies the full path and file name to individual camera files.
+This option can be listed multiple times.
+Each camera file should contain the options that are unique to that camera/video device.
+Common options are obtained from the motion.conf file and values are overwritten from each
+camera file.  While the motion.conf includes four sample camera files, the actual
+limit of cameras is only dependent upon the machine capabilities.
+Remember: If you have more than one camera you must have one
+camera file for each one. For example, 2 cameras would require 3 files:
+The motion.conf file AND camera1.conf and camera2.conf.
+only put the options that are unique to each camera in the
+camera config files.
+.RE
+.RE
+
+.TP
+.B camera_dir
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+This option specifies the optional subdirectory that contains the camera config files.
+.RE
+.RE
+
+.TP
+.B target_dir
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Target base directory for pictures and films.
+It is recommended to use an absolute path.
+If this option is not defined, the current working directory is used.
+This option accepts the conversion specifiers included at the end of this manual.
 .RE
 .RE
 
@@ -171,10 +249,25 @@ For FreeBSD certain devices use the bktr subsystem and they will use /dev/bktr0.
 .RE
 
 .TP
+.B vid_control_params
+.RS
+.nf
+Values: User specified string
+Default: None
+Description:
+.fi
+.RS
+String to specify the parameters to pass in for a videodevice.  The parameters
+permitted are dependent upon the device.  This only applies to V4L2 devices.  The
+Motion log reports all the available options for the device.
+.RE
+.RE
+
+.TP
 .B v4l2_palette
 .RS
 .nf
-Values: 0 to 17
+Values: 0 to 21
 .RS
 V4L2_PIX_FMT_SN9C10X : 0  'S910'
 V4L2_PIX_FMT_SBGGR16 : 1  'BYR2'
@@ -194,6 +287,10 @@ V4L2_PIX_FMT_UYVY    : 14 'UYVY'
 V4L2_PIX_FMT_YUYV    : 15 'YUYV'
 V4L2_PIX_FMT_YUV422P : 16 '422P'
 V4L2_PIX_FMT_YUV420  : 17 'YU12'
+V4L2_PIX_FMT_Y10     : 18 'Y10'
+V4L2_PIX_FMT_Y12     : 19 'Y12'
+V4L2_PIX_FMT_GREY    : 20 'GREY'
+V4L2_PIX_FMT_H264    : 21 'H264'
 .RE
 Default: 17
 Description:
@@ -201,20 +298,6 @@ Description:
 .RS
 The v4l2_palette option allows users to choose the preferred palette to be use by motion to capture from the video device.
 If the preferred palette is not available from the video device, Motion will attempt to use palettes that are supported.
-.RE
-.RE
-
-.TP
-.B tunerdevice
-.RS
-.nf
-Values: User Specified String
-Default: /dev/tuner0
-Description:
-.fi
-.RS
-Tuner device to be used for capturing images.
-This is ONLY used for FreeBSD.
 .RE
 .RE
 
@@ -269,92 +352,70 @@ The frequency to set the tuner in kHz when using a TV tuner card.
 .RE
 
 .TP
-.B power_line_frequency
+.B auto_brightness
 .RS
 .nf
-Values:
-.RS
--1 : Do not modify device setting
-0  : Power line frequency Disabled
-1  : 50hz
-2  : 60hz
-3  : Auto
-.RE
-Default: -1
-Description:
-.fi
-.RS
-Override the power line frequency for the video device.
-.RE
-.RE
-
-.TP
-.B rotate
-.RS
-.nf
-Values: 0, 90, 180, 270
+Values: 0 - 3
 Default: 0
 Description:
 .fi
 .RS
-Rotate image this number of degrees.
-The rotation affects all saved images as well as movies.
+The auto_brightness feature uses the device options to adjust the brightness
+Only recommended for cameras without auto brightness.
+0-disabled, 1=Use brightness, 2=Use exposure, 3=Use absolute exposure.
 .RE
 .RE
 
 .TP
-.B width
+.B tunerdevice
 .RS
 .nf
-Values: Dependent upon video device
-Default: 352
+Values: User Specified String
+Default: /dev/tuner0
 Description:
 .fi
 .RS
-Image width in pixels for the video device.
+Tuner device to be used for capturing images.
+This is ONLY used for FreeBSD.
 .RE
 .RE
 
 .TP
-.B height
+.B roundrobin_frames
 .RS
 .nf
-Values: Dependent upon video device
+Values: 1 to unlimited
+Default: 1
+Description:
+.fi
+.RS
+Number of frames to capture in each roundrobin step
+.RE
+.RE
+
+.TP
+.B roundrobin_skip
+.RS
+.nf
+Values: 1 to unlimited
+Default: 1
+Description:
+.fi
+.RS
+Number of frames to skip before each roundrobin step
+.RE
+.RE
+
+.TP
+.B roundrobin_switchfilter
+.RS
+.nf
+Values: on/off
 Default: off
 Description:
 .fi
 .RS
-Image height in pixels for the video device
-.RE
-.RE
-
-.TP
-.B framerate
-.RS
-.nf
-Values: 2 - 100
-Default: 100
-Description:
-.fi
-.RS
-The maximum number of frames to capture in 1 second.
-The default of 100 will normally be limited by the capabilities of the video device.
-Typical video devices have a maximum rate of 30.
-.RE
-.RE
-
-.TP
-.B minimum_frame_time
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-The minimum time in seconds between capturing picture frames from the camera.
-The default of 0 disables this option and relies upon the capture rate of the camera.
-This option is used when you want to capture images at a rate lower than 2 per second.
+Filter out noise generated by roundrobin
 .RE
 .RE
 
@@ -376,9 +437,36 @@ http://
 ftp://
 mjpg://
 rtsp://
+rtmp://
 mjpeg://
 file://
 v4l2://
+.RE
+
+The connection string is camera specific.
+It is usually the same as what other video playing applications would use to connect to the camera stream.
+Motion currently only supports basic authentication for the cameras.
+Digest is not currently supported.
+Basic authentication can be specified in the URL or via the netcam_userpass option.
+.RE
+.RE
+
+.TP
+.B netcam_highres
+.RS
+.nf
+Values: User specified string
+Default: None
+Description:
+.fi
+.RS
+Full connection URL string to use to connect to a high resolution network camera.
+The URL must provide a stream of images instead of only a static image.
+The following prefixes are recognized
+
+.RS
+rtsp://
+rtmp://
 .RE
 
 The connection string is camera specific.
@@ -428,7 +516,7 @@ Description:
 .RS
 This setting is to keep-alive (open) the network socket between requests.
 When used, this option should improve performance on compatible net cameras.
-This option is not applicable for the rtsp:// and mjpeg:// formats.
+This option is not applicable for the rtsp://, rtmp:// and mjpeg:// formats.
 .RE
 .RE
 
@@ -463,7 +551,7 @@ This can assist with cameras that have poor or buggy firmware.
 .RE
 
 .TP
-.B rtsp_uses_tcp
+.B netcam_use_tcp
 .RS
 .nf
 Values: on/off
@@ -471,7 +559,7 @@ Default: on
 Description:
 .fi
 .RS
-When using a RTSP connection for a network camera, use a TCP transport instead of UDP.
+When using a RTSP/RTMP connection for a network camera, use a TCP transport instead of UDP.
 The UDP transport frequently results in "smeared" corrupt images.
 .RE
 .RE
@@ -507,7 +595,161 @@ Typical value for the PI camera is -hf
 .RE
 
 .TP
-.B auto_brightness
+.B width
+.RS
+.nf
+Values: Dependent upon video device
+Default: 640
+Description:
+.fi
+.RS
+Image width in pixels for the video device.
+.RE
+.RE
+
+.TP
+.B height
+.RS
+.nf
+Values: Dependent upon video device
+Default: 480
+Description:
+.fi
+.RS
+Image height in pixels for the video device
+.RE
+.RE
+
+.TP
+.B framerate
+.RS
+.nf
+Values: 2 - 100
+Default: 15
+Description:
+.fi
+.RS
+The maximum number of frames to capture in 1 second.
+The default of 100 will normally be limited by the capabilities of the video device.
+Typical video devices have a maximum rate of 30.
+.RE
+.RE
+
+.TP
+.B minimum_frame_time
+.RS
+.nf
+Values: 0 to unlimited
+Default: 0
+Description:
+.fi
+.RS
+The minimum time in seconds between capturing picture frames from the camera.
+The default of 0 disables this option and relies upon the capture rate of the camera.
+This option is used when you want to capture images at a rate lower than 2 per second.
+.RE
+.RE
+
+.TP
+.B rotate
+.RS
+.nf
+Values: 0, 90, 180, 270
+Default: 0
+Description:
+.fi
+.RS
+Rotate image this number of degrees.
+The rotation affects all saved images as well as movies.
+.RE
+.RE
+
+.TP
+.B flip_axis
+.RS
+.nf
+Values: none, v, h
+Default: none
+Description:
+.fi
+.RS
+Flip the images vertically or horizontally.
+The flip affects all saved images as well as movies.
+.RE
+.RE
+
+.TP
+.B locate_motion_mode
+.RS
+.nf
+Values: on/off/preview
+Default: off
+Description:
+.fi
+.RS
+When specified as 'on', locate and draw a box around the moving object.
+When set 'preview', only draw a box in preview_shot pictures.
+.RE
+.RE
+
+.TP
+.B locate_motion_style
+.RS
+.nf
+Values:
+.RS
+.fi
+box : Draw traditional box around the part of the image generating the motion
+.nf
+
+.fi
+redbox : Draw a red box around the part of the image generating the motion
+.nf
+
+.fi
+cross : Draw a cross on the part of the image generating the motion
+.nf
+
+.fi
+redcross : Draw a red cross on the part of the image generating the motion
+.nf
+.RE
+Default: box
+Description:
+.fi
+.RS
+When locate_motion_mode is enable, this option specifies how the motion will be indicated on the image.
+.RE
+.RE
+
+.TP
+.B text_left
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Text to place in lower left corner of image.  Format specifiers follow C function strftime(3)
+.RE
+.RE
+
+.TP
+.B text_right
+.RS
+.nf
+Values: User specified string
+Default: %Y-%m-%d\\n%T
+Description:
+.fi
+.RS
+Text to place in lower right corner of image.  Format specifiers follow C function strftime(3)
+.RE
+.RE
+
+.TP
+.B text_changes
 .RS
 .nf
 Values: on/off
@@ -515,93 +757,44 @@ Default: off
 Description:
 .fi
 .RS
-The auto_brightness feature uses the brightness option as its target value.
-If brightness is zero auto_brightness will adjust to average brightness value 128.
-only recommended for cameras without auto brightness.
+When specified, draw the number of changed pixed on the images.
+This option will normally be set to off except when you setup and adjust the motion settings.
+The text is placed in upper right corner of the image.
 .RE
 .RE
 
 .TP
-.B brightness
+.B text_scale
 .RS
 .nf
-Values: 0 to 255
-Default: 0 (Disabled)
-Description:
-.fi
-.RS
-The initial brightness of a video device.
-If auto_brightness is enabled, this value defines the average brightness level which Motion will try and adjust to.
-.RE
-.RE
-
-.TP
-.B contrast
-.RS
-.nf
-Values: 0 to 255
-Default: 0 (Disabled)
-Description:
-.fi
-.RS
-The contrast value to set for the video device.
-.RE
-.RE
-
-.TP
-.B saturation
-.RS
-.nf
-Values: 0 to 255
-Default: 0 (Disabled)
-Description:
-.fi
-.RS
-The saturation value to set for the video device.
-.RE
-.RE
-
-.TP
-.B hue
-.RS
-.nf
-Values: 0 to 255
-Default: 0 (Disabled)
-Description:
-.fi
-.RS
-The hue value to set for the video device.
-.RE
-.RE
-
-.TP
-.B roundrobin_frames
-.RS
-.nf
-Values: 1 to unlimited
+Values: 1 to 10
 Default: 1
 Description:
 .fi
 .RS
-Number of frames to capture in each roundrobin step
+The scale at which to draw text over the image.
 .RE
 .RE
 
 .TP
-.B roundrobin_skip
+.B text_event
 .RS
 .nf
-Values: 1 to unlimited
-Default: 1
+Values: User specified string
+Default: %Y%m%d%H%M%S
 Description:
 .fi
 .RS
-Number of frames to skip before each roundrobin step
+Define the value of the special event conversion specifier %C.
+The user can use any conversion specifier in this option except %C.
+Date and time values are from the timestamp of the first image in the current event.
+The %C can be used filenames and text_left/right for creating
+a unique identifier for each event.
 .RE
 .RE
 
 .TP
-.B switchfilter
+.B emulate_motion
 .RS
 .nf
 Values: on/off
@@ -609,7 +802,7 @@ Default: off
 Description:
 .fi
 .RS
-Filter out noise generated by roundrobin
+Always save images even if there was no motion.
 .RE
 .RE
 
@@ -623,6 +816,19 @@ Description:
 .fi
 .RS
 Threshold for number of changed pixels in an image that triggers motion detection
+.RE
+.RE
+
+.TP
+.B threshold_maximum
+.RS
+.nf
+Values: 0, 1 to unlimited
+Default: 0
+Description:
+.fi
+.RS
+Maximum of changed pixels in an image that triggers motion detection.  A value of zero disables this option.
 .RE
 .RE
 
@@ -675,7 +881,7 @@ e/E : erode
 d/D : dilate
 l : label
 .RE
-Default: EedDl
+Default: Not defined
 Description:
 .fi
 .RS
@@ -685,6 +891,7 @@ The recommended value is EedDl. Any combination (and number of) of E, e, d, and 
 Comment out to disable
 .RE
 .RE
+
 
 .TP
 .B area_detect
@@ -761,7 +968,7 @@ Speed of mask changes when creating a dynamic mask file.
 .RE
 
 .TP
-.B lightswitch
+.B lightswitch_percent
 .RS
 .nf
 Values: 0 to 100
@@ -771,6 +978,19 @@ Description:
 .RS
 Ignore sudden massive light intensity changes.
 Value is a percentage of the picture area that changed intensity.
+.RE
+.RE
+
+.TP
+.B lightswitch_frames
+.RS
+.nf
+Values: 1 to 1000
+Default: 5
+Description:
+.fi
+.RS
+Number of frames to ignore when lightswitch has been triggered.
 .RE
 .RE
 
@@ -786,6 +1006,25 @@ Description:
 The minimum number of picture frames in a row that must contain motion before a event is triggered.
 The default of 1 means that all motion is detected.
 The recommended range is 1 to 5.
+.RE
+.RE
+
+.TP
+.B event_gap
+.RS
+.nf
+Values: -1 to unlimited
+Default: 60
+Description:
+.fi
+.RS
+The number of seconds of no motion that triggers the end of an event.
+An event is defined as a series of motion images taken within a short timeframe.
+The recommended value is 60 seconds.  The value -1 is allowed and disables
+events causing all Motion to be written to one single movie file and no pre_capture.
+If set to 0, motion is running in gapless mode.
+Movies don't have gaps anymore.
+An event ends right after no more motion is detected and post_capture is over.
 .RE
 .RE
 
@@ -819,58 +1058,34 @@ Number of frames to capture after motion is no longer detected.
 .RE
 
 .TP
-.B event_gap
+.B Script Options
 .RS
 .nf
-Values: -1 to unlimited
-Default: 60
+on_event_start, on_event_end, on_picture_save
+on_motion_detected, on_area_detected, on_movie_start
+on_movie_end, on_camera_lost, on_camera_found
+
+.fi
+.RE
+.RS
+.nf
+Values: User defined string
+Default: Not defined
 Description:
 .fi
 .RS
-The number of seconds of no motion that triggers the end of an event.
-An event is defined as a series of motion images taken within a short timeframe.
-The recommended value is 60 seconds.  The value -1 is allowed and disables
-events causing all Motion to be written to one single movie file and no pre_capture.
-If set to 0, motion is running in gapless mode.
-Movies don't have gaps anymore.
-An event ends right after no more motion is detected and post_capture is over.
+Specify the full path and file name for the script to execute when the indicated event occurs.
+When a file name is required for the script, append a %f to the script string.
 .RE
 .RE
 
-.TP
-.B max_movie_time
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-Maximum length in seconds of a movie.
-When value is exceeded a new movie file is created.
-The value of 0 means that there is no limit.
-.RE
-.RE
 
 .TP
-.B emulate_motion
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Always save images even if there was no motion.
-.RE
-.RE
-
-.TP
-.B output_pictures
+.B  picture_output
 .RS
 .nf
 Values: on, off, first, best, center
-Default: on
+Default: off
 Description:
 .fi
 .RS
@@ -883,7 +1098,7 @@ Can be used as preview shot for the corresponding movie.
 .RE
 
 .TP
-.B output_debug_pictures
+.B  picture_output_motion
 .RS
 .nf
 Values: on/off
@@ -892,19 +1107,6 @@ Description:
 .fi
 .RS
 Output pictures with only the pixels moving object (ghost images)
-.RE
-.RE
-
-.TP
-.B quality
-.RS
-.nf
-Values: 1 to 100
-Default: 75
-Description:
-.fi
-.RS
-The quality (in percent) to be used by the jpeg and webp compression
 .RE
 .RE
 
@@ -922,11 +1124,85 @@ The file type of output images
 .RE
 
 .TP
-.B ffmpeg_output_movies
+.B  picture_quality
+.RS
+.nf
+Values: 1 to 100
+Default: 75
+Description:
+.fi
+.RS
+The quality (in percent) to be used by the jpeg and webp compression
+.RE
+.RE
+
+.TP
+.B  picture_exif
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Text to include in a JPEG EXIF comment
+.RE
+.RE
+
+.TP
+.B picture_filename
+.RS
+.nf
+Values: User specified string
+Default: %v-%Y%m%d%H%M%S-%q
+Description:
+.fi
+.RS
+The file path for motion triggered images (jpeg, ppm or webp) relative to target_dir.
+The file extension .jpg, .ppm or .webp is automatically added so do not include this.
+Set to 'preview' together with best-preview feature enables special naming
+convention for preview shots.
+This option accepts the conversion specifiers included at the end of this manual.
+.RE
+.RE
+
+.TP
+.B snapshot_interval
+.RS
+.nf
+Values: 0 to unlimited
+Default: 0
+Description:
+.fi
+.RS
+When specified as 0, the snapshot feature is disabled.
+When a value is specified, the value indicates the number of seconds between snapshots.
+.RE
+.RE
+
+.TP
+.B snapshot_filename
+.RS
+.nf
+Values: User specified string
+Default: %v-%Y%m%d%H%M%S-snapshot
+Description:
+.fi
+.RS
+The file path for snapshots relative to target_dir.
+The file extension .jpg, .ppm or .webp is automatically added so do not include this.
+A symbolic link called lastsnap.jpg created in the target_dir will always
+point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
+This option accepts the conversion specifiers included at the end of this manual.
+.RE
+.RE
+
+.TP
+.B movie_output
 .RS
 .nf
 Values: on/off
-Default: off
+Default: on
 Description:
 .fi
 .RS
@@ -935,7 +1211,7 @@ Use ffmpeg to encode movies of the motion.
 .RE
 
 .TP
-.B ffmpeg_output_debug_movies
+.B movie_output_motion
 .RS
 .nf
 Values: on/off
@@ -948,7 +1224,150 @@ Use ffmpeg to encode movies with only the pixels moving object (ghost images)
 .RE
 
 .TP
-.B ffmpeg_timelapse
+.B  movie_max_time
+.RS
+.nf
+Values: 0 to unlimited
+Default: 120
+Description:
+.fi
+.RS
+Maximum length in seconds of a movie.
+When value is exceeded a new movie file is created.
+The value of 0 means that there is no limit.
+.RE
+.RE
+
+.TP
+.B  movie_bps
+.RS
+.nf
+Values: 0 to unlimited
+Default: 400000
+Description:
+.fi
+.RS
+Bitrate to be used by the ffmpeg encoder.
+This option is ignored if movie_quality is not 0.
+.RE
+.RE
+
+.TP
+.B  movie_quality
+.RS
+.nf
+Values: 0 to 100
+Default: 60
+Description:
+.fi
+.RS
+Enable and define the variable bitrate for the ffmpeg encoder.
+movie_bps is ignored if variable bitrate is enabled.
+When specified as 0, use the fixed bitrate defined by movie_bps.
+When defined as 1 - 100 varies the quality of the movie.
+A value of 1 is worst quality versus a value of 100 is best quality.
+.RE
+.RE
+
+.TP
+.B  movie_codec
+.RS
+.nf
+Values:
+.RS
+Motion videos:
+.RS
+mpeg4 - Creates .avi file
+msmpeg4 - Creates .avi file
+swf - Flash film with extension .swf
+flv - Flash video with extension .flv
+ffv1 - FF video codec 1 for Lossless Encoding
+mov - QuickTime
+mp4 - MPEG-4 Part 14 H264 encoding
+mkv - Matroska H264 encoding
+hevc - H.265 / HEVC (High Efficiency Video Coding)
+.RE
+.RE
+Default: mkv
+Description:
+.fi
+.RS
+For regular motion videos, the container/codec must be available in the ffmpeg installed on the computer.
+.RE
+.RE
+
+.TP
+.B movie_duplicate_frames
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+When creating videos, should frames be duplicated in order to keep up with the requested frames per second
+.RE
+.RE
+
+.TP
+.B  movie_passthrough
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+When using a rtsp camera, make movies without decoding the stream.
+.RE
+.RE
+
+.TP
+.B movie_filename
+.RS
+.nf
+Values: User specified string
+Default: %v-%Y%m%d%H%M%S
+Description:
+.fi
+.RS
+File path for motion triggered ffmpeg films (movies) relative to target_dir.
+The extensions(.swf, .avi, etc) are automatically added so do not include them
+This option accepts the conversion specifiers included at the end of this manual.
+.RE
+.RE
+
+.TP
+.B  movie_extpipe_use
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+Use the external pipe in order to encode videos.
+This is a replacement option for the FFMPEG builtin encoder for movie_output only.
+The options movie_filename and timelapse_filename are also used from the ffmpeg feature
+.RE
+.RE
+
+.TP
+.B  movie_extpipe
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+Command line string to receive and process a pipe of images to encode.
+Generally, use '-' for STDIN
+.RE
+.RE
+
+.TP
+.B timelapse_interval
 .RS
 .nf
 Values: 0 to unlimited
@@ -962,7 +1381,7 @@ Specify 0 to disable the timelapse.
 .RE
 
 .TP
-.B ffmpeg_timelapse_mode
+.B timelapse_mode
 .RS
 .nf
 Values:
@@ -988,320 +1407,35 @@ File rollover mode for the timelapse video.
 .RE
 
 .TP
-.B ffmpeg_bps
+.B timelapse_fps
 .RS
 .nf
 Values: 0 to unlimited
-Default: 400000
+Default: 30
 Description:
 .fi
 .RS
-Bitrate to be used by the ffmpeg encoder.
-This option is ignored if ffmpeg_variable_bitrate is not 0.
+Frames per second used for playback of the timelapse video.
 .RE
 .RE
 
 .TP
-.B ffmpeg_variable_bitrate
-.RS
-.nf
-Values: 0 to 100
-Default: 0
-Description:
-.fi
-.RS
-Enable and define the variable bitrate for the ffmpeg encoder.
-ffmpeg_bps is ignored if variable bitrate is enabled.
-When specified as 0, use the fixed bitrate defined by ffmpeg_bps.
-When defined as 1 - 100 varies the quality of the movie.
-A value of 1 is worst quality versus a value of 100 is best quality.
-.RE
-.RE
-
-.TP
-.B ffmpeg_video_codec
+.B timelapse_codec
 .RS
 .nf
 Values:
-.RS
-Timelapse videos:
 .RS
 mpg - Creates mpg file with mpeg-2 encoding.
 mpeg4 - Creates avi file with the default encoding.
 .RE
-Motion videos:
-.RS
-mpeg4 - Creates .avi file
-msmpeg4 - Creates .avi file
-swf - Flash film with extension .swf
-flv - Flash video with extension .flv
-ffv1 - FF video codec 1 for Lossless Encoding
-mov - QuickTime
-mp4 - MPEG-4 Part 14 H264 encoding
-mkv - Matroska H264 encoding
-hevc - H.265 / HEVC (High Efficiency Video Coding)
-.RE
-.RE
-Default: mpeg4
+Default: mpg
 Description:
 .fi
 .RS
-The container and codec to use when creating videos.
-When creating timelapse videos, there are only two options and the processing varies due to container/codec limitations.
 For mpg timelapse videos, if motion is shutdown and restarted, new pics will be appended
 to any previously created file with name indicated for timelapse.
 For mpeg4 timelapse videos, if motion is shutdown and restarted, new pics will create a
 new file with the name indicated for timelapse.
-For regular motion videos, the container/codec must be available in the ffmpeg installed on the computer.
-.RE
-.RE
-
-.TP
-.B ffmpeg_duplicate_frames
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-When creating videos, should frames be duplicated in order to keep up with the requested frames per second
-.RE
-.RE
-
-.TP
-.B use_extpipe
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Use the external pipe in order to encode videos.
-This is a replacement option for the FFMPEG builtin encoder for ffmpeg_output_movies only.
-The options movie_filename and timelapse_filename are also used from the ffmpeg feature
-.RE
-.RE
-
-.TP
-.B extpipe
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-Command line string to receive and process a pipe of images to encode.
-Generally, use '-' for STDIN
-.RE
-.RE
-
-.TP
-.B snapshot_interval
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-When specified as 0, the snapshot feature is disabled.
-When a value is specified, the value indicates the number of seconds between snapshots.
-.RE
-.RE
-
-.TP
-.B locate_motion_mode
-.RS
-.nf
-Values: on/off/preview
-Default: off
-Description:
-.fi
-.RS
-When specified as 'on', locate and draw a box around the moving object.
-When set 'preview', only draw a box in preview_shot pictures.
-.RE
-.RE
-
-.TP
-.B locate_motion_style
-.RS
-.nf
-Values:
-.RS
-.fi
-box : Draw traditional box around the part of the image generating the motion
-.nf
-
-.fi
-redbox : Draw a red box around the part of the image generating the motion
-.nf
-
-.fi
-cross : Draw a cross on the part of the image generating the motion
-.nf
-
-.fi
-redcross : Draw a red cross on the part of the image generating the motion
-.nf
-.RE
-Default: box
-Description:
-.fi
-.RS
-When locate_motion_mode is enable, this option specifies how the motion will be indicated on the image.
-.RE
-.RE
-
-.TP
-.B text_right
-.RS
-.nf
-Values: User specified string
-Default: %Y-%m-%d\n%T-%q
-Description:
-.fi
-.RS
-Text to place in lower right corner of image.  Format specifiers follow C function strftime(3)
-.RE
-.RE
-
-.TP
-.B text_left
-.RS
-.nf
-Values: User specified string
-Default: CAMERA %t
-Description:
-.fi
-.RS
-Text to place in lower left corner of image.  Format specifiers follow C function strftime(3)
-.RE
-.RE
-
-.TP
-.B text_changes
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-When specified, draw the number of changed pixed on the images.
-This option will normally be set to off except when you setup and adjust the motion settings.
-The text is placed in upper right corner of the image.
-.RE
-.RE
-
-.TP
-.B text_event
-.RS
-.nf
-Values: User specified string
-Default: %Y%m%d%H%M%S
-Description:
-.fi
-.RS
-Define the value of the special event conversion specifier %C.
-The user can use any conversion specifier in this option except %C.
-Date and time values are from the timestamp of the first image in the current event.
-The %C can be used filenames and text_left/right for creating
-a unique identifier for each event.
-.RE
-.RE
-
-.TP
-.B text_double
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Draw characters at twice normal size on images.
-.RE
-.RE
-
-.TP
-.B exif_text
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-Text to include in a JPEG EXIF comment
-.RE
-.RE
-
-.TP
-.B target_dir
-.RS
-.nf
-Values: User specified string
-Default: Not defined
-Description:
-.fi
-.RS
-Target base directory for pictures and films.
-It is recommended to use an absolute path.
-If this option is not defined, the current working directory is used.
-This option accepts the conversion specifiers included at the end of this manual.
-.RE
-.RE
-
-.TP
-.B snapshot_filename
-.RS
-.nf
-Values: User specified string
-Default: %v-%Y%m%d%H%M%S-snapshot
-Description:
-.fi
-.RS
-The file path for snapshots relative to target_dir.
-The file extension .jpg, .ppm or .webp is automatically added so do not include this.
-A symbolic link called lastsnap.jpg created in the target_dir will always
-point to the latest snapshot, unless snapshot_filename is exactly 'lastsnap'
-This option accepts the conversion specifiers included at the end of this manual.
-.RE
-.RE
-
-.TP
-.B picture_filename
-.RS
-.nf
-Values: User specified string
-Default: %v-%Y%m%d%H%M%S-%q
-Description:
-.fi
-.RS
-The file path for motion triggered images (jpeg, ppm or webp) relative to target_dir.
-The file extension .jpg, .ppm or .webp is automatically added so do not include this.
-Set to 'preview' together with best-preview feature enables special naming
-convention for preview shots.
-This option accepts the conversion specifiers included at the end of this manual.
-.RE
-.RE
-
-.TP
-.B movie_filename
-.RS
-.nf
-Values: User specified string
-Default: %v-%Y%m%d%H%M%S
-Description:
-.fi
-.RS
-File path for motion triggered ffmpeg films (movies) relative to target_dir.
-The extensions(.swf, .avi, etc) are automatically added so do not include them
-This option accepts the conversion specifiers included at the end of this manual.
 .RE
 .RE
 
@@ -1321,7 +1455,46 @@ This option accepts the conversion specifiers included at the end of this manual
 .RE
 
 .TP
-.B ipv6_enabled
+.B video_pipe
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+Output images to a video4linux loopback device.
+.RE
+.RE
+
+.TP
+.B  video_pipe_motion
+.RS
+.nf
+Values: User specified string
+Default: Not Defined
+Description:
+.fi
+.RS
+Output motion images to a video4linux loopback device.
+.RE
+.RE
+
+.TP
+.B webcontrol_port
+.RS
+.nf
+Values: 0 to maximum port number
+Default: 0
+Description:
+.fi
+.RS
+Port number for the web control / preview page.
+.RE
+.RE
+
+.TP
+.B  webcontrol_ipv6
 .RS
 .nf
 Values: on/off
@@ -1329,7 +1502,137 @@ Default: off
 Description:
 .fi
 .RS
-Listen to IPv6 localhost instead of IPv4
+Listen to IPv6 localhost instead of IPv4.  This option is also applicable for all streams.
+.RE
+.RE
+
+.TP
+.B webcontrol_localhost
+.RS
+.nf
+Values: on/off
+Default: on
+Description:
+.fi
+.RS
+Restrict control connections to localhost only
+.RE
+.RE
+
+.TP
+.B webcontrol_parms
+.RS
+.nf
+Values:
+.RS
+0 = No parameters available to change on web control
+1 = Limited list of parameters available to change
+2 = Advanced list of parameters (usually requires restart to become effective)
+3 = Restricted list of parameters (User IDs, passwords, commands to execute, etc)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The type of parameters that are able to be modified via the web interface.  This parameter can never be modified
+via the web interface and must be specified directly in the configuration file.
+.RE
+.RE
+
+.TP
+.B webcontrol_interface
+.RS
+.nf
+Values: 0-2
+Default: 0
+Description:
+.fi
+.RS
+Specified the web control interface type.  0=css, 1=text, 2=legacy
+.RE
+.RE
+
+.TP
+.B webcontrol_auth_method
+.RS
+.nf
+Values:
+.RS
+0 = disabled
+1 = Basic authentication
+2 = MD5 digest (the safer authentication)
+.RE
+Default: 0
+Description:
+.fi
+.RS
+The authentication method to use for the webcontrol.
+.RE
+.RE
+
+.TP
+.B webcontrol_authentication
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The username and password to use for authentication of the webcontrol.
+The format is Username:Password
+.RE
+.RE
+
+.TP
+.B webcontrol_tls
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+When specified as on, use SSL/TLS for the webcontrol.
+.RE
+.RE
+
+.TP
+.B webcontrol_cert
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The full path to the SSL certification file for webcontrol
+.RE
+.RE
+
+.TP
+.B webcontrol_key
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The full path to the SSL key file for webcontrol
+.RE
+.RE
+
+.TP
+.B webcontrol_cors_header
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The header to add for cross orgin on the webcontrol
 .RE
 .RE
 
@@ -1347,70 +1650,15 @@ This option is the port number that the mini-http server listens on for streams 
 .RE
 
 .TP
-.B stream_quality
-.RS
-.nf
-Values: 1 to 100
-Default: 50
-Description:
-.fi
-.RS
-The quality in percent for the jpg images streamed.
-.RE
-.RE
-
-.TP
-.B stream_motion
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Output frames at 1 fps when no motion is detected and increase to the rate given by stream_maxrate when motion is detected
-.RE
-.RE
-
-.TP
-.B stream_maxrate
-.RS
-.nf
-Values: 1 to unlimited
-Default: 1
-Description:
-.fi
-.RS
-Maximum frame rate to send to stream
-.RE
-.RE
-
-.TP
 .B stream_localhost
 .RS
 .nf
 Values: on/off
-Default: off
+Default: on
 Description:
 .fi
 .RS
 Restrict stream connections to localhost only
-.RE
-.RE
-
-.TP
-.B stream_limit
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-Limits the number of images per connection.
-The default value of 0 means unlimited.
-The number can be defined by multiplying actual stream rate by the desired number of seconds.
-The actual stream rate is the smallest of the framerate and stream_maxrate.
 .RE
 .RE
 
@@ -1447,6 +1695,35 @@ The format is Username:Password
 .RE
 
 .TP
+.B stream_tls
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+When specified as on, use SSL/TLS for the stream port.
+.RE
+.RE
+
+.TP
+.B stream_cors_header
+.RS
+.nf
+Values: User specified string
+Default: Not defined
+Description:
+.fi
+.RS
+The Access-Control-Allow-Origin header value to be sent with the stream.
+If unspecified, no Access-Control-Allow-Origin header is sent.
+The header allows browsers to access the stream via cross-origin resource sharing (CORS).
+For example, * allows access from browser client code served from any domain.
+.RE
+.RE
+
+.TP
 .B stream_preview_scale
 .RS
 .nf
@@ -1463,8 +1740,8 @@ This defines what percentage the stream image should be scaled to for the previe
 .B stream_preview_newline
 .RS
 .nf
-Values: yes/no
-Default: no
+Values: on/off
+Default: off
 Description:
 .fi
 .RS
@@ -1475,20 +1752,33 @@ or stacked on the page.
 .RE
 
 .TP
-.B webcontrol_port
+.B stream_preview_method
 .RS
 .nf
-Values: 0 to maximum port number
+Values: 0 to 2
 Default: 0
 Description:
 .fi
 .RS
-Port number for the web control / preview page.
+Method to display images on webcontrol page.  0=Full, 1=Substream, 2=Static
 .RE
 .RE
 
 .TP
-.B webcontrol_localhost
+.B stream_quality
+.RS
+.nf
+Values: 1 to 100
+Default: 50
+Description:
+.fi
+.RS
+The quality in percent for the jpg images streamed.
+.RE
+.RE
+
+.TP
+.B stream_grey
 .RS
 .nf
 Values: on/off
@@ -1496,38 +1786,238 @@ Default: off
 Description:
 .fi
 .RS
-Restrict control connections to localhost only
+Send the live stream of the camera in grey (black and white) instead of color.
 .RE
 .RE
 
 .TP
-.B webcontrol_html_output
+.B stream_maxrate
 .RS
 .nf
-Values: on/off
-Default: on
+Values: 1 to unlimited
+Default: 1
 Description:
 .fi
 .RS
-Specified whether the web control/preview page should be raw or html format.  Preview page is always html.
+Maximum frame rate to send to stream
 .RE
 .RE
 
 .TP
-.B webcontrol_authentication
+.B stream_motion
 .RS
 .nf
-Values:
+Values: on,off
+Default: off
+Description:
+.fi
 .RS
-0 = disabled
-1 = Basic authentication
-2 = MD5 digest (the safer authentication)
+Limit stream to 1 fps when no motion is being detected.
 .RE
+.RE
+
+.TP
+.B database_type
+.RS
+.nf
+Values: mysql, postgresql, sqlite3
+Default: Not defined
+Description:
+.fi
+.RS
+The type of database being used.
+.RE
+.RE
+
+.TP
+.B database_dbname
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+The name of the database being used (dbname).  For Sqlite3, the full path to the database.
+.RE
+.RE
+
+.TP
+.B database_host
+.RS
+.nf
+Values: User defined string
+Default: localhost
+Description:
+.fi
+.RS
+The name of the host on which the database is running.
+.RE
+.RE
+
+.TP
+.B database_port
+.RS
+.nf
+Values: 0 to maximum port number
+Default: Not defined
+Description:
+.fi
+.RS
+The port to use in order to access the database.
+Default ports: mysql 3306 , postgresql 5432
+.RE
+.RE
+
+
+.TP
+.B database_user
+.RS
+.nf
+Values: User defined string
+Default: Not Defined
+Description:
+.fi
+.RS
+The username to access the database
+.RE
+.RE
+
+.TP
+.B database_password
+.RS
+.nf
+Values: User defined string
+Default: Not Defined
+Description:
+.fi
+.RS
+The database password for the user to access the database.
+.RE
+.RE
+
+.TP
+.B database_busy_timeout
+.RS
+.nf
+Values: 0 to unlimited
 Default: 0
 Description:
 .fi
 .RS
-The authentication method to use for viewing the web control.
+Database wait time in milliseconds for locked database to be unlocked before returning database locked error
+.RE
+.RE
+
+.TP
+.B sql_log_picture
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+Log to the database when creating motion triggered picture file
+.RE
+.RE
+
+.TP
+.B sql_log_snapshot
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+Log to the database when creating a snapshot image file
+.RE
+.RE
+
+.TP
+.B sql_log_movie
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+Log to the database when creating motion triggered movie file
+.RE
+.RE
+
+.TP
+.B sql_log_timelapse
+.RS
+.nf
+Values: on/off
+Default: off
+Description:
+.fi
+.RS
+Log to the database when creating timelapse movies file
+.RE
+.RE
+
+.TP
+.B sql_query_start
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+SQL statement to execute at the start of a event.
+For mysql databases a unique id is returned in the dbeventid conversion specifier but for
+other databases, the dbeventid conversion specifier is assigned to zero.
+.RE
+.RE
+.RE
+
+.TP
+.B sql_query_stop
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+SQL statement to execute at the end of a event.
+.RE
+.RE
+.RE
+
+.TP
+.B sql_query
+.RS
+.nf
+Values: User defined string
+Default: Not defined
+Description:
+.fi
+.RS
+SQL statement to execute when a event occurs.
+Use same conversion specifiers as for text features
+Additional special conversion specifiers are
+.RS
+%n = the number representing the file_type
+%f = filename with full path
+.RE
+Sample table set up (not sql_query):
+.RS
+Mysql:  CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
+.RE
+.RS
+Postgresql: CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
+.RE
+Sample sql_query
+.RS
+insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
+.RE
 .RE
 .RE
 
@@ -1604,293 +2094,17 @@ These options specify the parameters for cameras with tracking capabilities.
 .RE
 
 .TP
-.B quiet
-.RS
-.nf
-Values: on/off
-Default: on
-Description:
-.fi
-.RS
-Do not sound beeps when detecting motion
-.RE
-.RE
-
-.TP
-.B Script Options
-.RS
-.nf
-on_event_start, on_event_end, on_picture_save
-on_motion_detected, on_area_detected, on_movie_start
-on_movie_end, on_camera_lost, on_camera_found
-
-.fi
-.RE
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-Specify the full path and file name for the script to execute when the indicated event occurs.
-When a file name is required for the script, append a %f to the script string.
-.RE
-.RE
-
-.TP
-.B sql_log_picture
-.RS
-.nf
-Values: on/off
-Default: on
-Description:
-.fi
-.RS
-Log to the database when creating motion triggered picture file
-.RE
-.RE
-
-.TP
-.B sql_log_snapshot
-.RS
-.nf
-Values: on/off
-Default: on
-Description:
-.fi
-.RS
-Log to the database when creating a snapshot image file
-.RE
-.RE
-
-.TP
-.B sql_log_movie
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Log to the database when creating motion triggered movie file
-.RE
-.RE
-
-.TP
-.B sql_log_timelapse
-.RS
-.nf
-Values: on/off
-Default: off
-Description:
-.fi
-.RS
-Log to the database when creating timelapse movies file
-.RE
-.RE
-
-.TP
-.B sql_query
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-SQL statement to execute when a event occurs.
-Use same conversion specifiers as for text features
-Additional special conversion specifiers are
-.RS
-%n = the number representing the file_type
-%f = filename with full path
-.RE
-Sample table set up (not sql_query):
-.RS
-Mysql:  CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp(14), event_time_stamp timestamp(14));
-.RE
-.RS
-Postgresql: CREATE TABLE security (camera int, filename char(80) not null, frame int, file_type int, time_stamp timestamp without time zone, event_time_stamp timestamp without time zone);
-.RE
-Sample sql_query
-.RS
-insert into security(camera, filename, frame, file_type, time_stamp, text_event) values('%t', '%f', '%q', '%n', '%Y-%m-%d %T', '%C')
-.RE
-.RE
-.RE
-
-.TP
-.B sql_query_start
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-SQL statement to execute at the start of a event.
-For mysql databases a unique id is returned in the dbeventid conversion specifier but for
-other databases, the dbeventid conversion specifier is assigned to zero.
-.RE
-.RE
-.RE
-
-.TP
-.B database_type
-.RS
-.nf
-Values: mysql, postgresql, sqlite3
-Default: Not defined
-Description:
-.fi
-.RS
-The type of database being used.
-.RE
-.RE
-
-.TP
-.B database_dbname
-.RS
-.nf
-Values: User defined string
-Default: Not defined
-Description:
-.fi
-.RS
-The name of the database being used (dbname).  For Sqlite3, the full path to the database.
-.RE
-.RE
-
-.TP
-.B database_host
-.RS
-.nf
-Values: User defined string
-Default: Not Defined
-Description:
-.fi
-.RS
-The name of the host on which the database is running.
-.RE
-.RE
-
-.TP
-.B database_user
-.RS
-.nf
-Values: User defined string
-Default: Not Defined
-Description:
-.fi
-.RS
-The username to access the database
-.RE
-.RE
-
-.TP
-.B database_password
-.RS
-.nf
-Values: User defined string
-Default: Not Defined
-Description:
-.fi
-.RS
-The database password for the user to access the database.
-.RE
-.RE
-
-.TP
-.B database_port
-.RS
-.nf
-Values: 0 to maximum port number
-Default: Not defined
-Description:
-.fi
-.RS
-The port to use in order to access the database.
-Default ports: mysql 3306 , postgresql 5432
-.RE
-.RE
-
-.TP
-.B database_busy_timeout
-.RS
-.nf
-Values: 0 to unlimited
-Default: 0
-Description:
-.fi
-.RS
-Database wait time in milliseconds for locked database to be unlocked before returning database locked error
-.RE
-.RE
-
-.TP
-.B video_pipe
+.B track_generic_move
 .RS
 .nf
 Values: User specified string
-Default: Not Defined
+Default: Not defined
 Description:
 .fi
 .RS
-Output images to a video4linux loopback device.
+Full path and file name for the script to execute to move a camera in generic tracking mode.
 .RE
 .RE
-
-.TP
-.B motion_video_pipe
-.RS
-.nf
-Values: User specified string
-Default: Not Defined
-Description:
-.fi
-.RS
-Output motion images to a video4linux loopback device.
-.RE
-.RE
-
-.TP
-.B camera_dir
-.RS
-.nf
-Values: User specified string
-Default: Not Defined
-Description:
-.fi
-.RS
-This option specifies the optional subdirectory that contains the camera config files.
-.RE
-.RE
-
-.TP
-.B camera
-.RS
-.nf
-Values: User specified string
-Default: Not Defined
-Description:
-.fi
-.RS
-This option specifies the full path and file name to individual camera files.
-This option can be listed multiple times.
-Each camera file should contain the options that are unique to that camera/video device.
-Common options are obtained from the motion.conf file and values are overwritten from each
-camera file.  While the motion.conf includes four sample camera files, the actual
-limit of cameras is only dependent upon the machine capabilities.
-Remember: If you have more than one camera you must have one
-camera file for each one. For example, 2 cameras would require 3 files:
-The motion.conf file AND camera1.conf and camera2.conf.
-only put the options that are unique to each camera in the
-camera config files.
-.RE
-.RE
-
-
 
 
 
@@ -1934,7 +2148,7 @@ Motion has a configuration file in the distribution package called motion-dist.c
 .br
 The configuration file needs to be renamed from motion-dist.conf to motion.conf. The original file is called motion-dist.conf so that your perfectly working motion.conf file does not accidentally get overwritten when you re-install or upgrade to a newer version of Motion.
 .br
-If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. Motion will then create an extra tread of itself for each camera. If you only have one camera you only need the motion.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motion.conf file.
+If you have more than one camera you should not try and invoke Motion more times. Motion is made to work with more than one camera in a very elegant way and the way to do it is to create a number of camera config files. Motion will then create an extra thread of itself for each camera. If you only have one camera you only need the motion.conf file. The minute you have two or more cameras you must have one camera config file per camera besides the motion.conf file.
 .br
 So if you have for example two cameras you need motion.conf and two camera config files. Total of 3 config files.
 .br
@@ -2000,6 +2214,9 @@ File name - used in the on_picture_save, on_movie_start, on_movie_end, and sql_q
 .TP
 .B %F
 Equivalent to %Y-%m-%d (the ISO 8601 date format).
+.TP
+.B %h
+The height of the image.
 .TP
 .B %H
 The hour as a decimal number using a 24-hour clock (range 00 to 23).
@@ -2120,6 +2337,9 @@ The frame per seconds.
 .TP
 .B %{dbeventid}
 The id number returned from mysql_insert_id.
+.TP
+.B %{ver}
+The version number of Motion.
 
 
 
@@ -2134,4 +2354,5 @@ Jeroen Vreeken (pe1rxq@amsat.org),
 Folkert van Heusden,
 Kenneth Lavrsen (kenneth@lavrsen.dk),
 Juan Angulo Moreno <juan@apuntale.com>,
+the motion-project team,
 and many others
