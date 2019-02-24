@@ -330,7 +330,7 @@ int header_extract_authinfo(const char *http_header, void *closure)
   char *s,*e,*header,*value;
 
 	digest_authinfo *auth=(digest_authinfo*)closure;
-	while(p>0 && p[0] > 0)
+	while(p!=0 && p[0] > 0)
 	{
 		s=p; //set s to start of string
 		e=strchr(s,'='); // set e to location of =
