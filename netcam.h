@@ -118,6 +118,13 @@ struct netcam_caps {                    /* netcam capabilities: */
         unsigned char content_length;   /*  0 - unsupported     */
 } caps;
 
+typedef struct 
+{
+	char server_realm[255];
+	char server_qop[255];
+	char server_nonce[255];
+	int  client_counter;
+} digest_authinfo;
 
 /*
  * struct netcam_context contains all the structures and other data
@@ -181,7 +188,8 @@ typedef struct netcam_context {
     int keepalive_timeup;       /* set to TRUE if it is time to close netcam's socket,
                                    and then re-open it with Keep-Alive set again.
                                    Even Keep-Alive netcams need a close/open sometimes. */
-
+  	digest_authinfo server_digest_auth_info; /* holds digest auth info read from server */
+	
     char *connect_request;      /* contains the complete string
                                    required for connection to the
                                    camera */

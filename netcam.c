@@ -625,6 +625,8 @@ int netcam_start(struct context *cnt){
     netcam = cnt->netcam;           /* Just for clarity in remaining code. */
     netcam->cnt = cnt;              /* Fill in the "parent" info. */
 
+    memset(&(netcam->server_digest_auth_info),0,sizeof(digest_authinfo));
+
     /* Our image buffers */
     netcam->receiving = mymalloc(sizeof(netcam_buff));
     netcam->receiving->ptr = mymalloc(NETCAM_BUFFSIZE);

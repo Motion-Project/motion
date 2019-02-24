@@ -62,6 +62,13 @@ typedef unsigned int UINT4;
 #define PROTO_LIST(list) ()
 #endif
 
+#define HASHLEN 16
+typedef char HASH[HASHLEN];
+#define HASHHEXLEN 32
+typedef char HASHHEX[HASHHEXLEN+1];
+#define IN
+#define OUT
+
 /* MD5 context. */
 typedef struct {
   UINT4 state[4];                                   /* state (ABCD) */
@@ -73,5 +80,27 @@ void MD5Init(MD5_CTX *);
 void MD5Update(MD5_CTX *, unsigned char *, unsigned int);
 void MD5Final(unsigned char [16], MD5_CTX *);
 void MD5(unsigned char *message, unsigned long message_length, unsigned char *md);
+void CvtHex(IN HASH Bin, OUT HASHHEX Hex);
+void DigestCalcResponse(
+    IN HASHHEX HA1,           /* H(A1) */
+    IN char * pszNonce,       /* nonce from server */
+    IN char * pszNonceCount,  /* 8 hex digits */
+    IN char * pszCNonce,      /* client nonce */
+    IN char * pszQop,         /* qop-value: "", "auth", "auth-int" */
+    IN char * pszMethod,      /* method from the request */
+    IN char * pszDigestUri,   /* requested URL */
+    IN HASHHEX HEntity,       /* H(entity body) if qop="auth-int" */
+    OUT HASHHEX Response      /* request-digest or response-digest */
+												);
+
+void DigestCalcHA1(
+    IN char * pszAlg,
+    IN char * pszUserName,
+    IN char * pszRealm,
+    IN char * pszPassword,
+    IN char * pszNonce,
+    IN char * pszCNonce,
+    OUT HASHHEX SessionKey
+									 );
 
 #endif // MD5_H
