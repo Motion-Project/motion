@@ -312,7 +312,7 @@ int netcam_read_next_header(netcam_context_ptr netcam)
 	return 0;
 }
 
-int header_extract_authinfo(const char *http_header, void *closure)
+static int header_extract_authinfo(const char *http_header, void *closure)
 {
 	char *buffer=0;
 	if(http_header!=0)
@@ -383,7 +383,7 @@ int header_extract_authinfo(const char *http_header, void *closure)
 	return 1;
 }
 
-int do_digest_auth(netcam_context_ptr netcam)
+static int do_digest_auth(netcam_context_ptr netcam)
 {
 	int ret;
 	char *header;
@@ -1410,7 +1410,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
 			ptr = url->userpass;
 		if (ptr) /* there's a username:password to use */
 		{
-			char *username,*password,*userpass;
+			char *username,*password;
 			int  headersize=0;
 				
 			char *p;
@@ -1453,7 +1453,7 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
 
 					
 				DigestCalcResponse(HA1,netcam->server_digest_auth_info.server_nonce,nonce_count,client_nonce,
-													 netcam->server_digest_auth_info.server_qop, "GET", url->path, HA2,
+													 netcam->server_digest_auth_info.server_qop, (char*)"GET", url->path, HA2,
 													 response);
 					
 				authorization_header=mymalloc(headersize);
