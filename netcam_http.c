@@ -1462,7 +1462,8 @@ static int netcam_http_build_url(netcam_context_ptr netcam, struct url_t *url)
 								username,netcam->server_digest_auth_info.server_realm,netcam->server_digest_auth_info.server_nonce,
 								url->path,nonce_count,client_nonce,response);
 				free(userpass);
-
+				userpass=0;
+				
 				MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO,_("Authorization header ('%s')"), authorization_header);
 			}
 		}
