@@ -11,8 +11,8 @@
  *    Copyright 2005, William M. Brack
  *    This program is published under the GNU Public license
  */
-#include "translate.h"
-#include "rotate.h"    /* already includes motion.h */
+#include "../translate.h"
+#include "../rotate.h"    /* already includes motion.h */
 
 /* This is a workaround regarding these defines.  The config.h file defines
  * HAVE_STDLIB_H as 1 whereas the jpeglib.h just defines it without a value.

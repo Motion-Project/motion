@@ -6,32 +6,7 @@ matrix:
     language: c
     compiler: gcc
   - os: linux
-    env:  BUILD_IMAGE=14.04
-    language: c
-    compiler: gcc
-    addons:
-      apt:
-        packages:
-        - libavformat-dev
-        - libavcodec-dev
-        - libavutil-dev
-        - libswscale-dev
-        - libavdevice-dev
-        - libjpeg8-dev
-        - libzip-dev
-        - libsqlite3-dev
-        - libpq-dev
-        - libmysqlclient-dev
-        - libwebp-dev
-        - libmicrohttpd-dev
-        - gettext
-  - os: linux
     env:  DOCKER_IMAGE=ubuntu:16.04
-    services:  docker
-    language: c
-    compiler: gcc
-  - os: linux
-    env:  DOCKER_IMAGE=ubuntu:17.10
     services:  docker
     language: c
     compiler: gcc
@@ -67,46 +42,55 @@ before_install:
       docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
     fi;
 
+#  Install the distro specific packages for Motion.
+#  MariaDB is not tested on osx and alpine since the mysql.h from MariaDB throws an error.
+#  16.04 and Jessie only support MySQL instead of MariaDB.
 before_script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
-      brew upgrade ffmpeg pkg-config jpeg libmicrohttpd;
-      brew install ffmpeg pkg-config libjpeg libmicrohttpd;
-      autoreconf -fiv;
-    elif [ "$BUILD_IMAGE" = "14.04" ]; then
-      autoreconf -fiv;
+      brew upgrade autoconf-archive gettext ffmpeg jpeg libmicrohttpd;
+      brew install autoconf-archive gettext ffmpeg libjpeg libmicrohttpd;
+      export PATH="/usr/local/opt/gettext/bin:/usr/local/bin:$PATH";
+      autoreconf --include=/usr/local/opt/gettext/share/aclocal/ -fiv;
     elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
       docker exec $(docker ps -aq) /bin/sh -c 'apk update';
-      docker exec $(docker ps -aq) /bin/sh -c 'apk add alpine-sdk autoconf automake pkgconf libtool';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add alpine-sdk autoconf autoconf-archive automake libtool';
       docker exec $(docker ps -aq) /bin/sh -c 'apk add libjpeg-turbo-dev libzip-dev ffmpeg-dev';
       docker exec $(docker ps -aq) /bin/sh -c 'apk add libmicrohttpd-dev gettext-dev';
+      docker exec $(docker ps -aq) /bin/sh -c 'apk add postgresql-dev sqlite-dev';
       docker exec $(docker ps -aq) /bin/sh -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "debian:stretch" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev autoconf autoconf-archive automake autopoint git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev default-libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "debian:jessie" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev autoconf autoconf-archive autopoint git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y wget && wget https://ftp.gnu.org/gnu/automake/automake-1.16.1.tar.xz';
+      docker exec $(docker ps -aq) /bin/bash -c 'tar -xf automake-1.16.1.tar.xz && cd automake-1.16.1 && ./configure --prefix=/usr && make -j6 && make -j6 install';
+      docker exec $(docker ps -aq) /bin/bash -c 'wget https://ftp.gnu.org/pub/gnu/gettext/gettext-0.20.1.tar.xz';
+      docker exec $(docker ps -aq) /bin/bash -c 'tar -xf gettext-0.20.1.tar.xz && cd gettext-0.20.1 && ./configure --prefix=/usr && make -j6 && make -j6 install';
+      docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
+    elif [ "x$DOCKER_IMAGE" != "ubuntu:16.04" ]; then
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev autoconf autoconf-archive automake autopoint git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev libzip-dev autoconf automake pkgconf libtool git';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg8-dev autoconf autoconf-archive automake autopoint git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libmariadbclient-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     fi;
 
 script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
-      ./configure --with-developer-flags && make;
-    elif [ "$BUILD_IMAGE" = "14.04" ]; then
-      ./test_builds.sh;
-    elif [ "$DOCKER_IMAGE" = "alpine:latest" ]; then
-      docker exec $(docker ps -aq) /bin/sh -c './test_builds.sh';
+      ./configure && make check ;
     elif [ "x$DOCKER_IMAGE" != "x" ]; then
-      docker exec $(docker ps -aq) /bin/bash -c './test_builds.sh';
+      docker exec $(docker ps -aq) /bin/sh -c './configure && make check';
     fi;

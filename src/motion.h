@@ -62,12 +62,12 @@ struct image_data;
 #include "stream.h"
 
 #include "track.h"
-#include "netcam.h"
-#include "netcam_rtsp.h"
+#include "netcam/netcam.h"
+#include "netcam/netcam_rtsp.h"
 #include "ffmpeg.h"
 
 #ifdef HAVE_MMAL
-#include "mmalcam.h"
+#include "mmal/mmalcam.h"
 #endif
 
 

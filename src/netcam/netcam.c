@@ -5,8 +5,8 @@
  *
  */
 
-#include "translate.h"
-#include "motion.h"
+#include "../translate.h"
+#include "../motion.h"
 
 #include <regex.h>                    /* For parsing of the URL */
 

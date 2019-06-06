@@ -21,9 +21,9 @@
 #include "interface/mmal/util/mmal_connection.h"
 #include "raspicam/RaspiCamControl.h"
 
-#include "translate.h"
-#include "motion.h"
-#include "rotate.h"
+#include "../translate.h"
+#include "../motion.h"
+#include "../rotate.h"
 
 #define MMALCAM_OK        0
 #define MMALCAM_ERROR    -1

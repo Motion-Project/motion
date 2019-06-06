@@ -8,8 +8,8 @@
  */
 
 /* For rotation */
-#include "translate.h"
-#include "rotate.h"     /* Already includes motion.h */
+#include "../translate.h"
+#include "../rotate.h"     /* Already includes motion.h */
 #include "video_common.h"
 #include "video_bktr.h"
 

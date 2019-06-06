@@ -8,8 +8,8 @@
  *      See also the file 'COPYING'.
  *
  */
-#include "translate.h"
-#include "motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
+#include "../translate.h"
+#include "../motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
 
 #include <ctype.h>
 #include <netdb.h>

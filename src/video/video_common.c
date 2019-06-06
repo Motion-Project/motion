@@ -8,8 +8,8 @@
  *      See also the file 'COPYING'.
  *
  */
-#include "translate.h"
-#include "motion.h"
+#include "../translate.h"
+#include "../motion.h"
 #include "video_common.h"
 #include "video_v4l2.h"
 #include "video_bktr.h"

@@ -9,11 +9,11 @@
 */
 #include "picture.h"   /* already includes motion.h */
 #include "translate.h"
-#include "netcam_rtsp.h"
+#include "netcam/netcam_rtsp.h"
 #include "ffmpeg.h"
 #include "event.h"
-#include "video_loopback.h"
-#include "video_common.h"
+#include "video/video_loopback.h"
+#include "video/video_common.h"
 
 /* Various functions (most doing the actual action) */
 

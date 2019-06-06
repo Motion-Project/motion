@@ -37,12 +37,12 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include "motion.h"
+#include "../motion.h"
 #include "webu.h"
 #include "webu_html.h"
 #include "webu_text.h"
 #include "webu_stream.h"
-#include "translate.h"
+#include "../translate.h"
 
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {

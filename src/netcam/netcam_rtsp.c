@@ -24,14 +24,14 @@
  ***********************************************************/
 
 #include <stdio.h>
-#include "translate.h"
-#include "rotate.h"    /* already includes motion.h */
+#include "../translate.h"
+#include "../rotate.h"    /* already includes motion.h */
 #include "netcam_rtsp.h"
-#include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
+#include "../video/video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
 
 #ifdef HAVE_FFMPEG
 
-#include "ffmpeg.h"
+#include "../ffmpeg.h"
 
 static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data){
     /* Determine if the format is YUV420P */

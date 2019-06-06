@@ -23,7 +23,7 @@ You should have received a copy of the GNU General Public License
 along with Wget; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#include "motion.h"
+#include "../motion.h"
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>

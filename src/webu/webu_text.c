@@ -19,10 +19,10 @@
  *
  */
 
-#include "motion.h"
+#include "../motion.h"
 #include "webu.h"
 #include "webu_text.h"
-#include "translate.h"
+#include "../translate.h"
 
 static void webu_text_seteol(struct webui_ctx *webui) {
     /* Set the end of line character for text interface */

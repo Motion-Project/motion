@@ -11,8 +11,8 @@
  *      Version 2.  See also the file 'COPYING'.
  ***********************************************************/
 
-#include "translate.h"
-#include "motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
+#include "../translate.h"
+#include "../motion.h"  /* Needs to come first, because _GNU_SOURCE_ set there. */
 #include "netcam_http.h"
 
 #define CONNECT_TIMEOUT        10     /* Timeout on remote connection attempt */
