@@ -471,6 +471,7 @@ struct context {
     int movie_fps;
     char newfilename[PATH_MAX];
     char extpipefilename[PATH_MAX];
+    char extpipecmdline[PATH_MAX];
     int movie_last_shot;
 
     struct ffmpeg   *ffmpeg_output;

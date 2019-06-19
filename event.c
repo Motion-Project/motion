@@ -830,13 +830,14 @@ static void event_create_extpipe(struct context *cnt,
             return ;
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
+        snprintf(cnt->extpipecmdline, PATH_MAX - 1, "%s", stamp);
 
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), stamp);
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cnt->extpipecmdline);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cnt->moviefps: %d", cnt->movie_fps);
 
         event(cnt, EVENT_FILECREATE, NULL, cnt->extpipefilename, (void *)FTYPE_MPEG, currenttime_tv);
-        cnt->extpipe = popen(stamp, "we");
+        cnt->extpipe = popen(cnt->extpipecmdline, "we");
 
         if (cnt->extpipe == NULL) {
             MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("popen failed"));
@@ -872,7 +873,7 @@ static void event_extpipe_put(struct context *cnt,
            }
         } else {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("pipe %s not created or closed already "), cnt->conf.movie_extpipe);
+                ,_("pipe %s not created or closed already "), cnt->extpipecmdline);
         }
     }
 }
