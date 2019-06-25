@@ -1,3 +1,5 @@
+AM_CPPFLAGS = -Dsysconfdir=\"$(sysconfdir)\"
+
 bin_PROGRAMS = motion
 
 motion_SOURCES = alg.c conf.c draw.c event.c ffmpeg.c logger.c md5.c motion.c \
