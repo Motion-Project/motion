@@ -1355,6 +1355,23 @@ void v4l2_mutex_destroy(void) {
 #endif // HAVE_V4L2
 }
 
+static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
+
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_streamparm* setfps;
+
+    setfps = (struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
+    memset(setfps, 0, sizeof(struct v4l2_streamparm));
+    setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    setfps->parm.capture.timeperframe.numerator = 1;
+    setfps->parm.capture.timeperframe.denominator = cnt->conf.framerate;
+
+    if (xioctl(vid_source, VIDIOC_S_PARM, setfps) == -1)
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: v4l2_set_fps VIDIOC_S_PARM");
+    return 0;
+}
+
+
 int v4l2_start(struct context *cnt) {
 #ifdef HAVE_V4L2
 
@@ -1392,6 +1409,7 @@ int v4l2_start(struct context *cnt) {
     if (retcd == 0) retcd = v4l2_norm_select(cnt, curdev);
     if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
     if (retcd == 0) retcd = v4l2_pixfmt_select(cnt, curdev);
+    if (retcd == 0) retcd = v4l2_fps_set(cnt, curdev);
     if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
     if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
     if (retcd == 0) retcd = vid_parms_parse(cnt);
