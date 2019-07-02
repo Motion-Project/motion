@@ -5,10 +5,12 @@ bin_PROGRAMS = motion
 motion_SOURCES = alg.c conf.c draw.c event.c ffmpeg.c logger.c md5.c motion.c \
 	picture.c rotate.c stream.c track.c translate.c
 
+if MMAL
 motion_SOURCES += mmal/mmalcam.c
 motion_SOURCES += \
 	mmal/raspicam/RaspiCLI.c \
 	mmal/raspicam/RaspiCamControl.c
+endif
 
 motion_SOURCES += \
 	netcam/netcam.c \
