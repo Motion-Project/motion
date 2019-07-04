@@ -30,6 +30,11 @@ AC_LIB_HAVE_LINKFLAGS([microhttpd])
 LIBS="$LIBMICROHTTPD $LIBS"
 AC_SEARCH_LIBS([MHD_start_daemon], [microhttpd])
 
+AX_PTHREAD
+LIBS="$PTHREAD_LIBS $LIBS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+CC="$PTHREAD_CC"
+
 AS_IF([test "x$with_mmal" != xno], [
 	AC_LIB_HAVE_LINKFLAGS([mmal_core], [mmal_util])
 	LIBS="$LIBMMAL_CORE $LIBS"
@@ -53,7 +58,7 @@ AS_IF([test "x$with_mmal" != xno], [
 ################################################################################
 AC_CHECK_HEADERS([jerror.h jpeglib.h], [], [jpeg_headers=no])
 
-AC_CHECK_HEADER([microhttpd.h])
+AC_CHECK_HEADERS([microhttpd.h pthread_np.h])
 
 AS_IF([test "x$with_mmal" != xno], [
 	AC_CHECK_HEADERS([dnl
@@ -79,6 +84,11 @@ AS_IF([test "x$with_mmal" != xno], [
 ])
 
 ################################################################################
+# Checks for library functions
+################################################################################
+AC_CHECK_FUNCS([pthread_getname_np pthread_setname_np])
+
+################################################################################
 # Reconcile configurations and checks
 ################################################################################
 AS_IF([test "x$ac_cv_search_jpeg_std_error" = xno],
@@ -90,6 +100,9 @@ AS_IF([test "x$ac_cv_search_MHD_start_daemon" = xno],
 	[AC_MSG_ERROR([microhttpd library not found])])
 AS_IF([test "x$ac_cv_header_microhttpd_h" != xyes],
 	[AC_MSG_ERROR([microhttpd header file not found])])
+
+AS_IF([test "x$ax_pthread_ok" = xno],
+	[AC_MSG_ERROR([pthreads not found])])
 
 AS_IF([test "x$with_mmal" != xno], [
 	AS_IF([test "x$ac_cv_search_mmal_component_create" = xno],
