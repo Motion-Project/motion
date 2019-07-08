@@ -6,6 +6,21 @@ AC_CONFIG_SRCDIR([src/motion.c])
 
 AC_USE_SYSTEM_EXTENSIONS
 
+MOTION_DEV_FLAGS=
+AC_ARG_WITH([developer-flags],
+	[AS_HELP_STRING([--with-developer-flags],
+		[Causes practically all of the possible gcc warning flags to be set. This may produce a large amount of warnings.])],
+	[], [with_developer_flags=no])
+AS_IF([test "x$with_developer_flags" != xno], [
+	AX_CHECK_COMPILE_FLAG([-Werror], [],
+		[AC_MSG_ERROR([Current compiler does not support -Werror])])
+	MOTION_DEV_FLAGS="-W -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+	AX_CHECK_COMPILE_FLAG([$MOTION_DEV_FLAGS], [],
+		[AC_MSG_ERROR([Current compiler does not support developer flags: $MOTION_DEV_FLAGS])])
+	MOTION_DEV_FLAGS="$MOTION_DEV_FLAGS -Werror"
+])
+AC_SUBST([MOTION_DEV_FLAGS])
+
 ################################################################################
 # Configurations for external software support
 ################################################################################
