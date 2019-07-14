@@ -86,11 +86,16 @@ AS_IF([test "x$with_mmal" != xno], [
 ################################################################################
 # Checks for library functions
 ################################################################################
+AC_FUNC_STRERROR_R
+
 AC_CHECK_FUNCS([pthread_getname_np pthread_setname_np])
 
 ################################################################################
 # Reconcile configurations and checks
 ################################################################################
+AS_IF([test "x$ac_cv_func_strerror_r" != xyes],
+	[AC_MSG_ERROR([strerror_r function not found])])
+
 AS_IF([test "x$ac_cv_search_jpeg_std_error" = xno],
 	[AC_MSG_ERROR([libjpeg library not found])])
 AS_IF([test "x$jpeg_headers" = xno],

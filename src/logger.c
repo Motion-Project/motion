@@ -173,7 +173,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     char usrfmt[1024];
 
 /* GNU-specific strerror_r() */
-#if (!defined(XSI_STRERROR_R))
+#if defined(STRERROR_R_CHAR_P)
     char msg_buf[100];
 #endif
     va_list ap;
@@ -254,7 +254,10 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
          * version of strerror_r, which doesn't actually put the message into
          * my buffer :-(.  I have put in a 'hack' to get around this.
          */
-#if defined(XSI_STRERROR_R)
+#if defined(STRERROR_R_CHAR_P)
+        /* GNU-specific strerror_r() */
+        strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
+#else
         /* XSI-compliant strerror_r() */
         if (strerror_r(errno_save, buf + n, sizeof(buf) - n))    /* 2 for the ': ' */
         {
@@ -262,9 +265,6 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
             On error, a (positive) error number is returned (since glibc 2.13),
             or -1 is returned and errno is set to indicate the error (glibc versions before */
         }
-#else
-        /* GNU-specific strerror_r() */
-        strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
 #endif
     }
 
