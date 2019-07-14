@@ -24,7 +24,9 @@ motion_SOURCES += \
 	video/jpegutils.c \
 	video/video_common.c
 motion_SOURCES += video/video_bktr.c
+if V4L2
 motion_SOURCES += video/video_loopback.c
+endif
 motion_SOURCES += video/video_v4l2.c
 
 motion_SOURCES += \

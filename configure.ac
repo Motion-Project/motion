@@ -19,6 +19,11 @@ AC_ARG_WITH([mmal],
 		[Compile without Multi-Media Abstraction Layer (MMAL) support])],
 	[], [with_mmal=check])
 
+AC_ARG_WITH([v4l2],
+	[AS_HELP_STRING([--without-v4l2],
+		[Compile without Video4Linux2 (V4L2) support])],
+	[], [with_v4l2=check])
+
 ################################################################################
 # Checks for programs
 ################################################################################
@@ -100,6 +105,11 @@ AS_IF([test "x$with_mmal" != xno], [
 	])
 ])
 
+AS_IF([test "x$with_v4l2" != xno], [
+	AC_CHECK_HEADER([linux/videodev2.h], [],
+		[AS_IF([test "x$with_v4l2" = xcheck], [with_v4l2=no])])
+])
+
 ################################################################################
 # Checks for library functions
 ################################################################################
@@ -170,6 +180,17 @@ AS_IF([test "x$with_mmal" != xno], [
 ])
 AM_CONDITIONAL([MMAL], [test "x$with_mmal" != xno])
 
+AS_IF([test "x$with_v4l2" != xno], [
+	AS_IF([test "x$ac_cv_header_linux_videodev2_h" != xyes],
+		[AC_MSG_ERROR([Video4Linux2 (V4L2) header file not found])])
+
+	AC_DEFINE([HAVE_V4L2], 1,
+		[Define to build with Video4Linux2 (V4L2) support])
+
+	with_v4l2=yes
+])
+AM_CONDITIONAL([V4L2], [test "x$with_v4l2" != xno])
+
 ################################################################################
 # Report configuration results
 ################################################################################
@@ -178,6 +199,7 @@ CONFIGURATION RESULTS:
 ----------------------
   Brooktree (bktr) device support: $with_bktr
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
+  Video4Linux2 (V4L2) support: $with_v4l2
 "])
 
 AC_CONFIG_FILES([
