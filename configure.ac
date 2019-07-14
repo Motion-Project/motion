@@ -9,6 +9,11 @@ AC_USE_SYSTEM_EXTENSIONS
 ################################################################################
 # Configurations for external software support
 ################################################################################
+AC_ARG_WITH([bktr],
+	[AS_HELP_STRING([--without-bktr],
+		[Compile without Brooktree (bktr) device support])],
+	[], [with_bktr=check])
+
 AC_ARG_WITH([mmal],
 	[AS_HELP_STRING([--without-mmal],
 		[Compile without Multi-Media Abstraction Layer (MMAL) support])],
@@ -59,6 +64,18 @@ AS_IF([test "x$with_mmal" != xno], [
 AC_CHECK_HEADERS([jerror.h jpeglib.h], [], [jpeg_headers=no])
 
 AC_CHECK_HEADERS([microhttpd.h pthread_np.h])
+
+AS_IF([test "x$with_bktr" != xno], [
+	AC_CHECK_HEADERS([dnl
+		dev/bktr/ioctl_meteor.h dnl
+		dev/bktr/ioctl_bt848.h dnl
+	], [], [
+		AC_CHECK_HEADER([dev/ic/bt8xx.h], [], [
+			bktr_headers=no
+			AS_IF([test "x$with_bktr" = xcheck], [with_bktr=no])
+		])
+	])
+])
 
 AS_IF([test "x$with_mmal" != xno], [
 	AC_CHECK_HEADERS([dnl
@@ -113,6 +130,16 @@ AS_IF([test "x$ac_cv_header_microhttpd_h" != xyes],
 AS_IF([test "x$ax_pthread_ok" = xno],
 	[AC_MSG_ERROR([pthreads not found])])
 
+AS_IF([test "x$with_bktr" != xno], [
+	AS_IF([test "x$bktr_headers" = xno],
+		[AC_MSG_ERROR([Brooktree (bktr) header files not found])])
+
+	AC_DEFINE([HAVE_BKTR], 1,
+		[Define to build with Brooktree (bktr) device support])
+
+	with_bktr=yes
+])
+
 AS_IF([test "x$with_mmal" != xno], [
 	AS_IF([test "x$ac_cv_search_mmal_component_create" = xno],
 		[AC_MSG_ERROR([mmal_core library not found])])
@@ -149,6 +176,7 @@ AM_CONDITIONAL([MMAL], [test "x$with_mmal" != xno])
 AS_ECHO(["
 CONFIGURATION RESULTS:
 ----------------------
+  Brooktree (bktr) device support: $with_bktr
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
 "])
 
