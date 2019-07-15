@@ -14,6 +14,11 @@ AC_ARG_WITH([bktr],
 		[Compile without Brooktree (bktr) device support])],
 	[], [with_bktr=check])
 
+AC_ARG_WITH([ffmpeg],
+	[AS_HELP_STRING([--without-ffmpeg],
+		[Compile without FFmpeg support])],
+	[], [with_ffmpeg=check])
+
 AC_ARG_WITH([mmal],
 	[AS_HELP_STRING([--without-mmal],
 		[Compile without Multi-Media Abstraction Layer (MMAL) support])],
@@ -49,6 +54,22 @@ AX_PTHREAD
 LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 CC="$PTHREAD_CC"
+
+AS_IF([test "x$with_ffmpeg" != xno], [
+	AC_LIB_HAVE_LINKFLAGS([avdevice], [avcodec avformat avutil swscale])
+	LIBS="$LIBAVDEVICE $LIBS"
+
+	AC_SEARCH_LIBS([avcodec_find_decoder], [avcodec], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
+	AC_SEARCH_LIBS([avdevice_register_all], [avdevice], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
+	AC_SEARCH_LIBS([avformat_alloc_context], [avformat], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
+	AC_SEARCH_LIBS([av_image_fill_arrays], [avutil], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
+	AC_SEARCH_LIBS([sws_scale], [swscale], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
+])
 
 AS_IF([test "x$with_mmal" != xno], [
 	AC_LIB_HAVE_LINKFLAGS([mmal_core], [mmal_util])
@@ -94,6 +115,21 @@ AS_IF([test "x$with_bktr" != xno], [
 			bktr_headers=no
 			AS_IF([test "x$with_bktr" = xcheck], [with_bktr=no])
 		])
+	])
+])
+
+AS_IF([test "x$with_ffmpeg" != xno], [
+	AC_CHECK_HEADERS([dnl
+		libavcodec/avcodec.h dnl
+		libavdevice/avdevice.h dnl
+		libavformat/avformat.h dnl
+		libavutil/avutil.h dnl
+		libavutil/imgutils.h dnl
+		libavutil/mathematics.h dnl
+		libswscale/swscale.h dnl
+	], [], [
+		ffmpeg_headers=no
+		AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])
 	])
 ])
 
@@ -175,6 +211,37 @@ AS_IF([test "x$with_bktr" != xno], [
 	with_bktr=yes
 ])
 
+AS_IF([test "x$with_ffmpeg" != xno], [
+	AS_IF([test "x$ac_cv_search_avcodec_find_decoder" = xno],
+		[AC_MSG_ERROR([avcodec library not found])])
+	AS_IF([test "x$ac_cv_search_avdevice_register_all" = xno],
+		[AC_MSG_ERROR([avdevice library not found])])
+	AS_IF([test "x$ac_cv_search_avformat_alloc_context" = xno],
+		[AC_MSG_ERROR([avformat library not found])])
+	AS_IF([test "x$ac_cv_search_av_image_fill_arrays" = xno],
+		[AC_MSG_ERROR([avutil library not found])])
+	AS_IF([test "x$ac_cv_search_sws_scale" = xno],
+		[AC_MSG_ERROR([swscale library not found])])
+	AS_IF([test "x$ffmpeg_headers" = xno],
+		[AC_MSG_ERROR([FFmpeg header files not found])])
+
+	AS_IF([test "x$ac_cv_search_avcodec_find_decoder" != "xnone required"],
+		[LIBS="$ac_cv_search_avcodec_find_decoder $LIBS"])
+	AS_IF([test "x$ac_cv_search_avdevice_register_all" != "xnone required"],
+		[LIBS="$ac_cv_search_avdevice_register_all $LIBS"])
+	AS_IF([test "x$ac_cv_search_avformat_alloc_context" != "xnone required"],
+		[LIBS="$ac_cv_search_avformat_alloc_context $LIBS"])
+	AS_IF([test "x$ac_cv_search_av_image_fill_arrays" != "xnone required"],
+		[LIBS="$ac_cv_search_av_image_fill_arrays $LIBS"])
+	AS_IF([test "x$ac_cv_search_sws_scale" != "xnone required"],
+		[LIBS="$ac_cv_search_sws_scale $LIBS"])
+
+	AC_DEFINE([HAVE_FFMPEG], 1,
+		[Define to build with FFmpeg support])
+
+	with_ffmpeg=yes
+])
+
 AS_IF([test "x$with_mmal" != xno], [
 	AS_IF([test "x$ac_cv_search_mmal_component_create" = xno],
 		[AC_MSG_ERROR([mmal_core library not found])])
@@ -242,6 +309,7 @@ AS_ECHO(["
 CONFIGURATION RESULTS:
 ----------------------
   Brooktree (bktr) device support: $with_bktr
+  FFmpeg support: $with_ffmpeg
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
   Video4Linux2 (V4L2) support: $with_v4l2
   WebP image support: $with_webp
