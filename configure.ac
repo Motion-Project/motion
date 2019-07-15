@@ -24,6 +24,11 @@ AC_ARG_WITH([v4l2],
 		[Compile without Video4Linux2 (V4L2) support])],
 	[], [with_v4l2=check])
 
+AC_ARG_WITH([webp],
+	[AS_HELP_STRING([--without-webp],
+		[Compile without WebP image support])],
+	[], [with_webp=check])
+
 ################################################################################
 # Checks for programs
 ################################################################################
@@ -61,6 +66,16 @@ AS_IF([test "x$with_mmal" != xno], [
 		[AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])])
 	AC_SEARCH_LIBS([vc_gencmd], [vchostif], [LIBS=$ac_func_search_save_LIBS],
 		[AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])])
+])
+
+AS_IF([test "x$with_webp" != xno], [
+	AC_LIB_HAVE_LINKFLAGS([webp])
+	LIBS="$LIBWEBP $LIBS"
+
+	AC_SEARCH_LIBS([WebPEncode], [webp], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_webp" = xcheck], [with_webp=no])])
+	AC_SEARCH_LIBS([WebPMuxAssemble], [webpmux], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_webp" = xcheck], [with_webp=no])])
 ])
 
 ################################################################################
@@ -108,6 +123,16 @@ AS_IF([test "x$with_mmal" != xno], [
 AS_IF([test "x$with_v4l2" != xno], [
 	AC_CHECK_HEADER([linux/videodev2.h], [],
 		[AS_IF([test "x$with_v4l2" = xcheck], [with_v4l2=no])])
+])
+
+AS_IF([test "x$with_webp" != xno], [
+	AC_CHECK_HEADERS([dnl
+		webp/encode.h dnl
+		webp/mux.h dnl
+	], [], [
+		webp_headers=no
+		AS_IF([test "x$with_webp" = xcheck], [with_webp=no])
+	])
 ])
 
 ################################################################################
@@ -191,6 +216,25 @@ AS_IF([test "x$with_v4l2" != xno], [
 ])
 AM_CONDITIONAL([V4L2], [test "x$with_v4l2" != xno])
 
+AS_IF([test "x$with_webp" != xno], [
+	AS_IF([test "x$ac_cv_search_WebPEncode" = xno],
+		[AC_MSG_ERROR([webp library not found])])
+	AS_IF([test "x$ac_cv_search_WebPMuxAssemble" = xno],
+		[AC_MSG_ERROR([webpmux library not found])])
+	AS_IF([test "x$webp_headers" = xno],
+		[AC_MSG_ERROR([WebP header files not found])])
+
+	AS_IF([test "x$ac_cv_search_WebPEncode" != "xnone required"],
+		[LIBS="$ac_cv_search_WebPEncode $LIBS"])
+	AS_IF([test "x$ac_cv_search_WebPMuxAssemble" != "xnone required"],
+		[LIBS="$ac_cv_search_WebPMuxAssemble $LIBS"])
+
+	AC_DEFINE([HAVE_WEBP], 1,
+		[Define to build with WebP image support])
+
+	with_webp=yes
+])
+
 ################################################################################
 # Report configuration results
 ################################################################################
@@ -200,6 +244,7 @@ CONFIGURATION RESULTS:
   Brooktree (bktr) device support: $with_bktr
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
   Video4Linux2 (V4L2) support: $with_v4l2
+  WebP image support: $with_webp
 "])
 
 AC_CONFIG_FILES([
