@@ -609,7 +609,7 @@ int netcam_next(struct context *cnt, struct image_data *img_data){
  *
  * Returns:     0 on success
  *              -1 on any failure
- *              -3 image dimensions are not modulo 8
+ *              -2 image dimensions are not modulo 8
  */
 int netcam_start(struct context *cnt){
 
