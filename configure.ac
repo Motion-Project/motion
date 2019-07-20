@@ -24,6 +24,11 @@ AC_ARG_WITH([mmal],
 		[Compile without Multi-Media Abstraction Layer (MMAL) support])],
 	[], [with_mmal=check])
 
+AC_ARG_WITH([sqlite3],
+	[AS_HELP_STRING([--without-sqlite3],
+		[Compile without SQLite version 3 support])],
+	[], [with_sqlite3=check])
+
 AC_ARG_WITH([v4l2],
 	[AS_HELP_STRING([--without-v4l2],
 		[Compile without Video4Linux2 (V4L2) support])],
@@ -87,6 +92,14 @@ AS_IF([test "x$with_mmal" != xno], [
 		[AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])])
 	AC_SEARCH_LIBS([vc_gencmd], [vchostif], [LIBS=$ac_func_search_save_LIBS],
 		[AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])])
+])
+
+AS_IF([test "x$with_sqlite3" != xno], [
+	AC_LIB_HAVE_LINKFLAGS([sqlite3])
+	LIBS="$LIBSQLITE3 $LIBS"
+
+	AC_SEARCH_LIBS([sqlite3_open], [sqlite3], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_sqlite3" = xcheck], [with_sqlite3=no])])
 ])
 
 AS_IF([test "x$with_webp" != xno], [
@@ -154,6 +167,11 @@ AS_IF([test "x$with_mmal" != xno], [
 		videocore_headers=no
 		AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])
 	])
+])
+
+AS_IF([test "x$with_sqlite3" != xno], [
+	AC_CHECK_HEADER([sqlite3.h], [],
+		[AS_IF([test "x$with_sqlite3" = xcheck], [with_sqlite3=no])])
 ])
 
 AS_IF([test "x$with_v4l2" != xno], [
@@ -272,6 +290,22 @@ AS_IF([test "x$with_mmal" != xno], [
 ])
 AM_CONDITIONAL([MMAL], [test "x$with_mmal" != xno])
 
+AS_IF([test "x$with_sqlite3" != xno], [
+	AS_IF([test "x$ac_cv_header_sqlite3_h" != xyes],
+		[AC_MSG_ERROR([SQLite version 3 header file not found])])
+
+	AS_IF([test "x$ac_cv_search_sqlite3_open" = xno],
+		[AC_MSG_ERROR([SQLite version 3 library not found])])
+
+	AS_IF([test "x$ac_cv_search_sqlite3_open" != "xnone required"],
+		[LIBS="$ac_cv_search_sqlite3_open $LIBS"])
+
+	AC_DEFINE([HAVE_SQLITE3], 1,
+		[Define to build with SQLite version 3 support])
+
+	with_sqlite3=yes
+])
+
 AS_IF([test "x$with_v4l2" != xno], [
 	AS_IF([test "x$ac_cv_header_linux_videodev2_h" != xyes],
 		[AC_MSG_ERROR([Video4Linux2 (V4L2) header file not found])])
@@ -311,6 +345,7 @@ CONFIGURATION RESULTS:
   Brooktree (bktr) device support: $with_bktr
   FFmpeg support: $with_ffmpeg
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
+  SQLite version 3 support: $with_sqlite3
   Video4Linux2 (V4L2) support: $with_v4l2
   WebP image support: $with_webp
 "])
