@@ -24,6 +24,11 @@ AC_ARG_WITH([mmal],
 		[Compile without Multi-Media Abstraction Layer (MMAL) support])],
 	[], [with_mmal=check])
 
+AC_ARG_WITH([mysql],
+	[AS_HELP_STRING([--without-mysql],
+		[Compile without MySQL support])],
+	[], [with_mysql=check])
+
 AC_ARG_WITH([sqlite3],
 	[AS_HELP_STRING([--without-sqlite3],
 		[Compile without SQLite version 3 support])],
@@ -92,6 +97,21 @@ AS_IF([test "x$with_mmal" != xno], [
 		[AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])])
 	AC_SEARCH_LIBS([vc_gencmd], [vchostif], [LIBS=$ac_func_search_save_LIBS],
 		[AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])])
+])
+
+AS_IF([test "x$with_mysql" != xno], [
+	mysql_includedir="-I/usr/local/include/mysql"
+	mysql_libdir="-L/usr/local/lib/mysql"
+	AX_CHECK_PREPROC_FLAG([$mysql_includedir],
+		[AX_APPEND_FLAG([$mysql_includedir], [CPPFLAGS])])
+	AX_CHECK_LINK_FLAG([$mysql_libdir],
+		[AX_APPEND_FLAG([$mysql_libdir], [LIBS])])
+
+	AC_LIB_HAVE_LINKFLAGS([mysqlclient])
+	LIBS="$LIBMYSQLCLIENT $LIBS"
+
+	AC_SEARCH_LIBS([mysql_query], [mysqlclient], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
 ])
 
 AS_IF([test "x$with_sqlite3" != xno], [
@@ -167,6 +187,11 @@ AS_IF([test "x$with_mmal" != xno], [
 		videocore_headers=no
 		AS_IF([test "x$with_mmal" = xcheck], [with_mmal=no])
 	])
+])
+
+AS_IF([test "x$with_mysql" != xno], [
+	AC_CHECK_HEADER([mysql.h], [],
+		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
 ])
 
 AS_IF([test "x$with_sqlite3" != xno], [
@@ -290,6 +315,22 @@ AS_IF([test "x$with_mmal" != xno], [
 ])
 AM_CONDITIONAL([MMAL], [test "x$with_mmal" != xno])
 
+AS_IF([test "x$with_mysql" != xno], [
+	AS_IF([test "x$ac_cv_header_mysql_h" != xyes],
+		[AC_MSG_ERROR([MySQL header file not found])])
+
+	AS_IF([test "x$ac_cv_search_mysql_query" = xno],
+		[AC_MSG_ERROR([MySQL library not found])])
+
+	AS_IF([test "x$ac_cv_search_mysql_query" != "xnone required"],
+		[LIBS="$ac_cv_search_mysql_query $LIBS"])
+
+	AC_DEFINE([HAVE_MYSQL], 1,
+		[Define to build with MySQL support])
+
+	with_mysql=yes
+])
+
 AS_IF([test "x$with_sqlite3" != xno], [
 	AS_IF([test "x$ac_cv_header_sqlite3_h" != xyes],
 		[AC_MSG_ERROR([SQLite version 3 header file not found])])
@@ -345,6 +386,7 @@ CONFIGURATION RESULTS:
   Brooktree (bktr) device support: $with_bktr
   FFmpeg support: $with_ffmpeg
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
+  MySQL support: $with_mysql
   SQLite version 3 support: $with_sqlite3
   Video4Linux2 (V4L2) support: $with_v4l2
   WebP image support: $with_webp
