@@ -967,21 +967,21 @@ static void mot_stream_deinit(struct context *cnt){
 /* TODO: dbse functions are to be moved to separate module in future change*/
 static void dbse_global_deinit(void){
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
-    #ifdef HAVE_MYSQL
+    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         mysql_library_end();
-    #endif /* HAVE_MYSQL */
+    #endif /* HAVE_MYSQL || HAVE_MARIADB */
 }
 
 static void dbse_global_init(void){
 
     MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
    /* Initialize all the database items */
-    #ifdef HAVE_MYSQL
+    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         if (mysql_library_init(0, NULL, NULL)) {
             fprintf(stderr, "could not initialize MySQL library\n");
             exit(1);
         }
-    #endif /* HAVE_MYSQL */
+    #endif /* HAVE_MYSQL || HAVE_MARIADB*/
 
     #ifdef HAVE_SQLITE3
         int indx;
@@ -1026,7 +1026,7 @@ static void dbse_global_init(void){
 
 static int dbse_init_mysql(struct context *cnt){
 
-    #ifdef HAVE_MYSQL
+    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
         if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
             // close database to be sure that we are not leaking
             mysql_close(cnt->database);
@@ -1052,7 +1052,7 @@ static int dbse_init_mysql(struct context *cnt){
         }
     #else
         (void)cnt;  /* Avoid compiler warnings */
-    #endif /* HAVE_MYSQL */
+    #endif /* HAVE_MYSQL || HAVE_MARIADB */
 
     return 0;
 
@@ -1150,12 +1150,12 @@ static int dbse_init(struct context *cnt){
 
 static void dbse_deinit(struct context *cnt){
     if (cnt->conf.database_type) {
-        #ifdef HAVE_MYSQL
+        #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
             if ( (!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
                 mysql_close(cnt->database);
                 cnt->database_event_id = 0;
             }
-        #endif /* HAVE_MYSQL */
+        #endif /* HAVE_MYSQL || HAVE_MARIADB*/
 
         #ifdef HAVE_PGSQL
                 if ((!strcmp(cnt->conf.database_type, "postgresql")) && (cnt->conf.database_dbname)) {
@@ -3179,6 +3179,12 @@ static void motion_ntc(void){
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : available"));
     #else
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : not available"));
+    #endif
+
+    #ifdef HAVE_MARIADB
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mariadb  : available"));
+    #else
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mariadb  : not available"));
     #endif
 
     #ifdef HAVE_SQLITE3

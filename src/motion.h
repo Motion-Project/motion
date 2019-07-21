@@ -17,7 +17,7 @@ struct image_data;
 #include "config.h"
 
 /* Includes */
-#ifdef HAVE_MYSQL
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
 #include <mysql.h>
 #endif
 
@@ -460,7 +460,7 @@ struct context {
     sqlite3 *database_sqlite3;
 #endif
 
-#ifdef HAVE_MYSQL
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
     MYSQL *database;
 #endif
 

@@ -19,6 +19,11 @@ AC_ARG_WITH([ffmpeg],
 		[Compile without FFmpeg support])],
 	[], [with_ffmpeg=check])
 
+AC_ARG_WITH([mariadb],
+	[AS_HELP_STRING([--without-mariadb],
+		[Compile without MariaDB support])],
+	[], [with_mariadb=check])
+
 AC_ARG_WITH([mmal],
 	[AS_HELP_STRING([--without-mmal],
 		[Compile without Multi-Media Abstraction Layer (MMAL) support])],
@@ -79,6 +84,21 @@ AS_IF([test "x$with_ffmpeg" != xno], [
 		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
 	AC_SEARCH_LIBS([sws_scale], [swscale], [LIBS=$ac_func_search_save_LIBS],
 		[AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])])
+])
+
+AS_IF([test "x$with_mariadb" != xno], [
+	mariadb_includedir="-I/usr/local/include/mysql"
+	mariadb_libdir="-L/usr/local/lib/mysql"
+	AX_CHECK_PREPROC_FLAG([$mariadb_includedir],
+		[AX_APPEND_FLAG([$mariadb_includedir], [CPPFLAGS])])
+	AX_CHECK_LINK_FLAG([$mariadb_libdir],
+		[AX_APPEND_FLAG([$mariadb_libdir], [LIBS])])
+
+	AC_LIB_HAVE_LINKFLAGS([mariadb])
+	LIBS="$LIBMARIADB $LIBS"
+
+	AC_SEARCH_LIBS([mysql_init], [mariadb], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_mariadb" = xcheck], [with_mariadb=no])])
 ])
 
 AS_IF([test "x$with_mmal" != xno], [
@@ -164,6 +184,11 @@ AS_IF([test "x$with_ffmpeg" != xno], [
 		ffmpeg_headers=no
 		AS_IF([test "x$with_ffmpeg" = xcheck], [with_ffmpeg=no])
 	])
+])
+
+AS_IF([test "x$with_mariadb" != xno], [
+	AC_CHECK_HEADER([mysql.h], [],
+		[AS_IF([test "x$with_mariadb" = xcheck], [with_mariadb=no])])
 ])
 
 AS_IF([test "x$with_mmal" != xno], [
@@ -285,6 +310,22 @@ AS_IF([test "x$with_ffmpeg" != xno], [
 	with_ffmpeg=yes
 ])
 
+AS_IF([test "x$with_mariadb" != xno], [
+	AS_IF([test "x$ac_cv_header_mysql_h" != xyes],
+		[AC_MSG_ERROR([MariaDB header file not found])])
+
+	AS_IF([test "x$ac_cv_search_mysql_init" = xno],
+		[AC_MSG_ERROR([MariaDB library not found])])
+
+	AS_IF([test "x$ac_cv_search_mysql_init" != "xnone required"],
+		[LIBS="$ac_cv_search_mysql_init $LIBS"])
+
+	AC_DEFINE([HAVE_MARIADB], 1,
+		[Define to build with MariaDB support])
+
+	with_mariadb=yes
+])
+
 AS_IF([test "x$with_mmal" != xno], [
 	AS_IF([test "x$ac_cv_search_mmal_component_create" = xno],
 		[AC_MSG_ERROR([mmal_core library not found])])
@@ -385,6 +426,7 @@ CONFIGURATION RESULTS:
 ----------------------
   Brooktree (bktr) device support: $with_bktr
   FFmpeg support: $with_ffmpeg
+  MariaDB support: $with_mariadb
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
   MySQL support: $with_mysql
   SQLite version 3 support: $with_sqlite3

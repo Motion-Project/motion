@@ -152,7 +152,7 @@ static void on_motion_detected_command(struct context *cnt,
         exec_command(cnt, cnt->conf.on_motion_detected, NULL, 0);
 }
 
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
 
 static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
 {
@@ -163,7 +163,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
         return;
     }
 
-#ifdef HAVE_MYSQL
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
     if (!strcmp(cnt->conf.database_type, "mysql")) {
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
         if (mysql_query(cnt->database, sqlquery) != 0) {
@@ -206,7 +206,7 @@ static void do_sql_query(char *sqlquery, struct context *cnt, int save_id)
             cnt->database_event_id = (unsigned long long) mysql_insert_id(cnt->database);
         }
     }
-#endif /* HAVE_MYSQL */
+#endif /* HAVE_MYSQL || HAVE_MARIADB */
 
 
 #ifdef HAVE_PGSQL
@@ -340,7 +340,7 @@ static void event_sqlfileclose(struct context *cnt, motion_event type  ATTRIBUTE
     }
 }
 
-#endif /* defined HAVE_MYSQL || defined HAVE_PGSQL || defined(HAVE_SQLITE3) */
+#endif /* defined HAVE_MYSQL || defined HAVE_MARIADB || defined HAVE_PGSQL || defined(HAVE_SQLITE3) */
 
 static void on_area_command(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
@@ -1240,7 +1240,7 @@ struct event_handlers {
 };
 
 struct event_handlers event_handlers[] = {
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     {
     EVENT_FILECREATE,
     event_sqlnewfile
@@ -1266,7 +1266,7 @@ struct event_handlers event_handlers[] = {
     EVENT_AREA_DETECTED,
     on_area_command
     },
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     {
     EVENT_FIRSTMOTION,
     event_sqlfirstmotion
@@ -1338,7 +1338,7 @@ struct event_handlers event_handlers[] = {
     EVENT_TIMELAPSEEND,
     event_ffmpeg_timelapseend
     },
-#if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3)
     {
     EVENT_FILECLOSE,
     event_sqlfileclose
