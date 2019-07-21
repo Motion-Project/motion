@@ -34,6 +34,11 @@ AC_ARG_WITH([mysql],
 		[Compile without MySQL support])],
 	[], [with_mysql=check])
 
+AC_ARG_WITH([pgsql],
+	[AS_HELP_STRING([--without-pgsql],
+		[Compile without PostgreSQL support])],
+	[], [with_pgsql=check])
+
 AC_ARG_WITH([sqlite3],
 	[AS_HELP_STRING([--without-sqlite3],
 		[Compile without SQLite version 3 support])],
@@ -134,6 +139,14 @@ AS_IF([test "x$with_mysql" != xno], [
 		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
 ])
 
+AS_IF([test "x$with_pgsql" != xno], [
+	AC_LIB_HAVE_LINKFLAGS([pq])
+	LIBS="$LIBPQ $LIBS"
+
+	AC_SEARCH_LIBS([PQstatus], [pq], [LIBS=$ac_func_search_save_LIBS],
+		[AS_IF([test "x$with_pgsql" = xcheck], [with_pgsql=no])])
+])
+
 AS_IF([test "x$with_sqlite3" != xno], [
 	AC_LIB_HAVE_LINKFLAGS([sqlite3])
 	LIBS="$LIBSQLITE3 $LIBS"
@@ -217,6 +230,11 @@ AS_IF([test "x$with_mmal" != xno], [
 AS_IF([test "x$with_mysql" != xno], [
 	AC_CHECK_HEADER([mysql.h], [],
 		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
+])
+
+AS_IF([test "x$with_pgsql" != xno], [
+	AC_CHECK_HEADER([libpq-fe.h], [],
+		[AS_IF([test "x$with_pgsql" = xcheck], [with_pgsql=no])])
 ])
 
 AS_IF([test "x$with_sqlite3" != xno], [
@@ -372,6 +390,22 @@ AS_IF([test "x$with_mysql" != xno], [
 	with_mysql=yes
 ])
 
+AS_IF([test "x$with_pgsql" != xno], [
+	AS_IF([test "x$ac_cv_header_libpq_fe_h" != xyes],
+		[AC_MSG_ERROR([PostgreSQL header file not found])])
+
+	AS_IF([test "x$ac_cv_search_PQstatus" = xno],
+		[AC_MSG_ERROR([PostgreSQL library not found])])
+
+	AS_IF([test "x$ac_cv_search_PQstatus" != "xnone required"],
+		[LIBS="$ac_cv_search_PQstatus $LIBS"])
+
+	AC_DEFINE([HAVE_PGSQL], 1,
+		[Define to build with PostgreSQL support])
+
+	with_pgsql=yes
+])
+
 AS_IF([test "x$with_sqlite3" != xno], [
 	AS_IF([test "x$ac_cv_header_sqlite3_h" != xyes],
 		[AC_MSG_ERROR([SQLite version 3 header file not found])])
@@ -429,6 +463,7 @@ CONFIGURATION RESULTS:
   MariaDB support: $with_mariadb
   Multi-Media Abstraction Layer (MMAL) support: $with_mmal
   MySQL support: $with_mysql
+  PostgreSQL support: $with_pgsql
   SQLite version 3 support: $with_sqlite3
   Video4Linux2 (V4L2) support: $with_v4l2
   WebP image support: $with_webp
