@@ -21,6 +21,22 @@ AS_IF([test "x$with_developer_flags" != xno], [
 ])
 AC_SUBST([MOTION_DEV_FLAGS])
 
+AC_ARG_WITH([optimizecpu],
+	[AS_HELP_STRING([--with-optimizecpu],
+		[Autodetect platform and cpu type. This will enable the compilation of gcc optimizing code by platform and cpu.])],
+	[], [with_optimizecpu=no])
+AS_IF([test "x$with_optimizecpu" != xno], [
+	AS_IF([test -e "/proc/device-tree/model"], [
+		# explicit test for RPI3 as /proc/cpuinfo reports armv7 even though it is armv8
+		RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
+		AS_IF([test "x${RPI3}" != "x"], [
+			CPU_OPTIONS="-mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+			AX_CHECK_COMPILE_FLAG([$CPU_OPTIONS], [],
+				[AC_MSG_ERROR([Current compiler does not support optimization options: $CPU_OPTIONS])])
+		])
+	])
+])
+
 ################################################################################
 # Configurations for external software support
 ################################################################################
