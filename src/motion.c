@@ -3199,7 +3199,7 @@ static void motion_ntc(void){
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("pgsql  : not available"));
     #endif
 
-    #ifdef HAVE_INTL
+    #ifdef ENABLE_NLS
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : available"));
     #else
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("nls    : not available"));

@@ -24,6 +24,22 @@ data/camera2-dist.conf
 data/camera3-dist.conf
 data/camera4-dist.conf
 
+#po
+po/POTFILES
+po/Makefile.in.in
+po/Makevars.template
+po/Rules-quot
+po/boldquot.sed
+po/en@boldquot.header
+po/en@quot.header
+po/insert-header.sin
+po/motion.pot
+po/quot.sed
+po/remove-potcdate.sed
+po/remove-potcdate.sin
+po/stamp-po
+po/*.gmo
+
 #src
 src/Makefile.in
 src/config.h

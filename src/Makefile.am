@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -Dsysconfdir=\"$(sysconfdir)\"
+AM_CPPFLAGS = -Dsysconfdir=\"$(sysconfdir)\" -DLOCALEDIR=\"$(localedir)\"
 
 bin_PROGRAMS = motion
 

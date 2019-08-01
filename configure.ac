@@ -265,6 +265,11 @@ AC_FUNC_STRERROR_R
 AC_CHECK_FUNCS_ONCE([memmem])
 AC_CHECK_FUNCS([pthread_getname_np pthread_setname_np])
 
+AM_GNU_GETTEXT([external])
+LIBS="$LIBINTL $LIBS"
+AM_GNU_GETTEXT_VERSION([0.19])
+AM_GNU_GETTEXT_REQUIRE_VERSION([0.19])
+
 ################################################################################
 # Reconcile configurations and checks
 ################################################################################
@@ -472,6 +477,7 @@ CONFIGURATION RESULTS:
 AC_CONFIG_FILES([
 	Makefile
 	data/Makefile
+	po/Makefile.in
 	src/Makefile
 ])
 AC_OUTPUT
