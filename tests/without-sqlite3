@@ -1,0 +1,4 @@
+#! /bin/sh
+./configure --with-developer-flags --without-sqlite3 && make -j6
+result=$?
+exit $result

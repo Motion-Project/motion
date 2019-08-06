@@ -1,0 +1,4 @@
+#! /bin/sh
+./configure --with-developer-flags && make -j6 clean && make -j6
+result=$?
+exit $result

@@ -1,6 +1,17 @@
 SUBDIRS = data po src
 
-EXTRA_DIST = CREDITS
+TESTS = \
+	tests/developer-flags \
+	tests/without-ffmpeg \
+	tests/without-mariadb \
+	tests/without-mysql \
+	tests/without-pgsql \
+	tests/without-sql \
+	tests/without-sqlite3 \
+	tests/without-v4l2 \
+	tests/without-webp
+
+EXTRA_DIST = CREDITS $(TESTS)
 
 dist_html_DATA = \
 	doc/mask1.png \

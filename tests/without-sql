@@ -1,0 +1,4 @@
+#! /bin/sh
+./configure --with-developer-flags --without-mariadb --without-mysql --without-pgsql --without-sqlite3 && make -j6
+result=$?
+exit $result
