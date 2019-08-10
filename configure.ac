@@ -88,6 +88,7 @@ AS_IF([test "x$with_mmal" != xno], [
 ################################################################################
 AC_FUNC_STRERROR_R
 
+AC_CHECK_FUNCS_ONCE([memmem])
 AC_CHECK_FUNCS([pthread_getname_np pthread_setname_np])
 
 ################################################################################
@@ -95,6 +96,9 @@ AC_CHECK_FUNCS([pthread_getname_np pthread_setname_np])
 ################################################################################
 AS_IF([test "x$ac_cv_func_strerror_r" != xyes],
 	[AC_MSG_ERROR([strerror_r function not found])])
+
+AS_IF([test "x$ac_cv_func_memmem" != xyes],
+	[AC_MSG_ERROR([memmem function not found])])
 
 AS_IF([test "x$ac_cv_search_jpeg_std_error" = xno],
 	[AC_MSG_ERROR([libjpeg library not found])])
