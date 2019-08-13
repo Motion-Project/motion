@@ -611,7 +611,7 @@ static void event_image_snapshot(struct context *cnt,
             , (int)(PATH_MAX-1-strlen(cnt->conf.target_dir))
             , filename);
         put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
-        event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, currenttime_tv);
+        event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, currenttime_tv);
 
         /*
          *  Update symbolic link *after* image has been written so that
@@ -640,7 +640,7 @@ static void event_image_snapshot(struct context *cnt,
             , filename);
         remove(fullfilename);
         put_picture(cnt, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
-        event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, currenttime_tv);
+        event(cnt, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, currenttime_tv);
     }
 
     cnt->snapshot = 0;
