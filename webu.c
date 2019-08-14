@@ -1297,9 +1297,6 @@ static int webu_answer_strm(void *cls
         return MHD_YES;
     }
 
-    /* Do not answer a request until the motion loop has completed at least once */
-    if (webui->cnt->passflag == 0) return MHD_NO;
-
     if (strcmp (method, "GET") != 0){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
@@ -1315,6 +1312,9 @@ static int webu_answer_strm(void *cls
         retcd = webu_mhd_send(webui, FALSE);
         return retcd;
     }
+
+    /* Do not answer a request until the motion loop has completed at least once */
+    if (webui->cnt->passflag == 0) return MHD_NO;
 
     if (webui->cnt->webcontrol_finish) return MHD_NO;
 
