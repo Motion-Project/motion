@@ -74,6 +74,7 @@ struct rtsp_context {
     int                       v4l2_palette;     /* Palette from config for v4l2 devices */
     int                       framerate;        /* Frames per second from configuration file */
     long                      cnct_delay;       /* Delay offset to prevent handler being too slow*/
+    int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
 
     struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
