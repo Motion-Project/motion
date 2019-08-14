@@ -975,6 +975,7 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     rtsp_data->pktarray = NULL;
     rtsp_data->handler_finished = TRUE;
     rtsp_data->first_image = TRUE;
+    rtsp_data->reconnect_count = 0;
 
     snprintf(rtsp_data->threadname, 15, "%s",_("Unknown"));
 
@@ -1350,7 +1351,7 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
 static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
 
     long usec_maxrate;
-    int framerate;
+    int framerate, retcd;
 
     if ((rtsp_data->status == RTSP_CONNECTED) ||
         (rtsp_data->status == RTSP_READINGIMAGE)){
@@ -1378,7 +1379,29 @@ static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
     }
 
     rtsp_data->status = RTSP_RECONNECTING;
-    netcam_rtsp_connect(rtsp_data);
+
+    /*
+    * The retry count of 100 is arbritrary.
+    * We want to try many times quickly to not lose too much information
+    * before we go into the long wait phase
+    */
+    retcd = netcam_rtsp_connect(rtsp_data);
+    if (retcd < 0){
+        if (rtsp_data->reconnect_count < 100){
+            rtsp_data->reconnect_count++;
+        } else if (rtsp_data->reconnect_count == 100){
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Camera did not reconnect."), rtsp_data->cameratype);
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: Checking for camera every 10 seconds."),rtsp_data->cameratype);
+            rtsp_data->reconnect_count++;
+            SLEEP(10,0);
+        } else {
+            SLEEP(10,0);
+        }
+    } else {
+        rtsp_data->reconnect_count = 0;
+    }
 
 }
 
