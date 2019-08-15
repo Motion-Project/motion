@@ -1478,6 +1478,10 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             , "Increasing capture rate to %d FPS to match camera."
             , rtsp_data->src_fps);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            , "To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+            , rtsp_data->src_fps);
+
     }
 
     return 0;
