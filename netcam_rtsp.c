@@ -224,10 +224,20 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data){
     int retcd;
     char errstr[128];
 
+    /* The Invalid data problem comes frequently.  Usually at startup of rtsp cameras.
+     * We now ignore those packets so this function would need to fail on a different error.
+     * We should consider adding a maximum count of these errors and reset every time
+     * we get a good image.
+     */
     if (rtsp_data->finish) return 0;   /* This just speeds up the shutdown time */
 
     retcd = avcodec_send_packet(rtsp_data->codec_context, &rtsp_data->packet_recv);
     if ((rtsp_data->interrupted) || (rtsp_data->finish)) return -1;
+    if (retcd == AVERROR_INVALIDDATA) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("Ignoring packet with invalid data"));
+        return 0;
+    }
     if (retcd < 0 && retcd != AVERROR_EOF){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -240,10 +250,6 @@ static int netcam_rtsp_decode_video(struct rtsp_context *rtsp_data){
 
     if (retcd == AVERROR(EAGAIN)) return 0;
 
-    /*
-     * At least one netcam (Wansview K1) is known to always send a bogus
-     * packet at the start of the stream. Just grin and bear it...
-     */
     if (retcd == AVERROR_INVALIDDATA) {
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Ignoring packet with invalid data"));
