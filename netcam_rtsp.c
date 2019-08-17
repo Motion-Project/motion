@@ -1001,11 +1001,6 @@ static void netcam_rtsp_set_parms (struct context *cnt, struct rtsp_context *rts
     if (gettimeofday(&rtsp_data->frame_prev_tm, NULL) < 0) {
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
     }
-    /* Upon startup, we close context and let the handler start it again.  Since
-     * this is a "planned" reconnection, we set our initial connection delay to be
-     * equal to the offset that the reconnect will add.
-     */
-    rtsp_data->cnct_delay = 50000;
 
     netcam_rtsp_set_path(cnt, rtsp_data);
 
@@ -1326,13 +1321,9 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
     } else {
         /* We set the capture rate to be a bit faster than the frame rate.  This
          * should provide the motion loop with a picture whenever it wants one.
-         * Now, if the user set the framerate really low, then the handler will
-         * lose connection to the camera. Each time we lose the connection we
-         * adjust the cnct_delay to shorten the sleep and speed up the captures
          */
         if (framerate < rtsp_data->src_fps) framerate = rtsp_data->src_fps;
-
-        usec_maxrate = (1000000L / (framerate + 3)) + rtsp_data->cnct_delay;
+        usec_maxrate = (1000000L / (framerate + 3));
     }
 
     if (gettimeofday(&rtsp_data->frame_curr_tm, NULL) < 0) {
@@ -1350,34 +1341,13 @@ static void netcam_rtsp_handler_wait(struct rtsp_context *rtsp_data){
 
 static void netcam_rtsp_handler_reconnect(struct rtsp_context *rtsp_data){
 
-    long usec_maxrate;
-    int framerate, retcd;
+    int retcd;
 
     if ((rtsp_data->status == RTSP_CONNECTED) ||
         (rtsp_data->status == RTSP_READINGIMAGE)){
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("%s: Reconnecting with camera...."),rtsp_data->cameratype);
     }
-
-    if (strcmp(rtsp_data->service,"file") != 0) {
-        /* Note that this works in reverse on the times.  The last time curr_tm was set
-        * was when we had a good image in netcam_rtsp_handler_wait.  The prev_time was
-        * set immediately before we called this function.
-        */
-        framerate = rtsp_data->conf->framerate;
-        if (framerate < 2) framerate = 2;
-        if (framerate < rtsp_data->src_fps) framerate = rtsp_data->src_fps;
-
-        if ((rtsp_data->frame_prev_tm.tv_sec -
-            rtsp_data->frame_curr_tm.tv_sec) < 3600){
-            rtsp_data->cnct_delay -= 50000;
-            usec_maxrate = (1000000L / (framerate+3)) + rtsp_data->cnct_delay;
-            if (usec_maxrate < 1000){
-                rtsp_data->cnct_delay = 1000 - (1000000L / (framerate+3));
-            }
-        }
-    }
-
     rtsp_data->status = RTSP_RECONNECTING;
 
     /*
@@ -1499,6 +1469,19 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
             SLEEP(0,5000000);
             wait_counter--;
         }
+    }
+    /* Warn the user about a mismatch of camera FPS vs handler capture rate*/
+    if (rtsp_data->conf->framerate < rtsp_data->src_fps){
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            , "Requested frame rate %d FPS is less than camera frame rate %d FPS"
+            , rtsp_data->conf->framerate,rtsp_data->src_fps);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            , "Increasing capture rate to %d FPS to match camera."
+            , rtsp_data->src_fps);
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            , "To lower CPU, change camera FPS to lower rate and decrease I frame interval."
+            , rtsp_data->src_fps);
+
     }
 
     return 0;
