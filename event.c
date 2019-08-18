@@ -427,8 +427,8 @@ static void event_stream_put(struct context *cnt,
                             ,(cnt->imgs.height / 2));
                     } else {
                         /* Substream was not multiple of 8 so send full image*/
-                        cnt->stream_norm.jpeg_size = put_picture_memory(cnt
-                            ,cnt->stream_norm.jpeg_data
+                        cnt->stream_sub.jpeg_size = put_picture_memory(cnt
+                            ,cnt->stream_sub.jpeg_data
                             ,cnt->imgs.size_norm
                             ,img_data->image_norm
                             ,cnt->conf.stream_quality
