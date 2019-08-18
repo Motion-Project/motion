@@ -1307,13 +1307,18 @@ static int motion_init(struct context *cnt)
             ,cnt->imgs.width, cnt->imgs.height);
         return -3;
     }
-
     if ((cnt->imgs.width  < 64) || (cnt->imgs.height < 64)){
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,cnt->imgs.width, cnt->imgs.height);
             return -3;
     }
+    /* Substream size notification*/
+    if ((cnt->imgs.width % 16) || (cnt->imgs.height % 16)) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Substream not available.  Image sizes not modulo 16."));
+    }
+
 
     /* We set size_high here so that it can be used in the retry function to determine whether
      * we need to break and reallocate buffers
