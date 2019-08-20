@@ -964,11 +964,16 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
                     my_packet_unref(ffmpeg->pkt);
                     return -1;
                 }
-                retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
-                if (retcd < 0) {
-                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                        ,_("Error writing draining video frame"));
-                    return -1;
+                // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
+                if ((ffmpeg->pkt.pts > 0) && (ffmpeg->pkt.size > 0)) {
+                    retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
+                    if (retcd < 0) {
+                        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                            ,_("Error writing draining video frame"));
+                        return -1;
+                    }
+                } else {
+                    recv_cd = AVERROR_EOF;
                 }
             }
             my_packet_unref(ffmpeg->pkt);
