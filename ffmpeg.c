@@ -811,12 +811,14 @@ static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
     frame->buf[0] = av_buffer_alloc(ret + 4*plane_padding);
     if (!frame->buf[0]) {
         ret = AVERROR(ENOMEM);
-        goto fail;
+        av_frame_unref(frame);
+        return ret;
     }
     frame->buf[1] = av_buffer_alloc(ret + 4*plane_padding);
     if (!frame->buf[1]) {
         ret = AVERROR(ENOMEM);
-        goto fail;
+        av_frame_unref(frame);
+        return ret;
     }
 
     frame->data[0] = frame->buf[0]->data;
