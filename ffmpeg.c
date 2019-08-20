@@ -774,7 +774,7 @@ static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
 }
 
 
-static int alloc_video_buffer(AVFrame *frame, int align)
+static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
 {
     const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(frame->format);
     int ret, i, padded_height;
@@ -826,13 +826,13 @@ static int alloc_video_buffer(AVFrame *frame, int align)
     frame->extended_data = frame->data;
 
     return 0;
-fail:
-    av_frame_unref(frame);
-    return ret;
 }
 
 
 static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
+
+    int retcd;
+    char errstr[128];
 
     ffmpeg->picture = my_frame_alloc();
     if (!ffmpeg->picture) {
@@ -855,8 +855,10 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
 
     // h264_v4l2m2m encoder expects video buffer to be allocated
     if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0) {
-        if (alloc_video_buffer(ffmpeg->picture, 32)) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc buffers"));
+        retcd = ffmpeg_alloc_video_buffer(ffmpeg->picture, 32);
+        if (retcd) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc buffers %s"), errstr);
             ffmpeg_free_context(ffmpeg);
             return -1;
         }
