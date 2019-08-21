@@ -1448,37 +1448,27 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
         }
 
         /* Setup pointers and line widths. */
-        // Some encoders look for the image in ffmpeg->picture->buf
-        if (ffmpeg->picture->buf[0] == NULL)
-            ffmpeg->picture->data[0] = image;
-        else
-            memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-
-        if (ffmpeg->picture->buf[1] == NULL) {
-            // assume YUV420P format
-            ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-            ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4);
-        } else {
+        if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0) {
+            // assume NV21 format
             int cr_len = ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4;
-            int cb_len = cr_len;
             unsigned char *imagecr = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
             unsigned char *imagecb = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) + cr_len;
-            if (ffmpeg->ctx_codec->pix_fmt == AV_PIX_FMT_NV21) {
-                int x;
-                int y;
-                for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
-                    for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
-                        ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
-                        ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
-                        imagecb++;
-                        imagecr++;
-                    }
+            int x;
+            int y;
+            memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+            for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
+                for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
+                    ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
+                    ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
+                    imagecb++;
+                    imagecr++;
                 }
-            } else {
-                // assume YUV420P format
-                memcpy(&ffmpeg->picture->data[1][0], imagecr, cr_len);
-                memcpy(&ffmpeg->picture->data[1][cr_len], imagecb, cb_len);
             }
+        } else {
+            // assume YUV420P format
+            ffmpeg->picture->data[0] = image;
+            ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+            ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
         }
 
         ffmpeg->gop_cnt ++;
