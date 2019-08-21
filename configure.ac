@@ -324,7 +324,7 @@ if test "${WITHOUT_MMAL}" = "no"; then
     AC_SUBST(MMAL_CFLAGS)
     AC_SUBST(MMAL_OBJ)
     AC_SUBST(MMAL_LIBS)
-    MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o"
+    MMAL_OBJ="mmalcam.o raspicam/RaspiCamControl.o raspicam/RaspiCLI.o raspicam/RaspiHelpers.o raspicam/RaspiPreview.o raspicam/RaspiCommonSettings.o"
     MMAL_CFLAGS="-std=gnu99 -DHAVE_MMAL -Irasppicam -I${MMAL_HEADERS}"
     AS_IF([test "${DISTRO}" = "FreeBSD" ], [
       MMAL_CFLAGS="${MMAL_CFLAGS} -I/usr/local/include -I/usr/local/include/interface/vcos -I/usr/local/include/interface/vcos/pthreads/ -I/usr/local/include/interface/vmcs_host/linux"
