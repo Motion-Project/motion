@@ -676,17 +676,17 @@ static void event_image_preview(struct context *cnt,
 
         if ((cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
             if (cnt->conf.movie_extpipe_use && cnt->extpipe) {
-                basename_len = strlen(cnt->extpipefilename) + 1;
-                strncpy(previewname, cnt->extpipefilename, basename_len);
+                basename_len = MIN(strlen(cnt->extpipefilename) + 1, sizeof(previewname) - 1);
+                strncpy(previewname, cnt->extpipefilename, sizeof(previewname));
                 previewname[basename_len - 1] = '.';
             } else {
                 /* Replace avi/mpg with jpg/ppm and keep the rest of the filename. */
-                basename_len = strlen(cnt->newfilename) - 3;
-                strncpy(previewname, cnt->newfilename, basename_len);
+                basename_len = MIN((cnt->newfilename - strrchr(cnt->newfilename, '.')) + 1, sizeof(previewname) - 1);
+                strncpy(previewname, cnt->newfilename, sizeof(previewname));
             }
 
             previewname[basename_len] = '\0';
-            strcat(previewname, imageext(cnt));
+            strncat(previewname, imageext(cnt), sizeof(previewname) - basename_len - 1);
 
             passthrough = util_check_passthrough(cnt);
             if ((cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -830,7 +830,7 @@ static void event_create_extpipe(struct context *cnt,
             return ;
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
-        snprintf(cnt->extpipecmdline, PATH_MAX - 1, "%s", stamp);
+        snprintf(cnt->extpipecmdline, PATH_MAX, "%s", stamp);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cnt->extpipecmdline);
 

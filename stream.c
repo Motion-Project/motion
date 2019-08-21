@@ -60,7 +60,7 @@ static void get_host(char *buf, int fd)
     if (res != 0)
         return;
 
-    strncpy(buf, host, NI_MAXHOST - 1);
+    strncpy(buf, host, NI_MAXHOST);
 }
 
 pthread_mutex_t stream_auth_mutex;
@@ -427,6 +427,7 @@ static void* handle_md5_digest(void* param)
 #define SERVER_URI_LEN 512
     char server_uri[SERVER_URI_LEN];
     char* server_user = NULL, *server_pass = NULL;
+    unsigned int server_pass_sz;
     unsigned int rand1,rand2;
     HASHHEX HA1;
     HASHHEX HA2 = "";
@@ -487,7 +488,8 @@ static void* handle_md5_digest(void* param)
     }
 
     server_user = (char*)malloc((h - p->conf->stream_authentication) + 1);
-    server_pass = (char*)malloc(strlen(h) + 1);
+    server_pass_sz = strlen(h) + 1;
+    server_pass = (char*)malloc(server_pass_sz);
 
     if (!server_user || !server_pass) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
@@ -495,13 +497,13 @@ static void* handle_md5_digest(void* param)
         goto InternalError;
     }
 
-    strncpy(server_user, p->conf->stream_authentication, h-p->conf->stream_authentication);
+    strncpy(server_user, p->conf->stream_authentication, h - p->conf->stream_authentication);
     server_user[h - p->conf->stream_authentication] = '\0';
-    strncpy(server_pass, h + 1, strlen(h + 1));
-    server_pass[strlen(h + 1)] = '\0';
+    strncpy(server_pass, h + 1, server_pass_sz);
+    server_pass[server_pass_sz - 1] = '\0';
 
     while(1) {
-        if(!read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN - 1))
+        if(!read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN))
             goto Invalid_Request;
 
         auth = strstr(buffer, "Authorization: Digest");

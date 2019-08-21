@@ -295,7 +295,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     if (ffmpeg->tlapse == TIMELAPSE_APPEND){
         ffmpeg->oc->oformat = av_guess_format ("mpeg2video", NULL, NULL);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
-        strncat(ffmpeg->filename, ".mpg", 4);
+        strcat(ffmpeg->filename, ".mpg");
         if (!ffmpeg->oc->oformat) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("ffmpeg_video_codec option value %s is not supported"), codec_name);
@@ -309,52 +309,52 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
 
     if (strcmp(codec_name, "mpeg4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
-        strncat(ffmpeg->filename, ".avi", 4);
+        strcat(ffmpeg->filename, ".avi");
     }
 
     if (strcmp(codec_name, "msmpeg4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
-        strncat(ffmpeg->filename, ".avi", 4);
+        strcat(ffmpeg->filename, ".avi");
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MSMPEG4V2;
     }
 
     if (strcmp(codec_name, "swf") == 0) {
         ffmpeg->oc->oformat = av_guess_format("swf", NULL, NULL);
-        strncat(ffmpeg->filename, ".swf", 4);
+        strcat(ffmpeg->filename, ".swf");
     }
 
     if (strcmp(codec_name, "flv") == 0) {
         ffmpeg->oc->oformat = av_guess_format("flv", NULL, NULL);
-        strncat(ffmpeg->filename, ".flv", 4);
+        strcat(ffmpeg->filename, ".flv");
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
     }
 
     if (strcmp(codec_name, "ffv1") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
-        strncat(ffmpeg->filename, ".avi", 4);
+        strcat(ffmpeg->filename, ".avi");
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FFV1;
     }
 
     if (strcmp(codec_name, "mov") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mov", NULL, NULL);
-        strncat(ffmpeg->filename, ".mov", 4);
+        strcat(ffmpeg->filename, ".mov");
     }
 
     if (strcmp(codec_name, "mp4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
-        strncat(ffmpeg->filename, ".mp4", 4);
+        strcat(ffmpeg->filename, ".mp4");
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
     }
 
     if (strcmp(codec_name, "mkv") == 0) {
         ffmpeg->oc->oformat = av_guess_format("matroska", NULL, NULL);
-        strncat(ffmpeg->filename, ".mkv", 4);
+        strcat(ffmpeg->filename, ".mkv");
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
     }
 
     if (strcmp(codec_name, "hevc") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
-        strncat(ffmpeg->filename, ".mp4", 4);
+        strcat(ffmpeg->filename, ".mp4");
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
     }
 
