@@ -20,6 +20,9 @@
 #include "rotate.h"
 #include "webu/webu.h"
 
+#if defined(HAVE_MYSQL)
+# include <stdbool.h>
+#endif
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
@@ -1045,9 +1048,12 @@ static int dbse_init_mysql(struct context *cnt){
                     ,_("MySQL error was %s"), mysql_error(cnt->database));
                 return -2;
             }
-            #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-                my_bool my_true = TRUE;
-                mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &my_true);
+            #if defined(HAVE_MARIADB)
+                my_bool reconnect = 1;
+                mysql_optionsv(cnt->database, MYSQL_OPT_RECONNECT, &reconnect);
+            #elif defined(HAVE_MYSQL)
+                bool reconnect = 1;
+                mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &reconnect);
             #endif
         }
     #else

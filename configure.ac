@@ -90,6 +90,12 @@ AC_ARG_WITH([webp],
 ################################################################################
 AC_PROG_CC
 
+AS_IF([test "x$with_mysql" != xno], [
+	AC_PROG_CC_C99
+	AS_IF([test "x$ac_cv_prog_cc_c99" = xno],
+		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
+])
+
 ################################################################################
 # Checks for libraries
 ################################################################################
@@ -259,6 +265,10 @@ AS_IF([test "x$with_mmal" != xno], [
 ])
 
 AS_IF([test "x$with_mysql" != xno], [
+	AC_CHECK_HEADER_STDBOOL
+	AS_IF([test "x$ac_cv_header_stdbool_h" != xyes],
+		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
+
 	AC_CHECK_HEADER([mysql.h], [],
 		[AS_IF([test "x$with_mysql" = xcheck], [with_mysql=no])])
 ])
@@ -411,6 +421,11 @@ AS_IF([test "x$with_mmal" != xno], [
 AM_CONDITIONAL([MMAL], [test "x$with_mmal" != xno])
 
 AS_IF([test "x$with_mysql" != xno], [
+	AS_IF([test "x$ac_cv_prog_cc_c99" = xno],
+		[AC_MSG_ERROR([C compiler has not been set to accept C99])])
+
+	AS_IF([test "x$ac_cv_header_stdbool_h" != xyes],
+		[AC_MSG_ERROR([Unable to find stdbool.h file that conforms to C99])])
 	AS_IF([test "x$ac_cv_header_mysql_h" != xyes],
 		[AC_MSG_ERROR([MySQL header file not found])])
 
