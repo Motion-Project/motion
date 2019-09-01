@@ -1337,6 +1337,24 @@ static int v4l2_device_capability(struct video_dev *curdev) {
     return 0;
 }
 
+static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
+
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_streamparm* setfps;
+
+    setfps = (struct v4l2_streamparm *) mymalloc(sizeof(struct v4l2_streamparm));
+    setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    setfps->parm.capture.timeperframe.numerator = 1;
+    setfps->parm.capture.timeperframe.denominator = cnt->conf.framerate;
+
+    if (xioctl(vid_source, VIDIOC_S_PARM, setfps) == -1) {
+        free(setfps);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: v4l2_set_fps VIDIOC_S_PARM");
+    }
+    free(setfps);
+    return 0;
+}
+
 #endif /* HAVE_V4L2 */
 
 void v4l2_mutex_init(void) {
@@ -1354,23 +1372,6 @@ void v4l2_mutex_destroy(void) {
     MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled"));
 #endif // HAVE_V4L2
 }
-
-static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
-
-    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-    struct v4l2_streamparm* setfps;
-
-    setfps = (struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
-    memset(setfps, 0, sizeof(struct v4l2_streamparm));
-    setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    setfps->parm.capture.timeperframe.numerator = 1;
-    setfps->parm.capture.timeperframe.denominator = cnt->conf.framerate;
-
-    if (xioctl(vid_source, VIDIOC_S_PARM, setfps) == -1)
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: v4l2_set_fps VIDIOC_S_PARM");
-    return 0;
-}
-
 
 int v4l2_start(struct context *cnt) {
 #ifdef HAVE_V4L2
