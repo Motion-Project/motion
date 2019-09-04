@@ -179,6 +179,14 @@ int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
 #endif
 }
 /*********************************************/
+void my_free_nal_info(struct ffmpeg *ffmpeg){
+    if (ffmpeg->nal_info) {
+        free(ffmpeg->nal_info);
+        ffmpeg->nal_info = NULL;
+        ffmpeg->nal_info_len = 0;
+    }
+}
+/*********************************************/
 
 /****************************************************************************
  ****************************************************************************
@@ -409,6 +417,25 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         return -1;
     }
 
+    if (ffmpeg->nal_info_separated) {
+        // h264_v4l2m2m has NAL units separated from the first frame, which makes
+        // some players very unhappy.
+        if ((ffmpeg->pkt.pts == 0) && (!(ffmpeg->pkt.flags & AV_PKT_FLAG_KEY))) {
+            my_free_nal_info(ffmpeg);
+            ffmpeg->nal_info_len = ffmpeg->pkt.size;
+            ffmpeg->nal_info = malloc(ffmpeg->nal_info_len);
+            if (ffmpeg->nal_info)
+                memcpy(ffmpeg->nal_info, &ffmpeg->pkt.data[0], ffmpeg->nal_info_len);
+            else
+                ffmpeg->nal_info_len = 0;
+        } else if (ffmpeg->nal_info) {
+            int old_size = ffmpeg->pkt.size;
+            av_grow_packet(&ffmpeg->pkt, ffmpeg->nal_info_len);
+            memmove(&ffmpeg->pkt.data[ffmpeg->nal_info_len], &ffmpeg->pkt.data[0], old_size);
+            memcpy(&ffmpeg->pkt.data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
+            my_free_nal_info(ffmpeg);
+        }
+    }
     return 0;
 
 #elif (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
@@ -714,6 +741,10 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
       ffmpeg->ctx_codec->level = 3;
     }
     ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
+    // h264_v4l2m2m has NAL units separated from the first frame. We need to deal
+    // with it appriopriately later
+    if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0)
+        ffmpeg->nal_info_separated = 1;
 
     retcd = ffmpeg_set_quality(ffmpeg);
     if (retcd < 0){
@@ -1422,6 +1453,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
             }
         }
         ffmpeg_free_context(ffmpeg);
+        my_free_nal_info(ffmpeg);
     }
 
 #else

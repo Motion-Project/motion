@@ -61,6 +61,9 @@ struct ffmpeg {
     int            high_resolution;
     int            motion_images;
     int            passthrough;
+    int nal_info_separated;
+    char *nal_info;
+    int nal_info_len;
 };
 #else
 struct ffmpeg {
