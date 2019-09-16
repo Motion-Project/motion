@@ -26,6 +26,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/*
+This file was modified to be used with the motion project. The controls are parsed
+via "mmalcam_control_params" function in motion to the raspicam driver. To fulfill
+such functionality without bloating the motion code, the following changes were
+made:
+- remove call to helper module "RaspiHelpers.h";
+- include only "mmal_status_to_int" function from "RaspiHelpers.h". This function
+was copied exactly as written in "RaspiHelpers.h" file.
+*/
+
+
 #include <stdio.h>
 #include <memory.h>
 #include <ctype.h>
@@ -933,6 +944,9 @@ void raspicamcontrol_dump_parameters(const RASPICAM_CAMERA_PARAMETERS *params)
 
 
 /**
+ * This function is copied from "RaspiHelpers.h" module, without any changes
+ * It is inserted here only for usage with motion project
+ *
  * Convert a MMAL status return value to a simple boolean of success
  * ALso displays a fault if code is not success
  *
