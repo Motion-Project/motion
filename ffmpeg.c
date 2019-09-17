@@ -179,18 +179,40 @@ int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
 #endif
 }
 /*********************************************/
-void my_free_nal_info(struct ffmpeg *ffmpeg){
+
+/****************************************************************************
+ ****************************************************************************
+ ****************************************************************************/
+/*********************************************/
+void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
     if (ffmpeg->nal_info) {
         free(ffmpeg->nal_info);
         ffmpeg->nal_info = NULL;
         ffmpeg->nal_info_len = 0;
     }
 }
-/*********************************************/
 
-/****************************************************************************
- ****************************************************************************
- ****************************************************************************/
+static void ffmpeg_encode_nal(struct ffmpeg *ffmpeg){
+    // h264_v4l2m2m has NAL units separated from the first frame, which makes
+    // some players very unhappy.
+    if ((ffmpeg->pkt.pts == 0) && (!(ffmpeg->pkt.flags & AV_PKT_FLAG_KEY))) {
+        ffmpeg_free_nal(ffmpeg);
+        ffmpeg->nal_info_len = ffmpeg->pkt.size;
+        ffmpeg->nal_info = malloc(ffmpeg->nal_info_len);
+        if (ffmpeg->nal_info)
+            memcpy(ffmpeg->nal_info, &ffmpeg->pkt.data[0], ffmpeg->nal_info_len);
+        else
+            ffmpeg->nal_info_len = 0;
+    } else if (ffmpeg->nal_info) {
+        int old_size = ffmpeg->pkt.size;
+        av_grow_packet(&ffmpeg->pkt, ffmpeg->nal_info_len);
+        memmove(&ffmpeg->pkt.data[ffmpeg->nal_info_len], &ffmpeg->pkt.data[0], old_size);
+        memcpy(&ffmpeg->pkt.data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
+        ffmpeg_free_nal(ffmpeg);
+    }
+
+}
+
 static int ffmpeg_timelapse_exists(const char *fname){
     FILE *file;
     file = fopen(fname, "r");
@@ -417,25 +439,10 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         return -1;
     }
 
-    if (ffmpeg->nal_info_separated) {
-        // h264_v4l2m2m has NAL units separated from the first frame, which makes
-        // some players very unhappy.
-        if ((ffmpeg->pkt.pts == 0) && (!(ffmpeg->pkt.flags & AV_PKT_FLAG_KEY))) {
-            my_free_nal_info(ffmpeg);
-            ffmpeg->nal_info_len = ffmpeg->pkt.size;
-            ffmpeg->nal_info = malloc(ffmpeg->nal_info_len);
-            if (ffmpeg->nal_info)
-                memcpy(ffmpeg->nal_info, &ffmpeg->pkt.data[0], ffmpeg->nal_info_len);
-            else
-                ffmpeg->nal_info_len = 0;
-        } else if (ffmpeg->nal_info) {
-            int old_size = ffmpeg->pkt.size;
-            av_grow_packet(&ffmpeg->pkt, ffmpeg->nal_info_len);
-            memmove(&ffmpeg->pkt.data[ffmpeg->nal_info_len], &ffmpeg->pkt.data[0], old_size);
-            memcpy(&ffmpeg->pkt.data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
-            my_free_nal_info(ffmpeg);
-        }
+    if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
+        ffmpeg_encode_nal(ffmpeg);
     }
+
     return 0;
 
 #elif (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
@@ -586,10 +593,13 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
             ffmpeg->quality = 45; // default to 45% quality
         av_dict_set(&ffmpeg->opts, "preset", "ultrafast", 0);
         av_dict_set(&ffmpeg->opts, "tune", "zerolatency", 0);
-        if ((strcmp(ffmpeg->codec->name, "h264_omx") == 0) ||
-           (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0) ||
-           (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0)) {
-            // H264 OMX encoder quality can only be controlled via bit_rate
+        /* This next if statement needs validation.  Are mpeg4omx
+         * and v4l2m2m even MY_CODEC_ID_H264 or MY_CODEC_ID_HEVC
+         * such that it even would be possible to be part of this
+         * if block to start with? */
+        if ((ffmpeg->preferred_codec == USER_CODEC_H264OMX) ||
+            (ffmpeg->preferred_codec == USER_CODEC_MPEG4OMX) ||
+            (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M)) {
             // bit_rate = ffmpeg->width * ffmpeg->height * ffmpeg->fps * quality_factor
             ffmpeg->quality = (int)(((int64_t)ffmpeg->width * ffmpeg->height * ffmpeg->fps * ffmpeg->quality) >> 7);
             // Clip bit rate to min
@@ -639,11 +649,7 @@ static int ffmpeg_codec_is_blacklisted(const char *codec_name){
     return 0;
 }
 
-static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
-
-    int retcd;
-    char errstr[128];
-    int chkrate;
+static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
 
     ffmpeg->codec = NULL;
@@ -671,8 +677,39 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
         ffmpeg_free_context(ffmpeg);
         return -1;
     }
+
+    if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0){
+        #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+            ffmpeg->preferred_codec = USER_CODEC_V4L2M2M;
+        #else
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("FFMpeg version is too old for codec %s"), ffmpeg->codec_name);
+            ffmpeg_free_context(ffmpeg);
+            return -1;
+        #endif
+    } else if (strcmp(ffmpeg->codec->name, "h264_omx") == 0){
+        ffmpeg->preferred_codec = USER_CODEC_H264OMX;
+    } else if (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0){
+        ffmpeg->preferred_codec = USER_CODEC_MPEG4OMX;
+    } else {
+        ffmpeg->preferred_codec = USER_CODEC_DEFAULT;
+    }
+
     if (ffmpeg->codec_name[codec_name_len])
         MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,_("Using codec %s"), ffmpeg->codec->name);
+
+    return 0;
+
+}
+
+static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
+
+    int retcd;
+    char errstr[128];
+    int chkrate;
+
+    retcd = ffmpeg_set_codec_preferred(ffmpeg);
+    if (retcd != 0) return retcd;
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     //If we provide the codec to this, it results in a memory leak.  ffmpeg ticket: 5714
@@ -735,20 +772,17 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     ffmpeg->ctx_codec->height        = ffmpeg->height;
     ffmpeg->ctx_codec->time_base.num = 1;
     ffmpeg->ctx_codec->time_base.den = ffmpeg->fps;
-    if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0)
+    if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
         ffmpeg->ctx_codec->pix_fmt   = AV_PIX_FMT_NV21;
-    else
+    } else {
         ffmpeg->ctx_codec->pix_fmt   = MY_PIX_FMT_YUV420P;
+    }
     ffmpeg->ctx_codec->max_b_frames  = 0;
     if (strcmp(ffmpeg->codec_name, "ffv1") == 0){
       ffmpeg->ctx_codec->strict_std_compliance = -2;
       ffmpeg->ctx_codec->level = 3;
     }
     ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
-    // h264_v4l2m2m has NAL units separated from the first frame. We need to deal
-    // with it appriopriately later
-    if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0)
-        ffmpeg->nal_info_separated = 1;
 
     retcd = ffmpeg_set_quality(ffmpeg);
     if (retcd < 0){
@@ -808,7 +842,7 @@ static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
 
 }
 
-
+/*Special allocation of video buffer for v4l2m2m codec*/
 static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
 {
     const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(frame->format);
@@ -890,8 +924,7 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
     ffmpeg->picture->width  = ffmpeg->ctx_codec->width;
     ffmpeg->picture->height = ffmpeg->ctx_codec->height;
 
-    // h264_v4l2m2m encoder expects video buffer to be allocated
-    if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0) {
+    if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M) {
         retcd = ffmpeg_alloc_video_buffer(ffmpeg->picture, 32);
         if (retcd) {
             av_strerror(retcd, errstr, sizeof(errstr));
@@ -1457,7 +1490,7 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
             }
         }
         ffmpeg_free_context(ffmpeg);
-        my_free_nal_info(ffmpeg);
+        ffmpeg_free_nal(ffmpeg);
     }
 
 #else
@@ -1465,11 +1498,53 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
 #endif // HAVE_FFMPEG
 }
 
+static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data){
+    unsigned char *image,*imagecr, *imagecb;
+    int cr_len, x, y;
+
+    if (ffmpeg->high_resolution){
+        image = img_data->image_high;
+    } else {
+        image = img_data->image_norm;
+    }
+
+    cr_len = ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4;
+    imagecr = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+    imagecb = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) + cr_len;
+
+    memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+    for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
+        for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
+            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
+            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
+            imagecb++;
+            imagecr++;
+        }
+    }
+
+}
+
+static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data){
+    unsigned char *image;
+
+    if (ffmpeg->high_resolution){
+        image = img_data->image_high;
+    } else {
+        image = img_data->image_norm;
+    }
+
+    // Usual setup for image pointers
+    ffmpeg->picture->data[0] = image;
+    ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+    ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
+
+}
+
 int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
 #ifdef HAVE_FFMPEG
     int retcd = 0;
     int cnt = 0;
-    unsigned char *image;
+
 
     if (ffmpeg->passthrough) {
         retcd = ffmpeg_passthru_put(ffmpeg, img_data);
@@ -1477,34 +1552,11 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
     }
 
     if (ffmpeg->picture) {
-        if (ffmpeg->high_resolution){
-            image = img_data->image_high;
-        } else {
-            image = img_data->image_norm;
-        }
 
-        /* Setup pointers and line widths. */
-        if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0) {
-            // assume NV21 format
-            int cr_len = ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4;
-            unsigned char *imagecr = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-            unsigned char *imagecb = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) + cr_len;
-            int x;
-            int y;
-            memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-            for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
-                for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
-                    ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
-                    ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
-                    imagecb++;
-                    imagecr++;
-                }
-            }
+        if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M) {
+            ffmpeg_put_pix_nv21(ffmpeg, img_data);
         } else {
-            // assume YUV420P format
-            ffmpeg->picture->data[0] = image;
-            ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-            ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
+            ffmpeg_put_pix_yuv420(ffmpeg, img_data);
         }
 
         ffmpeg->gop_cnt ++;
