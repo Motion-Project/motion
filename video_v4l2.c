@@ -1340,18 +1340,27 @@ static int v4l2_device_capability(struct video_dev *curdev) {
 static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
-    struct v4l2_streamparm* setfps;
+    struct v4l2_streamparm setfps;
+    int retcd;
 
-    setfps = (struct v4l2_streamparm *) mymalloc(sizeof(struct v4l2_streamparm));
-    setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    setfps->parm.capture.timeperframe.numerator = 1;
-    setfps->parm.capture.timeperframe.denominator = cnt->conf.framerate;
+    setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    setfps.parm.capture.timeperframe.numerator = 1;
+    setfps.parm.capture.timeperframe.denominator = cnt->conf.framerate;
 
-    if (xioctl(vid_source, VIDIOC_S_PARM, setfps) == -1) {
-        free(setfps);
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "%s: v4l2_set_fps VIDIOC_S_PARM");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        , _("Trying to set fps to %d")
+        , setfps.parm.capture.timeperframe.denominator);
+
+    retcd = xioctl(vid_source, VIDIOC_S_PARM, &setfps);
+    if (retcd != 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Error setting fps. Return code %d"), retcd);
     }
-    free(setfps);
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        , _("Device set fps to %d")
+        , setfps.parm.capture.timeperframe.denominator);
+
     return 0;
 }
 
