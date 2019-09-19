@@ -14,9 +14,7 @@
 int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
                      unsigned int width, unsigned int height, unsigned char *volatile img_out);
 
-unsigned prepare_exif(unsigned char **, const struct context *, const struct timeval *, const struct coord *);
-
-int put_jpeg_yuv420p_memory(unsigned char *, int image, unsigned char *, int, int, int, struct context *, struct timeval *, struct coord *);
-int    put_jpeg_grey_memory(unsigned char *, int image, unsigned char *, int, int, int, struct context *, struct timeval *, struct coord *);
+int jpgutl_put_yuv420p(unsigned char *, int image, unsigned char *, int, int, int, struct context *, struct timeval *, struct coord *);
+int jpgutl_put_grey(unsigned char *, int image, unsigned char *, int, int, int, struct context *, struct timeval *, struct coord *);
 
 #endif

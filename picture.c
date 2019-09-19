@@ -10,6 +10,7 @@
  */
 #include "translate.h"
 #include "picture.h"
+#include "jpegutils.h"
 #include "event.h"
 
 #include <assert.h>
@@ -486,7 +487,7 @@ static void put_jpeg_yuv420p_file(FILE *fp,
     int image_size = cnt->imgs.size_norm;
     unsigned char *buf = mymalloc(image_size);
 
-    sz = put_jpeg_yuv420p_memory(buf, image_size, image, width, height, quality, cnt ,tv1, box);
+    sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cnt ,tv1, box);
     fwrite(buf, sz, 1, fp);
 
     free(buf);
@@ -516,7 +517,7 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
     int image_size = cnt->imgs.size_norm;
     unsigned char *buf = mymalloc(image_size);
 
-    sz = put_jpeg_grey_memory(buf, image_size, image, width, height, quality, cnt ,tv1, box);
+    sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cnt ,tv1, box);
     fwrite(buf, sz, 1, picture);
 
     free(buf);
@@ -754,10 +755,10 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
     gettimeofday(&tv1, NULL);
 
     if (!cnt->conf.stream_grey){
-        return put_jpeg_yuv420p_memory(dest_image, image_size, image,
+        return jpgutl_put_yuv420p(dest_image, image_size, image,
                                        width, height, quality, cnt ,&tv1,NULL);
     } else {
-        return put_jpeg_grey_memory(dest_image, image_size, image,
+        return jpgutl_put_grey(dest_image, image_size, image,
                                        width, height, quality, cnt,&tv1,NULL);
     }
 

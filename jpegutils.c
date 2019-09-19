@@ -52,6 +52,7 @@
 #include "config.h"
 #include "motion.h"
 #include "jpegutils.h"
+#include "picture.h"    /* For the prepare_exif */
 #include <setjmp.h>
 
 
@@ -545,7 +546,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
 }
 
-int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
+int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
                    unsigned char *input_image, int width, int height, int quality,
                    struct context *cnt, struct timeval *tv1, struct coord *box)
 
@@ -634,7 +635,7 @@ int put_jpeg_yuv420p_memory(unsigned char *dest_image, int image_size,
 }
 
 
-int put_jpeg_grey_memory(unsigned char *dest_image, int image_size,
+int jpgutl_put_grey(unsigned char *dest_image, int image_size,
                    unsigned char *input_image, int width, int height, int quality,
                    struct context *cnt, struct timeval *tv1, struct coord *box)
 {
