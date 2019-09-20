@@ -1341,6 +1341,33 @@ static int v4l2_device_capability(struct video_dev *curdev) {
     return 0;
 }
 
+static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
+
+    src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
+    struct v4l2_streamparm setfps;
+    int retcd;
+
+    setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    setfps.parm.capture.timeperframe.numerator = 1;
+    setfps.parm.capture.timeperframe.denominator = cnt->conf.framerate;
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        , _("Trying to set fps to %d")
+        , setfps.parm.capture.timeperframe.denominator);
+
+    retcd = xioctl(vid_source, VIDIOC_S_PARM, &setfps);
+    if (retcd != 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            ,_("Error setting fps. Return code %d"), retcd);
+    }
+
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        , _("Device set fps to %d")
+        , setfps.parm.capture.timeperframe.denominator);
+
+    return 0;
+}
+
 #endif /* HAVE_V4L2 */
 
 void v4l2_mutex_init(void) {
@@ -1396,6 +1423,7 @@ int v4l2_start(struct context *cnt) {
     if (retcd == 0) retcd = v4l2_norm_select(cnt, curdev);
     if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
     if (retcd == 0) retcd = v4l2_pixfmt_select(cnt, curdev);
+    if (retcd == 0) retcd = v4l2_fps_set(cnt, curdev);
     if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
     if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
     if (retcd == 0) retcd = vid_parms_parse(cnt);
