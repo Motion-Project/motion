@@ -1399,7 +1399,7 @@ static int motion_init(struct context *cnt)
     /* create a reference frame */
     alg_update_reference_frame(cnt, RESET_REF_FRAME);
 
-    #if defined(HAVE_V4L2) && !defined(__FreeBSD__)
+    #if defined(HAVE_V4L2) && !defined(BSD)
         /* open video loopback devices if enabled */
         if (cnt->conf.video_pipe) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -1428,7 +1428,7 @@ static int motion_init(struct context *cnt)
                 return -1;
             }
         }
-    #endif /* HAVE_V4L2 && !__FreeBSD__ */
+    #endif /* HAVE_V4L2 && !BSD */
 
     retcd = dbse_init(cnt);
     if (retcd != 0) return retcd;

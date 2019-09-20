@@ -26,7 +26,11 @@
 
 #ifdef HAVE_V4L2
 
+#if defined(HAVE_LINUX_VIDEODEV2_H)
 #include <linux/videodev2.h>
+#else
+#include <sys/videoio.h>
+#endif
 
 #define u8 unsigned char
 #define u16 unsigned short
@@ -113,7 +117,7 @@ static void v4l2_palette_init(palette_item *palette_array){
 
 }
 
-#if defined (__OpenBSD__) || defined (__FreeBSD__)
+#if defined (BSD)
 static int xioctl(src_v4l2_t *vid_source, unsigned long request, void *arg)
 #else
 static int xioctl(src_v4l2_t *vid_source, int request, void *arg)

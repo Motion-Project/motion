@@ -10,7 +10,11 @@
 #include "motion.h"
 
 #ifdef HAVE_V4L2
+#if defined(HAVE_LINUX_VIDEODEV2_H)
 #include <linux/videodev2.h>
+#else
+#include <sys/videoio.h>
+#endif
 #include "pwc-ioctl.h"
 #endif
 

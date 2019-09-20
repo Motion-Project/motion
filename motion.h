@@ -53,7 +53,7 @@ struct image_data;
 #include <pthread.h>
 #include <microhttpd.h>
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__)
+#if defined(BSD) && !defined(__APPLE__)
 #include <pthread_np.h>
 #endif
 

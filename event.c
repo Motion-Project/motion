@@ -474,7 +474,7 @@ static void event_stream_put(struct context *cnt,
 }
 
 
-#if defined(HAVE_V4L2) && !defined(__FreeBSD__)
+#if defined(HAVE_V4L2) && !defined(BSD)
 static void event_vlp_putpipe(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             struct image_data *img_data, char *dummy ATTRIBUTE_UNUSED, void *devpipe,
@@ -486,7 +486,7 @@ static void event_vlp_putpipe(struct context *cnt,
                 ,_("Failed to put image into video pipe"));
     }
 }
-#endif /* defined(HAVE_V4L2) && !__FreeBSD__  */
+#endif /* defined(HAVE_V4L2) && !defined(BSD)  */
 
 const char *imageext(struct context *cnt)
 {
@@ -1292,7 +1292,7 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGE_SNAPSHOT,
     event_image_snapshot
     },
-#if defined(HAVE_V4L2) && !defined(__FreeBSD__)
+#if defined(HAVE_V4L2) && !defined(BSD)
     {
     EVENT_IMAGE,
     event_vlp_putpipe
@@ -1301,7 +1301,7 @@ struct event_handlers event_handlers[] = {
     EVENT_IMAGEM,
     event_vlp_putpipe
     },
-#endif /* defined(HAVE_V4L2) && !__FreeBSD__  */
+#endif /* defined(HAVE_V4L2) && !defined(BSD) */
     {
     EVENT_IMAGE_PREVIEW,
     event_image_preview
