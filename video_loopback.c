@@ -28,6 +28,7 @@ static int vlp_open_vidpipe(void)
     const char prefix[] = "/sys/class/video4linux/";
     int fd,tfd;
     int len,min;
+    int retcd;
 
     if ((dir = opendir(prefix)) == NULL) {
         MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Failed to open '%s'"), prefix);
@@ -36,10 +37,16 @@ static int vlp_open_vidpipe(void)
 
     while ((dirp = readdir(dir)) != NULL) {
         if (!strncmp(dirp->d_name, "video", 5)) {
-            strncpy(buffer, prefix, sizeof(buffer));
-            strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
-            strncat(buffer, "/name", sizeof(buffer) - strlen(buffer));
-            MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Opening buffer: %s"),buffer);
+
+            retcd = snprintf(buffer, sizeof(buffer),"%s%s/name", prefix, dirp->d_name);
+            if ((retcd<0) || (retcd >= (int)sizeof(buffer))) {
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO
+                    ,_("Error specifying buffer: %s"),buffer);
+                continue;
+            } else {
+                MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO,_("Opening buffer: %s"),buffer);
+            }
+
             if ((fd = open(buffer, O_RDONLY|O_CLOEXEC)) >= 0) {
                 if ((len = read(fd, buffer, sizeof(buffer)-1)) < 0) {
                     close(fd);
@@ -52,9 +59,17 @@ static int vlp_open_vidpipe(void)
                     continue;
                 }
                 min = atoi(&buffer[21]);
-                strcpy(buffer, "/dev/");
-                strncat(buffer, dirp->d_name, sizeof(buffer) - strlen(buffer));
-                MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("found video device '%s' %d"), buffer,min);
+
+                retcd = snprintf(buffer,sizeof(buffer),"/dev/%s",dirp->d_name);
+                if ((retcd < 0) || (retcd >= (int)sizeof(buffer))) {
+                    MOTION_LOG(NTC, TYPE_VIDEO, SHOW_ERRNO
+                        ,_("Error specifying buffer: %s"),buffer);
+                    close(fd);
+                    continue;
+                } else {
+                    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("found video device '%s' %d"), buffer,min);
+                }
+
                 if ((tfd = open(buffer, O_RDWR|O_CLOEXEC)) >= 0) {
                     strncpy(pipepath, buffer, sizeof(pipepath));
                     if (pipe_fd >= 0) close(pipe_fd);
