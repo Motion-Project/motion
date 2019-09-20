@@ -15,6 +15,14 @@ enum TIMELAPSE_TYPE {
     TIMELAPSE_NEW           /* Use create new file version of timelapse */
 };
 
+/* Enumeration of the user requested codecs that need special handling */
+enum USER_CODEC {
+    USER_CODEC_V4L2M2M,    /* Requested codec for movie is h264_v4l2m2m */
+    USER_CODEC_H264OMX,    /* Requested h264_omx */
+    USER_CODEC_MPEG4OMX,   /* Requested mpeg4_omx */
+    USER_CODEC_DEFAULT     /* All other default codecs */
+};
+
 #ifdef HAVE_FFMPEG
 
 #include <errno.h>
@@ -61,6 +69,9 @@ struct ffmpeg {
     int            high_resolution;
     int            motion_images;
     int            passthrough;
+    enum USER_CODEC     preferred_codec;
+    char *nal_info;
+    int  nal_info_len;
 };
 #else
 struct ffmpeg {
