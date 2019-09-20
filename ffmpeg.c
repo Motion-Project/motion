@@ -632,6 +632,7 @@ static int ffmpeg_codec_is_blacklisted(const char *codec_name){
 
     static const char *blacklisted_codec[] =
     {
+#if (!((LIBAVCODEC_VERSION_MAJOR >= 58) && (LIBAVCODEC_VERSION_MINOR >= 55)))
         /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
          * To use h264_omx encoder and workaround the lock up issue:
          * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
@@ -639,6 +640,7 @@ static int ffmpeg_codec_is_blacklisted(const char *codec_name){
          * More information: https://github.com/Motion-Project/motion/issues/433
          */
         "h264_omx",
+#endif
     };
     size_t i;
 
@@ -783,6 +785,15 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
       ffmpeg->ctx_codec->level = 3;
     }
     ffmpeg->ctx_codec->flags |= MY_CODEC_FLAG_GLOBAL_HEADER;
+
+    if ((strcmp(ffmpeg->codec->name, "h264_omx") == 0) ||
+        (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0)) {
+        /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
+         * To use h264_omx encoder, we need to disable zerocopy.
+         * More information: https://github.com/Motion-Project/motion/issues/433
+         */
+        av_dict_set(&ffmpeg->opts, "zerocopy", "0", 0);
+    }
 
     retcd = ffmpeg_set_quality(ffmpeg);
     if (retcd < 0){
