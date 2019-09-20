@@ -2464,6 +2464,12 @@ static void mlp_actions(struct context *cnt){
      * code section.
      */
     if ((cnt->conf.emulate_motion || cnt->event_user) && (cnt->startup_frames == 0)) {
+        /*  If we were previously detecting motion, started a movie, then got
+         *  no motion then we reset the start movie time so that we do not
+         *  get a pause in the movie.
+        */
+        if ( (cnt->detecting_motion == 0) && (cnt->ffmpeg_output != NULL) )
+            ffmpeg_reset_movie_start_time(cnt->ffmpeg_output, &cnt->current_image->timestamp_tv);
         cnt->detecting_motion = 1;
         if (cnt->conf.post_capture > 0) {
             /* Setup the postcap counter */
