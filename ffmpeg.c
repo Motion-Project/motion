@@ -184,7 +184,7 @@ int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
  ****************************************************************************
  ****************************************************************************/
 /*********************************************/
-void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
+static void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
     if (ffmpeg->nal_info) {
         free(ffmpeg->nal_info);
         ffmpeg->nal_info = NULL;
@@ -1343,6 +1343,48 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
     }
 }
 
+static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data){
+    unsigned char *image,*imagecr, *imagecb;
+    int cr_len, x, y;
+
+    if (ffmpeg->high_resolution){
+        image = img_data->image_high;
+    } else {
+        image = img_data->image_norm;
+    }
+
+    cr_len = ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4;
+    imagecr = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+    imagecb = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) + cr_len;
+
+    memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+    for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
+        for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
+            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
+            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
+            imagecb++;
+            imagecr++;
+        }
+    }
+
+}
+
+static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data){
+    unsigned char *image;
+
+    if (ffmpeg->high_resolution){
+        image = img_data->image_high;
+    } else {
+        image = img_data->image_norm;
+    }
+
+    // Usual setup for image pointers
+    ffmpeg->picture->data[0] = image;
+    ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
+    ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
+
+}
+
 
 #endif /* HAVE_FFMPEG */
 
@@ -1509,47 +1551,6 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
 #endif // HAVE_FFMPEG
 }
 
-static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data){
-    unsigned char *image,*imagecr, *imagecb;
-    int cr_len, x, y;
-
-    if (ffmpeg->high_resolution){
-        image = img_data->image_high;
-    } else {
-        image = img_data->image_norm;
-    }
-
-    cr_len = ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height / 4;
-    imagecr = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-    imagecb = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) + cr_len;
-
-    memcpy(ffmpeg->picture->data[0], image, ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-    for (y = 0; y < ffmpeg->ctx_codec->height; y++) {
-        for (x = 0; x < ffmpeg->ctx_codec->width/4; x++) {
-            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2] = *imagecb;
-            ffmpeg->picture->data[1][y*ffmpeg->ctx_codec->width/2 + x*2 + 1] = *imagecr;
-            imagecb++;
-            imagecr++;
-        }
-    }
-
-}
-
-static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data){
-    unsigned char *image;
-
-    if (ffmpeg->high_resolution){
-        image = img_data->image_high;
-    } else {
-        image = img_data->image_norm;
-    }
-
-    // Usual setup for image pointers
-    ffmpeg->picture->data[0] = image;
-    ffmpeg->picture->data[1] = image + (ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height);
-    ffmpeg->picture->data[2] = ffmpeg->picture->data[1] + ((ffmpeg->ctx_codec->width * ffmpeg->ctx_codec->height) / 4);
-
-}
 
 int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
 #ifdef HAVE_FFMPEG
