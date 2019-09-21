@@ -17,11 +17,16 @@
 
 #include <sys/mman.h>
 
-#if defined(__NetBSD__) || defined(__OpenBSD__)
-#include <dev/ic/bt8xx.h>
-#else
-#include <dev/bktr/ioctl_meteor.h>
-#include <dev/bktr/ioctl_bt848.h>
+#if defined(HAVE_DEV_IC_BT8XX_H)
+    #include <dev/ic/bt8xx.h>
+#endif
+
+#if defined(HAVE_DEV_BKTR_IOCTL_METEOR_H)
+    #include <dev/bktr/ioctl_meteor.h>
+#endif
+
+#if defined(HAVE_DEV_BKTR_IOCTL_BT848_H)
+    #include <dev/bktr/ioctl_bt848.h>
 #endif
 
 #define array_elem(x) (sizeof(x) / sizeof((x)[0]))

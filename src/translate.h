@@ -12,7 +12,7 @@
 
 int nls_enabled;
 
-#ifdef HAVE_INTL
+#ifdef HAVE_GETTEXT
 #   include <libintl.h>
     extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
 #endif

@@ -17,7 +17,7 @@ struct image_data;
 #include "config.h"
 
 /* Includes */
-#ifdef HAVE_MYSQL
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
 #include <mysql.h>
 #endif
 
@@ -53,8 +53,8 @@ struct image_data;
 #include <pthread.h>
 #include <microhttpd.h>
 
-#if defined(BSD) && !defined(__APPLE__)
-#include <pthread_np.h>
+#if defined(HAVE_PTHREAD_NP_H)
+    #include <pthread_np.h>
 #endif
 
 #include "logger.h"
@@ -460,7 +460,7 @@ struct context {
     sqlite3 *database_sqlite3;
 #endif
 
-#ifdef HAVE_MYSQL
+#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
     MYSQL *database;
 #endif
 
