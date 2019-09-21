@@ -210,7 +210,6 @@ static void ffmpeg_encode_nal(struct ffmpeg *ffmpeg){
         memcpy(&ffmpeg->pkt.data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
         ffmpeg_free_nal(ffmpeg);
     }
-
 }
 
 static int ffmpeg_timelapse_exists(const char *fname){
@@ -300,7 +299,13 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
 
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
     char *codec_name = malloc(codec_name_len + 1);
+    char basename[PATH_MAX];
+    int retcd;
 
+    /* TODO:  Rework the extenstion asssignment along with the code in event.c
+     * If extension is ever something other than three bytes,
+     * preceded by . then lots of things will fail
+     */
     if (codec_name == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Failed to allocate memory for codec name"));
@@ -322,13 +327,23 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
         return -1;
     }
 
+    retcd = snprintf(basename,PATH_MAX,"%s",ffmpeg->filename);
+    if ((retcd < 0) || (retcd >= PATH_MAX)){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Error setting base file name"));
+        ffmpeg_free_context(ffmpeg);
+        free(codec_name);
+        return -1;
+    }
+
     if (ffmpeg->tlapse == TIMELAPSE_APPEND){
         ffmpeg->oc->oformat = av_guess_format ("mpeg2video", NULL, NULL);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MPEG2VIDEO;
-        strncat(ffmpeg->filename, ".mpg", 4);
-        if (!ffmpeg->oc->oformat) {
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mpg",basename);
+        if ((!ffmpeg->oc->oformat) ||
+            (retcd < 0) || (retcd >= PATH_MAX)){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("ffmpeg_video_codec option value %s is not supported"), codec_name);
+                ,_("Error setting timelapse append for codec %s"), codec_name);
             ffmpeg_free_context(ffmpeg);
             free(codec_name);
             return -1;
@@ -339,56 +354,64 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
 
     if (strcmp(codec_name, "mpeg4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
-        strncat(ffmpeg->filename, ".avi", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
     }
 
     if (strcmp(codec_name, "msmpeg4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
-        strncat(ffmpeg->filename, ".avi", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_MSMPEG4V2;
     }
 
     if (strcmp(codec_name, "swf") == 0) {
         ffmpeg->oc->oformat = av_guess_format("swf", NULL, NULL);
-        strncat(ffmpeg->filename, ".swf", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.swf",basename);
     }
 
     if (strcmp(codec_name, "flv") == 0) {
         ffmpeg->oc->oformat = av_guess_format("flv", NULL, NULL);
-        strncat(ffmpeg->filename, ".flv", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.flv",basename);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FLV1;
     }
 
     if (strcmp(codec_name, "ffv1") == 0) {
         ffmpeg->oc->oformat = av_guess_format("avi", NULL, NULL);
-        strncat(ffmpeg->filename, ".avi", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.avi",basename);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_FFV1;
     }
 
     if (strcmp(codec_name, "mov") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mov", NULL, NULL);
-        strncat(ffmpeg->filename, ".mov", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mov",basename);
     }
 
     if (strcmp(codec_name, "mp4") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
-        strncat(ffmpeg->filename, ".mp4", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mp4",basename);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
     }
 
     if (strcmp(codec_name, "mkv") == 0) {
         ffmpeg->oc->oformat = av_guess_format("matroska", NULL, NULL);
-        strncat(ffmpeg->filename, ".mkv", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mkv",basename);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_H264;
     }
 
     if (strcmp(codec_name, "hevc") == 0) {
         ffmpeg->oc->oformat = av_guess_format("mp4", NULL, NULL);
-        strncat(ffmpeg->filename, ".mp4", 4);
+        retcd = snprintf(ffmpeg->filename,PATH_MAX,"%s.mp4",basename);
         if (ffmpeg->oc->oformat) ffmpeg->oc->oformat->video_codec = MY_CODEC_ID_HEVC;
     }
 
     //Check for valid results
+    if ((retcd < 0) || (retcd >= PATH_MAX)){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Error setting file name"));
+        ffmpeg_free_context(ffmpeg);
+        free(codec_name);
+        return -1;
+    }
+
     if (!ffmpeg->oc->oformat) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("codec option value %s is not supported"), codec_name);
@@ -464,6 +487,11 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
         return -2;
     }
 
+    /* This kills compiler warnings.  Nal setting is only for recent ffmpeg versions*/
+    if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
+        ffmpeg_encode_nal(ffmpeg);
+    }
+
     return 0;
 
 #else
@@ -498,6 +526,11 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     ffmpeg->pkt.dts = ffmpeg->pkt.pts;
 
     free(video_outbuf);
+
+    /* This kills compiler warnings.  Nal setting is only for recent ffmpeg versions*/
+    if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
+        ffmpeg_encode_nal(ffmpeg);
+    }
 
     return 0;
 

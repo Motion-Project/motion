@@ -50,6 +50,8 @@ struct auth_param {
 static void get_host(char *buf, int fd)
 {
     struct sockaddr_storage client;
+    int retcd;
+
     socklen_t client_len = sizeof(client);
     int res = getpeername(fd, (struct sockaddr *)&client, &client_len);
     if (res != 0)
@@ -60,7 +62,12 @@ static void get_host(char *buf, int fd)
     if (res != 0)
         return;
 
-    strncpy(buf, host, NI_MAXHOST - 1);
+    retcd = snprintf(buf,NI_MAXHOST - 1,"%s",host);
+    if ((retcd < 0) || (retcd >= (int)NI_MAXHOST-1)){
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
+            ,_("Error specifying host"));
+    }
+
 }
 
 pthread_mutex_t stream_auth_mutex;
@@ -177,8 +184,13 @@ static int read_http_request(int sock, char* buffer, int buflen, char* uri, int 
         return 0;
     }
 
-    if(uri)
-        strncpy(uri, url, uri_len);
+    if(uri){
+        ret = snprintf(uri, uri_len,"%s",url);
+        if ((ret < 0) || (ret >= uri_len)){
+            MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
+                ,_("Unable to set uri"));
+        }
+    }
 
     return 1;
 }
@@ -428,6 +440,8 @@ static void* handle_md5_digest(void* param)
     char server_uri[SERVER_URI_LEN];
     char* server_user = NULL, *server_pass = NULL;
     unsigned int rand1,rand2;
+    int retcd, len_user,len_pass;
+
     HASHHEX HA1;
     HASHHEX HA2 = "";
     HASHHEX server_response;
@@ -486,8 +500,10 @@ static void* handle_md5_digest(void* param)
         goto InternalError;
     }
 
-    server_user = (char*)malloc((h - p->conf->stream_authentication) + 1);
-    server_pass = (char*)malloc(strlen(h) + 1);
+    len_user = (h - p->conf->stream_authentication);
+    len_pass = strlen(h);
+    server_user = (char*)malloc(len_user + 1);
+    server_pass = (char*)malloc(len_pass + 1);
 
     if (!server_user || !server_pass) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
@@ -495,10 +511,20 @@ static void* handle_md5_digest(void* param)
         goto InternalError;
     }
 
-    strncpy(server_user, p->conf->stream_authentication, h-p->conf->stream_authentication);
-    server_user[h - p->conf->stream_authentication] = '\0';
-    strncpy(server_pass, h + 1, strlen(h + 1));
-    server_pass[strlen(h + 1)] = '\0';
+    retcd = snprintf(server_user, len_user+1, "%s", p->conf->stream_authentication);
+    if ((retcd < 0) || (retcd >= len_user)) {
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
+            ,_("Error server user"));
+        goto InternalError;
+    }
+
+    retcd = snprintf(server_pass, len_pass+1, "%s", h);
+    if ((retcd < 0) || (retcd >= len_user)) {
+        MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
+            ,_("Error server pass"));
+        goto InternalError;
+    }
+
 
     while(1) {
         if(!read_http_request(p->sock, buffer, length, server_uri, SERVER_URI_LEN - 1))
