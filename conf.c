@@ -2298,7 +2298,7 @@ struct context **conf_load(struct context **cnt)
 {
     FILE *fp = NULL;
     char filename[PATH_MAX];
-    int i;
+    int i, retcd;
     /* We preserve argc and argv because they get overwritten by the memcpy command. */
     char **argv = cnt[0]->conf.argv;
     int argc = cnt[0]->conf.argc;
@@ -2382,12 +2382,18 @@ struct context **conf_load(struct context **cnt)
 
     /* Now we process the motion.conf config file and close it. */
     if (fp) {
-      strncpy(cnt[0]->conf_filename, filename, sizeof(cnt[0]->conf_filename) - 1);
-      cnt[0]->conf_filename[sizeof(cnt[0]->conf_filename) - 1] = '\0';
-      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-        ,_("Processing thread 0 - config file %s"), filename);
-      cnt = conf_process(cnt, fp);
-      myfclose(fp);
+        retcd = snprintf(cnt[0]->conf_filename
+            ,sizeof(cnt[0]->conf_filename)
+            ,"%s",filename);
+        if ((retcd < 0) || (retcd >= (int)sizeof(cnt[0]->conf_filename))){
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Invalid file name %s"), filename);
+        } else {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Processing thread 0 - config file %s"), filename);
+            cnt = conf_process(cnt, fp);
+            myfclose(fp);
+        }
     } else {
         MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO
             ,_("No config file to process, using default values"));

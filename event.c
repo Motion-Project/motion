@@ -15,7 +15,17 @@
 #include "video_loopback.h"
 #include "video_common.h"
 
-/* Various functions (most doing the actual action) */
+/* Various functions (most doing the actual action)
+ * TODO Items:
+ * Rework the snprintf uses.
+ * Edit directories so they can never be null and eliminate defaults from here
+ * Move the ffmpeg initialize stuff to ffmpeg module
+ * eliminate #if for v4l2
+ * Eliminate #IF for database items
+ * Move database functions out of here.
+ * Move stream stuff to webu_stream
+ * Use (void) alternative for ATTRIBUTE_UNUSED
+ */
 
 const char *eventList[] = {
     "NULL",
@@ -658,35 +668,51 @@ static void event_image_preview(struct context *cnt,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
     int use_imagepath;
-    int basename_len;
     const char *imagepath;
     char previewname[PATH_MAX];
     char filename[PATH_MAX];
     struct image_data *saved_current_image;
-    int passthrough;
+    int passthrough, retcd;
 
     if (cnt->imgs.preview_image.diffs) {
-        /* Save current global context. */
         saved_current_image = cnt->current_image;
-        /* Set global context to the image we are processing. */
         cnt->current_image = &cnt->imgs.preview_image;
 
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cnt->conf.picture_filename, "preview");
 
         if ((cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
+
             if (cnt->conf.movie_extpipe_use && cnt->extpipe) {
-                basename_len = strlen(cnt->extpipefilename) + 1;
-                strncpy(previewname, cnt->extpipefilename, basename_len);
-                previewname[basename_len - 1] = '.';
+                retcd = snprintf(previewname, PATH_MAX,"%s.%s"
+                    , cnt->extpipefilename, imageext(cnt));
+                if ((retcd < 0) || (retcd >= PATH_MAX)) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                        ,_("Error creating preview pipe name %d %s")
+                        ,retcd, previewname);
+                    return;
+                }
             } else {
                 /* Replace avi/mpg with jpg/ppm and keep the rest of the filename. */
-                basename_len = strlen(cnt->newfilename) - 3;
-                strncpy(previewname, cnt->newfilename, basename_len);
+                /* TODO:  Hope that extensions are always 3 bytes*/
+                /* -2 to allow for null terminating byte*/
+                retcd = snprintf(filename, strlen(cnt->newfilename) - 2
+                    ,"%s", cnt->newfilename);
+                if (retcd < 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                        ,_("Error creating file name base %d %s")
+                        ,retcd, filename);
+                    return;
+                }
+                retcd = snprintf(previewname, PATH_MAX
+                    ,"%s%s", filename, imageext(cnt));
+                if ((retcd < 0) || (retcd >= PATH_MAX)) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                        ,_("Error creating preview name %d %s")
+                        , retcd, previewname);
+                    return;
+                }
             }
-
-            previewname[basename_len] = '\0';
-            strcat(previewname, imageext(cnt));
 
             passthrough = util_check_passthrough(cnt);
             if ((cnt->imgs.size_high > 0) && (!passthrough)) {
@@ -783,6 +809,8 @@ static void event_create_extpipe(struct context *cnt,
             struct image_data *dummy ATTRIBUTE_UNUSED, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
+    int retcd;
+
     if ((cnt->conf.movie_extpipe_use) && (cnt->conf.movie_extpipe)) {
         char stamp[PATH_MAX] = "";
         const char *moviepath;
@@ -830,8 +858,13 @@ static void event_create_extpipe(struct context *cnt,
             return ;
 
         mystrftime(cnt, stamp, sizeof(stamp), cnt->conf.movie_extpipe, currenttime_tv, cnt->extpipefilename, 0);
-        snprintf(cnt->extpipecmdline, PATH_MAX - 1, "%s", stamp);
 
+        retcd = snprintf(cnt->extpipecmdline, PATH_MAX, "%s", stamp);
+        if ((retcd < 0 ) || (retcd >= PATH_MAX)){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                , _("Error specifying command line: %s"), cnt->extpipecmdline);
+            return;
+        }
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("pipe: %s"), cnt->extpipecmdline);
 
         MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, "cnt->moviefps: %d", cnt->movie_fps);
