@@ -682,26 +682,34 @@ static void event_image_preview(struct context *cnt,
         use_imagepath = strcmp(cnt->conf.picture_filename, "preview");
 
         if ((cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
+
             if (cnt->conf.movie_extpipe_use && cnt->extpipe) {
                 retcd = snprintf(previewname, PATH_MAX,"%s.%s"
                     , cnt->extpipefilename, imageext(cnt));
                 if ((retcd < 0) || (retcd >= PATH_MAX)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Error creating file name"));
+                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                        ,_("Error creating preview pipe name %d %s")
+                        ,retcd, previewname);
                     return;
                 }
             } else {
                 /* Replace avi/mpg with jpg/ppm and keep the rest of the filename. */
                 /* TODO:  Hope that extensions are always 3 bytes*/
-                retcd = snprintf(filename, strlen(cnt->newfilename) - 3
+                /* -2 to allow for null terminating byte*/
+                retcd = snprintf(filename, strlen(cnt->newfilename) - 2
                     ,"%s", cnt->newfilename);
-                if ((retcd < 0) || (retcd >= (int)strlen(cnt->newfilename) - 3)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Error creating file name"));
+                if (retcd < 0) {
+                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                        ,_("Error creating file name base %d %s")
+                        ,retcd, filename);
                     return;
                 }
                 retcd = snprintf(previewname, PATH_MAX
                     ,"%s%s", filename, imageext(cnt));
                 if ((retcd < 0) || (retcd >= PATH_MAX)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Error creating file name"));
+                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                        ,_("Error creating preview name %d %s")
+                        , retcd, previewname);
                     return;
                 }
             }

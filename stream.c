@@ -511,14 +511,14 @@ static void* handle_md5_digest(void* param)
         goto InternalError;
     }
 
-    retcd = snprintf(server_user, len_user, "%s", p->conf->stream_authentication);
+    retcd = snprintf(server_user, len_user+1, "%s", p->conf->stream_authentication);
     if ((retcd < 0) || (retcd >= len_user)) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
             ,_("Error server user"));
         goto InternalError;
     }
 
-    retcd = snprintf(server_pass, len_pass, "%s", h);
+    retcd = snprintf(server_pass, len_pass+1, "%s", h);
     if ((retcd < 0) || (retcd >= len_user)) {
         MOTION_LOG(ERR, TYPE_STREAM, SHOW_ERRNO
             ,_("Error server pass"));
