@@ -51,7 +51,7 @@ before_install:
       docker pull $DOCKER_IMAGE;
       docker run -d -v $(pwd):/motion -w /motion $DOCKER_IMAGE /bin/bash -c 'while true; do sleep 1; done';
     fi;
-
+#  MariaDB has broken mysql.h and we do not test it for buster.
 before_script:
   - if [ $TRAVIS_OS_NAME = osx ]; then
       brew upgrade ffmpeg pkg-config jpeg libmicrohttpd;
@@ -69,7 +69,7 @@ before_script:
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y build-essential libjpeg62-turbo-dev libzip-dev autoconf automake pkgconf libtool git';
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev';
-      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev default-libmysqlclient-dev libwebp-dev libmicrohttpd-dev gettext';
+      docker exec $(docker ps -aq) /bin/bash -c 'apt-get install -y libsqlite3-dev libpq-dev libwebp-dev libmicrohttpd-dev gettext';
       docker exec $(docker ps -aq) /bin/bash -c 'autoreconf -fiv';
     elif [ "$DOCKER_IMAGE" = "debian:stretch" ]; then
       docker exec $(docker ps -aq) /bin/bash -c 'apt-get -qq update';
