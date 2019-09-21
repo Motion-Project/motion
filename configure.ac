@@ -158,7 +158,7 @@ AC_ARG_WITH(v4l2,
   [V4L2="yes"]
 )
 AS_IF([test "${V4L2}" = "yes" ], [
-  AC_CHECK_HEADERS(linux/videodev2.h sys/videoio.h,[V4L2="yes"],[V4L2="no"])
+  AC_CHECK_HEADERS(linux/videodev2.h sys/videoio.h,[V4L2="yes";break],[V4L2="no"])
     AS_IF([test "${V4L2}" = "yes" ], [
         AC_DEFINE([HAVE_V4L2], [1], [Define to 1 if V4L2 is around])
       ]

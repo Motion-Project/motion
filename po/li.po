@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-20 20:58-0600\n"
+"POT-Creation-Date: 2019-09-20 22:18-0600\n"
 "PO-Revision-Date: 2018-10-13 12:02-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -1687,6 +1687,14 @@ msgstr ""
 
 #: src/motion.c
 msgid "mysql  : not available"
+msgstr ""
+
+#: src/motion.c
+msgid "MariaDB: available"
+msgstr ""
+
+#: src/motion.c
+msgid "MariaDB: not available"
 msgstr ""
 
 #: src/motion.c
