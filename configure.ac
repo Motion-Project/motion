@@ -457,7 +457,7 @@ AC_ARG_WITH([prototype-flags],
     [PROTOTYPE_FLAGS=no])
 
 AS_IF([test "${PROTOTYPE_FLAGS}" = "yes"], [
-    TEMP_CFLAGS="$TEMP_CFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CFLAGS="$TEMP_CFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
   ]
 )
 
