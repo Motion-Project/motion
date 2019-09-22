@@ -2250,14 +2250,14 @@ void conf_print(struct context **cnt)
                     if (strlen(val) > 0)
                         fprintf(conffile, "%s\n", val);
                     else
-                        fprintf(conffile, "; camera %s/motion/camera1.conf\n", sysconfdir);
+                        fprintf(conffile, "; camera %s/camera1.conf\n", sysconfdir);
 
                     free(val);
                 } else if (thread == 0) {
                     char value[PATH_MAX];
                     /* The 'camera_dir' option should keep the installed default value */
                     if (!strncmp(config_params[i].param_name, "camera_dir", 10))
-                        sprintf(value, "%s", sysconfdir"/motion/conf.d");
+                        sprintf(value, "%s", sysconfdir"/conf.d");
                     else
                         sprintf(value, "%s", "value");
 
@@ -2370,7 +2370,7 @@ struct context **conf_load(struct context **cnt)
         fp = fopen(filename, "r");
 
         if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion/motion.conf", sysconfdir);
+            snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
             fp = fopen(filename, "r");
 
             if (!fp) /* There is no config file.... use defaults. */
@@ -3145,7 +3145,7 @@ static void usage()
     printf("-h\t\t\tShow this screen.\n");
     printf("\n");
     printf("Motion is configured using a config file only. If none is supplied,\n");
-    printf("it will read motion.conf from current directory, ~/.motion or %s/motion.\n", sysconfdir);
+    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
     printf("\n");
 }
 

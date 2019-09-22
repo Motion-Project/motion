@@ -11,6 +11,12 @@
  *
  */
 
+#include "translate.h"
+#include "motion.h"
+#include "rotate.h"
+
+#ifdef HAVE_MMAL
+
 #include "interface/vcos/vcos.h"
 #include "interface/mmal/mmal.h"
 #include "interface/mmal/mmal_buffer.h"
@@ -20,10 +26,6 @@
 #include "interface/mmal/util/mmal_default_components.h"
 #include "interface/mmal/util/mmal_connection.h"
 #include "raspicam/RaspiCamControl.h"
-
-#include "translate.h"
-#include "motion.h"
-#include "rotate.h"
 
 #define MMALCAM_OK        0
 #define MMALCAM_ERROR    -1
@@ -421,3 +423,5 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
 
     return 0;
 }
+
+#endif

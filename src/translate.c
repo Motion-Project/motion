@@ -11,7 +11,7 @@
 #include "translate.h"
 
 void translate_locale_chg(const char *langcd){
-#ifdef HAVE_INTL
+#ifdef HAVE_GETTEXT
     /* This routine is for development testing only.  It is not used for
      * regular users because once this locale is change, it changes the
      * whole computer over to the new locale.  Therefore, we just return
@@ -27,7 +27,7 @@ void translate_locale_chg(const char *langcd){
 }
 
 void translate_init(void){
-#ifdef HAVE_INTL
+#ifdef HAVE_GETTEXT
     /* Set the flag to enable native language support */
     nls_enabled = 1;
 
@@ -52,7 +52,7 @@ void translate_init(void){
 }
 
 char* translate_text(const char *msgid){
-#ifdef HAVE_INTL
+#ifdef HAVE_GETTEXT
     if (nls_enabled){
         return (char*)gettext(msgid);
     } else {

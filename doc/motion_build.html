@@ -122,7 +122,8 @@
       </ul>
       <p></p>
       Next, install the retrieved deb package.  Below is a sample method to install that
-      uses the gdebi tool.
+      uses the gdebi tool.  The author prefers this tool since it will automatically retrieve
+      any dependency packages and yet still can be run without graphical interface.
       <p></p>
       <ul>
         <code><strong>sudo apt-get install gdebi-core</strong></code>
@@ -159,7 +160,7 @@
       Once you have reviewed the script and determined that it is OK to run, close out of the editor and then
       run the command <code>chmod +x ./builddeb.sh</code> to make the script executable.
       <p></p>
-      Run the script <code>./builddeb.sh myname, myemail, master, n, any</code>
+      Run the script <code>./builddeb.sh myname myemail master n any</code>
       <p></p>
       The script will validate the dependencies and report any additional dependencies which must be installed or if
       all the dependencies are installed, it will create a deb package.  Note that this may take a bit of time on
@@ -180,7 +181,7 @@
       <p></p>
       Debian / Ubuntu / Raspbian Packages
       <ul>
-          <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool libzip-dev
+          <code><strong>sudo apt-get install autoconf automake autopoint build-essential pkgconf libtool libzip-dev
           libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
           libwebp-dev gettext libmicrohttpd-dev</strong></code>
           <p></p>
@@ -195,7 +196,7 @@
       </ul>
       FreeBSD
       <ul>
-          <code><strong>sudo pkg install autoconf pkgconf automake gmake git ffmpeg gettext libmicrohttpd </strong></code>
+          <code><strong>sudo pkg install autoconf pkgconf automake autopoint gmake git ffmpeg gettext libmicrohttpd </strong></code>
           <p></p>
           <code><strong>cd ~</strong></code>
           <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -208,7 +209,9 @@
       </ul>
       Mac OS X
       <ul>
-          <code><strong>brew install ffmpeg pkg-config libjpeg automake postgresql gettext libmicrohttpd</strong></code>
+          <code><strong>brew install ffmpeg pkg-config libjpeg libmicrohttpd</strong></code>
+          <p></p>
+          <code><strong>export PATH="/usr/local/opt/gettext/bin:/usr/local/bin:$PATH"</strong></code>
           <p></p>
           <code><strong>cd ~</strong></code>
           <br /><code><strong>git clone https://github.com/Motion-Project/motion.git</strong></code>
@@ -249,8 +252,8 @@
         <li>Required</li>
         <ul>
           <p></p>
-          <code><strong>sudo apt-get install autoconf automake build-essential pkgconf libtool git libzip-dev
-          libjpeg-dev gettext libmicrohttpd-dev</strong></code>
+          <code><strong>sudo apt-get install autoconf automake autopoint build-essential pkgconf
+          libtool git libzip-dev libjpeg62-turbo-dev gettext libmicrohttpd-dev</strong></code>
           <p></p>
         </ul>
         <p></p>
@@ -265,11 +268,17 @@
           <li>MySQL database functionality</li>
           <ul>
             <p></p>
-            <code><strong>sudo apt-get install mysql-server libmysqlclient-dev</strong></code>
+            <code><strong>sudo apt-get install libmysqlclient-dev</strong></code>
             <p></p>
             or (depends upon your distribution and version)
             <p></p>
             <code><strong>sudo apt-get install default-libmysqlclient-dev</strong></code>
+            <p></p>
+          </ul>
+          <li>MariaDB database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>sudo apt-get install libmariadbclient-dev</strong></code>
             <p></p>
           </ul>
           <li>PostgreSQL database functionality</li>
@@ -307,7 +316,7 @@
         <li>Required</li>
         <ul>
           <p></p>
-          <code><strong>sudo zypper install autoconf automake libtool git </strong></code>
+          <code><strong>sudo zypper install autoconf automake autopoint libtool git </strong></code>
           <p></p>
           <code><strong>sudo zypper install --type pattern devel_basis </strong></code>
           <p></p>
@@ -330,6 +339,12 @@
             <p></p>
           </ul>
           <li>MySQL database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
+          <li>MariaDB database functionality</li>
           <ul>
             <p></p>
             <code><strong>Not known by author</strong></code>
@@ -367,7 +382,7 @@
         <li>Required packages</li>
           <ul>
             <p></p>
-            <code><strong> sudo pkg install autoconf pkgconf automake gmake git gettext libmicrohttpd</strong></code>
+            <code><strong> sudo pkg install autoconf pkgconf automake autopoint gmake git gettext libmicrohttpd</strong></code>
             <p></p>
           </ul>
         <li>Optional packages</li>
@@ -382,6 +397,12 @@
           <ul>
             <p></p>
             <code><strong>sudo pkg install mysql57-client openssl</strong></code>
+            <p></p>
+          </ul>
+          <li>MariaDB database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
             <p></p>
           </ul>
           <li>PostgreSQL database functionality</li>
@@ -464,6 +485,12 @@
             <code><strong>Not known by author</strong></code>
             <p></p>
           </ul>
+          <li>MariaDB database functionality</li>
+          <ul>
+            <p></p>
+            <code><strong>Not known by author</strong></code>
+            <p></p>
+          </ul>
           <li>PostgreSQL database functionality</li>
           <ul>
             <p></p>
@@ -498,23 +525,23 @@
           <p></p>
           <li>Install brew as described on https://brew.sh</li>
           <p></p>
-          <code><strong>brew upgrade ffmpeg pkg-config jpeg automake gettext libmicrohttpd-dev</strong></code>
+          <code><strong>brew upgrade ffmpeg pkg-config jpeg libmicrohttpd-dev</strong></code>
           <p></p>
-          <code><strong>brew install ffmpeg pkg-config libjpeg automake </strong></code>
+          <code><strong>brew install ffmpeg pkg-config libjpeg libmicrohttpd </strong></code>
+          <p></p>
+          <code><strong>export PATH="/usr/local/opt/gettext/bin:/usr/local/bin:$PATH"</strong></code>
           <p></p>
         </ul>
         <p></p>
         <li>Optional Packages</li>
-        <li>PostgreSQL database functionality</li>
+        <ul>
+          <li>PostgreSQL database functionality</li>
           <ul>
             <p></p>
             <code><strong>brew upgrade postgresql</strong></code>
             <code><strong>brew install postgresql</strong></code>
             <p></p>
           </ul>
-
-        <ul>
-          <li>None known by author</li>
         </ul>
       </ul>
       <p></p>
@@ -529,13 +556,13 @@
       have the autotools create a configure script.  To do this open a terminal and change to the directory with
       the source code and type
       <p></p>
-      <code><strong>autoreconf </strong></code>
+      <code>autoreconf </code>
       <p></p>
       If the 'configure' file exists and contains a valid script, the tool will return immediately since no additional work
       needs to be completed.  If the script needs updating, then it will take a moment to return.  Once it has been executed,
       a file called 'configure' will exist in the directory.  Note that if the command is run as
       <p></p>
-      <code><strong>autoreconf -f</strong></code>
+      <code>autoreconf -f</code>
       <p></p>
       The -f parameter instructs it to force a new configure file to be created.  This can be preferable in certain
       situations so that the configure script gets updated with the correct version number.
@@ -775,6 +802,11 @@
       			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MySQL support </td>
       			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MySQL support in the package. <br /> This can also be useful if you get compilation errors related to MySQL and you actually do not need the feature anyway. </td>
       		</tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --without-mariadb </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with MariaDB support </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include MariaDB support in the package. <br /> This can also be useful if you get compilation errors related to MariaDB and you actually do not need the feature anyway. </td>
+          </tr>
       		<tr>
       			<td bgcolor="#edf4f9" word-wrap:break-word > --without-pgsql </td>
       			<td bgcolor="#edf4f9" word-wrap:break-word > Do not compile with PostgreSQL support </td>
@@ -782,7 +814,7 @@
       		</tr>
       		<tr>
       			<td bgcolor="#edf4f9" word-wrap:break-word > --without-sqlite3 </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > Disable sqlite3 support in motion. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Disable sqlite3 support in motion. </td>
       			<td bgcolor="#edf4f9" word-wrap:break-word > Use this if you do not want to include SQLite3 support in the package. <br /> This can also be useful if you get compilation errors related to SQLite3 and you actually do not need the feature anyway. </td>
       		</tr>
       		<tr>
@@ -793,8 +825,13 @@
       		<tr>
       			<td bgcolor="#edf4f9" word-wrap:break-word > --with-developer-flags </td>
       			<td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
-      			<td bgcolor="#edf4f9" word-wrap:break-word > This option is for developers only. It checks to ensure that the code is robust. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > This option is for developers only. It applies many compiler flags and errors on all warnings.</td>
       		</tr>
+          <tr>
+            <td bgcolor="#edf4f9" word-wrap:break-word > --with-prototype-flags </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > Add additional warning flags for the compiler. </td>
+            <td bgcolor="#edf4f9" word-wrap:break-word > This option is similar to --with-developer-flags but does not include flags for prototypes. </td>
+          </tr>
       	</tbody>
       </table>
       </div>
@@ -846,20 +883,20 @@
       These commands create the required directories and copy the files into the following locations. (default directories):
       <ul>
       <li>/usr/local/bin</li>
-      <li>usr/local/man/man1</li>
       <li>/usr/local/etc/motion</li>
+      <li>/usr/local/share/man/man1</li>
       <li>/usr/local/share/doc/motion</li>
-      <li>/usr/local/share/motion/examples</li>
+      <li>/usr/local/share/locale</li>
       </ul>
       <p></p>
       The contents of what gets copied into each directory is as follows:
       (assuming the default PREFIX /usr/local was used when running configure.  Otherwise adjust to the actual directory specified during the configure step.)
       <ul>
         <li> Executable binary "motion" to /usr/local/bin</li>
-        <li> Manual page "motion.1" to /usr/local/man/man1</li>
-        <li> Document files "CHANGELOG, COPYING, CREDITS, motion_guide.html, and README.md to /usr/local/share/doc/motion</li>
-        <li> Example configuration files "*.conf" to /usr/local/share/motion/examples</li>
-        <li> Configuration file "motion-dist.conf" to /usr/local/etc/motion</li>
+        <li> Manual page "motion.1" to /usr/local/share/man/man1</li>
+        <li> Document files to /usr/local/share/doc/motion</li>
+        <li> Example configuration files "*.conf" to /usr/local/etc/motion</li>
+        <li> Translation files to /usr/local/share/locale/*/LC_MESSAGES</li>
       </ul>
 
       Note that any existing files are overwritten. The default configuration file motion-dist.conf is named like
@@ -896,6 +933,16 @@
         <dd> deletes the files: config.status, config.log, config.cache, Makefile, and motion.spec.</dd>
       </dl>
       <p></p>
+       <dl>
+        <dt> <strong>make cleanall</strong> </dt>
+        <dd> Removes files created by autoreconf and runs a make clean.  Resets to only files provided from source</dd>
+      </dl>
+      <p></p>
+       <dl>
+        <dt> <strong>make check</strong> </dt>
+        <dd> Executes multiple configure and make using the developer flags for various combinations of the configure flags</dd>
+      </dl>
+      <p></p>
       <p></p>
     </ul>
 
@@ -918,44 +965,7 @@
         <code>locale</code>.  If the log and web control still display in English, then this means
         that translations have not been completed for that language.  The Motion developers rely on
         the community to provide these translations to the project.  Even those that do not how to
-        program can assist in this process.  The following is an abbreviated description of the
-        processes to update translations:
-        <p></p>
-        A .pot file is the base set of phrases and words to translate.  To create a .pot file for Motion,
-        first clone the Motion git to a local directory and in a terminal window type
-        <code>xgettext --keyword=_ -o po/motion.pot *.c</code>
-        This program scans all the files which end in <code>.c</code> looking for the keyword
-        <code>_</code>(an underscore) which is the macro in the code to identify a item to
-        translate.  The application then outputs a file into the po directory called
-        motion.pot.  The motion.pot file is a text file which is a template of all
-        the phrases that can be translated.  Translators can add translations to that file and
-        then save it with the particular language code and po extension.  e.g. es.po for Spanish
-        <p></p>
-        A alternative is to use a common gui translation tool called poedit that is available
-        on most distributions. This is a program that is designed to work with pot / po files.  It allows
-        users to open po and pot files and create/edit/merge translations.
-        <p></p>
-        It has been observed that it may be easiest to create the motion.pot file (as described above) and then
-        use that file in the poedit application.
-        <p></p>
-        Note that in order to simply revise an existing translation, users can edit the po file directly without
-        creating a motion.pot file.
-        <p></p>
-        <p></p>
-        <p></p>
-        The above process describes the items that have already been tagged within the code for
-        translation.  If a particular phrase is reported in the log in English and that phrase is not
-        listed in the motion.pot file, then this means that the phrase needs to be tagged in the code.  The
-        process to get the phrase tagging:
-        <p></p>
-        1.  Find the module in the source code that is printing the message.
-        <p></p>
-        2.  Validate that the header file "translate.h" is included at the top of the module.
-        <p></p>
-        3.  Find the particular phrase and surround it with a <code>_()</code>
-        <p></p>
-        Save the file and then re-create the motion.pot file.
-        <p></p>
+        program can assist in this process by editing the files in the po directory.
         <p></p>
         <p></p>
       </ul>

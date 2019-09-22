@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <link href="motion.png" rel="icon" type="image/png">
+    <title>Motion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="motion_stylesheet.css" media="screen">
+    <script>
+      function fnc_topnav() {
+        var x = document.getElementById("id_topnav");
+        if (x.className === "topnav") {
+          x.className += " responsive";
+        } else {
+          x.className = "topnav";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="topnav" id="id_topnav">
+      <img class="logoimg" src="motion.gif">
+
+      <a class="topnav-d" href="https://motion-project.github.io/motion_support.html">Support</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-d" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-d" href="https://motion-project.github.io/index.html">Home</a>
+
+      <a class="topnav-m" href="https://motion-project.github.io/index.html">Home</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_download.html">Download</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_guide.html" >Documentation</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_news.html" >News</a>
+      <a class="topnav-m" href="https://motion-project.github.io/motion_support.html">Support</a>
+
+      <a href="javascript:void(0);" class="icon" onclick="fnc_topnav()">&#9776;</a>
+    </div>
+    <section class="page-header">
+      <h1>
+        Documentation
+      </h1>
+    </section>
+    <section class="main-content">
+
+      <h3><a name="Current_Release"></a> Latest Stable Release</h3>
+      <ul>
+      <li> <a href="motion_build.html"> Installing with apt/debs and building from source </a></li>
+      <li> <a href="motion_config.html"> Configuration </a></li>
+      <li> <a href="motion_config.html#commandlineoptions"> Command Line Options </a></li>
+      <li> <a href="motion_config.html#configfiles">Configuration Files</a></li>
+      <li> <a href="motion_config.html#Signals_Sent"> Signals (sent with e.g. kill command) </a></li>
+      <li> Configuration Options</li>
+        <ul>
+          <li> <a href="motion_config.html#Configuration_OptionsAlpha"> Listed alphabetically with mapping of old option names to current names </a></li>
+          <li> <a href="motion_config.html#Configuration_OptionsTopic"> Listed by topic </a></li>
+          <li> <a href="motion_config.html#Configuration_OptionsDetail"> Detail descriptions of each option</a></li>
+          </ul>
+      <p></p>
+      <p></p>
+      </ul>
+      <p></p>
+        Short videos demonstrating the Motion software can also be viewed 
+        <a href="https://www.youtube.com/channel/UCZpOjUMnc-uO3qIyZAD_4lg/videos"> here</a>.
+      <p></p>
+
+      <p></p>
+      <p></p>
+      <h3><a name="Prior"></a> Prior Release Versions</h3>
+      <ul>
+      <li> <a href="4.2.2/motion_config.html"> Version 4.2.2</a></li>
+      <li> <a href="4.2.1/motion_config.html"> Version 4.2.1</a></li>
+      <li> <a href="4.2/motion_config.html"> Version 4.2</a></li>
+      <li> <a href="4.1.1/motion_guide.html"> Version 4.1.1</a></li>
+      <li> <a href="4.1/motion_guide.html"> Version 4.1</a></li>
+      <li> <a href="4.0.1/motion_guide.html"> Version 4.0.1</a></li>
+      <li> <a href="4.0/motion_guide.html"> Version 4.0</a></li>
+      <li> <a href="3.4.1/motion_guide.html"> Version 3.4.1</a></li>
+      <p></p>
+      <p></p>
+      </ul>
+    </section>
+  </body>
+</html>
+
