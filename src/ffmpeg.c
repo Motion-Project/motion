@@ -661,27 +661,38 @@ static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
     return 0;
 }
 
-static int ffmpeg_codec_is_blacklisted(const char *codec_name){
+struct blacklist_t
+{
+    const char *codec_name;
+    const char *reason;
+};
 
-    static const char *blacklisted_codec[] =
+static const char *ffmpeg_codec_is_blacklisted(const char *codec_name){
+
+    static struct blacklist_t blacklisted_codec[] =
     {
-#if (!((LIBAVCODEC_VERSION_MAJOR >= 58) && (LIBAVCODEC_VERSION_MINOR >= 55)))
+#if (LIBAVFORMAT_VERSION_MAJOR < 58) || ( (LIBAVFORMAT_VERSION_MAJOR == 58) && ( (LIBAVFORMAT_VERSION_MINOR < 29) || ((LIBAVFORMAT_VERSION_MINOR == 29) && (LIBAVFORMAT_VERSION_MICRO <= 100)) ) )
         /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
-         * To use h264_omx encoder and workaround the lock up issue:
+         * Newer versions of ffmpeg allow zerocopy to be disabled to workaround
+         * this issue.
+         * To use h264_omx encoder on older versions of ffmpeg:
          * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
          * - remove the "h264_omx" from this blacklist.
          * More information: https://github.com/Motion-Project/motion/issues/433
          */
-        "h264_omx",
+        {"h264_omx", "Codec causes lock up on your FFMpeg version"},
+#endif
+#if (LIBAVFORMAT_VERSION_MAJOR < 57) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR < 41))
+        {"h264_v4l2m2m", "FFMpeg version is too old"},
 #endif
     };
     size_t i;
 
     for (i = 0; i < sizeof(blacklisted_codec)/sizeof(blacklisted_codec[0]); i++) {
-        if (strcmp(codec_name, blacklisted_codec[i]) == 0)
-            return 1;
+        if (strcmp(codec_name, blacklisted_codec[i].codec_name) == 0)
+            return blacklisted_codec[i].reason;
     }
-    return 0;
+    return NULL;
 }
 
 static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
@@ -689,10 +700,11 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
 
     ffmpeg->codec = NULL;
     if (ffmpeg->codec_name[codec_name_len]) {
-        if (ffmpeg_codec_is_blacklisted(&ffmpeg->codec_name[codec_name_len+1])) {
+        const char *blacklist_reason = ffmpeg_codec_is_blacklisted(&ffmpeg->codec_name[codec_name_len+1]);
+        if (blacklist_reason) {
             MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
-                ,_("Preferred codec %s has been blacklisted")
-                ,&ffmpeg->codec_name[codec_name_len+1]);
+                ,_("Preferred codec %s has been blacklisted: %s")
+                ,&ffmpeg->codec_name[codec_name_len+1], blacklist_reason);
         } else {
             ffmpeg->codec = avcodec_find_encoder_by_name(&ffmpeg->codec_name[codec_name_len+1]);
             if ((ffmpeg->oc->oformat) && (ffmpeg->codec != NULL)) {
@@ -714,14 +726,7 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
     }
 
     if (strcmp(ffmpeg->codec->name, "h264_v4l2m2m") == 0){
-        #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-            ffmpeg->preferred_codec = USER_CODEC_V4L2M2M;
-        #else
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("FFMpeg version is too old for codec %s"), ffmpeg->codec_name);
-            ffmpeg_free_context(ffmpeg);
-            return -1;
-        #endif
+        ffmpeg->preferred_codec = USER_CODEC_V4L2M2M;
     } else if (strcmp(ffmpeg->codec->name, "h264_omx") == 0){
         ffmpeg->preferred_codec = USER_CODEC_H264OMX;
     } else if (strcmp(ffmpeg->codec->name, "mpeg4_omx") == 0){
