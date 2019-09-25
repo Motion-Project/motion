@@ -50,11 +50,11 @@ all-local:
 ## Update contents of sample files with the correct directory
 ###################################################################
 install-data-local:
-	@sed -e 's|$${prefix}|$(prefix)|' ${sysconfdir}/motion-dist.conf > ${sysconfdir}/motion-dist.conf.tmp && mv -f ${sysconfdir}/motion-dist.conf.tmp ${sysconfdir}/motion-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${sysconfdir}/camera1-dist.conf > ${sysconfdir}/camera1-dist.conf.tmp && mv -f ${sysconfdir}/camera1-dist.conf.tmp ${sysconfdir}/camera1-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${sysconfdir}/camera2-dist.conf > ${sysconfdir}/camera2-dist.conf.tmp && mv -f ${sysconfdir}/camera2-dist.conf.tmp ${sysconfdir}/camera2-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${sysconfdir}/camera3-dist.conf > ${sysconfdir}/camera3-dist.conf.tmp && mv -f ${sysconfdir}/camera3-dist.conf.tmp ${sysconfdir}/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${sysconfdir}/camera4-dist.conf > ${sysconfdir}/camera4-dist.conf.tmp && mv -f ${sysconfdir}/camera4-dist.conf.tmp ${sysconfdir}/camera4-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/motion-dist.conf > ${DESTDIR}${sysconfdir}/motion-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/motion-dist.conf.tmp ${DESTDIR}${sysconfdir}/motion-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera1-dist.conf > ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera1-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera2-dist.conf > ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera2-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera3-dist.conf > ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera3-dist.conf
+	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera4-dist.conf > ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera4-dist.conf
 
 	@sed -e 's|$${exec_prefix}|$(exec_prefix)|' data/motion.service > data/motion.service.tmp && mv -f data/motion.service.tmp data/motion.service
 
