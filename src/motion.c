@@ -8,7 +8,7 @@
  */
 #include "translate.h"
 #include "motion.h"
-#include "ffmpeg.h"
+#include "movie.h"
 #include "video_common.h"
 #include "video_v4l2.h"
 #include "video_loopback.h"
@@ -534,7 +534,7 @@ static void motion_detected(struct context *cnt, int dev, struct image_data *img
             mystrftime(cnt, cnt->text_event_string, sizeof(cnt->text_event_string),
                        cnt->conf.text_event, &img->timestamp_tv, NULL, 0);
 
-            /* EVENT_FIRSTMOTION triggers on_event_start_command and event_ffmpeg_newfile */
+            /* EVENT_FIRSTMOTION triggers on_event_start_command and event_movie_newfile */
             event(cnt, EVENT_FIRSTMOTION, img, NULL, NULL,
                 &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
@@ -647,7 +647,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
             if (!cnt->conf.movie_duplicate_frames) {
                 /* don't duplicate frames */
             } else if ((cnt->imgs.image_ring[cnt->imgs.image_ring_out].shot == 0) &&
-                (cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe))) {
+                (cnt->movie_output || (cnt->conf.movie_extpipe_use && cnt->extpipe))) {
                 /*
                  * movie_last_shoot is -1 when file is created,
                  * we don't know how many frames there is in first sec
@@ -667,7 +667,7 @@ static void process_image_ring(struct context *cnt, unsigned int max_images)
                     /* Check how many frames it was last sec */
                     while ((cnt->movie_last_shot + 1) < cnt->movie_fps) {
                         /* Add a filler frame into encoder */
-                        event(cnt, EVENT_FFMPEG_PUT,
+                        event(cnt, EVENT_MOVIE_PUT,
                           &cnt->imgs.image_ring[cnt->imgs.image_ring_out], NULL, NULL,
                           &cnt->imgs.image_ring[cnt->imgs.image_ring_out].timestamp_tv);
 
@@ -2431,8 +2431,8 @@ static void mlp_actions(struct context *cnt){
          *  no motion then we reset the start movie time so that we do not
          *  get a pause in the movie.
         */
-        if ( (cnt->detecting_motion == 0) && (cnt->ffmpeg_output != NULL) )
-            ffmpeg_reset_movie_start_time(cnt->ffmpeg_output, &cnt->current_image->timestamp_tv);
+        if ( (cnt->detecting_motion == 0) && (cnt->movie_output != NULL) )
+            movie_reset_movie_start_time(cnt->movie_output, &cnt->current_image->timestamp_tv);
         cnt->detecting_motion = 1;
         if (cnt->conf.post_capture > 0) {
             /* Setup the postcap counter */
@@ -2474,8 +2474,8 @@ static void mlp_actions(struct context *cnt){
              *  no motion then we reset the start movie time so that we do not
              *  get a pause in the movie.
             */
-            if ( (cnt->detecting_motion == 0) && (cnt->ffmpeg_output != NULL) )
-                ffmpeg_reset_movie_start_time(cnt->ffmpeg_output, &cnt->current_image->timestamp_tv);
+            if ( (cnt->detecting_motion == 0) && (cnt->movie_output != NULL) )
+                movie_reset_movie_start_time(cnt->movie_output, &cnt->current_image->timestamp_tv);
 
             cnt->detecting_motion = 1;
 
@@ -2687,12 +2687,12 @@ static void mlp_timelapse(struct context *cnt){
                     ,_("Invalid timelapse_mode argument '%s'"), cnt->conf.timelapse_mode);
                 MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
                     ,_("%:s Defaulting to manual timelapse mode"));
-                conf_cmdparse(&cnt, (char *)"ffmpeg_timelapse_mode",(char *)"manual");
+                conf_cmdparse(&cnt, (char *)"movie_timelapse_mode",(char *)"manual");
             }
         }
 
         /*
-         * If ffmpeg timelapse is enabled and time since epoch MOD ffmpeg_timelaps = 0
+         * If ffmpeg timelapse is enabled and time since epoch MOD movie_timelaps = 0
          * add a timelapse frame to the timelapse movie.
          */
         if (cnt->shots == 0 && cnt->time_current_frame % cnt->conf.timelapse_interval <=
@@ -2700,7 +2700,7 @@ static void mlp_timelapse(struct context *cnt){
                 event(cnt, EVENT_TIMELAPSE, cnt->current_image, NULL, NULL,
                     &cnt->current_image->timestamp_tv);
         }
-    } else if (cnt->ffmpeg_timelapse) {
+    } else if (cnt->movie_timelapse) {
     /*
      * If timelapse movie is in progress but conf.timelapse_interval is zero then close timelapse file
      * This is an important feature that allows manual roll-over of timelapse file using the http
@@ -3545,7 +3545,7 @@ int main (int argc, char **argv)
 
     motion_startup(1, argc, argv);
 
-    ffmpeg_global_init();
+    movie_global_init();
 
     dbse_global_init();
 
@@ -3590,7 +3590,7 @@ int main (int argc, char **argv)
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion terminating"));
 
-    ffmpeg_global_deinit();
+    movie_global_deinit();
 
     dbse_global_deinit();
 

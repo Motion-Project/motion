@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 21:50-0600\n"
+"POT-Creation-Date: 2019-09-25 22:05-0600\n"
 "PO-Revision-Date: 2018-10-13 12:04-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -911,249 +911,249 @@ msgstr ""
 msgid "Error encoding image"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Failed to allocate memory for codec name"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid ""
 "The frame rate specified is too high for the ffmpeg movie type specified. "
 "Choose a different ffmpeg container or lower framerate."
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error setting base file name"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error setting timelapse append for codec %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error setting file name"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "codec option value %s is not supported"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Could not get the codec"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error sending frame for encoding:%s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Receive packet threw EAGAIN returning -2 code :%s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error receiving encoded packet video:%s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error encoding video:%s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error encoding video"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "BAD TIMING!! Frame skipped."
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid ""
 "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d Change "
 "%d"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "%s codec vbr/crf/bit_rate: %d"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Preferred codec %s has been blacklisted: %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Preferred codec %s not found"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Codec %s not found"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Using codec %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Could not alloc stream"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Failed to allocate decoder!"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Unable to set quality"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Reported FPS Supported %d/%d"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Could not open codec %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Failed to copy decoder parameters!: %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "could not alloc frame"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "could not alloc buffers %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "error opening file %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Permission denied. %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error opening file %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Could not write ffmpeg header %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error entering draining mode:%s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error draining codec:%s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error writing draining video frame"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error while encoding picture"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error while writing video frame"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "Error while writing video frame: %s"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "RTSP context not available."
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "rtsp camera not ready for pass-through."
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "pass-through mode enabled.  Changing to MP4 container."
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Could not get codec!"
 msgstr ""
 
-#: src/ffmpeg.c src/netcam_rtsp.c
+#: src/movie.c src/netcam_rtsp.c
 msgid "Unable to copy codec parameters"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Pass-through disabled.  ffmpeg too old"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 #, c-format
 msgid "av_lockmgr_register failed (%d)"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "av_lockmgr_register reset failed on cleanup"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Could not allocate output context"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Could not setup passthru!"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Failed to allocate codec!"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Could not set the stream"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Error flushing codec"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Excessive attempts to clear buffered packet"
 msgstr ""
 
-#: src/ffmpeg.c
+#: src/movie.c
 msgid "Buffered packet"
 msgstr ""
 

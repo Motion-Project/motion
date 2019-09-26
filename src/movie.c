@@ -1,6 +1,6 @@
 /*
  *
- * ffmpeg.c
+ * movie.c
  *
  * This software is distributed under the GNU Public License version 2
  * See also the file 'COPYING'.
@@ -182,7 +182,7 @@ int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
  ****************************************************************************
  ****************************************************************************/
 /*********************************************/
-static void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
+static void movie_free_nal(struct ffmpeg *ffmpeg){
     if (ffmpeg->nal_info) {
         free(ffmpeg->nal_info);
         ffmpeg->nal_info = NULL;
@@ -190,11 +190,11 @@ static void ffmpeg_free_nal(struct ffmpeg *ffmpeg){
     }
 }
 
-static void ffmpeg_encode_nal(struct ffmpeg *ffmpeg){
+static void movie_encode_nal(struct ffmpeg *ffmpeg){
     // h264_v4l2m2m has NAL units separated from the first frame, which makes
     // some players very unhappy.
     if ((ffmpeg->pkt.pts == 0) && (!(ffmpeg->pkt.flags & AV_PKT_FLAG_KEY))) {
-        ffmpeg_free_nal(ffmpeg);
+        movie_free_nal(ffmpeg);
         ffmpeg->nal_info_len = ffmpeg->pkt.size;
         ffmpeg->nal_info = malloc(ffmpeg->nal_info_len);
         if (ffmpeg->nal_info)
@@ -206,11 +206,11 @@ static void ffmpeg_encode_nal(struct ffmpeg *ffmpeg){
         av_grow_packet(&ffmpeg->pkt, ffmpeg->nal_info_len);
         memmove(&ffmpeg->pkt.data[ffmpeg->nal_info_len], &ffmpeg->pkt.data[0], old_size);
         memcpy(&ffmpeg->pkt.data[0], ffmpeg->nal_info, ffmpeg->nal_info_len);
-        ffmpeg_free_nal(ffmpeg);
+        movie_free_nal(ffmpeg);
     }
 }
 
-static int ffmpeg_timelapse_exists(const char *fname){
+static int movie_timelapse_exists(const char *fname){
     FILE *file;
     file = fopen(fname, "r");
     if (file)
@@ -221,7 +221,7 @@ static int ffmpeg_timelapse_exists(const char *fname){
     return 0;
 }
 
-static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
+static int movie_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
     FILE *file;
 
     file = fopen(ffmpeg->filename, "a");
@@ -238,7 +238,7 @@ static int ffmpeg_timelapse_append(struct ffmpeg *ffmpeg, AVPacket pkt){
 /* TODO Determine if this is even needed for old versions. Per
  * documentation for version 58, 'av_lockmgr_register This function does nothing'
  */
-static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op){
+static int movie_lockmgr_cb(void **arg, enum AVLockOp op){
     pthread_mutex_t *mutex = *arg;
     int err;
 
@@ -274,7 +274,7 @@ static int ffmpeg_lockmgr_cb(void **arg, enum AVLockOp op){
 }
 #endif
 
-static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
+static void movie_free_context(struct ffmpeg *ffmpeg){
 
         if (ffmpeg->picture != NULL){
             my_frame_free(ffmpeg->picture);
@@ -293,7 +293,7 @@ static void ffmpeg_free_context(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
+static int movie_get_oformat(struct ffmpeg *ffmpeg){
 
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
     char *codec_name = malloc(codec_name_len + 1);
@@ -307,7 +307,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     if (codec_name == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Failed to allocate memory for codec name"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
     memcpy(codec_name, ffmpeg->codec_name, codec_name_len);
@@ -320,7 +320,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("The frame rate specified is too high for the ffmpeg movie type specified. "
             "Choose a different ffmpeg container or lower framerate."));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         free(codec_name);
         return -1;
     }
@@ -329,7 +329,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     if ((retcd < 0) || (retcd >= PATH_MAX)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting base file name"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         free(codec_name);
         return -1;
     }
@@ -342,7 +342,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
             (retcd < 0) || (retcd >= PATH_MAX)){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Error setting timelapse append for codec %s"), codec_name);
-            ffmpeg_free_context(ffmpeg);
+            movie_free_context(ffmpeg);
             free(codec_name);
             return -1;
         }
@@ -405,7 +405,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     if ((retcd < 0) || (retcd >= PATH_MAX)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Error setting file name"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         free(codec_name);
         return -1;
     }
@@ -413,14 +413,14 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     if (!ffmpeg->oc->oformat) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("codec option value %s is not supported"), codec_name);
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         free(codec_name);
         return -1;
     }
 
     if (ffmpeg->oc->oformat->video_codec == MY_CODEC_ID_NONE) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get the codec"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         free(codec_name);
         return -1;
     }
@@ -429,7 +429,7 @@ static int ffmpeg_get_oformat(struct ffmpeg *ffmpeg){
     return 0;
 }
 
-static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
+static int movie_encode_video(struct ffmpeg *ffmpeg){
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     //ffmpeg version 3.1 and after
@@ -461,7 +461,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
     }
 
     if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
-        ffmpeg_encode_nal(ffmpeg);
+        movie_encode_nal(ffmpeg);
     }
 
     return 0;
@@ -487,7 +487,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
 
     /* This kills compiler warnings.  Nal setting is only for recent ffmpeg versions*/
     if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
-        ffmpeg_encode_nal(ffmpeg);
+        movie_encode_nal(ffmpeg);
     }
 
     return 0;
@@ -527,7 +527,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
 
     /* This kills compiler warnings.  Nal setting is only for recent ffmpeg versions*/
     if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M){
-        ffmpeg_encode_nal(ffmpeg);
+        movie_encode_nal(ffmpeg);
     }
 
     return 0;
@@ -536,7 +536,7 @@ static int ffmpeg_encode_video(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+static int movie_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     int64_t pts_interval;
 
@@ -547,7 +547,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
         pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            ffmpeg_reset_movie_start_time(ffmpeg, tv1);
+            movie_reset_movie_start_time(ffmpeg, tv1);
             pts_interval = 0;
         }
         if (ffmpeg->last_pts < 0) {
@@ -575,7 +575,7 @@ static int ffmpeg_set_pts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     return 0;
 }
 
-static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+static int movie_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
     int64_t pts_interval;
 
@@ -586,7 +586,7 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
         pts_interval = ((1000000L * (tv1->tv_sec - ffmpeg->start_time.tv_sec)) + tv1->tv_usec - ffmpeg->start_time.tv_usec);
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            ffmpeg_reset_movie_start_time(ffmpeg, tv1);
+            movie_reset_movie_start_time(ffmpeg, tv1);
             pts_interval = 0;
         }
         ffmpeg->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},ffmpeg->video_st->time_base) + ffmpeg->base_pts;
@@ -614,7 +614,7 @@ static int ffmpeg_set_pktpts(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     return 0;
 }
 
-static int ffmpeg_set_quality(struct ffmpeg *ffmpeg){
+static int movie_set_quality(struct ffmpeg *ffmpeg){
 
     ffmpeg->opts = 0;
     if (ffmpeg->quality > 100) ffmpeg->quality = 100;
@@ -665,7 +665,7 @@ struct blacklist_t
     const char *reason;
 };
 
-static const char *ffmpeg_codec_is_blacklisted(const char *codec_name){
+static const char *movie_codec_is_blacklisted(const char *codec_name){
 
     static struct blacklist_t blacklisted_codec[] =
     {
@@ -693,12 +693,12 @@ static const char *ffmpeg_codec_is_blacklisted(const char *codec_name){
     return NULL;
 }
 
-static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
+static int movie_set_codec_preferred(struct ffmpeg *ffmpeg){
     size_t codec_name_len = strcspn(ffmpeg->codec_name, ":");
 
     ffmpeg->codec = NULL;
     if (ffmpeg->codec_name[codec_name_len]) {
-        const char *blacklist_reason = ffmpeg_codec_is_blacklisted(&ffmpeg->codec_name[codec_name_len+1]);
+        const char *blacklist_reason = movie_codec_is_blacklisted(&ffmpeg->codec_name[codec_name_len+1]);
         if (blacklist_reason) {
             MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO
                 ,_("Preferred codec %s has been blacklisted: %s")
@@ -719,7 +719,7 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
     if (!ffmpeg->codec) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Codec %s not found"), ffmpeg->codec_name);
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
 
@@ -740,13 +740,13 @@ static int ffmpeg_set_codec_preferred(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
+static int movie_set_codec(struct ffmpeg *ffmpeg){
 
     int retcd;
     char errstr[128];
     int chkrate;
 
-    retcd = ffmpeg_set_codec_preferred(ffmpeg);
+    retcd = movie_set_codec_preferred(ffmpeg);
     if (retcd != 0) return retcd;
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
@@ -754,20 +754,20 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, NULL);
     if (!ffmpeg->video_st) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
     ffmpeg->ctx_codec = avcodec_alloc_context3(ffmpeg->codec);
     if (ffmpeg->ctx_codec == NULL) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate decoder!"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
 #else
     ffmpeg->video_st = avformat_new_stream(ffmpeg->oc, ffmpeg->codec);
     if (!ffmpeg->video_st) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
     ffmpeg->ctx_codec = ffmpeg->video_st->codec;
@@ -831,7 +831,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
         av_dict_set(&ffmpeg->opts, "zerocopy", "0", 0);
     }
 
-    retcd = ffmpeg_set_quality(ffmpeg);
+    retcd = movie_set_quality(ffmpeg);
     if (retcd < 0){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to set quality"));
         return -1;
@@ -857,7 +857,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not open codec %s"),errstr);
             av_dict_free(&ffmpeg->opts);
-            ffmpeg_free_context(ffmpeg);
+            movie_free_context(ffmpeg);
             return -1;
         }
 
@@ -867,7 +867,7 @@ static int ffmpeg_set_codec(struct ffmpeg *ffmpeg){
     return 0;
 }
 
-static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
+static int movie_set_stream(struct ffmpeg *ffmpeg){
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     int retcd;
@@ -878,7 +878,7 @@ static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
             ,_("Failed to copy decoder parameters!: %s"), errstr);
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
 #endif
@@ -890,7 +890,7 @@ static int ffmpeg_set_stream(struct ffmpeg *ffmpeg){
 }
 
 /*Special allocation of video buffer for v4l2m2m codec*/
-static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
+static int movie_alloc_video_buffer(AVFrame *frame, int align)
 {
     const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(frame->format);
     int ret, i, padded_height;
@@ -947,7 +947,7 @@ static int ffmpeg_alloc_video_buffer(AVFrame *frame, int align)
 }
 
 
-static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
+static int movie_set_picture(struct ffmpeg *ffmpeg){
 
     int retcd;
     char errstr[128];
@@ -955,7 +955,7 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
     ffmpeg->picture = my_frame_alloc();
     if (!ffmpeg->picture) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc frame"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
 
@@ -972,11 +972,11 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
     ffmpeg->picture->height = ffmpeg->ctx_codec->height;
 
     if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M) {
-        retcd = ffmpeg_alloc_video_buffer(ffmpeg->picture, 32);
+        retcd = movie_alloc_video_buffer(ffmpeg->picture, 32);
         if (retcd) {
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc buffers %s"), errstr);
-            ffmpeg_free_context(ffmpeg);
+            movie_free_context(ffmpeg);
             return -1;
         }
     }
@@ -985,7 +985,7 @@ static int ffmpeg_set_picture(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
+static int movie_set_outputfile(struct ffmpeg *ffmpeg){
 
     int retcd;
     char errstr[128];
@@ -995,30 +995,30 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
 #endif
 
     /* Open the output file, if needed. */
-    if ((ffmpeg_timelapse_exists(ffmpeg->filename) == 0) || (ffmpeg->tlapse != TIMELAPSE_APPEND)) {
+    if ((movie_timelapse_exists(ffmpeg->filename) == 0) || (ffmpeg->tlapse != TIMELAPSE_APPEND)) {
         if (!(ffmpeg->oc->oformat->flags & AVFMT_NOFILE)) {
             if (avio_open(&ffmpeg->oc->pb, ffmpeg->filename, MY_FLAG_WRITE) < 0) {
                 if (errno == ENOENT) {
                     if (create_path(ffmpeg->filename) == -1) {
-                        ffmpeg_free_context(ffmpeg);
+                        movie_free_context(ffmpeg);
                         return -1;
                     }
                     if (avio_open(&ffmpeg->oc->pb, ffmpeg->filename, MY_FLAG_WRITE) < 0) {
                         MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                             ,_("error opening file %s"), ffmpeg->filename);
-                        ffmpeg_free_context(ffmpeg);
+                        movie_free_context(ffmpeg);
                         return -1;
                     }
                     /* Permission denied */
                 } else if (errno ==  EACCES) {
                     MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                         ,_("Permission denied. %s"),ffmpeg->filename);
-                    ffmpeg_free_context(ffmpeg);
+                    movie_free_context(ffmpeg);
                     return -1;
                 } else {
                     MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
                         ,_("Error opening file %s"), ffmpeg->filename);
-                    ffmpeg_free_context(ffmpeg);
+                    movie_free_context(ffmpeg);
                     return -1;
                 }
             }
@@ -1033,7 +1033,7 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                 ,_("Could not write ffmpeg header %s"),errstr);
-            ffmpeg_free_context(ffmpeg);
+            movie_free_context(ffmpeg);
             return -1;
         }
         if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
@@ -1047,7 +1047,7 @@ static int ffmpeg_set_outputfile(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
+static int movie_flush_codec(struct ffmpeg *ffmpeg){
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
     //ffmpeg version 3.1 and after
@@ -1111,21 +1111,21 @@ static int ffmpeg_flush_codec(struct ffmpeg *ffmpeg){
 
 }
 
-static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+static int movie_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     int retcd;
 
     av_init_packet(&ffmpeg->pkt);
     ffmpeg->pkt.data = NULL;
     ffmpeg->pkt.size = 0;
 
-    retcd = ffmpeg_set_pts(ffmpeg, tv1);
+    retcd = movie_set_pts(ffmpeg, tv1);
     if (retcd < 0) {
         //If there is an error, it has already been reported.
         my_packet_unref(ffmpeg->pkt);
         return 0;
     }
 
-    retcd = ffmpeg_encode_video(ffmpeg);
+    retcd = movie_encode_video(ffmpeg);
     if (retcd != 0){
         if (retcd != -2){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while encoding picture"));
@@ -1135,7 +1135,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     }
 
     if (ffmpeg->tlapse == TIMELAPSE_APPEND) {
-        retcd = ffmpeg_timelapse_append(ffmpeg, ffmpeg->pkt);
+        retcd = movie_timelapse_append(ffmpeg, ffmpeg->pkt);
     } else {
         retcd = av_write_frame(ffmpeg->oc, &ffmpeg->pkt);
     }
@@ -1149,7 +1149,7 @@ static int ffmpeg_put_frame(struct ffmpeg *ffmpeg, const struct timeval *tv1){
 
 }
 
-static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
+static void movie_passthru_reset(struct ffmpeg *ffmpeg){
     /* Reset the written flag at start of each event */
     int indx;
 
@@ -1161,7 +1161,7 @@ static void ffmpeg_passthru_reset(struct ffmpeg *ffmpeg){
 
 }
 
-static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
+static void movie_passthru_write(struct ffmpeg *ffmpeg, int indx){
     /* Write the packet in the buffer at indx to file */
     char errstr[128];
     int retcd;
@@ -1181,7 +1181,7 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
         return;
     }
 
-    retcd = ffmpeg_set_pktpts(ffmpeg, &ffmpeg->rtsp_data->pktarray[indx].timestamp_tv);
+    retcd = movie_set_pktpts(ffmpeg, &ffmpeg->rtsp_data->pktarray[indx].timestamp_tv);
     if (retcd < 0) {
         my_packet_unref(ffmpeg->pkt);
         return;
@@ -1200,7 +1200,7 @@ static void ffmpeg_passthru_write(struct ffmpeg *ffmpeg, int indx){
 
 }
 
-static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data){
+static int movie_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_data){
 
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
@@ -1260,7 +1260,7 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
                 (ffmpeg->rtsp_data->pktarray[indx].packet.size > 0) &&
                 (ffmpeg->rtsp_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
                 (ffmpeg->rtsp_data->pktarray[indx].idnbr <= idnbr_image)) {
-                ffmpeg_passthru_write(ffmpeg, indx);
+                movie_passthru_write(ffmpeg, indx);
             }
             if (ffmpeg->rtsp_data->pktarray[indx].idnbr == idnbr_stop) break;
             indx++;
@@ -1270,7 +1270,7 @@ static int ffmpeg_passthru_put(struct ffmpeg *ffmpeg, struct image_data *img_dat
     return 0;
 }
 
-static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
+static int movie_passthru_codec(struct ffmpeg *ffmpeg){
 
     int retcd;
     AVStream    *stream_in;
@@ -1296,7 +1296,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
             ffmpeg->codec_name = "mp4";
         }
 
-        retcd = ffmpeg_get_oformat(ffmpeg);
+        retcd = movie_get_oformat(ffmpeg);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
             pthread_mutex_unlock(&ffmpeg->rtsp_data->mutex_transfer);
@@ -1355,7 +1355,7 @@ static int ffmpeg_passthru_codec(struct ffmpeg *ffmpeg){
 
 }
 
-void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl){
+void movie_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl){
 
     char buf[1024];
     char *end;
@@ -1379,7 +1379,7 @@ void ffmpeg_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUT
     }
 }
 
-static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data){
+static void movie_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_data){
     unsigned char *image,*imagecr, *imagecb;
     int cr_len, x, y;
 
@@ -1405,7 +1405,7 @@ static void ffmpeg_put_pix_nv21(struct ffmpeg *ffmpeg, struct image_data *img_da
 
 }
 
-static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data){
+static void movie_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_data){
     unsigned char *image;
 
     if (ffmpeg->high_resolution){
@@ -1426,7 +1426,7 @@ static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_
  ****************************************************************************
  ****************************************************************************/
 
-void ffmpeg_global_init(void){
+void movie_global_init(void){
 
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
         ,_("ffmpeg libavcodec version %d.%d.%d"
@@ -1443,12 +1443,12 @@ void ffmpeg_global_init(void){
 
     avformat_network_init();
     avdevice_register_all();
-    av_log_set_callback((void *)ffmpeg_avcodec_log);
+    av_log_set_callback((void *)movie_avcodec_log);
 
 #if (LIBAVFORMAT_VERSION_MAJOR < 58)
     /* TODO: Determine if this is even needed for older versions */
     int ret;
-    ret = av_lockmgr_register(ffmpeg_lockmgr_cb);
+    ret = av_lockmgr_register(movie_lockmgr_cb);
     if (ret < 0)
     {
         MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("av_lockmgr_register failed (%d)"), ret);
@@ -1458,7 +1458,7 @@ void ffmpeg_global_init(void){
 
 }
 
-void ffmpeg_global_deinit(void) {
+void movie_global_deinit(void) {
 
     avformat_network_deinit();
 
@@ -1474,48 +1474,48 @@ void ffmpeg_global_deinit(void) {
 
 }
 
-int ffmpeg_open(struct ffmpeg *ffmpeg){
+int movie_open(struct ffmpeg *ffmpeg){
 
     int retcd;
 
     ffmpeg->oc = avformat_alloc_context();
     if (!ffmpeg->oc) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not allocate output context"));
-        ffmpeg_free_context(ffmpeg);
+        movie_free_context(ffmpeg);
         return -1;
     }
 
     if (ffmpeg->passthrough) {
-        retcd = ffmpeg_passthru_codec(ffmpeg);
+        retcd = movie_passthru_codec(ffmpeg);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not setup passthru!"));
-            ffmpeg_free_context(ffmpeg);
+            movie_free_context(ffmpeg);
             return -1;
         }
 
-        ffmpeg_passthru_reset(ffmpeg);
+        movie_passthru_reset(ffmpeg);
 
     } else {
-        retcd = ffmpeg_get_oformat(ffmpeg);
+        retcd = movie_get_oformat(ffmpeg);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
-            ffmpeg_free_context(ffmpeg);
+            movie_free_context(ffmpeg);
             return -1;
         }
 
-        retcd = ffmpeg_set_codec(ffmpeg);
+        retcd = movie_set_codec(ffmpeg);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec!"));
             return -1;
         }
 
-        retcd = ffmpeg_set_stream(ffmpeg);
+        retcd = movie_set_stream(ffmpeg);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
             return -1;
         }
 
-        retcd = ffmpeg_set_picture(ffmpeg);
+        retcd = movie_set_picture(ffmpeg);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
             return -1;
@@ -1524,7 +1524,7 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 
 
 
-    retcd = ffmpeg_set_outputfile(ffmpeg);
+    retcd = movie_set_outputfile(ffmpeg);
     if (retcd < 0){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
         return -1;
@@ -1534,11 +1534,11 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 
 }
 
-void ffmpeg_close(struct ffmpeg *ffmpeg){
+void movie_close(struct ffmpeg *ffmpeg){
 
     if (ffmpeg != NULL) {
 
-        if (ffmpeg_flush_codec(ffmpeg) < 0){
+        if (movie_flush_codec(ffmpeg) < 0){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error flushing codec"));
         }
         if (ffmpeg->oc->pb != NULL){
@@ -1551,30 +1551,30 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
                 }
             }
         }
-        ffmpeg_free_context(ffmpeg);
-        ffmpeg_free_nal(ffmpeg);
+        movie_free_context(ffmpeg);
+        movie_free_nal(ffmpeg);
     }
 
 }
 
 
-int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
+int movie_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
 
     int retcd = 0;
     int cnt = 0;
 
 
     if (ffmpeg->passthrough) {
-        retcd = ffmpeg_passthru_put(ffmpeg, img_data);
+        retcd = movie_passthru_put(ffmpeg, img_data);
         return retcd;
     }
 
     if (ffmpeg->picture) {
 
         if (ffmpeg->preferred_codec == USER_CODEC_V4L2M2M) {
-            ffmpeg_put_pix_nv21(ffmpeg, img_data);
+            movie_put_pix_nv21(ffmpeg, img_data);
         } else {
-            ffmpeg_put_pix_yuv420(ffmpeg, img_data);
+            movie_put_pix_yuv420(ffmpeg, img_data);
         }
 
         ffmpeg->gop_cnt ++;
@@ -1592,9 +1592,9 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
          * never want a frame buffered so we keep sending back the
          * the same pic until it flushes or fails in a different way
          */
-        retcd = ffmpeg_put_frame(ffmpeg, tv1);
+        retcd = movie_put_frame(ffmpeg, tv1);
         while ((retcd == -2) && (ffmpeg->tlapse != TIMELAPSE_NONE)) {
-            retcd = ffmpeg_put_frame(ffmpeg, tv1);
+            retcd = movie_put_frame(ffmpeg, tv1);
             cnt++;
             if (cnt > 50){
                 MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -1613,7 +1613,7 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
 
 }
 
-void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1){
+void movie_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1){
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, ffmpeg->fps},ffmpeg->video_st->time_base);
     if (one_frame_interval <= 0)
         one_frame_interval = 1;

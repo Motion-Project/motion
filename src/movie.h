@@ -1,5 +1,5 @@
-#ifndef _INCLUDE_FFMPEG_H_
-#define _INCLUDE_FFMPEG_H_
+#ifndef _INCLUDE_MOVIE_H_
+#define _INCLUDE_MOVIE_H_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -79,13 +79,13 @@ int my_image_copy_to_buffer(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelForma
 int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height);
 int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt);
 
-void ffmpeg_global_init(void);
-void ffmpeg_global_deinit(void);
-void ffmpeg_avcodec_log(void *, int, const char *, va_list);
+void movie_global_init(void);
+void movie_global_deinit(void);
+void movie_avcodec_log(void *, int, const char *, va_list);
 
-int ffmpeg_open(struct ffmpeg *ffmpeg);
-int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1);
-void ffmpeg_close(struct ffmpeg *ffmpeg);
-void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1);
+int movie_open(struct ffmpeg *ffmpeg);
+int movie_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1);
+void movie_close(struct ffmpeg *ffmpeg);
+void movie_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1);
 
-#endif /* _INCLUDE_FFMPEG_H_ */
+#endif /* _INCLUDE_MOVIE_H_ */

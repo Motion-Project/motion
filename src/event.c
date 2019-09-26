@@ -10,7 +10,7 @@
 #include "picture.h"   /* already includes motion.h */
 #include "translate.h"
 #include "netcam_rtsp.h"
-#include "ffmpeg.h"
+#include "movie.h"
 #include "event.h"
 #include "video_loopback.h"
 #include "video_common.h"
@@ -49,7 +49,7 @@ const char *eventList[] = {
     "EVENT_AREA_DETECTED",
     "EVENT_CAMERA_LOST",
     "EVENT_CAMERA_FOUND",
-    "EVENT_FFMPEG_PUT",
+    "EVENT_MOVIE_PUT",
     "EVENT_LAST"
 };
 
@@ -677,7 +677,7 @@ static void event_image_preview(struct context *cnt,
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cnt->conf.picture_filename, "preview");
 
-        if ((cnt->ffmpeg_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
+        if ((cnt->movie_output || (cnt->conf.movie_extpipe_use && cnt->extpipe)) && !use_imagepath) {
 
             if (cnt->conf.movie_extpipe_use && cnt->extpipe) {
                 retcd = snprintf(previewname, PATH_MAX,"%s.%s"
@@ -924,7 +924,7 @@ static void event_new_video(struct context *cnt,
 }
 
 
-static void event_ffmpeg_newfile(struct context *cnt,
+static void event_movie_newfile(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             struct image_data *dummy0 ATTRIBUTE_UNUSED,
             char *dummy1 ATTRIBUTE_UNUSED,
@@ -1028,87 +1028,87 @@ static void event_ffmpeg_newfile(struct context *cnt,
             , stamp);
     }
     if (cnt->conf.movie_output) {
-        cnt->ffmpeg_output = mymalloc(sizeof(struct ffmpeg));
+        cnt->movie_output = mymalloc(sizeof(struct ffmpeg));
         if (cnt->imgs.size_high > 0){
-            cnt->ffmpeg_output->width  = cnt->imgs.width_high;
-            cnt->ffmpeg_output->height = cnt->imgs.height_high;
-            cnt->ffmpeg_output->high_resolution = TRUE;
-            cnt->ffmpeg_output->rtsp_data = cnt->rtsp_high;
+            cnt->movie_output->width  = cnt->imgs.width_high;
+            cnt->movie_output->height = cnt->imgs.height_high;
+            cnt->movie_output->high_resolution = TRUE;
+            cnt->movie_output->rtsp_data = cnt->rtsp_high;
         } else {
-            cnt->ffmpeg_output->width  = cnt->imgs.width;
-            cnt->ffmpeg_output->height = cnt->imgs.height;
-            cnt->ffmpeg_output->high_resolution = FALSE;
-            cnt->ffmpeg_output->rtsp_data = cnt->rtsp;
+            cnt->movie_output->width  = cnt->imgs.width;
+            cnt->movie_output->height = cnt->imgs.height;
+            cnt->movie_output->high_resolution = FALSE;
+            cnt->movie_output->rtsp_data = cnt->rtsp;
         }
-        cnt->ffmpeg_output->tlapse = TIMELAPSE_NONE;
-        cnt->ffmpeg_output->fps = cnt->movie_fps;
-        cnt->ffmpeg_output->bps = cnt->conf.movie_bps;
-        cnt->ffmpeg_output->filename = cnt->newfilename;
-        cnt->ffmpeg_output->quality = cnt->conf.movie_quality;
-        cnt->ffmpeg_output->start_time.tv_sec = currenttime_tv->tv_sec;
-        cnt->ffmpeg_output->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_output->last_pts = -1;
-        cnt->ffmpeg_output->base_pts = 0;
-        cnt->ffmpeg_output->gop_cnt = 0;
-        cnt->ffmpeg_output->codec_name = codec;
+        cnt->movie_output->tlapse = TIMELAPSE_NONE;
+        cnt->movie_output->fps = cnt->movie_fps;
+        cnt->movie_output->bps = cnt->conf.movie_bps;
+        cnt->movie_output->filename = cnt->newfilename;
+        cnt->movie_output->quality = cnt->conf.movie_quality;
+        cnt->movie_output->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->movie_output->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->movie_output->last_pts = -1;
+        cnt->movie_output->base_pts = 0;
+        cnt->movie_output->gop_cnt = 0;
+        cnt->movie_output->codec_name = codec;
         if (strcmp(cnt->conf.movie_codec, "test") == 0) {
-            cnt->ffmpeg_output->test_mode = 1;
+            cnt->movie_output->test_mode = 1;
         } else {
-            cnt->ffmpeg_output->test_mode = 0;
+            cnt->movie_output->test_mode = 0;
         }
-        cnt->ffmpeg_output->motion_images = 0;
-        cnt->ffmpeg_output->passthrough =util_check_passthrough(cnt);
+        cnt->movie_output->motion_images = 0;
+        cnt->movie_output->passthrough =util_check_passthrough(cnt);
 
 
-        retcd = ffmpeg_open(cnt->ffmpeg_output);
+        retcd = movie_open(cnt->movie_output);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("Error opening context for movie output."));
-            free(cnt->ffmpeg_output);
-            cnt->ffmpeg_output=NULL;
+            free(cnt->movie_output);
+            cnt->movie_output=NULL;
             return;
         }
         event(cnt, EVENT_FILECREATE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, currenttime_tv);
     }
 
     if (cnt->conf.movie_output_motion) {
-        cnt->ffmpeg_output_motion = mymalloc(sizeof(struct ffmpeg));
-        cnt->ffmpeg_output_motion->width  = cnt->imgs.width;
-        cnt->ffmpeg_output_motion->height = cnt->imgs.height;
-        cnt->ffmpeg_output_motion->rtsp_data = NULL;
-        cnt->ffmpeg_output_motion->tlapse = TIMELAPSE_NONE;
-        cnt->ffmpeg_output_motion->fps = cnt->movie_fps;
-        cnt->ffmpeg_output_motion->bps = cnt->conf.movie_bps;
-        cnt->ffmpeg_output_motion->filename = cnt->motionfilename;
-        cnt->ffmpeg_output_motion->quality = cnt->conf.movie_quality;
-        cnt->ffmpeg_output_motion->start_time.tv_sec = currenttime_tv->tv_sec;
-        cnt->ffmpeg_output_motion->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_output_motion->last_pts = -1;
-        cnt->ffmpeg_output_motion->base_pts = 0;
-        cnt->ffmpeg_output_motion->gop_cnt = 0;
-        cnt->ffmpeg_output_motion->codec_name = codec;
+        cnt->movie_output_motion = mymalloc(sizeof(struct ffmpeg));
+        cnt->movie_output_motion->width  = cnt->imgs.width;
+        cnt->movie_output_motion->height = cnt->imgs.height;
+        cnt->movie_output_motion->rtsp_data = NULL;
+        cnt->movie_output_motion->tlapse = TIMELAPSE_NONE;
+        cnt->movie_output_motion->fps = cnt->movie_fps;
+        cnt->movie_output_motion->bps = cnt->conf.movie_bps;
+        cnt->movie_output_motion->filename = cnt->motionfilename;
+        cnt->movie_output_motion->quality = cnt->conf.movie_quality;
+        cnt->movie_output_motion->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->movie_output_motion->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->movie_output_motion->last_pts = -1;
+        cnt->movie_output_motion->base_pts = 0;
+        cnt->movie_output_motion->gop_cnt = 0;
+        cnt->movie_output_motion->codec_name = codec;
         if (strcmp(cnt->conf.movie_codec, "test") == 0) {
-            cnt->ffmpeg_output_motion->test_mode = TRUE;
+            cnt->movie_output_motion->test_mode = TRUE;
         } else {
-            cnt->ffmpeg_output_motion->test_mode = FALSE;
+            cnt->movie_output_motion->test_mode = FALSE;
         }
-        cnt->ffmpeg_output_motion->motion_images = TRUE;
-        cnt->ffmpeg_output_motion->passthrough = FALSE;
-        cnt->ffmpeg_output_motion->high_resolution = FALSE;
-        cnt->ffmpeg_output_motion->rtsp_data = NULL;
+        cnt->movie_output_motion->motion_images = TRUE;
+        cnt->movie_output_motion->passthrough = FALSE;
+        cnt->movie_output_motion->high_resolution = FALSE;
+        cnt->movie_output_motion->rtsp_data = NULL;
 
-        retcd = ffmpeg_open(cnt->ffmpeg_output_motion);
+        retcd = movie_open(cnt->movie_output_motion);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("ffopen_open error creating (motion) file [%s]"), cnt->motionfilename);
-            free(cnt->ffmpeg_output_motion);
-            cnt->ffmpeg_output_motion = NULL;
+            free(cnt->movie_output_motion);
+            cnt->movie_output_motion = NULL;
             return;
         }
     }
 }
 
-static void event_ffmpeg_timelapse(struct context *cnt,
+static void event_movie_timelapse(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED, struct image_data *img_data,
             char *dummy1 ATTRIBUTE_UNUSED, void *dummy2 ATTRIBUTE_UNUSED,
             struct timeval *currenttime_tv)
@@ -1116,7 +1116,7 @@ static void event_ffmpeg_timelapse(struct context *cnt,
     int retcd;
     int passthrough;
 
-    if (!cnt->ffmpeg_timelapse) {
+    if (!cnt->movie_timelapse) {
         char tmp[PATH_MAX];
         const char *timepath;
         const char *codec_mpg = "mpg";
@@ -1140,29 +1140,29 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             , (int)(PATH_MAX-5-strlen(cnt->conf.target_dir))
             , tmp);
         passthrough = util_check_passthrough(cnt);
-        cnt->ffmpeg_timelapse = mymalloc(sizeof(struct ffmpeg));
+        cnt->movie_timelapse = mymalloc(sizeof(struct ffmpeg));
         if ((cnt->imgs.size_high > 0) && (!passthrough)){
-            cnt->ffmpeg_timelapse->width  = cnt->imgs.width_high;
-            cnt->ffmpeg_timelapse->height = cnt->imgs.height_high;
-            cnt->ffmpeg_timelapse->high_resolution = TRUE;
+            cnt->movie_timelapse->width  = cnt->imgs.width_high;
+            cnt->movie_timelapse->height = cnt->imgs.height_high;
+            cnt->movie_timelapse->high_resolution = TRUE;
         } else {
-            cnt->ffmpeg_timelapse->width  = cnt->imgs.width;
-            cnt->ffmpeg_timelapse->height = cnt->imgs.height;
-            cnt->ffmpeg_timelapse->high_resolution = FALSE;
+            cnt->movie_timelapse->width  = cnt->imgs.width;
+            cnt->movie_timelapse->height = cnt->imgs.height;
+            cnt->movie_timelapse->high_resolution = FALSE;
         }
-        cnt->ffmpeg_timelapse->fps = cnt->conf.timelapse_fps;
-        cnt->ffmpeg_timelapse->bps = cnt->conf.movie_bps;
-        cnt->ffmpeg_timelapse->filename = cnt->timelapsefilename;
-        cnt->ffmpeg_timelapse->quality = cnt->conf.movie_quality;
-        cnt->ffmpeg_timelapse->start_time.tv_sec = currenttime_tv->tv_sec;
-        cnt->ffmpeg_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
-        cnt->ffmpeg_timelapse->last_pts = -1;
-        cnt->ffmpeg_timelapse->base_pts = 0;
-        cnt->ffmpeg_timelapse->test_mode = FALSE;
-        cnt->ffmpeg_timelapse->gop_cnt = 0;
-        cnt->ffmpeg_timelapse->motion_images = FALSE;
-        cnt->ffmpeg_timelapse->passthrough = FALSE;
-        cnt->ffmpeg_timelapse->rtsp_data = NULL;
+        cnt->movie_timelapse->fps = cnt->conf.timelapse_fps;
+        cnt->movie_timelapse->bps = cnt->conf.movie_bps;
+        cnt->movie_timelapse->filename = cnt->timelapsefilename;
+        cnt->movie_timelapse->quality = cnt->conf.movie_quality;
+        cnt->movie_timelapse->start_time.tv_sec = currenttime_tv->tv_sec;
+        cnt->movie_timelapse->start_time.tv_usec = currenttime_tv->tv_usec;
+        cnt->movie_timelapse->last_pts = -1;
+        cnt->movie_timelapse->base_pts = 0;
+        cnt->movie_timelapse->test_mode = FALSE;
+        cnt->movie_timelapse->gop_cnt = 0;
+        cnt->movie_timelapse->motion_images = FALSE;
+        cnt->movie_timelapse->passthrough = FALSE;
+        cnt->movie_timelapse->rtsp_data = NULL;
 
         if ((strcmp(cnt->conf.timelapse_codec,"mpg") == 0) ||
             (strcmp(cnt->conf.timelapse_codec,"swf") == 0) ){
@@ -1175,84 +1175,84 @@ static void event_ffmpeg_timelapse(struct context *cnt,
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpg codec."));
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be appended to file"));
 
-            cnt->ffmpeg_timelapse->tlapse = TIMELAPSE_APPEND;
-            cnt->ffmpeg_timelapse->codec_name = codec_mpg;
-            retcd = ffmpeg_open(cnt->ffmpeg_timelapse);
+            cnt->movie_timelapse->tlapse = TIMELAPSE_APPEND;
+            cnt->movie_timelapse->codec_name = codec_mpg;
+            retcd = movie_open(cnt->movie_timelapse);
         } else {
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpeg4 codec."));
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be trigger new files"));
 
-            cnt->ffmpeg_timelapse->tlapse = TIMELAPSE_NEW;
-            cnt->ffmpeg_timelapse->codec_name = codec_mpeg;
-            retcd = ffmpeg_open(cnt->ffmpeg_timelapse);
+            cnt->movie_timelapse->tlapse = TIMELAPSE_NEW;
+            cnt->movie_timelapse->codec_name = codec_mpeg;
+            retcd = movie_open(cnt->movie_timelapse);
         }
 
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
                 ,_("ffopen_open error creating (timelapse) file [%s]"), cnt->timelapsefilename);
-            free(cnt->ffmpeg_timelapse);
-            cnt->ffmpeg_timelapse = NULL;
+            free(cnt->movie_timelapse);
+            cnt->movie_timelapse = NULL;
             return;
         }
         event(cnt, EVENT_FILECREATE, NULL, cnt->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, currenttime_tv);
     }
 
-    if (ffmpeg_put_image(cnt->ffmpeg_timelapse, img_data, currenttime_tv) == -1) {
+    if (movie_put_image(cnt->movie_timelapse, img_data, currenttime_tv) == -1) {
         MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
     }
 
 }
 
-static void event_ffmpeg_put(struct context *cnt,
+static void event_movie_put(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             struct image_data *img_data, char *dummy1 ATTRIBUTE_UNUSED,
             void *dummy2 ATTRIBUTE_UNUSED, struct timeval *currenttime_tv)
 {
-    if (cnt->ffmpeg_output) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output, img_data, currenttime_tv) == -1){
+    if (cnt->movie_output) {
+        if (movie_put_image(cnt->movie_output, img_data, currenttime_tv) == -1){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
-    if (cnt->ffmpeg_output_motion) {
-        if (ffmpeg_put_image(cnt->ffmpeg_output_motion, &cnt->imgs.img_motion, currenttime_tv) == -1) {
+    if (cnt->movie_output_motion) {
+        if (movie_put_image(cnt->movie_output_motion, &cnt->imgs.img_motion, currenttime_tv) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
 }
 
-static void event_ffmpeg_closefile(struct context *cnt,
+static void event_movie_closefile(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             struct image_data *dummy1 ATTRIBUTE_UNUSED,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct timeval *currenttime_tv)
 {
 
-    if (cnt->ffmpeg_output) {
-        ffmpeg_close(cnt->ffmpeg_output);
-        free(cnt->ffmpeg_output);
-        cnt->ffmpeg_output = NULL;
+    if (cnt->movie_output) {
+        movie_close(cnt->movie_output);
+        free(cnt->movie_output);
+        cnt->movie_output = NULL;
         event(cnt, EVENT_FILECLOSE, NULL, cnt->newfilename, (void *)FTYPE_MPEG, currenttime_tv);
     }
 
-    if (cnt->ffmpeg_output_motion) {
-        ffmpeg_close(cnt->ffmpeg_output_motion);
-        free(cnt->ffmpeg_output_motion);
-        cnt->ffmpeg_output_motion = NULL;
+    if (cnt->movie_output_motion) {
+        movie_close(cnt->movie_output_motion);
+        free(cnt->movie_output_motion);
+        cnt->movie_output_motion = NULL;
         event(cnt, EVENT_FILECLOSE, NULL, cnt->motionfilename, (void *)FTYPE_MPEG_MOTION, currenttime_tv);
     }
 
 }
 
-static void event_ffmpeg_timelapseend(struct context *cnt,
+static void event_movie_timelapseend(struct context *cnt,
             motion_event type ATTRIBUTE_UNUSED,
             struct image_data *dummy1 ATTRIBUTE_UNUSED,
             char *dummy2 ATTRIBUTE_UNUSED, void *dummy3 ATTRIBUTE_UNUSED,
             struct timeval *currenttime_tv)
 {
-    if (cnt->ffmpeg_timelapse) {
-        ffmpeg_close(cnt->ffmpeg_timelapse);
-        free(cnt->ffmpeg_timelapse);
-        cnt->ffmpeg_timelapse = NULL;
+    if (cnt->movie_timelapse) {
+        movie_close(cnt->movie_timelapse);
+        free(cnt->movie_timelapse);
+        cnt->movie_timelapse = NULL;
         event(cnt, EVENT_FILECLOSE, NULL, cnt->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, currenttime_tv);
     }
 }
@@ -1345,27 +1345,27 @@ struct event_handlers event_handlers[] = {
     },
     {
     EVENT_FIRSTMOTION,
-    event_ffmpeg_newfile
+    event_movie_newfile
     },
     {
     EVENT_IMAGE_DETECTED,
-    event_ffmpeg_put
+    event_movie_put
     },
     {
-    EVENT_FFMPEG_PUT,
-    event_ffmpeg_put
+    EVENT_MOVIE_PUT,
+    event_movie_put
     },
     {
     EVENT_ENDMOTION,
-    event_ffmpeg_closefile
+    event_movie_closefile
     },
     {
     EVENT_TIMELAPSE,
-    event_ffmpeg_timelapse
+    event_movie_timelapse
     },
     {
     EVENT_TIMELAPSEEND,
-    event_ffmpeg_timelapseend
+    event_movie_timelapseend
     },
 #if defined(HAVE_MYSQL) || defined(HAVE_PGSQL) || defined(HAVE_SQLITE3) || defined(HAVE_MARIADB)
     {
@@ -1386,7 +1386,7 @@ struct event_handlers event_handlers[] = {
     event_extpipe_put
     },
     {
-    EVENT_FFMPEG_PUT,
+    EVENT_MOVIE_PUT,
     event_extpipe_put
     },
     {

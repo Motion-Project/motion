@@ -3,7 +3,7 @@ src/alg.c
 src/conf.c
 src/draw.c
 src/event.c
-src/ffmpeg.c
+src/movie.c
 src/jpegutils.c
 src/logger.c
 src/mmalcam.c

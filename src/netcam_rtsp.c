@@ -20,7 +20,7 @@
 #include "rotate.h"    /* already includes motion.h */
 #include "netcam_rtsp.h"
 #include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
-#include "ffmpeg.h"
+#include "movie.h"
 
 void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 {

@@ -31,7 +31,7 @@ typedef enum {
     EVENT_AREA_DETECTED,
     EVENT_CAMERA_LOST,
     EVENT_CAMERA_FOUND,
-    EVENT_FFMPEG_PUT,
+    EVENT_MOVIE_PUT,
     EVENT_LAST,
 } motion_event;
 

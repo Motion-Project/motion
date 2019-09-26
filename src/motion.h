@@ -62,7 +62,7 @@ struct image_data;
 
 #include "track.h"
 #include "netcam_rtsp.h"
-#include "ffmpeg.h"
+#include "movie.h"
 
 #ifdef HAVE_MMAL
 #include "mmalcam.h"
@@ -470,9 +470,9 @@ struct context {
     char extpipecmdline[PATH_MAX];
     int movie_last_shot;
 
-    struct ffmpeg   *ffmpeg_output;
-    struct ffmpeg   *ffmpeg_output_motion;
-    struct ffmpeg   *ffmpeg_timelapse;
+    struct ffmpeg   *movie_output;
+    struct ffmpeg   *movie_output_motion;
+    struct ffmpeg   *movie_timelapse;
     int             movie_passthrough;
 
     char timelapsefilename[PATH_MAX];
