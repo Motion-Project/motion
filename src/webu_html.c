@@ -570,54 +570,46 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
      * what images are to be sent but also whether we have tls/ssl.
      * There are WAY too many options for this.
     */
-    if (strm_info->cntlst[indx]->conf.stream_preview_method == 99){
-        snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-        snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","");
-        snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","");
+    /* If using the main port,we need to insert a thread number into url*/
+    if (strm_info->cntlst[0]->conf.stream_port != 0) {
+        snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
+            ,strm_info->cntlst[indx]->camera_id);
+        strm_info->port = strm_info->cntlst[0]->conf.stream_port;
+        if (strm_info->cntlst[0]->conf.stream_tls) {
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
+        } else {
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
+        }
+    } else {
         snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
         strm_info->port = strm_info->cntlst[indx]->conf.stream_port;
-    } else {
-        /* If using the main port,we need to insert a thread number into url*/
-        if (strm_info->cntlst[0]->conf.stream_port != 0) {
-            snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
-                ,strm_info->cntlst[indx]->camera_id);
-            strm_info->port = strm_info->cntlst[0]->conf.stream_port;
-            if (strm_info->cntlst[0]->conf.stream_tls) {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-            } else {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-            }
+        if (strm_info->cntlst[indx]->conf.stream_tls) {
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
         } else {
-            snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
-            strm_info->port = strm_info->cntlst[indx]->conf.stream_port;
-            if (strm_info->cntlst[indx]->conf.stream_tls) {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
-            } else {
-                snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
-            }
+            snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
         }
-        if (strm_info->motion_images){
-            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/motion");
-            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
+    }
+    if (strm_info->motion_images){
+        snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/motion");
+        snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
+    } else {
+        /* Assign what images and links we want */
+        if (strm_info->cntlst[indx]->conf.stream_preview_method == 1){
+            /* Substream for preview */
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
+        } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 2){
+            /* Static image for preview */
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
+        } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 4){
+            /* Source image for preview */
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
         } else {
-            /* Assign what images and links we want */
-            if (strm_info->cntlst[indx]->conf.stream_preview_method == 1){
-                /* Substream for preview */
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
-            } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 2){
-                /* Static image for preview */
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
-            } else if (strm_info->cntlst[indx]->conf.stream_preview_method == 4){
-                /* Source image for preview */
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
-            } else {
-                /* Full stream for preview (method 0 or 3)*/
-                snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
-                snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/stream");
-            }
+            /* Full stream for preview (method 0 or 3)*/
+            snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
+            snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/stream");
         }
     }
 

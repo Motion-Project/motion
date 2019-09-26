@@ -1485,30 +1485,6 @@ static int motion_init(struct context *cnt)
         cnt->threshold_maximum = (cnt->imgs.height * cnt->imgs.width * 3) / 2;
     }
 
-    if (cnt->conf.stream_preview_method == 99){
-        /* This is the depreciated Stop stream process */
-
-        /* Initialize stream server if stream port is specified to not 0 */
-
-        if (cnt->conf.stream_port) {
-            if (stream_init (&(cnt->stream), cnt->conf.stream_port, cnt->conf.stream_localhost,
-                cnt->conf.webcontrol_ipv6, cnt->conf.stream_cors_header) == -1) {
-                MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                    ,_("Problem enabling motion-stream server in port %d")
-                    ,cnt->conf.stream_port);
-                cnt->conf.stream_port = 0;
-                cnt->finish = 1;
-            } else {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                    ,_("Started motion-stream server on port %d (auth %s)")
-                    ,cnt->conf.stream_port
-                    ,cnt->conf.stream_auth_method ? _("Enabled"):_("Disabled"));
-            }
-        }
-
-    } /* End of legacy stream methods*/
-
-
     /* Prevent first few frames from triggering motion... */
     cnt->moved = 8;
 
@@ -1605,12 +1581,6 @@ static int motion_init(struct context *cnt)
  * Returns:     nothing
  */
 static void motion_cleanup(struct context *cnt) {
-
-    if (cnt->conf.stream_preview_method == 99){
-        /* This is the depreciated Stop stream process */
-        if ((cnt->conf.stream_port) && (cnt->stream.socket != -1))
-            stream_stop(&cnt->stream);
-    }
 
     event(cnt, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cnt, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
