@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 22:05-0600\n"
+"POT-Creation-Date: 2019-09-25 22:23-0600\n"
 "PO-Revision-Date: 2018-10-13 11:59-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -918,8 +918,8 @@ msgstr ""
 
 #: src/movie.c
 msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. "
-"Choose a different ffmpeg container or lower framerate."
+"The frame rate specified is too high for the movie movie type specified. "
+"Choose a different movie container or lower framerate."
 msgstr ""
 
 #: src/movie.c
@@ -1062,7 +1062,7 @@ msgstr ""
 
 #: src/movie.c
 #, c-format
-msgid "Could not write ffmpeg header %s"
+msgid "Could not write movie header %s"
 msgstr ""
 
 #: src/movie.c
@@ -1118,7 +1118,7 @@ msgstr ""
 
 #: src/movie.c
 #, c-format
-msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
+msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgstr ""
 
 #: src/movie.c

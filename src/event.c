@@ -19,7 +19,7 @@
  * TODO Items:
  * Rework the snprintf uses.
  * Edit directories so they can never be null and eliminate defaults from here
- * Move the ffmpeg initialize stuff to ffmpeg module
+ * Move the movie initialize stuff to movie module
  * eliminate #if for v4l2
  * Eliminate #IF for database items
  * Move database functions out of here.
@@ -960,7 +960,7 @@ static void event_movie_newfile(struct context *cnt,
       * that Motion permits. The container type is pre-pended to the name of the
       * file so that we can determine which container type created what movie.
       * The intent for this is be used for developer testing when the ffmpeg libs
-      * change or the code inside our ffmpeg module changes.  For each event, the
+      * change or the code inside our movie module changes.  For each event, the
       * container type will change.  This way, you can turn on emulate motion, then
       * specify a maximum movie time and let Motion run for days creating all the
       * different types of movies checking for crashes, warnings, etc.
@@ -1028,7 +1028,7 @@ static void event_movie_newfile(struct context *cnt,
             , stamp);
     }
     if (cnt->conf.movie_output) {
-        cnt->movie_output = mymalloc(sizeof(struct ffmpeg));
+        cnt->movie_output = mymalloc(sizeof(struct ctx_movie));
         if (cnt->imgs.size_high > 0){
             cnt->movie_output->width  = cnt->imgs.width_high;
             cnt->movie_output->height = cnt->imgs.height_high;
@@ -1072,7 +1072,7 @@ static void event_movie_newfile(struct context *cnt,
     }
 
     if (cnt->conf.movie_output_motion) {
-        cnt->movie_output_motion = mymalloc(sizeof(struct ffmpeg));
+        cnt->movie_output_motion = mymalloc(sizeof(struct ctx_movie));
         cnt->movie_output_motion->width  = cnt->imgs.width;
         cnt->movie_output_motion->height = cnt->imgs.height;
         cnt->movie_output_motion->rtsp_data = NULL;
@@ -1140,7 +1140,7 @@ static void event_movie_timelapse(struct context *cnt,
             , (int)(PATH_MAX-5-strlen(cnt->conf.target_dir))
             , tmp);
         passthrough = util_check_passthrough(cnt);
-        cnt->movie_timelapse = mymalloc(sizeof(struct ffmpeg));
+        cnt->movie_timelapse = mymalloc(sizeof(struct ctx_movie));
         if ((cnt->imgs.size_high > 0) && (!passthrough)){
             cnt->movie_timelapse->width  = cnt->imgs.width_high;
             cnt->movie_timelapse->height = cnt->imgs.height_high;

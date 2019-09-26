@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 22:05-0600\n"
+"POT-Creation-Date: 2019-09-25 22:23-0600\n"
 "PO-Revision-Date: 2018-10-13 12:01-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -920,9 +920,10 @@ msgid "Failed to allocate memory for codec name"
 msgstr "Impossible d'allouer de la mémoire pour le nom du codec"
 
 #: src/movie.c
+#, fuzzy
 msgid ""
-"The frame rate specified is too high for the ffmpeg movie type specified. "
-"Choose a different ffmpeg container or lower framerate."
+"The frame rate specified is too high for the movie movie type specified. "
+"Choose a different movie container or lower framerate."
 msgstr ""
 "Choisissez un conteneur ffmpeg différent ou une fréquence d'image plus basse."
 
@@ -1066,9 +1067,9 @@ msgid "Error opening file %s"
 msgstr ""
 
 #: src/movie.c
-#, c-format
-msgid "Could not write ffmpeg header %s"
-msgstr ""
+#, fuzzy, c-format
+msgid "Could not write movie header %s"
+msgstr "Ne peut pas créer le lien symbolique [%s]"
 
 #: src/movie.c
 #, c-format
@@ -1123,7 +1124,7 @@ msgstr ""
 
 #: src/movie.c
 #, c-format
-msgid "ffmpeg libavcodec version %d.%d.%d libavformat version %d.%d.%d"
+msgid "movie libavcodec version %d.%d.%d libavformat version %d.%d.%d"
 msgstr ""
 
 #: src/movie.c

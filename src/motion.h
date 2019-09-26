@@ -470,9 +470,9 @@ struct context {
     char extpipecmdline[PATH_MAX];
     int movie_last_shot;
 
-    struct ffmpeg   *movie_output;
-    struct ffmpeg   *movie_output_motion;
-    struct ffmpeg   *movie_timelapse;
+    struct ctx_movie   *movie_output;
+    struct ctx_movie   *movie_output_motion;
+    struct ctx_movie   *movie_timelapse;
     int             movie_passthrough;
 
     char timelapsefilename[PATH_MAX];

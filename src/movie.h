@@ -39,7 +39,7 @@ enum USER_CODEC {
 #define MyPixelFormat PixelFormat
 #endif  //Libavformat >= 56
 
-struct ffmpeg {
+struct ctx_movie {
     AVFormatContext *oc;
     AVStream *video_st;
     AVCodecContext *ctx_codec;
@@ -83,9 +83,9 @@ void movie_global_init(void);
 void movie_global_deinit(void);
 void movie_avcodec_log(void *, int, const char *, va_list);
 
-int movie_open(struct ffmpeg *ffmpeg);
-int movie_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1);
-void movie_close(struct ffmpeg *ffmpeg);
-void movie_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1);
+int movie_open(struct ctx_movie *ffmpeg);
+int movie_put_image(struct ctx_movie *ffmpeg, struct image_data *img_data, const struct timeval *tv1);
+void movie_close(struct ctx_movie *ffmpeg);
+void movie_reset_movie_start_time(struct ctx_movie *ffmpeg, const struct timeval *tv1);
 
 #endif /* _INCLUDE_MOVIE_H_ */
