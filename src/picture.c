@@ -8,12 +8,14 @@
  *    See also the file 'COPYING'.
  *
  */
+
 #include "translate.h"
 #include "picture.h"
 #include "jpegutils.h"
 #include "event.h"
 
 #include <assert.h>
+#include <jpeglib.h>
 
 #ifdef HAVE_WEBP
 #include <webp/encode.h>

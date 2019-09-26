@@ -26,6 +26,7 @@
 
 #include <dirent.h>
 #include <string.h>
+#include <regex.h>
 #include "translate.h"
 #include "motion.h"
 

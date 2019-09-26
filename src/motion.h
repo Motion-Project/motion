@@ -61,7 +61,6 @@ struct image_data;
 #include "conf.h"
 
 #include "track.h"
-#include "netcam.h"
 #include "netcam_rtsp.h"
 #include "ffmpeg.h"
 
@@ -178,6 +177,9 @@ struct image_data;
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
 
+#define TRUE 1
+#define FALSE 0
+
 
 /*
  * Structure to hold images information
@@ -200,8 +202,7 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_V4L2,
     CAMERA_TYPE_BKTR,
     CAMERA_TYPE_MMAL,
-    CAMERA_TYPE_RTSP,
-    CAMERA_TYPE_NETCAM
+    CAMERA_TYPE_RTSP
 };
 
 enum WEBUI_LEVEL{

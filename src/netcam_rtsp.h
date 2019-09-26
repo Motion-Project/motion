@@ -4,6 +4,10 @@
 struct context;
 struct image_data;
 
+#define NETCAM_GENERAL_ERROR       0x02          /* binary 000010 */
+#define NETCAM_RESTART_ERROR       0x12          /* binary 010010 */
+#define NETCAM_BUFFSIZE 4096
+
 enum RTSP_STATUS {
     RTSP_CONNECTED,      /* The camera is currently connected */
     RTSP_READINGIMAGE,   /* Motion is reading a image from camera */
@@ -15,6 +19,33 @@ struct imgsize_context {
     int                   width;
     int                   height;
 };
+
+/*
+ * struct url_t is used when parsing the user-supplied URL, as well as
+ * when attempting to connect to the netcam.
+ */
+struct url_t {
+    char *service;
+    char *userpass;
+    char *host;
+    int port;
+    char *path;
+};
+
+/*
+ * We use a special "triple-buffer" technique.  There are
+ * three separate buffers (latest, receiving and jpegbuf)
+ * which are each described using a struct netcam_image_buff
+ */
+typedef struct netcam_image_buff {
+    char *ptr;
+    int content_length;
+    size_t size;                    /* total allocated size */
+    size_t used;                    /* bytes already used */
+    struct timeval image_time;      /* time this image was received */
+} netcam_buff;
+typedef netcam_buff *netcam_buff_ptr;
+
 
 #ifdef HAVE_FFMPEG
 

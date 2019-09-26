@@ -6,15 +6,9 @@ src/event.c
 src/ffmpeg.c
 src/jpegutils.c
 src/logger.c
-src/md5.c
 src/mmalcam.c
 src/motion.c
-src/netcam.c
-src/netcam_ftp.c
-src/netcam_http.c
-src/netcam_jpeg.c
 src/netcam_rtsp.c
-src/netcam_wget.c
 src/picture.c
 src/rotate.c
 src/track.c

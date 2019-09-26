@@ -659,13 +659,6 @@ void vid_close(struct context *cnt) {
     }
 #endif
 
-    if (cnt->netcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_cleanup"));
-        netcam_cleanup(cnt->netcam, 0);
-        cnt->netcam = NULL;
-        return;
-    }
-
     if (cnt->rtsp) {
         /* This also cleans up high resolution */
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_rtsp_cleanup"));
@@ -727,17 +720,6 @@ int vid_start(struct context *cnt) {
         return dev;
     }
 #endif
-
-    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
-        dev = netcam_start(cnt);
-        if (dev < 0) {
-            netcam_cleanup(cnt->netcam, 1);
-            cnt->netcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam failed to open"));
-        }
-        return dev;
-    }
 
     if (cnt->camera_type == CAMERA_TYPE_RTSP) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam RTSP"));
@@ -803,13 +785,6 @@ int vid_next(struct context *cnt, struct image_data *img_data){
         return mmalcam_next(cnt, img_data);
     }
 #endif
-
-    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        if (cnt->video_dev == -1)
-            return NETCAM_GENERAL_ERROR;
-
-        return netcam_next(cnt, img_data);
-    }
 
     if (cnt->camera_type == CAMERA_TYPE_RTSP) {
         if (cnt->video_dev == -1)

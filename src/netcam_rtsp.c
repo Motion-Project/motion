@@ -24,6 +24,7 @@
  ***********************************************************/
 
 #include <stdio.h>
+#include <regex.h>
 #include "translate.h"
 #include "rotate.h"    /* already includes motion.h */
 #include "netcam_rtsp.h"
@@ -32,6 +33,230 @@
 #ifdef HAVE_FFMPEG
 
 #include "ffmpeg.h"
+
+void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
+{
+    int min_size_to_alloc;
+    int real_alloc;
+    int new_size;
+
+    if ((buff->size - buff->used) >= numbytes)
+        return;
+
+    min_size_to_alloc = numbytes - (buff->size - buff->used);
+    real_alloc = ((min_size_to_alloc / NETCAM_BUFFSIZE) * NETCAM_BUFFSIZE);
+
+    if ((min_size_to_alloc - real_alloc) > 0)
+        real_alloc += NETCAM_BUFFSIZE;
+
+    new_size = buff->size + real_alloc;
+
+    MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
+        ,_("expanding buffer from [%d/%d] to [%d/%d] bytes.")
+        ,(int) buff->used, (int) buff->size
+        ,(int) buff->used, new_size);
+
+    buff->ptr = myrealloc(buff->ptr, new_size,
+                          "netcam_check_buf_size");
+    buff->size = new_size;
+}
+
+/*
+ * The following three routines (netcam_url_match, netcam_url_parse and
+ * netcam_url_free are for 'parsing' (i.e. separating into the relevant
+ * components) the URL provided by the user.  They make use of regular
+ * expressions (which is outside the scope of this module, so detailed
+ * comments are not provided).  netcam_url_parse is called from netcam_start,
+ * and puts the "broken-up" components of the URL into the "url" element of
+ * the netcam_context structure.
+ *
+ * Note that the routines are not "very clever", but they work sufficiently
+ * well for the limited requirements of this module.  The expression:
+ *   (http)://(((.*):(.*))@)?([^/:]|[-.a-z0-9]+)(:([0-9]+))?($|(/[^:]*))
+ * requires
+ *   1) a string which begins with 'http', followed by '://'
+ *   2) optionally a '@' which is preceded by two strings
+ *      (with 0 or more characters each) separated by a ':'
+ *      [this is for an optional username:password]
+ *   3) a string comprising alpha-numerics, '-' and '.' characters
+ *      [this is for the hostname]
+ *   4) optionally a ':' followed by one or more numeric characters
+ *      [this is for an optional port number]
+ *   5) finally, either an end of line or a series of segments,
+ *      each of which begins with a '/', and contains anything
+ *      except a ':'
+ */
+
+/**
+ * netcam_url_match
+ *
+ *      Finds the matched part of a regular expression
+ *
+ * Parameters:
+ *
+ *      m          A structure containing the regular expression to be used
+ *      input      The input string
+ *
+ * Returns:        The string which was matched
+ *
+ */
+static char *netcam_url_match(regmatch_t m, const char *input)
+{
+    char *match = NULL;
+    int len;
+
+    if (m.rm_so != -1) {
+        len = m.rm_eo - m.rm_so;
+
+        if ((match = mymalloc(len + 1)) != NULL) {
+            strncpy(match, input + m.rm_so, len);
+            match[len] = '\0';
+        }
+    }
+
+    return match;
+}
+
+static void netcam_url_invalid(struct url_t *parse_url){
+
+    MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO,_("Invalid URL.  Can not parse values."));
+
+    parse_url->host = malloc(5);
+    parse_url->service = malloc(5);
+    parse_url->path = malloc(10);
+    parse_url->userpass = malloc(10);
+    parse_url->port = 0;
+    sprintf(parse_url->host, "%s","????");
+    sprintf(parse_url->service, "%s","????");
+    sprintf(parse_url->path, "%s","INVALID");
+    sprintf(parse_url->userpass, "%s","INVALID");
+
+}
+/**
+ * netcam_url_parse
+ *
+ *      parses a string containing a URL into it's components
+ *
+ * Parameters:
+ *      parse_url          A structure which will receive the results
+ *                         of the parsing
+ *      text_url           The input string containing the URL
+ *
+ * Returns:                Nothing
+ *
+ */
+void netcam_url_parse(struct url_t *parse_url, const char *text_url)
+{
+    char *s;
+    int i;
+
+    const char *re = "(http|ftp|mjpg|mjpeg|rtsp|rtmp)://(((.*):(.*))@)?"
+                     "([^/:]|[-_.a-z0-9]+)(:([0-9]+))?($|(/[^*]*))";
+    regex_t pattbuf;
+    regmatch_t matches[10];
+
+    if (!strncmp(text_url, "file", 4))
+        re = "(file)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+
+    if (!strncmp(text_url, "jpeg", 4))
+        re = "(jpeg)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+
+    if (!strncmp(text_url, "v4l2", 4))
+        re = "(v4l2)://(((.*):(.*))@)?([/:])?(:([0-9]+))?($|(/[^*]*))";
+
+    /*  Note that log messages are commented out to avoid leaking info related
+     *  to user/host/pass etc.  Keeing them in the code for easier debugging if
+     *  it is needed
+     */
+
+    //MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Entry netcam_url_parse data %s",text_url);
+
+    memset(parse_url, 0, sizeof(struct url_t));
+    /*
+     * regcomp compiles regular expressions into a form that is
+     * suitable for regexec searches
+     * regexec matches the URL string against the regular expression
+     * and returns an array of pointers to strings matching each match
+     * within (). The results that we need are finally placed in parse_url.
+     */
+    if (!regcomp(&pattbuf, re, REG_EXTENDED | REG_ICASE)) {
+        if (regexec(&pattbuf, text_url, 10, matches, 0) != REG_NOMATCH) {
+            for (i = 0; i < 10; i++) {
+                if ((s = netcam_url_match(matches[i], text_url)) != NULL) {
+                    //MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO, "Parse case %d data %s", i, s);
+                    switch (i) {
+                    case 1:
+                        parse_url->service = s;
+                        break;
+                    case 3:
+                        parse_url->userpass = s;
+                        break;
+                    case 6:
+                        parse_url->host = s;
+                        break;
+                    case 8:
+                        parse_url->port = atoi(s);
+                        free(s);
+                        break;
+                    case 9:
+                        parse_url->path = s;
+                        break;
+                        /* Other components ignored */
+                    default:
+                        free(s);
+                        break;
+                    }
+                }
+            }
+        } else {
+            netcam_url_invalid(parse_url);
+        }
+    } else {
+        netcam_url_invalid(parse_url);
+    }
+    if (((!parse_url->port) && (parse_url->service)) ||
+        ((parse_url->port > 65535) && (parse_url->service))) {
+        if (!strcmp(parse_url->service, "http"))
+            parse_url->port = 80;
+        else if (!strcmp(parse_url->service, "ftp"))
+            parse_url->port = 21;
+        else if (!strcmp(parse_url->service, "rtmp"))
+            parse_url->port = 1935;
+        else if (!strcmp(parse_url->service, "rtsp"))
+            parse_url->port = 554;
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Using port number %d"),parse_url->port);
+    }
+
+    regfree(&pattbuf);
+}
+
+/**
+ * netcam_url_free
+ *
+ *      General cleanup of the URL structure, called from netcam_cleanup.
+ *
+ * Parameters:
+ *
+ *      parse_url       Structure containing the parsed data.
+ *
+ * Returns:             Nothing
+ *
+ */
+void netcam_url_free(struct url_t *parse_url)
+{
+    free(parse_url->service);
+    parse_url->service = NULL;
+
+    free(parse_url->userpass);
+    parse_url->userpass = NULL;
+
+    free(parse_url->host);
+    parse_url->host = NULL;
+
+    free(parse_url->path);
+    parse_url->path = NULL;
+}
+
 
 static int netcam_rtsp_check_pixfmt(struct rtsp_context *rtsp_data){
     /* Determine if the format is YUV420P */
