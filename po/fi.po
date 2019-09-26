@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 21:10-0600\n"
+"POT-Creation-Date: 2019-09-25 21:34-0600\n"
 "PO-Revision-Date: 2018-10-13 12:00-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -1126,10 +1126,6 @@ msgid "av_lockmgr_register failed (%d)"
 msgstr ""
 
 #: src/ffmpeg.c
-msgid "No ffmpeg functionality included"
-msgstr ""
-
-#: src/ffmpeg.c
 msgid "av_lockmgr_register reset failed on cleanup"
 msgstr ""
 
@@ -1159,10 +1155,6 @@ msgstr ""
 
 #: src/ffmpeg.c
 msgid "Buffered packet"
-msgstr ""
-
-#: src/ffmpeg.c
-msgid "No ffmpeg support"
 msgstr ""
 
 #: src/jpegutils.c
@@ -1655,14 +1647,6 @@ msgstr ""
 
 #: src/motion.c
 msgid "mmal   : not available"
-msgstr ""
-
-#: src/motion.c
-msgid "ffmpeg : available"
-msgstr ""
-
-#: src/motion.c
-msgid "ffmpeg : not available"
 msgstr ""
 
 #: src/motion.c
@@ -2267,10 +2251,6 @@ msgstr ""
 #: src/netcam_rtsp.c
 #, c-format
 msgid "Failed trying to read first image - retval:%d"
-msgstr ""
-
-#: src/netcam_rtsp.c
-msgid "FFmpeg/Libav not found on computer.  No RTSP support"
 msgstr ""
 
 #: src/netcam_rtsp.c

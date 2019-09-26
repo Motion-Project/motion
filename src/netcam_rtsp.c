@@ -1,19 +1,10 @@
 /***********************************************************
- *  In the top section are the functions that are used
- *  when processing the camera feed.  Since these functions
- *  are internal to the RTSP module, and many require FFmpeg
- *  structures in their declarations, they are within the
- *  HAVE_FFMPEG block that eliminates them entirely when
- *  FFmpeg is not present.
  *
  *  The functions:
  *      netcam_rtsp_setup
  *      netcam_rtsp_next
  *      netcam_rtsp_cleanup
- *  are called from video_common.c therefore must be defined even
- *  if FFmpeg is not present.  They must also not have FFmpeg
- *  structures in the declarations.  Simple error
- *  messages are raised if called when no FFmpeg is found.
+ *  are called from video_common.c
  *
  *  Additional note:  Although this module is called netcam_rtsp,
  *  it actually handles more camera types than just rtsp.
@@ -29,9 +20,6 @@
 #include "rotate.h"    /* already includes motion.h */
 #include "netcam_rtsp.h"
 #include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
-
-#ifdef HAVE_FFMPEG
-
 #include "ffmpeg.h"
 
 void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
@@ -1719,14 +1707,7 @@ static int netcam_rtsp_start_handler(struct rtsp_context *rtsp_data){
 
 }
 
-/*********************************************************
- *  This ends the section of functions that rely upon FFmpeg
- ***********************************************************/
-#endif /* End HAVE_FFMPEG */
-
-
 int netcam_rtsp_setup(struct context *cnt){
-#ifdef HAVE_FFMPEG
 
     int retcd;
     int indx_cam, indx_max;
@@ -1796,16 +1777,10 @@ int netcam_rtsp_setup(struct context *cnt){
 
     return 0;
 
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if (cnt)
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-    return -1;
-#endif /* End #ifdef HAVE_FFMPEG */
 }
 
 int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
-#ifdef HAVE_FFMPEG
+
     /* This is called from the motion loop thread */
 
     if ((cnt->rtsp->status == RTSP_RECONNECTING) ||
@@ -1839,17 +1814,10 @@ int netcam_rtsp_next(struct context *cnt, struct image_data *img_data){
     rotate_map(cnt, img_data);
 
     return 0;
-
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if ((cnt) || (img_data))
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-    return -1;
-#endif /* End #ifdef HAVE_FFMPEG */
 }
 
 void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
-#ifdef HAVE_FFMPEG
+
      /*
      * If the init_retry_flag is not set this function was
      * called while retrying the initial connection and there is
@@ -1920,13 +1888,6 @@ void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag){
     }
     cnt->rtsp = NULL;
     cnt->rtsp_high = NULL;
-
-#else  /* No FFmpeg/Libav */
-    /* Stop compiler warnings */
-    if ((cnt) || (init_retry_flag))
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("FFmpeg/Libav not found on computer.  No RTSP support"));
-    return;
-#endif /* End #ifdef HAVE_FFMPEG */
 
 }
 

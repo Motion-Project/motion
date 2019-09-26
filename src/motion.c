@@ -3145,12 +3145,6 @@ static void motion_ntc(void){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mmal   : not available"));
     #endif
 
-    #ifdef HAVE_FFMPEG
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("ffmpeg : available"));
-    #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("ffmpeg : not available"));
-    #endif
-
     #ifdef HAVE_MYSQL
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("mysql  : available"));
     #else
@@ -4100,7 +4094,7 @@ void util_threadname_get(char *threadname){
 
 }
 int util_check_passthrough(struct context *cnt){
-#if (HAVE_FFMPEG && LIBAVFORMAT_VERSION_MAJOR < 55)
+#if (LIBAVFORMAT_VERSION_MAJOR < 55)
     if (cnt->movie_passthrough)
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("FFMPEG version too old. Disabling pass-through processing."));

@@ -24,8 +24,6 @@
 #include "translate.h"
 #include "motion.h"
 
-#ifdef HAVE_FFMPEG
-
 /****************************************************************************
  *  The section below is the "my" section of functions.
  *  These are designed to be extremely simple version specific
@@ -1424,15 +1422,11 @@ static void ffmpeg_put_pix_yuv420(struct ffmpeg *ffmpeg, struct image_data *img_
 }
 
 
-#endif /* HAVE_FFMPEG */
-
 /****************************************************************************
  ****************************************************************************
  ****************************************************************************/
 
 void ffmpeg_global_init(void){
-#ifdef HAVE_FFMPEG
-
 
     MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
         ,_("ffmpeg libavcodec version %d.%d.%d"
@@ -1462,15 +1456,9 @@ void ffmpeg_global_init(void){
     }
 #endif
 
-#else /* No FFMPEG */
-
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg functionality included"));
-
-#endif /* HAVE_FFMPEG */
 }
 
 void ffmpeg_global_deinit(void) {
-#ifdef HAVE_FFMPEG
 
     avformat_network_deinit();
 
@@ -1484,16 +1472,9 @@ void ffmpeg_global_deinit(void) {
 #endif
 
 
-#else /* No FFMPEG */
-
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg functionality included"));
-
-#endif /* HAVE_FFMPEG */
 }
 
 int ffmpeg_open(struct ffmpeg *ffmpeg){
-
-#ifdef HAVE_FFMPEG
 
     int retcd;
 
@@ -1551,19 +1532,9 @@ int ffmpeg_open(struct ffmpeg *ffmpeg){
 
     return 0;
 
-#else /* No FFMPEG */
-
-    if (ffmpeg) {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg functionality included"));
-    }
-    return -1;
-
-#endif /* HAVE_FFMPEG */
-
 }
 
 void ffmpeg_close(struct ffmpeg *ffmpeg){
-#ifdef HAVE_FFMPEG
 
     if (ffmpeg != NULL) {
 
@@ -1584,14 +1555,11 @@ void ffmpeg_close(struct ffmpeg *ffmpeg){
         ffmpeg_free_nal(ffmpeg);
     }
 
-#else
-    if (ffmpeg != NULL) free(ffmpeg);
-#endif // HAVE_FFMPEG
 }
 
 
 int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const struct timeval *tv1){
-#ifdef HAVE_FFMPEG
+
     int retcd = 0;
     int cnt = 0;
 
@@ -1643,16 +1611,9 @@ int ffmpeg_put_image(struct ffmpeg *ffmpeg, struct image_data *img_data, const s
 
     return retcd;
 
-#else
-    if (ffmpeg && img_data && tv1) {
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg support"));
-    }
-    return 0;
-#endif // HAVE_FFMPEG
 }
 
 void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *tv1){
-#ifdef HAVE_FFMPEG
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, ffmpeg->fps},ffmpeg->video_st->time_base);
     if (one_frame_interval <= 0)
         one_frame_interval = 1;
@@ -1661,9 +1622,4 @@ void ffmpeg_reset_movie_start_time(struct ffmpeg *ffmpeg, const struct timeval *
     ffmpeg->start_time.tv_sec = tv1->tv_sec;
     ffmpeg->start_time.tv_usec = tv1->tv_usec;
 
-#else
-    if (ffmpeg && tv1) {
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, _("No ffmpeg support"));
-    }
-#endif // HAVE_FFMPEG
 }

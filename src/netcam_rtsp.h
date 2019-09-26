@@ -47,8 +47,6 @@ typedef struct netcam_image_buff {
 typedef netcam_buff *netcam_buff_ptr;
 
 
-#ifdef HAVE_FFMPEG
-
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
@@ -119,16 +117,6 @@ struct rtsp_context {
     pthread_mutex_t           mutex_pktarray;   /* mutex used with the packet array */
 
 };
-
-#else /* Do not have FFmpeg */
-
-struct rtsp_context {
-    int                   dummy;
-    pthread_t             thread_id;
-    int                   handler_finished;
-};
-
-#endif /* end HAVE_FFMPEG  */
 
 int netcam_rtsp_setup(struct context *cnt);
 int netcam_rtsp_next(struct context *cnt, struct image_data *img_data);

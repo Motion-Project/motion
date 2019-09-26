@@ -232,7 +232,7 @@ AS_IF([test "${MMAL}" = "no"], [
 AM_CONDITIONAL([INC_MMAL_SRC],[test x${MMAL} = xyes])
 
 ##############################################################################
-###  Check for ffmpeg - Optional.
+###  Check for ffmpeg
 ##############################################################################
 FFMPEG_VER="--"
 AC_ARG_WITH([ffmpeg],
@@ -243,7 +243,7 @@ AC_ARG_WITH([ffmpeg],
 
 AS_IF([test "${FFMPEG}" = "no"], [
     AC_MSG_CHECKING(for FFmpeg)
-    AC_MSG_RESULT(skipped)
+    AC_MSG_ERROR([Package ffmpeg is required.])
   ],[
     AC_MSG_CHECKING(FFmpeg pkg-config path)
     TEMP_PATH=$PKG_CONFIG_PATH
@@ -261,11 +261,10 @@ AS_IF([test "${FFMPEG}" = "no"], [
         FFMPEG_VER=`pkg-config --modversion libavformat`
         TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags $FFMPEG_DEPS`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs $FFMPEG_DEPS`
-        AC_DEFINE([HAVE_FFMPEG], [1], [Define to 1 if FFMPEG is around])
         AC_MSG_RESULT(yes)
       ],[
         AC_MSG_RESULT(no)
-        AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev libavdevice-dev' were not found.  Please check motion_guide.html and install necessary dependencies or use the '--without-ffmpeg' configuration option.])
+        AC_MSG_ERROR([Required ffmpeg packages 'libavutil-dev libavformat-dev libavcodec-dev libswscale-dev libavdevice-dev' were not found.  Please check motion_guide.html and install necessary dependencies])
       ]
     )
     PKG_CONFIG_PATH=$TEMP_PATH
