@@ -748,13 +748,6 @@ static int init_camera_type(struct context *cnt){
         return 0;
     }
 
-    #ifdef HAVE_BKTR
-        if (strncmp(cnt->conf.video_device,"/dev/bktr",9) == 0) {
-            cnt->camera_type = CAMERA_TYPE_BKTR;
-            return 0;
-        }
-    #endif // HAVE_BKTR
-
     #ifdef HAVE_V4L2
         if (cnt->conf.video_device) {
             cnt->camera_type = CAMERA_TYPE_V4L2;
@@ -764,7 +757,7 @@ static int init_camera_type(struct context *cnt){
 
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-        , _("Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"));
+        , _("Unable to determine camera type (MMAL, Netcam, V4L2)"));
     return -1;
 
 }
@@ -3125,12 +3118,6 @@ static void motion_ntc(void){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
     #else
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : not available"));
-    #endif
-
-    #ifdef HAVE_BKTR
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("bktr   : available"));
-    #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("bktr   : not available"));
     #endif
 
     #ifdef HAVE_WEBP

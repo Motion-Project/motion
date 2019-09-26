@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 21:34-0600\n"
+"POT-Creation-Date: 2019-09-25 21:50-0600\n"
 "PO-Revision-Date: 2018-10-13 12:02-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -1293,7 +1293,7 @@ msgid "Added %d fillerframes into movie"
 msgstr ""
 
 #: src/motion.c
-msgid "Unable to determine camera type (MMAL, Netcam, V4L2, BKTR)"
+msgid "Unable to determine camera type (MMAL, Netcam, V4L2)"
 msgstr ""
 
 #: src/motion.c
@@ -1624,14 +1624,6 @@ msgstr ""
 
 #: src/motion.c
 msgid "v4l2   : not available"
-msgstr ""
-
-#: src/motion.c
-msgid "bktr   : available"
-msgstr ""
-
-#: src/motion.c
-msgid "bktr   : not available"
 msgstr ""
 
 #: src/motion.c
@@ -2590,178 +2582,6 @@ msgstr ""
 msgid "Language: English"
 msgstr "Kalba: Lietuvių"
 
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSHUE Error setting hue [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "to [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "METEORGHUE Error getting hue"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSCSAT Error setting saturation [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "METEORGCSAT Error getting saturation"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSCONT Error setting contrast [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "METEORGCONT Error getting contrast"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSBRIG  brightness [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "METEORGBRIG  getting brightness"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Not implemented"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "Device Input %d out of range (0-4)"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "METEORSINPUT %d invalid -Trying composite %d"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "BT848SFMT, Couldn't set the input format, try again with default"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "BT848SFMT, Couldn't set the input format either default"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Couldn't set the geometry"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "to [%d/%d] Norm %d"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "Not valid Frequency [%lu] for Source input [%i]"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "Frequency [%lu] Source input [%i]"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "set input [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "set input format [%d]"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "set geometry [%d]x[%d]"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Frequency set (no implemented yet"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Sizing buffer to 3x"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Sizing buffer to 3/2x"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "mmap failed"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "METEORCAPTUR using single method Error capturing"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Error capturing using single method"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "BKTR is not enabled."
-msgstr ""
-
-#: src/video_bktr.c src/video_v4l2.c
-msgid "Unable to find video device"
-msgstr ""
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "Closing video device %s"
-msgstr ""
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "Still %d users of video device %s, so we don't close it now"
-msgstr ""
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "config image width (%d) is not modulo 8"
-msgstr ""
-
-#: src/video_bktr.c src/video_v4l2.c
-#, c-format
-msgid "config image height (%d) is not modulo 8"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "Stopping capture"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "Reusing [%s] inputs [%d,%d] Change capture method METEOR_CAP_SINGLE"
-msgstr ""
-
-#: src/video_bktr.c
-msgid "VIDEO_PALETTE_YUV420P setting imgs.size_norm and imgs.motionsize"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "open video device %s"
-msgstr ""
-
-#: src/video_bktr.c
-#, c-format
-msgid "open tuner device %s"
-msgstr ""
-
 #: src/video_common.c
 msgid "Corrupt image ... continue"
 msgstr ""
@@ -2789,11 +2609,7 @@ msgid "Cleaning up V4L2 device"
 msgstr ""
 
 #: src/video_common.c
-msgid "Cleaning up BKTR device"
-msgstr ""
-
-#: src/video_common.c
-msgid "No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"
+msgid "No Camera device cleanup (MMAL, Netcam, V4L2)"
 msgstr ""
 
 #: src/video_common.c
@@ -2821,15 +2637,7 @@ msgid "V4L2 device failed to open"
 msgstr ""
 
 #: src/video_common.c
-msgid "Opening BKTR device"
-msgstr ""
-
-#: src/video_common.c
-msgid "BKTR device failed to open"
-msgstr ""
-
-#: src/video_common.c
-msgid "No Camera device specified (MMAL, Netcam, V4L2, BKTR)"
+msgid "No Camera device specified (MMAL, Netcam, V4L2)"
 msgstr ""
 
 #: src/video_loopback.c
@@ -3028,7 +2836,17 @@ msgstr ""
 
 #: src/video_v4l2.c
 #, c-format
+msgid "config image width (%d) is not modulo 8"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
 msgid "Adjusting to width (%d)"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "config image height (%d) is not modulo 8"
 msgstr ""
 
 #: src/video_v4l2.c
@@ -3162,6 +2980,20 @@ msgstr ""
 
 #: src/video_v4l2.c
 msgid "V4L2 is not enabled."
+msgstr ""
+
+#: src/video_v4l2.c
+msgid "Unable to find video device"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Closing video device %s"
+msgstr ""
+
+#: src/video_v4l2.c
+#, c-format
+msgid "Still %d users of video device %s, so we don't close it now"
 msgstr ""
 
 #: src/video_v4l2.c

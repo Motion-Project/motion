@@ -129,27 +129,6 @@ AC_LINK_IFELSE(
 CFLAGS="$HOLD_CFLAGS"
 
 ###############################################################################
-###  BKTR Video System - Optional
-###############################################################################
-AC_ARG_WITH(bktr,
-  AS_HELP_STRING([--without-bktr],[Disable bktr devices]),
-  [BKTR="$withval"],
-  [BKTR="yes"]
-)
-AS_IF([test "${BKTR}" = "yes" ], [
-    AC_CHECK_HEADERS(dev/bktr/ioctl_meteor.h dev/bktr/ioctl_bt848.h,[BKTR="yes"],[BKTR="no"])
-    AS_IF([test "${BKTR}" = "no" ], [
-        AC_CHECK_HEADERS(dev/ic/bt8xx.h,[BKTR="yes"],[BKTR="no"])
-      ]
-    )
-    AS_IF([test "${BKTR}" = "yes" ], [
-        AC_DEFINE([HAVE_BKTR], [1], [Define to 1 if BKTR is around])
-      ]
-    )
-  ]
-)
-
-###############################################################################
 ###  V4L2 Video System - Optional
 ###############################################################################
 AC_ARG_WITH(v4l2,
@@ -505,7 +484,6 @@ echo "pthread_getname_np  : $PTHREAD_GETNAME_NP"
 echo "XSI error           : $XSI_STRERROR"
 echo "webp support        : $WEBP"
 echo "V4L2 support        : $V4L2"
-echo "BKTR support        : $BKTR"
 echo "MMAL support        : $MMAL"
 echo "FFmpeg support      : $FFMPEG"
 echo "libavformat version : $FFMPEG_VER"

@@ -9,7 +9,7 @@ LIBS = @LIBINTL@ @LIBS@
 bin_PROGRAMS = motion
 
 motion_SOURCES = motion.c logger.c conf.c draw.c jpegutils.c video_loopback.c \
-	video_v4l2.c video_common.c video_bktr.c \
+	video_v4l2.c video_common.c \
 	netcam_rtsp.c track.c alg.c event.c picture.c \
 	rotate.c translate.c ffmpeg.c \
 	webu.c webu_html.c webu_stream.c webu_text.c mmalcam.c $(MMAL_SRC)

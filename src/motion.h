@@ -200,7 +200,6 @@ struct image_data;
 enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
-    CAMERA_TYPE_BKTR,
     CAMERA_TYPE_MMAL,
     CAMERA_TYPE_RTSP
 };
@@ -219,7 +218,7 @@ struct vdev_usrctrl_ctx {
 };
 
 struct vdev_context {
-    /* As v4l2 and bktr get rewritten, put thread specific items here
+    /* As v4l2 gets rewritten, put thread specific items here
      * Rather than use conf options directly, copy from conf to here
      * to handle cross thread webui changes which could cause problems
      */
@@ -388,7 +387,7 @@ struct context {
     struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
     struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
 
-    struct vdev_context *vdev;              /* Structure for v4l2 and bktr device information */
+    struct vdev_context *vdev;              /* Structure for v4l2 device information */
 
     struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;

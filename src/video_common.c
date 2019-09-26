@@ -12,7 +12,6 @@
 #include "motion.h"
 #include "video_common.h"
 #include "video_v4l2.h"
-#include "video_bktr.h"
 #include "jpegutils.h"
 
 typedef unsigned char uint8_t;
@@ -639,13 +638,11 @@ int vid_parms_parse(struct context *cnt){
 void vid_mutex_init(void)
 {
     v4l2_mutex_init();
-    bktr_mutex_init();
 }
 
 void vid_mutex_destroy(void)
 {
     v4l2_mutex_destroy();
-    bktr_mutex_destroy();
 }
 
 void vid_close(struct context *cnt) {
@@ -672,13 +669,7 @@ void vid_close(struct context *cnt) {
         return;
     }
 
-    if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Cleaning up BKTR device"));
-        bktr_cleanup(cnt);
-        return;
-    }
-
-    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup (MMAL, Netcam, V4L2, BKTR)"));
+    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("No Camera device cleanup (MMAL, Netcam, V4L2)"));
     return;
 
 }
@@ -740,17 +731,8 @@ int vid_start(struct context *cnt) {
         return dev;
     }
 
-    if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening BKTR device"));
-        dev = bktr_start(cnt);
-        if (dev < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("BKTR device failed to open"));
-        }
-        return dev;
-    }
-
     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-        ,_("No Camera device specified (MMAL, Netcam, V4L2, BKTR)"));
+        ,_("No Camera device specified (MMAL, Netcam, V4L2)"));
     return dev;
 
 }
@@ -796,10 +778,6 @@ int vid_next(struct context *cnt, struct image_data *img_data){
     if (cnt->camera_type == CAMERA_TYPE_V4L2) {
         return v4l2_next(cnt, img_data);
    }
-
-    if (cnt->camera_type == CAMERA_TYPE_BKTR) {
-        return bktr_next(cnt, img_data);
-    }
 
     return -2;
 }

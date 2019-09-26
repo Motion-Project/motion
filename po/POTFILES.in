@@ -13,7 +13,6 @@ src/picture.c
 src/rotate.c
 src/track.c
 src/translate.c
-src/video_bktr.c
 src/video_common.c
 src/video_loopback.c
 src/video_v4l2.c
