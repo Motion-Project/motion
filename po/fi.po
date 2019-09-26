@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-20 22:18-0600\n"
+"POT-Creation-Date: 2019-09-25 20:43-0600\n"
 "PO-Revision-Date: 2018-10-13 12:00-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -990,7 +990,7 @@ msgstr ""
 
 #: src/ffmpeg.c
 #, c-format
-msgid "Preferred codec %s has been blacklisted"
+msgid "Preferred codec %s has been blacklisted: %s"
 msgstr ""
 
 #: src/ffmpeg.c
@@ -1001,11 +1001,6 @@ msgstr ""
 #: src/ffmpeg.c
 #, c-format
 msgid "Codec %s not found"
-msgstr ""
-
-#: src/ffmpeg.c
-#, c-format
-msgid "FFMpeg version is too old for codec %s"
 msgstr ""
 
 #: src/ffmpeg.c
@@ -1503,16 +1498,6 @@ msgstr ""
 #: src/motion.c
 #, c-format
 msgid "Maskfile \"%s\" loaded."
-msgstr ""
-
-#: src/motion.c
-#, c-format
-msgid "Problem enabling motion-stream server in port %d"
-msgstr ""
-
-#: src/motion.c
-#, c-format
-msgid "Started motion-stream server on port %d (auth %s)"
 msgstr ""
 
 #: src/motion.c
