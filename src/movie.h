@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include "config.h"
 struct image_data; /* forward declare for functions */
-struct rtsp_context;
+struct ctx_netcam;
 
 enum TIMELAPSE_TYPE {
     TIMELAPSE_NONE,         /* No timelapse, regular processing */
@@ -47,7 +47,7 @@ struct ctx_movie {
     AVPacket pkt;
     AVFrame *picture;       /* contains default image pointers */
     AVDictionary *opts;
-    struct rtsp_context *rtsp_data;
+    struct ctx_netcam *netcam_data;
     int width;
     int height;
     enum TIMELAPSE_TYPE tlapse;

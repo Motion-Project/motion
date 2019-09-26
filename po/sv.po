@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 22:32-0600\n"
+"POT-Creation-Date: 2019-09-25 23:02-0600\n"
 "PO-Revision-Date: 2018-10-13 12:04-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -2600,7 +2600,7 @@ msgid "calling mmalcam_cleanup"
 msgstr ""
 
 #: src/video_common.c
-msgid "calling netcam_rtsp_cleanup"
+msgid "calling netcam_cleanup"
 msgstr ""
 
 #: src/video_common.c
@@ -2620,11 +2620,11 @@ msgid "MMAL cam failed to open"
 msgstr ""
 
 #: src/video_common.c
-msgid "Opening Netcam RTSP"
+msgid "Opening Netcam"
 msgstr ""
 
 #: src/video_common.c
-msgid "Netcam RTSP failed to open"
+msgid "Netcam failed to open"
 msgstr ""
 
 #: src/video_common.c

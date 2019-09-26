@@ -1153,11 +1153,11 @@ static void movie_passthru_reset(struct ctx_movie *movie){
     /* Reset the written flag at start of each event */
     int indx;
 
-    pthread_mutex_lock(&movie->rtsp_data->mutex_pktarray);
-        for(indx = 0; indx < movie->rtsp_data->pktarray_size; indx++) {
-            movie->rtsp_data->pktarray[indx].iswritten = FALSE;
+    pthread_mutex_lock(&movie->netcam_data->mutex_pktarray);
+        for(indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
+            movie->netcam_data->pktarray[indx].iswritten = FALSE;
         }
-    pthread_mutex_unlock(&movie->rtsp_data->mutex_pktarray);
+    pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
 
 }
 
@@ -1171,9 +1171,9 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx){
     movie->pkt.size = 0;
 
 
-    movie->rtsp_data->pktarray[indx].iswritten = TRUE;
+    movie->netcam_data->pktarray[indx].iswritten = TRUE;
 
-    retcd = my_copy_packet(&movie->pkt, &movie->rtsp_data->pktarray[indx].packet);
+    retcd = my_copy_packet(&movie->pkt, &movie->netcam_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
@@ -1181,7 +1181,7 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx){
         return;
     }
 
-    retcd = movie_set_pktpts(movie, &movie->rtsp_data->pktarray[indx].timestamp_tv);
+    retcd = movie_set_pktpts(movie, &movie->netcam_data->pktarray[indx].timestamp_tv);
     if (retcd < 0) {
         my_packet_unref(movie->pkt);
         return;
@@ -1205,10 +1205,10 @@ static int movie_passthru_put(struct ctx_movie *movie, struct image_data *img_da
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
 
-    if (movie->rtsp_data == NULL) return -1;
+    if (movie->netcam_data == NULL) return -1;
 
-    if ((movie->rtsp_data->status == RTSP_NOTCONNECTED  ) ||
-        (movie->rtsp_data->status == RTSP_RECONNECTING  ) ){
+    if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
+        (movie->netcam_data->status == NETCAM_RECONNECTING  ) ){
         return 0;
     }
 
@@ -1218,32 +1218,32 @@ static int movie_passthru_put(struct ctx_movie *movie, struct image_data *img_da
         idnbr_image = img_data->idnbr_norm;
     }
 
-    pthread_mutex_lock(&movie->rtsp_data->mutex_pktarray);
+    pthread_mutex_lock(&movie->netcam_data->mutex_pktarray);
         idnbr_lastwritten = 0;
         idnbr_firstkey = idnbr_image;
         idnbr_stop = 0;
         indx_lastwritten = -1;
         indx_firstkey = -1;
 
-        for(indx = 0; indx < movie->rtsp_data->pktarray_size; indx++) {
-            if ((movie->rtsp_data->pktarray[indx].iswritten) &&
-                (movie->rtsp_data->pktarray[indx].idnbr > idnbr_lastwritten)){
-                idnbr_lastwritten=movie->rtsp_data->pktarray[indx].idnbr;
+        for(indx = 0; indx < movie->netcam_data->pktarray_size; indx++) {
+            if ((movie->netcam_data->pktarray[indx].iswritten) &&
+                (movie->netcam_data->pktarray[indx].idnbr > idnbr_lastwritten)){
+                idnbr_lastwritten=movie->netcam_data->pktarray[indx].idnbr;
                 indx_lastwritten = indx;
             }
-            if ((movie->rtsp_data->pktarray[indx].idnbr >  idnbr_stop) &&
-                (movie->rtsp_data->pktarray[indx].idnbr <= idnbr_image)){
-                idnbr_stop=movie->rtsp_data->pktarray[indx].idnbr;
+            if ((movie->netcam_data->pktarray[indx].idnbr >  idnbr_stop) &&
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)){
+                idnbr_stop=movie->netcam_data->pktarray[indx].idnbr;
             }
-            if ((movie->rtsp_data->pktarray[indx].iskey) &&
-                (movie->rtsp_data->pktarray[indx].idnbr <= idnbr_firstkey)){
-                    idnbr_firstkey=movie->rtsp_data->pktarray[indx].idnbr;
+            if ((movie->netcam_data->pktarray[indx].iskey) &&
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_firstkey)){
+                    idnbr_firstkey=movie->netcam_data->pktarray[indx].idnbr;
                     indx_firstkey = indx;
             }
         }
 
         if (idnbr_stop == 0){
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_pktarray);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
             return 0;
         }
 
@@ -1256,17 +1256,17 @@ static int movie_passthru_put(struct ctx_movie *movie, struct image_data *img_da
         }
 
         while (TRUE){
-            if ((!movie->rtsp_data->pktarray[indx].iswritten) &&
-                (movie->rtsp_data->pktarray[indx].packet.size > 0) &&
-                (movie->rtsp_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
-                (movie->rtsp_data->pktarray[indx].idnbr <= idnbr_image)) {
+            if ((!movie->netcam_data->pktarray[indx].iswritten) &&
+                (movie->netcam_data->pktarray[indx].packet.size > 0) &&
+                (movie->netcam_data->pktarray[indx].idnbr >  idnbr_lastwritten) &&
+                (movie->netcam_data->pktarray[indx].idnbr <= idnbr_image)) {
                 movie_passthru_write(movie, indx);
             }
-            if (movie->rtsp_data->pktarray[indx].idnbr == idnbr_stop) break;
+            if (movie->netcam_data->pktarray[indx].idnbr == idnbr_stop) break;
             indx++;
-            if (indx == movie->rtsp_data->pktarray_size ) indx = 0;
+            if (indx == movie->netcam_data->pktarray_size ) indx = 0;
         }
-    pthread_mutex_unlock(&movie->rtsp_data->mutex_pktarray);
+    pthread_mutex_unlock(&movie->netcam_data->mutex_pktarray);
     return 0;
 }
 
@@ -1275,18 +1275,18 @@ static int movie_passthru_codec(struct ctx_movie *movie){
     int retcd;
     AVStream    *stream_in;
 
-    if (movie->rtsp_data == NULL){
+    if (movie->netcam_data == NULL){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("RTSP context not available."));
         return -1;
     }
 
-    pthread_mutex_lock(&movie->rtsp_data->mutex_transfer);
+    pthread_mutex_lock(&movie->netcam_data->mutex_transfer);
 
-        if ((movie->rtsp_data->status == RTSP_NOTCONNECTED  ) ||
-            (movie->rtsp_data->status == RTSP_RECONNECTING  ) ){
+        if ((movie->netcam_data->status == NETCAM_NOTCONNECTED  ) ||
+            (movie->netcam_data->status == NETCAM_RECONNECTING  ) ){
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
                 ,_("rtsp camera not ready for pass-through."));
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
             return -1;
         }
 
@@ -1299,57 +1299,57 @@ static int movie_passthru_codec(struct ctx_movie *movie){
         retcd = movie_get_oformat(movie);
         if (retcd < 0 ) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
             return -1;
         }
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-        stream_in = movie->rtsp_data->transfer_format->streams[0];
+        stream_in = movie->netcam_data->transfer_format->streams[0];
         movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
 
         movie->video_st = avformat_new_stream(movie->oc, NULL);
         if (!movie->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
             return -1;
         }
 
         retcd = avcodec_parameters_copy(movie->video_st->codecpar, stream_in->codecpar);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
             return -1;
         }
         movie->video_st->codecpar->codec_tag  = 0;
 
 #elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
 
-        stream_in = movie->rtsp_data->transfer_format->streams[0];
+        stream_in = movie->netcam_data->transfer_format->streams[0];
 
         movie->video_st = avformat_new_stream(movie->oc, stream_in->codec->codec);
         if (!movie->video_st) {
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
             return -1;
         }
 
         retcd = avcodec_copy_context(movie->video_st->codec, stream_in->codec);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
-            pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
             return -1;
         }
         movie->video_st->codec->flags     |= MY_CODEC_FLAG_GLOBAL_HEADER;
         movie->video_st->codec->codec_tag  = 0;
 #else
         /* This is disabled in the util_check_passthrough but we need it here for compiling */
-        pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+        pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through disabled.  ffmpeg too old"));
         return -1;
 #endif
 
         movie->video_st->time_base         = stream_in->time_base;
-    pthread_mutex_unlock(&movie->rtsp_data->mutex_transfer);
+    pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
     MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through stream opened");
     return 0;
 

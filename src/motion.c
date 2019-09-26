@@ -271,8 +271,8 @@ static void context_init(struct context *cnt)
 
     cnt->vdev = NULL;    /*Init to NULL to check loading parms vs web updates*/
     cnt->netcam = NULL;
-    cnt->rtsp = NULL;
-    cnt->rtsp_high = NULL;
+    cnt->netcam = NULL;
+    cnt->netcam_high = NULL;
 
 }
 
@@ -743,7 +743,7 @@ static int init_camera_type(struct context *cnt){
             (strncmp(cnt->conf.netcam_url,"file" ,4) == 0) ||
             (strncmp(cnt->conf.netcam_url,"rtmp" ,4) == 0) ||
             (strncmp(cnt->conf.netcam_url,"rtsp" ,4) == 0)) {
-            cnt->camera_type = CAMERA_TYPE_RTSP;
+            cnt->camera_type = CAMERA_TYPE_NETCAM;
         }
         return 0;
     }
@@ -1238,7 +1238,7 @@ static int motion_init(struct context *cnt)
 
     if (init_camera_type(cnt) != 0 ) return -3;
 
-    if ((cnt->camera_type != CAMERA_TYPE_RTSP) &&
+    if ((cnt->camera_type != CAMERA_TYPE_NETCAM) &&
         (cnt->movie_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         cnt->movie_passthrough = FALSE;
@@ -3418,42 +3418,42 @@ static void motion_watchdog(int indx){
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Thread %d - Watchdog timeout did NOT restart, killing it!")
             , cnt_list[indx]->threadnr);
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
-            (cnt_list[indx]->rtsp != NULL)){
-            pthread_cancel(cnt_list[indx]->rtsp->thread_id);
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->netcam != NULL)){
+            pthread_cancel(cnt_list[indx]->netcam->thread_id);
         }
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
-            (cnt_list[indx]->rtsp_high != NULL)){
-            pthread_cancel(cnt_list[indx]->rtsp_high->thread_id);
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->netcam_high != NULL)){
+            pthread_cancel(cnt_list[indx]->netcam_high->thread_id);
         }
         pthread_cancel(cnt_list[indx]->thread_id);
     }
 
     if (cnt_list[indx]->watchdog < WATCHDOG_KILL) {
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
-            (cnt_list[indx]->rtsp != NULL)){
-            if (!cnt_list[indx]->rtsp->handler_finished &&
-                pthread_kill(cnt_list[indx]->rtsp->thread_id, 0) == ESRCH) {
-                cnt_list[indx]->rtsp->handler_finished = TRUE;
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->netcam != NULL)){
+            if (!cnt_list[indx]->netcam->handler_finished &&
+                pthread_kill(cnt_list[indx]->netcam->thread_id, 0) == ESRCH) {
+                cnt_list[indx]->netcam->handler_finished = TRUE;
                 pthread_mutex_lock(&global_lock);
                     threads_running--;
                 pthread_mutex_unlock(&global_lock);
-                netcam_rtsp_cleanup(cnt_list[indx],FALSE);
+                netcam_cleanup(cnt_list[indx],FALSE);
             } else {
-                pthread_kill(cnt_list[indx]->rtsp->thread_id, SIGVTALRM);
+                pthread_kill(cnt_list[indx]->netcam->thread_id, SIGVTALRM);
             }
         }
-        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_RTSP) &&
-            (cnt_list[indx]->rtsp_high != NULL)){
-            if (!cnt_list[indx]->rtsp_high->handler_finished &&
-                pthread_kill(cnt_list[indx]->rtsp_high->thread_id, 0) == ESRCH) {
-                cnt_list[indx]->rtsp_high->handler_finished = TRUE;
+        if ((cnt_list[indx]->camera_type == CAMERA_TYPE_NETCAM) &&
+            (cnt_list[indx]->netcam_high != NULL)){
+            if (!cnt_list[indx]->netcam_high->handler_finished &&
+                pthread_kill(cnt_list[indx]->netcam_high->thread_id, 0) == ESRCH) {
+                cnt_list[indx]->netcam_high->handler_finished = TRUE;
                 pthread_mutex_lock(&global_lock);
                     threads_running--;
                 pthread_mutex_unlock(&global_lock);
-                netcam_rtsp_cleanup(cnt_list[indx],FALSE);
+                netcam_cleanup(cnt_list[indx],FALSE);
             } else {
-                pthread_kill(cnt_list[indx]->rtsp_high->thread_id, SIGVTALRM);
+                pthread_kill(cnt_list[indx]->netcam_high->thread_id, SIGVTALRM);
             }
         }
         if (cnt_list[indx]->running &&

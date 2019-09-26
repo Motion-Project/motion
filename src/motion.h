@@ -201,7 +201,7 @@ enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
     CAMERA_TYPE_MMAL,
-    CAMERA_TYPE_RTSP
+    CAMERA_TYPE_NETCAM
 };
 
 enum WEBUI_LEVEL{
@@ -380,12 +380,12 @@ struct context {
     int                 track_posy;
 
     enum CAMERA_TYPE      camera_type;
-    struct netcam_context *netcam;
+
 #ifdef HAVE_MMAL
     struct mmalcam_context *mmalcam;
 #endif
-    struct rtsp_context *rtsp;              /* this structure contains the context for normal RTSP connection */
-    struct rtsp_context *rtsp_high;         /* this structure contains the context for high resolution RTSP connection */
+    struct ctx_netcam *netcam;              /* this structure contains the context for normal RTSP connection */
+    struct ctx_netcam *netcam_high;         /* this structure contains the context for high resolution RTSP connection */
 
     struct vdev_context *vdev;              /* Structure for v4l2 device information */
 

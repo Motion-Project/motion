@@ -8,11 +8,11 @@ struct image_data;
 #define NETCAM_RESTART_ERROR       0x12          /* binary 010010 */
 #define NETCAM_BUFFSIZE 4096
 
-enum RTSP_STATUS {
-    RTSP_CONNECTED,      /* The camera is currently connected */
-    RTSP_READINGIMAGE,   /* Motion is reading a image from camera */
-    RTSP_NOTCONNECTED,   /* The camera has never connected */
-    RTSP_RECONNECTING   /* Motion is trying to reconnect to camera */
+enum NETCAM_STATUS {
+    NETCAM_CONNECTED,      /* The camera is currently connected */
+    NETCAM_READINGIMAGE,   /* Motion is reading a image from camera */
+    NETCAM_NOTCONNECTED,   /* The camera has never connected */
+    NETCAM_RECONNECTING   /* Motion is trying to reconnect to camera */
 };
 
 struct imgsize_context {
@@ -61,7 +61,7 @@ struct packet_item{
     struct timeval            timestamp_tv;
 };
 
-struct rtsp_context {
+struct ctx_netcam {
     AVFormatContext          *format_context;        /* Main format context for the camera */
     AVCodecContext           *codec_context;         /* Codec being sent from the camera */
     AVFrame                  *frame;                 /* Reusable frame for images from camera */
@@ -78,7 +78,7 @@ struct rtsp_context {
     int                       swsframe_size;         /* The size of the image after resizing */
     int                       video_stream_index;    /* Stream index associated with video from camera */
 
-    enum RTSP_STATUS          status;                /* Status of whether the camera is connecting, closed, etc*/
+    enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
     struct timeval            interruptstarttime;    /* The time set before calling the av functions */
     struct timeval            interruptcurrenttime;  /* Time during the interrupt to determine duration since start*/
     int                       interruptduration;      /* Seconds permitted before triggering a interrupt */
@@ -118,8 +118,8 @@ struct rtsp_context {
 
 };
 
-int netcam_rtsp_setup(struct context *cnt);
-int netcam_rtsp_next(struct context *cnt, struct image_data *img_data);
-void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag);
+int netcam_setup(struct context *cnt);
+int netcam_next(struct context *cnt, struct image_data *img_data);
+void netcam_cleanup(struct context *cnt, int init_retry_flag);
 
 #endif /* _INCLUDE_NETCAM_H */

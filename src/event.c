@@ -1033,12 +1033,12 @@ static void event_movie_newfile(struct context *cnt,
             cnt->movie_output->width  = cnt->imgs.width_high;
             cnt->movie_output->height = cnt->imgs.height_high;
             cnt->movie_output->high_resolution = TRUE;
-            cnt->movie_output->rtsp_data = cnt->rtsp_high;
+            cnt->movie_output->netcam_data = cnt->netcam_high;
         } else {
             cnt->movie_output->width  = cnt->imgs.width;
             cnt->movie_output->height = cnt->imgs.height;
             cnt->movie_output->high_resolution = FALSE;
-            cnt->movie_output->rtsp_data = cnt->rtsp;
+            cnt->movie_output->netcam_data = cnt->netcam;
         }
         cnt->movie_output->tlapse = TIMELAPSE_NONE;
         cnt->movie_output->fps = cnt->movie_fps;
@@ -1075,7 +1075,7 @@ static void event_movie_newfile(struct context *cnt,
         cnt->movie_output_motion = mymalloc(sizeof(struct ctx_movie));
         cnt->movie_output_motion->width  = cnt->imgs.width;
         cnt->movie_output_motion->height = cnt->imgs.height;
-        cnt->movie_output_motion->rtsp_data = NULL;
+        cnt->movie_output_motion->netcam_data = NULL;
         cnt->movie_output_motion->tlapse = TIMELAPSE_NONE;
         cnt->movie_output_motion->fps = cnt->movie_fps;
         cnt->movie_output_motion->bps = cnt->conf.movie_bps;
@@ -1095,7 +1095,7 @@ static void event_movie_newfile(struct context *cnt,
         cnt->movie_output_motion->motion_images = TRUE;
         cnt->movie_output_motion->passthrough = FALSE;
         cnt->movie_output_motion->high_resolution = FALSE;
-        cnt->movie_output_motion->rtsp_data = NULL;
+        cnt->movie_output_motion->netcam_data = NULL;
 
         retcd = movie_open(cnt->movie_output_motion);
         if (retcd < 0){
@@ -1162,7 +1162,7 @@ static void event_movie_timelapse(struct context *cnt,
         cnt->movie_timelapse->gop_cnt = 0;
         cnt->movie_timelapse->motion_images = FALSE;
         cnt->movie_timelapse->passthrough = FALSE;
-        cnt->movie_timelapse->rtsp_data = NULL;
+        cnt->movie_timelapse->netcam_data = NULL;
 
         if ((strcmp(cnt->conf.timelapse_codec,"mpg") == 0) ||
             (strcmp(cnt->conf.timelapse_codec,"swf") == 0) ){
