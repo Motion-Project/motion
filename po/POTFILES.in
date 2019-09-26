@@ -8,7 +8,7 @@ src/jpegutils.c
 src/logger.c
 src/mmalcam.c
 src/motion.c
-src/netcam_rtsp.c
+src/netcam.c
 src/picture.c
 src/rotate.c
 src/track.c

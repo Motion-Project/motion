@@ -9,7 +9,7 @@
 */
 #include "picture.h"   /* already includes motion.h */
 #include "translate.h"
-#include "netcam_rtsp.h"
+#include "netcam.h"
 #include "movie.h"
 #include "event.h"
 #include "video_loopback.h"

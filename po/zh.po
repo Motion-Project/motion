@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 22:23-0600\n"
+"POT-Creation-Date: 2019-09-25 22:32-0600\n"
 "PO-Revision-Date: 2018-10-13 12:04-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -1107,7 +1107,7 @@ msgstr ""
 msgid "Could not get codec!"
 msgstr ""
 
-#: src/movie.c src/netcam_rtsp.c
+#: src/movie.c src/netcam.c
 msgid "Unable to copy codec parameters"
 msgstr ""
 
@@ -1413,22 +1413,22 @@ msgstr ""
 msgid "Using default dimensions %dx%d"
 msgstr ""
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/motion.c src/netcam.c
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
 msgstr ""
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/motion.c src/netcam.c
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
 msgstr ""
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/motion.c src/netcam.c
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
 msgstr ""
 
-#: src/motion.c src/netcam_rtsp.c
+#: src/motion.c src/netcam.c
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
 msgstr ""
@@ -1846,420 +1846,420 @@ msgstr ""
 msgid "pass-through is enabled but is still experimental."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "expanding buffer from [%d/%d] to [%d/%d] bytes."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Invalid URL.  Can not parse values."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Using port number %d"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Resized packet array to %d"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: av_copy_packet: %s ,Interrupt: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "True"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "False"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Ignoring packet with invalid data"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error sending packet to codec: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error receiving frame from codec: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error decoding packet: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Error decoding video packet: Copying to buffer"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: av_find_best_stream: %s,Interrupt %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: avcodec_find_decoder: Failed,Interrupt %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: avcodec_alloc_context3: Failed,Interrupt %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: avcodec_parameters_to_context: %s,Interrupt %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: avcodec_open2: %s,Interrupt %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Camera reading (%s) timed out"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Camera (%s) timed out"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error allocating picture in: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error allocating picture out: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error resizing/reformatting: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Error putting frame into output buffer: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: av_read_frame: %s ,Interrupt: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "The network camera is sending pictures in a different"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "size than specified in the config and also a "
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "different picture format.  The picture is being"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "transcoded to YUV420P and into the size requested"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "in the config file.  If possible change netcam to"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "be in YUV420P format and the size requested in the"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "config to possibly lower CPU usage."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "size than specified in the configuration file."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "The picture is being transcoded into the size "
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "requested in the configuration.  If possible change"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "netcam or configuration to indicate the same size"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "to possibly lower CPU usage."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Netcam: %d x %d => Config: %d x %d"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "The image sent is being "
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "trancoded to YUV420P.  If possible change netcam "
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "picture format to YUV420P to possibly lower CPU usage."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Unable to allocate swsframe_in."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Unable to allocate swsframe_out."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Unable to allocate scaling context."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Error determining size of frame out"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting http input_format mjpeg"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting rtsp transport to tcp"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting rtsp transport to udp"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting attributes to read file"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Requested v4l2_palette option: %d"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Requested FOURCC code: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting v4l2 input_format: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting v4l2 framerate: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Setting v4l2 video_size: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Proxies not supported using for %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Setting up v4l2 via ffmpeg netcam"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Setting up file via ffmpeg netcam"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Setting up http via ffmpeg netcam"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Setting up %s via ffmpeg netcam"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "High resolution"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Normal resolution"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Setting up %s stream."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Unknown"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Stream copied for pass-through"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "ffmpeg too old"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Null path passed to connect"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Invalid camera service"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Unable to open camera(%s)"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Unable to open camera(%s): %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Opened camera(%s)"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Unable to find stream info: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Unable to open codec context: %s"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Camera image size is invalid"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Unable to allocate frame."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Failed to copy stream for pass-through."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Failed to read first image"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Camera (%s) connected"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Reconnecting with camera...."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Camera did not reconnect."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Checking for camera every 10 seconds."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Camera handler thread [%d] started"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Handler loop finished."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "netcam camera handler: finish set, exiting"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Error starting handler thread"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Waiting for first image from the handler."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "unable to create rtsp context"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "unable to create rtsp high context"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "Failed trying to read first image - retval:%d"
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: Shutting down network camera."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 #, c-format
 msgid "%s: No response from handler thread."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "Normal resolution: Shut down complete."
 msgstr ""
 
-#: src/netcam_rtsp.c
+#: src/netcam.c
 msgid "High resolution: Shut down complete."
 msgstr ""
 

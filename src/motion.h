@@ -61,7 +61,7 @@ struct image_data;
 #include "conf.h"
 
 #include "track.h"
-#include "netcam_rtsp.h"
+#include "netcam.h"
 #include "movie.h"
 
 #ifdef HAVE_MMAL

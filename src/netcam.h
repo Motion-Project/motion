@@ -1,5 +1,5 @@
-#ifndef _INCLUDE_NETCAM_RTSP_H
-#define _INCLUDE_NETCAM_RTSP_H
+#ifndef _INCLUDE_NETCAM_H
+#define _INCLUDE_NETCAM_H
 
 struct context;
 struct image_data;
@@ -122,4 +122,4 @@ int netcam_rtsp_setup(struct context *cnt);
 int netcam_rtsp_next(struct context *cnt, struct image_data *img_data);
 void netcam_rtsp_cleanup(struct context *cnt, int init_retry_flag);
 
-#endif /* _INCLUDE_NETCAM_RTSP_H */
+#endif /* _INCLUDE_NETCAM_H */
