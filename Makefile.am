@@ -46,24 +46,6 @@ cleanall: distclean
 all-local:
 	@rm -f po/*.po\~
 
-###################################################################
-## Update contents of sample files with the correct directory
-###################################################################
-install-data-local:
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/motion-dist.conf > ${DESTDIR}${sysconfdir}/motion-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/motion-dist.conf.tmp ${DESTDIR}${sysconfdir}/motion-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera1-dist.conf > ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera1-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera1-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera2-dist.conf > ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera2-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera2-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera3-dist.conf > ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera3-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' ${DESTDIR}${sysconfdir}/camera4-dist.conf > ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp && mv -f ${DESTDIR}${sysconfdir}/camera4-dist.conf.tmp ${DESTDIR}${sysconfdir}/camera4-dist.conf
-
-	@sed -e 's|$${exec_prefix}|$(exec_prefix)|' data/motion.service > data/motion.service.tmp && mv -f data/motion.service.tmp data/motion.service
-
-	@sed -e 's|$${prefix}|$(prefix)|' data/motion-dist.conf > data/motion-dist.conf.tmp && mv -f data/motion-dist.conf.tmp data/motion-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera1-dist.conf > data/camera1-dist.conf.tmp && mv -f data/camera1-dist.conf.tmp data/camera1-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera2-dist.conf > data/camera2-dist.conf.tmp && mv -f data/camera2-dist.conf.tmp data/camera2-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera3-dist.conf > data/camera3-dist.conf.tmp && mv -f data/camera3-dist.conf.tmp data/camera3-dist.conf
-	@sed -e 's|$${prefix}|$(prefix)|' data/camera4-dist.conf > data/camera4-dist.conf.tmp && mv -f data/camera4-dist.conf.tmp data/camera4-dist.conf
-
 check:
 	./configure --with-prototype-flags                   && $(MAKE) clean && $(MAKE)
 	./configure --with-prototype-flags --without-mariadb && $(MAKE) clean && $(MAKE)
