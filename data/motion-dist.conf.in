@@ -160,12 +160,12 @@ stream_localhost on
 ##############################################################
 # Camera config files - One for each camera.
 ##############################################################
-; camera @sysconfdir@/motion/camera1.conf
-; camera @sysconfdir@/motion/camera2.conf
-; camera @sysconfdir@/motion/camera3.conf
-; camera @sysconfdir@/motion/camera4.conf
+; camera @prefix@/etc/motion/camera1.conf
+; camera @prefix@/etc/motion/camera2.conf
+; camera @prefix@/etc/motion/camera3.conf
+; camera @prefix@/etc/motion/camera4.conf
 
 ##############################################################
 # Directory to read '.conf' files for cameras.
 ##############################################################
-; camera_dir @sysconfdir@/motion/conf.d
+; camera_dir @prefix@/etc/motion/conf.d
