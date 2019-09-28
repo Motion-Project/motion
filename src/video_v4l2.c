@@ -24,59 +24,57 @@
 
 
 #ifdef HAVE_V4L2
+    #if defined(HAVE_LINUX_VIDEODEV2_H)
+        #include <linux/videodev2.h>
+    #else
+        #include <sys/videoio.h>
+    #endif
+    #define u8 unsigned char
+    #define u16 unsigned short
+    #define u32 unsigned int
+    #define s32 signed int
 
-#if defined(HAVE_LINUX_VIDEODEV2_H)
-#include <linux/videodev2.h>
-#else
-#include <sys/videoio.h>
-#endif
+    #define MMAP_BUFFERS            4
+    #define MIN_MMAP_BUFFERS        2
+    #define V4L2_PALETTE_COUNT_MAX 21
 
-#define u8 unsigned char
-#define u16 unsigned short
-#define u32 unsigned int
-#define s32 signed int
+    #define MAX2(x, y) ((x) > (y) ? (x) : (y))
+    #define MIN2(x, y) ((x) < (y) ? (x) : (y))
 
-#define MMAP_BUFFERS            4
-#define MIN_MMAP_BUFFERS        2
-#define V4L2_PALETTE_COUNT_MAX 21
+    static pthread_mutex_t   v4l2_mutex;
+    static struct video_dev *video_devices = NULL;
 
-#define MAX2(x, y) ((x) > (y) ? (x) : (y))
-#define MIN2(x, y) ((x) < (y) ? (x) : (y))
+    typedef struct video_image_buff {
+        unsigned char *ptr;
+        int content_length;
+        size_t size;                    /* total allocated size */
+        size_t used;                    /* bytes already used */
+        struct timeval image_time;      /* time this image was received */
+    } video_buff;
 
-static pthread_mutex_t   v4l2_mutex;
-static struct video_dev *video_devices = NULL;
+    typedef struct {
+        int fd_device;
+        u32 fps;
 
-typedef struct video_image_buff {
-    unsigned char *ptr;
-    int content_length;
-    size_t size;                    /* total allocated size */
-    size_t used;                    /* bytes already used */
-    struct timeval image_time;      /* time this image was received */
-} video_buff;
+        struct v4l2_capability cap;
+        struct v4l2_format src_fmt;
+        struct v4l2_format dst_fmt;
+        struct v4l2_requestbuffers req;
+        struct v4l2_buffer buf;
 
-typedef struct {
-    int fd_device;
-    u32 fps;
+        video_buff *buffers;
 
-    struct v4l2_capability cap;
-    struct v4l2_format src_fmt;
-    struct v4l2_format dst_fmt;
-    struct v4l2_requestbuffers req;
-    struct v4l2_buffer buf;
+        s32 pframe;
 
-    video_buff *buffers;
+        u32 ctrl_flags;
+        volatile unsigned int *finish;      /* End the thread */
 
-    s32 pframe;
+    } src_v4l2_t;
 
-    u32 ctrl_flags;
-    volatile unsigned int *finish;      /* End the thread */
-
-} src_v4l2_t;
-
-typedef struct palette_item_struct{
-    u32      v4l2id;
-    char     fourcc[5];
-} palette_item;
+    typedef struct palette_item_struct{
+        u32      v4l2id;
+        char     fourcc[5];
+    } palette_item;
 
 static void v4l2_palette_init(palette_item *palette_array){
 
@@ -117,9 +115,9 @@ static void v4l2_palette_init(palette_item *palette_array){
 }
 
 #if defined (BSD)
-static int xioctl(src_v4l2_t *vid_source, unsigned long request, void *arg)
+    static int xioctl(src_v4l2_t *vid_source, unsigned long request, void *arg)
 #else
-static int xioctl(src_v4l2_t *vid_source, int request, void *arg)
+    static int xioctl(src_v4l2_t *vid_source, int request, void *arg)
 #endif
 {
     int ret;
@@ -1370,384 +1368,384 @@ static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
 #endif /* HAVE_V4L2 */
 
 void v4l2_mutex_init(void) {
-#ifdef HAVE_V4L2
-    pthread_mutex_init(&v4l2_mutex, NULL);
-#else
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled"));
-#endif // HAVE_V4L2
+    #ifdef HAVE_V4L2
+        pthread_mutex_init(&v4l2_mutex, NULL);
+    #else
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled"));
+    #endif // HAVE_V4L2
 }
 
 void v4l2_mutex_destroy(void) {
-#ifdef HAVE_V4L2
-    pthread_mutex_destroy(&v4l2_mutex);
-#else
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled"));
-#endif // HAVE_V4L2
+    #ifdef HAVE_V4L2
+        pthread_mutex_destroy(&v4l2_mutex);
+    #else
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled"));
+    #endif // HAVE_V4L2
 }
 
 int v4l2_start(struct context *cnt) {
-#ifdef HAVE_V4L2
+    #ifdef HAVE_V4L2
 
-    int retcd;
-    struct video_dev *curdev;
+        int retcd;
+        struct video_dev *curdev;
 
-    pthread_mutex_lock(&v4l2_mutex);
+        pthread_mutex_lock(&v4l2_mutex);
 
-    /* If device is already open and initialized use it*/
-    curdev = video_devices;
-    while (curdev) {
-        if (!strcmp(cnt->conf.video_device, curdev->video_device)) {
-            retcd = v4l2_vdev_init(cnt);
-            if (retcd == 0) retcd = vid_parms_parse(cnt);
-            if (retcd == 0) retcd = v4l2_imgs_set(cnt, curdev);
-            if (retcd == 0) {
-                curdev->usage_count++;
-                retcd = curdev->fd_device;
+        /* If device is already open and initialized use it*/
+        curdev = video_devices;
+        while (curdev) {
+            if (!strcmp(cnt->conf.video_device, curdev->video_device)) {
+                retcd = v4l2_vdev_init(cnt);
+                if (retcd == 0) retcd = vid_parms_parse(cnt);
+                if (retcd == 0) retcd = v4l2_imgs_set(cnt, curdev);
+                if (retcd == 0) {
+                    curdev->usage_count++;
+                    retcd = curdev->fd_device;
+                }
+                pthread_mutex_unlock(&v4l2_mutex);
+                return retcd;
             }
+            curdev = curdev->next;
+        }
+
+        curdev = mymalloc(sizeof(struct video_dev));
+
+        curdev->starting = TRUE;
+
+        retcd = v4l2_device_init(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_vdev_init(cnt);
+        if (retcd == 0) retcd = v4l2_device_open(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_device_capability(curdev);
+        if (retcd == 0) retcd = v4l2_input_select(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_norm_select(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_pixfmt_select(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_fps_set(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
+        if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
+        if (retcd == 0) retcd = vid_parms_parse(cnt);
+        if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
+        if (retcd == 0) retcd = v4l2_mmap_set(curdev);
+        if (retcd == 0) retcd = v4l2_imgs_set(cnt, curdev);
+        if (retcd < 0){
+            /* These may need more work to consider all the fail scenarios*/
+            if (curdev->v4l2_private != NULL){
+                free(curdev->v4l2_private);
+                curdev->v4l2_private = NULL;
+            }
+            pthread_mutexattr_destroy(&curdev->attr);
+            pthread_mutex_destroy(&curdev->mutex);
+            v4l2_vdev_free(cnt);
+            if (curdev->fd_device != -1) close(curdev->fd_device);
+            free(curdev);
             pthread_mutex_unlock(&v4l2_mutex);
             return retcd;
         }
-        curdev = curdev->next;
-    }
 
-    curdev = mymalloc(sizeof(struct video_dev));
+        curdev->starting = FALSE;
 
-    curdev->starting = TRUE;
+        /* Insert into linked list. */
+        curdev->next = video_devices;
+        video_devices = curdev;
 
-    retcd = v4l2_device_init(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_vdev_init(cnt);
-    if (retcd == 0) retcd = v4l2_device_open(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_device_capability(curdev);
-    if (retcd == 0) retcd = v4l2_input_select(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_norm_select(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_pixfmt_select(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_fps_set(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
-    if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
-    if (retcd == 0) retcd = vid_parms_parse(cnt);
-    if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
-    if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
-    if (retcd == 0) retcd = v4l2_mmap_set(curdev);
-    if (retcd == 0) retcd = v4l2_imgs_set(cnt, curdev);
-    if (retcd < 0){
-        /* These may need more work to consider all the fail scenarios*/
-        if (curdev->v4l2_private != NULL){
-            free(curdev->v4l2_private);
-            curdev->v4l2_private = NULL;
-        }
-        pthread_mutexattr_destroy(&curdev->attr);
-        pthread_mutex_destroy(&curdev->mutex);
-        v4l2_vdev_free(cnt);
-        if (curdev->fd_device != -1) close(curdev->fd_device);
-        free(curdev);
         pthread_mutex_unlock(&v4l2_mutex);
-        return retcd;
-    }
 
-    curdev->starting = FALSE;
-
-    /* Insert into linked list. */
-    curdev->next = video_devices;
-    video_devices = curdev;
-
-    pthread_mutex_unlock(&v4l2_mutex);
-
-    return curdev->fd_device;
-#else
-    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
-    return -1;
-#endif // HAVE_V4l2
+        return curdev->fd_device;
+    #else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        return -1;
+    #endif // HAVE_V4l2
 }
 
 void v4l2_cleanup(struct context *cnt) {
-#ifdef HAVE_V4L2
+    #ifdef HAVE_V4L2
 
-    struct video_dev *dev = video_devices;
-    struct video_dev *prev = NULL;
+        struct video_dev *dev = video_devices;
+        struct video_dev *prev = NULL;
 
-    /* Cleanup the v4l2 part */
-    pthread_mutex_lock(&v4l2_mutex);
-    while (dev) {
-        if (dev->fd_device == cnt->video_dev)
-            break;
-        prev = dev;
-        dev = dev->next;
-    }
-    pthread_mutex_unlock(&v4l2_mutex);
-
-    /* Set it as closed in thread context. */
-    cnt->video_dev = -1;
-
-    v4l2_vdev_free(cnt);
-
-    if (dev == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, _("Unable to find video device"));
-        return;
-    }
-
-    if (--dev->usage_count == 0) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Closing video device %s"), dev->video_device);
-
-        v4l2_device_close(dev);
-        v4l2_device_cleanup(dev);
-
-        dev->fd_device = -1;
-
-        /* Remove from list */
-        if (prev == NULL)
-            video_devices = dev->next;
-        else
-            prev->next = dev->next;
-
-        pthread_mutexattr_destroy(&dev->attr);
-        pthread_mutex_destroy(&dev->mutex);
-        free(dev);
-
-    } else {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            ,_("Still %d users of video device %s, so we don't close it now")
-            ,dev->usage_count, dev->video_device);
-        /*
-         * There is still at least one thread using this device
-         * If we own it, release it.
-         */
-        if (dev->owner == cnt->threadnr) {
-            dev->frames = 0;
-            dev->owner = -1;
-            pthread_mutex_unlock(&dev->mutex);
+        /* Cleanup the v4l2 part */
+        pthread_mutex_lock(&v4l2_mutex);
+        while (dev) {
+            if (dev->fd_device == cnt->video_dev)
+                break;
+            prev = dev;
+            dev = dev->next;
         }
-    }
+        pthread_mutex_unlock(&v4l2_mutex);
+
+        /* Set it as closed in thread context. */
+        cnt->video_dev = -1;
+
+        v4l2_vdev_free(cnt);
+
+        if (dev == NULL) {
+            MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, _("Unable to find video device"));
+            return;
+        }
+
+        if (--dev->usage_count == 0) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("Closing video device %s"), dev->video_device);
+
+            v4l2_device_close(dev);
+            v4l2_device_cleanup(dev);
+
+            dev->fd_device = -1;
+
+            /* Remove from list */
+            if (prev == NULL)
+                video_devices = dev->next;
+            else
+                prev->next = dev->next;
+
+            pthread_mutexattr_destroy(&dev->attr);
+            pthread_mutex_destroy(&dev->mutex);
+            free(dev);
+
+        } else {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("Still %d users of video device %s, so we don't close it now")
+                ,dev->usage_count, dev->video_device);
+            /*
+            * There is still at least one thread using this device
+            * If we own it, release it.
+            */
+            if (dev->owner == cnt->threadnr) {
+                dev->frames = 0;
+                dev->owner = -1;
+                pthread_mutex_unlock(&dev->mutex);
+            }
+        }
 
 
-#else
-    if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
-#endif // HAVE_V4L2
+    #else
+        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+    #endif // HAVE_V4L2
 }
 
 int v4l2_next(struct context *cnt, struct image_data *img_data) {
-#ifdef HAVE_V4L2
-    int ret = -2;
-    struct config *conf = &cnt->conf;
-    struct video_dev *dev;
+    #ifdef HAVE_V4L2
+        int ret = -2;
+        struct config *conf = &cnt->conf;
+        struct video_dev *dev;
 
-    pthread_mutex_lock(&v4l2_mutex);
-    dev = video_devices;
-    while (dev) {
-        if (dev->fd_device == cnt->video_dev)
-            break;
-        dev = dev->next;
-    }
-    pthread_mutex_unlock(&v4l2_mutex);
+        pthread_mutex_lock(&v4l2_mutex);
+        dev = video_devices;
+        while (dev) {
+            if (dev->fd_device == cnt->video_dev)
+                break;
+            dev = dev->next;
+        }
+        pthread_mutex_unlock(&v4l2_mutex);
 
-    if (dev == NULL){
+        if (dev == NULL){
+            return -1;
+        }
+
+        if (dev->owner != cnt->threadnr) {
+            pthread_mutex_lock(&dev->mutex);
+            dev->owner = cnt->threadnr;
+            dev->frames = conf->roundrobin_frames;
+        }
+
+        v4l2_device_select(cnt, dev, img_data->image_norm);
+        ret = v4l2_capture(cnt, dev, img_data->image_norm);
+
+        if (--dev->frames <= 0) {
+            dev->owner = -1;
+            dev->frames = 0;
+            pthread_mutex_unlock(&dev->mutex);
+        }
+
+        /* Rotate the image as specified. */
+        rotate_map(cnt, img_data);
+
+        return ret;
+    #else
+        if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
         return -1;
-    }
-
-    if (dev->owner != cnt->threadnr) {
-        pthread_mutex_lock(&dev->mutex);
-        dev->owner = cnt->threadnr;
-        dev->frames = conf->roundrobin_frames;
-    }
-
-    v4l2_device_select(cnt, dev, img_data->image_norm);
-    ret = v4l2_capture(cnt, dev, img_data->image_norm);
-
-    if (--dev->frames <= 0) {
-        dev->owner = -1;
-        dev->frames = 0;
-        pthread_mutex_unlock(&dev->mutex);
-    }
-
-    /* Rotate the image as specified. */
-    rotate_map(cnt, img_data);
-
-    return ret;
-#else
-    if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
-    return -1;
-#endif // HAVE_V4L2
+    #endif // HAVE_V4L2
 }
 
 int v4l2_palette_valid(char *video_device, int v4l2_palette) {
-#ifdef HAVE_V4L2
+    #ifdef HAVE_V4L2
 
-    /* This function is a boolean that returns true(1) if the palette selected in the
-     * configuration file is valid for the device and false(0) if the palette is not valid
-     */
+        /* This function is a boolean that returns true(1) if the palette selected in the
+        * configuration file is valid for the device and false(0) if the palette is not valid
+        */
 
-    palette_item *palette_array;
-    struct v4l2_fmtdesc fmtd;
+        palette_item *palette_array;
+        struct v4l2_fmtdesc fmtd;
 
-    int device_palette;
-    int retcd;
-    src_v4l2_t *vid_source;
+        int device_palette;
+        int retcd;
+        src_v4l2_t *vid_source;
 
-    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+        palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
 
-    v4l2_palette_init(palette_array);
+        v4l2_palette_init(palette_array);
 
-    vid_source = calloc(sizeof(src_v4l2_t), 1);
-    vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
-    if (vid_source->fd_device < 0) {
-        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
-            ,_("Failed to open video device %s"),video_device);
-        free(vid_source);
-        free(palette_array);
-        return 0;
-    }
-
-    memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
-    fmtd.index = device_palette = 0;
-    fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    retcd = 0;
-    while (xioctl(vid_source, VIDIOC_ENUM_FMT, &fmtd) != -1) {
-        if (palette_array[v4l2_palette].v4l2id == fmtd.pixelformat ) retcd = 1;
+        vid_source = calloc(sizeof(src_v4l2_t), 1);
+        vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
+        if (vid_source->fd_device < 0) {
+            MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
+                ,_("Failed to open video device %s"),video_device);
+            free(vid_source);
+            free(palette_array);
+            return 0;
+        }
 
         memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
-        fmtd.index = ++device_palette;
+        fmtd.index = device_palette = 0;
         fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    }
+        retcd = 0;
+        while (xioctl(vid_source, VIDIOC_ENUM_FMT, &fmtd) != -1) {
+            if (palette_array[v4l2_palette].v4l2id == fmtd.pixelformat ) retcd = 1;
 
-    close(vid_source->fd_device);
+            memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
+            fmtd.index = ++device_palette;
+            fmtd.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        }
 
-    free(vid_source);
+        close(vid_source->fd_device);
 
-    free(palette_array);
+        free(vid_source);
 
-    return retcd;
-#else
-    /* We do not have v4l2 so we can not determine whether it is valid or not */
-    if ((video_device) || (v4l2_palette)) return 0;
-    return 0;
-#endif // HAVE_V4L2
+        free(palette_array);
+
+        return retcd;
+    #else
+        /* We do not have v4l2 so we can not determine whether it is valid or not */
+        if ((video_device) || (v4l2_palette)) return 0;
+        return 0;
+    #endif // HAVE_V4L2
 }
 
 void v4l2_palette_fourcc(int v4l2_palette, char *fourcc) {
-#ifdef HAVE_V4L2
+    #ifdef HAVE_V4L2
 
-    /* This function populates the provided fourcc pointer with the fourcc code for the
-     * requested palette id code.  If the palette is not one of the ones that Motion supports
-     * it returns the string as "NULL"
-     */
+        /* This function populates the provided fourcc pointer with the fourcc code for the
+        * requested palette id code.  If the palette is not one of the ones that Motion supports
+        * it returns the string as "NULL"
+        */
 
-    palette_item *palette_array;
+        palette_item *palette_array;
 
-    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+        palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
 
-    v4l2_palette_init(palette_array);
+        v4l2_palette_init(palette_array);
 
-    if ((v4l2_palette > V4L2_PALETTE_COUNT_MAX) || (v4l2_palette < 0)){
+        if ((v4l2_palette > V4L2_PALETTE_COUNT_MAX) || (v4l2_palette < 0)){
+            sprintf(fourcc,"%s","NULL");
+        } else {
+            sprintf(fourcc,"%s",palette_array[v4l2_palette].fourcc);
+        }
+
+        free(palette_array);
+
+        return;
+    #else
         sprintf(fourcc,"%s","NULL");
-    } else {
-        sprintf(fourcc,"%s",palette_array[v4l2_palette].fourcc);
-    }
-
-    free(palette_array);
-
-    return;
-#else
-    sprintf(fourcc,"%s","NULL");
-    if (v4l2_palette) return;
-    return;
-#endif // HAVE_V4L2
+        if (v4l2_palette) return;
+        return;
+    #endif // HAVE_V4L2
 }
 
 int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l2_width, int v4l2_height){
-#ifdef HAVE_V4L2
+    #ifdef HAVE_V4L2
 
-    /* This function is a boolean that returns true(1) if the parms selected in the
-     * configuration file are valid for the device and false(0) if not valid
-     */
-    palette_item *palette_array;
-    struct v4l2_fmtdesc         dev_format;
-    struct v4l2_frmsizeenum     dev_sizes;
-    struct v4l2_frmivalenum     dev_frameint;
+        /* This function is a boolean that returns true(1) if the parms selected in the
+        * configuration file are valid for the device and false(0) if not valid
+        */
+        palette_item *palette_array;
+        struct v4l2_fmtdesc         dev_format;
+        struct v4l2_frmsizeenum     dev_sizes;
+        struct v4l2_frmivalenum     dev_frameint;
 
-    int retcd;
-    int indx_format, indx_sizes, indx_frameint;
+        int retcd;
+        int indx_format, indx_sizes, indx_frameint;
 
-    src_v4l2_t *vid_source;
+        src_v4l2_t *vid_source;
 
-    palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
+        palette_array = malloc(sizeof(palette_item) * (V4L2_PALETTE_COUNT_MAX+1));
 
-    v4l2_palette_init(palette_array);
+        v4l2_palette_init(palette_array);
 
-    vid_source = calloc(sizeof(src_v4l2_t), 1);
-    vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
-    if (vid_source->fd_device < 0) {
-        MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
-            ,_("Failed to open video device %s"),video_device);
-        free(vid_source);
-        free(palette_array);
-        return 0;
-    }
+        vid_source = calloc(sizeof(src_v4l2_t), 1);
+        vid_source->fd_device = open(video_device, O_RDWR|O_CLOEXEC);
+        if (vid_source->fd_device < 0) {
+            MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
+                ,_("Failed to open video device %s"),video_device);
+            free(vid_source);
+            free(palette_array);
+            return 0;
+        }
 
-    retcd = 0;
-    memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
-    dev_format.index = indx_format = 0;
-    dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    while (xioctl(vid_source, VIDIOC_ENUM_FMT, &dev_format) != -1) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            ,_("Testing palette %s (%c%c%c%c)")
-            ,dev_format.description
-            ,dev_format.pixelformat >> 0
-            ,dev_format.pixelformat >> 8
-            ,dev_format.pixelformat >> 16
-            ,dev_format.pixelformat >> 24);
-
-        memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
-        dev_sizes.index = indx_sizes = 0;
-        dev_sizes.pixel_format = dev_format.pixelformat;
-        while (xioctl(vid_source, VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
+        retcd = 0;
+        memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
+        dev_format.index = indx_format = 0;
+        dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        while (xioctl(vid_source, VIDIOC_ENUM_FMT, &dev_format) != -1) {
             MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                ,_("  Width: %d, Height %d")
-                ,dev_sizes.discrete.width
-                ,dev_sizes.discrete.height);
+                ,_("Testing palette %s (%c%c%c%c)")
+                ,dev_format.description
+                ,dev_format.pixelformat >> 0
+                ,dev_format.pixelformat >> 8
+                ,dev_format.pixelformat >> 16
+                ,dev_format.pixelformat >> 24);
 
-            memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
-            dev_frameint.index = indx_frameint = 0;
-            dev_frameint.pixel_format = dev_format.pixelformat;
-            dev_frameint.width = dev_sizes.discrete.width;
-            dev_frameint.height = dev_sizes.discrete.height;
-            while (xioctl(vid_source, VIDIOC_ENUM_FRAMEINTERVALS, &dev_frameint) != -1) {
+            memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
+            dev_sizes.index = indx_sizes = 0;
+            dev_sizes.pixel_format = dev_format.pixelformat;
+            while (xioctl(vid_source, VIDIOC_ENUM_FRAMESIZES, &dev_sizes) != -1) {
                 MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                    ,_("    Framerate %d/%d")
-                    ,dev_frameint.discrete.numerator
-                    ,dev_frameint.discrete.denominator);
-                if ((palette_array[v4l2_palette].v4l2id == dev_format.pixelformat) &&
-                    ((int)dev_sizes.discrete.width == v4l2_width) &&
-                    ((int)dev_sizes.discrete.height == v4l2_height) &&
-                    ((int)dev_frameint.discrete.numerator == 1) &&
-                    ((int)dev_frameint.discrete.denominator == v4l2_fps)) retcd = 1;
+                    ,_("  Width: %d, Height %d")
+                    ,dev_sizes.discrete.width
+                    ,dev_sizes.discrete.height);
+
                 memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
-                dev_frameint.index = ++indx_frameint;
+                dev_frameint.index = indx_frameint = 0;
                 dev_frameint.pixel_format = dev_format.pixelformat;
                 dev_frameint.width = dev_sizes.discrete.width;
                 dev_frameint.height = dev_sizes.discrete.height;
+                while (xioctl(vid_source, VIDIOC_ENUM_FRAMEINTERVALS, &dev_frameint) != -1) {
+                    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                        ,_("    Framerate %d/%d")
+                        ,dev_frameint.discrete.numerator
+                        ,dev_frameint.discrete.denominator);
+                    if ((palette_array[v4l2_palette].v4l2id == dev_format.pixelformat) &&
+                        ((int)dev_sizes.discrete.width == v4l2_width) &&
+                        ((int)dev_sizes.discrete.height == v4l2_height) &&
+                        ((int)dev_frameint.discrete.numerator == 1) &&
+                        ((int)dev_frameint.discrete.denominator == v4l2_fps)) retcd = 1;
+                    memset(&dev_frameint, 0, sizeof(struct v4l2_frmivalenum));
+                    dev_frameint.index = ++indx_frameint;
+                    dev_frameint.pixel_format = dev_format.pixelformat;
+                    dev_frameint.width = dev_sizes.discrete.width;
+                    dev_frameint.height = dev_sizes.discrete.height;
+                }
+                memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
+                dev_sizes.index = ++indx_sizes;
+                dev_sizes.pixel_format = dev_format.pixelformat;
             }
-            memset(&dev_sizes, 0, sizeof(struct v4l2_frmsizeenum));
-            dev_sizes.index = ++indx_sizes;
-            dev_sizes.pixel_format = dev_format.pixelformat;
+            memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
+            dev_format.index = ++indx_format;
+            dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         }
-        memset(&dev_format, 0, sizeof(struct v4l2_fmtdesc));
-        dev_format.index = ++indx_format;
-        dev_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    }
 
-    close(vid_source->fd_device);
+        close(vid_source->fd_device);
 
-    free(vid_source);
+        free(vid_source);
 
-    free(palette_array);
+        free(palette_array);
 
-    return retcd;
-#else
-    /* We do not have v4l2 so we can not determine whether it is valid or not */
-    if ((video_device) || (v4l2_fps) || (v4l2_palette) ||
-        (v4l2_width)   || (v4l2_height) ) return 0;
-    return 0;
-#endif // HAVE_V4L2
+        return retcd;
+    #else
+        /* We do not have v4l2 so we can not determine whether it is valid or not */
+        if ((video_device) || (v4l2_fps) || (v4l2_palette) ||
+            (v4l2_width)   || (v4l2_height) ) return 0;
+        return 0;
+    #endif // HAVE_V4L2
 }
 

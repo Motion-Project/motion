@@ -70,56 +70,56 @@ unsigned int restart = 0;
 
 
 void translate_locale_chg(const char *langcd){
-#ifdef HAVE_GETTEXT
-    /* This routine is for development testing only.  It is not used for
-     * regular users because once this locale is change, it changes the
-     * whole computer over to the new locale.  Therefore, we just return
-     */
-    return;
+    #ifdef HAVE_GETTEXT
+        /* This routine is for development testing only.  It is not used for
+        * regular users because once this locale is change, it changes the
+        * whole computer over to the new locale.  Therefore, we just return
+        */
+        return;
 
-    setenv ("LANGUAGE", langcd, 1);
-    /* Invoke external function to change locale*/
-    ++_nl_msg_cat_cntr;
-#else
-    if (langcd != NULL) MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
-#endif
+        setenv ("LANGUAGE", langcd, 1);
+        /* Invoke external function to change locale*/
+        ++_nl_msg_cat_cntr;
+    #else
+        if (langcd != NULL) MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
+    #endif
 }
 
 void translate_init(void){
-#ifdef HAVE_GETTEXT
-    /* Set the flag to enable native language support */
-    nls_enabled = 1;
+    #ifdef HAVE_GETTEXT
+        /* Set the flag to enable native language support */
+        nls_enabled = 1;
 
-    setlocale (LC_ALL, "");
+        setlocale (LC_ALL, "");
 
-    //translate_locale_chg("li");
-    translate_locale_chg("es");
+        //translate_locale_chg("li");
+        translate_locale_chg("es");
 
-    bindtextdomain ("motion", LOCALEDIR);
-    bind_textdomain_codeset ("motion", "UTF-8");
-    textdomain ("motion");
+        bindtextdomain ("motion", LOCALEDIR);
+        bind_textdomain_codeset ("motion", "UTF-8");
+        textdomain ("motion");
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
 
-#else
-    /* Disable native language support */
-    nls_enabled = 0;
+    #else
+        /* Disable native language support */
+        nls_enabled = 0;
 
-    /* This avoids a unused function warning */
-    translate_locale_chg("en");
-#endif
+        /* This avoids a unused function warning */
+        translate_locale_chg("en");
+    #endif
 }
 
 char* translate_text(const char *msgid){
-#ifdef HAVE_GETTEXT
-    if (nls_enabled){
-        return (char*)gettext(msgid);
-    } else {
+    #ifdef HAVE_GETTEXT
+        if (nls_enabled){
+            return (char*)gettext(msgid);
+        } else {
+            return (char*)msgid;
+        }
+    #else
         return (char*)msgid;
-    }
-#else
-    return (char*)msgid;
-#endif
+    #endif
 }
 
 /**
@@ -448,9 +448,9 @@ static void sig_handler(int signo)
  */
 static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
 {
-#ifdef WNOHANG
-    while (waitpid(-1, NULL, WNOHANG) > 0) {};
-#endif /* WNOHANG */
+    #ifdef WNOHANG
+        while (waitpid(-1, NULL, WNOHANG) > 0) {};
+    #endif /* WNOHANG */
     return;
 }
 
@@ -468,18 +468,18 @@ static void setup_signals(void){
     struct sigaction sig_handler_action;
     struct sigaction sigchild_action;
 
-#ifdef SA_NOCLDWAIT
-    sigchild_action.sa_flags = SA_NOCLDWAIT;
-#else
-    sigchild_action.sa_flags = 0;
-#endif
+    #ifdef SA_NOCLDWAIT
+        sigchild_action.sa_flags = SA_NOCLDWAIT;
+    #else
+        sigchild_action.sa_flags = 0;
+    #endif
     sigchild_action.sa_handler = sigchild_handler;
     sigemptyset(&sigchild_action.sa_mask);
-#ifdef SA_RESTART
-    sig_handler_action.sa_flags = SA_RESTART;
-#else
-    sig_handler_action.sa_flags = 0;
-#endif
+    #ifdef SA_RESTART
+        sig_handler_action.sa_flags = SA_RESTART;
+    #else
+        sig_handler_action.sa_flags = 0;
+    #endif
     sig_handler_action.sa_handler = sig_handler;
     sigemptyset(&sig_handler_action.sa_mask);
 
@@ -2995,11 +2995,11 @@ static void become_daemon(void)
     struct sigaction sig_ign_action;
 
     /* Setup sig_ign_action */
-#ifdef SA_RESTART
-    sig_ign_action.sa_flags = SA_RESTART;
-#else
-    sig_ign_action.sa_flags = 0;
-#endif
+    #ifdef SA_RESTART
+        sig_ign_action.sa_flags = SA_RESTART;
+    #else
+        sig_ign_action.sa_flags = 0;
+    #endif
     sig_ign_action.sa_handler = SIG_IGN;
     sigemptyset(&sig_ign_action.sa_mask);
 
@@ -3039,11 +3039,11 @@ static void become_daemon(void)
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
 
 
-#if (defined(BSD) && !defined(__APPLE__))
-    setpgrp(0, getpid());
-#else
-    setpgrp();
-#endif
+    #if (defined(BSD) && !defined(__APPLE__))
+        setpgrp(0, getpid());
+    #else
+        setpgrp();
+    #endif
 
 
     if ((i = open("/dev/tty", O_RDWR)) >= 0) {
@@ -4109,43 +4109,43 @@ void util_threadname_set(const char *abbr, int threadnbr, const char *threadname
         snprintf(tname, sizeof(tname), "%s",threadname);
     }
 
-#ifdef __APPLE__
-    pthread_setname_np(tname);
-#elif defined(BSD)
-    pthread_set_name_np(pthread_self(), tname);
-#elif HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(pthread_self(), tname);
-#else
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
-#endif
+    #ifdef __APPLE__
+        pthread_setname_np(tname);
+    #elif defined(BSD)
+        pthread_set_name_np(pthread_self(), tname);
+    #elif HAVE_PTHREAD_SETNAME_NP
+        pthread_setname_np(pthread_self(), tname);
+    #else
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
+    #endif
 
 }
 
 void util_threadname_get(char *threadname){
 
-#if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
-    char currname[16];
-    pthread_getname_np(pthread_self(), currname, sizeof(currname));
-    snprintf(threadname, sizeof(currname), "%s",currname);
-#else
-    snprintf(threadname, 8, "%s","Unknown");
-#endif
+    #if ((!defined(BSD) && HAVE_PTHREAD_GETNAME_NP) || defined(__APPLE__))
+        char currname[16];
+        pthread_getname_np(pthread_self(), currname, sizeof(currname));
+        snprintf(threadname, sizeof(currname), "%s",currname);
+    #else
+        snprintf(threadname, 8, "%s","Unknown");
+    #endif
 
 }
 int util_check_passthrough(struct context *cnt){
-#if (LIBAVFORMAT_VERSION_MAJOR < 55)
-    if (cnt->movie_passthrough)
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("FFMPEG version too old. Disabling pass-through processing."));
-    return 0;
-#else
-    if (cnt->movie_passthrough){
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("pass-through is enabled but is still experimental."));
-        return 1;
-    } else {
+    #if (LIBAVFORMAT_VERSION_MAJOR < 55)
+        if (cnt->movie_passthrough)
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("FFMPEG version too old. Disabling pass-through processing."));
         return 0;
-    }
-#endif
+    #else
+        if (cnt->movie_passthrough){
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("pass-through is enabled but is still experimental."));
+            return 1;
+        } else {
+            return 0;
+        }
+    #endif
 
 }

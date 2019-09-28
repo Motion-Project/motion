@@ -9,12 +9,12 @@
 #include "motion.h"
 
 #ifdef HAVE_V4L2
-#if defined(HAVE_LINUX_VIDEODEV2_H)
-#include <linux/videodev2.h>
-#else
-#include <sys/videoio.h>
-#endif
-#include "pwc-ioctl.h"
+    #if defined(HAVE_LINUX_VIDEODEV2_H)
+        #include <linux/videodev2.h>
+    #else
+        #include <sys/videoio.h>
+    #endif
+    #include "pwc-ioctl.h"
 #endif
 
 
@@ -56,12 +56,12 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
 static unsigned int iomojo_move(struct context *cnt, int dev, struct coord *cent, struct images *imgs);
 
 #ifdef HAVE_V4L2
-static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
-static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
-                              struct images *imgs, unsigned int manual);
-static unsigned int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
-static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
-                             struct images *imgs, unsigned int manual);
+    static unsigned int lqos_center(struct context *cnt, int dev, int xoff, int yoff);
+    static unsigned int lqos_move(struct context *cnt, int dev, struct coord *cent,
+                                struct images *imgs, unsigned int manual);
+    static unsigned int uvc_center(struct context *cnt, int dev, int xoff, int yoff);
+    static unsigned int uvc_move(struct context *cnt, int dev, struct coord *cent,
+                                struct images *imgs, unsigned int manual);
 #endif /* HAVE_V4L2 */
 
 static unsigned int generic_move(struct context *cnt, enum track_action action, unsigned int manual,
@@ -88,12 +88,12 @@ unsigned int track_center(struct context *cnt, int dev ATTRIBUTE_UNUSED,
     } else if (cnt->track.type == TRACK_TYPE_SERVO) {
         return servo_center(cnt, xoff, yoff);
     }
-#ifdef HAVE_V4L2
-    else if (cnt->track.type == TRACK_TYPE_PWC)
-        return lqos_center(cnt, dev, xoff, yoff);
-    else if (cnt->track.type == TRACK_TYPE_UVC)
-        return uvc_center(cnt, dev, xoff, yoff);
-#endif
+    #ifdef HAVE_V4L2
+        else if (cnt->track.type == TRACK_TYPE_PWC)
+            return lqos_center(cnt, dev, xoff, yoff);
+        else if (cnt->track.type == TRACK_TYPE_UVC)
+            return uvc_center(cnt, dev, xoff, yoff);
+    #endif
     else if (cnt->track.type == TRACK_TYPE_IOMOJO)
         return iomojo_center(cnt, xoff, yoff);
     else if (cnt->track.type == TRACK_TYPE_GENERIC) {
@@ -124,12 +124,12 @@ unsigned int track_move(struct context *cnt, int dev, struct coord *cent, struct
         return stepper_move(cnt, cent, imgs);
     else if (cnt->track.type == TRACK_TYPE_SERVO)
         return servo_move(cnt, cent, imgs, manual);
-#ifdef HAVE_V4L2
-    else if (cnt->track.type == TRACK_TYPE_PWC)
-        return lqos_move(cnt, dev, cent, imgs, manual);
-    else if (cnt->track.type == TRACK_TYPE_UVC)
-        return uvc_move(cnt, dev, cent, imgs, manual);
-#endif
+    #ifdef HAVE_V4L2
+        else if (cnt->track.type == TRACK_TYPE_PWC)
+            return lqos_move(cnt, dev, cent, imgs, manual);
+        else if (cnt->track.type == TRACK_TYPE_UVC)
+            return uvc_move(cnt, dev, cent, imgs, manual);
+    #endif
     else if (cnt->track.type == TRACK_TYPE_IOMOJO)
         return iomojo_move(cnt, dev, cent, imgs);
     else if (cnt->track.type == TRACK_TYPE_GENERIC) {
@@ -575,12 +575,12 @@ static unsigned int servo_move(struct context *cnt, struct coord *cent,
     return cnt->track.move_wait;
 }
 
-#if 0
-static unsigned int servo_status(struct context *cnt, unsigned int motor)
-{
-    return servo_command(cnt, motor, SERVO_COMMAND_STATUS, 0);
-}
-#endif
+    #if 0
+    static unsigned int servo_status(struct context *cnt, unsigned int motor)
+    {
+        return servo_command(cnt, motor, SERVO_COMMAND_STATUS, 0);
+    }
+    #endif
 
 /**
  * servo_center

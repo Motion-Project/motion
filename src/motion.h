@@ -18,22 +18,22 @@ struct image_data;
 
 /* Includes */
 #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-#include <mysql.h>
+    #include <mysql.h>
 #endif
 
 #ifdef HAVE_SQLITE3
-#include <sqlite3.h>
+    #include <sqlite3.h>
 #endif
 
 #ifdef HAVE_PGSQL
-#include <libpq-fe.h>
+    #include <libpq-fe.h>
 #endif
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef __USE_GNU
-#define __USE_GNU
+    #define __USE_GNU
 #endif
 #include <locale.h>
 #include <string.h>
@@ -66,13 +66,13 @@ struct image_data;
 #include "movie.h"
 
 #ifdef HAVE_MMAL
-#include "mmalcam.h"
+    #include "mmalcam.h"
 #endif
 
 int nls_enabled;
 
 #ifdef HAVE_GETTEXT
-#   include <libintl.h>
+    #include <libintl.h>
     extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
 #endif
 
@@ -84,14 +84,14 @@ int nls_enabled;
  * Macro used to signal to GCC unused function parameters
  */
 #ifdef __GNUC__
-#ifdef HAVE_ANSIDECL_H
-#include <ansidecl.h>
-#endif
-#ifndef ATTRIBUTE_UNUSED
-#define ATTRIBUTE_UNUSED __attribute__((unused))
-#endif
+    #ifdef HAVE_ANSIDECL_H
+        #include <ansidecl.h>
+    #endif
+    #ifndef ATTRIBUTE_UNUSED
+        #define ATTRIBUTE_UNUSED __attribute__((unused))
+    #endif
 #else
-#define ATTRIBUTE_UNUSED
+    #define ATTRIBUTE_UNUSED
 #endif
 
 /*
@@ -390,9 +390,9 @@ struct context {
 
     enum CAMERA_TYPE      camera_type;
 
-#ifdef HAVE_MMAL
-    struct mmalcam_context *mmalcam;
-#endif
+    #ifdef HAVE_MMAL
+        struct mmalcam_context *mmalcam;
+    #endif
     struct ctx_netcam *netcam;              /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam *netcam_high;         /* this structure contains the context for high resolution RTSP connection */
 
@@ -461,17 +461,17 @@ struct context {
 
     int sql_mask;
 
-#ifdef HAVE_SQLITE3
-    sqlite3 *database_sqlite3;
-#endif
+    #ifdef HAVE_SQLITE3
+        sqlite3 *database_sqlite3;
+    #endif
 
-#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-    MYSQL *database;
-#endif
+    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+        MYSQL *database;
+    #endif
 
-#ifdef HAVE_PGSQL
-    PGconn *database_pg;
-#endif
+    #ifdef HAVE_PGSQL
+        PGconn *database_pg;
+    #endif
 
     int movie_fps;
     char newfilename[PATH_MAX];

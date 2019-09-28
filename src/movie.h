@@ -30,13 +30,13 @@ enum USER_CODEC {
 #include <libavdevice/avdevice.h>
 
 #if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-#define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
-#define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
-#define MyPixelFormat AVPixelFormat
+    #define MY_PIX_FMT_YUV420P   AV_PIX_FMT_YUV420P
+    #define MY_PIX_FMT_YUVJ420P  AV_PIX_FMT_YUVJ420P
+    #define MyPixelFormat AVPixelFormat
 #else  //Old ffmpeg pixel formats
-#define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
-#define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
-#define MyPixelFormat PixelFormat
+    #define MY_PIX_FMT_YUV420P   PIX_FMT_YUV420P
+    #define MY_PIX_FMT_YUVJ420P  PIX_FMT_YUVJ420P
+    #define MyPixelFormat PixelFormat
 #endif  //Libavformat >= 56
 
 struct ctx_movie {

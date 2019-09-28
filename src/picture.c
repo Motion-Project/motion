@@ -17,8 +17,8 @@
 #include <jpeglib.h>
 
 #ifdef HAVE_WEBP
-#include <webp/encode.h>
-#include <webp/mux.h>
+    #include <webp/encode.h>
+    #include <webp/mux.h>
 #endif /* HAVE_WEBP */
 
 
@@ -454,13 +454,13 @@ static void put_webp_yuv420p_file(FILE *fp,
     if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
         MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
 
-#if WEBP_ENCODER_ABI_VERSION > 0x0202
-    /* writer.mem must be freed by calling WebPMemoryWriterClear */
-    WebPMemoryWriterClear(&webp_writer);
-#else
-    /* writer.mem must be freed by calling 'free(writer.mem)' */
-    free(webp_writer.mem);
-#endif /* WEBP_ENCODER_ABI_VERSION */
+    #if WEBP_ENCODER_ABI_VERSION > 0x0202
+        /* writer.mem must be freed by calling WebPMemoryWriterClear */
+        WebPMemoryWriterClear(&webp_writer);
+    #else
+        /* writer.mem must be freed by calling 'free(writer.mem)' */
+        free(webp_writer.mem);
+    #endif /* WEBP_ENCODER_ABI_VERSION */
 
     /* free the memory used by webp for image data */
     WebPPictureFree(&webp_image);

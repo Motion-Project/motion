@@ -29,151 +29,139 @@
  *  variants of the libav functions.
  ****************************************************************************/
 #if (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
-
-#define MY_FLAG_READ       AVIO_FLAG_READ
-#define MY_FLAG_WRITE      AVIO_FLAG_WRITE
-#define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
-
+    #define MY_FLAG_READ       AVIO_FLAG_READ
+    #define MY_FLAG_WRITE      AVIO_FLAG_WRITE
+    #define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
 #else  //Older versions
-
-#define MY_FLAG_READ       URL_RDONLY
-#define MY_FLAG_WRITE      URL_WRONLY
-#define MY_FLAG_READ_WRITE URL_RDWR
-
+    #define MY_FLAG_READ       URL_RDONLY
+    #define MY_FLAG_WRITE      URL_WRONLY
+    #define MY_FLAG_READ_WRITE URL_RDWR
 #endif
 /*********************************************/
 #if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-
-#define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
-#define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
-#define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
-#define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
-#define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
-#define MY_CODEC_ID_H264      AV_CODEC_ID_H264
-#define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
-
+    #define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
+    #define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
+    #define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
+    #define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
+    #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
+    #define MY_CODEC_ID_H264      AV_CODEC_ID_H264
+    #define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
 #else
-
-#define MY_CODEC_ID_MSMPEG4V2 CODEC_ID_MSMPEG4V2
-#define MY_CODEC_ID_FLV1      CODEC_ID_FLV1
-#define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
-#define MY_CODEC_ID_NONE      CODEC_ID_NONE
-#define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
-#define MY_CODEC_ID_H264      CODEC_ID_H264
-#define MY_CODEC_ID_HEVC      CODEC_ID_H264
-
+    #define MY_CODEC_ID_MSMPEG4V2 CODEC_ID_MSMPEG4V2
+    #define MY_CODEC_ID_FLV1      CODEC_ID_FLV1
+    #define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
+    #define MY_CODEC_ID_NONE      CODEC_ID_NONE
+    #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
+    #define MY_CODEC_ID_H264      CODEC_ID_H264
+    #define MY_CODEC_ID_HEVC      CODEC_ID_H264
 #endif
 
 /*********************************************/
 #if (LIBAVCODEC_VERSION_MAJOR >= 57)
-
-#define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-#define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
-
+    #define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
+    #define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
 #else
-
-#define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
-#define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
-
+    #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
+    #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
 #endif
 
 /*********************************************/
 AVFrame *my_frame_alloc(void){
     AVFrame *pic;
-#if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-    pic = av_frame_alloc();
-#else
-    pic = avcodec_alloc_frame();
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+        pic = av_frame_alloc();
+    #else
+        pic = avcodec_alloc_frame();
+    #endif
     return pic;
 }
 /*********************************************/
 void my_frame_free(AVFrame *frame){
-#if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-    av_frame_free(&frame);
-#else
-    av_freep(&frame);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+        av_frame_free(&frame);
+    #else
+        av_freep(&frame);
+    #endif
 }
 /*********************************************/
 int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
     int retcd = 0;
-#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-    int align = 1;
-    retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
-#else
-    retcd = avpicture_get_size(pix_fmt, width, height);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+        int align = 1;
+        retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
+    #else
+        retcd = avpicture_get_size(pix_fmt, width, height);
+    #endif
     return retcd;
 }
 /*********************************************/
 int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size){
     int retcd = 0;
-#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-    int align = 1;
-    retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
-        ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
-#else
-    retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
-        ,(unsigned char *)buffer_ptr,dest_size);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+        int align = 1;
+        retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
+            ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
+    #else
+        retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
+            ,(unsigned char *)buffer_ptr,dest_size);
+    #endif
     return retcd;
 }
 /*********************************************/
 int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
     int retcd = 0;
-#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-    int align = 1;
-    retcd = av_image_fill_arrays(
-        frame->data
-        ,frame->linesize
-        ,buffer_ptr
-        ,pix_fmt
-        ,width
-        ,height
-        ,align
-    );
-#else
-    retcd = avpicture_fill(
-        (AVPicture *)frame
-        ,buffer_ptr
-        ,pix_fmt
-        ,width
-        ,height);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+        int align = 1;
+        retcd = av_image_fill_arrays(
+            frame->data
+            ,frame->linesize
+            ,buffer_ptr
+            ,pix_fmt
+            ,width
+            ,height
+            ,align
+        );
+    #else
+        retcd = avpicture_fill(
+            (AVPicture *)frame
+            ,buffer_ptr
+            ,pix_fmt
+            ,width
+            ,height);
+    #endif
     return retcd;
 }
 /*********************************************/
 void my_packet_unref(AVPacket pkt){
-#if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-    av_packet_unref(&pkt);
-#else
-    av_free_packet(&pkt);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
+        av_packet_unref(&pkt);
+    #else
+        av_free_packet(&pkt);
+    #endif
 }
 /*********************************************/
 void my_avcodec_close(AVCodecContext *codec_context){
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    avcodec_free_context(&codec_context);
-#else
-    avcodec_close(codec_context);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        avcodec_free_context(&codec_context);
+    #else
+        avcodec_close(codec_context);
+    #endif
 }
 /*********************************************/
 int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
-#if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-    return av_packet_ref(dest_pkt, src_pkt);
-#else
-    /* Old versions of libav do not support copying packet
-     * We therefore disable the pass through recording and
-     * for this function, simply do not do anything
-    */
-    if (dest_pkt == src_pkt ){
-        return 0;
-    } else {
-        return 0;
-    }
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
+        return av_packet_ref(dest_pkt, src_pkt);
+    #else
+        /* Old versions of libav do not support copying packet
+        * We therefore disable the pass through recording and
+        * for this function, simply do not do anything
+        */
+        if (dest_pkt == src_pkt ){
+            return 0;
+        } else {
+            return 0;
+        }
+    #endif
 }
 /*********************************************/
 
@@ -234,43 +222,43 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt){
 }
 
 #if (LIBAVFORMAT_VERSION_MAJOR < 58)
-/* TODO Determine if this is even needed for old versions. Per
- * documentation for version 58, 'av_lockmgr_register This function does nothing'
- */
-static int movie_lockmgr_cb(void **arg, enum AVLockOp op){
-    pthread_mutex_t *mutex = *arg;
-    int err;
+    /* TODO Determine if this is even needed for old versions. Per
+    * documentation for version 58, 'av_lockmgr_register This function does nothing'
+    */
+    static int movie_lockmgr_cb(void **arg, enum AVLockOp op){
+        pthread_mutex_t *mutex = *arg;
+        int err;
 
-    switch (op) {
-    case AV_LOCK_CREATE:
-        mutex = malloc(sizeof(*mutex));
-        if (!mutex)
-            return AVERROR(ENOMEM);
-        if ((err = pthread_mutex_init(mutex, NULL))) {
+        switch (op) {
+        case AV_LOCK_CREATE:
+            mutex = malloc(sizeof(*mutex));
+            if (!mutex)
+                return AVERROR(ENOMEM);
+            if ((err = pthread_mutex_init(mutex, NULL))) {
+                free(mutex);
+                return AVERROR(err);
+            }
+            *arg = mutex;
+            return 0;
+        case AV_LOCK_OBTAIN:
+            if ((err = pthread_mutex_lock(mutex)))
+                return AVERROR(err);
+
+            return 0;
+        case AV_LOCK_RELEASE:
+            if ((err = pthread_mutex_unlock(mutex)))
+                return AVERROR(err);
+
+            return 0;
+        case AV_LOCK_DESTROY:
+            if (mutex)
+                pthread_mutex_destroy(mutex);
             free(mutex);
-            return AVERROR(err);
+            *arg = NULL;
+            return 0;
         }
-        *arg = mutex;
-        return 0;
-    case AV_LOCK_OBTAIN:
-        if ((err = pthread_mutex_lock(mutex)))
-            return AVERROR(err);
-
-        return 0;
-    case AV_LOCK_RELEASE:
-        if ((err = pthread_mutex_unlock(mutex)))
-            return AVERROR(err);
-
-        return 0;
-    case AV_LOCK_DESTROY:
-        if (mutex)
-            pthread_mutex_destroy(mutex);
-        free(mutex);
-        *arg = NULL;
-        return 0;
+        return 1;
     }
-    return 1;
-}
 #endif
 
 static void movie_free_context(struct ctx_movie *movie){
@@ -430,108 +418,108 @@ static int movie_get_oformat(struct ctx_movie *movie){
 
 static int movie_encode_video(struct ctx_movie *movie){
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    //ffmpeg version 3.1 and after
-    int retcd = 0;
-    char errstr[128];
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        //ffmpeg version 3.1 and after
+        int retcd = 0;
+        char errstr[128];
 
-    retcd = avcodec_send_frame(movie->ctx_codec, movie->picture);
-    if (retcd < 0 ){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("Error sending frame for encoding:%s"),errstr);
-        return -1;
-    }
-    retcd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
-    if (retcd == AVERROR(EAGAIN)){
-        //Buffered packet.  Throw special return code
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-            ,_("Receive packet threw EAGAIN returning -2 code :%s"),errstr);
-        my_packet_unref(movie->pkt);
-        return -2;
-    }
-    if (retcd < 0 ){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("Error receiving encoded packet video:%s"),errstr);
-        //Packet is freed upon failure of encoding
-        return -1;
-    }
+        retcd = avcodec_send_frame(movie->ctx_codec, movie->picture);
+        if (retcd < 0 ){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error sending frame for encoding:%s"),errstr);
+            return -1;
+        }
+        retcd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
+        if (retcd == AVERROR(EAGAIN)){
+            //Buffered packet.  Throw special return code
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                ,_("Receive packet threw EAGAIN returning -2 code :%s"),errstr);
+            my_packet_unref(movie->pkt);
+            return -2;
+        }
+        if (retcd < 0 ){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error receiving encoded packet video:%s"),errstr);
+            //Packet is freed upon failure of encoding
+            return -1;
+        }
 
-    if (movie->preferred_codec == USER_CODEC_V4L2M2M){
-        movie_encode_nal(movie);
-    }
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+            movie_encode_nal(movie);
+        }
 
-    return 0;
+        return 0;
 
-#elif (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
+    #elif (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
 
-    int retcd = 0;
-    char errstr[128];
-    int got_packet_ptr;
+        int retcd = 0;
+        char errstr[128];
+        int got_packet_ptr;
 
-    retcd = avcodec_encode_video2(movie->ctx_codec, &movie->pkt, movie->picture, &got_packet_ptr);
-    if (retcd < 0 ){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s"),errstr);
-        //Packet is freed upon failure of encoding
-        return -1;
-    }
-    if (got_packet_ptr == 0){
-        //Buffered packet.  Throw special return code
-        my_packet_unref(movie->pkt);
-        return -2;
-    }
+        retcd = avcodec_encode_video2(movie->ctx_codec, &movie->pkt, movie->picture, &got_packet_ptr);
+        if (retcd < 0 ){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video:%s"),errstr);
+            //Packet is freed upon failure of encoding
+            return -1;
+        }
+        if (got_packet_ptr == 0){
+            //Buffered packet.  Throw special return code
+            my_packet_unref(movie->pkt);
+            return -2;
+        }
 
-    /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
-    if (movie->preferred_codec == USER_CODEC_V4L2M2M){
-        movie_encode_nal(movie);
-    }
+        /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+            movie_encode_nal(movie);
+        }
 
-    return 0;
+        return 0;
 
-#else
+    #else
 
-    int retcd = 0;
-    uint8_t *video_outbuf;
-    int video_outbuf_size;
+        int retcd = 0;
+        uint8_t *video_outbuf;
+        int video_outbuf_size;
 
-    video_outbuf_size = (movie->ctx_codec->width +16) * (movie->ctx_codec->height +16) * 1;
-    video_outbuf = mymalloc(video_outbuf_size);
+        video_outbuf_size = (movie->ctx_codec->width +16) * (movie->ctx_codec->height +16) * 1;
+        video_outbuf = mymalloc(video_outbuf_size);
 
-    retcd = avcodec_encode_video(movie->video_st->codec, video_outbuf, video_outbuf_size, movie->picture);
-    if (retcd < 0 ){
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
-        my_packet_unref(movie->pkt);
-        return -1;
-    }
-    if (retcd == 0 ){
-        // No bytes encoded => buffered=>special handling
-        my_packet_unref(movie->pkt);
-        return -2;
-    }
+        retcd = avcodec_encode_video(movie->video_st->codec, video_outbuf, video_outbuf_size, movie->picture);
+        if (retcd < 0 ){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
+            my_packet_unref(movie->pkt);
+            return -1;
+        }
+        if (retcd == 0 ){
+            // No bytes encoded => buffered=>special handling
+            my_packet_unref(movie->pkt);
+            return -2;
+        }
 
-    // Encoder did not provide metadata, set it up manually
-    movie->pkt.size = retcd;
-    movie->pkt.data = video_outbuf;
+        // Encoder did not provide metadata, set it up manually
+        movie->pkt.size = retcd;
+        movie->pkt.data = video_outbuf;
 
-    if (movie->picture->key_frame == 1)
-      movie->pkt.flags |= AV_PKT_FLAG_KEY;
+        if (movie->picture->key_frame == 1)
+        movie->pkt.flags |= AV_PKT_FLAG_KEY;
 
-    movie->pkt.pts = movie->picture->pts;
-    movie->pkt.dts = movie->pkt.pts;
+        movie->pkt.pts = movie->picture->pts;
+        movie->pkt.dts = movie->pkt.pts;
 
-    free(video_outbuf);
+        free(video_outbuf);
 
-    /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
-    if (movie->preferred_codec == USER_CODEC_V4L2M2M){
-        movie_encode_nal(movie);
-    }
+        /* This kills compiler warnings.  Nal setting is only for recent movie versions*/
+        if (movie->preferred_codec == USER_CODEC_V4L2M2M){
+            movie_encode_nal(movie);
+        }
 
-    return 0;
+        return 0;
 
-#endif
+    #endif
 
 }
 
@@ -668,20 +656,20 @@ static const char *movie_codec_is_blacklisted(const char *codec_name){
 
     static struct blacklist_t blacklisted_codec[] =
     {
-#if (LIBAVFORMAT_VERSION_MAJOR < 58) || ( (LIBAVFORMAT_VERSION_MAJOR == 58) && ( (LIBAVFORMAT_VERSION_MINOR < 29) || ((LIBAVFORMAT_VERSION_MINOR == 29) && (LIBAVFORMAT_VERSION_MICRO <= 100)) ) )
-        /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
-         * Newer versions of ffmpeg allow zerocopy to be disabled to workaround
-         * this issue.
-         * To use h264_omx encoder on older versions of ffmpeg:
-         * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
-         * - remove the "h264_omx" from this blacklist.
-         * More information: https://github.com/Motion-Project/motion/issues/433
-         */
-        {"h264_omx", "Codec causes lock up on your FFMpeg version"},
-#endif
-#if (LIBAVFORMAT_VERSION_MAJOR < 57) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR < 41))
-        {"h264_v4l2m2m", "FFMpeg version is too old"},
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR < 58) || ( (LIBAVFORMAT_VERSION_MAJOR == 58) && ( (LIBAVFORMAT_VERSION_MINOR < 29) || ((LIBAVFORMAT_VERSION_MINOR == 29) && (LIBAVFORMAT_VERSION_MICRO <= 100)) ) )
+            /* h264_omx & ffmpeg combination locks up on Raspberry Pi.
+            * Newer versions of ffmpeg allow zerocopy to be disabled to workaround
+            * this issue.
+            * To use h264_omx encoder on older versions of ffmpeg:
+            * - disable input_zerocopy in ffmpeg omx.c:omx_encode_init function.
+            * - remove the "h264_omx" from this blacklist.
+            * More information: https://github.com/Motion-Project/motion/issues/433
+            */
+            {"h264_omx", "Codec causes lock up on your FFMpeg version"},
+    #endif
+    #if (LIBAVFORMAT_VERSION_MAJOR < 57) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR < 41))
+            {"h264_v4l2m2m", "FFMpeg version is too old"},
+    #endif
     };
     size_t i;
 
@@ -748,29 +736,29 @@ static int movie_set_codec(struct ctx_movie *movie){
     retcd = movie_set_codec_preferred(movie);
     if (retcd != 0) return retcd;
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    //If we provide the codec to this, it results in a memory leak.  movie ticket: 5714
-    movie->video_st = avformat_new_stream(movie->oc, NULL);
-    if (!movie->video_st) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-        movie_free_context(movie);
-        return -1;
-    }
-    movie->ctx_codec = avcodec_alloc_context3(movie->codec);
-    if (movie->ctx_codec == NULL) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate decoder!"));
-        movie_free_context(movie);
-        return -1;
-    }
-#else
-    movie->video_st = avformat_new_stream(movie->oc, movie->codec);
-    if (!movie->video_st) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-        movie_free_context(movie);
-        return -1;
-    }
-    movie->ctx_codec = movie->video_st->codec;
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        //If we provide the codec to this, it results in a memory leak.  movie ticket: 5714
+        movie->video_st = avformat_new_stream(movie->oc, NULL);
+        if (!movie->video_st) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+            movie_free_context(movie);
+            return -1;
+        }
+        movie->ctx_codec = avcodec_alloc_context3(movie->codec);
+        if (movie->ctx_codec == NULL) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate decoder!"));
+            movie_free_context(movie);
+            return -1;
+        }
+    #else
+        movie->video_st = avformat_new_stream(movie->oc, movie->codec);
+        if (!movie->video_st) {
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+            movie_free_context(movie);
+            return -1;
+        }
+        movie->ctx_codec = movie->video_st->codec;
+    #endif
 
 
     if (movie->tlapse != TIMELAPSE_NONE) {
@@ -868,19 +856,19 @@ static int movie_set_codec(struct ctx_movie *movie){
 
 static int movie_set_stream(struct ctx_movie *movie){
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    int retcd;
-    char errstr[128];
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        int retcd;
+        char errstr[128];
 
-    retcd = avcodec_parameters_from_context(movie->video_st->codecpar,movie->ctx_codec);
-    if (retcd < 0) {
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-            ,_("Failed to copy decoder parameters!: %s"), errstr);
-        movie_free_context(movie);
-        return -1;
-    }
-#endif
+        retcd = avcodec_parameters_from_context(movie->video_st->codecpar,movie->ctx_codec);
+        if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Failed to copy decoder parameters!: %s"), errstr);
+            movie_free_context(movie);
+            return -1;
+        }
+    #endif
 
     movie->video_st->time_base = (AVRational){1, movie->fps};
 
@@ -989,9 +977,9 @@ static int movie_set_outputfile(struct ctx_movie *movie){
     int retcd;
     char errstr[128];
 
-#if (LIBAVFORMAT_VERSION_MAJOR < 58)
-    snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+        snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
+    #endif
 
     /* Open the output file, if needed. */
     if ((movie_timelapse_exists(movie->filename) == 0) || (movie->tlapse != TIMELAPSE_APPEND)) {
@@ -1048,65 +1036,65 @@ static int movie_set_outputfile(struct ctx_movie *movie){
 
 static int movie_flush_codec(struct ctx_movie *movie){
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    //ffmpeg version 3.1 and after
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        //ffmpeg version 3.1 and after
 
-    int retcd;
-    int recv_cd = 0;
-    char errstr[128];
+        int retcd;
+        int recv_cd = 0;
+        char errstr[128];
 
-    if (movie->passthrough){
-        return 0;
-    }
-
-    retcd = 0;
-    recv_cd = 0;
-    if (movie->tlapse == TIMELAPSE_NONE) {
-        retcd = avcodec_send_frame(movie->ctx_codec, NULL);
-        if (retcd < 0 ){
-            av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                ,_("Error entering draining mode:%s"),errstr);
-            return -1;
+        if (movie->passthrough){
+            return 0;
         }
-        while (recv_cd != AVERROR_EOF){
-            av_init_packet(&movie->pkt);
-            movie->pkt.data = NULL;
-            movie->pkt.size = 0;
-            recv_cd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
-            if (recv_cd != AVERROR_EOF){
-                if (recv_cd < 0){
-                    av_strerror(recv_cd, errstr, sizeof(errstr));
-                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                        ,_("Error draining codec:%s"),errstr);
-                    my_packet_unref(movie->pkt);
-                    return -1;
-                }
-                // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
-                if ((movie->pkt.pts == 0) || (movie->pkt.size == 0)) {
-                    recv_cd = AVERROR_EOF;
-                    my_packet_unref(movie->pkt);
-                    continue;
-                }
-                retcd = av_write_frame(movie->oc, &movie->pkt);
-                if (retcd < 0) {
-                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
-                        ,_("Error writing draining video frame"));
-                    return -1;
-                }
+
+        retcd = 0;
+        recv_cd = 0;
+        if (movie->tlapse == TIMELAPSE_NONE) {
+            retcd = avcodec_send_frame(movie->ctx_codec, NULL);
+            if (retcd < 0 ){
+                av_strerror(retcd, errstr, sizeof(errstr));
+                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                    ,_("Error entering draining mode:%s"),errstr);
+                return -1;
             }
-            my_packet_unref(movie->pkt);
+            while (recv_cd != AVERROR_EOF){
+                av_init_packet(&movie->pkt);
+                movie->pkt.data = NULL;
+                movie->pkt.size = 0;
+                recv_cd = avcodec_receive_packet(movie->ctx_codec, &movie->pkt);
+                if (recv_cd != AVERROR_EOF){
+                    if (recv_cd < 0){
+                        av_strerror(recv_cd, errstr, sizeof(errstr));
+                        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                            ,_("Error draining codec:%s"),errstr);
+                        my_packet_unref(movie->pkt);
+                        return -1;
+                    }
+                    // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
+                    if ((movie->pkt.pts == 0) || (movie->pkt.size == 0)) {
+                        recv_cd = AVERROR_EOF;
+                        my_packet_unref(movie->pkt);
+                        continue;
+                    }
+                    retcd = av_write_frame(movie->oc, &movie->pkt);
+                    if (retcd < 0) {
+                        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                            ,_("Error writing draining video frame"));
+                        return -1;
+                    }
+                }
+                my_packet_unref(movie->pkt);
+            }
         }
-    }
-    return 0;
-#else
-    /* Dummy to kill warnings.  No draining in older ffmpeg versions */
-    if (movie) {
         return 0;
-    } else{
-        return 0;
-    }
-#endif
+    #else
+        /* Dummy to kill warnings.  No draining in older ffmpeg versions */
+        if (movie) {
+            return 0;
+        } else{
+            return 0;
+        }
+    #endif
 
 }
 
@@ -1302,50 +1290,50 @@ static int movie_passthru_codec(struct ctx_movie *movie){
             return -1;
         }
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-        stream_in = movie->netcam_data->transfer_format->streams[0];
-        movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+            stream_in = movie->netcam_data->transfer_format->streams[0];
+            movie->oc->oformat->video_codec = stream_in->codecpar->codec_id;
 
-        movie->video_st = avformat_new_stream(movie->oc, NULL);
-        if (!movie->video_st) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+            movie->video_st = avformat_new_stream(movie->oc, NULL);
+            if (!movie->video_st) {
+                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+                return -1;
+            }
+
+            retcd = avcodec_parameters_copy(movie->video_st->codecpar, stream_in->codecpar);
+            if (retcd < 0){
+                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
+                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+                return -1;
+            }
+            movie->video_st->codecpar->codec_tag  = 0;
+
+    #elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+
+            stream_in = movie->netcam_data->transfer_format->streams[0];
+
+            movie->video_st = avformat_new_stream(movie->oc, stream_in->codec->codec);
+            if (!movie->video_st) {
+                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+                return -1;
+            }
+
+            retcd = avcodec_copy_context(movie->video_st->codec, stream_in->codec);
+            if (retcd < 0){
+                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
+                pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+                return -1;
+            }
+            movie->video_st->codec->flags     |= MY_CODEC_FLAG_GLOBAL_HEADER;
+            movie->video_st->codec->codec_tag  = 0;
+    #else
+            /* This is disabled in the util_check_passthrough but we need it here for compiling */
             pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through disabled.  ffmpeg too old"));
             return -1;
-        }
-
-        retcd = avcodec_parameters_copy(movie->video_st->codecpar, stream_in->codecpar);
-        if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
-            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-            return -1;
-        }
-        movie->video_st->codecpar->codec_tag  = 0;
-
-#elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
-
-        stream_in = movie->netcam_data->transfer_format->streams[0];
-
-        movie->video_st = avformat_new_stream(movie->oc, stream_in->codec->codec);
-        if (!movie->video_st) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
-            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-            return -1;
-        }
-
-        retcd = avcodec_copy_context(movie->video_st->codec, stream_in->codec);
-        if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy codec parameters"));
-            pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-            return -1;
-        }
-        movie->video_st->codec->flags     |= MY_CODEC_FLAG_GLOBAL_HEADER;
-        movie->video_st->codec->codec_tag  = 0;
-#else
-        /* This is disabled in the util_check_passthrough but we need it here for compiling */
-        pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("Pass-through disabled.  ffmpeg too old"));
-        return -1;
-#endif
+    #endif
 
         movie->video_st->time_base         = stream_in->time_base;
     pthread_mutex_unlock(&movie->netcam_data->mutex_transfer);
@@ -1433,27 +1421,27 @@ void movie_global_init(void){
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 
-#if (LIBAVFORMAT_VERSION_MAJOR < 58)
-    /* TODO: Determine if this is even needed for older versions */
-    av_register_all();
-    avcodec_register_all();
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+        /* TODO: Determine if this is even needed for older versions */
+        av_register_all();
+        avcodec_register_all();
+    #endif
 
 
     avformat_network_init();
     avdevice_register_all();
     av_log_set_callback((void *)movie_avcodec_log);
 
-#if (LIBAVFORMAT_VERSION_MAJOR < 58)
-    /* TODO: Determine if this is even needed for older versions */
-    int ret;
-    ret = av_lockmgr_register(movie_lockmgr_cb);
-    if (ret < 0)
-    {
-        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("av_lockmgr_register failed (%d)"), ret);
-        exit(1);
-    }
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+        /* TODO: Determine if this is even needed for older versions */
+        int ret;
+        ret = av_lockmgr_register(movie_lockmgr_cb);
+        if (ret < 0)
+        {
+            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO, _("av_lockmgr_register failed (%d)"), ret);
+            exit(1);
+        }
+    #endif
 
 }
 
@@ -1461,14 +1449,14 @@ void movie_global_deinit(void) {
 
     avformat_network_deinit();
 
-#if (LIBAVFORMAT_VERSION_MAJOR < 58)
-    /* TODO Determine if this is even needed for old versions */
-    if (av_lockmgr_register(NULL) < 0)
-    {
-        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-            ,_("av_lockmgr_register reset failed on cleanup"));
-    }
-#endif
+    #if (LIBAVFORMAT_VERSION_MAJOR < 58)
+        /* TODO Determine if this is even needed for old versions */
+        if (av_lockmgr_register(NULL) < 0)
+        {
+            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+                ,_("av_lockmgr_register reset failed on cleanup"));
+        }
+    #endif
 
 
 }

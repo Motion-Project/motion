@@ -647,14 +647,14 @@ void vid_mutex_destroy(void)
 
 void vid_close(struct context *cnt) {
 
-#ifdef HAVE_MMAL
-    if (cnt->mmalcam) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
-        mmalcam_cleanup(cnt->mmalcam);
-        cnt->mmalcam = NULL;
-        return;
-    }
-#endif
+    #ifdef HAVE_MMAL
+        if (cnt->mmalcam) {
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
+            mmalcam_cleanup(cnt->mmalcam);
+            cnt->mmalcam = NULL;
+            return;
+        }
+    #endif
 
     if (cnt->netcam) {
         /* This also cleans up high resolution */
@@ -699,18 +699,18 @@ void vid_close(struct context *cnt) {
 int vid_start(struct context *cnt) {
     int dev = -1;
 
-#ifdef HAVE_MMAL
-    if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
-        dev = mmalcam_start(cnt);
-        if (dev < 0) {
-            mmalcam_cleanup(cnt->mmalcam);
-            cnt->mmalcam = NULL;
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+    #ifdef HAVE_MMAL
+        if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
+            dev = mmalcam_start(cnt);
+            if (dev < 0) {
+                mmalcam_cleanup(cnt->mmalcam);
+                cnt->mmalcam = NULL;
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
+            }
+            return dev;
         }
-        return dev;
-    }
-#endif
+    #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
@@ -759,14 +759,14 @@ int vid_start(struct context *cnt) {
  */
 int vid_next(struct context *cnt, struct image_data *img_data){
 
-#ifdef HAVE_MMAL
-     if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-        if (cnt->mmalcam == NULL) {
-            return NETCAM_GENERAL_ERROR;
+    #ifdef HAVE_MMAL
+        if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+            if (cnt->mmalcam == NULL) {
+                return NETCAM_GENERAL_ERROR;
+            }
+            return mmalcam_next(cnt, img_data);
         }
-        return mmalcam_next(cnt, img_data);
-    }
-#endif
+    #endif
 
     if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
         if (cnt->video_dev == -1)

@@ -431,79 +431,79 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam){
  */
 static int netcam_decode_video(struct ctx_netcam *netcam){
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
 
-    int retcd;
-    char errstr[128];
+        int retcd;
+        char errstr[128];
 
-    /* The Invalid data problem comes frequently.  Usually at startup of rtsp cameras.
-     * We now ignore those packets so this function would need to fail on a different error.
-     * We should consider adding a maximum count of these errors and reset every time
-     * we get a good image.
-     */
-    if (netcam->finish) return 0;   /* This just speeds up the shutdown time */
+        /* The Invalid data problem comes frequently.  Usually at startup of rtsp cameras.
+        * We now ignore those packets so this function would need to fail on a different error.
+        * We should consider adding a maximum count of these errors and reset every time
+        * we get a good image.
+        */
+        if (netcam->finish) return 0;   /* This just speeds up the shutdown time */
 
-    retcd = avcodec_send_packet(netcam->codec_context, &netcam->packet_recv);
-    if ((netcam->interrupted) || (netcam->finish)) return -1;
-    if (retcd == AVERROR_INVALIDDATA) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("Ignoring packet with invalid data"));
-        return 0;
-    }
-    if (retcd < 0 && retcd != AVERROR_EOF){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("Error sending packet to codec: %s"), errstr);
-        return -1;
-    }
+        retcd = avcodec_send_packet(netcam->codec_context, &netcam->packet_recv);
+        if ((netcam->interrupted) || (netcam->finish)) return -1;
+        if (retcd == AVERROR_INVALIDDATA) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("Ignoring packet with invalid data"));
+            return 0;
+        }
+        if (retcd < 0 && retcd != AVERROR_EOF){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("Error sending packet to codec: %s"), errstr);
+            return -1;
+        }
 
-    retcd = avcodec_receive_frame(netcam->codec_context, netcam->frame);
-    if ((netcam->interrupted) || (netcam->finish)) return -1;
+        retcd = avcodec_receive_frame(netcam->codec_context, netcam->frame);
+        if ((netcam->interrupted) || (netcam->finish)) return -1;
 
-    if (retcd == AVERROR(EAGAIN)) return 0;
+        if (retcd == AVERROR(EAGAIN)) return 0;
 
-    if (retcd == AVERROR_INVALIDDATA) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("Ignoring packet with invalid data"));
-        return 0;
-    }
+        if (retcd == AVERROR_INVALIDDATA) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("Ignoring packet with invalid data"));
+            return 0;
+        }
 
-    if (retcd < 0) {
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("Error receiving frame from codec: %s"), errstr);
-        return -1;
-    }
+        if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("Error receiving frame from codec: %s"), errstr);
+            return -1;
+        }
 
-    return 1;
+        return 1;
 
-#else
+    #else
 
-    int retcd;
-    int check = 0;
-    char errstr[128];
+        int retcd;
+        int check = 0;
+        char errstr[128];
 
-    if (netcam->finish) return 0;   /* This just speeds up the shutdown time */
+        if (netcam->finish) return 0;   /* This just speeds up the shutdown time */
 
-    retcd = avcodec_decode_video2(netcam->codec_context, netcam->frame, &check, &netcam->packet_recv);
-    if ((netcam->interrupted) || (netcam->finish)) return -1;
+        retcd = avcodec_decode_video2(netcam->codec_context, netcam->frame, &check, &netcam->packet_recv);
+        if ((netcam->interrupted) || (netcam->finish)) return -1;
 
-    if (retcd == AVERROR_INVALIDDATA) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Ignoring packet with invalid data"));
-        return 0;
-    }
+        if (retcd == AVERROR_INVALIDDATA) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Ignoring packet with invalid data"));
+            return 0;
+        }
 
-    if (retcd < 0) {
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Error decoding packet: %s"),errstr);
-        return -1;
-    }
+        if (retcd < 0) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Error decoding packet: %s"),errstr);
+            return -1;
+        }
 
-    if (check == 0 || retcd == 0) return 0;
+        if (check == 0 || retcd == 0) return 0;
 
-    return 1;
+        return 1;
 
-#endif
+    #endif
 
 }
 
@@ -543,99 +543,99 @@ static int netcam_decode_packet(struct ctx_netcam *netcam){
 
 static int netcam_open_codec(struct ctx_netcam *netcam){
 
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    int retcd;
-    char errstr[128];
-    AVStream *st;
-    AVCodec *decoder = NULL;
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        int retcd;
+        char errstr[128];
+        AVStream *st;
+        AVCodec *decoder = NULL;
 
-    if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
+        if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
 
-    retcd = av_find_best_stream(netcam->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-    if ((retcd < 0) || (netcam->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: av_find_best_stream: %s,Interrupt %s")
-            ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
-    netcam->video_stream_index = retcd;
-    st = netcam->format_context->streams[netcam->video_stream_index];
+        retcd = av_find_best_stream(netcam->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+        if ((retcd < 0) || (netcam->interrupted)){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: av_find_best_stream: %s,Interrupt %s")
+                ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
+        netcam->video_stream_index = retcd;
+        st = netcam->format_context->streams[netcam->video_stream_index];
 
-    decoder = avcodec_find_decoder(st->codecpar->codec_id);
-    if ((decoder == NULL) || (netcam->interrupted)){
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
-            ,netcam->cameratype, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
+        decoder = avcodec_find_decoder(st->codecpar->codec_id);
+        if ((decoder == NULL) || (netcam->interrupted)){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
+                ,netcam->cameratype, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
 
-    netcam->codec_context = avcodec_alloc_context3(decoder);
-    if ((netcam->codec_context == NULL) || (netcam->interrupted)){
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_alloc_context3: Failed,Interrupt %s")
-            ,netcam->cameratype, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
+        netcam->codec_context = avcodec_alloc_context3(decoder);
+        if ((netcam->codec_context == NULL) || (netcam->interrupted)){
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: avcodec_alloc_context3: Failed,Interrupt %s")
+                ,netcam->cameratype, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
 
-    retcd = avcodec_parameters_to_context(netcam->codec_context, st->codecpar);
-    if ((retcd < 0) || (netcam->interrupted)) {
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_parameters_to_context: %s,Interrupt %s")
-            ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
+        retcd = avcodec_parameters_to_context(netcam->codec_context, st->codecpar);
+        if ((retcd < 0) || (netcam->interrupted)) {
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: avcodec_parameters_to_context: %s,Interrupt %s")
+                ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
 
-    retcd = avcodec_open2(netcam->codec_context, decoder, NULL);
-    if ((retcd < 0) || (netcam->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_open2: %s,Interrupt %s")
-            ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
+        retcd = avcodec_open2(netcam->codec_context, decoder, NULL);
+        if ((retcd < 0) || (netcam->interrupted)){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: avcodec_open2: %s,Interrupt %s")
+                ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
 
-    return 0;
-#else
+        return 0;
+    #else
 
-    int retcd;
-    char errstr[128];
-    AVStream *st;
-    AVCodec *decoder = NULL;
+        int retcd;
+        char errstr[128];
+        AVStream *st;
+        AVCodec *decoder = NULL;
 
-    if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
+        if (netcam->finish) return -1;   /* This just speeds up the shutdown time */
 
-    retcd = av_find_best_stream(netcam->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-    if ((retcd < 0) || (netcam->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: av_find_best_stream: %s,Interrupt %s")
-            ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
-    netcam->video_stream_index = retcd;
-    st = netcam->format_context->streams[netcam->video_stream_index];
+        retcd = av_find_best_stream(netcam->format_context, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+        if ((retcd < 0) || (netcam->interrupted)){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: av_find_best_stream: %s,Interrupt %s")
+                ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
+        netcam->video_stream_index = retcd;
+        st = netcam->format_context->streams[netcam->video_stream_index];
 
-    netcam->codec_context = st->codec;
-    decoder = avcodec_find_decoder(netcam->codec_context->codec_id);
-    if ((decoder == NULL) || (netcam->interrupted)) {
-         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
-            ,netcam->cameratype, netcam->interrupted ? _("True"):_("False"));
-         return -1;
-     }
-    retcd = avcodec_open2(netcam->codec_context, decoder, NULL);
-    if ((retcd < 0) || (netcam->interrupted)){
-        av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            ,_("%s: avcodec_open2: %s,Interrupt %s")
-            ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
-        return -1;
-    }
+        netcam->codec_context = st->codec;
+        decoder = avcodec_find_decoder(netcam->codec_context->codec_id);
+        if ((decoder == NULL) || (netcam->interrupted)) {
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
+                ,netcam->cameratype, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
+        retcd = avcodec_open2(netcam->codec_context, decoder, NULL);
+        if ((retcd < 0) || (netcam->interrupted)){
+            av_strerror(retcd, errstr, sizeof(errstr));
+            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                ,_("%s: avcodec_open2: %s,Interrupt %s")
+                ,netcam->cameratype, errstr, netcam->interrupted ? _("True"):_("False"));
+            return -1;
+        }
 
-    return 0;
-#endif
+        return 0;
+    #endif
 
 
 }
@@ -1261,53 +1261,53 @@ static int netcam_set_dimensions (struct context *cnt) {
 
 static int netcam_copy_stream(struct ctx_netcam *netcam){
     /* Make a static copy of the stream information for use in passthrough processing */
-#if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-    AVStream  *transfer_stream, *stream_in;
-    int        retcd;
+    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
+        AVStream  *transfer_stream, *stream_in;
+        int        retcd;
 
-    pthread_mutex_lock(&netcam->mutex_transfer);
-        if (netcam->transfer_format != NULL) avformat_close_input(&netcam->transfer_format);
-        netcam->transfer_format = avformat_alloc_context();
-        transfer_stream = avformat_new_stream(netcam->transfer_format, NULL);
-        stream_in = netcam->format_context->streams[netcam->video_stream_index];
-        retcd = avcodec_parameters_copy(transfer_stream->codecpar, stream_in->codecpar);
-        if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                ,_("Unable to copy codec parameters"));
-            pthread_mutex_unlock(&netcam->mutex_transfer);
-            return -1;
-        }
-        transfer_stream->time_base         = stream_in->time_base;
-    pthread_mutex_unlock(&netcam->mutex_transfer);
+        pthread_mutex_lock(&netcam->mutex_transfer);
+            if (netcam->transfer_format != NULL) avformat_close_input(&netcam->transfer_format);
+            netcam->transfer_format = avformat_alloc_context();
+            transfer_stream = avformat_new_stream(netcam->transfer_format, NULL);
+            stream_in = netcam->format_context->streams[netcam->video_stream_index];
+            retcd = avcodec_parameters_copy(transfer_stream->codecpar, stream_in->codecpar);
+            if (retcd < 0){
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+                    ,_("Unable to copy codec parameters"));
+                pthread_mutex_unlock(&netcam->mutex_transfer);
+                return -1;
+            }
+            transfer_stream->time_base         = stream_in->time_base;
+        pthread_mutex_unlock(&netcam->mutex_transfer);
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
-    return 0;
-#elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
+        return 0;
+    #elif (LIBAVFORMAT_VERSION_MAJOR >= 55)
 
-    AVStream  *transfer_stream, *stream_in;
-    int        retcd;
+        AVStream  *transfer_stream, *stream_in;
+        int        retcd;
 
-    pthread_mutex_lock(&netcam->mutex_transfer);
-        if (netcam->transfer_format != NULL) avformat_close_input(&netcam->transfer_format);
-        netcam->transfer_format = avformat_alloc_context();
-        transfer_stream = avformat_new_stream(netcam->transfer_format, NULL);
-        stream_in = netcam->format_context->streams[netcam->video_stream_index];
-        retcd = avcodec_copy_context(transfer_stream->codec, stream_in->codec);
-        if (retcd < 0){
-            MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to copy codec parameters"));
-            pthread_mutex_unlock(&netcam->mutex_transfer);
-            return -1;
-        }
-        transfer_stream->time_base         = stream_in->time_base;
-    pthread_mutex_unlock(&netcam->mutex_transfer);
+        pthread_mutex_lock(&netcam->mutex_transfer);
+            if (netcam->transfer_format != NULL) avformat_close_input(&netcam->transfer_format);
+            netcam->transfer_format = avformat_alloc_context();
+            transfer_stream = avformat_new_stream(netcam->transfer_format, NULL);
+            stream_in = netcam->format_context->streams[netcam->video_stream_index];
+            retcd = avcodec_copy_context(transfer_stream->codec, stream_in->codec);
+            if (retcd < 0){
+                MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Unable to copy codec parameters"));
+                pthread_mutex_unlock(&netcam->mutex_transfer);
+                return -1;
+            }
+            transfer_stream->time_base         = stream_in->time_base;
+        pthread_mutex_unlock(&netcam->mutex_transfer);
 
-    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
-    return 0;
-#else
-    /* This is disabled in the util_check_passthrough but we need it here for compiling */
-    if (netcam != NULL) MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("ffmpeg too old"));
-    return -1;
-#endif
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Stream copied for pass-through"));
+        return 0;
+    #else
+        /* This is disabled in the util_check_passthrough but we need it here for compiling */
+        if (netcam != NULL) MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("ffmpeg too old"));
+        return -1;
+    #endif
 
 }
 
