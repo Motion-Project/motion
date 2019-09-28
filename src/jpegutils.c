@@ -48,7 +48,6 @@
  *    jpgutl_decode_jpeg
  */
 
-#include "translate.h"
 #include "config.h"
 #include "motion.h"
 #include "jpegutils.h"

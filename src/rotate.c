@@ -29,7 +29,6 @@
  *                       - speed optimization, including bswap
  *      v1 (28-Aug-2004) - initial version
  */
-#include "translate.h"
 #include "rotate.h"
 #include <stdint.h>
 #if defined(__APPLE__)

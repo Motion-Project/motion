@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-25 23:02-0600\n"
+"POT-Creation-Date: 2019-09-27 21:06-0600\n"
 "PO-Revision-Date: 2018-10-13 12:04-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -1262,6 +1262,10 @@ msgstr ""
 #: src/mmalcam.c
 msgid "Unable to return a buffer to the camera video port"
 msgstr ""
+
+#: src/motion.c
+msgid "Language: English"
+msgstr "Språk: Svenska"
 
 #: src/motion.c
 #, c-format
@@ -2576,10 +2580,6 @@ msgstr ""
 #, c-format
 msgid "After_REL_Y_Angel : x= %d , Y= %d"
 msgstr ""
-
-#: src/translate.c
-msgid "Language: English"
-msgstr "Språk: Svenska"
 
 #: src/video_common.c
 msgid "Corrupt image ... continue"

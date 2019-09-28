@@ -9,7 +9,6 @@
  *
  */
 
-#include "translate.h"
 #include "picture.h"
 #include "jpegutils.h"
 #include "event.h"

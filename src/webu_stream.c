@@ -16,7 +16,6 @@
 #include "motion.h"
 #include "webu.h"
 #include "webu_stream.h"
-#include "translate.h"
 
 static void webu_stream_mjpeg_checkbuffers(struct webui_ctx *webui) {
     /* Allocate buffers if needed */

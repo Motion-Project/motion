@@ -8,7 +8,6 @@
     see also the file 'COPYING'.
 */
 #include "picture.h"   /* already includes motion.h */
-#include "translate.h"
 #include "netcam.h"
 #include "movie.h"
 #include "event.h"

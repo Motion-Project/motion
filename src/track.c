@@ -6,7 +6,6 @@
  *    This program is published under the GNU Public license
  */
 #include <math.h>
-#include "translate.h"
 #include "motion.h"
 
 #ifdef HAVE_V4L2

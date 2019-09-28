@@ -8,7 +8,6 @@
  *    See also the file 'COPYING'.
  *
  */
-#include "translate.h"
 #include "motion.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))

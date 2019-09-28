@@ -36,7 +36,6 @@
 #include "motion.h"
 #include "webu.h"
 #include "webu_html.h"
-#include "translate.h"
 
 /* struct to save information regarding the links to include in html page */
 struct strminfo_ctx {

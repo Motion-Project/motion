@@ -11,6 +11,6 @@ bin_PROGRAMS = motion
 motion_SOURCES = motion.c logger.c conf.c draw.c jpegutils.c video_loopback.c \
 	video_v4l2.c video_common.c \
 	netcam.c track.c alg.c event.c picture.c \
-	rotate.c translate.c movie.c \
+	rotate.c movie.c \
 	webu.c webu_html.c webu_stream.c webu_text.c mmalcam.c $(MMAL_SRC)
 

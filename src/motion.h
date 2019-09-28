@@ -35,6 +35,7 @@ struct image_data;
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
+#include <locale.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -68,6 +69,14 @@ struct image_data;
 #include "mmalcam.h"
 #endif
 
+int nls_enabled;
+
+#ifdef HAVE_GETTEXT
+#   include <libintl.h>
+    extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
+#endif
+
+#define _(STRING) translate_text(STRING)
 
 /**
  * ATTRIBUTE_UNUSED:
@@ -540,5 +549,9 @@ int create_path(const char *);
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);
 int util_check_passthrough(struct context *cnt);
+
+    char* translate_text(const char *msgid);
+    void translate_init(void);
+    void translate_locale_chg(const char *langcd);
 
 #endif /* _INCLUDE_MOTION_H */
