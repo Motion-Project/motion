@@ -369,7 +369,7 @@ struct rotdata {
  *  These used to be global variables but now each thread will have its
  *  own context
  */
-struct context {
+struct ctx_cam {
     FILE *extpipe;
     int extpipe_open;
     char conf_filename[PATH_MAX];
@@ -543,12 +543,12 @@ void * mymalloc(size_t);
 void * myrealloc(void *, size_t, const char *);
 FILE * myfopen(const char *, const char *);
 int myfclose(FILE *);
-size_t mystrftime(const struct context *, char *, size_t, const char *, const struct timeval *, const char *, int);
+size_t mystrftime(const struct ctx_cam *, char *, size_t, const char *, const struct timeval *, const char *, int);
 int create_path(const char *);
 
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
 void util_threadname_get(char *threadname);
-int util_check_passthrough(struct context *cnt);
+int util_check_passthrough(struct ctx_cam *cam);
 
     char* translate_text(const char *msgid);
     void translate_init(void);

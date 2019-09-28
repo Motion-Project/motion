@@ -35,7 +35,7 @@
 
 struct config conf_template = {
     /* Overall system configuration parameters */
-    /* daemon is directly cast into the cnt context rather than conf */
+    /* daemon is directly cast into the cam ctx_cam rather than conf */
     .setup_mode =                      FALSE,
     .pid_file =                        NULL,
     .log_file =                        NULL,
@@ -203,30 +203,30 @@ struct config conf_template = {
 
 
 /* Forward Declares */
-static void malloc_strings(struct context *);
-static struct context **copy_bool(struct context **, const char *, int);
-static struct context **copy_int(struct context **, const char *, int);
-static struct context **config_camera(struct context **cnt, const char *str, int val);
-static struct context **copy_vid_ctrl(struct context **, const char *, int);
-static struct context **copy_text_double(struct context **, const char *, int);
-static struct context **copy_html_output(struct context **, const char *, int);
+static void malloc_strings(struct ctx_cam *);
+static struct ctx_cam **copy_bool(struct ctx_cam **, const char *, int);
+static struct ctx_cam **copy_int(struct ctx_cam **, const char *, int);
+static struct ctx_cam **config_camera(struct ctx_cam **camlst, const char *str, int val);
+static struct ctx_cam **copy_vid_ctrl(struct ctx_cam **, const char *, int);
+static struct ctx_cam **copy_text_double(struct ctx_cam **, const char *, int);
+static struct ctx_cam **copy_html_output(struct ctx_cam **, const char *, int);
 
-static const char *print_bool(struct context **, char **, int, unsigned int);
-static const char *print_int(struct context **, char **, int, unsigned int);
-static const char *print_string(struct context **, char **, int, unsigned int);
-static const char *print_camera(struct context **, char **, int, unsigned int);
+static const char *print_bool(struct ctx_cam **, char **, int, unsigned int);
+static const char *print_int(struct ctx_cam **, char **, int, unsigned int);
+static const char *print_string(struct ctx_cam **, char **, int, unsigned int);
+static const char *print_camera(struct ctx_cam **, char **, int, unsigned int);
 
 static void usage(void);
 static void config_parms_intl(void);
 
 /* Pointer magic to determine relative addresses of variables to a
-   struct context pointer */
-#define CNT_OFFSET(varname) ((long)&((struct context *)NULL)->varname)
-#define CONF_OFFSET(varname) ((long)&((struct context *)NULL)->conf.varname)
-#define TRACK_OFFSET(varname) ((long)&((struct context *)NULL)->track.varname)
+   struct ctx_cam pointer */
+#define CNT_OFFSET(varname) ((long)&((struct ctx_cam *)NULL)->varname)
+#define CONF_OFFSET(varname) ((long)&((struct ctx_cam *)NULL)->conf.varname)
+#define TRACK_OFFSET(varname) ((long)&((struct ctx_cam *)NULL)->track.varname)
 
 /* The sequence of these within here determines how they are presented to user
- * Note daemon goes directly to cnt context rather than conf.
+ * Note daemon goes directly to cam ctx_cam rather than conf.
  * Descriptions are limited to one line and few to no references to values since
  * the motion_guide.html is our single source of documentation and historically
  * these descriptions were not updated with revisions.
@@ -1963,9 +1963,9 @@ dep_config_param dep_config_params[] = {
  *
  * Returns nothing.
  */
-static void conf_cmdline(struct context *cnt, int thread)
+static void conf_cmdline(struct ctx_cam *cam, int thread)
 {
-    struct config *conf = &cnt->conf;
+    struct config *conf = &cam->conf;
     int c;
 
     /*
@@ -1977,13 +1977,13 @@ static void conf_cmdline(struct context *cnt, int thread)
         switch (c) {
         case 'c':
             if (thread == -1)
-                strcpy(cnt->conf_filename, optarg);
+                strcpy(cam->conf_filename, optarg);
             break;
         case 'b':
-            cnt->daemon = 1;
+            cam->daemon = 1;
             break;
         case 'n':
-            cnt->daemon = 0;
+            cam->daemon = 0;
             break;
         case 's':
             conf->setup_mode = 1;
@@ -1991,28 +1991,28 @@ static void conf_cmdline(struct context *cnt, int thread)
         case 'd':
             /* No validation - just take what user gives. */
             if (thread == -1)
-                cnt->log_level = (unsigned int)atoi(optarg);
+                cam->log_level = (unsigned int)atoi(optarg);
             break;
         case 'k':
             if (thread == -1) {
-                strncpy(cnt->log_type_str, optarg, sizeof(cnt->log_type_str) - 1);
-                cnt->log_type_str[sizeof(cnt->log_type_str) - 1] = '\0';
+                strncpy(cam->log_type_str, optarg, sizeof(cam->log_type_str) - 1);
+                cam->log_type_str[sizeof(cam->log_type_str) - 1] = '\0';
             }
             break;
         case 'p':
             if (thread == -1) {
-                strncpy(cnt->pid_file, optarg, sizeof(cnt->pid_file) - 1);
-                cnt->pid_file[sizeof(cnt->pid_file) - 1] = '\0';
+                strncpy(cam->pid_file, optarg, sizeof(cam->pid_file) - 1);
+                cam->pid_file[sizeof(cam->pid_file) - 1] = '\0';
             }
             break;
         case 'l':
             if (thread == -1) {
-                strncpy(cnt->log_file, optarg, sizeof(cnt->log_file) - 1);
-                cnt->log_file[sizeof(cnt->log_file) - 1] = '\0';
+                strncpy(cam->log_file, optarg, sizeof(cam->log_file) - 1);
+                cam->log_file[sizeof(cam->log_file) - 1] = '\0';
             }
             break;
         case 'm':
-            cnt->pause = 1;
+            cam->pause = 1;
             break;
         case 'h':
         case '?':
@@ -2033,14 +2033,14 @@ static void conf_cmdline(struct context *cnt, int thread)
  *      By calling the function pointed to by config_params[i].copy the option gets
  *      assigned.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char *arg1)
+struct ctx_cam **conf_cmdparse(struct ctx_cam **camlst, const char *cmd, const char *arg1)
 {
     unsigned int i = 0;
 
     if (!cmd)
-        return cnt;
+        return camlst;
 
     /*
      * We search through config_params until we find a param_name that matches
@@ -2052,7 +2052,7 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
             /* If config_param is string we don't want to check arg1. */
             if (strcasecmp(config_type(&config_params[i]), "string")) {
                 if (config_params[i].conf_value && !arg1){
-                    return cnt;
+                    return camlst;
                 }
             }
 
@@ -2063,13 +2063,13 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
              * If the option is a string, copy_string is called.
              * If the option is camera, config_camera is called.
              * The arguments to the function are:
-             *  cnt  - a pointer to the context structure.
+             *  cam  - a pointer to the ctx_cam structure.
              *  arg1 - a pointer to the new option value (represented as string).
              *  config_params[i].conf_value - an integer value which is a pointer
-             *  to the context structure member relative to the pointer cnt.
+             *  to the ctx_cam structure member relative to the pointer cam.
              */
-            cnt = config_params[i].copy(cnt, arg1, config_params[i].conf_value);
-            return cnt;
+            camlst = config_params[i].copy(camlst, arg1, config_params[i].conf_value);
+            return camlst;
         }
         i++;
     }
@@ -2087,26 +2087,26 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
 
             if (dep_config_params[i].copy != NULL){
                 /* If the depreciated option is a vid item, copy_vid_ctrl is called
-                 * with the array index sent instead of the context structure member pointer.
+                 * with the array index sent instead of the ctx_cam structure member pointer.
                  */
                 if (!strcmp(dep_config_params[i].name,"brightness") ||
                     !strcmp(dep_config_params[i].name,"contrast") ||
                     !strcmp(dep_config_params[i].name,"saturation") ||
                     !strcmp(dep_config_params[i].name,"hue") ||
                     !strcmp(dep_config_params[i].name,"power_line_frequency")) {
-                    cnt = copy_vid_ctrl(cnt, arg1, i);
+                    camlst = copy_vid_ctrl(camlst, arg1, i);
                 } else {
-                    cnt = dep_config_params[i].copy(cnt, arg1, dep_config_params[i].conf_value);
+                    camlst = dep_config_params[i].copy(camlst, arg1, dep_config_params[i].conf_value);
                 }
             }
-            return cnt;
+            return camlst;
         }
         i++;
     }
 
     /* If we get here, it's unknown to us. */
     MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
-    return cnt;
+    return camlst;
 }
 
 /**
@@ -2121,9 +2121,9 @@ struct context **conf_cmdparse(struct context **cnt, const char *cmd, const char
  *      For each option/argument pair the function conf_cmdparse is called which takes
  *      care of assigning the value to the option in the config structures.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-static struct context **conf_process(struct context **cnt, FILE *fp)
+static struct ctx_cam **conf_process(struct ctx_cam **camlst, FILE *fp)
 {
     /* Process each line from the config file. */
 
@@ -2182,11 +2182,11 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
             }
             /* Else arg1 stays null pointer */
 
-            cnt = conf_cmdparse(cnt, cmd, arg1);
+            camlst = conf_cmdparse(camlst, cmd, arg1);
         }
     }
 
-    return cnt;
+    return camlst;
 }
 
 /**
@@ -2196,19 +2196,19 @@ static struct context **conf_process(struct context **cnt, FILE *fp)
  *
  * Returns nothing.
  */
-void conf_print(struct context **cnt)
+void conf_print(struct ctx_cam **camlst)
 {
     const char *retval;
     char *val;
     unsigned int i, thread;
     FILE *conffile;
 
-    for (thread = 0; cnt[thread]; thread++) {
+    for (thread = 0; camlst[thread]; thread++) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Writing config file to %s")
-            ,cnt[thread]->conf_filename);
+            ,camlst[thread]->conf_filename);
 
-        conffile = myfopen(cnt[thread]->conf_filename, "w");
+        conffile = myfopen(camlst[thread]->conf_filename, "w");
 
         if (!conffile)
             continue;
@@ -2217,13 +2217,13 @@ void conf_print(struct context **cnt)
         time_t now = time(0);
         strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
-        fprintf(conffile, "# %s\n", cnt[thread]->conf_filename);
+        fprintf(conffile, "# %s\n", camlst[thread]->conf_filename);
         fprintf(conffile, "#\n# This config file was generated by motion " VERSION "\n");
         fprintf(conffile, "# at %s\n", timestamp);
         fprintf(conffile, "\n\n");
 
         for (i = 0; config_params[i].param_name; i++) {
-            retval = config_params[i].print(cnt, NULL, i, thread);
+            retval = config_params[i].print(camlst, NULL, i, thread);
             /* If config parameter has a value (not NULL) print it to the config file. */
             if (retval) {
                 fprintf(conffile, "%s\n", config_params[i].param_help);
@@ -2237,7 +2237,7 @@ void conf_print(struct context **cnt)
                     fprintf(conffile, "%s \"%s\"\n\n", config_params[i].param_name, retval);
             } else {
                 val = NULL;
-                config_params[i].print(cnt, &val, i, thread);
+                config_params[i].print(camlst, &val, i, thread);
                 /*
                  * It can either be a camera file parameter or a disabled parameter.
                  * If it is a camera parameter write it out.
@@ -2276,53 +2276,53 @@ void conf_print(struct context **cnt)
 /**
  * conf_load
  * Is the main function, called from motion.c
- * The function sets the important context structure "cnt" including
+ * The function sets the important ctx_cam structure "cam" including
  * loading the config parameters from config files and Command-line.
  * The following takes place in the function:
- * - The default start values for cnt stored in the struct conf_template
- *   are copied to cnt[0] which is the default context structure common to
+ * - The default start values for cam stored in the struct conf_template
+ *   are copied to camlst[0] which is the default ctx_cam structure common to
  *   all threads.
- * - All config (cnt.conf) struct members pointing to a string are changed
+ * - All config (cam.conf) struct members pointing to a string are changed
  *   so that they point to a malloc'ed piece of memory containing a copy of
  *   the string given in conf_template.
- * - motion.conf is opened and processed. The process populates the cnt[0] and
- *   for each camera config file it populates a cnt[1], cnt[2]... for each
+ * - motion.conf is opened and processed. The process populates the camlst[0] and
+ *   for each camera config file it populates a camlst[1], camlst[2]... for each
  *   camera.
  * - Finally it processes the options given in the Command-line. This is done
- *   for each camera cnt[i] so that the Command-line options overrides any
+ *   for each camera camlst[i] so that the Command-line options overrides any
  *   option given by motion.conf or a camera config file.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-struct context **conf_load(struct context **cnt)
+struct ctx_cam **conf_load(struct ctx_cam **camlst)
 {
     FILE *fp = NULL;
     char filename[PATH_MAX];
     int i, retcd;
     /* We preserve argc and argv because they get overwritten by the memcpy command. */
-    char **argv = cnt[0]->conf.argv;
-    int argc = cnt[0]->conf.argc;
+    char **argv = camlst[0]->conf.argv;
+    int argc = camlst[0]->conf.argc;
 
     /*
      * Copy the template config structure with all the default config values
-     * into cnt[0]->conf
+     * into camlst[0]->conf
      */
-    memcpy(&cnt[0]->conf, &conf_template, sizeof(struct config));
+    memcpy(&camlst[0]->conf, &conf_template, sizeof(struct config));
 
     /*
-     * For each member of cnt[0] which is a pointer to a string
+     * For each member of camlst[0] which is a pointer to a string
      * if the member points to a string in conf_template and is not NULL.
      * 1. Reserve (malloc) memory for the string.
      * 2. Copy the conf_template given string to the reserved memory.
-     * 3. Change the cnt[0] member (char*) pointing to the string in reserved memory.
+     * 3. Change the camlst[0] member (char*) pointing to the string in reserved memory.
      * This ensures that we can free and malloc the string when changed
      * via http remote control or config file or Command-line options.
      */
-    malloc_strings(cnt[0]);
+    malloc_strings(camlst[0]);
 
     /* Restore the argc and argv */
-    cnt[0]->conf.argv = argv;
-    cnt[0]->conf.argc = argc;
+    camlst[0]->conf.argv = argv;
+    camlst[0]->conf.argc = argc;
 
     /*
      * Open the motion.conf file. We try in this sequence:
@@ -2332,16 +2332,16 @@ struct context **conf_load(struct context **cnt)
      * 4. sysconfdir/motion.conf
      */
     /* Get filename , pid file & log file from Command-line. */
-    cnt[0]->log_type_str[0] = 0;
-    cnt[0]->conf_filename[0] = 0;
-    cnt[0]->pid_file[0] = 0;
-    cnt[0]->log_file[0] = 0;
-    cnt[0]->log_level = -1;
+    camlst[0]->log_type_str[0] = 0;
+    camlst[0]->conf_filename[0] = 0;
+    camlst[0]->pid_file[0] = 0;
+    camlst[0]->log_file[0] = 0;
+    camlst[0]->log_level = -1;
 
-    conf_cmdline(cnt[0], -1);
+    conf_cmdline(camlst[0], -1);
 
-    if (cnt[0]->conf_filename[0]) { /* User has supplied filename on Command-line. */
-      strncpy(filename, cnt[0]->conf_filename, PATH_MAX-1);
+    if (camlst[0]->conf_filename[0]) { /* User has supplied filename on Command-line. */
+      strncpy(filename, camlst[0]->conf_filename, PATH_MAX-1);
       filename[PATH_MAX-1] = '\0';
       fp = fopen (filename, "r");
     }
@@ -2349,7 +2349,7 @@ struct context **conf_load(struct context **cnt)
     if (!fp) {  /* Command-line didn't work, try current dir. */
         char path[PATH_MAX];
 
-        if (cnt[0]->conf_filename[0])
+        if (camlst[0]->conf_filename[0])
             MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
                 ,_("Configfile %s not found - trying defaults.")
                 ,filename);
@@ -2382,16 +2382,16 @@ struct context **conf_load(struct context **cnt)
 
     /* Now we process the motion.conf config file and close it. */
     if (fp) {
-        retcd = snprintf(cnt[0]->conf_filename
-            ,sizeof(cnt[0]->conf_filename)
+        retcd = snprintf(camlst[0]->conf_filename
+            ,sizeof(camlst[0]->conf_filename)
             ,"%s",filename);
-        if ((retcd < 0) || (retcd >= (int)sizeof(cnt[0]->conf_filename))){
+        if ((retcd < 0) || (retcd >= (int)sizeof(camlst[0]->conf_filename))){
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Invalid file name %s"), filename);
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Processing thread 0 - config file %s"), filename);
-            cnt = conf_process(cnt, fp);
+            camlst = conf_process(camlst, fp);
             myfclose(fp);
         }
     } else {
@@ -2401,38 +2401,38 @@ struct context **conf_load(struct context **cnt)
 
 
     /*
-     * For each thread (given by cnt[i]) being not null
-     * cnt is an array of pointers to a context type structure
-     * cnt[0] is the default context structure
-     * cnt[1], cnt[2], ... are context structures for each thread
+     * For each thread (given by camlst[i]) being not null
+     * cam is an array of pointers to a ctx_cam type structure
+     * camlst[0] is the default ctx_cam structure
+     * camlst[1], camlst[2], ... are ctx_cam structures for each thread
      * Command line options always wins over config file options
      * so we go through each thread and overrides any set Command-line
      * options.
      */
     i = -1;
 
-    while (cnt[++i])
-        conf_cmdline(cnt[i], i);
+    while (camlst[++i])
+        conf_cmdline(camlst[i], i);
 
     /* If pid file was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->pid_file[0])
-        cnt[0]->conf.pid_file = mystrcpy(cnt[0]->conf.pid_file, cnt[0]->pid_file);
+    if (camlst[0]->pid_file[0])
+        camlst[0]->conf.pid_file = mystrcpy(camlst[0]->conf.pid_file, camlst[0]->pid_file);
 
     /* If log file was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->log_file[0])
-        cnt[0]->conf.log_file = mystrcpy(cnt[0]->conf.log_file, cnt[0]->log_file);
+    if (camlst[0]->log_file[0])
+        camlst[0]->conf.log_file = mystrcpy(camlst[0]->conf.log_file, camlst[0]->log_file);
 
     /* If log type string was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->log_type_str[0])
-        cnt[0]->conf.log_type = mystrcpy(cnt[0]->conf.log_type, cnt[0]->log_type_str);
+    if (camlst[0]->log_type_str[0])
+        camlst[0]->conf.log_type = mystrcpy(camlst[0]->conf.log_type, camlst[0]->log_type_str);
 
     /* if log level was passed from Command-line copy to main thread conf struct. */
-    if (cnt[0]->log_level != -1)
-        cnt[0]->conf.log_level = cnt[0]->log_level;
+    if (camlst[0]->log_level != -1)
+        camlst[0]->conf.log_level = camlst[0]->log_level;
 
     config_parms_intl();
 
-    return cnt;
+    return camlst;
 }
 
 /**
@@ -2444,22 +2444,22 @@ struct context **conf_load(struct context **cnt)
  *
  * Returns nothing
  */
-void conf_output_parms(struct context **cnt)
+void conf_output_parms(struct ctx_cam **camlst)
 {
     unsigned int i, t = 0;
     const char *name, *value;
 
-    while(cnt[++t]);
+    while(camlst[++t]);
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Writing configuration parameters from all files (%d):"), t);
-    for (t = 0; cnt[t]; t++) {
+    for (t = 0; camlst[t]; t++) {
         motion_log(INF, TYPE_ALL, NO_ERRNO,0
-            ,_("Thread %d - Config file: %s"), t, cnt[t]->conf_filename);
+            ,_("Thread %d - Config file: %s"), t, camlst[t]->conf_filename);
         i = 0;
         while (config_params[i].param_name != NULL) {
             name=config_params[i].param_name;
-            if ((value = config_params[i].print(cnt, NULL, i, t)) != NULL) {
+            if ((value = config_params[i].print(camlst, NULL, i, t)) != NULL) {
                 if (!strncmp(name, "netcam_url", 10) ||
                     !strncmp(name, "netcam_userpass", 15) ||
                     !strncmp(name, "netcam_highres", 14) ||
@@ -2490,17 +2490,17 @@ void conf_output_parms(struct context **cnt)
 
 /**
  * malloc_strings
- *      goes through the members of a context structure.
- *      For each context structure member which is a pointer to a string it does this:
+ *      goes through the members of a ctx_cam structure.
+ *      For each ctx_cam structure member which is a pointer to a string it does this:
  *      If the member points to a string and is not NULL
  *      1. Reserve (malloc) memory for the string
  *      2. Copy the original string to the reserved memory
- *      3. Change the cnt member (char*) pointing to the string in reserved memory
+ *      3. Change the cam member (char*) pointing to the string in reserved memory
  *      This ensures that we can free and malloc the string if it is later changed
  *
  * Returns nothing.
  */
-void malloc_strings(struct context *cnt)
+void malloc_strings(struct ctx_cam *cam)
 {
     unsigned int i = 0;
     char **val;
@@ -2508,7 +2508,7 @@ void malloc_strings(struct context *cnt)
         if (config_params[i].copy == copy_string ||
             config_params[i].copy == copy_uri) { /* if member is a string */
             /* val is made to point to a pointer to the current string. */
-            val = (char **)((char *)cnt+config_params[i].conf_value);
+            val = (char **)((char *)cam+config_params[i].conf_value);
 
             /*
              * If there is a string, malloc() space for it, copy
@@ -2532,16 +2532,16 @@ void malloc_strings(struct context *cnt)
  * @param str     - A char *, pointing to a string representation of the
  *                  value.
  * @param val_ptr - points to the place where to store the value relative
- *                  to pointer pointing to the given context structure
- * @cnt           - points to a context structure for a thread
+ *                  to pointer pointing to the given ctx_cam structure
+ * @cam           - points to a ctx_cam structure for a thread
  *
- * The function is given a pointer cnt to a context structure and a pointer val_ptr
+ * The function is given a pointer cam to a ctx_cam structure and a pointer val_ptr
  * which is an integer giving the position of the structure member relative to the
- * pointer of the context structure.
- * If the context structure is for thread 0 (cnt[0]->threadnr is zero) then the
+ * pointer of the ctx_cam structure.
+ * If the ctx_cam structure is for thread 0 (camlst[0]->threadnr is zero) then the
  * function also sets the value for all the child threads since thread 0 is the
  * global thread.
- * If the thread given belongs to a child thread (cnt[0]->threadnr is not zero)
+ * If the thread given belongs to a child thread (camlst[0]->threadnr is not zero)
  * the function will only assign the value for the given thread.
  ***********************************************************************/
 
@@ -2552,16 +2552,16 @@ void malloc_strings(struct context *cnt)
  *      by the function. Values 1, yes and on are converted to 1 ignoring case.
  *      Any other value is converted to 0.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-static struct context **copy_bool(struct context **cnt, const char *str, int val_ptr)
+static struct ctx_cam **copy_bool(struct ctx_cam **camlst, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
 
     i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
+    while (camlst[++i]) {
+        tmp = (char *)camlst[i]+(int)val_ptr;
 
         if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
             *((int *)tmp) = 1;
@@ -2569,11 +2569,11 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
             *((int *)tmp) = 0;
         }
 
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (camlst[0]->threadnr)
+            return camlst;
     }
 
-    return cnt;
+    return camlst;
 }
 
 /**
@@ -2582,16 +2582,16 @@ static struct context **copy_bool(struct context **cnt, const char *str, int val
  *      The integer is given as a string in str which is converted to integer
  *      by the function.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-static struct context **copy_int(struct context **cnt, const char *str, int val_ptr)
+static struct ctx_cam **copy_int(struct ctx_cam **camlst, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
 
     i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+val_ptr;
+    while (camlst[++i]) {
+        tmp = (char *)camlst[i]+val_ptr;
         if (!strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
             *((int *)tmp) = 1;
         } else if (!strcasecmp(str, "no") || !strcasecmp(str, "off")) {
@@ -2599,11 +2599,11 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
         } else {
             *((int *)tmp) = atoi(str);
         }
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (camlst[0]->threadnr)
+            return camlst;
     }
 
-    return cnt;
+    return camlst;
 }
 
 /**
@@ -2615,17 +2615,17 @@ static struct context **copy_int(struct context **cnt, const char *str, int val_
  *      a freshly malloc()'d string with the value from str,
  *      or NULL if str is blank.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
+struct ctx_cam **copy_string(struct ctx_cam **camlst, const char *str, int val_ptr)
 {
     char **tmp;
     int i;
 
     i = -1;
 
-    while (cnt[++i]) {
-        tmp = (char **)((char *)cnt[i] + val_ptr);
+    while (camlst[++i]) {
+        tmp = (char **)((char *)camlst[i] + val_ptr);
 
         /*
          * mystrcpy assigns the new string value
@@ -2637,19 +2637,19 @@ struct context **copy_string(struct context **cnt, const char *str, int val_ptr)
          * Set the option on all threads if setting the option
          * for thread 0; otherwise just set that one thread's option.
          */
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (camlst[0]->threadnr)
+            return camlst;
     }
 
-    return cnt;
+    return camlst;
 }
 
 /**
  * copy_vid_ctrl
  *      Assigns a new string value to a config option.
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-static struct context **copy_vid_ctrl(struct context **cnt, const char *config_val, int config_indx) {
+static struct ctx_cam **copy_vid_ctrl(struct ctx_cam **camlst, const char *config_val, int config_indx) {
 
     int i, indx_vid;
     int parmnew_len, parmval;
@@ -2664,7 +2664,7 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
     if (strcmp(config_params[indx_vid].param_name,"vid_control_params")){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("Unable to locate vid_control_params"));
-        return cnt;
+        return camlst;
     }
 
     if (config_val == NULL){
@@ -2675,9 +2675,9 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
     /* If the depreciated option is the default, then just return */
     parmval = atoi(config_val);
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == -1)) return cnt;
+        (parmval == -1)) return camlst;
     if (strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == 0)) return cnt;
+        (parmval == 0)) return camlst;
 
     /* Remove underscore from parm name and add quotes*/
     if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency")) {
@@ -2690,44 +2690,44 @@ static struct context **copy_vid_ctrl(struct context **cnt, const char *config_v
 
     /* Recall that the current parms have already been processed by time this is called */
     i = -1;
-    while (cnt[++i]) {
+    while (camlst[++i]) {
         parmnew_len = strlen(parmname_new) + strlen(config_val) + 2; /*Add for = and /0*/
-        if (cnt[i]->conf.vid_control_params != NULL) {
-            orig_parm = mymalloc(strlen(cnt[i]->conf.vid_control_params)+1);
-            sprintf(orig_parm,"%s",cnt[i]->conf.vid_control_params);
+        if (camlst[i]->conf.vid_control_params != NULL) {
+            orig_parm = mymalloc(strlen(camlst[i]->conf.vid_control_params)+1);
+            sprintf(orig_parm,"%s",camlst[i]->conf.vid_control_params);
 
             parmnew_len = strlen(orig_parm) + parmnew_len + 1; /*extra 1 for the comma */
 
-            free(cnt[i]->conf.vid_control_params);
-            cnt[i]->conf.vid_control_params = mymalloc(parmnew_len);
-            sprintf(cnt[i]->conf.vid_control_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
+            free(camlst[i]->conf.vid_control_params);
+            camlst[i]->conf.vid_control_params = mymalloc(parmnew_len);
+            sprintf(camlst[i]->conf.vid_control_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
 
             free(orig_parm);
         } else {
-            cnt[i]->conf.vid_control_params = mymalloc(parmnew_len);
-            sprintf(cnt[i]->conf.vid_control_params,"%s=%s", parmname_new, config_val);
+            camlst[i]->conf.vid_control_params = mymalloc(parmnew_len);
+            sprintf(camlst[i]->conf.vid_control_params,"%s=%s", parmname_new, config_val);
         }
     }
 
     free(parmname_new);
 
-    return cnt;
+    return camlst;
 }
 
 /**
  * copy_text_double
  *      Converts the bool of text_double to a 1 or 2 in text_scale
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-static struct context **copy_text_double(struct context **cnt, const char *str, int val_ptr)
+static struct ctx_cam **copy_text_double(struct ctx_cam **camlst, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
 
     i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
+    while (camlst[++i]) {
+        tmp = (char *)camlst[i]+(int)val_ptr;
 
         if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
             *((int *)tmp) = 2;
@@ -2735,27 +2735,27 @@ static struct context **copy_text_double(struct context **cnt, const char *str, 
             *((int *)tmp) = 1;
         }
 
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (camlst[0]->threadnr)
+            return camlst;
     }
 
-    return cnt;
+    return camlst;
 }
 
 /**
  * copy_html_output
  *      Converts the webcontrol_html_output to the webcontrol_interface option.
  *
- * Returns context struct.
+ * Returns ctx_cam struct.
  */
-static struct context **copy_html_output(struct context **cnt, const char *str, int val_ptr)
+static struct ctx_cam **copy_html_output(struct ctx_cam **camlst, const char *str, int val_ptr)
 {
     void *tmp;
     int i;
 
     i = -1;
-    while (cnt[++i]) {
-        tmp = (char *)cnt[i]+(int)val_ptr;
+    while (camlst[++i]) {
+        tmp = (char *)camlst[i]+(int)val_ptr;
 
         if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
             *((int *)tmp) = 0;
@@ -2763,14 +2763,14 @@ static struct context **copy_html_output(struct context **cnt, const char *str, 
             *((int *)tmp) = 1;
         }
 
-        if (cnt[0]->threadnr)
-            return cnt;
+        if (camlst[0]->threadnr)
+            return camlst;
     }
 
-    return cnt;
+    return camlst;
 }
 
-struct context **copy_uri(struct context **cnt, const char *str, int val) {
+struct ctx_cam **copy_uri(struct ctx_cam **camlst, const char *str, int val) {
 
     // Here's a complicated regex I found here: https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
     // Use it for validating URIs.
@@ -2780,7 +2780,7 @@ struct context **copy_uri(struct context **cnt, const char *str, int val) {
     if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Error compiling regex in copy_uri"));
-        return cnt;
+        return camlst;
     }
 
     // A single asterisk is also valid, so check for that.
@@ -2788,12 +2788,12 @@ struct context **copy_uri(struct context **cnt, const char *str, int val) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Invalid origin for cors_header in copy_uri"));
         regfree(&regex);
-        return cnt;
+        return camlst;
     }
 
     regfree(&regex);
-    cnt = copy_string(cnt, str, val);
-    return cnt;
+    camlst = copy_string(camlst, str, val);
+    return camlst;
 
 }
 
@@ -2891,16 +2891,16 @@ const char *config_type(config_param *configparam)
  *
  * Returns const char *.
  */
-static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+static const char *print_bool(struct ctx_cam **camlst, char **str ATTRIBUTE_UNUSED,
                               int parm, unsigned int threadnr)
 {
     int val = config_params[parm].conf_value;
 
     if (threadnr &&
-        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val))
+        *(int*)((char *)camlst[threadnr] + val) == *(int*)((char *)camlst[0] + val))
         return NULL;
 
-    if (*(int*)((char *)cnt[threadnr] + val))
+    if (*(int*)((char *)camlst[threadnr] + val))
         return "on";
     else
         return "off";
@@ -2916,7 +2916,7 @@ static const char *print_bool(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  *         If the value is the same, NULL is returned which means that
  *         the option is not written to the camera config file.
  */
-static const char *print_string(struct context **cnt,
+static const char *print_string(struct ctx_cam **camlst,
                                 char **str ATTRIBUTE_UNUSED, int parm,
                                 unsigned int threadnr)
 {
@@ -2924,8 +2924,8 @@ static const char *print_string(struct context **cnt,
     const char **cptr0, **cptr1;
 
     /* strcmp does not like NULL so we have to check for this also. */
-    cptr0 = (const char **)((char *)cnt[0] + val);
-    cptr1 = (const char **)((char *)cnt[threadnr] + val);
+    cptr0 = (const char **)((char *)camlst[0] + val);
+    cptr1 = (const char **)((char *)camlst[threadnr] + val);
 
     if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (!strcmp(*cptr0, *cptr1)))
         return NULL;
@@ -2943,17 +2943,17 @@ static const char *print_string(struct context **cnt,
  *         If the option is the same, NULL is returned which means that
  *         the option is not written to the camera config file.
  */
-static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
+static const char *print_int(struct ctx_cam **camlst, char **str ATTRIBUTE_UNUSED,
                              int parm, unsigned int threadnr)
 {
     static char retval[20];
     int val = config_params[parm].conf_value;
 
     if (threadnr &&
-        *(int*)((char *)cnt[threadnr] + val) == *(int*)((char *)cnt[0] + val))
+        *(int*)((char *)camlst[threadnr] + val) == *(int*)((char *)camlst[0] + val))
         return NULL;
 
-    sprintf(retval, "%d", *(int*)((char *)cnt[threadnr] + val));
+    sprintf(retval, "%d", *(int*)((char *)camlst[threadnr] + val));
 
     return retval;
 }
@@ -2965,7 +2965,7 @@ static const char *print_int(struct context **cnt, char **str ATTRIBUTE_UNUSED,
  *
  * Returns NULL
  */
-static const char *print_camera(struct context **cnt, char **str,
+static const char *print_camera(struct ctx_cam **camlst, char **str,
                                 int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
 {
     char *retval;
@@ -2977,14 +2977,14 @@ static const char *print_camera(struct context **cnt, char **str,
     retval = mymalloc(1);
     retval[0] = 0;
 
-    while (cnt[++i]) {
+    while (camlst[++i]) {
         /* Skip config files loaded from conf directory */
-        if (cnt[i]->from_conf_dir)
+        if (camlst[i]->from_conf_dir)
             continue;
 
-        retval = myrealloc(retval, strlen(retval) + strlen(cnt[i]->conf_filename) + 10,
+        retval = myrealloc(retval, strlen(retval) + strlen(camlst[i]->conf_filename) + 10,
                            "print_camera");
-        sprintf(retval + strlen(retval), "camera %s\n", cnt[i]->conf_filename);
+        sprintf(retval + strlen(retval), "camera %s\n", camlst[i]->conf_filename);
     }
 
     *str = retval;
@@ -2998,7 +2998,7 @@ static const char *print_camera(struct context **cnt, char **str,
  *     When found calls config_camera
  */
 
-struct context **read_camera_dir(struct context **cnt, const char *str, int val)
+struct ctx_cam **read_camera_dir(struct ctx_cam **camlst, const char *str, int val)
 {
     DIR *dp;
     struct dirent *ep;
@@ -3025,13 +3025,13 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
                             str, ep->d_name);
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Processing config file %s"), conf_file );
-                cnt = config_camera(cnt, conf_file, 0);
-                /* The last context thread would be ours,
+                camlst = config_camera(camlst, conf_file, 0);
+                /* The last ctx_cam thread would be ours,
                  * set it as created from conf directory.
                  */
                 i = 0;
-                while (cnt[++i]);
-                cnt[i-1]->from_conf_dir = 1;
+                while (camlst[++i]);
+                camlst[i-1]->from_conf_dir = 1;
 	    }
         }
         closedir(dp);
@@ -3043,58 +3043,58 @@ struct context **read_camera_dir(struct context **cnt, const char *str, int val)
     }
 
     /* Store the given config value to allow writing it out */
-    cnt = copy_string(cnt, str, val);
+    camlst = copy_string(camlst, str, val);
 
-    return cnt;
+    return camlst;
 }
 
 /**
  * config_camera
  *      Is called during initial config file loading each time Motion
  *      finds a camera option in motion.conf
- *      The size of the context array is increased and the main context's values are
+ *      The size of the ctx_cam array is increased and the main ctx_cam's values are
  *      copied to the new thread.
  *
- *      cnt  - pointer to the array of pointers pointing to the context structures
+ *      cam  - pointer to the array of pointers pointing to the ctx_cam structures
  *      str  - pointer to a string which is the filename of the camera config file
  *      val  - is not used. It is defined to be function header compatible with
  *            copy_int, copy_bool and copy_string.
  */
-static struct context **config_camera(struct context **cnt, const char *str,
+static struct ctx_cam **config_camera(struct ctx_cam **camlst, const char *str,
                                       int val ATTRIBUTE_UNUSED)
 {
     int i;
     FILE *fp;
 
-    if (cnt[0]->threadnr)
-        return cnt;
+    if (camlst[0]->threadnr)
+        return camlst;
 
     fp = fopen(str, "r");
 
     if (!fp) {
         MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
             ,_("Camera config file %s not found"), str);
-        return cnt;
+        return camlst;
     }
 
     /* Find the current number of threads defined. */
     i = -1;
 
-    while (cnt[++i]);
+    while (camlst[++i]);
 
     /*
      * Make space for the threads + the terminating NULL pointer
-     * in the array of pointers to context structures
+     * in the array of pointers to ctx_cam structures
      * First thread is 0 so the number of threads is i + 1
      * plus an extra for the NULL pointer. This gives i + 2
      */
-    cnt = myrealloc(cnt, sizeof(struct context *) * (i + 2), "config_camera");
+    camlst = myrealloc(camlst, sizeof(struct ctx_cam *) * (i + 2), "config_camera");
 
-    /* Now malloc space for an additional context structure for thread nr. i */
-    cnt[i] = mymalloc(sizeof(struct context));
+    /* Now malloc space for an additional ctx_cam structure for thread nr. i */
+    camlst[i] = mymalloc(sizeof(struct ctx_cam));
 
-    /* And make this an exact clone of the context structure for thread 0 */
-    memcpy(cnt[i], cnt[0], sizeof(struct context));
+    /* And make this an exact clone of the ctx_cam structure for thread 0 */
+    memcpy(camlst[i], camlst[0], sizeof(struct ctx_cam));
 
     /*
      * All the integers are copies of the actual value.
@@ -3103,21 +3103,21 @@ static struct context **config_camera(struct context **cnt, const char *str,
      * change the string pointers to point to the new strings.
      * malloc_strings takes care of this.
      */
-    malloc_strings(cnt[i]);
+    malloc_strings(camlst[i]);
 
-    /* Mark the end if the array of pointers to context structures. */
-    cnt[i + 1] = NULL;
+    /* Mark the end if the array of pointers to ctx_cam structures. */
+    camlst[i + 1] = NULL;
 
     /* Process the camera's config file and notify user on console. */
-    strcpy(cnt[i]->conf_filename, str);
+    strcpy(camlst[i]->conf_filename, str);
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
         ,_("Processing camera config file %s"), str);
-    conf_process(cnt + i, fp);
+    conf_process(camlst + i, fp);
 
     /* Finally we close the camera config file. */
     myfclose(fp);
 
-    return cnt;
+    return camlst;
 }
 
 /**

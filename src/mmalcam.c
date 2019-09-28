@@ -264,24 +264,24 @@ static void destroy_camera_buffer_structures(mmalcam_context_ptr mmalcam)
  *
  * Parameters:
  *
- *      cnt     Pointer to the motion context structure for this device.
+ *      cam     Pointer to the motion context structure for this device.
  *
  * Returns:     0 on success
  *              -1 on any failure
  */
 
-int mmalcam_start(struct context *cnt)
+int mmalcam_start(struct ctx_cam *cam)
 {
     mmalcam_context_ptr mmalcam;
 
-    cnt->mmalcam = (mmalcam_context*) mymalloc(sizeof(struct mmalcam_context));
-    memset(cnt->mmalcam, 0, sizeof(mmalcam_context));
-    mmalcam = cnt->mmalcam;
-    mmalcam->cnt = cnt;
+    cam->mmalcam = (mmalcam_context*) mymalloc(sizeof(struct mmalcam_context));
+    memset(cam->mmalcam, 0, sizeof(mmalcam_context));
+    mmalcam = cam->mmalcam;
+    mmalcam->cam = cam;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps")
-        ,cnt->conf.mmalcam_name, cnt->conf.width, cnt->conf.height, cnt->conf.framerate);
+        ,cam->conf.mmalcam_name, cam->conf.width, cam->conf.height, cam->conf.framerate);
 
     mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
     if (mmalcam->camera_parameters == NULL) {
@@ -290,20 +290,20 @@ int mmalcam_start(struct context *cnt)
     }
 
     raspicamcontrol_set_defaults(mmalcam->camera_parameters);
-    mmalcam->width = cnt->conf.width;
-    mmalcam->height = cnt->conf.height;
-    mmalcam->framerate = cnt->conf.framerate;
+    mmalcam->width = cam->conf.width;
+    mmalcam->height = cam->conf.height;
+    mmalcam->framerate = cam->conf.framerate;
 
-    if (cnt->conf.mmalcam_control_params) {
-        parse_camera_control_params(cnt->conf.mmalcam_control_params, mmalcam->camera_parameters);
+    if (cam->conf.mmalcam_control_params) {
+        parse_camera_control_params(cam->conf.mmalcam_control_params, mmalcam->camera_parameters);
     }
 
-    cnt->imgs.width = mmalcam->width;
-    cnt->imgs.height = mmalcam->height;
-    cnt->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
-    cnt->imgs.motionsize = mmalcam->width * mmalcam->height;
+    cam->imgs.width = mmalcam->width;
+    cam->imgs.height = mmalcam->height;
+    cam->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
+    cam->imgs.motionsize = mmalcam->width * mmalcam->height;
 
-    int retval = create_camera_component(mmalcam, cnt->conf.mmalcam_name);
+    int retval = create_camera_component(mmalcam, cam->conf.mmalcam_name);
 
     if (retval == 0) {
         retval = create_camera_buffer_structures(mmalcam);
@@ -375,32 +375,32 @@ void mmalcam_cleanup(struct mmalcam_context *mmalcam)
  *      the Pi camera already in YUV420P, and returns it to motion.
  *
  * Parameters:
- *      cnt             Pointer to the context for this thread
+ *      cam             Pointer to the context for this thread
  *      image           Pointer to a buffer for the returned image
  *
  * Returns:             Error code
  */
-int mmalcam_next(struct context *cnt,  struct image_data *img_data)
+int mmalcam_next(struct ctx_cam *cam,  struct image_data *img_data)
 {
     mmalcam_context_ptr mmalcam;
 
-    if ((!cnt) || (!cnt->mmalcam))
+    if ((!cam) || (!cam->mmalcam))
         return NETCAM_FATAL_ERROR;
 
-    mmalcam = cnt->mmalcam;
+    mmalcam = cam->mmalcam;
 
     MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
 
     if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
-            && camera_buffer->length >= cnt->imgs.size_norm) {
+            && camera_buffer->length >= cam->imgs.size_norm) {
         mmal_buffer_header_mem_lock(camera_buffer);
-        memcpy(img_data->image_norm, camera_buffer->data, cnt->imgs.size_norm);
+        memcpy(img_data->image_norm, camera_buffer->data, cam->imgs.size_norm);
         mmal_buffer_header_mem_unlock(camera_buffer);
     } else {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             ,_("cmd %d flags %08x size %d/%d at %08x, img_size=%d")
             ,camera_buffer->cmd, camera_buffer->flags, camera_buffer->length
-            ,camera_buffer->alloc_size, camera_buffer->data, cnt->imgs.size_norm);
+            ,camera_buffer->alloc_size, camera_buffer->data, cam->imgs.size_norm);
     }
 
     mmal_buffer_header_release(camera_buffer);
@@ -418,7 +418,7 @@ int mmalcam_next(struct context *cnt,  struct image_data *img_data)
                 ,_("Unable to return a buffer to the camera video port"));
     }
 
-    rotate_map(cnt,img_data);
+    rotate_map(cam,img_data);
 
     return 0;
 }

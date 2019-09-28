@@ -351,9 +351,9 @@ void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, u
  * alg_noise_tune
  *
  */
-void alg_noise_tune(struct context *cnt, unsigned char *new)
+void alg_noise_tune(struct ctx_cam *cam, unsigned char *new)
 {
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     int i;
     unsigned char *ref = imgs->ref;
     int diff, sum = 0, count = 0;
@@ -382,14 +382,14 @@ void alg_noise_tune(struct context *cnt, unsigned char *new)
         sum /= count / 3;
 
     /* 5: safe, 4: regular, 3: more sensitive */
-    cnt->noise = 4 + (cnt->noise + sum) / 2;
+    cam->noise = 4 + (cam->noise + sum) / 2;
 }
 
 /**
  * alg_threshold_tune
  *
  */
-void alg_threshold_tune(struct context *cnt, int diffs, int motion)
+void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion)
 {
     int i;
     int sum = 0, top = diffs;
@@ -398,30 +398,30 @@ void alg_threshold_tune(struct context *cnt, int diffs, int motion)
         return;
 
     if (motion)
-        diffs = cnt->threshold / 4;
+        diffs = cam->threshold / 4;
 
     for (i = 0; i < THRESHOLD_TUNE_LENGTH - 1; i++) {
-        sum += cnt->diffs_last[i];
+        sum += cam->diffs_last[i];
 
-        if (cnt->diffs_last[i + 1] && !motion)
-            cnt->diffs_last[i] = cnt->diffs_last[i + 1];
+        if (cam->diffs_last[i + 1] && !motion)
+            cam->diffs_last[i] = cam->diffs_last[i + 1];
         else
-            cnt->diffs_last[i] = cnt->threshold / 4;
+            cam->diffs_last[i] = cam->threshold / 4;
 
-        if (cnt->diffs_last[i] > top)
-            top = cnt->diffs_last[i];
+        if (cam->diffs_last[i] > top)
+            top = cam->diffs_last[i];
     }
 
-    sum += cnt->diffs_last[i];
-    cnt->diffs_last[i] = diffs;
+    sum += cam->diffs_last[i];
+    cam->diffs_last[i] = diffs;
 
     sum /= THRESHOLD_TUNE_LENGTH / 4;
 
     if (sum < top * 2)
         sum = top * 2;
 
-    if (sum < cnt->conf.threshold)
-        cnt->threshold = (cnt->threshold + sum) / 2;
+    if (sum < cam->conf.threshold)
+        cam->threshold = (cam->threshold + sum) / 2;
 }
 
 /*
@@ -511,9 +511,9 @@ static int iflood(int x, int y, int width, int height,
  * alg_labeling
  *
  */
-static int alg_labeling(struct context *cnt)
+static int alg_labeling(struct ctx_cam *cam)
 {
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     unsigned char *out = imgs->img_motion.image_norm;
     int *labels = imgs->labels;
     int ix, iy, pixelpos;
@@ -524,7 +524,7 @@ static int alg_labeling(struct context *cnt)
     /* Keep track of the area just under the threshold.  */
     int max_under = 0;
 
-    cnt->current_image->total_labels = 0;
+    cam->current_image->total_labels = 0;
     imgs->labelsize_max = 0;
     /* ALL labels above threshold are counted as labelgroup. */
     imgs->labelgroup_max = 0;
@@ -550,11 +550,11 @@ static int alg_labeling(struct context *cnt)
 
             if (labelsize > 0) {
                 //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Label: %i (%i) Size: %i (%i,%i)",
-                //            current_label, cnt->current_image->total_labels,
+                //            current_label, cam->current_image->total_labels,
                 //           labelsize, ix, iy);
 
                 /* Label above threshold? Mark it again (add 32768 to labelnumber). */
-                if (labelsize > cnt->threshold) {
+                if (labelsize > cam->threshold) {
                     labelsize = iflood(ix, iy, width, height, out, labels, current_label + 32768, current_label);
                     imgs->labelgroup_max += labelsize;
                     imgs->labels_above++;
@@ -566,7 +566,7 @@ static int alg_labeling(struct context *cnt)
                     imgs->largest_label = current_label;
                 }
 
-                cnt->current_image->total_labels++;
+                cam->current_image->total_labels++;
                 current_label++;
             }
         }
@@ -575,7 +575,7 @@ static int alg_labeling(struct context *cnt)
 
     //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "%i Labels found. Largest connected Area: %i Pixel(s). "
     //           "Largest Label: %i", imgs->largest_label, imgs->labelsize_max,
-    //           cnt->current_image->total_labels);
+    //           cam->current_image->total_labels);
 
     /* Return group of significant labels or if that's none, the next largest
      * group (which is under the threshold, but especially for setup gives an
@@ -830,17 +830,17 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
  * alg_despeckle
  *      Despeckling routine to remove noisy detections.
  */
-int alg_despeckle(struct context *cnt, int olddiffs)
+int alg_despeckle(struct ctx_cam *cam, int olddiffs)
 {
     int diffs = 0;
-    unsigned char *out = cnt->imgs.img_motion.image_norm;
-    int width = cnt->imgs.width;
-    int height = cnt->imgs.height;
-    int done = 0, i, len = strlen(cnt->conf.despeckle_filter);
-    unsigned char *common_buffer = cnt->imgs.common_buffer;
+    unsigned char *out = cam->imgs.img_motion.image_norm;
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    int done = 0, i, len = strlen(cam->conf.despeckle_filter);
+    unsigned char *common_buffer = cam->imgs.common_buffer;
 
     for (i = 0; i < len; i++) {
-        switch (cnt->conf.despeckle_filter[i]) {
+        switch (cam->conf.despeckle_filter[i]) {
         case 'E':
             if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0)
                 i = len;
@@ -861,7 +861,7 @@ int alg_despeckle(struct context *cnt, int olddiffs)
             break;
         /* No further despeckle after labeling! */
         case 'l':
-            diffs = alg_labeling(cnt);
+            diffs = alg_labeling(cam);
             i = len;
             done = 2;
             break;
@@ -871,10 +871,10 @@ int alg_despeckle(struct context *cnt, int olddiffs)
     /* If conf.despeckle_filter contains any valid action EeDdl */
     if (done) {
         if (done != 2)
-            cnt->imgs.labelsize_max = 0; // Disable Labeling
+            cam->imgs.labelsize_max = 0; // Disable Labeling
         return diffs;
     } else {
-        cnt->imgs.labelsize_max = 0; // Disable Labeling
+        cam->imgs.labelsize_max = 0; // Disable Labeling
     }
 
     return olddiffs;
@@ -884,14 +884,14 @@ int alg_despeckle(struct context *cnt, int olddiffs)
  * alg_tune_smartmask
  *      Generates actual smartmask. Calculate sensitivity based on motion.
  */
-void alg_tune_smartmask(struct context *cnt)
+void alg_tune_smartmask(struct ctx_cam *cam)
 {
     int i, diff;
-    int motionsize = cnt->imgs.motionsize;
-    unsigned char *smartmask = cnt->imgs.smartmask;
-    unsigned char *smartmask_final = cnt->imgs.smartmask_final;
-    int *smartmask_buffer = cnt->imgs.smartmask_buffer;
-    int sensitivity = cnt->lastrate * (11 - cnt->smartmask_speed);
+    int motionsize = cam->imgs.motionsize;
+    unsigned char *smartmask = cam->imgs.smartmask;
+    unsigned char *smartmask_final = cam->imgs.smartmask_final;
+    int *smartmask_buffer = cam->imgs.smartmask_buffer;
+    int sensitivity = cam->lastrate * (11 - cam->smartmask_speed);
 
     for (i = 0; i < motionsize; i++) {
         /* Decrease smart_mask sensitivity every 5*speed seconds only. */
@@ -914,10 +914,10 @@ void alg_tune_smartmask(struct context *cnt)
             smartmask_final[i] = 255;
     }
     /* Further expansion (here:erode due to inverted logic!) of the mask. */
-    diff = erode9(smartmask_final, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.common_buffer, 255);
-    diff = erode5(smartmask_final, cnt->imgs.width, cnt->imgs.height,
-                  cnt->imgs.common_buffer, 255);
+    diff = erode9(smartmask_final, cam->imgs.width, cam->imgs.height,
+                  cam->imgs.common_buffer, 255);
+    diff = erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
+                  cam->imgs.common_buffer, 255);
 }
 
 /* Increment for *smartmask_buffer in alg_diff_standard. */
@@ -927,12 +927,12 @@ void alg_tune_smartmask(struct context *cnt)
  * alg_diff_standard
  *
  */
-int alg_diff_standard(struct context *cnt, unsigned char *new)
+int alg_diff_standard(struct ctx_cam *cam, unsigned char *new)
 {
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     int i, diffs = 0;
-    int noise = cnt->noise;
-    int smartmask_speed = cnt->smartmask_speed;
+    int noise = cam->noise;
+    int smartmask_speed = cam->smartmask_speed;
     unsigned char *ref = imgs->ref;
     unsigned char *out = imgs->img_motion.image_norm;
     unsigned char *mask = imgs->mask;
@@ -958,7 +958,7 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
                  * speed=10) we add 5 here. NOT related to the 5 at ratio-
                  * calculation.
                  */
-                if (cnt->event_nr != cnt->prev_event)
+                if (cam->event_nr != cam->prev_event)
                     (*smartmask_buffer) += SMARTMASK_SENSITIVITY_INCR;
                 /* Apply smart_mask */
                 if (!*smartmask_final)
@@ -983,11 +983,11 @@ int alg_diff_standard(struct context *cnt, unsigned char *new)
  * alg_diff_fast
  *      Very fast diff function, does not apply mask overlaying.
  */
-static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char *new)
+static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new)
 {
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     int i, diffs = 0, step = imgs->motionsize/10000;
-    int noise = cnt->noise;
+    int noise = cam->noise;
     unsigned char *ref = imgs->ref;
 
     if (!step % 2)
@@ -1016,12 +1016,12 @@ static char alg_diff_fast(struct context *cnt, int max_n_changes, unsigned char 
  *      Uses diff_fast to quickly decide if there is anything worth
  *      sending to diff_standard.
  */
-int alg_diff(struct context *cnt, unsigned char *new)
+int alg_diff(struct ctx_cam *cam, unsigned char *new)
 {
     int diffs = 0;
 
-    if (alg_diff_fast(cnt, cnt->conf.threshold / 2, new))
-        diffs = alg_diff_standard(cnt, new);
+    if (alg_diff_fast(cam, cam->conf.threshold / 2, new))
+        diffs = alg_diff_standard(cam, new);
 
     return diffs;
 }
@@ -1032,17 +1032,17 @@ int alg_diff(struct context *cnt, unsigned char *new)
  *      It is assumed to be the light being switched on or a camera displacement.
  *      In any way the user doesn't think it is worth capturing.
  */
-int alg_lightswitch(struct context *cnt, int diffs)
+int alg_lightswitch(struct ctx_cam *cam, int diffs)
 {
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
 
-    if (cnt->conf.lightswitch_percent < 0)
-        cnt->conf.lightswitch_percent = 0;
-    if (cnt->conf.lightswitch_percent > 100)
-        cnt->conf.lightswitch_percent = 100;
+    if (cam->conf.lightswitch_percent < 0)
+        cam->conf.lightswitch_percent = 0;
+    if (cam->conf.lightswitch_percent > 100)
+        cam->conf.lightswitch_percent = 100;
 
     /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cnt->conf.lightswitch_percent / 100))
+    if (diffs > (imgs->motionsize * cam->conf.lightswitch_percent / 100))
         return 1;
 
     return 0;
@@ -1052,33 +1052,33 @@ int alg_lightswitch(struct context *cnt, int diffs)
  * alg_switchfilter
  *
  */
-int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
+int alg_switchfilter(struct ctx_cam *cam, int diffs, unsigned char *newimg)
 {
-    int linediff = diffs / cnt->imgs.height;
-    unsigned char *out = cnt->imgs.img_motion.image_norm;
+    int linediff = diffs / cam->imgs.height;
+    unsigned char *out = cam->imgs.img_motion.image_norm;
     int y, x, line;
     int lines = 0, vertlines = 0;
 
-    for (y = 0; y < cnt->imgs.height; y++) {
+    for (y = 0; y < cam->imgs.height; y++) {
         line = 0;
-        for (x = 0; x < cnt->imgs.width; x++) {
+        for (x = 0; x < cam->imgs.width; x++) {
             if (*(out++))
                 line++;
         }
 
-        if (line > cnt->imgs.width / 18)
+        if (line > cam->imgs.width / 18)
             vertlines++;
 
         if (line > linediff * 2)
             lines++;
     }
 
-    if (vertlines > cnt->imgs.height / 10 && lines < vertlines / 3 &&
-        (vertlines > cnt->imgs.height / 4 || lines - vertlines > lines / 2)) {
-        if (cnt->conf.text_changes) {
+    if (vertlines > cam->imgs.height / 10 && lines < vertlines / 3 &&
+        (vertlines > cam->imgs.height / 4 || lines - vertlines > lines / 2)) {
+        if (cam->conf.text_changes) {
             char tmp[80];
             sprintf(tmp, "%d %d", lines, vertlines);
-            draw_text(newimg, cnt->imgs.width, cnt->imgs.height, cnt->imgs.width - 10, 20, tmp, cnt->conf.text_scale);
+            draw_text(newimg, cam->imgs.width, cam->imgs.height, cam->imgs.width - 10, 20, tmp, cam->conf.text_scale);
         }
         return diffs;
     }
@@ -1094,29 +1094,29 @@ int alg_switchfilter(struct context *cnt, int diffs, unsigned char *newimg)
  *
  * Parameters:
  *
- *   cnt    - current thread's context struct
+ *   cam    - current thread's context struct
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */
 #define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
 #define EXCLUDE_LEVEL_PERCENT 20
-void alg_update_reference_frame(struct context *cnt, int action)
+void alg_update_reference_frame(struct ctx_cam *cam, int action)
 {
-    int accept_timer = cnt->lastrate * ACCEPT_STATIC_OBJECT_TIME;
+    int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
-    int *ref_dyn = cnt->imgs.ref_dyn;
-    unsigned char *image_virgin = cnt->imgs.image_vprvcy.image_norm;
-    unsigned char *ref = cnt->imgs.ref;
-    unsigned char *smartmask = cnt->imgs.smartmask_final;
-    unsigned char *out = cnt->imgs.img_motion.image_norm;
+    int *ref_dyn = cam->imgs.ref_dyn;
+    unsigned char *image_virgin = cam->imgs.image_vprvcy.image_norm;
+    unsigned char *ref = cam->imgs.ref;
+    unsigned char *smartmask = cam->imgs.smartmask_final;
+    unsigned char *out = cam->imgs.img_motion.image_norm;
 
-    if (cnt->lastrate > 5)  /* Match rate limit */
-        accept_timer /= (cnt->lastrate / 3);
+    if (cam->lastrate > 5)  /* Match rate limit */
+        accept_timer /= (cam->lastrate / 3);
 
     if (action == UPDATE_REF_FRAME) { /* Black&white only for better performance. */
-        threshold_ref = cnt->noise * EXCLUDE_LEVEL_PERCENT / 100;
+        threshold_ref = cam->noise * EXCLUDE_LEVEL_PERCENT / 100;
 
-        for (i = cnt->imgs.motionsize; i > 0; i--) {
+        for (i = cam->imgs.motionsize; i > 0; i--) {
             /* Exclude pixels from ref frame well below noise level. */
             if (((int)(abs(*ref - *image_virgin)) > threshold_ref) && (*smartmask)) {
                 if (*ref_dyn == 0) { /* Always give new pixels a chance. */
@@ -1145,8 +1145,8 @@ void alg_update_reference_frame(struct context *cnt, int action)
 
     } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
         /* Copy fresh image */
-        memcpy(cnt->imgs.ref, cnt->imgs.image_vprvcy.image_norm, cnt->imgs.size_norm);
+        memcpy(cam->imgs.ref, cam->imgs.image_vprvcy.image_norm, cam->imgs.size_norm);
         /* Reset static objects */
-        memset(cnt->imgs.ref_dyn, 0, cnt->imgs.motionsize * sizeof(*cnt->imgs.ref_dyn));
+        memset(cam->imgs.ref_dyn, 0, cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
     }
 }

@@ -161,7 +161,7 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
  *
  */
 unsigned prepare_exif(unsigned char **exif,
-              const struct context *cnt,
+              const struct ctx_cam *cam,
               const struct timeval *tv_in1,
               const struct coord *box)
 {
@@ -201,9 +201,9 @@ unsigned prepare_exif(unsigned char **exif,
     // use as much of it as is indicated by conf->frame_limit
     subtime = NULL;
 
-    if (cnt->conf.picture_exif) {
+    if (cam->conf.picture_exif) {
         description = malloc(PATH_MAX);
-        mystrftime(cnt, description, PATH_MAX-1, cnt->conf.picture_exif, &tv1, NULL, 0);
+        mystrftime(cam, description, PATH_MAX-1, cam->conf.picture_exif, &tv1, NULL, 0);
     } else {
         description = NULL;
     }
@@ -352,12 +352,12 @@ unsigned prepare_exif(unsigned char **exif,
  * can then be written out to webp a file
  */
 static void put_webp_exif(WebPMux* webp_mux,
-              const struct context *cnt,
+              const struct ctx_cam *cam,
               const struct timeval *tv1,
               const struct coord *box)
 {
     unsigned char *exif = NULL;
-    unsigned exif_len = prepare_exif(&exif, cnt, tv1, box);
+    unsigned exif_len = prepare_exif(&exif, cam, tv1, box);
 
     if(exif_len > 0) {
         WebPData webp_exif;
@@ -395,7 +395,7 @@ static void put_webp_exif(WebPMux* webp_mux,
  */
 static void put_webp_yuv420p_file(FILE *fp,
                   unsigned char *image, int width, int height,
-                  int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+                  int quality, struct ctx_cam *cam, struct timeval *tv1, struct coord *box)
 {
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
@@ -441,7 +441,7 @@ static void put_webp_yuv420p_file(FILE *fp,
 
     /* Create a mux from the prepared image data */
     WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
-    put_webp_exif(webp_mux, cnt, tv1, box);
+    put_webp_exif(webp_mux, cam, tv1, box);
 
     /* Add Exif data to the webp image data */
     WebPData webp_output;
@@ -489,13 +489,13 @@ static void put_webp_yuv420p_file(FILE *fp,
 static void put_jpeg_yuv420p_file(FILE *fp,
                   unsigned char *image, int width, int height,
                   int quality,
-                  struct context *cnt, struct timeval *tv1, struct coord *box)
+                  struct ctx_cam *cam, struct timeval *tv1, struct coord *box)
 {
     int sz = 0;
-    int image_size = cnt->imgs.size_norm;
+    int image_size = cam->imgs.size_norm;
     unsigned char *buf = mymalloc(image_size);
 
-    sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cnt ,tv1, box);
+    sz = jpgutl_put_yuv420p(buf, image_size, image, width, height, quality, cam ,tv1, box);
     fwrite(buf, sz, 1, fp);
 
     free(buf);
@@ -518,14 +518,14 @@ static void put_jpeg_yuv420p_file(FILE *fp,
  * Returns nothing
  */
 static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
-                  int quality, struct context *cnt, struct timeval *tv1, struct coord *box)
+                  int quality, struct ctx_cam *cam, struct timeval *tv1, struct coord *box)
 
 {
     int sz = 0;
-    int image_size = cnt->imgs.size_norm;
+    int image_size = cam->imgs.size_norm;
     unsigned char *buf = mymalloc(image_size);
 
-    sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cnt ,tv1, box);
+    sz = jpgutl_put_grey(buf, image_size, image, width, height, quality, cam ,tv1, box);
     fwrite(buf, sz, 1, picture);
 
     free(buf);
@@ -609,10 +609,10 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
  *
  * Returns nothing.
  */
-void overlay_smartmask(struct context *cnt, unsigned char *out)
+void overlay_smartmask(struct ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     unsigned char *smartmask = imgs->smartmask_final;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -653,10 +653,10 @@ void overlay_smartmask(struct context *cnt, unsigned char *out)
  *
  * Returns nothing.
  */
-void overlay_fixed_mask(struct context *cnt, unsigned char *out)
+void overlay_fixed_mask(struct ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     unsigned char *mask = imgs->mask;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -697,10 +697,10 @@ void overlay_fixed_mask(struct context *cnt, unsigned char *out)
  *
  * Returns nothing.
  */
-void overlay_largest_label(struct context *cnt, unsigned char *out)
+void overlay_largest_label(struct ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct images *imgs = &cnt->imgs;
+    struct images *imgs = &cam->imgs;
     int *labels = imgs->labels;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -740,7 +740,7 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
  *      Is used for the webcam feature. Depending on the image type
  *      (colour YUV420P or greyscale) the corresponding put_jpeg_X_memory function is called.
  * Inputs:
- * - cnt is the thread context struct
+ * - cam is the thread context struct
  * - image_size is the size of the input image buffer
  * - *image points to the image buffer that contains the YUV420P or Grayscale image about to be put
  * - quality is the jpeg quality setting from the config file.
@@ -751,7 +751,7 @@ void overlay_largest_label(struct context *cnt, unsigned char *out)
  *
  * Returns the dest_image_size if successful. Otherwise 0.
  */
-int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image_size, unsigned char *image,
+int put_picture_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_size, unsigned char *image,
         int quality, int width, int height)
 {
     struct timeval tv1;
@@ -762,51 +762,51 @@ int put_picture_memory(struct context *cnt, unsigned char* dest_image, int image
      */
     gettimeofday(&tv1, NULL);
 
-    if (!cnt->conf.stream_grey){
+    if (!cam->conf.stream_grey){
         return jpgutl_put_yuv420p(dest_image, image_size, image,
-                                       width, height, quality, cnt ,&tv1,NULL);
+                                       width, height, quality, cam ,&tv1,NULL);
     } else {
         return jpgutl_put_grey(dest_image, image_size, image,
-                                       width, height, quality, cnt,&tv1,NULL);
+                                       width, height, quality, cam,&tv1,NULL);
     }
 
     return 0;
 }
 
-static void put_picture_fd(struct context *cnt, FILE *picture, unsigned char *image, int quality, int ftype){
+static void put_picture_fd(struct ctx_cam *cam, FILE *picture, unsigned char *image, int quality, int ftype){
     int width, height;
     int passthrough;
     int dummy = 1;
 
     /* See comment in put_picture_memory regarding dummy*/
 
-    passthrough = util_check_passthrough(cnt);
-    if ((ftype == FTYPE_IMAGE) && (cnt->imgs.size_high > 0) && (!passthrough)) {
-        width = cnt->imgs.width_high;
-        height = cnt->imgs.height_high;
+    passthrough = util_check_passthrough(cam);
+    if ((ftype == FTYPE_IMAGE) && (cam->imgs.size_high > 0) && (!passthrough)) {
+        width = cam->imgs.width_high;
+        height = cam->imgs.height_high;
     } else {
-        width = cnt->imgs.width;
-        height = cnt->imgs.height;
+        width = cam->imgs.width;
+        height = cam->imgs.height;
     }
 
-    if (cnt->imgs.picture_type == IMAGE_TYPE_PPM) {
+    if (cam->imgs.picture_type == IMAGE_TYPE_PPM) {
         put_ppm_bgr24_file(picture, image, width, height);
     } else {
         if (dummy == 1){
             #ifdef HAVE_WEBP
-            if (cnt->imgs.picture_type == IMAGE_TYPE_WEBP)
-                put_webp_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+            if (cam->imgs.picture_type == IMAGE_TYPE_WEBP)
+                put_webp_yuv420p_file(picture, image, width, height, quality, cam, &(cam->current_image->timestamp_tv), &(cam->current_image->location));
             #endif /* HAVE_WEBP */
-            if (cnt->imgs.picture_type == IMAGE_TYPE_JPEG)
-                put_jpeg_yuv420p_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+            if (cam->imgs.picture_type == IMAGE_TYPE_JPEG)
+                put_jpeg_yuv420p_file(picture, image, width, height, quality, cam, &(cam->current_image->timestamp_tv), &(cam->current_image->location));
         } else {
-            put_jpeg_grey_file(picture, image, width, height, quality, cnt, &(cnt->current_image->timestamp_tv), &(cnt->current_image->location));
+            put_jpeg_grey_file(picture, image, width, height, quality, cam, &(cam->current_image->timestamp_tv), &(cam->current_image->location));
        }
     }
 }
 
 
-void put_picture(struct context *cnt, char *file, unsigned char *image, int ftype)
+void put_picture(struct ctx_cam *cam, char *file, unsigned char *image, int ftype)
 {
     FILE *picture;
 
@@ -817,8 +817,8 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("Can't write picture to file %s - check access rights to target directory\n"
                 "Thread is going to finish due to this fatal error"), file);
-            cnt->finish = 1;
-            cnt->restart = 0;
+            cam->finish = 1;
+            cam->restart = 0;
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive. */
@@ -828,7 +828,7 @@ void put_picture(struct context *cnt, char *file, unsigned char *image, int ftyp
         }
     }
 
-    put_picture_fd(cnt, picture, image, cnt->conf.picture_quality, ftype);
+    put_picture_fd(cam, picture, image, cam->conf.picture_quality, ftype);
 
     myfclose(picture);
 }
@@ -931,7 +931,7 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
  *
  * Returns nothing.
  */
-void put_fixed_mask(struct context *cnt, const char *file)
+void put_fixed_mask(struct ctx_cam *cam, const char *file)
 {
     FILE *picture;
 
@@ -949,15 +949,15 @@ void put_fixed_mask(struct context *cnt, const char *file)
         }
         return;
     }
-    memset(cnt->imgs.img_motion.image_norm, 255, cnt->imgs.motionsize); /* Initialize to unset */
+    memset(cam->imgs.img_motion.image_norm, 255, cam->imgs.motionsize); /* Initialize to unset */
 
     /* Write pgm-header. */
     fprintf(picture, "P5\n");
-    fprintf(picture, "%d %d\n", cnt->conf.width, cnt->conf.height);
+    fprintf(picture, "%d %d\n", cam->conf.width, cam->conf.height);
     fprintf(picture, "%d\n", 255);
 
     /* Write pgm image data at once. */
-    if ((int)fwrite(cnt->imgs.img_motion.image_norm, cnt->conf.width, cnt->conf.height, picture) != cnt->conf.height) {
+    if ((int)fwrite(cam->imgs.img_motion.image_norm, cam->conf.width, cam->conf.height, picture) != cam->conf.height) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Failed writing default mask as pgm file"));
         return;
@@ -967,7 +967,7 @@ void put_fixed_mask(struct context *cnt, const char *file)
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         ,_("Creating empty mask %s\nPlease edit this file and "
-        "re-run motion to enable mask feature"), cnt->conf.mask_file);
+        "re-run motion to enable mask feature"), cam->conf.mask_file);
 }
 
 void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst){

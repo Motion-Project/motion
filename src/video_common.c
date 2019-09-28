@@ -509,7 +509,7 @@ static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char 
 
 }
 
-int vid_parms_parse(struct context *cnt){
+int vid_parms_parse(struct ctx_cam *cam){
 
     /* Parse through the configuration option to get values
      * The values are separated by commas but may also have
@@ -527,9 +527,9 @@ int vid_parms_parse(struct context *cnt){
     char tst;
     char *parmdesc, *parmval;
 
-    if (!cnt->vdev->update_parms) return 0;
+    if (!cam->vdev->update_parms) return 0;
 
-    vdevctx = cnt->vdev;
+    vdevctx = cam->vdev;
 
     for (indx_parm=0;indx_parm<vdevctx->usrctrl_count;indx_parm++){
         free(vdevctx->usrctrl_array[indx_parm].ctrl_name);
@@ -541,15 +541,15 @@ int vid_parms_parse(struct context *cnt){
     }
     vdevctx->usrctrl_count = 0;
 
-    if (cnt->conf.vid_control_params != NULL){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cnt->conf.vid_control_params);
+    if (cam->conf.vid_control_params != NULL){
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cam->conf.vid_control_params);
 
         indx_parm = 0;
         parmdesc_st  = parmval_st  = -1;
         parmdesc_len = parmval_len = 0;
         qte_open = FALSE;
         parmdesc = parmval = NULL;
-        tst = cnt->conf.vid_control_params[indx_parm];
+        tst = cam->conf.vid_control_params[indx_parm];
         while (tst != '\0') {
             if (!qte_open) {
                 if (tst == '\"') {                    /* This is the opening quotation */
@@ -564,7 +564,7 @@ int vid_parms_parse(struct context *cnt){
                     if ((parmval_st >= 0) && (parmval_len > 0)){
                         if (parmval  != NULL) free(parmval);
                         parmval = mymalloc(parmval_len);
-                        snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
+                        snprintf(parmval, parmval_len,"%s",&cam->conf.vid_control_params[parmval_st]);
                     }
                     parmdesc_st  = indx_parm + 1;
                     parmval_st  = -1;
@@ -573,7 +573,7 @@ int vid_parms_parse(struct context *cnt){
                     if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
                         if (parmdesc != NULL) free(parmdesc);
                         parmdesc = mymalloc(parmdesc_len);
-                        snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
+                        snprintf(parmdesc, parmdesc_len,"%s",&cam->conf.vid_control_params[parmdesc_st]);
                     }
                     parmdesc_st = -1;
                     parmval_st = indx_parm + 1;
@@ -593,7 +593,7 @@ int vid_parms_parse(struct context *cnt){
                 if (parmdesc_len > 0 ){
                     if (parmdesc != NULL) free(parmdesc);
                     parmdesc = mymalloc(parmdesc_len);
-                    snprintf(parmdesc, parmdesc_len,"%s",&cnt->conf.vid_control_params[parmdesc_st]);
+                    snprintf(parmdesc, parmdesc_len,"%s",&cam->conf.vid_control_params[parmdesc_st]);
                 }
                 parmdesc_st = -1;
                 parmval_st = indx_parm + 1;
@@ -610,13 +610,13 @@ int vid_parms_parse(struct context *cnt){
             }
 
             indx_parm++;
-            tst = cnt->conf.vid_control_params[indx_parm];
+            tst = cam->conf.vid_control_params[indx_parm];
         }
         /* Process the last parameter */
         if ((parmval_st >= 0) && (parmval_len > 0)){
             if (parmval  != NULL) free(parmval);
             parmval = mymalloc(parmval_len+1);
-            snprintf(parmval, parmval_len,"%s",&cnt->conf.vid_control_params[parmval_st]);
+            snprintf(parmval, parmval_len,"%s",&cam->conf.vid_control_params[parmval_st]);
         }
         if ((parmdesc != NULL) && (parmval  != NULL)){
             vid_parms_add(vdevctx, parmdesc, parmval);
@@ -629,7 +629,7 @@ int vid_parms_parse(struct context *cnt){
         if (parmval  != NULL) free(parmval);
     }
 
-    cnt->vdev->update_parms = FALSE;
+    cam->vdev->update_parms = FALSE;
 
     return 0;
 
@@ -645,27 +645,27 @@ void vid_mutex_destroy(void)
     v4l2_mutex_destroy();
 }
 
-void vid_close(struct context *cnt) {
+void vid_close(struct ctx_cam *cam) {
 
     #ifdef HAVE_MMAL
-        if (cnt->mmalcam) {
+        if (cam->mmalcam) {
             MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling mmalcam_cleanup"));
-            mmalcam_cleanup(cnt->mmalcam);
-            cnt->mmalcam = NULL;
+            mmalcam_cleanup(cam->mmalcam);
+            cam->mmalcam = NULL;
             return;
         }
     #endif
 
-    if (cnt->netcam) {
+    if (cam->netcam) {
         /* This also cleans up high resolution */
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("calling netcam_cleanup"));
-        netcam_cleanup(cnt, 0);
+        netcam_cleanup(cam, 0);
         return;
     }
 
-    if (cnt->camera_type == CAMERA_TYPE_V4L2) {
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Cleaning up V4L2 device"));
-        v4l2_cleanup(cnt);
+        v4l2_cleanup(cam);
         return;
     }
 
@@ -689,42 +689,42 @@ void vid_close(struct context *cnt) {
  * - if the camera is V4L2 v4l2_start is called
  *
  * Parameters:
- *     cnt        Pointer to the context for this thread
+ *     cam        Pointer to the context for this thread
  *
  * Returns
  *     device number
  *     -1 if failed to open device.
  *     -3 image dimensions are not modulo 8
  */
-int vid_start(struct context *cnt) {
+int vid_start(struct ctx_cam *cam) {
     int dev = -1;
 
     #ifdef HAVE_MMAL
-        if (cnt->camera_type == CAMERA_TYPE_MMAL) {
+        if (cam->camera_type == CAMERA_TYPE_MMAL) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening MMAL cam"));
-            dev = mmalcam_start(cnt);
+            dev = mmalcam_start(cam);
             if (dev < 0) {
-                mmalcam_cleanup(cnt->mmalcam);
-                cnt->mmalcam = NULL;
+                mmalcam_cleanup(cam->mmalcam);
+                cam->mmalcam = NULL;
                 MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("MMAL cam failed to open"));
             }
             return dev;
         }
     #endif
 
-    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
+    if (cam->camera_type == CAMERA_TYPE_NETCAM) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening Netcam"));
-        dev = netcam_setup(cnt);
+        dev = netcam_setup(cam);
         if (dev < 0) {
-            netcam_cleanup(cnt, 1);
+            netcam_cleanup(cam, 1);
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Netcam failed to open"));
         }
         return dev;
     }
 
-    if (cnt->camera_type == CAMERA_TYPE_V4L2) {
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening V4L2 device"));
-        dev = v4l2_start(cnt);
+        dev = v4l2_start(cam);
         if (dev < 0) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("V4L2 device failed to open"));
         }
@@ -743,7 +743,7 @@ int vid_start(struct context *cnt) {
  * vid_next fetches a video frame from a either v4l device or netcam
  *
  * Parameters:
- *     cnt        Pointer to the context for this thread
+ *     cam        Pointer to the context for this thread
  *     map        Pointer to the buffer in which the function puts the new image
  *
  * Global variable
@@ -757,26 +757,26 @@ int vid_start(struct context *cnt) {
  *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
-int vid_next(struct context *cnt, struct image_data *img_data){
+int vid_next(struct ctx_cam *cam, struct image_data *img_data){
 
     #ifdef HAVE_MMAL
-        if (cnt->camera_type == CAMERA_TYPE_MMAL) {
-            if (cnt->mmalcam == NULL) {
+        if (cam->camera_type == CAMERA_TYPE_MMAL) {
+            if (cam->mmalcam == NULL) {
                 return NETCAM_GENERAL_ERROR;
             }
-            return mmalcam_next(cnt, img_data);
+            return mmalcam_next(cam, img_data);
         }
     #endif
 
-    if (cnt->camera_type == CAMERA_TYPE_NETCAM) {
-        if (cnt->video_dev == -1)
+    if (cam->camera_type == CAMERA_TYPE_NETCAM) {
+        if (cam->video_dev == -1)
             return NETCAM_GENERAL_ERROR;
 
-        return netcam_next(cnt, img_data);
+        return netcam_next(cam, img_data);
     }
 
-    if (cnt->camera_type == CAMERA_TYPE_V4L2) {
-        return v4l2_next(cnt, img_data);
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        return v4l2_next(cam, img_data);
    }
 
     return -2;

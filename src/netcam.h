@@ -107,7 +107,7 @@ struct ctx_netcam {
 
     struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
     struct timeval            frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
-    struct config            *conf;             /* Pointer to conf parms of parent cnt*/
+    struct config            *conf;             /* Pointer to conf parms of parent cam*/
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */
@@ -118,8 +118,8 @@ struct ctx_netcam {
 
 };
 
-int netcam_setup(struct context *cnt);
-int netcam_next(struct context *cnt, struct image_data *img_data);
-void netcam_cleanup(struct context *cnt, int init_retry_flag);
+int netcam_setup(struct ctx_cam *cam);
+int netcam_next(struct ctx_cam *cam, struct image_data *img_data);
+void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag);
 
 #endif /* _INCLUDE_NETCAM_H */

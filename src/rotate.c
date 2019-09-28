@@ -182,37 +182,37 @@ static inline void rot90ccw(unsigned char *src, register unsigned char *dst,
  *
  * Parameters:
  *
- *   cnt - the current thread's context structure
+ *   cam - the current thread's context structure
  *
  * Returns: nothing
  */
-void rotate_init(struct context *cnt){
+void rotate_init(struct ctx_cam *cam){
     int size_norm, size_high;
 
     /* Make sure buffer_norm isn't freed if it hasn't been allocated. */
-    cnt->rotate_data.buffer_norm = NULL;
-    cnt->rotate_data.buffer_high = NULL;
+    cam->rotate_data.buffer_norm = NULL;
+    cam->rotate_data.buffer_high = NULL;
 
     /*
      * Assign the value in conf.rotate to rotate_data.degrees. This way,
      * we have a value that is safe from changes caused by motion-control.
      */
-    if ((cnt->conf.rotate % 90) > 0) {
+    if ((cam->conf.rotate % 90) > 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
-            ,cnt->conf.rotate);
-        cnt->conf.rotate = 0;     /* Disable rotation. */
-        cnt->rotate_data.degrees = 0; /* Force return below. */
+            ,cam->conf.rotate);
+        cam->conf.rotate = 0;     /* Disable rotation. */
+        cam->rotate_data.degrees = 0; /* Force return below. */
     } else {
-        cnt->rotate_data.degrees = cnt->conf.rotate % 360; /* Range: 0..359 */
+        cam->rotate_data.degrees = cam->conf.rotate % 360; /* Range: 0..359 */
     }
 
-    if (cnt->conf.flip_axis[0]=='h') {
-        cnt->rotate_data.axis = FLIP_TYPE_HORIZONTAL;
-    } else if (cnt->conf.flip_axis[0]=='v') {
-        cnt->rotate_data.axis = FLIP_TYPE_VERTICAL;
+    if (cam->conf.flip_axis[0]=='h') {
+        cam->rotate_data.axis = FLIP_TYPE_HORIZONTAL;
+    } else if (cam->conf.flip_axis[0]=='v') {
+        cam->rotate_data.axis = FLIP_TYPE_VERTICAL;
     } else {
-        cnt->rotate_data.axis = FLIP_TYPE_NONE;
+        cam->rotate_data.axis = FLIP_TYPE_NONE;
     }
 
     /*
@@ -222,27 +222,27 @@ void rotate_init(struct context *cnt){
      *
      * If rotating 90 or 270 degrees, the capture dimensions and output dimensions
      * are not the same. Capture dimensions will be contained in capture_width_norm and
-     * capture_height_norm in cnt->rotate_data, while output dimensions will be contained
+     * capture_height_norm in cam->rotate_data, while output dimensions will be contained
      * in imgs.width and imgs.height.
      */
 
     /* 1. Transfer capture dimensions into capture_width_norm and capture_height_norm. */
-    cnt->rotate_data.capture_width_norm  = cnt->imgs.width;
-    cnt->rotate_data.capture_height_norm = cnt->imgs.height;
+    cam->rotate_data.capture_width_norm  = cam->imgs.width;
+    cam->rotate_data.capture_height_norm = cam->imgs.height;
 
-    cnt->rotate_data.capture_width_high  = cnt->imgs.width_high;
-    cnt->rotate_data.capture_height_high = cnt->imgs.height_high;
+    cam->rotate_data.capture_width_high  = cam->imgs.width_high;
+    cam->rotate_data.capture_height_high = cam->imgs.height_high;
 
-    size_norm = cnt->imgs.width * cnt->imgs.height * 3 / 2;
-    size_high = cnt->imgs.width_high * cnt->imgs.height_high * 3 / 2;
+    size_norm = cam->imgs.width * cam->imgs.height * 3 / 2;
+    size_high = cam->imgs.width_high * cam->imgs.height_high * 3 / 2;
 
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)) {
+    if ((cam->rotate_data.degrees == 90) || (cam->rotate_data.degrees == 270)) {
         /* 2. "Swap" imgs.width and imgs.height. */
-        cnt->imgs.width = cnt->rotate_data.capture_height_norm;
-        cnt->imgs.height = cnt->rotate_data.capture_width_norm;
+        cam->imgs.width = cam->rotate_data.capture_height_norm;
+        cam->imgs.height = cam->rotate_data.capture_width_norm;
         if (size_high > 0 ) {
-            cnt->imgs.width_high = cnt->rotate_data.capture_height_high;
-            cnt->imgs.height_high = cnt->rotate_data.capture_width_high;
+            cam->imgs.width_high = cam->rotate_data.capture_height_high;
+            cam->imgs.height_high = cam->rotate_data.capture_width_high;
         }
     }
 
@@ -250,15 +250,15 @@ void rotate_init(struct context *cnt){
      * If we're not rotating, let's exit once we have setup the capture dimensions
      * and output dimensions properly.
      */
-    if (cnt->rotate_data.degrees == 0) return;
+    if (cam->rotate_data.degrees == 0) return;
 
     /*
      * Allocate memory if rotating 90 or 270 degrees, because those rotations
      * cannot be performed in-place (they can, but it would be too slow).
      */
-    if ((cnt->rotate_data.degrees == 90) || (cnt->rotate_data.degrees == 270)){
-        cnt->rotate_data.buffer_norm = mymalloc(size_norm);
-        if (size_high > 0 ) cnt->rotate_data.buffer_high = mymalloc(size_high);
+    if ((cam->rotate_data.degrees == 90) || (cam->rotate_data.degrees == 270)){
+        cam->rotate_data.buffer_norm = mymalloc(size_norm);
+        if (size_high > 0 ) cam->rotate_data.buffer_high = mymalloc(size_high);
     }
 
 }
@@ -270,17 +270,17 @@ void rotate_init(struct context *cnt){
  *
  * Parameters:
  *
- *   cnt - the current thread's context structure
+ *   cam - the current thread's context structure
  *
  * Returns: nothing
  */
-void rotate_deinit(struct context *cnt){
+void rotate_deinit(struct ctx_cam *cam){
 
-    if (cnt->rotate_data.buffer_norm)
-        free(cnt->rotate_data.buffer_norm);
+    if (cam->rotate_data.buffer_norm)
+        free(cam->rotate_data.buffer_norm);
 
-    if (cnt->rotate_data.buffer_high)
-        free(cnt->rotate_data.buffer_high);
+    if (cam->rotate_data.buffer_high)
+        free(cam->rotate_data.buffer_high);
 }
 
 /**
@@ -291,14 +291,14 @@ void rotate_deinit(struct context *cnt){
  * Parameters:
  *
  *   img_data- pointer to the image data to rotate
- *   cnt - the current thread's context structure
+ *   cam - the current thread's context structure
  *
  * Returns:
  *
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct context *cnt, struct image_data *img_data){
+int rotate_map(struct ctx_cam *cam, struct image_data *img_data){
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel
      * data is divided in three parts:
@@ -315,28 +315,28 @@ int rotate_map(struct context *cnt, struct image_data *img_data){
     unsigned char *img;
     unsigned char *temp_buff;
 
-    if (cnt->rotate_data.degrees == 0 && cnt->rotate_data.axis == FLIP_TYPE_NONE) return 0;
+    if (cam->rotate_data.degrees == 0 && cam->rotate_data.axis == FLIP_TYPE_NONE) return 0;
 
     indx = 0;
     indx_max = 0;
-    if ((cnt->rotate_data.capture_width_high != 0) && (cnt->rotate_data.capture_height_high != 0)) indx_max = 1;
+    if ((cam->rotate_data.capture_width_high != 0) && (cam->rotate_data.capture_height_high != 0)) indx_max = 1;
 
     while (indx <= indx_max) {
-        deg = cnt->rotate_data.degrees;
-        axis = cnt->rotate_data.axis;
+        deg = cam->rotate_data.degrees;
+        axis = cam->rotate_data.axis;
         wh4 = 0;
         w2 = 0;
         h2 = 0;
         if (indx == 0 ){
             img = img_data->image_norm;
-            width = cnt->rotate_data.capture_width_norm;
-            height = cnt->rotate_data.capture_height_norm;
-            temp_buff = cnt->rotate_data.buffer_norm;
+            width = cam->rotate_data.capture_width_norm;
+            height = cam->rotate_data.capture_height_norm;
+            temp_buff = cam->rotate_data.buffer_norm;
         } else {
             img = img_data->image_high;
-            width = cnt->rotate_data.capture_width_high;
-            height = cnt->rotate_data.capture_height_high;
-            temp_buff = cnt->rotate_data.buffer_high;
+            width = cam->rotate_data.capture_width_high;
+            height = cam->rotate_data.capture_height_high;
+            temp_buff = cam->rotate_data.buffer_high;
         }
         /*
          * Pre-calculate some stuff:

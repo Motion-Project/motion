@@ -50,13 +50,13 @@ struct video_dev {
 
 };
 
-int vid_start(struct context *cnt);
-int vid_next(struct context *cnt, struct image_data *img_data);
-void vid_close(struct context *cnt);
+int vid_start(struct ctx_cam *cam);
+int vid_next(struct ctx_cam *cam, struct image_data *img_data);
+void vid_close(struct ctx_cam *cam);
 void vid_mutex_destroy(void);
 void vid_mutex_init(void);
 
-int vid_parms_parse(struct context *cnt);
+int vid_parms_parse(struct ctx_cam *cam);
 
 void vid_yuv422to420p(unsigned char *map, unsigned char *cap_map, int width, int height);
 void vid_yuv422pto420p(unsigned char *map, unsigned char *cap_map, int width, int height);

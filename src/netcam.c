@@ -21,7 +21,7 @@
 #include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
 #include "movie.h"
 
-void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
+static void netcam_check_buffsize(netcam_buff_ptr buff, size_t numbytes)
 {
     int min_size_to_alloc;
     int real_alloc;
@@ -132,7 +132,7 @@ static void netcam_url_invalid(struct url_t *parse_url){
  * Returns:                Nothing
  *
  */
-void netcam_url_parse(struct url_t *parse_url, const char *text_url)
+static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
 {
     char *s;
     int i;
@@ -229,7 +229,7 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
  * Returns:             Nothing
  *
  */
-void netcam_url_free(struct url_t *parse_url)
+static void netcam_url_free(struct url_t *parse_url)
 {
     free(parse_url->service);
     parse_url->service = NULL;
@@ -302,7 +302,7 @@ static void netcam_close_context(struct ctx_netcam *netcam){
 
 }
 
-static void netcam_pktarray_resize(struct context *cnt, int is_highres){
+static void netcam_pktarray_resize(struct ctx_cam *cam, int is_highres){
     /* This is called from netcam_next and is on the motion loop thread
      * The netcam->mutex is locked around the call to this function.
     */
@@ -327,13 +327,13 @@ static void netcam_pktarray_resize(struct context *cnt, int is_highres){
     int                   newsize;
 
     if (is_highres){
-        idnbr_last = cnt->imgs.image_ring[cnt->imgs.image_ring_out].idnbr_high;
-        idnbr_first = cnt->imgs.image_ring[cnt->imgs.image_ring_in].idnbr_high;
-        netcam = cnt->netcam_high;
+        idnbr_last = cam->imgs.image_ring[cam->imgs.image_ring_out].idnbr_high;
+        idnbr_first = cam->imgs.image_ring[cam->imgs.image_ring_in].idnbr_high;
+        netcam = cam->netcam_high;
     } else {
-        idnbr_last = cnt->imgs.image_ring[cnt->imgs.image_ring_out].idnbr_norm;
-        idnbr_first = cnt->imgs.image_ring[cnt->imgs.image_ring_in].idnbr_norm;
-        netcam = cnt->netcam;
+        idnbr_last = cam->imgs.image_ring[cam->imgs.image_ring_out].idnbr_norm;
+        idnbr_first = cam->imgs.image_ring[cam->imgs.image_ring_in].idnbr_norm;
+        netcam = cam->netcam;
     }
 
     if (!netcam->passthrough) return;
@@ -1096,7 +1096,7 @@ static void netcam_set_v4l2(struct ctx_netcam *netcam){
 
 }
 
-static void netcam_set_path (struct context *cnt, struct ctx_netcam *netcam ) {
+static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
 
     char        *userpass = NULL;
     struct url_t url;
@@ -1106,18 +1106,18 @@ static void netcam_set_path (struct context *cnt, struct ctx_netcam *netcam ) {
     memset(&url, 0, sizeof(url));
 
     if (netcam->high_resolution){
-        netcam_url_parse(&url, cnt->conf.netcam_highres);
+        netcam_url_parse(&url, cam->conf.netcam_highres);
     } else {
-        netcam_url_parse(&url, cnt->conf.netcam_url);
+        netcam_url_parse(&url, cam->conf.netcam_url);
     }
 
-    if (cnt->conf.netcam_proxy) {
+    if (cam->conf.netcam_proxy) {
         MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
             ,_("Proxies not supported using for %s"),url.service);
     }
 
-    if (cnt->conf.netcam_userpass != NULL) {
-        userpass = mystrdup(cnt->conf.netcam_userpass);
+    if (cam->conf.netcam_userpass != NULL) {
+        userpass = mystrdup(cam->conf.netcam_userpass);
     } else if (url.userpass != NULL) {
         userpass = mystrdup(url.userpass);
     }
@@ -1161,7 +1161,7 @@ static void netcam_set_path (struct context *cnt, struct ctx_netcam *netcam ) {
 
 }
 
-static void netcam_set_parms (struct context *cnt, struct ctx_netcam *netcam ) {
+static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     /* Set the parameters to be used with our camera */
 
     if (netcam->high_resolution) {
@@ -1169,21 +1169,21 @@ static void netcam_set_parms (struct context *cnt, struct ctx_netcam *netcam ) {
         netcam->imgsize.height = 0;
         snprintf(netcam->cameratype,29, "%s",_("High resolution"));
     } else {
-        netcam->imgsize.width = cnt->conf.width;
-        netcam->imgsize.height = cnt->conf.height;
+        netcam->imgsize.width = cam->conf.width;
+        netcam->imgsize.height = cam->conf.height;
         snprintf(netcam->cameratype,29, "%s",_("Normal resolution"));
     }
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("Setting up %s stream."),netcam->cameratype);
 
-    util_check_passthrough(cnt); /* In case it was turned on via webcontrol */
+    util_check_passthrough(cam); /* In case it was turned on via webcontrol */
     netcam->status = NETCAM_NOTCONNECTED;
-    netcam->rtsp_uses_tcp =cnt->conf.netcam_use_tcp;
-    netcam->v4l2_palette = cnt->conf.v4l2_palette;
-    netcam->framerate = cnt->conf.framerate;
-    netcam->src_fps =  cnt->conf.framerate; /* Default to conf fps */
-    netcam->conf = &cnt->conf;
-    netcam->camera_name = cnt->conf.camera_name;
+    netcam->rtsp_uses_tcp =cam->conf.netcam_use_tcp;
+    netcam->v4l2_palette = cam->conf.v4l2_palette;
+    netcam->framerate = cam->conf.framerate;
+    netcam->src_fps =  cam->conf.framerate; /* Default to conf fps */
+    netcam->conf = &cam->conf;
+    netcam->camera_name = cam->conf.camera_name;
     netcam->img_recv = mymalloc(sizeof(netcam_buff));
     netcam->img_recv->ptr = mymalloc(NETCAM_BUFFSIZE);
     netcam->img_latest = mymalloc(sizeof(netcam_buff));
@@ -1205,10 +1205,10 @@ static void netcam_set_parms (struct context *cnt, struct ctx_netcam *netcam ) {
     }
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((!netcam->high_resolution) &&
-        (cnt->conf.netcam_highres)) {
+        (cam->conf.netcam_highres)) {
         netcam->passthrough = FALSE;
     } else {
-        netcam->passthrough = util_check_passthrough(cnt);
+        netcam->passthrough = util_check_passthrough(cam);
     }
     netcam->interruptduration = 5;
     netcam->interrupted = FALSE;
@@ -1220,41 +1220,41 @@ static void netcam_set_parms (struct context *cnt, struct ctx_netcam *netcam ) {
         MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
     }
 
-    netcam_set_path(cnt, netcam);
+    netcam_set_path(cam, netcam);
 
 }
 
-static int netcam_set_dimensions (struct context *cnt) {
+static int netcam_set_dimensions (struct ctx_cam *cam) {
 
-    cnt->imgs.width = 0;
-    cnt->imgs.height = 0;
-    cnt->imgs.size_norm = 0;
-    cnt->imgs.motionsize = 0;
+    cam->imgs.width = 0;
+    cam->imgs.height = 0;
+    cam->imgs.size_norm = 0;
+    cam->imgs.motionsize = 0;
 
-    cnt->imgs.width_high  = 0;
-    cnt->imgs.height_high = 0;
-    cnt->imgs.size_high   = 0;
+    cam->imgs.width_high  = 0;
+    cam->imgs.height_high = 0;
+    cam->imgs.size_high   = 0;
 
-    if (cnt->conf.width % 8) {
+    if (cam->conf.width % 8) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image width (%d) requested is not modulo 8."), cnt->conf.width);
-        cnt->conf.width = cnt->conf.width - (cnt->conf.width % 8) + 8;
+            ,_("Image width (%d) requested is not modulo 8."), cam->conf.width);
+        cam->conf.width = cam->conf.width - (cam->conf.width % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Adjusting width to next higher multiple of 8 (%d)."), cnt->conf.width);
+            ,_("Adjusting width to next higher multiple of 8 (%d)."), cam->conf.width);
     }
-    if (cnt->conf.height % 8) {
+    if (cam->conf.height % 8) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image height (%d) requested is not modulo 8."), cnt->conf.height);
-        cnt->conf.height = cnt->conf.height - (cnt->conf.height % 8) + 8;
+            ,_("Image height (%d) requested is not modulo 8."), cam->conf.height);
+        cam->conf.height = cam->conf.height - (cam->conf.height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Adjusting height to next higher multiple of 8 (%d)."), cnt->conf.height);
+            ,_("Adjusting height to next higher multiple of 8 (%d)."), cam->conf.height);
     }
 
     /* Fill in camera details into context structure. */
-    cnt->imgs.width = cnt->conf.width;
-    cnt->imgs.height = cnt->conf.height;
-    cnt->imgs.size_norm = (cnt->conf.width * cnt->conf.height * 3) / 2;
-    cnt->imgs.motionsize = cnt->conf.width * cnt->conf.height;
+    cam->imgs.width = cam->conf.width;
+    cam->imgs.height = cam->conf.height;
+    cam->imgs.size_norm = (cam->conf.width * cam->conf.height * 3) / 2;
+    cam->imgs.motionsize = cam->conf.width * cam->conf.height;
 
     return 0;
 }
@@ -1706,45 +1706,45 @@ static int netcam_start_handler(struct ctx_netcam *netcam){
 
 }
 
-int netcam_setup(struct context *cnt){
+int netcam_setup(struct ctx_cam *cam){
 
     int retcd;
     int indx_cam, indx_max;
     struct ctx_netcam *netcam;
 
-    cnt->netcam = NULL;
-    cnt->netcam_high = NULL;
+    cam->netcam = NULL;
+    cam->netcam_high = NULL;
 
-    if (netcam_set_dimensions(cnt) < 0 ) return -1;
+    if (netcam_set_dimensions(cam) < 0 ) return -1;
 
     indx_cam = 1;
     indx_max = 1;
-    if (cnt->conf.netcam_highres) indx_max = 2;
+    if (cam->conf.netcam_highres) indx_max = 2;
 
     while (indx_cam <= indx_max){
         if (indx_cam == 1){
-            cnt->netcam = netcam_new_context();
-            if (cnt->netcam == NULL) {
+            cam->netcam = netcam_new_context();
+            if (cam->netcam == NULL) {
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                     ,_("unable to create rtsp context"));
                 return -1;
             }
-            netcam = cnt->netcam;
+            netcam = cam->netcam;
             netcam->high_resolution = FALSE;           /* Set flag for this being the normal resolution camera */
         } else {
-            cnt->netcam_high = netcam_new_context();
-            if (cnt->netcam_high == NULL) {
+            cam->netcam_high = netcam_new_context();
+            if (cam->netcam_high == NULL) {
                 MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
                     ,_("unable to create rtsp high context"));
                 return -1;
             }
-            netcam = cnt->netcam_high;
+            netcam = cam->netcam_high;
             netcam->high_resolution = TRUE;            /* Set flag for this being the high resolution camera */
         }
 
         netcam_null_context(netcam);
 
-        netcam_set_parms(cnt, netcam);
+        netcam_set_parms(cam, netcam);
 
         if (netcam_connect(netcam) < 0) return -1;
 
@@ -1765,8 +1765,8 @@ int netcam_setup(struct context *cnt){
          * we must get the dimensions from the first image captured
          */
         if (netcam->high_resolution){
-            cnt->imgs.width_high = netcam->imgsize.width;
-            cnt->imgs.height_high = netcam->imgsize.height;
+            cam->imgs.width_high = netcam->imgsize.width;
+            cam->imgs.height_high = netcam->imgsize.height;
         }
 
         if (netcam_start_handler(netcam) < 0 ) return -1;
@@ -1778,44 +1778,44 @@ int netcam_setup(struct context *cnt){
 
 }
 
-int netcam_next(struct context *cnt, struct image_data *img_data){
+int netcam_next(struct ctx_cam *cam, struct image_data *img_data){
 
     /* This is called from the motion loop thread */
 
-    if ((cnt->netcam->status == NETCAM_RECONNECTING) ||
-        (cnt->netcam->status == NETCAM_NOTCONNECTED)){
+    if ((cam->netcam->status == NETCAM_RECONNECTING) ||
+        (cam->netcam->status == NETCAM_NOTCONNECTED)){
             return 1;
         }
-    pthread_mutex_lock(&cnt->netcam->mutex);
-        netcam_pktarray_resize(cnt, FALSE);
+    pthread_mutex_lock(&cam->netcam->mutex);
+        netcam_pktarray_resize(cam, FALSE);
         memcpy(img_data->image_norm
-               , cnt->netcam->img_latest->ptr
-               , cnt->netcam->img_latest->used);
-        img_data->idnbr_norm = cnt->netcam->idnbr;
-    pthread_mutex_unlock(&cnt->netcam->mutex);
+               , cam->netcam->img_latest->ptr
+               , cam->netcam->img_latest->used);
+        img_data->idnbr_norm = cam->netcam->idnbr;
+    pthread_mutex_unlock(&cam->netcam->mutex);
 
-    if (cnt->netcam_high){
-        if ((cnt->netcam_high->status == NETCAM_RECONNECTING) ||
-            (cnt->netcam_high->status == NETCAM_NOTCONNECTED)) return 1;
+    if (cam->netcam_high){
+        if ((cam->netcam_high->status == NETCAM_RECONNECTING) ||
+            (cam->netcam_high->status == NETCAM_NOTCONNECTED)) return 1;
 
-        pthread_mutex_lock(&cnt->netcam_high->mutex);
-            netcam_pktarray_resize(cnt, TRUE);
-            if (!(cnt->netcam_high->high_resolution && cnt->netcam_high->passthrough)) {
+        pthread_mutex_lock(&cam->netcam_high->mutex);
+            netcam_pktarray_resize(cam, TRUE);
+            if (!(cam->netcam_high->high_resolution && cam->netcam_high->passthrough)) {
                 memcpy(img_data->image_high
-                       ,cnt->netcam_high->img_latest->ptr
-                       ,cnt->netcam_high->img_latest->used);
+                       ,cam->netcam_high->img_latest->ptr
+                       ,cam->netcam_high->img_latest->used);
             }
-            img_data->idnbr_high = cnt->netcam_high->idnbr;
-        pthread_mutex_unlock(&cnt->netcam_high->mutex);
+            img_data->idnbr_high = cam->netcam_high->idnbr;
+        pthread_mutex_unlock(&cam->netcam_high->mutex);
     }
 
     /* Rotate images if requested */
-    rotate_map(cnt, img_data);
+    rotate_map(cam, img_data);
 
     return 0;
 }
 
-void netcam_cleanup(struct context *cnt, int init_retry_flag){
+void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag){
 
      /*
      * If the init_retry_flag is not set this function was
@@ -1829,13 +1829,13 @@ void netcam_cleanup(struct context *cnt, int init_retry_flag){
 
     indx_cam = 1;
     indx_max = 1;
-    if (cnt->netcam_high) indx_max = 2;
+    if (cam->netcam_high) indx_max = 2;
 
     while (indx_cam <= indx_max) {
         if (indx_cam == 1){
-            netcam = cnt->netcam;
+            netcam = cam->netcam;
         } else {
-            netcam = cnt->netcam_high;
+            netcam = cam->netcam_high;
         }
 
         if (netcam){
@@ -1885,8 +1885,8 @@ void netcam_cleanup(struct context *cnt, int init_retry_flag){
         }
         indx_cam++;
     }
-    cnt->netcam = NULL;
-    cnt->netcam_high = NULL;
+    cam->netcam = NULL;
+    cam->netcam_high = NULL;
 
 }
 

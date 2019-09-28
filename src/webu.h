@@ -64,13 +64,13 @@
         int             mhd_first;         /* Boolean for whether it is the first connection*/
 
         struct MHD_Connection  *connection; /* The MHD connection value from the client */
-        struct context        **cntlst;     /* The context list of all cameras */
-        struct context         *cnt;        /* The context information for the camera requested */
+        struct ctx_cam        **camlst;     /* The ctx_cam list of all cameras */
+        struct ctx_cam         *cam;        /* The ctx_cam information for the camera requested */
 
     };
 
-    void webu_start(struct context **cnt);
-    void webu_stop(struct context **cnt);
+    void webu_start(struct ctx_cam **cam);
+    void webu_stop(struct ctx_cam **cam);
     void webu_process_action(struct webui_ctx *webui);
     int webu_process_config(struct webui_ctx *webui);
     int webu_process_track(struct webui_ctx *webui);

@@ -129,36 +129,36 @@ static void v4l2_palette_init(palette_item *palette_array){
     return ret;
 }
 
-static void v4l2_vdev_free(struct context *cnt){
+static void v4l2_vdev_free(struct ctx_cam *cam){
     int indx;
 
     /* free the information we collected regarding the controls */
-    if (cnt->vdev != NULL){
-        if (cnt->vdev->usrctrl_count > 0){
-            for (indx=0;indx<cnt->vdev->usrctrl_count;indx++){
-                free(cnt->vdev->usrctrl_array[indx].ctrl_name);
-                cnt->vdev->usrctrl_array[indx].ctrl_name=NULL;
+    if (cam->vdev != NULL){
+        if (cam->vdev->usrctrl_count > 0){
+            for (indx=0;indx<cam->vdev->usrctrl_count;indx++){
+                free(cam->vdev->usrctrl_array[indx].ctrl_name);
+                cam->vdev->usrctrl_array[indx].ctrl_name=NULL;
             }
         }
-        cnt->vdev->usrctrl_count = 0;
-        if (cnt->vdev->usrctrl_array != NULL){
-            free(cnt->vdev->usrctrl_array);
-            cnt->vdev->usrctrl_array = NULL;
+        cam->vdev->usrctrl_count = 0;
+        if (cam->vdev->usrctrl_array != NULL){
+            free(cam->vdev->usrctrl_array);
+            cam->vdev->usrctrl_array = NULL;
         }
 
-        free(cnt->vdev);
-        cnt->vdev = NULL;
+        free(cam->vdev);
+        cam->vdev = NULL;
     }
 }
 
-static int v4l2_vdev_init(struct context *cnt){
+static int v4l2_vdev_init(struct ctx_cam *cam){
 
-    /* Create the v4l2 context within the main thread context  */
-    cnt->vdev = mymalloc(sizeof(struct vdev_context));
-    memset(cnt->vdev, 0, sizeof(struct vdev_context));
-    cnt->vdev->usrctrl_array = NULL;
-    cnt->vdev->usrctrl_count = 0;
-    cnt->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
+    /* Create the v4l2 ctx_cam within the main thread ctx_cam  */
+    cam->vdev = mymalloc(sizeof(struct vdev_context));
+    memset(cam->vdev, 0, sizeof(struct vdev_context));
+    cam->vdev->usrctrl_array = NULL;
+    cam->vdev->usrctrl_count = 0;
+    cam->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
 
     return 0;
 
@@ -328,24 +328,24 @@ static int v4l2_ctrls_set(struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev){
+static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
 
     struct vid_devctrl_ctx  *devitem;
     struct vdev_usrctrl_ctx *usritem;
     int indx_dev, indx_user;
 
-    if (cnt->conf.roundrobin_skip < 0) cnt->conf.roundrobin_skip = 1;
+    if (cam->conf.roundrobin_skip < 0) cam->conf.roundrobin_skip = 1;
 
     if (curdev->devctrl_count == 0){
-        cnt->vdev->update_parms = FALSE;
+        cam->vdev->update_parms = FALSE;
         return 0;
     }
 
     for (indx_dev=0; indx_dev<curdev->devctrl_count; indx_dev++ ) {
         devitem=&curdev->devctrl_array[indx_dev];
         devitem->ctrl_newval = devitem->ctrl_default;
-        for (indx_user=0; indx_user<cnt->vdev->usrctrl_count; indx_user++){
-            usritem=&cnt->vdev->usrctrl_array[indx_user];
+        for (indx_user=0; indx_user<cam->vdev->usrctrl_count; indx_user++){
+            usritem=&cam->vdev->usrctrl_array[indx_user];
             if ((!strcasecmp(devitem->ctrl_iddesc,usritem->ctrl_name)) ||
                 (!strcasecmp(devitem->ctrl_name  ,usritem->ctrl_name))) {
                 switch (devitem->ctrl_type) {
@@ -383,7 +383,7 @@ static int v4l2_parms_set(struct context *cnt, struct video_dev *curdev){
 
 }
 
-static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int method) {
+static int v4l2_autobright(struct ctx_cam *cam, struct video_dev *curdev, int method) {
 
     struct vid_devctrl_ctx  *devitem;
     struct vdev_usrctrl_ctx *usritem;
@@ -411,8 +411,8 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
     sprintf(cid_exp,"ID%08d",V4L2_CID_EXPOSURE);
     sprintf(cid_expabs,"ID%08d",V4L2_CID_EXPOSURE_ABSOLUTE);
 
-    for (indx = 0;indx < cnt->vdev->usrctrl_count; indx++){
-        usritem=&cnt->vdev->usrctrl_array[indx];
+    for (indx = 0;indx < cam->vdev->usrctrl_count; indx++){
+        usritem=&cam->vdev->usrctrl_array[indx];
         if ((method == 1) &&
             ((!strcasecmp(usritem->ctrl_name,"brightness")) ||
              (!strcasecmp(usritem->ctrl_name,cid_bright)))) {
@@ -462,8 +462,8 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
 
     avg = 0;
     pixel_count = 0;
-    image = cnt->imgs.image_vprvcy.image_norm;
-    for (indx = 0; indx < cnt->imgs.motionsize; indx += 10) {
+    image = cam->imgs.image_vprvcy.image_norm;
+    for (indx = 0; indx < cam->imgs.motionsize; indx += 10) {
         avg += image[indx];
         pixel_count++;
     }
@@ -521,20 +521,20 @@ static int v4l2_autobright(struct context *cnt, struct video_dev *curdev, int me
     return 0;
 }
 
-static int v4l2_input_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_input_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     /* Set the input number for the device if applicable */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_input    input;
 
-    if ((cnt->conf.input == curdev->input) &&
+    if ((cam->conf.input == curdev->input) &&
         (!curdev->starting)) return 0;
 
     memset(&input, 0, sizeof (struct v4l2_input));
-    if (cnt->conf.input == DEF_INPUT) {
+    if (cam->conf.input == DEF_INPUT) {
         input.index = 0;
     } else {
-        input.index = cnt->conf.input;
+        input.index = cam->conf.input;
     }
 
     if (xioctl(vid_source, VIDIOC_ENUMINPUT, &input) == -1) {
@@ -567,14 +567,14 @@ static int v4l2_input_select(struct context *cnt, struct video_dev *curdev) {
         return -1;
     }
 
-    curdev->input        = cnt->conf.input;
+    curdev->input        = cam->conf.input;
     curdev->device_type  = input.type;
     curdev->device_tuner = input.tuner;
 
     return 0;
 }
 
-static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_norm_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     /* Set the video standard (norm) for the device NTSC/PAL/etc*/
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -582,10 +582,10 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev) {
     v4l2_std_id std_id;
     int norm;
 
-    if ((cnt->conf.norm == curdev->norm) &&
+    if ((cam->conf.norm == curdev->norm) &&
         (!curdev->starting)) return 0;
 
-    norm = cnt->conf.norm;
+    norm = cam->conf.norm;
     if (xioctl(vid_source, VIDIOC_G_STD, &std_id) == -1) {
         if (curdev->starting){
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
@@ -633,19 +633,19 @@ static int v4l2_norm_select(struct context *cnt, struct video_dev *curdev) {
         }
     }
 
-    curdev->norm = cnt->conf.norm;
+    curdev->norm = cam->conf.norm;
 
     return 0;
 }
 
-static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_frequency_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     /* Set the frequency for the tuner */
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
 
-    if ((curdev->frequency == cnt->conf.frequency)&&
+    if ((curdev->frequency == cam->conf.frequency)&&
         (!curdev->starting)) return 0;
 
     /* If this input is attached to a tuner, set the frequency. */
@@ -668,7 +668,7 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev) 
         memset(&freq, 0, sizeof(struct v4l2_frequency));
         freq.tuner = curdev->device_tuner;
         freq.type = V4L2_TUNER_ANALOG_TV;
-        freq.frequency = (cnt->conf.frequency / 1000) * 16;
+        freq.frequency = (cam->conf.frequency / 1000) * 16;
 
         if (xioctl(vid_source, VIDIOC_S_FREQUENCY, &freq) == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
@@ -681,12 +681,12 @@ static int v4l2_frequency_select(struct context *cnt, struct video_dev *curdev) 
         }
     }
 
-    curdev->frequency = cnt->conf.frequency;
+    curdev->frequency = cam->conf.frequency;
 
     return 0;
 }
 
-static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pixformat){
+static int v4l2_pixfmt_set(struct ctx_cam *cam, struct video_dev *curdev, u32 pixformat){
 
     /* Set the pixel format for the camera*/
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
@@ -694,8 +694,8 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
     memset(&vid_source->dst_fmt, 0, sizeof(struct v4l2_format));
 
     vid_source->dst_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    vid_source->dst_fmt.fmt.pix.width = cnt->conf.width;
-    vid_source->dst_fmt.fmt.pix.height = cnt->conf.height;
+    vid_source->dst_fmt.fmt.pix.width = cam->conf.width;
+    vid_source->dst_fmt.fmt.pix.height = cam->conf.height;
     vid_source->dst_fmt.fmt.pix.pixelformat = pixformat;
     vid_source->dst_fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
@@ -705,17 +705,17 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
             ,_("Testing palette %c%c%c%c (%dx%d)")
             ,pixformat >> 0, pixformat >> 8
             ,pixformat >> 16, pixformat >> 24
-            ,cnt->conf.width, cnt->conf.height);
+            ,cam->conf.width, cam->conf.height);
 
         curdev->width = vid_source->dst_fmt.fmt.pix.width;
         curdev->height = vid_source->dst_fmt.fmt.pix.height;
 
-        if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) cnt->conf.width ||
-            vid_source->dst_fmt.fmt.pix.height != (unsigned int) cnt->conf.height) {
+        if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) cam->conf.width ||
+            vid_source->dst_fmt.fmt.pix.height != (unsigned int) cam->conf.height) {
 
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                 ,_("Adjusting resolution from %ix%i to %ix%i.")
-                ,cnt->conf.width, cnt->conf.height
+                ,cam->conf.width, cam->conf.height
                 ,vid_source->dst_fmt.fmt.pix.width
                 ,vid_source->dst_fmt.fmt.pix.height);
 
@@ -726,8 +726,8 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
                     ,_("Specify different palette or width/height in config file."));
                 return -1;
             }
-            cnt->conf.width = curdev->width;
-            cnt->conf.height = curdev->height;
+            cam->conf.width = curdev->width;
+            cam->conf.height = curdev->height;
         }
 
         if (xioctl(vid_source, VIDIOC_S_FMT, &vid_source->dst_fmt) == -1) {
@@ -743,7 +743,7 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
                 ,_("Using palette %c%c%c%c (%dx%d)")
                 ,pixformat >> 0 , pixformat >> 8
                 ,pixformat >> 16, pixformat >> 24
-                ,cnt->conf.width, cnt->conf.height);
+                ,cam->conf.width, cam->conf.height);
             MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
                 ,_("Bytesperlines %d sizeimage %d colorspace %08x")
                 ,vid_source->dst_fmt.fmt.pix.bytesperline
@@ -757,7 +757,7 @@ static int v4l2_pixfmt_set(struct context *cnt, struct video_dev *curdev, u32 pi
     return -1;
 }
 
-static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_pixfmt_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     /* Find and select the pixel format for camera*/
 
@@ -770,32 +770,32 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev) {
 
     v4l2_palette_init(palette_array);
 
-    if (cnt->conf.width % 8) {
+    if (cam->conf.width % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("config image width (%d) is not modulo 8"), cnt->conf.width);
-        cnt->conf.width = cnt->conf.width - (cnt->conf.width % 8) + 8;
+            ,_("config image width (%d) is not modulo 8"), cam->conf.width);
+        cam->conf.width = cam->conf.width - (cam->conf.width % 8) + 8;
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            , _("Adjusting to width (%d)"), cnt->conf.width);
+            , _("Adjusting to width (%d)"), cam->conf.width);
     }
 
-    if (cnt->conf.height % 8) {
+    if (cam->conf.height % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("config image height (%d) is not modulo 8"), cnt->conf.height);
-        cnt->conf.height = cnt->conf.height - (cnt->conf.height % 8) + 8;
+            ,_("config image height (%d) is not modulo 8"), cam->conf.height);
+        cam->conf.height = cam->conf.height - (cam->conf.height % 8) + 8;
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("Adjusting to height (%d)"), cnt->conf.height);
+            ,_("Adjusting to height (%d)"), cam->conf.height);
     }
 
-    if (cnt->conf.v4l2_palette == 21 ) {
+    if (cam->conf.v4l2_palette == 21 ) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("H264(21) format not supported via videodevice.  Changing to default palette"));
-        cnt->conf.v4l2_palette = 17;
+        cam->conf.v4l2_palette = 17;
     }
 
     /* First we try setting the config file value */
-    indx_palette = cnt->conf.v4l2_palette;
+    indx_palette = cam->conf.v4l2_palette;
     if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
-        retcd = v4l2_pixfmt_set(cnt, curdev,palette_array[indx_palette].v4l2id);
+        retcd = v4l2_pixfmt_set(cam, curdev,palette_array[indx_palette].v4l2id);
         if (retcd >= 0){
             free(palette_array);
             return 0;
@@ -803,7 +803,7 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
             , indx_palette, palette_array[indx_palette].fourcc
-            ,cnt->conf.width, cnt->conf.height);
+            ,cam->conf.width, cam->conf.height);
     }
 
     memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
@@ -835,7 +835,7 @@ static int v4l2_pixfmt_select(struct context *cnt, struct video_dev *curdev) {
     }
 
     if (indx_palette >= 0) {
-        retcd = v4l2_pixfmt_set(cnt, curdev, palette_array[indx_palette].v4l2id);
+        retcd = v4l2_pixfmt_set(cam, curdev, palette_array[indx_palette].v4l2id);
         if (retcd >= 0){
             if (curdev->starting) {
                 MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
@@ -958,21 +958,21 @@ static int v4l2_mmap_set(struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_imgs_set(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_imgs_set(struct ctx_cam *cam, struct video_dev *curdev) {
     /* Set the items on the imgs */
 
-    cnt->imgs.width = curdev->width;
-    cnt->imgs.height = curdev->height;
-    cnt->imgs.motionsize = cnt->imgs.width * cnt->imgs.height;
-    cnt->imgs.size_norm = (cnt->imgs.motionsize * 3) / 2;
-    cnt->conf.width = curdev->width;
-    cnt->conf.height = curdev->height;
+    cam->imgs.width = curdev->width;
+    cam->imgs.height = curdev->height;
+    cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
+    cam->imgs.size_norm = (cam->imgs.motionsize * 3) / 2;
+    cam->conf.width = curdev->width;
+    cam->conf.height = curdev->height;
 
     return 0;
 
 }
 
-static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned char *map) {
+static int v4l2_capture(struct ctx_cam *cam, struct video_dev *curdev, unsigned char *map) {
 
     /* Capture a image */
     /* FIXME:  This function needs to be refactored*/
@@ -981,8 +981,8 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     int shift, width, height, retcd;
 
-    width = cnt->conf.width;
-    height = cnt->conf.height;
+    width = cam->conf.width;
+    height = cam->conf.height;
 
     /* Block signals during IOCTL */
     sigemptyset(&set);
@@ -1095,24 +1095,24 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
         case V4L2_PIX_FMT_SGRBG8:
             /*FALLTHROUGH*/
         case V4L2_PIX_FMT_SBGGR8:    /* bayer */
-            vid_bayer2rgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height);
-            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            vid_bayer2rgb24(cam->imgs.common_buffer, the_buffer->ptr, width, height);
+            vid_rgb24toyuv420p(map, cam->imgs.common_buffer, width, height);
             return 0;
 
         case V4L2_PIX_FMT_SPCA561:
             /*FALLTHROUGH*/
         case V4L2_PIX_FMT_SN9C10X:
             vid_sonix_decompress(map, the_buffer->ptr, width, height);
-            vid_bayer2rgb24(cnt->imgs.common_buffer, map, width, height);
-            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            vid_bayer2rgb24(cam->imgs.common_buffer, map, width, height);
+            vid_rgb24toyuv420p(map, cam->imgs.common_buffer, width, height);
             return 0;
         case V4L2_PIX_FMT_Y12:
             shift += 2;
             /*FALLTHROUGH*/
         case V4L2_PIX_FMT_Y10:
             shift += 2;
-            vid_y10torgb24(cnt->imgs.common_buffer, the_buffer->ptr, width, height, shift);
-            vid_rgb24toyuv420p(map, cnt->imgs.common_buffer, width, height);
+            vid_y10torgb24(cam->imgs.common_buffer, the_buffer->ptr, width, height, shift);
+            vid_rgb24toyuv420p(map, cam->imgs.common_buffer, width, height);
             return 0;
         case V4L2_PIX_FMT_GREY:
             vid_greytoyuv420p(map, the_buffer->ptr, width, height);
@@ -1123,7 +1123,7 @@ static int v4l2_capture(struct context *cnt, struct video_dev *curdev, unsigned 
     return 1;
 }
 
-static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_device_init(struct ctx_cam *cam, struct video_dev *curdev) {
 
     src_v4l2_t *vid_source;
 
@@ -1138,11 +1138,11 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
     pthread_mutex_init(&curdev->mutex, &curdev->attr);
 
     curdev->usage_count = 1;
-    curdev->input = cnt->conf.input;
-    curdev->norm = cnt->conf.norm;
-    curdev->frequency = cnt->conf.frequency;
-    curdev->height = cnt->conf.height;
-    curdev->width = cnt->conf.width;
+    curdev->input = cam->conf.input;
+    curdev->norm = cam->conf.norm;
+    curdev->frequency = cam->conf.frequency;
+    curdev->height = cam->conf.height;
+    curdev->width = cam->conf.width;
 
     curdev->devctrl_array = NULL;
     curdev->devctrl_count = 0;
@@ -1152,15 +1152,15 @@ static int v4l2_device_init(struct context *cnt, struct video_dev *curdev) {
 
     curdev->v4l2_private = vid_source;
     vid_source->fd_device = curdev->fd_device;
-    vid_source->fps = cnt->conf.framerate;
+    vid_source->fps = cam->conf.framerate;
     vid_source->pframe = -1;
-    vid_source->finish = &cnt->finish;
+    vid_source->finish = &cam->finish;
     vid_source->buffers = NULL;
 
     return 0;
 }
 
-static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, unsigned char *map) {
+static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, unsigned char *map) {
 
     int indx, retcd;
 
@@ -1169,16 +1169,16 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
         return;
     }
 
-    if (cnt->conf.input     != curdev->input ||
-        cnt->conf.frequency != curdev->frequency ||
-        cnt->conf.norm      != curdev->norm) {
+    if (cam->conf.input     != curdev->input ||
+        cam->conf.frequency != curdev->frequency ||
+        cam->conf.norm      != curdev->norm) {
 
-        retcd = v4l2_input_select(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_norm_select(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
-        if (retcd == 0) retcd = vid_parms_parse(cnt);
-        if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
+        retcd = v4l2_input_select(cam, curdev);
+        if (retcd == 0) retcd = v4l2_norm_select(cam, curdev);
+        if (retcd == 0) retcd = v4l2_frequency_select(cam, curdev);
+        if (retcd == 0) retcd = vid_parms_parse(cam);
+        if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
+        if (retcd == 0) retcd = v4l2_autobright(cam, curdev, cam->conf.auto_brightness);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ){
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1187,19 +1187,19 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
 
         /* Clear the buffers from previous "robin" pictures*/
         for (indx =0; indx < curdev->buffer_count; indx++){
-            v4l2_capture(cnt, curdev, map);
+            v4l2_capture(cam, curdev, map);
         }
 
         /* Skip the requested round robin frame count */
-        for (indx = 1; indx < cnt->conf.roundrobin_skip; indx++){
-            v4l2_capture(cnt, curdev, map);
+        for (indx = 1; indx < cam->conf.roundrobin_skip; indx++){
+            v4l2_capture(cam, curdev, map);
         }
 
     } else {
         /* No round robin - we only adjust picture controls */
-        retcd = vid_parms_parse(cnt);
-        if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_autobright(cnt, curdev, cnt->conf.auto_brightness);
+        retcd = vid_parms_parse(cam);
+        if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
+        if (retcd == 0) retcd = v4l2_autobright(cam, curdev, cam->conf.auto_brightness);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1210,16 +1210,16 @@ static void v4l2_device_select(struct context *cnt, struct video_dev *curdev, un
 
 }
 
-static int v4l2_device_open(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     int fd_device;
     /* Open the video device */
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using videodevice %s and input %d")
-        ,cnt->conf.video_device, cnt->conf.input);
+        ,cam->conf.video_device, cam->conf.input);
 
-    curdev->video_device = cnt->conf.video_device;
+    curdev->video_device = cam->conf.video_device;
     curdev->fd_device = -1;
     fd_device = -1;
 
@@ -1233,7 +1233,7 @@ static int v4l2_device_open(struct context *cnt, struct video_dev *curdev) {
 
     MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
         ,_("Failed to open video device %s")
-        ,cnt->conf.video_device);
+        ,cam->conf.video_device);
     return -1;
 
 }
@@ -1338,7 +1338,7 @@ static int v4l2_device_capability(struct video_dev *curdev) {
     return 0;
 }
 
-static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
+static int v4l2_fps_set(struct ctx_cam *cam, struct video_dev *curdev) {
 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_streamparm setfps;
@@ -1346,7 +1346,7 @@ static int v4l2_fps_set(struct context *cnt, struct video_dev *curdev) {
 
     setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     setfps.parm.capture.timeperframe.numerator = 1;
-    setfps.parm.capture.timeperframe.denominator = cnt->conf.framerate;
+    setfps.parm.capture.timeperframe.denominator = cam->conf.framerate;
 
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
         , _("Trying to set fps to %d")
@@ -1383,7 +1383,7 @@ void v4l2_mutex_destroy(void) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_start(struct context *cnt) {
+int v4l2_start(struct ctx_cam *cam) {
     #ifdef HAVE_V4L2
 
         int retcd;
@@ -1394,10 +1394,10 @@ int v4l2_start(struct context *cnt) {
         /* If device is already open and initialized use it*/
         curdev = video_devices;
         while (curdev) {
-            if (!strcmp(cnt->conf.video_device, curdev->video_device)) {
-                retcd = v4l2_vdev_init(cnt);
-                if (retcd == 0) retcd = vid_parms_parse(cnt);
-                if (retcd == 0) retcd = v4l2_imgs_set(cnt, curdev);
+            if (!strcmp(cam->conf.video_device, curdev->video_device)) {
+                retcd = v4l2_vdev_init(cam);
+                if (retcd == 0) retcd = vid_parms_parse(cam);
+                if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);
                 if (retcd == 0) {
                     curdev->usage_count++;
                     retcd = curdev->fd_device;
@@ -1412,22 +1412,22 @@ int v4l2_start(struct context *cnt) {
 
         curdev->starting = TRUE;
 
-        retcd = v4l2_device_init(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_vdev_init(cnt);
-        if (retcd == 0) retcd = v4l2_device_open(cnt, curdev);
+        retcd = v4l2_device_init(cam, curdev);
+        if (retcd == 0) retcd = v4l2_vdev_init(cam);
+        if (retcd == 0) retcd = v4l2_device_open(cam, curdev);
         if (retcd == 0) retcd = v4l2_device_capability(curdev);
-        if (retcd == 0) retcd = v4l2_input_select(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_norm_select(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_frequency_select(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_pixfmt_select(cnt, curdev);
-        if (retcd == 0) retcd = v4l2_fps_set(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_input_select(cam, curdev);
+        if (retcd == 0) retcd = v4l2_norm_select(cam, curdev);
+        if (retcd == 0) retcd = v4l2_frequency_select(cam, curdev);
+        if (retcd == 0) retcd = v4l2_pixfmt_select(cam, curdev);
+        if (retcd == 0) retcd = v4l2_fps_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_count(curdev);
         if (retcd == 0) retcd = v4l2_ctrls_list(curdev);
-        if (retcd == 0) retcd = vid_parms_parse(cnt);
-        if (retcd == 0) retcd = v4l2_parms_set(cnt, curdev);
+        if (retcd == 0) retcd = vid_parms_parse(cam);
+        if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd == 0) retcd = v4l2_mmap_set(curdev);
-        if (retcd == 0) retcd = v4l2_imgs_set(cnt, curdev);
+        if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);
         if (retcd < 0){
             /* These may need more work to consider all the fail scenarios*/
             if (curdev->v4l2_private != NULL){
@@ -1436,7 +1436,7 @@ int v4l2_start(struct context *cnt) {
             }
             pthread_mutexattr_destroy(&curdev->attr);
             pthread_mutex_destroy(&curdev->mutex);
-            v4l2_vdev_free(cnt);
+            v4l2_vdev_free(cam);
             if (curdev->fd_device != -1) close(curdev->fd_device);
             free(curdev);
             pthread_mutex_unlock(&v4l2_mutex);
@@ -1453,12 +1453,12 @@ int v4l2_start(struct context *cnt) {
 
         return curdev->fd_device;
     #else
-        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        if (!cam) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
         return -1;
     #endif // HAVE_V4l2
 }
 
-void v4l2_cleanup(struct context *cnt) {
+void v4l2_cleanup(struct ctx_cam *cam) {
     #ifdef HAVE_V4L2
 
         struct video_dev *dev = video_devices;
@@ -1467,17 +1467,17 @@ void v4l2_cleanup(struct context *cnt) {
         /* Cleanup the v4l2 part */
         pthread_mutex_lock(&v4l2_mutex);
         while (dev) {
-            if (dev->fd_device == cnt->video_dev)
+            if (dev->fd_device == cam->video_dev)
                 break;
             prev = dev;
             dev = dev->next;
         }
         pthread_mutex_unlock(&v4l2_mutex);
 
-        /* Set it as closed in thread context. */
-        cnt->video_dev = -1;
+        /* Set it as closed in thread ctx_cam. */
+        cam->video_dev = -1;
 
-        v4l2_vdev_free(cnt);
+        v4l2_vdev_free(cam);
 
         if (dev == NULL) {
             MOTION_LOG(CRT, TYPE_VIDEO, NO_ERRNO, _("Unable to find video device"));
@@ -1511,7 +1511,7 @@ void v4l2_cleanup(struct context *cnt) {
             * There is still at least one thread using this device
             * If we own it, release it.
             */
-            if (dev->owner == cnt->threadnr) {
+            if (dev->owner == cam->threadnr) {
                 dev->frames = 0;
                 dev->owner = -1;
                 pthread_mutex_unlock(&dev->mutex);
@@ -1520,20 +1520,20 @@ void v4l2_cleanup(struct context *cnt) {
 
 
     #else
-        if (!cnt) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        if (!cam) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
     #endif // HAVE_V4L2
 }
 
-int v4l2_next(struct context *cnt, struct image_data *img_data) {
+int v4l2_next(struct ctx_cam *cam, struct image_data *img_data) {
     #ifdef HAVE_V4L2
         int ret = -2;
-        struct config *conf = &cnt->conf;
+        struct config *conf = &cam->conf;
         struct video_dev *dev;
 
         pthread_mutex_lock(&v4l2_mutex);
         dev = video_devices;
         while (dev) {
-            if (dev->fd_device == cnt->video_dev)
+            if (dev->fd_device == cam->video_dev)
                 break;
             dev = dev->next;
         }
@@ -1543,14 +1543,14 @@ int v4l2_next(struct context *cnt, struct image_data *img_data) {
             return -1;
         }
 
-        if (dev->owner != cnt->threadnr) {
+        if (dev->owner != cam->threadnr) {
             pthread_mutex_lock(&dev->mutex);
-            dev->owner = cnt->threadnr;
+            dev->owner = cam->threadnr;
             dev->frames = conf->roundrobin_frames;
         }
 
-        v4l2_device_select(cnt, dev, img_data->image_norm);
-        ret = v4l2_capture(cnt, dev, img_data->image_norm);
+        v4l2_device_select(cam, dev, img_data->image_norm);
+        ret = v4l2_capture(cam, dev, img_data->image_norm);
 
         if (--dev->frames <= 0) {
             dev->owner = -1;
@@ -1559,11 +1559,11 @@ int v4l2_next(struct context *cnt, struct image_data *img_data) {
         }
 
         /* Rotate the image as specified. */
-        rotate_map(cnt, img_data);
+        rotate_map(cam, img_data);
 
         return ret;
     #else
-        if (!cnt || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        if (!cam || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
         return -1;
     #endif // HAVE_V4L2
 }
