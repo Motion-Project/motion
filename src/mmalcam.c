@@ -225,7 +225,8 @@ static int send_pooled_buffers_to_port(MMAL_POOL_T *pool, MMAL_PORT_T *port)
 {
     int num = mmal_queue_length(pool->queue);
 
-    for (int i = 0; i < num; i++) {
+    int i;
+    for (i = 0; i < num; i++) {
         MMAL_BUFFER_HEADER_T *buffer = mmal_queue_get(pool->queue);
 
         if (!buffer) {
