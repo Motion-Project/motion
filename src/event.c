@@ -488,7 +488,7 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cam->conf.picture_filename, "preview");
 
-        if ((cam->movie_output || (cam->conf.movie_extpipe_use && cam->extpipe)) && !use_imagepath) {
+        if ((cam->movie_norm || (cam->conf.movie_extpipe_use && cam->extpipe)) && !use_imagepath) {
 
             if (cam->conf.movie_extpipe_use && cam->extpipe) {
                 retcd = snprintf(previewname, PATH_MAX,"%s.%s"
@@ -765,10 +765,6 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
             ,struct ctx_image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
 
-    char stamp[PATH_MAX];
-    const char *moviepath;
-    const char *codec;
-    long codenbr;
     int retcd;
 
     (void)evnt;
@@ -776,172 +772,27 @@ static void event_movie_newfile(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (!cam->conf.movie_output && !cam->conf.movie_output_motion)
-        return;
+    if (!cam->conf.movie_output && !cam->conf.movie_output_motion) return;
 
-    /*
-     *  conf.mpegpath would normally be defined but if someone deleted it by control interface
-     *  it is better to revert to the default than fail
-     */
-    if (cam->conf.movie_filename)
-        moviepath = cam->conf.movie_filename;
-    else
-        moviepath = DEF_MOVIEPATH;
-
-    mystrftime(cam, stamp, sizeof(stamp), moviepath, ts1, NULL, 0);
-
-    /*
-     *  motion movies get the same name as normal movies plus an appended 'm'
-     *  PATH_MAX - 4 to allow for .mpg to be appended without overflow
-     */
-
-     /* The following section allows for testing of all the various containers
-      * that Motion permits. The container type is pre-pended to the name of the
-      * file so that we can determine which container type created what movie.
-      * The intent for this is be used for developer testing when the ffmpeg libs
-      * change or the code inside our movie module changes.  For each event, the
-      * container type will change.  This way, you can turn on emulate motion, then
-      * specify a maximum movie time and let Motion run for days creating all the
-      * different types of movies checking for crashes, warnings, etc.
-     */
-    codec = cam->conf.movie_codec;
-    if (strcmp(codec, "ogg") == 0) {
-        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
-        codec = "mpeg4";
-    }
-    if (strcmp(codec, "test") == 0) {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
-        codenbr = cam->event_nr % 10;
-        switch (codenbr) {
-        case 1:
-            codec = "mpeg4";
-            break;
-        case 2:
-            codec = "msmpeg4";
-            break;
-        case 3:
-            codec = "swf";
-            break;
-        case 4:
-            codec = "flv";
-            break;
-        case 5:
-            codec = "ffv1";
-            break;
-        case 6:
-            codec = "mov";
-            break;
-        case 7:
-            codec = "mp4";
-            break;
-        case 8:
-            codec = "mkv";
-            break;
-        case 9:
-            codec = "hevc";
-            break;
-        default:
-            codec = "msmpeg4";
-            break;
-        }
-        snprintf(cam->motionfilename, PATH_MAX - 4, "%.*s/%s_%.*sm"
-            , (int)(PATH_MAX-7-strlen(stamp)-strlen(codec))
-            , cam->conf.target_dir, codec
-            , (int)(PATH_MAX-7-strlen(cam->conf.target_dir)-strlen(codec))
-            , stamp);
-        snprintf(cam->newfilename, PATH_MAX - 4, "%.*s/%s_%.*s"
-            , (int)(PATH_MAX-6-strlen(stamp)-strlen(codec))
-            , cam->conf.target_dir, codec
-            , (int)(PATH_MAX-6-strlen(cam->conf.target_dir)-strlen(codec))
-            , stamp);
-    } else {
-        snprintf(cam->motionfilename, PATH_MAX - 4, "%.*s/%.*sm"
-            , (int)(PATH_MAX-6-strlen(stamp))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-6-strlen(cam->conf.target_dir))
-            , stamp);
-        snprintf(cam->newfilename, PATH_MAX - 4, "%.*s/%.*s"
-            , (int)(PATH_MAX-5-strlen(stamp))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
-            , stamp);
-    }
     if (cam->conf.movie_output) {
-        cam->movie_output = mymalloc(sizeof(struct ctx_movie));
-        if (cam->imgs.size_high > 0){
-            cam->movie_output->width  = cam->imgs.width_high;
-            cam->movie_output->height = cam->imgs.height_high;
-            cam->movie_output->high_resolution = TRUE;
-            cam->movie_output->netcam_data = cam->netcam_high;
-        } else {
-            cam->movie_output->width  = cam->imgs.width;
-            cam->movie_output->height = cam->imgs.height;
-            cam->movie_output->high_resolution = FALSE;
-            cam->movie_output->netcam_data = cam->netcam;
-        }
-        cam->movie_output->tlapse = TIMELAPSE_NONE;
-        cam->movie_output->fps = cam->movie_fps;
-        cam->movie_output->bps = cam->conf.movie_bps;
-        cam->movie_output->filename = cam->newfilename;
-        cam->movie_output->quality = cam->conf.movie_quality;
-        cam->movie_output->start_time.tv_sec = ts1->tv_sec;
-        cam->movie_output->start_time.tv_nsec = ts1->tv_nsec;
-        cam->movie_output->last_pts = -1;
-        cam->movie_output->base_pts = 0;
-        cam->movie_output->gop_cnt = 0;
-        cam->movie_output->codec_name = codec;
-        if (strcmp(cam->conf.movie_codec, "test") == 0) {
-            cam->movie_output->test_mode = 1;
-        } else {
-            cam->movie_output->test_mode = 0;
-        }
-        cam->movie_output->motion_images = 0;
-        cam->movie_output->passthrough =util_check_passthrough(cam);
-
-
-        retcd = movie_open(cam->movie_output);
+        retcd = movie_init_norm(cam, ts1);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("Error opening context for movie output."));
-            free(cam->movie_output);
-            cam->movie_output=NULL;
+                ,_("Error opening ctx_cam for movie output."));
+            free(cam->movie_norm);
+            cam->movie_norm=NULL;
             return;
         }
-        event(cam, EVENT_FILECREATE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
+        event(cam, EVENT_FILECREATE, NULL, cam->movie_norm->filename, (void *)FTYPE_MPEG, ts1);
     }
 
     if (cam->conf.movie_output_motion) {
-        cam->movie_output_motion = mymalloc(sizeof(struct ctx_movie));
-        cam->movie_output_motion->width  = cam->imgs.width;
-        cam->movie_output_motion->height = cam->imgs.height;
-        cam->movie_output_motion->netcam_data = NULL;
-        cam->movie_output_motion->tlapse = TIMELAPSE_NONE;
-        cam->movie_output_motion->fps = cam->movie_fps;
-        cam->movie_output_motion->bps = cam->conf.movie_bps;
-        cam->movie_output_motion->filename = cam->motionfilename;
-        cam->movie_output_motion->quality = cam->conf.movie_quality;
-        cam->movie_output_motion->start_time.tv_sec = ts1->tv_sec;
-        cam->movie_output_motion->start_time.tv_nsec = ts1->tv_nsec;
-        cam->movie_output_motion->last_pts = -1;
-        cam->movie_output_motion->base_pts = 0;
-        cam->movie_output_motion->gop_cnt = 0;
-        cam->movie_output_motion->codec_name = codec;
-        if (strcmp(cam->conf.movie_codec, "test") == 0) {
-            cam->movie_output_motion->test_mode = TRUE;
-        } else {
-            cam->movie_output_motion->test_mode = FALSE;
-        }
-        cam->movie_output_motion->motion_images = TRUE;
-        cam->movie_output_motion->passthrough = FALSE;
-        cam->movie_output_motion->high_resolution = FALSE;
-        cam->movie_output_motion->netcam_data = NULL;
-
-        retcd = movie_open(cam->movie_output_motion);
+        retcd = movie_init_motion(cam, ts1);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("ffopen_open error creating (motion) file [%s]"), cam->motionfilename);
-            free(cam->movie_output_motion);
-            cam->movie_output_motion = NULL;
+                ,_("Error creating motion file [%s]"), cam->movie_motion->filename);
+            free(cam->movie_motion);
+            cam->movie_motion = NULL;
             return;
         }
     }
@@ -952,90 +803,22 @@ static void event_movie_timelapse(struct ctx_cam *cam, motion_event evnt
             ,void *ftype, struct timespec *ts1) {
 
     int retcd;
-    int passthrough;
-    char tmp[PATH_MAX];
-    const char *timepath;
-    const char *codec_mpg = "mpg";
-    const char *codec_mpeg = "mpeg4";
 
     (void)evnt;
     (void)fname;
     (void)ftype;
 
     if (!cam->movie_timelapse) {
-        /*
-         *  conf.timelapse_filename would normally be defined but if someone deleted it by control interface
-         *  it is better to revert to the default than fail
-         */
-        if (cam->conf.timelapse_filename)
-            timepath = cam->conf.timelapse_filename;
-        else
-            timepath = DEF_TIMEPATH;
-
-        mystrftime(cam, tmp, sizeof(tmp), timepath, ts1, NULL, 0);
-
-        /* PATH_MAX - 4 to allow for .mpg to be appended without overflow */
-        snprintf(cam->timelapsefilename, PATH_MAX - 4, "%.*s/%.*s"
-            , (int)(PATH_MAX-5-strlen(tmp))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
-            , tmp);
-        passthrough = util_check_passthrough(cam);
-        cam->movie_timelapse = mymalloc(sizeof(struct ctx_movie));
-        if ((cam->imgs.size_high > 0) && (!passthrough)){
-            cam->movie_timelapse->width  = cam->imgs.width_high;
-            cam->movie_timelapse->height = cam->imgs.height_high;
-            cam->movie_timelapse->high_resolution = TRUE;
-        } else {
-            cam->movie_timelapse->width  = cam->imgs.width;
-            cam->movie_timelapse->height = cam->imgs.height;
-            cam->movie_timelapse->high_resolution = FALSE;
-        }
-        cam->movie_timelapse->fps = cam->conf.timelapse_fps;
-        cam->movie_timelapse->bps = cam->conf.movie_bps;
-        cam->movie_timelapse->filename = cam->timelapsefilename;
-        cam->movie_timelapse->quality = cam->conf.movie_quality;
-        cam->movie_timelapse->start_time.tv_sec = ts1->tv_sec;
-        cam->movie_timelapse->start_time.tv_nsec = ts1->tv_nsec;
-        cam->movie_timelapse->last_pts = -1;
-        cam->movie_timelapse->base_pts = 0;
-        cam->movie_timelapse->test_mode = FALSE;
-        cam->movie_timelapse->gop_cnt = 0;
-        cam->movie_timelapse->motion_images = FALSE;
-        cam->movie_timelapse->passthrough = FALSE;
-        cam->movie_timelapse->netcam_data = NULL;
-
-        if ((strcmp(cam->conf.timelapse_codec,"mpg") == 0) ||
-            (strcmp(cam->conf.timelapse_codec,"swf") == 0) ){
-
-            if (strcmp(cam->conf.timelapse_codec,"swf") == 0) {
-                MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO
-                    ,_("The swf container for timelapse no longer supported.  Using mpg container."));
-            }
-
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpg codec."));
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be appended to file"));
-
-            cam->movie_timelapse->tlapse = TIMELAPSE_APPEND;
-            cam->movie_timelapse->codec_name = codec_mpg;
-            retcd = movie_open(cam->movie_timelapse);
-        } else {
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpeg4 codec."));
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be trigger new files"));
-
-            cam->movie_timelapse->tlapse = TIMELAPSE_NEW;
-            cam->movie_timelapse->codec_name = codec_mpeg;
-            retcd = movie_open(cam->movie_timelapse);
-        }
-
+        retcd = movie_init_timelapse(cam, ts1);
         if (retcd < 0){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                ,_("ffopen_open error creating (timelapse) file [%s]"), cam->timelapsefilename);
+                ,_("Error creating timelapse file [%s]"), cam->movie_timelapse->filename);
             free(cam->movie_timelapse);
             cam->movie_timelapse = NULL;
             return;
         }
-        event(cam, EVENT_FILECREATE, NULL, cam->timelapsefilename, (void *)FTYPE_MPEG_TIMELAPSE, ts1);
+        event(cam, EVENT_FILECREATE, NULL, cam->movie_timelapse->filename
+            , (void *)FTYPE_MPEG_TIMELAPSE, ts1);
     }
 
     if (movie_put_image(cam->movie_timelapse, img_data, ts1) == -1) {
@@ -1052,13 +835,13 @@ static void event_movie_put(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (cam->movie_output) {
-        if (movie_put_image(cam->movie_output, img_data, ts1) == -1){
+    if (cam->movie_norm) {
+        if (movie_put_image(cam->movie_norm, img_data, ts1) == -1){
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
-    if (cam->movie_output_motion) {
-        if (movie_put_image(cam->movie_output_motion, &cam->imgs.image_motion, ts1) == -1) {
+    if (cam->movie_motion) {
+        if (movie_put_image(cam->movie_motion, &cam->imgs.image_motion, ts1) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
@@ -1073,17 +856,17 @@ static void event_movie_closefile(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (cam->movie_output) {
-        movie_close(cam->movie_output);
-        free(cam->movie_output);
-        cam->movie_output = NULL;
+    if (cam->movie_norm) {
+        movie_close(cam->movie_norm);
+        free(cam->movie_norm);
+        cam->movie_norm = NULL;
         event(cam, EVENT_FILECLOSE, NULL, cam->newfilename, (void *)FTYPE_MPEG, ts1);
     }
 
-    if (cam->movie_output_motion) {
-        movie_close(cam->movie_output_motion);
-        free(cam->movie_output_motion);
-        cam->movie_output_motion = NULL;
+    if (cam->movie_motion) {
+        movie_close(cam->movie_motion);
+        free(cam->movie_motion);
+        cam->movie_motion = NULL;
         event(cam, EVENT_FILECLOSE, NULL, cam->motionfilename, (void *)FTYPE_MPEG_MOTION, ts1);
     }
 

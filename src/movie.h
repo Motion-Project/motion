@@ -86,6 +86,9 @@ void movie_avcodec_log(void *, int, const char *, va_list);
 int movie_open(struct ctx_movie *ffmpeg);
 int movie_put_image(struct ctx_movie *ffmpeg, struct ctx_image_data *img_data, const struct timespec *tv1);
 void movie_close(struct ctx_movie *ffmpeg);
-void movie_reset_movie_start_time(struct ctx_movie *ffmpeg, const struct timespec *tv1);
+void movie_reset_start_time(struct ctx_movie *ffmpeg, const struct timespec *tv1);
+int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1);
+int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1);
+int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1);
 
 #endif /* _INCLUDE_MOVIE_H_ */

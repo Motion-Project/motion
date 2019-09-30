@@ -689,7 +689,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
             if (!cam->conf.movie_duplicate_frames) {
                 /* don't duplicate frames */
             } else if ((cam->imgs.image_ring[cam->imgs.ring_out].shot == 0) &&
-                (cam->movie_output || (cam->conf.movie_extpipe_use && cam->extpipe))) {
+                (cam->movie_norm || (cam->conf.movie_extpipe_use && cam->extpipe))) {
                 /*
                  * movie_last_shoot is -1 when file is created,
                  * we don't know how many frames there is in first sec
@@ -2109,8 +2109,8 @@ static void mlp_actions(struct ctx_cam *cam){
          *  no motion then we reset the start movie time so that we do not
          *  get a pause in the movie.
         */
-        if ( (cam->detecting_motion == 0) && (cam->movie_output != NULL) )
-            movie_reset_movie_start_time(cam->movie_output, &cam->current_image->imgts);
+        if ( (cam->detecting_motion == 0) && (cam->movie_norm != NULL) )
+            movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
         cam->detecting_motion = 1;
         if (cam->conf.post_capture > 0) {
             /* Setup the postcap counter */
@@ -2152,8 +2152,8 @@ static void mlp_actions(struct ctx_cam *cam){
              *  no motion then we reset the start movie time so that we do not
              *  get a pause in the movie.
             */
-            if ( (cam->detecting_motion == 0) && (cam->movie_output != NULL) )
-                movie_reset_movie_start_time(cam->movie_output, &cam->current_image->imgts);
+            if ( (cam->detecting_motion == 0) && (cam->movie_norm != NULL) )
+                movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
 
             cam->detecting_motion = 1;
 

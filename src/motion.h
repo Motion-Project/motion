@@ -438,8 +438,8 @@ struct ctx_cam {
     char extpipecmdline[PATH_MAX];
     int movie_last_shot;
 
-    struct ctx_movie   *movie_output;
-    struct ctx_movie   *movie_output_motion;
+    struct ctx_movie   *movie_norm;
+    struct ctx_movie   *movie_motion;
     struct ctx_movie   *movie_timelapse;
     int             movie_passthrough;
 

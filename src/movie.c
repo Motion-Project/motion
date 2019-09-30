@@ -534,7 +534,7 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1){
         pts_interval = ((1000000L * (ts1->tv_sec - movie->start_time.tv_sec)) + (ts1->tv_nsec/1000) - (movie->start_time.tv_nsec/1000));
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            movie_reset_movie_start_time(movie, ts1);
+            movie_reset_start_time(movie, ts1);
             pts_interval = 0;
         }
         if (movie->last_pts < 0) {
@@ -573,7 +573,7 @@ static int movie_set_pktpts(struct ctx_movie *movie, const struct timespec *ts1)
         pts_interval = ((1000000L * (ts1->tv_sec - movie->start_time.tv_sec)) + (ts1->tv_nsec/1000) - (movie->start_time.tv_nsec/1000));
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            movie_reset_movie_start_time(movie, ts1);
+            movie_reset_start_time(movie, ts1);
             pts_interval = 0;
         }
         movie->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->video_st->time_base) + movie->base_pts;
@@ -1603,7 +1603,7 @@ int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, co
 
 }
 
-void movie_reset_movie_start_time(struct ctx_movie *movie, const struct timespec *ts1){
+void movie_reset_start_time(struct ctx_movie *movie, const struct timespec *ts1){
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps},movie->video_st->time_base);
     if (one_frame_interval <= 0)
         one_frame_interval = 1;
@@ -1611,5 +1611,237 @@ void movie_reset_movie_start_time(struct ctx_movie *movie, const struct timespec
 
     movie->start_time.tv_sec = ts1->tv_sec;
     movie->start_time.tv_nsec = ts1->tv_nsec;
+
+}
+
+static const char* movie_init_codec(struct ctx_cam *cam){
+
+    /* The following section allows for testing of all the various containers
+    * that Motion permits. The container type is pre-pended to the name of the
+    * file so that we can determine which container type created what movie.
+    * The intent for this is be used for developer testing when the ffmpeg libs
+    * change or the code inside our movie module changes.  For each event, the
+    * container type will change.  This way, you can turn on emulate motion, then
+    * specify a maximum movie time and let Motion run for days creating all the
+    * different types of movies checking for crashes, warnings, etc.
+    */
+    const char *codec;
+    int codenbr;
+
+    codec = cam->conf.movie_codec;
+    if (mystreq(codec, "ogg")) {
+        MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
+        codec = "mpeg4";
+    }
+    if (mystreq(codec, "test")) {
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
+        codenbr = cam->event_nr % 10;
+        if (codenbr == 1)      codec = "mpeg4";
+        else if (codenbr == 2) codec = "msmpeg4";
+        else if (codenbr == 3) codec = "swf";
+        else if (codenbr == 4) codec = "flv";
+        else if (codenbr == 5) codec = "ffv1";
+        else if (codenbr == 6) codec = "mov";
+        else if (codenbr == 7) codec = "mp4";
+        else if (codenbr == 8) codec = "mkv";
+        else if (codenbr == 9) codec = "hevc";
+        else                   codec = "msmpeg4";
+    }
+
+    return codec;
+
+}
+
+int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
+    char stamp[PATH_MAX];
+    const char *moviepath;
+    const char *codec;
+    int retcd;
+
+    if (cam->conf.movie_filename){
+        moviepath = cam->conf.movie_filename;
+    } else {
+        moviepath = "%v-%Y%m%d%H%M%S";
+    }
+    mystrftime(cam, stamp, sizeof(stamp), moviepath, ts1, NULL, 0);
+
+    codec = movie_init_codec(cam);
+
+    cam->movie_norm =(struct ctx_movie*) mymalloc(sizeof(struct ctx_movie));
+    if (mystreq(codec, "test")) {
+        snprintf(cam->movie_norm->filename, PATH_MAX - 4, "%.*s/%s_%.*s"
+            , (int)(PATH_MAX-6-strlen(stamp)-strlen(codec))
+            , cam->conf.target_dir, codec
+            , (int)(PATH_MAX-6-strlen(cam->conf.target_dir)-strlen(codec))
+            , stamp);
+    } else {
+        snprintf(cam->movie_norm->filename, PATH_MAX - 4, "%.*s/%.*s"
+            , (int)(PATH_MAX-5-strlen(stamp))
+            , cam->conf.target_dir
+            , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
+            , stamp);
+    }
+    if (cam->imgs.size_high > 0){
+        cam->movie_norm->width  = cam->imgs.width_high;
+        cam->movie_norm->height = cam->imgs.height_high;
+        cam->movie_norm->high_resolution = TRUE;
+        cam->movie_norm->netcam_data = cam->netcam_high;
+    } else {
+        cam->movie_norm->width  = cam->imgs.width;
+        cam->movie_norm->height = cam->imgs.height;
+        cam->movie_norm->high_resolution = FALSE;
+        cam->movie_norm->netcam_data = cam->netcam;
+    }
+    cam->movie_norm->tlapse = TIMELAPSE_NONE;
+    cam->movie_norm->fps = cam->lastrate;
+    cam->movie_norm->bps = cam->conf.movie_bps;
+    cam->movie_norm->quality = cam->conf.movie_quality;
+    cam->movie_norm->start_time.tv_sec = ts1->tv_sec;
+    cam->movie_norm->start_time.tv_nsec = ts1->tv_nsec;
+    cam->movie_norm->last_pts = -1;
+    cam->movie_norm->base_pts = 0;
+    cam->movie_norm->gop_cnt = 0;
+    cam->movie_norm->codec_name = codec;
+    if (mystreq(cam->conf.movie_codec, "test")) {
+        cam->movie_norm->test_mode = TRUE;
+    } else {
+        cam->movie_norm->test_mode = FALSE;
+    }
+    cam->movie_norm->motion_images = 0;
+    cam->movie_norm->passthrough = cam->movie_passthrough;
+
+    retcd = movie_open(cam->movie_norm);
+
+    return retcd;
+
+}
+
+int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
+    char stamp[PATH_MAX];
+    const char *moviepath;
+    const char *codec;
+    int retcd;
+
+    if (cam->conf.movie_filename){
+        moviepath = cam->conf.movie_filename;
+    } else {
+        moviepath = "%v-%Y%m%d%H%M%S";
+    }
+    mystrftime(cam, stamp, sizeof(stamp), moviepath, ts1, NULL, 0);
+
+    codec = movie_init_codec(cam);
+
+    cam->movie_motion =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
+    if (mystreq(codec, "test")) {
+        snprintf(cam->movie_motion->filename, PATH_MAX - 4, "%.*s/%s_%.*sm"
+            , (int)(PATH_MAX-6-strlen(stamp)-strlen(codec))
+            , cam->conf.target_dir, codec
+            , (int)(PATH_MAX-6-strlen(cam->conf.target_dir)-strlen(codec))
+            , stamp);
+    } else {
+        snprintf(cam->movie_motion->filename, PATH_MAX - 4, "%.*s/%.*sm"
+            , (int)(PATH_MAX-5-strlen(stamp))
+            , cam->conf.target_dir
+            , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
+            , stamp);
+    }
+
+    cam->movie_motion->width  = cam->imgs.width;
+    cam->movie_motion->height = cam->imgs.height;
+    cam->movie_motion->netcam_data = NULL;
+    cam->movie_motion->tlapse = TIMELAPSE_NONE;
+    cam->movie_motion->fps = cam->lastrate;
+    cam->movie_motion->bps = cam->conf.movie_bps;
+    cam->movie_motion->quality = cam->conf.movie_quality;
+    cam->movie_motion->start_time.tv_sec = ts1->tv_sec;
+    cam->movie_motion->start_time.tv_nsec = ts1->tv_nsec;
+    cam->movie_motion->last_pts = -1;
+    cam->movie_motion->base_pts = 0;
+    cam->movie_motion->gop_cnt = 0;
+    cam->movie_motion->codec_name = codec;
+    if (mystreq(cam->conf.movie_codec, "test")) {
+        cam->movie_motion->test_mode = TRUE;
+    } else {
+        cam->movie_motion->test_mode = FALSE;
+    }
+    cam->movie_motion->motion_images = TRUE;
+    cam->movie_motion->passthrough = FALSE;
+    cam->movie_motion->high_resolution = FALSE;
+    cam->movie_motion->netcam_data = NULL;
+
+    retcd = movie_open(cam->movie_motion);
+
+    return retcd;
+
+}
+
+int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1){
+
+    char tmp[PATH_MAX];
+    const char *timepath;
+    const char *codec_mpg = "mpg";
+    const char *codec_mpeg = "mpeg4";
+    int retcd;
+
+    cam->movie_timelapse =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
+
+    if (cam->conf.timelapse_filename){
+        timepath = cam->conf.timelapse_filename;
+    } else {
+        timepath = "%Y%m%d-timelapse";
+    }
+    mystrftime(cam, tmp, sizeof(tmp), timepath, ts1, NULL, 0);
+
+    snprintf(cam->movie_timelapse->filename, PATH_MAX - 4, "%.*s/%.*s"
+        , (int)(PATH_MAX-5-strlen(tmp))
+        , cam->conf.target_dir
+        , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
+        , tmp);
+    if ((cam->imgs.size_high > 0) && (!cam->movie_passthrough)){
+        cam->movie_timelapse->width  = cam->imgs.width_high;
+        cam->movie_timelapse->height = cam->imgs.height_high;
+        cam->movie_timelapse->high_resolution = TRUE;
+    } else {
+        cam->movie_timelapse->width  = cam->imgs.width;
+        cam->movie_timelapse->height = cam->imgs.height;
+        cam->movie_timelapse->high_resolution = FALSE;
+    }
+    cam->movie_timelapse->fps = cam->conf.timelapse_fps;
+    cam->movie_timelapse->bps = cam->conf.movie_bps;
+    cam->movie_timelapse->quality = cam->conf.movie_quality;
+    cam->movie_timelapse->start_time.tv_sec = ts1->tv_sec;
+    cam->movie_timelapse->start_time.tv_nsec = ts1->tv_nsec;
+    cam->movie_timelapse->last_pts = -1;
+    cam->movie_timelapse->base_pts = 0;
+    cam->movie_timelapse->test_mode = FALSE;
+    cam->movie_timelapse->gop_cnt = 0;
+    cam->movie_timelapse->motion_images = FALSE;
+    cam->movie_timelapse->passthrough = FALSE;
+    cam->movie_timelapse->netcam_data = NULL;
+
+    if (mystreq(cam->conf.timelapse_codec,"mpg") ||
+        mystreq(cam->conf.timelapse_codec,"swf") ){
+
+        if (mystreq(cam->conf.timelapse_codec,"swf")) {
+            MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO
+                ,_("The swf container for timelapse no longer supported.  Using mpg container."));
+        }
+
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpg codec."));
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be appended to file"));
+
+        cam->movie_timelapse->tlapse = TIMELAPSE_APPEND;
+        cam->movie_timelapse->codec_name = codec_mpg;
+        retcd = movie_open(cam->movie_timelapse);
+    } else {
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpeg4 codec."));
+        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be trigger new files"));
+
+        cam->movie_timelapse->tlapse = TIMELAPSE_NEW;
+        cam->movie_timelapse->codec_name = codec_mpeg;
+        retcd = movie_open(cam->movie_timelapse);
+    }
+
+    return retcd;
 
 }
