@@ -1342,10 +1342,13 @@ static int movie_passthru_codec(struct ctx_movie *movie){
 
 }
 
-void movie_avcodec_log(void *ignoreme ATTRIBUTE_UNUSED, int errno_flag ATTRIBUTE_UNUSED, const char *fmt, va_list vl){
+void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list vl){
 
     char buf[1024];
     char *end;
+
+    (void)ignoreme;
+    (void)errno_flag;
 
     /* Valgrind occasionally reports use of uninitialized values in here when we interrupt
      * some rtsp functions.  The offending value is either fmt or vl and seems to be from a

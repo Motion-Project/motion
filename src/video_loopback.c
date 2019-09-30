@@ -9,10 +9,10 @@
  *
  */
 #include "motion.h"
+#include "video_loopback.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))
 
-#include "video_loopback.h"
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
@@ -206,11 +206,19 @@ int vlp_startpipe(const char *dev_name, int width, int height)
 
     return dev;
 }
+#endif /* HAVE_V4L2 && !BSD */
 
-int vlp_putpipe(int dev, unsigned char *image, int imgsize)
-{
-    return write(dev, image, imgsize);
+int vlp_putpipe(int dev, unsigned char *image, int imgsize) {
+
+    #if (defined(HAVE_V4L2)) && (!defined(BSD))
+        return write(dev, image, imgsize);
+    #else
+        (void)dev;
+        (void)image;
+        (void)imgsize;
+        return -1;
+    #endif
 }
 
 
-#endif /* HAVE_V4L2 && !BSD */
+

@@ -78,22 +78,6 @@ int nls_enabled;
 
 #define _(STRING) translate_text(STRING)
 
-/**
- * ATTRIBUTE_UNUSED:
- *
- * Macro used to signal to GCC unused function parameters
- */
-#ifdef __GNUC__
-    #ifdef HAVE_ANSIDECL_H
-        #include <ansidecl.h>
-    #endif
-    #ifndef ATTRIBUTE_UNUSED
-        #define ATTRIBUTE_UNUSED __attribute__((unused))
-    #endif
-#else
-    #define ATTRIBUTE_UNUSED
-#endif
-
 /*
  *  The macro below defines a version of sleep using nanosleep
  * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping

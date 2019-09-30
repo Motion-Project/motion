@@ -446,8 +446,9 @@ static void sig_handler(int signo)
  *   This function is a POSIX compliant replacement of the commonly used
  *   signal(SIGCHLD, SIG_IGN).
  */
-static void sigchild_handler(int signo ATTRIBUTE_UNUSED)
+static void sigchild_handler(int signo)
 {
+    (void)signo;
     #ifdef WNOHANG
         while (waitpid(-1, NULL, WNOHANG) > 0) {};
     #endif /* WNOHANG */

@@ -46,8 +46,8 @@ struct trackoptions track_template = {
 
 static unsigned int servo_position(struct ctx_cam *cam, unsigned int motor);
 
-static unsigned int servo_center(struct ctx_cam *cam, int xoff, int yoff ATTRIBUTE_UNUSED);
-static unsigned int stepper_center(struct ctx_cam *cam, int xoff, int yoff ATTRIBUTE_UNUSED);
+static unsigned int servo_center(struct ctx_cam *cam, int xoff, int yoff);
+static unsigned int stepper_center(struct ctx_cam *cam, int xoff, int yoff);
 static unsigned int iomojo_center(struct ctx_cam *cam, int xoff, int yoff);
 
 static unsigned int stepper_move(struct ctx_cam *cam, struct coord *cent, struct images *imgs);
@@ -69,10 +69,12 @@ static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, 
 
 
 /* Add a call to your functions here: */
-unsigned int track_center(struct ctx_cam *cam, int dev ATTRIBUTE_UNUSED,
+unsigned int track_center(struct ctx_cam *cam, int dev,
                           unsigned int manual, int xoff, int yoff)
 {
     struct coord cent;
+
+    (void)dev;
 
     if (!manual && !cam->track.active)
         return 0;

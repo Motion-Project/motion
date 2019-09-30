@@ -1453,7 +1453,7 @@ int v4l2_start(struct ctx_cam *cam) {
 
         return curdev->fd_device;
     #else
-        if (!cam) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        (void)cam;
         return -1;
     #endif // HAVE_V4l2
 }
@@ -1520,7 +1520,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
 
 
     #else
-        if (!cam) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        (void)cam;
     #endif // HAVE_V4L2
 }
 
@@ -1563,7 +1563,8 @@ int v4l2_next(struct ctx_cam *cam, struct image_data *img_data) {
 
         return ret;
     #else
-        if (!cam || !img_data) MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("V4L2 is not enabled."));
+        (void)cam;
+        (void)img_data;
         return -1;
     #endif // HAVE_V4L2
 }
@@ -1617,7 +1618,8 @@ int v4l2_palette_valid(char *video_device, int v4l2_palette) {
         return retcd;
     #else
         /* We do not have v4l2 so we can not determine whether it is valid or not */
-        if ((video_device) || (v4l2_palette)) return 0;
+        (void)video_device;
+        (void)v4l2_palette;
         return 0;
     #endif // HAVE_V4L2
 }
@@ -1646,8 +1648,8 @@ void v4l2_palette_fourcc(int v4l2_palette, char *fourcc) {
 
         return;
     #else
+        (void)v4l2_palette;
         sprintf(fourcc,"%s","NULL");
-        if (v4l2_palette) return;
         return;
     #endif // HAVE_V4L2
 }
@@ -1743,8 +1745,11 @@ int v4l2_parms_valid(char *video_device, int v4l2_palette, int v4l2_fps, int v4l
         return retcd;
     #else
         /* We do not have v4l2 so we can not determine whether it is valid or not */
-        if ((video_device) || (v4l2_fps) || (v4l2_palette) ||
-            (v4l2_width)   || (v4l2_height) ) return 0;
+        (void)video_device;
+        (void)v4l2_fps;
+        (void)v4l2_palette;
+        (void)v4l2_width;
+        (void)v4l2_height;
         return 0;
     #endif // HAVE_V4L2
 }

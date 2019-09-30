@@ -2891,10 +2891,10 @@ const char *config_type(config_param *configparam)
  *
  * Returns const char *.
  */
-static const char *print_bool(struct ctx_cam **camlst, char **str ATTRIBUTE_UNUSED,
-                              int parm, unsigned int threadnr)
-{
+static const char *print_bool(struct ctx_cam **camlst, char **str, int parm, unsigned int threadnr) {
     int val = config_params[parm].conf_value;
+
+    (void)str;
 
     if (threadnr &&
         *(int*)((char *)camlst[threadnr] + val) == *(int*)((char *)camlst[0] + val))
@@ -2916,12 +2916,12 @@ static const char *print_bool(struct ctx_cam **camlst, char **str ATTRIBUTE_UNUS
  *         If the value is the same, NULL is returned which means that
  *         the option is not written to the camera config file.
  */
-static const char *print_string(struct ctx_cam **camlst,
-                                char **str ATTRIBUTE_UNUSED, int parm,
-                                unsigned int threadnr)
-{
+static const char *print_string(struct ctx_cam **camlst, char **str, int parm, unsigned int threadnr) {
+
     int val = config_params[parm].conf_value;
     const char **cptr0, **cptr1;
+
+    (void)str;
 
     /* strcmp does not like NULL so we have to check for this also. */
     cptr0 = (const char **)((char *)camlst[0] + val);
@@ -2943,11 +2943,11 @@ static const char *print_string(struct ctx_cam **camlst,
  *         If the option is the same, NULL is returned which means that
  *         the option is not written to the camera config file.
  */
-static const char *print_int(struct ctx_cam **camlst, char **str ATTRIBUTE_UNUSED,
-                             int parm, unsigned int threadnr)
-{
+static const char *print_int(struct ctx_cam **camlst, char **str, int parm, unsigned int threadnr) {
     static char retval[20];
     int val = config_params[parm].conf_value;
+
+    (void)str;
 
     if (threadnr &&
         *(int*)((char *)camlst[threadnr] + val) == *(int*)((char *)camlst[0] + val))
@@ -2965,14 +2965,14 @@ static const char *print_int(struct ctx_cam **camlst, char **str ATTRIBUTE_UNUSE
  *
  * Returns NULL
  */
-static const char *print_camera(struct ctx_cam **camlst, char **str,
-                                int parm ATTRIBUTE_UNUSED, unsigned int threadnr)
-{
+static const char *print_camera(struct ctx_cam **camlst, char **str, int parm , unsigned int threadnr) {
     char *retval;
     unsigned int i = 0;
 
     if (!str || threadnr)
         return NULL;
+
+    (void)parm;
 
     retval = mymalloc(1);
     retval[0] = 0;
@@ -3060,11 +3060,12 @@ struct ctx_cam **read_camera_dir(struct ctx_cam **camlst, const char *str, int v
  *      val  - is not used. It is defined to be function header compatible with
  *            copy_int, copy_bool and copy_string.
  */
-static struct ctx_cam **config_camera(struct ctx_cam **camlst, const char *str,
-                                      int val ATTRIBUTE_UNUSED)
-{
+static struct ctx_cam **config_camera(struct ctx_cam **camlst, const char *str, int val) {
+
     int i;
     FILE *fp;
+
+    (void)val;
 
     if (camlst[0]->threadnr)
         return camlst;

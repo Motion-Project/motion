@@ -209,8 +209,9 @@ static void guarantee_huff_tables(j_decompress_ptr dinfo)
  * Initialize source --- called by jpeg_read_header
  * before any data is actually read.
  */
-static void jpgutl_init_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void jpgutl_init_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
     /* No work necessary here */
 }
 
@@ -248,8 +249,9 @@ static void jpgutl_skip_data(j_decompress_ptr cinfo, long num_bytes)
  * Terminate source --- called by jpeg_finish_decompress
  * after all data has been read.  Often a no-op.
  */
-static void jpgutl_term_source(j_decompress_ptr cinfo ATTRIBUTE_UNUSED)
+static void jpgutl_term_source(j_decompress_ptr cinfo)
 {
+    (void)cinfo;
     /* No work necessary here */
 }
 
