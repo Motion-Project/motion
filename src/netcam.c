@@ -328,12 +328,12 @@ static void netcam_pktarray_resize(struct ctx_cam *cam, int is_highres){
     int                   newsize;
 
     if (is_highres){
-        idnbr_last = cam->imgs.image_ring[cam->imgs.image_ring_out].idnbr_high;
-        idnbr_first = cam->imgs.image_ring[cam->imgs.image_ring_in].idnbr_high;
+        idnbr_last = cam->imgs.image_ring[cam->imgs.ring_out].idnbr_high;
+        idnbr_first = cam->imgs.image_ring[cam->imgs.ring_in].idnbr_high;
         netcam = cam->netcam_high;
     } else {
-        idnbr_last = cam->imgs.image_ring[cam->imgs.image_ring_out].idnbr_norm;
-        idnbr_first = cam->imgs.image_ring[cam->imgs.image_ring_in].idnbr_norm;
+        idnbr_last = cam->imgs.image_ring[cam->imgs.ring_out].idnbr_norm;
+        idnbr_first = cam->imgs.image_ring[cam->imgs.ring_in].idnbr_norm;
         netcam = cam->netcam;
     }
 

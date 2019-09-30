@@ -148,12 +148,12 @@ static void image_ring_resize(struct ctx_cam *cam, int new_size)
     if (cam->event_nr != cam->prev_event) {
         int smallest;
 
-        if (new_size < cam->imgs.image_ring_size)  /* Decreasing */
+        if (new_size < cam->imgs.ring_size)  /* Decreasing */
             smallest = new_size;
         else  /* Increasing */
-            smallest = cam->imgs.image_ring_size;
+            smallest = cam->imgs.ring_size;
 
-        if (cam->imgs.image_ring_in == smallest - 1 || smallest == 0) {
+        if (cam->imgs.ring_in == smallest - 1 || smallest == 0) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Resizing pre_capture buffer to %d items"), new_size);
 
@@ -189,10 +189,10 @@ static void image_ring_resize(struct ctx_cam *cam, int new_size)
             cam->imgs.image_ring = tmp;
             cam->current_image = NULL;
 
-            cam->imgs.image_ring_size = new_size;
+            cam->imgs.ring_size = new_size;
 
-            cam->imgs.image_ring_in = 0;
-            cam->imgs.image_ring_out = 0;
+            cam->imgs.ring_in = 0;
+            cam->imgs.ring_out = 0;
         }
     }
 }
@@ -217,7 +217,7 @@ static void image_ring_destroy(struct ctx_cam *cam)
         return;
 
     /* Free all image buffers */
-    for (i = 0; i < cam->imgs.image_ring_size; i++){
+    for (i = 0; i < cam->imgs.ring_size; i++){
         free(cam->imgs.image_ring[i].image_norm);
         if (cam->imgs.size_high >0 ) free(cam->imgs.image_ring[i].image_high);
     }
@@ -227,7 +227,7 @@ static void image_ring_destroy(struct ctx_cam *cam)
 
     cam->imgs.image_ring = NULL;
     cam->current_image = NULL;
-    cam->imgs.image_ring_size = 0;
+    cam->imgs.ring_size = 0;
 }
 
 /**
@@ -247,43 +247,43 @@ static void image_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *im
     void *image_norm, *image_high;
 
     /* Save our pointers to our memory locations for images*/
-    image_norm = cam->imgs.preview_image.image_norm;
-    image_high = cam->imgs.preview_image.image_high;
+    image_norm = cam->imgs.image_preview.image_norm;
+    image_high = cam->imgs.image_preview.image_high;
 
     /* Copy over the meta data from the img into preview */
-    memcpy(&cam->imgs.preview_image, img, sizeof(struct ctx_image_data));
+    memcpy(&cam->imgs.image_preview, img, sizeof(struct ctx_image_data));
 
     /* Restore the pointers to the memory locations for images*/
-    cam->imgs.preview_image.image_norm = image_norm;
-    cam->imgs.preview_image.image_high = image_high;
+    cam->imgs.image_preview.image_norm = image_norm;
+    cam->imgs.image_preview.image_high = image_high;
 
     /* Copy the actual images for norm and high */
-    memcpy(cam->imgs.preview_image.image_norm, img->image_norm, cam->imgs.size_norm);
+    memcpy(cam->imgs.image_preview.image_norm, img->image_norm, cam->imgs.size_norm);
     if (cam->imgs.size_high > 0){
-        memcpy(cam->imgs.preview_image.image_high, img->image_high, cam->imgs.size_high);
+        memcpy(cam->imgs.image_preview.image_high, img->image_high, cam->imgs.size_high);
     }
 
     /*
      * If we set output_all to yes and during the event
      * there is no image with motion, diffs is 0, we are not going to save the preview event
      */
-    if (cam->imgs.preview_image.diffs == 0)
-        cam->imgs.preview_image.diffs = 1;
+    if (cam->imgs.image_preview.diffs == 0)
+        cam->imgs.image_preview.diffs = 1;
 
     /* draw locate box here when mode = LOCATE_PREVIEW */
     if (cam->locate_motion_mode == LOCATE_PREVIEW) {
 
         if (cam->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.preview_image.image_norm,
+            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
                               LOCATE_BOX, LOCATE_NORMAL, cam->process_thisframe);
         } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.preview_image.image_norm,
+            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
                                   LOCATE_REDBOX, LOCATE_NORMAL, cam->process_thisframe);
         } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.preview_image.image_norm,
+            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
                               LOCATE_CROSS, LOCATE_NORMAL, cam->process_thisframe);
         } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.preview_image.image_norm,
+            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
                                   LOCATE_REDCROSS, LOCATE_NORMAL, cam->process_thisframe);
         }
     }
@@ -579,7 +579,7 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data 
                        cam->conf.text_event, &img->imgts, NULL, 0);
 
             event(cam, EVENT_FIRSTMOTION, img, NULL, NULL,
-                &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts);
+                &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);
@@ -641,41 +641,41 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
     /* If image is flaged to be saved and not saved yet, process it */
     do {
         /* Check if we should save/send this image, breakout if not */
-        assert(cam->imgs.image_ring_out < cam->imgs.image_ring_size);
-        if ((cam->imgs.image_ring[cam->imgs.image_ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE)
+        assert(cam->imgs.ring_out < cam->imgs.ring_size);
+        if ((cam->imgs.image_ring[cam->imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE)
             break;
 
         /* Set inte global context that we are working with this image */
-        cam->current_image = &cam->imgs.image_ring[cam->imgs.image_ring_out];
+        cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
-        if (cam->imgs.image_ring[cam->imgs.image_ring_out].shot < cam->conf.framerate) {
+        if (cam->imgs.image_ring[cam->imgs.ring_out].shot < cam->conf.framerate) {
             if (cam->log_level >= DBG) {
                 char tmp[32];
                 const char *t;
 
-                if (cam->imgs.image_ring[cam->imgs.image_ring_out].flags & IMAGE_TRIGGER)
+                if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_TRIGGER)
                     t = "Trigger";
-                else if (cam->imgs.image_ring[cam->imgs.image_ring_out].flags & IMAGE_MOTION)
+                else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION)
                     t = "Motion";
-                else if (cam->imgs.image_ring[cam->imgs.image_ring_out].flags & IMAGE_PRECAP)
+                else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_PRECAP)
                     t = "Precap";
-                else if (cam->imgs.image_ring[cam->imgs.image_ring_out].flags & IMAGE_POSTCAP)
+                else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_POSTCAP)
                     t = "Postcap";
                 else
                     t = "Other";
 
                 mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q",
-                           &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts, NULL, 0);
-                draw_text(cam->imgs.image_ring[cam->imgs.image_ring_out].image_norm,
+                           &cam->imgs.image_ring[cam->imgs.ring_out].imgts, NULL, 0);
+                draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
                           cam->imgs.width, cam->imgs.height, 10, 20, tmp, cam->text_scale);
-                draw_text(cam->imgs.image_ring[cam->imgs.image_ring_out].image_norm,
+                draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
                           cam->imgs.width, cam->imgs.height, 10, 30, t, cam->text_scale);
             }
 
             /* Output the picture to jpegs and ffmpeg */
             event(cam, EVENT_IMAGE_DETECTED,
-              &cam->imgs.image_ring[cam->imgs.image_ring_out], NULL, NULL,
-              &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts);
+              &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
+              &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
 
 
             /*
@@ -687,7 +687,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
              */
             if (!cam->conf.movie_duplicate_frames) {
                 /* don't duplicate frames */
-            } else if ((cam->imgs.image_ring[cam->imgs.image_ring_out].shot == 0) &&
+            } else if ((cam->imgs.image_ring[cam->imgs.ring_out].shot == 0) &&
                 (cam->movie_output || (cam->conf.movie_extpipe_use && cam->extpipe))) {
                 /*
                  * movie_last_shoot is -1 when file is created,
@@ -701,7 +701,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
                             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                             ,_("Added %d fillerframes into movie"), frames);
                             sprintf(tmp, "Fillerframes %d", frames);
-                            draw_text(cam->imgs.image_ring[cam->imgs.image_ring_out].image_norm,
+                            draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
                                       cam->imgs.width, cam->imgs.height, 10, 40, tmp, cam->text_scale);
                         }
                     }
@@ -709,14 +709,14 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
                     while ((cam->movie_last_shot + 1) < cam->movie_fps) {
                         /* Add a filler frame into encoder */
                         event(cam, EVENT_MOVIE_PUT,
-                          &cam->imgs.image_ring[cam->imgs.image_ring_out], NULL, NULL,
-                          &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts);
+                          &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
+                          &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
 
                         cam->movie_last_shot++;
                     }
                 }
                 cam->movie_last_shot = 0;
-            } else if (cam->imgs.image_ring[cam->imgs.image_ring_out].shot != (cam->movie_last_shot + 1)) {
+            } else if (cam->imgs.image_ring[cam->imgs.ring_out].shot != (cam->movie_last_shot + 1)) {
                 /* We are out of sync! Propably we got motion - no motion - motion */
                 cam->movie_last_shot = -1;
             }
@@ -726,31 +726,31 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
              * only when we not are within first sec
              */
             if (cam->movie_last_shot >= 0)
-                cam->movie_last_shot = cam->imgs.image_ring[cam->imgs.image_ring_out].shot;
+                cam->movie_last_shot = cam->imgs.image_ring[cam->imgs.ring_out].shot;
         }
 
         /* Mark the image as saved */
-        cam->imgs.image_ring[cam->imgs.image_ring_out].flags |= IMAGE_SAVED;
+        cam->imgs.image_ring[cam->imgs.ring_out].flags |= IMAGE_SAVED;
 
         /* Store it as a preview image, only if it has motion */
-        if (cam->imgs.image_ring[cam->imgs.image_ring_out].flags & IMAGE_MOTION) {
+        if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION) {
             /* Check for most significant preview-shot when picture_output=best */
             if (cam->new_img & NEWIMG_BEST) {
-                if (cam->imgs.image_ring[cam->imgs.image_ring_out].diffs > cam->imgs.preview_image.diffs) {
-                    image_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.image_ring_out]);
+                if (cam->imgs.image_ring[cam->imgs.ring_out].diffs > cam->imgs.image_preview.diffs) {
+                    image_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
                 }
             }
             /* Check for most significant preview-shot when picture_output=center */
             if (cam->new_img & NEWIMG_CENTER) {
-                if (cam->imgs.image_ring[cam->imgs.image_ring_out].cent_dist < cam->imgs.preview_image.cent_dist) {
-                    image_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.image_ring_out]);
+                if (cam->imgs.image_ring[cam->imgs.ring_out].cent_dist < cam->imgs.image_preview.cent_dist) {
+                    image_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
                 }
             }
         }
 
         /* Increment to image after last sended */
-        if (++cam->imgs.image_ring_out >= cam->imgs.image_ring_size)
-            cam->imgs.image_ring_out = 0;
+        if (++cam->imgs.ring_out >= cam->imgs.ring_size)
+            cam->imgs.ring_out = 0;
 
         if (max_images != IMAGE_BUFFER_FLUSH) {
             max_images--;
@@ -760,7 +760,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
         }
 
         /* loop until out and in is same e.g. buffer empty */
-    } while (cam->imgs.image_ring_out != cam->imgs.image_ring_in);
+    } while (cam->imgs.ring_out != cam->imgs.ring_in);
 
     /* restore global context values */
     cam->current_image = saved_current_image;
@@ -943,8 +943,6 @@ static void mot_stream_init(struct ctx_cam *cam){
     /* The image buffers are allocated in event_stream_put if needed*/
     pthread_mutex_init(&cam->mutex_stream, NULL);
 
-    cam->imgs.substream_image = NULL;
-
     cam->stream_norm.jpeg_size = 0;
     cam->stream_norm.jpeg_data = NULL;
     cam->stream_norm.cnct_count = 0;
@@ -971,9 +969,9 @@ static void mot_stream_deinit(struct ctx_cam *cam){
 
     pthread_mutex_destroy(&cam->mutex_stream);
 
-    if (cam->imgs.substream_image != NULL){
-        free(cam->imgs.substream_image);
-        cam->imgs.substream_image = NULL;
+    if (cam->imgs.image_substream != NULL){
+        free(cam->imgs.image_substream);
+        cam->imgs.image_substream = NULL;
     }
 
     if (cam->stream_norm.jpeg_data != NULL){
@@ -1135,22 +1133,21 @@ static int motion_init(struct ctx_cam *cam)
     image_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
 
     cam->imgs.ref = mymalloc(cam->imgs.size_norm);
-    cam->imgs.img_motion.image_norm = mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_motion.image_norm = mymalloc(cam->imgs.size_norm);
 
     /* contains the moving objects of ref. frame */
     cam->imgs.ref_dyn = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
-    cam->imgs.image_virgin.image_norm = mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_vprvcy.image_norm = mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_virgin = mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_vprvcy = mymalloc(cam->imgs.size_norm);
     cam->imgs.smartmask = mymalloc(cam->imgs.motionsize);
     cam->imgs.smartmask_final = mymalloc(cam->imgs.motionsize);
     cam->imgs.smartmask_buffer = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
     cam->imgs.labels = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.labels));
     cam->imgs.labelsize = mymalloc((cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
-    cam->imgs.preview_image.image_norm = mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_preview.image_norm = mymalloc(cam->imgs.size_norm);
     cam->imgs.common_buffer = mymalloc(3 * cam->imgs.width * cam->imgs.height);
     if (cam->imgs.size_high > 0){
-        cam->imgs.image_virgin.image_high = mymalloc(cam->imgs.size_high);
-        cam->imgs.preview_image.image_high = mymalloc(cam->imgs.size_high);
+        cam->imgs.image_preview.image_high = mymalloc(cam->imgs.size_high);
     }
 
     mot_stream_init(cam);
@@ -1189,19 +1186,19 @@ static int motion_init(struct ctx_cam *cam)
         int i;
 
         for (i = 0; i < 5; i++) {
-            if (vid_next(cam, &cam->imgs.image_virgin) == 0)
+            if (vid_next(cam, cam->current_image) == 0)
                 break;
             SLEEP(2, 0);
         }
 
         if (i >= 5) {
-            memset(cam->imgs.image_virgin.image_norm, 0x80, cam->imgs.size_norm);       /* initialize to grey */
-            draw_text(cam->imgs.image_virgin.image_norm, cam->imgs.width, cam->imgs.height,
+            memset(cam->imgs.image_virgin, 0x80, cam->imgs.size_norm);       /* initialize to grey */
+            draw_text(cam->imgs.image_virgin, cam->imgs.width, cam->imgs.height,
                       10, 20, "Error capturing first image", cam->text_scale);
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
         }
     }
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.image_ring_in];
+    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
 
     /* create a reference frame */
     alg_update_reference_frame(cam, RESET_REF_FRAME);
@@ -1384,8 +1381,8 @@ static void motion_cleanup(struct ctx_cam *cam) {
         vid_close(cam);
     }
 
-    free(cam->imgs.img_motion.image_norm);
-    cam->imgs.img_motion.image_norm = NULL;
+    free(cam->imgs.image_motion.image_norm);
+    cam->imgs.image_motion.image_norm = NULL;
 
     free(cam->imgs.ref);
     cam->imgs.ref = NULL;
@@ -1393,11 +1390,11 @@ static void motion_cleanup(struct ctx_cam *cam) {
     free(cam->imgs.ref_dyn);
     cam->imgs.ref_dyn = NULL;
 
-    free(cam->imgs.image_virgin.image_norm);
-    cam->imgs.image_virgin.image_norm = NULL;
+    free(cam->imgs.image_virgin);
+    cam->imgs.image_virgin = NULL;
 
-    free(cam->imgs.image_vprvcy.image_norm);
-    cam->imgs.image_vprvcy.image_norm = NULL;
+    free(cam->imgs.image_vprvcy);
+    cam->imgs.image_vprvcy = NULL;
 
     free(cam->imgs.labels);
     cam->imgs.labels = NULL;
@@ -1432,15 +1429,12 @@ static void motion_cleanup(struct ctx_cam *cam) {
     free(cam->imgs.common_buffer);
     cam->imgs.common_buffer = NULL;
 
-    free(cam->imgs.preview_image.image_norm);
-    cam->imgs.preview_image.image_norm = NULL;
+    free(cam->imgs.image_preview.image_norm);
+    cam->imgs.image_preview.image_norm = NULL;
 
     if (cam->imgs.size_high > 0){
-        free(cam->imgs.image_virgin.image_high);
-        cam->imgs.image_virgin.image_high = NULL;
-
-        free(cam->imgs.preview_image.image_high);
-        cam->imgs.preview_image.image_high = NULL;
+        free(cam->imgs.image_preview.image_high);
+        cam->imgs.image_preview.image_high = NULL;
     }
 
     image_ring_destroy(cam); /* Cleanup the precapture ring buffer */
@@ -1597,7 +1591,7 @@ static void mlp_prepare(struct ctx_cam *cam){
 
     frame_buffer_size = cam->conf.pre_capture + cam->conf.minimum_motion_frames;
 
-    if (cam->imgs.image_ring_size != frame_buffer_size)
+    if (cam->imgs.ring_size != frame_buffer_size)
         image_ring_resize(cam, frame_buffer_size);
 
     /*
@@ -1639,18 +1633,18 @@ static void mlp_resetimages(struct ctx_cam *cam){
     }
 
     /* ring_buffer_in is pointing to current pos, update before put in a new image */
-    if (++cam->imgs.image_ring_in >= cam->imgs.image_ring_size)
-        cam->imgs.image_ring_in = 0;
+    if (++cam->imgs.ring_in >= cam->imgs.ring_size)
+        cam->imgs.ring_in = 0;
 
     /* Check if we have filled the ring buffer, throw away last image */
-    if (cam->imgs.image_ring_in == cam->imgs.image_ring_out) {
-        if (++cam->imgs.image_ring_out >= cam->imgs.image_ring_size)
-            cam->imgs.image_ring_out = 0;
+    if (cam->imgs.ring_in == cam->imgs.ring_out) {
+        if (++cam->imgs.ring_out >= cam->imgs.ring_size)
+            cam->imgs.ring_out = 0;
     }
 
     /* cam->current_image points to position in ring where to store image, diffs etc. */
     old_image = cam->current_image;
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.image_ring_in];
+    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
 
     /* Init/clear current_image */
     if (cam->process_thisframe) {
@@ -1782,11 +1776,11 @@ static int mlp_capture(struct ctx_cam *cam){
          * Save the newly captured still virgin image to a buffer
          * which we will not alter with text and location graphics
          */
-        memcpy(cam->imgs.image_virgin.image_norm, cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->imgs.image_virgin, cam->current_image->image_norm, cam->imgs.size_norm);
 
         mlp_mask_privacy(cam);
 
-        memcpy(cam->imgs.image_vprvcy.image_norm, cam->current_image->image_norm, cam->imgs.size_norm);
+        memcpy(cam->imgs.image_vprvcy, cam->current_image->image_norm, cam->imgs.size_norm);
 
     // FATAL ERROR - leave the thread by breaking out of the main loop
     } else if (vid_return_code < 0) {
@@ -1799,7 +1793,7 @@ static int mlp_capture(struct ctx_cam *cam){
          * a gray image with message is applied
          * flag lost_connection
          */
-        memcpy(cam->current_image->image_norm, cam->imgs.image_virgin.image_norm, cam->imgs.size_norm);
+        memcpy(cam->current_image->image_norm, cam->imgs.image_virgin, cam->imgs.size_norm);
         cam->lost_connection = 1;
     /* NO FATAL ERROR -
     *        copy last image or show grey image with message
@@ -1851,7 +1845,7 @@ static int mlp_capture(struct ctx_cam *cam){
 
         if (cam->video_dev >= 0 &&
             cam->missing_frame_counter < (MISSING_FRAMES_TIMEOUT * cam->conf.framerate)) {
-            memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy.image_norm, cam->imgs.size_norm);
+            memcpy(cam->current_image->image_norm, cam->imgs.image_vprvcy, cam->imgs.size_norm);
         } else {
             cam->lost_connection = 1;
 
@@ -1915,9 +1909,9 @@ static void mlp_detection(struct ctx_cam *cam){
              * anyway
              */
             if (cam->detecting_motion || cam->conf.setup_mode)
-                cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy.image_norm);
+                cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
             else
-                cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy.image_norm);
+                cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy);
 
             /* Lightswitch feature - has light intensity changed?
              * This can happen due to change of light conditions or due to a sudden change of the camera
@@ -2020,7 +2014,7 @@ static void mlp_tuning(struct ctx_cam *cam){
      */
     if ((cam->conf.noise_tune && cam->shots == 0) &&
          (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold)))
-        alg_noise_tune(cam, cam->imgs.image_vprvcy.image_norm);
+        alg_noise_tune(cam, cam->imgs.image_vprvcy);
 
 
     /*
@@ -2100,17 +2094,17 @@ static void mlp_overlay(struct ctx_cam *cam){
     if (cam->smartmask_speed &&
         (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
          cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)))
-        overlay_smartmask(cam, cam->imgs.img_motion.image_norm);
+        overlay_smartmask(cam, cam->imgs.image_motion.image_norm);
 
     /* Largest labels overlay */
     if (cam->imgs.largest_label && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
         cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)))
-        overlay_largest_label(cam, cam->imgs.img_motion.image_norm);
+        overlay_largest_label(cam, cam->imgs.image_motion.image_norm);
 
     /* Fixed mask overlay */
     if (cam->imgs.mask && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
         cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)))
-        overlay_fixed_mask(cam, cam->imgs.img_motion.image_norm);
+        overlay_fixed_mask(cam, cam->imgs.image_motion.image_norm);
 
     /* Add changed pixels in upper right corner of the pictures */
     if (cam->conf.text_changes) {
@@ -2130,11 +2124,11 @@ static void mlp_overlay(struct ctx_cam *cam){
     if (cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
                 cam->current_image->total_labels, cam->noise);
-        draw_text(cam->imgs.img_motion.image_norm, cam->imgs.width, cam->imgs.height,
+        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
                   cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
                   tmp, cam->text_scale);
         sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
-        draw_text(cam->imgs.img_motion.image_norm, cam->imgs.width, cam->imgs.height,
+        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
                   cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
                   tmp, cam->text_scale);
     }
@@ -2196,7 +2190,7 @@ static void mlp_actions(struct ctx_cam *cam){
 
         cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
         /* Mark all images in image_ring to be saved */
-        for (indx = 0; indx < cam->imgs.image_ring_size; indx++){
+        for (indx = 0; indx < cam->imgs.ring_size; indx++){
             cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
         }
 
@@ -2209,14 +2203,14 @@ static void mlp_actions(struct ctx_cam *cam){
 
         /* Count how many frames with motion there is in the last minimum_motion_frames in precap buffer */
         int frame_count = 0;
-        int pos = cam->imgs.image_ring_in;
+        int pos = cam->imgs.ring_in;
 
         for (indx = 0; indx < cam->conf.minimum_motion_frames; indx++) {
             if (cam->imgs.image_ring[pos].flags & IMAGE_MOTION)
                 frame_count++;
 
             if (pos == 0)
-                pos = cam->imgs.image_ring_size-1;
+                pos = cam->imgs.ring_size-1;
             else
                 pos--;
         }
@@ -2238,7 +2232,7 @@ static void mlp_actions(struct ctx_cam *cam){
             //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Setup post capture %d", cam->postcap);
 
             /* Mark all images in image_ring to be saved */
-            for (indx = 0; indx < cam->imgs.image_ring_size; indx++)
+            for (indx = 0; indx < cam->imgs.ring_size; indx++)
                 cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
 
         } else if (cam->postcap > 0) {
@@ -2293,9 +2287,9 @@ static void mlp_actions(struct ctx_cam *cam){
             process_image_ring(cam, IMAGE_BUFFER_FLUSH);
 
             /* Save preview_shot here at the end of event */
-            if (cam->imgs.preview_image.diffs) {
+            if (cam->imgs.image_preview.diffs) {
                 event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
-                cam->imgs.preview_image.diffs = 0;
+                cam->imgs.image_preview.diffs = 0;
             }
 
             event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
@@ -2480,8 +2474,8 @@ static void mlp_loopback(struct ctx_cam *cam){
      */
     if (cam->conf.setup_mode) {
 
-        event(cam, EVENT_IMAGE, &cam->imgs.img_motion, NULL, &cam->pipe, &cam->current_image->imgts);
-        event(cam, EVENT_STREAM, &cam->imgs.img_motion, NULL, NULL, &cam->current_image->imgts);
+        event(cam, EVENT_IMAGE, &cam->imgs.image_motion, NULL, &cam->pipe, &cam->current_image->imgts);
+        event(cam, EVENT_STREAM, &cam->imgs.image_motion, NULL, NULL, &cam->current_image->imgts);
     } else {
         event(cam, EVENT_IMAGE, cam->current_image, NULL,
               &cam->pipe, &cam->current_image->imgts);
@@ -2491,7 +2485,7 @@ static void mlp_loopback(struct ctx_cam *cam){
                   &cam->current_image->imgts);
     }
 
-    event(cam, EVENT_IMAGEM, &cam->imgs.img_motion, NULL, &cam->mpipe, &cam->current_image->imgts);
+    event(cam, EVENT_IMAGEM, &cam->imgs.image_motion, NULL, &cam->mpipe, &cam->current_image->imgts);
 
 }
 

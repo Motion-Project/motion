@@ -251,36 +251,34 @@ struct ctx_image_data {
 };
 
 struct ctx_images {
-    struct ctx_image_data   *image_ring;    /* The base address of the image ring buffer */
-    int image_ring_size;
-    int image_ring_in;                /* Index in image ring buffer we last added a image into */
-    int image_ring_out;               /* Index in image ring buffer we want to process next time */
+    struct ctx_image_data *image_ring;    /* The base address of the image ring buffer */
+    struct ctx_image_data image_motion;   /* Picture buffer for motion images */
+    struct ctx_image_data image_preview;  /* Picture buffer for best image when enables */
 
     unsigned char *ref;               /* The reference frame */
-    struct ctx_image_data img_motion;     /* Picture buffer for motion images */
-    int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
-    struct ctx_image_data image_virgin;   /* Last picture frame with no text or locate overlay */
-    struct ctx_image_data image_vprvcy;   /* Virgin image with the privacy mask applied */
-    struct ctx_image_data preview_image;  /* Picture buffer for best image when enables */
     unsigned char *mask;              /* Buffer for the mask file */
     unsigned char *smartmask;
     unsigned char *smartmask_final;
     unsigned char *common_buffer;
-    unsigned char *substream_image;
-
-    unsigned char *mask_privacy;      /* Buffer for the privacy mask values */
-    unsigned char *mask_privacy_uv;   /* Buffer for the privacy U&V values */
-
+    unsigned char *image_substream;
+    unsigned char *image_virgin;        /* Last picture frame with no text or locate overlay */
+    unsigned char *image_vprvcy;        /* Virgin image with the privacy mask applied */
+    unsigned char *mask_privacy;        /* Buffer for the privacy mask values */
+    unsigned char *mask_privacy_uv;     /* Buffer for the privacy U&V values */
     unsigned char *mask_privacy_high;      /* Buffer for the privacy mask values */
     unsigned char *mask_privacy_high_uv;   /* Buffer for the privacy U&V values */
 
+    int ring_size;
+    int ring_in;                /* Index in image ring buffer we last added a image into */
+    int ring_out;               /* Index in image ring buffer we want to process next time */
+
+    int *ref_dyn;               /* Dynamic objects to be excluded from reference frame */
     int *smartmask_buffer;
     int *labels;
     int *labelsize;
+
     int width;
     int height;
-    int type;
-    int picture_type;                 /* Output picture type IMAGE_JPEG, IMAGE_PPM */
     int size_norm;                    /* Number of bytes for normal size image */
 
     int width_high;
@@ -292,6 +290,7 @@ struct ctx_images {
     int labels_above;
     int labelsize_max;
     int largest_label;
+    int picture_type;
 };
 
 struct stream_data {

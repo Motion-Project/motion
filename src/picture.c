@@ -944,7 +944,7 @@ void put_fixed_mask(struct ctx_cam *cam, const char *file)
         }
         return;
     }
-    memset(cam->imgs.img_motion.image_norm, 255, cam->imgs.motionsize); /* Initialize to unset */
+    memset(cam->imgs.image_motion.image_norm, 255, cam->imgs.motionsize); /* Initialize to unset */
 
     /* Write pgm-header. */
     fprintf(picture, "P5\n");
@@ -952,7 +952,7 @@ void put_fixed_mask(struct ctx_cam *cam, const char *file)
     fprintf(picture, "%d\n", 255);
 
     /* Write pgm image data at once. */
-    if ((int)fwrite(cam->imgs.img_motion.image_norm, cam->conf.width, cam->conf.height, picture) != cam->conf.height) {
+    if ((int)fwrite(cam->imgs.image_motion.image_norm, cam->conf.width, cam->conf.height, picture) != cam->conf.height) {
         MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
             ,_("Failed writing default mask as pgm file"));
         return;

@@ -29,7 +29,7 @@ struct segment {
  */
 void alg_locate_center_size(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent)
 {
-    unsigned char *out = imgs->img_motion.image_norm;
+    unsigned char *out = imgs->image_motion.image_norm;
     int *labels = imgs->labels;
     int x, y, centc = 0, xdist = 0, ydist = 0;
 
@@ -77,7 +77,7 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
     /* First reset pointers back to initial value. */
     centc = 0;
     labels = imgs->labels;
-    out = imgs->img_motion.image_norm;
+    out = imgs->image_motion.image_norm;
 
     /* If Labeling then we find the area around largest labelgroup instead. */
     if (imgs->labelsize_max) {
@@ -178,10 +178,10 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
 void alg_draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new,
                        int style, int mode, int process_thisframe)
 {
-    unsigned char *out = imgs->img_motion.image_norm;
+    unsigned char *out = imgs->image_motion.image_norm;
     int x, y;
 
-    out = imgs->img_motion.image_norm;
+    out = imgs->image_motion.image_norm;
 
     /* Debug image always gets a 'normal' box. */
     if ((mode == LOCATE_BOTH) && process_thisframe) {
@@ -246,7 +246,7 @@ void alg_draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int widt
 void alg_draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new,
                            int style, int mode, int process_thisframe)
 {
-    unsigned char *out = imgs->img_motion.image_norm;
+    unsigned char *out = imgs->image_motion.image_norm;
     unsigned char *new_u, *new_v;
     int x, y, v, cwidth, cblock;
 
@@ -254,7 +254,7 @@ void alg_draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int 
     cblock = imgs->motionsize / 4;
     x = imgs->motionsize;
     v = x + cblock;
-    out = imgs->img_motion.image_norm;
+    out = imgs->image_motion.image_norm;
     new_u = new + x;
     new_v = new + v;
 
@@ -525,7 +525,7 @@ static int iflood(int x, int y, int width, int height,
 static int alg_labeling(struct ctx_cam *cam)
 {
     struct ctx_images *imgs = &cam->imgs;
-    unsigned char *out = imgs->img_motion.image_norm;
+    unsigned char *out = imgs->image_motion.image_norm;
     int *labels = imgs->labels;
     int ix, iy, pixelpos;
     int width = imgs->width;
@@ -844,7 +844,7 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
 int alg_despeckle(struct ctx_cam *cam, int olddiffs)
 {
     int diffs = 0;
-    unsigned char *out = cam->imgs.img_motion.image_norm;
+    unsigned char *out = cam->imgs.image_motion.image_norm;
     int width = cam->imgs.width;
     int height = cam->imgs.height;
     int done = 0, i, len = strlen(cam->conf.despeckle_filter);
@@ -945,7 +945,7 @@ int alg_diff_standard(struct ctx_cam *cam, unsigned char *new)
     int noise = cam->noise;
     int smartmask_speed = cam->smartmask_speed;
     unsigned char *ref = imgs->ref;
-    unsigned char *out = imgs->img_motion.image_norm;
+    unsigned char *out = imgs->image_motion.image_norm;
     unsigned char *mask = imgs->mask;
     unsigned char *smartmask_final = imgs->smartmask_final;
     int *smartmask_buffer = imgs->smartmask_buffer;
@@ -1066,7 +1066,7 @@ int alg_lightswitch(struct ctx_cam *cam, int diffs)
 int alg_switchfilter(struct ctx_cam *cam, int diffs, unsigned char *newimg)
 {
     int linediff = diffs / cam->imgs.height;
-    unsigned char *out = cam->imgs.img_motion.image_norm;
+    unsigned char *out = cam->imgs.image_motion.image_norm;
     int y, x, line;
     int lines = 0, vertlines = 0;
 
@@ -1116,10 +1116,10 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action)
     int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
     int i, threshold_ref;
     int *ref_dyn = cam->imgs.ref_dyn;
-    unsigned char *image_virgin = cam->imgs.image_vprvcy.image_norm;
+    unsigned char *image_virgin = cam->imgs.image_vprvcy;
     unsigned char *ref = cam->imgs.ref;
     unsigned char *smartmask = cam->imgs.smartmask_final;
-    unsigned char *out = cam->imgs.img_motion.image_norm;
+    unsigned char *out = cam->imgs.image_motion.image_norm;
 
     if (cam->lastrate > 5)  /* Match rate limit */
         accept_timer /= (cam->lastrate / 3);
@@ -1156,7 +1156,7 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action)
 
     } else {   /* action == RESET_REF_FRAME - also used to initialize the frame at startup. */
         /* Copy fresh image */
-        memcpy(cam->imgs.ref, cam->imgs.image_vprvcy.image_norm, cam->imgs.size_norm);
+        memcpy(cam->imgs.ref, cam->imgs.image_vprvcy, cam->imgs.size_norm);
         /* Reset static objects */
         memset(cam->imgs.ref_dyn, 0, cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
     }

@@ -308,17 +308,17 @@ static void event_stream_put(struct ctx_cam *cam, motion_event evnt
                     ((cam->imgs.height % 16) == 0)) {
 
                     subsize = ((cam->imgs.width / 2) * (cam->imgs.height / 2) * 3 / 2);
-                    if (cam->imgs.substream_image == NULL){
-                        cam->imgs.substream_image = mymalloc(subsize);
+                    if (cam->imgs.image_substream == NULL){
+                        cam->imgs.image_substream = mymalloc(subsize);
                     }
                     pic_scale_img(cam->imgs.width
                         ,cam->imgs.height
                         ,img_data->image_norm
-                        ,cam->imgs.substream_image);
+                        ,cam->imgs.image_substream);
                     cam->stream_sub.jpeg_size = put_picture_memory(cam
                         ,cam->stream_sub.jpeg_data
                         ,subsize
-                        ,cam->imgs.substream_image
+                        ,cam->imgs.image_substream
                         ,cam->conf.stream_quality
                         ,(cam->imgs.width / 2)
                         ,(cam->imgs.height / 2));
@@ -340,11 +340,11 @@ static void event_stream_put(struct ctx_cam *cam, motion_event evnt
             if (cam->stream_motion.jpeg_data == NULL){
                 cam->stream_motion.jpeg_data = mymalloc(cam->imgs.size_norm);
             }
-            if (cam->imgs.img_motion.image_norm != NULL){
+            if (cam->imgs.image_motion.image_norm != NULL){
                 cam->stream_motion.jpeg_size = put_picture_memory(cam
                     ,cam->stream_motion.jpeg_data
                     ,cam->imgs.size_norm
-                    ,cam->imgs.img_motion.image_norm
+                    ,cam->imgs.image_motion.image_norm
                     ,cam->conf.stream_quality
                     ,cam->imgs.width
                     ,cam->imgs.height);
@@ -356,11 +356,11 @@ static void event_stream_put(struct ctx_cam *cam, motion_event evnt
             if (cam->stream_source.jpeg_data == NULL){
                 cam->stream_source.jpeg_data = mymalloc(cam->imgs.size_norm);
             }
-            if (cam->imgs.image_virgin.image_norm != NULL){
+            if (cam->imgs.image_virgin != NULL){
                 cam->stream_source.jpeg_size = put_picture_memory(cam
                     ,cam->stream_source.jpeg_data
                     ,cam->imgs.size_norm
-                    ,cam->imgs.image_virgin.image_norm
+                    ,cam->imgs.image_virgin
                     ,cam->conf.stream_quality
                     ,cam->imgs.width
                     ,cam->imgs.height);
@@ -473,7 +473,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
             , cam->conf.target_dir
             , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
             , filenamem, imageext(cam));
-        put_picture(cam, fullfilenamem, cam->imgs.img_motion.image_norm, FTYPE_IMAGE_MOTION);
+        put_picture(cam, fullfilenamem, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
         event(cam, EVENT_FILECREATE, NULL, fullfilenamem, (void *)FTYPE_IMAGE, ts1);
     }
 }
@@ -568,9 +568,9 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
     (void)fname;
     (void)ftype;
 
-    if (cam->imgs.preview_image.diffs) {
+    if (cam->imgs.image_preview.diffs) {
         saved_current_image = cam->current_image;
-        cam->current_image = &cam->imgs.preview_image;
+        cam->current_image = &cam->imgs.image_preview;
 
         /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
         use_imagepath = strcmp(cam->conf.picture_filename, "preview");
@@ -610,9 +610,9 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
 
             passthrough = util_check_passthrough(cam);
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
-                put_picture(cam, previewname, cam->imgs.preview_image.image_high , FTYPE_IMAGE);
+                put_picture(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
             } else {
-                put_picture(cam, previewname, cam->imgs.preview_image.image_norm , FTYPE_IMAGE);
+                put_picture(cam, previewname, cam->imgs.image_preview.image_norm , FTYPE_IMAGE);
             }
             event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
         } else {
@@ -630,7 +630,7 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
             else
                 imagepath = (char *)DEF_IMAGEPATH;
 
-            mystrftime(cam, filename, sizeof(filename), imagepath, &cam->imgs.preview_image.imgts, NULL, 0);
+            mystrftime(cam, filename, sizeof(filename), imagepath, &cam->imgs.image_preview.imgts, NULL, 0);
             snprintf(previewname, PATH_MAX, "%.*s/%.*s.%s"
                 , (int)(PATH_MAX-2-strlen(filename)-strlen(imageext(cam)))
                 , cam->conf.target_dir
@@ -639,9 +639,9 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
 
             passthrough = util_check_passthrough(cam);
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
-                put_picture(cam, previewname, cam->imgs.preview_image.image_high , FTYPE_IMAGE);
+                put_picture(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
             } else {
-                put_picture(cam, previewname, cam->imgs.preview_image.image_norm, FTYPE_IMAGE);
+                put_picture(cam, previewname, cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
             }
             event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
         }
@@ -1145,7 +1145,7 @@ static void event_movie_put(struct ctx_cam *cam, motion_event evnt
         }
     }
     if (cam->movie_output_motion) {
-        if (movie_put_image(cam->movie_output_motion, &cam->imgs.img_motion, ts1) == -1) {
+        if (movie_put_image(cam->movie_output_motion, &cam->imgs.image_motion, ts1) == -1) {
             MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO, _("Error encoding image"));
         }
     }
