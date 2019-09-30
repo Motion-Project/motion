@@ -27,7 +27,7 @@ struct segment {
  * alg_locate_center_size
  *      Locates the center and size of the movement.
  */
-void alg_locate_center_size(struct images *imgs, int width, int height, struct ctx_coord *cent)
+void alg_locate_center_size(struct ctx_images *imgs, int width, int height, struct ctx_coord *cent)
 {
     unsigned char *out = imgs->img_motion.image_norm;
     int *labels = imgs->labels;
@@ -175,7 +175,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
  * alg_draw_location
  *      Draws a box around the movement.
  */
-void alg_draw_location(struct ctx_coord *cent, struct images *imgs, int width, unsigned char *new,
+void alg_draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new,
                        int style, int mode, int process_thisframe)
 {
     unsigned char *out = imgs->img_motion.image_norm;
@@ -243,7 +243,7 @@ void alg_draw_location(struct ctx_coord *cent, struct images *imgs, int width, u
  * alg_draw_red_location
  *          Draws a RED box around the movement.
  */
-void alg_draw_red_location(struct ctx_coord *cent, struct images *imgs, int width, unsigned char *new,
+void alg_draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new,
                            int style, int mode, int process_thisframe)
 {
     unsigned char *out = imgs->img_motion.image_norm;
@@ -364,7 +364,7 @@ void alg_draw_red_location(struct ctx_coord *cent, struct images *imgs, int widt
  */
 void alg_noise_tune(struct ctx_cam *cam, unsigned char *new)
 {
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     int i;
     unsigned char *ref = imgs->ref;
     int diff, sum = 0, count = 0;
@@ -524,7 +524,7 @@ static int iflood(int x, int y, int width, int height,
  */
 static int alg_labeling(struct ctx_cam *cam)
 {
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     unsigned char *out = imgs->img_motion.image_norm;
     int *labels = imgs->labels;
     int ix, iy, pixelpos;
@@ -940,7 +940,7 @@ void alg_tune_smartmask(struct ctx_cam *cam)
  */
 int alg_diff_standard(struct ctx_cam *cam, unsigned char *new)
 {
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     int i, diffs = 0;
     int noise = cam->noise;
     int smartmask_speed = cam->smartmask_speed;
@@ -996,7 +996,7 @@ int alg_diff_standard(struct ctx_cam *cam, unsigned char *new)
  */
 static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new)
 {
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     int i, diffs = 0, step = imgs->motionsize/10000;
     int noise = cam->noise;
     unsigned char *ref = imgs->ref;
@@ -1045,7 +1045,7 @@ int alg_diff(struct ctx_cam *cam, unsigned char *new)
  */
 int alg_lightswitch(struct ctx_cam *cam, int diffs)
 {
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
 
     if (cam->conf.lightswitch_percent < 0)
         cam->conf.lightswitch_percent = 0;

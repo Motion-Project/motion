@@ -11,7 +11,7 @@
 #define _INCLUDE_MOTION_H
 
 /* Forward declarations, used in functional definitions of headers */
-struct images;
+struct ctx_images;
 struct ctx_image_data;
 struct ctx_dbse;
 
@@ -250,39 +250,7 @@ struct ctx_image_data {
     int                 total_labels;
 };
 
-struct stream_data {
-    unsigned char   *jpeg_data; /* Image compressed as JPG */
-    long            jpeg_size;  /* The number of bytes for jpg */
-    int             cnct_count; /* Counter of the number of connections */
-};
-
-/*
- * DIFFERENCES BETWEEN imgs.width, conf.width AND rotate_data.cap_width
- * (and the corresponding height values, of course)
- * ===========================================================================
- * Location      Purpose
- *
- * conf          The values in conf reflect width and height set in the
- *               configuration file. These can be set via http remote control,
- *               but they are not used internally by Motion, so it won't break
- *               anything. These values are transferred to imgs in vid_start.
- *
- * imgs          The values in imgs are the actual output dimensions. Normally
- *               the output dimensions are the same as the capture dimensions,
- *               but for 90 or 270 degrees rotation, they are not. E.g., if
- *               you capture at 320x240, and rotate 90 degrees, the output
- *               dimensions are 240x320.
- *               These values are set from the conf values in vid_start, or
- *               from the first JPEG image in netcam_start. For 90 or 270
- *               degrees rotation, they are swapped in rotate_init.
- *
- * rotate_data   The values in rotate_data are named cap_width and cap_height,
- *               and contain the capture dimensions. The difference between
- *               capture and output dimensions is explained above.
- *               These values are set in rotate_init.
- */
-
-struct images {
+struct ctx_images {
     struct ctx_image_data   *image_ring;    /* The base address of the image ring buffer */
     int image_ring_size;
     int image_ring_in;                /* Index in image ring buffer we last added a image into */
@@ -324,6 +292,12 @@ struct images {
     int labels_above;
     int labelsize_max;
     int largest_label;
+};
+
+struct stream_data {
+    unsigned char   *jpeg_data; /* Image compressed as JPG */
+    long            jpeg_size;  /* The number of bytes for jpg */
+    int             cnct_count; /* Counter of the number of connections */
 };
 
 enum FLIP_TYPE {
@@ -368,7 +342,7 @@ struct ctx_cam {
     unsigned int log_type;
 
     struct config conf;
-    struct images imgs;
+    struct ctx_images imgs;
     struct trackoptions track;
     int                 track_posx;
     int                 track_posy;

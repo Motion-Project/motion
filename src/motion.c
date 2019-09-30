@@ -538,7 +538,7 @@ static void motion_remove_pid(void)
 static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img)
 {
     struct config *conf = &cam->conf;
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     struct ctx_coord *location = &img->location;
 
     /* Draw location */

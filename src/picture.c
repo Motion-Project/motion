@@ -612,7 +612,7 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
 void overlay_smartmask(struct ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     unsigned char *smartmask = imgs->smartmask_final;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -656,7 +656,7 @@ void overlay_smartmask(struct ctx_cam *cam, unsigned char *out)
 void overlay_fixed_mask(struct ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     unsigned char *mask = imgs->mask;
     unsigned char *out_y, *out_u, *out_v;
 
@@ -700,7 +700,7 @@ void overlay_fixed_mask(struct ctx_cam *cam, unsigned char *out)
 void overlay_largest_label(struct ctx_cam *cam, unsigned char *out)
 {
     int i, x, v, width, height, line;
-    struct images *imgs = &cam->imgs;
+    struct ctx_images *imgs = &cam->imgs;
     int *labels = imgs->labels;
     unsigned char *out_y, *out_u, *out_v;
 
