@@ -18,7 +18,7 @@
 #include "picture.h"
 #include "rotate.h"
 #include "webu.h"
-
+#include "dbse.h"
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
@@ -996,229 +996,6 @@ static void mot_stream_deinit(struct ctx_cam *cam){
     }
 }
 
-/* TODO: dbse functions are to be moved to separate module in future change*/
-static void dbse_global_deinit(void){
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        mysql_library_end();
-    #endif /* HAVE_MYSQL HAVE_MARIADB */
-
-}
-
-static void dbse_global_init(void){
-
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
-   /* Initialize all the database items */
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        if (mysql_library_init(0, NULL, NULL)) {
-            fprintf(stderr, "could not initialize MySQL library\n");
-            exit(1);
-        }
-    #endif /* HAVE_MYSQL HAVE_MARIADB */
-
-    #ifdef HAVE_SQLITE3
-        int indx;
-        /* database_sqlite3 == NULL if not changed causes each thread to create their own
-        * sqlite3 connection this will only happens when using a non-threaded sqlite version */
-        cam_list[0]->database_sqlite3=NULL;
-        if (cam_list[0]->conf.database_type && ((!strcmp(cam_list[0]->conf.database_type, "sqlite3")) && cam_list[0]->conf.database_dbname)) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("SQLite3 Database filename %s")
-                ,cam_list[0]->conf.database_dbname);
-
-            int thread_safe = sqlite3_threadsafe();
-            if (thread_safe > 0) {
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 is threadsafe"));
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO, _("SQLite3 serialized %s")
-                    ,(sqlite3_config(SQLITE_CONFIG_SERIALIZED)?_("FAILED"):_("SUCCESS")));
-                if (sqlite3_open( cam_list[0]->conf.database_dbname, &cam_list[0]->database_sqlite3) != SQLITE_OK) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        ,_("Can't open database %s : %s")
-                        ,cam_list[0]->conf.database_dbname
-                        ,sqlite3_errmsg( cam_list[0]->database_sqlite3));
-                    sqlite3_close( cam_list[0]->database_sqlite3);
-                    exit(1);
-                }
-                MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("database_busy_timeout %d msec"),
-                        cam_list[0]->conf.database_busy_timeout);
-                if (sqlite3_busy_timeout( cam_list[0]->database_sqlite3,  cam_list[0]->conf.database_busy_timeout) != SQLITE_OK)
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO,_("database_busy_timeout failed %s")
-                        ,sqlite3_errmsg( cam_list[0]->database_sqlite3));
-            }
-        }
-        /* Cascade to all threads */
-        indx = 1;
-        while (cam_list[indx] != NULL) {
-            cam_list[indx]->database_sqlite3 = cam_list[0]->database_sqlite3;
-            indx++;
-        }
-
-    #endif /* HAVE_SQLITE3 */
-
-}
-
-static int dbse_init_mysql(struct ctx_cam *cam){
-
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        if ((!strcmp(cam->conf.database_type, "mysql")) && (cam->conf.database_dbname)) {
-            // close database to be sure that we are not leaking
-            mysql_close(cam->database);
-            cam->database_event_id = 0;
-
-            cam->database = mymalloc(sizeof(MYSQL));
-            mysql_init(cam->database);
-
-            if (!mysql_real_connect(cam->database, cam->conf.database_host, cam->conf.database_user,
-                cam->conf.database_password, cam->conf.database_dbname, 0, NULL, 0)) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Cannot connect to MySQL database %s on host %s with user %s")
-                    ,cam->conf.database_dbname, cam->conf.database_host
-                    ,cam->conf.database_user);
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("MySQL error was %s"), mysql_error(cam->database));
-                return -2;
-            }
-            #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-                my_bool my_true = TRUE;
-                mysql_options(cam->database, MYSQL_OPT_RECONNECT, &my_true);
-            #endif
-        }
-    #else
-        (void)cam;  /* Avoid compiler warnings */
-    #endif /* HAVE_MYSQL HAVE_MARIADB */
-
-    return 0;
-
-}
-
-static int dbse_init_sqlite3(struct ctx_cam *cam){
-    #ifdef HAVE_SQLITE3
-        if (cam_list[0]->database_sqlite3 != 0) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO,_("SQLite3 using shared handle"));
-            cam->database_sqlite3 = cam_list[0]->database_sqlite3;
-
-        } else if ((!strcmp(cam->conf.database_type, "sqlite3")) && cam->conf.database_dbname) {
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("SQLite3 Database filename %s"), cam->conf.database_dbname);
-            if (sqlite3_open(cam->conf.database_dbname, &cam->database_sqlite3) != SQLITE_OK) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Can't open database %s : %s")
-                    ,cam->conf.database_dbname, sqlite3_errmsg(cam->database_sqlite3));
-                sqlite3_close(cam->database_sqlite3);
-                return -2;
-            }
-            MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-                ,_("database_busy_timeout %d msec"), cam->conf.database_busy_timeout);
-            if (sqlite3_busy_timeout(cam->database_sqlite3, cam->conf.database_busy_timeout) != SQLITE_OK)
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("database_busy_timeout failed %s")
-                    ,sqlite3_errmsg(cam->database_sqlite3));
-        }
-    #else
-        (void)cam;  /* Avoid compiler warnings */
-    #endif /* HAVE_SQLITE3 */
-
-    return 0;
-
-}
-
-static int dbse_init_pgsql(struct ctx_cam *cam){
-    #ifdef HAVE_PGSQL
-        if ((!strcmp(cam->conf.database_type, "postgresql")) && (cam->conf.database_dbname)) {
-            char connstring[255];
-
-            /*
-             * Create the connection string.
-             * Quote the values so we can have null values (blank)
-             */
-            snprintf(connstring, 255,
-                     "dbname='%s' host='%s' user='%s' password='%s' port='%d'",
-                      cam->conf.database_dbname, /* dbname */
-                      (cam->conf.database_host ? cam->conf.database_host : ""), /* host (may be blank) */
-                      (cam->conf.database_user ? cam->conf.database_user : ""), /* user (may be blank) */
-                      (cam->conf.database_password ? cam->conf.database_password : ""), /* password (may be blank) */
-                      cam->conf.database_port
-            );
-
-            cam->database_pg = PQconnectdb(connstring);
-            if (PQstatus(cam->database_pg) == CONNECTION_BAD) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                ,_("Connection to PostgreSQL database '%s' failed: %s")
-                ,cam->conf.database_dbname, PQerrorMessage(cam->database_pg));
-                return -2;
-            }
-        }
-    #else
-        (void)cam;  /* Avoid compiler warnings */
-    #endif /* HAVE_PGSQL */
-
-    return 0;
-}
-
-static int dbse_init(struct ctx_cam *cam){
-    int retcd = 0;
-
-    if (cam->conf.database_type) {
-        MOTION_LOG(NTC, TYPE_DB, NO_ERRNO
-            ,_("Database backend %s"), cam->conf.database_type);
-
-        retcd = dbse_init_mysql(cam);
-        if (retcd != 0) return retcd;
-
-        retcd = dbse_init_sqlite3(cam);
-        if (retcd != 0) return retcd;
-
-        retcd = dbse_init_pgsql(cam);
-        if (retcd != 0) return retcd;
-
-        /* Set the sql mask file according to the SQL config options*/
-        cam->sql_mask = cam->conf.sql_log_picture * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-                        cam->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-                        cam->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-                        cam->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
-    }
-
-    return retcd;
-}
-
-static void dbse_deinit(struct ctx_cam *cam){
-    if (cam->conf.database_type) {
-        #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-            if ( (!strcmp(cam->conf.database_type, "mysql")) && (cam->conf.database_dbname)) {
-                mysql_close(cam->database);
-                cam->database_event_id = 0;
-            }
-        #endif /* HAVE_MYSQL HAVE_MARIADB */
-
-        #ifdef HAVE_PGSQL
-                if ((!strcmp(cam->conf.database_type, "postgresql")) && (cam->conf.database_dbname)) {
-                    PQfinish(cam->database_pg);
-                }
-        #endif /* HAVE_PGSQL */
-
-        #ifdef HAVE_SQLITE3
-                /* Close the SQLite database */
-                if ((!strcmp(cam->conf.database_type, "sqlite3")) && (cam->conf.database_dbname)) {
-                    sqlite3_close(cam->database_sqlite3);
-                    cam->database_sqlite3 = NULL;
-                }
-        #endif /* HAVE_SQLITE3 */
-        (void)cam;
-    }
-}
-
-static void dbse_sqlmask_update(struct ctx_cam *cam){
-    /*
-    * Set the sql mask file according to the SQL config options
-    * We update it for every frame in case the config was updated
-    * via remote control.
-    */
-    cam->sql_mask = cam->conf.sql_log_picture * (FTYPE_IMAGE + FTYPE_IMAGE_MOTION) +
-                    cam->conf.sql_log_snapshot * FTYPE_IMAGE_SNAPSHOT +
-                    cam->conf.sql_log_movie * (FTYPE_MPEG + FTYPE_MPEG_MOTION) +
-                    cam->conf.sql_log_timelapse * FTYPE_MPEG_TIMELAPSE;
-}
-
 /**
  * motion_init
  *
@@ -1237,7 +1014,6 @@ static void dbse_sqlmask_update(struct ctx_cam *cam){
 static int motion_init(struct ctx_cam *cam)
 {
     FILE *picture;
-    int retcd;
 
     util_threadname_set("ml",cam->threadnr,cam->conf.camera_name);
 
@@ -1460,8 +1236,7 @@ static int motion_init(struct ctx_cam *cam)
         }
     #endif /* HAVE_V4L2 && !BSD */
 
-    retcd = dbse_init(cam);
-    if (retcd != 0) return retcd;
+    dbse_init(cam);
 
     /* Load the mask file if any */
     if (cam->conf.mask_file) {
@@ -3141,6 +2916,8 @@ static void motion_ntc(void){
  */
 static void motion_startup(int daemonize, int argc, char *argv[])
 {
+    int indx;
+
     /* Initialize our global mutex */
     pthread_mutex_init(&global_lock, NULL);
 
@@ -3198,6 +2975,11 @@ static void motion_startup(int daemonize, int argc, char *argv[])
     set_log_level(cam_list[0]->log_level);
     set_log_type(cam_list[0]->log_type);
 
+    indx= 0;
+    while (cam_list[indx] != NULL){
+        cam_list[indx]->cam_list = cam_list;
+        indx++;
+    }
 
     if (daemonize) {
         /*
@@ -3505,7 +3287,7 @@ int main (int argc, char **argv)
 
     movie_global_init();
 
-    dbse_global_init();
+    dbse_global_init(cam_list);
 
     translate_init();
 
@@ -3550,7 +3332,7 @@ int main (int argc, char **argv)
 
     movie_global_deinit();
 
-    dbse_global_deinit();
+    dbse_global_deinit(cam_list);
 
     motion_shutdown();
 
@@ -4054,4 +3836,24 @@ int util_check_passthrough(struct ctx_cam *cam){
         }
     #endif
 
+}
+
+/** Non case sensitive equality check for strings*/
+int mystrceq(const char* var1, const char* var2){
+    return (strcasecmp(var1,var2) ? 0 : 1);
+}
+
+/** Non case sensitive inequality check for strings*/
+int mystrcne(const char* var1, const char* var2){
+    return (strcasecmp(var1,var2) ? 1: 0);
+}
+
+/** Case sensitive equality check for strings*/
+int mystreq(const char* var1, const char* var2){
+    return (strcmp(var1,var2) ? 0 : 1);
+}
+
+/** Case sensitive inequality check for strings*/
+int mystrne(const char* var1, const char* var2){
+    return (strcmp(var1,var2) ? 1: 0);
 }

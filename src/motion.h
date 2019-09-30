@@ -13,6 +13,7 @@
 /* Forward declarations, used in functional definitions of headers */
 struct images;
 struct image_data;
+struct ctx_dbse;
 
 #include "config.h"
 
@@ -64,6 +65,7 @@ struct image_data;
 #include "track.h"
 #include "netcam.h"
 #include "movie.h"
+
 
 #ifdef HAVE_MMAL
     #include "mmalcam.h"
@@ -354,6 +356,8 @@ struct rotdata {
  *  own context
  */
 struct ctx_cam {
+    struct ctx_cam **cam_list;
+
     FILE *extpipe;
     int extpipe_open;
     char conf_filename[PATH_MAX];
@@ -444,19 +448,7 @@ struct ctx_cam {
 
     char hostname[PATH_MAX];
 
-    int sql_mask;
-
-    #ifdef HAVE_SQLITE3
-        sqlite3 *database_sqlite3;
-    #endif
-
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        MYSQL *database;
-    #endif
-
-    #ifdef HAVE_PGSQL
-        PGconn *database_pg;
-    #endif
+    struct ctx_dbse        *dbse;
 
     int movie_fps;
     char newfilename[PATH_MAX];
@@ -534,5 +526,10 @@ int util_check_passthrough(struct ctx_cam *cam);
     char* translate_text(const char *msgid);
     void translate_init(void);
     void translate_locale_chg(const char *langcd);
+
+int mystrceq(const char* var1, const char* var2);
+int mystrcne(const char* var1, const char* var2);
+int mystreq(const char* var1, const char* var2);
+int mystrne(const char* var1, const char* var2);
 
 #endif /* _INCLUDE_MOTION_H */

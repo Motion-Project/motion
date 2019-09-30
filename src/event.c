@@ -11,6 +11,7 @@
 #include "netcam.h"
 #include "movie.h"
 #include "event.h"
+#include "dbse.h"
 #include "video_loopback.h"
 #include "video_common.h"
 
@@ -172,128 +173,9 @@ static void on_motion_detected_command(struct ctx_cam *cam, motion_event evnt
         exec_command(cam, cam->conf.on_motion_detected, NULL, 0);
 }
 
-static void do_sql_query(char *sqlquery, struct ctx_cam *cam, int save_id)
-{
-
-    (void)cam;
-    (void)save_id;
-
-    if (strlen(sqlquery) <= 0) {
-        /* don't try to execute empty queries */
-        MOTION_LOG(WRN, TYPE_DB, NO_ERRNO, "Ignoring empty sql query");
-        return;
-    }
-
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-        if (!strcmp(cam->conf.database_type, "mysql")) {
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
-            if (mysql_query(cam->database, sqlquery) != 0) {
-                int error_code = mysql_errno(cam->database);
-
-                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                    ,_("Mysql query failed %s error code %d")
-                    ,mysql_error(cam->database), error_code);
-                /* Try to reconnect ONCE if fails continue and discard this sql query */
-                if (error_code >= 2000) {
-                    // Close connection before start a new connection
-                    mysql_close(cam->database);
-
-                    cam->database = (MYSQL *) mymalloc(sizeof(MYSQL));
-                    mysql_init(cam->database);
-
-                    if (!mysql_real_connect(cam->database, cam->conf.database_host,
-                                            cam->conf.database_user, cam->conf.database_password,
-                                            cam->conf.database_dbname, 0, NULL, 0)) {
-                        MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
-                            ,_("Cannot reconnect to MySQL"
-                            " database %s on host %s with user %s MySQL error was %s"),
-                            cam->conf.database_dbname,
-                            cam->conf.database_host, cam->conf.database_user,
-                            mysql_error(cam->database));
-                    } else {
-                        MOTION_LOG(INF, TYPE_DB, NO_ERRNO
-                            ,_("Re-Connection to Mysql database '%s' Succeed")
-                            ,cam->conf.database_dbname);
-                        if (mysql_query(cam->database, sqlquery) != 0) {
-                            int error_my = mysql_errno(cam->database);
-                            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-                                ,_("after re-connection Mysql query failed %s error code %d")
-                                ,mysql_error(cam->database), error_my);
-                        }
-                    }
-                }
-            }
-            if (save_id) {
-                cam->database_event_id = (unsigned long long) mysql_insert_id(cam->database);
-            }
-        }
-    #endif /* HAVE_MYSQL HAVE_MARIADB*/
-
-
-    #ifdef HAVE_PGSQL
-        if (!strcmp(cam->conf.database_type, "postgresql")) {
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing postgresql query");
-            PGresult *res;
-
-            res = PQexec(cam->database_pg, sqlquery);
-
-            if (PQstatus(cam->database_pg) == CONNECTION_BAD) {
-
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                    ,_("Connection to PostgreSQL database '%s' failed: %s")
-                    ,cam->conf.database_dbname, PQerrorMessage(cam->database_pg));
-
-            // This function will close the connection to the server and attempt to reestablish a new connection to the same server,
-            // using all the same parameters previously used. This may be useful for error recovery if a working connection is lost
-                PQreset(cam->database_pg);
-
-                if (PQstatus(cam->database_pg) == CONNECTION_BAD) {
-                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                        ,_("Re-Connection to PostgreSQL database '%s' failed: %s")
-                        ,cam->conf.database_dbname, PQerrorMessage(cam->database_pg));
-                } else {
-                    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
-                        ,_("Re-Connection to PostgreSQL database '%s' Succeed")
-                        ,cam->conf.database_dbname);
-                }
-
-            } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
-                MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO, "PGSQL query failed: [%s]  %s %s",
-                        sqlquery, PQresStatus(PQresultStatus(res)), PQresultErrorMessage(res));
-            }
-            if (save_id) {
-                //ToDO:  Find the equivalent option for pgsql
-                cam->database_event_id = 0;
-            }
-
-            PQclear(res);
-        }
-    #endif /* HAVE_PGSQL */
-
-    #ifdef HAVE_SQLITE3
-        if ((!strcmp(cam->conf.database_type, "sqlite3")) && (cam->conf.database_dbname)) {
-            int res;
-            char *errmsg = 0;
-            MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing sqlite query");
-            res = sqlite3_exec(cam->database_sqlite3, sqlquery, NULL, 0, &errmsg);
-            if (res != SQLITE_OK ) {
-                MOTION_LOG(ERR, TYPE_DB, NO_ERRNO, _("SQLite error was %s"), errmsg);
-                sqlite3_free(errmsg);
-            }
-            if (save_id) {
-                //ToDO:  Find the equivalent option for sqlite3
-                cam->database_event_id = 0;
-            }
-
-        }
-    #endif /* HAVE_SQLITE3 */
-}
-
 static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
             ,struct image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
-
-    char sqlquery[PATH_MAX];
 
     (void)evnt;
     (void)img_data;
@@ -301,16 +183,11 @@ static void event_sqlfirstmotion(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
     (void)ts1;
 
-    /* Only log the file types we want */
     if (!(cam->conf.database_type)) {
         return;
+    } else {
+        dbse_firstmotion(cam);
     }
-
-    mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf.sql_query_start,
-                &cam->current_image->imgts, NULL, 0);
-
-    do_sql_query(sqlquery, cam, 1);
-
 }
 
 static void event_sqlnewfile(struct ctx_cam *cam, motion_event evnt
@@ -318,18 +195,16 @@ static void event_sqlnewfile(struct ctx_cam *cam, motion_event evnt
             ,void *ftype, struct timespec *ts1) {
 
     int sqltype = (unsigned long)ftype;
-    char sqlquery[PATH_MAX];
 
     (void)evnt;
     (void)img_data;
 
     /* Only log the file types we want */
-    if (!(cam->conf.database_type) || (sqltype & cam->sql_mask) == 0)
+    if (!(cam->conf.database_type) || (sqltype & cam->dbse->sql_mask) == 0){
         return;
-
-    mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf.sql_query, ts1, fname, sqltype);
-
-    do_sql_query(sqlquery, cam, 0);
+    } else {
+        dbse_newfile(cam, fname, sqltype, ts1);
+    }
 
 }
 
@@ -338,18 +213,17 @@ static void event_sqlfileclose(struct ctx_cam *cam, motion_event evnt
             ,void *ftype, struct timespec *ts1) {
 
     int sqltype = (unsigned long)ftype;
-    char sqlquery[PATH_MAX];
 
     (void)evnt;
     (void)img_data;
 
     /* Only log the file types we want */
-    if (!(cam->conf.database_type) || (sqltype & cam->sql_mask) == 0)
+    if (!(cam->conf.database_type) || (sqltype & cam->dbse->sql_mask) == 0){
         return;
+    } else {
+        dbse_fileclose(cam, fname, sqltype, ts1);
+    }
 
-    mystrftime(cam, sqlquery, sizeof(sqlquery), cam->conf.sql_query_stop, ts1, fname, sqltype);
-
-    do_sql_query(sqlquery, cam, 0);
 
 }
 
