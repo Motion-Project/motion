@@ -12,7 +12,7 @@
 
 /* Forward declarations, used in functional definitions of headers */
 struct images;
-struct image_data;
+struct ctx_image_data;
 struct ctx_dbse;
 
 #include "config.h"
@@ -236,28 +236,18 @@ struct ctx_coord {
     int stddev_xy;
 };
 
-
-struct image_data {
-    unsigned char *image_norm;
-    unsigned char *image_high;
-    int diffs;
-    int64_t        idnbr_norm;
-    int64_t        idnbr_high;
-    struct timespec imgts;
-    int shot;                   /* Sub second timestamp count */
-
-    /*
-     * Movement center to img center distance
-     * Note: Dist is calculated distX*distX + distY*distY
-     */
-    unsigned long cent_dist;
-
-    unsigned int flags;         /* Se IMAGE_* defines */
-
-    struct ctx_coord location;      /* coordinates for center and size of last motion detection*/
-
-    int total_labels;
-
+struct ctx_image_data {
+    unsigned char       *image_norm;
+    unsigned char       *image_high;
+    int                 diffs;
+    int64_t             idnbr_norm;
+    int64_t             idnbr_high;
+    struct timespec     imgts;
+    int                 shot;           /* Sub second timestamp count */
+    unsigned long       cent_dist;      /* Movement center to img center distance * Note: Dist is calculated distX*distX + distY*distY */
+    unsigned int        flags;          /* See IMAGE_* defines */
+    struct ctx_coord    location;       /* coordinates for center and size of last motion detection*/
+    int                 total_labels;
 };
 
 struct stream_data {
@@ -300,17 +290,17 @@ int draw_text(unsigned char *image,
 int initialize_chars(void);
 
 struct images {
-    struct image_data *image_ring;    /* The base address of the image ring buffer */
+    struct ctx_image_data   *image_ring;    /* The base address of the image ring buffer */
     int image_ring_size;
     int image_ring_in;                /* Index in image ring buffer we last added a image into */
     int image_ring_out;               /* Index in image ring buffer we want to process next time */
 
     unsigned char *ref;               /* The reference frame */
-    struct image_data img_motion;     /* Picture buffer for motion images */
+    struct ctx_image_data img_motion;     /* Picture buffer for motion images */
     int *ref_dyn;                     /* Dynamic objects to be excluded from reference frame */
-    struct image_data image_virgin;   /* Last picture frame with no text or locate overlay */
-    struct image_data image_vprvcy;   /* Virgin image with the privacy mask applied */
-    struct image_data preview_image;  /* Picture buffer for best image when enables */
+    struct ctx_image_data image_virgin;   /* Last picture frame with no text or locate overlay */
+    struct ctx_image_data image_vprvcy;   /* Virgin image with the privacy mask applied */
+    struct ctx_image_data preview_image;  /* Picture buffer for best image when enables */
     unsigned char *mask;              /* Buffer for the mask file */
     unsigned char *smartmask;
     unsigned char *smartmask_final;
@@ -400,7 +390,7 @@ struct ctx_cam {
 
     struct vdev_context *vdev;              /* Structure for v4l2 device information */
 
-    struct image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
+    struct ctx_image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
     unsigned int new_img;
 
     int locate_motion_mode;

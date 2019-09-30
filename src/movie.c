@@ -1187,7 +1187,7 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx){
 
 }
 
-static int movie_passthru_put(struct ctx_movie *movie, struct image_data *img_data){
+static int movie_passthru_put(struct ctx_movie *movie, struct ctx_image_data *img_data){
 
     int idnbr_image, idnbr_lastwritten, idnbr_stop, idnbr_firstkey;
     int indx, indx_lastwritten, indx_firstkey;
@@ -1369,7 +1369,7 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
     }
 }
 
-static void movie_put_pix_nv21(struct ctx_movie *movie, struct image_data *img_data){
+static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *img_data){
     unsigned char *image,*imagecr, *imagecb;
     int cr_len, x, y;
 
@@ -1395,7 +1395,7 @@ static void movie_put_pix_nv21(struct ctx_movie *movie, struct image_data *img_d
 
 }
 
-static void movie_put_pix_yuv420(struct ctx_movie *movie, struct image_data *img_data){
+static void movie_put_pix_yuv420(struct ctx_movie *movie, struct ctx_image_data *img_data){
     unsigned char *image;
 
     if (movie->high_resolution){
@@ -1548,7 +1548,7 @@ void movie_close(struct ctx_movie *movie){
 }
 
 
-int movie_put_image(struct ctx_movie *movie, struct image_data *img_data, const struct timespec *ts1){
+int movie_put_image(struct ctx_movie *movie, struct ctx_image_data *img_data, const struct timespec *ts1){
 
     int retcd = 0;
     int cnt = 0;

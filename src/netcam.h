@@ -119,7 +119,7 @@ struct ctx_netcam {
 };
 
 int netcam_setup(struct ctx_cam *cam);
-int netcam_next(struct ctx_cam *cam, struct image_data *img_data);
+int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data);
 void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag);
 
 #endif /* _INCLUDE_NETCAM_H */

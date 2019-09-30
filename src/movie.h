@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <stdint.h>
 #include "config.h"
-struct image_data; /* forward declare for functions */
+struct ctx_image_data; /* forward declare for functions */
 struct ctx_netcam;
 
 enum TIMELAPSE_TYPE {
@@ -84,7 +84,7 @@ void movie_global_deinit(void);
 void movie_avcodec_log(void *, int, const char *, va_list);
 
 int movie_open(struct ctx_movie *ffmpeg);
-int movie_put_image(struct ctx_movie *ffmpeg, struct image_data *img_data, const struct timespec *tv1);
+int movie_put_image(struct ctx_movie *ffmpeg, struct ctx_image_data *img_data, const struct timespec *tv1);
 void movie_close(struct ctx_movie *ffmpeg);
 void movie_reset_movie_start_time(struct ctx_movie *ffmpeg, const struct timespec *tv1);
 

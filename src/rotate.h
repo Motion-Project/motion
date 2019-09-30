@@ -62,6 +62,6 @@ void rotate_deinit(struct ctx_cam *cam);
  *   0  - success
  *   -1 - failure (rare, shouldn't happen)
  */
-int rotate_map(struct ctx_cam *cam, struct image_data *img_data);
+int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data);
 
 #endif

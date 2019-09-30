@@ -757,7 +757,7 @@ int vid_start(struct ctx_cam *cam) {
  *    with bit 0 set            Non fatal V4L error (copy grey image and discard this image)
  *    with bit 1 set            Non fatal Netcam error
  */
-int vid_next(struct ctx_cam *cam, struct image_data *img_data){
+int vid_next(struct ctx_cam *cam, struct ctx_image_data *img_data){
 
     #ifdef HAVE_MMAL
         if (cam->camera_type == CAMERA_TYPE_MMAL) {

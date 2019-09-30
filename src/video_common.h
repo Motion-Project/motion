@@ -51,7 +51,7 @@ struct video_dev {
 };
 
 int vid_start(struct ctx_cam *cam);
-int vid_next(struct ctx_cam *cam, struct image_data *img_data);
+int vid_next(struct ctx_cam *cam, struct ctx_image_data *img_data);
 void vid_close(struct ctx_cam *cam);
 void vid_mutex_destroy(void);
 void vid_mutex_init(void);

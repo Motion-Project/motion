@@ -1755,7 +1755,7 @@ int netcam_setup(struct ctx_cam *cam){
 
 }
 
-int netcam_next(struct ctx_cam *cam, struct image_data *img_data){
+int netcam_next(struct ctx_cam *cam, struct ctx_image_data *img_data){
 
     /* This is called from the motion loop thread */
 

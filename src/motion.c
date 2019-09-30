@@ -157,15 +157,15 @@ static void image_ring_resize(struct ctx_cam *cam, int new_size)
                 ,_("Resizing pre_capture buffer to %d items"), new_size);
 
             /* Create memory for new ring buffer */
-            struct image_data *tmp;
-            tmp = mymalloc(new_size * sizeof(struct image_data));
+            struct ctx_image_data *tmp;
+            tmp = mymalloc(new_size * sizeof(struct ctx_image_data));
 
             /*
              * Copy all information from old to new
              * Smallest is 0 at initial init
              */
             if (smallest > 0)
-                memcpy(tmp, cam->imgs.image_ring, sizeof(struct image_data) * smallest);
+                memcpy(tmp, cam->imgs.image_ring, sizeof(struct ctx_image_data) * smallest);
 
 
             /* In the new buffers, allocate image memory */
@@ -237,11 +237,11 @@ static void image_ring_destroy(struct ctx_cam *cam)
  * Parameters:
  *
  *      cam      Pointer to the motion context structure
- *      img      Pointer to the image_data structure we want to set as preview image
+ *      img      Pointer to the ctx_image_data we want to set as preview image
  *
  * Returns:     nothing
  */
-static void image_save_as_preview(struct ctx_cam *cam, struct image_data *img)
+static void image_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *img)
 {
     void *image_norm, *image_high;
 
@@ -250,7 +250,7 @@ static void image_save_as_preview(struct ctx_cam *cam, struct image_data *img)
     image_high = cam->imgs.preview_image.image_high;
 
     /* Copy over the meta data from the img into preview */
-    memcpy(&cam->imgs.preview_image, img, sizeof(struct image_data));
+    memcpy(&cam->imgs.preview_image, img, sizeof(struct ctx_image_data));
 
     /* Restore the pointers to the memory locations for images*/
     cam->imgs.preview_image.image_norm = image_norm;
@@ -532,9 +532,9 @@ static void motion_remove_pid(void)
  *
  *   cam      - current thread's context struct
  *   dev      - video device file descriptor
- *   img      - pointer to the captured image_data with detected motion
+ *   img      - pointer to the captured ctx_image_data with detected motion
  */
-static void motion_detected(struct ctx_cam *cam, int dev, struct image_data *img)
+static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img)
 {
     struct config *conf = &cam->conf;
     struct images *imgs = &cam->imgs;
@@ -635,7 +635,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
      * some code that use cam->current_image
      * so set it temporary to our image
      */
-    struct image_data *saved_current_image = cam->current_image;
+    struct ctx_image_data *saved_current_image = cam->current_image;
 
     /* If image is flaged to be saved and not saved yet, process it */
     do {
@@ -1630,7 +1630,7 @@ static void mlp_prepare(struct ctx_cam *cam){
 
 static void mlp_resetimages(struct ctx_cam *cam){
 
-    struct image_data *old_image;
+    struct ctx_image_data *old_image;
 
     if (cam->conf.minimum_frame_time) {
         cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;

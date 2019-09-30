@@ -298,7 +298,7 @@ void rotate_deinit(struct ctx_cam *cam){
  *   0  - success
  *   -1 - failure (shouldn't happen)
  */
-int rotate_map(struct ctx_cam *cam, struct image_data *img_data){
+int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data){
     /*
      * The image format is YUV 4:2:0 planar, which has the pixel
      * data is divided in three parts:

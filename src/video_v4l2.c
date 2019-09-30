@@ -1524,7 +1524,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
     #endif // HAVE_V4L2
 }
 
-int v4l2_next(struct ctx_cam *cam, struct image_data *img_data) {
+int v4l2_next(struct ctx_cam *cam, struct ctx_image_data *img_data) {
     #ifdef HAVE_V4L2
         int ret = -2;
         struct config *conf = &cam->conf;
