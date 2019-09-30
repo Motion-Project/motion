@@ -19,6 +19,7 @@
 #include "rotate.h"
 #include "webu.h"
 #include "dbse.h"
+#include "draw.h"
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 

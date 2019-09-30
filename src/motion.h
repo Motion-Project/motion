@@ -282,13 +282,6 @@ struct stream_data {
  *               These values are set in rotate_init.
  */
 
-/* date/time drawing, draw.c */
-int draw_text(unsigned char *image,
-              int width, int height,
-              int startx, int starty,
-              const char *text, int factor);
-int initialize_chars(void);
-
 struct images {
     struct ctx_image_data   *image_ring;    /* The base address of the image ring buffer */
     int image_ring_size;

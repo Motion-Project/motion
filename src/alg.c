@@ -8,6 +8,7 @@
  */
 #include "motion.h"
 #include "alg.h"
+#include "draw.h"
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))

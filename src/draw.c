@@ -11,6 +11,7 @@
 
 #include <ctype.h>
 #include "motion.h"
+#include "draw.h"
 
 /* Highest ascii value is 126 (~) */
 #define ASCII_MAX 127
