@@ -42,7 +42,7 @@ typedef struct netcam_image_buff {
     int content_length;
     size_t size;                    /* total allocated size */
     size_t used;                    /* bytes already used */
-    struct timeval image_time;      /* time this image was received */
+    struct timespec image_time;      /* time this image was received */
 } netcam_buff;
 typedef netcam_buff *netcam_buff_ptr;
 
@@ -58,7 +58,7 @@ struct packet_item{
     int64_t                   idnbr;
     int                       iskey;
     int                       iswritten;
-    struct timeval            timestamp_tv;
+    struct timespec           timestamp_ts;
 };
 
 struct ctx_netcam {
@@ -79,8 +79,8 @@ struct ctx_netcam {
     int                       video_stream_index;    /* Stream index associated with video from camera */
 
     enum NETCAM_STATUS        status;                /* Status of whether the camera is connecting, closed, etc*/
-    struct timeval            interruptstarttime;    /* The time set before calling the av functions */
-    struct timeval            interruptcurrenttime;  /* Time during the interrupt to determine duration since start*/
+    struct timespec           interruptstarttime;    /* The time set before calling the av functions */
+    struct timespec           interruptcurrenttime;  /* Time during the interrupt to determine duration since start*/
     int                       interruptduration;      /* Seconds permitted before triggering a interrupt */
 
     netcam_buff_ptr           img_recv;         /* The image buffer that is currently being processed */
@@ -105,9 +105,9 @@ struct ctx_netcam {
     int                       reconnect_count;  /* Count of the times reconnection is tried*/
     int                       src_fps;          /* The fps provided from source*/
 
-    struct timeval            frame_prev_tm;    /* The time set before calling the av functions */
-    struct timeval            frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
-    struct config            *conf;             /* Pointer to conf parms of parent cam*/
+    struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
+    struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
+    struct config             *conf;            /* Pointer to conf parms of parent cam*/
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */

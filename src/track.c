@@ -1312,7 +1312,7 @@ static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, 
     cam->track_posx += cent->x;
     cam->track_posy += cent->y;
 
-    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->track.generic_move, &cam->current_image->timestamp_tv, NULL, 0);
+    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->track.generic_move, &cam->current_image->imgts, NULL, 0);
 
     if (!fork()) {
         int i;

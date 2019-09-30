@@ -569,39 +569,26 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct image_data *img
 
     /* Do things only if we have got minimum_motion_frames */
     if (img->flags & IMAGE_TRIGGER) {
-        /* Take action if this is a new event and we have a trigger image */
         if (cam->event_nr != cam->prev_event) {
-            /*
-             * Reset prev_event number to current event and save event time
-             * in both time_t and struct tm format.
-             */
+
             cam->prev_event = cam->event_nr;
-            cam->eventtime = img->timestamp_tv.tv_sec;
-            localtime_r(&cam->eventtime, cam->eventtime_tm);
+            cam->eventtime = img->imgts.tv_sec;
 
-            /*
-             * Since this is a new event we create the event_text_string used for
-             * the %C conversion specifier. We may already need it for
-             * on_motion_detected_commend so it must be done now.
-             */
             mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
-                       cam->conf.text_event, &img->timestamp_tv, NULL, 0);
+                       cam->conf.text_event, &img->imgts, NULL, 0);
 
-            /* EVENT_FIRSTMOTION triggers on_event_start_command and event_movie_newfile */
             event(cam, EVENT_FIRSTMOTION, img, NULL, NULL,
-                &cam->imgs.image_ring[cam->imgs.image_ring_out].timestamp_tv);
+                &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);
 
-            /* always save first motion frame as preview-shot, may be changed to an other one later */
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
                 image_save_as_preview(cam, img);
 
         }
 
-        /* EVENT_MOTION triggers event_beep and on_motion_detected_command */
-        event(cam, EVENT_MOTION, NULL, NULL, NULL, &img->timestamp_tv);
+        event(cam, EVENT_MOTION, NULL, NULL, NULL, &img->imgts);
     }
 
     /* Limit framerate */
@@ -613,14 +600,14 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct image_data *img
          * We also disable this in setup_mode.
          */
         if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
-            event(cam, EVENT_STREAM, img, NULL, NULL, &img->timestamp_tv);
+            event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
 
         /*
          * Save motion jpeg, if configured
          * Output the image_out (motion) picture.
          */
         if (conf->picture_output_motion)
-            event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->timestamp_tv);
+            event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
     }
 
     /* if track enabled and auto track on */
@@ -677,7 +664,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
                     t = "Other";
 
                 mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q",
-                           &cam->imgs.image_ring[cam->imgs.image_ring_out].timestamp_tv, NULL, 0);
+                           &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts, NULL, 0);
                 draw_text(cam->imgs.image_ring[cam->imgs.image_ring_out].image_norm,
                           cam->imgs.width, cam->imgs.height, 10, 20, tmp, cam->text_scale);
                 draw_text(cam->imgs.image_ring[cam->imgs.image_ring_out].image_norm,
@@ -687,7 +674,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
             /* Output the picture to jpegs and ffmpeg */
             event(cam, EVENT_IMAGE_DETECTED,
               &cam->imgs.image_ring[cam->imgs.image_ring_out], NULL, NULL,
-              &cam->imgs.image_ring[cam->imgs.image_ring_out].timestamp_tv);
+              &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts);
 
 
             /*
@@ -722,7 +709,7 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
                         /* Add a filler frame into encoder */
                         event(cam, EVENT_MOVIE_PUT,
                           &cam->imgs.image_ring[cam->imgs.image_ring_out], NULL, NULL,
-                          &cam->imgs.image_ring[cam->imgs.image_ring_out].timestamp_tv);
+                          &cam->imgs.image_ring[cam->imgs.image_ring_out].imgts);
 
                         cam->movie_last_shot++;
                     }
@@ -1250,18 +1237,15 @@ static void dbse_sqlmask_update(struct ctx_cam *cam){
 static int motion_init(struct ctx_cam *cam)
 {
     FILE *picture;
-    int indx, retcd;
+    int retcd;
 
     util_threadname_set("ml",cam->threadnr,cam->conf.camera_name);
 
     /* Store thread number in TLS. */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
-    cam->currenttime_tm = mymalloc(sizeof(struct tm));
-    cam->eventtime_tm = mymalloc(sizeof(struct tm));
-    /* Init frame time */
-    cam->currenttime = time(NULL);
-    localtime_r(&cam->currenttime, cam->currenttime_tm);
+    clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
+    clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
 
     cam->smartmask_speed = 0;
 
@@ -1544,19 +1528,6 @@ static int motion_init(struct ctx_cam *cam)
 
     cam->frame_delay = cam->required_frame_time;
 
-    /*
-     * Reserve enough space for a 10 second timing history buffer. Note that,
-     * if there is any problem on the allocation, mymalloc does not return.
-     */
-    cam->rolling_average_data = NULL;
-    cam->rolling_average_limit = 10 * cam->conf.framerate;
-    cam->rolling_average_data = mymalloc(sizeof(cam->rolling_average_data) * cam->rolling_average_limit);
-
-    /* Preset history buffer with expected frame rate */
-    for (indx = 0; indx < cam->rolling_average_limit; indx++)
-        cam->rolling_average_data[indx] = cam->required_frame_time;
-
-
     cam->track_posx = 0;
     cam->track_posy = 0;
     if (cam->track.type)
@@ -1710,17 +1681,6 @@ static void motion_cleanup(struct ctx_cam *cam) {
         cam->mpipe = -1;
     }
 
-    if (cam->rolling_average_data != NULL) free(cam->rolling_average_data);
-
-
-    /* Cleanup the current time structure */
-    free(cam->currenttime_tm);
-    cam->currenttime_tm = NULL;
-
-    /* Cleanup the event time structure */
-    free(cam->eventtime_tm);
-    cam->eventtime_tm = NULL;
-
     dbse_deinit(cam);
 
 }
@@ -1818,7 +1778,7 @@ static void mlp_areadetect(struct ctx_cam *cam){
                     cam->current_image->location.x < cam->area_maxx[z] &&
                     cam->current_image->location.y > cam->area_miny[z] &&
                     cam->current_image->location.y < cam->area_maxy[z]) {
-                    event(cam, EVENT_AREA_DETECTED, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                    event(cam, EVENT_AREA_DETECTED, NULL, NULL, NULL, &cam->current_image->imgts);
                     cam->areadetect_eventnbr = cam->event_nr; /* Fire script only once per event */
                     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
                         ,_("Motion in area %d detected."), z + 1);
@@ -1833,19 +1793,14 @@ static void mlp_areadetect(struct ctx_cam *cam){
 static void mlp_prepare(struct ctx_cam *cam){
 
     int frame_buffer_size;
-    struct timeval tv1;
 
-    /***** MOTION LOOP - PREPARE FOR NEW FRAME SECTION *****/
     cam->watchdog = WATCHDOG_TMO;
 
-    /* Get current time and preserver last time for frame interval calc. */
-
-    /* This may be better at the end of the loop or moving the part in
-     * the end doing elapsed time calc in here
-     */
     cam->timebefore = cam->timenow;
-    gettimeofday(&tv1, NULL);
-    cam->timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
+
+    cam->frame_last_ts.tv_sec = cam->frame_curr_ts.tv_sec;
+    cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
+    clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
 
     /*
      * Calculate detection rate limit. Above 5fps we limit the detection
@@ -1858,42 +1813,23 @@ static void mlp_prepare(struct ctx_cam *cam){
         cam->process_thisframe = 1;
     }
 
-    /*
-     * Since we don't have sanity checks done when options are set,
-     * this sanity check must go in the main loop :(, before pre_captures
-     * are attempted.
-     */
     if (cam->conf.minimum_motion_frames < 1)
         cam->conf.minimum_motion_frames = 1;
 
     if (cam->conf.pre_capture < 0)
         cam->conf.pre_capture = 0;
 
-    /*
-     * Check if our buffer is still the right size
-     * If pre_capture or minimum_motion_frames has been changed
-     * via the http remote control we need to re-size the ring buffer
-     */
     frame_buffer_size = cam->conf.pre_capture + cam->conf.minimum_motion_frames;
 
     if (cam->imgs.image_ring_size != frame_buffer_size)
         image_ring_resize(cam, frame_buffer_size);
-
-    /* Get time for current frame */
-    cam->currenttime = time(NULL);
-
-    /*
-     * localtime returns static data and is not threadsafe
-     * so we use localtime_r which is reentrant and threadsafe
-     */
-    localtime_r(&cam->currenttime, cam->currenttime_tm);
 
     /*
      * If we have started on a new second we reset the shots variable
      * lastrate is updated to be the number of the last frame. last rate
      * is used as the ffmpeg framerate when motion is detected.
      */
-    if (cam->lastframetime != cam->currenttime) {
+    if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
         cam->lastrate = cam->shots + 1;
         cam->shots = -1;
         cam->lastframetime = cam->currenttime;
@@ -1955,7 +1891,7 @@ static void mlp_resetimages(struct ctx_cam *cam){
     } else if (cam->current_image && old_image) {
         /* not processing this frame: save some important values for next image */
         cam->current_image->diffs = old_image->diffs;
-        cam->current_image->timestamp_tv = old_image->timestamp_tv;
+        cam->current_image->imgts = old_image->imgts;
         cam->current_image->shot = old_image->shot;
         cam->current_image->cent_dist = old_image->cent_dist;
         cam->current_image->flags = old_image->flags & (~IMAGE_SAVED);
@@ -1963,8 +1899,7 @@ static void mlp_resetimages(struct ctx_cam *cam){
         cam->current_image->total_labels = old_image->total_labels;
     }
 
-    /* Store time with pre_captured image */
-    gettimeofday(&cam->current_image->timestamp_tv, NULL);
+    clock_gettime(CLOCK_REALTIME, &cam->current_image->imgts);
 
     /* Store shot number with pre_captured image */
     cam->current_image->shot = cam->shots;
@@ -2037,7 +1972,7 @@ static int mlp_capture(struct ctx_cam *cam){
     const char *tmpin;
     char tmpout[80];
     int vid_return_code = 0;        /* Return code used when calling vid_next */
-    struct timeval tv1;
+    struct timespec ts1;
 
     /***** MOTION LOOP - IMAGE CAPTURE SECTION *****/
     /*
@@ -2077,16 +2012,6 @@ static int mlp_capture(struct ctx_cam *cam){
 
         memcpy(cam->imgs.image_vprvcy.image_norm, cam->current_image->image_norm, cam->imgs.size_norm);
 
-        /*
-         * If the camera is a netcam we let the camera decide the pace.
-         * Otherwise we will keep on adding duplicate frames.
-         * By resetting the timer the framerate becomes maximum the rate
-         * of the Netcam.
-         */
-        if (cam->conf.netcam_url) {
-            gettimeofday(&tv1, NULL);
-            cam->timenow = tv1.tv_usec + 1000000L * tv1.tv_sec;
-        }
     // FATAL ERROR - leave the thread by breaking out of the main loop
     } else if (vid_return_code < 0) {
         /* Fatal error - Close video device */
@@ -2159,10 +2084,10 @@ static int mlp_capture(struct ctx_cam *cam){
             else
                 tmpin = "UNABLE TO OPEN VIDEO DEVICE\\nSINCE %Y-%m-%d %T";
 
-            tv1.tv_sec=cam->connectionlosttime;
-            tv1.tv_usec = 0;
+            ts1.tv_sec=cam->connectionlosttime;
+            ts1.tv_nsec = 0;
             memset(cam->current_image->image_norm, 0x80, cam->imgs.size_norm);
-            mystrftime(cam, tmpout, sizeof(tmpout), tmpin, &tv1, NULL, 0);
+            mystrftime(cam, tmpout, sizeof(tmpout), tmpin, &ts1, NULL, 0);
             draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                       10, 20 * cam->text_scale, tmpout, cam->text_scale);
 
@@ -2171,7 +2096,7 @@ static int mlp_capture(struct ctx_cam *cam){
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                     ,_("Video signal lost - Adding grey image"));
                 // Event for lost video signal can be called from here
-                event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &tv1);
+                event(cam, EVENT_CAMERA_LOST, NULL, NULL, NULL, &ts1);
             }
 
             /*
@@ -2441,7 +2366,7 @@ static void mlp_overlay(struct ctx_cam *cam){
     /* Add text in lower left corner of the pictures */
     if (cam->conf.text_left) {
         mystrftime(cam, tmp, sizeof(tmp), cam->conf.text_left,
-                   &cam->current_image->timestamp_tv, NULL, 0);
+                   &cam->current_image->imgts, NULL, 0);
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   10, cam->imgs.height - (10 * cam->text_scale), tmp, cam->text_scale);
     }
@@ -2449,7 +2374,7 @@ static void mlp_overlay(struct ctx_cam *cam){
     /* Add text in lower right corner of the pictures */
     if (cam->conf.text_right) {
         mystrftime(cam, tmp, sizeof(tmp), cam->conf.text_right,
-                   &cam->current_image->timestamp_tv, NULL, 0);
+                   &cam->current_image->imgts, NULL, 0);
         draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height,
                   cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
                   tmp, cam->text_scale);
@@ -2485,7 +2410,7 @@ static void mlp_actions(struct ctx_cam *cam){
          *  get a pause in the movie.
         */
         if ( (cam->detecting_motion == 0) && (cam->movie_output != NULL) )
-            movie_reset_movie_start_time(cam->movie_output, &cam->current_image->timestamp_tv);
+            movie_reset_movie_start_time(cam->movie_output, &cam->current_image->imgts);
         cam->detecting_motion = 1;
         if (cam->conf.post_capture > 0) {
             /* Setup the postcap counter */
@@ -2528,7 +2453,7 @@ static void mlp_actions(struct ctx_cam *cam){
              *  get a pause in the movie.
             */
             if ( (cam->detecting_motion == 0) && (cam->movie_output != NULL) )
-                movie_reset_movie_start_time(cam->movie_output, &cam->current_image->timestamp_tv);
+                movie_reset_movie_start_time(cam->movie_output, &cam->current_image->imgts);
 
             cam->detecting_motion = 1;
 
@@ -2567,7 +2492,7 @@ static void mlp_actions(struct ctx_cam *cam){
 
     /* Update last frame saved time, so we can end event after gap time */
     if (cam->current_image->flags & IMAGE_SAVE)
-        cam->lasttime = cam->current_image->timestamp_tv.tv_sec;
+        cam->lasttime = cam->current_image->imgts.tv_sec;
 
 
     mlp_areadetect(cam);
@@ -2593,11 +2518,11 @@ static void mlp_actions(struct ctx_cam *cam){
 
             /* Save preview_shot here at the end of event */
             if (cam->imgs.preview_image.diffs) {
-                event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
                 cam->imgs.preview_image.diffs = 0;
             }
 
-            event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+            event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
 
             /*
              * If tracking is enabled we center our camera so it does not
@@ -2683,9 +2608,10 @@ static void mlp_snapshot(struct ctx_cam *cam){
     cam->time_current_frame = cam->currenttime;
 
     if ((cam->conf.snapshot_interval > 0 && cam->shots == 0 &&
-         cam->time_current_frame % cam->conf.snapshot_interval <= cam->time_last_frame % cam->conf.snapshot_interval) ||
+         cam->frame_curr_ts.tv_sec % cam->conf.snapshot_interval <=
+         cam->frame_last_ts.tv_sec % cam->conf.snapshot_interval) ||
          cam->snapshot) {
-        event(cam, EVENT_IMAGE_SNAPSHOT, cam->current_image, NULL, NULL, &cam->current_image->timestamp_tv);
+        event(cam, EVENT_IMAGE_SNAPSHOT, cam->current_image, NULL, NULL, &cam->current_image->imgts);
         cam->snapshot = 0;
     }
 
@@ -2696,7 +2622,7 @@ static void mlp_timelapse(struct ctx_cam *cam){
     struct tm timestamp_tm;
 
     if (cam->conf.timelapse_interval) {
-        localtime_r(&cam->current_image->timestamp_tv.tv_sec, &timestamp_tm);
+        localtime_r(&cam->current_image->imgts.tv_sec, &timestamp_tm);
 
         /*
          * Check to see if we should start a new timelapse file. We start one when
@@ -2704,7 +2630,7 @@ static void mlp_timelapse(struct ctx_cam *cam){
          * to prevent the timelapse file from getting reset multiple times during the minute.
          */
         if (timestamp_tm.tm_min == 0 &&
-            (cam->time_current_frame % 60 < cam->time_last_frame % 60) &&
+            (cam->frame_curr_ts.tv_sec % 60 < cam->frame_last_ts.tv_sec % 60) &&
             cam->shots == 0) {
 
             if (strcasecmp(cam->conf.timelapse_mode, "manual") == 0) {
@@ -2713,27 +2639,27 @@ static void mlp_timelapse(struct ctx_cam *cam){
             /* If we are daily, raise timelapseend event at midnight */
             } else if (strcasecmp(cam->conf.timelapse_mode, "daily") == 0) {
                 if (timestamp_tm.tm_hour == 0)
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
 
             /* handle the hourly case */
             } else if (strcasecmp(cam->conf.timelapse_mode, "hourly") == 0) {
-                event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
 
             /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
             } else if (strcasecmp(cam->conf.timelapse_mode, "weekly-sunday") == 0) {
                 if (timestamp_tm.tm_wday == 0 &&
                     timestamp_tm.tm_hour == 0)
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
             /* If we are weekly-monday, raise timelapseend event at midnight on monday */
             } else if (strcasecmp(cam->conf.timelapse_mode, "weekly-monday") == 0) {
                 if (timestamp_tm.tm_wday == 1 &&
                     timestamp_tm.tm_hour == 0)
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
             /* If we are monthly, raise timelapseend event at midnight on first day of month */
             } else if (strcasecmp(cam->conf.timelapse_mode, "monthly") == 0) {
                 if (timestamp_tm.tm_mday == 1 &&
                     timestamp_tm.tm_hour == 0)
-                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+                    event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
             /* If invalid we report in syslog once and continue in manual mode */
             } else {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -2744,22 +2670,20 @@ static void mlp_timelapse(struct ctx_cam *cam){
             }
         }
 
-        /*
-         * If ffmpeg timelapse is enabled and time since epoch MOD movie_timelaps = 0
-         * add a timelapse frame to the timelapse movie.
-         */
-        if (cam->shots == 0 && cam->time_current_frame % cam->conf.timelapse_interval <=
-            cam->time_last_frame % cam->conf.timelapse_interval) {
-                event(cam, EVENT_TIMELAPSE, cam->current_image, NULL, NULL,
-                    &cam->current_image->timestamp_tv);
+        if (cam->shots == 0 &&
+            cam->frame_curr_ts.tv_sec % cam->conf.timelapse_interval <=
+            cam->frame_last_ts.tv_sec % cam->conf.timelapse_interval) {
+                event(cam, EVENT_TIMELAPSE, cam->current_image, NULL
+                    , NULL, &cam->current_image->imgts);
         }
+
     } else if (cam->movie_timelapse) {
     /*
      * If timelapse movie is in progress but conf.timelapse_interval is zero then close timelapse file
      * This is an important feature that allows manual roll-over of timelapse file using the http
      * remote control via a cron job.
      */
-        event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->timestamp_tv);
+        event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
     }
 
     cam->time_last_frame = cam->time_current_frame;
@@ -2780,18 +2704,18 @@ static void mlp_loopback(struct ctx_cam *cam){
      */
     if (cam->conf.setup_mode) {
 
-        event(cam, EVENT_IMAGE, &cam->imgs.img_motion, NULL, &cam->pipe, &cam->current_image->timestamp_tv);
-        event(cam, EVENT_STREAM, &cam->imgs.img_motion, NULL, NULL, &cam->current_image->timestamp_tv);
+        event(cam, EVENT_IMAGE, &cam->imgs.img_motion, NULL, &cam->pipe, &cam->current_image->imgts);
+        event(cam, EVENT_STREAM, &cam->imgs.img_motion, NULL, NULL, &cam->current_image->imgts);
     } else {
         event(cam, EVENT_IMAGE, cam->current_image, NULL,
-              &cam->pipe, &cam->current_image->timestamp_tv);
+              &cam->pipe, &cam->current_image->imgts);
 
         if (!cam->conf.stream_motion || cam->shots == 1)
             event(cam, EVENT_STREAM, cam->current_image, NULL, NULL,
-                  &cam->current_image->timestamp_tv);
+                  &cam->current_image->imgts);
     }
 
-    event(cam, EVENT_IMAGEM, &cam->imgs.img_motion, NULL, &cam->mpipe, &cam->current_image->timestamp_tv);
+    event(cam, EVENT_IMAGEM, &cam->imgs.img_motion, NULL, &cam->mpipe, &cam->current_image->imgts);
 
 }
 
@@ -2871,59 +2795,40 @@ static void mlp_parmsupdate(struct ctx_cam *cam){
 static void mlp_frametiming(struct ctx_cam *cam){
 
     int indx;
-    struct timeval tv2;
-    unsigned long int elapsedtime;  //TODO: Need to evaluate logic for needing this.
-    long int delay_time_nsec;
+    struct timespec ts2;
+    int64_t avgtime;
 
-    /***** MOTION LOOP - FRAMERATE TIMING AND SLEEPING SECTION *****/
-    /*
-     * Work out expected frame rate based on config setting which may
-     * have changed from http-control
-     */
-    if (cam->conf.framerate)
-        cam->required_frame_time = 1000000L / cam->conf.framerate;
-    else
-        cam->required_frame_time = 0;
+    /* Shuffle the last wait times*/
+    for (indx=0; indx<AVGCNT-1; indx++){
+        cam->frame_wait[indx]=cam->frame_wait[indx+1];
+    }
 
-    /* Get latest time to calculate time taken to process video data */
-    gettimeofday(&tv2, NULL);
-    elapsedtime = (tv2.tv_usec + 1000000L * tv2.tv_sec) - cam->timenow;
+    if (cam->conf.framerate) {
+        cam->frame_wait[AVGCNT-1] = 1000000L / cam->conf.framerate;
+    } else {
+        cam->frame_wait[AVGCNT-1] = 0;
+    }
 
-    /*
-     * Update history buffer but ignore first pass as timebefore
-     * variable will be inaccurate
-     */
-    if (cam->passflag)
-        cam->rolling_average_data[cam->rolling_frame] = cam->timenow - cam->timebefore;
-    else
-        cam->passflag = 1;
+    clock_gettime(CLOCK_REALTIME, &ts2);
 
-    cam->rolling_frame++;
-    if (cam->rolling_frame >= cam->rolling_average_limit)
-        cam->rolling_frame = 0;
+    cam->frame_wait[AVGCNT-1] = cam->frame_wait[AVGCNT-1] -
+            (1000000L * (ts2.tv_sec - cam->frame_curr_ts.tv_sec)) -
+            ((ts2.tv_nsec - cam->frame_curr_ts.tv_nsec)/1000);
 
-    /* Calculate 10 second average and use deviation in delay calculation */
-    cam->rolling_average = 0L;
+    avgtime = 0;
+    for (indx=0; indx<AVGCNT; indx++){
+        avgtime = avgtime + cam->frame_wait[indx];
+    }
+    avgtime = (avgtime/AVGCNT);
 
-    for (indx = 0; indx < cam->rolling_average_limit; indx++)
-        cam->rolling_average += cam->rolling_average_data[indx];
-
-    cam->rolling_average /= cam->rolling_average_limit;
-    cam->frame_delay = cam->required_frame_time - elapsedtime - (cam->rolling_average - cam->required_frame_time);
-
-    if (cam->frame_delay > 0) {
-        /* Apply delay to meet frame time */
-        if (cam->frame_delay > cam->required_frame_time)
-            cam->frame_delay = cam->required_frame_time;
-
-        /* Delay time in nanoseconds for SLEEP */
-        delay_time_nsec = cam->frame_delay * 1000;
-
-        if (delay_time_nsec > 999999999)
-            delay_time_nsec = 999999999;
-
-        /* SLEEP as defined in motion.h  A safe sleep using nanosleep */
-        SLEEP(0, delay_time_nsec);
+    if (avgtime > 0) {
+        avgtime = avgtime * 1000;
+        /* If over 1 second, just do one*/
+        if (avgtime > 999999999) {
+            SLEEP(1, 0);
+        } else {
+            SLEEP(0, avgtime);
+        }
     }
 
 }
@@ -3923,7 +3828,7 @@ static void mystrftime_long (const struct ctx_cam *cam,
  * Returns: number of bytes written to the string s
  */
 size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *userformat,
-                  const struct timeval *tv1, const char *filename, int sqltype)
+                  const struct timespec *ts1, const char *filename, int sqltype)
 {
     char formatstring[PATH_MAX] = "";
     char tempstring[PATH_MAX] = "";
@@ -3932,7 +3837,7 @@ size_t mystrftime(const struct ctx_cam *cam, char *s, size_t max, const char *us
     int width;
     struct tm timestamp_tm;
 
-    localtime_r(&tv1->tv_sec, &timestamp_tm);
+    localtime_r(&ts1->tv_sec, &timestamp_tm);
 
     format = formatstring;
 

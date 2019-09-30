@@ -523,7 +523,7 @@ static int movie_encode_video(struct ctx_movie *movie){
 
 }
 
-static int movie_set_pts(struct ctx_movie *movie, const struct timeval *tv1){
+static int movie_set_pts(struct ctx_movie *movie, const struct timespec *ts1){
 
     int64_t pts_interval;
 
@@ -531,10 +531,10 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timeval *tv1){
         movie->last_pts++;
         movie->picture->pts = movie->last_pts;
     } else {
-        pts_interval = ((1000000L * (tv1->tv_sec - movie->start_time.tv_sec)) + tv1->tv_usec - movie->start_time.tv_usec);
+        pts_interval = ((1000000L * (ts1->tv_sec - movie->start_time.tv_sec)) + (ts1->tv_nsec/1000) - (movie->start_time.tv_nsec/1000));
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            movie_reset_movie_start_time(movie, tv1);
+            movie_reset_movie_start_time(movie, ts1);
             pts_interval = 0;
         }
         if (movie->last_pts < 0) {
@@ -562,7 +562,7 @@ static int movie_set_pts(struct ctx_movie *movie, const struct timeval *tv1){
     return 0;
 }
 
-static int movie_set_pktpts(struct ctx_movie *movie, const struct timeval *tv1){
+static int movie_set_pktpts(struct ctx_movie *movie, const struct timespec *ts1){
 
     int64_t pts_interval;
 
@@ -570,10 +570,10 @@ static int movie_set_pktpts(struct ctx_movie *movie, const struct timeval *tv1){
         movie->last_pts++;
         movie->pkt.pts = movie->last_pts;
     } else {
-        pts_interval = ((1000000L * (tv1->tv_sec - movie->start_time.tv_sec)) + tv1->tv_usec - movie->start_time.tv_usec);
+        pts_interval = ((1000000L * (ts1->tv_sec - movie->start_time.tv_sec)) + (ts1->tv_nsec/1000) - (movie->start_time.tv_nsec/1000));
         if (pts_interval < 0){
             /* This can occur when we have pre-capture frames.  Reset start time of video. */
-            movie_reset_movie_start_time(movie, tv1);
+            movie_reset_movie_start_time(movie, ts1);
             pts_interval = 0;
         }
         movie->pkt.pts = av_rescale_q(pts_interval,(AVRational){1, 1000000L},movie->video_st->time_base) + movie->base_pts;
@@ -1098,14 +1098,14 @@ static int movie_flush_codec(struct ctx_movie *movie){
 
 }
 
-static int movie_put_frame(struct ctx_movie *movie, const struct timeval *tv1){
+static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1){
     int retcd;
 
     av_init_packet(&movie->pkt);
     movie->pkt.data = NULL;
     movie->pkt.size = 0;
 
-    retcd = movie_set_pts(movie, tv1);
+    retcd = movie_set_pts(movie, ts1);
     if (retcd < 0) {
         //If there is an error, it has already been reported.
         my_packet_unref(movie->pkt);
@@ -1168,7 +1168,7 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx){
         return;
     }
 
-    retcd = movie_set_pktpts(movie, &movie->netcam_data->pktarray[indx].timestamp_tv);
+    retcd = movie_set_pktpts(movie, &movie->netcam_data->pktarray[indx].timestamp_ts);
     if (retcd < 0) {
         my_packet_unref(movie->pkt);
         return;
@@ -1548,7 +1548,7 @@ void movie_close(struct ctx_movie *movie){
 }
 
 
-int movie_put_image(struct ctx_movie *movie, struct image_data *img_data, const struct timeval *tv1){
+int movie_put_image(struct ctx_movie *movie, struct image_data *img_data, const struct timespec *ts1){
 
     int retcd = 0;
     int cnt = 0;
@@ -1582,9 +1582,9 @@ int movie_put_image(struct ctx_movie *movie, struct image_data *img_data, const 
          * never want a frame buffered so we keep sending back the
          * the same pic until it flushes or fails in a different way
          */
-        retcd = movie_put_frame(movie, tv1);
+        retcd = movie_put_frame(movie, ts1);
         while ((retcd == -2) && (movie->tlapse != TIMELAPSE_NONE)) {
-            retcd = movie_put_frame(movie, tv1);
+            retcd = movie_put_frame(movie, ts1);
             cnt++;
             if (cnt > 50){
                 MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -1603,13 +1603,13 @@ int movie_put_image(struct ctx_movie *movie, struct image_data *img_data, const 
 
 }
 
-void movie_reset_movie_start_time(struct ctx_movie *movie, const struct timeval *tv1){
+void movie_reset_movie_start_time(struct ctx_movie *movie, const struct timespec *ts1){
     int64_t one_frame_interval = av_rescale_q(1,(AVRational){1, movie->fps},movie->video_st->time_base);
     if (one_frame_interval <= 0)
         one_frame_interval = 1;
     movie->base_pts = movie->last_pts + one_frame_interval;
 
-    movie->start_time.tv_sec = tv1->tv_sec;
-    movie->start_time.tv_usec = tv1->tv_usec;
+    movie->start_time.tv_sec = ts1->tv_sec;
+    movie->start_time.tv_nsec = ts1->tv_nsec;
 
 }

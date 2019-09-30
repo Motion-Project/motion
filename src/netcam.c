@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <regex.h>
+#include <time.h>
 #include "rotate.h"    /* already includes motion.h */
 #include "netcam.h"
 #include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
@@ -414,8 +415,8 @@ static void netcam_pktarray_add(struct ctx_netcam *netcam){
             netcam->pktarray[indx_next].iskey = FALSE;
         }
         netcam->pktarray[indx_next].iswritten = FALSE;
-        netcam->pktarray[indx_next].timestamp_tv.tv_sec = netcam->img_recv->image_time.tv_sec;
-        netcam->pktarray[indx_next].timestamp_tv.tv_usec = netcam->img_recv->image_time.tv_usec;
+        netcam->pktarray[indx_next].timestamp_ts.tv_sec = netcam->img_recv->image_time.tv_sec;
+        netcam->pktarray[indx_next].timestamp_ts.tv_nsec = netcam->img_recv->image_time.tv_nsec;
         netcam->pktarray_index = indx_next;
     pthread_mutex_unlock(&netcam->mutex_pktarray);
 
@@ -662,9 +663,7 @@ static int netcam_interrupt(void *ctx){
     if (netcam->status == NETCAM_CONNECTED) {
         return FALSE;
     } else if (netcam->status == NETCAM_READINGIMAGE) {
-        if (gettimeofday(&netcam->interruptcurrenttime, NULL) < 0) {
-            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-        }
+        clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
         if ((netcam->interruptcurrenttime.tv_sec - netcam->interruptstarttime.tv_sec ) > netcam->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera reading (%s) timed out")
@@ -680,9 +679,7 @@ static int netcam_interrupt(void *ctx){
          * netcam_connect function will use the same start time.  Otherwise we
          * would need to reset the time before each call to a ffmpeg function.
         */
-        if (gettimeofday(&netcam->interruptcurrenttime, NULL) < 0) {
-            MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-        }
+        clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
         if ((netcam->interruptcurrenttime.tv_sec - netcam->interruptstarttime.tv_sec ) > netcam->interruptduration){
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("%s: Camera (%s) timed out")
@@ -797,9 +794,7 @@ static int netcam_read_image(struct ctx_netcam *netcam){
     netcam->packet_recv.size = 0;
 
     netcam->interrupted=FALSE;
-    if (gettimeofday(&netcam->interruptstarttime, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
+    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
     netcam->interruptduration = 10;
 
     netcam->status = NETCAM_READINGIMAGE;
@@ -843,10 +838,7 @@ static int netcam_read_image(struct ctx_netcam *netcam){
             return -1;
         }
     }
-    if (gettimeofday(&netcam->img_recv->image_time, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
-
+    clock_gettime(CLOCK_REALTIME, &netcam->img_recv->image_time);
     /* Skip status change on our first image to keep the "next" function waiting
      * until the handler thread gets going
      */
@@ -1197,12 +1189,9 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
 
     snprintf(netcam->threadname, 15, "%s",_("Unknown"));
 
-    if (gettimeofday(&netcam->interruptstarttime, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
-    if (gettimeofday(&netcam->interruptcurrenttime, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
+    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
+    clock_gettime(CLOCK_REALTIME, &netcam->interruptcurrenttime);
+
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((!netcam->high_resolution) &&
         (cam->conf.netcam_highres)) {
@@ -1213,12 +1202,8 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     netcam->interruptduration = 5;
     netcam->interrupted = FALSE;
 
-    if (gettimeofday(&netcam->frame_curr_tm, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
-    if (gettimeofday(&netcam->frame_prev_tm, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
+    clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
+    clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
 
     netcam_set_path(cam, netcam);
 
@@ -1331,9 +1316,7 @@ static int netcam_open_context(struct ctx_netcam *netcam){
     netcam->format_context->interrupt_callback.opaque = netcam;
     netcam->interrupted = FALSE;
 
-    if (gettimeofday(&netcam->interruptstarttime, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
+    clock_gettime(CLOCK_REALTIME, &netcam->interruptstarttime);
 
     netcam->interruptduration = 20;
 
@@ -1544,13 +1527,11 @@ static void netcam_handler_wait(struct ctx_netcam *netcam){
         usec_maxrate = (1000000L / (framerate + 3));
     }
 
-    if (gettimeofday(&netcam->frame_curr_tm, NULL) < 0) {
-        MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-    }
+    clock_gettime(CLOCK_REALTIME, &netcam->frame_curr_tm);
 
     usec_delay = usec_maxrate -
         ((netcam->frame_curr_tm.tv_sec - netcam->frame_prev_tm.tv_sec) * 1000000L) -
-        (netcam->frame_curr_tm.tv_usec - netcam->frame_prev_tm.tv_usec);
+        ((netcam->frame_curr_tm.tv_nsec - netcam->frame_prev_tm.tv_nsec)/1000);
     if ((usec_delay > 0) && (usec_delay < 1000000L)){
         SLEEP(0, usec_delay * 1000);
     }
@@ -1609,15 +1590,11 @@ static void *netcam_handler(void *arg){
 
     while (!netcam->finish) {
         if (!netcam->format_context) {      /* We must have disconnected.  Try to reconnect */
-            if (gettimeofday(&netcam->frame_prev_tm, NULL) < 0) {
-                MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-            }
+            clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
             netcam_handler_reconnect(netcam);
             continue;
         } else {            /* We think we are connected...*/
-            if (gettimeofday(&netcam->frame_prev_tm, NULL) < 0) {
-                MOTION_LOG(ERR, TYPE_NETCAM, SHOW_ERRNO, "gettimeofday");
-            }
+            clock_gettime(CLOCK_REALTIME, &netcam->frame_prev_tm);
             if (netcam_read_image(netcam) < 0) {
                 if (!netcam->finish) {   /* Nope.  We are not or got bad image.  Reconnect*/
                     netcam_handler_reconnect(netcam);

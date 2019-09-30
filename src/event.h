@@ -36,9 +36,9 @@ typedef enum {
 } motion_event;
 
 typedef void(* event_handler)(struct ctx_cam *cam, motion_event, struct image_data *,
-             char *, void *, struct timeval *);
+             char *, void *, struct timespec *);
 
-void event(struct ctx_cam *cam, motion_event, struct image_data *img_data, char *, void *, struct timeval *);
+void event(struct ctx_cam *cam, motion_event, struct image_data *img_data, char *, void *, struct timespec *);
 const char * imageext(struct ctx_cam *cam);
 
 #endif /* _INCLUDE_EVENT_H_ */

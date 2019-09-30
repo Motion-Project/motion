@@ -60,7 +60,7 @@
         size_t          resp_used;         /* The amount of the response page used */
         uint64_t        stream_pos;        /* Stream position of sent image */
         int             stream_fps;        /* Stream rate per second */
-        struct timeval  time_last;         /* Keep track of processing time for stream thread*/
+        struct timespec time_last;         /* Keep track of processing time for stream thread*/
         int             mhd_first;         /* Boolean for whether it is the first connection*/
 
         struct MHD_Connection  *connection; /* The MHD connection value from the client */

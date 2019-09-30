@@ -422,11 +422,11 @@ static GLOBAL(int) _jpeg_mem_size(j_compress_ptr cinfo)
  */
 static void put_jpeg_exif(j_compress_ptr cinfo,
               const struct ctx_cam *cam,
-              const struct timeval *tv1,
+              const struct timespec *ts1,
               const struct coord *box)
 {
     unsigned char *exif = NULL;
-    unsigned exif_len = prepare_exif(&exif, cam, tv1, box);
+    unsigned exif_len = prepare_exif(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
         /* EXIF data lives in a JPEG APP1 marker */
@@ -549,7 +549,7 @@ int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
 
 int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
                    unsigned char *input_image, int width, int height, int quality,
-                   struct ctx_cam *cam, struct timeval *tv1, struct coord *box)
+                   struct ctx_cam *cam, struct timespec *ts1, struct coord *box)
 
 {
     int i, j, jpeg_image_size;
@@ -606,7 +606,7 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
 
     jpeg_start_compress(&cinfo, TRUE);
 
-    put_jpeg_exif(&cinfo, cam, tv1, box);
+    put_jpeg_exif(&cinfo, cam, ts1, box);
 
     /* If the image is not a multiple of 16, this overruns the buffers
      * we'll just pad those last bytes with zeros
@@ -638,7 +638,7 @@ int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
 
 int jpgutl_put_grey(unsigned char *dest_image, int image_size,
                    unsigned char *input_image, int width, int height, int quality,
-                   struct ctx_cam *cam, struct timeval *tv1, struct coord *box)
+                   struct ctx_cam *cam, struct timespec *ts1, struct coord *box)
 {
     int y, dest_image_size;
     JSAMPROW row_ptr[1];
@@ -674,7 +674,7 @@ int jpgutl_put_grey(unsigned char *dest_image, int image_size,
 
     jpeg_start_compress (&cjpeg, TRUE);
 
-    put_jpeg_exif(&cjpeg, cam, tv1, box);
+    put_jpeg_exif(&cjpeg, cam, ts1, box);
 
     row_ptr[0] = input_image;
 

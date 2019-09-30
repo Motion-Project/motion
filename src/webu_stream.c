@@ -35,15 +35,15 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
      */
 
     long   stream_rate;
-    struct timeval time_curr;
+    struct timespec time_curr;
     long   stream_delay;
 
-    gettimeofday(&time_curr, NULL);
+    clock_gettime(CLOCK_REALTIME, &time_curr);
 
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
      * will occur with the SLEEP function.
      */
-    stream_delay = ((time_curr.tv_usec - webui->time_last.tv_usec)*1000) +
+    stream_delay = ((time_curr.tv_nsec - webui->time_last.tv_nsec)) +
         ((time_curr.tv_sec - webui->time_last.tv_sec)*1000000000);
     if (stream_delay < 0)  stream_delay = 0;
     if (stream_delay > 1000000000 ) stream_delay = 1000000000;
@@ -56,7 +56,7 @@ static void webu_stream_mjpeg_delay(struct webui_ctx *webui) {
             SLEEP(1,0);
         }
     }
-    gettimeofday(&webui->time_last, NULL);
+    clock_gettime(CLOCK_REALTIME, &webui->time_last);
 
 }
 
@@ -270,7 +270,7 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
 
     webu_stream_mjpeg_checkbuffers(webui);
 
-    gettimeofday(&webui->time_last, NULL);
+    clock_gettime(CLOCK_REALTIME, &webui->time_last);
 
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
         ,&webu_stream_mjpeg_response, webui, NULL);

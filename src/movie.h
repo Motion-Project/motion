@@ -60,7 +60,7 @@ struct ctx_movie {
     int64_t base_pts;
     int test_mode;
     int gop_cnt;
-    struct timeval start_time;
+    struct timespec start_time;
     int            high_resolution;
     int            motion_images;
     int            passthrough;
@@ -84,8 +84,8 @@ void movie_global_deinit(void);
 void movie_avcodec_log(void *, int, const char *, va_list);
 
 int movie_open(struct ctx_movie *ffmpeg);
-int movie_put_image(struct ctx_movie *ffmpeg, struct image_data *img_data, const struct timeval *tv1);
+int movie_put_image(struct ctx_movie *ffmpeg, struct image_data *img_data, const struct timespec *tv1);
 void movie_close(struct ctx_movie *ffmpeg);
-void movie_reset_movie_start_time(struct ctx_movie *ffmpeg, const struct timeval *tv1);
+void movie_reset_movie_start_time(struct ctx_movie *ffmpeg, const struct timespec *tv1);
 
 #endif /* _INCLUDE_MOVIE_H_ */

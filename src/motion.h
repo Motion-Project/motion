@@ -83,10 +83,10 @@ int nls_enabled;
  * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping
  */
 #define SLEEP(seconds, nanoseconds) {              \
-                struct timespec tv;                \
-                tv.tv_sec = (seconds);             \
-                tv.tv_nsec = (nanoseconds);        \
-                while (nanosleep(&tv, &tv) == -1); \
+                struct timespec ts1;                \
+                ts1.tv_sec = (seconds);             \
+                ts1.tv_nsec = (nanoseconds);        \
+                while (nanosleep(&ts1, &ts1) == -1); \
         }
 
 #define DEF_PALETTE             17
@@ -172,7 +172,7 @@ int nls_enabled;
 
 #define TRUE 1
 #define FALSE 0
-
+#define AVGCNT          30
 
 /*
  * Structure to hold images information
@@ -227,7 +227,7 @@ struct image_data {
     int diffs;
     int64_t        idnbr_norm;
     int64_t        idnbr_high;
-    struct timeval timestamp_tv;
+    struct timespec imgts;
     int shot;                   /* Sub second timestamp count */
 
     /*
@@ -422,8 +422,9 @@ struct ctx_cam {
     int postcap;                             /* downcounter, frames left to to send post event */
     int shots;
     unsigned int detecting_motion;
-    struct tm *currenttime_tm;
-    struct tm *eventtime_tm;
+    long    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
+    struct timespec frame_curr_ts;
+    struct timespec frame_last_ts;
 
     time_t currenttime;
     time_t lasttime;
@@ -483,10 +484,6 @@ struct ctx_cam {
 
     long int required_frame_time, frame_delay;
 
-    long int rolling_average_limit;
-    long int *rolling_average_data;
-    unsigned long int rolling_average;
-
     int olddiffs;   //only need this in here for a printf later...do we need that printf?
     int smartmask_ratio;
     int smartmask_count;
@@ -527,7 +524,7 @@ void * mymalloc(size_t);
 void * myrealloc(void *, size_t, const char *);
 FILE * myfopen(const char *, const char *);
 int myfclose(FILE *);
-size_t mystrftime(const struct ctx_cam *, char *, size_t, const char *, const struct timeval *, const char *, int);
+size_t mystrftime(const struct ctx_cam *, char *, size_t, const char *, const struct timespec *, const char *, int);
 int create_path(const char *);
 
 void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
