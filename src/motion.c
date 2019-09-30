@@ -20,6 +20,7 @@
 #include "webu.h"
 #include "dbse.h"
 #include "draw.h"
+#include "webu_stream.h"
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
@@ -938,78 +939,7 @@ static void init_text_scale(struct ctx_cam *cam){
 
 }
 
-static void mot_stream_init(struct ctx_cam *cam){
-
-    /* The image buffers are allocated in event_stream_put if needed*/
-    pthread_mutex_init(&cam->mutex_stream, NULL);
-
-    cam->stream_norm.jpeg_size = 0;
-    cam->stream_norm.jpeg_data = NULL;
-    cam->stream_norm.cnct_count = 0;
-
-    cam->stream_sub.jpeg_size = 0;
-    cam->stream_sub.jpeg_data = NULL;
-    cam->stream_sub.cnct_count = 0;
-
-    cam->stream_motion.jpeg_size = 0;
-    cam->stream_motion.jpeg_data = NULL;
-    cam->stream_motion.cnct_count = 0;
-
-    cam->stream_source.jpeg_size = 0;
-    cam->stream_source.jpeg_data = NULL;
-    cam->stream_source.cnct_count = 0;
-
-}
-
-static void mot_stream_deinit(struct ctx_cam *cam){
-
-    /* Need to check whether buffers were allocated since init
-     * function defers the allocations to event_stream_put
-    */
-
-    pthread_mutex_destroy(&cam->mutex_stream);
-
-    if (cam->imgs.image_substream != NULL){
-        free(cam->imgs.image_substream);
-        cam->imgs.image_substream = NULL;
-    }
-
-    if (cam->stream_norm.jpeg_data != NULL){
-        free(cam->stream_norm.jpeg_data);
-        cam->stream_norm.jpeg_data = NULL;
-    }
-
-    if (cam->stream_sub.jpeg_data != NULL){
-        free(cam->stream_sub.jpeg_data);
-        cam->stream_sub.jpeg_data = NULL;
-    }
-
-    if (cam->stream_motion.jpeg_data != NULL){
-        free(cam->stream_motion.jpeg_data);
-        cam->stream_motion.jpeg_data = NULL;
-    }
-
-    if (cam->stream_source.jpeg_data != NULL){
-        free(cam->stream_source.jpeg_data);
-        cam->stream_source.jpeg_data = NULL;
-    }
-}
-
-/**
- * motion_init
- *
- * This routine is called from motion_loop (the main thread of the program) to do
- * all of the initialization required before starting the actual run.
- *
- * Parameters:
- *
- *      cam     Pointer to the motion context structure
- *
- * Returns:     0 OK
- *             -1 Fatal error, open loopback error
- *             -2 Fatal error, open SQL database error
- *             -3 Fatal error, image dimensions are not modulo 8
- */
+/** motion_init */
 static int motion_init(struct ctx_cam *cam)
 {
     FILE *picture;
@@ -1150,7 +1080,7 @@ static int motion_init(struct ctx_cam *cam)
         cam->imgs.image_preview.image_high = mymalloc(cam->imgs.size_high);
     }
 
-    mot_stream_init(cam);
+    webu_stream_init(cam);
 
     /* Set output picture type */
     if (!strcmp(cam->conf.picture_type, "ppm"))
@@ -1374,7 +1304,7 @@ static void motion_cleanup(struct ctx_cam *cam) {
     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
 
-    mot_stream_deinit(cam);
+    webu_stream_deinit(cam);
 
     if (cam->video_dev >= 0) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from motion_cleanup"));
@@ -2093,17 +2023,17 @@ static void mlp_overlay(struct ctx_cam *cam){
     /* Smartmask overlay */
     if (cam->smartmask_speed &&
         (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
-         cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)))
+         cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
         overlay_smartmask(cam, cam->imgs.image_motion.image_norm);
 
     /* Largest labels overlay */
     if (cam->imgs.largest_label && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
-        cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)))
+        cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
         overlay_largest_label(cam, cam->imgs.image_motion.image_norm);
 
     /* Fixed mask overlay */
     if (cam->imgs.mask && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
-        cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)))
+        cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
         overlay_fixed_mask(cam, cam->imgs.image_motion.image_norm);
 
     /* Add changed pixels in upper right corner of the pictures */
@@ -2121,7 +2051,7 @@ static void mlp_overlay(struct ctx_cam *cam){
      * Add changed pixels to motion-images (for stream) in setup_mode
      * and always overlay smartmask (not only when motion is detected)
      */
-    if (cam->conf.setup_mode || (cam->stream_motion.cnct_count > 0)) {
+    if (cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
                 cam->current_image->total_labels, cam->noise);
         draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
@@ -3237,7 +3167,7 @@ static int motion_check_threadcount(void){
     while (cam_list[indx] != NULL){
         if ((cam_list[indx]->webcontrol_finish == FALSE) &&
             ((cam_list[indx]->webcontrol_daemon != NULL) ||
-             (cam_list[indx]->webstream_daemon != NULL))) {
+             (cam_list[indx]->stream.daemon != NULL))) {
             motion_threads_running++;
         }
         indx++;

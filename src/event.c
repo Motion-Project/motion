@@ -14,6 +14,7 @@
 #include "dbse.h"
 #include "video_loopback.h"
 #include "video_common.h"
+#include "webu_stream.h"
 
 /* Various functions (most doing the actual action)
  * TODO Items:
@@ -273,100 +274,12 @@ static void event_stream_put(struct ctx_cam *cam, motion_event evnt
             ,struct ctx_image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
 
-    int subsize;
-
     (void)evnt;
     (void)fname;
     (void)ftype;
     (void)ts1;
 
-    pthread_mutex_lock(&cam->mutex_stream);
-        /* Normal stream processing */
-        if (cam->stream_norm.cnct_count > 0){
-            if (cam->stream_norm.jpeg_data == NULL){
-                cam->stream_norm.jpeg_data = mymalloc(cam->imgs.size_norm);
-            }
-            if (img_data->image_norm != NULL){
-                cam->stream_norm.jpeg_size = put_picture_memory(cam
-                    ,cam->stream_norm.jpeg_data
-                    ,cam->imgs.size_norm
-                    ,img_data->image_norm
-                    ,cam->conf.stream_quality
-                    ,cam->imgs.width
-                    ,cam->imgs.height);
-            }
-        }
-
-        /* Substream processing */
-        if (cam->stream_sub.cnct_count > 0){
-            if (cam->stream_sub.jpeg_data == NULL){
-                cam->stream_sub.jpeg_data = mymalloc(cam->imgs.size_norm);
-            }
-            if (img_data->image_norm != NULL){
-                /* Resulting substream image must be multiple of 8 */
-                if (((cam->imgs.width  % 16) == 0)  &&
-                    ((cam->imgs.height % 16) == 0)) {
-
-                    subsize = ((cam->imgs.width / 2) * (cam->imgs.height / 2) * 3 / 2);
-                    if (cam->imgs.image_substream == NULL){
-                        cam->imgs.image_substream = mymalloc(subsize);
-                    }
-                    pic_scale_img(cam->imgs.width
-                        ,cam->imgs.height
-                        ,img_data->image_norm
-                        ,cam->imgs.image_substream);
-                    cam->stream_sub.jpeg_size = put_picture_memory(cam
-                        ,cam->stream_sub.jpeg_data
-                        ,subsize
-                        ,cam->imgs.image_substream
-                        ,cam->conf.stream_quality
-                        ,(cam->imgs.width / 2)
-                        ,(cam->imgs.height / 2));
-                } else {
-                    /* Substream was not multiple of 8 so send full image*/
-                    cam->stream_sub.jpeg_size = put_picture_memory(cam
-                        ,cam->stream_sub.jpeg_data
-                        ,cam->imgs.size_norm
-                        ,img_data->image_norm
-                        ,cam->conf.stream_quality
-                        ,cam->imgs.width
-                        ,cam->imgs.height);
-                }
-            }
-        }
-
-        /* Motion stream processing */
-        if (cam->stream_motion.cnct_count > 0){
-            if (cam->stream_motion.jpeg_data == NULL){
-                cam->stream_motion.jpeg_data = mymalloc(cam->imgs.size_norm);
-            }
-            if (cam->imgs.image_motion.image_norm != NULL){
-                cam->stream_motion.jpeg_size = put_picture_memory(cam
-                    ,cam->stream_motion.jpeg_data
-                    ,cam->imgs.size_norm
-                    ,cam->imgs.image_motion.image_norm
-                    ,cam->conf.stream_quality
-                    ,cam->imgs.width
-                    ,cam->imgs.height);
-            }
-        }
-
-        /* Source stream processing */
-        if (cam->stream_source.cnct_count > 0){
-            if (cam->stream_source.jpeg_data == NULL){
-                cam->stream_source.jpeg_data = mymalloc(cam->imgs.size_norm);
-            }
-            if (cam->imgs.image_virgin != NULL){
-                cam->stream_source.jpeg_size = put_picture_memory(cam
-                    ,cam->stream_source.jpeg_data
-                    ,cam->imgs.size_norm
-                    ,cam->imgs.image_virgin
-                    ,cam->conf.stream_quality
-                    ,cam->imgs.width
-                    ,cam->imgs.height);
-            }
-        }
-    pthread_mutex_unlock(&cam->mutex_stream);
+    webu_stream_getimg(cam, img_data);
 
 }
 

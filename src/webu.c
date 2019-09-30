@@ -1443,29 +1443,29 @@ static void webu_mhd_deinit(void *cls
     (void)toe;
 
     if (webui->cnct_type == WEBUI_CNCT_FULL ){
-        pthread_mutex_lock(&webui->cam->mutex_stream);
-            webui->cam->stream_norm.cnct_count--;
-        pthread_mutex_unlock(&webui->cam->mutex_stream);
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            webui->cam->stream.norm.cnct_count--;
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_SUB ){
-        pthread_mutex_lock(&webui->cam->mutex_stream);
-            webui->cam->stream_sub.cnct_count--;
-        pthread_mutex_unlock(&webui->cam->mutex_stream);
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            webui->cam->stream.sub.cnct_count--;
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_MOTION ){
-        pthread_mutex_lock(&webui->cam->mutex_stream);
-            webui->cam->stream_motion.cnct_count--;
-        pthread_mutex_unlock(&webui->cam->mutex_stream);
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            webui->cam->stream.motion.cnct_count--;
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ){
-        pthread_mutex_lock(&webui->cam->mutex_stream);
-            webui->cam->stream_source.cnct_count--;
-        pthread_mutex_unlock(&webui->cam->mutex_stream);
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            webui->cam->stream.source.cnct_count--;
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_STATIC ){
-        pthread_mutex_lock(&webui->cam->mutex_stream);
-            webui->cam->stream_norm.cnct_count--;
-        pthread_mutex_unlock(&webui->cam->mutex_stream);
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            webui->cam->stream.norm.cnct_count--;
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     }
 
@@ -1764,8 +1764,8 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
             mhdst->mhd_opt_nbr++;
         } else {
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
-            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->camlst[mhdst->indxthrd]->webstream_digest_rand);
-            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->camlst[mhdst->indxthrd]->webstream_digest_rand;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->camlst[mhdst->indxthrd]->stream.digest_rand);
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->camlst[mhdst->indxthrd]->stream.digest_rand;
             mhdst->mhd_opt_nbr++;
         }
 
@@ -1942,11 +1942,11 @@ static void webu_start_strm(struct ctx_cam **camlst){
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
     randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
-    snprintf(camlst[0]->webstream_digest_rand
-        ,sizeof(camlst[0]->webstream_digest_rand),"%d",randnbr);
+    snprintf(camlst[0]->stream.digest_rand
+        ,sizeof(camlst[0]->stream.digest_rand),"%d",randnbr);
 
     while (camlst[mhdst.indxthrd] != NULL){
-        camlst[mhdst.indxthrd]->webstream_daemon = NULL;
+        camlst[mhdst.indxthrd]->stream.daemon = NULL;
         if (camlst[mhdst.indxthrd]->conf.stream_port != 0 ){
             if (mhdst.indxthrd == 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
@@ -1964,14 +1964,14 @@ static void webu_start_strm(struct ctx_cam **camlst){
             webu_mhd_opts(&mhdst);
             webu_mhd_flags(&mhdst);
             if (mhdst.indxthrd == 0){
-                camlst[mhdst.indxthrd]->webstream_daemon = MHD_start_daemon (mhdst.mhd_flags
+                camlst[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
                     ,camlst[mhdst.indxthrd]->conf.stream_port
                     ,NULL, NULL
                     ,&webu_answer_strm, camlst
                     ,MHD_OPTION_ARRAY, mhdst.mhd_ops
                     ,MHD_OPTION_END);
             } else {
-                camlst[mhdst.indxthrd]->webstream_daemon = MHD_start_daemon (mhdst.mhd_flags
+                camlst[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
                     ,camlst[mhdst.indxthrd]->conf.stream_port
                     ,NULL, NULL
                     ,&webu_answer_strm, camlst[mhdst.indxthrd]
@@ -1979,7 +1979,7 @@ static void webu_start_strm(struct ctx_cam **camlst){
                     ,MHD_OPTION_END);
             }
             free(mhdst.mhd_ops);
-            if (camlst[mhdst.indxthrd]->webstream_daemon == NULL){
+            if (camlst[mhdst.indxthrd]->stream.daemon == NULL){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Unable to start stream for camera %d")
                     ,camlst[mhdst.indxthrd]->camera_id);
@@ -2055,11 +2055,11 @@ void webu_stop(struct ctx_cam **camlst) {
 
     indxthrd = 0;
     while (camlst[indxthrd] != NULL){
-        if (camlst[indxthrd]->webstream_daemon != NULL){
+        if (camlst[indxthrd]->stream.daemon != NULL){
             camlst[indxthrd]->webcontrol_finish = TRUE;
-            MHD_stop_daemon (camlst[indxthrd]->webstream_daemon);
+            MHD_stop_daemon (camlst[indxthrd]->stream.daemon);
         }
-        camlst[indxthrd]->webstream_daemon = NULL;
+        camlst[indxthrd]->stream.daemon = NULL;
         camlst[indxthrd]->webcontrol_daemon = NULL;
         indxthrd++;
     }
@@ -2083,7 +2083,7 @@ void webu_start(struct ctx_cam **camlst) {
 
     indxthrd = 0;
     while (camlst[indxthrd] != NULL){
-        camlst[indxthrd]->webstream_daemon = NULL;
+        camlst[indxthrd]->stream.daemon = NULL;
         camlst[indxthrd]->webcontrol_daemon = NULL;
         camlst[indxthrd]->webcontrol_finish = FALSE;
         indxthrd++;

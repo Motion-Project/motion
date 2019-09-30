@@ -207,6 +207,12 @@ enum WEBUI_LEVEL{
   WEBUI_LEVEL_NEVER      = 99
 };
 
+enum FLIP_TYPE {
+    FLIP_TYPE_NONE,
+    FLIP_TYPE_HORIZONTAL,
+    FLIP_TYPE_VERTICAL
+};
+
 struct vdev_usrctrl_ctx {
     char          *ctrl_name;       /* The name or description of the ID as requested by user*/
     int            ctrl_value;      /* The value that the user wants the control set to*/
@@ -293,16 +299,22 @@ struct ctx_images {
     int picture_type;
 };
 
-struct stream_data {
+struct ctx_stream_data {
     unsigned char   *jpeg_data; /* Image compressed as JPG */
     long            jpeg_size;  /* The number of bytes for jpg */
     int             cnct_count; /* Counter of the number of connections */
 };
 
-enum FLIP_TYPE {
-    FLIP_TYPE_NONE,
-    FLIP_TYPE_HORIZONTAL,
-    FLIP_TYPE_VERTICAL
+struct ctx_stream {
+    pthread_mutex_t         mutex;
+    struct MHD_Daemon       *daemon;
+    char                    digest_rand[8];
+    int                     finish;
+
+    struct ctx_stream_data  norm;    /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  sub;     /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  motion;  /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  source;  /* Copy of the image to use for web stream*/
 };
 
 /* Contains data for image rotation, see rotate.c. */
@@ -459,18 +471,10 @@ struct ctx_cam {
     int rolling_frame;
 
     struct MHD_Daemon   *webcontrol_daemon;
-    struct MHD_Daemon   *webstream_daemon;
     char                webcontrol_digest_rand[8];
-    char                webstream_digest_rand[8];
     int                 camera_id;
 
-    pthread_mutex_t     mutex_stream;
-
-    struct stream_data  stream_norm;    /* Copy of the image to use for web stream*/
-    struct stream_data  stream_sub;     /* Copy of the image to use for web stream*/
-    struct stream_data  stream_motion;  /* Copy of the image to use for web stream*/
-    struct stream_data  stream_source;  /* Copy of the image to use for web stream*/
-
+    struct ctx_stream      stream;
 
 };
 
