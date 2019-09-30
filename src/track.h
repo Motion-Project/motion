@@ -44,7 +44,7 @@
     extern struct trackoptions track_template;
 
     unsigned int track_center(struct ctx_cam *cam, int, unsigned int, int, int);
-    unsigned int track_move(struct ctx_cam *cam, int, struct coord *, struct images *, unsigned int);
+    unsigned int track_move(struct ctx_cam *cam, int, struct ctx_coord *, struct images *, unsigned int);
 
     enum track_action { TRACK_CENTER, TRACK_MOVE };
 

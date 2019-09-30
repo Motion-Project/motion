@@ -761,7 +761,7 @@ int webu_process_config(struct webui_ctx *webui) {
 
 int webu_process_track(struct webui_ctx *webui) {
     /* Call the tracking move functions as requested */
-    struct coord cent;
+    struct ctx_coord cent;
     int retcd;
 
     if (!strcmp(webui->uri_cmd2, "center")) {

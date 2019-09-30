@@ -222,6 +222,20 @@ struct vdev_context {
     int update_parms;                           /*Bool for whether to update the parameters on the device*/
 };
 
+struct ctx_coord {
+    int x;
+    int y;
+    int width;
+    int height;
+    int minx;
+    int maxx;
+    int miny;
+    int maxy;
+    int stddev_x;
+    int stddev_y;
+    int stddev_xy;
+};
+
 
 struct image_data {
     unsigned char *image_norm;
@@ -240,7 +254,7 @@ struct image_data {
 
     unsigned int flags;         /* Se IMAGE_* defines */
 
-    struct coord location;      /* coordinates for center and size of last motion detection*/
+    struct ctx_coord location;      /* coordinates for center and size of last motion detection*/
 
     int total_labels;
 

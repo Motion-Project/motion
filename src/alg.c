@@ -12,11 +12,21 @@
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 
+/*
+struct segment {
+    struct ctx_coord coord;
+    int width;
+    int height;
+    int open;
+    int count;
+};
+*/
+
 /**
  * alg_locate_center_size
  *      Locates the center and size of the movement.
  */
-void alg_locate_center_size(struct images *imgs, int width, int height, struct coord *cent)
+void alg_locate_center_size(struct images *imgs, int width, int height, struct ctx_coord *cent)
 {
     unsigned char *out = imgs->img_motion.image_norm;
     int *labels = imgs->labels;
@@ -164,7 +174,7 @@ void alg_locate_center_size(struct images *imgs, int width, int height, struct c
  * alg_draw_location
  *      Draws a box around the movement.
  */
-void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
+void alg_draw_location(struct ctx_coord *cent, struct images *imgs, int width, unsigned char *new,
                        int style, int mode, int process_thisframe)
 {
     unsigned char *out = imgs->img_motion.image_norm;
@@ -232,7 +242,7 @@ void alg_draw_location(struct coord *cent, struct images *imgs, int width, unsig
  * alg_draw_red_location
  *          Draws a RED box around the movement.
  */
-void alg_draw_red_location(struct coord *cent, struct images *imgs, int width, unsigned char *new,
+void alg_draw_red_location(struct ctx_coord *cent, struct images *imgs, int width, unsigned char *new,
                            int style, int mode, int process_thisframe)
 {
     unsigned char *out = imgs->img_motion.image_norm;

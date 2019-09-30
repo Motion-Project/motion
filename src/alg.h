@@ -10,30 +10,11 @@
 #ifndef _INCLUDE_ALG_H
 #define _INCLUDE_ALG_H
 
-    #include "motion.h"
+    struct ctx_coord;
 
-    struct coord {
-        int x;
-        int y;
-        int width;
-        int height;
-        int minx;
-        int maxx;
-        int miny;
-        int maxy;
-    };
-
-    struct segment {
-        struct coord coord;
-        int width;
-        int height;
-        int open;
-        int count;
-    };
-
-    void alg_locate_center_size(struct images *, int width, int height, struct coord *);
-    void alg_draw_location(struct coord *, struct images *, int width, unsigned char *, int, int, int);
-    void alg_draw_red_location(struct coord *, struct images *, int width, unsigned char *, int, int, int);
+    void alg_locate_center_size(struct images *, int width, int height, struct ctx_coord *);
+    void alg_draw_location(struct ctx_coord *, struct images *, int width, unsigned char *, int, int, int);
+    void alg_draw_red_location(struct ctx_coord *, struct images *, int width, unsigned char *, int, int, int);
     int alg_diff(struct ctx_cam *cam, unsigned char *);
     int alg_diff_standard(struct ctx_cam *cam, unsigned char *);
     int alg_lightswitch(struct ctx_cam *cam, int diffs);

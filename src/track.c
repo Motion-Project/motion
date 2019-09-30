@@ -50,29 +50,29 @@ static unsigned int servo_center(struct ctx_cam *cam, int xoff, int yoff);
 static unsigned int stepper_center(struct ctx_cam *cam, int xoff, int yoff);
 static unsigned int iomojo_center(struct ctx_cam *cam, int xoff, int yoff);
 
-static unsigned int stepper_move(struct ctx_cam *cam, struct coord *cent, struct images *imgs);
-static unsigned int servo_move(struct ctx_cam *cam, struct coord *cent,
+static unsigned int stepper_move(struct ctx_cam *cam, struct ctx_coord *cent, struct images *imgs);
+static unsigned int servo_move(struct ctx_cam *cam, struct ctx_coord *cent,
                                struct images *imgs, unsigned int manual);
-static unsigned int iomojo_move(struct ctx_cam *cam, int dev, struct coord *cent, struct images *imgs);
+static unsigned int iomojo_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent, struct images *imgs);
 
 #ifdef HAVE_V4L2
     static unsigned int lqos_center(struct ctx_cam *cam, int dev, int xoff, int yoff);
-    static unsigned int lqos_move(struct ctx_cam *cam, int dev, struct coord *cent,
+    static unsigned int lqos_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
                                 struct images *imgs, unsigned int manual);
     static unsigned int uvc_center(struct ctx_cam *cam, int dev, int xoff, int yoff);
-    static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct coord *cent,
+    static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
                                 struct images *imgs, unsigned int manual);
 #endif /* HAVE_V4L2 */
 
 static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, unsigned int manual,
-                                 int xoff, int yoff, struct coord *cent, struct images *imgs);
+                                 int xoff, int yoff, struct ctx_coord *cent, struct images *imgs);
 
 
 /* Add a call to your functions here: */
 unsigned int track_center(struct ctx_cam *cam, int dev,
                           unsigned int manual, int xoff, int yoff)
 {
-    struct coord cent;
+    struct ctx_coord cent;
 
     (void)dev;
 
@@ -115,7 +115,7 @@ unsigned int track_center(struct ctx_cam *cam, int dev,
 }
 
 /* Add a call to your functions here: */
-unsigned int track_move(struct ctx_cam *cam, int dev, struct coord *cent, struct images *imgs,
+unsigned int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent, struct images *imgs,
                         unsigned int manual)
 {
 
@@ -249,7 +249,7 @@ static unsigned int stepper_center(struct ctx_cam *cam, int x_offset, int y_offs
 }
 
 static unsigned int stepper_move(struct ctx_cam *cam,
-                                 struct coord *cent, struct images *imgs)
+                                 struct ctx_coord *cent, struct images *imgs)
 {
     unsigned int command = 0, data = 0;
 
@@ -399,7 +399,7 @@ static unsigned int servo_position(struct ctx_cam *cam, unsigned int motor)
  *      Does relative movements to current position.
  *
  */
-static unsigned int servo_move(struct ctx_cam *cam, struct coord *cent,
+static unsigned int servo_move(struct ctx_cam *cam, struct ctx_coord *cent,
                                struct images *imgs, unsigned int manual)
 {
     unsigned int command = 0;
@@ -756,7 +756,7 @@ static unsigned int iomojo_center(struct ctx_cam *cam, int x_offset, int y_offse
     return cam->track.move_wait;
 }
 
-static unsigned int iomojo_move(struct ctx_cam *cam, int dev, struct coord *cent,
+static unsigned int iomojo_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
                                       struct images *imgs)
 {
     char command[5];
@@ -875,7 +875,7 @@ static unsigned int lqos_center(struct ctx_cam *cam, int dev, int x_angle, int y
     return cam->track.move_wait;
 }
 
-static unsigned int lqos_move(struct ctx_cam *cam, int dev, struct coord *cent,
+static unsigned int lqos_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
                                     struct images *imgs, unsigned int manual)
 {
     int delta_x = cent->x - (imgs->width / 2);
@@ -1116,7 +1116,7 @@ static unsigned int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_
     return cam->track.move_wait;
 }
 
-static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct coord *cent,
+static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
                                    struct images *imgs, unsigned int manual)
 {
     /* RELATIVE MOVING : Act.Position +/- X and Y */
@@ -1306,7 +1306,7 @@ static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct coord *cent,
 #endif /* HAVE_V4L2 */
 
 static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, unsigned int manual,
-                                 int xoff, int yoff, struct coord *cent, struct images *imgs)
+                                 int xoff, int yoff, struct ctx_coord *cent, struct images *imgs)
 {
     char fmtcmd[PATH_MAX];
     cam->track_posx += cent->x;

@@ -140,7 +140,7 @@ static void put_stringentry(struct tiff_writing *into, unsigned tag, const char 
     into->buf += 4;
 }
 
-static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
+static void put_subjectarea(struct tiff_writing *into, const struct ctx_coord *box)
 {
     put_uint16(into->buf    , EXIF_TAG_SUBJECT_AREA);
     put_uint16(into->buf + 2, TIFF_TYPE_USHORT);
@@ -163,7 +163,7 @@ static void put_subjectarea(struct tiff_writing *into, const struct coord *box)
 unsigned prepare_exif(unsigned char **exif,
               const struct ctx_cam *cam,
               const struct timespec *ts_in1,
-              const struct coord *box)
+              const struct ctx_coord *box)
 {
     /* description, datetime, and subtime are the values that are actually
      * put into the EXIF data
@@ -354,7 +354,7 @@ unsigned prepare_exif(unsigned char **exif,
 static void put_webp_exif(WebPMux* webp_mux,
               const struct ctx_cam *cam,
               const struct timespec *ts1,
-              const struct coord *box)
+              const struct ctx_coord *box)
 {
     unsigned char *exif = NULL;
     unsigned exif_len = prepare_exif(&exif, cam, ts1, box);
@@ -395,7 +395,7 @@ static void put_webp_exif(WebPMux* webp_mux,
  */
 static void put_webp_yuv420p_file(FILE *fp,
                   unsigned char *image, int width, int height,
-                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct coord *box)
+                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 {
     /* Create a config present and check for compatible library version */
     WebPConfig webp_config;
@@ -489,7 +489,7 @@ static void put_webp_yuv420p_file(FILE *fp,
 static void put_jpeg_yuv420p_file(FILE *fp,
                   unsigned char *image, int width, int height,
                   int quality,
-                  struct ctx_cam *cam, struct timespec *ts1, struct coord *box)
+                  struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 {
     int sz = 0;
     int image_size = cam->imgs.size_norm;
@@ -518,7 +518,7 @@ static void put_jpeg_yuv420p_file(FILE *fp,
  * Returns nothing
  */
 static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
-                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct coord *box)
+                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 
 {
     int sz = 0;

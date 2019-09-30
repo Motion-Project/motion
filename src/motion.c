@@ -538,7 +538,7 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct image_data *img
 {
     struct config *conf = &cam->conf;
     struct images *imgs = &cam->imgs;
-    struct coord *location = &img->location;
+    struct ctx_coord *location = &img->location;
 
     /* Draw location */
     if (cam->locate_motion_mode == LOCATE_ON) {
