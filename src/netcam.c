@@ -17,7 +17,8 @@
 #include <stdio.h>
 #include <regex.h>
 #include <time.h>
-#include "rotate.h"    /* already includes motion.h */
+#include "motion.h"
+#include "rotate.h"
 #include "netcam.h"
 #include "video_v4l2.h"  /* Needed to validate palette for v4l2 via netcam */
 #include "movie.h"

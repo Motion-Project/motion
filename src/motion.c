@@ -7,6 +7,7 @@
  *
  */
 #include "motion.h"
+#include "rotate.h"
 #include "movie.h"
 #include "video_common.h"
 #include "video_v4l2.h"

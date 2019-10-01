@@ -11,8 +11,7 @@
 #ifndef _INCLUDE_ROTATE_H
 #define _INCLUDE_ROTATE_H
 
-#include "motion.h" /* for struct context */
-
+    struct ctx_cam;
 /**
  * rotate_init
  *
@@ -62,6 +61,22 @@ void rotate_deinit(struct ctx_cam *cam);
  *   0  - success
  *   -1 - failure (rare, shouldn't happen)
  */
+/* Contains data for image rotation, see rotate.c. */
+struct ctx_rotate {
+
+    unsigned char *buffer_norm;  /* Temporary buffer for 90 and 270 degrees rotation of normal resolution image. */
+    unsigned char *buffer_high;  /* Temporary buffer for 90 and 270 degrees rotation of high resolution image. */
+    int degrees;              /* Degrees to rotate; copied from conf.rotate_deg. */
+    enum FLIP_TYPE axis;      /* Rotate image over the Horizontal or Vertical axis. */
+
+    int capture_width_norm;            /* Capture width of normal resolution image */
+    int capture_height_norm;           /* Capture height of normal resolution image */
+
+    int capture_width_high;            /* Capture width of high resolution image */
+    int capture_height_high;           /* Capture height of high resolution image */
+
+};
+
 int rotate_map(struct ctx_cam *cam, struct ctx_image_data *img_data);
 
 #endif

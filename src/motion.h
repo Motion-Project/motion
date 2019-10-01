@@ -10,12 +10,6 @@
 #ifndef _INCLUDE_MOTION_H
 #define _INCLUDE_MOTION_H
 
-/* Forward declarations, used in functional definitions of headers */
-struct ctx_images;
-struct ctx_image_data;
-struct ctx_dbse;
-struct ctx_mmalcam;
-
 #include "config.h"
 
 /* Includes */
@@ -60,9 +54,15 @@ struct ctx_mmalcam;
     #include <pthread_np.h>
 #endif
 
+/* Forward declarations, used in functional definitions of headers */
+struct ctx_rotate;
+struct ctx_images;
+struct ctx_image_data;
+struct ctx_dbse;
+struct ctx_mmalcam;
+
 #include "logger.h"
 #include "conf.h"
-
 #include "track.h"
 #include "netcam.h"
 #include "movie.h"
@@ -313,22 +313,6 @@ struct ctx_stream {
     struct ctx_stream_data  source;  /* Copy of the image to use for web stream*/
 };
 
-/* Contains data for image rotation, see rotate.c. */
-struct rotdata {
-
-    unsigned char *buffer_norm;  /* Temporary buffer for 90 and 270 degrees rotation of normal resolution image. */
-    unsigned char *buffer_high;  /* Temporary buffer for 90 and 270 degrees rotation of high resolution image. */
-    int degrees;              /* Degrees to rotate; copied from conf.rotate_deg. */
-    enum FLIP_TYPE axis;      /* Rotate image over the Horizontal or Vertical axis. */
-
-    int capture_width_norm;            /* Capture width of normal resolution image */
-    int capture_height_norm;           /* Capture height of normal resolution image */
-
-    int capture_width_high;            /* Capture width of high resolution image */
-    int capture_height_high;           /* Capture height of high resolution image */
-
-};
-
 /*
  *  These used to be global variables but now each thread will have its
  *  own context
@@ -356,19 +340,17 @@ struct ctx_cam {
 
     enum CAMERA_TYPE      camera_type;
 
-    struct ctx_mmalcam *mmalcam;
-    struct ctx_netcam *netcam;              /* this structure contains the context for normal RTSP connection */
-    struct ctx_netcam *netcam_high;         /* this structure contains the context for high resolution RTSP connection */
-
-    struct vdev_context *vdev;              /* Structure for v4l2 device information */
-
-    struct ctx_image_data *current_image;       /* Pointer to a structure where the image, diffs etc is stored */
+    struct ctx_mmalcam      *mmalcam;
+    struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
+    struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
+    struct vdev_context     *vdev;              /* Structure for v4l2 device information */
+    struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
+    struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
     unsigned int new_img;
 
     int locate_motion_mode;
     int locate_motion_style;
     int process_thisframe;
-    struct rotdata rotate_data;              /* rotation data is thread-specific */
 
     int noise;
     int threshold;
