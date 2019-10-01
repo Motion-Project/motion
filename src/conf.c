@@ -28,6 +28,7 @@
 #include <string.h>
 #include <regex.h>
 #include "motion.h"
+#include "util.h"
 
 #define EXTENSION ".conf"
 
@@ -2795,73 +2796,6 @@ struct ctx_cam **copy_uri(struct ctx_cam **camlst, const char *str, int val) {
     camlst = copy_string(camlst, str, val);
     return camlst;
 
-}
-
-/**
- * mystrcpy
- *      Is used to assign string type fields (e.g. config options)
- *      In a way so that we the memory is malloc'ed to fit the string.
- *      If a field is already pointing to a string (not NULL) the memory of the
- *      old string is free'd and new memory is malloc'ed and filled with the
- *      new string is copied into the the memory and with the char pointer
- *      pointing to the new string.
- *
- *      from - pointer to the new string we want to copy
- *      to   - the pointer to the current string (or pointing to NULL)
- *              If not NULL the memory it points to is free'd.
- *
- * Returns pointer to the new string which is in malloc'ed memory
- * FIXME The strings that are malloc'ed with this function should be freed
- * when the motion program is terminated normally instead of relying on the
- * OS to clean up.
- */
-char *mystrcpy(char *to, const char *from){
-    /*
-     * Free the memory used by the to string, if such memory exists,
-     * and return a pointer to a freshly malloc()'d string with the
-     * same value as from.
-     */
-
-    if (to != NULL)
-        free(to);
-
-    return mystrdup(from);
-}
-
-/**
- * mystrdup
- *      Truncates the string to the length given by the environment
- *      variable PATH_MAX to ensure that config options can always contain
- *      a really long path but no more than that.
- *
- * Returns a pointer to a freshly malloc()'d string with the same
- *      value as the string that the input parameter 'from' points to,
- *      or NULL if the from string is 0 characters.
- */
-char *mystrdup(const char *from)
-{
-    char *tmp;
-    size_t stringlength;
-
-    if (from == NULL || !strlen(from)) {
-        tmp = NULL;
-    } else {
-        stringlength = strlen(from);
-        stringlength = (stringlength < PATH_MAX ? stringlength : PATH_MAX);
-        tmp = mymalloc(stringlength + 1);
-        strncpy(tmp, from, stringlength);
-
-        /*
-         * We must ensure the string always has a NULL terminator.
-         * This necessary because strncpy will not append a NULL terminator
-         * if the original string is greater than string length.
-         */
-        tmp += stringlength;
-        *tmp = '\0';
-        tmp -= stringlength;
-    }
-
-    return tmp;
 }
 
 /**

@@ -38,6 +38,7 @@
 #include <sys/socket.h>
 
 #include "motion.h"
+#include "util.h"
 #include "webu.h"
 #include "webu_html.h"
 #include "webu_text.h"
@@ -1231,7 +1232,7 @@ static int webu_answer_ctrl(void *cls
 
     webui->cnct_type = WEBUI_CNCT_CONTROL;
 
-    util_threadname_set("wu", 0,NULL);
+    mythreadname_set("wu", 0,NULL);
 
     webui->connection = connection;
 
@@ -1301,7 +1302,7 @@ static int webu_answer_strm(void *cls
         return MHD_NO;
     }
 
-    util_threadname_set("st", 0,NULL);
+    mythreadname_set("st", 0,NULL);
 
     webui->connection = connection;
 
@@ -1376,7 +1377,7 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
     (void)connection;
 
     /* Set the thread name to connection until we know whether control or stream answers*/
-    util_threadname_set("cn", 0,NULL);
+    mythreadname_set("cn", 0,NULL);
 
     webui = malloc(sizeof(struct webui_ctx));
 
@@ -1410,7 +1411,7 @@ static void *webu_mhd_init_one(void *cls, const char *uri, struct MHD_Connection
     (void)connection;
 
     /* Set the thread name to connection until we know whether control or stream answers*/
-    util_threadname_set("cn", 0,NULL);
+    mythreadname_set("cn", 0,NULL);
 
     webui = malloc(sizeof(struct webui_ctx));
 

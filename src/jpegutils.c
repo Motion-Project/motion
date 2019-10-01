@@ -50,6 +50,7 @@
 
 #include "config.h"
 #include "motion.h"
+#include "util.h"
 #include "jpegutils.h"
 #include "exif.h"
 #include <setjmp.h>

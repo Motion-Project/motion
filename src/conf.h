@@ -232,7 +232,5 @@
     void conf_output_parms(struct ctx_cam **camlst);
     const char *config_type(config_param *);
     void conf_print(struct ctx_cam **camlst);
-    char *mystrdup(const char *);
-    char *mystrcpy(char *, const char *);
 
 #endif /* _INCLUDE_CONF_H */

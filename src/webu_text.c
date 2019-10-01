@@ -20,6 +20,7 @@
  */
 
 #include "motion.h"
+#include "util.h"
 #include "webu.h"
 #include "webu_text.h"
 

@@ -10,7 +10,7 @@
 #ifndef _INCLUDE_PICTURE_H_
 #define _INCLUDE_PICTURE_H_
 
-    #include "motion.h"
+    struct ctx_cam;
 
     void overlay_smartmask(struct ctx_cam *cam, unsigned char *);
     void overlay_fixed_mask(struct ctx_cam *cam, unsigned char *);

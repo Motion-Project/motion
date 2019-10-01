@@ -7,7 +7,9 @@
     This software is distributed under the GNU Public License Version 2
     see also the file 'COPYING'.
 */
-#include "picture.h"   /* already includes motion.h */
+#include "motion.h"
+#include "util.h"
+#include "picture.h"
 #include "netcam.h"
 #include "movie.h"
 #include "event.h"
@@ -340,7 +342,7 @@ static void event_image_detect(struct ctx_cam *cam, motion_event evnt
             , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
             , filename, imageext(cam));
 
-        passthrough = util_check_passthrough(cam);
+        passthrough = mycheck_passthrough(cam);
         if ((cam->imgs.size_high > 0) && (!passthrough)) {
             put_picture(cam, fullfilename,img_data->image_high, FTYPE_IMAGE);
         } else {
@@ -521,7 +523,7 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
                 }
             }
 
-            passthrough = util_check_passthrough(cam);
+            passthrough = mycheck_passthrough(cam);
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
                 put_picture(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
             } else {
@@ -550,7 +552,7 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
                 , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
                 , filename, imageext(cam));
 
-            passthrough = util_check_passthrough(cam);
+            passthrough = mycheck_passthrough(cam);
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
                 put_picture(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
             } else {
@@ -669,7 +671,7 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
             } else if (errno ==  ENOENT) {
                 MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
                     ,_("path not found, trying to create it %s ..."), cam->conf.target_dir);
-                if (create_path(cam->extpipefilename) == -1)
+                if (mycreate_path(cam->extpipefilename) == -1)
                     return ;
             }
             else {
@@ -680,7 +682,7 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
         }
 
         /* Always create any path specified as file name */
-        if (create_path(cam->extpipefilename) == -1)
+        if (mycreate_path(cam->extpipefilename) == -1)
             return ;
 
         mystrftime(cam, stamp, sizeof(stamp), cam->conf.movie_extpipe, ts1, cam->extpipefilename, 0);
@@ -722,7 +724,7 @@ static void event_extpipe_put(struct ctx_cam *cam, motion_event evnt
     /* Check use_extpipe enabled and ext_pipe not NULL */
     if ((cam->conf.movie_extpipe_use) && (cam->extpipe != NULL)) {
         MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Using extpipe"));
-        passthrough = util_check_passthrough(cam);
+        passthrough = mycheck_passthrough(cam);
         /* Check that is open */
         if ((cam->extpipe_open) && (fileno(cam->extpipe) > 0)) {
             if ((cam->imgs.size_high > 0) && (!passthrough)){

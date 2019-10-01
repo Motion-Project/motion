@@ -14,6 +14,7 @@
  */
 
 #include "motion.h"
+#include "util.h"
 #include "picture.h"
 #include "webu.h"
 #include "webu_stream.h"

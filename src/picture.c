@@ -8,7 +8,8 @@
  *    See also the file 'COPYING'.
  *
  */
-
+#include "motion.h"
+#include "util.h"
 #include "picture.h"
 #include "jpegutils.h"
 #include "event.h"
@@ -454,7 +455,7 @@ static void put_picture_fd(struct ctx_cam *cam, FILE *picture, unsigned char *im
 
     /* See comment in put_picture_memory regarding dummy*/
 
-    passthrough = util_check_passthrough(cam);
+    passthrough = mycheck_passthrough(cam);
     if ((ftype == FTYPE_IMAGE) && (cam->imgs.size_high > 0) && (!passthrough)) {
         width = cam->imgs.width_high;
         height = cam->imgs.height_high;

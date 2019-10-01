@@ -22,148 +22,8 @@
 */
 
 #include "motion.h"
+#include "util.h"
 
-/****************************************************************************
- *  The section below is the "my" section of functions.
- *  These are designed to be extremely simple version specific
- *  variants of the libav functions.
- ****************************************************************************/
-#if (LIBAVFORMAT_VERSION_MAJOR >= 55) || ((LIBAVFORMAT_VERSION_MAJOR == 54) && (LIBAVFORMAT_VERSION_MINOR > 6))
-    #define MY_FLAG_READ       AVIO_FLAG_READ
-    #define MY_FLAG_WRITE      AVIO_FLAG_WRITE
-    #define MY_FLAG_READ_WRITE AVIO_FLAG_READ_WRITE
-#else  //Older versions
-    #define MY_FLAG_READ       URL_RDONLY
-    #define MY_FLAG_WRITE      URL_WRONLY
-    #define MY_FLAG_READ_WRITE URL_RDWR
-#endif
-/*********************************************/
-#if (LIBAVFORMAT_VERSION_MAJOR >= 56)
-    #define MY_CODEC_ID_MSMPEG4V2 AV_CODEC_ID_MSMPEG4V2
-    #define MY_CODEC_ID_FLV1      AV_CODEC_ID_FLV1
-    #define MY_CODEC_ID_FFV1      AV_CODEC_ID_FFV1
-    #define MY_CODEC_ID_NONE      AV_CODEC_ID_NONE
-    #define MY_CODEC_ID_MPEG2VIDEO AV_CODEC_ID_MPEG2VIDEO
-    #define MY_CODEC_ID_H264      AV_CODEC_ID_H264
-    #define MY_CODEC_ID_HEVC      AV_CODEC_ID_HEVC
-#else
-    #define MY_CODEC_ID_MSMPEG4V2 CODEC_ID_MSMPEG4V2
-    #define MY_CODEC_ID_FLV1      CODEC_ID_FLV1
-    #define MY_CODEC_ID_FFV1      CODEC_ID_FFV1
-    #define MY_CODEC_ID_NONE      CODEC_ID_NONE
-    #define MY_CODEC_ID_MPEG2VIDEO CODEC_ID_MPEG2VIDEO
-    #define MY_CODEC_ID_H264      CODEC_ID_H264
-    #define MY_CODEC_ID_HEVC      CODEC_ID_H264
-#endif
-
-/*********************************************/
-#if (LIBAVCODEC_VERSION_MAJOR >= 57)
-    #define MY_CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-    #define MY_CODEC_FLAG_QSCALE        AV_CODEC_FLAG_QSCALE
-#else
-    #define MY_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
-    #define MY_CODEC_FLAG_QSCALE        CODEC_FLAG_QSCALE
-#endif
-
-/*********************************************/
-AVFrame *my_frame_alloc(void){
-    AVFrame *pic;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-        pic = av_frame_alloc();
-    #else
-        pic = avcodec_alloc_frame();
-    #endif
-    return pic;
-}
-/*********************************************/
-void my_frame_free(AVFrame *frame){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-        av_frame_free(&frame);
-    #else
-        av_freep(&frame);
-    #endif
-}
-/*********************************************/
-int my_image_get_buffer_size(enum MyPixelFormat pix_fmt, int width, int height){
-    int retcd = 0;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-        int align = 1;
-        retcd = av_image_get_buffer_size(pix_fmt, width, height, align);
-    #else
-        retcd = avpicture_get_size(pix_fmt, width, height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int my_image_copy_to_buffer(AVFrame *frame, uint8_t *buffer_ptr, enum MyPixelFormat pix_fmt,int width, int height,int dest_size){
-    int retcd = 0;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-        int align = 1;
-        retcd = av_image_copy_to_buffer((uint8_t *)buffer_ptr,dest_size
-            ,(const uint8_t * const*)frame,frame->linesize,pix_fmt,width,height,align);
-    #else
-        retcd = avpicture_layout((const AVPicture*)frame,pix_fmt,width,height
-            ,(unsigned char *)buffer_ptr,dest_size);
-    #endif
-    return retcd;
-}
-/*********************************************/
-int my_image_fill_arrays(AVFrame *frame,uint8_t *buffer_ptr,enum MyPixelFormat pix_fmt,int width,int height){
-    int retcd = 0;
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-        int align = 1;
-        retcd = av_image_fill_arrays(
-            frame->data
-            ,frame->linesize
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height
-            ,align
-        );
-    #else
-        retcd = avpicture_fill(
-            (AVPicture *)frame
-            ,buffer_ptr
-            ,pix_fmt
-            ,width
-            ,height);
-    #endif
-    return retcd;
-}
-/*********************************************/
-void my_packet_unref(AVPacket pkt){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 57)
-        av_packet_unref(&pkt);
-    #else
-        av_free_packet(&pkt);
-    #endif
-}
-/*********************************************/
-void my_avcodec_close(AVCodecContext *codec_context){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 58) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR >= 41))
-        avcodec_free_context(&codec_context);
-    #else
-        avcodec_close(codec_context);
-    #endif
-}
-/*********************************************/
-int my_copy_packet(AVPacket *dest_pkt, AVPacket *src_pkt){
-    #if (LIBAVFORMAT_VERSION_MAJOR >= 55)
-        return av_packet_ref(dest_pkt, src_pkt);
-    #else
-        /* Old versions of libav do not support copying packet
-        * We therefore disable the pass through recording and
-        * for this function, simply do not do anything
-        */
-        if (dest_pkt == src_pkt ){
-            return 0;
-        } else {
-            return 0;
-        }
-    #endif
-}
-/*********************************************/
 
 /****************************************************************************
  ****************************************************************************
@@ -264,12 +124,12 @@ static int movie_timelapse_append(struct ctx_movie *movie, AVPacket pkt){
 static void movie_free_context(struct ctx_movie *movie){
 
         if (movie->picture != NULL){
-            my_frame_free(movie->picture);
+            myframe_free(movie->picture);
             movie->picture = NULL;
         }
 
         if (movie->ctx_codec != NULL){
-            my_avcodec_close(movie->ctx_codec);
+            myavcodec_close(movie->ctx_codec);
             movie->ctx_codec = NULL;
         }
 
@@ -436,7 +296,7 @@ static int movie_encode_video(struct ctx_movie *movie){
             av_strerror(retcd, errstr, sizeof(errstr));
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
                 ,_("Receive packet threw EAGAIN returning -2 code :%s"),errstr);
-            my_packet_unref(movie->pkt);
+            mypacket_unref(movie->pkt);
             return -2;
         }
         if (retcd < 0 ){
@@ -468,7 +328,7 @@ static int movie_encode_video(struct ctx_movie *movie){
         }
         if (got_packet_ptr == 0){
             //Buffered packet.  Throw special return code
-            my_packet_unref(movie->pkt);
+            mypacket_unref(movie->pkt);
             return -2;
         }
 
@@ -491,12 +351,12 @@ static int movie_encode_video(struct ctx_movie *movie){
         retcd = avcodec_encode_video(movie->video_st->codec, video_outbuf, video_outbuf_size, movie->picture);
         if (retcd < 0 ){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error encoding video"));
-            my_packet_unref(movie->pkt);
+            mypacket_unref(movie->pkt);
             return -1;
         }
         if (retcd == 0 ){
             // No bytes encoded => buffered=>special handling
-            my_packet_unref(movie->pkt);
+            mypacket_unref(movie->pkt);
             return -2;
         }
 
@@ -939,7 +799,7 @@ static int movie_set_picture(struct ctx_movie *movie){
     int retcd;
     char errstr[128];
 
-    movie->picture = my_frame_alloc();
+    movie->picture = myframe_alloc();
     if (!movie->picture) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc frame"));
         movie_free_context(movie);
@@ -986,7 +846,7 @@ static int movie_set_outputfile(struct ctx_movie *movie){
         if (!(movie->oc->oformat->flags & AVFMT_NOFILE)) {
             if (avio_open(&movie->oc->pb, movie->filename, MY_FLAG_WRITE) < 0) {
                 if (errno == ENOENT) {
-                    if (create_path(movie->filename) == -1) {
+                    if (mycreate_path(movie->filename) == -1) {
                         movie_free_context(movie);
                         return -1;
                     }
@@ -1067,13 +927,13 @@ static int movie_flush_codec(struct ctx_movie *movie){
                         av_strerror(recv_cd, errstr, sizeof(errstr));
                         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
                             ,_("Error draining codec:%s"),errstr);
-                        my_packet_unref(movie->pkt);
+                        mypacket_unref(movie->pkt);
                         return -1;
                     }
                     // v4l2_m2m encoder uses pts 0 and size 0 to indicate AVERROR_EOF
                     if ((movie->pkt.pts == 0) || (movie->pkt.size == 0)) {
                         recv_cd = AVERROR_EOF;
-                        my_packet_unref(movie->pkt);
+                        mypacket_unref(movie->pkt);
                         continue;
                     }
                     retcd = av_write_frame(movie->oc, &movie->pkt);
@@ -1083,7 +943,7 @@ static int movie_flush_codec(struct ctx_movie *movie){
                         return -1;
                     }
                 }
-                my_packet_unref(movie->pkt);
+                mypacket_unref(movie->pkt);
             }
         }
         return 0;
@@ -1108,7 +968,7 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1){
     retcd = movie_set_pts(movie, ts1);
     if (retcd < 0) {
         //If there is an error, it has already been reported.
-        my_packet_unref(movie->pkt);
+        mypacket_unref(movie->pkt);
         return 0;
     }
 
@@ -1117,7 +977,7 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1){
         if (retcd != -2){
             MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while encoding picture"));
         }
-        my_packet_unref(movie->pkt);
+        mypacket_unref(movie->pkt);
         return retcd;
     }
 
@@ -1126,7 +986,7 @@ static int movie_put_frame(struct ctx_movie *movie, const struct timespec *ts1){
     } else {
         retcd = av_write_frame(movie->oc, &movie->pkt);
     }
-    my_packet_unref(movie->pkt);
+    mypacket_unref(movie->pkt);
 
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while writing video frame"));
@@ -1160,24 +1020,24 @@ static void movie_passthru_write(struct ctx_movie *movie, int indx){
 
     movie->netcam_data->pktarray[indx].iswritten = TRUE;
 
-    retcd = my_copy_packet(&movie->pkt, &movie->netcam_data->pktarray[indx].packet);
+    retcd = mycopy_packet(&movie->pkt, &movie->netcam_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
-        my_packet_unref(movie->pkt);
+        mypacket_unref(movie->pkt);
         return;
     }
 
     retcd = movie_set_pktpts(movie, &movie->netcam_data->pktarray[indx].timestamp_ts);
     if (retcd < 0) {
-        my_packet_unref(movie->pkt);
+        mypacket_unref(movie->pkt);
         return;
     }
 
     movie->pkt.stream_index = 0;
 
     retcd = av_write_frame(movie->oc, &movie->pkt);
-    my_packet_unref(movie->pkt);
+    mypacket_unref(movie->pkt);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO

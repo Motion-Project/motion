@@ -9,8 +9,9 @@
  *      See also the file 'COPYING'.
  *
  */
-
-#include "logger.h"   /* already includes motion.h */
+#include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include <stdarg.h>
 
 static int log_mode = LOGMODE_SYSLOG;
@@ -203,7 +204,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     errno_save = errno;
 
     char threadname[32];
-    util_threadname_get(threadname);
+    mythreadname_get(threadname);
 
     /*
      * Prefix the message with the thread number and name,

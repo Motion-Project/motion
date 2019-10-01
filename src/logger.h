@@ -12,7 +12,6 @@
 #ifndef _INCLUDE_LOGGER_H_
 #define _INCLUDE_LOGGER_H_
 
-    #include "motion.h"
     #include <syslog.h>
 
     /* Logging mode */

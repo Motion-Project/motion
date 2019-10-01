@@ -12,6 +12,7 @@
  */
 
 #include "motion.h"
+#include "util.h"
 #include "rotate.h"
 #include "mmalcam.h"
 

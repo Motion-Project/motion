@@ -7,6 +7,7 @@
  *
  */
 #include "motion.h"
+#include "util.h"
 #include "alg.h"
 #include "draw.h"
 

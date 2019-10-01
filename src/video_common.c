@@ -10,6 +10,7 @@
  */
 
 #include "motion.h"
+#include "util.h"
 #include "video_common.h"
 #include "video_v4l2.h"
 #include "jpegutils.h"

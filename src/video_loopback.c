@@ -9,6 +9,7 @@
  *
  */
 #include "motion.h"
+#include "util.h"
 #include "video_loopback.h"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))

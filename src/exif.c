@@ -21,6 +21,7 @@
 
 
 #include "motion.h"
+#include "util.h"
 #include "logger.h"
 #include "exif.h"
 #include <jpeglib.h>

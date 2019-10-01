@@ -55,24 +55,6 @@ struct ctx_mmalcam;
 
 int nls_enabled;
 
-#ifdef HAVE_GETTEXT
-    #include <libintl.h>
-    extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
-#endif
-
-#define _(STRING) translate_text(STRING)
-
-/*
- *  The macro below defines a version of sleep using nanosleep
- * If a signal such as SIG_CHLD interrupts the sleep we just continue sleeping
- */
-#define SLEEP(seconds, nanoseconds) {              \
-                struct timespec ts1;                \
-                ts1.tv_sec = (seconds);             \
-                ts1.tv_nsec = (nanoseconds);        \
-                while (nanosleep(&ts1, &ts1) == -1); \
-        }
-
 #define DEF_PALETTE             17
 
 /* Default picture settings */
@@ -440,29 +422,7 @@ struct ctx_cam {
 extern pthread_mutex_t global_lock;
 extern volatile int threads_running;
 extern FILE *ptr_logfile;
-
-/* TLS keys below */
 extern pthread_key_t tls_key_threadnr; /* key for thread number */
 
-int http_bindsock(int, int, int);
-void * mymalloc(size_t);
-void * myrealloc(void *, size_t, const char *);
-FILE * myfopen(const char *, const char *);
-int myfclose(FILE *);
-size_t mystrftime(const struct ctx_cam *, char *, size_t, const char *, const struct timespec *, const char *, int);
-int create_path(const char *);
-
-void util_threadname_set(const char *abbr, int threadnbr, const char *threadname);
-void util_threadname_get(char *threadname);
-int util_check_passthrough(struct ctx_cam *cam);
-
-    char* translate_text(const char *msgid);
-    void translate_init(void);
-    void translate_locale_chg(const char *langcd);
-
-int mystrceq(const char* var1, const char* var2);
-int mystrcne(const char* var1, const char* var2);
-int mystreq(const char* var1, const char* var2);
-int mystrne(const char* var1, const char* var2);
 
 #endif /* _INCLUDE_MOTION_H */
