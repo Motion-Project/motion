@@ -11,24 +11,25 @@
 #ifndef MMALCAM_H_
 #define MMALCAM_H_
 
-    typedef struct mmalcam_context *mmalcam_context_ptr;
+    typedef struct ctx_mmalcam *ctx_mmalcam_ptr;
 
-    typedef struct mmalcam_context {
+    typedef struct ctx_mmalcam {
         struct ctx_cam *cam;        /* pointer to parent motion
                                     context structure */
         int width;
         int height;
         int framerate;
+        #ifdef HAVE_MMAL
+            struct MMAL_COMPONENT_T *camera_component;
+            struct MMAL_PORT_T *camera_capture_port;
+            struct MMAL_POOL_T *camera_buffer_pool;
+            struct MMAL_QUEUE_T *camera_buffer_queue;
+            struct raspicam_camera_parameters_s *camera_parameters;
+        #endif
+    } ctx_mmalcam;
 
-        struct MMAL_COMPONENT_T *camera_component;
-        struct MMAL_PORT_T *camera_capture_port;
-        struct MMAL_POOL_T *camera_buffer_pool;
-        struct MMAL_QUEUE_T *camera_buffer_queue;
-        struct raspicam_camera_parameters_s *camera_parameters;
-    } mmalcam_context;
-
-    int mmalcam_start (struct context *);
-    int mmalcam_next (struct context *, struct image_data *img_data);
-    void mmalcam_cleanup (struct mmalcam_context *);
+    int mmalcam_start (struct ctx_cam *cam);
+    int mmalcam_next (struct ctx_cam *cam, struct ctx_image_data *img_data);
+    void mmalcam_cleanup (struct ctx_mmalcam *mmalcam);
 
 #endif /* MMALCAM_H_ */

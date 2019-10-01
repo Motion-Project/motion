@@ -14,6 +14,7 @@
 struct ctx_images;
 struct ctx_image_data;
 struct ctx_dbse;
+struct ctx_mmalcam;
 
 #include "config.h"
 
@@ -65,11 +66,6 @@ struct ctx_dbse;
 #include "track.h"
 #include "netcam.h"
 #include "movie.h"
-
-
-#ifdef HAVE_MMAL
-    #include "mmalcam.h"
-#endif
 
 int nls_enabled;
 
@@ -360,9 +356,7 @@ struct ctx_cam {
 
     enum CAMERA_TYPE      camera_type;
 
-    #ifdef HAVE_MMAL
-        struct mmalcam_context *mmalcam;
-    #endif
+    struct ctx_mmalcam *mmalcam;
     struct ctx_netcam *netcam;              /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam *netcam_high;         /* this structure contains the context for high resolution RTSP connection */
 

@@ -13,6 +13,7 @@
 
 #include "motion.h"
 #include "rotate.h"
+#include "mmalcam.h"
 
 #ifdef HAVE_MMAL
 
@@ -74,11 +75,11 @@ static void camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buf
 
 static void camera_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
-    mmalcam_context_ptr mmalcam = (mmalcam_context_ptr) port->userdata;
+    ctx_mmalcam_ptr mmalcam = (ctx_mmalcam_ptr) port->userdata;
     mmal_queue_put(mmalcam->camera_buffer_queue, buffer);
 }
 
-static void set_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T *format)
+static void set_port_format(ctx_mmalcam_ptr mmalcam, MMAL_ES_FORMAT_T *format)
 {
     format->encoding = MMAL_ENCODING_OPAQUE;
     format->encoding_variant = MMAL_ENCODING_I420;
@@ -90,7 +91,7 @@ static void set_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T *forma
     format->es->video.crop.height = mmalcam->height;
 }
 
-static void set_video_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T *format)
+static void set_video_port_format(ctx_mmalcam_ptr mmalcam, MMAL_ES_FORMAT_T *format)
 {
     set_port_format(mmalcam, format);
     format->es->video.frame_rate.num = mmalcam->framerate;
@@ -102,7 +103,7 @@ static void set_video_port_format(mmalcam_context_ptr mmalcam, MMAL_ES_FORMAT_T 
     }
 }
 
-static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmalcam_name)
+static int create_camera_component(ctx_mmalcam_ptr mmalcam, const char *mmalcam_name)
 {
     MMAL_STATUS_T status;
     MMAL_COMPONENT_T *camera_component;
@@ -194,7 +195,7 @@ static int create_camera_component(mmalcam_context_ptr mmalcam, const char *mmal
     return MMALCAM_ERROR;
 }
 
-static void destroy_camera_component(mmalcam_context_ptr mmalcam)
+static void destroy_camera_component(ctx_mmalcam_ptr mmalcam)
 {
     if (mmalcam->camera_component) {
         mmal_component_destroy(mmalcam->camera_component);
@@ -202,7 +203,7 @@ static void destroy_camera_component(mmalcam_context_ptr mmalcam)
     }
 }
 
-static int create_camera_buffer_structures(mmalcam_context_ptr mmalcam)
+static int create_camera_buffer_structures(ctx_mmalcam_ptr mmalcam)
 {
     mmalcam->camera_buffer_pool = mmal_pool_create(mmalcam->camera_capture_port->buffer_num,
             mmalcam->camera_capture_port->buffer_size);
@@ -242,7 +243,7 @@ static int send_pooled_buffers_to_port(MMAL_POOL_T *pool, MMAL_PORT_T *port)
     return MMALCAM_OK;
 }
 
-static void destroy_camera_buffer_structures(mmalcam_context_ptr mmalcam)
+static void destroy_camera_buffer_structures(ctx_mmalcam_ptr mmalcam)
 {
     if (mmalcam->camera_buffer_queue != NULL ) {
         mmal_queue_destroy(mmalcam->camera_buffer_queue);
@@ -254,6 +255,8 @@ static void destroy_camera_buffer_structures(mmalcam_context_ptr mmalcam)
         mmalcam->camera_buffer_pool = NULL;
     }
 }
+
+#endif
 
 /**
  * mmalcam_start
@@ -270,65 +273,70 @@ static void destroy_camera_buffer_structures(mmalcam_context_ptr mmalcam)
  *              -1 on any failure
  */
 
-int mmalcam_start(struct ctx_cam *cam)
-{
-    mmalcam_context_ptr mmalcam;
+int mmalcam_start(struct ctx_cam *cam) {
+    #ifdef HAVE_MMAL
+        ctx_mmalcam_ptr mmalcam;
 
-    cam->mmalcam = (mmalcam_context*) mymalloc(sizeof(struct mmalcam_context));
-    memset(cam->mmalcam, 0, sizeof(mmalcam_context));
-    mmalcam = cam->mmalcam;
-    mmalcam->cam = cam;
+        cam->mmalcam = (ctx_mmalcam*) mymalloc(sizeof(struct ctx_mmalcam));
+        memset(cam->mmalcam, 0, sizeof(ctx_mmalcam));
+        mmalcam = cam->mmalcam;
+        mmalcam->cam = cam;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        ,_("MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps")
-        ,cam->conf.mmalcam_name, cam->conf.width, cam->conf.height, cam->conf.framerate);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            ,_("MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps")
+            ,cam->conf.mmalcam_name, cam->conf.width, cam->conf.height, cam->conf.framerate);
 
-    mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
-    if (mmalcam->camera_parameters == NULL) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("camera params couldn't be allocated"));
-        return MMALCAM_ERROR;
-    }
-
-    raspicamcontrol_set_defaults(mmalcam->camera_parameters);
-    mmalcam->width = cam->conf.width;
-    mmalcam->height = cam->conf.height;
-    mmalcam->framerate = cam->conf.framerate;
-
-    if (cam->conf.mmalcam_control_params) {
-        parse_camera_control_params(cam->conf.mmalcam_control_params, mmalcam->camera_parameters);
-    }
-
-    cam->imgs.width = mmalcam->width;
-    cam->imgs.height = mmalcam->height;
-    cam->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
-    cam->imgs.motionsize = mmalcam->width * mmalcam->height;
-
-    int retval = create_camera_component(mmalcam, cam->conf.mmalcam_name);
-
-    if (retval == 0) {
-        retval = create_camera_buffer_structures(mmalcam);
-    }
-
-    if (retval == 0) {
-        if (mmal_port_enable(mmalcam->camera_capture_port, camera_buffer_callback)) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera capture port enabling failed"));
-            retval = MMALCAM_ERROR;
+        mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
+        if (mmalcam->camera_parameters == NULL) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("camera params couldn't be allocated"));
+            return MMALCAM_ERROR;
         }
-    }
 
-    if (retval == 0) {
-        if (mmal_port_parameter_set_boolean(mmalcam->camera_capture_port, MMAL_PARAMETER_CAPTURE, 1)
-                != MMAL_SUCCESS) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera capture start failed"));
-            retval = MMALCAM_ERROR;
+        raspicamcontrol_set_defaults(mmalcam->camera_parameters);
+        mmalcam->width = cam->conf.width;
+        mmalcam->height = cam->conf.height;
+        mmalcam->framerate = cam->conf.framerate;
+
+        if (cam->conf.mmalcam_control_params) {
+            parse_camera_control_params(cam->conf.mmalcam_control_params, mmalcam->camera_parameters);
         }
-    }
 
-    if (retval == 0) {
-        retval = send_pooled_buffers_to_port(mmalcam->camera_buffer_pool, mmalcam->camera_capture_port);
-    }
+        cam->imgs.width = mmalcam->width;
+        cam->imgs.height = mmalcam->height;
+        cam->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
+        cam->imgs.motionsize = mmalcam->width * mmalcam->height;
 
-    return retval;
+        int retval = create_camera_component(mmalcam, cam->conf.mmalcam_name);
+
+        if (retval == 0) {
+            retval = create_camera_buffer_structures(mmalcam);
+        }
+
+        if (retval == 0) {
+            if (mmal_port_enable(mmalcam->camera_capture_port, camera_buffer_callback)) {
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera capture port enabling failed"));
+                retval = MMALCAM_ERROR;
+            }
+        }
+
+        if (retval == 0) {
+            if (mmal_port_parameter_set_boolean(mmalcam->camera_capture_port, MMAL_PARAMETER_CAPTURE, 1)
+                    != MMAL_SUCCESS) {
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, _("MMAL camera capture start failed"));
+                retval = MMALCAM_ERROR;
+            }
+        }
+
+        if (retval == 0) {
+            retval = send_pooled_buffers_to_port(mmalcam->camera_buffer_pool, mmalcam->camera_capture_port);
+        }
+
+        return retval;
+    #else
+        (void)cam;
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("MMAL Camera not available"));
+        return -1;
+    #endif
 }
 
 /**
@@ -347,24 +355,27 @@ int mmalcam_start(struct ctx_cam *cam)
  * Returns:              Nothing.
  *
  */
-void mmalcam_cleanup(struct mmalcam_context *mmalcam)
-{
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL Camera cleanup"));
+void mmalcam_cleanup(struct ctx_mmalcam *mmalcam) {
+    #ifdef HAVE_MMAL
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("MMAL Camera cleanup"));
 
-    if (mmalcam != NULL ) {
-        if (mmalcam->camera_component) {
-            check_disable_port(mmalcam->camera_capture_port);
-            mmal_component_disable(mmalcam->camera_component);
-            destroy_camera_buffer_structures(mmalcam);
-            destroy_camera_component(mmalcam);
+        if (mmalcam != NULL ) {
+            if (mmalcam->camera_component) {
+                check_disable_port(mmalcam->camera_capture_port);
+                mmal_component_disable(mmalcam->camera_component);
+                destroy_camera_buffer_structures(mmalcam);
+                destroy_camera_component(mmalcam);
+            }
+
+            if (mmalcam->camera_parameters) {
+                free(mmalcam->camera_parameters);
+            }
+
+            free(mmalcam);
         }
-
-        if (mmalcam->camera_parameters) {
-            free(mmalcam->camera_parameters);
-        }
-
-        free(mmalcam);
-    }
+    #else
+        (void)mmalcam;
+    #endif
 }
 
 /**
@@ -380,47 +391,51 @@ void mmalcam_cleanup(struct mmalcam_context *mmalcam)
  *
  * Returns:             Error code
  */
-int mmalcam_next(struct ctx_cam *cam,  struct image_data *img_data)
-{
-    mmalcam_context_ptr mmalcam;
+int mmalcam_next(struct ctx_cam *cam,  struct ctx_image_data *img_data) {
+    #ifdef HAVE_MMAL
+        ctx_mmalcam_ptr mmalcam;
 
-    if ((!cam) || (!cam->mmalcam))
-        return NETCAM_FATAL_ERROR;
+        if ((!cam) || (!cam->mmalcam))
+            return NETCAM_FATAL_ERROR;
 
-    mmalcam = cam->mmalcam;
+        mmalcam = cam->mmalcam;
 
-    MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
+        MMAL_BUFFER_HEADER_T *camera_buffer = mmal_queue_wait(mmalcam->camera_buffer_queue);
 
-    if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
-            && camera_buffer->length >= cam->imgs.size_norm) {
-        mmal_buffer_header_mem_lock(camera_buffer);
-        memcpy(img_data->image_norm, camera_buffer->data, cam->imgs.size_norm);
-        mmal_buffer_header_mem_unlock(camera_buffer);
-    } else {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("cmd %d flags %08x size %d/%d at %08x, img_size=%d")
-            ,camera_buffer->cmd, camera_buffer->flags, camera_buffer->length
-            ,camera_buffer->alloc_size, camera_buffer->data, cam->imgs.size_norm);
-    }
-
-    mmal_buffer_header_release(camera_buffer);
-
-    if (mmalcam->camera_capture_port->is_enabled) {
-        MMAL_STATUS_T status;
-        MMAL_BUFFER_HEADER_T *new_buffer = mmal_queue_get(mmalcam->camera_buffer_pool->queue);
-
-        if (new_buffer) {
-            status = mmal_port_send_buffer(mmalcam->camera_capture_port, new_buffer);
+        if (camera_buffer->cmd == 0 && (camera_buffer->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
+                && camera_buffer->length >= cam->imgs.size_norm) {
+            mmal_buffer_header_mem_lock(camera_buffer);
+            memcpy(img_data->image_norm, camera_buffer->data, cam->imgs.size_norm);
+            mmal_buffer_header_mem_unlock(camera_buffer);
+        } else {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                ,_("cmd %d flags %08x size %d/%d at %08x, img_size=%d")
+                ,camera_buffer->cmd, camera_buffer->flags, camera_buffer->length
+                ,camera_buffer->alloc_size, camera_buffer->data, cam->imgs.size_norm);
         }
 
-        if (!new_buffer || status != MMAL_SUCCESS)
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                ,_("Unable to return a buffer to the camera video port"));
-    }
+        mmal_buffer_header_release(camera_buffer);
 
-    rotate_map(cam,img_data);
+        if (mmalcam->camera_capture_port->is_enabled) {
+            MMAL_STATUS_T status;
+            MMAL_BUFFER_HEADER_T *new_buffer = mmal_queue_get(mmalcam->camera_buffer_pool->queue);
 
-    return 0;
+            if (new_buffer) {
+                status = mmal_port_send_buffer(mmalcam->camera_capture_port, new_buffer);
+            }
+
+            if (!new_buffer || status != MMAL_SUCCESS)
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                    ,_("Unable to return a buffer to the camera video port"));
+        }
+
+        rotate_map(cam,img_data);
+
+        return 0;
+    #else
+        (void)cam;
+        (void)img_data;
+        return -1;
+    #endif
 }
 
-#endif

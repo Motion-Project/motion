@@ -771,12 +771,10 @@ static int init_camera_type(struct ctx_cam *cam){
 
     cam->camera_type = CAMERA_TYPE_UNKNOWN;
 
-    #ifdef HAVE_MMAL
-        if (cam->conf.mmalcam_name) {
-            cam->camera_type = CAMERA_TYPE_MMAL;
-            return 0;
-        }
-    #endif // HAVE_MMAL
+    if (cam->conf.mmalcam_name) {
+        cam->camera_type = CAMERA_TYPE_MMAL;
+        return 0;
+    }
 
     if (cam->conf.netcam_url) {
         if ((strncmp(cam->conf.netcam_url,"mjpeg",5) == 0) ||
