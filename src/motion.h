@@ -12,20 +12,6 @@
 
 #include "config.h"
 
-/* Includes */
-#if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
-    #include <mysql.h>
-#endif
-
-#ifdef HAVE_SQLITE3
-    #include <sqlite3.h>
-#endif
-
-#ifdef HAVE_PGSQL
-    #include <libpq-fe.h>
-#endif
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef __USE_GNU
@@ -114,9 +100,6 @@ int nls_enabled;
 
 #define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
 #define WATCHDOG_KILL          -10   /* 10 sec grace period before calling thread cancel */
-
-#define CONNECTION_KO           "Lost connection"
-#define CONNECTION_OK           "Connection OK"
 
 #define DEF_MAXSTREAMS          10   /* Maximum number of stream clients per camera */
 #define DEF_MAXWEBQUEUE         10   /* Maximum number of stream client in queue */
