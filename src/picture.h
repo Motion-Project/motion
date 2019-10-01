@@ -22,6 +22,4 @@
     void preview_save(struct ctx_cam *cam);
     void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
 
-    unsigned prepare_exif(unsigned char **, const struct ctx_cam *cam, const struct timespec *, const struct ctx_coord *);
-
 #endif /* _INCLUDE_PICTURE_H_ */

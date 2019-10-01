@@ -1,4 +1,4 @@
-/*    dbse.cpp
+/*    dbse.c
  *
  *    This file is part of the Motion application
  *    Copyright (C) 2019  Motion-Project Developers(motion-project.github.io)

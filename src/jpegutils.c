@@ -51,7 +51,7 @@
 #include "config.h"
 #include "motion.h"
 #include "jpegutils.h"
-#include "picture.h"    /* For the prepare_exif */
+#include "exif.h"
 #include <setjmp.h>
 
 
@@ -426,7 +426,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo,
               const struct ctx_coord *box)
 {
     unsigned char *exif = NULL;
-    unsigned exif_len = prepare_exif(&exif, cam, ts1, box);
+    unsigned exif_len = exif_prepare(&exif, cam, ts1, box);
 
     if(exif_len > 0) {
         /* EXIF data lives in a JPEG APP1 marker */
