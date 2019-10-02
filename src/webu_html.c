@@ -482,7 +482,7 @@ static void webu_html_config(struct webui_ctx *webui) {
                 } else if (((strlen(val_temp) == 0) && (val_thread != NULL)) ) {
                     diff_vals = TRUE;
                 } else {
-                    if (strcasecmp(val_temp, val_thread)) diff_vals = TRUE;
+                    if (mystrcne(val_temp, val_thread)) diff_vals = TRUE;
                 }
                 if (diff_vals){
                     snprintf(response, sizeof (response),"%s","\" \\ \n");
@@ -500,8 +500,8 @@ static void webu_html_config(struct webui_ctx *webui) {
             }
         }
         /* Terminate the open quote and option.  For foreign language put hint in ()  */
-        if (!strcasecmp(webui->lang,"en") ||
-            !strcasecmp(config_params[indx_parm].param_name
+        if (mystrceq(webui->lang,"en") ||
+            mystrceq(config_params[indx_parm].param_name
                 ,_(config_params[indx_parm].param_name))){
             snprintf(response, sizeof (response),"\" >%s</option>\n",
                 config_params[indx_parm].param_name);
@@ -1230,20 +1230,20 @@ void webu_html_main(struct webui_ctx *webui) {
     if (strlen(webui->uri_camid) == 0){
         webu_html_page(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"write"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"write"))) {
         webu_process_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"config")) {
+    } else if (mystreq(webui->uri_cmd1,"config")) {
         retcd = webu_process_config(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"action")){
+    } else if (mystreq(webui->uri_cmd1,"action")){
         webu_process_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"detection")){
+    } else if (mystreq(webui->uri_cmd1,"detection")){
         webu_process_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"track")){
+    } else if (mystreq(webui->uri_cmd1,"track")){
         retcd = webu_process_track(webui);
 
     } else{

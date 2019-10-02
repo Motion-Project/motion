@@ -2048,10 +2048,10 @@ struct ctx_cam **conf_cmdparse(struct ctx_cam **camlst, const char *cmd, const c
      * our option given by cmd (or reach the end = NULL).
      */
     while (config_params[i].param_name != NULL) {
-        if (!strcasecmp(cmd, config_params[i].param_name)) {
+        if (mystrceq(cmd, config_params[i].param_name)) {
 
             /* If config_param is string we don't want to check arg1. */
-            if (strcasecmp(config_type(&config_params[i]), "string")) {
+            if (mystrcne(config_type(&config_params[i]), "string")) {
                 if (config_params[i].conf_value && !arg1){
                     return camlst;
                 }
@@ -2090,11 +2090,11 @@ struct ctx_cam **conf_cmdparse(struct ctx_cam **camlst, const char *cmd, const c
                 /* If the depreciated option is a vid item, copy_vid_ctrl is called
                  * with the array index sent instead of the ctx_cam structure member pointer.
                  */
-                if (!strcmp(dep_config_params[i].name,"brightness") ||
-                    !strcmp(dep_config_params[i].name,"contrast") ||
-                    !strcmp(dep_config_params[i].name,"saturation") ||
-                    !strcmp(dep_config_params[i].name,"hue") ||
-                    !strcmp(dep_config_params[i].name,"power_line_frequency")) {
+                if (mystreq(dep_config_params[i].name,"brightness") ||
+                    mystreq(dep_config_params[i].name,"contrast") ||
+                    mystreq(dep_config_params[i].name,"saturation") ||
+                    mystreq(dep_config_params[i].name,"hue") ||
+                    mystreq(dep_config_params[i].name,"power_line_frequency")) {
                     camlst = copy_vid_ctrl(camlst, arg1, i);
                 } else {
                     camlst = dep_config_params[i].copy(camlst, arg1, dep_config_params[i].conf_value);
@@ -2564,7 +2564,7 @@ static struct ctx_cam **copy_bool(struct ctx_cam **camlst, const char *str, int 
     while (camlst[++i]) {
         tmp = (char *)camlst[i]+(int)val_ptr;
 
-        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 1;
         } else {
             *((int *)tmp) = 0;
@@ -2593,9 +2593,9 @@ static struct ctx_cam **copy_int(struct ctx_cam **camlst, const char *str, int v
     i = -1;
     while (camlst[++i]) {
         tmp = (char *)camlst[i]+val_ptr;
-        if (!strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 1;
-        } else if (!strcasecmp(str, "no") || !strcasecmp(str, "off")) {
+        } else if (mystrceq(str, "no") || mystrceq(str, "off")) {
             *((int *)tmp) = 0;
         } else {
             *((int *)tmp) = atoi(str);
@@ -2658,11 +2658,11 @@ static struct ctx_cam **copy_vid_ctrl(struct ctx_cam **camlst, const char *confi
 
     indx_vid = 0;
     while (config_params[indx_vid].param_name != NULL) {
-        if (!strcmp(config_params[indx_vid].param_name,"vid_control_params")) break;
+        if (mystreq(config_params[indx_vid].param_name,"vid_control_params")) break;
         indx_vid++;
     }
 
-    if (strcmp(config_params[indx_vid].param_name,"vid_control_params")){
+    if (mystrne(config_params[indx_vid].param_name,"vid_control_params")){
         MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
             ,_("Unable to locate vid_control_params"));
         return camlst;
@@ -2675,13 +2675,13 @@ static struct ctx_cam **copy_vid_ctrl(struct ctx_cam **camlst, const char *confi
 
     /* If the depreciated option is the default, then just return */
     parmval = atoi(config_val);
-    if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
         (parmval == -1)) return camlst;
-    if (strcmp(dep_config_params[config_indx].name,"power_line_frequency") &&
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
         (parmval == 0)) return camlst;
 
     /* Remove underscore from parm name and add quotes*/
-    if (!strcmp(dep_config_params[config_indx].name,"power_line_frequency")) {
+    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency")) {
         parmname_new = mymalloc(strlen(dep_config_params[config_indx].name) + 3);
         sprintf(parmname_new,"%s","\"power line frequency\"");
     } else {
@@ -2730,7 +2730,7 @@ static struct ctx_cam **copy_text_double(struct ctx_cam **camlst, const char *st
     while (camlst[++i]) {
         tmp = (char *)camlst[i]+(int)val_ptr;
 
-        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 2;
         } else {
             *((int *)tmp) = 1;
@@ -2758,7 +2758,7 @@ static struct ctx_cam **copy_html_output(struct ctx_cam **camlst, const char *st
     while (camlst[++i]) {
         tmp = (char *)camlst[i]+(int)val_ptr;
 
-        if (!strcmp(str, "1") || !strcasecmp(str, "yes") || !strcasecmp(str, "on")) {
+        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
             *((int *)tmp) = 0;
         } else {
             *((int *)tmp) = 1;
@@ -2785,7 +2785,7 @@ struct ctx_cam **copy_uri(struct ctx_cam **camlst, const char *str, int val) {
     }
 
     // A single asterisk is also valid, so check for that.
-    if (strcmp(str, "*") != 0 && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
+    if (mystrne(str, "*") && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Invalid origin for cors_header in copy_uri"));
         regfree(&regex);
@@ -2857,11 +2857,11 @@ static const char *print_string(struct ctx_cam **camlst, char **str, int parm, u
 
     (void)str;
 
-    /* strcmp does not like NULL so we have to check for this also. */
+    /* Need to check for nulls as well */
     cptr0 = (const char **)((char *)camlst[0] + val);
     cptr1 = (const char **)((char *)camlst[threadnr] + val);
 
-    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (!strcmp(*cptr0, *cptr1)))
+    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (mystreq(*cptr0, *cptr1)))
         return NULL;
 
     return *cptr1;

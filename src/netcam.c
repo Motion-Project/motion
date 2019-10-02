@@ -206,13 +206,13 @@ static void netcam_url_parse(struct url_t *parse_url, const char *text_url)
     }
     if (((!parse_url->port) && (parse_url->service)) ||
         ((parse_url->port > 65535) && (parse_url->service))) {
-        if (!strcmp(parse_url->service, "http"))
+        if (mystreq(parse_url->service, "http"))
             parse_url->port = 80;
-        else if (!strcmp(parse_url->service, "ftp"))
+        else if (mystreq(parse_url->service, "ftp"))
             parse_url->port = 21;
-        else if (!strcmp(parse_url->service, "rtmp"))
+        else if (mystreq(parse_url->service, "rtmp"))
             parse_url->port = 1935;
-        else if (!strcmp(parse_url->service, "rtsp"))
+        else if (mystreq(parse_url->service, "rtsp"))
             parse_url->port = 554;
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Using port number %d"),parse_url->port);
     }
@@ -1034,14 +1034,14 @@ static void netcam_set_v4l2(struct ctx_netcam *netcam){
 
     v4l2_palette_fourcc(netcam->v4l2_palette, fourcc);
 
-    if (strcmp(fourcc,"MJPG") == 0) {
+    if (mystreq(fourcc,"MJPG")) {
         if (v4l2_palette_valid(netcam->path,netcam->v4l2_palette)){
             sprintf(optfmt, "%s","mjpeg");
             av_dict_set(&netcam->opts, "input_format", optfmt, 0);
         } else {
             sprintf(optfmt, "%s","default");
         }
-    } else if (strcmp(fourcc,"H264") == 0){
+    } else if (mystreq(fourcc,"H264")){
         if (v4l2_palette_valid(netcam->path,netcam->v4l2_palette)){
             sprintf(optfmt, "%s","h264");
             av_dict_set(&netcam->opts, "input_format", optfmt, 0);
@@ -1052,7 +1052,7 @@ static void netcam_set_v4l2(struct ctx_netcam *netcam){
         sprintf(optfmt, "%s","default");
     }
 
-    if (strcmp(optfmt,"default") != 0) {
+    if (mystrne(optfmt,"default")) {
         if (v4l2_parms_valid(netcam->path
                              ,netcam->v4l2_palette
                              ,netcam->framerate
@@ -1116,18 +1116,18 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
         userpass = mystrdup(url.userpass);
     }
 
-    if (strcmp(url.service, "v4l2") == 0) {
+    if (mystreq(url.service, "v4l2")) {
         netcam->path = mymalloc(strlen(url.path) + 1);
         sprintf(netcam->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up v4l2 via ffmpeg netcam"));
-    } else if (strcmp(url.service, "file") == 0) {
+    } else if (mystreq(url.service, "file")) {
         netcam->path = mymalloc(strlen(url.path) + 1);
         sprintf(netcam->path, "%s",url.path);
         MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
             ,_("Setting up file via ffmpeg netcam"));
     } else {
-        if (!strcmp(url.service, "mjpeg")) {
+        if (mystreq(url.service, "mjpeg")) {
             sprintf(url.service, "%s","http");
             MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
                 ,_("Setting up http via ffmpeg netcam"));
@@ -1518,7 +1518,7 @@ static void netcam_handler_wait(struct ctx_netcam *netcam){
     framerate = netcam->conf->framerate;
     if (framerate < 2) framerate = 2;
 
-    if (strcmp(netcam->service,"file") == 0) {
+    if (mystreq(netcam->service,"file")) {
         /* For file processing, we try to match exactly the motion loop rate */
         usec_maxrate = (1000000L / framerate);
     } else {

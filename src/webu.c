@@ -521,8 +521,8 @@ static int webu_parseurl(struct webui_ctx *webui) {
         snprintf(webui->uri_cmd2, parm_len,"%s", st_pos);
     }
 
-    if ((!strcmp(webui->uri_cmd1,"config") ||
-         !strcmp(webui->uri_cmd1,"track") ) &&
+    if ((mystreq(webui->uri_cmd1,"config") ||
+         mystreq(webui->uri_cmd1,"track") ) &&
         (strlen(webui->uri_cmd2) > 0)) {
         webu_parseurl_parms(webui, st_pos);
     }
@@ -547,8 +547,8 @@ void webu_process_action(struct webui_ctx *webui) {
     int indx;
 
     indx = 0;
-    if ((strcmp(webui->uri_cmd2,"makemovie") == 0) ||
-        (strcmp(webui->uri_cmd2,"eventend") == 0)) {
+    if ((mystreq(webui->uri_cmd2,"makemovie")) ||
+        (mystreq(webui->uri_cmd2,"eventend"))) {
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             while (webui->camlst[++indx]){
                 webui->camlst[indx]->event_stop = TRUE;
@@ -557,7 +557,7 @@ void webu_process_action(struct webui_ctx *webui) {
             webui->cam->event_stop = TRUE;
         }
 
-    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0){
+    } else if (mystreq(webui->uri_cmd2,"eventstart")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             while (webui->camlst[++indx]){
                 webui->camlst[indx]->event_user = TRUE;
@@ -566,7 +566,7 @@ void webu_process_action(struct webui_ctx *webui) {
             webui->cam->event_user = TRUE;
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"snapshot")){
+    } else if (mystreq(webui->uri_cmd2,"snapshot")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             while (webui->camlst[++indx])
             webui->camlst[indx]->snapshot = 1;
@@ -575,7 +575,7 @@ void webu_process_action(struct webui_ctx *webui) {
         }
 
 
-    } else if (!strcmp(webui->uri_cmd2,"restart")){
+    } else if (mystreq(webui->uri_cmd2,"restart")){
         if (webui->thread_nbr == 0) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all threads"));
             webui->camlst[0]->webcontrol_finish = TRUE;
@@ -591,7 +591,7 @@ void webu_process_action(struct webui_ctx *webui) {
 
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"quit")){
+    } else if (mystreq(webui->uri_cmd2,"quit")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             while (webui->camlst[++indx]){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
@@ -610,7 +610,7 @@ void webu_process_action(struct webui_ctx *webui) {
             webui->cam->finish = TRUE;
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"end")){
+    } else if (mystreq(webui->uri_cmd2,"end")){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Motion terminating"));
             while (webui->camlst[indx]){
                 webui->camlst[indx]->webcontrol_finish = TRUE;
@@ -622,7 +622,7 @@ void webu_process_action(struct webui_ctx *webui) {
             }
 
 
-    } else if (!strcmp(webui->uri_cmd2,"start")){
+    } else if (mystreq(webui->uri_cmd2,"start")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
                 webui->camlst[indx]->pause = 0;
@@ -630,7 +630,7 @@ void webu_process_action(struct webui_ctx *webui) {
         } else {
             webui->cam->pause = 0;
         }
-    } else if (!strcmp(webui->uri_cmd2,"pause")){
+    } else if (mystreq(webui->uri_cmd2,"pause")){
         if (webui->thread_nbr == 0 && webui->cam_threads > 1) {
             do {
                 webui->camlst[indx]->pause = 1;
@@ -639,14 +639,14 @@ void webu_process_action(struct webui_ctx *webui) {
             webui->cam->pause = 1;
         }
 
-    } else if (!strcmp(webui->uri_cmd2,"connection")){
+    } else if (mystreq(webui->uri_cmd2,"connection")){
         webu_text_connection(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"status")){
+    } else if (mystreq(webui->uri_cmd2,"status")){
         webu_text_status(webui);
 
-    } else if ((!strcmp(webui->uri_cmd2,"write")) ||
-               (!strcmp(webui->uri_cmd2,"writeyes"))){
+    } else if ((mystreq(webui->uri_cmd2,"write")) ||
+               (mystreq(webui->uri_cmd2,"writeyes"))){
         conf_print(webui->camlst);
 
     } else {
@@ -672,7 +672,7 @@ static int webu_process_config_set(struct webui_ctx *webui) {
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_parm1);
     indx=0;
     while (dep_config_params[indx].name != NULL) {
-        if (strcmp(dep_config_params[indx].name,webui->uri_parm1) == 0){
+        if (mystreq(dep_config_params[indx].name,webui->uri_parm1)){
             snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx].newname);
             break;
         }
@@ -689,7 +689,7 @@ static int webu_process_config_set(struct webui_ctx *webui) {
             indx++;
             continue;
         }
-        if (!strcmp(temp_name, config_params[indx].param_name)) break;
+        if (mystreq(temp_name, config_params[indx].param_name)) break;
         indx++;
     }
     /* If we found the parm, assign it.  If the loop above did not find the parm
@@ -705,13 +705,13 @@ static int webu_process_config_set(struct webui_ctx *webui) {
                 , webui->uri_parm1, webui->uri_value1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
-            if (!strcmp(config_params[indx].param_name, "vid_control_params") &&
+            if (mystreq(config_params[indx].param_name, "vid_control_params") &&
                 (webui->camlst[webui->thread_nbr]->vdev != NULL)){
                 webui->camlst[webui->thread_nbr]->vdev->update_parms = TRUE;
             }
 
             /* If changing language, do it now */
-            if (!strcmp(config_params[indx].param_name, "native_language")){
+            if (mystreq(config_params[indx].param_name, "native_language")){
                 nls_enabled = webui->camlst[webui->thread_nbr]->conf.native_language;
                 if (nls_enabled){
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
@@ -737,16 +737,16 @@ int webu_process_config(struct webui_ctx *webui) {
 
     retcd = 0;
 
-    if ((!strcmp(webui->uri_cmd1,"config")) &&
-        (!strcmp(webui->uri_cmd2,"set"))) {
+    if ((mystreq(webui->uri_cmd1,"config")) &&
+        (mystreq(webui->uri_cmd2,"set"))) {
         retcd = webu_process_config_set(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"get"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"get"))) {
         webu_text_get_query(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"list"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"list"))) {
         webu_text_list(webui);
 
     } else {
@@ -765,11 +765,11 @@ int webu_process_track(struct webui_ctx *webui) {
     struct ctx_coord cent;
     int retcd;
 
-    if (!strcmp(webui->uri_cmd2, "center")) {
+    if (mystreq(webui->uri_cmd2, "center")) {
         webui->camlst[webui->thread_nbr]->moved = track_center(webui->camlst[webui->thread_nbr], 0, 1, 0, 0);
         retcd = 0;
-    } else if (!strcmp(webui->uri_cmd2, "set")) {
-        if (!strcmp(webui->uri_parm1, "pan")) {
+    } else if (mystreq(webui->uri_cmd2, "set")) {
+        if (mystreq(webui->uri_parm1, "pan")) {
             cent.width = webui->camlst[webui->thread_nbr]->imgs.width;
             cent.height = webui->camlst[webui->thread_nbr]->imgs.height;
             cent.x = atoi(webui->uri_value1);
@@ -786,7 +786,7 @@ int webu_process_track(struct webui_ctx *webui) {
                 ,webui->camlst[webui->thread_nbr]->video_dev
                 ,&cent, &webui->camlst[webui->thread_nbr]->imgs, 1);
             retcd = 0;
-        } else if (!strcasecmp(webui->uri_parm1, "x")) {
+        } else if (mystrceq(webui->uri_parm1, "x")) {
             webui->camlst[webui->thread_nbr]->moved = track_center(webui->camlst[webui->thread_nbr]
                 , webui->camlst[webui->thread_nbr]->video_dev, 1
                 , atoi(webui->uri_value1), atoi(webui->uri_value2));
@@ -938,7 +938,7 @@ static int webu_mhd_digest(struct webui_ctx *webui) {
     }
 
     /* Check for valid user name */
-    if (strcmp(user, webui->auth_user) != 0){
+    if (mystrne(user, webui->auth_user) ){
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"), webui->clientip);
         if (user != NULL) free(user);
@@ -998,7 +998,7 @@ static int webu_mhd_basic(struct webui_ctx *webui) {
         return webu_mhd_basic_fail(webui);
     }
 
-    if ((strcmp(user, webui->auth_user) != 0) || (strcmp(pass, webui->auth_pass) != 0)) {
+    if ((mystrne(user, webui->auth_user)) || (mystrne(pass, webui->auth_pass))) {
         MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
             ,_("Failed authentication from %s"),webui->clientip);
         if (user != NULL) free(user);
@@ -1168,25 +1168,25 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
 static void webu_answer_strm_type(struct webui_ctx *webui) {
     /* Assign the type of stream that is being answered*/
 
-    if ((strcmp(webui->uri_cmd1,"stream") == 0) ||
-        (strcmp(webui->uri_camid,"stream") == 0) ||
+    if ((mystreq(webui->uri_cmd1,"stream")) ||
+        (mystreq(webui->uri_camid,"stream")) ||
         (strlen(webui->uri_camid) == 0)) {
         webui->cnct_type = WEBUI_CNCT_FULL;
 
-    } else if ((strcmp(webui->uri_cmd1,"substream") == 0) ||
-        (strcmp(webui->uri_camid,"substream") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"substream")) ||
+        (mystreq(webui->uri_camid,"substream"))){
         webui->cnct_type = WEBUI_CNCT_SUB;
 
-    } else if ((strcmp(webui->uri_cmd1,"motion") == 0) ||
-        (strcmp(webui->uri_camid,"motion") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"motion")) ||
+        (mystreq(webui->uri_camid,"motion"))){
         webui->cnct_type = WEBUI_CNCT_MOTION;
 
-    } else if ((strcmp(webui->uri_cmd1,"source") == 0) ||
-        (strcmp(webui->uri_camid,"source") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"source")) ||
+        (mystreq(webui->uri_camid,"source"))){
         webui->cnct_type = WEBUI_CNCT_SOURCE;
 
-    } else if ((strcmp(webui->uri_cmd1,"current") == 0) ||
-        (strcmp(webui->uri_camid,"current") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"current")) ||
+        (mystreq(webui->uri_camid,"current"))){
         webui->cnct_type = WEBUI_CNCT_STATIC;
 
     } else if ((strlen(webui->uri_camid) > 0) &&
@@ -1225,7 +1225,7 @@ static int webu_answer_ctrl(void *cls
         return MHD_YES;
     }
 
-    if (strcmp (method, "GET") != 0){
+    if (mystrne (method, "GET")){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }
@@ -1297,7 +1297,7 @@ static int webu_answer_strm(void *cls
         return MHD_YES;
     }
 
-    if (strcmp (method, "GET") != 0){
+    if (mystreq(method, "GET")){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }

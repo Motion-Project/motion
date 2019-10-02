@@ -412,7 +412,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
     if (len >= 9)
         offset = len - 8;
 
-    if (strcmp(cam->conf.snapshot_filename+offset, "lastsnap")) {
+    if (mystrne(cam->conf.snapshot_filename+offset, "lastsnap")) {
         /*
          *  conf.snapshot_filename would normally be defined but if someone deleted it by control interface
          *  it is better to revert to the default than fail

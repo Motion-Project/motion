@@ -1031,9 +1031,9 @@ static int motion_init(struct ctx_cam *cam)
     webu_stream_init(cam);
 
     /* Set output picture type */
-    if (!strcmp(cam->conf.picture_type, "ppm"))
+    if (mystreq(cam->conf.picture_type, "ppm"))
         cam->imgs.picture_type = IMAGE_TYPE_PPM;
-    else if (!strcmp(cam->conf.picture_type, "webp")) {
+    else if (mystreq(cam->conf.picture_type, "webp")) {
         #ifdef HAVE_WEBP
                 cam->imgs.picture_type = IMAGE_TYPE_WEBP;
         #else
@@ -2281,30 +2281,30 @@ static void mlp_timelapse(struct ctx_cam *cam){
             (cam->frame_curr_ts.tv_sec % 60 < cam->frame_last_ts.tv_sec % 60) &&
             cam->shots == 0) {
 
-            if (strcasecmp(cam->conf.timelapse_mode, "manual") == 0) {
+            if (mystrceq(cam->conf.timelapse_mode, "manual")) {
                 ;/* No action */
 
             /* If we are daily, raise timelapseend event at midnight */
-            } else if (strcasecmp(cam->conf.timelapse_mode, "daily") == 0) {
+            } else if (mystrceq(cam->conf.timelapse_mode, "daily")) {
                 if (timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
 
             /* handle the hourly case */
-            } else if (strcasecmp(cam->conf.timelapse_mode, "hourly") == 0) {
+            } else if (mystreq(cam->conf.timelapse_mode, "hourly")) {
                 event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
 
             /* If we are weekly-sunday, raise timelapseend event at midnight on sunday */
-            } else if (strcasecmp(cam->conf.timelapse_mode, "weekly-sunday") == 0) {
+            } else if (mystrceq(cam->conf.timelapse_mode, "weekly-sunday")) {
                 if (timestamp_tm.tm_wday == 0 &&
                     timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
             /* If we are weekly-monday, raise timelapseend event at midnight on monday */
-            } else if (strcasecmp(cam->conf.timelapse_mode, "weekly-monday") == 0) {
+            } else if (mystrceq(cam->conf.timelapse_mode, "weekly-monday") == 0) {
                 if (timestamp_tm.tm_wday == 1 &&
                     timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
             /* If we are monthly, raise timelapseend event at midnight on first day of month */
-            } else if (strcasecmp(cam->conf.timelapse_mode, "monthly") == 0) {
+            } else if (mystrceq(cam->conf.timelapse_mode, "monthly")) {
                 if (timestamp_tm.tm_mday == 1 &&
                     timestamp_tm.tm_hour == 0)
                     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
@@ -2375,31 +2375,31 @@ static void mlp_parmsupdate(struct ctx_cam *cam){
 
     init_text_scale(cam);  /* Initialize and validate text_scale */
 
-    if (strcasecmp(cam->conf.picture_output, "on") == 0)
+    if (mystrceq(cam->conf.picture_output, "on"))
         cam->new_img = NEWIMG_ON;
-    else if (strcasecmp(cam->conf.picture_output, "first") == 0)
+    else if (mystrceq(cam->conf.picture_output, "first"))
         cam->new_img = NEWIMG_FIRST;
-    else if (strcasecmp(cam->conf.picture_output, "best") == 0)
+    else if (mystrceq(cam->conf.picture_output, "best"))
         cam->new_img = NEWIMG_BEST;
-    else if (strcasecmp(cam->conf.picture_output, "center") == 0)
+    else if (mystrceq(cam->conf.picture_output, "center"))
         cam->new_img = NEWIMG_CENTER;
     else
         cam->new_img = NEWIMG_OFF;
 
-    if (strcasecmp(cam->conf.locate_motion_mode, "on") == 0)
+    if (mystrceq(cam->conf.locate_motion_mode, "on"))
         cam->locate_motion_mode = LOCATE_ON;
-    else if (strcasecmp(cam->conf.locate_motion_mode, "preview") == 0)
+    else if (mystrceq(cam->conf.locate_motion_mode, "preview"))
         cam->locate_motion_mode = LOCATE_PREVIEW;
     else
         cam->locate_motion_mode = LOCATE_OFF;
 
-    if (strcasecmp(cam->conf.locate_motion_style, "box") == 0)
+    if (mystrceq(cam->conf.locate_motion_style, "box"))
         cam->locate_motion_style = LOCATE_BOX;
-    else if (strcasecmp(cam->conf.locate_motion_style, "redbox") == 0)
+    else if (mystrceq(cam->conf.locate_motion_style, "redbox"))
         cam->locate_motion_style = LOCATE_REDBOX;
-    else if (strcasecmp(cam->conf.locate_motion_style, "cross") == 0)
+    else if (mystrceq(cam->conf.locate_motion_style, "cross"))
         cam->locate_motion_style = LOCATE_CROSS;
-    else if (strcasecmp(cam->conf.locate_motion_style, "redcross") == 0)
+    else if (mystrceq(cam->conf.locate_motion_style, "redcross"))
         cam->locate_motion_style = LOCATE_REDCROSS;
     else
         cam->locate_motion_style = LOCATE_BOX;
@@ -2899,7 +2899,7 @@ static void motion_start_thread(struct ctx_cam *cam){
     char service[6];
     pthread_attr_t thread_attr;
 
-    if (strcmp(cam->conf_filename, "")){
+    if (mystrne(cam->conf_filename, "")){
         cam->conf_filename[sizeof(cam->conf_filename) - 1] = '\0';
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Camera ID: %d is from %s")
             ,cam->camera_id, cam->conf_filename);

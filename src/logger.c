@@ -264,7 +264,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
         #endif
     }
 
-    if ((!strcmp(buf,flood_msg)) && (flood_cnt <= 5000)){
+    if ((mystreq(buf,flood_msg)) && (flood_cnt <= 5000)){
         flood_cnt++;
     } else {
         if (flood_cnt > 1){

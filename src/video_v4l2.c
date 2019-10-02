@@ -348,8 +348,8 @@ static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
         devitem->ctrl_newval = devitem->ctrl_default;
         for (indx_user=0; indx_user<cam->vdev->usrctrl_count; indx_user++){
             usritem=&cam->vdev->usrctrl_array[indx_user];
-            if ((!strcasecmp(devitem->ctrl_iddesc,usritem->ctrl_name)) ||
-                (!strcasecmp(devitem->ctrl_name  ,usritem->ctrl_name))) {
+            if ((mystrceq(devitem->ctrl_iddesc,usritem->ctrl_name)) ||
+                (mystrceq(devitem->ctrl_name  ,usritem->ctrl_name))) {
                 switch (devitem->ctrl_type) {
                 case V4L2_CTRL_TYPE_MENU:
                     /*FALLTHROUGH*/
@@ -416,16 +416,16 @@ static int v4l2_autobright(struct ctx_cam *cam, struct video_dev *curdev, int me
     for (indx = 0;indx < cam->vdev->usrctrl_count; indx++){
         usritem=&cam->vdev->usrctrl_array[indx];
         if ((method == 1) &&
-            ((!strcasecmp(usritem->ctrl_name,"brightness")) ||
-             (!strcasecmp(usritem->ctrl_name,cid_bright)))) {
+            ((mystrceq(usritem->ctrl_name,"brightness")) ||
+             (mystrceq(usritem->ctrl_name,cid_bright)))) {
                target = usritem->ctrl_value;
         } else if ((method == 2) &&
-            ((!strcasecmp(usritem->ctrl_name,"exposure")) ||
-             (!strcasecmp(usritem->ctrl_name,cid_exp)))) {
+            ((mystrceq(usritem->ctrl_name,"exposure")) ||
+             (mystrceq(usritem->ctrl_name,cid_exp)))) {
                target = usritem->ctrl_value;
         } else if ((method == 3) &&
-            ((!strcasecmp(usritem->ctrl_name,"exposure (absolute)")) ||
-             (!strcasecmp(usritem->ctrl_name,cid_expabs)))) {
+            ((mystrceq(usritem->ctrl_name,"exposure (absolute)")) ||
+             (mystrceq(usritem->ctrl_name,cid_expabs)))) {
                target = usritem->ctrl_value;
         }
     }
@@ -1396,7 +1396,7 @@ int v4l2_start(struct ctx_cam *cam) {
         /* If device is already open and initialized use it*/
         curdev = video_devices;
         while (curdev) {
-            if (!strcmp(cam->conf.video_device, curdev->video_device)) {
+            if (mystreq(cam->conf.video_device, curdev->video_device)) {
                 retcd = v4l2_vdev_init(cam);
                 if (retcd == 0) retcd = vid_parms_parse(cam);
                 if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);

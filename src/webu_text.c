@@ -330,7 +330,7 @@ static void webu_text_set_query(struct webui_ctx *webui) {
         if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0)) ||
-            (strcmp(webui->uri_parm1, config_params[indx_parm].param_name))) {
+            (mystrne(webui->uri_parm1, config_params[indx_parm].param_name))) {
             indx_parm++;
             continue;
         }
@@ -631,33 +631,33 @@ static void webu_text_action_write(struct webui_ctx *webui) {
 static void webu_text_action(struct webui_ctx *webui) {
     /* Call the action functions */
 
-    if (!strcmp(webui->uri_cmd2,"makemovie")){
+    if (mystreq(webui->uri_cmd2,"makemovie")){
         webu_text_action_makemovie(webui);
 
-    } else if (strcmp(webui->uri_cmd2,"eventstart") == 0){
+    } else if (mystreq(webui->uri_cmd2,"eventstart")){
         webu_text_action_eventstart(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"eventend")){
+    } else if (mystreq(webui->uri_cmd2,"eventend")){
         webu_text_action_eventend(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"snapshot")){
+    } else if (mystreq(webui->uri_cmd2,"snapshot")){
         webu_text_action_snapshot(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"restart")){
+    } else if (mystreq(webui->uri_cmd2,"restart")){
         webu_text_action_restart(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"start")){
+    } else if (mystreq(webui->uri_cmd2,"start")){
         webu_text_action_start(webui);
 
-    } else if (!strcmp(webui->uri_cmd2,"pause")){
+    } else if (mystreq(webui->uri_cmd2,"pause")){
         webu_text_action_pause(webui);
 
-    } else if ((!strcmp(webui->uri_cmd2,"quit")) ||
-               (!strcmp(webui->uri_cmd2,"end"))){
+    } else if ((mystreq(webui->uri_cmd2,"quit")) ||
+               (mystreq(webui->uri_cmd2,"end"))){
         webu_text_action_quit(webui);
 
-    } else if ((!strcmp(webui->uri_cmd2,"write")) ||
-               (!strcmp(webui->uri_cmd2,"writeyes"))){
+    } else if ((mystreq(webui->uri_cmd2,"write")) ||
+               (mystreq(webui->uri_cmd2,"writeyes"))){
         webu_text_action_write(webui);
 
     } else {
@@ -837,19 +837,19 @@ static void webu_text_menu_track(struct webui_ctx *webui) {
 
 static void webu_text_submenu(struct webui_ctx *webui) {
 
-    if ((!strcmp(webui->uri_cmd1,"config")) &&
+    if ((mystreq(webui->uri_cmd1,"config")) &&
         (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_config(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"action")) &&
+    } else if ((mystreq(webui->uri_cmd1,"action")) &&
                 (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_action(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
                 (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_detection(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"track")) &&
+    } else if ((mystreq(webui->uri_cmd1,"track")) &&
                 (strlen(webui->uri_cmd2) == 0)) {
         webu_text_menu_track(webui);
 
@@ -876,7 +876,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_value1);
     indx_parm=0;
     while (dep_config_params[indx_parm].name != NULL) {
-        if (strcmp(dep_config_params[indx_parm].name, webui->uri_value1) == 0){
+        if (mystreq(dep_config_params[indx_parm].name, webui->uri_value1)){
             snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx_parm].newname);
             break;
         }
@@ -888,8 +888,8 @@ void webu_text_get_query(struct webui_ctx *webui) {
 
         if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
             (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            strcmp(webui->uri_parm1,"query") ||
-            strcmp(temp_name, config_params[indx_parm].param_name)){
+            mystrne(webui->uri_parm1,"query") ||
+            mystrne(temp_name, config_params[indx_parm].param_name)){
             indx_parm++;
             continue;
         }
@@ -899,7 +899,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
             val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
         }
 
-        if (strcmp(webui->uri_value1, config_params[indx_parm].param_name) != 0){
+        if (mystrne(webui->uri_value1, config_params[indx_parm].param_name)){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("'%s' option is depreciated.  New option name is `%s'")
             ,webui->uri_value1, config_params[indx_parm].param_name);
@@ -1048,71 +1048,71 @@ void webu_text_main(struct webui_ctx *webui) {
     } else if (strlen(webui->uri_cmd2) == 0) {
         webu_text_submenu(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set")) &&
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"set")) &&
                (strlen(webui->uri_parm1) == 0)) {
         webu_text_set_menu(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set")) &&
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"set")) &&
                (strlen(webui->uri_parm1) > 0) &&
                (strlen(webui->uri_value1) == 0) ) {
         webu_text_set_query(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"set"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"set"))) {
         webu_text_set_assign(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"write"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"write"))) {
         webu_text_action(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"list"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"list"))) {
         webu_text_list(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"get")) &&
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"get")) &&
                (strlen(webui->uri_parm1) == 0)) {
         webu_text_get_menu(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"config")) &&
-               (!strcmp(webui->uri_cmd2,"get"))) {
+    } else if ((mystreq(webui->uri_cmd1,"config")) &&
+               (mystreq(webui->uri_cmd2,"get"))) {
         webu_text_get_query(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"status"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"status"))) {
         webu_text_status(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"connection"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"connection"))) {
         webu_text_connection(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"start"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"start"))) {
         webu_text_action(webui);
 
-    } else if ((!strcmp(webui->uri_cmd1,"detection")) &&
-               (!strcmp(webui->uri_cmd2,"pause"))) {
+    } else if ((mystreq(webui->uri_cmd1,"detection")) &&
+               (mystreq(webui->uri_cmd2,"pause"))) {
         webu_text_action(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
-               (strcmp(webui->uri_cmd2,"quit") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"action")) &&
+               (mystreq(webui->uri_cmd2,"quit"))){
         webu_text_action(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"action") == 0) &&
-               (strcmp(webui->uri_cmd2,"end") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"action")) &&
+               (mystreq(webui->uri_cmd2,"end"))){
         webu_text_action(webui);
 
-    } else if (!strcmp(webui->uri_cmd1,"action")) {
+    } else if (mystreq(webui->uri_cmd1,"action")) {
         webu_text_action(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"track") == 0) &&
-               (strcmp(webui->uri_cmd2,"set") == 0) &&
+    } else if ((mystreq(webui->uri_cmd1,"track")) &&
+               (mystreq(webui->uri_cmd2,"set")) &&
                (strlen(webui->uri_parm1) == 0)) {
         webu_text_track_pantilt(webui);
 
-    } else if ((strcmp(webui->uri_cmd1,"track") == 0)){
+    } else if ((mystreq(webui->uri_cmd1,"track"))){
         webu_text_track(webui);
 
     } else{

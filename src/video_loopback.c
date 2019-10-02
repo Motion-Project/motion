@@ -155,7 +155,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     struct v4l2_format v;
     struct v4l2_capability vc;
 
-    if (!strcmp(dev_name, "-")) {
+    if (mystreq(dev_name, "-")) {
         dev = vlp_open_vidpipe();
     } else {
         dev = open(dev_name, O_RDWR|O_CLOEXEC);
