@@ -7,6 +7,7 @@
  */
 #include <math.h>
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 
 #ifdef HAVE_V4L2

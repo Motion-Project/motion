@@ -18,6 +18,7 @@
  *
 */
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "rotate.h"
 #include "video_common.h"

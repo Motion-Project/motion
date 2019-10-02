@@ -28,6 +28,7 @@
 #include <string.h>
 #include <regex.h>
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 
 #define EXTENSION ".conf"

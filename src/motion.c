@@ -7,12 +7,14 @@
  *
  */
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "rotate.h"
 #include "movie.h"
 #include "video_common.h"
 #include "video_v4l2.h"
 #include "video_loopback.h"
+#include "netcam.h"
 #include "conf.h"
 #include "alg.h"
 #include "track.h"

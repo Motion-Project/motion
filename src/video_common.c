@@ -10,9 +10,11 @@
  */
 
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "video_common.h"
 #include "video_v4l2.h"
+#include "netcam.h"
 #include "jpegutils.h"
 #include "mmalcam.h"
 

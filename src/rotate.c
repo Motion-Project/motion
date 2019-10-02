@@ -30,6 +30,7 @@
  *      v1 (28-Aug-2004) - initial version
  */
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "rotate.h"
 

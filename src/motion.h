@@ -40,18 +40,23 @@
     #include <pthread_np.h>
 #endif
 
+#include <errno.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/mathematics.h>
+#include <libavdevice/avdevice.h>
+
 /* Forward declarations, used in functional definitions of headers */
 struct ctx_rotate;
 struct ctx_images;
 struct ctx_image_data;
 struct ctx_dbse;
 struct ctx_mmalcam;
+struct ctx_movie;
+struct ctx_netcam;
 
-#include "logger.h"
 #include "conf.h"
 #include "track.h"
-#include "netcam.h"
-#include "movie.h"
 
 int nls_enabled;
 

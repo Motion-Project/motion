@@ -23,12 +23,6 @@ enum USER_CODEC {
     USER_CODEC_DEFAULT     /* All other default codecs */
 };
 
-#include <errno.h>
-#include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/mathematics.h>
-#include <libavdevice/avdevice.h>
-
 
 struct ctx_movie {
     AVFormatContext *oc;

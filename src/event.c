@@ -8,6 +8,7 @@
     see also the file 'COPYING'.
 */
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "picture.h"
 #include "netcam.h"

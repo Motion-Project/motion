@@ -9,6 +9,7 @@
  *
  */
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "video_loopback.h"
 

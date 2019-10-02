@@ -48,8 +48,8 @@
  *    jpgutl_decode_jpeg
  */
 
-#include "config.h"
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "jpegutils.h"
 #include "exif.h"

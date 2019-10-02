@@ -9,14 +9,12 @@
  *
  */
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "picture.h"
 #include "jpegutils.h"
 #include "event.h"
 #include "exif.h"
-
-// #include <assert.h>
-//#include <jpeglib.h>
 
 #ifdef HAVE_WEBP
     #include <webp/encode.h>

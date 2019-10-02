@@ -14,6 +14,7 @@
  */
 
 #include "motion.h"
+#include "logger.h"
 #include "util.h"
 #include "picture.h"
 #include "webu.h"
