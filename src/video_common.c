@@ -486,13 +486,13 @@ void vid_greytoyuv420p(unsigned char *map, unsigned char *cap_map, int width, in
 
 }
 
-static void vid_parms_add(struct vdev_context *vdevctx, char *config_name, char *config_val){
+static void vid_parms_add(struct ctx_vdev *vdevctx, char *config_name, char *config_val){
 
     /* Add the parameter and value to our user control array*/
-    struct vdev_usrctrl_ctx *tmp;
+    struct ctx_usrctrl *tmp;
     int indx;
 
-    tmp = mymalloc(sizeof(struct vdev_usrctrl_ctx)*(vdevctx->usrctrl_count+1));
+    tmp = mymalloc(sizeof(struct ctx_usrctrl)*(vdevctx->usrctrl_count+1));
     for (indx=0;indx<vdevctx->usrctrl_count;indx++){
         tmp[indx].ctrl_name = mymalloc(strlen(vdevctx->usrctrl_array[indx].ctrl_name)+1);
         sprintf(tmp[indx].ctrl_name,"%s",vdevctx->usrctrl_array[indx].ctrl_name);
@@ -522,12 +522,13 @@ int vid_parms_parse(struct ctx_cam *cam){
      * vid_control_parms ID01234= 1, ID23456=2
      * vid_control_parms "Brightness, auto" = 1, ID23456=2
      * vid_control_parms ID23456=2, "Brightness, auto" = 1,ID2222=5
+     * TODO:  This code is terrible and needs rewriting
      */
     int indx_parm;
     int parmval_st , parmval_len;
     int parmdesc_st, parmdesc_len;
     int qte_open;
-    struct vdev_context *vdevctx;
+    struct ctx_vdev *vdevctx;
     char tst;
     char *parmdesc, *parmval;
 

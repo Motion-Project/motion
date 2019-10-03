@@ -157,8 +157,8 @@ static void v4l2_vdev_free(struct ctx_cam *cam){
 static int v4l2_vdev_init(struct ctx_cam *cam){
 
     /* Create the v4l2 ctx_cam within the main thread ctx_cam  */
-    cam->vdev = mymalloc(sizeof(struct vdev_context));
-    memset(cam->vdev, 0, sizeof(struct vdev_context));
+    cam->vdev = mymalloc(sizeof(struct ctx_vdev));
+    memset(cam->vdev, 0, sizeof(struct ctx_vdev));
     cam->vdev->usrctrl_array = NULL;
     cam->vdev->usrctrl_count = 0;
     cam->vdev->update_parms = TRUE;     /*Set trigger that we have updated user parameters */
@@ -334,7 +334,7 @@ static int v4l2_ctrls_set(struct video_dev *curdev) {
 static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
 
     struct vid_devctrl_ctx  *devitem;
-    struct vdev_usrctrl_ctx *usritem;
+    struct ctx_usrctrl *usritem;
     int indx_dev, indx_user;
 
     if (cam->conf.roundrobin_skip < 0) cam->conf.roundrobin_skip = 1;
@@ -388,8 +388,8 @@ static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
 
 static int v4l2_autobright(struct ctx_cam *cam, struct video_dev *curdev, int method) {
 
-    struct vid_devctrl_ctx  *devitem;
-    struct vdev_usrctrl_ctx *usritem;
+    struct vid_devctrl_ctx    *devitem;
+    struct ctx_usrctrl *usritem;
     unsigned char           *image;
     int                      window_high;
     int                      window_low;

@@ -179,17 +179,17 @@ enum FLIP_TYPE {
     FLIP_TYPE_VERTICAL
 };
 
-struct vdev_usrctrl_ctx {
+struct ctx_usrctrl {
     char          *ctrl_name;       /* The name or description of the ID as requested by user*/
     int            ctrl_value;      /* The value that the user wants the control set to*/
 };
 
-struct vdev_context {
+struct ctx_vdev {
     /* As v4l2 gets rewritten, put thread specific items here
      * Rather than use conf options directly, copy from conf to here
      * to handle cross thread webui changes which could cause problems
      */
-    struct vdev_usrctrl_ctx *usrctrl_array;     /*Array of the controls the user specified*/
+    struct ctx_usrctrl *usrctrl_array;     /*Array of the controls the user specified*/
     int usrctrl_count;                          /*Count of the controls the user specified*/
     int update_parms;                           /*Bool for whether to update the parameters on the device*/
 };
@@ -313,7 +313,7 @@ struct ctx_cam {
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
-    struct vdev_context     *vdev;              /* Structure for v4l2 device information */
+    struct ctx_vdev         *vdev;              /* Structure for v4l2 device information */
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
     unsigned int new_img;
