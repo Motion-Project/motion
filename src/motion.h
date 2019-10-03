@@ -166,11 +166,11 @@ enum CAMERA_TYPE {
 };
 
 enum WEBUI_LEVEL{
-  WEBUI_LEVEL_ALWAYS     = 0,
-  WEBUI_LEVEL_LIMITED    = 1,
-  WEBUI_LEVEL_ADVANCED   = 2,
-  WEBUI_LEVEL_RESTRICTED = 3,
-  WEBUI_LEVEL_NEVER      = 99
+    WEBUI_LEVEL_ALWAYS     = 0,
+    WEBUI_LEVEL_LIMITED    = 1,
+    WEBUI_LEVEL_ADVANCED   = 2,
+    WEBUI_LEVEL_RESTRICTED = 3,
+    WEBUI_LEVEL_NEVER      = 99
 };
 
 enum FLIP_TYPE {
@@ -288,139 +288,125 @@ struct ctx_stream {
  *  own context
  */
 struct ctx_cam {
-    struct ctx_cam **cam_list;
+    struct ctx_cam          **cam_list;
 
-    FILE *extpipe;
-    int extpipe_open;
-    char conf_filename[PATH_MAX];
-    int from_conf_dir;
-    int threadnr;
-    unsigned int daemon;
-    char pid_file[PATH_MAX];
-    char log_file[PATH_MAX];
-    char log_type_str[6];
-    int log_level;
-    unsigned int log_type;
+    FILE                    *extpipe;
+    int                     extpipe_open;
+    char                    conf_filename[PATH_MAX];
+    int                     from_conf_dir;
+    int                     threadnr;
+    unsigned int            daemon;
+    char                    pid_file[PATH_MAX];
+    char                    log_file[PATH_MAX];
+    char                    log_type_str[6];
+    int                     log_level;
+    unsigned int            log_type;
 
-    struct config conf;
-    struct ctx_images imgs;
-    struct trackoptions track;
-    int                 track_posx;
-    int                 track_posy;
+    struct config           conf;
+    struct trackoptions     track;
 
-    enum CAMERA_TYPE      camera_type;
-
+    struct ctx_images       imgs;
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
     struct ctx_vdev         *vdev;              /* Structure for v4l2 device information */
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
-    unsigned int new_img;
+    struct ctx_dbse         *dbse;
+    struct ctx_movie        *movie_norm;
+    struct ctx_movie        *movie_motion;
+    struct ctx_movie        *movie_timelapse;
+    struct ctx_stream       stream;
 
-    int locate_motion_mode;
-    int locate_motion_style;
-    int process_thisframe;
+    int                     track_posx;
+    int                     track_posy;
+    int                     camera_id;
+    enum CAMERA_TYPE        camera_type;
+    unsigned int            new_img;
+    int                     locate_motion_mode;
+    int                     locate_motion_style;
+    int                     process_thisframe;
+    int                     noise;
+    int                     threshold;
+    int                     threshold_maximum;
+    int                     diffs_last[THRESHOLD_TUNE_LENGTH];
+    int                     smartmask_speed;
 
-    int noise;
-    int threshold;
-    int threshold_maximum;
-    int diffs_last[THRESHOLD_TUNE_LENGTH];
-    int smartmask_speed;
+    volatile unsigned int   snapshot;    /* Make a snapshot */
+    volatile unsigned int   event_stop;  /* Boolean for whether to stop a event */
+    volatile unsigned int   event_user;  /* Boolean for whether to user triggered an event */
+    volatile unsigned int   finish;      /* End the thread */
+    volatile unsigned int   restart;     /* Restart the thread when it ends */
+    volatile unsigned int   running;
+    volatile unsigned int   webcontrol_running;
+    volatile unsigned int   webcontrol_finish;      /* End the thread */
+    volatile int            watchdog;
 
+    pthread_t               thread_id;
 
-    /* Commands to the motion thread */
-    volatile unsigned int snapshot;    /* Make a snapshot */
-    volatile unsigned int event_stop;  /* Boolean for whether to stop a event */
-    volatile unsigned int event_user;  /* Boolean for whether to user triggered an event */
-    volatile unsigned int finish;      /* End the thread */
-    volatile unsigned int restart;     /* Restart the thread when it ends */
-    /* Is the motion thread running */
-    volatile unsigned int running;
-    /* Is the web control thread running */
-    volatile unsigned int webcontrol_running;
-    volatile unsigned int webcontrol_finish;      /* End the thread */
-    volatile int watchdog;
+    int                     event_nr;
+    int                     prev_event;
+    unsigned long long      database_event_id;
+    unsigned int            lightswitch_framecounter;
+    char                    text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
+    int                     text_scale;
 
-    pthread_t thread_id;
+    int                     postcap;                             /* downcounter, frames left to to send post event */
+    int                     shots;
+    unsigned int            detecting_motion;
+    long                    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
 
-    int event_nr;
-    int prev_event;
-    unsigned long long database_event_id;
-    unsigned int lightswitch_framecounter;
-    char text_event_string[PATH_MAX];        /* The text for conv. spec. %C - */
-    int text_scale;
+    struct timespec         frame_curr_ts;
+    struct timespec         frame_last_ts;
 
-    int postcap;                             /* downcounter, frames left to to send post event */
-    int shots;
-    unsigned int detecting_motion;
-    long    frame_wait[AVGCNT];   /* Last wait times through motion loop*/
-    struct timespec frame_curr_ts;
-    struct timespec frame_last_ts;
+    time_t                  currenttime;
+    time_t                  lasttime;
+    time_t                  eventtime;
+    time_t                  connectionlosttime;               /* timestamp from connection lost */
+    time_t                  lastframetime;
+    unsigned int            lastrate;
+    unsigned int            startup_frames;
+    unsigned int            moved;
+    unsigned int            pause;
+    int                     missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
+    unsigned int            lost_connection;
 
-    time_t currenttime;
-    time_t lasttime;
-    time_t eventtime;
-    time_t connectionlosttime;               /* timestamp from connection lost */
+    int                     video_dev;
+    int                     pipe;
+    int                     mpipe;
 
-    unsigned int lastrate;
-    unsigned int startup_frames;
-    unsigned int moved;
-    unsigned int pause;
-    int missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
-    unsigned int lost_connection;
+    char                    hostname[PATH_MAX];
 
-    int video_dev;
-    int pipe;
-    int mpipe;
-
-    char hostname[PATH_MAX];
-
-    struct ctx_dbse        *dbse;
-
-    int movie_fps;
-    char newfilename[PATH_MAX];
-    char extpipefilename[PATH_MAX];
-    char extpipecmdline[PATH_MAX];
-    int movie_last_shot;
-
-    struct ctx_movie   *movie_norm;
-    struct ctx_movie   *movie_motion;
-    struct ctx_movie   *movie_timelapse;
-    int             movie_passthrough;
-
-    char timelapsefilename[PATH_MAX];
-    char motionfilename[PATH_MAX];
+    int                     movie_fps;
+    char                    newfilename[PATH_MAX];
+    char                    extpipefilename[PATH_MAX];
+    char                    extpipecmdline[PATH_MAX];
+    int                     movie_last_shot;
+    int                     movie_passthrough;
+    char                    timelapsefilename[PATH_MAX];
+    char                    motionfilename[PATH_MAX];
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
-    int areadetect_eventnbr;
-    /* ToDo Determine why we need these...just put it all into prepare? */
-    unsigned long long int timenow, timebefore;
+    int                     areadetect_eventnbr;
+    unsigned long long int  timenow, timebefore;
+    unsigned int            rate_limit;
+    int                     minimum_frame_time_downcounter;
+    unsigned int            get_image;    /* Flag used to signal that we capture new image when we run the loop */
+    long int                required_frame_time, frame_delay;
 
-    unsigned int rate_limit;
-    time_t lastframetime;
-    int minimum_frame_time_downcounter;
-    unsigned int get_image;    /* Flag used to signal that we capture new image when we run the loop */
-
-    long int required_frame_time, frame_delay;
-
-    int olddiffs;   //only need this in here for a printf later...do we need that printf?
-    int smartmask_ratio;
-    int smartmask_count;
+    int                     olddiffs;   //only need this in here for a printf later...do we need that printf?
+    int                     smartmask_ratio;
+    int                     smartmask_count;
+    unsigned int            smartmask_lastrate;
 
     int previous_diffs, previous_location_x, previous_location_y;
-    unsigned long int time_last_frame, time_current_frame;
+    unsigned long int       time_last_frame, time_current_frame;
 
-    unsigned int smartmask_lastrate;
+    unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
+    int                     rolling_frame;
 
-    unsigned int passflag;  //only purpose is to flag first frame vs all others.....
-    int rolling_frame;
-
-    struct MHD_Daemon   *webcontrol_daemon;
-    char                webcontrol_digest_rand[8];
-    int                 camera_id;
-
-    struct ctx_stream      stream;
+    struct MHD_Daemon       *webcontrol_daemon;
+    char                    webcontrol_digest_rand[8];
 
 };
 
