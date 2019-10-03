@@ -1509,51 +1509,6 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "track_port",
-    "# Serial port of motor",
-    0,
-    TRACK_OFFSET(port),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_motorx",
-    "# Motor number for x-axis",
-    0,
-    TRACK_OFFSET(motorx),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_motorx_reverse",
-    "# Set motorx reverse",
-    0,
-    TRACK_OFFSET(motorx_reverse),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_motory",
-    "# Motor number for y-axis",
-    0,
-    TRACK_OFFSET(motory),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_motory_reverse",
-    "# Set motory reverse",
-    0,
-    TRACK_OFFSET(motory_reverse),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "track_maxx",
     "# Maximum value on x-axis",
     0,
@@ -1590,33 +1545,6 @@ config_param config_params[] = {
     WEBUI_LEVEL_LIMITED
     },
     {
-    "track_homex",
-    "# Center value on x-axis",
-    0,
-    TRACK_OFFSET(homex),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_homey",
-    "# Center value on y-axis",
-    0,
-    TRACK_OFFSET(homey),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_iomojo_id",
-    "# ID of an iomojo camera if used",
-    0,
-    TRACK_OFFSET(iomojo_id),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
     "track_step_angle_x",
     "# Angle in degrees the camera moves per step on the X-axis with auto-track",
     0,
@@ -1639,24 +1567,6 @@ config_param config_params[] = {
     "# Delay to wait for after tracking movement as number of picture frames.",
     0,
     TRACK_OFFSET(move_wait),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_speed",
-    "# Speed to set the motor to (stepper motor option)",
-    0,
-    TRACK_OFFSET(speed),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_stepsize",
-    "# Number of steps to make (stepper motor option)",
-    0,
-    TRACK_OFFSET(stepsize),
     copy_int,
     print_int,
     WEBUI_LEVEL_LIMITED
@@ -3230,23 +3140,13 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_query",_("sql_query"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_type",_("track_type"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_auto",_("track_auto"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_port",_("track_port"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_motorx",_("track_motorx"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_motorx_reverse",_("track_motorx_reverse"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_motory",_("track_motory"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_motory_reverse",_("track_motory_reverse"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_maxx",_("track_maxx"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_minx",_("track_minx"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_maxy",_("track_maxy"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_miny",_("track_miny"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_homex",_("track_homex"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_homey",_("track_homey"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_iomojo_id",_("track_iomojo_id"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_step_angle_x",_("track_step_angle_x"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_step_angle_y",_("track_step_angle_y"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_move_wait",_("track_move_wait"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_speed",_("track_speed"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_stepsize",_("track_stepsize"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_generic_move",_("track_generic_move"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera",_("camera"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","camera_dir",_("camera_dir"));

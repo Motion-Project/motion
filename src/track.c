@@ -9,1310 +9,410 @@
 #include "motion.h"
 #include "logger.h"
 #include "util.h"
+#include "track.h"
 
 #ifdef HAVE_V4L2
-    #if defined(HAVE_LINUX_VIDEODEV2_H)
-        #include <linux/videodev2.h>
-    #else
-        #include <sys/videoio.h>
+    /*UVC*/
+    #ifndef V4L2_CID_PAN_RELATIVE
+        #define V4L2_CID_PAN_RELATIVE                   (V4L2_CID_CAMERA_CLASS_BASE+4)
     #endif
-    #include "pwc-ioctl.h"
+    #ifndef V4L2_CID_TILT_RELATIVE
+        #define V4L2_CID_TILT_RELATIVE                  (V4L2_CID_CAMERA_CLASS_BASE+5)
+    #endif
+    #ifndef V4L2_CID_PAN_RESET
+        #define V4L2_CID_PAN_RESET                      (V4L2_CID_CAMERA_CLASS_BASE+6)
+    #endif
+    #ifndef V4L2_CID_TILT_RESET
+        #define V4L2_CID_TILT_RESET                     (V4L2_CID_CAMERA_CLASS_BASE+7)
+    #endif
+    #define INCPANTILT 64 // 1 degree
+    #include <linux/videodev2.h>
 #endif
 
-
-struct trackoptions track_template = {
-    .dev =             -1,             /* dev open */
-    .port =            NULL,           /* char *port */
-    .motorx =          0,              /* int motorx */
-    .motory =          0,              /* int motory */
-    .maxx =            0,              /* int maxx; */
-    .maxy =            0,              /* int maxy; */
-    .minx =            0,              /* int minx; */
-    .miny =            0,              /* int miny; */
-    .homex =           128,            /* int homex; */
-    .homey =           128,            /* int homey; */
-    .motorx_reverse =  0,              /* int reversed x servo; */
-    .motory_reverse =  0,              /* int reversed y servo; */
-    .speed =           TRACK_SPEED,    /* speed */
-    .stepsize =        TRACK_STEPSIZE, /* stepsize */
-    .active =          0,              /* auto tracking active */
-    .minmaxfound =     0,              /* flag for minmax values stored for pwc based camera */
-    .step_angle_x =    10,             /* UVC step angle in degrees X-axis that camera moves during auto tracking */
-    .step_angle_y =    10,             /* UVC step angle in degrees Y-axis that camera moves during auto tracking */
-    .move_wait =       10,             /* number of frames to disable motion detection after camera moving */
-    .generic_move =    NULL            /* command to execute to move a generic camera */
-};
-
-
-/* Add your own center and move functions here: */
-
-static unsigned int servo_position(struct ctx_cam *cam, unsigned int motor);
-
-static unsigned int servo_center(struct ctx_cam *cam, int xoff, int yoff);
-static unsigned int stepper_center(struct ctx_cam *cam, int xoff, int yoff);
-static unsigned int iomojo_center(struct ctx_cam *cam, int xoff, int yoff);
-
-static unsigned int stepper_move(struct ctx_cam *cam, struct ctx_coord *cent, struct ctx_images *imgs);
-static unsigned int servo_move(struct ctx_cam *cam, struct ctx_coord *cent,
-                               struct ctx_images *imgs, unsigned int manual);
-static unsigned int iomojo_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent, struct ctx_images *imgs);
-
-#ifdef HAVE_V4L2
-    static unsigned int lqos_center(struct ctx_cam *cam, int dev, int xoff, int yoff);
-    static unsigned int lqos_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
-                                struct ctx_images *imgs, unsigned int manual);
-    static unsigned int uvc_center(struct ctx_cam *cam, int dev, int xoff, int yoff);
-    static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
-                                struct ctx_images *imgs, unsigned int manual);
-#endif /* HAVE_V4L2 */
-
-static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, unsigned int manual,
-                                 int xoff, int yoff, struct ctx_coord *cent, struct ctx_images *imgs);
-
-
-/* Add a call to your functions here: */
-unsigned int track_center(struct ctx_cam *cam, int dev,
-                          unsigned int manual, int xoff, int yoff)
-{
-    struct ctx_coord cent;
-
-    (void)dev;
-
-    if (!manual && !cam->track.active)
-        return 0;
-
-    if (cam->track.type == TRACK_TYPE_STEPPER) {
-        unsigned int ret;
-        ret = stepper_center(cam, xoff, yoff);
-        if (!ret) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("internal error"));
-            return 0;
-        }
-        else return ret;
-    } else if (cam->track.type == TRACK_TYPE_SERVO) {
-        return servo_center(cam, xoff, yoff);
-    }
-    #ifdef HAVE_V4L2
-        else if (cam->track.type == TRACK_TYPE_PWC)
-            return lqos_center(cam, dev, xoff, yoff);
-        else if (cam->track.type == TRACK_TYPE_UVC)
-            return uvc_center(cam, dev, xoff, yoff);
-    #endif
-    else if (cam->track.type == TRACK_TYPE_IOMOJO)
-        return iomojo_center(cam, xoff, yoff);
-    else if (cam->track.type == TRACK_TYPE_GENERIC) {
-        if (cam->track.generic_move){
-            cent.x = -cam->track_posx;
-            cent.y = -cam->track_posy;
-            return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
-        } else {
-            return 10; // FIX ME. I chose to return something reasonable.
-        }
-    }
-
-    MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->track.type);
-
-    return 0;
-}
-
-/* Add a call to your functions here: */
-unsigned int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent, struct ctx_images *imgs,
-                        unsigned int manual)
-{
-
-    if (!manual && !cam->track.active)
-        return 0;
-
-    if (cam->track.type == TRACK_TYPE_STEPPER)
-        return stepper_move(cam, cent, imgs);
-    else if (cam->track.type == TRACK_TYPE_SERVO)
-        return servo_move(cam, cent, imgs, manual);
-    #ifdef HAVE_V4L2
-        else if (cam->track.type == TRACK_TYPE_PWC)
-            return lqos_move(cam, dev, cent, imgs, manual);
-        else if (cam->track.type == TRACK_TYPE_UVC)
-            return uvc_move(cam, dev, cent, imgs, manual);
-    #endif
-    else if (cam->track.type == TRACK_TYPE_IOMOJO)
-        return iomojo_move(cam, dev, cent, imgs);
-    else if (cam->track.type == TRACK_TYPE_GENERIC) {
-        if (cam->track.generic_move)
-          return generic_move(cam, TRACK_MOVE, manual, 0, 0, cent, imgs);
-        else
-          return cam->track.move_wait; // FIX ME. I chose to return something reasonable.
-    }
-
-    MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->track.type);
-
-    return 0;
-}
-
-/******************************************************************************
-    Stepper motor on serial port
-    http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTracking
-    http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTrackerAPI
-******************************************************************************/
-
-static unsigned int stepper_command(struct ctx_cam *cam, unsigned int motor,
-                                    unsigned int command, unsigned int data)
-{
-    char buffer[3];
-    time_t timeout = time(NULL);
-
-    buffer[0] = motor;
-    buffer[1] = command;
-    buffer[2] = data;
-
-    if (write(cam->track.dev, buffer, 3) != 3) {
-        MOTION_LOG(NTC, TYPE_TRACK, SHOW_ERRNO
-            ,_("port %s dev fd %i, motor %hu command %hu data %hu")
-            ,cam->track.port, cam->track.dev, motor, command, data);
-        return 0;
-    }
-
-    while (read(cam->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1);
-
-    if (time(NULL) >= timeout + 2) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Status byte timeout!"));
-        return 0;
-    }
-
-    return buffer[0];
-}
-
-
-static unsigned int stepper_status(struct ctx_cam *cam, unsigned int motor)
-{
-    return stepper_command(cam, motor, STEPPER_COMMAND_STATUS, 0);
-}
-
-
-static unsigned int stepper_center(struct ctx_cam *cam, int x_offset, int y_offset)
-{
-    struct termios adtio;
-
-    if (cam->track.dev < 0) {
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("Try to open serial device %s"), cam->track.port);
-
-        if ((cam->track.dev = open(cam->track.port, O_RDWR|O_CLOEXEC | O_NOCTTY)) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Unable to open serial device %s"), cam->track.port);
-            return 0;
-        }
-
-        bzero (&adtio, sizeof(adtio));
-        adtio.c_cflag= STEPPER_BAUDRATE | CS8 | CLOCAL | CREAD;
-        adtio.c_iflag= IGNPAR;
-        adtio.c_oflag= 0;
-        adtio.c_lflag= 0;    /* non-canon, no echo */
-        adtio.c_cc[VTIME] = 0;    /* timer unused */
-        adtio.c_cc[VMIN] = 0;    /* blocking read until 1 char */
-        tcflush (cam->track.dev, TCIFLUSH);
-
-        if (tcsetattr(cam->track.dev, TCSANOW, &adtio) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Unable to initialize serial device %s"), cam->track.port);
-            cam->track.dev = -1;
-            return 0;
-        }
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("Opened serial device %s and initialize, fd %i")
-            ,cam->track.port, cam->track.dev);
-    }
-
-    /* x-axis */
-
-    stepper_command(cam, cam->track.motorx, STEPPER_COMMAND_SPEED, cam->track.speed);
-    stepper_command(cam, cam->track.motorx, STEPPER_COMMAND_LEFT_N, cam->track.maxx);
-
-    while (stepper_status(cam, cam->track.motorx) & STEPPER_STATUS_LEFT);
-
-    stepper_command(cam, cam->track.motorx, STEPPER_COMMAND_RIGHT_N,
-                    cam->track.maxx / 2 + x_offset * cam->track.stepsize);
-
-    while (stepper_status(cam, cam->track.motorx) & STEPPER_STATUS_RIGHT);
-
-    /* y-axis */
-
-    stepper_command(cam, cam->track.motory, STEPPER_COMMAND_SPEED, cam->track.speed);
-    stepper_command(cam, cam->track.motory, STEPPER_COMMAND_UP_N, cam->track.maxy);
-
-    while (stepper_status(cam, cam->track.motory) & STEPPER_STATUS_UP)
-
-    stepper_command(cam, cam->track.motory, STEPPER_COMMAND_DOWN_N,
-                    cam->track.maxy / 2 + y_offset * cam->track.stepsize);
-
-    while (stepper_status(cam, cam->track.motory) & STEPPER_STATUS_DOWN);
-
-    return cam->track.move_wait;
-}
-
-static unsigned int stepper_move(struct ctx_cam *cam,
-                                 struct ctx_coord *cent, struct ctx_images *imgs)
-{
-    unsigned int command = 0, data = 0;
-
-    if (cam->track.dev < 0) {
-        MOTION_LOG(WRN, TYPE_TRACK, NO_ERRNO
-            ,_("No device %s started yet , trying stepper_center()")
-            ,cam->track.port);
-
-        if (!stepper_center(cam, 0, 0)) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("failed to initialize stepper device on %s , fd [%i].")
-                ,cam->track.port, cam->track.dev);
-            return 0;
-        }
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("succeed , device started %s , fd [%i]")
-            ,cam->track.port, cam->track.dev);
-    }
-
-    /* x-axis */
-
-    if (cent->x < imgs->width / 2) {
-        command = STEPPER_COMMAND_LEFT_N;
-        data = imgs->width / 2 - cent->x;
-    }
-
-    if (cent->x > imgs->width / 2) {
-        command = STEPPER_COMMAND_RIGHT_N;
-        data = cent->x - imgs->width / 2;
-    }
-
-    data = data * cam->track.stepsize / imgs->width;
-
-    if (data) stepper_command(cam, cam->track.motorx, command, data);
-
-    /* y-axis */
-
-    if (cent->y < imgs->height / 2) {
-        command = STEPPER_COMMAND_UP_N;
-        data = imgs->height / 2 - cent->y;
-    }
-
-    if (cent->y > imgs->height / 2) {
-        command = STEPPER_COMMAND_DOWN_N;
-        data = cent->y - imgs->height / 2;
-    }
-
-    data = data * cam->track.stepsize / imgs->height;
-
-    if (data)
-        stepper_command(cam, cam->track.motory, command, data);
-
-
-    return cam->track.move_wait;
-}
-
-/******************************************************************************
- *   Servo motor on serial port
- *   http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTracking
- *   http://www.lavrsen.dk/twiki/bin/view/Motion/MotionTrackerServoAPI
- ******************************************************************************/
-
-static int servo_open(struct ctx_cam *cam)
-{
-    struct termios adtio;
-
-    if ((cam->track.dev = open(cam->track.port, O_RDWR|O_CLOEXEC | O_NOCTTY)) < 0) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-            ,_("Unable to open serial device %s"),cam->track.port);
-        return 0;
-    }
-
-    bzero (&adtio, sizeof(adtio));
-    adtio.c_cflag= SERVO_BAUDRATE | CS8 | CLOCAL | CREAD;
-    adtio.c_iflag= IGNPAR;
-    adtio.c_oflag= 0;
-    adtio.c_lflag= 0;       /* non-canon, no echo */
-    adtio.c_cc[VTIME] = 0;  /* timer unused */
-    adtio.c_cc[VMIN] = 0;   /* blocking read until 1 char */
-    tcflush (cam->track.dev, TCIFLUSH);
-
-    if (tcsetattr(cam->track.dev, TCSANOW, &adtio) < 0) {
-        MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO
-            ,_("Unable to initialize serial device %s"), cam->track.port);
-        cam->track.dev = -1;
-        return 0;
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-        ,_("Opened serial device %s and initialize, fd %i")
-        ,cam->track.port, cam->track.dev);
-
-    return 1;
-}
-
-
-static unsigned int servo_command(struct ctx_cam *cam, unsigned int motor,
-                                  unsigned int command, unsigned int data)
-{
-    unsigned char buffer[3];
-    time_t timeout = time(NULL);
-
-    buffer[0] = motor;
-    buffer[1] = command;
-    buffer[2] = data;
-
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-        ,_("SENDS port %s dev fd %i, motor %hu command %hu data %hu")
-        ,cam->track.port, cam->track.dev, buffer[0], buffer[1], buffer[2]);
-
-    if (write(cam->track.dev, buffer, 3) != 3) {
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("port %s dev fd %i, motor %hu command %hu data %hu")
-            ,cam->track.port, cam->track.dev, motor, command, data);
-        return 0;
-    }
-
-    while (read(cam->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 1);
-
-    if (time(NULL) >= timeout + 2) {
-        MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO,_("Status byte timeout!"));
-        return 0;
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-        ,_("Command return %d"), buffer[0]);
-
-
-    return buffer[0];
-}
-
-
-static unsigned int servo_position(struct ctx_cam *cam, unsigned int motor)
-{
-    unsigned int ret = 0;
-
-    ret = servo_command(cam, motor, SERVO_COMMAND_POSITION, 0);
-
-    return ret;
-}
-
-
-/**
- * servo_move
- *      Does relative movements to current position.
- *
- */
-static unsigned int servo_move(struct ctx_cam *cam, struct ctx_coord *cent,
-                               struct ctx_images *imgs, unsigned int manual)
-{
-    unsigned int command = 0;
-    unsigned int data = 0;
-    unsigned int position;
-
-    /* If device is not open yet , open and center */
-    if (cam->track.dev < 0) {
-        if (!servo_center(cam, 0, 0)) {
-            MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO,_("Problem opening servo!"));
-            return 0;
-        }
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-        ,_("cent->x %d, cent->y %d, reversex %d, reversey %d manual %d")
-        ,cent->x , cent->y, cam->track.motorx_reverse
-        ,cam->track.motory_reverse, manual);
-
-    if (manual) {
-        int offset;
-
-        if (cent->x) {
-            position = servo_position(cam, cam->track.motorx);
-            offset = cent->x * cam->track.stepsize;
-
-
-            if ((cam->track.motorx_reverse && (offset > 0)) ||
-                (!cam->track.motorx_reverse && (offset < 0)))
-                command = SERVO_COMMAND_LEFT_N;
-            else
-                command = SERVO_COMMAND_RIGHT_N;
-
-            data = abs(offset);
-
-            if ((data + position > (unsigned)cam->track.maxx) ||
-                (position - offset < (unsigned)cam->track.minx)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO
-                    ,_("x %d value out of range! (%d - %d)")
-                    ,data, cam->track.minx, cam->track.maxx);
-                return 0;
-            }
-
-            /* Set Speed , TODO : it should be done only when speed changes */
-            servo_command(cam, cam->track.motorx, SERVO_COMMAND_SPEED, cam->track.speed);
-            servo_command(cam, cam->track.motorx, command, data);
-        }
-
-
-        if (cent->y) {
-            position = servo_position(cam, cam->track.motory);
-            offset = cent->y * cam->track.stepsize;
-
-            if ((cam->track.motory_reverse && (offset > 0)) ||
-                (!cam->track.motory_reverse && (offset < 0)))
-                command = SERVO_COMMAND_UP_N;
-            else
-                command = SERVO_COMMAND_DOWN_N;
-
-            data = abs(offset);
-
-            if ((data + position > (unsigned)cam->track.maxy) ||
-                (position - offset < (unsigned)cam->track.miny)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO
-                    ,_("y %d value out of range! (%d - %d)")
-                    ,data, cam->track.miny, cam->track.maxy);
-                return 0;
-            }
-
-            /* Set Speed , TODO : it should be done only when speed changes */
-            servo_command(cam, cam->track.motory, SERVO_COMMAND_SPEED, cam->track.speed);
-            servo_command(cam, cam->track.motory, command, data);
-        }
-
-    } else {
-        /***** x-axis *****/
-
-        /* Move left */
-        if (cent->x < imgs->width / 2) {
-            if (cam->track.motorx_reverse)
-                command = SERVO_COMMAND_RIGHT_N;
-            else
-                command = SERVO_COMMAND_LEFT_N;
-            data = imgs->width / 2 - cent->x;
-        }
-
-        /* Move right */
-        if (cent->x > imgs->width / 2) {
-            if (cam->track.motorx_reverse)
-                command = SERVO_COMMAND_LEFT_N;
-            else
-                command = SERVO_COMMAND_RIGHT_N;
-            data = cent->x - imgs->width / 2;
-        }
-
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO,_("X offset %d"), data);
-
-        data = data * cam->track.stepsize / imgs->width;
-
-        if (data && command) {
-
-            // TODO: need to get position to avoid overflow limits
-            position = servo_position(cam, cam->track.motorx);
-
-            if ((position + data > (unsigned)cam->track.maxx) ||
-                (position - data < (unsigned)cam->track.minx)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO
-                    ,_("x %d value out of range! (%d - %d)")
-                    ,data, cam->track.minx, cam->track.maxx);
-                return 0;
-            }
-
-            /* Set Speed , TODO : it should be done only when speed changes */
-
-            servo_command(cam, cam->track.motorx, SERVO_COMMAND_SPEED, cam->track.speed);
-            servo_command(cam, cam->track.motorx, command, data);
-
-            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-                ,_("X cent->x %d, cent->y %d, reversex %d,"
-                "reversey %d motorx %d data %d command %d")
-                ,cent->x, cent->y, cam->track.motorx_reverse
-                ,cam->track.motory_reverse, cam->track.motorx, data, command);
-        }
-
-        /***** y-axis *****/
-
-        /* Move down */
-        if (cent->y < imgs->height / 2) {
-            if (cam->track.motory_reverse)
-                command = SERVO_COMMAND_UP_N;
-            else
-                command = SERVO_COMMAND_DOWN_N;
-            data = imgs->height / 2 - cent->y;
-        }
-
-        /* Move up */
-        if (cent->y > imgs->height / 2) {
-            if (cam->track.motory_reverse)
-                command = SERVO_COMMAND_DOWN_N;
-            else
-                command = SERVO_COMMAND_UP_N;
-            data = cent->y - imgs->height / 2;
-        }
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO,_("Y offset %d"), data);
-
-        data = data * cam->track.stepsize / imgs->height;
-
-        if (data && command) {
-
-            // TODO: need to get position to avoid overflow limits
-            position = servo_position(cam, cam->track.motory);
-
-            if ((position + data > (unsigned)cam->track.maxy) ||
-                (position - data < (unsigned)cam->track.miny)) {
-                MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO
-                    ,_("y %d value out of range! (%d - %d)")
-                    ,data, cam->track.miny, cam->track.maxy);
-                return 0;
-            }
-
-            /* Set Speed , TODO : it should be done only when speed changes */
-            servo_command(cam, cam->track.motory, SERVO_COMMAND_SPEED, cam->track.speed);
-            servo_command(cam, cam->track.motory, command, data);
-
-            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-                ,_("Y cent->x %d, cent->y %d, reversex %d,"
-                "reversey %d motory %d data %d command %d")
-                ,cent->x, cent->y, cam->track.motorx_reverse
-                ,cam->track.motory_reverse, cam->track.motory, command);
-        }
-    }
-
-    return cam->track.move_wait;
-}
-
-    #if 0
-    static unsigned int servo_status(struct ctx_cam *cam, unsigned int motor)
-    {
-        return servo_command(cam, motor, SERVO_COMMAND_STATUS, 0);
-    }
-    #endif
-
-/**
- * servo_center
- *      Moves servo to home position.
- *      Does absolute movements ( offsets relative to home position ).
- *
- *      Note : Using Clockwise as a convention for right , left , up , down
- *              so left minx , right maxx , down miny , up maxy
- *
- */
-
-static unsigned int servo_center(struct ctx_cam *cam, int x_offset, int y_offset)
-{
-    int x_offset_abs;
-    int y_offset_abs;
-
-    /* If device is not open yet */
-    if (cam->track.dev < 0) {
-        if (!servo_open(cam)) {
-            MOTION_LOG(ERR, TYPE_TRACK, NO_ERRNO,_("Problem opening servo!"));
-            return 0;
-        }
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-        ,_("X-offset %d, Y-offset %d, x-position %d. y-position %d,"
-        "reversex %d, reversey %d , stepsize %d")
-        ,x_offset, y_offset
-        ,cam->track.homex + (x_offset * cam->track.stepsize)
-        ,cam->track.homey + (y_offset * cam->track.stepsize)
-        ,cam->track.motorx_reverse, cam->track.motory_reverse
-        ,cam->track.stepsize);
-
-    /* x-axis */
-    if (cam->track.motorx_reverse)
-        x_offset_abs = (128 - cam->track.homex) - (x_offset * cam->track.stepsize) + 128;
-    else
-        x_offset_abs = cam->track.homex + (x_offset * cam->track.stepsize);
-
-    if (x_offset_abs <= cam->track.maxx  && x_offset_abs >= cam->track.minx) {
-        /* Set Speed , TODO : it should be done only when speed changes */
-        servo_command(cam, cam->track.motorx, SERVO_COMMAND_SPEED, cam->track.speed);
-        servo_command(cam, cam->track.motorx, SERVO_COMMAND_ABSOLUTE, x_offset_abs);
-    }
-
-    /* y-axis */
-    if (cam->track.motory_reverse)
-        y_offset_abs = (128 - cam->track.homey) - (y_offset * cam->track.stepsize) + 128;
-    else
-        y_offset_abs = cam->track.homey + (y_offset * cam->track.stepsize);
-
-    if (y_offset_abs <= cam->track.maxy && y_offset_abs >= cam->track.minx) {
-        /* Set Speed , TODO : it should be done only when speed changes */
-        servo_command(cam, cam->track.motory, SERVO_COMMAND_SPEED, cam->track.speed);
-        servo_command(cam, cam->track.motory, SERVO_COMMAND_ABSOLUTE, y_offset_abs);
-    }
-
-    return cam->track.move_wait;
-}
+#define TRACK_TYPE_GENERIC      1
+#define TRACK_TYPE_UVC          2
 
 
 /******************************************************************************
-
-    Iomojo Smilecam on serial port
-
-******************************************************************************/
-
-static char iomojo_command(struct ctx_cam *cam, char *command, int len, unsigned int ret)
-{
-    char buffer[1];
-    time_t timeout = time(NULL);
-
-    if (write(cam->track.dev, command, len) != len)
-        return 0;
-
-    if (ret) {
-        while (read(cam->track.dev, buffer, 1) != 1 && time(NULL) < timeout + 2);
-
-        if (time(NULL) >= timeout + 2) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Return byte timeout!"));
-            return 0;
-        }
-    }
-    /* range values ? */
-    return buffer[0];
-}
-
-static void iomojo_setspeed(struct ctx_cam *cam, unsigned int speed)
-{
-    char command[3];
-
-    command[0] = IOMOJO_SETSPEED_CMD;
-    command[1] = cam->track.iomojo_id;
-    command[2] = speed;
-
-    if (iomojo_command(cam, command, 3, 1) != IOMOJO_SETSPEED_RET)
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Unable to set camera speed"));
-}
-
-static void iomojo_movehome(struct ctx_cam *cam)
-{
-    char command[2];
-
-    command[0] = IOMOJO_MOVEHOME;
-    command[1] = cam->track.iomojo_id;
-
-    iomojo_command(cam, command, 2, 0);
-}
-
-static unsigned int iomojo_center(struct ctx_cam *cam, int x_offset, int y_offset)
-{
-    struct termios adtio;
-    char command[5], direction = 0;
-
-    if (cam->track.dev < 0) {
-        if ((cam->track.dev = open(cam->track.port, O_RDWR|O_CLOEXEC | O_NOCTTY)) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Unable to open serial device %s"), cam->track.port);
-            return 0;
-        }
-
-        bzero (&adtio, sizeof(adtio));
-        adtio.c_cflag = IOMOJO_BAUDRATE | CS8 | CLOCAL | CREAD;
-        adtio.c_iflag = IGNPAR;
-        adtio.c_oflag = 0;
-        adtio.c_lflag = 0;      /* non-canon, no echo */
-        adtio.c_cc[VTIME] = 0;  /* timer unused */
-        adtio.c_cc[VMIN] = 0;   /* blocking read until 1 char */
-        tcflush(cam->track.dev, TCIFLUSH);
-        if (tcsetattr(cam->track.dev, TCSANOW, &adtio) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Unable to initialize serial device %s"), cam->track.port);
-            return 0;
-        }
-    }
-
-    iomojo_setspeed(cam, 40);
-    iomojo_movehome(cam);
-
-    if (x_offset || y_offset) {
-        if (x_offset > 0) {
-            direction |= IOMOJO_DIRECTION_RIGHT;
-        } else {
-            direction |= IOMOJO_DIRECTION_LEFT;
-            x_offset *= -1;
-        }
-
-        if (y_offset > 0) {
-            direction |= IOMOJO_DIRECTION_UP;
-        } else {
-            direction |= IOMOJO_DIRECTION_DOWN;
-            y_offset *= -1;
-        }
-
-        if (x_offset > 180)
-            x_offset = 180;
-
-        if (y_offset > 60)
-            y_offset = 60;
-
-        command[0] = IOMOJO_MOVEOFFSET_CMD;
-        command[1] = cam->track.iomojo_id;
-        command[2] = direction;
-        command[3] = x_offset;
-        command[4] = y_offset;
-        iomojo_command(cam, command, 5, 0);
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO,_("succeed"));
-
-    return cam->track.move_wait;
-}
-
-static unsigned int iomojo_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
-                                      struct ctx_images *imgs)
-{
-    char command[5];
-    int direction = 0;
-    int nx = 0, ny = 0;
-    int i;
-
-    if (dev < 0)
-        if (!iomojo_center(cam, 0, 0))
-            return 0;
-
-    if (cent->x < imgs->width / 2) {
-        direction |= IOMOJO_DIRECTION_LEFT;
-        nx = imgs->width / 2 - cent->x;
-    }
-
-    if (cent->x > imgs->width / 2) {
-        direction |= IOMOJO_DIRECTION_RIGHT;
-        nx = cent->x - imgs->width / 2;
-    }
-
-    if (cent->y < imgs->height / 2) {
-        direction |= IOMOJO_DIRECTION_DOWN;
-        ny = imgs->height / 2 - cent->y;
-    }
-
-    if (cent->y > imgs->height / 2) {
-        direction |= IOMOJO_DIRECTION_UP;
-        ny = cent->y - imgs->height / 2;
-    }
-
-    nx = nx * 72 / imgs->width;
-    ny = ny * 72 / imgs->height;
-
-    if (nx || ny) {
-        if (nx > 180)
-            nx = 180;
-
-        if (ny > 60)
-            ny = 60;
-
-        command[0] = IOMOJO_MOVEOFFSET_CMD;
-        command[1] = cam->track.iomojo_id;
-        command[2] = direction;
-        command[3] = nx;
-        command[4] = ny;
-        iomojo_command(cam, command, 5, 0);
-
-        /* Number of frames to skip while moving */
-        if (ny >= nx)
-            i = 25 * ny / 90;
-        else
-            i = 25 * nx / 90;
-        return i;
-    }
-
-    return 0;
-}
-
-/******************************************************************************
-
-    Logitech QuickCam Orbit camera tracking code by folkert@vanheusden.com
-
-******************************************************************************/
-#ifdef HAVE_V4L2
-static unsigned int lqos_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle)
-{
-    int reset = 3;
-    struct pwc_mpt_angles pma;
-    struct pwc_mpt_range pmr;
-
-    if (cam->track.dev == -1) {
-
-        if (ioctl(dev, VIDIOCPWCMPTRESET, &reset) == -1) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to reset pwc camera to starting position! Reason"));
-            return 0;
-        }
-
-        SLEEP(6, 0);
-
-        if (ioctl(dev, VIDIOCPWCMPTGRANGE, &pmr) == -1) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("failed VIDIOCPWCMPTGRANGE"));
-            return 0;
-        }
-
-        cam->track.dev = dev;
-        cam->track.minmaxfound = 1;
-        cam->track.minx = pmr.pan_min;
-        cam->track.maxx = pmr.pan_max;
-        cam->track.miny = pmr.tilt_min;
-        cam->track.maxy = pmr.tilt_max;
-    }
-
-    if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1)
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-            ,_("ioctl VIDIOCPWCMPTGANGLE"));
-
-    pma.absolute = 1;
-
-    if (x_angle * 100 < cam->track.maxx && x_angle * 100 > cam->track.minx)
-        pma.pan = x_angle * 100;
-
-    if (y_angle * 100 < cam->track.maxy && y_angle * 100 > cam->track.miny)
-        pma.tilt = y_angle * 100;
-
-    if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-            ,_("Failed to pan/tilt pwc camera! Reason"));
-        return 0;
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO,_("succeed"));
-
-    return cam->track.move_wait;
-}
-
-static unsigned int lqos_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
-                                    struct ctx_images *imgs, unsigned int manual)
-{
-    int delta_x = cent->x - (imgs->width / 2);
-    int delta_y = cent->y - (imgs->height / 2);
-    int move_x_degrees, move_y_degrees;
-    struct pwc_mpt_angles pma;
-    struct pwc_mpt_range pmr;
-
-    /* If we are on auto track we calculate delta, otherwise we use user input in degrees times 100 */
-    if (!manual) {
-        if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8)
-            return 0;
-        if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8)
-            return 0;
-
-        move_x_degrees = delta_x * cam->track.step_angle_x * 100 / (imgs->width / 2);
-        move_y_degrees = -delta_y * cam->track.step_angle_y * 100 / (imgs->height / 2);
-    } else {
-        move_x_degrees = cent->x * 100;
-        move_y_degrees = cent->y * 100;
-    }
-
-    /* If we never checked for the min/max values for pan/tilt we do it now */
-    if (cam->track.minmaxfound == 0) {
-        if (ioctl(dev, VIDIOCPWCMPTGRANGE, &pmr) == -1) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("failed VIDIOCPWCMPTGRANGE"));
-            return 0;
-        }
-        cam->track.minmaxfound = 1;
-        cam->track.minx = pmr.pan_min;
-        cam->track.maxx = pmr.pan_max;
-        cam->track.miny = pmr.tilt_min;
-        cam->track.maxy = pmr.tilt_max;
-    }
-
-    /* Get current camera position */
-    if (ioctl(dev, VIDIOCPWCMPTGANGLE, &pma) == -1)
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-            ,_("ioctl VIDIOCPWCMPTGANGLE"));
-
-
-    /*
-     * Check current position of camera and see if we need to adjust
-     * values down to what is left to move
-     */
-    if (move_x_degrees < 0 && (cam->track.minx - pma.pan) > move_x_degrees)
-        move_x_degrees = (cam->track.minx - pma.pan);
-
-    if (move_x_degrees > 0 && (cam->track.maxx - pma.pan) < move_x_degrees)
-        move_x_degrees = (cam->track.maxx - pma.pan);
-
-    if (move_y_degrees < 0 && (cam->track.miny - pma.tilt) > move_y_degrees)
-        move_y_degrees = (cam->track.miny - pma.tilt);
-
-    if (move_y_degrees > 0 && (cam->track.maxy - pma.tilt) < move_y_degrees)
-        move_y_degrees = (cam->track.maxy - pma.tilt);
-
-    /* Move camera relative to current position */
-    pma.absolute = 0;
-    pma.pan = move_x_degrees;
-    pma.tilt = move_y_degrees;
-
-    if (ioctl(dev, VIDIOCPWCMPTSANGLE, &pma) == -1) {
-        MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-            ,_("Failed to pan/tilt pwc camera! Reason"));
-        return 0;
-    }
-
-    return cam->track.move_wait;
-}
-
-/******************************************************************************
-
     Logitech QuickCam Sphere camera tracking code by oBi
-
     Modify by Dirk Wesenberg(Munich) 30.03.07
     - for new API in uvcvideo
     - add Trace-steps for investigation
 ******************************************************************************/
-static unsigned int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle)
-{
-    /* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
-    int move_x_degrees = 0, move_y_degrees = 0;
+static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
 
-    union pantilt {
-        struct {
-            short pan;
-            short tilt;
-        } s16;
-        int value;
-    };
-    union pantilt pan;
+    #ifdef HAVE_V4L2
+        /* CALC ABSOLUTE MOVING : Act.Position +/- delta to request X and Y */
+        int move_x_degrees = 0, move_y_degrees = 0;
 
-    if (cam->track.dev == -1) {
+        union pantilt {
+            struct {
+                short pan;
+                short tilt;
+            } s16;
+            int value;
+        };
+        union pantilt pan;
 
-        int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
+        if (cam->track.dev == -1) {
+
+            int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
+            struct v4l2_control control_s;
+
+            control_s.id = V4L2_CID_PAN_RESET;
+            control_s.value = (unsigned char) reset;
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+                    ,_("Failed to reset UVC camera to starting position! Reason"));
+                return 0;
+            }
+
+            control_s.id = V4L2_CID_TILT_RESET;
+            control_s.value = (unsigned char) reset;
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+                    ,_("Failed to reset UVC camera to starting position! Reason"));
+                return 0;
+            }
+
+            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
+                ,_("Reseting UVC camera to starting position"));
+
+            SLEEP(8, 0);
+
+            /* Get camera range */
+            struct v4l2_queryctrl queryctrl;
+            queryctrl.id = V4L2_CID_PAN_RELATIVE;
+
+            if (ioctl(dev, VIDIOC_QUERYCTRL, &queryctrl) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("ioctl querycontrol"));
+                return 0;
+            }
+
+            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO,_("Getting camera range"));
+
+            /* DWe 30.03.07 The orig request failed :
+            * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual
+            * Range X = -70 to +70 degrees
+            * Y = -30 to +30 degrees
+            */
+
+            //get mininum
+            //pan.value = queryctrl.minimum;
+
+            cam->track.minx = -4480 / INCPANTILT;
+            cam->track.miny = -1920 / INCPANTILT;
+            //get maximum
+            cam->track.maxx = 4480 / INCPANTILT;
+            cam->track.maxy = 1920 / INCPANTILT;
+            //pan.value = queryctrl.maximum;
+
+            cam->track.dev = dev;
+            cam->track.pan_angle = 0;
+            cam->track.tilt_angle = 0;
+            cam->track.minmaxfound = 1;
+
+        }
+
         struct v4l2_control control_s;
 
-        control_s.id = V4L2_CID_PAN_RESET;
-        control_s.value = (unsigned char) reset;
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to reset UVC camera to starting position! Reason"));
-            return 0;
-        }
-
-        control_s.id = V4L2_CID_TILT_RESET;
-        control_s.value = (unsigned char) reset;
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to reset UVC camera to starting position! Reason"));
-            return 0;
-        }
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("Reseting UVC camera to starting position"));
-
-        SLEEP(8, 0);
-
-        /* Get camera range */
-        struct v4l2_queryctrl queryctrl;
-        queryctrl.id = V4L2_CID_PAN_RELATIVE;
-
-        if (ioctl(dev, VIDIOC_QUERYCTRL, &queryctrl) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("ioctl querycontrol"));
-            return 0;
-        }
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO,_("Getting camera range"));
-
-       /* DWe 30.03.07 The orig request failed :
-        * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual
-        * Range X = -70 to +70 degrees
-        * Y = -30 to +30 degrees
-        */
-
-        //get mininum
-        //pan.value = queryctrl.minimum;
-
-        cam->track.minx = -4480 / INCPANTILT;
-        cam->track.miny = -1920 / INCPANTILT;
-        //get maximum
-        cam->track.maxx = 4480 / INCPANTILT;
-        cam->track.maxy = 1920 / INCPANTILT;
-        //pan.value = queryctrl.maximum;
-
-        cam->track.dev = dev;
-        cam->track.pan_angle = 0;
-        cam->track.tilt_angle = 0;
-        cam->track.minmaxfound = 1;
-
-    }
-
-    struct v4l2_control control_s;
-
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ")
-        ,cam->track.minx, cam->track.maxx, cam->track.miny, cam->track.maxy);
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ")
-        ,x_angle, y_angle);
-
-    if (x_angle <= cam->track.maxx && x_angle >= cam->track.minx)
-        move_x_degrees = x_angle - (cam->track.pan_angle);
-
-    if (y_angle <= cam->track.maxy && y_angle >= cam->track.miny)
-        move_y_degrees = y_angle - (cam->track.tilt_angle);
-
-
-    /*
-     * tilt up: - value
-     * tilt down: + value
-     * pan left: - value
-     * pan right: + value
-     */
-    pan.s16.pan = -move_x_degrees * INCPANTILT;
-    pan.s16.tilt = -move_y_degrees * INCPANTILT;
-
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("For_SET_ABS move_X %d,move_Y %d")
-        ,move_x_degrees, move_y_degrees);
-
-    /* DWe 30.03.07 Must be broken in diff calls, because
-     * one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
-     * The Webcam or uvcvideo does not like a call with a zero-move
-     */
-
-    if (move_x_degrees != 0) {
-        control_s.id = V4L2_CID_PAN_RELATIVE;
-        //control_s.value = pan.value;
-        control_s.value = pan.s16.pan;
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Failed to move UVC camera!"));
-            return 0;
-        }
-    }
-
-    /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
-    if ((move_x_degrees != 0) && (move_y_degrees != 0))
-        SLEEP(1, 0);
-
-    if (move_y_degrees != 0) {
-        control_s.id = V4L2_CID_TILT_RELATIVE;
-        //control_s.value = pan.value;
-        control_s.value = pan.s16.tilt;
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Failed to move UVC camera!"));
-            return 0;
-        }
-    }
-
-    MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-        ,_("Found MINMAX = %d"),cam->track.minmaxfound);
-
-    if (cam->track.dev != -1) {
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-            ,_("Before_ABS_Y_Angel : x= %d , Y= %d, ")
-            ,cam->track.pan_angle, cam->track.tilt_angle);
+            ,_("INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ")
+            ,cam->track.minx, cam->track.maxx, cam->track.miny, cam->track.maxy);
+        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+            ,_("INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ")
+            ,x_angle, y_angle);
 
-        if (move_x_degrees != -1) {
-            cam->track.pan_angle += move_x_degrees;
+        if (x_angle <= cam->track.maxx && x_angle >= cam->track.minx){
+            move_x_degrees = x_angle - (cam->track.pan_angle);
         }
 
-        if (move_x_degrees != -1) {
-            cam->track.tilt_angle += move_y_degrees;
+        if (y_angle <= cam->track.maxy && y_angle >= cam->track.miny){
+            move_y_degrees = y_angle - (cam->track.tilt_angle);
         }
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("After_ABS_Y_Angel : x= %d , Y= %d")
-            ,cam->track.pan_angle, cam->track.tilt_angle);
-    }
-
-    return cam->track.move_wait;
-}
-
-static unsigned int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent,
-                                   struct ctx_images *imgs, unsigned int manual)
-{
-    /* RELATIVE MOVING : Act.Position +/- X and Y */
-
-    int delta_x = cent->x - (imgs->width / 2);
-    int delta_y = cent->y - (imgs->height / 2);
-    int move_x_degrees, move_y_degrees;
-
-    /*
-     *  DWe 30.03.07 Does the request of act.position from WebCam work ? luvcview shows at every position 180 :(
-     *        Now we init the Web by call Reset, so we can sure, that we are at x/y = 0,0
-     *        Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...?
-     *        PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that
-     */
-    if ((cam->track.minmaxfound != 1) || (cent->x == 7777)) {
-        unsigned int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
-        struct v4l2_control control_s;
-
-        control_s.id = V4L2_CID_PAN_RESET;
-        control_s.value = (unsigned char) reset;
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to reset UVC camera to starting position! Reason"));
-            return 0;
-        }
-
-        control_s.id = V4L2_CID_TILT_RESET;
-        control_s.value = (unsigned char) reset;
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to reset UVC camera to starting position! Reason"));
-            return 0;
-        }
-
-        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("Reseting UVC camera to starting position"));
-
-        /* set the "helpvalue" back to null because after reset CAM should be in x=0 and not 70 */
-        cent->x = 0;
-        SLEEP(8, 0);
 
         /*
-         * DWe 30.03.07 The orig request failed :
-         * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual
-         * Range X = -70 to +70 degrees
-         *       Y = -30 to +30 degrees
-         */
+        * tilt up: - value
+        * tilt down: + value
+        * pan left: - value
+        * pan right: + value
+        */
+        pan.s16.pan = -move_x_degrees * INCPANTILT;
+        pan.s16.tilt = -move_y_degrees * INCPANTILT;
 
-        cam->track.minx = -4480 / INCPANTILT;
-        cam->track.miny = -1920 / INCPANTILT;
-        cam->track.maxx = 4480 / INCPANTILT;
-        cam->track.maxy = 1920 / INCPANTILT;
-        cam->track.dev = dev;
-        cam->track.pan_angle = 0;
-        cam->track.tilt_angle = 0;
-        cam->track.minmaxfound = 1;
-    }
-
-
-    /* If we are on auto track we calculate delta, otherwise we use user input in degrees */
-    if (!manual) {
-        if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8)
-            return 0;
-        if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8)
-            return 0;
-
-        move_x_degrees = delta_x * cam->track.step_angle_x / (imgs->width / 2);
-        move_y_degrees = -delta_y * cam->track.step_angle_y / (imgs->height / 2);
-    } else {
-        move_x_degrees = cent->x;
-        move_y_degrees = cent->y;
-    }
-
-    union pantilt {
-        struct {
-            short pan;
-            short tilt;
-        } s16;
-        int value;
-    };
-
-    struct v4l2_control control_s;
-    union pantilt pan;
-
-    if (cam->track.minmaxfound == 1) {
-    /*
-     * Check current position of camera and see if we need to adjust
-     * values down to what is left to move
-     */
-        if (move_x_degrees < 0 && (cam->track.minx - cam->track.pan_angle) > move_x_degrees)
-            move_x_degrees = cam->track.minx - cam->track.pan_angle;
-
-        if (move_x_degrees > 0 && (cam->track.maxx - cam->track.pan_angle) < move_x_degrees)
-            move_x_degrees = cam->track.maxx - cam->track.pan_angle;
-
-        if (move_y_degrees < 0 && (cam->track.miny - cam->track.tilt_angle) > move_y_degrees)
-            move_y_degrees = cam->track.miny - cam->track.tilt_angle;
-
-        if (move_y_degrees > 0 && (cam->track.maxy - cam->track.tilt_angle) < move_y_degrees)
-            move_y_degrees = cam->track.maxy - cam->track.tilt_angle;
-    }
-
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d")
-        ,cam->track.minx, cam->track.maxx, cam->track.miny, cam->track.maxy);
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("For_SET_REL track_pan_Angel %d, track_tilt_Angel %d")
-        ,cam->track.pan_angle, cam->track.tilt_angle);
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("For_SET_REL move_X %d,move_Y %d"), move_x_degrees, move_y_degrees);
-
-    /*
-     * tilt up: - value
-     * tilt down: + value
-     * pan left: - value
-     * pan right: + value
-     */
-
-    pan.s16.pan = -move_x_degrees * INCPANTILT;
-    pan.s16.tilt = -move_y_degrees * INCPANTILT;
-
-    /* DWe 30.03.07 Must be broken in diff calls, because
-     * one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
-     * The Webcam or uvcvideo does not like a call with a zero-move
-     */
-
-    if (move_x_degrees != 0) {
-
-        control_s.id = V4L2_CID_PAN_RELATIVE;
-
-        control_s.value = pan.s16.pan;
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-            ,_(" dev %d, addr= %d, control_S= %d, Wert= %d")
-            ,dev, VIDIOC_S_CTRL, &control_s, pan.s16.pan);
+            ,_("For_SET_ABS move_X %d,move_Y %d")
+            ,move_x_degrees, move_y_degrees);
 
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to move UVC camera!"));
-            return 0;
+        /* DWe 30.03.07 Must be broken in diff calls, because
+        * one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
+        * The Webcam or uvcvideo does not like a call with a zero-move
+        */
+
+        if (move_x_degrees != 0) {
+            control_s.id = V4L2_CID_PAN_RELATIVE;
+            //control_s.value = pan.value;
+            control_s.value = pan.s16.pan;
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Failed to move UVC camera!"));
+                return 0;
+            }
         }
-    }
 
-    /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
-    if ((move_x_degrees != 0) && (move_y_degrees != 0))
-        SLEEP (1, 0);
-
-
-    if (move_y_degrees != 0) {
-
-        control_s.id = V4L2_CID_TILT_RELATIVE;
-
-        control_s.value = pan.s16.tilt;
-        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-            ,_(" dev %d,addr= %d, control_S= %d, Wert= %d")
-            ,dev, VIDIOC_S_CTRL, &control_s, pan.s16.tilt);
-
-        if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
-            MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-                ,_("Failed to move UVC camera!"));
-            return 0;
+        /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
+        if ((move_x_degrees != 0) && (move_y_degrees != 0)){
+            SLEEP(1, 0);
         }
-    }
 
-    MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-        ,_("Found MINMAX = %d"), cam->track.minmaxfound);
+        if (move_y_degrees != 0) {
+            control_s.id = V4L2_CID_TILT_RELATIVE;
+            //control_s.value = pan.value;
+            control_s.value = pan.s16.tilt;
 
-    if (cam->track.minmaxfound == 1) {
-        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-            ,_("Before_REL_Y_Angel : x= %d , Y= %d")
-            ,cam->track.pan_angle, cam->track.tilt_angle);
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO,_("Failed to move UVC camera!"));
+                return 0;
+            }
+        }
 
-        if (move_x_degrees != 0)
-            cam->track.pan_angle += -pan.s16.pan / INCPANTILT;
+        MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
+            ,_("Found MINMAX = %d"),cam->track.minmaxfound);
 
-        if (move_y_degrees != 0)
-            cam->track.tilt_angle += -pan.s16.tilt / INCPANTILT;
+        if (cam->track.dev != -1) {
+            MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+                ,_("Before_ABS_Y_Angel : x= %d , Y= %d, ")
+                ,cam->track.pan_angle, cam->track.tilt_angle);
 
-        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-            ,_("After_REL_Y_Angel : x= %d , Y= %d")
-            ,cam->track.pan_angle, cam->track.tilt_angle);
-    }
+            if (move_x_degrees != -1) {
+                cam->track.pan_angle += move_x_degrees;
+            }
 
-    return cam->track.move_wait;
+            if (move_x_degrees != -1) {
+                cam->track.tilt_angle += move_y_degrees;
+            }
+
+            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
+                ,_("After_ABS_Y_Angel : x= %d , Y= %d")
+                ,cam->track.pan_angle, cam->track.tilt_angle);
+        }
+
+        return cam->track.move_wait;
+    #else
+        return 0;
+    #endif
+
 }
-#endif /* HAVE_V4L2 */
 
-static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, unsigned int manual,
-                                 int xoff, int yoff, struct ctx_coord *cent, struct ctx_images *imgs)
-{
+static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
+            , struct ctx_images *imgs, int manual) {
+
+    #ifdef HAVE_V4L2
+        /* RELATIVE MOVING : Act.Position +/- X and Y */
+
+        int delta_x = cent->x - (imgs->width / 2);
+        int delta_y = cent->y - (imgs->height / 2);
+        int move_x_degrees, move_y_degrees;
+
+        /*
+        *  DWe 30.03.07 Does the request of act.position from WebCam work ? luvcview shows at every position 180 :(
+        *        Now we init the Web by call Reset, so we can sure, that we are at x/y = 0,0
+        *        Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...?
+        *        PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that
+        */
+        if ((cam->track.minmaxfound != 1) || (cent->x == 7777)) {
+            int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
+            struct v4l2_control control_s;
+
+            control_s.id = V4L2_CID_PAN_RESET;
+            control_s.value = (unsigned char) reset;
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+                    ,_("Failed to reset UVC camera to starting position! Reason"));
+                return 0;
+            }
+
+            control_s.id = V4L2_CID_TILT_RESET;
+            control_s.value = (unsigned char) reset;
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+                    ,_("Failed to reset UVC camera to starting position! Reason"));
+                return 0;
+            }
+
+            MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
+                ,_("Reseting UVC camera to starting position"));
+
+            /* set the "helpvalue" back to null because after reset CAM should be in x=0 and not 70 */
+            cent->x = 0;
+            SLEEP(8, 0);
+
+            /*
+            * DWe 30.03.07 The orig request failed :
+            * must be VIDIOC_G_CTRL separate for pan and tilt or via VIDIOC_G_EXT_CTRLS - now for 1st manual
+            * Range X = -70 to +70 degrees
+            *       Y = -30 to +30 degrees
+            */
+
+            cam->track.minx = -4480 / INCPANTILT;
+            cam->track.miny = -1920 / INCPANTILT;
+            cam->track.maxx = 4480 / INCPANTILT;
+            cam->track.maxy = 1920 / INCPANTILT;
+            cam->track.dev = dev;
+            cam->track.pan_angle = 0;
+            cam->track.tilt_angle = 0;
+            cam->track.minmaxfound = 1;
+        }
+
+
+        /* If we are on auto track we calculate delta, otherwise we use user input in degrees */
+        if (!manual) {
+            if (delta_x > imgs->width * 3/8 && delta_x < imgs->width * 5/8){
+                return 0;
+            }
+            if (delta_y > imgs->height * 3/8 && delta_y < imgs->height * 5/8){
+                return 0;
+            }
+
+            move_x_degrees = delta_x * cam->track.step_angle_x / (imgs->width / 2);
+            move_y_degrees = -delta_y * cam->track.step_angle_y / (imgs->height / 2);
+        } else {
+            move_x_degrees = cent->x;
+            move_y_degrees = cent->y;
+        }
+
+        union pantilt {
+            struct {
+                short pan;
+                short tilt;
+            } s16;
+            int value;
+        };
+
+        struct v4l2_control control_s;
+        union pantilt pan;
+
+        if (cam->track.minmaxfound == 1) {
+            /*
+            * Check current position of camera and see if we need to adjust
+            * values down to what is left to move
+            */
+            if (move_x_degrees < 0 && (cam->track.minx - cam->track.pan_angle) > move_x_degrees){
+                move_x_degrees = cam->track.minx - cam->track.pan_angle;
+            }
+
+            if (move_x_degrees > 0 && (cam->track.maxx - cam->track.pan_angle) < move_x_degrees){
+                move_x_degrees = cam->track.maxx - cam->track.pan_angle;
+            }
+
+            if (move_y_degrees < 0 && (cam->track.miny - cam->track.tilt_angle) > move_y_degrees){
+                move_y_degrees = cam->track.miny - cam->track.tilt_angle;
+            }
+
+            if (move_y_degrees > 0 && (cam->track.maxy - cam->track.tilt_angle) < move_y_degrees){
+                move_y_degrees = cam->track.maxy - cam->track.tilt_angle;
+            }
+        }
+
+        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+            ,_("For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d")
+            ,cam->track.minx, cam->track.maxx, cam->track.miny, cam->track.maxy);
+        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+            ,_("For_SET_REL track_pan_Angel %d, track_tilt_Angel %d")
+            ,cam->track.pan_angle, cam->track.tilt_angle);
+        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+            ,_("For_SET_REL move_X %d,move_Y %d"), move_x_degrees, move_y_degrees);
+
+        /*
+        * tilt up: - value
+        * tilt down: + value
+        * pan left: - value
+        * pan right: + value
+        */
+
+        pan.s16.pan = -move_x_degrees * INCPANTILT;
+        pan.s16.tilt = -move_y_degrees * INCPANTILT;
+
+        /* DWe 30.03.07 Must be broken in diff calls, because
+        * one call for both is not accept via VIDIOC_S_CTRL -> maybe via VIDIOC_S_EXT_CTRLS
+        * The Webcam or uvcvideo does not like a call with a zero-move
+        */
+
+        if (move_x_degrees != 0) {
+
+            control_s.id = V4L2_CID_PAN_RELATIVE;
+
+            control_s.value = pan.s16.pan;
+            MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+                ,_(" dev %d, addr= %d, control_S= %d, Wert= %d")
+                ,dev, VIDIOC_S_CTRL, &control_s, pan.s16.pan);
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+                    ,_("Failed to move UVC camera!"));
+                return 0;
+            }
+        }
+
+        /* DWe 30.03.07 We must wait a little,before we set the next CMD, otherwise PAN is mad ... */
+        if ((move_x_degrees != 0) && (move_y_degrees != 0)){
+            SLEEP (1, 0);
+        }
+
+        if (move_y_degrees != 0) {
+
+            control_s.id = V4L2_CID_TILT_RELATIVE;
+
+            control_s.value = pan.s16.tilt;
+            MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+                ,_(" dev %d,addr= %d, control_S= %d, Wert= %d")
+                ,dev, VIDIOC_S_CTRL, &control_s, pan.s16.tilt);
+
+            if (ioctl(dev, VIDIOC_S_CTRL, &control_s) < 0) {
+                MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+                    ,_("Failed to move UVC camera!"));
+                return 0;
+            }
+        }
+
+        MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+            ,_("Found MINMAX = %d"), cam->track.minmaxfound);
+
+        if (cam->track.minmaxfound == 1) {
+            MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+                ,_("Before_REL_Y_Angel : x= %d , Y= %d")
+                ,cam->track.pan_angle, cam->track.tilt_angle);
+
+            if (move_x_degrees != 0){
+                cam->track.pan_angle += -pan.s16.pan / INCPANTILT;
+            }
+
+            if (move_y_degrees != 0){
+                cam->track.tilt_angle += -pan.s16.tilt / INCPANTILT;
+            }
+
+            MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
+                ,_("After_REL_Y_Angel : x= %d , Y= %d")
+                ,cam->track.pan_angle, cam->track.tilt_angle);
+        }
+
+        return cam->track.move_wait;
+    #else
+        return 0;
+    #endif /* HAVE_V4L2 */
+}
+
+
+static int generic_move(struct ctx_cam *cam, enum track_action action, int manual, int xoff
+        , int yoff, struct ctx_coord *cent, struct ctx_images *imgs) {
+
     char fmtcmd[PATH_MAX];
-    cam->track_posx += cent->x;
-    cam->track_posy += cent->y;
+    cam->track.posx += cent->x;
+    cam->track.posy += cent->y;
 
     mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->track.generic_move, &cam->current_image->imgts, NULL, 0);
 
@@ -1324,29 +424,30 @@ static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, 
         setsid();
 
         /* Provides data as environment variables */
-        if (manual)
+        if (manual){
           setenv("TRACK_MANUAL", "manual", 1);
+        }
         switch (action) {
           case TRACK_CENTER:
             setenv("TRACK_ACTION", "center", 1);
-            sprintf(buf, "%d", xoff);	setenv("TRACK_XOFF", buf, 1);
-            sprintf(buf, "%d", yoff);	setenv("TRACK_YOFF", buf, 1);
+            sprintf(buf, "%d", xoff);    setenv("TRACK_XOFF", buf, 1);
+            sprintf(buf, "%d", yoff);    setenv("TRACK_YOFF", buf, 1);
             break;
           case TRACK_MOVE:
             setenv("TRACK_ACTION", "move", 1);
             if (cent) {
-              sprintf(buf, "%d", cent->x);	setenv("TRACK_CENT_X", buf, 1);
-              sprintf(buf, "%d", cent->y);	setenv("TRACK_CENT_Y", buf, 1);
-              sprintf(buf, "%d", cent->width);	setenv("TRACK_CENT_WIDTH", buf, 1);
-              sprintf(buf, "%d", cent->height);	setenv("TRACK_CENT_HEIGHT", buf, 1);
-              sprintf(buf, "%d", cent->minx);	setenv("TRACK_CENT_MINX", buf, 1);
-              sprintf(buf, "%d", cent->maxx);	setenv("TRACK_CENT_MAXX", buf, 1);
-              sprintf(buf, "%d", cent->miny);	setenv("TRACK_CENT_MINY", buf, 1);
-              sprintf(buf, "%d", cent->maxy);	setenv("TRACK_CENT_MAXY", buf, 1);
+              sprintf(buf, "%d", cent->x);          setenv("TRACK_CENT_X", buf, 1);
+              sprintf(buf, "%d", cent->y);          setenv("TRACK_CENT_Y", buf, 1);
+              sprintf(buf, "%d", cent->width);      setenv("TRACK_CENT_WIDTH", buf, 1);
+              sprintf(buf, "%d", cent->height);     setenv("TRACK_CENT_HEIGHT", buf, 1);
+              sprintf(buf, "%d", cent->minx);       setenv("TRACK_CENT_MINX", buf, 1);
+              sprintf(buf, "%d", cent->maxx);       setenv("TRACK_CENT_MAXX", buf, 1);
+              sprintf(buf, "%d", cent->miny);       setenv("TRACK_CENT_MINY", buf, 1);
+              sprintf(buf, "%d", cent->maxy);       setenv("TRACK_CENT_MAXY", buf, 1);
             }
             if (imgs) {
-              sprintf(buf, "%d", imgs->width);	setenv("TRACK_IMGS_WIDTH", buf, 1);
-              sprintf(buf, "%d", imgs->height);	setenv("TRACK_IMGS_HEIGHT", buf, 1);
+              sprintf(buf, "%d", imgs->width);      setenv("TRACK_IMGS_WIDTH", buf, 1);
+              sprintf(buf, "%d", imgs->height);     setenv("TRACK_IMGS_HEIGHT", buf, 1);
               sprintf(buf, "%d", imgs->motionsize); setenv("TRACK_IMGS_MOTIONSIZE", buf, 1);
             }
         }
@@ -1355,10 +456,11 @@ static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, 
          * Close any file descriptor except console because we will
          * like to see error messages
          */
-        for (i = getdtablesize() - 1; i > 2; i--)
+        for (i = getdtablesize() - 1; i > 2; i--){
             close(i);
+        }
 
-        execl("/bin/sh", "sh", "-c", fmtcmd, " &", NULL);
+        execl("/bin/sh", "sh", "-c", fmtcmd, " &", (char *)NULL);
 
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
@@ -1374,3 +476,76 @@ static unsigned int generic_move(struct ctx_cam *cam, enum track_action action, 
 
     return cam->track.move_wait;
 }
+
+void track_init(struct ctx_cam *cam){
+
+    cam->track.dev =            -1;             /* dev open */
+    cam->track.active =         0;              /* auto tracking active */
+    cam->track.move_wait =      10;             /* number of frames to disable motion detection after camera moving */
+    cam->track.generic_move =   NULL;           /* command to execute to move a generic camera */
+    cam->track.maxx =           0;              /* int maxx; */
+    cam->track.minx =           0;              /* int minx; */
+    cam->track.maxy =           0;              /* int maxy; */
+    cam->track.miny =           0;              /* int miny; */
+    cam->track.step_angle_x =   10;             /* UVC step angle in degrees X-axis that camera moves during auto tracking */
+    cam->track.step_angle_y =   10;             /* UVC step angle in degrees Y-axis that camera moves during auto tracking */
+
+    cam->track.pan_angle =      0;              /* degrees*/
+    cam->track.tilt_angle =     0;              /* degrees*/
+    cam->track.posx =           0;
+    cam->track.posy =           0;
+    cam->track.minmaxfound =    0;              /* flag for minmax values stored for pwc based camera */
+
+    if (cam->track.type)
+        cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
+
+}
+/* Add a call to your functions here: */
+int track_center(struct ctx_cam *cam, int dev,
+        int manual, int xoff, int yoff)
+{
+    struct ctx_coord cent;
+    (void)dev;
+
+    if (!manual && !cam->track.active) return 0;
+
+    if (cam->track.type == TRACK_TYPE_UVC){
+        return uvc_center(cam, dev, xoff, yoff);
+    } else if (cam->track.type == TRACK_TYPE_GENERIC) {
+        if (cam->track.generic_move){
+            cent.x = -cam->track.posx;
+            cent.y = -cam->track.posy;
+            return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
+        } else {
+            return 10; // FIX ME. I chose to return something reasonable.
+        }
+    }
+
+    MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
+        ,_("internal error, %hu is not a known track-type"), cam->track.type);
+
+    return 0;
+}
+
+int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
+        , struct ctx_images *imgs, int manual)
+{
+
+    if (!manual && !cam->track.active) return 0;
+
+    if (cam->track.type == TRACK_TYPE_UVC){
+        return uvc_move(cam, dev, cent, imgs, manual);
+    } else if (cam->track.type == TRACK_TYPE_GENERIC) {
+        if (cam->track.generic_move) {
+            return generic_move(cam, TRACK_MOVE, manual, 0, 0, cent, imgs);
+        } else {
+            return cam->track.move_wait;
+        }
+    }
+
+    MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO
+        ,_("internal error, %hu is not a known track-type"), cam->track.type);
+
+    return 0;
+}
+

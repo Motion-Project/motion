@@ -767,7 +767,7 @@ int webu_process_track(struct webui_ctx *webui) {
     int retcd;
 
     if (mystreq(webui->uri_cmd2, "center")) {
-        webui->camlst[webui->thread_nbr]->moved = track_center(webui->camlst[webui->thread_nbr], 0, 1, 0, 0);
+        webui->camlst[webui->thread_nbr]->frame_skip = track_center(webui->camlst[webui->thread_nbr], 0, 1, 0, 0);
         retcd = 0;
     } else if (mystreq(webui->uri_cmd2, "set")) {
         if (mystreq(webui->uri_parm1, "pan")) {
@@ -775,7 +775,7 @@ int webu_process_track(struct webui_ctx *webui) {
             cent.height = webui->camlst[webui->thread_nbr]->imgs.height;
             cent.x = atoi(webui->uri_value1);
             cent.y = 0;
-            webui->camlst[webui->thread_nbr]->moved = track_move(webui->camlst[webui->thread_nbr]
+            webui->camlst[webui->thread_nbr]->frame_skip = track_move(webui->camlst[webui->thread_nbr]
                 ,webui->camlst[webui->thread_nbr]->video_dev
                 ,&cent, &webui->camlst[webui->thread_nbr]->imgs, 1);
 
@@ -783,12 +783,12 @@ int webu_process_track(struct webui_ctx *webui) {
             cent.height = webui->camlst[webui->thread_nbr]->imgs.height;
             cent.x = 0;
             cent.y = atoi(webui->uri_value2);
-            webui->camlst[webui->thread_nbr]->moved = track_move(webui->camlst[webui->thread_nbr]
+            webui->camlst[webui->thread_nbr]->frame_skip = track_move(webui->camlst[webui->thread_nbr]
                 ,webui->camlst[webui->thread_nbr]->video_dev
                 ,&cent, &webui->camlst[webui->thread_nbr]->imgs, 1);
             retcd = 0;
         } else if (mystrceq(webui->uri_parm1, "x")) {
-            webui->camlst[webui->thread_nbr]->moved = track_center(webui->camlst[webui->thread_nbr]
+            webui->camlst[webui->thread_nbr]->frame_skip = track_center(webui->camlst[webui->thread_nbr]
                 , webui->camlst[webui->thread_nbr]->video_dev, 1
                 , atoi(webui->uri_value1), atoi(webui->uri_value2));
             retcd = 0;

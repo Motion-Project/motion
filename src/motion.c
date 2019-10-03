@@ -270,8 +270,6 @@ static void context_init(struct ctx_cam *cam)
     cam->noise = 255;
     cam->lastrate = 25;
 
-    memcpy(&cam->track, &track_template, sizeof(struct trackoptions));
-
     cam->pipe = -1;
     cam->mpipe = -1;
 
@@ -566,7 +564,7 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data 
 
     /* if track enabled and auto track on */
     if (cam->track.type && cam->track.active)
-        cam->moved = track_move(cam, dev, location, imgs, 0);
+        cam->frame_skip = track_move(cam, dev, location, imgs, 0);
 
 }
 
@@ -1167,8 +1165,8 @@ static int motion_init(struct ctx_cam *cam)
         cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
     }
 
-    /* Prevent first few frames from triggering motion... */
-    cam->moved = 8;
+    track_init(cam);
+    cam->frame_skip = 8;
 
     /* Work out expected frame rate based on config setting */
     if (cam->conf.framerate < 2)
@@ -1184,7 +1182,7 @@ static int motion_init(struct ctx_cam *cam)
     cam->track_posx = 0;
     cam->track_posy = 0;
     if (cam->track.type)
-        cam->moved = track_center(cam, cam->video_dev, 0, 0, 0);
+        cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
     /* Initialize area detection */
     cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
@@ -1808,8 +1806,8 @@ static void mlp_detection(struct ctx_cam *cam){
                     else if (cam->conf.lightswitch_frames > 1000)
                         cam->conf.lightswitch_frames = 1000;
 
-                    if (cam->moved < (unsigned int)cam->conf.lightswitch_frames)
-                        cam->moved = (unsigned int)cam->conf.lightswitch_frames;
+                    if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
+                        cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
 
                     cam->current_image->diffs = 0;
                     alg_update_reference_frame(cam, RESET_REF_FRAME);
@@ -1869,7 +1867,7 @@ static void mlp_detection(struct ctx_cam *cam){
     }
 
     /*
-     * cam->moved is set by the tracking code when camera has been asked to move.
+     * cam->frame_skip is set by the tracking code when camera has been asked to move.
      * When camera is moving we do not want motion to detect motion or we will
      * get our camera chasing itself like crazy and we will get motion detected
      * which is not really motion. So we pretend there is no motion by setting
@@ -1877,8 +1875,8 @@ static void mlp_detection(struct ctx_cam *cam){
      * We also pretend to have a moving camera when we start Motion and when light
      * switch has been detected to allow camera to settle.
      */
-    if (cam->moved) {
-        cam->moved--;
+    if (cam->frame_skip) {
+        cam->frame_skip--;
         cam->current_image->diffs = 0;
     }
 
@@ -2179,7 +2177,7 @@ static void mlp_actions(struct ctx_cam *cam){
              * point to a place where it will miss the next action
              */
             if (cam->track.type)
-                cam->moved = track_center(cam, cam->video_dev, 0, 0, 0);
+                cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
 

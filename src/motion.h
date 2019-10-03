@@ -303,7 +303,7 @@ struct ctx_cam {
     unsigned int            log_type;
 
     struct config           conf;
-    struct trackoptions     track;
+    struct ctx_track        track;
 
     struct ctx_images       imgs;
     struct ctx_mmalcam      *mmalcam;
@@ -366,7 +366,7 @@ struct ctx_cam {
     time_t                  lastframetime;
     unsigned int            lastrate;
     unsigned int            startup_frames;
-    unsigned int            moved;
+    unsigned int            frame_skip;
     unsigned int            pause;
     int                     missing_frame_counter;               /* counts failed attempts to fetch picture frame from camera */
     unsigned int            lost_connection;
