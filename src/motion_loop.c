@@ -262,31 +262,13 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
 
 static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
     struct config *conf = &cam->conf;
-    struct ctx_images *imgs = &cam->imgs;
-    struct ctx_coord *location = &img->location;
 
-    /* Draw location */
-    if (cam->locate_motion_mode == LOCATE_ON) {
-
-        if (cam->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
-                              LOCATE_BOTH, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDBOX,
-                                  LOCATE_BOTH, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_CROSS,
-                              LOCATE_BOTH, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDCROSS,
-                                  LOCATE_BOTH, cam->process_thisframe);
-        }
-    }
+    draw_locate(cam, img);
 
     /* Calculate how centric motion is if configured preview center*/
     if (cam->new_img & NEWIMG_CENTER) {
-        unsigned int distX = abs((imgs->width / 2) - location->x);
-        unsigned int distY = abs((imgs->height / 2) - location->y);
+        unsigned int distX = abs((cam->imgs.width / 2) - img->location.x );
+        unsigned int distY = abs((cam->imgs.height / 2) - img->location.y);
 
         img->cent_dist = distX * distX + distY * distY;
     }
@@ -337,7 +319,7 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data 
 
     /* if track enabled and auto track on */
     if (cam->track.type && cam->track.active)
-        cam->frame_skip = track_move(cam, dev, location, imgs, 0);
+        cam->frame_skip = track_move(cam, dev, &img->location, &cam->imgs, 0);
 
 }
 

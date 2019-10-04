@@ -645,7 +645,7 @@ static void motion_startup(int daemonize, int argc, char *argv[])
 
     motion_camera_ids();
 
-    initialize_chars();
+    draw_init_chars();
 
     webu_start(cam_list);
 

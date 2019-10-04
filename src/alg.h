@@ -13,8 +13,6 @@
     struct ctx_coord;
 
     void alg_locate_center_size(struct ctx_images *, int width, int height, struct ctx_coord *);
-    void alg_draw_location(struct ctx_coord *, struct ctx_images *, int width, unsigned char *, int, int, int);
-    void alg_draw_red_location(struct ctx_coord *, struct ctx_images *, int width, unsigned char *, int, int, int);
     int alg_diff(struct ctx_cam *cam, unsigned char *);
     int alg_diff_standard(struct ctx_cam *cam, unsigned char *);
     int alg_lightswitch(struct ctx_cam *cam, int diffs);

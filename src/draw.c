@@ -1180,11 +1180,8 @@ int draw_text(unsigned char *image, int width, int height, int startx, int start
     return 0;
 }
 
-/**
- * initialize_chars
- */
-int initialize_chars(void)
-{
+/** initialize_chars */
+int draw_init_chars(void) {
     unsigned int i;
     size_t draw_table_size;
 
@@ -1232,3 +1229,219 @@ void draw_init_scale(struct ctx_cam *cam){
 
 }
 
+/** Draws a box around the movement. */
+static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new,
+                       int style, int mode, int process_thisframe)
+{
+    unsigned char *out = imgs->image_motion.image_norm;
+    int x, y;
+
+    out = imgs->image_motion.image_norm;
+
+    /* Debug image always gets a 'normal' box. */
+    if ((mode == LOCATE_BOTH) && process_thisframe) {
+        int width_miny = width * cent->miny;
+        int width_maxy = width * cent->maxy;
+
+        for (x = cent->minx; x <= cent->maxx; x++) {
+            int width_miny_x = x + width_miny;
+            int width_maxy_x = x + width_maxy;
+
+            out[width_miny_x] =~out[width_miny_x];
+            out[width_maxy_x] =~out[width_maxy_x];
+        }
+
+        for (y = cent->miny; y <= cent->maxy; y++) {
+            int width_minx_y = cent->minx + y * width;
+            int width_maxx_y = cent->maxx + y * width;
+
+            out[width_minx_y] =~out[width_minx_y];
+            out[width_maxx_y] =~out[width_maxx_y];
+        }
+    }
+    if (style == LOCATE_BOX) { /* Draw a box on normal images. */
+        int width_miny = width * cent->miny;
+        int width_maxy = width * cent->maxy;
+
+        for (x = cent->minx; x <= cent->maxx; x++) {
+            int width_miny_x = x + width_miny;
+            int width_maxy_x = x + width_maxy;
+
+            new[width_miny_x] =~new[width_miny_x];
+            new[width_maxy_x] =~new[width_maxy_x];
+        }
+
+        for (y = cent->miny; y <= cent->maxy; y++) {
+            int width_minx_y = cent->minx + y * width;
+            int width_maxx_y = cent->maxx + y * width;
+
+            new[width_minx_y] =~new[width_minx_y];
+            new[width_maxx_y] =~new[width_maxx_y];
+        }
+    } else if (style == LOCATE_CROSS) { /* Draw a cross on normal images. */
+        int centy = cent->y * width;
+
+        for (x = cent->x - 10;  x <= cent->x + 10; x++) {
+            new[centy + x] =~new[centy + x];
+            out[centy + x] =~out[centy + x];
+        }
+
+        for (y = cent->y - 10; y <= cent->y + 10; y++) {
+            new[cent->x + y * width] =~new[cent->x + y * width];
+            out[cent->x + y * width] =~out[cent->x + y * width];
+        }
+    }
+}
+
+
+/** Draws a RED box around the movement. */
+static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new,
+                           int style, int mode, int process_thisframe)
+{
+    unsigned char *out = imgs->image_motion.image_norm;
+    unsigned char *new_u, *new_v;
+    int x, y, v, cwidth, cblock;
+
+    cwidth = width / 2;
+    cblock = imgs->motionsize / 4;
+    x = imgs->motionsize;
+    v = x + cblock;
+    out = imgs->image_motion.image_norm;
+    new_u = new + x;
+    new_v = new + v;
+
+    /* Debug image always gets a 'normal' box. */
+    if ((mode == LOCATE_BOTH) && process_thisframe) {
+        int width_miny = width * cent->miny;
+        int width_maxy = width * cent->maxy;
+
+        for (x = cent->minx; x <= cent->maxx; x++) {
+            int width_miny_x = x + width_miny;
+            int width_maxy_x = x + width_maxy;
+
+            out[width_miny_x] =~out[width_miny_x];
+            out[width_maxy_x] =~out[width_maxy_x];
+        }
+
+        for (y = cent->miny; y <= cent->maxy; y++) {
+            int width_minx_y = cent->minx + y * width;
+            int width_maxx_y = cent->maxx + y * width;
+
+            out[width_minx_y] =~out[width_minx_y];
+            out[width_maxx_y] =~out[width_maxx_y];
+        }
+    }
+
+    if (style == LOCATE_REDBOX) { /* Draw a red box on normal images. */
+        int width_miny = width * cent->miny;
+        int width_maxy = width * cent->maxy;
+        int cwidth_miny = cwidth * (cent->miny / 2);
+        int cwidth_maxy = cwidth * (cent->maxy / 2);
+
+        for (x = cent->minx + 2; x <= cent->maxx - 2; x += 2) {
+            int width_miny_x = x + width_miny;
+            int width_maxy_x = x + width_maxy;
+            int cwidth_miny_x = x / 2 + cwidth_miny;
+            int cwidth_maxy_x = x / 2 + cwidth_maxy;
+
+            new_u[cwidth_miny_x] = 128;
+            new_u[cwidth_maxy_x] = 128;
+            new_v[cwidth_miny_x] = 255;
+            new_v[cwidth_maxy_x] = 255;
+
+            new[width_miny_x] = 128;
+            new[width_maxy_x] = 128;
+
+            new[width_miny_x + 1] = 128;
+            new[width_maxy_x + 1] = 128;
+
+            new[width_miny_x + width] = 128;
+            new[width_maxy_x + width] = 128;
+
+            new[width_miny_x + 1 + width] = 128;
+            new[width_maxy_x + 1 + width] = 128;
+        }
+
+        for (y = cent->miny; y <= cent->maxy; y += 2) {
+            int width_minx_y = cent->minx + y * width;
+            int width_maxx_y = cent->maxx + y * width;
+            int cwidth_minx_y = (cent->minx / 2) + (y / 2) * cwidth;
+            int cwidth_maxx_y = (cent->maxx / 2) + (y / 2) * cwidth;
+
+            new_u[cwidth_minx_y] = 128;
+            new_u[cwidth_maxx_y] = 128;
+            new_v[cwidth_minx_y] = 255;
+            new_v[cwidth_maxx_y] = 255;
+
+            new[width_minx_y] = 128;
+            new[width_maxx_y] = 128;
+
+            new[width_minx_y + width] = 128;
+            new[width_maxx_y + width] = 128;
+
+            new[width_minx_y + 1] = 128;
+            new[width_maxx_y + 1] = 128;
+
+            new[width_minx_y + width + 1] = 128;
+            new[width_maxx_y + width + 1] = 128;
+        }
+    } else if (style == LOCATE_REDCROSS) { /* Draw a red cross on normal images. */
+        int cwidth_maxy = cwidth * (cent->y / 2);
+
+        for (x = cent->x - 10; x <= cent->x + 10; x += 2) {
+            int cwidth_maxy_x = x / 2 + cwidth_maxy;
+
+            new_u[cwidth_maxy_x] = 128;
+            new_v[cwidth_maxy_x] = 255;
+        }
+
+        for (y = cent->y - 10; y <= cent->y + 10; y += 2) {
+            int cwidth_minx_y = (cent->x / 2) + (y / 2) * cwidth;
+
+            new_u[cwidth_minx_y] = 128;
+            new_v[cwidth_minx_y] = 255;
+        }
+    }
+}
+
+void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img){
+    /* draw locate box here when mode = LOCATE_PREVIEW */
+    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
+
+        if (cam->locate_motion_style == LOCATE_BOX) {
+            draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                              LOCATE_BOX, LOCATE_NORMAL, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
+            draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                                  LOCATE_REDBOX, LOCATE_NORMAL, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_CROSS) {
+            draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                              LOCATE_CROSS, LOCATE_NORMAL, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
+            draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                                  LOCATE_REDCROSS, LOCATE_NORMAL, cam->process_thisframe);
+        }
+    }
+}
+
+void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img){
+    struct ctx_images *imgs = &cam->imgs;
+    struct ctx_coord *location = &img->location;
+
+    if (cam->locate_motion_mode == LOCATE_ON) {
+
+        if (cam->locate_motion_style == LOCATE_BOX) {
+            draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
+                              LOCATE_BOTH, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
+            draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDBOX,
+                                  LOCATE_BOTH, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_CROSS) {
+            draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_CROSS,
+                              LOCATE_BOTH, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
+            draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDCROSS,
+                                  LOCATE_BOTH, cam->process_thisframe);
+        }
+    }
+}

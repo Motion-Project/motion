@@ -15,7 +15,7 @@
 #include "jpegutils.h"
 #include "event.h"
 #include "exif.h"
-#include "alg.h"
+#include "draw.h"
 
 #ifdef HAVE_WEBP
     #include <webp/encode.h>
@@ -688,22 +688,7 @@ void pic_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *img) {
     if (cam->imgs.image_preview.diffs == 0)
         cam->imgs.image_preview.diffs = 1;
 
-    /* draw locate box here when mode = LOCATE_PREVIEW */
-    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
+    draw_locate_preview(cam, img);
 
-        if (cam->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                              LOCATE_BOX, LOCATE_NORMAL, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                                  LOCATE_REDBOX, LOCATE_NORMAL, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                              LOCATE_CROSS, LOCATE_NORMAL, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                                  LOCATE_REDCROSS, LOCATE_NORMAL, cam->process_thisframe);
-        }
-    }
 }
 

@@ -23,11 +23,14 @@
 #define _INCLUDE_DRAW_H_
 
 /* date/time drawing, draw.c */
-int draw_text(unsigned char *image,
+    int draw_text(unsigned char *image,
               int width, int height,
               int startx, int starty,
               const char *text, int factor);
-int initialize_chars(void);
-void draw_init_scale(struct ctx_cam *cam);
+    int draw_init_chars(void);
+    void draw_init_scale(struct ctx_cam *cam);
+
+    void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img);
+    void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img);
 
 #endif
