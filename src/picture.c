@@ -26,11 +26,11 @@
 
 #ifdef HAVE_WEBP
 /*
- * put_webp_exif writes the EXIF APP1 chunk to the webp file.
+ * pic_webp_exif writes the EXIF APP1 chunk to the webp file.
  * It must be called after WebPEncode() and the result
  * can then be written out to webp a file
  */
-static void put_webp_exif(WebPMux* webp_mux,
+static void pic_webp_exif(WebPMux* webp_mux,
               const struct ctx_cam *cam,
               const struct timespec *ts1,
               const struct ctx_coord *box)
@@ -56,120 +56,99 @@ static void put_webp_exif(WebPMux* webp_mux,
 
 
 
-#ifdef HAVE_WEBP
-/**
- * put_webp_yuv420p_file
- *      Converts an YUV420P coded image to a webp image and writes
- *      it to an already open file.
- *
- * Inputs:
- * - image is the image in YUV420P format.
- * - width and height are the dimensions of the image
- * - quality is the webp encoding quality 0-100%
- *
- * Output:
- * - The webp is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_webp_yuv420p_file(FILE *fp,
-                  unsigned char *image, int width, int height,
+/** Save image as webp to file */
+static void pic_save_webp(FILE *fp, unsigned char *image, int width, int height,
                   int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
 {
-    /* Create a config present and check for compatible library version */
-    WebPConfig webp_config;
-    if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
-        return;
-    }
+    #ifdef HAVE_WEBP
+        /* Create a config present and check for compatible library version */
+        WebPConfig webp_config;
+        if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT, (float) quality)){
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
+            return;
+        }
 
-    /* Create the input data structure and check for compatible library version */
-    WebPPicture webp_image;
-    if (!WebPPictureInit(&webp_image)){
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
-        return;
-    }
+        /* Create the input data structure and check for compatible library version */
+        WebPPicture webp_image;
+        if (!WebPPictureInit(&webp_image)){
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
+            return;
+        }
 
-    /* Allocate the image buffer based on image width and height */
-    webp_image.width = width;
-    webp_image.height = height;
-    if (!WebPPictureAlloc(&webp_image)){
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
-        return;
-    }
+        /* Allocate the image buffer based on image width and height */
+        webp_image.width = width;
+        webp_image.height = height;
+        if (!WebPPictureAlloc(&webp_image)){
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
+            return;
+        }
 
-    /* Map the input YUV420P buffer as individual Y, U and V pointers */
-    webp_image.y = image;
-    webp_image.u = image + width * height;
-    webp_image.v = webp_image.u + (width * height) / 4;
+        /* Map the input YUV420P buffer as individual Y, U and V pointers */
+        webp_image.y = image;
+        webp_image.u = image + width * height;
+        webp_image.v = webp_image.u + (width * height) / 4;
 
-    /* Setup the memory writting method */
-    WebPMemoryWriter webp_writer;
-    WebPMemoryWriterInit(&webp_writer);
-    webp_image.writer = WebPMemoryWrite;
-    webp_image.custom_ptr = (void*) &webp_writer;
+        /* Setup the memory writting method */
+        WebPMemoryWriter webp_writer;
+        WebPMemoryWriterInit(&webp_writer);
+        webp_image.writer = WebPMemoryWrite;
+        webp_image.custom_ptr = (void*) &webp_writer;
 
-    /* Encode the YUV image as webp */
-    if (!WebPEncode(&webp_config, &webp_image))
-        MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
+        /* Encode the YUV image as webp */
+        if (!WebPEncode(&webp_config, &webp_image))
+            MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
 
-    /* A bitstream object is needed for the muxing proces */
-    WebPData webp_bitstream;
-    webp_bitstream.bytes = webp_writer.mem;
-    webp_bitstream.size = webp_writer.size;
+        /* A bitstream object is needed for the muxing proces */
+        WebPData webp_bitstream;
+        webp_bitstream.bytes = webp_writer.mem;
+        webp_bitstream.size = webp_writer.size;
 
-    /* Create a mux from the prepared image data */
-    WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
-    put_webp_exif(webp_mux, cam, ts1, box);
+        /* Create a mux from the prepared image data */
+        WebPMux* webp_mux = WebPMuxCreate(&webp_bitstream, 1);
+        pic_webp_exif(webp_mux, cam, ts1, box);
 
-    /* Add Exif data to the webp image data */
-    WebPData webp_output;
-    WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
-    if (err != WEBP_MUX_OK) {
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
-    }
+        /* Add Exif data to the webp image data */
+        WebPData webp_output;
+        WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
+        if (err != WEBP_MUX_OK) {
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
+        }
 
-    /* Write the webp final bitstream to the file */
-    if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
-        MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
+        /* Write the webp final bitstream to the file */
+        if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size)
+            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
 
-    #if WEBP_ENCODER_ABI_VERSION > 0x0202
-        /* writer.mem must be freed by calling WebPMemoryWriterClear */
-        WebPMemoryWriterClear(&webp_writer);
+        #if WEBP_ENCODER_ABI_VERSION > 0x0202
+            /* writer.mem must be freed by calling WebPMemoryWriterClear */
+            WebPMemoryWriterClear(&webp_writer);
+        #else
+            /* writer.mem must be freed by calling 'free(writer.mem)' */
+            free(webp_writer.mem);
+        #endif /* WEBP_ENCODER_ABI_VERSION */
+
+        /* free the memory used by webp for image data */
+        WebPPictureFree(&webp_image);
+        /* free the memory used by webp mux object */
+        WebPMuxDelete(webp_mux);
+        /* free the memory used by webp for output data */
+        WebPDataClear(&webp_output);
     #else
-        /* writer.mem must be freed by calling 'free(writer.mem)' */
-        free(webp_writer.mem);
-    #endif /* WEBP_ENCODER_ABI_VERSION */
-
-    /* free the memory used by webp for image data */
-    WebPPictureFree(&webp_image);
-    /* free the memory used by webp mux object */
-    WebPMuxDelete(webp_mux);
-    /* free the memory used by webp for output data */
-    WebPDataClear(&webp_output);
+        (void)fp;
+        (void)image;
+        (void)width;
+        (void)height;
+        (void) quality;
+        (void)cam;
+        (void)ts1;
+        (void)box;
+    #endif /* HAVE_WEBP */
 }
-#endif /* HAVE_WEBP */
 
-/**
- * put_jpeg_yuv420p_file
- *      Converts an YUV420P coded image to a jpeg image and writes
- *      it to an already open file.
- *
- * Inputs:
- * - image is the image in YUV420P format.
- * - width and height are the dimensions of the image
- * - quality is the jpeg encoding quality 0-100%
- *
- * Output:
- * - The jpeg is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_jpeg_yuv420p_file(FILE *fp,
-                  unsigned char *image, int width, int height,
-                  int quality,
-                  struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
-{
+
+/** Save image as yuv420p jpeg to file */
+static void pic_save_yuv420p(FILE *fp, unsigned char *image, int width, int height,
+                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box) {
+
     int sz = 0;
     int image_size = cam->imgs.size_norm;
     unsigned char *buf = mymalloc(image_size);
@@ -181,25 +160,10 @@ static void put_jpeg_yuv420p_file(FILE *fp,
 
 }
 
+/** Save image as grey jpeg to file */
+static void pic_save_grey(FILE *picture, unsigned char *image, int width, int height,
+                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box) {
 
-/**
- * put_jpeg_grey_file
- *      Converts an greyscale image to a jpeg image and writes
- *      it to an already open file.
- *
- * Inputs:
- * - image is the image in greyscale format.
- * - width and height are the dimensions of the image
- * - quality is the jpeg encoding quality 0-100%
- * Output:
- * - The jpeg is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, int height,
-                  int quality, struct ctx_cam *cam, struct timespec *ts1, struct ctx_coord *box)
-
-{
     int sz = 0;
     int image_size = cam->imgs.size_norm;
     unsigned char *buf = mymalloc(image_size);
@@ -210,22 +174,8 @@ static void put_jpeg_grey_file(FILE *picture, unsigned char *image, int width, i
     free(buf);
 }
 
-
-/**
- * put_ppm_bgr24_file
- *      Converts an greyscale image to a PPM image and writes
- *      it to an already open file.
- * Inputs:
- * - image is the image in YUV420P format.
- * - width and height are the dimensions of the image
- *
- * Output:
- * - The PPM is written directly to the file given by the file pointer fp
- *
- * Returns nothing
- */
-static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, int height)
-{
+/** Save image as greyscale ppm image to file */
+static void pic_save_ppm(FILE *picture, unsigned char *image, int width, int height) {
     int x, y;
     unsigned char *l = image;
     unsigned char *u = image + width * height;
@@ -282,177 +232,30 @@ static void put_ppm_bgr24_file(FILE *picture, unsigned char *image, int width, i
     }
 }
 
-/**
- * overlay_smartmask
- *      Copies smartmask as an overlay into motion images and movies.
- *
- * Returns nothing.
- */
-void overlay_smartmask(struct ctx_cam *cam, unsigned char *out)
-{
-    int i, x, v, width, height, line;
-    struct ctx_images *imgs = &cam->imgs;
-    unsigned char *smartmask = imgs->smartmask_final;
-    unsigned char *out_y, *out_u, *out_v;
 
-    i = imgs->motionsize;
-    v = i + ((imgs->motionsize) / 4);
-    width = imgs->width;
-    height = imgs->height;
+/** Put picture into memory as jpg */
+int pic_put_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_size, unsigned char *image,
+        int quality, int width, int height) {
 
-    /* Set V to 255 to make smartmask appear red. */
-    out_v = out + v;
-    out_u = out + i;
-    for (i = 0; i < height; i += 2) {
-        line = i * width;
-        for (x = 0; x < width; x += 2) {
-            if (smartmask[line + x] == 0 || smartmask[line + x + 1] == 0 ||
-                smartmask[line + width + x] == 0 ||
-                smartmask[line + width + x + 1] == 0) {
-
-                *out_v = 255;
-                *out_u = 128;
-            }
-            out_v++;
-            out_u++;
-        }
-    }
-    out_y = out;
-    /* Set colour intensity for smartmask. */
-    for (i = 0; i < imgs->motionsize; i++) {
-        if (smartmask[i] == 0)
-            *out_y = 0;
-        out_y++;
-    }
-}
-
-/**
- * overlay_fixed_mask
- *      Copies fixed mask as green overlay into motion images and movies.
- *
- * Returns nothing.
- */
-void overlay_fixed_mask(struct ctx_cam *cam, unsigned char *out)
-{
-    int i, x, v, width, height, line;
-    struct ctx_images *imgs = &cam->imgs;
-    unsigned char *mask = imgs->mask;
-    unsigned char *out_y, *out_u, *out_v;
-
-    i = imgs->motionsize;
-    v = i + ((imgs->motionsize) / 4);
-    width = imgs->width;
-    height = imgs->height;
-
-    /* Set U and V to 0 to make fixed mask appear green. */
-    out_v = out + v;
-    out_u = out + i;
-    for (i = 0; i < height; i += 2) {
-        line = i * width;
-        for (x = 0; x < width; x += 2) {
-            if (mask[line + x] == 0 || mask[line + x + 1] == 0 ||
-                mask[line + width + x] == 0 ||
-                mask[line + width + x + 1] == 0) {
-
-                *out_v = 0;
-                *out_u = 0;
-            }
-            out_v++;
-            out_u++;
-        }
-    }
-    out_y = out;
-    /* Set colour intensity for mask. */
-    for (i = 0; i < imgs->motionsize; i++) {
-        if (mask[i] == 0)
-            *out_y = 0;
-        out_y++;
-    }
-}
-
-/**
- * overlay_largest_label
- *      Copies largest label as an overlay into motion images and movies.
- *
- * Returns nothing.
- */
-void overlay_largest_label(struct ctx_cam *cam, unsigned char *out)
-{
-    int i, x, v, width, height, line;
-    struct ctx_images *imgs = &cam->imgs;
-    int *labels = imgs->labels;
-    unsigned char *out_y, *out_u, *out_v;
-
-    i = imgs->motionsize;
-    v = i + ((imgs->motionsize) / 4);
-    width = imgs->width;
-    height = imgs->height;
-
-    /* Set U to 255 to make label appear blue. */
-    out_u = out + i;
-    out_v = out + v;
-    for (i = 0; i < height; i += 2) {
-        line = i * width;
-        for (x = 0; x < width; x += 2) {
-            if (labels[line + x] & 32768 || labels[line + x + 1] & 32768 ||
-                labels[line + width + x] & 32768 ||
-                labels[line + width + x + 1] & 32768) {
-
-                *out_u = 255;
-                *out_v = 128;
-            }
-            out_u++;
-            out_v++;
-        }
-    }
-    out_y = out;
-    /* Set intensity for coloured label to have better visibility. */
-    for (i = 0; i < imgs->motionsize; i++) {
-        if (*labels++ & 32768)
-            *out_y = 0;
-        out_y++;
-    }
-}
-
-/**
- * put_picture_mem
- *      Is used for the webcam feature. Depending on the image type
- *      (colour YUV420P or greyscale) the corresponding put_jpeg_X_memory function is called.
- * Inputs:
- * - cam is the thread context struct
- * - image_size is the size of the input image buffer
- * - *image points to the image buffer that contains the YUV420P or Grayscale image about to be put
- * - quality is the jpeg quality setting from the config file.
- *
- * Output:
- * - **dest_image is a pointer to a pointer that points to the destination buffer in which the
- *   converted image it put
- *
- * Returns the dest_image_size if successful. Otherwise 0.
- */
-int put_picture_memory(struct ctx_cam *cam, unsigned char* dest_image, int image_size, unsigned char *image,
-        int quality, int width, int height)
-{
     struct timespec ts1;
 
     clock_gettime(CLOCK_REALTIME, &ts1);
     if (!cam->conf.stream_grey){
         return jpgutl_put_yuv420p(dest_image, image_size, image,
-                                       width, height, quality, cam ,&ts1, NULL);
+                                width, height, quality, cam ,&ts1, NULL);
     } else {
         return jpgutl_put_grey(dest_image, image_size, image,
-                                       width, height, quality, cam,&ts1, NULL);
+                                width, height, quality, cam,&ts1, NULL);
     }
 
     return 0;
 }
 
-static void put_picture_fd(struct ctx_cam *cam, FILE *picture, unsigned char *image, int quality, int ftype){
+/* Write the picture to a file */
+static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, int quality, int ftype){
+
     int width, height;
     int passthrough;
-    int dummy = 1;
-
-    /* See comment in put_picture_memory regarding dummy*/
 
     passthrough = mycheck_passthrough(cam);
     if ((ftype == FTYPE_IMAGE) && (cam->imgs.size_high > 0) && (!passthrough)) {
@@ -464,24 +267,18 @@ static void put_picture_fd(struct ctx_cam *cam, FILE *picture, unsigned char *im
     }
 
     if (cam->imgs.picture_type == IMAGE_TYPE_PPM) {
-        put_ppm_bgr24_file(picture, image, width, height);
+        pic_save_ppm(picture, image, width, height);
+    } else if (cam->imgs.picture_type == IMAGE_TYPE_WEBP) {
+        pic_save_webp(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
+    } else if (cam->imgs.picture_type == IMAGE_TYPE_JPEG) {
+        pic_save_yuv420p(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
     } else {
-        if (dummy == 1){
-            #ifdef HAVE_WEBP
-            if (cam->imgs.picture_type == IMAGE_TYPE_WEBP)
-                put_webp_yuv420p_file(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
-            #endif /* HAVE_WEBP */
-            if (cam->imgs.picture_type == IMAGE_TYPE_JPEG)
-                put_jpeg_yuv420p_file(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
-        } else {
-            put_jpeg_grey_file(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
-       }
+        pic_save_grey(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
     }
 }
 
-
-void put_picture(struct ctx_cam *cam, char *file, unsigned char *image, int ftype)
-{
+/* Saves image to a file in format requested */
+void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ftype) {
     FILE *picture;
 
     picture = myfopen(file, "w");
@@ -502,18 +299,14 @@ void put_picture(struct ctx_cam *cam, char *file, unsigned char *image, int ftyp
         }
     }
 
-    put_picture_fd(cam, picture, image, cam->conf.picture_quality, ftype);
+    pic_write(cam, picture, image, cam->conf.picture_quality, ftype);
 
     myfclose(picture);
 }
 
-/**
- * get_pgm
- *      Get the pgm file used as fixed mask
- *
- */
-unsigned char *get_pgm(FILE *picture, int width, int height)
-{
+/** Get the pgm file used as fixed mask */
+unsigned char *pic_load_pgm(FILE *picture, int width, int height) {
+
     int x, y, mask_width, mask_height, maxval;
     char line[256];
     unsigned char *image, *resized_image;
@@ -597,16 +390,8 @@ unsigned char *get_pgm(FILE *picture, int width, int height)
     return image;
 }
 
-/**
- * put_fixed_mask
- *      If a mask file is asked for but does not exist this function
- *      creates an empty mask file in the right binary pgm format and
- *      and the right size - easy to edit with Gimp or similar tool.
- *
- * Returns nothing.
- */
-void put_fixed_mask(struct ctx_cam *cam, const char *file)
-{
+/** Write out a base mask file if needed */
+void pic_write_mask(struct ctx_cam *cam, const char *file) {
     FILE *picture;
 
     picture = myfopen(file, "w");
@@ -661,7 +446,7 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
     return;
 }
 
-void pic_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *img) {
+void pic_save_preview(struct ctx_cam *cam, struct ctx_image_data *img) {
     void *image_norm, *image_high;
 
     /* Save our pointers to our memory locations for images*/

@@ -231,13 +231,13 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
             /* Check for most significant preview-shot when picture_output=best */
             if (cam->new_img & NEWIMG_BEST) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].diffs > cam->imgs.image_preview.diffs) {
-                    pic_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                    pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
                 }
             }
             /* Check for most significant preview-shot when picture_output=center */
             if (cam->new_img & NEWIMG_CENTER) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].cent_dist < cam->imgs.image_preview.cent_dist) {
-                    pic_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                    pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
                 }
             }
         }
@@ -291,7 +291,7 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data 
                        cam->event_nr);
 
             if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
-                pic_save_as_preview(cam, img);
+                pic_save_preview(cam, img);
 
         }
 
@@ -385,7 +385,7 @@ static void init_mask_privacy(struct ctx_cam *cam){
              * applies to the already rotated image, not the capture image. Thus, use
              * width and height from imgs.
              */
-            cam->imgs.mask_privacy = get_pgm(picture, cam->imgs.width, cam->imgs.height);
+            cam->imgs.mask_privacy = pic_load_pgm(picture, cam->imgs.width, cam->imgs.height);
 
             /* We only need the "or" mask for the U & V chrominance area.  */
             cam->imgs.mask_privacy_uv = mymalloc((cam->imgs.height * cam->imgs.width) / 2);
@@ -393,7 +393,7 @@ static void init_mask_privacy(struct ctx_cam *cam){
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
                     ,_("Opening high resolution privacy mask file"));
                 rewind(picture);
-                cam->imgs.mask_privacy_high = get_pgm(picture, cam->imgs.width_high, cam->imgs.height_high);
+                cam->imgs.mask_privacy_high = pic_load_pgm(picture, cam->imgs.width_high, cam->imgs.height_high);
                 cam->imgs.mask_privacy_high_uv = mymalloc((cam->imgs.height_high * cam->imgs.width_high) / 2);
             }
 
@@ -402,7 +402,7 @@ static void init_mask_privacy(struct ctx_cam *cam){
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("Error opening mask file %s"), cam->conf.mask_privacy);
             /* Try to write an empty mask file to make it easier for the user to edit it */
-            put_fixed_mask(cam, cam->conf.mask_privacy);
+            pic_write_mask(cam, cam->conf.mask_privacy);
         }
 
         if (!cam->imgs.mask_privacy) {
@@ -701,7 +701,7 @@ static int mlp_init(struct ctx_cam *cam) {
              * applies to the already rotated image, not the capture image. Thus, use
              * width and height from imgs.
              */
-            cam->imgs.mask = get_pgm(picture, cam->imgs.width, cam->imgs.height);
+            cam->imgs.mask = pic_load_pgm(picture, cam->imgs.width, cam->imgs.height);
             myfclose(picture);
         } else {
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
@@ -711,7 +711,7 @@ static int mlp_init(struct ctx_cam *cam) {
              * Try to write an empty mask file to make it easier
              * for the user to edit it
              */
-            put_fixed_mask(cam, cam->conf.mask_file);
+            pic_write_mask(cam, cam->conf.mask_file);
         }
 
         if (!cam->imgs.mask) {
@@ -1514,17 +1514,17 @@ static void mlp_overlay(struct ctx_cam *cam){
     if (cam->smartmask_speed &&
         (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
          cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
-        overlay_smartmask(cam, cam->imgs.image_motion.image_norm);
+        draw_smartmask(cam, cam->imgs.image_motion.image_norm);
 
     /* Largest labels overlay */
     if (cam->imgs.largest_label && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
         cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
-        overlay_largest_label(cam, cam->imgs.image_motion.image_norm);
+        draw_largest_label(cam, cam->imgs.image_motion.image_norm);
 
     /* Fixed mask overlay */
     if (cam->imgs.mask && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
         cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
-        overlay_fixed_mask(cam, cam->imgs.image_motion.image_norm);
+        draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
 
     /* Add changed pixels in upper right corner of the pictures */
     if (cam->conf.text_changes) {

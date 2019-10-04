@@ -345,9 +345,9 @@ static void event_image_detect(struct ctx_cam *cam, motion_event evnt
 
         passthrough = mycheck_passthrough(cam);
         if ((cam->imgs.size_high > 0) && (!passthrough)) {
-            put_picture(cam, fullfilename,img_data->image_high, FTYPE_IMAGE);
+            pic_save_norm(cam, fullfilename,img_data->image_high, FTYPE_IMAGE);
         } else {
-            put_picture(cam, fullfilename,img_data->image_norm, FTYPE_IMAGE);
+            pic_save_norm(cam, fullfilename,img_data->image_norm, FTYPE_IMAGE);
         }
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE, ts1);
     }
@@ -389,7 +389,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
             , cam->conf.target_dir
             , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
             , filenamem, imageext(cam));
-        put_picture(cam, fullfilenamem, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
+        pic_save_norm(cam, fullfilenamem, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
         event(cam, EVENT_FILECREATE, NULL, fullfilenamem, (void *)FTYPE_IMAGE, ts1);
     }
 }
@@ -432,7 +432,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
             , cam->conf.target_dir
             , (int)(PATH_MAX-1-strlen(cam->conf.target_dir))
             , filename);
-        put_picture(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
 
         /*
@@ -461,7 +461,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
             , (int)(PATH_MAX-1-strlen(cam->conf.target_dir))
             , filename);
         remove(fullfilename);
-        put_picture(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
+        pic_save_norm(cam, fullfilename, img_data->image_norm, FTYPE_IMAGE_SNAPSHOT);
         event(cam, EVENT_FILECREATE, NULL, fullfilename, (void *)FTYPE_IMAGE_SNAPSHOT, ts1);
     }
 
@@ -526,9 +526,9 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
 
             passthrough = mycheck_passthrough(cam);
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
-                put_picture(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
+                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
             } else {
-                put_picture(cam, previewname, cam->imgs.image_preview.image_norm , FTYPE_IMAGE);
+                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm , FTYPE_IMAGE);
             }
             event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
         } else {
@@ -555,9 +555,9 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
 
             passthrough = mycheck_passthrough(cam);
             if ((cam->imgs.size_high > 0) && (!passthrough)) {
-                put_picture(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
+                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
             } else {
-                put_picture(cam, previewname, cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
+                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
             }
             event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
         }

@@ -406,7 +406,7 @@ static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *
         cam->stream.norm.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
     if (img_data->image_norm != NULL){
-        cam->stream.norm.jpeg_size = put_picture_memory(cam
+        cam->stream.norm.jpeg_size = pic_put_memory(cam
             ,cam->stream.norm.jpeg_data
             ,cam->imgs.size_norm
             ,img_data->image_norm
@@ -438,7 +438,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
                 ,cam->imgs.height
                 ,img_data->image_norm
                 ,cam->imgs.image_substream);
-            cam->stream.sub.jpeg_size = put_picture_memory(cam
+            cam->stream.sub.jpeg_size = pic_put_memory(cam
                 ,cam->stream.sub.jpeg_data
                 ,subsize
                 ,cam->imgs.image_substream
@@ -447,7 +447,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
                 ,(cam->imgs.height / 2));
         } else {
             /* Substream was not multiple of 8 so send full image*/
-            cam->stream.sub.jpeg_size = put_picture_memory(cam
+            cam->stream.sub.jpeg_size = pic_put_memory(cam
                 ,cam->stream.sub.jpeg_data
                 ,cam->imgs.size_norm
                 ,img_data->image_norm
@@ -466,7 +466,7 @@ static void webu_stream_getimg_motion(struct ctx_cam *cam){
         cam->stream.motion.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
     if (cam->imgs.image_motion.image_norm != NULL){
-        cam->stream.motion.jpeg_size = put_picture_memory(cam
+        cam->stream.motion.jpeg_size = pic_put_memory(cam
             ,cam->stream.motion.jpeg_data
             ,cam->imgs.size_norm
             ,cam->imgs.image_motion.image_norm
@@ -484,7 +484,7 @@ static void webu_stream_getimg_source(struct ctx_cam *cam){
         cam->stream.source.jpeg_data =(unsigned char*)mymalloc(cam->imgs.size_norm);
     }
     if (cam->imgs.image_virgin != NULL){
-        cam->stream.source.jpeg_size = put_picture_memory(cam
+        cam->stream.source.jpeg_size = pic_put_memory(cam
             ,cam->stream.source.jpeg_data
             ,cam->imgs.size_norm
             ,cam->imgs.image_virgin

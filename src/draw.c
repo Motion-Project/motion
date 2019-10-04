@@ -1445,3 +1445,117 @@ void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img){
         }
     }
 }
+
+/** Draw the smart mask on the motion images */
+void draw_smartmask(struct ctx_cam *cam, unsigned char *out) {
+    int i, x, v, width, height, line;
+    struct ctx_images *imgs = &cam->imgs;
+    unsigned char *smartmask = imgs->smartmask_final;
+    unsigned char *out_y, *out_u, *out_v;
+
+    i = imgs->motionsize;
+    v = i + ((imgs->motionsize) / 4);
+    width = imgs->width;
+    height = imgs->height;
+
+    /* Set V to 255 to make smartmask appear red. */
+    out_v = out + v;
+    out_u = out + i;
+    for (i = 0; i < height; i += 2) {
+        line = i * width;
+        for (x = 0; x < width; x += 2) {
+            if (smartmask[line + x] == 0 || smartmask[line + x + 1] == 0 ||
+                smartmask[line + width + x] == 0 ||
+                smartmask[line + width + x + 1] == 0) {
+
+                *out_v = 255;
+                *out_u = 128;
+            }
+            out_v++;
+            out_u++;
+        }
+    }
+    out_y = out;
+    /* Set colour intensity for smartmask. */
+    for (i = 0; i < imgs->motionsize; i++) {
+        if (smartmask[i] == 0)
+            *out_y = 0;
+        out_y++;
+    }
+}
+
+/** Draw the fixed mask on the motion images */
+void draw_fixed_mask(struct ctx_cam *cam, unsigned char *out){
+    int i, x, v, width, height, line;
+    struct ctx_images *imgs = &cam->imgs;
+    unsigned char *mask = imgs->mask;
+    unsigned char *out_y, *out_u, *out_v;
+
+    i = imgs->motionsize;
+    v = i + ((imgs->motionsize) / 4);
+    width = imgs->width;
+    height = imgs->height;
+
+    /* Set U and V to 0 to make fixed mask appear green. */
+    out_v = out + v;
+    out_u = out + i;
+    for (i = 0; i < height; i += 2) {
+        line = i * width;
+        for (x = 0; x < width; x += 2) {
+            if (mask[line + x] == 0 || mask[line + x + 1] == 0 ||
+                mask[line + width + x] == 0 ||
+                mask[line + width + x + 1] == 0) {
+
+                *out_v = 0;
+                *out_u = 0;
+            }
+            out_v++;
+            out_u++;
+        }
+    }
+    out_y = out;
+    /* Set colour intensity for mask. */
+    for (i = 0; i < imgs->motionsize; i++) {
+        if (mask[i] == 0)
+            *out_y = 0;
+        out_y++;
+    }
+}
+
+/** Draw largest label on the motion images */
+void draw_largest_label(struct ctx_cam *cam, unsigned char *out) {
+    int i, x, v, width, height, line;
+    struct ctx_images *imgs = &cam->imgs;
+    int *labels = imgs->labels;
+    unsigned char *out_y, *out_u, *out_v;
+
+    i = imgs->motionsize;
+    v = i + ((imgs->motionsize) / 4);
+    width = imgs->width;
+    height = imgs->height;
+
+    /* Set U to 255 to make label appear blue. */
+    out_u = out + i;
+    out_v = out + v;
+    for (i = 0; i < height; i += 2) {
+        line = i * width;
+        for (x = 0; x < width; x += 2) {
+            if (labels[line + x] & 32768 || labels[line + x + 1] & 32768 ||
+                labels[line + width + x] & 32768 ||
+                labels[line + width + x + 1] & 32768) {
+
+                *out_u = 255;
+                *out_v = 128;
+            }
+            out_u++;
+            out_v++;
+        }
+    }
+    out_y = out;
+    /* Set intensity for coloured label to have better visibility. */
+    for (i = 0; i < imgs->motionsize; i++) {
+        if (*labels++ & 32768)
+            *out_y = 0;
+        out_y++;
+    }
+}
