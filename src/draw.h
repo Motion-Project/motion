@@ -1,4 +1,4 @@
-/*    dbse.h
+/*    draw.h
  *
  *    This file is part of the Motion application
  *    Copyright (C) 2019  Motion-Project Developers(motion-project.github.io)
@@ -20,7 +20,7 @@
 */
 
 #ifndef _INCLUDE_DRAW_H_
-#define _INCLUDE_DRAQ_H_
+#define _INCLUDE_DRAW_H_
 
 /* date/time drawing, draw.c */
 int draw_text(unsigned char *image,
@@ -28,6 +28,6 @@ int draw_text(unsigned char *image,
               int startx, int starty,
               const char *text, int factor);
 int initialize_chars(void);
-
+void draw_init_scale(struct ctx_cam *cam);
 
 #endif

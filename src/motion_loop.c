@@ -42,21 +42,8 @@
 
 #define IMAGE_BUFFER_FLUSH ((unsigned int)-1)
 
-/**
- * image_ring_resize
- *
- * This routine is called from motion_loop to resize the image precapture ringbuffer
- * NOTE: This function clears all images in the old ring buffer
 
- * Parameters:
- *
- *      cam      Pointer to the motion ctx_cam structure
- *      new_size The new size of the ring buffer
- *
- * Returns:     nothing
- */
-static void image_ring_resize(struct ctx_cam *cam, int new_size)
-{
+static void mlp_ring_resize(struct ctx_cam *cam, int new_size) {
     /*
      * Only resize if :
      * Not in an event and
@@ -116,19 +103,7 @@ static void image_ring_resize(struct ctx_cam *cam, int new_size)
     }
 }
 
-/**
- * image_ring_destroy
- *
- * This routine is called when we want to free the ring
- *
- * Parameters:
- *
- *      cam      Pointer to the motion context structure
- *
- * Returns:     nothing
- */
-static void image_ring_destroy(struct ctx_cam *cam)
-{
+static void mlp_ring_destroy(struct ctx_cam *cam) {
     int i;
 
     /* Exit if don't have any ring */
@@ -149,173 +124,7 @@ static void image_ring_destroy(struct ctx_cam *cam)
     cam->imgs.ring_size = 0;
 }
 
-/**
- * image_save_as_preview
- *
- * This routine is called when we detect motion and want to save an image in the preview buffer
- *
- * Parameters:
- *
- *      cam      Pointer to the motion context structure
- *      img      Pointer to the ctx_image_data we want to set as preview image
- *
- * Returns:     nothing
- */
-static void image_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *img)
-{
-    void *image_norm, *image_high;
-
-    /* Save our pointers to our memory locations for images*/
-    image_norm = cam->imgs.image_preview.image_norm;
-    image_high = cam->imgs.image_preview.image_high;
-
-    /* Copy over the meta data from the img into preview */
-    memcpy(&cam->imgs.image_preview, img, sizeof(struct ctx_image_data));
-
-    /* Restore the pointers to the memory locations for images*/
-    cam->imgs.image_preview.image_norm = image_norm;
-    cam->imgs.image_preview.image_high = image_high;
-
-    /* Copy the actual images for norm and high */
-    memcpy(cam->imgs.image_preview.image_norm, img->image_norm, cam->imgs.size_norm);
-    if (cam->imgs.size_high > 0){
-        memcpy(cam->imgs.image_preview.image_high, img->image_high, cam->imgs.size_high);
-    }
-
-    /*
-     * If we set output_all to yes and during the event
-     * there is no image with motion, diffs is 0, we are not going to save the preview event
-     */
-    if (cam->imgs.image_preview.diffs == 0)
-        cam->imgs.image_preview.diffs = 1;
-
-    /* draw locate box here when mode = LOCATE_PREVIEW */
-    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
-
-        if (cam->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                              LOCATE_BOX, LOCATE_NORMAL, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                                  LOCATE_REDBOX, LOCATE_NORMAL, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                              LOCATE_CROSS, LOCATE_NORMAL, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                                  LOCATE_REDCROSS, LOCATE_NORMAL, cam->process_thisframe);
-        }
-    }
-}
-
-/**
- * motion_detected
- *
- *   Called from 'motion_loop' when motion is detected
- *   Can be called when no motion if emulate_motion is set!
- *
- * Parameters:
- *
- *   cam      - current thread's context struct
- *   dev      - video device file descriptor
- *   img      - pointer to the captured ctx_image_data with detected motion
- */
-static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img)
-{
-    struct config *conf = &cam->conf;
-    struct ctx_images *imgs = &cam->imgs;
-    struct ctx_coord *location = &img->location;
-
-    /* Draw location */
-    if (cam->locate_motion_mode == LOCATE_ON) {
-
-        if (cam->locate_motion_style == LOCATE_BOX) {
-            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
-                              LOCATE_BOTH, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
-            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDBOX,
-                                  LOCATE_BOTH, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_CROSS) {
-            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_CROSS,
-                              LOCATE_BOTH, cam->process_thisframe);
-        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
-            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDCROSS,
-                                  LOCATE_BOTH, cam->process_thisframe);
-        }
-    }
-
-    /* Calculate how centric motion is if configured preview center*/
-    if (cam->new_img & NEWIMG_CENTER) {
-        unsigned int distX = abs((imgs->width / 2) - location->x);
-        unsigned int distY = abs((imgs->height / 2) - location->y);
-
-        img->cent_dist = distX * distX + distY * distY;
-    }
-
-
-    /* Do things only if we have got minimum_motion_frames */
-    if (img->flags & IMAGE_TRIGGER) {
-        if (cam->event_nr != cam->prev_event) {
-
-            cam->prev_event = cam->event_nr;
-            cam->eventtime = img->imgts.tv_sec;
-
-            mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
-                       cam->conf.text_event, &img->imgts, NULL, 0);
-
-            event(cam, EVENT_FIRSTMOTION, img, NULL, NULL,
-                &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
-
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
-                       cam->event_nr);
-
-            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
-                image_save_as_preview(cam, img);
-
-        }
-
-        event(cam, EVENT_MOTION, NULL, NULL, NULL, &img->imgts);
-    }
-
-    /* Limit framerate */
-    if (img->shot < conf->framerate) {
-        /*
-         * If config option stream_motion is enabled, send the latest motion detected image
-         * to the stream but only if it is not the first shot within a second. This is to
-         * avoid double frames since we already have sent a frame to the stream.
-         * We also disable this in setup_mode.
-         */
-        if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
-            event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
-
-        /*
-         * Save motion jpeg, if configured
-         * Output the image_out (motion) picture.
-         */
-        if (conf->picture_output_motion)
-            event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
-    }
-
-    /* if track enabled and auto track on */
-    if (cam->track.type && cam->track.active)
-        cam->frame_skip = track_move(cam, dev, location, imgs, 0);
-
-}
-
-/**
- * process_image_ring
- *
- *   Called from 'motion_loop' to save images / send images to movie
- *
- * Parameters:
- *
- *   cam        - current thread's context struct
- *   max_images - Max number of images to process
- *                Set to IMAGE_BUFFER_FLUSH to send/save all images in buffer
- */
-
-static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
-{
+static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
     /*
      * We are going to send an event, in the events there is still
      * some code that use cam->current_image
@@ -422,13 +231,13 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
             /* Check for most significant preview-shot when picture_output=best */
             if (cam->new_img & NEWIMG_BEST) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].diffs > cam->imgs.image_preview.diffs) {
-                    image_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                    pic_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
                 }
             }
             /* Check for most significant preview-shot when picture_output=center */
             if (cam->new_img & NEWIMG_CENTER) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].cent_dist < cam->imgs.image_preview.cent_dist) {
-                    image_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                    pic_save_as_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
                 }
             }
         }
@@ -450,6 +259,88 @@ static void process_image_ring(struct ctx_cam *cam, unsigned int max_images)
     /* restore global context values */
     cam->current_image = saved_current_image;
 }
+
+static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
+    struct config *conf = &cam->conf;
+    struct ctx_images *imgs = &cam->imgs;
+    struct ctx_coord *location = &img->location;
+
+    /* Draw location */
+    if (cam->locate_motion_mode == LOCATE_ON) {
+
+        if (cam->locate_motion_style == LOCATE_BOX) {
+            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
+                              LOCATE_BOTH, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
+            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDBOX,
+                                  LOCATE_BOTH, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_CROSS) {
+            alg_draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_CROSS,
+                              LOCATE_BOTH, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
+            alg_draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDCROSS,
+                                  LOCATE_BOTH, cam->process_thisframe);
+        }
+    }
+
+    /* Calculate how centric motion is if configured preview center*/
+    if (cam->new_img & NEWIMG_CENTER) {
+        unsigned int distX = abs((imgs->width / 2) - location->x);
+        unsigned int distY = abs((imgs->height / 2) - location->y);
+
+        img->cent_dist = distX * distX + distY * distY;
+    }
+
+
+    /* Do things only if we have got minimum_motion_frames */
+    if (img->flags & IMAGE_TRIGGER) {
+        if (cam->event_nr != cam->prev_event) {
+
+            cam->prev_event = cam->event_nr;
+            cam->eventtime = img->imgts.tv_sec;
+
+            mystrftime(cam, cam->text_event_string, sizeof(cam->text_event_string),
+                       cam->conf.text_event, &img->imgts, NULL, 0);
+
+            event(cam, EVENT_FIRSTMOTION, img, NULL, NULL,
+                &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
+
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
+                       cam->event_nr);
+
+            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
+                pic_save_as_preview(cam, img);
+
+        }
+
+        event(cam, EVENT_MOTION, NULL, NULL, NULL, &img->imgts);
+    }
+
+    /* Limit framerate */
+    if (img->shot < conf->framerate) {
+        /*
+         * If config option stream_motion is enabled, send the latest motion detected image
+         * to the stream but only if it is not the first shot within a second. This is to
+         * avoid double frames since we already have sent a frame to the stream.
+         * We also disable this in setup_mode.
+         */
+        if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
+            event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
+
+        /*
+         * Save motion jpeg, if configured
+         * Output the image_out (motion) picture.
+         */
+        if (conf->picture_output_motion)
+            event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
+    }
+
+    /* if track enabled and auto track on */
+    if (cam->track.type && cam->track.active)
+        cam->frame_skip = track_move(cam, dev, location, imgs, 0);
+
+}
+
 
 static int init_camera_type(struct ctx_cam *cam){
 
@@ -592,38 +483,10 @@ static void init_mask_privacy(struct ctx_cam *cam){
 
 }
 
-static void init_text_scale(struct ctx_cam *cam){
 
-    /* Consider that web interface may change conf values at any moment.
-     * The below can put two sections in the image so make sure that after
-     * scaling does not occupy more than 1/4 of image (10 pixels * 2 lines)
-     */
+/** mlp_init */
+static int mlp_init(struct ctx_cam *cam) {
 
-    cam->text_scale = cam->conf.text_scale;
-    if (cam->text_scale <= 0) cam->text_scale = 1;
-
-    if ((cam->text_scale * 10 * 2) > (cam->imgs.width / 4)) {
-        cam->text_scale = (cam->imgs.width / (4 * 10 * 2));
-        if (cam->text_scale <= 0) cam->text_scale = 1;
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
-    }
-
-    if ((cam->text_scale * 10 * 2) > (cam->imgs.height / 4)) {
-        cam->text_scale = (cam->imgs.height / (4 * 10 * 2));
-        if (cam->text_scale <= 0) cam->text_scale = 1;
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
-    }
-
-    /* If we had to modify the scale, change conf so we don't get another message */
-    cam->conf.text_scale = cam->text_scale;
-
-}
-
-/** motion_init */
-static int motion_init(struct ctx_cam *cam)
-{
     FILE *picture;
 
     mythreadname_set("ml",cam->threadnr,cam->conf.camera_name);
@@ -742,7 +605,7 @@ static int motion_init(struct ctx_cam *cam)
      */
     cam->imgs.size_high = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
 
-    image_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
+    mlp_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
 
     cam->imgs.ref = mymalloc(cam->imgs.size_norm);
     cam->imgs.image_motion.image_norm = mymalloc(cam->imgs.size_norm);
@@ -791,7 +654,7 @@ static int motion_init(struct ctx_cam *cam)
      */
     rotate_init(cam); /* rotate_deinit is called in main */
 
-    init_text_scale(cam);   /*Initialize and validate the text_scale */
+    draw_init_scale(cam);   /*Initialize and validate the text_scale */
 
     /* Capture first image, or we will get an alarm on start */
     if (cam->video_dev >= 0) {
@@ -970,7 +833,7 @@ static int motion_init(struct ctx_cam *cam)
 }
 
 /** clean up all memory etc. from motion init */
-void motion_cleanup(struct ctx_cam *cam) {
+void mlp_cleanup(struct ctx_cam *cam) {
 
     event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, NULL);
     event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
@@ -978,7 +841,7 @@ void motion_cleanup(struct ctx_cam *cam) {
     webu_stream_deinit(cam);
 
     if (cam->video_dev >= 0) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from motion_cleanup"));
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from mlp_cleanup"));
         vid_close(cam);
     }
 
@@ -1038,7 +901,7 @@ void motion_cleanup(struct ctx_cam *cam) {
         cam->imgs.image_preview.image_high = NULL;
     }
 
-    image_ring_destroy(cam); /* Cleanup the precapture ring buffer */
+    mlp_ring_destroy(cam); /* Cleanup the precapture ring buffer */
 
     rotate_deinit(cam); /* cleanup image rotation data */
 
@@ -1193,7 +1056,7 @@ static void mlp_prepare(struct ctx_cam *cam){
     frame_buffer_size = cam->conf.pre_capture + cam->conf.minimum_motion_frames;
 
     if (cam->imgs.ring_size != frame_buffer_size)
-        image_ring_resize(cam, frame_buffer_size);
+        mlp_ring_resize(cam, frame_buffer_size);
 
     /*
      * If we have started on a new second we reset the shots variable
@@ -1489,18 +1352,6 @@ static int mlp_capture(struct ctx_cam *cam){
 
 static void mlp_detection(struct ctx_cam *cam){
 
-
-    /***** MOTION LOOP - MOTION DETECTION SECTION *****/
-    /*
-     * The actual motion detection takes place in the following
-     * diffs is the number of pixels detected as changed
-     * Make a differences picture in image_out
-     *
-     * alg_diff_standard is the slower full feature motion detection algorithm
-     * alg_diff first calls a fast detection algorithm which only looks at a
-     * fraction of the pixels. If this detects possible motion alg_diff_standard
-     * is called.
-     */
     if (cam->process_thisframe) {
         if (cam->threshold && !cam->pause) {
             /*
@@ -1607,12 +1458,6 @@ static void mlp_detection(struct ctx_cam *cam){
 
 static void mlp_tuning(struct ctx_cam *cam){
 
-    /***** MOTION LOOP - TUNING SECTION *****/
-
-    /*
-     * If noise tuning was selected, do it now. but only when
-     * no frames have been recorded and only once per second
-     */
     if ((cam->conf.noise_tune && cam->shots == 0) &&
          (!cam->detecting_motion && (cam->current_image->diffs <= cam->threshold)))
         alg_noise_tune(cam, cam->imgs.image_vprvcy);
@@ -1682,14 +1527,6 @@ static void mlp_tuning(struct ctx_cam *cam){
 static void mlp_overlay(struct ctx_cam *cam){
 
     char tmp[PATH_MAX];
-
-    /***** MOTION LOOP - TEXT AND GRAPHICS OVERLAY SECTION *****/
-    /*
-     * Some overlays on top of the motion image
-     * Note that these now modifies the cam->imgs.out so this buffer
-     * can no longer be used for motion detection features until next
-     * picture frame is captured.
-     */
 
     /* Smartmask overlay */
     if (cam->smartmask_speed &&
@@ -1885,7 +1722,7 @@ static void mlp_actions(struct ctx_cam *cam){
         if (cam->event_nr == cam->prev_event || cam->event_stop) {
 
             /* Flush image buffer */
-            process_image_ring(cam, IMAGE_BUFFER_FLUSH);
+            mlp_ring_process(cam, IMAGE_BUFFER_FLUSH);
 
             /* Save preview_shot here at the end of event */
             if (cam->imgs.image_preview.diffs) {
@@ -1923,13 +1760,12 @@ static void mlp_actions(struct ctx_cam *cam){
     }
 
     /* Save/send to movie some images */
-    process_image_ring(cam, 2);
+    mlp_ring_process(cam, 2);
 
 
 }
 
 static void mlp_setupmode(struct ctx_cam *cam){
-    /***** MOTION LOOP - SETUP MODE CONSOLE OUTPUT SECTION *****/
 
     /* If CAMERA_VERBOSE enabled output some numbers to console */
     if (cam->conf.setup_mode) {
@@ -1965,15 +1801,6 @@ static void mlp_setupmode(struct ctx_cam *cam){
 }
 
 static void mlp_snapshot(struct ctx_cam *cam){
-    /***** MOTION LOOP - SNAPSHOT FEATURE SECTION *****/
-    /*
-     * Did we get triggered to make a snapshot from control http? Then shoot a snap
-     * If snapshot_interval is not zero and time since epoch MOD snapshot_interval = 0 then snap
-     * We actually allow the time to run over the interval in case we have a delay
-     * from slow camera.
-     * Note: Negative value means SIGALRM snaps are enabled
-     * httpd-control snaps are always enabled.
-     */
 
     /* time_current_frame is used both for snapshot and timelapse features */
     cam->time_current_frame = cam->currenttime;
@@ -2091,12 +1918,11 @@ static void mlp_loopback(struct ctx_cam *cam){
 }
 
 static void mlp_parmsupdate(struct ctx_cam *cam){
-    /***** MOTION LOOP - ONCE PER SECOND PARAMETER UPDATE SECTION *****/
 
     /* Check for some config parameter changes but only every second */
     if (cam->shots != 0) return;
 
-    init_text_scale(cam);  /* Initialize and validate text_scale */
+    draw_init_scale(cam);  /* Initialize and validate text_scale */
 
     if (mystrceq(cam->conf.picture_output, "on"))
         cam->new_img = NEWIMG_ON;
@@ -2209,7 +2035,7 @@ void *motion_loop(void *arg) {
 
     struct ctx_cam *cam = arg;
 
-    if (motion_init(cam) == 0){
+    if (mlp_init(cam) == 0){
         while (!cam->finish || cam->event_stop) {
             mlp_prepare(cam);
             if (cam->get_image) {
@@ -2233,7 +2059,7 @@ void *motion_loop(void *arg) {
     cam->lost_connection = 1;
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Thread exiting"));
 
-    motion_cleanup(cam);
+    mlp_cleanup(cam);
 
     pthread_mutex_lock(&global_lock);
         threads_running--;

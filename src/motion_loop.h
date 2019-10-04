@@ -25,6 +25,6 @@
 struct ctx_cam;
 
 void *motion_loop(void *arg);
-void motion_cleanup(struct ctx_cam *cam);
+void mlp_cleanup(struct ctx_cam *cam);
 
 #endif

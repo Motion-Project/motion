@@ -11,6 +11,8 @@
 
 #include <ctype.h>
 #include "motion.h"
+#include "util.h"
+#include "logger.h"
 #include "draw.h"
 
 /* Highest ascii value is 126 (~) */
@@ -1199,5 +1201,34 @@ int initialize_chars(void)
     }
 
     return 0;
+}
+
+void draw_init_scale(struct ctx_cam *cam){
+
+    /* Consider that web interface may change conf values at any moment.
+     * The below can put two sections in the image so make sure that after
+     * scaling does not occupy more than 1/4 of image (10 pixels * 2 lines)
+     */
+
+    cam->text_scale = cam->conf.text_scale;
+    if (cam->text_scale <= 0) cam->text_scale = 1;
+
+    if ((cam->text_scale * 10 * 2) > (cam->imgs.width / 4)) {
+        cam->text_scale = (cam->imgs.width / (4 * 10 * 2));
+        if (cam->text_scale <= 0) cam->text_scale = 1;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
+    }
+
+    if ((cam->text_scale * 10 * 2) > (cam->imgs.height / 4)) {
+        cam->text_scale = (cam->imgs.height / (4 * 10 * 2));
+        if (cam->text_scale <= 0) cam->text_scale = 1;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
+    }
+
+    /* If we had to modify the scale, change conf so we don't get another message */
+    cam->conf.text_scale = cam->text_scale;
+
 }
 

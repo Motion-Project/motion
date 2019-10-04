@@ -848,7 +848,7 @@ static void motion_watchdog(int indx){
             pthread_mutex_lock(&global_lock);
                 threads_running--;
             pthread_mutex_unlock(&global_lock);
-            motion_cleanup(cam_list[indx]);
+            mlp_cleanup(cam_list[indx]);
             cam_list[indx]->running = 0;
             cam_list[indx]->finish = 0;
         } else {

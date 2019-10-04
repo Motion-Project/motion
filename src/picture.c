@@ -15,6 +15,7 @@
 #include "jpegutils.h"
 #include "event.h"
 #include "exif.h"
+#include "alg.h"
 
 #ifdef HAVE_WEBP
     #include <webp/encode.h>
@@ -658,5 +659,51 @@ void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsign
        }
 
     return;
+}
+
+void pic_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *img) {
+    void *image_norm, *image_high;
+
+    /* Save our pointers to our memory locations for images*/
+    image_norm = cam->imgs.image_preview.image_norm;
+    image_high = cam->imgs.image_preview.image_high;
+
+    /* Copy over the meta data from the img into preview */
+    memcpy(&cam->imgs.image_preview, img, sizeof(struct ctx_image_data));
+
+    /* Restore the pointers to the memory locations for images*/
+    cam->imgs.image_preview.image_norm = image_norm;
+    cam->imgs.image_preview.image_high = image_high;
+
+    /* Copy the actual images for norm and high */
+    memcpy(cam->imgs.image_preview.image_norm, img->image_norm, cam->imgs.size_norm);
+    if (cam->imgs.size_high > 0){
+        memcpy(cam->imgs.image_preview.image_high, img->image_high, cam->imgs.size_high);
+    }
+
+    /*
+     * If we set output_all to yes and during the event
+     * there is no image with motion, diffs is 0, we are not going to save the preview event
+     */
+    if (cam->imgs.image_preview.diffs == 0)
+        cam->imgs.image_preview.diffs = 1;
+
+    /* draw locate box here when mode = LOCATE_PREVIEW */
+    if (cam->locate_motion_mode == LOCATE_PREVIEW) {
+
+        if (cam->locate_motion_style == LOCATE_BOX) {
+            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                              LOCATE_BOX, LOCATE_NORMAL, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDBOX) {
+            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                                  LOCATE_REDBOX, LOCATE_NORMAL, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_CROSS) {
+            alg_draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                              LOCATE_CROSS, LOCATE_NORMAL, cam->process_thisframe);
+        } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
+            alg_draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
+                                  LOCATE_REDCROSS, LOCATE_NORMAL, cam->process_thisframe);
+        }
+    }
 }
 

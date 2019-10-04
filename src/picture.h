@@ -21,5 +21,6 @@
     unsigned char *get_pgm(FILE *, int, int);
     void preview_save(struct ctx_cam *cam);
     void pic_scale_img(int width_src, int height_src, unsigned char *img_src, unsigned char *img_dst);
+    void pic_save_as_preview(struct ctx_cam *cam, struct ctx_image_data *img);
 
 #endif /* _INCLUDE_PICTURE_H_ */
