@@ -260,19 +260,7 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
     cam->current_image = saved_current_image;
 }
 
-static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
-    struct config *conf = &cam->conf;
-
-    draw_locate(cam, img);
-
-    /* Calculate how centric motion is if configured preview center*/
-    if (cam->new_img & NEWIMG_CENTER) {
-        unsigned int distX = abs((cam->imgs.width / 2) - img->location.x );
-        unsigned int distY = abs((cam->imgs.height / 2) - img->location.y);
-
-        img->cent_dist = distX * distX + distY * distY;
-    }
-
+static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img) {
 
     /* Do things only if we have got minimum_motion_frames */
     if (img->flags & IMAGE_TRIGGER) {
@@ -298,6 +286,23 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data 
         event(cam, EVENT_MOTION, NULL, NULL, NULL, &img->imgts);
     }
 
+}
+
+static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
+    struct config *conf = &cam->conf;
+
+    draw_locate(cam, img);
+
+    /* Calculate how centric motion is if configured preview center*/
+    if (cam->new_img & NEWIMG_CENTER) {
+        unsigned int distX = abs((cam->imgs.width / 2) - img->location.x );
+        unsigned int distY = abs((cam->imgs.height / 2) - img->location.y);
+
+        img->cent_dist = distX * distX + distY * distY;
+    }
+
+    mlp_detected_trigger(cam, img);
+
     /* Limit framerate */
     if (img->shot < conf->framerate) {
         /*
@@ -309,10 +314,6 @@ static void motion_detected(struct ctx_cam *cam, int dev, struct ctx_image_data 
         if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
             event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
 
-        /*
-         * Save motion jpeg, if configured
-         * Output the image_out (motion) picture.
-         */
         if (conf->picture_output_motion)
             event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
     }
@@ -1589,8 +1590,8 @@ static void mlp_actions(struct ctx_cam *cam){
 
     /*
      * If motion has been detected we take action and start saving
-     * pictures and movies etc by calling motion_detected().
-     * Is emulate_motion enabled we always call motion_detected()
+     * pictures and movies etc by calling mlp_detected().
+     * Is emulate_motion enabled we always call mlp_detected()
      * If post_capture is enabled we also take care of this in the this
      * code section.
      */
@@ -1614,7 +1615,7 @@ static void mlp_actions(struct ctx_cam *cam){
             cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
         }
 
-        motion_detected(cam, cam->video_dev, cam->current_image);
+        mlp_detected(cam, cam->video_dev, cam->current_image);
     } else if ((cam->current_image->flags & IMAGE_MOTION) && (cam->startup_frames == 0)) {
         /*
          * Did we detect motion (like the cat just walked in :) )?
@@ -1664,8 +1665,8 @@ static void mlp_actions(struct ctx_cam *cam){
             cam->current_image->flags |= IMAGE_PRECAP;
         }
 
-        /* Always call motion_detected when we have a motion image */
-        motion_detected(cam, cam->video_dev, cam->current_image);
+        /* Always call mlp_detected when we have a motion image */
+        mlp_detected(cam, cam->video_dev, cam->current_image);
     } else if (cam->postcap > 0) {
         /* No motion, doing postcap */
         cam->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
@@ -1879,7 +1880,7 @@ static void mlp_loopback(struct ctx_cam *cam){
      * the image to the stream. We always send the first image in a second to the stream.
      * Other image are sent only when the config option stream_motion is off
      * The result is that with stream_motion on the stream stream is normally at the minimal
-     * 1 frame per second but the minute motion is detected the motion_detected() function
+     * 1 frame per second but the minute motion is detected the mlp_detected() function
      * sends all detected pictures to the stream except the 1st per second which is already sent.
      */
     if (cam->conf.setup_mode) {
