@@ -360,121 +360,12 @@ static int init_camera_type(struct ctx_cam *cam){
 
 }
 
-static void init_mask_privacy(struct ctx_cam *cam){
-
-    int indxrow, indxcol;
-    int start_cr, offset_cb, start_cb;
-    int y_index, uv_index;
-    int indx_img, indx_max;         /* Counter and max for norm/high */
-    int indx_width, indx_height;
-    unsigned char *img_temp, *img_temp_uv;
-
-
-    FILE *picture;
-
-    /* Load the privacy file if any */
-    cam->imgs.mask_privacy = NULL;
-    cam->imgs.mask_privacy_uv = NULL;
-    cam->imgs.mask_privacy_high = NULL;
-    cam->imgs.mask_privacy_high_uv = NULL;
-
-    if (cam->conf.mask_privacy) {
-        if ((picture = myfopen(cam->conf.mask_privacy, "r"))) {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
-            /*
-             * NOTE: The mask is expected to have the output dimensions. I.e., the mask
-             * applies to the already rotated image, not the capture image. Thus, use
-             * width and height from imgs.
-             */
-            cam->imgs.mask_privacy = pic_load_pgm(picture, cam->imgs.width, cam->imgs.height);
-
-            /* We only need the "or" mask for the U & V chrominance area.  */
-            cam->imgs.mask_privacy_uv = mymalloc((cam->imgs.height * cam->imgs.width) / 2);
-            if (cam->imgs.size_high > 0){
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-                    ,_("Opening high resolution privacy mask file"));
-                rewind(picture);
-                cam->imgs.mask_privacy_high = pic_load_pgm(picture, cam->imgs.width_high, cam->imgs.height_high);
-                cam->imgs.mask_privacy_high_uv = mymalloc((cam->imgs.height_high * cam->imgs.width_high) / 2);
-            }
-
-            myfclose(picture);
-        } else {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Error opening mask file %s"), cam->conf.mask_privacy);
-            /* Try to write an empty mask file to make it easier for the user to edit it */
-            pic_write_mask(cam, cam->conf.mask_privacy);
-        }
-
-        if (!cam->imgs.mask_privacy) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Failed to read mask privacy image. Mask privacy feature disabled."));
-        } else {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-            ,_("Mask privacy file \"%s\" loaded."), cam->conf.mask_privacy);
-
-            indx_img = 1;
-            indx_max = 1;
-            if (cam->imgs.size_high > 0) indx_max = 2;
-
-            while (indx_img <= indx_max){
-                if (indx_img == 1){
-                    start_cr = (cam->imgs.height * cam->imgs.width);
-                    offset_cb = ((cam->imgs.height * cam->imgs.width)/4);
-                    start_cb = start_cr + offset_cb;
-                    indx_width = cam->imgs.width;
-                    indx_height = cam->imgs.height;
-                    img_temp = cam->imgs.mask_privacy;
-                    img_temp_uv = cam->imgs.mask_privacy_uv;
-                } else {
-                    start_cr = (cam->imgs.height_high * cam->imgs.width_high);
-                    offset_cb = ((cam->imgs.height_high * cam->imgs.width_high)/4);
-                    start_cb = start_cr + offset_cb;
-                    indx_width = cam->imgs.width_high;
-                    indx_height = cam->imgs.height_high;
-                    img_temp = cam->imgs.mask_privacy_high;
-                    img_temp_uv = cam->imgs.mask_privacy_high_uv;
-                }
-
-                for (indxrow = 0; indxrow < indx_height; indxrow++) {
-                    for (indxcol = 0; indxcol < indx_width; indxcol++) {
-                        y_index = indxcol + (indxrow * indx_width);
-                        if (img_temp[y_index] == 0xff) {
-                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
-                                uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
-                                img_temp[start_cr + uv_index] = 0xff;
-                                img_temp[start_cb + uv_index] = 0xff;
-                                img_temp_uv[uv_index] = 0x00;
-                                img_temp_uv[offset_cb + uv_index] = 0x00;
-                            }
-                        } else {
-                            img_temp[y_index] = 0x00;
-                            if ((indxcol % 2 == 0) && (indxrow % 2 == 0) ){
-                                uv_index = (indxcol/2) + ((indxrow * indx_width)/4);
-                                img_temp[start_cr + uv_index] = 0x00;
-                                img_temp[start_cb + uv_index] = 0x00;
-                                img_temp_uv[uv_index] = 0x80;
-                                img_temp_uv[offset_cb + uv_index] = 0x80;
-                            }
-                        }
-                    }
-                }
-                indx_img++;
-            }
-        }
-    }
-
-}
-
 
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
-    FILE *picture;
-
     mythreadname_set("ml",cam->threadnr,cam->conf.camera_name);
 
-    /* Store thread number in TLS. */
     pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
 
     clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
@@ -694,40 +585,9 @@ static int mlp_init(struct ctx_cam *cam) {
 
     dbse_init(cam);
 
-    /* Load the mask file if any */
-    if (cam->conf.mask_file) {
-        if ((picture = myfopen(cam->conf.mask_file, "r"))) {
-            /*
-             * NOTE: The mask is expected to have the output dimensions. I.e., the mask
-             * applies to the already rotated image, not the capture image. Thus, use
-             * width and height from imgs.
-             */
-            cam->imgs.mask = pic_load_pgm(picture, cam->imgs.width, cam->imgs.height);
-            myfclose(picture);
-        } else {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
-                ,_("Error opening mask file %s")
-                ,cam->conf.mask_file);
-            /*
-             * Try to write an empty mask file to make it easier
-             * for the user to edit it
-             */
-            pic_write_mask(cam, cam->conf.mask_file);
-        }
+    pic_init_mask(cam);
 
-        if (!cam->imgs.mask) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Failed to read mask image. Mask feature disabled."));
-        } else {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-                ,_("Maskfile \"%s\" loaded.")
-                ,cam->conf.mask_file);
-        }
-    } else {
-        cam->imgs.mask = NULL;
-    }
-
-    init_mask_privacy(cam);
+    pic_init_privacy(cam);
 
     /* Always initialize smart_mask - someone could turn it on later... */
     memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
