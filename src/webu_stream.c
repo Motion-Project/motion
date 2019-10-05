@@ -130,7 +130,7 @@ static ssize_t webu_stream_mjpeg_response (void *cls, uint64_t pos, char *buf, s
 
     (void)pos;  /*Remove compiler warning */
 
-    if (webui->cam->webcontrol_finish) return -1;
+    if (webui->cam->motapp->webcontrol_finish) return -1;
 
     if ((webui->stream_pos == 0) || (webui->resp_used == 0)){
 

@@ -288,8 +288,8 @@ void pic_save_norm(struct ctx_cam *cam, char *file, unsigned char *image, int ft
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
                 ,_("Can't write picture to file %s - check access rights to target directory\n"
                 "Thread is going to finish due to this fatal error"), file);
-            cam->finish = 1;
-            cam->restart = 0;
+            cam->finish_cam = 1;
+            cam->restart_cam = 0;
             return;
         } else {
             /* If target dir is temporarily unavailable we may survive. */

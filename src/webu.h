@@ -69,8 +69,8 @@
 
     };
 
-    void webu_start(struct ctx_cam **cam);
-    void webu_stop(struct ctx_cam **cam);
+    void webu_init(struct ctx_motapp *motapp);
+    void webu_deinit(struct ctx_motapp *motapp);
     void webu_process_action(struct webui_ctx *webui);
     int webu_process_config(struct webui_ctx *webui);
     int webu_process_track(struct webui_ctx *webui);

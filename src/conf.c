@@ -1,10 +1,6 @@
 /*
   **
-  ** conf.c
-  **
-  ** I originally wrote conf.c as part of the drpoxy package
-  ** thanks to Matthew Pratt and others for their additions.
-  **
+  ** conf.cpp
   ** Copyright 1999 Jeroen Vreeken (pe1rxq@chello.nl)
   **
   ** This software is licensed under the terms of the GNU General
@@ -13,227 +9,33 @@
   **
 */
 
-/**
- * How to add a config option :
- *
- *   1. think twice, there are settings enough
- *
- *   2. add a field to 'struct config' (conf.h) and 'struct config conf'
- *
- *   4. add a entry to the config_params array below, if your
- *      option should be configurable by the config file.
- */
-
 #include <dirent.h>
 #include <string.h>
 #include <regex.h>
 #include "motion.h"
-#include "logger.h"
 #include "util.h"
+#include "logger.h"
 
 #define EXTENSION ".conf"
 
-#define stripnewline(x) {if ((x)[strlen(x)-1]=='\n') (x)[strlen(x) - 1] = 0; }
-
-struct config conf_template = {
-    /* Overall system configuration parameters */
-    /* daemon is directly cast into the cam ctx_cam rather than conf */
-    .setup_mode =                      FALSE,
-    .pid_file =                        NULL,
-    .log_file =                        NULL,
-    .log_level =                       LEVEL_DEFAULT+10,
-    .log_type =                        NULL,
-    .quiet =                           TRUE,
-    .native_language =                 TRUE,
-    .camera_name =                     NULL,
-    .camera_id =                       0,
-    .camera_dir =                      NULL,
-    .target_dir =                      NULL,
-
-    /* Capture device configuration parameters */
-    .video_device =                    DEF_VIDEO_DEVICE,
-    .vid_control_params =              NULL,
-    .v4l2_palette =                    DEF_PALETTE,
-    .input =                           DEF_INPUT,
-    .norm =                            0,
-    .frequency =                       0,
-    .auto_brightness =                 0,
-    .tuner_device =                    NULL,
-    .roundrobin_frames =               1,
-    .roundrobin_skip =                 1,
-    .roundrobin_switchfilter =         FALSE,
-
-    .netcam_url =                      NULL,
-    .netcam_highres=                   NULL,
-    .netcam_userpass =                 NULL,
-    .netcam_keepalive =                "off",
-    .netcam_proxy =                    NULL,
-    .netcam_tolerant_check =           FALSE,
-    .netcam_use_tcp =                  TRUE,
-
-    .mmalcam_name =                    NULL,
-    .mmalcam_control_params =          NULL,
-
-    /* Image processing configuration parameters */
-    .width =                           DEF_WIDTH,
-    .height =                          DEF_HEIGHT,
-    .framerate =                       DEF_MAXFRAMERATE,
-    .minimum_frame_time =              0,
-    .rotate =                          0,
-    .flip_axis =                       "none",
-    .locate_motion_mode =              "off",
-    .locate_motion_style =             "box",
-    .text_left =                       NULL,
-    .text_right =                      DEF_TIMESTAMP,
-    .text_changes =                    FALSE,
-    .text_scale =                      1,
-    .text_event =                      DEF_EVENTSTAMP,
-
-    /* Motion detection configuration parameters */
-    .emulate_motion =                  FALSE,
-    .threshold =                       DEF_CHANGES,
-    .threshold_maximum =               0,
-    .threshold_tune =                  FALSE,
-    .noise_level =                     DEF_NOISELEVEL,
-    .noise_tune =                      TRUE,
-    .despeckle_filter =                NULL,
-    .area_detect =                     NULL,
-    .mask_file =                       NULL,
-    .mask_privacy =                    NULL,
-    .smart_mask_speed =                0,
-    .lightswitch_percent =             0,
-    .lightswitch_frames =              5,
-    .minimum_motion_frames =           1,
-    .event_gap =                       DEF_EVENT_GAP,
-    .pre_capture =                     0,
-    .post_capture =                    0,
-
-    /* Script execution configuration parameters */
-    .on_event_start =                  NULL,
-    .on_event_end =                    NULL,
-    .on_picture_save =                 NULL,
-    .on_motion_detected =              NULL,
-    .on_area_detected =                NULL,
-    .on_movie_start =                  NULL,
-    .on_movie_end =                    NULL,
-    .on_camera_lost =                  NULL,
-    .on_camera_found =                 NULL,
-
-    /* Picture output configuration parameters */
-    .picture_output =                  "off",
-    .picture_output_motion =           FALSE,
-    .picture_type =                    "jpeg",
-    .picture_quality =                 75,
-    .picture_exif =                    NULL,
-    .picture_filename =                DEF_IMAGEPATH,
-
-    /* Snapshot configuration parameters */
-    .snapshot_interval =               0,
-    .snapshot_filename =               DEF_SNAPPATH,
-
-    /* Movie output configuration parameters */
-    .movie_output =                    TRUE,
-    .movie_output_motion =             FALSE,
-    .movie_max_time =                  120,
-    .movie_bps =                       400000,
-    .movie_quality =                   60,
-    .movie_codec =                     "mkv",
-    .movie_duplicate_frames =          FALSE,
-    .movie_passthrough =               FALSE,
-    .movie_filename =                  DEF_MOVIEPATH,
-    .movie_extpipe_use =               FALSE,
-    .movie_extpipe =                   NULL,
-
-    /* Timelapse movie configuration parameters */
-    .timelapse_interval =              0,
-    .timelapse_mode =                  DEF_TIMELAPSE_MODE,
-    .timelapse_fps =                   30,
-    .timelapse_codec =                 "mpg",
-    .timelapse_filename =              DEF_TIMEPATH,
-
-    /* Loopback device configuration parameters */
-    .video_pipe =                      NULL,
-    .video_pipe_motion =               NULL,
-
-    /* Webcontrol configuration parameters */
-    .webcontrol_port =                 0,
-    .webcontrol_ipv6 =                 FALSE,
-    .webcontrol_localhost =            TRUE,
-    .webcontrol_parms =                0,
-    .webcontrol_interface =            0,
-    .webcontrol_auth_method =          0,
-    .webcontrol_authentication =       NULL,
-    .webcontrol_tls =                  FALSE,
-    .webcontrol_cert =                 NULL,
-    .webcontrol_key =                  NULL,
-    .webcontrol_cors_header =          NULL,
-
-    /* Live stream configuration parameters */
-    .stream_port =                     0,
-    .stream_localhost =                TRUE,
-    .stream_auth_method =              0,
-    .stream_authentication =           NULL,
-    .stream_tls =                      FALSE,
-    .stream_cors_header =              NULL,
-    .stream_preview_scale =            25,
-    .stream_preview_newline =          FALSE,
-    .stream_preview_method =           0,
-    .stream_quality =                  50,
-    .stream_grey =                     FALSE,
-    .stream_motion =                   FALSE,
-    .stream_maxrate =                  1,
-    .stream_limit =                    0,
-
-    /* Database and SQL configuration parameters */
-    .database_type =                   NULL,
-    .database_dbname =                 NULL,
-    .database_host =                   "localhost",
-    .database_port =                   0,
-    .database_user =                   NULL,
-    .database_password =               NULL,
-    .database_busy_timeout =           0,
-
-    .sql_log_picture =                 FALSE,
-    .sql_log_snapshot =                FALSE,
-    .sql_log_movie =                   FALSE,
-    .sql_log_timelapse =               FALSE,
-    .sql_query_start =                 NULL,
-    .sql_query_stop =                  NULL,
-    .sql_query =                       NULL
-
-};
-
-
 /* Forward Declares */
-static void malloc_strings(struct ctx_cam *);
-static struct ctx_cam **copy_bool(struct ctx_cam **, const char *, int);
-static struct ctx_cam **copy_int(struct ctx_cam **, const char *, int);
-static struct ctx_cam **config_camera(struct ctx_cam **camlst, const char *str, int val);
-static struct ctx_cam **copy_vid_ctrl(struct ctx_cam **, const char *, int);
-static struct ctx_cam **copy_text_double(struct ctx_cam **, const char *, int);
-static struct ctx_cam **copy_html_output(struct ctx_cam **, const char *, int);
+static void conf_process(struct ctx_cam *cam, FILE *fp);
 
-static const char *print_bool(struct ctx_cam **, char **, int, unsigned int);
-static const char *print_int(struct ctx_cam **, char **, int, unsigned int);
-static const char *print_string(struct ctx_cam **, char **, int, unsigned int);
-static const char *print_camera(struct ctx_cam **, char **, int, unsigned int);
-
-static void usage(void);
-static void config_parms_intl(void);
-
-/* Pointer magic to determine relative addresses of variables to a
-   struct ctx_cam pointer */
-#define CNT_OFFSET(varname) ((long)&((struct ctx_cam *)NULL)->varname)
+/* Set a NULL (0) as a type of ctx_cam, then get the address of the varname.
+ * This result will be the offset from the start of any ctx_cam to the location
+ * of the variable within the entire ctx_cam struct
+ */
 #define CONF_OFFSET(varname) ((long)&((struct ctx_cam *)NULL)->conf.varname)
 #define TRACK_OFFSET(varname) ((long)&((struct ctx_cam *)NULL)->track.varname)
 
 /* The sequence of these within here determines how they are presented to user
- * Note daemon goes directly to cam ctx_cam rather than conf.
  * Descriptions are limited to one line and few to no references to values since
  * the motion_guide.html is our single source of documentation and historically
  * these descriptions were not updated with revisions.
  */
-config_param config_params[] = {
+
+/*Configuration parameters */
+struct ctx_parm config_parms[] = {
     {
     "daemon",
     "############################################################\n"
@@ -241,9 +43,8 @@ config_param config_params[] = {
     "############################################################\n\n"
     "# Start in daemon (background) mode and release terminal.",
     1,
-    CNT_OFFSET(daemon),
-    copy_bool,
-    print_bool,
+    CONF_OFFSET(daemon),
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -251,8 +52,7 @@ config_param config_params[] = {
     "# Start in Setup-Mode, daemon disabled.",
     0,
     CONF_OFFSET(setup_mode),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -260,8 +60,7 @@ config_param config_params[] = {
     "# File to store the process ID.",
     1,
     CONF_OFFSET(pid_file),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -269,8 +68,7 @@ config_param config_params[] = {
     "# File to write logs messages into.  If not defined stderr and syslog is used.",
     1,
     CONF_OFFSET(log_file),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -278,8 +76,7 @@ config_param config_params[] = {
     "# Level of log messages [1..9] (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL).",
     1,
     CONF_OFFSET(log_level),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -287,8 +84,7 @@ config_param config_params[] = {
     "# Filter to log messages by type (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL).",
     1,
     CONF_OFFSET(log_type),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -296,8 +92,7 @@ config_param config_params[] = {
     "# Do not sound beeps when detecting motion",
     0,
     CONF_OFFSET(quiet),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -305,8 +100,7 @@ config_param config_params[] = {
     "# Native language support.",
     1,
     CONF_OFFSET(native_language),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -314,8 +108,7 @@ config_param config_params[] = {
     "# User defined name for the camera.",
     0,
     CONF_OFFSET(camera_name),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -323,8 +116,7 @@ config_param config_params[] = {
     "# Numeric identifier for the camera.",
     0,
     CONF_OFFSET(camera_id),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     /* camera and camera_dir must be last in this list */
@@ -333,8 +125,7 @@ config_param config_params[] = {
     "# Target directory for pictures, snapshots and movies",
     0,
     CONF_OFFSET(target_dir),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -342,8 +133,7 @@ config_param config_params[] = {
     "# Video device (e.g. /dev/video0) to be used for capturing.",
     0,
     CONF_OFFSET(video_device),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -351,8 +141,7 @@ config_param config_params[] = {
     "# Parameters to control video device.  See motion_guide.html",
     0,
     CONF_OFFSET(vid_control_params),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -360,8 +149,7 @@ config_param config_params[] = {
     "# Preferred color palette to be used for the video device",
     0,
     CONF_OFFSET(v4l2_palette),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -369,8 +157,7 @@ config_param config_params[] = {
     "# The input number to be used on the video device.",
     0,
     CONF_OFFSET(input),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -378,8 +165,7 @@ config_param config_params[] = {
     "# The video norm to use for video capture and TV tuner cards.",
     0,
     CONF_OFFSET(norm),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -387,26 +173,7 @@ config_param config_params[] = {
     "# The frequency to set the tuner to (kHz) for TV tuner cards",
     0,
     CONF_OFFSET(frequency),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_ADVANCED
-    },
-    {
-    "auto_brightness",
-    "# The Motion method to use to change the brightness/exposure on video device.",
-    0,
-    CONF_OFFSET(auto_brightness),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "tunerdevice",
-    "# Device name (e.g. /dev/tuner0) to be used for capturing when using tuner as source",
-    0,
-    CONF_OFFSET(tuner_device),
-    copy_string,
-    print_string,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -414,8 +181,7 @@ config_param config_params[] = {
     "# Number of frames to capture in each roundrobin step",
     0,
     CONF_OFFSET(roundrobin_frames),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -423,8 +189,7 @@ config_param config_params[] = {
     "# Number of frames to skip before each roundrobin step",
     0,
     CONF_OFFSET(roundrobin_skip),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -432,8 +197,7 @@ config_param config_params[] = {
     "# Try to filter out noise generated by roundrobin",
     0,
     CONF_OFFSET(roundrobin_switchfilter),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -441,8 +205,7 @@ config_param config_params[] = {
     "# The full URL of the network camera stream.",
     0,
     CONF_OFFSET(netcam_url),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -450,8 +213,7 @@ config_param config_params[] = {
     "# Optional high resolution URL for rtsp/rtmp cameras only.",
     0,
     CONF_OFFSET(netcam_highres),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -459,8 +221,7 @@ config_param config_params[] = {
     "# Username and password for network camera. Syntax username:password",
     0,
     CONF_OFFSET(netcam_userpass),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -468,8 +229,7 @@ config_param config_params[] = {
     "# The method for keep-alive of network socket for mjpeg streams.",
     0,
     CONF_OFFSET(netcam_keepalive),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -477,8 +237,7 @@ config_param config_params[] = {
     "# The URL to use for a netcam proxy server.",
     0,
     CONF_OFFSET(netcam_proxy),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -486,8 +245,7 @@ config_param config_params[] = {
     "# Use less strict jpeg checks for network cameras.",
     0,
     CONF_OFFSET(netcam_tolerant_check),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -495,8 +253,7 @@ config_param config_params[] = {
     "# Use TCP transport for RTSP/RTMP connections to camera.",
     1,
     CONF_OFFSET(netcam_use_tcp),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -504,8 +261,7 @@ config_param config_params[] = {
     "# Name of mmal camera (e.g. vc.ril.camera for pi camera).",
     0,
     CONF_OFFSET(mmalcam_name),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -513,8 +269,7 @@ config_param config_params[] = {
     "# Camera control parameters (see raspivid/raspistill tool documentation)",
     0,
     CONF_OFFSET(mmalcam_control_params),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -525,8 +280,7 @@ config_param config_params[] = {
     "# Image width in pixels.",
     0,
     CONF_OFFSET(width),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -534,8 +288,7 @@ config_param config_params[] = {
     "# Image height in pixels.",
     0,
     CONF_OFFSET(height),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -543,17 +296,7 @@ config_param config_params[] = {
     "# Maximum number of frames to be captured per second.",
     0,
     CONF_OFFSET(framerate),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "minimum_frame_time",
-    "# Minimum time in seconds between capturing picture frames from the camera.",
-    0,
-    CONF_OFFSET(minimum_frame_time),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -561,8 +304,7 @@ config_param config_params[] = {
     "# Number of degrees to rotate image.",
     0,
     CONF_OFFSET(rotate),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -570,8 +312,7 @@ config_param config_params[] = {
     "# Flip image over a given axis",
     0,
     CONF_OFFSET(flip_axis),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -579,8 +320,7 @@ config_param config_params[] = {
     "# Draw a locate box around the moving object.",
     0,
     CONF_OFFSET(locate_motion_mode),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -588,8 +328,7 @@ config_param config_params[] = {
     "# Set the look and style of the locate box.",
     0,
     CONF_OFFSET(locate_motion_style),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -597,8 +336,7 @@ config_param config_params[] = {
     "# Text to be overlayed in the lower left corner of images",
     0,
     CONF_OFFSET(text_left),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -606,8 +344,7 @@ config_param config_params[] = {
     "# Text to be overlayed in the lower right corner of images.",
     0,
     CONF_OFFSET(text_right),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -615,8 +352,7 @@ config_param config_params[] = {
     "# Overlay number of changed pixels in upper right corner of images.",
     0,
     CONF_OFFSET(text_changes),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -624,8 +360,7 @@ config_param config_params[] = {
     "# Scale factor for text overlayed on images.",
     0,
     CONF_OFFSET(text_scale),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -633,8 +368,7 @@ config_param config_params[] = {
     "# The special event conversion specifier %C",
     0,
     CONF_OFFSET(text_event),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -645,8 +379,7 @@ config_param config_params[] = {
     "# Always save pictures and movies even if there was no motion.",
     0,
     CONF_OFFSET(emulate_motion),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -654,8 +387,7 @@ config_param config_params[] = {
     "# Threshold for number of changed pixels that triggers motion.",
     0,
     CONF_OFFSET(threshold),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -663,8 +395,7 @@ config_param config_params[] = {
     "# The maximum threshold for number of changed pixels that triggers motion.",
     0,
     CONF_OFFSET(threshold_maximum),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -672,8 +403,7 @@ config_param config_params[] = {
     "# Enable tuning of the threshold down if possible.",
     0,
     CONF_OFFSET(threshold_tune),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -681,8 +411,7 @@ config_param config_params[] = {
     "# Noise threshold for the motion detection.",
     0,
     CONF_OFFSET(noise_level),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -690,8 +419,7 @@ config_param config_params[] = {
     "# Automatically tune the noise threshold",
     0,
     CONF_OFFSET(noise_tune),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -699,8 +427,7 @@ config_param config_params[] = {
     "# Despeckle the image using (E/e)rode or (D/d)ilate or (l)abel.",
     0,
     CONF_OFFSET(despeckle_filter),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -708,8 +435,7 @@ config_param config_params[] = {
     "# Area number used to trigger the on_area_detected script.",
     0,
     CONF_OFFSET(area_detect),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -717,8 +443,7 @@ config_param config_params[] = {
     "# Full path and file name for motion detection mask PGM file.",
     0,
     CONF_OFFSET(mask_file),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -726,8 +451,7 @@ config_param config_params[] = {
     "# Full path and file name for privacy mask PGM file.",
     0,
     CONF_OFFSET(mask_privacy),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -735,8 +459,7 @@ config_param config_params[] = {
     "# The value defining how slow or fast the smart motion mask created and used.",
     0,
     CONF_OFFSET(smart_mask_speed),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -744,8 +467,7 @@ config_param config_params[] = {
     "# Percentage of image that triggers a lightswitch detected.",
     0,
     CONF_OFFSET(lightswitch_percent),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -753,8 +475,7 @@ config_param config_params[] = {
     "# When lightswitch is detected, ignore this many frames",
     0,
     CONF_OFFSET(lightswitch_frames),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -762,8 +483,7 @@ config_param config_params[] = {
     "# Number of images that must contain motion to trigger an event.",
     0,
     CONF_OFFSET(minimum_motion_frames),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -771,8 +491,7 @@ config_param config_params[] = {
     "# Gap in seconds of no motion detected that triggers the end of an event.",
     0,
     CONF_OFFSET(event_gap),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -780,8 +499,7 @@ config_param config_params[] = {
     "# The number of pre-captured (buffered) pictures from before motion.",
     0,
     CONF_OFFSET(pre_capture),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -789,8 +507,7 @@ config_param config_params[] = {
     "# Number of frames to capture after motion is no longer detected.",
     0,
     CONF_OFFSET(post_capture),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -801,8 +518,7 @@ config_param config_params[] = {
     "# Command to be executed when an event starts.",
     0,
     CONF_OFFSET(on_event_start),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -810,8 +526,7 @@ config_param config_params[] = {
     "# Command to be executed when an event ends.",
     0,
     CONF_OFFSET(on_event_end),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -819,8 +534,7 @@ config_param config_params[] = {
     "# Command to be executed when a picture is saved.",
     0,
     CONF_OFFSET(on_picture_save),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -828,8 +542,7 @@ config_param config_params[] = {
     "# Command to be executed when motion in a predefined area is detected",
     0,
     CONF_OFFSET(on_area_detected),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -837,8 +550,7 @@ config_param config_params[] = {
     "# Command to be executed when motion is detected",
     0,
     CONF_OFFSET(on_motion_detected),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -846,8 +558,7 @@ config_param config_params[] = {
     "# Command to be executed when a movie file is created.",
     0,
     CONF_OFFSET(on_movie_start),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -855,8 +566,7 @@ config_param config_params[] = {
     "# Command to be executed when a movie file is closed.",
     0,
     CONF_OFFSET(on_movie_end),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -864,8 +574,7 @@ config_param config_params[] = {
     "# Command to be executed when a camera can't be opened or if it is lost",
     0,
     CONF_OFFSET(on_camera_lost),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -873,8 +582,7 @@ config_param config_params[] = {
     "# Command to be executed when a camera that was lost has been found.",
     0,
     CONF_OFFSET(on_camera_found),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -885,8 +593,7 @@ config_param config_params[] = {
     "# Output pictures when motion is detected",
     0,
     CONF_OFFSET(picture_output),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -894,8 +601,7 @@ config_param config_params[] = {
     "# Output pictures with only the pixels moving object (ghost images)",
     0,
     CONF_OFFSET(picture_output_motion),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -903,8 +609,7 @@ config_param config_params[] = {
     "# Format for the output pictures.",
     0,
     CONF_OFFSET(picture_type),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -912,8 +617,7 @@ config_param config_params[] = {
     "# The quality (in percent) to be used in the picture compression",
     0,
     CONF_OFFSET(picture_quality),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -921,8 +625,7 @@ config_param config_params[] = {
     "# Text to include in a JPEG EXIF comment",
     0,
     CONF_OFFSET(picture_exif),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -930,8 +633,7 @@ config_param config_params[] = {
     "# File name(without extension) for pictures relative to target directory",
     0,
     CONF_OFFSET(picture_filename),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -942,8 +644,7 @@ config_param config_params[] = {
     "# Make automated snapshot every N seconds",
     0,
     CONF_OFFSET(snapshot_interval),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -951,8 +652,7 @@ config_param config_params[] = {
     "# File name(without extension) for snapshots relative to target directory",
     0,
     CONF_OFFSET(snapshot_filename),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -963,8 +663,7 @@ config_param config_params[] = {
     "# Create movies of motion events.",
     0,
     CONF_OFFSET(movie_output),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -972,8 +671,7 @@ config_param config_params[] = {
     "# Create movies of moving pixels of motion events.",
     0,
     CONF_OFFSET(movie_output_motion),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -981,8 +679,7 @@ config_param config_params[] = {
     "# Maximum length of movie in seconds.",
     0,
     CONF_OFFSET(movie_max_time),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -990,8 +687,7 @@ config_param config_params[] = {
     "# The fixed bitrate to be used by the movie encoder. Ignore quality setting",
     0,
     CONF_OFFSET(movie_bps),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -999,8 +695,7 @@ config_param config_params[] = {
     "# The encoding quality of the movie. (0=use bitrate. 1=worst quality, 100=best)",
     0,
     CONF_OFFSET(movie_quality),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1008,17 +703,7 @@ config_param config_params[] = {
     "# Container/Codec to used for the movie. See motion_guide.html",
     0,
     CONF_OFFSET(movie_codec),
-    copy_string,
-    print_string,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "movie_duplicate_frames",
-    "# Duplicate frames to achieve \"framerate\" fps.",
-    0,
-    CONF_OFFSET(movie_duplicate_frames),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1026,8 +711,7 @@ config_param config_params[] = {
     "# Pass through from the camera to the movie without decode/encoding.",
     0,
     CONF_OFFSET(movie_passthrough),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1035,8 +719,7 @@ config_param config_params[] = {
     "# File name(without extension) for movies relative to target directory",
     0,
     CONF_OFFSET(movie_filename),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1044,8 +727,7 @@ config_param config_params[] = {
     "# Use pipe and external encoder for creating movies.",
     0,
     CONF_OFFSET(movie_extpipe_use),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1053,8 +735,7 @@ config_param config_params[] = {
     "# Full path and options for external encoder of movies from raw images",
     0,
     CONF_OFFSET(movie_extpipe),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1065,8 +746,7 @@ config_param config_params[] = {
     "# Interval in seconds between timelapse captures.",
     0,
     CONF_OFFSET(timelapse_interval),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1074,8 +754,7 @@ config_param config_params[] = {
     "# Timelapse file rollover mode. See motion_guide.html for options and uses.",
     0,
     CONF_OFFSET(timelapse_mode),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1083,8 +762,7 @@ config_param config_params[] = {
     "# Frame rate for timelapse playback",
     0,
     CONF_OFFSET(timelapse_fps),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1092,8 +770,7 @@ config_param config_params[] = {
     "# Container/Codec for timelapse movie.",
     0,
     CONF_OFFSET(timelapse_codec),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1101,8 +778,7 @@ config_param config_params[] = {
     "# File name(without extension) for timelapse movies relative to target directory",
     0,
     CONF_OFFSET(timelapse_filename),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1113,8 +789,7 @@ config_param config_params[] = {
     "# v4l2 loopback device to receive normal images",
     0,
     CONF_OFFSET(video_pipe),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1122,8 +797,7 @@ config_param config_params[] = {
     "# v4l2 loopback device to receive motion images",
     0,
     CONF_OFFSET(video_pipe_motion),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1134,8 +808,7 @@ config_param config_params[] = {
     "# Port number used for the webcontrol.",
     1,
     CONF_OFFSET(webcontrol_port),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1143,8 +816,7 @@ config_param config_params[] = {
     "# Enable IPv6 addresses.",
     0,
     CONF_OFFSET(webcontrol_ipv6),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1152,8 +824,7 @@ config_param config_params[] = {
     "# Restrict webcontrol connections to the localhost.",
     1,
     CONF_OFFSET(webcontrol_localhost),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1161,8 +832,7 @@ config_param config_params[] = {
     "# Type of configuration options to allow via the webcontrol.",
     1,
     CONF_OFFSET(webcontrol_parms),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_NEVER
     },
     {
@@ -1170,8 +840,7 @@ config_param config_params[] = {
     "# Method that webcontrol should use for interface with user.",
     1,
     CONF_OFFSET(webcontrol_interface),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1179,8 +848,7 @@ config_param config_params[] = {
     "# The authentication method for the webcontrol",
     0,
     CONF_OFFSET(webcontrol_auth_method),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1188,8 +856,7 @@ config_param config_params[] = {
     "# Authentication string for the webcontrol. Syntax username:password",
     1,
     CONF_OFFSET(webcontrol_authentication),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1197,8 +864,7 @@ config_param config_params[] = {
     "# Use ssl / tls for the webcontrol",
     0,
     CONF_OFFSET(webcontrol_tls),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1206,8 +872,7 @@ config_param config_params[] = {
     "# Full path and file name of the certificate file for tls",
     1,
     CONF_OFFSET(webcontrol_cert),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1215,8 +880,7 @@ config_param config_params[] = {
     "# Full path and file name of the key file for tls",
     1,
     CONF_OFFSET(webcontrol_key),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1224,11 +888,9 @@ config_param config_params[] = {
     "# The cross-origin resource sharing (CORS) header for webcontrol",
     0,
     CONF_OFFSET(webcontrol_cors_header),
-    copy_uri,
-    print_string,
+    PARM_TYPE_URI,
     WEBUI_LEVEL_RESTRICTED
     },
-
     {
     "stream_port",
     "############################################################\n"
@@ -1237,8 +899,7 @@ config_param config_params[] = {
     "# The port number for the live stream.",
     0,
     CONF_OFFSET(stream_port),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1246,8 +907,7 @@ config_param config_params[] = {
     "# Restrict stream connections to the localhost.",
     0,
     CONF_OFFSET(stream_localhost),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1255,8 +915,7 @@ config_param config_params[] = {
     "# Authentication method for live stream.",
     0,
     CONF_OFFSET(stream_auth_method),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1264,8 +923,7 @@ config_param config_params[] = {
     "# The authentication string for the stream. Syntax username:password",
     1,
     CONF_OFFSET(stream_authentication),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1273,8 +931,7 @@ config_param config_params[] = {
     "# Use ssl / tls for stream.",
     0,
     CONF_OFFSET(stream_tls),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1282,8 +939,7 @@ config_param config_params[] = {
     "# The cross-origin resource sharing (CORS) header for the stream",
     0,
     CONF_OFFSET(stream_cors_header),
-    copy_uri,
-    print_string,
+    PARM_TYPE_URI,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1291,8 +947,7 @@ config_param config_params[] = {
     "# Percentage to scale the stream image on the webcontrol.",
     0,
     CONF_OFFSET(stream_preview_scale),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1300,8 +955,7 @@ config_param config_params[] = {
     "# Have the stream image start on a new line of the webcontrol",
     0,
     CONF_OFFSET(stream_preview_newline),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1309,8 +963,7 @@ config_param config_params[] = {
     "# Method for showing stream on webcontrol.",
     0,
     CONF_OFFSET(stream_preview_method),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1318,8 +971,7 @@ config_param config_params[] = {
     "# Quality of the jpeg images produced for stream.",
     0,
     CONF_OFFSET(stream_quality),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1327,8 +979,7 @@ config_param config_params[] = {
     "# Provide the stream images in black and white",
     0,
     CONF_OFFSET(stream_grey),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1336,8 +987,7 @@ config_param config_params[] = {
     "# Output frames at 1 fps when no motion is detected.",
     0,
     CONF_OFFSET(stream_motion),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1345,8 +995,7 @@ config_param config_params[] = {
     "# Maximum framerate of images provided for stream",
     0,
     CONF_OFFSET(stream_maxrate),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1354,8 +1003,7 @@ config_param config_params[] = {
     "# Limit the number of images per connection",
     0,
     CONF_OFFSET(stream_limit),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1366,8 +1014,7 @@ config_param config_params[] = {
     "# The type of database being used if any.",
     0,
     CONF_OFFSET(database_type),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1375,8 +1022,7 @@ config_param config_params[] = {
     "# Database name to use. For sqlite3, the full path and name.",
     0,
     CONF_OFFSET(database_dbname),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1384,8 +1030,7 @@ config_param config_params[] = {
     "# The host on which the database is located",
     0,
     CONF_OFFSET(database_host),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1393,8 +1038,7 @@ config_param config_params[] = {
     "# Port used by the database.",
     0,
     CONF_OFFSET(database_port),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1402,8 +1046,7 @@ config_param config_params[] = {
     "# User account name for database.",
     0,
     CONF_OFFSET(database_user),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1411,8 +1054,7 @@ config_param config_params[] = {
     "# User password for database.",
     0,
     CONF_OFFSET(database_password),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_RESTRICTED
     },
     {
@@ -1420,8 +1062,7 @@ config_param config_params[] = {
     "# Database wait for unlock time",
     0,
     CONF_OFFSET(database_busy_timeout),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1429,8 +1070,7 @@ config_param config_params[] = {
     "# Log to the database when creating motion triggered image file",
     0,
     CONF_OFFSET(sql_log_picture),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1438,8 +1078,7 @@ config_param config_params[] = {
     "# Log to the database when creating a snapshot image file",
     0,
     CONF_OFFSET(sql_log_snapshot),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1447,8 +1086,7 @@ config_param config_params[] = {
     "# Log to the database when creating motion triggered movie file",
     0,
     CONF_OFFSET(sql_log_movie),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1456,8 +1094,7 @@ config_param config_params[] = {
     "# Log to the database when creating timelapse movie file",
     0,
     CONF_OFFSET(sql_log_timelapse),
-    copy_bool,
-    print_bool,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1465,8 +1102,7 @@ config_param config_params[] = {
     "# SQL query at event start.  See motion_guide.html",
     0,
     CONF_OFFSET(sql_query_start),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1474,8 +1110,7 @@ config_param config_params[] = {
     "# SQL query at event stop.  See motion_guide.html",
     0,
     CONF_OFFSET(sql_query_stop),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1483,8 +1118,7 @@ config_param config_params[] = {
     "# SQL query string that is sent to the database.  See motion_guide.html",
     0,
     CONF_OFFSET(sql_query),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -1495,8 +1129,7 @@ config_param config_params[] = {
     "# Method used by tracking camera. See motion_guide.html",
     0,
     TRACK_OFFSET(type),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1504,62 +1137,7 @@ config_param config_params[] = {
     "# Enable auto tracking",
     0,
     TRACK_OFFSET(active),
-    copy_bool,
-    print_bool,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_maxx",
-    "# Maximum value on x-axis",
-    0,
-    TRACK_OFFSET(maxx),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_minx",
-    "# Minimum value on x-axis",
-    0,
-    TRACK_OFFSET(minx),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_maxy",
-    "# Maximum value on y-axis",
-    0,
-    TRACK_OFFSET(maxy),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_miny",
-    "# Minimum value on y-axis",
-    0,
-    TRACK_OFFSET(miny),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_step_angle_x",
-    "# Angle in degrees the camera moves per step on the X-axis with auto-track",
-    0,
-    TRACK_OFFSET(step_angle_x),
-    copy_int,
-    print_int,
-    WEBUI_LEVEL_LIMITED
-    },
-    {
-    "track_step_angle_y",
-    "# Angle in degrees the camera moves per step on the Y-axis with auto-track.",
-    0,
-    TRACK_OFFSET(step_angle_y),
-    copy_int,
-    print_int,
+    PARM_TYPE_BOOL,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1567,8 +1145,7 @@ config_param config_params[] = {
     "# Delay to wait for after tracking movement as number of picture frames.",
     0,
     TRACK_OFFSET(move_wait),
-    copy_int,
-    print_int,
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1576,8 +1153,55 @@ config_param config_params[] = {
     "# Command to execute to move a camera in generic tracking mode",
     0,
     TRACK_OFFSET(generic_move),
-    copy_string,
-    print_string,
+    PARM_TYPE_STRING,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "track_maxx",
+    "# Maximum value on x-axis",
+    0,
+    TRACK_OFFSET(maxx),
+    PARM_TYPE_INT,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "track_minx",
+    "# Minimum value on x-axis",
+    0,
+    TRACK_OFFSET(minx),
+    PARM_TYPE_INT,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "track_maxy",
+    "# Maximum value on y-axis",
+    0,
+    TRACK_OFFSET(maxy),
+    PARM_TYPE_INT,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "track_miny",
+    "# Minimum value on y-axis",
+    0,
+    TRACK_OFFSET(miny),
+    PARM_TYPE_INT,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "track_step_angle_x",
+    "# Angle in degrees the camera moves per step on the X-axis with auto-track",
+    0,
+    TRACK_OFFSET(step_angle_x),
+    PARM_TYPE_INT,
+    WEBUI_LEVEL_LIMITED
+    },
+    {
+    "track_step_angle_y",
+    "# Angle in degrees the camera moves per step on the Y-axis with auto-track.",
+    0,
+    TRACK_OFFSET(step_angle_y),
+    PARM_TYPE_INT,
     WEBUI_LEVEL_LIMITED
     },
     {
@@ -1587,8 +1211,7 @@ config_param config_params[] = {
     "##############################################################",
     1,
     0,
-    config_camera,
-    print_camera,
+    PARM_TYPE_CAMERA,
     WEBUI_LEVEL_ADVANCED
     },
     /* using a conf.d style camera addition */
@@ -1599,16 +1222,15 @@ config_param config_params[] = {
     "##############################################################",
     1,
     CONF_OFFSET(camera_dir),
-    read_camera_dir,
-    print_string,
+    PARM_TYPE_STRING,
     WEBUI_LEVEL_ADVANCED
     },
-    { NULL, NULL, 0, 0, NULL, NULL, 0 }
+    { NULL, NULL, 0, 0, (enum PARM_TYPE)0, (enum WEBUI_LEVEL)0 }
 };
 
 /*
  * Array of deprecated config options:
- * When deprecating an option, remove it from above (config_params array)
+ * When deprecating an option, remove it from above (config_parms array)
  * and create an entry in this array of name, last version, info,
  * and (if applicable) a replacement conf value and copy funcion.
  * Upon reading a deprecated config option, a warning will be logged
@@ -1616,14 +1238,14 @@ config_param config_params[] = {
  * If set, the given value will be copied into the conf value
  * for backwards compatibility.
  */
-dep_config_param dep_config_params[] = {
+struct ctx_parm_depr config_parms_depr[] = {
     {
     "thread",
     "3.4.1",
     "The \"thread\" option has been replaced by the \"camera\"",
     0,
     "camera",
-    config_camera
+    PARM_TYPE_CAMERA
     },
     {
     "ffmpeg_timelapse",
@@ -1631,7 +1253,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\"",
     CONF_OFFSET(timelapse_interval),
     "timelapse_interval",
-    copy_int
+    PARM_TYPE_INT
     },
     {
     "ffmpeg_timelapse_mode",
@@ -1639,7 +1261,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\"",
     CONF_OFFSET(timelapse_mode),
     "timelapse_mode",
-    copy_string
+    PARM_TYPE_STRING
     },
     {
     "brightness",
@@ -1647,7 +1269,7 @@ dep_config_param dep_config_params[] = {
     "\"brightness\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
-    copy_vid_ctrl
+    PARM_TYPE_STRING
     },
     {
     "contrast",
@@ -1655,7 +1277,7 @@ dep_config_param dep_config_params[] = {
     "\"contrast\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
-    copy_vid_ctrl
+    PARM_TYPE_STRING
     },
     {
     "saturation",
@@ -1663,7 +1285,7 @@ dep_config_param dep_config_params[] = {
     "\"saturation\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
-    copy_vid_ctrl
+    PARM_TYPE_STRING
     },
     {
     "hue",
@@ -1671,7 +1293,7 @@ dep_config_param dep_config_params[] = {
     "\"hue\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
-    copy_vid_ctrl
+    PARM_TYPE_STRING
     },
     {
     "power_line_frequency",
@@ -1679,7 +1301,7 @@ dep_config_param dep_config_params[] = {
     "\"power_line_frequency\" replaced with \"vid_control_params\"",
     CONF_OFFSET(vid_control_params),
     "vid_control_params",
-    copy_vid_ctrl
+    PARM_TYPE_STRING
     },
     {
     "text_double",
@@ -1687,7 +1309,7 @@ dep_config_param dep_config_params[] = {
     "\"text_double\" replaced with \"text_scale\"",
     CONF_OFFSET(text_scale),
     "text_scale",
-    copy_text_double
+    PARM_TYPE_INT
     },
     {
     "webcontrol_html_output",
@@ -1695,7 +1317,7 @@ dep_config_param dep_config_params[] = {
     "\"webcontrol_html_output\" replaced with \"webcontrol_interface\"",
     CONF_OFFSET(webcontrol_interface),
     "webcontrol_interface",
-    copy_html_output
+    PARM_TYPE_INT
     },
     {
      "lightswitch",
@@ -1703,7 +1325,7 @@ dep_config_param dep_config_params[] = {
     "\"lightswitch\" replaced with \"lightswitch_percent\"",
     CONF_OFFSET(lightswitch_percent),
     "lightswitch_percent",
-    copy_int
+    PARM_TYPE_INT
     },
     {
     "ffmpeg_output_movies",
@@ -1711,7 +1333,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_output_movies\" replaced with \"movie_output\"",
     CONF_OFFSET(movie_output),
     "movie_output",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "ffmpeg_output_debug_movies",
@@ -1719,7 +1341,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_motion\"",
     CONF_OFFSET(movie_output_motion),
     "movie_output_motion",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "max_movie_time",
@@ -1727,7 +1349,7 @@ dep_config_param dep_config_params[] = {
     "\"max_movie_time\" replaced with \"movie_max_time\"",
     CONF_OFFSET(movie_max_time),
     "movie_max_time",
-    copy_int
+    PARM_TYPE_INT
     },
     {
     "ffmpeg_bps",
@@ -1735,7 +1357,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_bps\" replaced with \"movie_bps\"",
     CONF_OFFSET(movie_bps),
     "movie_bps",
-    copy_int
+    PARM_TYPE_INT
     },
     {
     "ffmpeg_variable_bitrate",
@@ -1743,7 +1365,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_variable_bitrate\" replaced with \"movie_quality\"",
     CONF_OFFSET(movie_quality),
     "movie_quality",
-    copy_int
+    PARM_TYPE_INT
     },
     {
     "ffmpeg_video_codec",
@@ -1751,15 +1373,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_video_codec\" replaced with \"movie_codec\"",
     CONF_OFFSET(movie_codec),
     "movie_codec",
-    copy_string
-    },
-    {
-    "ffmpeg_duplicate_frames",
-    "4.1.1",
-    "\"ffmpeg_duplicate_frames\" replaced with \"movie_duplicate_frames\"",
-    CONF_OFFSET(movie_duplicate_frames),
-    "movie_duplicate_frames",
-    copy_bool
+    PARM_TYPE_STRING
     },
     {
     "ffmpeg_passthrough",
@@ -1767,7 +1381,7 @@ dep_config_param dep_config_params[] = {
     "\"ffmpeg_passthrough\" replaced with \"movie_passthrough\"",
     CONF_OFFSET(movie_passthrough),
     "movie_passthrough",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "use_extpipe",
@@ -1775,7 +1389,7 @@ dep_config_param dep_config_params[] = {
     "\"use_extpipe\" replaced with \"movie_extpipe_use\"",
     CONF_OFFSET(movie_extpipe_use),
     "movie_extpipe_use",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "extpipe",
@@ -1783,7 +1397,7 @@ dep_config_param dep_config_params[] = {
     "\"extpipe\" replaced with \"movie_extpipe\"",
     CONF_OFFSET(movie_extpipe),
     "movie_extpipe",
-    copy_string
+    PARM_TYPE_STRING
     },
     {
     "output_pictures",
@@ -1791,7 +1405,7 @@ dep_config_param dep_config_params[] = {
     "\"output_pictures\" replaced with \"picture_output\"",
     CONF_OFFSET(picture_output),
     "picture_output",
-    copy_string
+    PARM_TYPE_STRING
     },
     {
     "output_debug_pictures",
@@ -1799,7 +1413,7 @@ dep_config_param dep_config_params[] = {
     "\"output_debug_pictures\" replaced with \"picture_output_motion\"",
     CONF_OFFSET(picture_output_motion),
     "picture_output_motion",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "quality",
@@ -1807,7 +1421,7 @@ dep_config_param dep_config_params[] = {
     "\"quality\" replaced with \"picture_quality\"",
     CONF_OFFSET(picture_quality),
     "picture_quality",
-    copy_int
+    PARM_TYPE_INT
     },
     {
     "exif_text",
@@ -1815,7 +1429,7 @@ dep_config_param dep_config_params[] = {
     "\"exif_text\" replaced with \"picture_exif\"",
     CONF_OFFSET(picture_exif),
     "picture_exif",
-    copy_string
+    PARM_TYPE_STRING
     },
     {
     "motion_video_pipe",
@@ -1823,7 +1437,7 @@ dep_config_param dep_config_params[] = {
     "\"motion_video_pipe\" replaced with \"video_pipe_motion\"",
     CONF_OFFSET(video_pipe_motion),
     "video_pipe_motion",
-    copy_string
+    PARM_TYPE_STRING
     },
     {
     "ipv6_enabled",
@@ -1831,7 +1445,7 @@ dep_config_param dep_config_params[] = {
     "\"ipv6_enabled\" replaced with \"webcontrol_ipv6\"",
     CONF_OFFSET(webcontrol_ipv6),
     "webcontrol_ipv6",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "rtsp_uses_tcp",
@@ -1839,7 +1453,7 @@ dep_config_param dep_config_params[] = {
     "\"rtsp_uses_tcp\" replaced with \"netcam_use_tcp\"",
     CONF_OFFSET(netcam_use_tcp),
     "netcam_use_tcp",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "switchfilter",
@@ -1847,7 +1461,7 @@ dep_config_param dep_config_params[] = {
     "\"switchfilter\" replaced with \"roundrobin_switchfilter\"",
     CONF_OFFSET(roundrobin_switchfilter),
     "roundrobin_switchfilter",
-    copy_bool
+    PARM_TYPE_BOOL
     },
     {
     "logfile",
@@ -1855,7 +1469,7 @@ dep_config_param dep_config_params[] = {
     "\"logfile\" replaced with \"log_file\"",
     CONF_OFFSET(log_file),
     "log_file",
-    copy_string
+    PARM_TYPE_STRING
     },
     {
     "process_id_file",
@@ -1863,1139 +1477,12 @@ dep_config_param dep_config_params[] = {
     "\"process_id_file\" replaced with \"pid_file\"",
     CONF_OFFSET(pid_file),
     "pid_file",
-    copy_string
+    PARM_TYPE_STRING
     },
-    { NULL, NULL, NULL, 0, NULL, NULL}
+    { NULL, NULL, NULL, 0, NULL,(enum PARM_TYPE)0}
 };
 
-/**
- * conf_cmdline
- *      Sets the conf struct options as defined by the Command-line.
- *      Any option already set from a config file are overridden.
- *
- * Returns nothing.
- */
-static void conf_cmdline(struct ctx_cam *cam, int thread)
-{
-    struct config *conf = &cam->conf;
-    int c;
-
-    /*
-     * For the string options, we free() if necessary and malloc()
-     * if necessary. This is accomplished by calling mystrcpy();
-     * see this function for more information.
-     */
-    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
-        switch (c) {
-        case 'c':
-            if (thread == -1)
-                strcpy(cam->conf_filename, optarg);
-            break;
-        case 'b':
-            cam->daemon = 1;
-            break;
-        case 'n':
-            cam->daemon = 0;
-            break;
-        case 's':
-            conf->setup_mode = 1;
-            break;
-        case 'd':
-            /* No validation - just take what user gives. */
-            if (thread == -1)
-                cam->log_level = (unsigned int)atoi(optarg);
-            break;
-        case 'k':
-            if (thread == -1) {
-                strncpy(cam->log_type_str, optarg, sizeof(cam->log_type_str) - 1);
-                cam->log_type_str[sizeof(cam->log_type_str) - 1] = '\0';
-            }
-            break;
-        case 'p':
-            if (thread == -1) {
-                strncpy(cam->pid_file, optarg, sizeof(cam->pid_file) - 1);
-                cam->pid_file[sizeof(cam->pid_file) - 1] = '\0';
-            }
-            break;
-        case 'l':
-            if (thread == -1) {
-                strncpy(cam->log_file, optarg, sizeof(cam->log_file) - 1);
-                cam->log_file[sizeof(cam->log_file) - 1] = '\0';
-            }
-            break;
-        case 'm':
-            cam->pause = 1;
-            break;
-        case 'h':
-        case '?':
-        default:
-             usage();
-             exit(1);
-        }
-
-    optind = 1;
-}
-
-
-/**
- * conf_cmdparse
- *      Sets a config option given by 'cmd' to the value given by 'arg1'.
- *      Based on the name of the option it searches through the struct 'config_params'
- *      for an option where the config_params[i].param_name matches the option.
- *      By calling the function pointed to by config_params[i].copy the option gets
- *      assigned.
- *
- * Returns ctx_cam struct.
- */
-struct ctx_cam **conf_cmdparse(struct ctx_cam **camlst, const char *cmd, const char *arg1)
-{
-    unsigned int i = 0;
-
-    if (!cmd)
-        return camlst;
-
-    /*
-     * We search through config_params until we find a param_name that matches
-     * our option given by cmd (or reach the end = NULL).
-     */
-    while (config_params[i].param_name != NULL) {
-        if (mystrceq(cmd, config_params[i].param_name)) {
-
-            /* If config_param is string we don't want to check arg1. */
-            if (mystrcne(config_type(&config_params[i]), "string")) {
-                if (config_params[i].conf_value && !arg1){
-                    return camlst;
-                }
-            }
-
-            /*
-             * We call the function given by the pointer config_params[i].copy
-             * If the option is a bool, copy_bool is called.
-             * If the option is an int, copy_int is called.
-             * If the option is a string, copy_string is called.
-             * If the option is camera, config_camera is called.
-             * The arguments to the function are:
-             *  cam  - a pointer to the ctx_cam structure.
-             *  arg1 - a pointer to the new option value (represented as string).
-             *  config_params[i].conf_value - an integer value which is a pointer
-             *  to the ctx_cam structure member relative to the pointer cam.
-             */
-            camlst = config_params[i].copy(camlst, arg1, config_params[i].conf_value);
-            return camlst;
-        }
-        i++;
-    }
-
-    /*
-     * We reached the end of config_params without finding a matching option.
-     * Check if it's a deprecated option, log a warning, and if applicable
-     * set the replacement option to the given value.
-     */
-    i = 0;
-    while (dep_config_params[i].name != NULL) {
-        if (!strncasecmp(cmd, dep_config_params[i].name, 255 + 50)) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
-                , dep_config_params[i].info, dep_config_params[i].last_version);
-
-            if (dep_config_params[i].copy != NULL){
-                /* If the depreciated option is a vid item, copy_vid_ctrl is called
-                 * with the array index sent instead of the ctx_cam structure member pointer.
-                 */
-                if (mystreq(dep_config_params[i].name,"brightness") ||
-                    mystreq(dep_config_params[i].name,"contrast") ||
-                    mystreq(dep_config_params[i].name,"saturation") ||
-                    mystreq(dep_config_params[i].name,"hue") ||
-                    mystreq(dep_config_params[i].name,"power_line_frequency")) {
-                    camlst = copy_vid_ctrl(camlst, arg1, i);
-                } else {
-                    camlst = dep_config_params[i].copy(camlst, arg1, dep_config_params[i].conf_value);
-                }
-            }
-            return camlst;
-        }
-        i++;
-    }
-
-    /* If we get here, it's unknown to us. */
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
-    return camlst;
-}
-
-/**
- * conf_process
- *      Walks through an already open config file line by line
- *      Any line starting with '#' or ';' or empty lines are ignored as a comments.
- *      Any non empty line is processed so that the first word is the name of an option 'cmd'
- *      and the rest of the line is the argument 'arg1'
- *      White space before the first word, between option and argument and end of the line
- *      is discarded. A '=' between option and first word in argument is also discarded.
- *      Quotation marks round the argument are also discarded.
- *      For each option/argument pair the function conf_cmdparse is called which takes
- *      care of assigning the value to the option in the config structures.
- *
- * Returns ctx_cam struct.
- */
-static struct ctx_cam **conf_process(struct ctx_cam **camlst, FILE *fp)
-{
-    /* Process each line from the config file. */
-
-    char line[PATH_MAX], *cmd = NULL, *arg1 = NULL;
-    char *beg = NULL, *end = NULL;
-
-    while (fgets(line, PATH_MAX-1, fp)) {
-        if (!(line[0] == '#' || line[0] == ';' || strlen(line) <  2)) {/* skipcomment */
-
-            arg1 = NULL;
-
-            /* Trim white space and any CR or LF at the end of the line. */
-            end = line + strlen(line) - 1; /* Point to the last non-null character in the string. */
-            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r'))
-                end--;
-
-            *(end+1) = '\0';
-
-            /* If line is only whitespace we continue to the next line. */
-            if (strlen(line) == 0)
-                continue;
-
-            /* Trim leading whitespace from the line and find command. */
-            beg = line;
-            while (*beg == ' ' || *beg == '\t')
-                beg++;
-
-
-            cmd = beg; /* Command starts here. */
-
-            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0')
-                beg++;
-
-            *beg = '\0'; /* Command string terminates here. */
-
-            /* Trim space between command and argument. */
-            beg++;
-
-            if (strlen(beg) > 0) {
-                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r')
-                    beg++;
-
-
-                /*
-                 * If argument is in "" we will strip them off
-                 * It is important that we can use "" so that we can use
-                 * leading spaces in text_left and text_right.
-                 */
-                if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
-                    (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
-                    beg[strlen(beg)-1] = '\0';
-                    beg++;
-                }
-
-                arg1 = beg; /* Argument starts here */
-            }
-            /* Else arg1 stays null pointer */
-
-            camlst = conf_cmdparse(camlst, cmd, arg1);
-        }
-    }
-
-    return camlst;
-}
-
-/**
- * conf_print
- *       Is used to write out the config file(s) motion.conf and any camera
- *       config files. The function is called when using http remote control.
- *
- * Returns nothing.
- */
-void conf_print(struct ctx_cam **camlst)
-{
-    const char *retval;
-    char *val;
-    unsigned int i, thread;
-    FILE *conffile;
-
-    for (thread = 0; camlst[thread]; thread++) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Writing config file to %s")
-            ,camlst[thread]->conf_filename);
-
-        conffile = myfopen(camlst[thread]->conf_filename, "w");
-
-        if (!conffile)
-            continue;
-
-        char timestamp[32];
-        time_t now = time(0);
-        strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
-
-        fprintf(conffile, "# %s\n", camlst[thread]->conf_filename);
-        fprintf(conffile, "#\n# This config file was generated by motion " VERSION "\n");
-        fprintf(conffile, "# at %s\n", timestamp);
-        fprintf(conffile, "\n\n");
-
-        for (i = 0; config_params[i].param_name; i++) {
-            retval = config_params[i].print(camlst, NULL, i, thread);
-            /* If config parameter has a value (not NULL) print it to the config file. */
-            if (retval) {
-                fprintf(conffile, "%s\n", config_params[i].param_help);
-                /*
-                 * If the option is a text_* and first char is a space put
-                 * quotation marks around to allow leading spaces.
-                 */
-                if (strncmp(config_params[i].param_name, "text", 4) || strncmp(retval, " ", 1))
-                    fprintf(conffile, "%s %s\n\n", config_params[i].param_name, retval);
-                else
-                    fprintf(conffile, "%s \"%s\"\n\n", config_params[i].param_name, retval);
-            } else {
-                val = NULL;
-                config_params[i].print(camlst, &val, i, thread);
-                /*
-                 * It can either be a camera file parameter or a disabled parameter.
-                 * If it is a camera parameter write it out.
-                 * Else write the disabled option to the config file but with a
-                 * comment mark in front of the parameter name.
-                 */
-                if (val) {
-                    fprintf(conffile, "%s\n", config_params[i].param_help);
-
-                    if (strlen(val) > 0)
-                        fprintf(conffile, "%s\n", val);
-                    else
-                        fprintf(conffile, "; camera %s/camera1.conf\n", sysconfdir);
-
-                    free(val);
-                } else if (thread == 0) {
-                    char value[PATH_MAX];
-                    /* The 'camera_dir' option should keep the installed default value */
-                    if (!strncmp(config_params[i].param_name, "camera_dir", 10))
-                        sprintf(value, "%s", sysconfdir"/conf.d");
-                    else
-                        sprintf(value, "%s", "value");
-
-                    fprintf(conffile, "%s\n", config_params[i].param_help);
-                    fprintf(conffile, "; %s %s\n\n", config_params[i].param_name, value);
-                }
-            }
-        }
-
-        fprintf(conffile, "\n");
-        myfclose(conffile);
-        conffile = NULL;
-    }
-}
-
-/**
- * conf_load
- * Is the main function, called from motion.c
- * The function sets the important ctx_cam structure "cam" including
- * loading the config parameters from config files and Command-line.
- * The following takes place in the function:
- * - The default start values for cam stored in the struct conf_template
- *   are copied to camlst[0] which is the default ctx_cam structure common to
- *   all threads.
- * - All config (cam.conf) struct members pointing to a string are changed
- *   so that they point to a malloc'ed piece of memory containing a copy of
- *   the string given in conf_template.
- * - motion.conf is opened and processed. The process populates the camlst[0] and
- *   for each camera config file it populates a camlst[1], camlst[2]... for each
- *   camera.
- * - Finally it processes the options given in the Command-line. This is done
- *   for each camera camlst[i] so that the Command-line options overrides any
- *   option given by motion.conf or a camera config file.
- *
- * Returns ctx_cam struct.
- */
-struct ctx_cam **conf_load(struct ctx_cam **camlst)
-{
-    FILE *fp = NULL;
-    char filename[PATH_MAX];
-    int i, retcd;
-    /* We preserve argc and argv because they get overwritten by the memcpy command. */
-    char **argv = camlst[0]->conf.argv;
-    int argc = camlst[0]->conf.argc;
-
-    /*
-     * Copy the template config structure with all the default config values
-     * into camlst[0]->conf
-     */
-    memcpy(&camlst[0]->conf, &conf_template, sizeof(struct config));
-
-    /*
-     * For each member of camlst[0] which is a pointer to a string
-     * if the member points to a string in conf_template and is not NULL.
-     * 1. Reserve (malloc) memory for the string.
-     * 2. Copy the conf_template given string to the reserved memory.
-     * 3. Change the camlst[0] member (char*) pointing to the string in reserved memory.
-     * This ensures that we can free and malloc the string when changed
-     * via http remote control or config file or Command-line options.
-     */
-    malloc_strings(camlst[0]);
-
-    /* Restore the argc and argv */
-    camlst[0]->conf.argv = argv;
-    camlst[0]->conf.argc = argc;
-
-    /*
-     * Open the motion.conf file. We try in this sequence:
-     * 1. Command-line
-     * 2. current working directory
-     * 3. $HOME/.motion/motion.conf
-     * 4. sysconfdir/motion.conf
-     */
-    /* Get filename , pid file & log file from Command-line. */
-    camlst[0]->log_type_str[0] = 0;
-    camlst[0]->conf_filename[0] = 0;
-    camlst[0]->pid_file[0] = 0;
-    camlst[0]->log_file[0] = 0;
-    camlst[0]->log_level = -1;
-
-    conf_cmdline(camlst[0], -1);
-
-    if (camlst[0]->conf_filename[0]) { /* User has supplied filename on Command-line. */
-      strncpy(filename, camlst[0]->conf_filename, PATH_MAX-1);
-      filename[PATH_MAX-1] = '\0';
-      fp = fopen (filename, "r");
-    }
-
-    if (!fp) {  /* Command-line didn't work, try current dir. */
-        char path[PATH_MAX];
-
-        if (camlst[0]->conf_filename[0])
-            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-                ,_("Configfile %s not found - trying defaults.")
-                ,filename);
-
-        if (getcwd(path, sizeof(path)) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error getcwd"));
-            exit(-1);
-        }
-
-        snprintf(filename, PATH_MAX, "%.*s/motion.conf"
-            , (int)(PATH_MAX-1-strlen("/motion.conf"))
-            , path);
-        fp = fopen (filename, "r");
-    }
-
-    if (!fp) {  /* Specified file does not exist... try default file. */
-        snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
-        fp = fopen(filename, "r");
-
-        if (!fp) {
-            snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
-            fp = fopen(filename, "r");
-
-            if (!fp) /* There is no config file.... use defaults. */
-                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-                    ,_("could not open configfile %s")
-                    ,filename);
-        }
-    }
-
-    /* Now we process the motion.conf config file and close it. */
-    if (fp) {
-        retcd = snprintf(camlst[0]->conf_filename
-            ,sizeof(camlst[0]->conf_filename)
-            ,"%s",filename);
-        if ((retcd < 0) || (retcd >= (int)sizeof(camlst[0]->conf_filename))){
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Invalid file name %s"), filename);
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Processing thread 0 - config file %s"), filename);
-            camlst = conf_process(camlst, fp);
-            myfclose(fp);
-        }
-    } else {
-        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO
-            ,_("No config file to process, using default values"));
-    }
-
-
-    /*
-     * For each thread (given by camlst[i]) being not null
-     * cam is an array of pointers to a ctx_cam type structure
-     * camlst[0] is the default ctx_cam structure
-     * camlst[1], camlst[2], ... are ctx_cam structures for each thread
-     * Command line options always wins over config file options
-     * so we go through each thread and overrides any set Command-line
-     * options.
-     */
-    i = -1;
-
-    while (camlst[++i])
-        conf_cmdline(camlst[i], i);
-
-    /* If pid file was passed from Command-line copy to main thread conf struct. */
-    if (camlst[0]->pid_file[0])
-        camlst[0]->conf.pid_file = mystrcpy(camlst[0]->conf.pid_file, camlst[0]->pid_file);
-
-    /* If log file was passed from Command-line copy to main thread conf struct. */
-    if (camlst[0]->log_file[0])
-        camlst[0]->conf.log_file = mystrcpy(camlst[0]->conf.log_file, camlst[0]->log_file);
-
-    /* If log type string was passed from Command-line copy to main thread conf struct. */
-    if (camlst[0]->log_type_str[0])
-        camlst[0]->conf.log_type = mystrcpy(camlst[0]->conf.log_type, camlst[0]->log_type_str);
-
-    /* if log level was passed from Command-line copy to main thread conf struct. */
-    if (camlst[0]->log_level != -1)
-        camlst[0]->conf.log_level = camlst[0]->log_level;
-
-    config_parms_intl();
-
-    return camlst;
-}
-
-/**
- * conf_output_parms
- *      Dump config options to log, useful for support purposes.
- *      Redact sensitive information and re-add quotation marks where needed (see conf_print).
- *      Not using the MOTION_LOG macro here to skip the function naming,
- *      and produce a slightly cleaner dump.
- *
- * Returns nothing
- */
-void conf_output_parms(struct ctx_cam **camlst)
-{
-    unsigned int i, t = 0;
-    const char *name, *value;
-
-    while(camlst[++t]);
-
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-        ,_("Writing configuration parameters from all files (%d):"), t);
-    for (t = 0; camlst[t]; t++) {
-        motion_log(INF, TYPE_ALL, NO_ERRNO,0
-            ,_("Thread %d - Config file: %s"), t, camlst[t]->conf_filename);
-        i = 0;
-        while (config_params[i].param_name != NULL) {
-            name=config_params[i].param_name;
-            if ((value = config_params[i].print(camlst, NULL, i, t)) != NULL) {
-                if (!strncmp(name, "netcam_url", 10) ||
-                    !strncmp(name, "netcam_userpass", 15) ||
-                    !strncmp(name, "netcam_highres", 14) ||
-                    !strncmp(name, "stream_cors_header", 18) ||
-                    !strncmp(name, "stream_authentication", 21) ||
-                    !strncmp(name, "webcontrol_authentication", 25) ||
-                    !strncmp(name, "webcontrol_cors_header", 22) ||
-                    !strncmp(name, "webcontrol_key", 14) ||
-                    !strncmp(name, "webcontrol_cert", 15) ||
-                    !strncmp(name, "database_user", 13) ||
-                    !strncmp(name, "database_password", 17))
-                {
-                    motion_log(INF, TYPE_ALL, NO_ERRNO,0
-                        ,_("%-25s <redacted>"), name);
-                } else {
-                    if (strncmp(name, "text", 4) || strncmp(value, " ", 1))
-                        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s", name, value);
-                    else
-                        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s \"%s\"", name, value);
-                }
-            } else {
-                if (t == 0) motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s ", name);
-            }
-            i++;
-        }
-    }
-}
-
-/**
- * malloc_strings
- *      goes through the members of a ctx_cam structure.
- *      For each ctx_cam structure member which is a pointer to a string it does this:
- *      If the member points to a string and is not NULL
- *      1. Reserve (malloc) memory for the string
- *      2. Copy the original string to the reserved memory
- *      3. Change the cam member (char*) pointing to the string in reserved memory
- *      This ensures that we can free and malloc the string if it is later changed
- *
- * Returns nothing.
- */
-void malloc_strings(struct ctx_cam *cam)
-{
-    unsigned int i = 0;
-    char **val;
-    while (config_params[i].param_name != NULL) {
-        if (config_params[i].copy == copy_string ||
-            config_params[i].copy == copy_uri) { /* if member is a string */
-            /* val is made to point to a pointer to the current string. */
-            val = (char **)((char *)cam+config_params[i].conf_value);
-
-            /*
-             * If there is a string, malloc() space for it, copy
-             * the string to new space, and point to the new
-             * string. we don't free() because we're copying a
-             * static string.
-             */
-            *val = mystrdup(*val);
-        }
-        i++;
-    }
-}
-
-/************************************************************************
- * copy functions
- *
- *   copy_bool   - convert a bool representation to int
- *   copy_int    - convert a string to int
- *   copy_string - just a string copy
- *
- * @param str     - A char *, pointing to a string representation of the
- *                  value.
- * @param val_ptr - points to the place where to store the value relative
- *                  to pointer pointing to the given ctx_cam structure
- * @cam           - points to a ctx_cam structure for a thread
- *
- * The function is given a pointer cam to a ctx_cam structure and a pointer val_ptr
- * which is an integer giving the position of the structure member relative to the
- * pointer of the ctx_cam structure.
- * If the ctx_cam structure is for thread 0 (camlst[0]->threadnr is zero) then the
- * function also sets the value for all the child threads since thread 0 is the
- * global thread.
- * If the thread given belongs to a child thread (camlst[0]->threadnr is not zero)
- * the function will only assign the value for the given thread.
- ***********************************************************************/
-
-/**
- * copy_bool
- *      Assigns a config option to a new boolean value.
- *      The boolean is given as a string in str which is converted to 0 or 1
- *      by the function. Values 1, yes and on are converted to 1 ignoring case.
- *      Any other value is converted to 0.
- *
- * Returns ctx_cam struct.
- */
-static struct ctx_cam **copy_bool(struct ctx_cam **camlst, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (camlst[++i]) {
-        tmp = (char *)camlst[i]+(int)val_ptr;
-
-        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 1;
-        } else {
-            *((int *)tmp) = 0;
-        }
-
-        if (camlst[0]->threadnr)
-            return camlst;
-    }
-
-    return camlst;
-}
-
-/**
- * copy_int
- *      Assigns a config option to a new integer value.
- *      The integer is given as a string in str which is converted to integer
- *      by the function.
- *
- * Returns ctx_cam struct.
- */
-static struct ctx_cam **copy_int(struct ctx_cam **camlst, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (camlst[++i]) {
-        tmp = (char *)camlst[i]+val_ptr;
-        if (mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 1;
-        } else if (mystrceq(str, "no") || mystrceq(str, "off")) {
-            *((int *)tmp) = 0;
-        } else {
-            *((int *)tmp) = atoi(str);
-        }
-        if (camlst[0]->threadnr)
-            return camlst;
-    }
-
-    return camlst;
-}
-
-/**
- * copy_string
- *      Assigns a new string value to a config option.
- *      Strings are handled differently from bool and int.
- *      the char *conf->option that we are working on is free()'d
- *      (if memory for it has already been malloc()'d), and set to
- *      a freshly malloc()'d string with the value from str,
- *      or NULL if str is blank.
- *
- * Returns ctx_cam struct.
- */
-struct ctx_cam **copy_string(struct ctx_cam **camlst, const char *str, int val_ptr)
-{
-    char **tmp;
-    int i;
-
-    i = -1;
-
-    while (camlst[++i]) {
-        tmp = (char **)((char *)camlst[i] + val_ptr);
-
-        /*
-         * mystrcpy assigns the new string value
-         * including free'ing and reserving new memory for it.
-         */
-        *tmp = mystrcpy(*tmp, str);
-
-        /*
-         * Set the option on all threads if setting the option
-         * for thread 0; otherwise just set that one thread's option.
-         */
-        if (camlst[0]->threadnr)
-            return camlst;
-    }
-
-    return camlst;
-}
-
-/**
- * copy_vid_ctrl
- *      Assigns a new string value to a config option.
- * Returns ctx_cam struct.
- */
-static struct ctx_cam **copy_vid_ctrl(struct ctx_cam **camlst, const char *config_val, int config_indx) {
-
-    int i, indx_vid;
-    int parmnew_len, parmval;
-    char *orig_parm, *parmname_new;
-
-    indx_vid = 0;
-    while (config_params[indx_vid].param_name != NULL) {
-        if (mystreq(config_params[indx_vid].param_name,"vid_control_params")) break;
-        indx_vid++;
-    }
-
-    if (mystrne(config_params[indx_vid].param_name,"vid_control_params")){
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("Unable to locate vid_control_params"));
-        return camlst;
-    }
-
-    if (config_val == NULL){
-        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
-            ,_("No value provided to put into vid_control_params"));
-    }
-
-    /* If the depreciated option is the default, then just return */
-    parmval = atoi(config_val);
-    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == -1)) return camlst;
-    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency") &&
-        (parmval == 0)) return camlst;
-
-    /* Remove underscore from parm name and add quotes*/
-    if (mystreq(dep_config_params[config_indx].name,"power_line_frequency")) {
-        parmname_new = mymalloc(strlen(dep_config_params[config_indx].name) + 3);
-        sprintf(parmname_new,"%s","\"power line frequency\"");
-    } else {
-        parmname_new = mymalloc(strlen(dep_config_params[config_indx].name)+1);
-        sprintf(parmname_new,"%s",dep_config_params[config_indx].name);
-    }
-
-    /* Recall that the current parms have already been processed by time this is called */
-    i = -1;
-    while (camlst[++i]) {
-        parmnew_len = strlen(parmname_new) + strlen(config_val) + 2; /*Add for = and /0*/
-        if (camlst[i]->conf.vid_control_params != NULL) {
-            orig_parm = mymalloc(strlen(camlst[i]->conf.vid_control_params)+1);
-            sprintf(orig_parm,"%s",camlst[i]->conf.vid_control_params);
-
-            parmnew_len = strlen(orig_parm) + parmnew_len + 1; /*extra 1 for the comma */
-
-            free(camlst[i]->conf.vid_control_params);
-            camlst[i]->conf.vid_control_params = mymalloc(parmnew_len);
-            sprintf(camlst[i]->conf.vid_control_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
-
-            free(orig_parm);
-        } else {
-            camlst[i]->conf.vid_control_params = mymalloc(parmnew_len);
-            sprintf(camlst[i]->conf.vid_control_params,"%s=%s", parmname_new, config_val);
-        }
-    }
-
-    free(parmname_new);
-
-    return camlst;
-}
-
-/**
- * copy_text_double
- *      Converts the bool of text_double to a 1 or 2 in text_scale
- *
- * Returns ctx_cam struct.
- */
-static struct ctx_cam **copy_text_double(struct ctx_cam **camlst, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (camlst[++i]) {
-        tmp = (char *)camlst[i]+(int)val_ptr;
-
-        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 2;
-        } else {
-            *((int *)tmp) = 1;
-        }
-
-        if (camlst[0]->threadnr)
-            return camlst;
-    }
-
-    return camlst;
-}
-
-/**
- * copy_html_output
- *      Converts the webcontrol_html_output to the webcontrol_interface option.
- *
- * Returns ctx_cam struct.
- */
-static struct ctx_cam **copy_html_output(struct ctx_cam **camlst, const char *str, int val_ptr)
-{
-    void *tmp;
-    int i;
-
-    i = -1;
-    while (camlst[++i]) {
-        tmp = (char *)camlst[i]+(int)val_ptr;
-
-        if (mystreq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-            *((int *)tmp) = 0;
-        } else {
-            *((int *)tmp) = 1;
-        }
-
-        if (camlst[0]->threadnr)
-            return camlst;
-    }
-
-    return camlst;
-}
-
-struct ctx_cam **copy_uri(struct ctx_cam **camlst, const char *str, int val) {
-
-    // Here's a complicated regex I found here: https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
-    // Use it for validating URIs.
-    const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
-
-    regex_t regex;
-    if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Error compiling regex in copy_uri"));
-        return camlst;
-    }
-
-    // A single asterisk is also valid, so check for that.
-    if (mystrne(str, "*") && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Invalid origin for cors_header in copy_uri"));
-        regfree(&regex);
-        return camlst;
-    }
-
-    regfree(&regex);
-    camlst = copy_string(camlst, str, val);
-    return camlst;
-
-}
-
-/**
- * config_type
- *      Returns a pointer to string containing value the type of config parameter passed.
- *
- * Returns const char *.
- */
-const char *config_type(config_param *configparam)
-{
-    if (configparam->copy == copy_string)
-        return "string";
-    if (configparam->copy == copy_int)
-        return "int";
-    if (configparam->copy == copy_bool)
-        return "bool";
-    if (configparam->copy == copy_uri)
-        return "uri";
-
-    return "unknown";
-}
-
-
-/**
- * print_bool
- *      Returns a pointer to string containing boolean value 'on' / 'off' or NULL.
- *
- * Returns const char *.
- */
-static const char *print_bool(struct ctx_cam **camlst, char **str, int parm, unsigned int threadnr) {
-    int val = config_params[parm].conf_value;
-
-    (void)str;
-
-    if (threadnr &&
-        *(int*)((char *)camlst[threadnr] + val) == *(int*)((char *)camlst[0] + val))
-        return NULL;
-
-    if (*(int*)((char *)camlst[threadnr] + val))
-        return "on";
-    else
-        return "off";
-}
-
-/**
- * print_string
- *      Returns a pointer to a string containing the value of the config option,
- *      If the thread number is not 0 the string is compared with the value of the same
- *      option in thread 0.
- *
- * Returns If the option is not defined NULL is returned.
- *         If the value is the same, NULL is returned which means that
- *         the option is not written to the camera config file.
- */
-static const char *print_string(struct ctx_cam **camlst, char **str, int parm, unsigned int threadnr) {
-
-    int val = config_params[parm].conf_value;
-    const char **cptr0, **cptr1;
-
-    (void)str;
-
-    /* Need to check for nulls as well */
-    cptr0 = (const char **)((char *)camlst[0] + val);
-    cptr1 = (const char **)((char *)camlst[threadnr] + val);
-
-    if ((threadnr) && (*cptr0 != NULL) && (*cptr1 != NULL) && (mystreq(*cptr0, *cptr1)))
-        return NULL;
-
-    return *cptr1;
-}
-
-/**
- * print_int
- *      Returns a pointer to a string containing the integer of the config option value.
- *      If the thread number is not 0 the integer is compared with the value of the same
- *      option in thread 0.
- *
- * Returns If the option is different, const char *
- *         If the option is the same, NULL is returned which means that
- *         the option is not written to the camera config file.
- */
-static const char *print_int(struct ctx_cam **camlst, char **str, int parm, unsigned int threadnr) {
-    static char retval[20];
-    int val = config_params[parm].conf_value;
-
-    (void)str;
-
-    if (threadnr &&
-        *(int*)((char *)camlst[threadnr] + val) == *(int*)((char *)camlst[0] + val))
-        return NULL;
-
-    sprintf(retval, "%d", *(int*)((char *)camlst[threadnr] + val));
-
-    return retval;
-}
-
-/**
- * print_camera
- *      Modifies a pointer to a string with each 'camera' line.
- *      Does nothing if single threaded or no pointer was supplied.
- *
- * Returns NULL
- */
-static const char *print_camera(struct ctx_cam **camlst, char **str, int parm , unsigned int threadnr) {
-    char *retval;
-    unsigned int i = 0;
-
-    if (!str || threadnr)
-        return NULL;
-
-    (void)parm;
-
-    retval = mymalloc(1);
-    retval[0] = 0;
-
-    while (camlst[++i]) {
-        /* Skip config files loaded from conf directory */
-        if (camlst[i]->from_conf_dir)
-            continue;
-
-        retval = myrealloc(retval, strlen(retval) + strlen(camlst[i]->conf_filename) + 10,
-                           "print_camera");
-        sprintf(retval + strlen(retval), "camera %s\n", camlst[i]->conf_filename);
-    }
-
-    *str = retval;
-
-    return NULL;
-}
-
-/**
- * read_camera_dir
- *     Read the directory finding all *.conf files in the path
- *     When found calls config_camera
- */
-
-struct ctx_cam **read_camera_dir(struct ctx_cam **camlst, const char *str, int val)
-{
-    DIR *dp;
-    struct dirent *ep;
-    size_t name_len;
-    int i;
-
-    char conf_file[PATH_MAX];
-
-    dp = opendir(str);
-    if (dp != NULL)
-    {
-        while( (ep = readdir(dp)) )
-        {
-            name_len = strlen(ep->d_name);
-            if (name_len > strlen(EXTENSION) &&
-                    (strncmp(EXTENSION,
-                                (ep->d_name + name_len - strlen(EXTENSION)),
-                                strlen(EXTENSION)) == 0
-                    )
-                )
-            {
-                memset(conf_file, '\0', sizeof(conf_file));
-                snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
-                            str, ep->d_name);
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                    ,_("Processing config file %s"), conf_file );
-                camlst = config_camera(camlst, conf_file, 0);
-                /* The last ctx_cam thread would be ours,
-                 * set it as created from conf directory.
-                 */
-                i = 0;
-                while (camlst[++i]);
-                camlst[i-1]->from_conf_dir = 1;
-	    }
-        }
-        closedir(dp);
-    }
-    else
-    {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-            ,_("Camera directory config %s not found"), str);
-    }
-
-    /* Store the given config value to allow writing it out */
-    camlst = copy_string(camlst, str, val);
-
-    return camlst;
-}
-
-/**
- * config_camera
- *      Is called during initial config file loading each time Motion
- *      finds a camera option in motion.conf
- *      The size of the ctx_cam array is increased and the main ctx_cam's values are
- *      copied to the new thread.
- *
- *      cam  - pointer to the array of pointers pointing to the ctx_cam structures
- *      str  - pointer to a string which is the filename of the camera config file
- *      val  - is not used. It is defined to be function header compatible with
- *            copy_int, copy_bool and copy_string.
- */
-static struct ctx_cam **config_camera(struct ctx_cam **camlst, const char *str, int val) {
-
-    int i;
-    FILE *fp;
-
-    (void)val;
-
-    if (camlst[0]->threadnr)
-        return camlst;
-
-    fp = fopen(str, "r");
-
-    if (!fp) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
-            ,_("Camera config file %s not found"), str);
-        return camlst;
-    }
-
-    /* Find the current number of threads defined. */
-    i = -1;
-
-    while (camlst[++i]);
-
-    /*
-     * Make space for the threads + the terminating NULL pointer
-     * in the array of pointers to ctx_cam structures
-     * First thread is 0 so the number of threads is i + 1
-     * plus an extra for the NULL pointer. This gives i + 2
-     */
-    camlst = myrealloc(camlst, sizeof(struct ctx_cam *) * (i + 2), "config_camera");
-
-    /* Now malloc space for an additional ctx_cam structure for thread nr. i */
-    camlst[i] = mymalloc(sizeof(struct ctx_cam));
-
-    /* And make this an exact clone of the ctx_cam structure for thread 0 */
-    memcpy(camlst[i], camlst[0], sizeof(struct ctx_cam));
-
-    /*
-     * All the integers are copies of the actual value.
-     * The strings are all pointers to strings so we need to create
-     * unique malloc'ed space for all the strings that are not NULL and
-     * change the string pointers to point to the new strings.
-     * malloc_strings takes care of this.
-     */
-    malloc_strings(camlst[i]);
-
-    /* Mark the end if the array of pointers to ctx_cam structures. */
-    camlst[i + 1] = NULL;
-
-    /* Process the camera's config file and notify user on console. */
-    strcpy(camlst[i]->conf_filename, str);
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-        ,_("Processing camera config file %s"), str);
-    conf_process(camlst + i, fp);
-
-    /* Finally we close the camera config file. */
-    myfclose(fp);
-
-    return camlst;
-}
-
-/**
- * usage
- *      Prints usage and options allowed from Command-line.
- *
- * Returns nothing.
- */
-static void usage()
-{
-    printf("motion Version "VERSION", Copyright 2000-2019 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n");
-    printf("\nHome page :\t https://motion-project.github.io/ \n");
-    printf("\nusage:\tmotion [options]\n");
-    printf("\n\n");
-    printf("Possible options:\n\n");
-    printf("-b\t\t\tRun in background (daemon) mode.\n");
-    printf("-n\t\t\tRun in non-daemon mode.\n");
-    printf("-s\t\t\tRun in setup mode.\n");
-    printf("-c config\t\tFull path and filename of config file.\n");
-    printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). default: 6 / NTC.\n");
-    printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
-    printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
-    printf("-l log file \t\tFull path and filename of log file.\n");
-    printf("-m\t\t\tDisable motion detection at startup.\n");
-    printf("-h\t\t\tShow this screen.\n");
-    printf("\n");
-    printf("Motion is configured using a config file only. If none is supplied,\n");
-    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
-    printf("\n");
-}
-
-static void config_parms_intl(){
+static void config_parms_intl(void){
     /* This function prints out the configuration parms side by side
      * with the translations.  It is currently disabled but put into
      * the code so that they can be found by xgettext.  If enabled, then
@@ -3020,7 +1507,6 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","input",_("input"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","norm",_("norm"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","frequency",_("frequency"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","auto_brightness",_("auto_brightness"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","tunerdevice",_("tunerdevice"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","roundrobin_frames",_("roundrobin_frames"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","roundrobin_skip",_("roundrobin_skip"));
@@ -3037,7 +1523,6 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","height",_("height"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","framerate",_("framerate"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","minimum_frame_time",_("minimum_frame_time"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","rotate",_("rotate"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","flip_axis",_("flip_axis"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","locate_motion_mode",_("locate_motion_mode"));
@@ -3087,7 +1572,6 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_bps",_("movie_bps"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_quality",_("movie_quality"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_codec",_("movie_codec"));
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_duplicate_frames",_("movie_duplicate_frames"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_passthrough",_("movie_passthrough"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_filename",_("movie_filename"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_extpipe_use",_("movie_extpipe_use"));
@@ -3153,3 +1637,1038 @@ static void config_parms_intl(){
 
     }
 }
+
+/** Prints usage and options allowed from Command-line. */
+static void usage(void) {
+    printf("motion Version %s, Copyright 2000-2019 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen/Motion-Project maintainers\n",PACKAGE_VERSION);
+    printf("\nHome page :\t https://motion-project.github.io/ \n");
+    printf("\nusage:\tmotion [options]\n");
+    printf("\n\n");
+    printf("Possible options:\n\n");
+    printf("-b\t\t\tRun in background (daemon) mode.\n");
+    printf("-n\t\t\tRun in non-daemon mode.\n");
+    printf("-s\t\t\tRun in setup mode.\n");
+    printf("-c config\t\tFull path and filename of config file.\n");
+    printf("-d level\t\tLog level (1-9) (EMG, ALR, CRT, ERR, WRN, NTC, INF, DBG, ALL). default: 6 / NTC.\n");
+    printf("-k type\t\t\tType of log (COR, STR, ENC, NET, DBL, EVT, TRK, VID, ALL). default: ALL.\n");
+    printf("-p process_id_file\tFull path and filename of process id file (pid file).\n");
+    printf("-l log file \t\tFull path and filename of log file.\n");
+    printf("-m\t\t\tDisable motion detection at startup.\n");
+    printf("-h\t\t\tShow this screen.\n");
+    printf("\n");
+    printf("Motion is configured using a config file only. If none is supplied,\n");
+    printf("it will read motion.conf from current directory, ~/.motion or %s.\n", sysconfdir);
+    printf("%s\n", sysconfdir);
+    printf("\n");
+}
+
+static void conf_malloc_strings(struct ctx_cam *cam) {
+    unsigned int i = 0;
+    char **val;
+
+    while (config_parms[i].parm_name != NULL) {
+        if ((config_parms[i].parm_type == PARM_TYPE_STRING) ||
+            (config_parms[i].parm_type == PARM_TYPE_URI)) {
+            /* val is made to point to a pointer to the current string. */
+            val = (char **)((char *)cam + config_parms[i].parm_offset);
+
+            /*
+             * If there is a string, malloc() space for it, copy
+             * the string to new space, and point to the new
+             * string. we don't free() because we're copying a
+             * static string.
+             */
+            *val = mystrdup(*val);
+        }
+        i++;
+    }
+}
+
+/** Process Command-line options specified */
+static void conf_cmdline(struct ctx_cam *cam, int thread) {
+    struct ctx_config *conf = &cam->conf;
+    int c;
+
+    while ((c = getopt(conf->argc, conf->argv, "bc:d:hmns?p:k:l:")) != EOF)
+        switch (c) {
+        case 'c':
+            if (thread == -1){
+                strcpy(cam->conf_filename, optarg);
+            }
+            break;
+        case 'b':
+            cam->motapp->daemon = TRUE;
+            break;
+        case 'n':
+            cam->motapp->daemon = FALSE;
+            break;
+        case 's':
+            conf->setup_mode = 1;
+            break;
+        case 'd':
+            /* No validation - just take what user gives. */
+            if (thread == -1){
+                cam->motapp->log_level = (unsigned int)atoi(optarg);
+            }
+            break;
+        case 'k':
+            if (thread == -1) {
+                strncpy(cam->motapp->log_type_str, optarg, sizeof(cam->motapp->log_type_str) - 1);
+                cam->motapp->log_type_str[sizeof(cam->motapp->log_type_str) - 1] = '\0';
+            }
+            break;
+        case 'p':
+            if (thread == -1) {
+                strncpy(cam->motapp->pid_file, optarg, sizeof(cam->motapp->pid_file) - 1);
+                cam->motapp->pid_file[sizeof(cam->motapp->pid_file) - 1] = '\0';
+            }
+            break;
+        case 'l':
+            if (thread == -1) {
+                strncpy(cam->motapp->log_file, optarg, sizeof(cam->motapp->log_file) - 1);
+                cam->motapp->log_file[sizeof(cam->motapp->log_file) - 1] = '\0';
+            }
+            break;
+        case 'm':
+            cam->pause = TRUE;
+            break;
+        case 'h':
+        case '?':
+        default:
+             usage();
+             exit(1);
+        }
+
+    optind = 1;
+}
+
+static void conf_parm_set_bool(struct ctx_cam *cam, const char *str, int offset) {
+    void *tmp;
+
+    tmp = (char *)cam + (int)offset;
+
+    if (mystrceq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
+        *((int *)tmp) = 1;
+    } else {
+        *((int *)tmp) = 0;
+    }
+}
+
+static void conf_parm_set_int(struct ctx_cam *cam, const char *str, int offset) {
+    void *tmp;
+
+    tmp = (char *)cam + offset;
+    if ( mystrceq(str, "yes") || mystrceq(str, "on")) {
+        *((int *)tmp) = 1;
+    } else if (mystrceq(str, "no") || mystrceq(str, "off")) {
+        *((int *)tmp) = 0;
+    } else {
+        *((int *)tmp) = atoi(str);
+    }
+}
+
+static void conf_parm_set_string(struct ctx_cam *cam, const char *str, int offset) {
+    char **tmp;
+
+    tmp = (char **)((char *)cam + offset);
+    *tmp = mystrcpy(*tmp, str);
+}
+
+static void conf_parm_set_uri(struct ctx_cam *cam, const char *str, int offset) {
+    // A complicated regex to validate a url found here:
+    // https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
+    const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+
+    regex_t regex;
+    if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Error compiling regex in copy_uri"));
+        return;
+    }
+
+    // A single asterisk is also valid
+    if (!mystrceq(str, "*") && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            ,_("Invalid origin for cors_header"));
+        regfree(&regex);
+        return;
+    }
+
+    regfree(&regex);
+    conf_parm_set_string(cam, str, offset);
+}
+
+static void conf_parm_set_text_double(struct ctx_cam *cam, const char *str, int offset) {
+    void *tmp;
+
+    tmp = (char *)cam + (int)offset;
+    if (mystrceq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
+        *((int *)tmp) = 2;
+    } else {
+        *((int *)tmp) = 1;
+    }
+}
+
+static void conf_parm_set_html_output(struct ctx_cam *cam, const char *str, int offset) {
+    void *tmp;
+
+    tmp = (char *)cam + (int)offset;
+    if (mystrceq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
+        *((int *)tmp) = 0;
+    } else {
+        *((int *)tmp) = 1;
+    }
+}
+
+static void conf_parm_set_vid_ctrl(struct ctx_cam *cam, const char *config_val, int config_indx) {
+
+    int indx_vid;
+    int parmnew_len, parmval;
+    char *orig_parm, *parmname_new;
+
+    indx_vid = 0;
+    while (config_parms[indx_vid].parm_name != NULL) {
+        if (mystreq(config_parms[indx_vid].parm_name,"vid_control_params")) break;
+        indx_vid++;
+    }
+
+    if (mystrne(config_parms[indx_vid].parm_name,"vid_control_params")){
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("Unable to locate vid_control_params"));
+        return;
+    }
+
+    if (config_val == NULL){
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO
+            ,_("No value provided to put into vid_control_params"));
+    }
+
+    /* If the depreciated option is the default, then just return */
+    parmval = atoi(config_val);
+    if (mystreq(config_parms_depr[config_indx].parm_name,"power_line_frequency") &&
+        (parmval == -1)) return;
+    if (mystrne(config_parms_depr[config_indx].parm_name,"power_line_frequency") &&
+        (parmval == 0)) return;
+
+    /* Remove underscore from parm name and add quotes*/
+    if (mystreq(config_parms_depr[config_indx].parm_name,"power_line_frequency")) {
+        parmname_new = (char*)mymalloc(strlen(config_parms_depr[config_indx].parm_name) + 3);
+        sprintf(parmname_new,"%s","\"power line frequency\"");
+    } else {
+        parmname_new = (char*)mymalloc(strlen(config_parms_depr[config_indx].parm_name)+1);
+        sprintf(parmname_new,"%s",config_parms_depr[config_indx].parm_name);
+    }
+
+    /* Recall that the current parms have already been processed by time this is called */
+    parmnew_len = strlen(parmname_new) + strlen(config_val) + 2; /*Add for = and /0*/
+    if (cam->conf.vid_control_params != NULL) {
+        orig_parm = (char*)mymalloc(strlen(cam->conf.vid_control_params)+1);
+        sprintf(orig_parm,"%s",cam->conf.vid_control_params);
+
+        parmnew_len = strlen(orig_parm) + parmnew_len + 1; /*extra 1 for the comma */
+
+        free(cam->conf.vid_control_params);
+        cam->conf.vid_control_params = (char*)mymalloc(parmnew_len);
+        sprintf(cam->conf.vid_control_params,"%s=%s,%s",parmname_new, config_val, orig_parm);
+
+        free(orig_parm);
+    } else {
+        cam->conf.vid_control_params = (char*)mymalloc(parmnew_len);
+        sprintf(cam->conf.vid_control_params,"%s=%s", parmname_new, config_val);
+    }
+
+    free(parmname_new);
+
+    return;
+}
+
+static void conf_camera(struct ctx_cam *cam, const char *str) {
+
+    int indx_cams;
+    FILE *fp;
+
+    fp = fopen(str, "r");
+    if (!fp) {
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+            ,_("Camera config file %s not found"), str);
+        return;
+    }
+
+    /* Find the current number of threads defined. */
+    indx_cams = 0;
+    while (cam->motapp->cam_list[indx_cams] != NULL){
+        indx_cams++;
+    };
+
+    /* Index starts at zero (+1) plus another for our new camera(+2)*/
+    cam->motapp->cam_list = (struct ctx_cam **)myrealloc(
+        cam->motapp->cam_list, sizeof(struct ctx_cam *) * (indx_cams + 2), "config_camera");
+    cam->motapp->cam_list[indx_cams] = mymalloc(sizeof(struct ctx_cam));
+    cam->motapp->cam_list[indx_cams + 1] = NULL;
+
+    /* Copy numeric values and set string pointers to new locations */
+    memcpy(cam->motapp->cam_list[indx_cams],cam->motapp->cam_list[0], sizeof(struct ctx_cam));
+    conf_malloc_strings(cam->motapp->cam_list[indx_cams]);
+
+    /* Process the camera's config file and notify user on console. */
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Processing camera config file %s"), str);
+    snprintf(cam->motapp->cam_list[indx_cams]->conf_filename
+        ,sizeof(cam->motapp->cam_list[indx_cams]->conf_filename),"%s", str);
+    conf_process(cam->motapp->cam_list[indx_cams], fp);
+
+    /*Cascade new pointers to all cameras. */
+    cam->motapp->cam_list[indx_cams]->motapp = cam->motapp;
+    indx_cams = 0;
+    while (cam->motapp->cam_list[indx_cams] != NULL){
+        cam->motapp->cam_list[indx_cams]->cam_list = cam->motapp->cam_list;
+        indx_cams++;
+    }
+
+    /* Finally we close the camera config file. */
+    myfclose(fp);
+
+    return;
+}
+
+/** Process camera_dir */
+static void conf_camera_dir(struct ctx_cam *cam, const char *str, int offset) {
+    DIR *dp;
+    struct dirent *ep;
+    size_t name_len;
+    int i;
+
+    char conf_file[PATH_MAX];
+
+    dp = opendir(str);
+    if (dp != NULL) {
+        while( (ep = readdir(dp)) ) {
+            name_len = strlen(ep->d_name);
+            if (name_len > strlen(EXTENSION) &&
+                    (strncmp(EXTENSION,
+                                (ep->d_name + name_len - strlen(EXTENSION)),
+                                strlen(EXTENSION)) == 0
+                    )
+                )
+            {
+                memset(conf_file, '\0', sizeof(conf_file));
+                snprintf(conf_file, sizeof(conf_file) - 1, "%s/%s",
+                            str, ep->d_name);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    ,_("Processing config file %s"), conf_file );
+                conf_camera(cam, conf_file);
+                /* The last ctx_cam thread would be ours,
+                 * set it as created from conf directory.
+                 */
+                i = 0;
+                while (cam->motapp->cam_list[++i]);
+                cam->motapp->cam_list[i-1]->from_conf_dir = 1;
+            }
+        }
+        closedir(dp);
+    } else {
+        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+            ,_("Camera directory config %s not found"), str);
+    }
+
+    /* Store the given config value to allow writing it out */
+    conf_parm_set_string(cam, str, offset);
+
+    return;
+}
+
+static int conf_parm_set_current(struct ctx_cam *cam, const char *cmd, const char *arg1) {
+
+    int indx = 0;
+
+    while (config_parms[indx].parm_name != NULL) {
+        if (mystreq(cmd, config_parms[indx].parm_name)) {
+
+            if (mystreq(config_parms[indx].parm_name,"camera")) {
+                conf_camera(cam, arg1);
+
+            } else if (mystreq(config_parms[indx].parm_name,"camera_dir")) {
+                conf_camera_dir(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms[indx].parm_type == PARM_TYPE_BOOL) {
+                conf_parm_set_bool(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms[indx].parm_type == PARM_TYPE_INT) {
+                conf_parm_set_int(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms[indx].parm_type == PARM_TYPE_STRING) {
+                conf_parm_set_string(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms[indx].parm_type == PARM_TYPE_URI) {
+                conf_parm_set_uri(cam, arg1, config_parms[indx].parm_offset);
+
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("Coding error \"%s\""), config_parms[indx].parm_name);
+            }
+            return 0;
+        }
+        indx++;
+    }
+    return -1;
+}
+
+static int conf_parm_set_depreciated(struct ctx_cam *cam, const char *cmd, const char *arg1) {
+
+    int indx = 0;
+
+    while (config_parms_depr[indx].parm_name != NULL) {
+        if (mystreq(cmd, config_parms_depr[indx].parm_name)) {
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
+                , config_parms_depr[indx].info
+                , config_parms_depr[indx].last_version);
+
+            if (mystreq(config_parms_depr[indx].parm_name,"brightness") ||
+                mystreq(config_parms_depr[indx].parm_name,"contrast") ||
+                mystreq(config_parms_depr[indx].parm_name,"saturation") ||
+                mystreq(config_parms_depr[indx].parm_name,"hue") ||
+                mystreq(config_parms_depr[indx].parm_name,"power_line_frequency")) {
+                conf_parm_set_vid_ctrl(cam, arg1, indx);
+
+            } else if (mystreq(config_parms_depr[indx].parm_name,"webcontrol_html_output")) {
+                conf_parm_set_html_output(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (mystreq(config_parms_depr[indx].parm_name,"text_double")) {
+                conf_parm_set_text_double(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (mystreq(config_parms_depr[indx].parm_name,"thread")) {
+               conf_camera(cam, arg1);
+
+            } else if (config_parms_depr[indx].parm_type == PARM_TYPE_BOOL) {
+                conf_parm_set_bool(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms_depr[indx].parm_type == PARM_TYPE_INT) {
+                conf_parm_set_int(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms_depr[indx].parm_type == PARM_TYPE_STRING) {
+                conf_parm_set_string(cam, arg1, config_parms[indx].parm_offset);
+
+            } else if (config_parms_depr[indx].parm_type == PARM_TYPE_URI) {
+                conf_parm_set_uri(cam, arg1, config_parms[indx].parm_offset);
+
+            } else {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    , _("Coding error \"%s\""), config_parms_depr[indx].parm_name);
+
+            }
+            return 0;
+        }
+        indx++;
+    }
+    return -1;
+}
+
+/** Set the parameter to specified value */
+void conf_parm_set(struct ctx_cam *cam, const char *cmd, const char *arg1) {
+
+    if (!cmd) return;
+
+    if (conf_parm_set_current(cam, cmd, arg1) == 0) return;
+
+    if (conf_parm_set_depreciated(cam, cmd, arg1) == 0) return;
+
+    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
+
+    return;
+}
+
+/** Process each line from the config file. */
+static void conf_process(struct ctx_cam *cam, FILE *fp) {
+
+    char line[PATH_MAX], *cmd = NULL, *arg1 = NULL;
+    char *beg = NULL, *end = NULL;
+
+    while (fgets(line, PATH_MAX-1, fp)) {
+        if (!(line[0] == '#' || line[0] == ';' || strlen(line) <  2)) {/* skipcomment */
+
+            arg1 = NULL;
+
+            /* Trim white space and any CR or LF at the end of the line. */
+            end = line + strlen(line) - 1; /* Point to the last non-null character in the string. */
+            while (end >= line && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')){
+                end--;
+            }
+
+            *(end+1) = '\0';
+
+            /* If line is only whitespace we continue to the next line. */
+            if (strlen(line) == 0) continue;
+
+            /* Trim leading whitespace from the line and find command. */
+            beg = line;
+            while (*beg == ' ' || *beg == '\t'){
+                beg++;
+            }
+
+            cmd = beg; /* Command starts here. */
+
+            while (*beg != ' ' && *beg != '\t' && *beg != '=' && *beg != '\0'){
+                beg++;
+            }
+
+            *beg = '\0'; /* Command string terminates here. */
+
+            /* Trim space between command and argument. */
+            beg++;
+
+            if (strlen(beg) > 0) {
+                while (*beg == ' ' || *beg == '\t' || *beg == '=' || *beg == '\n' || *beg == '\r'){
+                    beg++;
+                }
+
+                /*
+                 * If argument is in "" we will strip them off
+                 * It is important that we can use "" so that we can use
+                 * leading spaces in text_left and text_right.
+                 */
+                if ((beg[0] == '"' && beg[strlen(beg)-1] == '"') ||
+                    (beg[0] == '\'' && beg[strlen(beg)-1] == '\'')) {
+                    beg[strlen(beg)-1] = '\0';
+                    beg++;
+                }
+
+                arg1 = beg; /* Argument starts here */
+            }
+            /* Else arg1 stays null pointer */
+
+            conf_parm_set(cam, cmd, arg1);
+        }
+    }
+
+    return;
+}
+
+static void conf_defaults(struct ctx_cam **cam_list) {
+    /*
+     * Copy the template config structure with all the default config values
+     * into cam_list[0]->conf
+     */
+
+    cam_list[0]->conf.setup_mode      = FALSE;
+    cam_list[0]->conf.pid_file        = NULL;
+    cam_list[0]->conf.log_file        = NULL;
+    cam_list[0]->conf.log_level       = LEVEL_DEFAULT+10;
+    cam_list[0]->conf.log_type        = NULL;
+    cam_list[0]->conf.quiet           = TRUE;
+    cam_list[0]->conf.native_language = TRUE;
+    cam_list[0]->conf.camera_name     = NULL;
+    cam_list[0]->conf.camera_id       = 0;
+    cam_list[0]->conf.camera_dir      = NULL;
+    cam_list[0]->conf.target_dir      = NULL;
+
+    /* Capture device configuration parameters */
+    cam_list[0]->conf.video_device            = "/dev/video0";
+    cam_list[0]->conf.vid_control_params      = NULL;
+    cam_list[0]->conf.v4l2_palette            = 17;
+    cam_list[0]->conf.input                   = -1;
+    cam_list[0]->conf.norm                    = 0;
+    cam_list[0]->conf.frequency               = 0;
+    cam_list[0]->conf.roundrobin_frames       = 1;
+    cam_list[0]->conf.roundrobin_skip         = 1;
+    cam_list[0]->conf.roundrobin_switchfilter = FALSE;
+
+    cam_list[0]->conf.netcam_url            = NULL;
+    cam_list[0]->conf.netcam_highres        = NULL;
+    cam_list[0]->conf.netcam_userpass       = NULL;
+    cam_list[0]->conf.netcam_keepalive      = "off";
+    cam_list[0]->conf.netcam_proxy          = NULL;
+    cam_list[0]->conf.netcam_tolerant_check = FALSE;
+    cam_list[0]->conf.netcam_use_tcp        = TRUE;
+
+    cam_list[0]->conf.mmalcam_name           = NULL;
+    cam_list[0]->conf.mmalcam_control_params = NULL;
+
+    /* Image processing configuration parameters */
+    cam_list[0]->conf.width               = 640;
+    cam_list[0]->conf.height              = 480;
+    cam_list[0]->conf.framerate           = 15;
+    cam_list[0]->conf.rotate              = 0;
+    cam_list[0]->conf.flip_axis           = "none";
+    cam_list[0]->conf.locate_motion_mode  = "off";
+    cam_list[0]->conf.locate_motion_style = "box",
+    cam_list[0]->conf.text_left           =  NULL;
+    cam_list[0]->conf.text_right          =  "%Y-%m-%d\\n%T";
+    cam_list[0]->conf.text_changes        =  FALSE;
+    cam_list[0]->conf.text_scale          =  1;
+    cam_list[0]->conf.text_event          =  "%Y%m%d%H%M%S";
+
+    /* Motion detection configuration parameters */
+    cam_list[0]->conf.emulate_motion        = FALSE;
+    cam_list[0]->conf.threshold             = 1500;
+    cam_list[0]->conf.threshold_maximum     = 0;
+    cam_list[0]->conf.threshold_tune        = FALSE;
+
+    cam_list[0]->conf.noise_level           = 32;
+    cam_list[0]->conf.noise_tune            = TRUE;
+    cam_list[0]->conf.despeckle_filter      = NULL;
+    cam_list[0]->conf.area_detect           = NULL;
+    cam_list[0]->conf.mask_file             = NULL;
+    cam_list[0]->conf.mask_privacy          = NULL;
+    cam_list[0]->conf.smart_mask_speed      = 0;
+    cam_list[0]->conf.lightswitch_percent   = 0;
+    cam_list[0]->conf.lightswitch_frames    = 5;
+    cam_list[0]->conf.minimum_motion_frames = 1;
+    cam_list[0]->conf.event_gap             = 60;
+    cam_list[0]->conf.pre_capture           = 0;
+    cam_list[0]->conf.post_capture          = 0;
+
+    /* Script execution configuration parameters */
+    cam_list[0]->conf.on_event_start     = NULL;
+    cam_list[0]->conf.on_event_end       = NULL;
+    cam_list[0]->conf.on_picture_save    = NULL;
+    cam_list[0]->conf.on_motion_detected = NULL;
+    cam_list[0]->conf.on_area_detected   = NULL;
+    cam_list[0]->conf.on_movie_start     = NULL;
+    cam_list[0]->conf.on_movie_end       = NULL;
+    cam_list[0]->conf.on_camera_lost     = NULL;
+    cam_list[0]->conf.on_camera_found    = NULL;
+
+    /* Picture output configuration parameters */
+    cam_list[0]->conf.picture_output        = "off";
+    cam_list[0]->conf.picture_output_motion = FALSE;
+    cam_list[0]->conf.picture_type          = "jpeg";
+    cam_list[0]->conf.picture_quality       = 75;
+    cam_list[0]->conf.picture_exif          = NULL;
+    cam_list[0]->conf.picture_filename      = "%v-%Y%m%d%H%M%S-%q";
+
+    /* Snapshot configuration parameters */
+    cam_list[0]->conf.snapshot_interval = 0;
+    cam_list[0]->conf.snapshot_filename = "%v-%Y%m%d%H%M%S-snapshot";
+
+    /* Movie output configuration parameters */
+    cam_list[0]->conf.movie_output           = TRUE;
+    cam_list[0]->conf.movie_output_motion    = FALSE;
+    cam_list[0]->conf.movie_max_time         = 120;
+    cam_list[0]->conf.movie_bps              = 400000;
+    cam_list[0]->conf.movie_quality          = 60;
+    cam_list[0]->conf.movie_codec            = "mkv";
+    cam_list[0]->conf.movie_passthrough      = FALSE;
+    cam_list[0]->conf.movie_filename         = "%v-%Y%m%d%H%M%S";
+    cam_list[0]->conf.movie_extpipe_use      = FALSE;
+    cam_list[0]->conf.movie_extpipe          = NULL;
+
+    /* Timelapse movie configuration parameters */
+    cam_list[0]->conf.timelapse_interval  = 0;
+    cam_list[0]->conf.timelapse_mode      = "daily";
+    cam_list[0]->conf.timelapse_fps       = 30;
+    cam_list[0]->conf.timelapse_codec     = "mpg";
+    cam_list[0]->conf.timelapse_filename  = "%Y%m%d-timelapse";
+
+    /* Loopback device configuration parameters */
+    cam_list[0]->conf.video_pipe        = NULL;
+    cam_list[0]->conf.video_pipe_motion = NULL;
+
+    /* Webcontrol configuration parameters */
+    cam_list[0]->conf.webcontrol_port           = 0;
+    cam_list[0]->conf.webcontrol_ipv6           = FALSE;
+    cam_list[0]->conf.webcontrol_localhost      = TRUE;
+    cam_list[0]->conf.webcontrol_parms          = 0;
+    cam_list[0]->conf.webcontrol_interface      = 0;
+    cam_list[0]->conf.webcontrol_auth_method    = 0;
+    cam_list[0]->conf.webcontrol_authentication = NULL;
+    cam_list[0]->conf.webcontrol_tls            = FALSE;
+    cam_list[0]->conf.webcontrol_cert           = NULL;
+    cam_list[0]->conf.webcontrol_key            = NULL;
+    cam_list[0]->conf.webcontrol_cors_header    = NULL;
+
+    /* Live stream configuration parameters */
+    cam_list[0]->conf.stream_port            = 0;
+    cam_list[0]->conf.stream_localhost       = TRUE;
+    cam_list[0]->conf.stream_auth_method     = 0;
+    cam_list[0]->conf.stream_authentication  = NULL;
+    cam_list[0]->conf.stream_tls             = FALSE;
+    cam_list[0]->conf.stream_cors_header     = NULL;
+    cam_list[0]->conf.stream_preview_scale   = 25;
+    cam_list[0]->conf.stream_preview_newline = FALSE;
+    cam_list[0]->conf.stream_preview_method  = 0;
+    cam_list[0]->conf.stream_quality         = 50;
+    cam_list[0]->conf.stream_grey            = FALSE;
+    cam_list[0]->conf.stream_motion          = FALSE;
+    cam_list[0]->conf.stream_maxrate         = 1;
+    cam_list[0]->conf.stream_limit           = 0;
+
+    /* Database and SQL configuration parameters */
+    cam_list[0]->conf.database_type         = NULL;
+    cam_list[0]->conf.database_dbname       = NULL;
+    cam_list[0]->conf.database_host         = "localhost";
+    cam_list[0]->conf.database_port         = 0;
+    cam_list[0]->conf.database_user         = NULL;
+    cam_list[0]->conf.database_password     = NULL;
+    cam_list[0]->conf.database_busy_timeout = 0;
+
+    cam_list[0]->conf.sql_log_picture   = 0;
+    cam_list[0]->conf.sql_log_snapshot  = 0;
+    cam_list[0]->conf.sql_log_movie     = 0;
+    cam_list[0]->conf.sql_log_timelapse = 0;
+    cam_list[0]->conf.sql_query_start   = NULL;
+    cam_list[0]->conf.sql_query_stop    = NULL;
+    cam_list[0]->conf.sql_query         = NULL;
+
+}
+
+static const char *conf_parm_get_bool(struct ctx_cam **cam_list, int indx_parm, int indx_thrd) {
+    int val = config_parms[indx_parm].parm_offset;
+
+    if (indx_thrd &&
+        *(int*)((char *)cam_list[indx_thrd] + val) == *(int*)((char *)cam_list[0] + val)){
+        return NULL;
+    }
+
+    if (*(int*)((char *)cam_list[indx_thrd] + val)){
+        return "on";
+    } else {
+        return "off";
+    }
+}
+
+static const char *conf_parm_get_int(struct ctx_cam **cam_list, int indx_parm, int indx_thrd){
+    static char retval[20];
+    int val = config_parms[indx_parm].parm_offset;
+
+    if (indx_thrd &&
+        *(int*)((char *)cam_list[indx_thrd] + val) == *(int*)((char *)cam_list[0] + val)){
+        return NULL;
+    }
+
+    sprintf(retval, "%d", *(int*)((char *)cam_list[indx_thrd] + val));
+
+    return retval;
+}
+
+static const char *conf_parm_get_string(struct ctx_cam **cam_list, int indx_parm, int indx_thrd) {
+    int val = config_parms[indx_parm].parm_offset;
+    const char **cptr0, **cptr1;
+
+    cptr0 = (const char **)((char *)cam_list[0] + val);
+    cptr1 = (const char **)((char *)cam_list[indx_thrd] + val);
+
+    if ((indx_thrd) && (*cptr0 != NULL) && (*cptr1 != NULL) && (mystreq(*cptr0, *cptr1))){
+        return NULL;
+    }
+
+    return *cptr1;
+}
+
+static const char *conf_parm_get_camera(struct ctx_cam **cam_list, int indx_parm, int indx_thrd){
+    char *retval;
+    unsigned int i = 0;
+
+    (void)indx_parm;
+
+    if (indx_thrd != 0) return NULL;
+
+    retval = (char*)mymalloc(1);
+    retval[0] = 0;
+
+    while (cam_list[++i]) {
+        /* Skip config files loaded from conf directory */
+        if (cam_list[i]->from_conf_dir) continue;
+
+        retval = (char*)myrealloc(retval, strlen(retval) + strlen(cam_list[i]->conf_filename) + 10,
+                           "print_camera");
+        sprintf(retval + strlen(retval), "camera %s\n", cam_list[i]->conf_filename);
+    }
+
+    return NULL;
+}
+
+/**  Retrieve the parameter requested */
+const char *conf_parm_get(struct ctx_cam **cam_list, int indx_parm, int indx_thrd){
+
+    if (config_parms[indx_parm].parm_type == PARM_TYPE_BOOL) {
+        return conf_parm_get_bool(cam_list, indx_parm, indx_thrd);
+
+    } else if (config_parms[indx_parm].parm_type == PARM_TYPE_INT) {
+        return conf_parm_get_int(cam_list, indx_parm, indx_thrd);
+
+    } else if ((config_parms[indx_parm].parm_type == PARM_TYPE_STRING) ||
+               (config_parms[indx_parm].parm_type == PARM_TYPE_URI)) {
+        return conf_parm_get_string(cam_list, indx_parm, indx_thrd);
+
+    } else if ((config_parms[indx_parm].parm_type == PARM_TYPE_CAMERA)) {
+        return conf_parm_get_camera(cam_list, indx_parm, indx_thrd);
+
+    } else {
+        return NULL;
+    }
+
+}
+
+/**  Write the configuration(s) to the log */
+void conf_parms_log(struct ctx_cam **cam_list) {
+    int i, t;
+    const char *parm_val;
+
+    t = 0;
+    while(cam_list[++t]);
+
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("Writing configuration parameters from all files (%d):"), t);
+    for (t = 0; cam_list[t]; t++) {
+        motion_log(INF, TYPE_ALL, NO_ERRNO,0
+            ,_("Camera %d - Config file: %s"), t, cam_list[t]->conf_filename);
+        i = 0;
+        while (config_parms[i].parm_name != NULL) {
+            parm_val = conf_parm_get(cam_list, i, t);
+            if (parm_val != NULL) {
+                if (mystreq(config_parms[i].parm_name, "netcam_url") ||
+                    mystreq(config_parms[i].parm_name, "netcam_userpass") ||
+                    mystreq(config_parms[i].parm_name, "netcam_highres") ||
+                    mystreq(config_parms[i].parm_name, "stream_cors_header") ||
+                    mystreq(config_parms[i].parm_name, "stream_authentication") ||
+                    mystreq(config_parms[i].parm_name, "webcontrol_authentication") ||
+                    mystreq(config_parms[i].parm_name, "webcontrol_cors_header") ||
+                    mystreq(config_parms[i].parm_name, "webcontrol_key") ||
+                    mystreq(config_parms[i].parm_name, "webcontrol_cert") ||
+                    mystreq(config_parms[i].parm_name, "database_user") ||
+                    mystreq(config_parms[i].parm_name, "database_password"))
+                {
+                    motion_log(INF, TYPE_ALL, NO_ERRNO,0
+                        ,_("%-25s <redacted>"), config_parms[i].parm_name);
+                } else {
+                    if (strncmp(config_parms[i].parm_name, "text", 4) ||
+                        strncmp(parm_val, " ", 1)){
+                        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s %s"
+                            , config_parms[i].parm_name, parm_val);
+                    } else {
+                        motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s \"%s\""
+                            , config_parms[i].parm_name, parm_val);
+                    }
+                }
+            } else {
+                if (t == 0) {
+                    motion_log(INF, TYPE_ALL, NO_ERRNO,0, "%-25s "
+                        , config_parms[i].parm_name);
+                }
+            }
+            i++;
+        }
+    }
+}
+
+/**  Write the configuration(s) to file */
+void conf_parms_write(struct ctx_cam **cam_list) {
+    const char *retval;
+    int i, thread;
+    char timestamp[32];
+    FILE *conffile;
+
+    for (thread = 0; cam_list[thread]; thread++) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Writing config file to %s")
+            ,cam_list[thread]->conf_filename);
+
+        conffile = myfopen(cam_list[thread]->conf_filename, "w");
+
+        if (!conffile) continue;
+
+        time_t now = time(0);
+        strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
+
+        fprintf(conffile, "# %s\n", cam_list[thread]->conf_filename);
+        fprintf(conffile, "#\n# This config file was generated by motion " VERSION "\n");
+        fprintf(conffile, "# at %s\n", timestamp);
+        fprintf(conffile, "\n\n");
+
+        for (i = 0; config_parms[i].parm_name; i++) {
+            retval = conf_parm_get(cam_list, i, thread);
+            /* If config parameter has a value (not NULL) print it to the config file. */
+            if (retval) {
+                fprintf(conffile, "%s\n", config_parms[i].parm_help);
+                /*
+                 * If the option is a text_* and first char is a space put
+                 * quotation marks around to allow leading spaces.
+                 */
+                if (strncmp(config_parms[i].parm_name, "text", 4) || strncmp(retval, " ", 1)){
+                    fprintf(conffile, "%s %s\n\n", config_parms[i].parm_name, retval);
+                } else {
+                    fprintf(conffile, "%s \"%s\"\n\n", config_parms[i].parm_name, retval);
+                }
+            } else {
+                if (thread == 0) {
+                    char value[PATH_MAX];
+                    /* The 'camera_dir' option should keep the installed default value */
+                    if (!strncmp(config_parms[i].parm_name, "camera_dir", 10)){
+                        sprintf(value, "%s", sysconfdir "/conf.d");
+                    } else {
+                        sprintf(value, "%s", "value");
+                    }
+
+                    fprintf(conffile, "%s\n", config_parms[i].parm_help);
+                    fprintf(conffile, "; %s %s\n\n", config_parms[i].parm_name, value);
+                }
+            }
+        }
+
+        fprintf(conffile, "\n");
+        myfclose(conffile);
+        conffile = NULL;
+    }
+}
+
+void conf_init(struct ctx_motapp *motapp, int argc, char *argv[]){
+    FILE *fp = NULL;
+    char filename[PATH_MAX];
+    int i;
+
+    /* Create the starting cam_list.  The last entry must be NULL */
+    motapp->cam_list = (struct ctx_cam**)calloc(sizeof(struct ctx_cam *), 2);
+
+    motapp->cam_list[0] = mymalloc(sizeof(struct ctx_cam));
+    memset(motapp->cam_list[0], 0, sizeof(struct ctx_cam));
+    motapp->cam_list[1] = NULL;
+
+    /* Minimum required initial values.  Most defaults set in
+    *  motion_init_defaults at start of motion_loop
+    */
+    motapp->cam_list[0]->motapp = motapp;
+    motapp->cam_list[0]->cam_list = motapp->cam_list;
+    motapp->cam_list[0]->conf.argv = argv;
+    motapp->cam_list[0]->conf.argc = argc;
+
+    conf_defaults(motapp->cam_list);
+
+    /*
+     * For each member of cam_list[0] which is a pointer to a string
+     * if the member points to a string in conf_template and is not NULL.
+     * 1. Reserve (malloc) memory for the string.
+     * 2. Copy the conf_template given string to the reserved memory.
+     * 3. Change the cam_list[0] member (char*) pointing to the string in reserved memory.
+     * This ensures that we can free and malloc the string when changed
+     * via http remote control or config file or Command-line options.
+     */
+    conf_malloc_strings(motapp->cam_list[0]);
+
+    /*
+     * Open the motion.conf file. We try in this sequence:
+     * 1. Command-line
+     * 2. current working directory
+     * 3. $HOME/.motion/motion.conf
+     * 4. sysconfdir/motion.conf
+     */
+    /* Get filename , pid file & log file from Command-line. */
+
+    conf_cmdline(motapp->cam_list[0], -1);
+
+    if (motapp->cam_list[0]->conf_filename[0]) { /* User has supplied filename on Command-line. */
+      strncpy(filename, motapp->cam_list[0]->conf_filename, PATH_MAX-1);
+      filename[PATH_MAX-1] = '\0';
+      fp = fopen (filename, "r");
+    }
+
+    if (!fp) {  /* Command-line didn't work, try current dir. */
+        char path[PATH_MAX];
+
+        if (motapp->cam_list[0]->conf_filename[0]){
+            MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+                ,_("Configfile %s not found - trying defaults.")
+                ,filename);
+        }
+
+        if (getcwd(path, sizeof(path)) == NULL) {
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error getcwd"));
+            exit(-1);
+        }
+
+        snprintf(filename, PATH_MAX, "%.*s/motion.conf"
+            , (int)(PATH_MAX-1-strlen("/motion.conf"))
+            , path);
+        fp = fopen (filename, "r");
+    }
+
+    if (!fp) {  /* Specified file does not exist... try default file. */
+        snprintf(filename, PATH_MAX, "%s/.motion/motion.conf", getenv("HOME"));
+        fp = fopen(filename, "r");
+
+        if (!fp) {
+            snprintf(filename, PATH_MAX, "%s/motion.conf", sysconfdir);
+            fp = fopen(filename, "r");
+
+            if (!fp){ /* There is no config file.... use defaults. */
+                MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+                    ,_("could not open configfile %s")
+                    ,filename);
+            }
+        }
+    }
+
+    /* Now we process the motion.conf config file and close it. */
+    if (fp) {
+      strncpy(motapp->cam_list[0]->conf_filename, filename
+        , sizeof(motapp->cam_list[0]->conf_filename) - 1);
+      motapp->cam_list[0]->conf_filename[sizeof(motapp->cam_list[0]->conf_filename) - 1] = '\0';
+
+      MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Processing thread 0 - config file %s"), filename);
+
+      conf_process(motapp->cam_list[0], fp);
+
+      myfclose(fp);
+    } else {
+        MOTION_LOG(CRT, TYPE_ALL, NO_ERRNO
+            ,_("No config file to process, using default values"));
+    }
+
+    /* Set the application defaults to values in cam_list[0] */
+    motapp->daemon = motapp->cam_list[0]->conf.daemon;
+    if (motapp->cam_list[0]->conf.pid_file){
+        snprintf(motapp->pid_file
+            , sizeof(motapp->pid_file)
+            , "%s", motapp->cam_list[0]->conf.pid_file);
+    }
+    if (motapp->cam_list[0]->conf.log_file){
+        snprintf(motapp->log_file
+            , sizeof(motapp->log_file)
+            , "%s", motapp->cam_list[0]->conf.log_file);
+    }
+    if (motapp->cam_list[0]->conf.log_type){
+        snprintf(motapp->log_type_str
+            , sizeof(motapp->log_type_str)
+            , "%s", motapp->cam_list[0]->conf.log_type);
+    }
+    motapp->log_level = motapp->cam_list[0]->conf.log_level;
+
+    /*Now update everything with command line overrides */
+    i = -1;
+    while (motapp->cam_list[++i]){
+        conf_cmdline(motapp->cam_list[i], i);
+        motapp->cam_list[i]->motapp = motapp;
+        motapp->cam_list[i]->cam_list = motapp->cam_list;
+    }
+    config_parms_intl();
+
+    return;
+}
+
+void conf_deinit(struct ctx_motapp *motapp) {
+    int j, indx;
+    void **val;
+
+    indx = 0;
+    while (motapp->cam_list[indx] != NULL){
+        /* Free memory allocated for config parameters */
+        for (j = 0; config_parms[j].parm_name != NULL; j++) {
+            if ((config_parms[j].parm_type == PARM_TYPE_STRING) ||
+                (config_parms[j].parm_type == PARM_TYPE_URI) ) {
+
+                val = (void **)((char *)motapp->cam_list[indx] + config_parms[j].parm_offset);
+                if (*val) {
+                    free(*val);
+                    *val = NULL;
+                }
+            }
+        }
+        free(motapp->cam_list[indx]);
+        indx++;
+    }
+
+    free(motapp->cam_list);
+    motapp->cam_list = NULL;
+
+}
+

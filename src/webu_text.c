@@ -173,22 +173,22 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
     const char *val_parm;
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, webui->thread_nbr);
+        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
         if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
+            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
         }
         snprintf(response, sizeof (response),
             "  %s = %s \n"
-            ,config_params[indx_parm].param_name
+            ,config_parms[indx_parm].parm_name
             ,val_parm
         );
         webu_write(webui, response);
@@ -218,24 +218,24 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, webui->thread_nbr);
+        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
         if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
+            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
         }
         snprintf(response, sizeof (response),
             "  <li><a href=/%s/config/set?%s>%s</a> = %s</li>\n"
             ,webui->uri_camid
-            ,config_params[indx_parm].param_name
-            ,config_params[indx_parm].param_name
+            ,config_parms[indx_parm].parm_name
+            ,config_parms[indx_parm].parm_name
             ,val_parm);
         webu_write(webui, response);
 
@@ -274,23 +274,23 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
-        val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, webui->thread_nbr);
+        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
         if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
+            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
         }
         snprintf(response, sizeof(response),
             "<option value='%s'>%s</option>\n"
-            ,config_params[indx_parm].param_name
-            ,config_params[indx_parm].param_name
+            ,config_parms[indx_parm].parm_name
+            ,config_parms[indx_parm].parm_name
         );
         webu_write(webui, response);
 
@@ -326,27 +326,26 @@ static void webu_text_set_query(struct webui_ctx *webui) {
     webu_text_camera_name(webui);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0)) ||
-            (mystrne(webui->uri_parm1, config_params[indx_parm].param_name))) {
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0)) ||
+            (mystrne(webui->uri_parm1, config_parms[indx_parm].parm_name))) {
             indx_parm++;
             continue;
         }
 
-        val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, webui->thread_nbr);
+        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
         if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
+            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
         }
-
         snprintf(response, sizeof (response),
             "<form action=set?>\n"
             "%s <input type=text name='%s' value='%s' size=60>\n"
             "<input type='submit' value='set'>\n"
-            ,config_params[indx_parm].param_name
-            ,config_params[indx_parm].param_name
+            ,config_parms[indx_parm].parm_name
+            ,config_parms[indx_parm].parm_name
             ,val_parm
         );
         webu_write(webui, response);
@@ -406,19 +405,19 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
     webu_write(webui, response);
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
-            ((webui->thread_nbr != 0) && (config_params[indx_parm].main_thread != 0))){
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+            ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
             continue;
         }
 
         snprintf(response, sizeof(response),
             "<option value='%s'>%s</option>\n"
-            ,config_params[indx_parm].param_name
-            ,config_params[indx_parm].param_name
+            ,config_parms[indx_parm].parm_name
+            ,config_parms[indx_parm].parm_name
         );
         webu_write(webui, response);
 
@@ -876,34 +875,33 @@ void webu_text_get_query(struct webui_ctx *webui) {
      */
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_value1);
     indx_parm=0;
-    while (dep_config_params[indx_parm].name != NULL) {
-        if (mystreq(dep_config_params[indx_parm].name, webui->uri_value1)){
-            snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx_parm].newname);
+    while (config_parms_depr[indx_parm].parm_name != NULL) {
+        if (mystreq(config_parms_depr[indx_parm].parm_name, webui->uri_value1)){
+            snprintf(temp_name, WEBUI_LEN_PARM, "%s", config_parms_depr[indx_parm].newname);
             break;
         }
         indx_parm++;
     }
 
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             mystrne(webui->uri_parm1,"query") ||
-            mystrne(temp_name, config_params[indx_parm].param_name)){
+            mystrne(temp_name, config_parms[indx_parm].parm_name)){
             indx_parm++;
             continue;
         }
 
-        val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, webui->thread_nbr);
+        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
         if (val_parm == NULL){
-            val_parm = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
+            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
         }
-
-        if (mystrne(webui->uri_value1, config_params[indx_parm].param_name)){
+        if (mystrne(webui->uri_value1, config_parms[indx_parm].parm_name)){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("'%s' option is depreciated.  New option name is `%s'")
-            ,webui->uri_value1, config_params[indx_parm].param_name);
+            ,webui->uri_value1, config_parms[indx_parm].parm_name);
         }
 
         webu_text_header(webui);
@@ -917,14 +915,14 @@ void webu_text_get_query(struct webui_ctx *webui) {
                 "<ul>\n"
                 "  <li>%s = %s </li>\n"
                 "</ul>\n"
-                ,config_params[indx_parm].param_name
+                ,config_parms[indx_parm].parm_name
                 ,val_parm
             );
         } else {
             snprintf(response, sizeof (response),
                 "%s = %s %s\n"
                 "Done %s\n"
-                ,config_params[indx_parm].param_name
+                ,config_parms[indx_parm].parm_name
                 ,val_parm
                 ,webui->text_eol, webui->text_eol
             );
@@ -935,7 +933,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
         break;
     }
 
-    if (config_params[indx_parm].param_name == NULL){
+    if (config_parms[indx_parm].parm_name == NULL){
         webu_text_badreq(webui);
     }
 
@@ -959,7 +957,7 @@ void webu_text_status(struct webui_ctx *webui) {
             snprintf(response, sizeof(response),
                 "Camera %d Detection status %s %s\n"
                 ,webui->camlst[indx]->camera_id
-                ,(!webui->camlst[indx]->running)? "NOT RUNNING":
+                ,(!webui->camlst[indx]->running_cam)? "NOT RUNNING":
                 (webui->camlst[indx]->pause)? "PAUSE":"ACTIVE"
                 ,webui->text_eol
             );
@@ -969,7 +967,7 @@ void webu_text_status(struct webui_ctx *webui) {
         snprintf(response, sizeof(response),
             "Camera %d Detection status %s %s\n"
             ,webui->cam->camera_id
-            ,(!webui->cam->running)? "NOT RUNNING":
+            ,(!webui->cam->running_cam)? "NOT RUNNING":
             (webui->cam->pause)? "PAUSE":"ACTIVE"
             ,webui->text_eol
         );
@@ -999,7 +997,7 @@ void webu_text_connection(struct webui_ctx *webui) {
                 ,webui->camlst[indx]->camera_id
                 ,webui->camlst[indx]->conf.camera_name ? " -- " : ""
                 ,webui->camlst[indx]->conf.camera_name ? webui->camlst[indx]->conf.camera_name : ""
-                ,(!webui->camlst[indx]->running)? "NOT RUNNING" :
+                ,(!webui->camlst[indx]->running_cam)? "NOT RUNNING" :
                 (webui->camlst[indx]->lost_connection)? "Lost connection": "Connection OK"
                 ,webui->text_eol
             );
@@ -1011,7 +1009,7 @@ void webu_text_connection(struct webui_ctx *webui) {
             ,webui->cam->camera_id
             ,webui->cam->conf.camera_name ? " -- " : ""
             ,webui->cam->conf.camera_name ? webui->cam->conf.camera_name : ""
-            ,(!webui->cam->running)? "NOT RUNNING" :
+            ,(!webui->cam->running_cam)? "NOT RUNNING" :
              (webui->cam->lost_connection)? "Lost connection": "Connection OK"
             ,webui->text_eol
         );

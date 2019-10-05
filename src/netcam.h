@@ -107,7 +107,8 @@ struct ctx_netcam {
 
     struct timespec           frame_prev_tm;    /* The time set before calling the av functions */
     struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
-    struct config             *conf;            /* Pointer to conf parms of parent cam*/
+    struct ctx_motapp         *motapp;          /* Pointer to parent application context  */
+    struct ctx_config         *conf;            /* Pointer to conf parms of parent cam*/
 
     char                      threadname[16];   /* The thread name*/
     int                       threadnbr;        /* The thread number */

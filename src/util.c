@@ -555,9 +555,7 @@ static void mytranslate_locale_chg(const char *langcd){
 
 void mytranslate_init(void){
     #ifdef HAVE_GETTEXT
-        /* Set the flag to enable native language support */
-        nls_enabled = 1;
-
+        mytranslate_text("", 1);
         setlocale (LC_ALL, "");
 
         //translate_locale_chg("li");
@@ -571,23 +569,41 @@ void mytranslate_init(void){
 
     #else
         /* Disable native language support */
-        nls_enabled = 0;
+        mytranslate_text("", 0);
 
         /* This avoids a unused function warning */
         translate_locale_chg("en");
     #endif
 }
 
-char* mytranslate_text(const char *msgid){
-    #ifdef HAVE_GETTEXT
+char* mytranslate_text(const char *msgid, int setnls){
+    static int nls_enabled = TRUE;
+
+    if (setnls == 0){
         if (nls_enabled){
-            return (char*)gettext(msgid);
-        } else {
-            return (char*)msgid;
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
         }
-    #else
-        return (char*)msgid;
-    #endif
+        nls_enabled = FALSE;
+        return NULL;
+
+    } else if (setnls == 1){
+        if (!nls_enabled){
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
+        }
+        nls_enabled = TRUE;
+        return NULL;
+
+    } else {
+        #ifdef HAVE_GETTEXT
+            if (nls_enabled){
+                return (char*)gettext(msgid);
+            } else {
+                return (char*)msgid;
+            }
+        #else
+            return (char*)msgid;
+        #endif
+    }
 }
 
 /**

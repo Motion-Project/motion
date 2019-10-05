@@ -58,8 +58,6 @@ struct ctx_netcam;
 #include "conf.h"
 #include "track.h"
 
-int nls_enabled;
-
 #define DEF_PALETTE             17
 
 /* Default picture settings */
@@ -174,6 +172,14 @@ enum FLIP_TYPE {
     FLIP_TYPE_VERTICAL
 };
 
+enum MOTION_SIGNAL {
+    MOTION_SIGNAL_NONE,
+    MOTION_SIGNAL_ALARM,
+    MOTION_SIGNAL_USR1,
+    MOTION_SIGNAL_SIGHUP,
+    MOTION_SIGNAL_SIGTERM
+};
+
 struct ctx_usrctrl {
     char          *ctrl_name;       /* The name or description of the ID as requested by user*/
     int            ctrl_value;      /* The value that the user wants the control set to*/
@@ -283,6 +289,8 @@ struct ctx_stream {
  *  own context
  */
 struct ctx_cam {
+    pthread_t               thread_id;
+    struct ctx_motapp       *motapp;
     struct ctx_cam          **cam_list;
 
     FILE                    *extpipe;
@@ -297,9 +305,8 @@ struct ctx_cam {
     int                     log_level;
     unsigned int            log_type;
 
-    struct config           conf;
+    struct ctx_config       conf;
     struct ctx_track        track;
-
     struct ctx_images       imgs;
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
@@ -330,14 +337,10 @@ struct ctx_cam {
     volatile unsigned int   snapshot;    /* Make a snapshot */
     volatile unsigned int   event_stop;  /* Boolean for whether to stop a event */
     volatile unsigned int   event_user;  /* Boolean for whether to user triggered an event */
-    volatile unsigned int   finish;      /* End the thread */
-    volatile unsigned int   restart;     /* Restart the thread when it ends */
-    volatile unsigned int   running;
-    volatile unsigned int   webcontrol_running;
-    volatile unsigned int   webcontrol_finish;      /* End the thread */
+    volatile unsigned int   finish_cam;      /* End the thread */
+    volatile unsigned int   restart_cam;     /* Restart the thread when it ends */
+    volatile unsigned int   running_cam;
     volatile int            watchdog;
-
-    pthread_t               thread_id;
 
     int                     event_nr;
     int                     prev_event;
@@ -405,10 +408,31 @@ struct ctx_cam {
 
 };
 
-extern pthread_mutex_t global_lock;
-extern volatile int threads_running;
-extern FILE *ptr_logfile;
-extern pthread_key_t tls_key_threadnr; /* key for thread number */
+/*  ctx_cam for whole motion application including all the cameras */
+struct ctx_motapp {
 
+    struct ctx_cam      **cam_list;
+    pthread_mutex_t     global_lock;
+
+    volatile int        threads_running;
+    volatile int        finish_all;
+    volatile int        restart_all;
+
+    int                 daemon;
+    char                pid_file[PATH_MAX];
+    char                log_file[PATH_MAX];
+    char                log_type_str[6];
+    int                 log_level;
+    unsigned int        log_type;
+
+    volatile int        webcontrol_running;
+    volatile int        webcontrol_finish;
+
+    struct MHD_Daemon   *webcontrol_daemon;
+    char                webcontrol_digest_rand[8];
+
+};
+
+extern pthread_key_t tls_key_threadnr; /* key for thread number */
 
 #endif /* _INCLUDE_MOTION_H */

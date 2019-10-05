@@ -12,6 +12,8 @@
 #ifndef _INCLUDE_LOGGER_H_
 #define _INCLUDE_LOGGER_H_
 
+    struct ctx_cam;
+
     #include <syslog.h>
 
     /* Logging mode */
@@ -51,13 +53,8 @@
 
     #define MOTION_LOG(x, y, z, format, args...)  motion_log(x, y, z, 1, format, __FUNCTION__, ##args)
 
-    int get_log_type(const char* type);
-    const char* get_log_type_str(unsigned int type);
-    void set_log_type(unsigned int type);
-    const char* get_log_level_str(unsigned int level);
-    void set_log_level(unsigned int level);
-    void set_log_mode(int mode);
-    FILE * set_logfile(const char *logfile_name);
     void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...);
+    void log_init(struct ctx_motapp *motapp);
+    void log_deinit(struct ctx_motapp *motapp);
 
 #endif

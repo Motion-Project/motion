@@ -1177,6 +1177,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     netcam->v4l2_palette = cam->conf.v4l2_palette;
     netcam->framerate = cam->conf.framerate;
     netcam->src_fps =  cam->conf.framerate; /* Default to conf fps */
+    netcam->motapp = cam->motapp;
     netcam->conf = &cam->conf;
     netcam->camera_name = cam->conf.camera_name;
     netcam->img_recv = mymalloc(sizeof(netcam_buff));
@@ -1613,9 +1614,9 @@ static void *netcam_handler(void *arg){
     netcam_shutdown(netcam);
 
     /* Our thread is finished - decrement motion's thread count. */
-    pthread_mutex_lock(&global_lock);
-        threads_running--;
-    pthread_mutex_unlock(&global_lock);
+    pthread_mutex_lock(&netcam->motapp->global_lock);
+        netcam->motapp->threads_running--;
+    pthread_mutex_unlock(&netcam->motapp->global_lock);
 
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("netcam camera handler: finish set, exiting"));
@@ -1637,9 +1638,9 @@ static int netcam_start_handler(struct ctx_netcam *netcam){
     pthread_attr_init(&handler_attribute);
     pthread_attr_setdetachstate(&handler_attribute, PTHREAD_CREATE_DETACHED);
 
-    pthread_mutex_lock(&global_lock);
-        netcam->threadnbr = ++threads_running;
-    pthread_mutex_unlock(&global_lock);
+    pthread_mutex_lock(&netcam->motapp->global_lock);
+        netcam->threadnbr = ++netcam->motapp->threads_running;
+    pthread_mutex_unlock(&netcam->motapp->global_lock);
 
     retcd = pthread_create(&netcam->thread_id, &handler_attribute, &netcam_handler, netcam);
     if (retcd < 0) {
@@ -1841,9 +1842,9 @@ void netcam_cleanup(struct ctx_cam *cam, int init_retry_flag){
                 pthread_cancel(netcam->thread_id);
                 pthread_kill(netcam->thread_id, SIGVTALRM); /* This allows the cancel to be processed */
                 if (!init_retry_flag){
-                    pthread_mutex_lock(&global_lock);
-                        threads_running--;
-                    pthread_mutex_unlock(&global_lock);
+                    pthread_mutex_lock(&netcam->motapp->global_lock);
+                        netcam->motapp->threads_running--;
+                    pthread_mutex_unlock(&netcam->motapp->global_lock);
                 }
             }
             /* If we never connect we don't have a handler but we still need to clean up some */

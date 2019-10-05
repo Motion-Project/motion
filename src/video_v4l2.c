@@ -1157,7 +1157,7 @@ static int v4l2_device_init(struct ctx_cam *cam, struct video_dev *curdev) {
     vid_source->fd_device = curdev->fd_device;
     vid_source->fps = cam->conf.framerate;
     vid_source->pframe = -1;
-    vid_source->finish = &cam->finish;
+    vid_source->finish = &cam->finish_cam;
     vid_source->buffers = NULL;
 
     return 0;
@@ -1530,7 +1530,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
 int v4l2_next(struct ctx_cam *cam, struct ctx_image_data *img_data) {
     #ifdef HAVE_V4L2
         int ret = -2;
-        struct config *conf = &cam->conf;
+        struct ctx_config *conf = &cam->conf;
         struct video_dev *dev;
 
         pthread_mutex_lock(&v4l2_mutex);

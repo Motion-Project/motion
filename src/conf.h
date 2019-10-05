@@ -15,12 +15,12 @@
 #ifndef _INCLUDE_CONF_H
 #define _INCLUDE_CONF_H
 
-    /*
-    * More parameters may be added later.
-    */
-    struct config {
+    struct ctx_cam;
+    struct ctx_motapp;
+
+    struct ctx_config {
         /* Overall system configuration parameters */
-        /* daemon is directly cast into the cam ctx_cam rather than conf */
+        int             daemon;
         int             setup_mode;
         char            *pid_file;
         char            *log_file;
@@ -189,48 +189,42 @@
         char            **argv;
     };
 
-    /**
-     * typedef for a param copy function.
-     */
-    typedef struct ctx_cam ** (* conf_copy_func)(struct ctx_cam **, const char *, int);
-    typedef const char *(* conf_print_func)(struct ctx_cam **, char **, int, unsigned int);
+    enum PARM_TYPE{
+        PARM_TYPE_BOOL,
+        PARM_TYPE_INT,
+        PARM_TYPE_STRING,
+        PARM_TYPE_URI,
+        PARM_TYPE_CAMERA
+    };
 
-    /**
-     * description for parameters in the config file
-     */
-    typedef struct {
-        const char      *param_name;      /* name for this parameter                  */
-        const char      *param_help;      /* short explanation for parameter          */
-        unsigned int    main_thread;      /* belong only to main thread when value>0  */
-        int             conf_value;       /* pointer to a field in struct ctx_cam     */
-        conf_copy_func  copy;             /* a function to set the value in 'config'  */
-        conf_print_func print;            /* a function to output the value to a file */
-        int             webui_level;      /* Enum to display in webui: 0,1,2,3,99(always to never)*/
-    } config_param;
+    /** Current parameters in the config file */
+    struct ctx_parm {
+        const char          *parm_name;     /* name for this parameter                  */
+        const char          *parm_help;     /* short explanation for parameter          */
+        unsigned int        main_thread;    /* belong only to main thread when value>0  */
+        int                 parm_offset;    /* Offset from ctx_cam pointer to variable */
+        enum PARM_TYPE      parm_type;      /* char string of either bool,int,string,etc.  */
+        int                 webui_level;    /* Enum to display in webui: 0,1,2,3,99(always to never)*/
+    };
 
-    extern config_param config_params[];
+    /** Deprecated parameters in the config file  */
+    struct ctx_parm_depr{
+        const char          *parm_name;     /* Name of the deprecated option */
+        const char          *last_version;  /* Last version this option was used in */
+        const char          *info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
+        int                 parm_offset;    /* Offset from ctx_cam pointer to variable */
+        const char          *newname;       /* Name of the new parameter */
+        enum PARM_TYPE      parm_type;      /* char string of either bool,int,string,etc.  */
+    };
 
-    /**
-     * description for deprecated parameters in the config file
-     */
-    typedef struct {
-        const char      *name;          /* Name of the deprecated option */
-        const char      *last_version;  /* Last version this option was used in */
-        const char      *info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
-        int             conf_value;     /* Pointer to the replacement field in struct ctx_cam */
-        const char      *newname;       /* Name of the new parameter */
-        conf_copy_func  copy;           /* Function to set the replacement value */
-    } dep_config_param;
+    extern struct ctx_parm config_parms[];
+    extern struct ctx_parm_depr config_parms_depr[];
 
-    extern dep_config_param dep_config_params[];
-
-    struct ctx_cam **conf_load(struct ctx_cam **camlst);
-    struct ctx_cam **copy_string(struct ctx_cam **camlst, const char *, int);
-    struct ctx_cam **copy_uri(struct ctx_cam **camlst, const char *, int);
-    struct ctx_cam **conf_cmdparse(struct ctx_cam **camlst, const char *, const char *);
-    struct ctx_cam **read_camera_dir(struct ctx_cam **camlst, const char *, int);
-    void conf_output_parms(struct ctx_cam **camlst);
-    const char *config_type(config_param *);
-    void conf_print(struct ctx_cam **camlst);
+    void conf_init(struct ctx_motapp *motapp, int argc, char *argv[]);
+    void conf_deinit(struct ctx_motapp *motapp);
+    void conf_parms_log(struct ctx_cam **cam_list);
+    void conf_parms_write(struct ctx_cam **cam_list);
+    void conf_parm_set(struct ctx_cam *cam, const char *cmd, const char *arg1);
+    const char *conf_parm_get(struct ctx_cam **cam_list, int indx_parm, int indx_thrd);
 
 #endif /* _INCLUDE_CONF_H */

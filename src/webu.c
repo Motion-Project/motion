@@ -579,15 +579,14 @@ void webu_process_action(struct webui_ctx *webui) {
     } else if (mystreq(webui->uri_cmd2,"restart")){
         if (webui->thread_nbr == 0) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all threads"));
-            webui->camlst[0]->webcontrol_finish = TRUE;
             kill(getpid(),SIGHUP);
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                 _("Restarting thread %d"),webui->thread_nbr);
-            webui->cam->restart = TRUE;
-            if (webui->cam->running) {
+            webui->cam->restart_cam = TRUE;
+            if (webui->cam->running_cam) {
                 webui->cam->event_stop = TRUE;
-                webui->cam->finish = TRUE;
+                webui->cam->finish_cam = TRUE;
             }
 
         }
@@ -597,28 +596,27 @@ void webu_process_action(struct webui_ctx *webui) {
             while (webui->camlst[++indx]){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                     _("Quitting thread %d"),webui->thread_nbr);
-                webui->camlst[indx]->restart = FALSE;
+                webui->camlst[indx]->restart_cam = FALSE;
                 webui->camlst[indx]->event_stop = TRUE;
                 webui->camlst[indx]->event_user = TRUE;
-                webui->camlst[indx]->finish = TRUE;
+                webui->camlst[indx]->finish_cam = TRUE;
             }
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO,
                 _("Quitting thread %d"),webui->thread_nbr);
-            webui->cam->restart = FALSE;
+            webui->cam->restart_cam = FALSE;
             webui->cam->event_stop = TRUE;
             webui->cam->event_user = TRUE;
-            webui->cam->finish = TRUE;
+            webui->cam->finish_cam = TRUE;
         }
 
     } else if (mystreq(webui->uri_cmd2,"end")){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Motion terminating"));
             while (webui->camlst[indx]){
-                webui->camlst[indx]->webcontrol_finish = TRUE;
-                webui->camlst[indx]->restart = FALSE;
+                webui->camlst[indx]->restart_cam = FALSE;
                 webui->camlst[indx]->event_stop = TRUE;
                 webui->camlst[indx]->event_user = TRUE;
-                webui->camlst[indx]->finish = TRUE;
+                webui->camlst[indx]->finish_cam = TRUE;
                 indx++;
             }
 
@@ -648,7 +646,7 @@ void webu_process_action(struct webui_ctx *webui) {
 
     } else if ((mystreq(webui->uri_cmd2,"write")) ||
                (mystreq(webui->uri_cmd2,"writeyes"))){
-        conf_print(webui->camlst);
+        conf_parms_write(webui->camlst);
 
     } else {
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO,
@@ -672,9 +670,9 @@ static int webu_process_config_set(struct webui_ctx *webui) {
      */
     snprintf(temp_name, WEBUI_LEN_PARM, "%s", webui->uri_parm1);
     indx=0;
-    while (dep_config_params[indx].name != NULL) {
-        if (mystreq(dep_config_params[indx].name,webui->uri_parm1)){
-            snprintf(temp_name, WEBUI_LEN_PARM, "%s", dep_config_params[indx].newname);
+    while (config_parms_depr[indx].parm_name != NULL) {
+        if (mystreq(config_parms_depr[indx].parm_name,webui->uri_parm1)){
+            snprintf(temp_name, WEBUI_LEN_PARM, "%s", config_parms_depr[indx].newname);
             break;
         }
         indx++;
@@ -683,40 +681,37 @@ static int webu_process_config_set(struct webui_ctx *webui) {
      * webcontrol_parms level.
      */
     indx=0;
-    while (config_params[indx].param_name != NULL) {
-        if (((webui->thread_nbr != 0) && (config_params[indx].main_thread)) ||
-            (config_params[indx].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx].webui_level == WEBUI_LEVEL_NEVER) ) {
+    while (config_parms[indx].parm_name != NULL) {
+        if (((webui->thread_nbr != 0) && (config_parms[indx].main_thread)) ||
+            (config_parms[indx].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx].webui_level == WEBUI_LEVEL_NEVER) ) {
             indx++;
             continue;
         }
-        if (mystreq(temp_name, config_params[indx].param_name)) break;
+        if (mystreq(temp_name, config_parms[indx].parm_name)) break;
         indx++;
     }
     /* If we found the parm, assign it.  If the loop above did not find the parm
      * then we ignore the request
      */
-    if (config_params[indx].param_name != NULL){
+    if (config_parms[indx].parm_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
-            /* This is legacy assumption on the pointers being sequential
-             * We send in the original parm name so it will trigger the depreciated warnings
-             * and perform any required transformations from old parm to new parm
-             */
-            conf_cmdparse(webui->camlst + webui->thread_nbr
-                , webui->uri_parm1, webui->uri_value1);
+
+            conf_parm_set(webui->cam, webui->uri_parm1, webui->uri_value1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
-            if (mystreq(config_params[indx].param_name, "vid_control_params") &&
+            if (mystreq(config_parms[indx].parm_name, "vid_control_params") &&
                 (webui->camlst[webui->thread_nbr]->vdev != NULL)){
                 webui->camlst[webui->thread_nbr]->vdev->update_parms = TRUE;
             }
 
             /* If changing language, do it now */
-            if (mystreq(config_params[indx].param_name, "native_language")){
-                nls_enabled = webui->camlst[webui->thread_nbr]->conf.native_language;
-                if (nls_enabled){
+            if (mystreq(config_parms[indx].parm_name, "native_language")){
+                if (webui->camlst[webui->thread_nbr]->conf.native_language){
+                    mytranslate_text("", 1);
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
                 } else {
+                    mytranslate_text("", 0);
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : off"));
                 }
             }
@@ -1244,7 +1239,7 @@ static int webu_answer_ctrl(void *cls
         return retcd;
     }
 
-    if (webui->cam->webcontrol_finish) return MHD_NO;
+    if (webui->cam->motapp->webcontrol_finish) return MHD_NO;
 
     if (strlen(webui->clientip) == 0){
         webu_clientip(webui);
@@ -1317,7 +1312,7 @@ static int webu_answer_strm(void *cls
     /* Do not answer a request until the motion loop has completed at least once */
     if (webui->cam->passflag == 0) return MHD_NO;
 
-    if (webui->cam->webcontrol_finish) return MHD_NO;
+    if (webui->cam->motapp->webcontrol_finish) return MHD_NO;
 
     if (strlen(webui->clientip) == 0){
         webu_clientip(webui);
@@ -1841,64 +1836,6 @@ static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
 
 }
 
-static void webu_start_ctrl(struct ctx_cam **camlst){
-    /* This is the function that actually starts the MHD daemon for handling the webcontrol.
-     * There are many options for MHD and they will vary depending upon what our Motion user
-     * has requested in the configuration.  There are many functions in this module to assign
-     * these options and they are passed in a pointer to the mhdst variable so that they can
-     * assign the correct values for MHD start up. Since this function is doing the webcontrol
-     * we are only using thread 0 values.
-     */
-
-    struct mhdstart_ctx mhdst;
-    unsigned int randnbr;
-
-    mhdst.tls_cert = webu_mhd_loadfile(camlst[0]->conf.webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(camlst[0]->conf.webcontrol_key);
-    mhdst.ctrl = TRUE;
-    mhdst.indxthrd = 0;
-    mhdst.camlst = camlst;
-    mhdst.ipv6 = camlst[0]->conf.webcontrol_ipv6;
-
-    /* Set the rand number for webcontrol digest if needed */
-    srand(time(NULL));
-    randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
-    snprintf(camlst[0]->webcontrol_digest_rand
-        ,sizeof(camlst[0]->webcontrol_digest_rand),"%d",randnbr);
-
-    camlst[0]->webcontrol_daemon = NULL;
-    if (camlst[0]->conf.webcontrol_port != 0 ){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-            ,_("Starting webcontrol on port %d")
-            ,camlst[0]->conf.webcontrol_port);
-
-        mhdst.mhd_ops = malloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
-        webu_mhd_features(&mhdst);
-        webu_mhd_opts(&mhdst);
-        webu_mhd_flags(&mhdst);
-
-        camlst[0]->webcontrol_daemon = MHD_start_daemon (mhdst.mhd_flags
-            ,camlst[0]->conf.webcontrol_port
-            ,NULL, NULL
-            ,&webu_answer_ctrl, camlst
-            ,MHD_OPTION_ARRAY, mhdst.mhd_ops
-            ,MHD_OPTION_END);
-        free(mhdst.mhd_ops);
-        if (camlst[0]->webcontrol_daemon == NULL){
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
-        } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                ,_("Started webcontrol on port %d")
-                ,camlst[0]->conf.webcontrol_port);
-        }
-    }
-
-    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
-    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
-
-    return;
-}
-
 static void webu_strm_ntc(struct ctx_cam **camlst, int indxthrd){
     int indx;
 
@@ -1925,7 +1862,65 @@ static void webu_strm_ntc(struct ctx_cam **camlst, int indxthrd){
     }
 }
 
-static void webu_start_strm(struct ctx_cam **camlst){
+static void webu_init_ctrl(struct ctx_motapp *motapp){
+    /* This is the function that actually starts the MHD daemon for handling the webcontrol.
+     * There are many options for MHD and they will vary depending upon what our Motion user
+     * has requested in the configuration.  There are many functions in this module to assign
+     * these options and they are passed in a pointer to the mhdst variable so that they can
+     * assign the correct values for MHD start up. Since this function is doing the webcontrol
+     * we are only using thread 0 values.
+     */
+
+    struct mhdstart_ctx mhdst;
+    unsigned int randnbr;
+
+    mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf.webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf.webcontrol_key);
+    mhdst.ctrl = TRUE;
+    mhdst.indxthrd = 0;
+    mhdst.camlst = motapp->cam_list;
+    mhdst.ipv6 = motapp->cam_list[0]->conf.webcontrol_ipv6;
+
+    /* Set the rand number for webcontrol digest if needed */
+    srand(time(NULL));
+    randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
+    snprintf(motapp->webcontrol_digest_rand
+        ,sizeof(motapp->webcontrol_digest_rand),"%d",randnbr);
+
+    motapp->webcontrol_daemon = NULL;
+    if (motapp->cam_list[0]->conf.webcontrol_port != 0 ){
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            ,_("Starting webcontrol on port %d")
+            ,motapp->cam_list[0]->conf.webcontrol_port);
+
+        mhdst.mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
+        webu_mhd_features(&mhdst);
+        webu_mhd_opts(&mhdst);
+        webu_mhd_flags(&mhdst);
+
+        motapp->webcontrol_daemon = MHD_start_daemon (mhdst.mhd_flags
+            ,motapp->cam_list[0]->conf.webcontrol_port
+            ,NULL, NULL
+            ,&webu_answer_ctrl, motapp->cam_list
+            ,MHD_OPTION_ARRAY, mhdst.mhd_ops
+            ,MHD_OPTION_END);
+        free(mhdst.mhd_ops);
+        if (motapp->webcontrol_daemon == NULL){
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Unable to start MHD"));
+        } else {
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                ,_("Started webcontrol on port %d")
+                ,motapp->cam_list[0]->conf.webcontrol_port);
+        }
+    }
+
+    if (mhdst.tls_cert != NULL) free(mhdst.tls_cert);
+    if (mhdst.tls_key  != NULL) free(mhdst.tls_key);
+
+    return;
+}
+
+static void webu_init_strm(struct ctx_cam **cam_list){
     /* This function starts up the daemon for the streams. It loops through
      * all of the camera context's provided and starts streams as requested.  If
      * the thread number is zero, then it starts the full list stream context
@@ -1934,59 +1929,59 @@ static void webu_start_strm(struct ctx_cam **camlst){
     struct mhdstart_ctx mhdst;
     unsigned int randnbr;
 
-    mhdst.tls_cert = webu_mhd_loadfile(camlst[0]->conf.webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(camlst[0]->conf.webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(cam_list[0]->conf.webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(cam_list[0]->conf.webcontrol_key);
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
-    mhdst.camlst = camlst;
-    mhdst.ipv6 = camlst[0]->conf.webcontrol_ipv6;
+    mhdst.camlst = cam_list;
+    mhdst.ipv6 = cam_list[0]->conf.webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
     randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
-    snprintf(camlst[0]->stream.digest_rand
-        ,sizeof(camlst[0]->stream.digest_rand),"%d",randnbr);
+    snprintf(cam_list[0]->stream.digest_rand
+        ,sizeof(cam_list[0]->stream.digest_rand),"%d",randnbr);
 
-    while (camlst[mhdst.indxthrd] != NULL){
-        camlst[mhdst.indxthrd]->stream.daemon = NULL;
-        if (camlst[mhdst.indxthrd]->conf.stream_port != 0 ){
+    while (cam_list[mhdst.indxthrd] != NULL){
+        cam_list[mhdst.indxthrd]->stream.daemon = NULL;
+        if (cam_list[mhdst.indxthrd]->conf.stream_port != 0 ){
             if (mhdst.indxthrd == 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Starting all camera streams on port %d")
-                    ,camlst[mhdst.indxthrd]->conf.stream_port);
+                    ,cam_list[mhdst.indxthrd]->conf.stream_port);
             } else {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Starting camera %d stream on port %d")
-                    ,camlst[mhdst.indxthrd]->camera_id
-                    ,camlst[mhdst.indxthrd]->conf.stream_port);
+                    ,cam_list[mhdst.indxthrd]->camera_id
+                    ,cam_list[mhdst.indxthrd]->conf.stream_port);
             }
 
-            mhdst.mhd_ops= malloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
+            mhdst.mhd_ops=(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
             webu_mhd_features(&mhdst);
             webu_mhd_opts(&mhdst);
             webu_mhd_flags(&mhdst);
             if (mhdst.indxthrd == 0){
-                camlst[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
-                    ,camlst[mhdst.indxthrd]->conf.stream_port
+                cam_list[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
+                    ,cam_list[mhdst.indxthrd]->conf.stream_port
                     ,NULL, NULL
-                    ,&webu_answer_strm, camlst
+                    ,&webu_answer_strm, cam_list
                     ,MHD_OPTION_ARRAY, mhdst.mhd_ops
                     ,MHD_OPTION_END);
             } else {
-                camlst[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
-                    ,camlst[mhdst.indxthrd]->conf.stream_port
+                cam_list[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
+                    ,cam_list[mhdst.indxthrd]->conf.stream_port
                     ,NULL, NULL
-                    ,&webu_answer_strm, camlst[mhdst.indxthrd]
+                    ,&webu_answer_strm, cam_list[mhdst.indxthrd]
                     ,MHD_OPTION_ARRAY, mhdst.mhd_ops
                     ,MHD_OPTION_END);
             }
             free(mhdst.mhd_ops);
-            if (camlst[mhdst.indxthrd]->stream.daemon == NULL){
+            if (cam_list[mhdst.indxthrd]->stream.daemon == NULL){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Unable to start stream for camera %d")
-                    ,camlst[mhdst.indxthrd]->camera_id);
+                    ,cam_list[mhdst.indxthrd]->camera_id);
             } else {
-                webu_strm_ntc(camlst,mhdst.indxthrd);
+                webu_strm_ntc(cam_list,mhdst.indxthrd);
             }
         }
         mhdst.indxthrd++;
@@ -1997,25 +1992,25 @@ static void webu_start_strm(struct ctx_cam **camlst){
     return;
 }
 
-static void webu_start_ports(struct ctx_cam **camlst){
+static void webu_init_ports(struct ctx_cam **cam_list){
     /* Perform check for duplicate ports being specified.  The config loading will
      * duplicate ports from the motion.conf file to all the cameras so we do not
      * log these duplicates to the user and instead just silently set them to zero
      */
     int indx, indx2;
 
-    if (camlst[0]->conf.webcontrol_port != 0){
+    if (cam_list[0]->conf.webcontrol_port != 0){
         indx = 0;
-        while (camlst[indx] != NULL){
-            if ((camlst[0]->conf.webcontrol_port == camlst[indx]->conf.webcontrol_port) && (indx > 0)){
-                camlst[indx]->conf.webcontrol_port = 0;
+        while (cam_list[indx] != NULL){
+            if ((cam_list[0]->conf.webcontrol_port == cam_list[indx]->conf.webcontrol_port) && (indx > 0)){
+                cam_list[indx]->conf.webcontrol_port = 0;
             }
 
-            if (camlst[0]->conf.webcontrol_port == camlst[indx]->conf.stream_port){
+            if (cam_list[0]->conf.webcontrol_port == cam_list[indx]->conf.stream_port){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Duplicate port requested %d")
-                    ,camlst[indx]->conf.stream_port);
-                camlst[indx]->conf.stream_port = 0;
+                    ,cam_list[indx]->conf.stream_port);
+                cam_list[indx]->conf.stream_port = 0;
             }
 
             indx++;
@@ -2024,17 +2019,17 @@ static void webu_start_ports(struct ctx_cam **camlst){
 
     /* Now check on the stream ports */
     indx = 0;
-    while (camlst[indx] != NULL){
-        if (camlst[indx]->conf.stream_port != 0){
+    while (cam_list[indx] != NULL){
+        if (cam_list[indx]->conf.stream_port != 0){
             indx2 = indx + 1;
-            while (camlst[indx2] != NULL){
-                if (camlst[indx]->conf.stream_port == camlst[indx2]->conf.stream_port){
+            while (cam_list[indx2] != NULL){
+                if (cam_list[indx]->conf.stream_port == cam_list[indx2]->conf.stream_port){
                     if (indx != 0){
                         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                             ,_("Duplicate port requested %d")
-                            ,camlst[indx2]->conf.stream_port);
+                            ,cam_list[indx2]->conf.stream_port);
                     }
-                    camlst[indx2]->conf.stream_port = 0;
+                    cam_list[indx2]->conf.stream_port = 0;
                 }
                 indx2++;
             }
@@ -2043,31 +2038,29 @@ static void webu_start_ports(struct ctx_cam **camlst){
     }
 }
 
-void webu_stop(struct ctx_cam **camlst) {
+void webu_deinit(struct ctx_motapp *motapp) {
     /* This function is called from the main Motion loop to shutdown the
      * various MHD connections
      */
     int indxthrd;
 
-    if (camlst[0]->webcontrol_daemon != NULL){
-        camlst[0]->webcontrol_finish = TRUE;
-        MHD_stop_daemon (camlst[0]->webcontrol_daemon);
+    if (motapp->webcontrol_daemon != NULL){
+        motapp->webcontrol_finish = TRUE;
+        MHD_stop_daemon (motapp->webcontrol_daemon);
     }
 
 
     indxthrd = 0;
-    while (camlst[indxthrd] != NULL){
-        if (camlst[indxthrd]->stream.daemon != NULL){
-            camlst[indxthrd]->webcontrol_finish = TRUE;
-            MHD_stop_daemon (camlst[indxthrd]->stream.daemon);
+    while (motapp->cam_list[indxthrd] != NULL){
+        if (motapp->cam_list[indxthrd]->stream.daemon != NULL){
+            MHD_stop_daemon (motapp->cam_list[indxthrd]->stream.daemon);
         }
-        camlst[indxthrd]->stream.daemon = NULL;
-        camlst[indxthrd]->webcontrol_daemon = NULL;
+        motapp->cam_list[indxthrd]->stream.daemon = NULL;
         indxthrd++;
     }
 }
 
-void webu_start(struct ctx_cam **camlst) {
+void webu_init(struct ctx_motapp *motapp) {
     /* This function is called from the main motion thread to start up the
      * webcontrol and streams.  We need to block some signals otherwise MHD
      * will not function correctly.
@@ -2082,25 +2075,22 @@ void webu_start(struct ctx_cam **camlst) {
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGCHLD, &act, NULL);
 
+    motapp->webcontrol_daemon = NULL;
+    motapp->webcontrol_finish = FALSE;
 
     indxthrd = 0;
-    while (camlst[indxthrd] != NULL){
-        camlst[indxthrd]->stream.daemon = NULL;
-        camlst[indxthrd]->webcontrol_daemon = NULL;
-        camlst[indxthrd]->webcontrol_finish = FALSE;
+    while (motapp->cam_list[indxthrd] != NULL){
+        motapp->cam_list[indxthrd]->stream.daemon = NULL;
+        motapp->cam_list[indxthrd]->stream.finish = FALSE;
         indxthrd++;
     }
 
-    if (camlst[0]->conf.stream_preview_method != 99){
-        webu_start_ports(camlst);
+    webu_init_ports(motapp->cam_list);
 
-        webu_start_strm(camlst);
-    }
+    webu_init_strm(motapp->cam_list);
 
-    webu_start_ctrl(camlst);
+    webu_init_ctrl(motapp);
 
     return;
 
 }
-
-

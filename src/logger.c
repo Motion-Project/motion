@@ -15,7 +15,7 @@
 #include <stdarg.h>
 
 static int log_mode = LOGMODE_SYSLOG;
-static FILE *logfile;
+static FILE *logfile  = NULL;
 static unsigned int log_level = LEVEL_DEFAULT;
 static unsigned int log_type = TYPE_DEFAULT;
 
@@ -23,14 +23,8 @@ static const char *log_type_str[] = {NULL, "COR", "STR", "ENC", "NET", "DBL", "E
 static const char *log_level_str[] = {"EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL", NULL};
 
 
-/**
- * get_log_type
- *
- *
- * Returns: index of log type or 0 if not valid type.
- */
-int get_log_type(const char *type)
-{
+/** Returns index of log type or 0 if not valid type. */
+static int log_get_type(const char *type) {
     unsigned int i, ret = 0;
     unsigned int maxtype = sizeof(log_type_str)/sizeof(const char *);
 
@@ -44,97 +38,57 @@ int get_log_type(const char *type)
     return ret;
 }
 
-/**
- * get_log_type_str
- *      Gets string value for type log level.
- *
- * Returns: name of type log level.
- */
-const char* get_log_type_str(unsigned int type)
-{
+/** Gets string value for type log level. */
+static const char* log_get_type_str(unsigned int type) {
     return log_type_str[type];
 }
 
-/**
- * set_log_type
- *      Sets log type level.
- *
- * Returns: nothing.
- */
-void set_log_type(unsigned int type)
-{
+/** Sets log type level. */
+static void log_set_type(unsigned int type) {
     log_type = type;
-    //printf("set log type %d\n", type);
 }
 
-/**
- * get_log_level_str
- *      Gets string value for log level.
- *
- * Returns: name of log level.
- */
-const char* get_log_level_str(unsigned int level)
-{
+/** Gets string value for log level. */
+static const char* log_get_level_str(unsigned int level) {
     return log_level_str[level];
 }
 
-/**
- * set_log_level
- *      Sets log level.
- *
- * Returns nothing.
- */
-void set_log_level(unsigned int level)
-{
+/** Sets log level. */
+static void log_set_level(unsigned int level) {
     log_level = level;
-    //printf("set log level %d\n", level);
 }
 
-/**
- * set_log_mode
- *      Sets mode of logging, could be using syslog or files.
- *
- * Returns: nothing.
- */
-void set_log_mode(int mode)
-{
+/** Sets mode of logging, could be using syslog or files. */
+static void log_set_mode(int mode) {
     int prev_mode = log_mode;
 
     log_mode = mode;
-    //printf("set log mode %d\n", mode);
 
-    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG)
+    if (mode == LOGMODE_SYSLOG && prev_mode != LOGMODE_SYSLOG){
         openlog("motion", LOG_PID, LOG_USER);
+    }
 
-    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG)
+    if (mode != LOGMODE_SYSLOG && prev_mode == LOGMODE_SYSLOG){
         closelog();
+    }
 }
 
-/**
- * set_logfile
- *      Sets logfile to be used instead of syslog.
- *
- * Returns: pointer to log file.
- */
-FILE * set_logfile(const char *logfile_name)
-{
+/** Sets logfile to be used instead of syslog. */
+static void log_set_logfile(const char *logfile_name) {
     /* Setup temporary to let log if myfopen fails */
-    set_log_mode(LOGMODE_SYSLOG);
+    log_set_mode(LOGMODE_SYSLOG);
 
     logfile = myfopen(logfile_name, "a");
 
     /* If logfile was opened correctly */
-    if (logfile)
-        set_log_mode(LOGMODE_FILE);
+    if (logfile){
+        log_set_mode(LOGMODE_FILE);
+    }
 
-    return logfile;
+    return;
 }
 
-/**
- * str_time
- *
- * Return: string with human readable time
- */
+/** Return string with human readable time */
 static char *str_time(void)
 {
     static char buffer[16];
@@ -172,28 +126,26 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     int errno_save, n;
     char buf[1024];
     char usrfmt[1024];
+    char msg_buf[100];
 
-    /* GNU-specific strerror_r() */
-    #if (!defined(XSI_STRERROR_R))
-        char msg_buf[100];
-    #endif
     va_list ap;
     int threadnr;
 
     static int flood_cnt = 0;
     static char flood_msg[1024];
     char flood_repeats[1024];
+    char threadname[32];
 
 
     /* Exit if level is greater than log_level */
-    if ((unsigned int)level > log_level)
+    if ((unsigned int)level > log_level){
         return;
+    }
 
     /* Exit if type is not equal to log_type and not TYPE_ALL */
-    if ((log_type != TYPE_ALL) && (type != log_type))
+    if ((log_type != TYPE_ALL) && (type != log_type)){
         return;
-
-    //printf("log_type %d, type %d level %d\n", log_type, type, level);
+    }
 
     threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
 
@@ -203,7 +155,6 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
      */
     errno_save = errno;
 
-    char threadname[32];
     mythreadname_get(threadname);
 
     /*
@@ -213,7 +164,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
      */
     if (log_mode == LOGMODE_FILE) {
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
-                     threadnr, threadname, get_log_level_str(level), get_log_type_str(type),
+                     threadnr, threadname, log_get_level_str(level), log_get_type_str(type),
                      str_time());
     } else {
     /*
@@ -222,7 +173,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
      * e.g. [1:trk] [DBG] [ALL] blah
      */
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
-                     threadnr, threadname, get_log_level_str(level), get_log_type_str(type));
+                     threadnr, threadname, log_get_level_str(level), log_get_type_str(type));
     }
 
     /* Prepend the format specifier for the function name */
@@ -258,6 +209,7 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
         #if defined(XSI_STRERROR_R)
             /* XSI-compliant strerror_r() */
             strerror_r(errno_save, buf + n, sizeof(buf) - n);    /* 2 for the ': ' */
+            (void)msg_buf;
         #else
             /* GNU-specific strerror_r() */
             strncat(buf, strerror_r(errno_save, msg_buf, sizeof(msg_buf)), 1024 - strlen(buf));
@@ -269,8 +221,8 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
     } else {
         if (flood_cnt > 1){
             snprintf(flood_repeats,1024,"[%d:%s] [%s] [%s] Above message repeats %d times",
-                     threadnr, threadname, get_log_level_str(level)
-                     , get_log_type_str(type), flood_cnt-1);
+                     threadnr, threadname, log_get_level_str(level)
+                     , log_get_type_str(type), flood_cnt-1);
             switch (log_mode) {
             case LOGMODE_FILE:
                 strncat(flood_repeats, "\n", 1024 - strlen(flood_repeats));
@@ -306,3 +258,68 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
 
 }
 
+void log_init(struct ctx_motapp *motapp){
+
+    if ((motapp->log_level > ALL) ||
+        (motapp->log_level == 0)) {
+        motapp->log_level = LEVEL_DEFAULT;
+        motapp->cam_list[0]->conf.log_level = motapp->log_level;
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            ,_("Using default log level (%s) (%d)")
+            ,log_get_level_str(motapp->log_level)
+            ,SHOW_LEVEL_VALUE(motapp->log_level));
+    } else {
+        motapp->log_level--; // Let's make syslog compatible
+    }
+
+
+    if ((motapp->log_file[0]) && (strncmp(motapp->log_file, "syslog", 6))) {
+
+        log_set_mode(LOGMODE_FILE);
+
+        log_set_logfile(motapp->log_file);
+
+        if (logfile) {
+            log_set_mode(LOGMODE_SYSLOG);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Logging to file (%s)"),motapp->log_file);
+            log_set_mode(LOGMODE_FILE);
+        } else {
+            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+                ,_("Exit motion, cannot create log file %s")
+                ,motapp->log_file);
+            exit(0);
+        }
+    } else {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
+    }
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
+
+    if ((motapp->log_type_str[0] == 0) ||
+        !(motapp->log_type = log_get_type(motapp->log_type_str))) {
+        motapp->log_type = TYPE_DEFAULT;
+        snprintf(motapp->log_type_str,4,"ALL");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Using default log type (%s)"),
+                   log_get_type_str(motapp->log_type));
+    }
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Using log type (%s) log level (%s)"),
+               log_get_type_str(motapp->log_type), log_get_level_str(motapp->log_level));
+
+    log_set_level(motapp->log_level);
+    log_set_type(motapp->log_type);
+
+}
+
+void log_deinit(struct ctx_motapp *motapp){
+
+    if (logfile != NULL) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Closing logfile (%s)."),
+                   motapp->log_file);
+        myfclose(logfile);
+        log_set_mode(LOGMODE_NONE);
+        logfile = NULL;
+    }
+
+}

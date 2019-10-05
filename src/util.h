@@ -72,7 +72,7 @@
     extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
 #endif
 
-#define _(STRING) mytranslate_text(STRING)
+#define _(STRING) mytranslate_text(STRING, 2)
 
 #define SLEEP(seconds, nanoseconds) {              \
                 struct timespec ts1;                \
@@ -92,7 +92,7 @@
     void mythreadname_get(char *threadname);
     int mycheck_passthrough(struct ctx_cam *cam);
 
-    char* mytranslate_text(const char *msgid);
+    char* mytranslate_text(const char *msgid, int setnls);
     void mytranslate_init(void);
 
     int mystrceq(const char* var1, const char* var2);

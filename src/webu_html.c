@@ -400,7 +400,7 @@ static void webu_html_h3desc(struct webui_ctx *webui) {
             "    <h3 id='h3_cam' data-cam=\"cam_all00\" class='header-center'>%s (%s)</h3>\n"
             "  </div>\n"
             ,_("All Cameras")
-            ,(!webui->camlst[0]->running)? _("Not running") :
+            ,(!webui->camlst[0]->running_cam)? _("Not running") :
                 (webui->camlst[0]->lost_connection)? _("Lost connection"):
                 (webui->camlst[0]->pause)? _("Paused"):_("Active")
             );
@@ -450,19 +450,19 @@ static void webu_html_config(struct webui_ctx *webui) {
      */
     val_temp=malloc(PATH_MAX);
     indx_parm = 0;
-    while (config_params[indx_parm].param_name != NULL){
+    while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_params[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
-            (config_params[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
             indx_parm++;
             continue;
         }
 
-        val_main = config_params[indx_parm].print(webui->camlst, NULL, indx_parm, 0);
+        val_main = conf_parm_get(webui->camlst, indx_parm, 0);
 
         snprintf(response, sizeof (response),
             "        <option value='%s' data-cam_all00=\""
-            , config_params[indx_parm].param_name);
+            , config_parms[indx_parm].parm_name);
         webu_write(webui, response);
 
         memset(val_temp,'\0',PATH_MAX);
@@ -475,7 +475,7 @@ static void webu_html_config(struct webui_ctx *webui) {
         /* Loop through all the treads and see if any have a different value from motion.conf */
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
-                val_thread=config_params[indx_parm].print(webui->camlst, NULL, indx_parm, indx);
+                val_thread=conf_parm_get(webui->camlst, indx_parm, indx);
                 diff_vals = FALSE;
                 if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
                     ((strlen(val_temp) != 0) && (val_thread == NULL))) {
@@ -502,15 +502,15 @@ static void webu_html_config(struct webui_ctx *webui) {
         }
         /* Terminate the open quote and option.  For foreign language put hint in ()  */
         if (mystrceq(webui->lang,"en") ||
-            mystrceq(config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name))){
+            mystrceq(config_parms[indx_parm].parm_name
+                ,_(config_parms[indx_parm].parm_name))){
             snprintf(response, sizeof (response),"\" >%s</option>\n",
-                config_params[indx_parm].param_name);
+                config_parms[indx_parm].parm_name);
             webu_write(webui, response);
         } else {
             snprintf(response, sizeof (response),"\" >%s (%s)</option>\n",
-                config_params[indx_parm].param_name
-                ,_(config_params[indx_parm].param_name));
+                config_parms[indx_parm].parm_name
+                ,_(config_parms[indx_parm].parm_name));
             webu_write(webui, response);
         }
 
@@ -803,7 +803,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
                 " class='header-center' >%s %d (%s)</h3>\"\n"
                 ,_("Camera")
                 , webui->camlst[indx]->camera_id
-                ,(!webui->camlst[indx]->running)? _("Not running") :
+                ,(!webui->camlst[indx]->running_cam)? _("Not running") :
                  (webui->camlst[indx]->lost_connection)? _("Lost connection"):
                  (webui->camlst[indx]->pause)? _("Paused"):_("Active")
              );
@@ -812,7 +812,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s (%s)</h3>\"\n"
                 , webui->camlst[indx]->conf.camera_name
-                ,(!webui->camlst[indx]->running)? _("Not running") :
+                ,(!webui->camlst[indx]->running_cam)? _("Not running") :
                  (webui->camlst[indx]->lost_connection)? _("Lost connection"):
                  (webui->camlst[indx]->pause)? _("Paused"):_("Active")
                 );

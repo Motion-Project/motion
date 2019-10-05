@@ -353,7 +353,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
             ,struct ctx_image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
 
-    struct config *conf = &cam->conf;
+    struct ctx_config *conf = &cam->conf;
     char fullfilenamem[PATH_MAX];
     char filename[PATH_MAX];
     char filenamem[PATH_MAX];

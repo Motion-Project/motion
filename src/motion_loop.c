@@ -289,7 +289,7 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
 }
 
 static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
-    struct config *conf = &cam->conf;
+    struct ctx_config *conf = &cam->conf;
 
     draw_locate(cam, img);
 
@@ -1674,7 +1674,7 @@ static void mlp_timelapse(struct ctx_cam *cam){
                     ,_("Invalid timelapse_mode argument '%s'"), cam->conf.timelapse_mode);
                 MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
                     ,_("%:s Defaulting to manual timelapse mode"));
-                conf_cmdparse(&cam, (char *)"movie_timelapse_mode",(char *)"manual");
+                conf_parm_set(cam, (char *)"movie_timelapse_mode",(char *)"manual");
             }
         }
 
@@ -1846,7 +1846,7 @@ void *motion_loop(void *arg) {
     struct ctx_cam *cam = arg;
 
     if (mlp_init(cam) == 0){
-        while (!cam->finish || cam->event_stop) {
+        while (!cam->finish_cam || cam->event_stop) {
             mlp_prepare(cam);
             if (cam->get_image) {
                 mlp_resetimages(cam);
@@ -1871,12 +1871,12 @@ void *motion_loop(void *arg) {
 
     mlp_cleanup(cam);
 
-    pthread_mutex_lock(&global_lock);
-        threads_running--;
-    pthread_mutex_unlock(&global_lock);
+    pthread_mutex_lock(&cam->motapp->global_lock);
+        cam->motapp->threads_running--;
+    pthread_mutex_unlock(&cam->motapp->global_lock);
 
-    cam->running = 0;
-    cam->finish = 0;
+    cam->running_cam = 0;
+    cam->finish_cam = 0;
 
     pthread_exit(NULL);
 }
