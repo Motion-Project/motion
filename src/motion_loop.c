@@ -423,6 +423,32 @@ static void mlp_init_szconf(struct ctx_cam *cam){
 
 }
 
+/** Check the image size to determine if modulo 8 and over 64 */
+static int mlp_check_szimg(struct ctx_cam *cam){
+
+    /* Revalidate we got a valid image size */
+    if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image width (%d) or height(%d) requested is not modulo 8.")
+            ,cam->imgs.width, cam->imgs.height);
+        return -3;
+    }
+    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
+            ,cam->imgs.width, cam->imgs.height);
+            return -3;
+    }
+    /* Substream size notification*/
+    if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Substream not available.  Image sizes not modulo 16."));
+    }
+
+    return 0;
+
+}
+
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
@@ -492,25 +518,8 @@ static int mlp_init(struct ctx_cam *cam) {
             ,_("Motion only supports width and height modulo 8"));
         return -3;
     }
-    /* Revalidate we got a valid image size */
-    if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image width (%d) or height(%d) requested is not modulo 8.")
-            ,cam->imgs.width, cam->imgs.height);
-        return -3;
-    }
-    if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-            ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
-            ,cam->imgs.width, cam->imgs.height);
-            return -3;
-    }
-    /* Substream size notification*/
-    if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Substream not available.  Image sizes not modulo 16."));
-    }
 
+    if (mlp_check_szimg(cam) != 0) return -1;
 
     /* We set size_high here so that it can be used in the retry function to determine whether
      * we need to break and reallocate buffers
@@ -990,19 +999,7 @@ static int mlp_retry(struct ctx_cam *cam){
             return 1;
         }
 
-        if ((cam->imgs.width % 8) || (cam->imgs.height % 8)) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-                ,_("Image width (%d) or height(%d) requested is not modulo 8.")
-                ,cam->imgs.width, cam->imgs.height);
-            return 1;
-        }
-
-        if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
-                ,cam->imgs.width, cam->imgs.height);
-                return 1;
-        }
+        if (mlp_check_szimg(cam) != 0) return 1;
 
         /*
          * If the netcam has different dimensions than in the config file
