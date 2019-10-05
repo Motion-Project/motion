@@ -3,9 +3,9 @@ Makefile.in
 ABOUT-NLS
 compile
 config.guess
-config.h
-config.h.in
-config.h.in~
+config.hpp
+config.hpp.in
+config.hpp.in~
 config.log
 config.rpath
 config.status

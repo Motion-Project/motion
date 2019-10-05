@@ -1,4 +1,4 @@
-AM_CFLAGS= -Dsysconfdir=\"$(sysconfdir)/motion\" -DLOCALEDIR=\"$(DESTDIR)$(localedir)\"
+AM_CPPFLAGS= -Dsysconfdir=\"$(sysconfdir)/motion\" -DLOCALEDIR=\"$(DESTDIR)$(localedir)\"
 
 if INC_MMAL_SRC
 MMAL_SRC=raspicam/RaspiCamControl.c raspicam/RaspiCLI.c
@@ -8,8 +8,8 @@ LIBS = @LIBINTL@ @LIBS@
 
 bin_PROGRAMS = motion
 
-motion_SOURCES = motion.c logger.c conf.c draw.c jpegutils.c video_loopback.c \
-	video_v4l2.c video_common.c dbse.c rotate.c movie.c exif.c util.c \
-	netcam.c track.c alg.c event.c picture.c motion_loop.c\
-	webu.c webu_html.c webu_stream.c webu_text.c mmalcam.c $(MMAL_SRC)
+motion_SOURCES = motion.cpp logger.cpp conf.cpp draw.cpp jpegutils.cpp video_loopback.cpp \
+	video_v4l2.cpp video_common.cpp dbse.cpp rotate.cpp movie.cpp exif.cpp util.cpp \
+	netcam.cpp track.cpp alg.cpp event.cpp picture.cpp motion_loop.cpp \
+	webu.cpp webu_html.cpp webu_stream.cpp webu_text.cpp mmalcam.cpp $(MMAL_SRC)
 

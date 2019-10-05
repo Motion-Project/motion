@@ -3,8 +3,8 @@ AM_INIT_AUTOMAKE([subdir-objects foreign])
 AC_PROG_CC
 AC_PROG_CXX
 AC_GNU_SOURCE
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_SRCDIR([src/motion.c])
+AC_CONFIG_HEADERS([config.hpp])
+AC_CONFIG_SRCDIR([src/motion.cpp])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -36,7 +36,7 @@ AS_IF([test "${PKGCONFIG}" = "no" ],[
 ###  Check pthread
 ##############################################################################
 AC_CHECK_HEADERS(pthread.h,,AC_MSG_ERROR([pthread is required.]))
-CFLAGS="${CFLAGS} -D_THREAD_SAFE "
+CPPFLAGS="${CPPFLAGS} -D_THREAD_SAFE "
 LIBS="$LIBS -pthread "
 
 ##############################################################################
@@ -47,7 +47,7 @@ AC_MSG_CHECKING(jpg libraries)
 AC_MSG_RESULT($JPGS)
 AS_IF([test "${JPGS}" = "yes" ], [
     AS_IF([pkg-config libjpeg ], [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libjpeg`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libjpeg`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libjpeg`
       ],[
         TEMP_LIBS="$TEMP_LIBS -ljpeg"
@@ -64,7 +64,7 @@ AC_CHECK_HEADERS(microhttpd.h,[MHTTP="yes"],[MHTTP="no"])
 AC_MSG_CHECKING(libmicrohttpd libraries)
 AC_MSG_RESULT($MHTTP)
 AS_IF([test "${MHTTP}" = "yes" ], [
-    TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libmicrohttpd`
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libmicrohttpd`
     TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libmicrohttpd`
   ],[
     AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
@@ -106,8 +106,8 @@ AC_LINK_IFELSE(
 ###  Check XSI strerror_r.  Check for Linux/*BSD/Apple/MUSL variations
 ##############################################################################
 AC_MSG_CHECKING([for XSI strerror_r])
-HOLD_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -Werror"
+HOLD_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -Werror"
 AC_LINK_IFELSE(
   [AC_LANG_SOURCE[
     #include <string.h>
@@ -126,7 +126,7 @@ AC_LINK_IFELSE(
     AC_MSG_RESULT([no])
   ]
 )
-CFLAGS="$HOLD_CFLAGS"
+CPPFLAGS="$HOLD_CPPFLAGS"
 
 ###############################################################################
 ###  V4L2 Video System - Optional
@@ -159,7 +159,7 @@ AS_IF([test "${WEBP}" = "yes" ], [
     AS_IF([pkg-config libwebpmux ], [
         AC_MSG_RESULT(yes)
         AC_DEFINE([HAVE_WEBP], [1], [Define to 1 if WEBP is around])
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libwebpmux`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libwebpmux`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libwebpmux`
       ],[
         AC_MSG_RESULT(no)
@@ -195,7 +195,7 @@ AS_IF([test "${MMAL}" = "no"], [
 
     AC_MSG_CHECKING(for MMAL)
     AS_IF([pkg-config mmal], [
-        TEMP_CFLAGS="$TEMP_CFLAGS -Irasppicam "`pkg-config --cflags mmal`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS -Irasppicam "`pkg-config --cflags mmal`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mmal`
         AC_MSG_RESULT([yes])
         AC_DEFINE([HAVE_MMAL], [1], [Define to 1 if MMAL is around])
@@ -238,7 +238,7 @@ AS_IF([test "${FFMPEG}" = "no"], [
     AC_MSG_CHECKING(for FFmpeg)
     AS_IF([pkg-config $FFMPEG_DEPS], [
         FFMPEG_VER=`pkg-config --modversion libavformat`
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags $FFMPEG_DEPS`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags $FFMPEG_DEPS`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs $FFMPEG_DEPS`
         AC_MSG_RESULT(yes)
       ],[
@@ -276,7 +276,7 @@ AS_IF([test "${MARIADB}" = "no"], [
 
     AC_MSG_CHECKING(for MariaDB)
     AS_IF([pkg-config mariadb], [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags mariadb`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags mariadb`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mariadb`
         AC_DEFINE([HAVE_MARIADB], [1], [Define to 1 if you have MariaDB support])
       ],[
@@ -314,7 +314,7 @@ AS_IF([test "${MYSQL}" = "no"], [
 
     AC_MSG_CHECKING(for MySQL)
     AS_IF([pkg-config mysqlclient], [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags mysqlclient`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags mysqlclient`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mysqlclient`
         AC_DEFINE([HAVE_MYSQL], [1], [Define to 1 if you have MySQL support])
       ],[
@@ -352,7 +352,7 @@ AS_IF([test "${PGSQL}" = "no"], [
 
     AC_MSG_CHECKING(for PostgreSQL)
     AS_IF([pkg-config libpq], [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags libpq`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags libpq`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs libpq`
         AC_DEFINE([HAVE_PGSQL], [1], [Define to 1 if you have PostgreSQL support])
       ],[
@@ -378,7 +378,7 @@ AS_IF([test "${SQLITE3}" = "no"], [
     AC_MSG_RESULT(skipping)
   ],[
     AC_CHECK_HEADERS(sqlite3.h, [
-        TEMP_CFLAGS="$TEMP_CFLAGS "`pkg-config --cflags sqlite3`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags sqlite3`
         TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs sqlite3`
         AC_DEFINE([HAVE_SQLITE3], [1], [Define to 1 if you have SQLITE3 support])
       ],[
@@ -403,7 +403,7 @@ AS_IF([test "${OPTIMIZECPU}" = "yes"], [
         # explicit test for RPI3 as /proc/cpuinfo reports armv7 even though it is armv8
         RPI3=`grep "Raspberry Pi 3 Model" /proc/device-tree/model`
         AS_IF([test "x${RPI3}" != "x"], [
-            TEMP_CFLAGS="$TEMP_CFLAGS -mcpu=cortex-a53 -mfpu=neon-fp-armv8"
+            TEMP_CPPFLAGS="$TEMP_CPPFLAGS -mcpu=cortex-a53 -mfpu=neon-fp-armv8"
           ]
         )
       ]
@@ -421,7 +421,7 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=no])
 
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
-    TEMP_CFLAGS="$TEMP_CFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
   ]
 )
 ##############################################################################
@@ -435,12 +435,12 @@ AC_ARG_WITH([prototype-flags],
     [PROTOTYPE_FLAGS=no])
 
 AS_IF([test "${PROTOTYPE_FLAGS}" = "yes"], [
-    TEMP_CFLAGS="$TEMP_CFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
   ]
 )
 
 
-CFLAGS="$CFLAGS $TEMP_CFLAGS"
+CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
 LIBS="$LIBS $TEMP_LIBS"
 LDFLAGS="$TEMP_LDFLAGS"
 
@@ -470,7 +470,7 @@ echo "      Configure status       "
 echo "      ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 echo "   **************************"
 echo
-echo "CFLAGS: $CFLAGS"
+echo "CPPFLAGS: $CPPFLAGS"
 echo
 echo "LIBS: $LIBS"
 echo
