@@ -385,6 +385,44 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
 
 }
 
+/** Validate the config parms for height and width */
+static void mlp_init_szconf(struct ctx_cam *cam){
+
+    if ((cam->conf.height == 0) || (cam->conf.width == 0)) {
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Invalid configuration dimensions %dx%d"),cam->conf.height,cam->conf.width);
+        cam->conf.height = DEF_HEIGHT;
+        cam->conf.width = DEF_WIDTH;
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+            ,_("Using default dimensions %dx%d"),cam->conf.height,cam->conf.width);
+    }
+    if (cam->conf.width % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image width (%d) requested is not modulo 8."), cam->conf.width);
+        cam->conf.width = cam->conf.width - (cam->conf.width % 8) + 8;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Adjusting width to next higher multiple of 8 (%d)."), cam->conf.width);
+    }
+    if (cam->conf.height % 8) {
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Image height (%d) requested is not modulo 8."), cam->conf.height);
+        cam->conf.height = cam->conf.height - (cam->conf.height % 8) + 8;
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Adjusting height to next higher multiple of 8 (%d)."), cam->conf.height);
+    }
+    if (cam->conf.width  < 64){
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Adjusting to minimum picture width of 64."));
+        cam->conf.width  = 64;
+    }
+    if (cam->conf.height < 64){
+        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            ,_("Adjusting to minimum picture height of 64."));
+        cam->conf.height = 64;
+    }
+
+}
+
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
@@ -429,32 +467,8 @@ static int mlp_init(struct ctx_cam *cam) {
         cam->movie_passthrough = FALSE;
     }
 
-    if ((cam->conf.height == 0) || (cam->conf.width == 0)) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Invalid configuration dimensions %dx%d"),cam->conf.height,cam->conf.width);
-        cam->conf.height = DEF_HEIGHT;
-        cam->conf.width = DEF_WIDTH;
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
-            ,_("Using default dimensions %dx%d"),cam->conf.height,cam->conf.width);
-    }
-    if (cam->conf.width % 8) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image width (%d) requested is not modulo 8."), cam->conf.width);
-        cam->conf.width = cam->conf.width - (cam->conf.width % 8) + 8;
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Adjusting width to next higher multiple of 8 (%d)."), cam->conf.width);
-    }
-    if (cam->conf.height % 8) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image height (%d) requested is not modulo 8."), cam->conf.height);
-        cam->conf.height = cam->conf.height - (cam->conf.height % 8) + 8;
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Adjusting height to next higher multiple of 8 (%d)."), cam->conf.height);
-    }
-    if (cam->conf.width  < 64) cam->conf.width  = 64;
-    if (cam->conf.height < 64) cam->conf.height = 64;
+    mlp_init_szconf(cam);
 
-    /* set the device settings */
     cam->video_dev = vid_start(cam);
 
     /*
