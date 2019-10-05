@@ -449,6 +449,32 @@ static int mlp_check_szimg(struct ctx_cam *cam){
 
 }
 
+/** Set the items required for the area detect */
+static void mlp_init_areadetect(struct ctx_cam *cam){
+
+    /* Initialize area detection */
+    cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
+    cam->area_miny[0] = cam->area_miny[1] = cam->area_miny[2] = 0;
+
+    cam->area_minx[1] = cam->area_minx[4] = cam->area_minx[7] = cam->imgs.width / 3;
+    cam->area_maxx[0] = cam->area_maxx[3] = cam->area_maxx[6] = cam->imgs.width / 3;
+
+    cam->area_minx[2] = cam->area_minx[5] = cam->area_minx[8] = cam->imgs.width / 3 * 2;
+    cam->area_maxx[1] = cam->area_maxx[4] = cam->area_maxx[7] = cam->imgs.width / 3 * 2;
+
+    cam->area_miny[3] = cam->area_miny[4] = cam->area_miny[5] = cam->imgs.height / 3;
+    cam->area_maxy[0] = cam->area_maxy[1] = cam->area_maxy[2] = cam->imgs.height / 3;
+
+    cam->area_miny[6] = cam->area_miny[7] = cam->area_miny[8] = cam->imgs.height / 3 * 2;
+    cam->area_maxy[3] = cam->area_maxy[4] = cam->area_maxy[5] = cam->imgs.height / 3 * 2;
+
+    cam->area_maxx[2] = cam->area_maxx[5] = cam->area_maxx[8] = cam->imgs.width;
+    cam->area_maxy[6] = cam->area_maxy[7] = cam->area_maxy[8] = cam->imgs.height;
+
+    cam->areadetect_eventnbr = 0;
+
+}
+
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
@@ -622,26 +648,7 @@ static int mlp_init(struct ctx_cam *cam) {
     if (cam->track.type)
         cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
-    /* Initialize area detection */
-    cam->area_minx[0] = cam->area_minx[3] = cam->area_minx[6] = 0;
-    cam->area_miny[0] = cam->area_miny[1] = cam->area_miny[2] = 0;
-
-    cam->area_minx[1] = cam->area_minx[4] = cam->area_minx[7] = cam->imgs.width / 3;
-    cam->area_maxx[0] = cam->area_maxx[3] = cam->area_maxx[6] = cam->imgs.width / 3;
-
-    cam->area_minx[2] = cam->area_minx[5] = cam->area_minx[8] = cam->imgs.width / 3 * 2;
-    cam->area_maxx[1] = cam->area_maxx[4] = cam->area_maxx[7] = cam->imgs.width / 3 * 2;
-
-    cam->area_miny[3] = cam->area_miny[4] = cam->area_miny[5] = cam->imgs.height / 3;
-    cam->area_maxy[0] = cam->area_maxy[1] = cam->area_maxy[2] = cam->imgs.height / 3;
-
-    cam->area_miny[6] = cam->area_miny[7] = cam->area_miny[8] = cam->imgs.height / 3 * 2;
-    cam->area_maxy[3] = cam->area_maxy[4] = cam->area_maxy[5] = cam->imgs.height / 3 * 2;
-
-    cam->area_maxx[2] = cam->area_maxx[5] = cam->area_maxx[8] = cam->imgs.width;
-    cam->area_maxy[6] = cam->area_maxy[7] = cam->area_maxy[8] = cam->imgs.height;
-
-    cam->areadetect_eventnbr = 0;
+    mlp_init_areadetect(cam);
 
     cam->timenow = 0;
     cam->timebefore = 0;
