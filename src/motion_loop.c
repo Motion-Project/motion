@@ -359,7 +359,31 @@ static int init_camera_type(struct ctx_cam *cam){
     return -1;
 
 }
+/** Get first images from camera at startup */
+static void mlp_init_firstimage(struct ctx_cam *cam) {
 
+    int indx;
+
+    /* Capture first image, or we will get an alarm on start */
+    if (cam->video_dev >= 0) {
+        for (indx = 0; indx < 5; indx++) {
+            if (vid_next(cam, cam->current_image) == 0)
+                break;
+            SLEEP(2, 0);
+        }
+
+        if (indx >= 5) {
+            memset(cam->imgs.image_virgin, 0x80, cam->imgs.size_norm);       /* initialize to grey */
+            draw_text(cam->imgs.image_virgin, cam->imgs.width, cam->imgs.height,
+                      10, 20, "Error capturing first image", cam->text_scale);
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
+        }
+    }
+    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
+
+    alg_update_reference_frame(cam, RESET_REF_FRAME);
+
+}
 
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
@@ -530,27 +554,7 @@ static int mlp_init(struct ctx_cam *cam) {
 
     draw_init_scale(cam);   /*Initialize and validate the text_scale */
 
-    /* Capture first image, or we will get an alarm on start */
-    if (cam->video_dev >= 0) {
-        int i;
-
-        for (i = 0; i < 5; i++) {
-            if (vid_next(cam, cam->current_image) == 0)
-                break;
-            SLEEP(2, 0);
-        }
-
-        if (i >= 5) {
-            memset(cam->imgs.image_virgin, 0x80, cam->imgs.size_norm);       /* initialize to grey */
-            draw_text(cam->imgs.image_virgin, cam->imgs.width, cam->imgs.height,
-                      10, 20, "Error capturing first image", cam->text_scale);
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("Error capturing first image"));
-        }
-    }
-    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-
-    /* create a reference frame */
-    alg_update_reference_frame(cam, RESET_REF_FRAME);
+    mlp_init_firstimage(cam);
 
     vlp_init(cam);
 
