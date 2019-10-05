@@ -475,6 +475,27 @@ static void mlp_init_areadetect(struct ctx_cam *cam){
 
 }
 
+/** Allocate the required buffers */
+static void mlp_init_buffers(struct ctx_cam *cam){
+
+    cam->imgs.ref = mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_motion.image_norm = mymalloc(cam->imgs.size_norm);
+    cam->imgs.ref_dyn = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
+    cam->imgs.image_virgin = mymalloc(cam->imgs.size_norm);
+    cam->imgs.image_vprvcy = mymalloc(cam->imgs.size_norm);
+    cam->imgs.smartmask = mymalloc(cam->imgs.motionsize);
+    cam->imgs.smartmask_final = mymalloc(cam->imgs.motionsize);
+    cam->imgs.smartmask_buffer = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
+    cam->imgs.labels = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.labels));
+    cam->imgs.labelsize = mymalloc((cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
+    cam->imgs.image_preview.image_norm = mymalloc(cam->imgs.size_norm);
+    cam->imgs.common_buffer = mymalloc(3 * cam->imgs.width * cam->imgs.height);
+    if (cam->imgs.size_high > 0){
+        cam->imgs.image_preview.image_high = mymalloc(cam->imgs.size_high);
+    }
+
+}
+
 /** mlp_init */
 static int mlp_init(struct ctx_cam *cam) {
 
@@ -523,11 +544,6 @@ static int mlp_init(struct ctx_cam *cam) {
 
     cam->video_dev = vid_start(cam);
 
-    /*
-     * We failed to get an initial image from a camera
-     * So we need to guess height and width based on the config
-     * file options.
-     */
     if (cam->video_dev == -1) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Could not fetch initial image from camera "));
@@ -543,34 +559,17 @@ static int mlp_init(struct ctx_cam *cam) {
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height modulo 8"));
         return -3;
+    } else {
+        cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
+        cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
+        cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
     }
 
     if (mlp_check_szimg(cam) != 0) return -1;
 
-    /* We set size_high here so that it can be used in the retry function to determine whether
-     * we need to break and reallocate buffers
-     */
-    cam->imgs.size_high = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
-
     mlp_ring_resize(cam, 1); /* Create a initial precapture ring buffer with 1 frame */
 
-    cam->imgs.ref = mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_motion.image_norm = mymalloc(cam->imgs.size_norm);
-
-    /* contains the moving objects of ref. frame */
-    cam->imgs.ref_dyn = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
-    cam->imgs.image_virgin = mymalloc(cam->imgs.size_norm);
-    cam->imgs.image_vprvcy = mymalloc(cam->imgs.size_norm);
-    cam->imgs.smartmask = mymalloc(cam->imgs.motionsize);
-    cam->imgs.smartmask_final = mymalloc(cam->imgs.motionsize);
-    cam->imgs.smartmask_buffer = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
-    cam->imgs.labels = mymalloc(cam->imgs.motionsize * sizeof(*cam->imgs.labels));
-    cam->imgs.labelsize = mymalloc((cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
-    cam->imgs.image_preview.image_norm = mymalloc(cam->imgs.size_norm);
-    cam->imgs.common_buffer = mymalloc(3 * cam->imgs.width * cam->imgs.height);
-    if (cam->imgs.size_high > 0){
-        cam->imgs.image_preview.image_high = mymalloc(cam->imgs.size_high);
-    }
+    mlp_init_buffers(cam);
 
     webu_stream_init(cam);
 
@@ -590,18 +589,9 @@ static int mlp_init(struct ctx_cam *cam) {
     else
         cam->imgs.picture_type = IMAGE_TYPE_JPEG;
 
-    /*
-     * Now is a good time to init rotation data. Since vid_start has been
-     * called, we know that we have imgs.width and imgs.height. When capturing
-     * from a V4L device, these are copied from the corresponding conf values
-     * in vid_start. When capturing from a netcam, they get set in netcam_start,
-     * which is called from vid_start.
-     *
-     * rotate_init will set cap_width and cap_height in cam->rotate_data.
-     */
-    rotate_init(cam); /* rotate_deinit is called in main */
+    rotate_init(cam);
 
-    draw_init_scale(cam);   /*Initialize and validate the text_scale */
+    draw_init_scale(cam);
 
     mlp_init_firstimage(cam);
 
