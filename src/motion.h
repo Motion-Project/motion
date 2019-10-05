@@ -101,11 +101,6 @@ int nls_enabled;
 
 #define DEF_TIMELAPSE_MODE      "daily"
 
-/* OUTPUT Image types */
-#define IMAGE_TYPE_JPEG        0
-#define IMAGE_TYPE_PPM         1
-#define IMAGE_TYPE_WEBP        2
-
 /* Filetype defines */
 #define FTYPE_IMAGE            1
 #define FTYPE_IMAGE_SNAPSHOT   2
@@ -262,7 +257,7 @@ struct ctx_images {
     int labels_above;
     int labelsize_max;
     int largest_label;
-    int picture_type;
+
 };
 
 struct ctx_stream_data {

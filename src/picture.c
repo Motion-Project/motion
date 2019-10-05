@@ -266,14 +266,14 @@ static void pic_write(struct ctx_cam *cam, FILE *picture, unsigned char *image, 
         height = cam->imgs.height;
     }
 
-    if (cam->imgs.picture_type == IMAGE_TYPE_PPM) {
+    if (mystreq(cam->conf.picture_type, "ppm")) {
         pic_save_ppm(picture, image, width, height);
-    } else if (cam->imgs.picture_type == IMAGE_TYPE_WEBP) {
+    } else if (mystreq(cam->conf.picture_type, "webp")) {
         pic_save_webp(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
-    } else if (cam->imgs.picture_type == IMAGE_TYPE_JPEG) {
-        pic_save_yuv420p(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
-    } else {
+    } else if (mystreq(cam->conf.picture_type, "grey")) {
         pic_save_grey(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
+    } else {
+        pic_save_yuv420p(picture, image, width, height, quality, cam, &(cam->current_image->imgts), &(cam->current_image->location));
     }
 }
 

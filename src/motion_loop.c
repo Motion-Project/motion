@@ -573,22 +573,6 @@ static int mlp_init(struct ctx_cam *cam) {
 
     webu_stream_init(cam);
 
-    /* Set output picture type */
-    if (mystreq(cam->conf.picture_type, "ppm"))
-        cam->imgs.picture_type = IMAGE_TYPE_PPM;
-    else if (mystreq(cam->conf.picture_type, "webp")) {
-        #ifdef HAVE_WEBP
-                cam->imgs.picture_type = IMAGE_TYPE_WEBP;
-        #else
-                /* Fallback to jpeg if webp was selected in the config file, but the support for it was not compiled in */
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("webp image format is not available, failing back to jpeg"));
-                cam->imgs.picture_type = IMAGE_TYPE_JPEG;
-        #endif /* HAVE_WEBP */
-    }
-    else
-        cam->imgs.picture_type = IMAGE_TYPE_JPEG;
-
     rotate_init(cam);
 
     draw_init_scale(cam);

@@ -304,12 +304,8 @@ static void event_vlp_putpipe(struct ctx_cam *cam, motion_event evnt
 
 const char *imageext(struct ctx_cam *cam) {
 
-    if (cam->imgs.picture_type == IMAGE_TYPE_PPM)
-        return "ppm";
-
-    if (cam->imgs.picture_type == IMAGE_TYPE_WEBP)
-        return "webp";
-
+    if (mystreq(cam->conf.picture_type, "ppm")) return "ppm";
+    if (mystreq(cam->conf.picture_type, "webp")) return "webp";
     return "jpg";
 }
 
