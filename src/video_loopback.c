@@ -19,8 +19,39 @@
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 
-static int vlp_open_vidpipe(void)
-{
+typedef struct capent {const char *cap; int code;} capentT;
+    capentT cap_list[] ={
+        {"V4L2_CAP_VIDEO_CAPTURE"        ,0x00000001 },
+        {"V4L2_CAP_VIDEO_CAPTURE_MPLANE" ,0x00001000 },
+        {"V4L2_CAP_VIDEO_OUTPUT"         ,0x00000002 },
+        {"V4L2_CAP_VIDEO_OUTPUT_MPLANE"  ,0x00002000 },
+        {"V4L2_CAP_VIDEO_M2M"            ,0x00004000 },
+        {"V4L2_CAP_VIDEO_M2M_MPLANE"     ,0x00008000 },
+        {"V4L2_CAP_VIDEO_OVERLAY"        ,0x00000004 },
+        {"V4L2_CAP_VBI_CAPTURE"          ,0x00000010 },
+        {"V4L2_CAP_VBI_OUTPUT"           ,0x00000020 },
+        {"V4L2_CAP_SLICED_VBI_CAPTURE"   ,0x00000040 },
+        {"V4L2_CAP_SLICED_VBI_OUTPUT"    ,0x00000080 },
+        {"V4L2_CAP_RDS_CAPTURE"          ,0x00000100 },
+        {"V4L2_CAP_VIDEO_OUTPUT_OVERLAY" ,0x00000200 },
+        {"V4L2_CAP_HW_FREQ_SEEK"         ,0x00000400 },
+        {"V4L2_CAP_RDS_OUTPUT"           ,0x00000800 },
+        {"V4L2_CAP_TUNER"                ,0x00010000 },
+        {"V4L2_CAP_AUDIO"                ,0x00020000 },
+        {"V4L2_CAP_RADIO"                ,0x00040000 },
+        {"V4L2_CAP_MODULATOR"            ,0x00080000 },
+        {"V4L2_CAP_SDR_CAPTURE"          ,0x00100000 },
+        {"V4L2_CAP_EXT_PIX_FORMAT"       ,0x00200000 },
+        {"V4L2_CAP_SDR_OUTPUT"           ,0x00400000 },
+        {"V4L2_CAP_READWRITE"            ,0x01000000 },
+        {"V4L2_CAP_ASYNCIO"              ,0x02000000 },
+        {"V4L2_CAP_STREAMING"            ,0x04000000 },
+        {"V4L2_CAP_DEVICE_CAPS"          ,0x80000000 },
+        {"Last",0}
+};
+
+static int vlp_open_vidpipe(void) {
+
     int pipe_fd = -1;
     char pipepath[255];
     char buffer[255];
@@ -90,37 +121,6 @@ static int vlp_open_vidpipe(void)
     return pipe_fd;
 }
 
-typedef struct capent {const char *cap; int code;} capentT;
-    capentT cap_list[] ={
-        {"V4L2_CAP_VIDEO_CAPTURE"        ,0x00000001 },
-        {"V4L2_CAP_VIDEO_CAPTURE_MPLANE" ,0x00001000 },
-        {"V4L2_CAP_VIDEO_OUTPUT"         ,0x00000002 },
-        {"V4L2_CAP_VIDEO_OUTPUT_MPLANE"  ,0x00002000 },
-        {"V4L2_CAP_VIDEO_M2M"            ,0x00004000 },
-        {"V4L2_CAP_VIDEO_M2M_MPLANE"     ,0x00008000 },
-        {"V4L2_CAP_VIDEO_OVERLAY"        ,0x00000004 },
-        {"V4L2_CAP_VBI_CAPTURE"          ,0x00000010 },
-        {"V4L2_CAP_VBI_OUTPUT"           ,0x00000020 },
-        {"V4L2_CAP_SLICED_VBI_CAPTURE"   ,0x00000040 },
-        {"V4L2_CAP_SLICED_VBI_OUTPUT"    ,0x00000080 },
-        {"V4L2_CAP_RDS_CAPTURE"          ,0x00000100 },
-        {"V4L2_CAP_VIDEO_OUTPUT_OVERLAY" ,0x00000200 },
-        {"V4L2_CAP_HW_FREQ_SEEK"         ,0x00000400 },
-        {"V4L2_CAP_RDS_OUTPUT"           ,0x00000800 },
-        {"V4L2_CAP_TUNER"                ,0x00010000 },
-        {"V4L2_CAP_AUDIO"                ,0x00020000 },
-        {"V4L2_CAP_RADIO"                ,0x00040000 },
-        {"V4L2_CAP_MODULATOR"            ,0x00080000 },
-        {"V4L2_CAP_SDR_CAPTURE"          ,0x00100000 },
-        {"V4L2_CAP_EXT_PIX_FORMAT"       ,0x00200000 },
-        {"V4L2_CAP_SDR_OUTPUT"           ,0x00400000 },
-        {"V4L2_CAP_READWRITE"            ,0x01000000 },
-        {"V4L2_CAP_ASYNCIO"              ,0x02000000 },
-        {"V4L2_CAP_STREAMING"            ,0x04000000 },
-        {"V4L2_CAP_DEVICE_CAPS"          ,0x80000000 },
-        {"Last",0}
-};
-
 static void vlp_show_vcap(struct v4l2_capability *cap) {
     unsigned int vers = cap->version;
     unsigned int c    = cap->capabilities;
@@ -150,8 +150,7 @@ static void vlp_show_vfmt(struct v4l2_format *v) {
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
-int vlp_startpipe(const char *dev_name, int width, int height)
-{
+int vlp_startpipe(const char *dev_name, int width, int height) {
     int dev;
     struct v4l2_format v;
     struct v4l2_capability vc;
@@ -208,6 +207,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
 
     return dev;
 }
+
 #endif /* HAVE_V4L2 && !BSD */
 
 int vlp_putpipe(int dev, unsigned char *image, int imgsize) {
@@ -222,5 +222,40 @@ int vlp_putpipe(int dev, unsigned char *image, int imgsize) {
     #endif
 }
 
+void vlp_init(struct ctx_cam *cam){
+
+    #if defined(HAVE_V4L2) && !defined(BSD)
+        /* open video loopback devices if enabled */
+        if (cam->conf.video_pipe) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Opening video loopback device for normal pictures"));
+
+            /* vid_startpipe should get the output dimensions */
+            cam->pipe = vlp_startpipe(cam->conf.video_pipe, cam->imgs.width, cam->imgs.height);
+
+            if (cam->pipe < 0) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Failed to open video loopback for normal pictures"));
+                return;
+            }
+        }
+
+        if (cam->conf.video_pipe_motion) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                ,_("Opening video loopback device for motion pictures"));
+
+            /* vid_startpipe should get the output dimensions */
+            cam->mpipe = vlp_startpipe(cam->conf.video_pipe_motion, cam->imgs.width, cam->imgs.height);
+
+            if (cam->mpipe < 0) {
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                    ,_("Failed to open video loopback for motion pictures"));
+                return;
+            }
+        }
+    #else
+        (void)cam;
+    #endif /* HAVE_V4L2 && !BSD */
+}
 
 
