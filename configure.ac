@@ -421,21 +421,7 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=no])
 
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
-  ]
-)
-##############################################################################
-###  Prototype Flags
-###  mysql and mariadb have upstream prototype errors so remove that check
-##############################################################################
-AC_ARG_WITH([prototype-flags],
-    AS_HELP_STRING([--with-prototype-flags],
-    [Causes practically all of the possible gcc warning flags to be set except missing prototypes.]),
-    [PROTOTYPE_FLAGS=$withval],
-    [PROTOTYPE_FLAGS=no])
-
-AS_IF([test "${PROTOTYPE_FLAGS}" = "yes"], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wnested-externs -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
   ]
 )
 

@@ -65,15 +65,15 @@ install-data-local:
 	@sed -e 's|$${prefix}|$(prefix)|' data/camera4-dist.conf > data/camera4-dist.conf.tmp && mv -f data/camera4-dist.conf.tmp data/camera4-dist.conf
 
 check:
-	./configure --with-prototype-flags                   && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-mariadb && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-ffmpeg  && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-mysql   && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-mariadb && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-sqlite3 && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-pgsql   && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-v4l2    && $(MAKE) clean && $(MAKE)
-	./configure --with-prototype-flags --without-webp    && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags                   && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-ffmpeg  && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-mysql   && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-mariadb && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-sqlite3 && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-pgsql   && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-v4l2    && $(MAKE) clean && $(MAKE)
+	./configure --with-developer-flags --without-webp    && $(MAKE) clean && $(MAKE)
 	./configure --with-developer-flags \
 		--without-mysql \
 		--without-mariadb \
