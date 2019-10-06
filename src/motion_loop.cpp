@@ -158,13 +158,11 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
             if (cam->new_img & NEWIMG_BEST) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].diffs > cam->imgs.image_preview.diffs) {
                     pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
-                    cam->imgs.image_preview.diffs = cam->imgs.image_ring[cam->imgs.ring_out].diffs;
                 }
             }
             if (cam->new_img & NEWIMG_CENTER) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].cent_dist < cam->imgs.image_preview.cent_dist) {
                     pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
-                    cam->imgs.image_preview.cent_dist = cam->imgs.image_ring[cam->imgs.ring_out].cent_dist;
                 }
             }
         }
@@ -185,7 +183,6 @@ static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
 
 static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img) {
 
-    /* Do things only if we have got minimum_motion_frames */
     if (img->flags & IMAGE_TRIGGER) {
         if (cam->event_nr != cam->prev_event) {
 
@@ -201,8 +198,9 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion detected - starting event %d"),
                        cam->event_nr);
 
-            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER))
+            if (cam->new_img & (NEWIMG_FIRST | NEWIMG_BEST | NEWIMG_CENTER)){
                 pic_save_preview(cam, img);
+            }
 
         }
 
@@ -213,37 +211,31 @@ static void mlp_detected_trigger(struct ctx_cam *cam, struct ctx_image_data *img
 
 static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *img) {
     struct ctx_config *conf = &cam->conf;
+    unsigned int distX, distY;
 
     draw_locate(cam, img);
 
     /* Calculate how centric motion is if configured preview center*/
     if (cam->new_img & NEWIMG_CENTER) {
-        unsigned int distX = abs((cam->imgs.width / 2) - img->location.x );
-        unsigned int distY = abs((cam->imgs.height / 2) - img->location.y);
-
+        distX = abs((cam->imgs.width / 2) - img->location.x );
+        distY = abs((cam->imgs.height / 2) - img->location.y);
         img->cent_dist = distX * distX + distY * distY;
     }
 
     mlp_detected_trigger(cam, img);
 
-    /* Limit framerate */
     if (img->shot < conf->framerate) {
-        /*
-         * If config option stream_motion is enabled, send the latest motion detected image
-         * to the stream but only if it is not the first shot within a second. This is to
-         * avoid double frames since we already have sent a frame to the stream.
-         * We also disable this in setup_mode.
-         */
-        if (conf->stream_motion && !conf->setup_mode && img->shot != 1)
+        if (conf->stream_motion && !conf->setup_mode && img->shot != 1){
             event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
-
-        if (conf->picture_output_motion)
+        }
+        if (conf->picture_output_motion){
             event(cam, EVENT_IMAGEM_DETECTED, NULL, NULL, NULL, &img->imgts);
+        }
     }
 
-    /* if track enabled and auto track on */
-    if (cam->track.type && cam->track.active)
+    if (cam->track.type && cam->track.active){
         cam->frame_skip = track_move(cam, dev, &img->location, &cam->imgs, 0);
+    }
 
 }
 
@@ -269,19 +261,17 @@ static int init_camera_type(struct ctx_cam *cam){
         return 0;
     }
 
-    #ifdef HAVE_V4L2
-        if (cam->conf.video_device) {
-            cam->camera_type = CAMERA_TYPE_V4L2;
-            return 0;
-        }
-    #endif // HAVE_V4L2
-
+    if (cam->conf.video_device) {
+        cam->camera_type = CAMERA_TYPE_V4L2;
+        return 0;
+    }
 
     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
         , _("Unable to determine camera type (MMAL, Netcam, V4L2)"));
     return -1;
 
 }
+
 /** Get first images from camera at startup */
 static void mlp_init_firstimage(struct ctx_cam *cam) {
 
