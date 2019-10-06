@@ -121,7 +121,6 @@
         int             movie_bps;
         int             movie_quality;
         const char      *movie_codec;
-        int             movie_duplicate_frames;
         int             movie_passthrough;
         const char      *movie_filename;
         int             movie_extpipe_use;

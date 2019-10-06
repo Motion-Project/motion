@@ -44,54 +44,39 @@
 
 
 static void mlp_ring_resize(struct ctx_cam *cam, int new_size) {
-    /*
-     * Only resize if :
-     * Not in an event and
-     * decreasing at last position in new buffer
-     * increasing at last position in old buffer
-     * e.g. at end of smallest buffer
-     */
-    if (cam->event_nr != cam->prev_event) {
-        int smallest;
 
-        if (new_size < cam->imgs.ring_size)  /* Decreasing */
+    int smallest, i;
+    struct ctx_image_data *tmp;
+
+    if (cam->event_nr != cam->prev_event) {
+
+        if (new_size < cam->imgs.ring_size){
             smallest = new_size;
-        else  /* Increasing */
+        } else {
             smallest = cam->imgs.ring_size;
+        }
 
         if (cam->imgs.ring_in == smallest - 1 || smallest == 0) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Resizing pre_capture buffer to %d items"), new_size);
 
-            /* Create memory for new ring buffer */
-            struct ctx_image_data *tmp;
             tmp =(struct ctx_image_data*) mymalloc(new_size * sizeof(struct ctx_image_data));
 
-            /*
-             * Copy all information from old to new
-             * Smallest is 0 at initial init
-             */
-            if (smallest > 0)
+            if (smallest > 0){
                 memcpy(tmp, cam->imgs.image_ring, sizeof(struct ctx_image_data) * smallest);
+            }
 
-
-            /* In the new buffers, allocate image memory */
-            {
-                int i;
-                for(i = smallest; i < new_size; i++) {
-                    tmp[i].image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
-                    memset(tmp[i].image_norm, 0x80, cam->imgs.size_norm);  /* initialize to grey */
-                    if (cam->imgs.size_high > 0){
-                        tmp[i].image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
-                        memset(tmp[i].image_high, 0x80, cam->imgs.size_high);
-                    }
+            for(i = smallest; i < new_size; i++) {
+                tmp[i].image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
+                memset(tmp[i].image_norm, 0x80, cam->imgs.size_norm);  /* initialize to grey */
+                if (cam->imgs.size_high > 0){
+                    tmp[i].image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
+                    memset(tmp[i].image_high, 0x80, cam->imgs.size_high);
                 }
             }
 
-            /* Free the old ring */
             free(cam->imgs.image_ring);
 
-            /* Point to the new ring */
             cam->imgs.image_ring = tmp;
             cam->current_image = NULL;
 
@@ -106,17 +91,12 @@ static void mlp_ring_resize(struct ctx_cam *cam, int new_size) {
 static void mlp_ring_destroy(struct ctx_cam *cam) {
     int i;
 
-    /* Exit if don't have any ring */
-    if (cam->imgs.image_ring == NULL)
-        return;
+    if (cam->imgs.image_ring == NULL) return;
 
-    /* Free all image buffers */
     for (i = 0; i < cam->imgs.ring_size; i++){
         free(cam->imgs.image_ring[i].image_norm);
         if (cam->imgs.size_high >0 ) free(cam->imgs.image_ring[i].image_high);
     }
-
-    /* Free the ring */
     free(cam->imgs.image_ring);
 
     cam->imgs.image_ring = NULL;
@@ -124,139 +104,82 @@ static void mlp_ring_destroy(struct ctx_cam *cam) {
     cam->imgs.ring_size = 0;
 }
 
+static void mlp_ring_process_debug(struct ctx_cam *cam){
+    char tmp[32];
+    const char *t;
+
+    if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_TRIGGER){
+        t = "Trigger";
+    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION){
+        t = "Motion";
+    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_PRECAP){
+        t = "Precap";
+    } else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_POSTCAP){
+        t = "Postcap";
+    } else {
+        t = "Other";
+    }
+
+    mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q",
+                &cam->imgs.image_ring[cam->imgs.ring_out].imgts, NULL, 0);
+    draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
+                cam->imgs.width, cam->imgs.height, 10, 20, tmp, cam->text_scale);
+    draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
+                cam->imgs.width, cam->imgs.height, 10, 30, t, cam->text_scale);
+
+}
+
 static void mlp_ring_process(struct ctx_cam *cam, unsigned int max_images) {
-    /*
-     * We are going to send an event, in the events there is still
-     * some code that use cam->current_image
-     * so set it temporary to our image
-     */
+
     struct ctx_image_data *saved_current_image = cam->current_image;
 
-    /* If image is flaged to be saved and not saved yet, process it */
     do {
-        /* Check if we should save/send this image, breakout if not */
-        assert(cam->imgs.ring_out < cam->imgs.ring_size);
-        if ((cam->imgs.image_ring[cam->imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE)
+        if ((cam->imgs.image_ring[cam->imgs.ring_out].flags & (IMAGE_SAVE | IMAGE_SAVED)) != IMAGE_SAVE){
             break;
+        }
 
-        /* Set inte global context that we are working with this image */
         cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_out];
 
         if (cam->imgs.image_ring[cam->imgs.ring_out].shot < cam->conf.framerate) {
-            if (cam->log_level >= DBG) {
-                char tmp[32];
-                const char *t;
+            if (cam->log_level >= DBG) mlp_ring_process_debug(cam);
 
-                if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_TRIGGER)
-                    t = "Trigger";
-                else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION)
-                    t = "Motion";
-                else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_PRECAP)
-                    t = "Precap";
-                else if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_POSTCAP)
-                    t = "Postcap";
-                else
-                    t = "Other";
-
-                mystrftime(cam, tmp, sizeof(tmp), "%H%M%S-%q",
-                           &cam->imgs.image_ring[cam->imgs.ring_out].imgts, NULL, 0);
-                draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
-                          cam->imgs.width, cam->imgs.height, 10, 20, tmp, cam->text_scale);
-                draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
-                          cam->imgs.width, cam->imgs.height, 10, 30, t, cam->text_scale);
-            }
-
-            /* Output the picture to jpegs and ffmpeg */
             event(cam, EVENT_IMAGE_DETECTED,
               &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
               &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
 
-
-            /*
-             * Check if we must add any "filler" frames into movie to keep up fps
-             * Only if we are recording videos ( ffmpeg or extenal pipe )
-             * While the overall elapsed time might be correct, if there are
-             * many duplicated frames, say 10 fps, 5 duplicated, the video will
-             * look like it is frozen every second for half a second.
-             */
-            if (!cam->conf.movie_duplicate_frames) {
-                /* don't duplicate frames */
-            } else if ((cam->imgs.image_ring[cam->imgs.ring_out].shot == 0) &&
-                (cam->movie_norm || (cam->conf.movie_extpipe_use && cam->extpipe))) {
-                /*
-                 * movie_last_shoot is -1 when file is created,
-                 * we don't know how many frames there is in first sec
-                 */
-                if (cam->movie_last_shot >= 0) {
-                    if (cam->log_level >= DBG) {
-                        int frames = cam->movie_fps - (cam->movie_last_shot + 1);
-                        if (frames > 0) {
-                            char tmp[25];
-                            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-                            ,_("Added %d fillerframes into movie"), frames);
-                            sprintf(tmp, "Fillerframes %d", frames);
-                            draw_text(cam->imgs.image_ring[cam->imgs.ring_out].image_norm,
-                                      cam->imgs.width, cam->imgs.height, 10, 40, tmp, cam->text_scale);
-                        }
-                    }
-                    /* Check how many frames it was last sec */
-                    while ((cam->movie_last_shot + 1) < cam->movie_fps) {
-                        /* Add a filler frame into encoder */
-                        event(cam, EVENT_MOVIE_PUT,
-                          &cam->imgs.image_ring[cam->imgs.ring_out], NULL, NULL,
-                          &cam->imgs.image_ring[cam->imgs.ring_out].imgts);
-
-                        cam->movie_last_shot++;
-                    }
-                }
-                cam->movie_last_shot = 0;
-            } else if (cam->imgs.image_ring[cam->imgs.ring_out].shot != (cam->movie_last_shot + 1)) {
-                /* We are out of sync! Propably we got motion - no motion - motion */
-                cam->movie_last_shot = -1;
-            }
-
-            /*
-             * Save last shot added to movie
-             * only when we not are within first sec
-             */
-            if (cam->movie_last_shot >= 0)
+            if (cam->movie_last_shot >= 0){
                 cam->movie_last_shot = cam->imgs.image_ring[cam->imgs.ring_out].shot;
+            }
         }
 
-        /* Mark the image as saved */
         cam->imgs.image_ring[cam->imgs.ring_out].flags |= IMAGE_SAVED;
 
-        /* Store it as a preview image, only if it has motion */
         if (cam->imgs.image_ring[cam->imgs.ring_out].flags & IMAGE_MOTION) {
-            /* Check for most significant preview-shot when picture_output=best */
             if (cam->new_img & NEWIMG_BEST) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].diffs > cam->imgs.image_preview.diffs) {
                     pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                    cam->imgs.image_preview.diffs = cam->imgs.image_ring[cam->imgs.ring_out].diffs;
                 }
             }
-            /* Check for most significant preview-shot when picture_output=center */
             if (cam->new_img & NEWIMG_CENTER) {
                 if (cam->imgs.image_ring[cam->imgs.ring_out].cent_dist < cam->imgs.image_preview.cent_dist) {
                     pic_save_preview(cam, &cam->imgs.image_ring[cam->imgs.ring_out]);
+                    cam->imgs.image_preview.cent_dist = cam->imgs.image_ring[cam->imgs.ring_out].cent_dist;
                 }
             }
         }
 
-        /* Increment to image after last sended */
-        if (++cam->imgs.ring_out >= cam->imgs.ring_size)
+        if (++cam->imgs.ring_out >= cam->imgs.ring_size) {
             cam->imgs.ring_out = 0;
-
-        if (max_images != IMAGE_BUFFER_FLUSH) {
-            max_images--;
-            /* breakout if we have done max_images */
-            if (max_images == 0)
-                break;
         }
 
-        /* loop until out and in is same e.g. buffer empty */
+        /* TODO mlp_action requests this....only wants two images...but why?*/
+        if (max_images != IMAGE_BUFFER_FLUSH) {
+            max_images--;
+            if (max_images == 0) break;
+        }
     } while (cam->imgs.ring_out != cam->imgs.ring_in);
 
-    /* restore global context values */
     cam->current_image = saved_current_image;
 }
 
@@ -1570,6 +1493,7 @@ static void mlp_actions(struct ctx_cam *cam){
     }
 
     /* Save/send to movie some images */
+    /* But why?  And why just two images from the ring? Didn't other functions flush already?*/
     mlp_ring_process(cam, 2);
 
 
