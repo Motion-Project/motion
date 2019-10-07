@@ -330,7 +330,6 @@ struct ctx_cam {
     unsigned int            new_img;
     int                     locate_motion_mode;
     int                     locate_motion_style;
-    int                     process_thisframe;
     int                     noise;
     int                     threshold;
     int                     threshold_maximum;
@@ -389,11 +388,8 @@ struct ctx_cam {
 
     int area_minx[9], area_miny[9], area_maxx[9], area_maxy[9];
     int                     areadetect_eventnbr;
-    unsigned long long int  timenow, timebefore;
-    unsigned int            rate_limit;
     int                     minimum_frame_time_downcounter;
     unsigned int            get_image;    /* Flag used to signal that we capture new image when we run the loop */
-    long int                required_frame_time, frame_delay;
 
     int                     olddiffs;   //only need this in here for a printf later...do we need that printf?
     int                     smartmask_ratio;

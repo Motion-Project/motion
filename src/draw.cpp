@@ -1231,7 +1231,7 @@ void draw_init_scale(struct ctx_cam *cam){
 
 /** Draws a box around the movement. */
 static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new_var,
-                       int style, int mode, int process_thisframe)
+                       int style, int mode)
 {
     unsigned char *out = imgs->image_motion.image_norm;
     int x, y;
@@ -1239,7 +1239,7 @@ static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int w
     out = imgs->image_motion.image_norm;
 
     /* Debug image always gets a 'normal' box. */
-    if ((mode == LOCATE_BOTH) && process_thisframe) {
+    if (mode == LOCATE_BOTH) {
         int width_miny = width * cent->miny;
         int width_maxy = width * cent->maxy;
 
@@ -1296,7 +1296,7 @@ static void draw_location(struct ctx_coord *cent, struct ctx_images *imgs, int w
 
 /** Draws a RED box around the movement. */
 static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, int width, unsigned char *new_var,
-                           int style, int mode, int process_thisframe)
+                           int style, int mode)
 {
     unsigned char *out = imgs->image_motion.image_norm;
     unsigned char *new_u, *new_v;
@@ -1311,7 +1311,7 @@ static void draw_red_location(struct ctx_coord *cent, struct ctx_images *imgs, i
     new_v = new_var + v;
 
     /* Debug image always gets a 'normal' box. */
-    if ((mode == LOCATE_BOTH) && process_thisframe) {
+    if (mode == LOCATE_BOTH) {
         int width_miny = width * cent->miny;
         int width_maxy = width * cent->maxy;
 
@@ -1410,16 +1410,16 @@ void draw_locate_preview(struct ctx_cam *cam, struct ctx_image_data *img){
 
         if (cam->locate_motion_style == LOCATE_BOX) {
             draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                              LOCATE_BOX, LOCATE_NORMAL, cam->process_thisframe);
+                              LOCATE_BOX, LOCATE_NORMAL);
         } else if (cam->locate_motion_style == LOCATE_REDBOX) {
             draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                                  LOCATE_REDBOX, LOCATE_NORMAL, cam->process_thisframe);
+                                  LOCATE_REDBOX, LOCATE_NORMAL);
         } else if (cam->locate_motion_style == LOCATE_CROSS) {
             draw_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                              LOCATE_CROSS, LOCATE_NORMAL, cam->process_thisframe);
+                              LOCATE_CROSS, LOCATE_NORMAL);
         } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
             draw_red_location(&img->location, &cam->imgs, cam->imgs.width, cam->imgs.image_preview.image_norm,
-                                  LOCATE_REDCROSS, LOCATE_NORMAL, cam->process_thisframe);
+                                  LOCATE_REDCROSS, LOCATE_NORMAL);
         }
     }
 }
@@ -1432,16 +1432,16 @@ void draw_locate(struct ctx_cam *cam, struct ctx_image_data *img){
 
         if (cam->locate_motion_style == LOCATE_BOX) {
             draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_BOX,
-                              LOCATE_BOTH, cam->process_thisframe);
+                              LOCATE_BOTH);
         } else if (cam->locate_motion_style == LOCATE_REDBOX) {
             draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDBOX,
-                                  LOCATE_BOTH, cam->process_thisframe);
+                                  LOCATE_BOTH);
         } else if (cam->locate_motion_style == LOCATE_CROSS) {
             draw_location(location, imgs, imgs->width, img->image_norm, LOCATE_CROSS,
-                              LOCATE_BOTH, cam->process_thisframe);
+                              LOCATE_BOTH);
         } else if (cam->locate_motion_style == LOCATE_REDCROSS) {
             draw_red_location(location, imgs, imgs->width, img->image_norm, LOCATE_REDCROSS,
-                                  LOCATE_BOTH, cam->process_thisframe);
+                                  LOCATE_BOTH);
         }
     }
 }

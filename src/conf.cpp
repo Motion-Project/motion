@@ -2235,7 +2235,7 @@ static void conf_defaults(struct ctx_cam **cam_list) {
     /* Image processing configuration parameters */
     cam_list[0]->conf.width               = 640;
     cam_list[0]->conf.height              = 480;
-    cam_list[0]->conf.framerate           = 15;
+    conf_edit_framerate(cam_list[0],"15");
     cam_list[0]->conf.rotate              = 0;
     cam_list[0]->conf.flip_axis           = "none";
     cam_list[0]->conf.locate_motion_mode  = "off";

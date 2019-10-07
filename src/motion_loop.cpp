@@ -517,22 +517,11 @@ static int mlp_init(struct ctx_cam *cam) {
 
     track_init(cam);
 
-    /* Work out expected frame rate based on config setting */
-    if (cam->conf.framerate < 2)
-        cam->conf.framerate = 2;
-
     /* 2 sec startup delay so FPS is calculated correct */
     cam->startup_frames = (cam->conf.framerate * 2) + cam->conf.pre_capture + cam->conf.minimum_motion_frames;
 
-    cam->required_frame_time = 1000000L / cam->conf.framerate;
-
-    cam->frame_delay = cam->required_frame_time;
-
     mlp_init_areadetect(cam);
 
-    cam->timenow = 0;
-    cam->timebefore = 0;
-    cam->rate_limit = 0;
     cam->lastframetime = 0;
     cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;
     cam->get_image = 1;
@@ -758,22 +747,9 @@ static void mlp_prepare(struct ctx_cam *cam){
 
     cam->watchdog = WATCHDOG_TMO;
 
-    cam->timebefore = cam->timenow;
-
     cam->frame_last_ts.tv_sec = cam->frame_curr_ts.tv_sec;
     cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
-
-    /*
-     * Calculate detection rate limit. Above 5fps we limit the detection
-     * rate to 3fps to reduce load at higher framerates.
-     */
-    cam->process_thisframe = 0;
-    cam->rate_limit++;
-    if (cam->rate_limit >= (cam->lastrate / 3)) {
-        cam->rate_limit = 0;
-        cam->process_thisframe = 1;
-    }
 
     if (cam->conf.minimum_motion_frames < 1)
         cam->conf.minimum_motion_frames = 1;
@@ -817,8 +793,6 @@ static void mlp_prepare(struct ctx_cam *cam){
 
 static void mlp_resetimages(struct ctx_cam *cam){
 
-    struct ctx_image_data *old_image;
-
     if (cam->conf.minimum_frame_time) {
         cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;
         cam->get_image = 0;
@@ -835,31 +809,18 @@ static void mlp_resetimages(struct ctx_cam *cam){
     }
 
     /* cam->current_image points to position in ring where to store image, diffs etc. */
-    old_image = cam->current_image;
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
 
-    /* Init/clear current_image */
-    if (cam->process_thisframe) {
-        /* set diffs to 0 now, will be written after we calculated diffs in new image */
-        cam->current_image->diffs = 0;
+    /* set diffs to 0 now, will be written after we calculated diffs in new image */
+    cam->current_image->diffs = 0;
 
-        /* Set flags to 0 */
-        cam->current_image->flags = 0;
-        cam->current_image->cent_dist = 0;
+    /* Set flags to 0 */
+    cam->current_image->flags = 0;
+    cam->current_image->cent_dist = 0;
 
-        /* Clear location data */
-        memset(&cam->current_image->location, 0, sizeof(cam->current_image->location));
-        cam->current_image->total_labels = 0;
-    } else if (cam->current_image && old_image) {
-        /* not processing this frame: save some important values for next image */
-        cam->current_image->diffs = old_image->diffs;
-        cam->current_image->imgts = old_image->imgts;
-        cam->current_image->shot = old_image->shot;
-        cam->current_image->cent_dist = old_image->cent_dist;
-        cam->current_image->flags = old_image->flags & (~IMAGE_SAVED);
-        cam->current_image->location = old_image->location;
-        cam->current_image->total_labels = old_image->total_labels;
-    }
+    /* Clear location data */
+    memset(&cam->current_image->location, 0, sizeof(cam->current_image->location));
+    cam->current_image->total_labels = 0;
 
     clock_gettime(CLOCK_REALTIME, &cam->current_image->imgts);
 
@@ -1068,85 +1029,84 @@ static int mlp_capture(struct ctx_cam *cam){
 
 static void mlp_detection(struct ctx_cam *cam){
 
-    if (cam->process_thisframe) {
-        if (cam->threshold && !cam->pause) {
-            /*
-             * If we've already detected motion and we want to see if there's
-             * still motion, don't bother trying the fast one first. IF there's
-             * motion, the alg_diff will trigger alg_diff_standard
-             * anyway
-             */
-            if (cam->detecting_motion || cam->conf.setup_mode)
-                cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
-            else
-                cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy);
+    if (cam->threshold && !cam->pause) {
+        /*
+            * If we've already detected motion and we want to see if there's
+            * still motion, don't bother trying the fast one first. IF there's
+            * motion, the alg_diff will trigger alg_diff_standard
+            * anyway
+            */
+        if (cam->detecting_motion || cam->conf.setup_mode)
+            cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
+        else
+            cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy);
 
-            /* Lightswitch feature - has light intensity changed?
-             * This can happen due to change of light conditions or due to a sudden change of the camera
-             * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
-             * 'lightswitch_frames' frames to allow the camera to settle.
-             * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
-             */
-            if (cam->conf.lightswitch_percent > 1 && !cam->lost_connection) {
-                if (alg_lightswitch(cam, cam->current_image->diffs)) {
-                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
+        /* Lightswitch feature - has light intensity changed?
+            * This can happen due to change of light conditions or due to a sudden change of the camera
+            * sensitivity. If alg_lightswitch detects lightswitch we suspend motion detection the next
+            * 'lightswitch_frames' frames to allow the camera to settle.
+            * Don't check if we have lost connection, we detect "Lost signal" frame as lightswitch
+            */
+        if (cam->conf.lightswitch_percent > 1 && !cam->lost_connection) {
+            if (alg_lightswitch(cam, cam->current_image->diffs)) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
 
-                    if (cam->conf.lightswitch_frames < 1)
-                        cam->conf.lightswitch_frames = 1;
-                    else if (cam->conf.lightswitch_frames > 1000)
-                        cam->conf.lightswitch_frames = 1000;
+                if (cam->conf.lightswitch_frames < 1)
+                    cam->conf.lightswitch_frames = 1;
+                else if (cam->conf.lightswitch_frames > 1000)
+                    cam->conf.lightswitch_frames = 1000;
 
-                    if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
-                        cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
+                if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
+                    cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
 
-                    cam->current_image->diffs = 0;
-                    alg_update_reference_frame(cam, RESET_REF_FRAME);
-                }
+                cam->current_image->diffs = 0;
+                alg_update_reference_frame(cam, RESET_REF_FRAME);
             }
-
-            /*
-             * Switchfilter feature tries to detect a change in the video signal
-             * from one camera to the next. This is normally used in the Round
-             * Robin feature. The algorithm is not very safe.
-             * The algorithm takes a little time so we only call it when needed
-             * ie. when feature is enabled and diffs>threshold.
-             * We do not suspend motion detection like we did for lightswitch
-             * because with Round Robin this is controlled by roundrobin_skip.
-             */
-            if (cam->conf.roundrobin_switchfilter && cam->current_image->diffs > cam->threshold) {
-                cam->current_image->diffs = alg_switchfilter(cam, cam->current_image->diffs,
-                                                             cam->current_image->image_norm);
-
-                if ((cam->current_image->diffs <= cam->threshold) ||
-                    (cam->current_image->diffs > cam->threshold_maximum)) {
-
-                    cam->current_image->diffs = 0;
-                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
-                }
-            }
-
-            /*
-             * Despeckle feature
-             * First we run (as given by the despeckle_filter option iterations
-             * of erode and dilate algorithms.
-             * Finally we run the labelling feature.
-             * All this is done in the alg_despeckle code.
-             */
-            cam->current_image->total_labels = 0;
-            cam->imgs.largest_label = 0;
-            cam->olddiffs = 0;
-
-            if (cam->conf.despeckle_filter && cam->current_image->diffs > 0) {
-                cam->olddiffs = cam->current_image->diffs;
-                cam->current_image->diffs = alg_despeckle(cam, cam->olddiffs);
-            } else if (cam->imgs.labelsize_max) {
-                cam->imgs.labelsize_max = 0; /* Disable labeling if enabled */
-            }
-
-        } else if (!cam->conf.setup_mode) {
-            cam->current_image->diffs = 0;
         }
+
+        /*
+            * Switchfilter feature tries to detect a change in the video signal
+            * from one camera to the next. This is normally used in the Round
+            * Robin feature. The algorithm is not very safe.
+            * The algorithm takes a little time so we only call it when needed
+            * ie. when feature is enabled and diffs>threshold.
+            * We do not suspend motion detection like we did for lightswitch
+            * because with Round Robin this is controlled by roundrobin_skip.
+            */
+        if (cam->conf.roundrobin_switchfilter && cam->current_image->diffs > cam->threshold) {
+            cam->current_image->diffs = alg_switchfilter(cam, cam->current_image->diffs,
+                                                            cam->current_image->image_norm);
+
+            if ((cam->current_image->diffs <= cam->threshold) ||
+                (cam->current_image->diffs > cam->threshold_maximum)) {
+
+                cam->current_image->diffs = 0;
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
+            }
+        }
+
+        /*
+            * Despeckle feature
+            * First we run (as given by the despeckle_filter option iterations
+            * of erode and dilate algorithms.
+            * Finally we run the labelling feature.
+            * All this is done in the alg_despeckle code.
+            */
+        cam->current_image->total_labels = 0;
+        cam->imgs.largest_label = 0;
+        cam->olddiffs = 0;
+
+        if (cam->conf.despeckle_filter && cam->current_image->diffs > 0) {
+            cam->olddiffs = cam->current_image->diffs;
+            cam->current_image->diffs = alg_despeckle(cam, cam->olddiffs);
+        } else if (cam->imgs.labelsize_max) {
+            cam->imgs.labelsize_max = 0; /* Disable labeling if enabled */
+        }
+
+    } else if (!cam->conf.setup_mode) {
+        cam->current_image->diffs = 0;
     }
+
 
     //TODO:  This section needs investigation for purpose, cause and effect
     /* Manipulate smart_mask sensitivity (only every smartmask_ratio seconds) */
@@ -1183,59 +1143,58 @@ static void mlp_tuning(struct ctx_cam *cam){
      * If we are not noise tuning lets make sure that remote controlled
      * changes of noise_level are used.
      */
-    if (cam->process_thisframe) {
-        /*
-         * threshold tuning if enabled
-         * if we are not threshold tuning lets make sure that remote controlled
-         * changes of threshold are used.
-         */
-        if (cam->conf.threshold_tune){
-            alg_threshold_tune(cam, cam->current_image->diffs, cam->detecting_motion);
-        }
-
-        /*
-         * If motion is detected (cam->current_image->diffs > cam->threshold) and before we add text to the pictures
-         * we find the center and size coordinates of the motion to be used for text overlays and later
-         * for adding the locate rectangle
-         */
-        if ((cam->current_image->diffs > cam->threshold) &&
-            (cam->current_image->diffs < cam->threshold_maximum)){
-
-            alg_locate_center_size(&cam->imgs
-                , cam->imgs.width
-                , cam->imgs.height
-                , &cam->current_image->location);
-            }
-
-        /*
-         * Update reference frame.
-         * micro-lighswitch: trying to auto-detect lightswitch events.
-         * frontdoor illumination. Updates are rate-limited to 3 per second at
-         * framerates above 5fps to save CPU resources and to keep sensitivity
-         * at a constant level.
-         */
-
-        if ((cam->current_image->diffs > cam->threshold) &&
-            (cam->current_image->diffs < cam->threshold_maximum) &&
-            (cam->conf.lightswitch_percent >= 1) &&
-            (cam->lightswitch_framecounter < (cam->lastrate * 2)) && /* two seconds window only */
-            /* number of changed pixels almost the same in two consecutive frames and */
-            ((abs(cam->previous_diffs - cam->current_image->diffs)) < (cam->previous_diffs / 15)) &&
-            /* center of motion in about the same place ? */
-            ((abs(cam->current_image->location.x - cam->previous_location_x)) <= (cam->imgs.width / 150)) &&
-            ((abs(cam->current_image->location.y - cam->previous_location_y)) <= (cam->imgs.height / 150))) {
-            alg_update_reference_frame(cam, RESET_REF_FRAME);
-            cam->current_image->diffs = 0;
-            cam->lightswitch_framecounter = 0;
-
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
-        } else {
-            alg_update_reference_frame(cam, UPDATE_REF_FRAME);
-        }
-        cam->previous_diffs = cam->current_image->diffs;
-        cam->previous_location_x = cam->current_image->location.x;
-        cam->previous_location_y = cam->current_image->location.y;
+    /*
+        * threshold tuning if enabled
+        * if we are not threshold tuning lets make sure that remote controlled
+        * changes of threshold are used.
+        */
+    if (cam->conf.threshold_tune){
+        alg_threshold_tune(cam, cam->current_image->diffs, cam->detecting_motion);
     }
+
+    /*
+        * If motion is detected (cam->current_image->diffs > cam->threshold) and before we add text to the pictures
+        * we find the center and size coordinates of the motion to be used for text overlays and later
+        * for adding the locate rectangle
+        */
+    if ((cam->current_image->diffs > cam->threshold) &&
+        (cam->current_image->diffs < cam->threshold_maximum)){
+
+        alg_locate_center_size(&cam->imgs
+            , cam->imgs.width
+            , cam->imgs.height
+            , &cam->current_image->location);
+        }
+
+    /*
+        * Update reference frame.
+        * micro-lighswitch: trying to auto-detect lightswitch events.
+        * frontdoor illumination. Updates are rate-limited to 3 per second at
+        * framerates above 5fps to save CPU resources and to keep sensitivity
+        * at a constant level.
+        */
+
+    if ((cam->current_image->diffs > cam->threshold) &&
+        (cam->current_image->diffs < cam->threshold_maximum) &&
+        (cam->conf.lightswitch_percent >= 1) &&
+        (cam->lightswitch_framecounter < (cam->lastrate * 2)) && /* two seconds window only */
+        /* number of changed pixels almost the same in two consecutive frames and */
+        ((abs(cam->previous_diffs - cam->current_image->diffs)) < (cam->previous_diffs / 15)) &&
+        /* center of motion in about the same place ? */
+        ((abs(cam->current_image->location.x - cam->previous_location_x)) <= (cam->imgs.width / 150)) &&
+        ((abs(cam->current_image->location.y - cam->previous_location_y)) <= (cam->imgs.height / 150))) {
+        alg_update_reference_frame(cam, RESET_REF_FRAME);
+        cam->current_image->diffs = 0;
+        cam->lightswitch_framecounter = 0;
+
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
+    } else {
+        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
+    }
+    cam->previous_diffs = cam->current_image->diffs;
+    cam->previous_location_x = cam->current_image->location.x;
+    cam->previous_location_y = cam->current_image->location.y;
+
 
 
 }
