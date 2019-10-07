@@ -315,30 +315,21 @@ static void event_image_detect(struct ctx_cam *cam, motion_event evnt
 
     char fullfilename[PATH_MAX];
     char filename[PATH_MAX];
-    int  passthrough;
-    const char *imagepath;
+    int  passthrough, retcd;
 
     (void)evnt;
     (void)fname;
     (void)ftype;
 
     if (cam->new_img & NEWIMG_ON) {
-        /*
-         *  conf.imagepath would normally be defined but if someone deleted it by control interface
-         *  it is better to revert to the default than fail
-         */
-        if (cam->conf.picture_filename)
-            imagepath = cam->conf.picture_filename;
-        else
-            imagepath = DEF_IMAGEPATH;
-
-        mystrftime(cam, filename, sizeof(filename), imagepath, ts1, NULL, 0);
-        snprintf(fullfilename, PATH_MAX, "%.*s/%.*s.%s"
-            , (int)(PATH_MAX-2-strlen(filename)-strlen(imageext(cam)))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
-            , filename, imageext(cam));
-
+        mystrftime(cam, filename, sizeof(filename), cam->conf.picture_filename, ts1, NULL, 0);
+        retcd = snprintf(fullfilename, PATH_MAX, "%s/%s.%s"
+            , cam->conf.target_dir, filename, imageext(cam));
+        if ((retcd < 0) || (retcd >= PATH_MAX)){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                ,_("Error creating image file name"));
+            return;
+        }
         passthrough = mycheck_passthrough(cam);
         if ((cam->imgs.size_high > 0) && (!passthrough)) {
             pic_save_norm(cam, fullfilename,img_data->image_high, FTYPE_IMAGE);
@@ -357,7 +348,7 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
     char fullfilenamem[PATH_MAX];
     char filename[PATH_MAX];
     char filenamem[PATH_MAX];
-    const char *imagepath;
+    int retcd;
 
     (void)evnt;
     (void)img_data;
@@ -365,26 +356,14 @@ static void event_imagem_detect(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     if (conf->picture_output_motion) {
-        /*
-         *  conf.picture_filename would normally be defined but if someone deleted it by control interface
-         *  it is better to revert to the default than fail
-         */
-        if (cam->conf.picture_filename)
-            imagepath = cam->conf.picture_filename;
-        else
-            imagepath = DEF_IMAGEPATH;
-
-        mystrftime(cam, filename, sizeof(filename), imagepath, ts1, NULL, 0);
-
-        /* motion images gets same name as normal images plus an appended 'm' */
-        snprintf(filenamem, PATH_MAX, "%.*sm"
-            , (int)(PATH_MAX-1-strlen(filename))
-            , filename);
-        snprintf(fullfilenamem, PATH_MAX, "%.*s/%.*s.%s"
-            , (int)(PATH_MAX-2-strlen(filenamem)-strlen(imageext(cam)))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
-            , filenamem, imageext(cam));
+        mystrftime(cam, filename, sizeof(filename), cam->conf.picture_filename, ts1, NULL, 0);
+        retcd = snprintf(fullfilenamem, PATH_MAX, "%s/%sm.%s"
+            , cam->conf.target_dir, filenamem, imageext(cam));
+        if ((retcd < 0) || (retcd >= PATH_MAX)){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                ,_("Error creating image motion file name"));
+            return;
+        }
         pic_save_norm(cam, fullfilenamem, cam->imgs.image_motion.image_norm, FTYPE_IMAGE_MOTION);
         event(cam, EVENT_FILECREATE, NULL, fullfilenamem, (void *)FTYPE_IMAGE, ts1);
     }
@@ -468,8 +447,6 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
             ,struct ctx_image_data *img_data, char *fname
             ,void *ftype, struct timespec *ts1) {
 
-    int use_imagepath;
-    const char *imagepath;
     char previewname[PATH_MAX];
     char filename[PATH_MAX];
     struct ctx_image_data *saved_current_image;
@@ -484,79 +461,22 @@ static void event_image_preview(struct ctx_cam *cam, motion_event evnt
         saved_current_image = cam->current_image;
         cam->current_image = &cam->imgs.image_preview;
 
-        /* Use filename of movie i.o. jpeg_filename when set to 'preview'. */
-        use_imagepath = strcmp(cam->conf.picture_filename, "preview");
-
-        if ((cam->movie_norm || (cam->conf.movie_extpipe_use && cam->extpipe)) && !use_imagepath) {
-
-            if (cam->conf.movie_extpipe_use && cam->extpipe) {
-                retcd = snprintf(previewname, PATH_MAX,"%s.%s"
-                    , cam->extpipefilename, imageext(cam));
-                if ((retcd < 0) || (retcd >= PATH_MAX)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                        ,_("Error creating preview pipe name %d %s")
-                        ,retcd, previewname);
-                    return;
-                }
-            } else {
-                /* Replace avi/mpg with jpg/ppm and keep the rest of the filename. */
-                /* TODO:  Hope that extensions are always 3 bytes*/
-                /* -2 to allow for null terminating byte*/
-                retcd = snprintf(filename, strlen(cam->newfilename) - 2
-                    ,"%s", cam->newfilename);
-                if (retcd < 0) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                        ,_("Error creating file name base %d %s")
-                        ,retcd, filename);
-                    return;
-                }
-                retcd = snprintf(previewname, PATH_MAX
-                    ,"%s%s", filename, imageext(cam));
-                if ((retcd < 0) || (retcd >= PATH_MAX)) {
-                    MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-                        ,_("Error creating preview name %d %s")
-                        , retcd, previewname);
-                    return;
-                }
-            }
-
-            passthrough = mycheck_passthrough(cam);
-            if ((cam->imgs.size_high > 0) && (!passthrough)) {
-                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
-            } else {
-                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm , FTYPE_IMAGE);
-            }
-            event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
-        } else {
-            /*
-             * Save best preview-shot also when no movies are recorded or imagepath
-             * is used. Filename has to be generated - nothing available to reuse!
-             */
-
-            /*
-             * conf.picture_filename would normally be defined but if someone deleted it by
-             * control interface it is better to revert to the default than fail.
-             */
-            if (cam->conf.picture_filename)
-                imagepath = cam->conf.picture_filename;
-            else
-                imagepath = (char *)DEF_IMAGEPATH;
-
-            mystrftime(cam, filename, sizeof(filename), imagepath, &cam->imgs.image_preview.imgts, NULL, 0);
-            snprintf(previewname, PATH_MAX, "%.*s/%.*s.%s"
-                , (int)(PATH_MAX-2-strlen(filename)-strlen(imageext(cam)))
-                , cam->conf.target_dir
-                , (int)(PATH_MAX-2-strlen(cam->conf.target_dir)-strlen(imageext(cam)))
-                , filename, imageext(cam));
-
-            passthrough = mycheck_passthrough(cam);
-            if ((cam->imgs.size_high > 0) && (!passthrough)) {
-                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
-            } else {
-                pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
-            }
-            event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
+        mystrftime(cam, filename, sizeof(filename), cam->conf.picture_filename
+            , &cam->imgs.image_preview.imgts, NULL, 0);
+        retcd = snprintf(previewname, PATH_MAX, "%s/%s.%s"
+            , cam->conf.target_dir, filename, imageext(cam));
+        if ((retcd < 0) || (retcd >= PATH_MAX)){
+            MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+                ,_("Error creating preview file name"));
+            return;
         }
+        passthrough = mycheck_passthrough(cam);
+        if ((cam->imgs.size_high > 0) && (!passthrough)) {
+            pic_save_norm(cam, previewname, cam->imgs.image_preview.image_high , FTYPE_IMAGE);
+        } else {
+            pic_save_norm(cam, previewname, cam->imgs.image_preview.image_norm, FTYPE_IMAGE);
+        }
+        event(cam, EVENT_FILECREATE, NULL, previewname, (void *)FTYPE_IMAGE, ts1);
 
         /* Restore global context values. */
         cam->current_image = saved_current_image;

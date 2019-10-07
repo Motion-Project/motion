@@ -1994,12 +1994,29 @@ static void conf_edit_framerate(struct ctx_cam *cam, const char *arg1) {
     cam->conf.framerate = parm;
 }
 
+static void conf_edit_picture_filename(struct ctx_cam *cam, const char *arg1) {
+
+    if (cam->conf.picture_filename != NULL) free(cam->conf.picture_filename);
+
+    if (arg1 == NULL){
+        cam->conf.picture_filename = (char*)mymalloc(strlen("%v-%Y%m%d%H%M%S-%q")+1);
+        snprintf(cam->conf.picture_filename,strlen("%v-%Y%m%d%H%M%S-%q")+1
+            ,"%s","%v-%Y%m%d%H%M%S-%q");
+    } else {
+        cam->conf.picture_filename = (char*)mymalloc(strlen(arg1)+1);
+        snprintf(cam->conf.picture_filename, strlen(arg1)+1, "%s", arg1);
+    }
+
+}
+
 static int conf_edit(struct ctx_cam *cam, const char *cmd, const char *arg1) {
     int retcd;
 
     retcd = 0;
     if (mystreq(cmd,"framerate") ){
         conf_edit_framerate(cam, arg1);
+    } else if (mystreq(cmd,"picture_filename") ){
+        conf_edit_picture_filename(cam, arg1);
     } else {
         retcd = -1;
     }
@@ -2266,7 +2283,7 @@ static void conf_defaults(struct ctx_cam **cam_list) {
     cam_list[0]->conf.picture_type          = "jpeg";
     cam_list[0]->conf.picture_quality       = 75;
     cam_list[0]->conf.picture_exif          = NULL;
-    cam_list[0]->conf.picture_filename      = "%v-%Y%m%d%H%M%S-%q";
+    conf_edit_picture_filename(cam_list[0], NULL);
 
     /* Snapshot configuration parameters */
     cam_list[0]->conf.snapshot_interval = 0;
@@ -2340,6 +2357,7 @@ static void conf_defaults(struct ctx_cam **cam_list) {
     cam_list[0]->conf.sql_query_start   = NULL;
     cam_list[0]->conf.sql_query_stop    = NULL;
     cam_list[0]->conf.sql_query         = NULL;
+
 
 }
 

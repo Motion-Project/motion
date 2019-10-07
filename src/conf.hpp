@@ -108,7 +108,7 @@
         const char      *picture_type;
         int             picture_quality;
         const char      *picture_exif;
-        const char      *picture_filename;
+        char            *picture_filename;
 
         /* Snapshot configuration parameters */
         int             snapshot_interval;
