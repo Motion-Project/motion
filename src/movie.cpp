@@ -841,7 +841,12 @@ static int movie_set_outputfile(struct ctx_movie *movie){
     char errstr[128];
 
     #if (LIBAVFORMAT_VERSION_MAJOR < 58)
-        snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
+        retcd = snprintf(movie->oc->filename, sizeof(movie->oc->filename), "%s", movie->filename);
+        if ((retcd < 0) || (retcd >= PATH_MAX)){
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                ,_("Error setting file name"));
+            return -1;
+        }
     #endif
 
     /* Open the output file, if needed. */
@@ -1209,6 +1214,7 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
 
     char buf[1024];
     char *end;
+    int retcd;
 
     (void)ignoreme;
     (void)errno_flag;
@@ -1219,9 +1225,12 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
      * the log level.  Now we put the avcodec messages to INF level since their error
      * are not necessarily our errors.
      */
+
     if (errno_flag <= AV_LOG_WARNING){
-        /* Flatten the message coming in from avcodec. */
-        vsnprintf(buf, sizeof(buf), fmt, vl);
+        retcd = vsnprintf(buf, sizeof(buf), fmt, vl);
+        if (retcd >=1024){
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, "av message truncated %d bytes",(retcd - 1024));
+        }
         end = buf + strlen(buf);
         if (end > buf && end[-1] == '\n')
         {
@@ -1230,6 +1239,7 @@ void movie_avcodec_log(void *ignoreme, int errno_flag, const char *fmt, va_list 
 
         MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "%s", buf);
     }
+
 }
 
 static void movie_put_pix_nv21(struct ctx_movie *movie, struct ctx_image_data *img_data){
@@ -1292,7 +1302,6 @@ void movie_global_init(void){
         av_register_all();
         avcodec_register_all();
     #endif
-
 
     avformat_network_init();
     avdevice_register_all();
@@ -1532,17 +1541,16 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
 
     cam->movie_norm =(struct ctx_movie*) mymalloc(sizeof(struct ctx_movie));
     if (mystreq(codec, "test")) {
-        snprintf(cam->movie_norm->filename, PATH_MAX - 4, "%.*s/%s_%.*s"
-            , (int)(PATH_MAX-6-strlen(stamp)-strlen(codec))
-            , cam->conf.target_dir, codec
-            , (int)(PATH_MAX-6-strlen(cam->conf.target_dir)-strlen(codec))
-            , stamp);
+        retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s_%s"
+            , cam->conf.target_dir, codec, stamp);
     } else {
-        snprintf(cam->movie_norm->filename, PATH_MAX - 4, "%.*s/%.*s"
-            , (int)(PATH_MAX-5-strlen(stamp))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
-            , stamp);
+        retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s"
+            , cam->conf.target_dir, stamp);
+    }
+    if ((retcd < 0) || (retcd >= PATH_MAX)){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Error setting file name"));
+        return -1;
     }
     if (cam->imgs.size_high > 0){
         cam->movie_norm->width  = cam->imgs.width_high;
@@ -1596,17 +1604,16 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
 
     cam->movie_motion =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
     if (mystreq(codec, "test")) {
-        snprintf(cam->movie_motion->filename, PATH_MAX - 4, "%.*s/%s_%.*sm"
-            , (int)(PATH_MAX-6-strlen(stamp)-strlen(codec))
-            , cam->conf.target_dir, codec
-            , (int)(PATH_MAX-6-strlen(cam->conf.target_dir)-strlen(codec))
-            , stamp);
+        retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%s_%sm"
+            , cam->conf.target_dir, codec, stamp);
     } else {
-        snprintf(cam->movie_motion->filename, PATH_MAX - 4, "%.*s/%.*sm"
-            , (int)(PATH_MAX-5-strlen(stamp))
-            , cam->conf.target_dir
-            , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
-            , stamp);
+        retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%sm"
+            , cam->conf.target_dir, stamp);
+    }
+    if ((retcd < 0) || (retcd >= PATH_MAX)){
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            ,_("Error setting file name"));
+        return -1;
     }
 
     cam->movie_motion->width  = cam->imgs.width;
