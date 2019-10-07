@@ -1221,7 +1221,7 @@ static int webu_answer_ctrl(void *cls
         return MHD_YES;
     }
 
-    if (mystrne (method, "GET")){
+    if (mystrne(method, "GET")){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }
@@ -1293,7 +1293,7 @@ static int webu_answer_strm(void *cls
         return MHD_YES;
     }
 
-    if (mystreq(method, "GET")){
+    if (mystrne(method, "GET")){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Invalid Method requested: %s"),method);
         return MHD_NO;
     }
