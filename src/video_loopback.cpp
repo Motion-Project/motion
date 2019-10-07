@@ -238,6 +238,8 @@ void vlp_init(struct ctx_cam *cam){
                     ,_("Failed to open video loopback for normal pictures"));
                 return;
             }
+        } else {
+            cam->pipe = -1;
         }
 
         if (cam->conf.video_pipe_motion) {
@@ -252,9 +254,12 @@ void vlp_init(struct ctx_cam *cam){
                     ,_("Failed to open video loopback for motion pictures"));
                 return;
             }
+        } else {
+            cam->mpipe = -1;
         }
     #else
-        (void)cam;
+        cam->mpipe = -1;
+        cam->pipe = -1;
     #endif /* HAVE_V4L2 && !BSD */
 }
 
