@@ -1977,9 +1977,41 @@ static void conf_camera_dir(struct ctx_cam *cam, const char *str, int offset) {
     return;
 }
 
+static void conf_edit_framerate(struct ctx_cam *cam, const char *arg1) {
+    int parm;
+
+    parm = atoi(arg1);
+    if (parm < 2) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Invalid framerate using minimum value of 2"));
+        parm = 2;
+    } else if (parm >100) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Invalid framerate using maximum value of 100"));
+        parm = 100;
+    }
+
+    cam->conf.framerate = parm;
+}
+
+static int conf_edit(struct ctx_cam *cam, const char *cmd, const char *arg1) {
+    int retcd;
+
+    retcd = 0;
+    if (mystreq(cmd,"framerate") ){
+        conf_edit_framerate(cam, arg1);
+    } else {
+        retcd = -1;
+    }
+    return retcd;
+
+}
+
 static int conf_parm_set_current(struct ctx_cam *cam, const char *cmd, const char *arg1) {
 
     int indx = 0;
+
+    if  (conf_edit(cam,cmd,arg1) == 0) return 0;
 
     while (config_parms[indx].parm_name != NULL) {
         if (mystreq(cmd, config_parms[indx].parm_name)) {

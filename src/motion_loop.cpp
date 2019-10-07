@@ -277,11 +277,12 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
 
     int indx;
 
+    cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
+
     /* Capture first image, or we will get an alarm on start */
     if (cam->video_dev >= 0) {
         for (indx = 0; indx < 5; indx++) {
-            if (vid_next(cam, cam->current_image) == 0)
-                break;
+            if (vid_next(cam, cam->current_image) == 0) break;
             SLEEP(2, 0);
         }
 
@@ -344,13 +345,13 @@ static int mlp_check_szimg(struct ctx_cam *cam){
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
             ,_("Image width (%d) or height(%d) requested is not modulo 8.")
             ,cam->imgs.width, cam->imgs.height);
-        return -3;
+        return -1;
     }
     if ((cam->imgs.width  < 64) || (cam->imgs.height < 64)){
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height greater than or equal to 64 %dx%d")
             ,cam->imgs.width, cam->imgs.height);
-            return -3;
+            return -1;
     }
     /* Substream size notification*/
     if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
@@ -505,10 +506,8 @@ static int mlp_init(struct ctx_cam *cam) {
     memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
     memset(cam->imgs.smartmask_buffer, 0, cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
 
-    /* Set noise level */
     cam->noise = cam->conf.noise_level;
 
-    /* Set threshold value */
     cam->threshold = cam->conf.threshold;
     if (cam->conf.threshold_maximum > cam->conf.threshold ){
         cam->threshold_maximum = cam->conf.threshold_maximum;
@@ -517,7 +516,6 @@ static int mlp_init(struct ctx_cam *cam) {
     }
 
     track_init(cam);
-    cam->frame_skip = 8;
 
     /* Work out expected frame rate based on config setting */
     if (cam->conf.framerate < 2)
@@ -529,11 +527,6 @@ static int mlp_init(struct ctx_cam *cam) {
     cam->required_frame_time = 1000000L / cam->conf.framerate;
 
     cam->frame_delay = cam->required_frame_time;
-
-    cam->track_posx = 0;
-    cam->track_posy = 0;
-    if (cam->track.type)
-        cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
     mlp_init_areadetect(cam);
 
@@ -1751,7 +1744,7 @@ static void mlp_frametiming(struct ctx_cam *cam){
             SLEEP(0, avgtime);
         }
     }
-
+    cam->passflag = 1;
 }
 
 /** Thread function for each camera */
