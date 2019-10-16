@@ -1028,6 +1028,7 @@ static void dbse_global_init(void){
 static int dbse_init_mysql(struct context *cnt){
 
     #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+        int dbport;
         if ((!strcmp(cnt->conf.database_type, "mysql")) && (cnt->conf.database_dbname)) {
             // close database to be sure that we are not leaking
             mysql_close(cnt->database);
@@ -1035,9 +1036,13 @@ static int dbse_init_mysql(struct context *cnt){
 
             cnt->database = mymalloc(sizeof(MYSQL));
             mysql_init(cnt->database);
-
+            if ((cnt->conf.database_port < 0) || (cnt->conf.database_port > 65535)){
+                dbport = 0;
+            } else {
+                dbport = cnt->conf.database_port;
+            }
             if (!mysql_real_connect(cnt->database, cnt->conf.database_host, cnt->conf.database_user,
-                cnt->conf.database_password, cnt->conf.database_dbname, 0, NULL, 0)) {
+                cnt->conf.database_password, cnt->conf.database_dbname, dbport, NULL, 0)) {
                 MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                     ,_("Cannot connect to MySQL database %s on host %s with user %s")
                     ,cnt->conf.database_dbname, cnt->conf.database_host
