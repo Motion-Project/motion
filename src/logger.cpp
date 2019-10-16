@@ -263,7 +263,6 @@ void log_init(struct ctx_motapp *motapp){
     if ((motapp->log_level > ALL) ||
         (motapp->log_level == 0)) {
         motapp->log_level = LEVEL_DEFAULT;
-        motapp->cam_list[0]->conf.log_level = motapp->log_level;
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("Using default log level (%s) (%d)")
             ,log_get_level_str(motapp->log_level)
@@ -273,36 +272,30 @@ void log_init(struct ctx_motapp *motapp){
     }
 
 
-    if ((motapp->log_file[0]) && (strncmp(motapp->log_file, "syslog", 6))) {
-
-        log_set_mode(LOGMODE_FILE);
-
-        log_set_logfile(motapp->log_file);
-
-        if (logfile) {
-            log_set_mode(LOGMODE_SYSLOG);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Logging to file (%s)"),motapp->log_file);
+    if (motapp->log_file != NULL) {
+        if (mystrne(motapp->log_file,"syslog")) {
             log_set_mode(LOGMODE_FILE);
+            log_set_logfile(motapp->log_file);
+            if (logfile) {
+                log_set_mode(LOGMODE_SYSLOG);
+                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                    ,_("Logging to file (%s)"),motapp->log_file);
+                log_set_mode(LOGMODE_FILE);
+            } else {
+                MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+                    ,_("Exit motion, cannot create log file %s")
+                    ,motapp->log_file);
+                exit(0);
+            }
         } else {
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
-                ,_("Exit motion, cannot create log file %s")
-                ,motapp->log_file);
-            exit(0);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
         }
     } else {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Logging to syslog"));
     }
-
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Motion %s Started",VERSION);
 
-    if ((motapp->log_type_str[0] == 0) ||
-        !(motapp->log_type = log_get_type(motapp->log_type_str))) {
-        motapp->log_type = TYPE_DEFAULT;
-        snprintf(motapp->log_type_str,4,"ALL");
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Using default log type (%s)"),
-                   log_get_type_str(motapp->log_type));
-    }
+    motapp->log_type = log_get_type(motapp->log_type_str);
 
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Using log type (%s) log level (%s)"),
                log_get_type_str(motapp->log_type), log_get_level_str(motapp->log_level));

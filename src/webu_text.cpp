@@ -24,6 +24,7 @@
 #include "util.hpp"
 #include "webu.hpp"
 #include "webu_text.hpp"
+#include "conf_edit.hpp"
 
 static void webu_text_seteol(struct webui_ctx *webui) {
     /* Set the end of line character for text interface */
@@ -170,7 +171,7 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
-    const char *val_parm;
+    char val_parm[PATH_MAX];
 
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
@@ -182,9 +183,11 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
             continue;
         }
 
-        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
+        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+            , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
+            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+                , val_parm, config_parms[indx_parm].parm_cat);
         }
         snprintf(response, sizeof (response),
             "  %s = %s \n"
@@ -202,7 +205,7 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
     /* Write out the options and values */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
-    const char *val_parm;
+    char val_parm[PATH_MAX];
 
     webu_text_header(webui);
 
@@ -227,9 +230,11 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
             continue;
         }
 
-        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
+        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+            , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
+            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+                , val_parm, config_parms[indx_parm].parm_cat);
         }
         snprintf(response, sizeof (response),
             "  <li><a href=/%s/config/set?%s>%s</a> = %s</li>\n"
@@ -254,7 +259,7 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
     int indx_parm;
-    const char *val_parm;
+    char val_parm[PATH_MAX];
 
     webu_text_header(webui);
 
@@ -283,9 +288,11 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
             continue;
         }
 
-        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
+        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+            , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
+            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+                , val_parm, config_parms[indx_parm].parm_cat);
         }
         snprintf(response, sizeof(response),
             "<option value='%s'>%s</option>\n"
@@ -317,7 +324,7 @@ static void webu_text_set_query(struct webui_ctx *webui) {
     /* Write out the options and values to allow user to set them*/
     char response[WEBUI_LEN_RESP];
     int indx_parm;
-    const char *val_parm;
+    char val_parm[PATH_MAX];
 
     webu_text_header(webui);
 
@@ -336,9 +343,11 @@ static void webu_text_set_query(struct webui_ctx *webui) {
             continue;
         }
 
-        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
+        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+            , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
+            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+                , val_parm, config_parms[indx_parm].parm_cat);
         }
         snprintf(response, sizeof (response),
             "<form action=set?>\n"
@@ -866,7 +875,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
     /* Write out the option value for one parm */
     char response[WEBUI_LEN_RESP];
     int indx_parm;
-    const char *val_parm;
+    char val_parm[PATH_MAX];
     char temp_name[WEBUI_LEN_PARM];
 
 
@@ -894,9 +903,11 @@ void webu_text_get_query(struct webui_ctx *webui) {
             continue;
         }
 
-        val_parm = conf_parm_get(webui->camlst, indx_parm, webui->thread_nbr);
+        conf_edit_get(webui->camlst[webui->thread_nbr], config_parms[indx_parm].parm_name
+            , val_parm, config_parms[indx_parm].parm_cat);
         if (val_parm == NULL){
-            val_parm = conf_parm_get(webui->camlst, indx_parm, 0);
+            conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+                , val_parm, config_parms[indx_parm].parm_cat);
         }
         if (mystrne(webui->uri_value1, config_parms[indx_parm].parm_name)){
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO

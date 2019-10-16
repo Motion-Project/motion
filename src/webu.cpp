@@ -44,6 +44,8 @@
 #include "webu_html.hpp"
 #include "webu_text.hpp"
 #include "webu_stream.hpp"
+#include "conf_edit.hpp"
+
 
 /* Context to pass the parms to functions to start mhd */
 struct mhdstart_ctx {
@@ -697,7 +699,8 @@ static int webu_process_config_set(struct webui_ctx *webui) {
     if (config_parms[indx].parm_name != NULL){
         if (strlen(webui->uri_parm1) > 0){
 
-            conf_parm_set(webui->cam, webui->uri_parm1, webui->uri_value1);
+            conf_edit_set(webui->camlst[webui->thread_nbr]->motapp,webui->thread_nbr
+                , (char *)config_parms[indx].parm_name, webui->uri_parm1);
 
             /*If we are updating vid parms, set the flag to update the device.*/
             if (mystreq(config_parms[indx].parm_name, "vid_control_params") &&
@@ -707,7 +710,7 @@ static int webu_process_config_set(struct webui_ctx *webui) {
 
             /* If changing language, do it now */
             if (mystreq(config_parms[indx].parm_name, "native_language")){
-                if (webui->camlst[webui->thread_nbr]->conf.native_language){
+                if (webui->camlst[webui->thread_nbr]->motapp->native_language){
                     mytranslate_text("", 1);
                     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Native Language : on"));
                 } else {
@@ -1756,8 +1759,8 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
 
         if (mhdst->ctrl) {
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
-            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->camlst[mhdst->indxthrd]->webcontrol_digest_rand);
-            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->camlst[mhdst->indxthrd]->webcontrol_digest_rand;
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(mhdst->camlst[mhdst->indxthrd]->motapp->webcontrol_digest_rand);
+            mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = mhdst->camlst[mhdst->indxthrd]->motapp->webcontrol_digest_rand;
             mhdst->mhd_opt_nbr++;
         } else {
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;

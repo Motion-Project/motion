@@ -13,17 +13,10 @@ struct ctx_coord;
 
 struct ctx_track {
     int             dev;
-    /* Config options: */
-    int    type;
-    int    active;            /* This is the track_auto but 'auto' is defined word so use active*/
-    int    move_wait;
-    char   *generic_move;
-    int    maxx;
-    int    minx;
-    int    maxy;
-    int    miny;
-    int    step_angle_x;
-    int    step_angle_y;
+    int     maxx;
+    int     minx;
+    int     maxy;
+    int     miny;
 
     int    pan_angle; // degrees
     int    tilt_angle; // degrees

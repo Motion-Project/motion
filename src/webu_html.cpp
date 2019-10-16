@@ -38,6 +38,7 @@
 #include "util.hpp"
 #include "webu.hpp"
 #include "webu_html.hpp"
+#include "conf_edit.hpp"
 
 /* struct to save information regarding the links to include in html page */
 struct strminfo_ctx {
@@ -426,7 +427,7 @@ static void webu_html_config(struct webui_ctx *webui) {
 
     char response[WEBUI_LEN_RESP];
     int indx_parm, indx, diff_vals;
-    const char *val_main, *val_thread;
+    char val_main[PATH_MAX], val_thread[PATH_MAX];
     char *val_temp;
 
 
@@ -458,7 +459,8 @@ static void webu_html_config(struct webui_ctx *webui) {
             continue;
         }
 
-        val_main = conf_parm_get(webui->camlst, indx_parm, 0);
+        conf_edit_get(webui->camlst[0], config_parms[indx_parm].parm_name
+            , val_main, config_parms[indx_parm].parm_cat);
 
         snprintf(response, sizeof (response),
             "        <option value='%s' data-cam_all00=\""
@@ -475,7 +477,8 @@ static void webu_html_config(struct webui_ctx *webui) {
         /* Loop through all the treads and see if any have a different value from motion.conf */
         if (webui->cam_threads > 1){
             for (indx=1;indx <= webui->cam_count;indx++){
-                val_thread=conf_parm_get(webui->camlst, indx_parm, indx);
+                conf_edit_get(webui->camlst[indx], config_parms[indx_parm].parm_name
+                    , val_thread, config_parms[indx_parm].parm_cat);
                 diff_vals = FALSE;
                 if (((strlen(val_temp) == 0) && (val_thread == NULL)) ||
                     ((strlen(val_temp) != 0) && (val_thread == NULL))) {

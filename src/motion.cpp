@@ -149,9 +149,9 @@ static void setup_signals(void){
 static void motion_remove_pid(struct ctx_motapp *motapp) {
 
     if ((motapp->daemon) &&
-        (motapp->cam_list[0]->conf.pid_file) &&
+        (motapp->pid_file) &&
         (motapp->restart_all == FALSE)) {
-        if (!unlink(motapp->cam_list[0]->conf.pid_file)){
+        if (!unlink(motapp->pid_file)){
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
             MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
@@ -355,22 +355,24 @@ static void motion_ntc(void){
 /** Initialize upon start up or restart */
 static void motion_startup(struct ctx_motapp *motapp, int daemonize, int argc, char *argv[]) {
 
-    conf_init(motapp, argc, argv);
+    conf_init_app(motapp, argc, argv);
 
     log_init(motapp);
 
+    conf_init_cams(motapp);
+
     mytranslate_init();
 
-    mytranslate_text("",motapp->cam_list[0]->conf.native_language);
+    mytranslate_text("",motapp->native_language);
 
     if (daemonize) {
-        if (motapp->daemon && motapp->cam_list[0]->conf.setup_mode == 0) {
+        if (motapp->daemon && motapp->setup_mode == 0) {
             motion_daemon(motapp);
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion running as daemon process"));
         }
     }
 
-    if (motapp->cam_list[0]->conf.setup_mode){
+    if (motapp->setup_mode){
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion running in setup mode."));
     }
 

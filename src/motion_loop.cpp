@@ -30,6 +30,7 @@
 #include "video_loopback.hpp"
 #include "netcam.hpp"
 #include "conf.hpp"
+#include "conf_edit.hpp"
 #include "alg.hpp"
 #include "track.hpp"
 #include "event.hpp"
@@ -225,7 +226,7 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
     mlp_detected_trigger(cam, img);
 
     if (img->shot < conf->framerate) {
-        if (conf->stream_motion && !conf->setup_mode && img->shot != 1){
+        if (conf->stream_motion && !cam->motapp->setup_mode && img->shot != 1){
             event(cam, EVENT_STREAM, img, NULL, NULL, &img->imgts);
         }
         if (conf->picture_output_motion){
@@ -233,7 +234,7 @@ static void mlp_detected(struct ctx_cam *cam, int dev, struct ctx_image_data *im
         }
     }
 
-    if (cam->track.type && cam->track.active){
+    if (cam->conf.track_type && cam->conf.track_auto){
         cam->frame_skip = track_move(cam, dev, &img->location, &cam->imgs, 0);
     }
 
@@ -261,7 +262,7 @@ static int init_camera_type(struct ctx_cam *cam){
         return 0;
     }
 
-    if (cam->conf.video_device) {
+    if (cam->conf.videodevice) {
         cam->camera_type = CAMERA_TYPE_V4L2;
         return 0;
     }
@@ -522,7 +523,6 @@ static int mlp_init(struct ctx_cam *cam) {
 
     mlp_init_areadetect(cam);
 
-    cam->lastframetime = 0;
     cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;
     cam->get_image = 1;
 
@@ -534,13 +534,9 @@ static int mlp_init(struct ctx_cam *cam) {
     cam->previous_location_x = 0;
     cam->previous_location_y = 0;
 
-    cam->time_last_frame = 1;
-    cam->time_current_frame = 0;
-
     cam->smartmask_lastrate = 0;
 
     cam->passflag = 0;  //only purpose to flag first frame
-    cam->rolling_frame = 0;
 
     if (cam->conf.emulate_motion) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
@@ -751,9 +747,6 @@ static void mlp_prepare(struct ctx_cam *cam){
     cam->frame_last_ts.tv_nsec = cam->frame_curr_ts.tv_nsec;
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
 
-    if (cam->conf.minimum_motion_frames < 1)
-        cam->conf.minimum_motion_frames = 1;
-
     if (cam->conf.pre_capture < 0)
         cam->conf.pre_capture = 0;
 
@@ -762,15 +755,9 @@ static void mlp_prepare(struct ctx_cam *cam){
     if (cam->imgs.ring_size != frame_buffer_size)
         mlp_ring_resize(cam, frame_buffer_size);
 
-    /*
-     * If we have started on a new second we reset the shots variable
-     * lastrate is updated to be the number of the last frame. last rate
-     * is used as the ffmpeg framerate when motion is detected.
-     */
     if (cam->frame_last_ts.tv_sec != cam->frame_curr_ts.tv_sec) {
         cam->lastrate = cam->shots + 1;
         cam->shots = -1;
-        cam->lastframetime = cam->currenttime;
 
         if (cam->conf.minimum_frame_time) {
             cam->minimum_frame_time_downcounter--;
@@ -781,8 +768,6 @@ static void mlp_prepare(struct ctx_cam *cam){
         }
     }
 
-
-    /* Increase the shots variable for each frame captured within this second */
     cam->shots++;
 
     if (cam->startup_frames > 0)
@@ -838,7 +823,7 @@ static int mlp_retry(struct ctx_cam *cam){
     int size_high;
 
     if (cam->video_dev < 0 &&
-        cam->currenttime % 10 == 0 && cam->shots == 0) {
+        cam->frame_curr_ts.tv_sec % 10 == 0 && cam->shots == 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Retrying until successful connection with camera"));
         cam->video_dev = vid_start(cam);
@@ -971,7 +956,7 @@ static int mlp_capture(struct ctx_cam *cam){
          * Don't reset time when thread restarts
          */
         if (cam->connectionlosttime == 0){
-            cam->connectionlosttime = cam->currenttime;
+            cam->connectionlosttime = cam->frame_curr_ts.tv_sec;
         }
 
 
@@ -1036,7 +1021,7 @@ static void mlp_detection(struct ctx_cam *cam){
             * motion, the alg_diff will trigger alg_diff_standard
             * anyway
             */
-        if (cam->detecting_motion || cam->conf.setup_mode)
+        if (cam->detecting_motion || cam->motapp->setup_mode)
             cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
         else
             cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy);
@@ -1103,7 +1088,7 @@ static void mlp_detection(struct ctx_cam *cam){
             cam->imgs.labelsize_max = 0; /* Disable labeling if enabled */
         }
 
-    } else if (!cam->conf.setup_mode) {
+    } else if (!cam->motapp->setup_mode) {
         cam->current_image->diffs = 0;
     }
 
@@ -1206,17 +1191,17 @@ static void mlp_overlay(struct ctx_cam *cam){
     /* Smartmask overlay */
     if (cam->smartmask_speed &&
         (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
-         cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
+         cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)))
         draw_smartmask(cam, cam->imgs.image_motion.image_norm);
 
     /* Largest labels overlay */
     if (cam->imgs.largest_label && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
-        cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
+        cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)))
         draw_largest_label(cam, cam->imgs.image_motion.image_norm);
 
     /* Fixed mask overlay */
     if (cam->imgs.mask && (cam->conf.picture_output_motion || cam->conf.movie_output_motion ||
-        cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)))
+        cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)))
         draw_fixed_mask(cam, cam->imgs.image_motion.image_norm);
 
     /* Add changed pixels in upper right corner of the pictures */
@@ -1234,7 +1219,7 @@ static void mlp_overlay(struct ctx_cam *cam){
      * Add changed pixels to motion-images (for stream) in setup_mode
      * and always overlay smartmask (not only when motion is detected)
      */
-    if (cam->conf.setup_mode || (cam->stream.motion.cnct_count > 0)) {
+    if (cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)) {
         sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
                 cam->current_image->total_labels, cam->noise);
         draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
@@ -1385,14 +1370,14 @@ static void mlp_actions(struct ctx_cam *cam){
      * First test for movie_max_time
      */
     if ((cam->conf.movie_max_time && cam->event_nr == cam->prev_event) &&
-        (cam->currenttime - cam->eventtime >= cam->conf.movie_max_time))
+        (cam->frame_curr_ts.tv_sec - cam->eventtime >= cam->conf.movie_max_time))
         cam->event_stop = TRUE;
 
     /*
      * Now test for quiet longer than 'gap' OR make movie as decided in
      * previous statement.
      */
-    if (((cam->currenttime - cam->lasttime >= cam->conf.event_gap) && cam->conf.event_gap > 0) ||
+    if (((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf.event_gap) && cam->conf.event_gap > 0) ||
           cam->event_stop) {
         if (cam->event_nr == cam->prev_event || cam->event_stop) {
 
@@ -1411,7 +1396,7 @@ static void mlp_actions(struct ctx_cam *cam){
              * If tracking is enabled we center our camera so it does not
              * point to a place where it will miss the next action
              */
-            if (cam->track.type)
+            if (cam->conf.track_type)
                 cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
@@ -1444,7 +1429,7 @@ static void mlp_actions(struct ctx_cam *cam){
 static void mlp_setupmode(struct ctx_cam *cam){
 
     /* If CAMERA_VERBOSE enabled output some numbers to console */
-    if (cam->conf.setup_mode) {
+    if (cam->motapp->setup_mode) {
         char msg[1024] = "\0";
         char part[100];
 
@@ -1477,9 +1462,6 @@ static void mlp_setupmode(struct ctx_cam *cam){
 }
 
 static void mlp_snapshot(struct ctx_cam *cam){
-
-    /* time_current_frame is used both for snapshot and timelapse features */
-    cam->time_current_frame = cam->currenttime;
 
     if ((cam->conf.snapshot_interval > 0 && cam->shots == 0 &&
          cam->frame_curr_ts.tv_sec % cam->conf.snapshot_interval <=
@@ -1540,7 +1522,8 @@ static void mlp_timelapse(struct ctx_cam *cam){
                     ,_("Invalid timelapse_mode argument '%s'"), cam->conf.timelapse_mode);
                 MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
                     ,_("%:s Defaulting to manual timelapse mode"));
-                conf_parm_set(cam, (char *)"movie_timelapse_mode",(char *)"manual");
+                //conf_edit_set(cam, (char *)"movie_timelapse_mode"
+                //    , (char *)"manual", PARM_CAT_03,FALSE);
             }
         }
 
@@ -1560,9 +1543,6 @@ static void mlp_timelapse(struct ctx_cam *cam){
         event(cam, EVENT_TIMELAPSEEND, NULL, NULL, NULL, &cam->current_image->imgts);
     }
 
-    cam->time_last_frame = cam->time_current_frame;
-
-
 }
 
 static void mlp_loopback(struct ctx_cam *cam){
@@ -1576,7 +1556,7 @@ static void mlp_loopback(struct ctx_cam *cam){
      * 1 frame per second but the minute motion is detected the mlp_detected() function
      * sends all detected pictures to the stream except the 1st per second which is already sent.
      */
-    if (cam->conf.setup_mode) {
+    if (cam->motapp->setup_mode) {
 
         event(cam, EVENT_IMAGE, &cam->imgs.image_motion, NULL, &cam->pipe, &cam->current_image->imgts);
         event(cam, EVENT_STREAM, &cam->imgs.image_motion, NULL, NULL, &cam->current_image->imgts);

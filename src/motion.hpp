@@ -359,11 +359,9 @@ struct ctx_cam {
     struct timespec         frame_curr_ts;
     struct timespec         frame_last_ts;
 
-    time_t                  currenttime;
     time_t                  lasttime;
     time_t                  eventtime;
     time_t                  connectionlosttime;               /* timestamp from connection lost */
-    time_t                  lastframetime;
     unsigned int            lastrate;
     unsigned int            startup_frames;
     unsigned int            frame_skip;
@@ -395,15 +393,8 @@ struct ctx_cam {
     int                     smartmask_ratio;
     int                     smartmask_count;
     unsigned int            smartmask_lastrate;
-
     int previous_diffs, previous_location_x, previous_location_y;
-    unsigned long int       time_last_frame, time_current_frame;
-
     unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
-    int                     rolling_frame;
-
-    struct MHD_Daemon       *webcontrol_daemon;
-    char                    webcontrol_digest_rand[8];
 
 };
 
@@ -417,12 +408,18 @@ struct ctx_motapp {
     volatile int        finish_all;
     volatile int        restart_all;
 
+    int                 argc;
+    char                **argv;
     int                 daemon;
-    char                pid_file[PATH_MAX];
-    char                log_file[PATH_MAX];
-    char                log_type_str[6];
+    char                *conf_filename;
+    char                *pid_file;
+    char                *log_file;
+    char                *log_type_str;
     int                 log_level;
-    unsigned int        log_type;
+    int                 log_type;
+    int                 setup_mode;
+    int                 pause;
+    int                 native_language;
 
     volatile int        webcontrol_running;
     volatile int        webcontrol_finish;

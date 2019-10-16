@@ -19,7 +19,7 @@ struct video_dev {
     struct video_dev        *next;
     int                      usage_count;
     int                      fd_device;
-    const char              *video_device;
+    const char              *videodevice;
     int                      input;
     int                      norm;
     int                      width;

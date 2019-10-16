@@ -199,7 +199,7 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
                 ,cam->track.pan_angle, cam->track.tilt_angle);
         }
 
-        return cam->track.move_wait;
+        return cam->conf.track_move_wait;
     #else
         return 0;
     #endif
@@ -278,8 +278,8 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
                 return 0;
             }
 
-            move_x_degrees = delta_x * cam->track.step_angle_x / (imgs->width / 2);
-            move_y_degrees = -delta_y * cam->track.step_angle_y / (imgs->height / 2);
+            move_x_degrees = delta_x * cam->conf.track_step_angle_x / (imgs->width / 2);
+            move_y_degrees = -delta_y * cam->conf.track_step_angle_y / (imgs->height / 2);
         } else {
             move_x_degrees = cent->x;
             move_y_degrees = cent->y;
@@ -400,7 +400,7 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
                 ,cam->track.pan_angle, cam->track.tilt_angle);
         }
 
-        return cam->track.move_wait;
+        return cam->conf.track_move_wait;
     #else
         return 0;
     #endif /* HAVE_V4L2 */
@@ -414,7 +414,7 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
     cam->track.posx += cent->x;
     cam->track.posy += cent->y;
 
-    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->track.generic_move, &cam->current_image->imgts, NULL, 0);
+    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->conf.track_generic_move, &cam->current_image->imgts, NULL, 0);
 
     if (!fork()) {
         int i;
@@ -465,7 +465,7 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'")
-            ,cam->track.generic_move);
+            ,cam->conf.track_generic_move);
 
         exit(1);
     }
@@ -474,21 +474,16 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         ,_("Executing external command '%s'")
         , fmtcmd);
 
-    return cam->track.move_wait;
+    return cam->conf.track_move_wait;
 }
 
 void track_init(struct ctx_cam *cam){
 
     cam->track.dev =            -1;             /* dev open */
-    cam->track.active =         0;              /* auto tracking active */
-    cam->track.move_wait =      10;             /* number of frames to disable motion detection after camera moving */
-    cam->track.generic_move =   NULL;           /* command to execute to move a generic camera */
     cam->track.maxx =           0;              /* int maxx; */
     cam->track.minx =           0;              /* int minx; */
     cam->track.maxy =           0;              /* int maxy; */
     cam->track.miny =           0;              /* int miny; */
-    cam->track.step_angle_x =   10;             /* UVC step angle in degrees X-axis that camera moves during auto tracking */
-    cam->track.step_angle_y =   10;             /* UVC step angle in degrees Y-axis that camera moves during auto tracking */
 
     cam->track.pan_angle =      0;              /* degrees*/
     cam->track.tilt_angle =     0;              /* degrees*/
@@ -496,7 +491,7 @@ void track_init(struct ctx_cam *cam){
     cam->track.posy =           0;
     cam->track.minmaxfound =    0;              /* flag for minmax values stored for pwc based camera */
 
-    if (cam->track.type)
+    if (cam->conf.track_type)
         cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
 }
@@ -507,12 +502,12 @@ int track_center(struct ctx_cam *cam, int dev,
     struct ctx_coord cent;
     (void)dev;
 
-    if (!manual && !cam->track.active) return 0;
+    if (!manual && !cam->conf.track_auto) return 0;
 
-    if (cam->track.type == TRACK_TYPE_UVC){
+    if (cam->conf.track_type == TRACK_TYPE_UVC){
         return uvc_center(cam, dev, xoff, yoff);
-    } else if (cam->track.type == TRACK_TYPE_GENERIC) {
-        if (cam->track.generic_move){
+    } else if (cam->conf.track_type == TRACK_TYPE_GENERIC) {
+        if (cam->conf.track_generic_move){
             cent.x = -cam->track.posx;
             cent.y = -cam->track.posy;
             return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
@@ -522,7 +517,7 @@ int track_center(struct ctx_cam *cam, int dev,
     }
 
     MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->track.type);
+        ,_("internal error, %hu is not a known track-type"), cam->conf.track_type);
 
     return 0;
 }
@@ -531,20 +526,20 @@ int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         , struct ctx_images *imgs, int manual)
 {
 
-    if (!manual && !cam->track.active) return 0;
+    if (!manual && !cam->conf.track_auto) return 0;
 
-    if (cam->track.type == TRACK_TYPE_UVC){
+    if (cam->conf.track_type == TRACK_TYPE_UVC){
         return uvc_move(cam, dev, cent, imgs, manual);
-    } else if (cam->track.type == TRACK_TYPE_GENERIC) {
-        if (cam->track.generic_move) {
+    } else if (cam->conf.track_type == TRACK_TYPE_GENERIC) {
+        if (cam->conf.track_generic_move) {
             return generic_move(cam, TRACK_MOVE, manual, 0, 0, cent, imgs);
         } else {
-            return cam->track.move_wait;
+            return cam->conf.track_move_wait;
         }
     }
 
     MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->track.type);
+        ,_("internal error, %hu is not a known track-type"), cam->conf.track_type);
 
     return 0;
 }

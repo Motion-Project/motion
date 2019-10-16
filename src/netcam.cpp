@@ -1106,11 +1106,6 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
         netcam_url_parse(&url, cam->conf.netcam_url);
     }
 
-    if (cam->conf.netcam_proxy) {
-        MOTION_LOG(WRN, TYPE_NETCAM, NO_ERRNO
-            ,_("Proxies not supported using for %s"),url.service);
-    }
-
     if (cam->conf.netcam_userpass != NULL) {
         userpass = mystrdup(cam->conf.netcam_userpass);
     } else if (url.userpass != NULL) {
