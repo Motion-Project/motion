@@ -135,7 +135,7 @@ void netcam_url_parse(struct url_t *parse_url, const char *text_url)
         if (regexec(&pattbuf, text_url, 10, matches, 0) != REG_NOMATCH) {
             for (i = 0; i < 10; i++) {
                 if ((s = netcam_url_match(matches[i], text_url)) != NULL) {
-                    MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Parse case %d data %s", i, s);
+                    //MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO, "Parse case %d data %s", i, s);
                     switch (i) {
                     case 1:
                         parse_url->service = s;
