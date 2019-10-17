@@ -217,8 +217,9 @@ AS_IF([test "${MMAL}" = "no"], [
     AC_MSG_CHECKING(for MMAL)
     AS_IF([pkg-config mmal], [
         TEMP_CFLAGS="$TEMP_CFLAGS -Irasppicam "`pkg-config --cflags mmal`
-        #pkg config parm does not provide --no-as-needed variant that buildroot requires
-        TEMP_LIBS="$TEMP_LIBS -lmmal_core -lmmal_util -Wl,--push-state,--no-as-needed -lmmal_vc_client -Wl,--pop-state -lvcos -lvchostif -lvchiq_arm"
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs mmal`
+        #pkg config parm does not provide -lvchostif that buildroot requires
+        TEMP_LIBS="$TEMP_LIBS -lvchostif "
         AC_MSG_RESULT([yes])
         AC_DEFINE([HAVE_MMAL], [1], [Define to 1 if MMAL is around])
       ],[
