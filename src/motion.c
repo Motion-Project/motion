@@ -1047,7 +1047,7 @@ static int dbse_init_mysql(struct context *cnt){
                 return -2;
             }
             #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
-                my_bool my_true = TRUE;
+                int my_true = TRUE;
                 mysql_options(cnt->database, MYSQL_OPT_RECONNECT, &my_true);
             #endif
         }
