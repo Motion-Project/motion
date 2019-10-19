@@ -532,6 +532,13 @@ static void conf_edit_width(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact)
         parm_in = atoi(arg1);
         if ((parm_in < 64) || (parm_in > 9999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid width %d"),parm_in);
+        } else if (parm_in % 8) {
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Image width (%d) requested is not modulo 8."), parm_in);
+            parm_in = parm_in - (parm_in % 8) + 8;
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Adjusting width to next higher multiple of 8 (%d)."), parm_in);
+            cam->conf.width = parm_in;
         } else {
             cam->conf.width = parm_in;
         }
@@ -549,6 +556,13 @@ static void conf_edit_height(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact
         parm_in = atoi(arg1);
         if ((parm_in < 64) || (parm_in > 9999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid height %d"),parm_in);
+        } else if (parm_in % 8) {
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Image height (%d) requested is not modulo 8."), parm_in);
+            parm_in = parm_in - (parm_in % 8) + 8;
+            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+                ,_("Adjusting height to next higher multiple of 8 (%d)."), parm_in);
+            cam->conf.height = parm_in;
         } else {
             cam->conf.height = parm_in;
         }
