@@ -296,7 +296,12 @@ static void mlp_init_firstimage(struct ctx_cam *cam) {
     }
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
 
-    alg_update_reference_frame(cam, RESET_REF_FRAME);
+    if (cam->conf.primary_method == 0){
+        alg_update_reference_frame(cam, RESET_REF_FRAME);
+    } else {
+        alg_new_update_frame(cam);
+    }
+
 
 }
 
@@ -906,64 +911,71 @@ static int mlp_capture(struct ctx_cam *cam){
 static void mlp_detection(struct ctx_cam *cam){
 
     if (cam->threshold && !cam->pause) {
-        if (cam->detecting_motion || cam->motapp->setup_mode)
-            cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
-        else
-            cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy);
+        if (cam->conf.primary_method == 0){
+            if (cam->detecting_motion || cam->motapp->setup_mode)
+                cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
+            else
+                cam->current_image->diffs = alg_diff(cam, cam->imgs.image_vprvcy);
 
-        if (cam->conf.lightswitch_percent > 1 && !cam->lost_connection) {
-            if (alg_lightswitch(cam, cam->current_image->diffs)) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
+            if (cam->conf.lightswitch_percent > 1 && !cam->lost_connection) {
+                if (alg_lightswitch(cam, cam->current_image->diffs)) {
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
 
-                if (cam->conf.lightswitch_frames < 1)
-                    cam->conf.lightswitch_frames = 1;
-                else if (cam->conf.lightswitch_frames > 1000)
-                    cam->conf.lightswitch_frames = 1000;
+                    if (cam->conf.lightswitch_frames < 1)
+                        cam->conf.lightswitch_frames = 1;
+                    else if (cam->conf.lightswitch_frames > 1000)
+                        cam->conf.lightswitch_frames = 1000;
 
-                if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
-                    cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
+                    if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
+                        cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
 
-                cam->current_image->diffs = 0;
-                alg_update_reference_frame(cam, RESET_REF_FRAME);
+                    cam->current_image->diffs = 0;
+                    if (cam->conf.primary_method == 0){
+                        alg_update_reference_frame(cam, RESET_REF_FRAME);
+                    } else {
+                        alg_new_update_frame(cam);
+                    }
+                }
             }
-        }
 
-        if (cam->conf.roundrobin_switchfilter && cam->current_image->diffs > cam->threshold) {
-            cam->current_image->diffs = alg_switchfilter(cam, cam->current_image->diffs,
-                                                            cam->current_image->image_norm);
+            if (cam->conf.roundrobin_switchfilter && cam->current_image->diffs > cam->threshold) {
+                cam->current_image->diffs = alg_switchfilter(cam, cam->current_image->diffs,
+                                                                cam->current_image->image_norm);
 
-            if ((cam->current_image->diffs <= cam->threshold) ||
-                (cam->current_image->diffs > cam->threshold_maximum)) {
+                if ((cam->current_image->diffs <= cam->threshold) ||
+                    (cam->current_image->diffs > cam->threshold_maximum)) {
 
-                cam->current_image->diffs = 0;
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
+                    cam->current_image->diffs = 0;
+                    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
+                }
             }
-        }
 
-        cam->current_image->total_labels = 0;
-        cam->imgs.largest_label = 0;
-        cam->olddiffs = 0;
+            cam->current_image->total_labels = 0;
+            cam->imgs.largest_label = 0;
+            cam->olddiffs = 0;
 
-        if (cam->conf.despeckle_filter && cam->current_image->diffs > 0) {
-            cam->olddiffs = cam->current_image->diffs;
-            cam->current_image->diffs = alg_despeckle(cam, cam->olddiffs);
-        } else if (cam->imgs.labelsize_max) {
-            cam->imgs.labelsize_max = 0; /* Disable labeling if enabled */
+            if (cam->conf.despeckle_filter && cam->current_image->diffs > 0) {
+                cam->olddiffs = cam->current_image->diffs;
+                cam->current_image->diffs = alg_despeckle(cam, cam->olddiffs);
+            } else if (cam->imgs.labelsize_max) {
+                cam->imgs.labelsize_max = 0; /* Disable labeling if enabled */
+            }
+
+            if ((cam->smartmask_speed && (cam->event_nr != cam->prev_event)) &&
+                (!--cam->smartmask_count)) {
+                alg_tune_smartmask(cam);
+                cam->smartmask_count = cam->smartmask_ratio;
+            }
+
+            if (cam->frame_skip) {
+                cam->frame_skip--;
+                cam->current_image->diffs = 0;
+            }
+        } else {
+            alg_new_diff(cam);
         }
 
     } else if (!cam->motapp->setup_mode) {
-        cam->current_image->diffs = 0;
-    }
-
-
-    if ((cam->smartmask_speed && (cam->event_nr != cam->prev_event)) &&
-        (!--cam->smartmask_count)) {
-        alg_tune_smartmask(cam);
-        cam->smartmask_count = cam->smartmask_ratio;
-    }
-
-    if (cam->frame_skip) {
-        cam->frame_skip--;
         cam->current_image->diffs = 0;
     }
 
@@ -1005,13 +1017,21 @@ static void mlp_tuning(struct ctx_cam *cam){
         /* center of motion in about the same place ? */
         ((abs(cam->current_image->location.x - cam->previous_location_x)) <= (cam->imgs.width / 150)) &&
         ((abs(cam->current_image->location.y - cam->previous_location_y)) <= (cam->imgs.height / 150))) {
-        alg_update_reference_frame(cam, RESET_REF_FRAME);
+        if (cam->conf.primary_method == 0){
+            alg_update_reference_frame(cam, RESET_REF_FRAME);
+        } else {
+            alg_new_update_frame(cam);
+        }
         cam->current_image->diffs = 0;
         cam->lightswitch_framecounter = 0;
 
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
     } else {
-        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
+        if (cam->conf.primary_method == 0){
+            alg_update_reference_frame(cam, UPDATE_REF_FRAME);
+        } else {
+            alg_new_update_frame(cam);
+        }
     }
     cam->previous_diffs = cam->current_image->diffs;
     cam->previous_location_x = cam->current_image->location.x;

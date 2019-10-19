@@ -13,16 +13,24 @@
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
+#define NORM               100
+#define ABS(x)             ((x) < 0 ? -(x) : (x))
+#define DIFF(x, y)         (ABS((x)-(y)))
+#define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
+#define MAXS 10000               /* max depth of stack */
 
-/*
-struct segment {
-    struct ctx_coord coord;
-    int width;
-    int height;
-    int open;
-    int count;
-};
-*/
+#define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
+        if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
+        {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
+
+#define POP(Y, XL, XR, DY)      /* pop segment off stack */      \
+        {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
+
+typedef struct {
+    short y, xl, xr, dy;
+} Segment;
+
+
 
 /**
  * alg_locate_center_size
@@ -171,11 +179,6 @@ void alg_locate_center_size(struct ctx_images *imgs, int width, int height, stru
 
 }
 
-#define NORM               100
-#define ABS(x)             ((x) < 0 ? -(x) : (x))
-#define DIFF(x, y)         (ABS((x)-(y)))
-#define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
-
 /**
  * alg_noise_tune
  *
@@ -262,19 +265,6 @@ void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion)
  * Filled horizontal segment of scanline y for xl <= x <= xr.
  * Parent segment was on line y - dy.  dy = 1 or -1
  */
-
-#define MAXS 10000               /* max depth of stack */
-
-#define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
-        if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
-        {sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++;}
-
-#define POP(Y, XL, XR, DY)      /* pop segment off stack */      \
-        {sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
-
-typedef struct {
-    short y, xl, xr, dy;
-} Segment;
 
 /**
  * iflood
@@ -978,4 +968,280 @@ void alg_update_reference_frame(struct ctx_cam *cam, int action)
         /* Reset static objects */
         memset(cam->imgs.ref_dyn, 0, cam->imgs.motionsize * sizeof(*cam->imgs.ref_dyn));
     }
+}
+
+/*Copy in new reference frame*/
+void alg_new_update_frame(ctx_cam *cam) {
+
+    /* There used to be a lot more to this function before.....*/
+    memcpy(cam->imgs.ref, cam->imgs.image_vprvcy, cam->imgs.size_norm);
+
+}
+
+/*Calculate the center location of changes*/
+static void alg_new_location_center(ctx_cam *cam) {
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+    unsigned char *out = cam->imgs.image_motion.image_norm;
+    int x, y, centc=0;
+
+    cent->x = 0;
+    cent->y = 0;
+
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            if (*(out++)) {
+                cent->x += x;
+                cent->y += y;
+                centc++;
+            }
+        }
+    }
+
+    if (centc) {
+        cent->x = cent->x / centc;
+        cent->y = cent->y / centc;
+    }
+
+    /* This allows for the redcross and boxes to be drawn*/
+    if (cent->x < 10) cent->x = 15;
+    if (cent->y < 10) cent->y = 15;
+    if ((cent->x + 10) > width) cent->x = width - 15;
+    if ((cent->y + 10) > height) cent->y = height - 15;
+
+}
+
+/*Calculate distribution and variances of changes*/
+static void alg_new_location_dist(ctx_cam *cam) {
+    ctx_images *imgs = &cam->imgs;
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+    unsigned char *out = imgs->image_motion.image_norm;
+    int x, y, centc=0, xdist = 0, ydist = 0;
+    uint64_t variance_x, variance_y, variance_xy, distance_mean;
+
+    /* Note that the term variance refers to the statistical calulation.  It is
+     * not really precise however since we are using integers rather than floats.
+     * This is done to improve performance over the statistically correct
+     * calculation for mean and variance
+     */
+    cent->maxx = 0;
+    cent->maxy = 0;
+    cent->minx = width;
+    cent->miny = height;
+    variance_x=0;
+    variance_y=0;
+    distance_mean=0;
+
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            if (*(out++)) {
+                variance_x += pow((x - cent->x),2);
+                variance_y += pow((y - cent->y),2);
+                /* ToDo: We should store this number for the variance calc...*/
+                distance_mean += sqrt(pow((x - cent->x),2) + pow((y - cent->y),2));
+
+                if (x > cent->x){
+                    xdist += x - cent->x;
+                } else if (x < cent->x){
+                    xdist += cent->x - x;
+                }
+
+                if (y > cent->y){
+                    ydist += y - cent->y;
+                } else if (y < cent->y){
+                    ydist += cent->y - y;
+                }
+
+                centc++;
+            }
+        }
+    }
+
+    if (centc) {
+        cent->minx = cent->x - xdist / centc * 3;
+        cent->maxx = cent->x + xdist / centc * 3;
+        cent->miny = cent->y - ydist / centc * 3;
+        cent->maxy = cent->y + ydist / centc * 3;
+        cent->stddev_x = sqrt((variance_x / centc));
+        cent->stddev_y = sqrt((variance_y / centc));;
+        distance_mean = (distance_mean / centc);
+    } else {
+        cent->stddev_y = 0;
+        cent->stddev_x = 0;
+        distance_mean = 0;
+    }
+
+    variance_xy= 0;
+    out = imgs->image_motion.image_norm;
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            if (*(out++)) {
+                variance_xy += pow(
+                    sqrt(pow((x - cent->x),2) + pow((y - cent->y),2)) -
+                    distance_mean, 2);
+            }
+        }
+    }
+    /* Per statistics, divide by n-1 for calc of a standard deviation */
+    if ((centc-1) > 0) {
+        cent->stddev_xy = sqrt((variance_xy / (centc-1)));
+    }
+
+}
+
+/* Ensure min/max are within limits*/
+static void alg_new_location_minmax(ctx_cam *cam) {
+
+    int width = cam->imgs.width;
+    int height = cam->imgs.height;
+    ctx_coord *cent = &cam->current_image->location;
+
+    if (cent->maxx > width - 1){
+        cent->maxx = width - 1;
+    } else if (cent->maxx < 0){
+        cent->maxx = 0;
+    }
+
+    if (cent->maxy > height - 1){
+        cent->maxy = height - 1;
+    } else if (cent->maxy < 0){
+        cent->maxy = 0;
+    }
+
+    if (cent->minx > width - 1){
+        cent->minx = width - 1;
+    } else if (cent->minx < 0){
+        cent->minx = 0;
+    }
+
+    if (cent->miny > height - 1){
+        cent->miny = height - 1;
+    } else if (cent->miny < 0){
+        cent->miny = 0;
+    }
+
+    /* Align for better locate box handling */
+    cent->minx += cent->minx % 2;
+    cent->miny += cent->miny % 2;
+    cent->maxx -= cent->maxx % 2;
+    cent->maxy -= cent->maxy % 2;
+
+    cent->width = cent->maxx - cent->minx;
+    cent->height = cent->maxy - cent->miny;
+    cent->y = (cent->miny + cent->maxy) / 2;
+
+}
+
+/* Determine the location and standard deviations of changes*/
+static void alg_new_location(ctx_cam *cam) {
+
+    alg_new_location_center(cam);
+
+    alg_new_location_dist(cam);
+
+    alg_new_location_minmax(cam);
+
+}
+
+/* Apply user or default thresholds on standard deviations*/
+static void alg_new_stddev(ctx_cam *cam){
+
+    long chk_stddev;
+    /* Think about a dot in the center of the image, the distance to
+    * the edges is half the height/width. We can then implement a
+    * rule which says if the standard deviation is over a quarter of
+    * that distance then we have an excessive change.  This is the /8
+    * The above is the default if nothing is specified by the user.
+    */
+    if (cam->conf.threshold_sdevx >0){
+        if (cam->current_image->location.stddev_x < cam->conf.threshold_sdevx){
+            cam->current_image->diffs = 0;
+            return;
+        }
+    } else {
+        chk_stddev = (long)((cam->imgs.width/8) - cam->current_image->location.stddev_x);
+        if (chk_stddev < 0) {
+            cam->current_image->diffs = 0;
+            return;
+        }
+    }
+
+    if (cam->conf.threshold_sdevy >0){
+        if (cam->current_image->location.stddev_y < cam->conf.threshold_sdevy){
+            cam->current_image->diffs = 0;
+            return;
+        }
+    } else {
+        chk_stddev = (long)((cam->imgs.height/8) - cam->current_image->location.stddev_y);
+        if (chk_stddev < 0) {
+            cam->current_image->diffs = 0;
+            return;
+        }
+    }
+
+    if (cam->conf.threshold_sdevxy >0){
+        if (cam->current_image->location.stddev_xy < cam->conf.threshold_sdevxy){
+            cam->current_image->diffs = 0;
+            return;
+        }
+    } else {
+        chk_stddev = (long)((sqrt(cam->imgs.height*cam->imgs.width)/8) -
+            cam->current_image->location.stddev_xy);
+        if (chk_stddev < 0) {
+            cam->current_image->diffs = 0;
+            return;
+        }
+    }
+
+}
+
+/* Determine base differences */
+static void alg_new_diff_base(ctx_cam *cam) {
+
+    ctx_images *imgs = &cam->imgs;
+    int indx = 0;
+    int indx_en = imgs->motionsize;
+    int diffs = 0;
+    int noise = cam->noise;
+    unsigned char *ref = imgs->ref;
+    unsigned char *out = imgs->image_motion.image_norm;
+    unsigned char *mask = imgs->mask;
+    unsigned char *new_var = cam->imgs.image_vprvcy;
+    unsigned char curdiff;
+
+    memset(out + indx_en, 128, indx_en / 2); /* Motion pictures are now b/w i.o. green */
+    memset(out, 0, indx_en);
+
+    for (indx=0; indx<indx_en; indx++) {
+        curdiff = (int)(abs(*ref - *new_var));
+        if (mask){
+            curdiff = ((int)(curdiff * *mask++) / 255);
+        }
+        if (curdiff > noise) {
+            *out = *new_var;
+            diffs++;
+        }
+        out++;
+        ref++;
+        new_var++;
+    }
+    cam->current_image->diffs = diffs;
+
+}
+
+void alg_new_diff(ctx_cam *cam) {
+
+    alg_new_diff_base(cam);
+
+    alg_new_location(cam);
+
+    alg_new_update_frame(cam);
+
+    alg_new_stddev(cam);
+
+    return;
+
 }

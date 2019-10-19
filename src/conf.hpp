@@ -64,8 +64,12 @@
 
         /* Motion detection configuration parameters */
         int             emulate_motion;
+        int             primary_method;
         int             threshold;
         int             threshold_maximum;
+        int             threshold_sdevx;
+        int             threshold_sdevy;
+        int             threshold_sdevxy;
         int             threshold_tune;
         int             noise_level;
         int             noise_tune;

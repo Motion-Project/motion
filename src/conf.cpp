@@ -193,12 +193,28 @@ struct ctx_parm config_parms[] = {
     "# Always save pictures and movies even if there was no motion.",
     0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
+    "primary_method",
+    "# Primary method to be used for detection.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
     "threshold",
     "# Threshold for number of changed pixels that triggers motion.",
     0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
     "threshold_maximum",
     "# The maximum threshold for number of changed pixels that triggers motion.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "threshold_sdevx",
+    "# The maximum standard deviation of the width of motion to center.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "threshold_sdevy",
+    "# The maximum standard deviation of the height of motion to center.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "threshold_sdevxy",
+    "# The maximum standard deviation of the distance of motion to center.",
     0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
     {
     "threshold_tune",

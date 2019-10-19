@@ -775,6 +775,23 @@ static void conf_edit_emulate_motion(struct ctx_cam *cam, char *arg1, enum PARM_
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
 }
+static void conf_edit_primary_method(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf.threshold = 0;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(arg1);
+        if ((parm_in < 0) || (parm_in > 1)) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid primary method %d"),parm_in);
+        } else {
+            cam->conf.primary_method = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_int(cam->conf.primary_method, arg1);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","primary_method",_("primary_method"));
+}
 static void conf_edit_threshold(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
     int parm_in;
     if (pact == PARM_ACT_DFLT){
@@ -808,6 +825,57 @@ static void conf_edit_threshold_maximum(struct ctx_cam *cam, char *arg1, enum PA
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_maximum",_("threshold_maximum"));
+}
+static void conf_edit_threshold_sdevx(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf.threshold_sdevx = 0;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(arg1);
+        if ((parm_in < 0) ) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevx %d"),parm_in);
+        } else {
+            cam->conf.threshold_sdevx = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_int(cam->conf.threshold_sdevx, arg1);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevx",_("threshold_sdevx"));
+}
+static void conf_edit_threshold_sdevy(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf.threshold_sdevy = 0;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(arg1);
+        if ((parm_in < 0) ) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevy %d"),parm_in);
+        } else {
+            cam->conf.threshold_sdevy = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_int(cam->conf.threshold_sdevy, arg1);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevy",_("threshold_sdevy"));
+}
+static void conf_edit_threshold_sdevxy(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
+    int parm_in;
+    if (pact == PARM_ACT_DFLT){
+        cam->conf.threshold_sdevxy = 0;
+    } else if (pact == PARM_ACT_SET){
+        parm_in = atoi(arg1);
+        if ((parm_in < 0) ) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevxy %d"),parm_in);
+        } else {
+            cam->conf.threshold_sdevxy = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_int(cam->conf.threshold_sdevxy, arg1);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevxy",_("threshold_sdevxy"));
 }
 static void conf_edit_threshold_tune(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT){
@@ -2318,8 +2386,12 @@ static void conf_edit_cat02(struct ctx_cam *cam, const char *cmd, char *arg1, en
     } else if (mystreq(cmd,"text_scale")){              conf_edit_text_scale(cam, arg1, pact);
     } else if (mystreq(cmd,"text_event")){              conf_edit_text_event(cam, arg1, pact);
     } else if (mystreq(cmd,"emulate_motion")){          conf_edit_emulate_motion(cam, arg1, pact);
+    } else if (mystreq(cmd,"primary_method")){          conf_edit_primary_method(cam, arg1, pact);
     } else if (mystreq(cmd,"threshold")){               conf_edit_threshold(cam, arg1, pact);
     } else if (mystreq(cmd,"threshold_maximum")){       conf_edit_threshold_maximum(cam, arg1, pact);
+    } else if (mystreq(cmd,"threshold_sdevx")){         conf_edit_threshold_sdevx(cam, arg1, pact);
+    } else if (mystreq(cmd,"threshold_sdevy")){         conf_edit_threshold_sdevy(cam, arg1, pact);
+    } else if (mystreq(cmd,"threshold_sdevxy")){        conf_edit_threshold_sdevxy(cam, arg1, pact);
     } else if (mystreq(cmd,"threshold_tune")){          conf_edit_threshold_tune(cam, arg1, pact);
     } else if (mystreq(cmd,"noise_level")){             conf_edit_noise_level(cam, arg1, pact);
     } else if (mystreq(cmd,"noise_tune")){              conf_edit_noise_tune(cam, arg1, pact);

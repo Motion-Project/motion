@@ -23,4 +23,8 @@
     void alg_tune_smartmask(struct ctx_cam *cam);
     void alg_update_reference_frame(struct ctx_cam *cam, int);
 
+    void alg_new_update_frame(ctx_cam *cam);
+    void alg_new_diff(ctx_cam *cam);
+
+
 #endif /* _INCLUDE_ALG_H */
