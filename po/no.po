@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-16 20:30-0600\n"
+"POT-Creation-Date: 2019-10-18 21:42-0600\n"
 "PO-Revision-Date: 2018-10-13 12:03-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -34,14 +34,6 @@ msgstr ""
 #: src/conf.cpp
 #, c-format
 msgid "Camera directory config %s not found"
-msgstr ""
-
-#: src/conf.cpp
-msgid "Unable to locate vid_control_params"
-msgstr ""
-
-#: src/conf.cpp
-msgid "No value provided to put into vid_control_params"
 msgstr ""
 
 #: src/conf.cpp

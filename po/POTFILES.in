@@ -1,6 +1,7 @@
 # main sources
 src/alg.cpp
 src/conf.cpp
+src/conf_edit.cpp
 src/draw.cpp
 src/event.cpp
 src/movie.cpp

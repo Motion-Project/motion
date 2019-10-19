@@ -89,6 +89,19 @@ static void conf_edit_setup_mode(struct ctx_motapp *motapp, char *arg1, int pact
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","setup_mode",_("setup_mode"));
 }
+static void conf_edit_conf_filename(struct ctx_motapp *motapp, char *arg1, enum PARM_ACT pact) {
+    if (pact == PARM_ACT_DFLT) {
+        conf_edit_set_string(&motapp->conf_filename,NULL);
+    } else if (pact == PARM_ACT_FREE){
+        conf_edit_set_string(&motapp->conf_filename,NULL);
+    } else if (pact == PARM_ACT_SET){
+        conf_edit_set_string(&motapp->conf_filename,arg1);
+    } else if (pact == PARM_ACT_GET){
+        conf_edit_get_string(motapp->conf_filename,arg1);
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_file",_("log_file"));
+}
 static void conf_edit_pid_file(struct ctx_motapp *motapp, char *arg1, int pact) {
     if (pact == PARM_ACT_DFLT) {
         conf_edit_set_string(&motapp->pid_file,NULL);
@@ -1690,6 +1703,21 @@ static void conf_edit_webcontrol_cors_header(struct ctx_cam *cam, char *arg1, en
     } else if (pact == PARM_ACT_FREE){
         conf_edit_set_string(&cam->conf.webcontrol_cors_header,NULL);
     } else if (pact == PARM_ACT_SET){
+        // A complicated regex to validate a url found here:
+        // https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
+        const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+        regex_t regex;
+        if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error compiling regex in copy_uri"));
+            return;
+        }
+        // A single asterisk is also valid
+        if (mystrne(arg1, "*") && regexec(&regex, arg1, 0, NULL, 0) == REG_NOMATCH) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Invalid origin for cors_header"));
+            regfree(&regex);
+            return;
+        }
+        regfree(&regex);
         conf_edit_set_string(&cam->conf.webcontrol_cors_header,arg1);
     } else if (pact == PARM_ACT_GET){
         conf_edit_get_string(cam->conf.webcontrol_cors_header,arg1);
@@ -1781,6 +1809,21 @@ static void conf_edit_stream_cors_header(struct ctx_cam *cam, char *arg1, enum P
     } else if (pact == PARM_ACT_FREE){
         conf_edit_set_string(&cam->conf.stream_cors_header,NULL);
     } else if (pact == PARM_ACT_SET){
+        // A complicated regex to validate a url found here:
+        // https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
+        const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
+        regex_t regex;
+        if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Error compiling regex in copy_uri"));
+            return;
+        }
+        // A single asterisk is also valid
+        if (mystrne(arg1, "*") && regexec(&regex, arg1, 0, NULL, 0) == REG_NOMATCH) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Invalid origin for cors_header"));
+            regfree(&regex);
+            return;
+        }
+        regfree(&regex);
         conf_edit_set_string(&cam->conf.stream_cors_header,arg1);
     } else if (pact == PARM_ACT_GET){
         conf_edit_get_string(cam->conf.stream_cors_header,arg1);
@@ -2206,39 +2249,9 @@ static void conf_edit_track_step_angle_y(struct ctx_cam *cam, char *arg1, enum P
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","track_step_angle_y",_("track_step_angle_y"));
 }
 
-
-static void conf_parm_set_uri(struct ctx_cam *cam, const char *str, int offset) {
-
-    (void)cam;
-    (void)str;
-    (void)offset;
-    /*
-    // A complicated regex to validate a url found here:
-    // https://stackoverflow.com/questions/38608116/how-to-check-a-specified-string-is-a-valid-url-or-not-using-c-code
-    const char *regex_str = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
-
-    regex_t regex;
-    if (regcomp(&regex, regex_str, REG_EXTENDED) != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Error compiling regex in copy_uri"));
-        return;
-    }
-
-    // A single asterisk is also valid
-    if (!mystrceq(str, "*") && regexec(&regex, str, 0, NULL, 0) == REG_NOMATCH) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Invalid origin for cors_header"));
-        regfree(&regex);
-        return;
-    }
-
-    regfree(&regex);
-    */
-}
-
-
 static void conf_edit_cat00(struct ctx_motapp *motapp, const char *cmd, char *arg1, enum PARM_ACT pact) {
     if (mystreq(cmd,"daemon") ){                        conf_edit_daemon(motapp, arg1, pact);
+    } else if (mystreq(cmd,"conf_filename")){           conf_edit_conf_filename(motapp, arg1, pact);
     } else if (mystreq(cmd,"setup_mode")) {             conf_edit_setup_mode(motapp, arg1, pact);
     } else if (mystreq(cmd,"pid_file")){                conf_edit_pid_file(motapp, arg1, pact);
     } else if (mystreq(cmd,"log_file")){                conf_edit_log_file(motapp, arg1, pact);
@@ -2429,7 +2442,7 @@ void conf_edit_free(struct ctx_cam *cam) {
 }
 
 void conf_edit_dflt_app(struct ctx_motapp *motapp) {
-    motapp->conf_filename = (char*)mymalloc(PATH_MAX);
+    motapp->conf_filename = NULL;
     motapp->log_file = NULL;
     motapp->log_type_str = NULL;
     motapp->pid_file = NULL;
@@ -2572,10 +2585,11 @@ static int conf_edit_set_depr(struct ctx_motapp *motapp, int threadnbr, char *cm
             } else {
                 conf_edit_set_active(motapp, threadnbr, (char*)config_parms_depr[indx].newname, arg1);
             }
+            return 0;
         }
         indx++;
     }
-
+    return -1;
 }
 
 void conf_edit_set(struct ctx_motapp *motapp, int threadnbr, char *cmd, char *arg1){
@@ -2603,9 +2617,6 @@ int conf_edit_get(struct ctx_cam *cam, const char *cmd, char *arg1, enum PARM_CA
         retcd = -1;
     }
     return retcd;
-    if (FALSE){
-        conf_parm_set_uri(cam,NULL,0);
-    }
 
 }
 
