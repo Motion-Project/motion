@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-05 12:24-0600\n"
+"POT-Creation-Date: 2019-10-16 20:30-0600\n"
 "PO-Revision-Date: 2018-10-13 12:00-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -15,599 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
-
-#: src/conf.cpp
-msgid "daemon"
-msgstr ""
-
-# Configuration Option Hints
-#: src/conf.cpp
-msgid "setup_mode"
-msgstr "modo de configuración"
-
-#: src/conf.cpp
-msgid "pid_file"
-msgstr ""
-
-#: src/conf.cpp
-msgid "log_file"
-msgstr ""
-
-#: src/conf.cpp
-msgid "log_level"
-msgstr ""
-
-#: src/conf.cpp
-msgid "log_type"
-msgstr ""
-
-#: src/conf.cpp
-msgid "quiet"
-msgstr ""
-
-#: src/conf.cpp
-msgid "native_language"
-msgstr ""
-
-#: src/conf.cpp
-msgid "camera_name"
-msgstr ""
-
-#: src/conf.cpp
-msgid "camera_id"
-msgstr ""
-
-#: src/conf.cpp
-msgid "target_dir"
-msgstr ""
-
-#: src/conf.cpp
-msgid "videodevice"
-msgstr ""
-
-#: src/conf.cpp
-msgid "vid_control_params"
-msgstr ""
-
-#: src/conf.cpp
-msgid "v4l2_palette"
-msgstr ""
-
-#: src/conf.cpp
-msgid "input"
-msgstr ""
-
-#: src/conf.cpp
-msgid "norm"
-msgstr ""
-
-#: src/conf.cpp
-msgid "frequency"
-msgstr ""
-
-#: src/conf.cpp
-msgid "tunerdevice"
-msgstr ""
-
-#: src/conf.cpp
-msgid "roundrobin_frames"
-msgstr ""
-
-#: src/conf.cpp
-msgid "roundrobin_skip"
-msgstr ""
-
-#: src/conf.cpp
-msgid "roundrobin_switchfilter"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_url"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_highres"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_userpass"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_keepalive"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_proxy"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_tolerant_check"
-msgstr ""
-
-#: src/conf.cpp
-msgid "netcam_use_tcp"
-msgstr ""
-
-#: src/conf.cpp
-msgid "mmalcam_name"
-msgstr ""
-
-#: src/conf.cpp
-msgid "mmalcam_control_params"
-msgstr ""
-
-#: src/conf.cpp
-msgid "width"
-msgstr ""
-
-#: src/conf.cpp
-msgid "height"
-msgstr ""
-
-#: src/conf.cpp
-msgid "framerate"
-msgstr ""
-
-#: src/conf.cpp
-msgid "rotate"
-msgstr ""
-
-#: src/conf.cpp
-msgid "flip_axis"
-msgstr ""
-
-#: src/conf.cpp
-msgid "locate_motion_mode"
-msgstr ""
-
-#: src/conf.cpp
-msgid "locate_motion_style"
-msgstr ""
-
-#: src/conf.cpp
-msgid "text_left"
-msgstr ""
-
-#: src/conf.cpp
-msgid "text_right"
-msgstr ""
-
-#: src/conf.cpp
-msgid "text_changes"
-msgstr ""
-
-#: src/conf.cpp
-msgid "text_scale"
-msgstr ""
-
-#: src/conf.cpp
-msgid "text_event"
-msgstr ""
-
-#: src/conf.cpp
-msgid "emulate_motion"
-msgstr ""
-
-#: src/conf.cpp
-msgid "threshold"
-msgstr ""
-
-#: src/conf.cpp
-msgid "threshold_maximum"
-msgstr ""
-
-#: src/conf.cpp
-msgid "threshold_tune"
-msgstr ""
-
-#: src/conf.cpp
-msgid "noise_level"
-msgstr ""
-
-#: src/conf.cpp
-msgid "noise_tune"
-msgstr ""
-
-#: src/conf.cpp
-msgid "despeckle_filter"
-msgstr ""
-
-#: src/conf.cpp
-msgid "area_detect"
-msgstr ""
-
-#: src/conf.cpp
-msgid "mask_file"
-msgstr ""
-
-#: src/conf.cpp
-msgid "mask_privacy"
-msgstr ""
-
-#: src/conf.cpp
-msgid "smart_mask_speed"
-msgstr ""
-
-#: src/conf.cpp
-msgid "lightswitch_percent"
-msgstr ""
-
-#: src/conf.cpp
-msgid "lightswitch_frames"
-msgstr ""
-
-#: src/conf.cpp
-msgid "minimum_motion_frames"
-msgstr ""
-
-#: src/conf.cpp
-msgid "event_gap"
-msgstr ""
-
-#: src/conf.cpp
-msgid "pre_capture"
-msgstr ""
-
-#: src/conf.cpp
-msgid "post_capture"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_event_start"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_event_end"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_picture_save"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_area_detected"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_motion_detected"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_movie_start"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_movie_end"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_camera_lost"
-msgstr ""
-
-#: src/conf.cpp
-msgid "on_camera_found"
-msgstr ""
-
-#: src/conf.cpp
-msgid "picture_output"
-msgstr ""
-
-#: src/conf.cpp
-msgid "picture_output_motion"
-msgstr ""
-
-#: src/conf.cpp
-msgid "picture_type"
-msgstr ""
-
-#: src/conf.cpp
-msgid "picture_quality"
-msgstr ""
-
-#: src/conf.cpp
-msgid "picture_exif"
-msgstr ""
-
-#: src/conf.cpp
-msgid "picture_filename"
-msgstr ""
-
-#: src/conf.cpp
-msgid "snapshot_interval"
-msgstr ""
-
-#: src/conf.cpp
-msgid "snapshot_filename"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_output"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_output_motion"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_max_time"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_bps"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_quality"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_codec"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_passthrough"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_filename"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_extpipe_use"
-msgstr ""
-
-#: src/conf.cpp
-msgid "movie_extpipe"
-msgstr ""
-
-#: src/conf.cpp
-msgid "timelapse_interval"
-msgstr ""
-
-#: src/conf.cpp
-msgid "timelapse_mode"
-msgstr ""
-
-#: src/conf.cpp
-msgid "timelapse_fps"
-msgstr ""
-
-#: src/conf.cpp
-msgid "timelapse_codec"
-msgstr ""
-
-#: src/conf.cpp
-msgid "timelapse_filename"
-msgstr ""
-
-#: src/conf.cpp
-msgid "video_pipe"
-msgstr ""
-
-#: src/conf.cpp
-msgid "video_pipe_motion"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_port"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_ipv6"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_localhost"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_parms"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_interface"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_auth_method"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_authentication"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_tls"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_cert"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_key"
-msgstr ""
-
-#: src/conf.cpp
-msgid "webcontrol_cors_header"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_port"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_localhost"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_auth_method"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_authentication"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_tls"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_cors_header"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_quality"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_grey"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_motion"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_maxrate"
-msgstr ""
-
-#: src/conf.cpp
-msgid "stream_limit"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_type"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_dbname"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_host"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_port"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_user"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_password"
-msgstr ""
-
-#: src/conf.cpp
-msgid "database_busy_timeout"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_log_picture"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_log_snapshot"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_log_movie"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_log_timelapse"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_query_start"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_query_stop"
-msgstr ""
-
-#: src/conf.cpp
-msgid "sql_query"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_type"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_auto"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_maxx"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_minx"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_maxy"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_miny"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_step_angle_x"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_step_angle_y"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_move_wait"
-msgstr ""
-
-#: src/conf.cpp
-msgid "track_generic_move"
-msgstr ""
-
-#: src/conf.cpp
-msgid "camera"
-msgstr ""
-
-#: src/conf.cpp
-msgid "camera_dir"
-msgstr ""
-
-#: src/conf.cpp
-msgid "Error compiling regex in copy_uri"
-msgstr ""
-
-#: src/conf.cpp
-msgid "Invalid origin for cors_header"
-msgstr ""
-
-#: src/conf.cpp
-msgid "Unable to locate vid_control_params"
-msgstr ""
-
-#: src/conf.cpp
-msgid "No value provided to put into vid_control_params"
-msgstr ""
 
 #: src/conf.cpp
 #, c-format
@@ -630,18 +37,15 @@ msgid "Camera directory config %s not found"
 msgstr ""
 
 #: src/conf.cpp
-#, c-format
-msgid "Coding error \"%s\""
+msgid "Unable to locate vid_control_params"
 msgstr ""
 
 #: src/conf.cpp
-#, c-format
-msgid "Unknown config option \"%s\""
+msgid "No value provided to put into vid_control_params"
 msgstr ""
 
 #: src/conf.cpp
-#, c-format
-msgid "Writing configuration parameters from all files (%d):"
+msgid "Writing configuration parameters from all files"
 msgstr ""
 
 #: src/conf.cpp
@@ -660,8 +64,7 @@ msgid "Writing config file to %s"
 msgstr ""
 
 #: src/conf.cpp
-#, c-format
-msgid "Configfile %s not found - trying defaults."
+msgid "Error setting filename"
 msgstr ""
 
 #: src/conf.cpp
@@ -674,12 +77,17 @@ msgid "could not open configfile %s"
 msgstr ""
 
 #: src/conf.cpp
-#, c-format
-msgid "Processing thread 0 - config file %s"
+msgid "No config file to process, using default values"
 msgstr ""
 
 #: src/conf.cpp
-msgid "No config file to process, using default values"
+#, c-format
+msgid "Error setting file name %s"
+msgstr ""
+
+#: src/conf.cpp
+#, c-format
+msgid "Processing thread 0 - config file %s"
 msgstr ""
 
 #: src/draw.cpp
@@ -707,23 +115,20 @@ msgid "Failed to put image into video pipe"
 msgstr ""
 
 #: src/event.cpp
+msgid "Error creating image file name"
+msgstr ""
+
+#: src/event.cpp
+msgid "Error creating image motion file name"
+msgstr ""
+
+#: src/event.cpp
 #, c-format
 msgid "Could not create symbolic link [%s]"
 msgstr ""
 
 #: src/event.cpp
-#, c-format
-msgid "Error creating preview pipe name %d %s"
-msgstr ""
-
-#: src/event.cpp
-#, c-format
-msgid "Error creating file name base %d %s"
-msgstr ""
-
-#: src/event.cpp
-#, c-format
-msgid "Error creating preview name %d %s"
+msgid "Error creating preview file name"
 msgstr ""
 
 #: src/event.cpp
@@ -1100,11 +505,6 @@ msgstr ""
 
 #: src/logger.cpp
 msgid "Logging to syslog"
-msgstr ""
-
-#: src/logger.cpp
-#, c-format
-msgid "Using default log type (%s)"
 msgstr ""
 
 #: src/logger.cpp
@@ -1607,11 +1007,6 @@ msgstr ""
 #: src/netcam.cpp
 #, c-format
 msgid "%s: Setting v4l2 video_size: %s"
-msgstr ""
-
-#: src/netcam.cpp
-#, c-format
-msgid "Proxies not supported using for %s"
 msgstr ""
 
 #: src/netcam.cpp
@@ -2785,6 +2180,10 @@ msgstr ""
 #, c-format
 msgid "'%s' option is depreciated.  New option name is `%s'"
 msgstr ""
+
+# Configuration Option Hints
+#~ msgid "setup_mode"
+#~ msgstr "modo de configuración"
 
 #~ msgid "Language: English"
 #~ msgstr "Idioma: Español"

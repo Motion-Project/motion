@@ -124,9 +124,9 @@ static char *str_time(void)
  */
 void motion_log(int level, unsigned int type, int errno_flag,int fncname, const char *fmt, ...){
     int errno_save, n;
-    char buf[1024];
-    char usrfmt[1024];
-    char msg_buf[100];
+    char buf[1024]= {0};
+    char usrfmt[1024]= {0};
+    char msg_buf[100]= {0};
 
     va_list ap;
     int threadnr;
@@ -149,29 +149,18 @@ void motion_log(int level, unsigned int type, int errno_flag,int fncname, const 
 
     threadnr = (unsigned long)pthread_getspecific(tls_key_threadnr);
 
-    /*
-     * First we save the current 'error' value.  This is required because
-     * the subsequent calls to vsnprintf could conceivably change it!
-     */
+    snprintf(buf, sizeof(buf), "%s","");
+    n = 0;
+
     errno_save = errno;
 
     mythreadname_get(threadname);
 
-    /*
-     * Prefix the message with the thread number and name,
-     * log level string, log type string, and time.
-     * e.g. [1:enc] [ERR] [ALL] [Apr 03 00:08:44] blah
-     */
     if (log_mode == LOGMODE_FILE) {
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] [%s] ",
                      threadnr, threadname, log_get_level_str(level), log_get_type_str(type),
                      str_time());
     } else {
-    /*
-     * Prefix the message with the thread number and name,
-     * log level string and log type string.
-     * e.g. [1:trk] [DBG] [ALL] blah
-     */
         n = snprintf(buf, sizeof(buf), "[%d:%s] [%s] [%s] ",
                      threadnr, threadname, log_get_level_str(level), log_get_type_str(type));
     }

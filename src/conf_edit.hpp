@@ -29,5 +29,6 @@ void conf_edit_set(struct ctx_motapp *motapp, int threadnbr, char *cmd, char *ar
 int conf_edit_get(struct ctx_cam *cam, const char *cmd, char *arg1 , enum PARM_CAT pcat);
 void conf_edit_dflt_app(struct ctx_motapp *motapp);
 void conf_edit_dflt_cam(struct ctx_cam *cam);
+void conf_edit_free(struct ctx_cam *cam);
 
 #endif

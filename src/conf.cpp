@@ -980,31 +980,6 @@ static void conf_parm_camera_dir(struct ctx_motapp *motapp, char *str) {
     return;
 }
 
-static void conf_parm_set_text_double(struct ctx_cam *cam, const char *str, int offset) {
-    void *tmp;
-
-    return;
-
-    tmp = (char *)cam + (int)offset;
-    if (mystrceq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-        *((int *)tmp) = 2;
-    } else {
-        *((int *)tmp) = 1;
-    }
-}
-
-static void conf_parm_set_html_output(struct ctx_cam *cam, const char *str, int offset) {
-    void *tmp;
-
-    return;
-
-    tmp = (char *)cam + (int)offset;
-    if (mystrceq(str, "1") || mystrceq(str, "yes") || mystrceq(str, "on")) {
-        *((int *)tmp) = 0;
-    } else {
-        *((int *)tmp) = 1;
-    }
-}
 
 static void conf_parm_set_vid_ctrl(struct ctx_cam *cam, const char *config_val, int config_indx) {
 
@@ -1204,37 +1179,6 @@ void conf_process(struct ctx_motapp *motapp, FILE *fp, int threadnbr) {
     return;
 }
 
-
-static const char *conf_parm_get_camera(struct ctx_cam **cam_list, int indx_parm, int indx_thrd){
-
-    (void)cam_list;
-    (void)indx_thrd;
-    (void)indx_parm;
-
-    /*
-    char *retval;
-    unsigned int i = 0;
-
-    (void)indx_parm;
-
-    if (indx_thrd != 0) return NULL;
-
-    retval = (char*)mymalloc(1);
-    retval[0] = 0;
-
-    while (cam_list[++i]) {
-        if (cam_list[i]->from_conf_dir) continue;
-
-        retval = (char*)myrealloc(retval, strlen(retval) + strlen(cam_list[i]->conf_filename) + 10,
-                           "print_camera");
-        sprintf(retval + strlen(retval), "camera %s\n", cam_list[i]->conf_filename);
-    }
-
-    return NULL;
-    */
-   return NULL;
-}
-
 /**  Write the configuration(s) to the log */
 void conf_parms_log(struct ctx_cam **cam_list) {
     int i, threadnbr, diff_val;
@@ -1429,7 +1373,6 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[]){
 
 void conf_init_cams(struct ctx_motapp *motapp){
     FILE *fp = NULL;
-    char filename[PATH_MAX];
     int i, retcd;
 
     motapp->cam_list = (struct ctx_cam**)calloc(sizeof(struct ctx_cam *), 2);
@@ -1447,7 +1390,7 @@ void conf_init_cams(struct ctx_motapp *motapp){
             ,PATH_MAX,"%s",motapp->conf_filename);
         if ((retcd < 0)|| (retcd > PATH_MAX)){
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("Error setting file name %s"), filename);
+                ,_("Error setting file name %s"), motapp->conf_filename);
             exit(1);
         }
         fp = fopen (motapp->conf_filename, "r");
@@ -1455,7 +1398,7 @@ void conf_init_cams(struct ctx_motapp *motapp){
 
     if (fp) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("Processing thread 0 - config file %s"), filename);
+            ,_("Processing thread 0 - config file %s"), motapp->conf_filename);
         conf_process(motapp, fp, 0);
         myfclose(fp);
     } else {
@@ -1469,29 +1412,15 @@ void conf_init_cams(struct ctx_motapp *motapp){
 }
 
 void conf_deinit(struct ctx_motapp *motapp) {
-    int j, indx;
-    void **val;
+    int indx;
 
-    (void)val;
     indx = 0;
     while (motapp->cam_list[indx] != NULL){
-        /* Free memory allocated for config parameters */
-        for (j = 0; config_parms[j].parm_name != NULL; j++) {
-            if (FALSE){
-            //if ((config_parms[j].parm_type == PARM_TYPE_STRING) ||
-            //    (config_parms[j].parm_type == PARM_TYPE_URI) ) {
-
-            //    val = (void **)((char *)motapp->cam_list[indx] + config_parms[j].parm_offset);
-            //    if (*val) {
-            //        free(*val);
-            //        *val = NULL;
-            //    }
-            }
-        }
+        conf_edit_free(motapp->cam_list[indx]);
         free(motapp->cam_list[indx]);
         indx++;
     }
-
+    free(motapp->conf_filename);
     free(motapp->cam_list);
     motapp->cam_list = NULL;
 
