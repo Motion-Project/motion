@@ -1077,31 +1077,23 @@ static void mlp_actions_motion(struct ctx_cam *cam){
     mlp_detected(cam, cam->video_dev, cam->current_image);
 }
 
-static void mlp_actions_event_stop(struct ctx_cam *cam){
+static void mlp_actions_event(struct ctx_cam *cam){
 
-    /* Note that the event_stop may have already been set at this point.  The
-     * if statements are separate only for coding clarity
-    */
-    if ((cam->conf.movie_max_time && cam->event_nr == cam->prev_event) &&
-        (cam->frame_curr_ts.tv_sec - cam->eventtime >= cam->conf.movie_max_time)) {
+    if ((cam->conf.movie_max_time > 0) &&
+        (cam->event_nr == cam->prev_event) &&
+        ((cam->frame_curr_ts.tv_sec - cam->eventtime) >= cam->conf.movie_max_time)) {
         cam->event_stop = TRUE;
     }
 
-    if ((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf.event_gap) && cam->conf.event_gap > 0) {
-        cam->event_stop = TRUE;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("222En222dddd of event %d"), cam->event_nr);
-    }
+    if (((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf.event_gap) &&
+        (cam->conf.event_gap > 0)) || cam->event_stop) {
 
-    if (cam->event_stop) {
         if (cam->event_nr == cam->prev_event || cam->event_stop) {
-
             mlp_ring_process(cam, IMAGE_BUFFER_FLUSH);
-
             if (cam->imgs.image_preview.diffs) {
                 event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
                 cam->imgs.image_preview.diffs = 0;
             }
-
             event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
 
             if (cam->conf.track_type) {
@@ -1117,7 +1109,6 @@ static void mlp_actions_event_stop(struct ctx_cam *cam){
             cam->text_event_string[0] = '\0';
         }
     }
-
 }
 
 static void mlp_actions(struct ctx_cam *cam){
@@ -1148,7 +1139,7 @@ static void mlp_actions(struct ctx_cam *cam){
 
     mlp_areadetect(cam);
 
-    mlp_actions_event_stop(cam);
+    mlp_actions_event(cam);
 
     /* Save/send to movie some images */
     /* But why?  And why just two images from the ring? Didn't other functions flush already?*/
