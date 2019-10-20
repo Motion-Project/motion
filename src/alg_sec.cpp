@@ -69,14 +69,15 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
             putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_SIMPLEX, 1, 255, 2);
         }
         imwrite(testdir  + "/detect_" + algmethod + ".jpg", mat_src);
-        param[0] = cv::IMWRITE_JPEG_QUALITY;
-        param[1] = 75;
-        cv::imencode(".jpg", mat_src, buff, param);
-        pthread_mutex_lock(&cam->algsec->mutex);
-            std::copy(buff.begin(), buff.end(), cam->imgs.image_secondary);
-            cam->imgs.size_secondary = (int)buff.size();
-        pthread_mutex_unlock(&cam->algsec->mutex);
     }
+
+    param[0] = cv::IMWRITE_JPEG_QUALITY;
+    param[1] = 75;
+    cv::imencode(".jpg", mat_src, buff, param);
+    pthread_mutex_lock(&cam->algsec->mutex);
+        std::copy(buff.begin(), buff.end(), cam->imgs.image_secondary);
+        cam->imgs.size_secondary = (int)buff.size();
+    pthread_mutex_unlock(&cam->algsec->mutex);
 
 }
 
@@ -172,9 +173,9 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
             ,false);
 
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-            , _("HOG Parmeters: winstride %d,%d padding %d,%d scale %.2f theshold %d")
-            ,Size(algmdl.parms_int[0][2], algmdl.parms_int[0][2])
-            ,Size(algmdl.parms_int[0][3], algmdl.parms_int[0][3])
+            , _("Parms: winstride %d,%d padding %d,%d scale %.2f theshold %d")
+            ,algmdl.parms_int[0][2], algmdl.parms_int[0][2]
+            ,algmdl.parms_int[0][3], algmdl.parms_int[0][3]
             ,algmdl.parms_float[0][4]
             ,algmdl.parms_int[0][5]);
 
@@ -215,9 +216,9 @@ static void algsec_detect_haar(ctx_cam *cam, ctx_algsec_model &algmdl){
     }
 }
 
-static void algsec_load_yolo(ctx_algsec_model &algsec){
+static void algsec_load_yolo(ctx_algsec_model &algmdl){
     /* Placeholder for implementation of yolo classifier */
-    (void)algsec;
+    algmdl.method = 0;
 
 }
 
@@ -399,16 +400,10 @@ static void algsec_load_parms(ctx_cam *cam){
 /**If possible preload the models and initialize them */
 static int algsec_load_models(ctx_cam *cam){
 
-    int indx, retcd;
-    /* Default the return code to no models found.  If after looping
-     * through and loading the models, we have a method, then we set
-     * the return code to ok (zero).  If a model fails to load then
-     * in that function we reset the method to zero.
-     */
-    retcd = -1;
+    int indx;
+
     for (indx=0;indx<3;indx++){
         if (cam->algsec->models[indx].method != 0){
-            retcd = 0;
             switch (cam->algsec->models[indx].method) {
             case 1:     //Haar Method
                 algsec_load_haar(cam->algsec->models[indx]);
@@ -418,11 +413,20 @@ static int algsec_load_models(ctx_cam *cam){
             case 3:     //YoLo Method
                 algsec_load_yolo(cam->algsec->models[indx]);
                 break;
+            default:
+                cam->algsec->models[indx].method = 0;
             }
         }
     }
 
-    return retcd;
+    /* If model fails to load, it sets method to zero*/
+    if (cam->algsec->models[0].method != 0){
+        cam->algsec_inuse = TRUE;
+        return 0;
+    } else {
+        cam->algsec_inuse = FALSE;
+        return -1;
+    }
 
 }
 
@@ -523,8 +527,8 @@ void algsec_deinit(ctx_cam *cam){
 
         if (!cam->algsec->closing) {
             cam->algsec->closing = true;
-            while ((cam->algsec->closing) && (waitcnt <100)){
-                SLEEP(0,1000000)
+            while ((cam->algsec->closing) && (waitcnt <1000)){
+                SLEEP(0,100000)
                 waitcnt++;
             }
         }
@@ -532,7 +536,7 @@ void algsec_deinit(ctx_cam *cam){
             free(cam->algsec->image_norm);
             cam->algsec->image_norm = nullptr;
         }
-        if (waitcnt == 100){
+        if (waitcnt == 1000){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Graceful shutdown of secondary detector thread failed"));
         }

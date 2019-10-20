@@ -399,7 +399,7 @@ static void mlp_init_values(struct ctx_cam *cam) {
     cam->event_user = FALSE;
     cam->event_stop = FALSE;
     cam->passflag = FALSE;  //only purpose to flag first frame
-
+    cam->algsec_inuse = FALSE;
 
     /* Make sure to default the high res to zero */
     cam->imgs.width_high = 0;

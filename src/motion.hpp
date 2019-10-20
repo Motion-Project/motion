@@ -328,6 +328,7 @@ struct ctx_cam {
     struct ctx_movie        *movie_timelapse;
     struct ctx_stream       stream;
 
+    int                     algsec_inuse;        /*Bool for whether we have secondary detection*/
     int                     track_posx;
     int                     track_posy;
     int                     camera_id;
@@ -399,6 +400,7 @@ struct ctx_cam {
     unsigned int            smartmask_lastrate;
     int previous_diffs, previous_location_x, previous_location_y;
     unsigned int            passflag;  //only purpose is to flag first frame vs all others.....
+
 
 };
 

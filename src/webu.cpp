@@ -1186,7 +1186,11 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
 
     } else if ((mystreq(webui->uri_cmd1,"secondary")) ||
         (mystreq(webui->uri_camid,"secondary"))){
-        webui->cnct_type = WEBUI_CNCT_SECONDARY;
+        if (webui->cam->algsec_inuse) {
+            webui->cnct_type = WEBUI_CNCT_SECONDARY;
+        } else {
+            webui->cnct_type = WEBUI_CNCT_UNKNOWN;
+        }
 
     } else if ((mystreq(webui->uri_cmd1,"current")) ||
         (mystreq(webui->uri_camid,"current"))){
