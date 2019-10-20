@@ -397,7 +397,6 @@ static int mlp_init(struct ctx_cam *cam) {
      */
     cam->event_nr = 1;
     cam->prev_event = 0;
-    cam->lightswitch_framecounter = 0;
     cam->detecting_motion = 0;
     cam->event_user = FALSE;
     cam->event_stop = FALSE;
@@ -957,39 +956,12 @@ static void mlp_tuning(struct ctx_cam *cam){
             , &cam->current_image->location);
         }
 
-    /*
-        * Update reference frame.
-        * micro-lighswitch: trying to auto-detect lightswitch events.
-        * frontdoor illumination. Updates are rate-limited to 3 per second at
-        * framerates above 5fps to save CPU resources and to keep sensitivity
-        * at a constant level.
-        */
-
-    if ((cam->current_image->diffs > cam->threshold) &&
-        (cam->current_image->diffs < cam->threshold_maximum) &&
-        (cam->conf.lightswitch_percent >= 1) &&
-        (cam->lightswitch_framecounter < (cam->lastrate * 2)) && /* two seconds window only */
-        /* number of changed pixels almost the same in two consecutive frames and */
-        ((abs(cam->previous_diffs - cam->current_image->diffs)) < (cam->previous_diffs / 15)) &&
-        /* center of motion in about the same place ? */
-        ((abs(cam->current_image->location.x - cam->previous_location_x)) <= (cam->imgs.width / 150)) &&
-        ((abs(cam->current_image->location.y - cam->previous_location_y)) <= (cam->imgs.height / 150))) {
-        if (cam->conf.primary_method == 0){
-            alg_update_reference_frame(cam, RESET_REF_FRAME);
-        } else {
-            alg_new_update_frame(cam);
-        }
-        cam->current_image->diffs = 0;
-        cam->lightswitch_framecounter = 0;
-
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("micro-lightswitch!"));
+    if (cam->conf.primary_method == 0){
+        alg_update_reference_frame(cam, UPDATE_REF_FRAME);
     } else {
-        if (cam->conf.primary_method == 0){
-            alg_update_reference_frame(cam, UPDATE_REF_FRAME);
-        } else {
-            alg_new_update_frame(cam);
-        }
+        alg_new_update_frame(cam);
     }
+
     cam->previous_diffs = cam->current_image->diffs;
     cam->previous_location_x = cam->current_image->location.x;
     cam->previous_location_y = cam->current_image->location.y;
@@ -1061,9 +1033,6 @@ static void mlp_actions(struct ctx_cam *cam){
     if ((cam->current_image->diffs > cam->threshold) &&
         (cam->current_image->diffs < cam->threshold_maximum)) {
         cam->current_image->flags |= IMAGE_MOTION;
-        cam->lightswitch_framecounter++; /* micro lightswitch */
-    } else {
-        cam->lightswitch_framecounter = 0;
     }
 
     if ((cam->conf.emulate_motion || cam->event_user) && (cam->startup_frames == 0)) {
@@ -1189,7 +1158,6 @@ static void mlp_actions(struct ctx_cam *cam){
             cam->event_user = FALSE;
             cam->postcap = 0;
             cam->event_nr++;
-            cam->lightswitch_framecounter = 0;
             cam->text_event_string[0] = '\0';
         }
     }
