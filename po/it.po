@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-18 21:42-0600\n"
+"POT-Creation-Date: 2019-10-20 13:24-0600\n"
 "PO-Revision-Date: 2018-10-13 12:02-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -15,6 +15,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.0.6\n"
+
+#: src/alg.cpp
+msgid "Lightswitch detected"
+msgstr ""
+
+#: src/alg.cpp
+msgid "Switchfilter detected"
+msgstr ""
 
 #: src/conf.cpp
 #, c-format
@@ -80,6 +88,958 @@ msgstr ""
 #: src/conf.cpp
 #, c-format
 msgid "Processing thread 0 - config file %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "daemon"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "setup_mode"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "log_file"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "pid_file"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid log_level %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "log_level"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid log_level %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "log_type"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_changes"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "quiet"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "camera_name"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid camera_id %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, fuzzy
+msgid "camera_id"
+msgstr "Telecamera"
+
+#: src/conf_edit.cpp
+#, fuzzy
+msgid "camera_dir"
+msgstr "Telecamera"
+
+#: src/conf_edit.cpp
+msgid "target_dir"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "videodevice"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "vid_control_params"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid v4l2_palette %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "v4l2_palette"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid input %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "input"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid norm %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "norm"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid frequency %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "frequency"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "tuner_device"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid roundrobin_frames %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "roundrobin_frames"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid roundrobin_skip %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "roundrobin_skip"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "roundrobin_switchfilter"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "netcam_url"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "netcam_highres"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "netcam_userpass"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "mmalcam_name"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "mmalcam_control_params"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid width %d"
+msgstr ""
+
+#: src/conf_edit.cpp src/netcam.cpp
+#, c-format
+msgid "Image width (%d) requested is not modulo 8."
+msgstr ""
+
+#: src/conf_edit.cpp src/netcam.cpp
+#, c-format
+msgid "Adjusting width to next higher multiple of 8 (%d)."
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "width"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid height %d"
+msgstr ""
+
+#: src/conf_edit.cpp src/netcam.cpp
+#, c-format
+msgid "Image height (%d) requested is not modulo 8."
+msgstr ""
+
+#: src/conf_edit.cpp src/netcam.cpp
+#, c-format
+msgid "Adjusting height to next higher multiple of 8 (%d)."
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "height"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid framerate %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, fuzzy
+msgid "framerate"
+msgstr "Telecamera"
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid minimum_frame_time %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "minimum_frame_time"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid rotate %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "rotate"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid flip_axis %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "flip_axis"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid locate_motion_mode %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "locate_motion_mode"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid locate_motion_style %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "locate_motion_style"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_left"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_right"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid text_scale %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_scale"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "text_event"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "emulate_motion"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid primary method %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "primary_method"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid threshold %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "threshold"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid threshold_maximum %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "threshold_maximum"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid threshold_sdevx %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "threshold_sdevx"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid threshold_sdevy %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "threshold_sdevy"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid threshold_sdevxy %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "threshold_sdevxy"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "threshold_tune"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid secondary_interval %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_interval"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid secondary_method %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_method"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_model"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_config"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid secondary_method2 %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_method2"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_model2"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_config2"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid secondary_method3 %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_method3"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_model3"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "secondary_config3"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid noise_level %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "noise_level"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "noise_tune"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "despeckle_filter"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "area_detect"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "mask_file"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "mask_privacy"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid smart_mask_speed %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "smart_mask_speed"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid lightswitch_percent %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "lightswitch_percent"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid lightswitch_frames %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "lightswitch_frames"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid minimum_motion_frames %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "minimum_motion_frames"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid event_gap %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "event_gap"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid pre_capture %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "pre_capture"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid post_capture %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "post_capture"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_event_start"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_event_end"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_picture_save"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_area_detected"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_motion_detected"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_movie_start"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_movie_end"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_camera_lost"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "on_camera_found"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid picture_output %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "picture_output"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "picture_output_motion"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid picture_type %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "picture_type"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid picture_quality %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "picture_quality"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "picture_exif"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "picture_filename"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid snapshot_interval %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "snapshot_interval"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "snapshot_filename"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_output"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_output_motion"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid movie_max_time %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_max_time"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid movie_bps %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_bps"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid movie_quality %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_quality"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_codec"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_passthrough"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_filename"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_extpipe_use"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "movie_extpipe"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid timelapse_interval %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "timelapse_interval"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid timelapse_mode %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "timelapse_mode"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid timelapse_fps %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "timelapse_fps"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid timelapse_codec %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "timelapse_codec"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "timelapse_filename"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "video_pipe"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "video_pipe_motion"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid webcontrol_port %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_port"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_ipv6"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_localhost"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid webcontrol_parms %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_parms"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid webcontrol_interface %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_interface"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid webcontrol_auth_method %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_auth_method"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_authentication"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_tls"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_cert"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_key"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "Error compiling regex in copy_uri"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "Invalid origin for cors_header"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "webcontrol_cors_header"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid stream_port %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_port"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_localhost"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid stream_auth_method %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_auth_method"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_authentication"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_tls"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_cors_header"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid stream_preview_scale %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_preview_scale"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_preview_newline"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid stream_preview_method %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_preview_method"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid stream_quality %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_quality"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_grey"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_motion"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid stream_maxrate %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "stream_maxrate"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid database_type %s"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_type"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_dbname"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_host"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid database_port %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_port"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_user"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_password"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid database_busy_timeout %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "database_busy_timeout"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_log_picture"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_log_snapshot"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_log_movie"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_log_timelapse"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_query_start"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_query_stop"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "sql_query"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid track_type %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "track_type"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "track_auto"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid track_move_wait %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "track_move_wait"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "track_generic_move"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid track_step_angle_x %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "track_step_angle_x"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Invalid track_step_angle_y %d"
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "track_step_angle_y"
+msgstr ""
+
+#: src/conf_edit.cpp
+#, c-format
+msgid "Unknown config option \"%s\""
+msgstr ""
+
+#: src/conf_edit.cpp
+msgid "Program coding error"
 msgstr ""
 
 #: src/draw.cpp
@@ -1033,26 +1993,6 @@ msgstr ""
 
 #: src/netcam.cpp
 msgid "Unknown"
-msgstr ""
-
-#: src/netcam.cpp
-#, c-format
-msgid "Image width (%d) requested is not modulo 8."
-msgstr ""
-
-#: src/netcam.cpp
-#, c-format
-msgid "Adjusting width to next higher multiple of 8 (%d)."
-msgstr ""
-
-#: src/netcam.cpp
-#, c-format
-msgid "Image height (%d) requested is not modulo 8."
-msgstr ""
-
-#: src/netcam.cpp
-#, c-format
-msgid "Adjusting height to next higher multiple of 8 (%d)."
 msgstr ""
 
 #: src/netcam.cpp
