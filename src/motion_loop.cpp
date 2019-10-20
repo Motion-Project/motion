@@ -397,7 +397,7 @@ static int mlp_init(struct ctx_cam *cam) {
      */
     cam->event_nr = 1;
     cam->prev_event = 0;
-    cam->detecting_motion = 0;
+    cam->detecting_motion = FALSE;
     cam->event_user = FALSE;
     cam->event_stop = FALSE;
 
@@ -1026,122 +1026,85 @@ static void mlp_overlay(struct ctx_cam *cam){
 
 }
 
-static void mlp_actions(struct ctx_cam *cam){
+static void mlp_actions_emulate(struct ctx_cam *cam){
 
     int indx;
 
-    if ((cam->current_image->diffs > cam->threshold) &&
-        (cam->current_image->diffs < cam->threshold_maximum)) {
-        cam->current_image->flags |= IMAGE_MOTION;
+    if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) )
+        movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
+
+    cam->detecting_motion = TRUE;
+    if (cam->conf.post_capture > 0) {
+        cam->postcap = cam->conf.post_capture;
     }
 
-    if ((cam->conf.emulate_motion || cam->event_user) && (cam->startup_frames == 0)) {
-        /*  If we were previously detecting motion, started a movie, then got
-         *  no motion then we reset the start movie time so that we do not
-         *  get a pause in the movie.
-        */
-        if ( (cam->detecting_motion == 0) && (cam->movie_norm != NULL) )
-            movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
-        cam->detecting_motion = 1;
-        if (cam->conf.post_capture > 0) {
-            cam->postcap = cam->conf.post_capture;
+    cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
+    /* Mark all images in image_ring to be saved */
+    for (indx = 0; indx < cam->imgs.ring_size; indx++){
+        cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
+    }
+
+    mlp_detected(cam, cam->video_dev, cam->current_image);
+
+}
+
+static void mlp_actions_motion(struct ctx_cam *cam){
+    int indx, frame_count = 0;
+    int pos = cam->imgs.ring_in;
+
+    for (indx = 0; indx < cam->conf.minimum_motion_frames; indx++) {
+        if (cam->imgs.image_ring[pos].flags & IMAGE_MOTION) frame_count++;
+        if (pos == 0){
+            pos = cam->imgs.ring_size-1;
+        } else {
+            pos--;
         }
+    }
+
+    if (frame_count >= cam->conf.minimum_motion_frames) {
 
         cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
-        /* Mark all images in image_ring to be saved */
+
+        if ( (cam->detecting_motion == FALSE) && (cam->movie_norm != NULL) ){
+            movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
+        }
+        cam->detecting_motion = TRUE;
+        cam->postcap = cam->conf.post_capture;
+
         for (indx = 0; indx < cam->imgs.ring_size; indx++){
             cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
         }
 
-        mlp_detected(cam, cam->video_dev, cam->current_image);
-    } else if ((cam->current_image->flags & IMAGE_MOTION) && (cam->startup_frames == 0)) {
-
-        int frame_count = 0;
-        int pos = cam->imgs.ring_in;
-
-        for (indx = 0; indx < cam->conf.minimum_motion_frames; indx++) {
-            if (cam->imgs.image_ring[pos].flags & IMAGE_MOTION)
-                frame_count++;
-
-            if (pos == 0)
-                pos = cam->imgs.ring_size-1;
-            else
-                pos--;
-        }
-
-        if (frame_count >= cam->conf.minimum_motion_frames) {
-
-            cam->current_image->flags |= (IMAGE_TRIGGER | IMAGE_SAVE);
-            /*  If we were previously detecting motion, started a movie, then got
-             *  no motion then we reset the start movie time so that we do not
-             *  get a pause in the movie.
-            */
-            if ( (cam->detecting_motion == 0) && (cam->movie_norm != NULL) )
-                movie_reset_start_time(cam->movie_norm, &cam->current_image->imgts);
-
-            cam->detecting_motion = 1;
-
-            /* Setup the postcap counter */
-            cam->postcap = cam->conf.post_capture;
-            //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "Setup post capture %d", cam->postcap);
-
-            /* Mark all images in image_ring to be saved */
-            for (indx = 0; indx < cam->imgs.ring_size; indx++)
-                cam->imgs.image_ring[indx].flags |= IMAGE_SAVE;
-
-        } else if (cam->postcap > 0) {
-           /* we have motion in this frame, but not enought frames for trigger. Check postcap */
-            cam->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
-            cam->postcap--;
-            //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "post capture %d", cam->postcap);
-        } else {
-            cam->current_image->flags |= IMAGE_PRECAP;
-        }
-
-        /* Always call mlp_detected when we have a motion image */
-        mlp_detected(cam, cam->video_dev, cam->current_image);
     } else if (cam->postcap > 0) {
-        /* No motion, doing postcap */
+        /* we have motion in this frame, but not enough frames for trigger. Check postcap */
         cam->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
         cam->postcap--;
-        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, "post capture %d", cam->postcap);
     } else {
-        /* Done with postcap, so just have the image in the precap buffer */
         cam->current_image->flags |= IMAGE_PRECAP;
-        /* gapless movie feature */
-        if ((cam->conf.event_gap == 0) && (cam->detecting_motion == 1))
-            cam->event_stop = TRUE;
-        cam->detecting_motion = 0;
     }
 
-    /* Update last frame saved time, so we can end event after gap time */
-    if (cam->current_image->flags & IMAGE_SAVE)
-        cam->lasttime = cam->current_image->imgts.tv_sec;
+    mlp_detected(cam, cam->video_dev, cam->current_image);
+}
 
-    if (cam->detecting_motion) algsec_detect(cam);
+static void mlp_actions_event_stop(struct ctx_cam *cam){
 
-    mlp_areadetect(cam);
-
-    /*
-     * Is the movie too long? Then make movies
-     * First test for movie_max_time
-     */
+    /* Note that the event_stop may have already been set at this point.  The
+     * if statements are separate only for coding clarity
+    */
     if ((cam->conf.movie_max_time && cam->event_nr == cam->prev_event) &&
-        (cam->frame_curr_ts.tv_sec - cam->eventtime >= cam->conf.movie_max_time))
+        (cam->frame_curr_ts.tv_sec - cam->eventtime >= cam->conf.movie_max_time)) {
         cam->event_stop = TRUE;
+    }
 
-    /*
-     * Now test for quiet longer than 'gap' OR make movie as decided in
-     * previous statement.
-     */
-    if (((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf.event_gap) && cam->conf.event_gap > 0) ||
-          cam->event_stop) {
+    if ((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf.event_gap) && cam->conf.event_gap > 0) {
+        cam->event_stop = TRUE;
+    }
+
+    if (cam->event_stop) {
         if (cam->event_nr == cam->prev_event || cam->event_stop) {
 
-            /* Flush image buffer */
             mlp_ring_process(cam, IMAGE_BUFFER_FLUSH);
 
-            /* Save preview_shot here at the end of event */
             if (cam->imgs.image_preview.diffs) {
                 event(cam, EVENT_IMAGE_PREVIEW, NULL, NULL, NULL, &cam->current_image->imgts);
                 cam->imgs.image_preview.diffs = 0;
@@ -1149,8 +1112,9 @@ static void mlp_actions(struct ctx_cam *cam){
 
             event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, &cam->current_image->imgts);
 
-            if (cam->conf.track_type)
+            if (cam->conf.track_type) {
                 cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
+            }
 
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("End of event %d"), cam->event_nr);
 
@@ -1161,6 +1125,38 @@ static void mlp_actions(struct ctx_cam *cam){
             cam->text_event_string[0] = '\0';
         }
     }
+
+}
+
+static void mlp_actions(struct ctx_cam *cam){
+
+     if ((cam->current_image->diffs > cam->threshold) &&
+        (cam->current_image->diffs < cam->threshold_maximum)) {
+        cam->current_image->flags |= IMAGE_MOTION;
+    }
+
+    if ((cam->conf.emulate_motion || cam->event_user) && (cam->startup_frames == 0)) {
+        mlp_actions_emulate(cam);
+    } else if ((cam->current_image->flags & IMAGE_MOTION) && (cam->startup_frames == 0)) {
+        mlp_actions_motion(cam);
+    } else if (cam->postcap > 0) {
+        cam->current_image->flags |= (IMAGE_POSTCAP | IMAGE_SAVE);
+        cam->postcap--;
+    } else {
+        cam->current_image->flags |= IMAGE_PRECAP;
+        if ((cam->conf.event_gap == 0) && cam->detecting_motion)  cam->event_stop = TRUE;
+        cam->detecting_motion = FALSE;
+    }
+
+    if (cam->current_image->flags & IMAGE_SAVE){
+        cam->lasttime = cam->current_image->imgts.tv_sec;
+    }
+
+    if (cam->detecting_motion) algsec_detect(cam);
+
+    mlp_areadetect(cam);
+
+    mlp_actions_event_stop(cam);
 
     /* Save/send to movie some images */
     /* But why?  And why just two images from the ring? Didn't other functions flush already?*/
