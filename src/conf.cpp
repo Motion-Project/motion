@@ -955,6 +955,7 @@ static void conf_parm_camera(struct ctx_motapp *motapp, char *str) {
     motapp->cam_list = (struct ctx_cam **)myrealloc(
         motapp->cam_list, sizeof(struct ctx_cam *) * (indx_cams + 2), "config_camera");
     motapp->cam_list[indx_cams] = new ctx_cam;
+    memset(motapp->cam_list[indx_cams],0,sizeof(struct ctx_cam));
     motapp->cam_list[indx_cams + 1] = NULL;
 
     conf_edit_dflt_cam(motapp->cam_list[indx_cams]);
@@ -1274,7 +1275,6 @@ void conf_init_app(struct ctx_motapp *motapp, int argc, char *argv[]){
 
     /* Now we process the motion.conf config file and close it. */
     if (fp) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Processing config file %s"), filename);
 
         conf_edit_set(motapp, -1, (char*)"conf_filename", (char*)filename);
 
@@ -1298,6 +1298,7 @@ void conf_init_cams(struct ctx_motapp *motapp){
 
     motapp->cam_list = (struct ctx_cam**)calloc(sizeof(struct ctx_cam *), 2);
     motapp->cam_list[0] = new ctx_cam;
+    memset(motapp->cam_list[0],0,sizeof(struct ctx_cam));
     motapp->cam_list[1] = NULL;
 
     motapp->cam_list[0]->motapp = motapp;
@@ -1337,7 +1338,7 @@ void conf_deinit(struct ctx_motapp *motapp) {
     indx = 0;
     while (motapp->cam_list[indx] != NULL){
         conf_edit_free(motapp->cam_list[indx]);
-        free(motapp->cam_list[indx]);
+        delete motapp->cam_list[indx];
         indx++;
     }
 

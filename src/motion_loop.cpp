@@ -385,15 +385,19 @@ static void mlp_init_buffers(struct ctx_cam *cam){
 
 static void mlp_init_values(struct ctx_cam *cam) {
 
+    /* cam has been initialized to 0 upon creation
+     * so we only need to initialize non zero values*/
+
     clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
 
-    cam->smartmask_speed = 0;
     cam->event_nr = 1;
-    cam->prev_event = 0;
+
+    /* These are soon to be changed to bools so we leave the init for now*/
     cam->detecting_motion = FALSE;
     cam->event_user = FALSE;
     cam->event_stop = FALSE;
+    cam->passflag = FALSE;  //only purpose to flag first frame
 
     /* Make sure to default the high res to zero */
     cam->imgs.width_high = 0;
@@ -413,18 +417,6 @@ static void mlp_init_values(struct ctx_cam *cam) {
 
     cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;
     cam->get_image = 1;
-
-    cam->olddiffs = 0;
-    cam->smartmask_ratio = 0;
-    cam->smartmask_count = 20;
-
-    cam->previous_diffs = 0;
-    cam->previous_location_x = 0;
-    cam->previous_location_y = 0;
-
-    cam->smartmask_lastrate = 0;
-
-    cam->passflag = 0;  //only purpose to flag first frame
 
     cam->movie_passthrough = cam->conf.movie_passthrough;
     if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&

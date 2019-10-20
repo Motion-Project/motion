@@ -2822,7 +2822,9 @@ void conf_edit_set(struct ctx_motapp *motapp, int threadnbr, char *cmd, char *ar
 
     if (conf_edit_set_depr(motapp, threadnbr, cmd, arg1) == 0) return;
 
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
+    if (threadnbr != -1){
+        MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), cmd);
+    }
 
 }
 
