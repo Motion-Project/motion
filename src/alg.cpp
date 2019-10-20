@@ -10,6 +10,7 @@
 #include "util.hpp"
 #include "alg.hpp"
 #include "draw.hpp"
+#include "logger.hpp"
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))
 #define MAX3(x, y, z) ((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
@@ -645,18 +646,25 @@ static int erode5(unsigned char *img, int width, int height, void *buffer, unsig
     return sum;
 }
 
-/**
- * alg_despeckle
- *      Despeckling routine to remove noisy detections.
- */
-int alg_despeckle(struct ctx_cam *cam, int olddiffs)
-{
-    int diffs = 0;
-    unsigned char *out = cam->imgs.image_motion.image_norm;
-    int width = cam->imgs.width;
-    int height = cam->imgs.height;
-    int done = 0, i, len = strlen(cam->conf.despeckle_filter);
-    unsigned char *common_buffer = cam->imgs.common_buffer;
+void alg_despeckle(struct ctx_cam *cam) {
+    int diffs,width,height,done,i,len;
+    unsigned char *out, *common_buffer;
+
+    if (!cam->conf.despeckle_filter || cam->current_image->diffs <= 0){
+        if (cam->imgs.labelsize_max) cam->imgs.labelsize_max = 0;
+        return;
+    }
+
+    diffs = 0;
+    out = cam->imgs.image_motion.image_norm;
+    width = cam->imgs.width;
+    height = cam->imgs.height;
+    done = 0;
+    len = strlen(cam->conf.despeckle_filter);
+    common_buffer = cam->imgs.common_buffer;
+    cam->current_image->total_labels = 0;
+    cam->imgs.largest_label = 0;
+    cam->olddiffs = cam->current_image->diffs;
 
     for (i = 0; i < len; i++) {
         switch (cam->conf.despeckle_filter[i]) {
@@ -691,26 +699,28 @@ int alg_despeckle(struct ctx_cam *cam, int olddiffs)
     if (done) {
         if (done != 2)
             cam->imgs.labelsize_max = 0; // Disable Labeling
-        return diffs;
+        cam->current_image->diffs = diffs;
+        return;
     } else {
         cam->imgs.labelsize_max = 0; // Disable Labeling
     }
-
-    return olddiffs;
+    cam->current_image->diffs = cam->olddiffs;
+    return;
 }
 
-/**
- * alg_tune_smartmask
- *      Generates actual smartmask. Calculate sensitivity based on motion.
- */
-void alg_tune_smartmask(struct ctx_cam *cam)
-{
+void alg_tune_smartmask(struct ctx_cam *cam) {
     int i, diff;
     int motionsize = cam->imgs.motionsize;
     unsigned char *smartmask = cam->imgs.smartmask;
     unsigned char *smartmask_final = cam->imgs.smartmask_final;
     int *smartmask_buffer = cam->imgs.smartmask_buffer;
     int sensitivity = cam->lastrate * (11 - cam->smartmask_speed);
+
+    if (!cam->smartmask_speed ||
+        (cam->event_nr == cam->prev_event) ||
+        (--cam->smartmask_count)) {
+        return;
+    }
 
     for (i = 0; i < motionsize; i++) {
         /* Decrease smart_mask sensitivity every 5*speed seconds only. */
@@ -737,17 +747,13 @@ void alg_tune_smartmask(struct ctx_cam *cam)
                   cam->imgs.common_buffer, 255);
     diff = erode5(smartmask_final, cam->imgs.width, cam->imgs.height,
                   cam->imgs.common_buffer, 255);
+    cam->smartmask_count = cam->smartmask_ratio;
 }
 
 /* Increment for *smartmask_buffer in alg_diff_standard. */
 #define SMARTMASK_SENSITIVITY_INCR 5
 
-/**
- * alg_diff_standard
- *
- */
-int alg_diff_standard(struct ctx_cam *cam, unsigned char *new_var)
-{
+static int alg_diff_standard(struct ctx_cam *cam, unsigned char *new_var) {
     struct ctx_images *imgs = &cam->imgs;
     int i, diffs = 0;
     int noise = cam->noise;
@@ -798,12 +804,7 @@ int alg_diff_standard(struct ctx_cam *cam, unsigned char *new_var)
     return diffs;
 }
 
-/**
- * alg_diff_fast
- *      Very fast diff function, does not apply mask overlaying.
- */
-static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new_var)
-{
+static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char *new_var) {
     struct ctx_images *imgs = &cam->imgs;
     int i, diffs = 0, step = imgs->motionsize/10000;
     int noise = cam->noise;
@@ -830,66 +831,57 @@ static char alg_diff_fast(struct ctx_cam *cam, int max_n_changes, unsigned char 
     return 0;
 }
 
-/**
- * alg_diff
- *      Uses diff_fast to quickly decide if there is anything worth
- *      sending to diff_standard.
- */
-int alg_diff(struct ctx_cam *cam, unsigned char *new_var)
-{
-    int diffs = 0;
+void alg_diff(struct ctx_cam *cam) {
 
-    if (alg_diff_fast(cam, cam->conf.threshold / 2, new_var))
-        diffs = alg_diff_standard(cam, new_var);
+    if (cam->detecting_motion || cam->motapp->setup_mode){
+        cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
+    } else {
+        if (alg_diff_fast(cam, cam->conf.threshold / 2, cam->imgs.image_vprvcy)){
+            cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
+        } else {
+            cam->current_image->diffs = 0;
+        }
+    }
 
-    return diffs;
 }
 
-/**
- * alg_lightswitch
- *      Detects a sudden massive change in the picture.
- *      It is assumed to be the light being switched on or a camera displacement.
- *      In any way the user doesn't think it is worth capturing.
- */
-int alg_lightswitch(struct ctx_cam *cam, int diffs)
-{
-    struct ctx_images *imgs = &cam->imgs;
+void alg_lightswitch(struct ctx_cam *cam) {
 
-    if (cam->conf.lightswitch_percent < 0)
-        cam->conf.lightswitch_percent = 0;
-    if (cam->conf.lightswitch_percent > 100)
-        cam->conf.lightswitch_percent = 100;
+    if (cam->conf.lightswitch_percent > 1 && !cam->lost_connection) {
+        if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf.lightswitch_percent / 100)) {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
+            if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
+                cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
+            cam->current_image->diffs = 0;
+            alg_update_reference_frame(cam, RESET_REF_FRAME);
+        }
+    }
 
-    /* Is lightswitch percent of the image changed? */
-    if (diffs > (imgs->motionsize * cam->conf.lightswitch_percent / 100))
-        return 1;
-
-    return 0;
 }
 
-/**
- * alg_switchfilter
- *
- */
-int alg_switchfilter(struct ctx_cam *cam, int diffs, unsigned char *newimg)
-{
-    int linediff = diffs / cam->imgs.height;
-    unsigned char *out = cam->imgs.image_motion.image_norm;
+void alg_switchfilter(struct ctx_cam *cam) {
+
+    /* TODO:  This function needs evaluation.
+     * Lots of random numbers and unknown logic
+     */
+    int linediff;
+    unsigned char *out;
     int y, x, line;
     int lines = 0, vertlines = 0;
+
+    if (!cam->conf.roundrobin_switchfilter ||
+        cam->current_image->diffs < cam->threshold) return;
+
+    linediff = cam->current_image->diffs / cam->imgs.height;
+    out = cam->imgs.image_motion.image_norm;
 
     for (y = 0; y < cam->imgs.height; y++) {
         line = 0;
         for (x = 0; x < cam->imgs.width; x++) {
-            if (*(out++))
-                line++;
+            if (*(out++)) line++;
         }
-
-        if (line > cam->imgs.width / 18)
-            vertlines++;
-
-        if (line > linediff * 2)
-            lines++;
+        if (line > cam->imgs.width / 18) vertlines++;
+        if (line > linediff * 2) lines++;
     }
 
     if (vertlines > cam->imgs.height / 10 && lines < vertlines / 3 &&
@@ -897,11 +889,17 @@ int alg_switchfilter(struct ctx_cam *cam, int diffs, unsigned char *newimg)
         if (cam->conf.text_changes) {
             char tmp[80];
             sprintf(tmp, "%d %d", lines, vertlines);
-            draw_text(newimg, cam->imgs.width, cam->imgs.height, cam->imgs.width - 10, 20, tmp, cam->conf.text_scale);
+            draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height
+                , cam->imgs.width - 10, 20, tmp, cam->conf.text_scale);
         }
-        return diffs;
+        return;
     }
-    return 0;
+
+    cam->current_image->diffs = 0;
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Switchfilter detected"));
+
+    return;
+
 }
 
 /**
