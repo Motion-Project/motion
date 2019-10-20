@@ -386,144 +386,6 @@ static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
 
 }
 
-static int v4l2_autobright(struct ctx_cam *cam, struct video_dev *curdev, int method) {
-
-    struct vid_devctrl_ctx    *devitem;
-    struct ctx_usrctrl *usritem;
-    unsigned char           *image;
-    int                      window_high;
-    int                      window_low;
-    int                      target;
-    int indx, device_value, make_change;
-    int pixel_count, avg, step;
-    int parm_hysteresis, parm_damper, parm_max, parm_min;
-    char cid_exp[15],cid_expabs[15],cid_bright[15];
-
-
-    if ((method == 0) || (method > 3)) return 0;
-
-    /* Set the values for the control variables */
-    parm_hysteresis = 20;
-    parm_damper = 20;
-    parm_max = 255;
-    parm_min = 0;
-
-    target = -1;
-
-    sprintf(cid_bright,"ID%08d",V4L2_CID_BRIGHTNESS);
-    sprintf(cid_exp,"ID%08d",V4L2_CID_EXPOSURE);
-    sprintf(cid_expabs,"ID%08d",V4L2_CID_EXPOSURE_ABSOLUTE);
-
-    for (indx = 0;indx < cam->vdev->usrctrl_count; indx++){
-        usritem=&cam->vdev->usrctrl_array[indx];
-        if ((method == 1) &&
-            ((mystrceq(usritem->ctrl_name,"brightness")) ||
-             (mystrceq(usritem->ctrl_name,cid_bright)))) {
-               target = usritem->ctrl_value;
-        } else if ((method == 2) &&
-            ((mystrceq(usritem->ctrl_name,"exposure")) ||
-             (mystrceq(usritem->ctrl_name,cid_exp)))) {
-               target = usritem->ctrl_value;
-        } else if ((method == 3) &&
-            ((mystrceq(usritem->ctrl_name,"exposure (absolute)")) ||
-             (mystrceq(usritem->ctrl_name,cid_expabs)))) {
-               target = usritem->ctrl_value;
-        }
-    }
-
-    device_value = -1;
-    for (indx = 0;indx < curdev->devctrl_count; indx++){
-        devitem=&curdev->devctrl_array[indx];
-        if ((method == 1) &&
-            (devitem->ctrl_id == V4L2_CID_BRIGHTNESS)) {
-            device_value = devitem->ctrl_currval;
-            parm_max = devitem->ctrl_maximum;
-            parm_min = devitem->ctrl_minimum;
-            if (target == -1){
-                target = (int) ((devitem->ctrl_maximum - devitem->ctrl_minimum)/2);
-            }
-        } else if ((method == 2) &&
-            (devitem->ctrl_id == V4L2_CID_EXPOSURE)) {
-            device_value = devitem->ctrl_currval;
-            parm_max = devitem->ctrl_maximum;
-            parm_min = devitem->ctrl_minimum;
-            if (target == -1){
-                target = (int) ((devitem->ctrl_maximum - devitem->ctrl_minimum)/2);
-            }
-        } else if ((method == 3) &&
-            (devitem->ctrl_id == V4L2_CID_EXPOSURE_ABSOLUTE)) {
-            device_value = devitem->ctrl_currval;
-            parm_max = devitem->ctrl_maximum;
-            parm_min = devitem->ctrl_minimum;
-            if (target == -1){
-                target = (int) ((devitem->ctrl_maximum - devitem->ctrl_minimum)/2);
-            }
-        }
-    }
-    /* If we can not find control just give up */
-    if (device_value == -1) return 0;
-
-    avg = 0;
-    pixel_count = 0;
-    image = cam->imgs.image_vprvcy;
-    for (indx = 0; indx < cam->imgs.motionsize; indx += 10) {
-        avg += image[indx];
-        pixel_count++;
-    }
-    /* The compiler seems to mandate this be done in separate steps */
-    /* Must be an integer math thing..must read up on this...*/
-    avg = (avg / pixel_count);
-    avg = avg * (parm_max - parm_min);
-    avg = avg / 255;
-
-    make_change = FALSE;
-    step = 0;
-    window_high = MIN2(target + parm_hysteresis, parm_max);
-    window_low  = MAX2(target - parm_hysteresis, parm_min);
-
-    /* Average is above window - turn down exposure - go for the target. */
-    if (avg > window_high) {
-        step = MIN2((avg - target) / parm_damper + 1, device_value - parm_min);
-        if (device_value > step + 1 - parm_min) {
-            device_value -= step;
-            make_change = TRUE;
-        } else {
-            device_value = parm_min;
-            make_change = TRUE;
-        }
-        //MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Down Avg %d step: %d device:%d",avg,step,device_value);
-    } else if (avg < window_low) {
-        /* Average is below window - turn up exposure - go for the target. */
-        step = MIN2((target - avg) / parm_damper + 1, parm_max - device_value);
-        if (device_value < parm_max - step) {
-            device_value += step;
-            make_change = TRUE;
-        } else {
-            device_value = parm_max;
-            make_change = TRUE;
-        }
-        //MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Up Avg %d step: %d device:%d",avg,step,device_value);
-    }
-
-    if (make_change){
-        for (indx = 0;indx < curdev->devctrl_count; indx++){
-            devitem=&curdev->devctrl_array[indx];
-            if ((method == 1) &&
-                (devitem->ctrl_id == V4L2_CID_BRIGHTNESS)) {
-                devitem->ctrl_newval = device_value;
-            } else if ((method == 2) &&
-                (devitem->ctrl_id == V4L2_CID_EXPOSURE)) {
-                devitem->ctrl_newval = device_value;
-            } else if ((method == 3) &&
-                (devitem->ctrl_id == V4L2_CID_EXPOSURE_ABSOLUTE)) {
-                devitem->ctrl_newval = device_value;
-            }
-        }
-    }
-
-    return 0;
-}
-
 static int v4l2_input_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     /* Set the input number for the device if applicable */
@@ -1181,7 +1043,6 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
         if (retcd == 0) retcd = v4l2_frequency_select(cam, curdev);
         if (retcd == 0) retcd = vid_parms_parse(cam);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
-        if (retcd == 0) retcd = v4l2_autobright(cam, curdev, cam->conf.auto_brightness);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ){
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
@@ -1202,7 +1063,6 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
         /* No round robin - we only adjust picture controls */
         retcd = vid_parms_parse(cam);
         if (retcd == 0) retcd = v4l2_parms_set(cam, curdev);
-        if (retcd == 0) retcd = v4l2_autobright(cam, curdev, cam->conf.auto_brightness);
         if (retcd == 0) retcd = v4l2_ctrls_set(curdev);
         if (retcd < 0 ) {
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO

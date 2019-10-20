@@ -362,23 +362,6 @@ static void conf_edit_frequency(struct ctx_cam *cam, char *arg1, enum PARM_ACT p
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","frequency",_("frequency"));
 }
-static void conf_edit_auto_brightness(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
-    int parm_in;
-    if (pact == PARM_ACT_DFLT){
-        cam->conf.auto_brightness = 0;
-    } else if (pact == PARM_ACT_SET){
-        parm_in = atoi(arg1);
-        if ((parm_in < 0) || (parm_in > 3)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid auto_brightness %d"),parm_in);
-        } else {
-            cam->conf.auto_brightness = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET){
-        conf_edit_get_int(cam->conf.auto_brightness, arg1);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","auto_brightness",_("auto_brightness"));
-}
 static void conf_edit_tuner_device(struct ctx_cam *cam, char *arg1, enum PARM_ACT pact) {
     if (pact == PARM_ACT_DFLT){
         conf_edit_set_string(&cam->conf.tuner_device,(char*)"/dev/tuner0");
@@ -2502,7 +2485,6 @@ static void conf_edit_cat01(struct ctx_cam *cam, const char *cmd, char *arg1, en
     } else if (mystreq(cmd,"input")){                   conf_edit_input(cam, arg1, pact);
     } else if (mystreq(cmd,"norm")){                    conf_edit_norm(cam, arg1, pact);
     } else if (mystreq(cmd,"frequency")){               conf_edit_frequency(cam, arg1, pact);
-    } else if (mystreq(cmd,"auto_brightness")){         conf_edit_auto_brightness(cam, arg1, pact);
     } else if (mystreq(cmd,"tuner_device")){            conf_edit_tuner_device(cam, arg1, pact);
     } else if (mystreq(cmd,"roundrobin_frames")){       conf_edit_roundrobin_frames(cam, arg1, pact);
     } else if (mystreq(cmd,"roundrobin_skip")){         conf_edit_roundrobin_skip(cam, arg1, pact);

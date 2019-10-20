@@ -33,7 +33,6 @@
         int             input;
         int             norm;
         unsigned long   frequency;
-        int             auto_brightness;
         char            *tuner_device;
         int             roundrobin_frames;
         int             roundrobin_skip;
