@@ -324,7 +324,7 @@ static int mlp_check_szimg(struct ctx_cam *cam){
     }
     /* Substream size notification*/
     if ((cam->imgs.width % 16) || (cam->imgs.height % 16)) {
-        MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
             ,_("Substream not available.  Image sizes not modulo 16."));
     }
 
@@ -377,24 +377,18 @@ static void mlp_init_buffers(struct ctx_cam *cam){
         cam->imgs.image_preview.image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
     }
 
+    memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
+    memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
+    memset(cam->imgs.smartmask_buffer, 0, cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
+
 }
 
-/** mlp_init */
-static int mlp_init(struct ctx_cam *cam) {
-
-    mythreadname_set("ml",cam->threadnr,cam->conf.camera_name);
-
-    pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
+static void mlp_init_values(struct ctx_cam *cam) {
 
     clock_gettime(CLOCK_REALTIME, &cam->frame_last_ts);
     clock_gettime(CLOCK_REALTIME, &cam->frame_curr_ts);
 
     cam->smartmask_speed = 0;
-
-    /*
-     * We initialize cam->event_nr to 1 and cam->prev_event to 0 (not really needed) so
-     * that certain code below does not run until motion has been detected the first time
-     */
     cam->event_nr = 1;
     cam->prev_event = 0;
     cam->detecting_motion = FALSE;
@@ -405,19 +399,43 @@ static int mlp_init(struct ctx_cam *cam) {
     cam->imgs.width_high = 0;
     cam->imgs.height_high = 0;
     cam->imgs.size_high = 0;
+
+    cam->noise = cam->conf.noise_level;
+
+    cam->threshold = cam->conf.threshold;
+    if (cam->conf.threshold_maximum > cam->conf.threshold ){
+        cam->threshold_maximum = cam->conf.threshold_maximum;
+    } else {
+        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
+    }
+
+    cam->startup_frames = (cam->conf.framerate * 2) + cam->conf.pre_capture + cam->conf.minimum_motion_frames;
+
+    cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;
+    cam->get_image = 1;
+
+    cam->olddiffs = 0;
+    cam->smartmask_ratio = 0;
+    cam->smartmask_count = 20;
+
+    cam->previous_diffs = 0;
+    cam->previous_location_x = 0;
+    cam->previous_location_y = 0;
+
+    cam->smartmask_lastrate = 0;
+
+    cam->passflag = 0;  //only purpose to flag first frame
+
     cam->movie_passthrough = cam->conf.movie_passthrough;
-
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-        ,_("Camera %d started: motion detection %s"),
-        cam->camera_id, cam->pause ? _("Disabled"):_("Enabled"));
-
-    if (init_camera_type(cam) != 0 ) return -3;
-
     if ((cam->camera_type != CAMERA_TYPE_NETCAM) &&
         (cam->movie_passthrough)) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
         cam->movie_passthrough = FALSE;
     }
+
+}
+
+static int mlp_init_cam_start(struct ctx_cam *cam) {
 
     cam->video_dev = vid_start(cam);
 
@@ -435,12 +453,29 @@ static int mlp_init(struct ctx_cam *cam) {
             ,_("Could not fetch initial image from camera "));
         MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             ,_("Motion only supports width and height modulo 8"));
-        return -3;
+        return -1;
     } else {
         cam->imgs.motionsize = (cam->imgs.width * cam->imgs.height);
         cam->imgs.size_norm  = (cam->imgs.width * cam->imgs.height * 3) / 2;
         cam->imgs.size_high  = (cam->imgs.width_high * cam->imgs.height_high * 3) / 2;
     }
+
+    return 0;
+
+}
+
+/** mlp_init */
+static int mlp_init(struct ctx_cam *cam) {
+
+    mythreadname_set("ml",cam->threadnr,cam->conf.camera_name);
+
+    pthread_setspecific(tls_key_threadnr, (void *)((unsigned long)cam->threadnr));
+
+    if (init_camera_type(cam) != 0 ) return -1;
+
+    mlp_init_values(cam);
+
+    if (mlp_init_cam_start(cam) != 0) return -1;
 
     if (mlp_check_szimg(cam) != 0) return -1;
 
@@ -466,41 +501,13 @@ static int mlp_init(struct ctx_cam *cam) {
 
     pic_init_privacy(cam);
 
-    /* Always initialize smart_mask - someone could turn it on later... */
-    memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
-    memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
-    memset(cam->imgs.smartmask_buffer, 0, cam->imgs.motionsize * sizeof(*cam->imgs.smartmask_buffer));
-
-    cam->noise = cam->conf.noise_level;
-
-    cam->threshold = cam->conf.threshold;
-    if (cam->conf.threshold_maximum > cam->conf.threshold ){
-        cam->threshold_maximum = cam->conf.threshold_maximum;
-    } else {
-        cam->threshold_maximum = (cam->imgs.height * cam->imgs.width * 3) / 2;
-    }
-
     track_init(cam);
-
-    /* 2 sec startup delay so FPS is calculated correct */
-    cam->startup_frames = (cam->conf.framerate * 2) + cam->conf.pre_capture + cam->conf.minimum_motion_frames;
 
     mlp_init_areadetect(cam);
 
-    cam->minimum_frame_time_downcounter = cam->conf.minimum_frame_time;
-    cam->get_image = 1;
-
-    cam->olddiffs = 0;
-    cam->smartmask_ratio = 0;
-    cam->smartmask_count = 20;
-
-    cam->previous_diffs = 0;
-    cam->previous_location_x = 0;
-    cam->previous_location_y = 0;
-
-    cam->smartmask_lastrate = 0;
-
-    cam->passflag = 0;  //only purpose to flag first frame
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        ,_("Camera %d started: motion detection %s"),
+        cam->camera_id, cam->pause ? _("Disabled"):_("Enabled"));
 
     if (cam->conf.emulate_motion) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Emulating motion"));
@@ -519,10 +526,7 @@ void mlp_cleanup(struct ctx_cam *cam) {
 
     algsec_deinit(cam);
 
-    if (cam->video_dev >= 0) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from mlp_cleanup"));
-        vid_close(cam);
-    }
+    if (cam->video_dev >= 0) vid_close(cam);
 
     free(cam->imgs.image_motion.image_norm);
     cam->imgs.image_motion.image_norm = NULL;
@@ -676,10 +680,7 @@ static void mlp_mask_privacy(struct ctx_cam *cam){
 
 static void mlp_areadetect(struct ctx_cam *cam){
     int i, j, z = 0;
-    /*
-     * Simple hack to recognize motion in a specific area
-     * Do we need a new coversion specifier as well??
-     */
+
     if ((cam->conf.area_detect) &&
         (cam->event_nr != cam->areadetect_eventnbr) &&
         (cam->current_image->flags & IMAGE_TRIGGER)) {
@@ -759,17 +760,10 @@ static void mlp_resetimages(struct ctx_cam *cam){
             cam->imgs.ring_out = 0;
     }
 
-    /* cam->current_image points to position in ring where to store image, diffs etc. */
     cam->current_image = &cam->imgs.image_ring[cam->imgs.ring_in];
-
-    /* set diffs to 0 now, will be written after we calculated diffs in new image */
     cam->current_image->diffs = 0;
-
-    /* Set flags to 0 */
     cam->current_image->flags = 0;
     cam->current_image->cent_dist = 0;
-
-    /* Clear location data */
     memset(&cam->current_image->location, 0, sizeof(cam->current_image->location));
     cam->current_image->total_labels = 0;
 
@@ -1313,24 +1307,14 @@ static void mlp_parmsupdate(struct ctx_cam *cam){
     else
         cam->locate_motion_style = LOCATE_BOX;
 
-    /* Sanity check for smart_mask_speed, silly value disables smart mask */
-    if (cam->conf.smart_mask_speed < 0 || cam->conf.smart_mask_speed > 10)
-        cam->conf.smart_mask_speed = 0;
-
-    /* Has someone changed smart_mask_speed or framerate? */
     if (cam->conf.smart_mask_speed != cam->smartmask_speed ||
         cam->smartmask_lastrate != cam->lastrate) {
         if (cam->conf.smart_mask_speed == 0) {
             memset(cam->imgs.smartmask, 0, cam->imgs.motionsize);
             memset(cam->imgs.smartmask_final, 255, cam->imgs.motionsize);
         }
-
         cam->smartmask_lastrate = cam->lastrate;
         cam->smartmask_speed = cam->conf.smart_mask_speed;
-        /*
-            * Decay delay - based on smart_mask_speed (framerate independent)
-            * This is always 5*smartmask_speed seconds
-            */
         cam->smartmask_ratio = 5 * cam->lastrate * (11 - cam->smartmask_speed);
     }
 
