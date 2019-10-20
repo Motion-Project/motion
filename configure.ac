@@ -250,6 +250,45 @@ AS_IF([test "${FFMPEG}" = "no"], [
     export PKG_CONFIG_PATH
   ]
 )
+##############################################################################
+###  OpenCV support
+##############################################################################
+OPENCV_VER="--"
+AC_ARG_WITH([opencv],
+  AS_HELP_STRING([--with-opencv[=DIR]],[Build with OpenCV support]),
+  [OPENCV=$withval],
+  [OPENCV="yes"]
+)
+
+AS_IF([test "${OPENCV}" = "no"], [
+    AC_MSG_CHECKING(for OpenCV support)
+    AC_MSG_RESULT(skipped)
+  ],[
+    TEMP_PATH=$PKG_CONFIG_PATH
+    AC_MSG_CHECKING(OpenCV pkg-config path)
+    AS_IF([test "${OPENCV}" != "yes"], [
+        PKG_CONFIG_PATH=${OPENCV}/lib/pkgconfig:$PKG_CONFIG_PATH
+        OPENCV="yes"
+      ]
+    )
+    export PKG_CONFIG_PATH
+    AC_MSG_RESULT($PKG_CONFIG_PATH)
+
+    AC_MSG_CHECKING(for OpenCV)
+    AS_IF([pkg-config opencv], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkg-config --cflags opencv`
+        TEMP_LIBS="$TEMP_LIBS "`pkg-config --libs opencv`
+        OPENCV_VER=`pkg-config --modversion opencv`
+        AC_DEFINE([HAVE_OPENCV], [1], [Define to 1 if OpenCV is around])
+      ],[
+        OPENCV="no"
+      ]
+    )
+    AC_MSG_RESULT([$OPENCV])
+    PKG_CONFIG_PATH=$TEMP_PATH
+    export PKG_CONFIG_PATH
+  ]
+)
 
 ##############################################################################
 ###  Check for MariaDB - Optional
@@ -421,7 +460,7 @@ AC_ARG_WITH([developer-flags],
     [DEVELOPER_FLAGS=no])
 
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -Werror -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Winline -Wredundant-decls -Wno-long-long -ggdb -g3"
   ]
 )
 
@@ -463,20 +502,22 @@ echo
 echo "LDFLAGS: $LDFLAGS"
 echo
 echo
-echo "OS                  : $host_os"
-echo "pthread_np          : $PTHREAD_NP"
-echo "pthread_setname_np  : $PTHREAD_SETNAME_NP"
-echo "pthread_getname_np  : $PTHREAD_GETNAME_NP"
-echo "XSI error           : $XSI_STRERROR"
-echo "webp support        : $WEBP"
-echo "V4L2 support        : $V4L2"
-echo "MMAL support        : $MMAL"
-echo "FFmpeg support      : $FFMPEG"
-echo "libavformat version : $FFMPEG_VER"
-echo "SQLite3 support     : $SQLITE3"
-echo "MYSQL support       : $MYSQL"
-echo "PostgreSQL support  : $PGSQL"
-echo "MariaDB support     : $MARIADB"
+echo "OS                    : $host_os"
+echo "pthread_np            : $PTHREAD_NP"
+echo "pthread_setname_np    : $PTHREAD_SETNAME_NP"
+echo "pthread_getname_np    : $PTHREAD_GETNAME_NP"
+echo "XSI error             : $XSI_STRERROR"
+echo "webp support          : $WEBP"
+echo "V4L2 support          : $V4L2"
+echo "MMAL support          : $MMAL"
+echo "FFmpeg support        : $FFMPEG"
+echo "  libavformat version : $FFMPEG_VER"
+echo "OpenCV                : $OPENCV"
+echo "  version             : $OPENCV_VER"
+echo "SQLite3 support       : $SQLITE3"
+echo "MYSQL support         : $MYSQL"
+echo "PostgreSQL support    : $PGSQL"
+echo "MariaDB support       : $MARIADB"
 echo
 echo  "Install prefix:       $prefix"
 echo

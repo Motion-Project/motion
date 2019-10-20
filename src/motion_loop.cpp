@@ -32,6 +32,7 @@
 #include "conf.hpp"
 #include "conf_edit.hpp"
 #include "alg.hpp"
+#include "alg_sec.hpp"
 #include "track.hpp"
 #include "event.hpp"
 #include "picture.hpp"
@@ -450,6 +451,8 @@ static int mlp_init(struct ctx_cam *cam) {
 
     webu_stream_init(cam);
 
+    algsec_init(cam);
+
     rotate_init(cam);
 
     draw_init_scale(cam);
@@ -514,6 +517,8 @@ void mlp_cleanup(struct ctx_cam *cam) {
     event(cam, EVENT_ENDMOTION, NULL, NULL, NULL, NULL);
 
     webu_stream_deinit(cam);
+
+    algsec_deinit(cam);
 
     if (cam->video_dev >= 0) {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Calling vid_close() from mlp_cleanup"));
@@ -1192,6 +1197,7 @@ static void mlp_actions(struct ctx_cam *cam){
     if (cam->current_image->flags & IMAGE_SAVE)
         cam->lasttime = cam->current_image->imgts.tv_sec;
 
+    if (cam->detecting_motion) algsec_detect(cam);
 
     mlp_areadetect(cam);
 

@@ -71,6 +71,16 @@
         int             threshold_sdevy;
         int             threshold_sdevxy;
         int             threshold_tune;
+        int             secondary_interval;
+        int             secondary_method;
+        char            *secondary_model;
+        char            *secondary_config;
+        int             secondary_method2;
+        char            *secondary_model2;
+        char            *secondary_config2;
+        int             secondary_method3;
+        char            *secondary_model3;
+        char            *secondary_config3;
         int             noise_level;
         int             noise_tune;
         char      *despeckle_filter;

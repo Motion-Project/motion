@@ -221,6 +221,46 @@ struct ctx_parm config_parms[] = {
     "# Enable tuning of the threshold down if possible.",
     0,PARM_TYP_BOOL, PARM_CAT_02, WEBUI_LEVEL_LIMITED},
     {
+    "secondary_interval",
+    "# The interval between secondary detections.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_method",
+    "# The method to use for secondary detection.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_model",
+    "# Full path name for the secondary model.",
+    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_config",
+    "# Configuration parameters for the secondary model.",
+    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_method2",
+    "# The method to use for secondary detection 2.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_model2",
+    "# Full path name for the secondary model 2.",
+    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_config2",
+    "# Configuration parameters for the secondary model 2.",
+    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_method3",
+    "# The method to use for secondary detection 3.",
+    0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_model3",
+    "# Full path name for the secondary model 3.",
+    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
+    "secondary_config3",
+    "# Configuration parameters for the secondary model 3.",
+    0,PARM_TYP_STRING, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
+    {
     "noise_level",
     "# Noise threshold for the motion detection.",
     0,PARM_TYP_INT, PARM_CAT_02, WEBUI_LEVEL_LIMITED },
@@ -914,7 +954,7 @@ static void conf_parm_camera(struct ctx_motapp *motapp, char *str) {
     /* Index starts at zero (+1) plus another for our new camera(+2)*/
     motapp->cam_list = (struct ctx_cam **)myrealloc(
         motapp->cam_list, sizeof(struct ctx_cam *) * (indx_cams + 2), "config_camera");
-    motapp->cam_list[indx_cams] = (struct ctx_cam *)mymalloc(sizeof(struct ctx_cam));
+    motapp->cam_list[indx_cams] = new ctx_cam;
     motapp->cam_list[indx_cams + 1] = NULL;
 
     conf_edit_dflt_cam(motapp->cam_list[indx_cams]);
@@ -1257,8 +1297,7 @@ void conf_init_cams(struct ctx_motapp *motapp){
     int retcd;
 
     motapp->cam_list = (struct ctx_cam**)calloc(sizeof(struct ctx_cam *), 2);
-    motapp->cam_list[0] = (struct ctx_cam *)mymalloc(sizeof(struct ctx_cam));
-    memset(motapp->cam_list[0], 0, sizeof(struct ctx_cam));
+    motapp->cam_list[0] = new ctx_cam;
     motapp->cam_list[1] = NULL;
 
     motapp->cam_list[0]->motapp = motapp;
