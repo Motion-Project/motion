@@ -238,12 +238,13 @@ struct ctx_images {
     unsigned char *smartmask_final;
     unsigned char *common_buffer;
     unsigned char *image_substream;
-    unsigned char *image_virgin;        /* Last picture frame with no text or locate overlay */
-    unsigned char *image_vprvcy;        /* Virgin image with the privacy mask applied */
-    unsigned char *mask_privacy;        /* Buffer for the privacy mask values */
-    unsigned char *mask_privacy_uv;     /* Buffer for the privacy U&V values */
-    unsigned char *mask_privacy_high;      /* Buffer for the privacy mask values */
-    unsigned char *mask_privacy_high_uv;   /* Buffer for the privacy U&V values */
+    unsigned char *image_virgin;            /* Last picture frame with no text or locate overlay */
+    unsigned char *image_vprvcy;            /* Virgin image with the privacy mask applied */
+    unsigned char *mask_privacy;            /* Buffer for the privacy mask values */
+    unsigned char *mask_privacy_uv;         /* Buffer for the privacy U&V values */
+    unsigned char *mask_privacy_high;       /* Buffer for the privacy mask values */
+    unsigned char *mask_privacy_high_uv;    /* Buffer for the privacy U&V values */
+    unsigned char *image_secondary;         /* Buffer for JPG from alg_sec methods */
 
     int ring_size;
     int ring_in;                /* Index in image ring buffer we last added a image into */
@@ -267,6 +268,7 @@ struct ctx_images {
     int labels_above;
     int labelsize_max;
     int largest_label;
+    int size_secondary;             /* Size of the jpg put into image_secondary*/
 
 };
 
@@ -282,10 +284,11 @@ struct ctx_stream {
     char                    digest_rand[8];
     int                     finish;
 
-    struct ctx_stream_data  norm;    /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  sub;     /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  motion;  /* Copy of the image to use for web stream*/
-    struct ctx_stream_data  source;  /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  norm;       /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  sub;        /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  motion;     /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  source;     /* Copy of the image to use for web stream*/
+    struct ctx_stream_data  secondary;  /* Copy of the image to use for web stream*/
 };
 
 /*

@@ -24,6 +24,7 @@
         WEBUI_CNCT_MOTION      = 3,
         WEBUI_CNCT_SOURCE      = 4,
         WEBUI_CNCT_STATIC      = 5,
+        WEBUI_CNCT_SECONDARY   = 6,
         WEBUI_CNCT_UNKNOWN     = 99
     };
 

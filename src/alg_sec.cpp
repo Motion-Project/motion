@@ -6,14 +6,16 @@
  *    See also the file 'COPYING'.
  *
  */
-#include "motion.hpp"
-#include "util.hpp"
-#include "logger.hpp"
-#include "alg_sec.hpp"
+
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <stdexcept>
+
+#include "motion.hpp"
+#include "util.hpp"
+#include "logger.hpp"
+#include "alg_sec.hpp"
 
 #ifdef HAVE_OPENCV
 
@@ -31,6 +33,8 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     std::vector<double> fltr_weights;
     std::string testdir;
     std::size_t indx0, indx1;
+    std::vector<uchar> buff;//buffer for coding
+    std::vector<int> param(2);
     bool  isdetected;
     char wstr[10];
 
@@ -65,6 +69,13 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
             putText(mat_src, wstr, Point(r.x,r.y), FONT_HERSHEY_SIMPLEX, 1, 255, 2);
         }
         imwrite(testdir  + "/detect_" + algmethod + ".jpg", mat_src);
+        param[0] = cv::IMWRITE_JPEG_QUALITY;
+        param[1] = 75;
+        cv::imencode(".jpg", mat_src, buff, param);
+        pthread_mutex_lock(&cam->algsec->mutex);
+            std::copy(buff.begin(), buff.end(), cam->imgs.image_secondary);
+            cam->imgs.size_secondary = (int)buff.size();
+        pthread_mutex_unlock(&cam->algsec->mutex);
     }
 
 }
@@ -159,6 +170,13 @@ static void algsec_detect_hog(ctx_cam *cam, ctx_algsec_model &algmdl){
             ,algmdl.parms_float[0][4]
             ,algmdl.parms_int[0][5]
             ,false);
+
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+            , _("HOG Parmeters: winstride %d,%d padding %d,%d scale %.2f theshold %d")
+            ,Size(algmdl.parms_int[0][2], algmdl.parms_int[0][2])
+            ,Size(algmdl.parms_int[0][3], algmdl.parms_int[0][3])
+            ,algmdl.parms_float[0][4]
+            ,algmdl.parms_int[0][5]);
 
         algsec_img_show(cam, mat_dst, detect_pos, detect_weights, "hog"
             ,algmdl.parms_float[0][1]);
@@ -418,11 +436,7 @@ static void *algsec_handler(void *arg) {
 
     cam->algsec->closing = false;
 
-    if (cam->conf.framerate < 2){
-        interval = 1000000L / 2;
-    } else {
-        interval = 1000000L / cam->conf.framerate;
-    }
+    interval = 1000000L / cam->conf.framerate;
 
     while (!cam->algsec->closing){
         if (cam->algsec->detecting){
@@ -487,6 +501,8 @@ void algsec_init(ctx_cam *cam){
 
         cam->algsec = new ctx_algsec;
 
+        pthread_mutex_init(&cam->algsec->mutex, NULL);
+
         algsec_load_parms(cam);
 
         retcd = algsec_load_models(cam);
@@ -520,6 +536,8 @@ void algsec_deinit(ctx_cam *cam){
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("Graceful shutdown of secondary detector thread failed"));
         }
+
+        pthread_mutex_destroy(&cam->algsec->mutex);
 
         delete cam->algsec;
 

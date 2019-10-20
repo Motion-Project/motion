@@ -46,6 +46,7 @@ struct ctx_algsec {
     unsigned char           *image_norm;
     int                     width;
     int                     height;
+    pthread_mutex_t         mutex;
     struct ctx_algsec_model models[3];
 };
 

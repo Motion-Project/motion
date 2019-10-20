@@ -373,6 +373,7 @@ static void mlp_init_buffers(struct ctx_cam *cam){
     cam->imgs.labelsize =(int*) mymalloc((cam->imgs.motionsize/2+1) * sizeof(*cam->imgs.labelsize));
     cam->imgs.image_preview.image_norm =(unsigned char*) mymalloc(cam->imgs.size_norm);
     cam->imgs.common_buffer =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
+    cam->imgs.image_secondary =(unsigned char*) mymalloc(3 * cam->imgs.width * cam->imgs.height);
     if (cam->imgs.size_high > 0){
         cam->imgs.image_preview.image_high =(unsigned char*) mymalloc(cam->imgs.size_high);
     }
@@ -398,6 +399,7 @@ static void mlp_init_values(struct ctx_cam *cam) {
     cam->event_user = FALSE;
     cam->event_stop = FALSE;
     cam->passflag = FALSE;  //only purpose to flag first frame
+
 
     /* Make sure to default the high res to zero */
     cam->imgs.width_high = 0;
@@ -567,6 +569,9 @@ void mlp_cleanup(struct ctx_cam *cam) {
 
     free(cam->imgs.common_buffer);
     cam->imgs.common_buffer = NULL;
+
+    free(cam->imgs.image_secondary);
+    cam->imgs.image_secondary = NULL;
 
     free(cam->imgs.image_preview.image_norm);
     cam->imgs.image_preview.image_norm = NULL;
@@ -1084,6 +1089,7 @@ static void mlp_actions_event_stop(struct ctx_cam *cam){
 
     if ((cam->frame_curr_ts.tv_sec - cam->lasttime >= cam->conf.event_gap) && cam->conf.event_gap > 0) {
         cam->event_stop = TRUE;
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("222En222dddd of event %d"), cam->event_nr);
     }
 
     if (cam->event_stop) {

@@ -1184,6 +1184,10 @@ static void webu_answer_strm_type(struct webui_ctx *webui) {
         (mystreq(webui->uri_camid,"source"))){
         webui->cnct_type = WEBUI_CNCT_SOURCE;
 
+    } else if ((mystreq(webui->uri_cmd1,"secondary")) ||
+        (mystreq(webui->uri_camid,"secondary"))){
+        webui->cnct_type = WEBUI_CNCT_SECONDARY;
+
     } else if ((mystreq(webui->uri_cmd1,"current")) ||
         (mystreq(webui->uri_camid,"current"))){
         webui->cnct_type = WEBUI_CNCT_STATIC;
@@ -1460,6 +1464,11 @@ static void webu_mhd_deinit(void *cls
     } else if (webui->cnct_type == WEBUI_CNCT_SOURCE ){
         pthread_mutex_lock(&webui->cam->stream.mutex);
             webui->cam->stream.source.cnct_count--;
+        pthread_mutex_unlock(&webui->cam->stream.mutex);
+
+    } else if (webui->cnct_type == WEBUI_CNCT_SECONDARY ){
+        pthread_mutex_lock(&webui->cam->stream.mutex);
+            webui->cam->stream.secondary.cnct_count--;
         pthread_mutex_unlock(&webui->cam->stream.mutex);
 
     } else if (webui->cnct_type == WEBUI_CNCT_STATIC ){
