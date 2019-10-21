@@ -18,6 +18,7 @@
 #include <regex.h>
 #include <time.h>
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "rotate.hpp"
@@ -1101,13 +1102,13 @@ static void netcam_set_path (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
     memset(&url, 0, sizeof(url));
 
     if (netcam->high_resolution){
-        netcam_url_parse(&url, cam->conf.netcam_highres);
+        netcam_url_parse(&url, cam->conf->netcam_highres);
     } else {
-        netcam_url_parse(&url, cam->conf.netcam_url);
+        netcam_url_parse(&url, cam->conf->netcam_url);
     }
 
-    if (cam->conf.netcam_userpass != NULL) {
-        userpass = mystrdup(cam->conf.netcam_userpass);
+    if (cam->conf->netcam_userpass != NULL) {
+        userpass = mystrdup(cam->conf->netcam_userpass);
     } else if (url.userpass != NULL) {
         userpass = mystrdup(url.userpass);
     }
@@ -1159,8 +1160,8 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
         netcam->imgsize.height = 0;
         snprintf(netcam->cameratype,29, "%s",_("High resolution"));
     } else {
-        netcam->imgsize.width = cam->conf.width;
-        netcam->imgsize.height = cam->conf.height;
+        netcam->imgsize.width = cam->conf->width;
+        netcam->imgsize.height = cam->conf->height;
         snprintf(netcam->cameratype,29, "%s",_("Normal resolution"));
     }
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
@@ -1168,13 +1169,13 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
 
     mycheck_passthrough(cam); /* In case it was turned on via webcontrol */
     netcam->status = NETCAM_NOTCONNECTED;
-    netcam->rtsp_uses_tcp =cam->conf.netcam_use_tcp;
-    netcam->v4l2_palette = cam->conf.v4l2_palette;
-    netcam->framerate = cam->conf.framerate;
-    netcam->src_fps =  cam->conf.framerate; /* Default to conf fps */
+    netcam->rtsp_uses_tcp =cam->conf->netcam_use_tcp;
+    netcam->v4l2_palette = cam->conf->v4l2_palette;
+    netcam->framerate = cam->conf->framerate;
+    netcam->src_fps =  cam->conf->framerate; /* Default to conf fps */
     netcam->motapp = cam->motapp;
-    netcam->conf = &cam->conf;
-    netcam->camera_name = cam->conf.camera_name;
+    netcam->conf = cam->conf;
+    netcam->camera_name = cam->conf->camera_name;
     netcam->img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     netcam->img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
     netcam->img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
@@ -1193,7 +1194,7 @@ static void netcam_set_parms (struct ctx_cam *cam, struct ctx_netcam *netcam ) {
 
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((!netcam->high_resolution) &&
-        (cam->conf.netcam_highres)) {
+        (cam->conf->netcam_highres)) {
         netcam->passthrough = FALSE;
     } else {
         netcam->passthrough = mycheck_passthrough(cam);
@@ -1219,26 +1220,26 @@ static int netcam_set_dimensions (struct ctx_cam *cam) {
     cam->imgs.height_high = 0;
     cam->imgs.size_high   = 0;
 
-    if (cam->conf.width % 8) {
+    if (cam->conf->width % 8) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image width (%d) requested is not modulo 8."), cam->conf.width);
-        cam->conf.width = cam->conf.width - (cam->conf.width % 8) + 8;
+            ,_("Image width (%d) requested is not modulo 8."), cam->conf->width);
+        cam->conf->width = cam->conf->width - (cam->conf->width % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Adjusting width to next higher multiple of 8 (%d)."), cam->conf.width);
+            ,_("Adjusting width to next higher multiple of 8 (%d)."), cam->conf->width);
     }
-    if (cam->conf.height % 8) {
+    if (cam->conf->height % 8) {
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Image height (%d) requested is not modulo 8."), cam->conf.height);
-        cam->conf.height = cam->conf.height - (cam->conf.height % 8) + 8;
+            ,_("Image height (%d) requested is not modulo 8."), cam->conf->height);
+        cam->conf->height = cam->conf->height - (cam->conf->height % 8) + 8;
         MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
-            ,_("Adjusting height to next higher multiple of 8 (%d)."), cam->conf.height);
+            ,_("Adjusting height to next higher multiple of 8 (%d)."), cam->conf->height);
     }
 
     /* Fill in camera details into context structure. */
-    cam->imgs.width = cam->conf.width;
-    cam->imgs.height = cam->conf.height;
-    cam->imgs.size_norm = (cam->conf.width * cam->conf.height * 3) / 2;
-    cam->imgs.motionsize = cam->conf.width * cam->conf.height;
+    cam->imgs.width = cam->conf->width;
+    cam->imgs.height = cam->conf->height;
+    cam->imgs.size_norm = (cam->conf->width * cam->conf->height * 3) / 2;
+    cam->imgs.motionsize = cam->conf->width * cam->conf->height;
 
     return 0;
 }
@@ -1695,7 +1696,7 @@ int netcam_setup(struct ctx_cam *cam){
 
     indx_cam = 1;
     indx_max = 1;
-    if (cam->conf.netcam_highres) indx_max = 2;
+    if (cam->conf->netcam_highres) indx_max = 2;
 
     while (indx_cam <= indx_max){
         if (indx_cam == 1){

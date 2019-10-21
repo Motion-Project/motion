@@ -18,6 +18,7 @@
  *
 */
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "rotate.hpp"
@@ -337,7 +338,7 @@ static int v4l2_parms_set(struct ctx_cam *cam, struct video_dev *curdev){
     struct ctx_usrctrl *usritem;
     int indx_dev, indx_user;
 
-    if (cam->conf.roundrobin_skip < 0) cam->conf.roundrobin_skip = 1;
+    if (cam->conf->roundrobin_skip < 0) cam->conf->roundrobin_skip = 1;
 
     if (curdev->devctrl_count == 0){
         cam->vdev->update_parms = FALSE;
@@ -392,14 +393,14 @@ static int v4l2_input_select(struct ctx_cam *cam, struct video_dev *curdev) {
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     struct v4l2_input    input;
 
-    if ((cam->conf.input == curdev->input) &&
+    if ((cam->conf->input == curdev->input) &&
         (!curdev->starting)) return 0;
 
     memset(&input, 0, sizeof (struct v4l2_input));
-    if (cam->conf.input == DEF_INPUT) {
+    if (cam->conf->input == DEF_INPUT) {
         input.index = 0;
     } else {
-        input.index = cam->conf.input;
+        input.index = cam->conf->input;
     }
 
     if (xioctl(vid_source, VIDIOC_ENUMINPUT, &input) == -1) {
@@ -432,7 +433,7 @@ static int v4l2_input_select(struct ctx_cam *cam, struct video_dev *curdev) {
         return -1;
     }
 
-    curdev->input        = cam->conf.input;
+    curdev->input        = cam->conf->input;
     curdev->device_type  = input.type;
     curdev->device_tuner = input.tuner;
 
@@ -447,10 +448,10 @@ static int v4l2_norm_select(struct ctx_cam *cam, struct video_dev *curdev) {
     v4l2_std_id std_id;
     int norm;
 
-    if ((cam->conf.norm == curdev->norm) &&
+    if ((cam->conf->norm == curdev->norm) &&
         (!curdev->starting)) return 0;
 
-    norm = cam->conf.norm;
+    norm = cam->conf->norm;
     if (xioctl(vid_source, VIDIOC_G_STD, &std_id) == -1) {
         if (curdev->starting){
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
@@ -498,7 +499,7 @@ static int v4l2_norm_select(struct ctx_cam *cam, struct video_dev *curdev) {
         }
     }
 
-    curdev->norm = cam->conf.norm;
+    curdev->norm = cam->conf->norm;
 
     return 0;
 }
@@ -510,7 +511,7 @@ static int v4l2_frequency_select(struct ctx_cam *cam, struct video_dev *curdev) 
     struct v4l2_tuner     tuner;
     struct v4l2_frequency freq;
 
-    if ((curdev->frequency == cam->conf.frequency)&&
+    if ((curdev->frequency == cam->conf->frequency)&&
         (!curdev->starting)) return 0;
 
     /* If this input is attached to a tuner, set the frequency. */
@@ -533,7 +534,7 @@ static int v4l2_frequency_select(struct ctx_cam *cam, struct video_dev *curdev) 
         memset(&freq, 0, sizeof(struct v4l2_frequency));
         freq.tuner = curdev->device_tuner;
         freq.type = V4L2_TUNER_ANALOG_TV;
-        freq.frequency = (cam->conf.frequency / 1000) * 16;
+        freq.frequency = (cam->conf->frequency / 1000) * 16;
 
         if (xioctl(vid_source, VIDIOC_S_FREQUENCY, &freq) == -1) {
             MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO
@@ -546,7 +547,7 @@ static int v4l2_frequency_select(struct ctx_cam *cam, struct video_dev *curdev) 
         }
     }
 
-    curdev->frequency = cam->conf.frequency;
+    curdev->frequency = cam->conf->frequency;
 
     return 0;
 }
@@ -559,8 +560,8 @@ static int v4l2_pixfmt_set(struct ctx_cam *cam, struct video_dev *curdev, u32 pi
     memset(&vid_source->dst_fmt, 0, sizeof(struct v4l2_format));
 
     vid_source->dst_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    vid_source->dst_fmt.fmt.pix.width = cam->conf.width;
-    vid_source->dst_fmt.fmt.pix.height = cam->conf.height;
+    vid_source->dst_fmt.fmt.pix.width = cam->conf->width;
+    vid_source->dst_fmt.fmt.pix.height = cam->conf->height;
     vid_source->dst_fmt.fmt.pix.pixelformat = pixformat;
     vid_source->dst_fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
@@ -570,17 +571,17 @@ static int v4l2_pixfmt_set(struct ctx_cam *cam, struct video_dev *curdev, u32 pi
             ,_("Testing palette %c%c%c%c (%dx%d)")
             ,pixformat >> 0, pixformat >> 8
             ,pixformat >> 16, pixformat >> 24
-            ,cam->conf.width, cam->conf.height);
+            ,cam->conf->width, cam->conf->height);
 
         curdev->width = vid_source->dst_fmt.fmt.pix.width;
         curdev->height = vid_source->dst_fmt.fmt.pix.height;
 
-        if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) cam->conf.width ||
-            vid_source->dst_fmt.fmt.pix.height != (unsigned int) cam->conf.height) {
+        if (vid_source->dst_fmt.fmt.pix.width != (unsigned int) cam->conf->width ||
+            vid_source->dst_fmt.fmt.pix.height != (unsigned int) cam->conf->height) {
 
             MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
                 ,_("Adjusting resolution from %ix%i to %ix%i.")
-                ,cam->conf.width, cam->conf.height
+                ,cam->conf->width, cam->conf->height
                 ,vid_source->dst_fmt.fmt.pix.width
                 ,vid_source->dst_fmt.fmt.pix.height);
 
@@ -591,8 +592,8 @@ static int v4l2_pixfmt_set(struct ctx_cam *cam, struct video_dev *curdev, u32 pi
                     ,_("Specify different palette or width/height in config file."));
                 return -1;
             }
-            cam->conf.width = curdev->width;
-            cam->conf.height = curdev->height;
+            cam->conf->width = curdev->width;
+            cam->conf->height = curdev->height;
         }
 
         if (xioctl(vid_source, VIDIOC_S_FMT, &vid_source->dst_fmt) == -1) {
@@ -608,7 +609,7 @@ static int v4l2_pixfmt_set(struct ctx_cam *cam, struct video_dev *curdev, u32 pi
                 ,_("Using palette %c%c%c%c (%dx%d)")
                 ,pixformat >> 0 , pixformat >> 8
                 ,pixformat >> 16, pixformat >> 24
-                ,cam->conf.width, cam->conf.height);
+                ,cam->conf->width, cam->conf->height);
             MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
                 ,_("Bytesperlines %d sizeimage %d colorspace %08x")
                 ,vid_source->dst_fmt.fmt.pix.bytesperline
@@ -635,30 +636,30 @@ static int v4l2_pixfmt_select(struct ctx_cam *cam, struct video_dev *curdev) {
 
     v4l2_palette_init(palette_array);
 
-    if (cam->conf.width % 8) {
+    if (cam->conf->width % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("config image width (%d) is not modulo 8"), cam->conf.width);
-        cam->conf.width = cam->conf.width - (cam->conf.width % 8) + 8;
+            ,_("config image width (%d) is not modulo 8"), cam->conf->width);
+        cam->conf->width = cam->conf->width - (cam->conf->width % 8) + 8;
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            , _("Adjusting to width (%d)"), cam->conf.width);
+            , _("Adjusting to width (%d)"), cam->conf->width);
     }
 
-    if (cam->conf.height % 8) {
+    if (cam->conf->height % 8) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            ,_("config image height (%d) is not modulo 8"), cam->conf.height);
-        cam->conf.height = cam->conf.height - (cam->conf.height % 8) + 8;
+            ,_("config image height (%d) is not modulo 8"), cam->conf->height);
+        cam->conf->height = cam->conf->height - (cam->conf->height % 8) + 8;
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
-            ,_("Adjusting to height (%d)"), cam->conf.height);
+            ,_("Adjusting to height (%d)"), cam->conf->height);
     }
 
-    if (cam->conf.v4l2_palette == 21 ) {
+    if (cam->conf->v4l2_palette == 21 ) {
         MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("H264(21) format not supported via videodevice.  Changing to default palette"));
-        cam->conf.v4l2_palette = 17;
+        cam->conf->v4l2_palette = 17;
     }
 
     /* First we try setting the config file value */
-    indx_palette = cam->conf.v4l2_palette;
+    indx_palette = cam->conf->v4l2_palette;
     if ((indx_palette >= 0) && (indx_palette <= V4L2_PALETTE_COUNT_MAX)) {
         retcd = v4l2_pixfmt_set(cam, curdev,palette_array[indx_palette].v4l2id);
         if (retcd >= 0){
@@ -668,7 +669,7 @@ static int v4l2_pixfmt_select(struct ctx_cam *cam, struct video_dev *curdev) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("Configuration palette index %d (%s) for %dx%d doesn't work.")
             , indx_palette, palette_array[indx_palette].fourcc
-            ,cam->conf.width, cam->conf.height);
+            ,cam->conf->width, cam->conf->height);
     }
 
     memset(&fmtd, 0, sizeof(struct v4l2_fmtdesc));
@@ -830,8 +831,8 @@ static int v4l2_imgs_set(struct ctx_cam *cam, struct video_dev *curdev) {
     cam->imgs.height = curdev->height;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
     cam->imgs.size_norm = (cam->imgs.motionsize * 3) / 2;
-    cam->conf.width = curdev->width;
-    cam->conf.height = curdev->height;
+    cam->conf->width = curdev->width;
+    cam->conf->height = curdev->height;
 
     return 0;
 
@@ -846,8 +847,8 @@ static int v4l2_capture(struct ctx_cam *cam, struct video_dev *curdev, unsigned 
     src_v4l2_t *vid_source = (src_v4l2_t *) curdev->v4l2_private;
     int shift, width, height, retcd;
 
-    width = cam->conf.width;
-    height = cam->conf.height;
+    width = cam->conf->width;
+    height = cam->conf->height;
 
     /* Block signals during IOCTL */
     sigemptyset(&set);
@@ -1003,11 +1004,11 @@ static int v4l2_device_init(struct ctx_cam *cam, struct video_dev *curdev) {
     pthread_mutex_init(&curdev->mutex, &curdev->attr);
 
     curdev->usage_count = 1;
-    curdev->input = cam->conf.input;
-    curdev->norm = cam->conf.norm;
-    curdev->frequency = cam->conf.frequency;
-    curdev->height = cam->conf.height;
-    curdev->width = cam->conf.width;
+    curdev->input = cam->conf->input;
+    curdev->norm = cam->conf->norm;
+    curdev->frequency = cam->conf->frequency;
+    curdev->height = cam->conf->height;
+    curdev->width = cam->conf->width;
 
     curdev->devctrl_array = NULL;
     curdev->devctrl_count = 0;
@@ -1017,7 +1018,7 @@ static int v4l2_device_init(struct ctx_cam *cam, struct video_dev *curdev) {
 
     curdev->v4l2_private = vid_source;
     vid_source->fd_device = curdev->fd_device;
-    vid_source->fps = cam->conf.framerate;
+    vid_source->fps = cam->conf->framerate;
     vid_source->pframe = -1;
     vid_source->finish = &cam->finish_cam;
     vid_source->buffers = NULL;
@@ -1034,9 +1035,9 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
         return;
     }
 
-    if (cam->conf.input     != curdev->input ||
-        cam->conf.frequency != curdev->frequency ||
-        cam->conf.norm      != curdev->norm) {
+    if (cam->conf->input     != curdev->input ||
+        cam->conf->frequency != curdev->frequency ||
+        cam->conf->norm      != curdev->norm) {
 
         retcd = v4l2_input_select(cam, curdev);
         if (retcd == 0) retcd = v4l2_norm_select(cam, curdev);
@@ -1055,7 +1056,7 @@ static void v4l2_device_select(struct ctx_cam *cam, struct video_dev *curdev, un
         }
 
         /* Skip the requested round robin frame count */
-        for (indx = 1; indx < cam->conf.roundrobin_skip; indx++){
+        for (indx = 1; indx < cam->conf->roundrobin_skip; indx++){
             v4l2_capture(cam, curdev, map);
         }
 
@@ -1080,9 +1081,9 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         ,_("Using videodevice %s and input %d")
-        ,cam->conf.videodevice, cam->conf.input);
+        ,cam->conf->videodevice, cam->conf->input);
 
-    curdev->videodevice = cam->conf.videodevice;
+    curdev->videodevice = cam->conf->videodevice;
     curdev->fd_device = -1;
     fd_device = -1;
 
@@ -1096,7 +1097,7 @@ static int v4l2_device_open(struct ctx_cam *cam, struct video_dev *curdev) {
 
     MOTION_LOG(ALR, TYPE_VIDEO, SHOW_ERRNO
         ,_("Failed to open video device %s")
-        ,cam->conf.videodevice);
+        ,cam->conf->videodevice);
     return -1;
 
 }
@@ -1209,7 +1210,7 @@ static int v4l2_fps_set(struct ctx_cam *cam, struct video_dev *curdev) {
 
     setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     setfps.parm.capture.timeperframe.numerator = 1;
-    setfps.parm.capture.timeperframe.denominator = cam->conf.framerate;
+    setfps.parm.capture.timeperframe.denominator = cam->conf->framerate;
 
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
         , _("Trying to set fps to %d")
@@ -1257,7 +1258,7 @@ int v4l2_start(struct ctx_cam *cam) {
         /* If device is already open and initialized use it*/
         curdev = videodevices;
         while (curdev) {
-            if (mystreq(cam->conf.videodevice, curdev->videodevice)) {
+            if (mystreq(cam->conf->videodevice, curdev->videodevice)) {
                 retcd = v4l2_vdev_init(cam);
                 if (retcd == 0) retcd = vid_parms_parse(cam);
                 if (retcd == 0) retcd = v4l2_imgs_set(cam, curdev);
@@ -1390,7 +1391,7 @@ void v4l2_cleanup(struct ctx_cam *cam) {
 int v4l2_next(struct ctx_cam *cam, struct ctx_image_data *img_data) {
     #ifdef HAVE_V4L2
         int ret = -2;
-        struct ctx_config *conf = &cam->conf;
+        struct ctx_config *conf = cam->conf;
         struct video_dev *dev;
 
         pthread_mutex_lock(&v4l2_mutex);

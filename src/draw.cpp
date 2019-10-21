@@ -11,6 +11,7 @@
 
 #include <ctype.h>
 #include "motion.hpp"
+#include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
 #include "draw.hpp"
@@ -1207,7 +1208,7 @@ void draw_init_scale(struct ctx_cam *cam){
      * scaling does not occupy more than 1/4 of image (10 pixels * 2 lines)
      */
 
-    cam->text_scale = cam->conf.text_scale;
+    cam->text_scale = cam->conf->text_scale;
     if (cam->text_scale <= 0) cam->text_scale = 1;
 
     if ((cam->text_scale * 10 * 2) > (cam->imgs.width / 4)) {
@@ -1225,7 +1226,7 @@ void draw_init_scale(struct ctx_cam *cam){
     }
 
     /* If we had to modify the scale, change conf so we don't get another message */
-    cam->conf.text_scale = cam->text_scale;
+    cam->conf->text_scale = cam->text_scale;
 
 }
 

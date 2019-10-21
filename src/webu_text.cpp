@@ -20,6 +20,7 @@
  */
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "webu.hpp"
@@ -28,7 +29,7 @@
 
 static void webu_text_seteol(struct webui_ctx *webui) {
     /* Set the end of line character for text interface */
-    if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
         snprintf(webui->text_eol, WEBUI_LEN_PARM,"%s","<br>");
     } else {
         snprintf(webui->text_eol, WEBUI_LEN_PARM,"%s","");
@@ -39,7 +40,7 @@ static void webu_text_seteol(struct webui_ctx *webui) {
 static void webu_text_camera_name(struct webui_ctx *webui) {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[webui->thread_nbr]->conf.camera_name == NULL){
+    if (webui->camlst[webui->thread_nbr]->conf->camera_name == NULL){
         snprintf(response,sizeof(response),
             "Camera %s %s\n"
             ,webui->uri_camid,webui->text_eol
@@ -47,7 +48,7 @@ static void webu_text_camera_name(struct webui_ctx *webui) {
     } else {
         snprintf(response,sizeof(response),
             "Camera %s %s\n"
-            ,webui->camlst[webui->thread_nbr]->conf.camera_name
+            ,webui->camlst[webui->thread_nbr]->conf->camera_name
             ,webui->text_eol
         );
     }
@@ -58,7 +59,7 @@ static void webu_text_camera_name(struct webui_ctx *webui) {
 static void webu_text_back(struct webui_ctx *webui, const char *prevuri) {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
         snprintf(response,sizeof(response),
             "<a href=/%s%s><- back</a><br><br>\n"
             ,webui->uri_camid, prevuri
@@ -71,7 +72,7 @@ static void webu_text_back(struct webui_ctx *webui, const char *prevuri) {
 static void webu_text_header(struct webui_ctx *webui) {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
         snprintf(response, sizeof (response),"%s",
             "<!DOCTYPE html>\n"
             "<html>\n"
@@ -85,7 +86,7 @@ static void webu_text_header(struct webui_ctx *webui) {
 static void webu_text_trailer(struct webui_ctx *webui) {
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
         snprintf(response, sizeof (response),"%s",
             "</body>\n"
             "</html>\n");
@@ -148,7 +149,7 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
 
     if (webui->cam_threads > 1){
         for (indx = 1; indx < webui->cam_threads; indx++) {
-            if (webui->camlst[indx]->conf.camera_name == NULL){
+            if (webui->camlst[indx]->conf->camera_name == NULL){
                 snprintf(response, sizeof (response),
                     "<a href='/%d/'>Camera %d</a><br>\n"
                     , webui->camlst[indx]->camera_id
@@ -158,7 +159,7 @@ static void webu_text_page_basic(struct webui_ctx *webui) {
                 snprintf(response, sizeof (response),
                     "<a href='/%d/'>Camera %s</a><br>\n"
                     , webui->camlst[indx]->camera_id
-                    ,webui->camlst[indx]->conf.camera_name);
+                    ,webui->camlst[indx]->conf->camera_name);
                 webu_write(webui, response);
             }
         }
@@ -176,7 +177,7 @@ static void webu_text_list_raw(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
@@ -223,7 +224,7 @@ static void webu_text_list_basic(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
@@ -281,7 +282,7 @@ static void webu_text_set_menu(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
@@ -335,7 +336,7 @@ static void webu_text_set_query(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0)) ||
             (mystrne(webui->uri_parm1, config_parms[indx_parm].parm_name))) {
@@ -416,7 +417,7 @@ static void webu_text_get_menu(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             ((webui->thread_nbr != 0) && (config_parms[indx_parm].main_thread != 0))){
             indx_parm++;
@@ -895,7 +896,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER) ||
             mystrne(webui->uri_parm1,"query") ||
             mystrne(temp_name, config_parms[indx_parm].parm_name)){
@@ -921,7 +922,7 @@ void webu_text_get_query(struct webui_ctx *webui) {
 
         webu_text_camera_name(webui);
 
-        if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+        if (webui->camlst[0]->conf->webcontrol_interface == 2) {
             snprintf(response, sizeof (response),
                 "<ul>\n"
                 "  <li>%s = %s </li>\n"
@@ -1006,8 +1007,8 @@ void webu_text_connection(struct webui_ctx *webui) {
             snprintf(response,sizeof(response)
                 , "Camera %d%s%s %s %s\n"
                 ,webui->camlst[indx]->camera_id
-                ,webui->camlst[indx]->conf.camera_name ? " -- " : ""
-                ,webui->camlst[indx]->conf.camera_name ? webui->camlst[indx]->conf.camera_name : ""
+                ,webui->camlst[indx]->conf->camera_name ? " -- " : ""
+                ,webui->camlst[indx]->conf->camera_name ? webui->camlst[indx]->conf->camera_name : ""
                 ,(!webui->camlst[indx]->running_cam)? "NOT RUNNING" :
                 (webui->camlst[indx]->lost_connection)? "Lost connection": "Connection OK"
                 ,webui->text_eol
@@ -1018,8 +1019,8 @@ void webu_text_connection(struct webui_ctx *webui) {
         snprintf(response,sizeof(response)
             , "Camera %d%s%s %s %s\n"
             ,webui->cam->camera_id
-            ,webui->cam->conf.camera_name ? " -- " : ""
-            ,webui->cam->conf.camera_name ? webui->cam->conf.camera_name : ""
+            ,webui->cam->conf->camera_name ? " -- " : ""
+            ,webui->cam->conf->camera_name ? webui->cam->conf->camera_name : ""
             ,(!webui->cam->running_cam)? "NOT RUNNING" :
              (webui->cam->lost_connection)? "Lost connection": "Connection OK"
             ,webui->text_eol
@@ -1031,7 +1032,7 @@ void webu_text_connection(struct webui_ctx *webui) {
 
 void webu_text_list(struct webui_ctx *webui) {
 
-    if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+    if (webui->camlst[0]->conf->webcontrol_interface == 2) {
         webu_text_list_basic(webui);
     } else {
         webu_text_list_raw(webui);
@@ -1046,7 +1047,7 @@ void webu_text_main(struct webui_ctx *webui) {
     webu_text_seteol(webui);
 
     if (strlen(webui->uri_camid) == 0){
-        if (webui->camlst[0]->conf.webcontrol_interface == 2) {
+        if (webui->camlst[0]->conf->webcontrol_interface == 2) {
             webu_text_page_basic(webui);
         } else {
             webu_text_page_raw(webui);

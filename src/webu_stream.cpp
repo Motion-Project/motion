@@ -14,6 +14,7 @@
  */
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "picture.hpp"
@@ -96,10 +97,10 @@ static void webu_stream_mjpeg_getimg(struct webui_ctx *webui) {
 
     /* Copy jpg from the motion loop thread */
     pthread_mutex_lock(&webui->cam->stream.mutex);
-        if ((!webui->cam->detecting_motion) && (webui->cam->conf.stream_motion)){
+        if ((!webui->cam->detecting_motion) && (webui->cam->conf->stream_motion)){
             webui->stream_fps = 1;
         } else {
-            webui->stream_fps = webui->cam->conf.stream_maxrate;
+            webui->stream_fps = webui->cam->conf->stream_maxrate;
         }
         if (local_stream->jpeg_data == NULL) {
             pthread_mutex_unlock(&webui->cam->stream.mutex);
@@ -294,9 +295,9 @@ int webu_stream_mjpeg(struct webui_ctx *webui) {
         return MHD_NO;
     }
 
-    if (webui->cam->conf.stream_cors_header != NULL){
+    if (webui->cam->conf->stream_cors_header != NULL){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cam->conf.stream_cors_header);
+            , webui->cam->conf->stream_cors_header);
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE
@@ -334,9 +335,9 @@ int webu_stream_static(struct webui_ctx *webui) {
         return MHD_NO;
     }
 
-    if (webui->cam->conf.stream_cors_header != NULL){
+    if (webui->cam->conf->stream_cors_header != NULL){
         MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-            , webui->cam->conf.stream_cors_header);
+            , webui->cam->conf->stream_cors_header);
     }
 
     MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "image/jpeg;");
@@ -431,7 +432,7 @@ static void webu_stream_getimg_norm(struct ctx_cam *cam, struct ctx_image_data *
             ,cam->stream.norm.jpeg_data
             ,cam->imgs.size_norm
             ,img_data->image_norm
-            ,cam->conf.stream_quality
+            ,cam->conf->stream_quality
             ,cam->imgs.width
             ,cam->imgs.height);
     }
@@ -463,7 +464,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
                 ,cam->stream.sub.jpeg_data
                 ,subsize
                 ,cam->imgs.image_substream
-                ,cam->conf.stream_quality
+                ,cam->conf->stream_quality
                 ,(cam->imgs.width / 2)
                 ,(cam->imgs.height / 2));
         } else {
@@ -472,7 +473,7 @@ static void webu_stream_getimg_sub(struct ctx_cam *cam, struct ctx_image_data *i
                 ,cam->stream.sub.jpeg_data
                 ,cam->imgs.size_norm
                 ,img_data->image_norm
-                ,cam->conf.stream_quality
+                ,cam->conf->stream_quality
                 ,cam->imgs.width
                 ,cam->imgs.height);
         }
@@ -491,7 +492,7 @@ static void webu_stream_getimg_motion(struct ctx_cam *cam){
             ,cam->stream.motion.jpeg_data
             ,cam->imgs.size_norm
             ,cam->imgs.image_motion.image_norm
-            ,cam->conf.stream_quality
+            ,cam->conf->stream_quality
             ,cam->imgs.width
             ,cam->imgs.height);
     }
@@ -509,7 +510,7 @@ static void webu_stream_getimg_source(struct ctx_cam *cam){
             ,cam->stream.source.jpeg_data
             ,cam->imgs.size_norm
             ,cam->imgs.image_virgin
-            ,cam->conf.stream_quality
+            ,cam->conf->stream_quality
             ,cam->imgs.width
             ,cam->imgs.height);
     }

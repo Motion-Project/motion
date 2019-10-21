@@ -10,6 +10,7 @@
  */
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "video_common.hpp"
@@ -546,15 +547,15 @@ int vid_parms_parse(struct ctx_cam *cam){
     }
     vdevctx->usrctrl_count = 0;
 
-    if (cam->conf.vid_control_params != NULL){
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cam->conf.vid_control_params);
+    if (cam->conf->vid_control_params != NULL){
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Parsing controls: %s"),cam->conf->vid_control_params);
 
         indx_parm = 0;
         parmdesc_st  = parmval_st  = -1;
         parmdesc_len = parmval_len = 0;
         qte_open = FALSE;
         parmdesc = parmval = NULL;
-        tst = cam->conf.vid_control_params[indx_parm];
+        tst = cam->conf->vid_control_params[indx_parm];
         while (tst != '\0') {
             if (!qte_open) {
                 if (tst == '\"') {                    /* This is the opening quotation */
@@ -569,7 +570,7 @@ int vid_parms_parse(struct ctx_cam *cam){
                     if ((parmval_st >= 0) && (parmval_len > 0)){
                         if (parmval  != NULL) free(parmval);
                         parmval =(char*) mymalloc(parmval_len);
-                        snprintf(parmval, parmval_len,"%s",&cam->conf.vid_control_params[parmval_st]);
+                        snprintf(parmval, parmval_len,"%s",&cam->conf->vid_control_params[parmval_st]);
                     }
                     parmdesc_st  = indx_parm + 1;
                     parmval_st  = -1;
@@ -578,7 +579,7 @@ int vid_parms_parse(struct ctx_cam *cam){
                     if ((parmdesc_st >= 0) && (parmdesc_len > 0)) {
                         if (parmdesc != NULL) free(parmdesc);
                         parmdesc =(char*) mymalloc(parmdesc_len);
-                        snprintf(parmdesc, parmdesc_len,"%s",&cam->conf.vid_control_params[parmdesc_st]);
+                        snprintf(parmdesc, parmdesc_len,"%s",&cam->conf->vid_control_params[parmdesc_st]);
                     }
                     parmdesc_st = -1;
                     parmval_st = indx_parm + 1;
@@ -598,7 +599,7 @@ int vid_parms_parse(struct ctx_cam *cam){
                 if (parmdesc_len > 0 ){
                     if (parmdesc != NULL) free(parmdesc);
                     parmdesc =(char*) mymalloc(parmdesc_len);
-                    snprintf(parmdesc, parmdesc_len,"%s",&cam->conf.vid_control_params[parmdesc_st]);
+                    snprintf(parmdesc, parmdesc_len,"%s",&cam->conf->vid_control_params[parmdesc_st]);
                 }
                 parmdesc_st = -1;
                 parmval_st = indx_parm + 1;
@@ -615,13 +616,13 @@ int vid_parms_parse(struct ctx_cam *cam){
             }
 
             indx_parm++;
-            tst = cam->conf.vid_control_params[indx_parm];
+            tst = cam->conf->vid_control_params[indx_parm];
         }
         /* Process the last parameter */
         if ((parmval_st >= 0) && (parmval_len > 0)){
             if (parmval  != NULL) free(parmval);
             parmval =(char*) mymalloc(parmval_len+1);
-            snprintf(parmval, parmval_len,"%s",&cam->conf.vid_control_params[parmval_st]);
+            snprintf(parmval, parmval_len,"%s",&cam->conf->vid_control_params[parmval_st]);
         }
         if ((parmdesc != NULL) && (parmval  != NULL)){
             vid_parms_add(vdevctx, parmdesc, parmval);

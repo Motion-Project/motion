@@ -34,6 +34,7 @@
  */
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "webu.hpp"
@@ -253,7 +254,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
 
     if (webui->cam_threads == 1){
         /* Only Motion.conf file */
-        if (webui->camlst[0]->conf.camera_name == NULL){
+        if (webui->camlst[0]->conf->camera_name == NULL){
             snprintf(response, sizeof (response),
                 "    <div class=\"dropdown\">\n"
                 "      <button onclick='display_cameras()' id=\"cam_drop\" class=\"dropbtn\">%s</button>\n"
@@ -271,7 +272,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
                 ,_("Cameras")
                 ,webui->camlst[0]->camera_id
-                ,webui->camlst[0]->conf.camera_name);
+                ,webui->camlst[0]->conf->camera_name);
             webu_write(webui, response);
         }
     } else if (webui->cam_threads > 1){
@@ -286,7 +287,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
         webu_write(webui, response);
 
         for (indx=1;indx <= webui->cam_count;indx++){
-            if (webui->camlst[indx]->conf.camera_name == NULL){
+            if (webui->camlst[indx]->conf->camera_name == NULL){
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%05d');\">%s %d</a>\n"
                     ,webui->camlst[indx]->camera_id
@@ -295,7 +296,7 @@ static void webu_html_navbar_camera(struct webui_ctx *webui) {
                 snprintf(response, sizeof (response),
                     "        <a onclick=\"camera_click('cam_%05d');\">%s</a>\n"
                     ,webui->camlst[indx]->camera_id
-                    ,webui->camlst[indx]->conf.camera_name
+                    ,webui->camlst[indx]->conf->camera_name
                 );
             }
             webu_write(webui, response);
@@ -371,15 +372,15 @@ static void webu_html_config_notice(struct webui_ctx *webui) {
      */
     char response[WEBUI_LEN_RESP];
 
-    if (webui->camlst[0]->conf.webcontrol_parms == 0){
+    if (webui->camlst[0]->conf->webcontrol_parms == 0){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 0 (%s)</h4>\n"
             ,_("No Configuration Options"));
-    } else if (webui->camlst[0]->conf.webcontrol_parms == 1){
+    } else if (webui->camlst[0]->conf->webcontrol_parms == 1){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 1 (%s)</h4>\n"
             ,_("Limited Configuration Options"));
-    } else if (webui->camlst[0]->conf.webcontrol_parms == 2){
+    } else if (webui->camlst[0]->conf->webcontrol_parms == 2){
         snprintf(response, sizeof (response),
             "    <h4 id='h4_parm' class='header-center'>webcontrol_parms = 2 (%s)</h4>\n"
             ,_("Advanced Configuration Options"));
@@ -453,7 +454,7 @@ static void webu_html_config(struct webui_ctx *webui) {
     indx_parm = 0;
     while (config_parms[indx_parm].parm_name != NULL){
 
-        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+        if ((config_parms[indx_parm].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx_parm].webui_level == WEBUI_LEVEL_NEVER)){
             indx_parm++;
             continue;
@@ -575,19 +576,19 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
      * There are WAY too many options for this.
     */
     /* If using the main port,we need to insert a thread number into url*/
-    if (strm_info->camlst[0]->conf.stream_port != 0) {
+    if (strm_info->camlst[0]->conf->stream_port != 0) {
         snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"/%d"
             ,strm_info->camlst[indx]->camera_id);
-        strm_info->port = strm_info->camlst[0]->conf.stream_port;
-        if (strm_info->camlst[0]->conf.stream_tls) {
+        strm_info->port = strm_info->camlst[0]->conf->stream_port;
+        if (strm_info->camlst[0]->conf->stream_tls) {
             snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
         } else {
             snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
         }
     } else {
         snprintf(strm_info->lnk_camid,WEBUI_LEN_LNK,"%s","");
-        strm_info->port = strm_info->camlst[indx]->conf.stream_port;
-        if (strm_info->camlst[indx]->conf.stream_tls) {
+        strm_info->port = strm_info->camlst[indx]->conf->stream_port;
+        if (strm_info->camlst[indx]->conf->stream_tls) {
             snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","https");
         } else {
             snprintf(strm_info->proto,WEBUI_LEN_LNK,"%s","http");
@@ -598,15 +599,15 @@ static void webu_html_strminfo(struct strminfo_ctx *strm_info, int indx) {
         snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/motion");
     } else {
         /* Assign what images and links we want */
-        if (strm_info->camlst[indx]->conf.stream_preview_method == 1){
+        if (strm_info->camlst[indx]->conf->stream_preview_method == 1){
             /* Substream for preview */
             snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
             snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/substream");
-        } else if (strm_info->camlst[indx]->conf.stream_preview_method == 2){
+        } else if (strm_info->camlst[indx]->conf->stream_preview_method == 2){
             /* Static image for preview */
             snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/stream");
             snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/current");
-        } else if (strm_info->camlst[indx]->conf.stream_preview_method == 4){
+        } else if (strm_info->camlst[indx]->conf->stream_preview_method == 4){
             /* Source image for preview */
             snprintf(strm_info->lnk_ref,WEBUI_LEN_LNK,"%s","/source");
             snprintf(strm_info->lnk_src,WEBUI_LEN_LNK,"%s","/source");
@@ -640,15 +641,15 @@ static void webu_html_preview(struct webui_ctx *webui) {
     if (webui->cam_threads == 1) indx_st = 0;
 
     for (indx = indx_st; indx<webui->cam_threads; indx++){
-        if (webui->camlst[indx]->conf.stream_preview_newline){
+        if (webui->camlst[indx]->conf->stream_preview_newline){
             snprintf(response, sizeof (response),"%s","      <br>\n");
             webu_write(webui, response);
         }
 
-        if (webui->camlst[indx]->conf.stream_preview_method == 3){
+        if (webui->camlst[indx]->conf->stream_preview_method == 3){
             preview_scale = 45;
         } else {
-            preview_scale = webui->camlst[indx]->conf.stream_preview_scale;
+            preview_scale = webui->camlst[indx]->conf->stream_preview_scale;
         }
 
         strm_info.motion_images = FALSE;
@@ -663,7 +664,7 @@ static void webu_html_preview(struct webui_ctx *webui) {
             ,preview_scale);
         webu_write(webui, response);
 
-        if (webui->camlst[indx]->conf.stream_preview_method == 3){
+        if (webui->camlst[indx]->conf->stream_preview_method == 3){
             strm_info.motion_images = TRUE;
             webu_html_strminfo(&strm_info,indx);
             snprintf(response, sizeof (response),
@@ -725,7 +726,7 @@ static void webu_html_script_action(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),
         "        var url = \"%s://%s:%d/\"; \n"
         ,webui->hostproto, webui->hostname
-        ,webui->camlst[0]->conf.webcontrol_port);
+        ,webui->camlst[0]->conf->webcontrol_port);
     webu_write(webui, response);
 
     snprintf(response, sizeof (response),
@@ -770,7 +771,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             ,webui->camlst[indx]->camera_id);
         webu_write(webui, response);
 
-        if (webui->camlst[indx]->conf.stream_preview_method == 3){
+        if (webui->camlst[indx]->conf->stream_preview_method == 3){
             preview_scale = 45;
         } else {
             preview_scale = 95;
@@ -787,7 +788,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             ,strm_info.lnk_camid, strm_info.lnk_src, preview_scale);
         webu_write(webui, response);
 
-        if (webui->camlst[indx]->conf.stream_preview_method == 3){
+        if (webui->camlst[indx]->conf->stream_preview_method == 3){
             strm_info.motion_images = TRUE;
             webu_html_strminfo(&strm_info, indx);
             snprintf(response, sizeof (response),
@@ -800,7 +801,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             webu_write(webui, response);
         }
 
-        if (webui->camlst[indx]->conf.camera_name == NULL){
+        if (webui->camlst[indx]->conf->camera_name == NULL){
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s %d (%s)</h3>\"\n"
@@ -814,7 +815,7 @@ static void webu_html_script_camera_thread(struct webui_ctx *webui) {
             snprintf(response, sizeof (response),
                 "        header=\"<h3 id='h3_cam' data-cam='\" + camid + \"' "
                 " class='header-center' >%s (%s)</h3>\"\n"
-                , webui->camlst[indx]->conf.camera_name
+                , webui->camlst[indx]->conf->camera_name
                 ,(!webui->camlst[indx]->running_cam)? _("Not running") :
                  (webui->camlst[indx]->lost_connection)? _("Lost connection"):
                  (webui->camlst[indx]->pause)? _("Paused"):_("Active")
@@ -850,15 +851,15 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
             webu_write(webui, response);
         }
 
-        if (webui->camlst[indx]->conf.stream_preview_newline){
+        if (webui->camlst[indx]->conf->stream_preview_newline){
             snprintf(response, sizeof (response),"%s","        preview = preview + \"      <br>\";\n");
             webu_write(webui, response);
         }
 
-        if (webui->camlst[indx]->conf.stream_preview_method == 3){
+        if (webui->camlst[indx]->conf->stream_preview_method == 3){
             preview_scale = 45;
         } else {
-            preview_scale = webui->camlst[indx]->conf.stream_preview_scale;
+            preview_scale = webui->camlst[indx]->conf->stream_preview_scale;
         }
 
         strm_info.motion_images = FALSE;
@@ -873,7 +874,7 @@ static void webu_html_script_camera_all(struct webui_ctx *webui) {
             ,preview_scale);
         webu_write(webui, response);
 
-        if (webui->camlst[indx]->conf.stream_preview_method == 3){
+        if (webui->camlst[indx]->conf->stream_preview_method == 3){
             strm_info.motion_images = TRUE;
             webu_html_strminfo(&strm_info, indx);
             snprintf(response, sizeof (response),
@@ -997,7 +998,7 @@ static void webu_html_script_cfgclk(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),
         "      var url = \"%s://%s:%d/\"; \n"
         ,webui->hostproto, webui->hostname
-        ,webui->camlst[0]->conf.webcontrol_port);
+        ,webui->camlst[0]->conf->webcontrol_port);
     webu_write(webui, response);
 
     snprintf(response, sizeof (response),
@@ -1098,7 +1099,7 @@ static void webu_html_script_trkclk(struct webui_ctx *webui) {
     snprintf(response, sizeof (response),
         "      var url = \"%s://%s:%d/\"; \n"
         ,webui->hostproto, webui->hostname
-        ,webui->camlst[0]->conf.webcontrol_port);
+        ,webui->camlst[0]->conf->webcontrol_port);
     webu_write(webui, response);
 
     snprintf(response, sizeof (response),

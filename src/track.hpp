@@ -29,6 +29,7 @@ struct ctx_track {
 enum track_action { TRACK_CENTER, TRACK_MOVE };
 
 void track_init(struct ctx_cam *cam);
+void track_deinit(struct ctx_cam *cam);
 
 int track_center(struct ctx_cam *cam, int dev,
         int manual, int xoff, int yoff);

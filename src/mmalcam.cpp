@@ -12,6 +12,7 @@
  */
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "rotate.hpp"
@@ -288,7 +289,7 @@ int mmalcam_start(struct ctx_cam *cam) {
 
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             ,_("MMAL Camera thread starting... for camera (%s) of %d x %d at %d fps")
-            ,cam->conf.mmalcam_name, cam->conf.width, cam->conf.height, cam->conf.framerate);
+            ,cam->conf->mmalcam_name, cam->conf->width, cam->conf->height, cam->conf->framerate);
 
         mmalcam->camera_parameters = (RASPICAM_CAMERA_PARAMETERS*)malloc(sizeof(RASPICAM_CAMERA_PARAMETERS));
         if (mmalcam->camera_parameters == NULL) {
@@ -297,12 +298,12 @@ int mmalcam_start(struct ctx_cam *cam) {
         }
 
         raspicamcontrol_set_defaults(mmalcam->camera_parameters);
-        mmalcam->width = cam->conf.width;
-        mmalcam->height = cam->conf.height;
-        mmalcam->framerate = cam->conf.framerate;
+        mmalcam->width = cam->conf->width;
+        mmalcam->height = cam->conf->height;
+        mmalcam->framerate = cam->conf->framerate;
 
-        if (cam->conf.mmalcam_control_params) {
-            parse_camera_control_params(cam->conf.mmalcam_control_params, mmalcam->camera_parameters);
+        if (cam->conf->mmalcam_control_params) {
+            parse_camera_control_params(cam->conf->mmalcam_control_params, mmalcam->camera_parameters);
         }
 
         cam->imgs.width = mmalcam->width;
@@ -310,7 +311,7 @@ int mmalcam_start(struct ctx_cam *cam) {
         cam->imgs.size_norm = (mmalcam->width * mmalcam->height * 3) / 2;
         cam->imgs.motionsize = mmalcam->width * mmalcam->height;
 
-        int retval = create_camera_component(mmalcam, cam->conf.mmalcam_name);
+        int retval = create_camera_component(mmalcam, cam->conf->mmalcam_name);
 
         if (retval == 0) {
             retval = create_camera_buffer_structures(mmalcam);

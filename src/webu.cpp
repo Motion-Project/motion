@@ -38,13 +38,16 @@
 #include <sys/socket.h>
 
 #include "motion.hpp"
+#include "conf.hpp"
+#include "conf_edit.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "webu.hpp"
 #include "webu_html.hpp"
 #include "webu_text.hpp"
 #include "webu_stream.hpp"
-#include "conf_edit.hpp"
+#include "track.hpp"
+
 
 
 /* Context to pass the parms to functions to start mhd */
@@ -180,13 +183,13 @@ static void webu_badreq(struct webui_ctx *webui){
      * bad request response either with or without the HTML tags.
      */
     if (webui->cam != NULL) {
-        if (webui->cam->conf.webcontrol_interface == 1){
+        if (webui->cam->conf->webcontrol_interface == 1){
             webu_text_badreq(webui);
         } else {
             webu_html_badreq(webui);
         }
     } else if (webui->camlst != NULL) {
-        if (webui->camlst[0]->conf.webcontrol_interface == 1){
+        if (webui->camlst[0]->conf->webcontrol_interface == 1){
             webu_text_badreq(webui);
         } else {
             webu_html_badreq(webui);
@@ -685,7 +688,7 @@ static int webu_process_config_set(struct webui_ctx *webui) {
     indx=0;
     while (config_parms[indx].parm_name != NULL) {
         if (((webui->thread_nbr != 0) && (config_parms[indx].main_thread)) ||
-            (config_parms[indx].webui_level > webui->camlst[0]->conf.webcontrol_parms) ||
+            (config_parms[indx].webui_level > webui->camlst[0]->conf->webcontrol_parms) ||
             (config_parms[indx].webui_level == WEBUI_LEVEL_NEVER) ) {
             indx++;
             continue;
@@ -816,9 +819,9 @@ static void webu_clientip(struct webui_ctx *webui) {
 
     is_ipv6 = FALSE;
     if (webui->cam != NULL ){
-        if (webui->cam->conf.webcontrol_ipv6) is_ipv6 = TRUE;
+        if (webui->cam->conf->webcontrol_ipv6) is_ipv6 = TRUE;
     } else {
-        if (webui->camlst[0]->conf.webcontrol_ipv6) is_ipv6 = TRUE;
+        if (webui->camlst[0]->conf->webcontrol_ipv6) is_ipv6 = TRUE;
     }
 
     con_info = MHD_get_connection_info(webui->connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
@@ -886,13 +889,13 @@ static void webu_hostname(struct webui_ctx *webui, int ctrl) {
      * streams.
      */
     if (ctrl){
-        if (webui->cam->conf.webcontrol_tls){
+        if (webui->cam->conf->webcontrol_tls){
             snprintf(webui->hostproto,6,"%s","https");
         } else {
             snprintf(webui->hostproto,6,"%s","http");
         }
     } else {
-        if (webui->cam->conf.stream_tls){
+        if (webui->cam->conf->stream_tls){
             snprintf(webui->hostproto,6,"%s","https");
         } else {
             snprintf(webui->hostproto,6,"%s","http");
@@ -1025,35 +1028,35 @@ static void webu_mhd_auth_parse(struct webui_ctx *webui, int ctrl){
     webui->auth_pass = NULL;
 
     if (ctrl){
-        auth_len = strlen(webui->cam->conf.webcontrol_authentication);
-        col_pos =(char*) strstr(webui->cam->conf.webcontrol_authentication,":");
+        auth_len = strlen(webui->cam->conf->webcontrol_authentication);
+        col_pos =(char*) strstr(webui->cam->conf->webcontrol_authentication,":");
         if (col_pos == NULL){
             webui->auth_user = (char*)mymalloc(auth_len+1);
             webui->auth_pass = (char*)mymalloc(2);
             snprintf(webui->auth_user, auth_len + 1, "%s"
-                ,webui->cam->conf.webcontrol_authentication);
+                ,webui->cam->conf->webcontrol_authentication);
             snprintf(webui->auth_pass, 2, "%s","");
         } else {
             webui->auth_user = (char*)mymalloc(auth_len - strlen(col_pos) + 1);
             webui->auth_pass =(char*)mymalloc(strlen(col_pos));
             snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
-                ,webui->cam->conf.webcontrol_authentication);
+                ,webui->cam->conf->webcontrol_authentication);
             snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
         }
     } else {
-        auth_len = strlen(webui->cam->conf.stream_authentication);
-        col_pos =(char*) strstr(webui->cam->conf.stream_authentication,":");
+        auth_len = strlen(webui->cam->conf->stream_authentication);
+        col_pos =(char*) strstr(webui->cam->conf->stream_authentication,":");
         if (col_pos == NULL){
             webui->auth_user = (char*)mymalloc(auth_len+1);
             webui->auth_pass = (char*)mymalloc(2);
             snprintf(webui->auth_user, auth_len + 1, "%s"
-                ,webui->cam->conf.stream_authentication);
+                ,webui->cam->conf->stream_authentication);
             snprintf(webui->auth_pass, 2, "%s","");
         } else {
             webui->auth_user = (char*)mymalloc(auth_len - strlen(col_pos) + 1);
             webui->auth_pass = (char*)mymalloc(strlen(col_pos));
             snprintf(webui->auth_user, auth_len - strlen(col_pos) + 1, "%s"
-                ,webui->cam->conf.stream_authentication);
+                ,webui->cam->conf->stream_authentication);
             snprintf(webui->auth_pass, strlen(col_pos), "%s", col_pos + 1);
         }
     }
@@ -1078,9 +1081,9 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
     if (ctrl){
         /* Authentication for the webcontrol*/
-        if (webui->cam->conf.webcontrol_authentication == NULL){
+        if (webui->cam->conf->webcontrol_authentication == NULL){
             webui->authenticated = TRUE;
-            if (webui->cam->conf.webcontrol_auth_method != 0){
+            if (webui->cam->conf->webcontrol_auth_method != 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
             }
             return MHD_YES;
@@ -1088,17 +1091,17 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
         if (webui->auth_user == NULL) webu_mhd_auth_parse(webui, ctrl);
 
-        if (webui->cam->conf.webcontrol_auth_method == 1){
+        if (webui->cam->conf->webcontrol_auth_method == 1){
             return webu_mhd_basic(webui);
-        } else if (webui->cam->conf.webcontrol_auth_method == 2){
+        } else if (webui->cam->conf->webcontrol_auth_method == 2){
             return webu_mhd_digest(webui);
         }
 
     } else {
         /* Authentication for the streams */
-        if (webui->cam->conf.stream_authentication == NULL){
+        if (webui->cam->conf->stream_authentication == NULL){
             webui->authenticated = TRUE;
-            if (webui->cam->conf.stream_auth_method != 0){
+            if (webui->cam->conf->stream_auth_method != 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No stream user:pass provided"));
             }
             return MHD_YES;
@@ -1106,9 +1109,9 @@ static int webu_mhd_auth(struct webui_ctx *webui, int ctrl){
 
         if (webui->auth_user == NULL) webu_mhd_auth_parse(webui, ctrl);
 
-        if (webui->cam->conf.stream_auth_method == 1) {
+        if (webui->cam->conf->stream_auth_method == 1) {
             return webu_mhd_basic(webui);
-        } else if (webui->cam->conf.stream_auth_method == 2){
+        } else if (webui->cam->conf->stream_auth_method == 2){
             return webu_mhd_digest(webui);
         }
     }
@@ -1140,19 +1143,19 @@ static int webu_mhd_send(struct webui_ctx *webui, int ctrl) {
 
     if (webui->cam != NULL){
         if (ctrl){
-            if (webui->cam->conf.webcontrol_cors_header != NULL){
+            if (webui->cam->conf->webcontrol_cors_header != NULL){
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                    , webui->cam->conf.webcontrol_cors_header);
+                    , webui->cam->conf->webcontrol_cors_header);
             }
-            if (webui->cam->conf.webcontrol_interface == 1){
+            if (webui->cam->conf->webcontrol_interface == 1){
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/plain;");
             } else {
                 MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
             }
         } else {
-            if (webui->cam->conf.stream_cors_header != NULL){
+            if (webui->cam->conf->stream_cors_header != NULL){
                 MHD_add_response_header (response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
-                    , webui->cam->conf.stream_cors_header);
+                    , webui->cam->conf->stream_cors_header);
             }
             MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
         }
@@ -1263,8 +1266,8 @@ static int webu_answer_ctrl(void *cls
         if (!webui->authenticated) return retcd;
     }
 
-    if ((webui->camlst[0]->conf.webcontrol_interface == 1) ||
-        (webui->camlst[0]->conf.webcontrol_interface == 2)) {
+    if ((webui->camlst[0]->conf->webcontrol_interface == 1) ||
+        (webui->camlst[0]->conf->webcontrol_interface == 2)) {
         webu_text_main(webui);
     } else {
         webu_html_main(webui);
@@ -1497,12 +1500,12 @@ static void webu_mhd_features_basic(struct mhdstart_ctx *mhdst){
         if (retcd == MHD_YES){
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
-            if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_auth_method == 1)){
+            if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_auth_method == 1)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
-            } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_auth_method == 1)){
+                mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_auth_method = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_auth_method == 1)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.stream_auth_method = 0;
+                mhdst->camlst[mhdst->indxthrd]->conf->stream_auth_method = 0;
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             }
@@ -1520,12 +1523,12 @@ static void webu_mhd_features_digest(struct mhdstart_ctx *mhdst){
         if (retcd == MHD_YES){
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
-            if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)){
+            if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_auth_method == 2)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_auth_method = 0;
-            } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_auth_method == 2)){
+                mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_auth_method = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_auth_method == 2)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.stream_auth_method = 0;
+                mhdst->camlst[mhdst->indxthrd]->conf->stream_auth_method = 0;
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             }
@@ -1561,12 +1564,12 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
      * support the ssl/tls request.
      */
     #if MHD_VERSION < 0x00094400
-        if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_tls)){
+        if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls)){
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
-            mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_tls = 0;
-        } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_tls)) {
+            mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls = 0;
+        } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls)) {
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
-            mhdst->camlst[mhdst->indxthrd]->conf.stream_tls = 0;
+            mhdst->camlst[mhdst->indxthrd]->conf->stream_tls = 0;
         }
     #else
         int retcd;
@@ -1574,12 +1577,12 @@ static void webu_mhd_features_tls(struct mhdstart_ctx *mhdst){
         if (retcd == MHD_YES){
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
-            if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_tls)){
+            if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_tls = 0;
-            } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_tls)){
+                mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls = 0;
+            } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls)){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.stream_tls = 0;
+                mhdst->camlst[mhdst->indxthrd]->conf->stream_tls = 0;
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
             }
@@ -1648,29 +1651,29 @@ static void webu_mhd_checktls(struct mhdstart_ctx *mhdst){
      * then we revise the configuration request for ssl/tls
      */
     if (mhdst->ctrl){
-        if (mhdst->camlst[0]->conf.webcontrol_tls){
-            if ((mhdst->camlst[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
+        if (mhdst->camlst[0]->conf->webcontrol_tls){
+            if ((mhdst->camlst[0]->conf->webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
-                mhdst->camlst[0]->conf.webcontrol_tls = 0;
+                mhdst->camlst[0]->conf->webcontrol_tls = 0;
             }
-            if ((mhdst->camlst[0]->conf.webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
+            if ((mhdst->camlst[0]->conf->webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
-                mhdst->camlst[0]->conf.webcontrol_tls = 0;
+                mhdst->camlst[0]->conf->webcontrol_tls = 0;
             }
         }
     } else {
-        if (mhdst->camlst[mhdst->indxthrd]->conf.stream_tls){
-            if ((mhdst->camlst[0]->conf.webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
+        if (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls){
+            if ((mhdst->camlst[0]->conf->webcontrol_cert == NULL) || (mhdst->tls_cert == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.stream_tls = 0;
+                mhdst->camlst[mhdst->indxthrd]->conf->stream_tls = 0;
             }
-            if ((mhdst->camlst[0]->conf.webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
+            if ((mhdst->camlst[0]->conf->webcontrol_key == NULL) || (mhdst->tls_key == NULL)) {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
-                mhdst->camlst[mhdst->indxthrd]->conf.stream_tls = 0;
+                mhdst->camlst[mhdst->indxthrd]->conf->stream_tls = 0;
             }
         }
     }
@@ -1713,11 +1716,11 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
      * motion configuation option of localhost only.
      */
 
-    if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_localhost)){
+    if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_localhost)){
         if (mhdst->ipv6){
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
-            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_port);
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_port);
             mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1728,7 +1731,7 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
         } else {
             memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
             mhdst->lpbk_ipv4.sin_family = AF_INET;
-            mhdst->lpbk_ipv4.sin_port = htons(mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_port);
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_port);
             mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1736,11 +1739,11 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = (struct sockaddr *)(&mhdst->lpbk_ipv4);
             mhdst->mhd_opt_nbr++;
         }
-    } else if((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_localhost)){
+    } else if((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_localhost)){
         if (mhdst->ipv6){
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
-            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->camlst[mhdst->indxthrd]->conf.stream_port);
+            mhdst->lpbk_ipv6.sin6_port = htons(mhdst->camlst[mhdst->indxthrd]->conf->stream_port);
             mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1750,7 +1753,7 @@ static void webu_mhd_opts_localhost(struct mhdstart_ctx *mhdst){
         } else {
             memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
             mhdst->lpbk_ipv4.sin_family = AF_INET;
-            mhdst->lpbk_ipv4.sin_port = htons(mhdst->camlst[mhdst->indxthrd]->conf.stream_port);
+            mhdst->lpbk_ipv4.sin_port = htons(mhdst->camlst[mhdst->indxthrd]->conf->stream_port);
             mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -1767,8 +1770,8 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
      * function is when we are wanting to use digest authentication
      */
 
-    if (((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_auth_method == 2)) ||
-        ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_auth_method == 2))) {
+    if (((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_auth_method == 2)) ||
+        ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_auth_method == 2))) {
 
         if (mhdst->ctrl) {
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
@@ -1797,8 +1800,8 @@ static void webu_mhd_opts_digest(struct mhdstart_ctx *mhdst){
 
 static void webu_mhd_opts_tls(struct mhdstart_ctx *mhdst){
     /* Set the MHD options needed when we want TLS connections */
-    if ((( mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_tls)) ||
-        ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_tls))) {
+    if ((( mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls)) ||
+        ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls))) {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_HTTPS_MEM_CERT;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = 0;
@@ -1844,9 +1847,9 @@ static void webu_mhd_flags(struct mhdstart_ctx *mhdst){
 
     if (mhdst->ipv6) mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_DUAL_STACK;
 
-    if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.webcontrol_tls)){
+    if ((mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->webcontrol_tls)){
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
-    } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf.stream_tls)){
+    } else if ((!mhdst->ctrl) && (mhdst->camlst[mhdst->indxthrd]->conf->stream_tls)){
         mhdst->mhd_flags = mhdst->mhd_flags | MHD_USE_SSL;
     }
 
@@ -1862,19 +1865,19 @@ static void webu_strm_ntc(struct ctx_cam **camlst, int indxthrd){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Started camera %d stream on port/camera_id %d/%d")
                     ,camlst[indx]->camera_id
-                    ,camlst[indxthrd]->conf.stream_port
+                    ,camlst[indxthrd]->conf->stream_port
                     ,camlst[indx]->camera_id);
                 indx++;
             }
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("Started camera %d stream on port %d")
-                ,camlst[indxthrd]->camera_id,camlst[indxthrd]->conf.stream_port);
+                ,camlst[indxthrd]->camera_id,camlst[indxthrd]->conf->stream_port);
         }
     } else {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Started camera %d stream on port %d")
-            ,camlst[indxthrd]->camera_id,camlst[indxthrd]->conf.stream_port);
+            ,camlst[indxthrd]->camera_id,camlst[indxthrd]->conf->stream_port);
     }
 }
 
@@ -1890,12 +1893,12 @@ static void webu_init_ctrl(struct ctx_motapp *motapp){
     struct mhdstart_ctx mhdst;
     unsigned int randnbr;
 
-    mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf.webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf.webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(motapp->cam_list[0]->conf->webcontrol_key);
     mhdst.ctrl = TRUE;
     mhdst.indxthrd = 0;
     mhdst.camlst = motapp->cam_list;
-    mhdst.ipv6 = motapp->cam_list[0]->conf.webcontrol_ipv6;
+    mhdst.ipv6 = motapp->cam_list[0]->conf->webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
@@ -1904,10 +1907,10 @@ static void webu_init_ctrl(struct ctx_motapp *motapp){
         ,sizeof(motapp->webcontrol_digest_rand),"%d",randnbr);
 
     motapp->webcontrol_daemon = NULL;
-    if (motapp->cam_list[0]->conf.webcontrol_port != 0 ){
+    if (motapp->cam_list[0]->conf->webcontrol_port != 0 ){
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             ,_("Starting webcontrol on port %d")
-            ,motapp->cam_list[0]->conf.webcontrol_port);
+            ,motapp->cam_list[0]->conf->webcontrol_port);
 
         mhdst.mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
         webu_mhd_features(&mhdst);
@@ -1915,7 +1918,7 @@ static void webu_init_ctrl(struct ctx_motapp *motapp){
         webu_mhd_flags(&mhdst);
 
         motapp->webcontrol_daemon = MHD_start_daemon (mhdst.mhd_flags
-            ,motapp->cam_list[0]->conf.webcontrol_port
+            ,motapp->cam_list[0]->conf->webcontrol_port
             ,NULL, NULL
             ,&webu_answer_ctrl, motapp->cam_list
             ,MHD_OPTION_ARRAY, mhdst.mhd_ops
@@ -1926,7 +1929,7 @@ static void webu_init_ctrl(struct ctx_motapp *motapp){
         } else {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("Started webcontrol on port %d")
-                ,motapp->cam_list[0]->conf.webcontrol_port);
+                ,motapp->cam_list[0]->conf->webcontrol_port);
         }
     }
 
@@ -1945,12 +1948,12 @@ static void webu_init_strm(struct ctx_cam **cam_list){
     struct mhdstart_ctx mhdst;
     unsigned int randnbr;
 
-    mhdst.tls_cert = webu_mhd_loadfile(cam_list[0]->conf.webcontrol_cert);
-    mhdst.tls_key  = webu_mhd_loadfile(cam_list[0]->conf.webcontrol_key);
+    mhdst.tls_cert = webu_mhd_loadfile(cam_list[0]->conf->webcontrol_cert);
+    mhdst.tls_key  = webu_mhd_loadfile(cam_list[0]->conf->webcontrol_key);
     mhdst.ctrl = FALSE;
     mhdst.indxthrd = 0;
     mhdst.camlst = cam_list;
-    mhdst.ipv6 = cam_list[0]->conf.webcontrol_ipv6;
+    mhdst.ipv6 = cam_list[0]->conf->webcontrol_ipv6;
 
     /* Set the rand number for webcontrol digest if needed */
     srand(time(NULL));
@@ -1960,16 +1963,16 @@ static void webu_init_strm(struct ctx_cam **cam_list){
 
     while (cam_list[mhdst.indxthrd] != NULL){
         cam_list[mhdst.indxthrd]->stream.daemon = NULL;
-        if (cam_list[mhdst.indxthrd]->conf.stream_port != 0 ){
+        if (cam_list[mhdst.indxthrd]->conf->stream_port != 0 ){
             if (mhdst.indxthrd == 0){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Starting all camera streams on port %d")
-                    ,cam_list[mhdst.indxthrd]->conf.stream_port);
+                    ,cam_list[mhdst.indxthrd]->conf->stream_port);
             } else {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Starting camera %d stream on port %d")
                     ,cam_list[mhdst.indxthrd]->camera_id
-                    ,cam_list[mhdst.indxthrd]->conf.stream_port);
+                    ,cam_list[mhdst.indxthrd]->conf->stream_port);
             }
 
             mhdst.mhd_ops=(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
@@ -1978,14 +1981,14 @@ static void webu_init_strm(struct ctx_cam **cam_list){
             webu_mhd_flags(&mhdst);
             if (mhdst.indxthrd == 0){
                 cam_list[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
-                    ,cam_list[mhdst.indxthrd]->conf.stream_port
+                    ,cam_list[mhdst.indxthrd]->conf->stream_port
                     ,NULL, NULL
                     ,&webu_answer_strm, cam_list
                     ,MHD_OPTION_ARRAY, mhdst.mhd_ops
                     ,MHD_OPTION_END);
             } else {
                 cam_list[mhdst.indxthrd]->stream.daemon = MHD_start_daemon (mhdst.mhd_flags
-                    ,cam_list[mhdst.indxthrd]->conf.stream_port
+                    ,cam_list[mhdst.indxthrd]->conf->stream_port
                     ,NULL, NULL
                     ,&webu_answer_strm, cam_list[mhdst.indxthrd]
                     ,MHD_OPTION_ARRAY, mhdst.mhd_ops
@@ -2015,18 +2018,18 @@ static void webu_init_ports(struct ctx_cam **cam_list){
      */
     int indx, indx2;
 
-    if (cam_list[0]->conf.webcontrol_port != 0){
+    if (cam_list[0]->conf->webcontrol_port != 0){
         indx = 0;
         while (cam_list[indx] != NULL){
-            if ((cam_list[0]->conf.webcontrol_port == cam_list[indx]->conf.webcontrol_port) && (indx > 0)){
-                cam_list[indx]->conf.webcontrol_port = 0;
+            if ((cam_list[0]->conf->webcontrol_port == cam_list[indx]->conf->webcontrol_port) && (indx > 0)){
+                cam_list[indx]->conf->webcontrol_port = 0;
             }
 
-            if (cam_list[0]->conf.webcontrol_port == cam_list[indx]->conf.stream_port){
+            if (cam_list[0]->conf->webcontrol_port == cam_list[indx]->conf->stream_port){
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     ,_("Duplicate port requested %d")
-                    ,cam_list[indx]->conf.stream_port);
-                cam_list[indx]->conf.stream_port = 0;
+                    ,cam_list[indx]->conf->stream_port);
+                cam_list[indx]->conf->stream_port = 0;
             }
 
             indx++;
@@ -2036,16 +2039,16 @@ static void webu_init_ports(struct ctx_cam **cam_list){
     /* Now check on the stream ports */
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->conf.stream_port != 0){
+        if (cam_list[indx]->conf->stream_port != 0){
             indx2 = indx + 1;
             while (cam_list[indx2] != NULL){
-                if (cam_list[indx]->conf.stream_port == cam_list[indx2]->conf.stream_port){
+                if (cam_list[indx]->conf->stream_port == cam_list[indx2]->conf->stream_port){
                     if (indx != 0){
                         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                             ,_("Duplicate port requested %d")
-                            ,cam_list[indx2]->conf.stream_port);
+                            ,cam_list[indx2]->conf->stream_port);
                     }
-                    cam_list[indx2]->conf.stream_port = 0;
+                    cam_list[indx2]->conf->stream_port = 0;
                 }
                 indx2++;
             }

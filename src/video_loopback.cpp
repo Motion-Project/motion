@@ -9,6 +9,7 @@
  *
  */
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "video_loopback.hpp"
@@ -226,12 +227,12 @@ void vlp_init(struct ctx_cam *cam){
 
     #if defined(HAVE_V4L2) && !defined(BSD)
         /* open video loopback devices if enabled */
-        if (cam->conf.video_pipe) {
+        if (cam->conf->video_pipe) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Opening video loopback device for normal pictures"));
 
             /* vid_startpipe should get the output dimensions */
-            cam->pipe = vlp_startpipe(cam->conf.video_pipe, cam->imgs.width, cam->imgs.height);
+            cam->pipe = vlp_startpipe(cam->conf->video_pipe, cam->imgs.width, cam->imgs.height);
 
             if (cam->pipe < 0) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
@@ -242,12 +243,12 @@ void vlp_init(struct ctx_cam *cam){
             cam->pipe = -1;
         }
 
-        if (cam->conf.video_pipe_motion) {
+        if (cam->conf->video_pipe_motion) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("Opening video loopback device for motion pictures"));
 
             /* vid_startpipe should get the output dimensions */
-            cam->mpipe = vlp_startpipe(cam->conf.video_pipe_motion, cam->imgs.width, cam->imgs.height);
+            cam->mpipe = vlp_startpipe(cam->conf->video_pipe_motion, cam->imgs.width, cam->imgs.height);
 
             if (cam->mpipe < 0) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO

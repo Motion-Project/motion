@@ -58,9 +58,8 @@ struct ctx_mmalcam;
 struct ctx_movie;
 struct ctx_netcam;
 struct ctx_algsec;
-
-#include "conf.hpp"
-#include "track.hpp"
+struct ctx_config;
+struct ctx_track;
 
 #define DEF_PALETTE             17
 
@@ -312,15 +311,15 @@ struct ctx_cam {
     int                     log_level;
     unsigned int            log_type;
 
-    struct ctx_config       conf;
-    struct ctx_track        track;
+    struct ctx_config       *conf;
+    struct ctx_track        *track;
     struct ctx_images       imgs;
     struct ctx_mmalcam      *mmalcam;
     struct ctx_netcam       *netcam;            /* this structure contains the context for normal RTSP connection */
     struct ctx_netcam       *netcam_high;       /* this structure contains the context for high resolution RTSP connection */
     struct ctx_vdev         *vdev;              /* Structure for v4l2 device information */
     struct ctx_image_data   *current_image;     /* Pointer to a structure where the image, diffs etc is stored */
-    ctx_algsec              *algsec;
+    struct ctx_algsec       *algsec;
     struct ctx_rotate       *rotate_data;       /* rotation data is thread-specific */
     struct ctx_dbse         *dbse;
     struct ctx_movie        *movie_norm;

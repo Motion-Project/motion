@@ -7,6 +7,7 @@
  *
  */
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "motion_loop.hpp"
@@ -29,7 +30,7 @@ static void motion_signal_process(struct ctx_motapp *motapp){
         if (motapp->cam_list != NULL) {
             indx = 0;
             while (motapp->cam_list[indx] != NULL) {
-                if (motapp->cam_list[indx]->conf.snapshot_interval){
+                if (motapp->cam_list[indx]->conf->snapshot_interval){
                     motapp->cam_list[indx]->snapshot = TRUE;
                 }
                 indx++;
@@ -270,8 +271,8 @@ static void motion_camera_ids(struct ctx_cam **cam_list){
     /* Set defaults */
     indx = 0;
     while (cam_list[indx] != NULL){
-        if (cam_list[indx]->conf.camera_id > 0){
-            cam_list[indx]->camera_id = cam_list[indx]->conf.camera_id;
+        if (cam_list[indx]->conf->camera_id > 0){
+            cam_list[indx]->camera_id = cam_list[indx]->conf->camera_id;
         } else {
             cam_list[indx]->camera_id = indx;
         }

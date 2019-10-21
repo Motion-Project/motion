@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
 #include "alg_sec.hpp"
@@ -38,7 +39,7 @@ static void algsec_img_show(ctx_cam *cam, Mat &mat_src
     bool  isdetected;
     char wstr[10];
 
-    testdir = cam->conf.target_dir;
+    testdir = cam->conf->target_dir;
 
     imwrite(testdir  + "/src_" + algmethod + ".jpg", mat_src);
 
@@ -345,7 +346,7 @@ static void algsec_load_parms(ctx_cam *cam){
     cam->algsec->height = cam->imgs.height;
     cam->algsec->width = cam->imgs.width;
 
-    cam->algsec->frame_interval = cam->conf.secondary_interval;
+    cam->algsec->frame_interval = cam->conf->secondary_interval;
     cam->algsec->frame_cnt = cam->algsec->frame_interval;
     cam->algsec->image_norm = (unsigned char*)mymalloc(cam->imgs.size_norm);
     cam->algsec->frame_missed = 0;
@@ -357,37 +358,37 @@ static void algsec_load_parms(ctx_cam *cam){
     */
     cam->algsec->closing = true;
 
-    if (cam->conf.secondary_method != 0) {
-        cam->algsec->models[0].method = cam->conf.secondary_method;
-        if (cam->conf.secondary_model != NULL){
-            cam->algsec->models[0].modelfile = cam->conf.secondary_model;
+    if (cam->conf->secondary_method != 0) {
+        cam->algsec->models[0].method = cam->conf->secondary_method;
+        if (cam->conf->secondary_model != NULL){
+            cam->algsec->models[0].modelfile = cam->conf->secondary_model;
         }
-        if (cam->conf.secondary_config != NULL) {
-            cam->algsec->models[0].config = cam->conf.secondary_config;
+        if (cam->conf->secondary_config != NULL) {
+            cam->algsec->models[0].config = cam->conf->secondary_config;
         }
     } else {
         cam->algsec->models[0].method = 0;
     }
 
-    if (cam->conf.secondary_method2 != 0) {
-        cam->algsec->models[1].method = cam->conf.secondary_method2;
-        if (cam->conf.secondary_model2 != NULL){
-            cam->algsec->models[1].modelfile = cam->conf.secondary_model2;
+    if (cam->conf->secondary_method2 != 0) {
+        cam->algsec->models[1].method = cam->conf->secondary_method2;
+        if (cam->conf->secondary_model2 != NULL){
+            cam->algsec->models[1].modelfile = cam->conf->secondary_model2;
         }
-        if (cam->conf.secondary_config2 != NULL) {
-            cam->algsec->models[1].config = cam->conf.secondary_config2;
+        if (cam->conf->secondary_config2 != NULL) {
+            cam->algsec->models[1].config = cam->conf->secondary_config2;
         }
     } else {
         cam->algsec->models[1].method = 0;
     }
 
-    if (cam->conf.secondary_method3 != 0) {
-        cam->algsec->models[2].method = cam->conf.secondary_method3;
-        if (cam->conf.secondary_model3 != NULL) {
-            cam->algsec->models[2].modelfile = cam->conf.secondary_model3;
+    if (cam->conf->secondary_method3 != 0) {
+        cam->algsec->models[2].method = cam->conf->secondary_method3;
+        if (cam->conf->secondary_model3 != NULL) {
+            cam->algsec->models[2].modelfile = cam->conf->secondary_model3;
         }
-        if (cam->conf.secondary_config3 != NULL) {
-            cam->algsec->models[2].config = cam->conf.secondary_config3;
+        if (cam->conf->secondary_config3 != NULL) {
+            cam->algsec->models[2].config = cam->conf->secondary_config3;
         }
     } else {
         cam->algsec->models[2].method = 0;
@@ -440,7 +441,7 @@ static void *algsec_handler(void *arg) {
 
     cam->algsec->closing = false;
 
-    interval = 1000000L / cam->conf.framerate;
+    interval = 1000000L / cam->conf->framerate;
 
     while (!cam->algsec->closing){
         if (cam->algsec->detecting){
@@ -501,7 +502,7 @@ void algsec_init(ctx_cam *cam){
     #ifdef HAVE_OPENCV
         int retcd;
 
-        mythreadname_set("cv",cam->threadnr,cam->conf.camera_name);
+        mythreadname_set("cv",cam->threadnr,cam->conf->camera_name);
 
         cam->algsec = new ctx_algsec;
 
@@ -513,7 +514,7 @@ void algsec_init(ctx_cam *cam){
 
         if (retcd == 0) algsec_start_handler(cam);
 
-        mythreadname_set("ml",cam->threadnr,cam->conf.camera_name);
+        mythreadname_set("ml",cam->threadnr,cam->conf->camera_name);
     #else
         (void)cam;
     #endif

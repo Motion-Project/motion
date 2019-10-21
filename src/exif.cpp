@@ -21,6 +21,7 @@
 
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
 #include "exif.hpp"
@@ -205,9 +206,9 @@ unsigned exif_prepare(unsigned char **exif,
     // use as much of it as is indicated by conf->frame_limit
     subtime = NULL;
 
-    if (cam->conf.picture_exif) {
+    if (cam->conf->picture_exif) {
         description =(char*) malloc(PATH_MAX);
-        mystrftime(cam, description, PATH_MAX-1, cam->conf.picture_exif, &ts1, NULL, 0);
+        mystrftime(cam, description, PATH_MAX-1, cam->conf->picture_exif, &ts1, NULL, 0);
     } else {
         description = NULL;
     }

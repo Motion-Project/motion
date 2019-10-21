@@ -10,6 +10,7 @@
  *
  */
 #include "motion.hpp"
+#include "conf.hpp"
 #include "util.hpp"
 #include "logger.hpp"
 #include <stdarg.h>

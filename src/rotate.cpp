@@ -30,6 +30,7 @@
  *      v1 (28-Aug-2004) - initial version
  */
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "rotate.hpp"
@@ -203,19 +204,19 @@ void rotate_init(struct ctx_cam *cam){
      * Assign the value in conf.rotate to rotate_data->degrees. This way,
      * we have a value that is safe from changes caused by motion-control.
      */
-    if ((cam->conf.rotate % 90) > 0) {
+    if ((cam->conf->rotate % 90) > 0) {
         MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Config option \"rotate\" not a multiple of 90: %d")
-            ,cam->conf.rotate);
-        cam->conf.rotate = 0;     /* Disable rotation. */
+            ,cam->conf->rotate);
+        cam->conf->rotate = 0;     /* Disable rotation. */
         cam->rotate_data->degrees = 0; /* Force return below. */
     } else {
-        cam->rotate_data->degrees = cam->conf.rotate % 360; /* Range: 0..359 */
+        cam->rotate_data->degrees = cam->conf->rotate % 360; /* Range: 0..359 */
     }
 
-    if (cam->conf.flip_axis[0]=='h') {
+    if (cam->conf->flip_axis[0]=='h') {
         cam->rotate_data->axis = FLIP_TYPE_HORIZONTAL;
-    } else if (cam->conf.flip_axis[0]=='v') {
+    } else if (cam->conf->flip_axis[0]=='v') {
         cam->rotate_data->axis = FLIP_TYPE_VERTICAL;
     } else {
         cam->rotate_data->axis = FLIP_TYPE_NONE;

@@ -22,6 +22,7 @@
 */
 
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "netcam.hpp"
@@ -1500,7 +1501,7 @@ static const char* movie_init_codec(struct ctx_cam *cam){
     const char *codec;
     int codenbr;
 
-    codec = cam->conf.movie_codec;
+    codec = cam->conf->movie_codec;
     if (mystreq(codec, "ogg")) {
         MOTION_LOG(WRN, TYPE_ENCODER, NO_ERRNO, "The ogg container is no longer supported.  Changing to mpeg4");
         codec = "mpeg4";
@@ -1530,8 +1531,8 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
     const char *codec;
     int retcd;
 
-    if (cam->conf.movie_filename){
-        moviepath = cam->conf.movie_filename;
+    if (cam->conf->movie_filename){
+        moviepath = cam->conf->movie_filename;
     } else {
         moviepath = "%v-%Y%m%d%H%M%S";
     }
@@ -1542,10 +1543,10 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
     cam->movie_norm =(struct ctx_movie*) mymalloc(sizeof(struct ctx_movie));
     if (mystreq(codec, "test")) {
         retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s_%s"
-            , cam->conf.target_dir, codec, stamp);
+            , cam->conf->target_dir, codec, stamp);
     } else {
         retcd = snprintf(cam->movie_norm->filename, PATH_MAX, "%s/%s"
-            , cam->conf.target_dir, stamp);
+            , cam->conf->target_dir, stamp);
     }
     if ((retcd < 0) || (retcd >= PATH_MAX)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -1565,15 +1566,15 @@ int movie_init_norm(struct ctx_cam *cam, struct timespec *ts1){
     }
     cam->movie_norm->tlapse = TIMELAPSE_NONE;
     cam->movie_norm->fps = cam->lastrate;
-    cam->movie_norm->bps = cam->conf.movie_bps;
-    cam->movie_norm->quality = cam->conf.movie_quality;
+    cam->movie_norm->bps = cam->conf->movie_bps;
+    cam->movie_norm->quality = cam->conf->movie_quality;
     cam->movie_norm->start_time.tv_sec = ts1->tv_sec;
     cam->movie_norm->start_time.tv_nsec = ts1->tv_nsec;
     cam->movie_norm->last_pts = -1;
     cam->movie_norm->base_pts = 0;
     cam->movie_norm->gop_cnt = 0;
     cam->movie_norm->codec_name = codec;
-    if (mystreq(cam->conf.movie_codec, "test")) {
+    if (mystreq(cam->conf->movie_codec, "test")) {
         cam->movie_norm->test_mode = TRUE;
     } else {
         cam->movie_norm->test_mode = FALSE;
@@ -1593,8 +1594,8 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
     const char *codec;
     int retcd;
 
-    if (cam->conf.movie_filename){
-        moviepath = cam->conf.movie_filename;
+    if (cam->conf->movie_filename){
+        moviepath = cam->conf->movie_filename;
     } else {
         moviepath = "%v-%Y%m%d%H%M%S";
     }
@@ -1605,10 +1606,10 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
     cam->movie_motion =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
     if (mystreq(codec, "test")) {
         retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%s_%sm"
-            , cam->conf.target_dir, codec, stamp);
+            , cam->conf->target_dir, codec, stamp);
     } else {
         retcd = snprintf(cam->movie_motion->filename, PATH_MAX, "%s/%sm"
-            , cam->conf.target_dir, stamp);
+            , cam->conf->target_dir, stamp);
     }
     if ((retcd < 0) || (retcd >= PATH_MAX)){
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
@@ -1621,15 +1622,15 @@ int movie_init_motion(struct ctx_cam *cam, struct timespec *ts1){
     cam->movie_motion->netcam_data = NULL;
     cam->movie_motion->tlapse = TIMELAPSE_NONE;
     cam->movie_motion->fps = cam->lastrate;
-    cam->movie_motion->bps = cam->conf.movie_bps;
-    cam->movie_motion->quality = cam->conf.movie_quality;
+    cam->movie_motion->bps = cam->conf->movie_bps;
+    cam->movie_motion->quality = cam->conf->movie_quality;
     cam->movie_motion->start_time.tv_sec = ts1->tv_sec;
     cam->movie_motion->start_time.tv_nsec = ts1->tv_nsec;
     cam->movie_motion->last_pts = -1;
     cam->movie_motion->base_pts = 0;
     cam->movie_motion->gop_cnt = 0;
     cam->movie_motion->codec_name = codec;
-    if (mystreq(cam->conf.movie_codec, "test")) {
+    if (mystreq(cam->conf->movie_codec, "test")) {
         cam->movie_motion->test_mode = TRUE;
     } else {
         cam->movie_motion->test_mode = FALSE;
@@ -1655,8 +1656,8 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1){
 
     cam->movie_timelapse =(struct ctx_movie*)mymalloc(sizeof(struct ctx_movie));
 
-    if (cam->conf.timelapse_filename){
-        timepath = cam->conf.timelapse_filename;
+    if (cam->conf->timelapse_filename){
+        timepath = cam->conf->timelapse_filename;
     } else {
         timepath = "%Y%m%d-timelapse";
     }
@@ -1664,8 +1665,8 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1){
 
     snprintf(cam->movie_timelapse->filename, PATH_MAX - 4, "%.*s/%.*s"
         , (int)(PATH_MAX-5-strlen(tmp))
-        , cam->conf.target_dir
-        , (int)(PATH_MAX-5-strlen(cam->conf.target_dir))
+        , cam->conf->target_dir
+        , (int)(PATH_MAX-5-strlen(cam->conf->target_dir))
         , tmp);
     if ((cam->imgs.size_high > 0) && (!cam->movie_passthrough)){
         cam->movie_timelapse->width  = cam->imgs.width_high;
@@ -1676,9 +1677,9 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1){
         cam->movie_timelapse->height = cam->imgs.height;
         cam->movie_timelapse->high_resolution = FALSE;
     }
-    cam->movie_timelapse->fps = cam->conf.timelapse_fps;
-    cam->movie_timelapse->bps = cam->conf.movie_bps;
-    cam->movie_timelapse->quality = cam->conf.movie_quality;
+    cam->movie_timelapse->fps = cam->conf->timelapse_fps;
+    cam->movie_timelapse->bps = cam->conf->movie_bps;
+    cam->movie_timelapse->quality = cam->conf->movie_quality;
     cam->movie_timelapse->start_time.tv_sec = ts1->tv_sec;
     cam->movie_timelapse->start_time.tv_nsec = ts1->tv_nsec;
     cam->movie_timelapse->last_pts = -1;
@@ -1689,10 +1690,10 @@ int movie_init_timelapse(struct ctx_cam *cam, struct timespec *ts1){
     cam->movie_timelapse->passthrough = FALSE;
     cam->movie_timelapse->netcam_data = NULL;
 
-    if (mystreq(cam->conf.timelapse_codec,"mpg") ||
-        mystreq(cam->conf.timelapse_codec,"swf") ){
+    if (mystreq(cam->conf->timelapse_codec,"mpg") ||
+        mystreq(cam->conf->timelapse_codec,"swf") ){
 
-        if (mystreq(cam->conf.timelapse_codec,"swf")) {
+        if (mystreq(cam->conf->timelapse_codec,"swf")) {
             MOTION_LOG(WRN, TYPE_EVENTS, NO_ERRNO
                 ,_("The swf container for timelapse no longer supported.  Using mpg container."));
         }

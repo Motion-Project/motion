@@ -14,6 +14,7 @@
 #include "motion.hpp"
 #include "util.hpp"
 #include "logger.hpp"
+#include "conf.hpp"
 #include "conf_edit.hpp"
 
 /* Forward Declares */
@@ -956,6 +957,9 @@ static void conf_parm_camera(struct ctx_motapp *motapp, char *str) {
         motapp->cam_list, sizeof(struct ctx_cam *) * (indx_cams + 2), "config_camera");
     motapp->cam_list[indx_cams] = new ctx_cam;
     memset(motapp->cam_list[indx_cams],0,sizeof(struct ctx_cam));
+    motapp->cam_list[indx_cams]->conf = new ctx_config;
+    memset(motapp->cam_list[indx_cams]->conf,0,sizeof(ctx_config));
+
     motapp->cam_list[indx_cams + 1] = NULL;
 
     conf_edit_dflt_cam(motapp->cam_list[indx_cams]);
@@ -1299,6 +1303,10 @@ void conf_init_cams(struct ctx_motapp *motapp){
     motapp->cam_list = (struct ctx_cam**)calloc(sizeof(struct ctx_cam *), 2);
     motapp->cam_list[0] = new ctx_cam;
     memset(motapp->cam_list[0],0,sizeof(struct ctx_cam));
+
+    motapp->cam_list[0]->conf = new ctx_config;
+    memset(motapp->cam_list[0]->conf,0,sizeof(ctx_config));
+
     motapp->cam_list[1] = NULL;
 
     motapp->cam_list[0]->motapp = motapp;
@@ -1338,6 +1346,7 @@ void conf_deinit(struct ctx_motapp *motapp) {
     indx = 0;
     while (motapp->cam_list[indx] != NULL){
         conf_edit_free(motapp->cam_list[indx]);
+        delete motapp->cam_list[indx]->conf;
         delete motapp->cam_list[indx];
         indx++;
     }

@@ -7,6 +7,7 @@
  */
 #include <math.h>
 #include "motion.hpp"
+#include "conf.hpp"
 #include "logger.hpp"
 #include "util.hpp"
 #include "track.hpp"
@@ -54,7 +55,7 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
         };
         union pantilt pan;
 
-        if (cam->track.dev == -1) {
+        if (cam->track->dev == -1) {
 
             int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
             struct v4l2_control control_s;
@@ -102,17 +103,17 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
             //get mininum
             //pan.value = queryctrl.minimum;
 
-            cam->track.minx = -4480 / INCPANTILT;
-            cam->track.miny = -1920 / INCPANTILT;
+            cam->track->minx = -4480 / INCPANTILT;
+            cam->track->miny = -1920 / INCPANTILT;
             //get maximum
-            cam->track.maxx = 4480 / INCPANTILT;
-            cam->track.maxy = 1920 / INCPANTILT;
+            cam->track->maxx = 4480 / INCPANTILT;
+            cam->track->maxy = 1920 / INCPANTILT;
             //pan.value = queryctrl.maximum;
 
-            cam->track.dev = dev;
-            cam->track.pan_angle = 0;
-            cam->track.tilt_angle = 0;
-            cam->track.minmaxfound = 1;
+            cam->track->dev = dev;
+            cam->track->pan_angle = 0;
+            cam->track->tilt_angle = 0;
+            cam->track->minmaxfound = 1;
 
         }
 
@@ -120,17 +121,17 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
 
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
             ,_("INPUT_PARAM_ABS pan_min %d,pan_max %d,tilt_min %d,tilt_max %d ")
-            ,cam->track.minx, cam->track.maxx, cam->track.miny, cam->track.maxy);
+            ,cam->track->minx, cam->track->maxx, cam->track->miny, cam->track->maxy);
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
             ,_("INPUT_PARAM_ABS X_Angel %d, Y_Angel %d ")
             ,x_angle, y_angle);
 
-        if (x_angle <= cam->track.maxx && x_angle >= cam->track.minx){
-            move_x_degrees = x_angle - (cam->track.pan_angle);
+        if (x_angle <= cam->track->maxx && x_angle >= cam->track->minx){
+            move_x_degrees = x_angle - (cam->track->pan_angle);
         }
 
-        if (y_angle <= cam->track.maxy && y_angle >= cam->track.miny){
-            move_y_degrees = y_angle - (cam->track.tilt_angle);
+        if (y_angle <= cam->track->maxy && y_angle >= cam->track->miny){
+            move_y_degrees = y_angle - (cam->track->tilt_angle);
         }
 
         /*
@@ -179,27 +180,27 @@ static int uvc_center(struct ctx_cam *cam, int dev, int x_angle, int y_angle) {
         }
 
         MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
-            ,_("Found MINMAX = %d"),cam->track.minmaxfound);
+            ,_("Found MINMAX = %d"),cam->track->minmaxfound);
 
-        if (cam->track.dev != -1) {
+        if (cam->track->dev != -1) {
             MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
                 ,_("Before_ABS_Y_Angel : x= %d , Y= %d, ")
-                ,cam->track.pan_angle, cam->track.tilt_angle);
+                ,cam->track->pan_angle, cam->track->tilt_angle);
 
             if (move_x_degrees != -1) {
-                cam->track.pan_angle += move_x_degrees;
+                cam->track->pan_angle += move_x_degrees;
             }
 
             if (move_x_degrees != -1) {
-                cam->track.tilt_angle += move_y_degrees;
+                cam->track->tilt_angle += move_y_degrees;
             }
 
             MOTION_LOG(NTC, TYPE_TRACK, NO_ERRNO
                 ,_("After_ABS_Y_Angel : x= %d , Y= %d")
-                ,cam->track.pan_angle, cam->track.tilt_angle);
+                ,cam->track->pan_angle, cam->track->tilt_angle);
         }
 
-        return cam->conf.track_move_wait;
+        return cam->conf->track_move_wait;
     #else
         return 0;
     #endif
@@ -222,7 +223,7 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         *        Don't worry, if the WebCam make a sound - over End at PAN  - hmmm, should it be normal ...?
         *        PAN Value 7777 in relative will init also a want reset for CAM - it will be "0" after that
         */
-        if ((cam->track.minmaxfound != 1) || (cent->x == 7777)) {
+        if ((cam->track->minmaxfound != 1) || (cent->x == 7777)) {
             int reset = 3; //0-non reset, 1-reset pan, 2-reset tilt, 3-reset pan&tilt
             struct v4l2_control control_s;
 
@@ -258,14 +259,14 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
             *       Y = -30 to +30 degrees
             */
 
-            cam->track.minx = -4480 / INCPANTILT;
-            cam->track.miny = -1920 / INCPANTILT;
-            cam->track.maxx = 4480 / INCPANTILT;
-            cam->track.maxy = 1920 / INCPANTILT;
-            cam->track.dev = dev;
-            cam->track.pan_angle = 0;
-            cam->track.tilt_angle = 0;
-            cam->track.minmaxfound = 1;
+            cam->track->minx = -4480 / INCPANTILT;
+            cam->track->miny = -1920 / INCPANTILT;
+            cam->track->maxx = 4480 / INCPANTILT;
+            cam->track->maxy = 1920 / INCPANTILT;
+            cam->track->dev = dev;
+            cam->track->pan_angle = 0;
+            cam->track->tilt_angle = 0;
+            cam->track->minmaxfound = 1;
         }
 
 
@@ -278,8 +279,8 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
                 return 0;
             }
 
-            move_x_degrees = delta_x * cam->conf.track_step_angle_x / (imgs->width / 2);
-            move_y_degrees = -delta_y * cam->conf.track_step_angle_y / (imgs->height / 2);
+            move_x_degrees = delta_x * cam->conf->track_step_angle_x / (imgs->width / 2);
+            move_y_degrees = -delta_y * cam->conf->track_step_angle_y / (imgs->height / 2);
         } else {
             move_x_degrees = cent->x;
             move_y_degrees = cent->y;
@@ -296,34 +297,34 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         struct v4l2_control control_s;
         union pantilt pan;
 
-        if (cam->track.minmaxfound == 1) {
+        if (cam->track->minmaxfound == 1) {
             /*
             * Check current position of camera and see if we need to adjust
             * values down to what is left to move
             */
-            if (move_x_degrees < 0 && (cam->track.minx - cam->track.pan_angle) > move_x_degrees){
-                move_x_degrees = cam->track.minx - cam->track.pan_angle;
+            if (move_x_degrees < 0 && (cam->track->minx - cam->track->pan_angle) > move_x_degrees){
+                move_x_degrees = cam->track->minx - cam->track->pan_angle;
             }
 
-            if (move_x_degrees > 0 && (cam->track.maxx - cam->track.pan_angle) < move_x_degrees){
-                move_x_degrees = cam->track.maxx - cam->track.pan_angle;
+            if (move_x_degrees > 0 && (cam->track->maxx - cam->track->pan_angle) < move_x_degrees){
+                move_x_degrees = cam->track->maxx - cam->track->pan_angle;
             }
 
-            if (move_y_degrees < 0 && (cam->track.miny - cam->track.tilt_angle) > move_y_degrees){
-                move_y_degrees = cam->track.miny - cam->track.tilt_angle;
+            if (move_y_degrees < 0 && (cam->track->miny - cam->track->tilt_angle) > move_y_degrees){
+                move_y_degrees = cam->track->miny - cam->track->tilt_angle;
             }
 
-            if (move_y_degrees > 0 && (cam->track.maxy - cam->track.tilt_angle) < move_y_degrees){
-                move_y_degrees = cam->track.maxy - cam->track.tilt_angle;
+            if (move_y_degrees > 0 && (cam->track->maxy - cam->track->tilt_angle) < move_y_degrees){
+                move_y_degrees = cam->track->maxy - cam->track->tilt_angle;
             }
         }
 
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
             ,_("For_SET_REL pan_min %d,pan_max %d,tilt_min %d,tilt_max %d")
-            ,cam->track.minx, cam->track.maxx, cam->track.miny, cam->track.maxy);
+            ,cam->track->minx, cam->track->maxx, cam->track->miny, cam->track->maxy);
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
             ,_("For_SET_REL track_pan_Angel %d, track_tilt_Angel %d")
-            ,cam->track.pan_angle, cam->track.tilt_angle);
+            ,cam->track->pan_angle, cam->track->tilt_angle);
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
             ,_("For_SET_REL move_X %d,move_Y %d"), move_x_degrees, move_y_degrees);
 
@@ -380,27 +381,27 @@ static int uvc_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         }
 
         MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
-            ,_("Found MINMAX = %d"), cam->track.minmaxfound);
+            ,_("Found MINMAX = %d"), cam->track->minmaxfound);
 
-        if (cam->track.minmaxfound == 1) {
+        if (cam->track->minmaxfound == 1) {
             MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
                 ,_("Before_REL_Y_Angel : x= %d , Y= %d")
-                ,cam->track.pan_angle, cam->track.tilt_angle);
+                ,cam->track->pan_angle, cam->track->tilt_angle);
 
             if (move_x_degrees != 0){
-                cam->track.pan_angle += -pan.s16.pan / INCPANTILT;
+                cam->track->pan_angle += -pan.s16.pan / INCPANTILT;
             }
 
             if (move_y_degrees != 0){
-                cam->track.tilt_angle += -pan.s16.tilt / INCPANTILT;
+                cam->track->tilt_angle += -pan.s16.tilt / INCPANTILT;
             }
 
             MOTION_LOG(DBG, TYPE_TRACK, NO_ERRNO
                 ,_("After_REL_Y_Angel : x= %d , Y= %d")
-                ,cam->track.pan_angle, cam->track.tilt_angle);
+                ,cam->track->pan_angle, cam->track->tilt_angle);
         }
 
-        return cam->conf.track_move_wait;
+        return cam->conf->track_move_wait;
     #else
         return 0;
     #endif /* HAVE_V4L2 */
@@ -411,10 +412,10 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         , int yoff, struct ctx_coord *cent, struct ctx_images *imgs) {
 
     char fmtcmd[PATH_MAX];
-    cam->track.posx += cent->x;
-    cam->track.posy += cent->y;
+    cam->track->posx += cent->x;
+    cam->track->posy += cent->y;
 
-    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->conf.track_generic_move, &cam->current_image->imgts, NULL, 0);
+    mystrftime(cam, fmtcmd, sizeof(fmtcmd), cam->conf->track_generic_move, &cam->current_image->imgts, NULL, 0);
 
     if (!fork()) {
         int i;
@@ -465,7 +466,7 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         /* if above function succeeds the program never reach here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'")
-            ,cam->conf.track_generic_move);
+            ,cam->conf->track_generic_move);
 
         exit(1);
     }
@@ -474,27 +475,26 @@ static int generic_move(struct ctx_cam *cam, enum track_action action, int manua
         ,_("Executing external command '%s'")
         , fmtcmd);
 
-    return cam->conf.track_move_wait;
+    return cam->conf->track_move_wait;
 }
 
 void track_init(struct ctx_cam *cam){
 
-    cam->track.dev =            -1;             /* dev open */
-    cam->track.maxx =           0;              /* int maxx; */
-    cam->track.minx =           0;              /* int minx; */
-    cam->track.maxy =           0;              /* int maxy; */
-    cam->track.miny =           0;              /* int miny; */
+    cam->track = new ctx_track;
+    memset(cam->track,0,sizeof(ctx_track));
 
-    cam->track.pan_angle =      0;              /* degrees*/
-    cam->track.tilt_angle =     0;              /* degrees*/
-    cam->track.posx =           0;
-    cam->track.posy =           0;
-    cam->track.minmaxfound =    0;              /* flag for minmax values stored for pwc based camera */
+    cam->track->dev = -1;             /* dev open */
 
-    if (cam->conf.track_type)
+    if (cam->conf->track_type)
         cam->frame_skip = track_center(cam, cam->video_dev, 0, 0, 0);
 
 }
+void track_deinit(struct ctx_cam *cam){
+
+    delete cam->track;
+
+}
+
 /* Add a call to your functions here: */
 int track_center(struct ctx_cam *cam, int dev,
         int manual, int xoff, int yoff)
@@ -502,14 +502,14 @@ int track_center(struct ctx_cam *cam, int dev,
     struct ctx_coord cent;
     (void)dev;
 
-    if (!manual && !cam->conf.track_auto) return 0;
+    if (!manual && !cam->conf->track_auto) return 0;
 
-    if (cam->conf.track_type == TRACK_TYPE_UVC){
+    if (cam->conf->track_type == TRACK_TYPE_UVC){
         return uvc_center(cam, dev, xoff, yoff);
-    } else if (cam->conf.track_type == TRACK_TYPE_GENERIC) {
-        if (cam->conf.track_generic_move){
-            cent.x = -cam->track.posx;
-            cent.y = -cam->track.posy;
+    } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
+        if (cam->conf->track_generic_move){
+            cent.x = -cam->track->posx;
+            cent.y = -cam->track->posy;
             return generic_move(cam, TRACK_CENTER, manual,0 ,0 ,&cent , NULL);
         } else {
             return 10; // FIX ME. I chose to return something reasonable.
@@ -517,7 +517,7 @@ int track_center(struct ctx_cam *cam, int dev,
     }
 
     MOTION_LOG(ERR, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->conf.track_type);
+        ,_("internal error, %hu is not a known track-type"), cam->conf->track_type);
 
     return 0;
 }
@@ -526,20 +526,20 @@ int track_move(struct ctx_cam *cam, int dev, struct ctx_coord *cent
         , struct ctx_images *imgs, int manual)
 {
 
-    if (!manual && !cam->conf.track_auto) return 0;
+    if (!manual && !cam->conf->track_auto) return 0;
 
-    if (cam->conf.track_type == TRACK_TYPE_UVC){
+    if (cam->conf->track_type == TRACK_TYPE_UVC){
         return uvc_move(cam, dev, cent, imgs, manual);
-    } else if (cam->conf.track_type == TRACK_TYPE_GENERIC) {
-        if (cam->conf.track_generic_move) {
+    } else if (cam->conf->track_type == TRACK_TYPE_GENERIC) {
+        if (cam->conf->track_generic_move) {
             return generic_move(cam, TRACK_MOVE, manual, 0, 0, cent, imgs);
         } else {
-            return cam->conf.track_move_wait;
+            return cam->conf->track_move_wait;
         }
     }
 
     MOTION_LOG(WRN, TYPE_TRACK, SHOW_ERRNO
-        ,_("internal error, %hu is not a known track-type"), cam->conf.track_type);
+        ,_("internal error, %hu is not a known track-type"), cam->conf->track_type);
 
     return 0;
 }

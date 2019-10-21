@@ -7,6 +7,7 @@
  *
  */
 #include "motion.hpp"
+#include "conf.hpp"
 #include "util.hpp"
 #include "alg.hpp"
 #include "draw.hpp"
@@ -253,7 +254,7 @@ void alg_threshold_tune(struct ctx_cam *cam, int diffs, int motion)
     if (sum < top * 2)
         sum = top * 2;
 
-    if (sum < cam->conf.threshold)
+    if (sum < cam->conf->threshold)
         cam->threshold = (cam->threshold + sum) / 2;
 }
 
@@ -650,7 +651,7 @@ void alg_despeckle(struct ctx_cam *cam) {
     int diffs,width,height,done,i,len;
     unsigned char *out, *common_buffer;
 
-    if (!cam->conf.despeckle_filter || cam->current_image->diffs <= 0){
+    if (!cam->conf->despeckle_filter || cam->current_image->diffs <= 0){
         if (cam->imgs.labelsize_max) cam->imgs.labelsize_max = 0;
         return;
     }
@@ -660,14 +661,14 @@ void alg_despeckle(struct ctx_cam *cam) {
     width = cam->imgs.width;
     height = cam->imgs.height;
     done = 0;
-    len = strlen(cam->conf.despeckle_filter);
+    len = strlen(cam->conf->despeckle_filter);
     common_buffer = cam->imgs.common_buffer;
     cam->current_image->total_labels = 0;
     cam->imgs.largest_label = 0;
     cam->olddiffs = cam->current_image->diffs;
 
     for (i = 0; i < len; i++) {
-        switch (cam->conf.despeckle_filter[i]) {
+        switch (cam->conf->despeckle_filter[i]) {
         case 'E':
             if ((diffs = erode9(out, width, height, common_buffer, 0)) == 0)
                 i = len;
@@ -836,7 +837,7 @@ void alg_diff(struct ctx_cam *cam) {
     if (cam->detecting_motion || cam->motapp->setup_mode){
         cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
     } else {
-        if (alg_diff_fast(cam, cam->conf.threshold / 2, cam->imgs.image_vprvcy)){
+        if (alg_diff_fast(cam, cam->conf->threshold / 2, cam->imgs.image_vprvcy)){
             cam->current_image->diffs = alg_diff_standard(cam, cam->imgs.image_vprvcy);
         } else {
             cam->current_image->diffs = 0;
@@ -847,11 +848,11 @@ void alg_diff(struct ctx_cam *cam) {
 
 void alg_lightswitch(struct ctx_cam *cam) {
 
-    if (cam->conf.lightswitch_percent > 1 && !cam->lost_connection) {
-        if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf.lightswitch_percent / 100)) {
+    if (cam->conf->lightswitch_percent > 1 && !cam->lost_connection) {
+        if (cam->current_image->diffs > (cam->imgs.motionsize * cam->conf->lightswitch_percent / 100)) {
             MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
-            if (cam->frame_skip < (unsigned int)cam->conf.lightswitch_frames)
-                cam->frame_skip = (unsigned int)cam->conf.lightswitch_frames;
+            if (cam->frame_skip < (unsigned int)cam->conf->lightswitch_frames)
+                cam->frame_skip = (unsigned int)cam->conf->lightswitch_frames;
             cam->current_image->diffs = 0;
             alg_update_reference_frame(cam, RESET_REF_FRAME);
         }
@@ -869,7 +870,7 @@ void alg_switchfilter(struct ctx_cam *cam) {
     int y, x, line;
     int lines = 0, vertlines = 0;
 
-    if (!cam->conf.roundrobin_switchfilter ||
+    if (!cam->conf->roundrobin_switchfilter ||
         cam->current_image->diffs < cam->threshold) return;
 
     linediff = cam->current_image->diffs / cam->imgs.height;
@@ -886,11 +887,11 @@ void alg_switchfilter(struct ctx_cam *cam) {
 
     if (vertlines > cam->imgs.height / 10 && lines < vertlines / 3 &&
         (vertlines > cam->imgs.height / 4 || lines - vertlines > lines / 2)) {
-        if (cam->conf.text_changes) {
+        if (cam->conf->text_changes) {
             char tmp[80];
             sprintf(tmp, "%d %d", lines, vertlines);
             draw_text(cam->current_image->image_norm, cam->imgs.width, cam->imgs.height
-                , cam->imgs.width - 10, 20, tmp, cam->conf.text_scale);
+                , cam->imgs.width - 10, 20, tmp, cam->conf->text_scale);
         }
         return;
     }
@@ -1154,8 +1155,8 @@ static void alg_new_stddev(ctx_cam *cam){
     * that distance then we have an excessive change.  This is the /8
     * The above is the default if nothing is specified by the user.
     */
-    if (cam->conf.threshold_sdevx >0){
-        if (cam->current_image->location.stddev_x < cam->conf.threshold_sdevx){
+    if (cam->conf->threshold_sdevx >0){
+        if (cam->current_image->location.stddev_x < cam->conf->threshold_sdevx){
             cam->current_image->diffs = 0;
             return;
         }
@@ -1167,8 +1168,8 @@ static void alg_new_stddev(ctx_cam *cam){
         }
     }
 
-    if (cam->conf.threshold_sdevy >0){
-        if (cam->current_image->location.stddev_y < cam->conf.threshold_sdevy){
+    if (cam->conf->threshold_sdevy >0){
+        if (cam->current_image->location.stddev_y < cam->conf->threshold_sdevy){
             cam->current_image->diffs = 0;
             return;
         }
@@ -1180,8 +1181,8 @@ static void alg_new_stddev(ctx_cam *cam){
         }
     }
 
-    if (cam->conf.threshold_sdevxy >0){
-        if (cam->current_image->location.stddev_xy < cam->conf.threshold_sdevxy){
+    if (cam->conf->threshold_sdevxy >0){
+        if (cam->current_image->location.stddev_xy < cam->conf->threshold_sdevxy){
             cam->current_image->diffs = 0;
             return;
         }
