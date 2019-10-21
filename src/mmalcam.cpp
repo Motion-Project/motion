@@ -19,15 +19,17 @@
 
 #ifdef HAVE_MMAL
 
-#include "interface/vcos/vcos.h"
-#include "interface/mmal/mmal.h"
-#include "interface/mmal/mmal_buffer.h"
-#include "interface/mmal/mmal_port.h"
-#include "interface/mmal/util/mmal_util.h"
-#include "interface/mmal/util/mmal_util_params.h"
-#include "interface/mmal/util/mmal_default_components.h"
-#include "interface/mmal/util/mmal_connection.h"
-#include "raspicam/RaspiCamControl.h"
+extern "C" {
+    #include "interface/vcos/vcos.h"
+    #include "interface/mmal/mmal.h"
+    #include "interface/mmal/mmal_buffer.h"
+    #include "interface/mmal/mmal_port.h"
+    #include "interface/mmal/util/mmal_util.h"
+    #include "interface/mmal/util/mmal_util_params.h"
+    #include "interface/mmal/util/mmal_default_components.h"
+    #include "interface/mmal/util/mmal_connection.h"
+    #include "raspicam/RaspiCamControl.h"
+}
 
 #define MMALCAM_OK        0
 #define MMALCAM_ERROR    -1
@@ -43,7 +45,7 @@ const int MAX_BITRATE = 30000000; // 30Mbits/s
 
 static void parse_camera_control_params(const char *control_params_str, RASPICAM_CAMERA_PARAMETERS *camera_params)
 {
-    char *control_params_tok = alloca(strlen(control_params_str) + 1);
+    char *control_params_tok =(char*) alloca(strlen(control_params_str) + 1);
     strcpy(control_params_tok, control_params_str);
 
     char *next_param = strtok(control_params_tok, " ");
@@ -85,12 +87,12 @@ static void set_port_format(ctx_mmalcam_ptr mmalcam, MMAL_ES_FORMAT_T *format)
 {
     format->encoding = MMAL_ENCODING_OPAQUE;
     format->encoding_variant = MMAL_ENCODING_I420;
-    format->es->video.width = mmalcam->width;
-    format->es->video.height = mmalcam->height;
+    format->es->video.width = (unsigned int)mmalcam->width;
+    format->es->video.height = (unsigned int)mmalcam->height;
     format->es->video.crop.x = 0;
     format->es->video.crop.y = 0;
-    format->es->video.crop.width = mmalcam->width;
-    format->es->video.crop.height = mmalcam->height;
+    format->es->video.crop.width = (unsigned int)mmalcam->width;
+    format->es->video.crop.height = (unsigned int)mmalcam->height;
 }
 
 static void set_video_port_format(ctx_mmalcam_ptr mmalcam, MMAL_ES_FORMAT_T *format)
@@ -398,7 +400,7 @@ int mmalcam_next(struct ctx_cam *cam,  struct ctx_image_data *img_data) {
         ctx_mmalcam_ptr mmalcam;
 
         if ((!cam) || (!cam->mmalcam))
-            return NETCAM_FATAL_ERROR;
+            return -1;
 
         mmalcam = cam->mmalcam;
 
