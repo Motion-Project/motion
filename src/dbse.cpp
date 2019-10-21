@@ -37,10 +37,11 @@ static int dbse_global_edits(struct ctx_cam **cam_list){
         retcd = -1;
     }
     if (((mystreq(cam_list[0]->conf->database_type, "mysql")) ||
+         (mystreq(cam_list[0]->conf->database_type, "mariadb")) ||
          (mystreq(cam_list[0]->conf->database_type, "pgsql"))) &&
         (cam_list[0]->conf->database_port == 0)){
         MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                ,_("Must specify database port for mysql/pgsql"));
+                ,_("Must specify database port for mysql/mariadb/pgsql"));
         retcd = -1;
     }
 
@@ -59,9 +60,20 @@ void dbse_global_deinit(struct ctx_cam **cam_list){
 
     int indx;
 
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+    #if defined(HAVE_MYSQL)
         if (cam_list[0]->conf->database_type != NULL) {
             if (mystreq(cam_list[0]->conf->database_type, "mysql")) {
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
+                mysql_library_end();
+            }
+        }
+    #else
+        (void)cam_list;
+    #endif /* HAVE_MYSQL */
+
+    #if defined(HAVE_MARIADB)
+        if (cam_list[0]->conf->database_type != NULL) {
+            if (mystreq(cam_list[0]->conf->database_type, "mariadb")) {
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing MYSQL"));
                 mysql_library_end();
             }
@@ -93,7 +105,7 @@ void dbse_global_init(struct ctx_cam **cam_list){
 
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Initializing database"));
         /* Initialize all the database items */
-        #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+        #if defined(HAVE_MYSQL)
             if (mystreq(cam_list[0]->conf->database_type, "mysql")) {
                 if (mysql_library_init(0, NULL, NULL)) {
                     MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
@@ -105,6 +117,19 @@ void dbse_global_init(struct ctx_cam **cam_list){
                 }
             }
         #endif /* HAVE_MYSQL */
+
+        #if defined(HAVE_MARIADB)
+            if (mystreq(cam_list[0]->conf->database_type, "mariadb")) {
+                if (mysql_library_init(0, NULL, NULL)) {
+                    MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                        ,_("Could not initialize database %s")
+                        ,cam_list[0]->conf->database_type);
+                    free((void *)cam_list[0]->conf->database_type);
+                    cam_list[0]->conf->database_type = NULL;
+                    return;
+                }
+            }
+        #endif /* HAVE_MARIADB */
 
         #ifdef HAVE_SQLITE3
             /* database_sqlite3 == NULL if not changed causes each thread to create their own
@@ -154,22 +179,23 @@ void dbse_global_init(struct ctx_cam **cam_list){
 
 static void dbse_init_mysql(struct ctx_cam *cam){
 
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+    #if defined(HAVE_MYSQL)
         // close database to be sure that we are not leaking
-        mysql_close(cam->dbse->database);
+        mysql_close(cam->dbse->database_mysql);
         cam->dbse->database_event_id = 0;
 
-        cam->dbse->database = (MYSQL *) mymalloc(sizeof(MYSQL));
-        mysql_init(cam->dbse->database);
+        cam->dbse->database_mysql = (MYSQL *) mymalloc(sizeof(MYSQL));
+        mysql_init(cam->dbse->database_mysql);
 
-        if (!mysql_real_connect(cam->dbse->database, cam->conf->database_host, cam->conf->database_user,
-            cam->conf->database_password, cam->conf->database_dbname, 0, NULL, 0)) {
+        if (!mysql_real_connect(cam->dbse->database_mysql, cam->conf->database_host
+            , cam->conf->database_user, cam->conf->database_password, cam->conf->database_dbname
+            , cam->conf->database_port, NULL, 0)) {
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Cannot connect to MySQL database %s on host %s with user %s")
                 ,cam->conf->database_dbname, cam->conf->database_host
                 ,cam->conf->database_user);
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
-                ,_("MySQL error was %s"), mysql_error(cam->dbse->database));
+                ,_("MySQL error was %s"), mysql_error(cam->dbse->database_mysql));
             MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
                 ,_("Disabling database functionality"));
             dbse_global_deinit(cam->cam_list);
@@ -179,11 +205,49 @@ static void dbse_init_mysql(struct ctx_cam *cam){
         }
         #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
             my_bool my_true = TRUE;
-            mysql_options(cam->dbse->database, MYSQL_OPT_RECONNECT, &my_true);
+            mysql_options(cam->dbse->database_mysql, MYSQL_OPT_RECONNECT, &my_true);
         #endif
     #else
         (void)cam;  /* Avoid compiler warnings */
     #endif /* HAVE_MYSQL */
+
+    return;
+
+}
+
+static void dbse_init_mariadb(struct ctx_cam *cam){
+
+    #if defined(HAVE_MARIADB)
+        // close database to be sure that we are not leaking
+        mysql_close(cam->dbse->database_mariadb);
+        cam->dbse->database_event_id = 0;
+
+        cam->dbse->database_mariadb = (MYSQL *) mymalloc(sizeof(MYSQL));
+        mysql_init(cam->dbse->database_mariadb);
+
+        if (!mysql_real_connect(cam->dbse->database_mariadb, cam->conf->database_host
+            , cam->conf->database_user, cam->conf->database_password, cam->conf->database_dbname
+            , cam->conf->database_port, NULL, 0)) {
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                ,_("Cannot connect to MySQL database %s on host %s with user %s")
+                ,cam->conf->database_dbname, cam->conf->database_host
+                ,cam->conf->database_user);
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                ,_("MySQL error was %s"), mysql_error(cam->dbse->database_mariadb));
+            MOTION_LOG(ERR, TYPE_DB, NO_ERRNO
+                ,_("Disabling database functionality"));
+            dbse_global_deinit(cam->cam_list);
+            free((void *)cam->conf->database_type);
+            cam->conf->database_type = NULL;
+            return;
+        }
+        #if (defined(MYSQL_VERSION_ID)) && (MYSQL_VERSION_ID > 50012)
+            my_bool my_true = TRUE;
+            mysql_options(cam->dbse->database_mariadb, MYSQL_OPT_RECONNECT, &my_true);
+        #endif
+    #else
+        (void)cam;  /* Avoid compiler warnings */
+    #endif /* HAVE_MARIADB */
 
     return;
 
@@ -263,6 +327,8 @@ void dbse_init(struct ctx_cam *cam){
             ,_("Database backend %s"), cam->conf->database_type);
         if (mystreq(cam->conf->database_type, "mysql")) {
             dbse_init_mysql(cam);
+        } else if (mystreq(cam->conf->database_type, "mariadb")) {
+            dbse_init_mariadb(cam);
         } else if (mystreq(cam->conf->database_type, "postgresql")) {
             dbse_init_pgsql(cam);
         } else if (mystreq(cam->conf->database_type, "sqlite3")) {
@@ -282,9 +348,16 @@ void dbse_deinit(struct ctx_cam *cam){
     if (cam->conf->database_type) {
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO, _("Closing database"));
 
-        #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+        #if defined(HAVE_MYSQL)
             if (mystreq(cam->conf->database_type, "mysql")) {
-                mysql_close(cam->dbse->database);
+                mysql_close(cam->dbse->database_mysql);
+                cam->dbse->database_event_id = 0;
+            }
+        #endif /* HAVE_MYSQL */
+
+        #if defined(HAVE_MARIADB)
+            if (mystreq(cam->conf->database_type, "mariadb")) {
+                mysql_close(cam->dbse->database_mariadb);
                 cam->dbse->database_event_id = 0;
             }
         #endif /* HAVE_MYSQL */
@@ -319,53 +392,104 @@ void dbse_sqlmask_update(struct ctx_cam *cam){
 }
 
 static void dbse_mysql_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
-    /*TODO: Need to separate MariaDB from Mysql? */
-    #if defined(HAVE_MYSQL) || defined(HAVE_MARIADB)
+
+    #if defined(HAVE_MYSQL)
         MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
-        if (mysql_query(cam->dbse->database, sqlquery) != 0) {
-            int error_code = mysql_errno(cam->dbse->database);
+        if (mysql_query(cam->dbse->database_mysql, sqlquery) != 0) {
+            int error_code = mysql_errno(cam->dbse->database_mysql);
 
             MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
                 ,_("Mysql query failed %s error code %d")
-                ,mysql_error(cam->dbse->database), error_code);
+                ,mysql_error(cam->dbse->database_mysql), error_code);
             /* Try to reconnect ONCE if fails continue and discard this sql query */
             if (error_code >= 2000) {
                 // Close connection before start a new connection
-                mysql_close(cam->dbse->database);
+                mysql_close(cam->dbse->database_mysql);
 
-                cam->dbse->database = (MYSQL *) mymalloc(sizeof(MYSQL));
-                mysql_init(cam->dbse->database);
+                cam->dbse->database_mysql = (MYSQL *) mymalloc(sizeof(MYSQL));
+                mysql_init(cam->dbse->database_mysql);
 
-                if (!mysql_real_connect(cam->dbse->database, cam->conf->database_host,
+                if (!mysql_real_connect(cam->dbse->database_mysql, cam->conf->database_host,
                                         cam->conf->database_user, cam->conf->database_password,
-                                        cam->conf->database_dbname, 0, NULL, 0)) {
+                                        cam->conf->database_dbname, cam->conf->database_port, NULL, 0)) {
                     MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
                         ,_("Cannot reconnect to MySQL"
                         " database %s on host %s with user %s MySQL error was %s"),
                         cam->conf->database_dbname,
                         cam->conf->database_host, cam->conf->database_user,
-                        mysql_error(cam->dbse->database));
+                        mysql_error(cam->dbse->database_mysql));
                 } else {
                     MOTION_LOG(INF, TYPE_DB, NO_ERRNO
                         ,_("Re-Connection to Mysql database '%s' Succeed")
                         ,cam->conf->database_dbname);
-                    if (mysql_query(cam->dbse->database, sqlquery) != 0) {
-                        int error_my = mysql_errno(cam->dbse->database);
+                    if (mysql_query(cam->dbse->database_mysql, sqlquery) != 0) {
+                        int error_my = mysql_errno(cam->dbse->database_mysql);
                         MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
                             ,_("after re-connection Mysql query failed %s error code %d")
-                            ,mysql_error(cam->dbse->database), error_my);
+                            ,mysql_error(cam->dbse->database_mysql), error_my);
                     }
                 }
             }
         }
         if (save_id) {
-            cam->dbse->database_event_id = (unsigned long long) mysql_insert_id(cam->dbse->database);
+            cam->dbse->database_event_id = (unsigned long long) mysql_insert_id(cam->dbse->database_mysql);
         }
     #else
         (void)sqlquery;
         (void)cam;
         (void)save_id;
     #endif /* HAVE_MYSQL  HAVE_MARIADB*/
+
+}
+
+static void dbse_mariadb_exec(char *sqlquery,struct ctx_cam *cam, int save_id) {
+
+    #if defined(HAVE_MARIADB)
+        MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing mysql query");
+        if (mysql_query(cam->dbse->database_mariadb, sqlquery) != 0) {
+            int error_code = mysql_errno(cam->dbse->database_mariadb);
+
+            MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
+                ,_("Mysql query failed %s error code %d")
+                ,mysql_error(cam->dbse->database_mariadb), error_code);
+            /* Try to reconnect ONCE if fails continue and discard this sql query */
+            if (error_code >= 2000) {
+                // Close connection before start a new connection
+                mysql_close(cam->dbse->database_mariadb);
+
+                cam->dbse->database_mariadb = (MYSQL *) mymalloc(sizeof(MYSQL));
+                mysql_init(cam->dbse->database_mariadb);
+
+                if (!mysql_real_connect(cam->dbse->database_mariadb, cam->conf->database_host,
+                                        cam->conf->database_user, cam->conf->database_password,
+                                        cam->conf->database_dbname,cam->conf->database_port, NULL, 0)) {
+                    MOTION_LOG(ALR, TYPE_DB, NO_ERRNO
+                        ,_("Cannot reconnect to MySQL"
+                        " database %s on host %s with user %s MySQL error was %s"),
+                        cam->conf->database_dbname,
+                        cam->conf->database_host, cam->conf->database_user,
+                        mysql_error(cam->dbse->database_mariadb));
+                } else {
+                    MOTION_LOG(INF, TYPE_DB, NO_ERRNO
+                        ,_("Re-Connection to Mysql database '%s' Succeed")
+                        ,cam->conf->database_dbname);
+                    if (mysql_query(cam->dbse->database_mariadb, sqlquery) != 0) {
+                        int error_my = mysql_errno(cam->dbse->database_mariadb);
+                        MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
+                            ,_("after re-connection Mysql query failed %s error code %d")
+                            ,mysql_error(cam->dbse->database_mariadb), error_my);
+                    }
+                }
+            }
+        }
+        if (save_id) {
+            cam->dbse->database_event_id = (unsigned long long) mysql_insert_id(cam->dbse->database_mariadb);
+        }
+    #else
+        (void)sqlquery;
+        (void)cam;
+        (void)save_id;
+    #endif /* HAVE_MARIADB*/
 
 }
 
@@ -449,6 +573,8 @@ void dbse_firstmotion(struct ctx_cam *cam){
 
     if (mystreq(cam->conf->database_type, "mysql")) {
         dbse_mysql_exec(sqlquery, cam, 1);
+    } else if (mystreq(cam->conf->database_type, "mariadb")) {
+        dbse_mariadb_exec(sqlquery, cam, 1);
     } else if (mystreq(cam->conf->database_type, "postgresql")) {
         dbse_pgsql_exec(sqlquery, cam, 1);
     } else if (mystreq(cam->conf->database_type, "sqlite3")) {
@@ -470,6 +596,8 @@ void dbse_newfile(struct ctx_cam *cam, char *filename, int sqltype, struct times
 
     if (mystreq(cam->conf->database_type, "mysql")) {
         dbse_mysql_exec(sqlquery, cam, 0);
+    } else if (mystreq(cam->conf->database_type, "mariadb")) {
+        dbse_mariadb_exec(sqlquery, cam, 0);
     } else if (mystreq(cam->conf->database_type, "postgresql")) {
         dbse_pgsql_exec(sqlquery, cam, 0);
     } else if (mystreq(cam->conf->database_type, "sqlite3")) {
@@ -487,6 +615,8 @@ void dbse_fileclose(struct ctx_cam *cam, char *filename, int sqltype, struct tim
 
     if (mystreq(cam->conf->database_type, "mysql")) {
         dbse_mysql_exec(sqlquery, cam, 0);
+    } else if (mystreq(cam->conf->database_type, "mariadb")) {
+        dbse_mariadb_exec(sqlquery, cam, 0);
     } else if (mystreq(cam->conf->database_type, "postgresql")) {
         dbse_pgsql_exec(sqlquery, cam, 0);
     } else if (mystreq(cam->conf->database_type, "sqlite3")) {

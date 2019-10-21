@@ -2164,7 +2164,8 @@ static void conf_edit_database_type(struct ctx_cam *cam, char *arg1, enum PARM_A
         if (arg1 == NULL){
             conf_edit_set_string(&cam->conf->database_type, NULL);
         } else {
-            if (mystreq(arg1,"mysql") || mystreq(arg1,"postgresql") || mystreq(arg1,"sqlite3")) {
+            if (mystreq(arg1,"mysql") || mystreq(arg1,"mariadb") ||
+                mystreq(arg1,"postgresql") || mystreq(arg1,"sqlite3")) {
                 conf_edit_set_string(&cam->conf->database_type, arg1);
             } else {
                 MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_type %s"),arg1);

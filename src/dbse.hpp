@@ -50,11 +50,11 @@ struct ctx_dbse {
     #endif
 
     #ifdef HAVE_MYSQL
-        MYSQL *database;
+        MYSQL *database_mysql;
     #endif
 
     #ifdef HAVE_MARIADB
-        MYSQL *database;
+        MYSQL *database_mariadb;
     #endif
 
     #ifdef HAVE_PGSQL
