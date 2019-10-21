@@ -390,14 +390,7 @@ static void event_image_snapshot(struct ctx_cam *cam, motion_event evnt
         offset = len - 8;
 
     if (mystrne(cam->conf->snapshot_filename+offset, "lastsnap")) {
-        /*
-         *  conf.snapshot_filename would normally be defined but if someone deleted it by control interface
-         *  it is better to revert to the default than fail
-         */
-        if (cam->conf->snapshot_filename)
-            snappath = cam->conf->snapshot_filename;
-        else
-            snappath = DEF_SNAPPATH;
+        snappath = cam->conf->snapshot_filename;
 
         mystrftime(cam, filepath, sizeof(filepath), snappath, ts1, NULL, 0);
         snprintf(filename, PATH_MAX, "%.*s.%s"
@@ -561,16 +554,7 @@ static void event_create_extpipe(struct ctx_cam *cam, motion_event evnt
     (void)ftype;
 
     if ((cam->conf->movie_extpipe_use) && (cam->conf->movie_extpipe)) {
-        /*
-         *  conf.mpegpath would normally be defined but if someone deleted it by control interface
-         *  it is better to revert to the default than fail
-         */
-        if (cam->conf->movie_filename) {
-            moviepath = cam->conf->movie_filename;
-        } else {
-            moviepath = DEF_MOVIEPATH;
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("moviepath: %s"), moviepath);
-        }
+        moviepath = cam->conf->movie_filename;
 
         mystrftime(cam, stamp, sizeof(stamp), moviepath, ts1, NULL, 0);
         snprintf(cam->extpipefilename, PATH_MAX - 4, "%.*s/%.*s"

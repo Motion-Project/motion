@@ -61,46 +61,11 @@ struct ctx_algsec;
 struct ctx_config;
 struct ctx_track;
 
-#define DEF_PALETTE             17
-
-/* Default picture settings */
-#define DEF_WIDTH              640
-#define DEF_HEIGHT             480
-#define DEF_QUALITY             75
-#define DEF_CHANGES           1500
-
-#define DEF_MAXFRAMERATE        15
-#define DEF_NOISELEVEL          32
-
-/* Minimum time between two 'actions' (email, sms, external) */
-#define DEF_EVENT_GAP            60  /* 1 minutes */
-
-#define DEF_INPUT               -1
-#define DEF_VIDEO_DEVICE         "/dev/video0"
-
 #define THRESHOLD_TUNE_LENGTH  256
-
-#define MISSING_FRAMES_TIMEOUT  30  /* When failing to get picture frame from camera
-                                       we reuse the previous frame until
-                                       MISSING_FRAMES_TIMEOUT seconds has passed
-                                       and then we show a grey image instead
-                                     */
-
+#define MISSING_FRAMES_TIMEOUT  30  /* Frame count before grey lost image is used */
 #define WATCHDOG_TMO            30   /* 30 sec max motion_loop interval */
 #define WATCHDOG_KILL          -10   /* 10 sec grace period before calling thread cancel */
 
-#define DEF_MAXSTREAMS          10   /* Maximum number of stream clients per camera */
-#define DEF_MAXWEBQUEUE         10   /* Maximum number of stream client in queue */
-
-#define DEF_TIMESTAMP           "%Y-%m-%d\\n%T"
-#define DEF_EVENTSTAMP          "%Y%m%d%H%M%S"
-
-#define DEF_SNAPPATH            "%v-%Y%m%d%H%M%S-snapshot"
-#define DEF_IMAGEPATH           "%v-%Y%m%d%H%M%S-%q"
-#define DEF_MOVIEPATH           "%v-%Y%m%d%H%M%S"
-#define DEF_TIMEPATH            "%Y%m%d-timelapse"
-
-#define DEF_TIMELAPSE_MODE      "daily"
 
 /* Filetype defines */
 #define FTYPE_IMAGE            1
@@ -134,9 +99,9 @@ struct ctx_track;
 #define UPDATE_REF_FRAME  1
 #define RESET_REF_FRAME   2
 
-#define TRUE 1
-#define FALSE 0
-#define AVGCNT          30
+#define TRUE              1
+#define FALSE             0
+#define AVGCNT            30
 
 /*
  * Structure to hold images information

@@ -397,7 +397,7 @@ static int v4l2_input_select(struct ctx_cam *cam, struct video_dev *curdev) {
         (!curdev->starting)) return 0;
 
     memset(&input, 0, sizeof (struct v4l2_input));
-    if (cam->conf->input == DEF_INPUT) {
+    if (cam->conf->input == -1) {
         input.index = 0;
     } else {
         input.index = cam->conf->input;
