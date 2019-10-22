@@ -20,6 +20,8 @@
 #define DIFF(x, y)         (ABS((x)-(y)))
 #define NDIFF(x, y)        (ABS(x) * NORM / (ABS(x) + 2 * DIFF(x, y)))
 #define MAXS 10000               /* max depth of stack */
+#define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
+#define EXCLUDE_LEVEL_PERCENT 20
 
 #define PUSH(Y, XL, XR, DY)     /* push new segment on stack */  \
         if (sp<stack+MAXS && Y+(DY) >= 0 && Y+(DY) < height)     \
@@ -916,8 +918,6 @@ void alg_switchfilter(struct ctx_cam *cam) {
  *   action - UPDATE_REF_FRAME or RESET_REF_FRAME
  *
  */
-#define ACCEPT_STATIC_OBJECT_TIME 10  /* Seconds */
-#define EXCLUDE_LEVEL_PERCENT 20
 void alg_update_reference_frame(struct ctx_cam *cam, int action)
 {
     int accept_timer = cam->lastrate * ACCEPT_STATIC_OBJECT_TIME;
@@ -1156,40 +1156,44 @@ static void alg_new_stddev(ctx_cam *cam){
     * The above is the default if nothing is specified by the user.
     */
     if (cam->conf->threshold_sdevx >0){
-        if (cam->current_image->location.stddev_x < cam->conf->threshold_sdevx){
+        if (cam->current_image->location.stddev_x > cam->conf->threshold_sdevx){
             cam->current_image->diffs = 0;
             return;
         }
-    } else {
+    } else if (cam->conf->threshold_sdevy >0){
+        if (cam->current_image->location.stddev_y > cam->conf->threshold_sdevy){
+            cam->current_image->diffs = 0;
+            return;
+        }
+    } else if (cam->conf->threshold_sdevxy >0){
+        if (cam->current_image->location.stddev_xy > cam->conf->threshold_sdevxy){
+            cam->current_image->diffs = 0;
+            return;
+        }
+    }
+
+    /* Default standard deviation testing.  The 8 is just a developer choice of
+     * that would say if the deviation is within 1/8th of the screen count it
+     */
+    if ((cam->conf->threshold_sdevxy == 0) &&
+        (cam->conf->threshold_sdevx == 0) &&
+        (cam->conf->threshold_sdevy == 0)) {
+
         chk_stddev = (long)((cam->imgs.width/8) - cam->current_image->location.stddev_x);
-        if (chk_stddev < 0) {
+        if (chk_stddev > 0) {
             cam->current_image->diffs = 0;
             return;
         }
-    }
 
-    if (cam->conf->threshold_sdevy >0){
-        if (cam->current_image->location.stddev_y < cam->conf->threshold_sdevy){
-            cam->current_image->diffs = 0;
-            return;
-        }
-    } else {
         chk_stddev = (long)((cam->imgs.height/8) - cam->current_image->location.stddev_y);
-        if (chk_stddev < 0) {
+        if (chk_stddev > 0) {
             cam->current_image->diffs = 0;
             return;
         }
-    }
 
-    if (cam->conf->threshold_sdevxy >0){
-        if (cam->current_image->location.stddev_xy < cam->conf->threshold_sdevxy){
-            cam->current_image->diffs = 0;
-            return;
-        }
-    } else {
         chk_stddev = (long)((sqrt(cam->imgs.height*cam->imgs.width)/8) -
             cam->current_image->location.stddev_xy);
-        if (chk_stddev < 0) {
+        if (chk_stddev > 0) {
             cam->current_image->diffs = 0;
             return;
         }
@@ -1229,11 +1233,15 @@ static void alg_new_diff_base(ctx_cam *cam) {
     }
     cam->current_image->diffs = diffs;
 
+    return;
+
 }
 
 void alg_new_diff(ctx_cam *cam) {
 
     alg_new_diff_base(cam);
+
+    alg_despeckle(cam);
 
     alg_new_location(cam);
 

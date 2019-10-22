@@ -989,15 +989,26 @@ static void mlp_overlay(struct ctx_cam *cam){
     }
 
     if (cam->motapp->setup_mode || (cam->stream.motion.cnct_count > 0)) {
-        sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
+        if (cam->conf->primary_method == 0){
+            sprintf(tmp, "D:%5d L:%3d N:%3d", cam->current_image->diffs,
                 cam->current_image->total_labels, cam->noise);
-        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-                  cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
-                  tmp, cam->text_scale);
-        sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
-        draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
-                  cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
-                  tmp, cam->text_scale);
+            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
+                cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
+                tmp, cam->text_scale);
+            sprintf(tmp, "THREAD %d SETUP", cam->threadnr);
+            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
+                cam->imgs.width - 10, cam->imgs.height - (10 * cam->text_scale),
+                tmp, cam->text_scale);
+        } else {
+            sprintf(tmp, "D:%5d xy:%3d x:%3d y:%3d"
+                , cam->current_image->diffs
+                , cam->current_image->location.stddev_xy
+                , cam->current_image->location.stddev_x
+                , cam->current_image->location.stddev_y);
+            draw_text(cam->imgs.image_motion.image_norm, cam->imgs.width, cam->imgs.height,
+                cam->imgs.width - 10, cam->imgs.height - (30 * cam->text_scale),
+                tmp, cam->text_scale);
+        }
     }
 
     /* Add text in lower left corner of the pictures */
