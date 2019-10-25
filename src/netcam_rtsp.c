@@ -350,7 +350,16 @@ static int netcam_rtsp_open_codec(struct rtsp_context *rtsp_data){
     rtsp_data->video_stream_index = retcd;
     st = rtsp_data->format_context->streams[rtsp_data->video_stream_index];
 
-    decoder = avcodec_find_decoder(st->codecpar->codec_id);
+    if (st->codecpar->codec_id == AV_CODEC_ID_H264){
+        decoder = avcodec_find_decoder_by_name("h264_mmal");
+    }
+    if (decoder == NULL) {
+        decoder = avcodec_find_decoder(st->codecpar->codec_id);
+    } else {
+        MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            ,_("%s: Using h264_mmal decoder"),rtsp_data->cameratype);
+    }
+
     if ((decoder == NULL) || (rtsp_data->interrupted)){
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             ,_("%s: avcodec_find_decoder: Failed,Interrupt %s")
