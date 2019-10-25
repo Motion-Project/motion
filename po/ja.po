@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-10-20 13:24-0600\n"
+"POT-Creation-Date: 2019-10-22 20:17-0600\n"
 "PO-Revision-Date: 2018-10-13 12:02-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -1086,11 +1086,6 @@ msgstr ""
 #: src/event.cpp
 #, c-format
 msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr ""
-
-#: src/event.cpp
-#, c-format
-msgid "moviepath: %s"
 msgstr ""
 
 #: src/event.cpp
