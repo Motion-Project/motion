@@ -68,6 +68,7 @@ struct config conf_template = {
     .netcam_proxy =                    NULL,
     .netcam_tolerant_check =           FALSE,
     .netcam_use_tcp =                  TRUE,
+    .netcam_decoder =                  NULL,
 
     .mmalcam_name =                    NULL,
     .mmalcam_control_params =          NULL,
@@ -495,6 +496,15 @@ config_param config_params[] = {
     CONF_OFFSET(netcam_use_tcp),
     copy_bool,
     print_bool,
+    WEBUI_LEVEL_ADVANCED
+    },
+    {
+    "netcam_decoder",
+    "# User requested decoder for netcam.",
+    0,
+    CONF_OFFSET(netcam_decoder),
+    copy_string,
+    print_string,
     WEBUI_LEVEL_ADVANCED
     },
     {
@@ -3186,6 +3196,7 @@ static void config_parms_intl(){
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_proxy",_("netcam_proxy"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_tolerant_check",_("netcam_tolerant_check"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_use_tcp",_("netcam_use_tcp"));
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_decoder",_("netcam_decoder"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_name",_("mmalcam_name"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mmalcam_control_params",_("mmalcam_control_params"));
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));

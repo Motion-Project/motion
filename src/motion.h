@@ -453,6 +453,7 @@ struct context {
     int stream_count;
 
     char hostname[PATH_MAX];
+    char *netcam_decoder;
 
     int sql_mask;
 

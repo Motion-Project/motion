@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.x\n"
 "Report-Msgid-Bugs-To: https://motion-project.github.io\n"
-"POT-Creation-Date: 2019-09-28 09:39-0600\n"
+"POT-Creation-Date: 2019-10-27 22:19-0600\n"
 "PO-Revision-Date: 2018-10-13 11:59-0600\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
@@ -219,6 +219,10 @@ msgstr ""
 
 #: src/conf.c
 msgid "netcam_use_tcp"
+msgstr ""
+
+#: src/conf.c
+msgid "netcam_decoder"
 msgstr ""
 
 #: src/conf.c
@@ -2572,27 +2576,22 @@ msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: av_find_best_stream: %s,Interrupt %s"
+msgid "%s: %s: %s,Interrupt %s"
 msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: avcodec_find_decoder: Failed,Interrupt %s"
+msgid "%s: %s: Failed,Interrupt %s"
 msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: avcodec_alloc_context3: Failed,Interrupt %s"
+msgid "%s: Ignoring user requested decoder %s"
 msgstr ""
 
 #: src/netcam_rtsp.c
 #, c-format
-msgid "%s: avcodec_parameters_to_context: %s,Interrupt %s"
-msgstr ""
-
-#: src/netcam_rtsp.c
-#, c-format
-msgid "%s: avcodec_open2: %s,Interrupt %s"
+msgid "%s: Using decoder %s"
 msgstr ""
 
 #: src/netcam_rtsp.c
